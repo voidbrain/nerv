@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-005",
   "id": "F-005-T22",
-  "status": "planned",
+  "status": "closed",
   "title": "T08e — Demonstration of prerequisites and optional engine management on an owner-selected target",
   "goal": "Demonstration of prerequisites and optional engine management on an owner-selected target.",
   "capabilities": [
@@ -13,7 +13,7 @@
   ],
   "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
   "acceptance": [
-    "Owner decision 2026-11-13: the Linux VM on Neo Tokyo-3, set up once (docs/acceptance/linux-vm.md)",
+    "Target: Calvary (NERV-03, ClockworkPi DevTerm, Debian 11 arm64, `ssh Calvary`), owner decision 2026-11-18 replacing the Linux VM, which had no outbound internet",
     "Demonstration of prerequisites and optional engine management on an owner-selected target",
     "Check supported Node version, executable and non-interactive service environment before install/start/update; report missing or incompatible prerequisites",
     "Provide explicit supported-platform Node installation/upgrade choices with reviewed ownership, permission and recovery; never silently replace a user-managed runtime",
@@ -54,8 +54,10 @@
     "reviewed": "2026-11-18",
     "baselineDays": 0.5,
     "ownerHours": 0,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "estimateAgentHours": 0.5,
-    "baselineAgentHours": 0.5
+    "baselineAgentHours": 0.5,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
   }
 }

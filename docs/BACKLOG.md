@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 5 | 12 | 4 |
+| **This week** | 2 | 5 | 15 | 4 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 15 |
+| **Open** | 41 | 18 |
 | **Require Human 🧑** | 6 | 3 |
 
 ### Require Human 🧑
@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 71.25 h agent + 11.75 h owner across 139 open steps of 38 features and 15 other records. 37.5 h of actual effort recorded on 86 steps. Generated from the task files.
+**Remaining effort:** 72 h agent + 11.75 h owner across 141 open steps of 38 features and 18 other records. 40 h of actual effort recorded on 89 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -83,7 +83,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 7.5 h agent + 0.25 h owner | [B-080-T01](#b-080-t01) | [F-012-T05](#f-012-t05) | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 7 h agent + 0.25 h owner | [B-080-T01](#b-080-t01) | [F-012-T05](#f-012-t05) | 🤖 | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
 
@@ -98,10 +98,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | 🤖 |
-| 🟢 Small | <a id="f-005-t22"></a>F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-005-t26"></a>F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 1 h | 0 h | 1 h | Planned | 🤖 |
+| 🟢 Small | <a id="f-005-t31"></a>F-005-T31 — Record the evidence of F-005-T22 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
 | 🟢 Small | <a id="f-005-t24"></a>F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 1 h | 0 h | 1 h | Planned · waits on [B-080-T01](#b-080-t01) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-005-t31"></a>F-005-T31 — Record the evidence of F-005-T22 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T22](#f-005-t22) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-005-t32"></a>F-005-T32 — Record the evidence of F-005-T24 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T24](#f-005-t24) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-005-t33"></a>F-005-T33 — Record the evidence of F-005-T26 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T26](#f-005-t26) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-005-t11"></a>F-005-T11 — Propose the device matrix for final acceptance | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T31](#f-005-t31), [F-005-T32](#f-005-t32), [F-005-T33](#f-005-t33) | ⏳ 🤖 |
@@ -113,9 +112,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-005-T35](#f-005-t35) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T29](#f-005-t29) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T36](#f-005-t36) | ⏳ 🤖 |
-| 🔴 Large | **Total** | 23.25 h (30 of 37 steps) | 8.75 h (16 of 37 steps recorded) | 7.5 h agent + 0.25 h owner | 21 of 37 completed | |
+| 🔴 Large | **Total** | 23.25 h (30 of 37 steps) | 10.25 h (17 of 37 steps recorded) | 7 h agent + 0.25 h owner | 22 of 37 completed | |
 
-<details><summary>Done steps (21)</summary>
+<details><summary>Done steps (22)</summary>
 
 | Effort | Step | Estimate | Actual | Status |
 |---|---|---|---|---|
@@ -138,6 +137,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-005-t19"></a>F-005-T19 — T08b — Node install or upgrade choices with ownership and recovery; never replaces a user-managed runtime silently | 1.25 h | 0.5 h (stated) | Completed |
 | — | <a id="f-005-t20"></a>F-005-T20 — T08c — Engine/provider contract for several instances and endpoints, local and remote; Ollama becomes one adapter | 1.25 h | 0.5 h (stated) | Completed |
 | — | <a id="f-005-t21"></a>F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0.25 h (stated) | Completed |
+| — | <a id="f-005-t22"></a>F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.5 h | 1.5 h (stated) | Completed |
 | — | <a id="f-005-t23"></a>F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | Completed |
 | — | <a id="f-005-t25"></a>F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | Completed |
 
@@ -525,6 +525,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-016-T10: [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review. [PR #454](https://github.com/voidbrain/nerv/pull/454) (owner agreement); [PR #470](https://github.com/voidbrain/nerv/pull/470) (merged; CI green); [PR #417](https://github.com/voidbrain/nerv/pull/417) F-016-T10 revised decision and clean second review (`docs/decisions/coordinator-relocation.md`, `docs/reviews/2026-11-14-f016-relocation-review-2.md`); [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #307](https://github.com/voidbrain/nerv/pull/307) F-016-T01 decision (`docs/decisions/coordinator-relocation.md`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; [CI 43240473540](https://github.com/voidbrain/nerv/actions/runs/43240473540) passed plan, native-macos, windows and validate (full-suite skipped by scoped verification), merged main `e821c11` |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-016-T10 verified: [PR #417](https://github.com/voidbrain/nerv/pull/417) merged on green CI (second fresh-context review found no blocker). F-016-T12 closed with the accepted decision revision and zero-blocking review in PR #470; scoped CI passed. Remaining distributed relocation acceptance is open. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-082"></a>[🐞 B-082](#top)
+
+**Windows: a service installed from an SSH session cannot register its logon task**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24): the fenced install over SSH ended `uncertain` at the register step; `schtasks /Create` with NERV's task XML answered "ERROR: No mapping between account names and security IDs" because the XML named `WORKGROUP\\<user>`: `renderService` used `USERDOMAIN\\USERNAME`, and an SSH session on a workgroup machine reports `USERDOMAIN=WORKGROUP`, which names no account (the account is `KITCHEN\\<user>`). |
+| **Reproduce** | On a workgroup Windows machine, over SSH: `nodes lifecycle-inspect --action install`, then `lifecycle-apply`. |
+| **Check** | Test committed failing first: `windowsServiceUser` gives `COMPUTERNAME\\user` for a local account (also when USERDOMAIN is WORKGROUP) and `USERDOMAIN\\user` when USERDNSDOMAIN is set; on Tabgha an SSH install registers the task. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-082-t01"></a>B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-082.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/node-inspection.test.ts` "B-082: the Windows task user is the machine account over SSH…" (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI and the live check named above. |
 | Reviewed | 2026-11-18 |
 
 </details>
@@ -2469,6 +2507,82 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | Steps: B-078-T01: [PR #515](https://github.com/voidbrain/nerv/pull/515) opened. F-085-T03 run 2026-11-18 |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-083"></a>[🐞 B-083](#top)
+
+**Inspecting a target whose Node is older than 14 fails with a generic error**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-083-T01 — Inspecting a target whose Node is older than 14 fails with a generic error (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Calvary (Node 12.22.12): `nodes inspect --ssh Calvary` said "Read-only command failed" instead of naming the version as too old. The probe sent to the target's `node` used `require('node:os')`, which Node 12 lacks, so it crashed before reporting. |
+| **Reproduce** | `nerv nodes inspect --ssh <host with Node 12>` |
+| **Check** | Test committed failing first: the probe uses no `node:` require and no `??` or `?.`; on Calvary the inspection reports "Node.js 12.22.12 on the target is below the version NERV requires (>=24.0.0)". |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-083-t01"></a>B-083-T01 — Inspecting a target whose Node is older than 14 fails with a generic error | 0.5 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-083.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/node-inspection.test.ts` "B-083: the read-only probe runs on an old Node…" (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI and the live check named above. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-084"></a>[🐞 B-084](#top)
+
+**Lifecycle inspection on a fresh data home fails with a raw ENOENT**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-084-T01 — Lifecycle inspection names a missing base key or database instead of a raw ENOENT (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Calvary: after `nerv init`, `nodes lifecycle-inspect --action install` stopped with `ENOENT: no such file or directory, lstat '/home/db/.nerv/base-key'`, and after `nerv base pubkey` with the same for `nerv.sqlite`. `init` creates neither; the F-005-T22 page says to initialize with `nerv setup` or `nerv doctor`. |
+| **Reproduce** | Fresh host: `nerv init --base X --name Y --no-model-setup`, then `nerv nodes lifecycle-inspect --action install --out plan.json`. |
+| **Check** | A committed test fails first: on a data home without `base-key` or `nerv.sqlite`, the inspection names what is missing and how to create it (or `init` creates them), and changes nothing. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-084-t01"></a>B-084-T01 — Lifecycle inspection names a missing base key or database instead of a raw ENOENT | 0.75 h | 0 h | 0.75 h | Ready |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-084.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | F-005-T22 run on Calvary, 2026-11-18 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |

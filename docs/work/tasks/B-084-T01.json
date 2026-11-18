@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "parent": "B-084",
+  "id": "B-084-T01",
+  "title": "Lifecycle inspection names a missing base key or database instead of a raw ENOENT",
+  "goal": "A fresh data home gets a clear message",
+  "status": "ready",
+  "acceptance": [
+    "A committed test fails first: missing base-key or nerv.sqlite is named with how to create it; nothing changes"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/node-lifecycle-execution.ts",
+    "src/node-lifecycle-apply.ts",
+    "test/**",
+    "docs/work/records/B-084.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-18: one check and a test. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  },
+  "prs": []
+}
