@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 5 | 17 | 5 |
+| **This week** | 2 | 5 | 18 | 5 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 19 |
+| **Open** | 41 | 20 |
 | **Require Human 🧑** | 6 | 3 |
 
 ### Require Human 🧑
@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 71 h agent + 11.75 h owner across 142 open steps of 38 features and 19 other records. 40.75 h of actual effort recorded on 91 steps. Generated from the task files.
+**Remaining effort:** 71.25 h agent + 11.75 h owner across 143 open steps of 38 features and 20 other records. 41.5 h of actual effort recorded on 92 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -601,6 +601,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-086-T01: [PR #518](https://github.com/voidbrain/nerv/pull/518) fix. Test: `test/linux-service-lifecycle.test.ts` fake now loads a written unit (committed failing first: F-005-T10 and F-005-T25 failed) |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI and the NERV-03 install on Calvary. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-088"></a>[🐞 B-088](#top)
+
+**Every lifecycle update is refused at the rehearsal: the candidate reader runs without dependencies**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-088-T01 — The rehearsal resolves the candidate reader's packages from the installed checkout (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 updating NERV-03 on Calvary (F-005-T26): `lifecycle-apply --action update` ran backup, fetch and rehearse, then was refused: "The reader refused or failed on the first open: The candidate reader exited with a failure." The rehearsal exports the candidate with `git archive` into `~/.nerv-lifecycle/staging/<digest>`, outside the checkout, so it has no `node_modules`; the real reader imports `src/rpc.ts`, which imports `ajv`, and Node answered `ERR_MODULE_NOT_FOUND: Cannot find package 'ajv'`. So every update is refused on every host, the Mac's live service and automatic updates (F-102) included; the refusal is safe (backup kept, nothing changed). The adapter test's readers import only Node built-ins, so CI never saw it. |
+| **Reproduce** | On any host: `nodes lifecycle-inspect --action update --revision <newer main>` after a fenced stop, then `lifecycle-apply`. Directly: export a revision into `~/.nerv-lifecycle/staging/x` and run `node src/upgrade-reader.ts <copy.sqlite> <home>` there. |
+| **Check** | Test committed failing first: a candidate reader importing a package present only in the installed checkout's `node_modules` rehearses with no blockers; no tree, archive or link is left; the installed dependencies and checkout stay untouched; an update on Calvary completes. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-088-t01"></a>B-088-T01 — The rehearsal resolves the candidate reader's packages from the installed checkout | 1 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 1 h | 0.75 h | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-088.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/upgrade-lifecycle.test.ts` "B-088: the candidate reader resolves packages from the installed checkout…" (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI, then an update completing on Calvary. |
 | Reviewed | 2026-11-18 |
 
 </details>
