@@ -101,6 +101,24 @@ test('windowsRegistrationMatches verifies NERV Agency task with wscript and owne
   assert.equal(windowsRegistrationMatches(foreignOutput, c), false);
 });
 
+test('B-073: the Windows adapter asks the process identity through its own runner with a 60 s bound', async () => {
+  const { root, context } = makeFixture(1);
+  try {
+    const calls: { program: string; timeout?: number }[] = [];
+    const host = windowsServiceAdapter(context, async (program, args, _cwd, timeout) => {
+      calls.push({ program, ...(timeout === undefined ? {} : { timeout }) });
+      assert.match(args.join(' '), /GetProcessById\(4242\)/);
+      return { status: 0, out: '133000000000000000|C:\\node\\node.exe\r\n', err: '' };
+    });
+    assert.ok(host.identity, 'the adapter answers identity queries');
+    const first = await host.identity(4242);
+    assert.equal(typeof first, 'string');
+    assert.deepEqual(calls, [{ program: 'powershell', timeout: 60000 }]);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('windowsServiceAdapter executes install, status, start, stop and uninstall under the fencing journal', async () => {
   let registered = false;
   let running = false;
