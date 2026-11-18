@@ -1,6 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync, existsSync, lstatSync, symlinkSync, chmodSync, mkdirSync } from 'node:fs';
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  lstatSync,
+  symlinkSync,
+  chmodSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  rmSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { DatabaseSync } from 'node:sqlite';
@@ -806,4 +818,25 @@ test('B-085: lifecycle commands keep the user session bus, so systemctl --user c
 test('B-080 review: the environment lifecycle commands get uses the Windows PATH separator on win32', () => {
   assert.equal(lifecycle.childEnv({ PATH: 'C:\\a;C:\\b' }, 'C:\\n', 'win32').PATH, 'C:\\n;C:\\a;C:\\b');
   assert.equal(lifecycle.childEnv({}, 'C:\\n', 'win32').PATH, 'C:\\n');
+});
+
+test('B-084: a fresh data home names the files lifecycle needs and how to create them, changing nothing', () => {
+  const home = mkdtempSync(join(tmpdir(), 'nerv-b084-'));
+  try {
+    writeFileSync(join(home, 'config.json'), '{}');
+    writeFileSync(join(home, 'token'), 't'.repeat(32));
+    const before = readdirSync(home).sort();
+    assert.throws(
+      () => lifecycle.requireServiceHome(home),
+      (error: Error) =>
+        /base-key/.test(error.message) &&
+        /nerv\.sqlite/.test(error.message) &&
+        /nerv base pubkey/.test(error.message) &&
+        /nerv doctor/.test(error.message) &&
+        /nothing was changed/.test(error.message),
+    );
+    assert.deepEqual(readdirSync(home).sort(), before);
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
 });

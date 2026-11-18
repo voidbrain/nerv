@@ -4,7 +4,7 @@
   "id": "B-070-T02",
   "title": "Agent repairs npm under Node 26.12 (npm 11)",
   "goal": "npm test passes on the Mac with the local Node",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "npm --version prints 11.x from the Node 26.12 install",
     "node --test test/bom.test.ts passes on the Mac"
@@ -31,9 +31,17 @@
     "estimate": "0.25 h",
     "basis": "Estimated 2026-11-18: one copy-paste procedure. Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent).",
     "reviewed": "2026-11-18",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "ownerHours": 0,
     "baselineAgentHours": 0.25,
-    "estimateAgentHours": 0.25
-  }
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 523,
+      "note": "this change"
+    }
+  ]
 }

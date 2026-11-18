@@ -4,7 +4,7 @@
   "id": "B-078-T01",
   "title": "Page reports: no script text in the summary; repository fields marked not applicable",
   "goal": "A web page report is accurate",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "A committed test fails first with an invented page holding an inline script",
     "Summary without script/style text; page reports mark repository fields not applicable and add no licence risk"
@@ -33,14 +33,20 @@
     "estimate": "1 h",
     "basis": "Estimated 2026-11-18: strip script/style before the summary, kind-aware fields, one test. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 1,
+    "agentHours": 0.25,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
   },
   "prs": [
     {
       "pr": 515,
       "note": "opened"
+    },
+    {
+      "pr": 523,
+      "note": "this change"
     }
   ]
 }

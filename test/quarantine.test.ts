@@ -143,7 +143,7 @@ describe('F-085-T02 sourced project report', () => {
     );
   });
 
-  it('cites the page URL and flags missing licence and instruction-override text', async () => {
+  it('cites the page URL, marks licence not applicable and flags instruction-override text', async () => {
     const url = 'https://example.invalid/project-page';
     const fetched = await fetchIntoQuarantine(url, {
       fetchFn: async () =>
@@ -157,7 +157,61 @@ describe('F-085-T02 sourced project report', () => {
     assert.equal(report.activity.source, url);
     assert.equal(report.licence.source, url);
     assert.equal(report.buildAndTest.source, url);
-    assert.ok(report.visibleRisks.some((r) => r.source === url && /Missing licence/.test(r.summary)));
+    // B-078 (owner review of F-085-T03, 2026-11-18): a web page has no licence file; that is not a risk.
+    assert.ok(!report.visibleRisks.some((r) => /Missing licence/.test(r.summary)));
+    assert.match(report.licence.summary, /^Not applicable to a web page/);
     assert.ok(report.visibleRisks.some((r) => r.source === url && /instruction-override/.test(r.summary)));
   });
+});
+
+it('B-078: a page report names the page, not its scripts, and marks repository fields not applicable', () => {
+  const html =
+    '<!doctype html><html><head><title>Neutral Fixture Page</title><meta name="description" content="An invented page about tea.">' +
+    '<script>(()=>{let i=document.documentElement;window.track=1})()</script><style>body{color:red}</style></head>' +
+    '<body><!-- note --><h1>Neutral heading</h1><p>Some text.</p></body></html>';
+  const report = buildProjectReport({
+    target: 'https://example.invalid/about',
+    kind: 'page',
+    tainted: true,
+    trust: 'tainted',
+    jobDir: '/nonexistent',
+    discarded: true,
+    files: [{ path: 'page.txt', content: html }],
+    text: html,
+  } as Parameters<typeof buildProjectReport>[0]);
+  assert.equal(report.whatItIs.summary, 'Neutral Fixture Page — An invented page about tea.');
+  assert.doesNotMatch(report.whatItIs.summary, /document|window|color/);
+  for (const field of [report.activity, report.licence, report.buildAndTest])
+    assert.match(field.summary, /^Not applicable to a web page/);
+  assert.ok(!report.visibleRisks.some((r) => /licence/i.test(r.summary)), 'no licence risk for a page');
+});
+
+it('B-078: script end tags with whitespace or attributes are removed, and entities are decoded once', () => {
+  const html =
+    '<html><head><title>Tea &amp;lt;b&amp;gt; notes</title></head><body><script>var hidden=1</script\t\n bar>' +
+    '<p>Visible text</p></body></html>';
+  const report = buildProjectReport({
+    target: 'https://example.invalid/tea',
+    kind: 'page',
+    tainted: true,
+    trust: 'tainted',
+    jobDir: '/nonexistent',
+    discarded: true,
+    files: [{ path: 'page.txt', content: html }],
+    text: html,
+  } as Parameters<typeof buildProjectReport>[0]);
+  assert.equal(report.whatItIs.summary, 'Tea &lt;b&gt; notes', 'decoded once, never into markup');
+  const noTitle = '<html><body><script>var hidden=1</script\t\n bar><p>Visible text</p></body></html>';
+  const second = buildProjectReport({
+    target: 'https://example.invalid/tea2',
+    kind: 'page',
+    tainted: true,
+    trust: 'tainted',
+    jobDir: '/nonexistent',
+    discarded: true,
+    files: [{ path: 'page.txt', content: noTitle }],
+    text: noTitle,
+  } as Parameters<typeof buildProjectReport>[0]);
+  assert.doesNotMatch(second.whatItIs.summary, /hidden/);
+  assert.equal(second.whatItIs.summary, 'Visible text');
 });
