@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 5 | 17 | 7 |
+| **This week** | 3 | 5 | 17 | 7 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 17 |
+| **Open** | 42 | 17 |
 | **Require Human 🧑** | 6 | 3 |
 
 ### Require Human 🧑
@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 69 h agent + 11.75 h owner across 139 open steps of 38 features and 17 other records. 41.5 h of actual effort recorded on 92 steps. Generated from the task files.
+**Remaining effort:** 70.75 h agent + 11.75 h owner across 141 open steps of 39 features and 17 other records. 42.25 h of actual effort recorded on 93 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2134,6 +2134,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-107"></a>[✨ F-107](#top)
+
+**Kaji map: routes and the heartbeat mesh, readable base names and status colours**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-107-T01 — Map: green routes, heartbeat mesh lines, names in their case and status colour (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-18, after NERV-03 joined: with a main base the map drew only peer-to-main lines, so it showed routing but not that every pair of bases exchanges heartbeats (Tabgha and Calvary talk directly); base names were all capitals; the names in the list under the map did not follow their base's status; peer-to-main lines used the accent colour rather than a "communicating" green. |
+| **Reproduce** | Dashboard with three enrolled bases and a main base: map and list under it. |
+| **Check** | Routes to the main base are green while both ends are up; peers are joined by a thin neutral dotted heartbeat-mesh line that carries no pulses; base names keep their case; list names take their status colour; legend and design notes say so (F-107-T01). The mesh line is coloured from both peers' own reports once heartbeats carry them (F-107-T02). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-107-t01"></a>F-107-T01 — Map: green routes, heartbeat mesh lines, names in their case and status colour | 1 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #521](https://github.com/voidbrain/nerv/pull/521) map |
+| 🟡 Medium | <a id="f-107-t02"></a>F-107-T02 — Heartbeats report reachable peers; the map colours each mesh line from both ends | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-107-T01](#f-107-t01) | — |
+| 🟡 Medium | **Total** | 2.5 h | 0.75 h (1 of 2 steps recorded) | 1.75 h | 0 of 2 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-107.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-107-T01: [PR #521](https://github.com/voidbrain/nerv/pull/521) map. `test/dashboard.test.ts` (B-065 bases test extended) |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI and a look at the live dashboard. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-098"></a>[✨ F-098](#top)
 
 **FPV fleet diary: crashes, parts, spares and photos**
@@ -2480,8 +2519,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-083-t01"></a>B-083-T01 — Inspecting a target whose Node is older than 14 fails with a generic error | 0.5 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #517](https://github.com/voidbrain/nerv/pull/517) this change |
-| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0.25 h | 0 of 1 completed | |
+| 🟢 Small | <a id="b-083-t01"></a>B-083-T01 — Inspecting a target whose Node is older than 14 fails with a generic error | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #517](https://github.com/voidbrain/nerv/pull/517) this change |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

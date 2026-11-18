@@ -29,12 +29,12 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
+    "estimate": "0.75 h",
     "basis": "Estimated 2026-11-18: four require names and a test. Not a measurement.",
     "reviewed": "2026-11-18",
     "agentHours": 0.25,
     "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5,
+    "estimateAgentHours": 0.75,
     "actualAgentHours": 0.5,
     "actualSource": "stated"
   },
