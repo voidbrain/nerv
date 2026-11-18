@@ -4,7 +4,7 @@
   "parent": "F-009",
   "title": "Linux service target acceptance",
   "goal": "Linux service target acceptance",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Target: Calvary (NERV-03, ClockworkPi DevTerm, Debian 11 arm64, `ssh Calvary`), owner decision 2026-11-18 replacing the Linux VM, which had no outbound internet",
     "On Calvary: install/status/start/stop/uninstall and restart catch-up pass; evidence recorded"
@@ -37,8 +37,10 @@
     "reviewed": "2026-11-18",
     "baselineDays": 0.5,
     "ownerHours": 0,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "estimateAgentHours": 0.5,
-    "baselineAgentHours": 0.5
+    "baselineAgentHours": 0.5,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
   }
 }

@@ -25,7 +25,7 @@ Status per milestone, derived from the records (Delivered: all closed; Awaiting 
 |---|---|---:|---:|---:|---|
 | 0 — Harness and contracts | In progress | 17 | 0 | 4 | F-076, F-079, F-097, F-105 |
 | 1 — Reliable local core | In progress | 2 | 0 | 1 | F-062 |
-| 1a — Headless and bilingual workspace | Awaiting verification | 5 | 1 | 0 | — |
+| 1a — Headless and bilingual workspace | Delivered | 6 | 0 | 0 | — |
 | 1a.1 — Isolated runtime foundation | Delivered | 2 | 0 | 0 | — |
 | 1b — Native macOS companion | Awaiting verification | 1 | 1 | 0 | — |
 | 2a — Useful, gated assistant | In progress | 14 | 0 | 4 | F-027, F-056, F-082, F-083 |

@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 5 | 7 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 6 | 7 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -4896,6 +4896,40 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | PR / evidence | [PR #506](https://github.com/voidbrain/nerv/pull/506) (merged; CI green: B-070-T01); local run 2026-11-16 in a fresh worktree; CI on #502 passed the same test |
 | Opened | 2026-11-16 |
 | Verification | 2026-11-18: B-070-T02 run by the agent: `npm-cli.js` was missing from Node 26.12; `npm install -g --prefix ~/.nvm/versions/node/v26.12.0 npm@11` with Node 24.19's npm gave npm and npx 11.21.3; `node --test test/bom.test.ts` 3/3 with that npm. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### F-009
+
+**Run NERV Agency headless as one local user service**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18; Mac and Linux service acceptance done.
+
+| | |
+|---|---|
+| **Issue** | Service commands and definitions implemented. Portable tests validate rendering/process lifecycle; later owner-authorized F-005 Mac default-profile service operations passed. Linux/session acceptance remains incomplete. |
+| **Reproduce** | Follow the [service and login acceptance procedure](../acceptance/f009-service-login-procedure.md) and [docs/INSTALL.md](../INSTALL.md). |
+| **Check** | Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. F-009-T03 (Linux service target, Calvary instead of the VM by owner decision): 2026-11-18 on Calvary (NERV-03, Debian 11 arm64, Node 24.22.3, linger on): fenced install, stop, start (all completed); a fenced update `bf1e27ef` → `e61388cf` through NERV's own flow (backup, fetch, rehearse, checkout, dependencies, build, start, verify, all completed; after B-088); fenced uninstall (unit removed, data kept) and reinstall (completed); after `systemctl reboot` the user service started by itself through linger and served within 30 s, Kaji listening and NERV-01/NERV-02 reachable; a reminder due while the service was stopped (17:32:53Z) was delivered once after the fenced start (17:33:38Z). An earlier update attempt was refused safely at the rehearsal (B-088: backup kept, nothing changed). Mac login/logout was F-009-T02 (2026-11-15). No review: records-only closure; the code changes behind it (B-085, B-086, B-088) get their own fresh-context review. F-009-T03 progress ([PR #520](https://github.com/voidbrain/nerv/pull/520)): 2026-11-18 on Calvary (NERV-03, Debian 11 arm64, Node 24.22.3, linger on), checkout `main` at `261ad183`: fenced install completed (`definition`, `start`, `verify`), `nerv.service` enabled and active, `http://127.0.0.1:4317/` 200, `doctor` quick_check ok; then a fenced stop (unit inactive, no answer) and a fenced start (active, 200) both completed. Left for T03: restart catch-up after a reboot. 2026-11-18: F-009-T03 moved from the owner to the agent. Owner decision 2026-11-18: the agent runs this itself (over SSH to nerv-linux or Tabgha, or the CLI on the Mac) and records the commands and output; the owner page stays as the procedure2026-11-18: the owner found `nerv service status` failing ("Could not find service io.nerv.agent"): launchd had not loaded the agent since about 2026-11-16 14:48 (last `service-error.log` write; the plist is present, enabled, RunAtLoad and KeepAlive; no lifecycle operation since 2026-11-12; boot 2026-11-15), and NERV ran from a manual `nerv launch` started 2026-11-18 10:42. Likely the companion's Stop (`launchctl bootout`), not proven: the system log no longer covers that day. 2026-11-18: F-009-T04 closed; F-009-T02's evidence below was already recorded with PR #455 and no failure needed a B- record. Next: the owner's Linux VM acceptance (F-009-T03). F-009-T02 passed 2026-11-15 (owner, [PR #455](https://github.com/voidbrain/nerv/pull/455)): after logout and login, launchd restarted `io.nerv.agent` unaided (`state = running`, new pid, HTTP 200). 2026-11-13: the owner chose a Linux VM on the Mac as the Linux acceptance target (also F-005-T26). Owner later selected this Mac default installation and authorized service work on2026-11-10 under F-005. [PR #253](https://github.com/voidbrain/nerv/pull/253) / full CI42874665479 and [accepted service evidence](../acceptance/node-service-2026-11-10.md) establish the selected per-user Mac install/status/stop/start/uninstall/reinstall and recovery checks; this is not a system service or linger exception. Actual login/logout and a selected Linux service target remain pending; no fresh owner choice for the already selected Mac is required. The following is earlier history, not a current prohibition: 2026-11-08: read-only launchctl/plist inspection confirms no NERV service is installed or registered on the execution Mac. docs/agents/areas.md prohibits installing services or enabling linger here; a separate target host is required for OS-service/login acceptance. Target choice requested from the owner; no service was installed, started or stopped. Portable process and recent Windows/macOS CI remain distinct from that trial.  Validate launchd/systemd installation and login/logout on target hosts; PR #1 CI is green. Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 1 h agent + 0.75 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 2 open steps in hours total 1 h agent + 0.75 h owner (steps table; method in each task basis). Day figures below are dated history. Medium remaining validation effort; provisionally 1–2 focused hours per target OS, excluding time waiting for access or troubleshooting. Reassessed 2026-11-08; no completion is inferred from portable tests.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) accepted Mac service evidence under F-005; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-18: Linux target acceptance on Calvary (install/status/start/stop/update/uninstall, reboot start, restart catch-up). 2026-11-10 selected per-user Mac lifecycle operations accepted under F-005-T04; actual session/login and Linux target acceptance remain pending. Earlier2026-11-08: read-only execution-host check confirms no installed/registered launchd service. Existing portable headless checks pass; separate target-host install/status/start/stop/uninstall and login/logout acceptance remain pending. Closed 2026-11-18. |
 | Reviewed | 2026-11-18 |
 
 </details>

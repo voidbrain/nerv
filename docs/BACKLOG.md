@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 3 | 5 | 18 | 7 |
+| **This week** | 3 | 6 | 18 | 7 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 42 | 18 |
+| **Open** | 41 | 18 |
 | **Require Human 🧑** | 6 | 3 |
 
 ### Require Human 🧑
@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 71 h agent + 11.75 h owner across 142 open steps of 39 features and 18 other records. 43 h of actual effort recorded on 94 steps. Generated from the task files.
+**Remaining effort:** 69 h agent + 11.75 h owner across 138 open steps of 38 features and 18 other records. 45.5 h of actual effort recorded on 95 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -45,7 +45,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 6.75 h agent + 0.25 h owner | — | [F-012-T05](#f-012-t05) | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 5.5 h agent + 0.25 h owner | — | [F-012-T05](#f-012-t05) | 🤖 | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
 
@@ -61,10 +61,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | 🤖 | — |
 | 🟢 Small | <a id="f-005-t24"></a>F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 1 h | 0 h | 1 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-005-t26"></a>F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 1 h | 0 h | 1 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-005-t32"></a>F-005-T32 — Record the evidence of F-005-T24 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T24](#f-005-t24) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-005-t33"></a>F-005-T33 — Record the evidence of F-005-T26 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T26](#f-005-t26) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-005-t11"></a>F-005-T11 — Propose the device matrix for final acceptance | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T32](#f-005-t32), [F-005-T33](#f-005-t33) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-005-t11"></a>F-005-T11 — Propose the device matrix for final acceptance | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T32](#f-005-t32) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t37"></a>F-005-T37 — Agree the device matrix | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-005-T11](#f-005-t11) | ⏳ 🤔 | — |
 | 🟢 Small | <a id="f-005-t27"></a>F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 1 h | 0 h | 1 h | Planned · waits on [F-005-T37](#f-005-t37) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t34"></a>F-005-T34 — Record the evidence of F-005-T27 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T27](#f-005-t27) | ⏳ 🤖 | — |
@@ -73,9 +71,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-005-T35](#f-005-t35) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T29](#f-005-t29) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T36](#f-005-t36) | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 23.25 h (30 of 37 steps) | 10.25 h (17 of 37 steps recorded) | 6.75 h agent + 0.25 h owner | 23 of 37 completed | | |
+| 🔴 Large | **Total** | 23.25 h (30 of 37 steps) | 12.75 h (18 of 37 steps recorded) | 5.5 h agent + 0.25 h owner | 25 of 37 completed | | |
 
-<details><summary>Done steps (23)</summary>
+<details><summary>Done steps (25)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -101,7 +99,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-005-t22"></a>F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.5 h | 1.5 h (stated) | Completed | [PR #517](https://github.com/voidbrain/nerv/pull/517) this change |
 | — | <a id="f-005-t23"></a>F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | Completed | — |
 | — | <a id="f-005-t25"></a>F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-005-t26"></a>F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 1 h | 2.5 h (stated) | Completed | — |
 | — | <a id="f-005-t31"></a>F-005-T31 — Record the evidence of F-005-T22 and close it | 0.25 h | 0 h | Completed | [PR #523](https://github.com/voidbrain/nerv/pull/523) this change |
+| — | <a id="f-005-t33"></a>F-005-T33 — Record the evidence of F-005-T26 and close it | 0.25 h | 0 h | Completed | — |
 
 </details>
 
@@ -277,58 +277,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-
-### <a id="f-009"></a>[✨ F-009](#top)
-
-**Run NERV Agency headless as one local user service**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-009-T03 — Linux service target acceptance (Planned).
-
-| | |
-|---|---|
-| **Issue** | Service commands and definitions implemented. Portable tests validate rendering/process lifecycle; later owner-authorized F-005 Mac default-profile service operations passed. Linux/session acceptance remains incomplete. |
-| **Reproduce** | Follow the [service and login acceptance procedure](acceptance/f009-service-login-procedure.md) and [docs/INSTALL.md](INSTALL.md). |
-| **Check** | Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-009-t03"></a>F-009-T03 — Linux service target acceptance | 0.5 h | 0 h | 0.5 h | Planned | 🤖 |
-| 🟢 Small | <a id="f-009-t05"></a>F-009-T05 — Record the evidence of F-009-T03 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-009-T03](#f-009-t03) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 1 h (3 of 5 steps) | 0 h (0 of 5 steps recorded) | 0.75 h | 3 of 5 completed | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-009-t01"></a>F-009-T01 — Single-process service, config and lifecycle commands | — | 0 days | Completed |
-| — | <a id="f-009-t02"></a>F-009-T02 — Mac login/logout acceptance | — | 0 h | Completed |
-| — | <a id="f-009-t04"></a>F-009-T04 — Record the evidence of F-009-T02 and close it | 0.25 h | 0 h | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-009.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) accepted Mac service evidence under F-005; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
-| Opened | 2026-11-01 |
-| Verification | 2026-11-10 selected per-user Mac lifecycle operations accepted under F-005-T04; actual session/login and Linux target acceptance remain pending. Earlier2026-11-08: read-only execution-host check confirms no installed/registered launchd service. Existing portable headless checks pass; separate target-host install/status/start/stop/uninstall and login/logout acceptance remain pending. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-
-
 
 ### <a id="f-021"></a>[✨ F-021](#top)
 
