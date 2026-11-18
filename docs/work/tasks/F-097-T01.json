@@ -4,7 +4,7 @@
   "parent": "F-097",
   "title": "Agent reruns the seven system cases at the 8.14.1 source",
   "goal": "The seven nerv-system-flows cases have a run at the merged harness 8.14.1 source",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Pending cases this task covers (listed for check:gauntlet-runs): nerv-system-flows/*",
     "Copy and paste: cd <a worktree of this branch or of main after merge> && npm run build && npm run gauntlet:all -- --allow-expensive --execute --out-dir=/private/tmp/nerv-system-8141 && npm run gauntlet:pending — expected: seven passing system cases, gauntlet:pending prints nothing",
@@ -34,9 +34,17 @@
     "estimate": "0.25 h",
     "basis": "Estimated 2026-11-14: one command, about 15 minutes of running. Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent).",
     "reviewed": "2026-11-18",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25,
-    "ownerHours": 0
-  }
+    "ownerHours": 0,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 515,
+      "note": "system rerun"
+    }
+  ]
 }
