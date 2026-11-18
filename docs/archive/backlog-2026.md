@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 5 | 4 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 5 | 5 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -4794,6 +4794,40 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | PR / evidence | [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #471](https://github.com/voidbrain/nerv/pull/471) (merged; CI green); [PR #372](https://github.com/voidbrain/nerv/pull/372) F-048-T01..T03 (visible bounded request queue, per-model budgets, per-item locks); [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](../README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](../../audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-18: F-048-T01, F-048-T02 and F-048-T03 closed (were Verified). 2026-11-18: F-048-T04 verified: [PR #471](https://github.com/voidbrain/nerv/pull/471) merged on green CI. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-080
+
+**Windows: every lifecycle command fails with "Lifecycle command could not start"**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18; verified on Tabgha.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 running F-005-T24 on Tabgha: `nodes lifecycle-inspect --action start` exited 1 with "Lifecycle command could not start." and wrote no plan. `command()` in `src/node-lifecycle-execution.ts` joined Node's folder to the child's `PATH` with `:`; on Windows the separator is `;`, so the first PATH entry was corrupted and `schtasks` was not found (`ENOENT`; `git` and `powershell` still started). CI never saw it: the Windows lifecycle tests inject their own runner. |
+| **Reproduce** | On Windows, before the fix: `node --use-system-ca src/cli.ts nodes lifecycle-inspect --action start --out plan.json`. A spawn probe on Tabgha with NERV's environment gave `schtasks: spawn error ENOENT`; with `;` all three helpers started. |
+| **Check** | Test committed failing first: `childPath` joins with `;` on win32 and `:` elsewhere; the lifecycle tests pass; on Tabgha a clone of the fix writes a start plan (exit 0, `execution: none`). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Verified on Tabgha's own checkout after `git pull` to `7c027b5b`: `nodes lifecycle-inspect --action stop` exited 0 and wrote a plan, and the fenced install from the desktop completed (`definition`, `start`, `verify`). Review: fresh-context design review of PR #516 (2026-11-18): no blocking issues; its should-fix, a win32 `childEnv` test joining `command()`'s environment to the separator, is added in the B-077 PR. 2026-11-18: B-080-T01 implemented. Test: `test/node-lifecycle-execution.test.ts` "B-080: lifecycle commands put Node first on PATH with the platform separator" (committed failing first). Lifecycle tests 47/47. Live: a temporary clone of the fix on Tabgha ran `lifecycle-inspect --action start` with exit 0 and saved plan `034f5373…` (`execution: none`); its blockers were the expected ones for an unbuilt clone that is not the installed source; the clone was removed. Tabgha's own checkout (`C:\Projects\nerv` at `b8367586`) still has the bug, so its first fixed revision has to arrive by `git pull`, not by the lifecycle update. The change moved the system source key, so the seven `nerv-system-flows` cases were rerun on this branch: all passed at `91206f76bc85…` (ledger committed). Opened 2026-11-18.
+
+**Estimates:** Small, estimated 2026-11-18: 0.75 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/node-lifecycle-execution.test.ts` B-080; Tabgha spawn probe and clone check 2026-11-18 |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: CI green on PR #516; live on Tabgha (lifecycle-inspect exit 0, fenced install completed from the desktop). Closed 2026-11-18. |
 | Reviewed | 2026-11-18 |
 
 </details>

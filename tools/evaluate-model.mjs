@@ -48,7 +48,7 @@ export function validateRoleBundleConfig({role='both',limit,profile,limits}){
  if(profile.backend!=='ollama')throw Error('Unsupported role profile backend; only local ollama is supported');
  if(profile.parallel!==1)throw Error('Unsupported role profile parallel setting; only serial (parallel=1) is supported');
  checkLoopbackEndpoint(profile.endpoint);
- if(limits.repeat!==1)throw Error('Unsupported role limits repeat; only repeat=1 is supported');
+ if(!Number.isInteger(limits.repeat)||limits.repeat<1)throw Error('Role limits repeat must be a whole number of at least 1');
  const selection=roleCases(role,limit);
  if(selection.cases.length>limits.maxCases)throw Error(`Selected ${selection.cases.length} role cases exceed limits.maxCases (${limits.maxCases})`);
  return selection;
@@ -91,10 +91,12 @@ export async function runRoleBundle({role='both',limit,profile,limits,environmen
  const beginSuite=Date.now(),deadline=beginSuite+limits.suiteMs,results=[];
  let remainingOutputTokens=limits.outputTokens,usedOutputTokens=0,calls=0;
  try{
-  for(const item of selection.cases){
-   if(controller.signal.aborted){results.push({role:item.role,suiteId:item.suiteId,id:item.case.id,split:item.case.split,family:item.case.family,expected:item.case.expected,observed:null,status:'not-run',error:'Interrupted by signal'});continue;}
-   if(Date.now()>=deadline){results.push({role:item.role,suiteId:item.suiteId,id:item.case.id,split:item.case.split,family:item.case.family,expected:item.case.expected,observed:null,status:'not-run',error:'Aggregate suite time budget exceeded'});continue;}
-   if(remainingOutputTokens<=0){results.push({role:item.role,suiteId:item.suiteId,id:item.case.id,split:item.case.split,family:item.case.family,expected:item.case.expected,observed:null,status:'not-run',error:'Aggregate output token budget exceeded'});continue;}
+  // B-077: each selected case runs limits.repeat times; every result names its iteration, and the budgets cover all runs.
+  const runs=selection.cases.flatMap(item=>Array.from({length:limits.repeat},(_,i)=>({item,iteration:i+1})));
+  for(const {item,iteration} of runs){
+   if(controller.signal.aborted){results.push({iteration,role:item.role,suiteId:item.suiteId,id:item.case.id,split:item.case.split,family:item.case.family,expected:item.case.expected,observed:null,status:'not-run',error:'Interrupted by signal'});continue;}
+   if(Date.now()>=deadline){results.push({iteration,role:item.role,suiteId:item.suiteId,id:item.case.id,split:item.case.split,family:item.case.family,expected:item.case.expected,observed:null,status:'not-run',error:'Aggregate suite time budget exceeded'});continue;}
+   if(remainingOutputTokens<=0){results.push({iteration,role:item.role,suiteId:item.suiteId,id:item.case.id,split:item.case.split,family:item.case.family,expected:item.case.expected,observed:null,status:'not-run',error:'Aggregate output token budget exceeded'});continue;}
    const ask=item.role==='casper'?casperAsk(item.case.input):misatoAsk({...item.case.input,tools:toolDocs},'local');
    const messages=[...(ask.system?[{role:'system',content:ask.system}]:[]),{role:'user',content:ask.prompt}];
    const ollamaOptions={
@@ -132,10 +134,10 @@ export async function runRoleBundle({role='both',limit,profile,limits,environmen
     if(promptEvalCount===null)gaps.add('prompt_eval_count');
     calls++;
     const graded=gradeRole(item.role,item.case,text);
-    results.push({role:item.role,suiteId:item.suiteId,id:item.case.id,split:item.case.split,family:item.case.family,expected:item.case.expected,observed:graded.observed,status:graded.status,returnedModel:raw?.model??null,doneReason:raw?.done_reason??null,usage:{inputTokens:promptEvalCount,outputTokens:evalCount,durationMs:Math.round(performance.now()-caseBegin)},responseTruncated:text.length>4096,response:text.slice(0,4096)});
+    results.push({iteration,role:item.role,suiteId:item.suiteId,id:item.case.id,split:item.case.split,family:item.case.family,expected:item.case.expected,observed:graded.observed,status:graded.status,returnedModel:raw?.model??null,doneReason:raw?.done_reason??null,usage:{inputTokens:promptEvalCount,outputTokens:evalCount,durationMs:Math.round(performance.now()-caseBegin)},responseTruncated:text.length>4096,response:text.slice(0,4096)});
    }catch(error){
     const interrupted=controller.signal.aborted;
-    results.push({role:item.role,suiteId:item.suiteId,id:item.case.id,split:item.case.split,family:item.case.family,expected:item.case.expected,observed:null,status:interrupted?'not-run':'error',error:interrupted?'Interrupted by signal':error.message,usage:{inputTokens:null,outputTokens:null,durationMs:Math.round(performance.now()-caseBegin)}});
+    results.push({iteration,role:item.role,suiteId:item.suiteId,id:item.case.id,split:item.case.split,family:item.case.family,expected:item.case.expected,observed:null,status:interrupted?'not-run':'error',error:interrupted?'Interrupted by signal':error.message,usage:{inputTokens:null,outputTokens:null,durationMs:Math.round(performance.now()-caseBegin)}});
    }
   }
  }finally{

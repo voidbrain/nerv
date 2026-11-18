@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 5 | 17 | 4 |
+| **This week** | 2 | 5 | 17 | 5 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 20 |
+| **Open** | 41 | 19 |
 | **Require Human 🧑** | 6 | 3 |
 
 ### Require Human 🧑
@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 72.5 h agent + 11.75 h owner across 143 open steps of 38 features and 20 other records. 41 h of actual effort recorded on 91 steps. Generated from the task files.
+**Remaining effort:** 71 h agent + 11.75 h owner across 142 open steps of 38 features and 19 other records. 40.75 h of actual effort recorded on 91 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -39,51 +39,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 - **Status:** 🔴 Open · 🟠 Investigate · 🟡 Implemented · 🟢 Verified · 🟣 Blocked · 🔵 Closed
 - **Steps:** `effort` = remaining agent time (🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more); `estimate` = latest whole-step estimate; `actual` = effort spent so far; `h` = agent hours (owner time apart); step status is not parent acceptance.
 
-### <a id="b-080"></a>[🐞 B-080](#top)
-
-**Windows: every lifecycle command fails with "Lifecycle command could not start"**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.25 h | — | [F-005-T24](#f-005-t24) | 🤖 | — | — |
-
-💻 **→** Next: B-080-T01 — Lifecycle commands join PATH with the platform separator (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 running F-005-T24 on Tabgha: `nodes lifecycle-inspect --action start` exited 1 with "Lifecycle command could not start." and wrote no plan. `command()` in `src/node-lifecycle-execution.ts` joined Node's folder to the child's `PATH` with `:`; on Windows the separator is `;`, so the first PATH entry was corrupted and `schtasks` was not found (`ENOENT`; `git` and `powershell` still started). CI never saw it: the Windows lifecycle tests inject their own runner. |
-| **Reproduce** | On Windows, before the fix: `node --use-system-ca src/cli.ts nodes lifecycle-inspect --action start --out plan.json`. A spawn probe on Tabgha with NERV's environment gave `schtasks: spawn error ENOENT`; with `;` all three helpers started. |
-| **Check** | Test committed failing first: `childPath` joins with `;` on win32 and `:` elsewhere; the lifecycle tests pass; on Tabgha a clone of the fix writes a start plan (exit 0, `execution: none`). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-080-t01"></a>B-080-T01 — Lifecycle commands join PATH with the platform separator | 0.75 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #516](https://github.com/voidbrain/nerv/pull/516) fix |
-| 🟢 Small | **Total** | 0.75 h | 0.75 h | 0.25 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-080.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-080-T01: [PR #516](https://github.com/voidbrain/nerv/pull/516) fix. Test: `test/node-lifecycle-execution.test.ts` B-080; Tabgha spawn probe and clone check 2026-11-18 |
-| Opened | 2026-11-18 |
-| Verification | Pending: CI, then lifecycle-inspect on Tabgha's own checkout after it is updated. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
 ### <a id="f-005"></a>[✨ F-005](#top)
 
 **Discover, install and operate enrolled remote workers**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 7 h agent + 0.25 h owner | [B-080-T01](#b-080-t01) | [F-012-T05](#f-012-t05) | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 7 h agent + 0.25 h owner | — | [F-012-T05](#f-012-t05) | 🤖 | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
 
@@ -98,9 +60,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | 🤖 | — |
+| 🟢 Small | <a id="f-005-t24"></a>F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 1 h | 0 h | 1 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-005-t26"></a>F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 1 h | 0 h | 1 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-005-t31"></a>F-005-T31 — Record the evidence of F-005-T22 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-005-t24"></a>F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 1 h | 0 h | 1 h | Planned · waits on [B-080-T01](#b-080-t01) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t32"></a>F-005-T32 — Record the evidence of F-005-T24 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T24](#f-005-t24) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t33"></a>F-005-T33 — Record the evidence of F-005-T26 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T26](#f-005-t26) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t11"></a>F-005-T11 — Propose the device matrix for final acceptance | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T31](#f-005-t31), [F-005-T32](#f-005-t32), [F-005-T33](#f-005-t33) | ⏳ 🤖 | — |
@@ -166,9 +128,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-006-T11](#f-006-t11), [F-006-T13](#f-006-t13), [F-006-T21](#f-006-t21) | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | [F-006-T11](#f-006-t11), [F-006-T13](#f-006-t13), [F-006-T21](#f-006-t21) | 🤖 | — | — |
 
-💻 **→** Next: B-077-T01 — Role bundles run each case the configured number of times (Ready).
+💻 **→** Next: B-077-T01 — Role bundles run each case the configured number of times (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -178,10 +140,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-077-t01"></a>B-077-T01 — Role bundles run each case the configured number of times | 1.5 h | 0 h | 1.5 h | Ready |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-077-t01"></a>B-077-T01 — Role bundles run each case the configured number of times | 1.5 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #519](https://github.com/voidbrain/nerv/pull/519) fix |
+| 🟢 Small | **Total** | 1.5 h | 0.5 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -190,9 +152,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Dry run 2026-11-18 on main, scratch profile copied from the protocol's `gemma4-12b.json` |
+| PR / evidence | Steps: B-077-T01: [PR #519](https://github.com/voidbrain/nerv/pull/519) fix. Test: `test/gauntlet.test.mjs` B-077; Dry run 2026-11-18 on main, scratch profile copied from the protocol's `gemma4-12b.json` |
 | Opened | 2026-11-18 |
-| Verification | Pending. |
+| Verification | Pending: CI. |
 | Reviewed | 2026-11-18 |
 
 </details>

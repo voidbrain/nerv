@@ -802,3 +802,8 @@ test('B-085: lifecycle commands keep the user session bus, so systemctl --user c
   assert.equal(env.PATH, '/opt/node/bin:/usr/bin');
   assert.equal(env.UNRELATED_SECRET, undefined, 'only the named variables pass');
 });
+
+test('B-080 review: the environment lifecycle commands get uses the Windows PATH separator on win32', () => {
+  assert.equal(lifecycle.childEnv({ PATH: 'C:\\a;C:\\b' }, 'C:\\n', 'win32').PATH, 'C:\\n;C:\\a;C:\\b');
+  assert.equal(lifecycle.childEnv({}, 'C:\\n', 'win32').PATH, 'C:\\n');
+});

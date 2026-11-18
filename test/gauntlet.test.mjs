@@ -1542,3 +1542,81 @@ test('B-079: the root command reruns system cases whose source changed, as pendi
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('B-077: a role bundle with repeat 3 runs each case three times and reports every iteration', async () => {
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-role-repeat-'));
+  const profilePath = 'node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json';
+  try {
+    const limitsPath = join(dir, 'limits-repeat3.json');
+    writeFileSync(
+      limitsPath,
+      JSON.stringify({
+        caseMs: 30000,
+        suiteMs: 300000,
+        maxCases: 10,
+        repeat: 3,
+        outputTokens: 61440,
+        maxBytes: 1048576,
+      }),
+    );
+    const planned = await main([
+      'role-plan',
+      '--role=casper',
+      '--limit=2',
+      '--profile=' + profilePath,
+      '--limits=' + limitsPath,
+    ]);
+    assert.equal(planned.limits.repeat, 3);
+    let chats = 0;
+    const mockFetch = async (url) => {
+      const path = new URL(String(url)).pathname;
+      if (path === '/api/version') return new Response(JSON.stringify({ version: '0.12.0' }));
+      if (path === '/api/tags')
+        return new Response(JSON.stringify({ models: [{ name: 'gemma4:12b', digest: 'a'.repeat(64) }] }));
+      if (path === '/api/show') return new Response(JSON.stringify({ details: { quantization_level: 'Q4_K_M' } }));
+      if (path === '/api/ps') return new Response(JSON.stringify({ models: [] }));
+      if (path === '/api/generate') return new Response(JSON.stringify({ done: true }));
+      if (path === '/api/chat') {
+        chats++;
+        return new Response(
+          JSON.stringify({
+            model: 'gemma4:12b',
+            done_reason: 'stop',
+            message: { content: '{"vote":"approve","reason":"ok","confidence":1}' },
+            eval_count: 10,
+            prompt_eval_count: 5,
+          }),
+        );
+      }
+      throw Error('Unexpected endpoint ' + path);
+    };
+    const outPath = join(dir, 'role-repeat.json');
+    await main(
+      [
+        'role-run',
+        '--role=casper',
+        '--limit=2',
+        '--profile=' + profilePath,
+        '--limits=' + limitsPath,
+        '--execute',
+        '--allow-models',
+        '--out=' + outPath,
+      ],
+      { fetch: mockFetch },
+    );
+    assert.equal(chats, 6);
+    const report = JSON.parse(readFileSync(outPath, 'utf8'));
+    assert.equal(report.results.length, 6);
+    const ids = [...new Set(report.results.map((r) => r.id))];
+    assert.equal(ids.length, 2);
+    for (const id of ids)
+      assert.deepEqual(
+        report.results.filter((r) => r.id === id).map((r) => r.iteration),
+        [1, 2, 3],
+      );
+    assert.equal(report.budget.calls, 6);
+    assert.equal(report.budget.usedOutputTokens, 60);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
