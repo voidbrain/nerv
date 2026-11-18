@@ -4,7 +4,7 @@
   "id": "B-075-T01",
   "title": "Read the failed Telegram tests on Windows and name the cause",
   "goal": "The cause of the 2026-11-16 Windows Telegram failures is named and fixed or bounded",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "The failure messages and cause are in the record",
     "A committed test fails first if the cause is in code"
@@ -33,14 +33,20 @@
     "estimate": "1 h",
     "basis": "Estimated 2026-11-18: read the CI log, reproduce under load, fix or bound, one test. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 1,
+    "agentHours": 0.25,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
   },
   "prs": [
     {
       "pr": 510,
       "note": "verification sweep"
+    },
+    {
+      "pr": 513,
+      "note": "bound"
     }
   ]
 }

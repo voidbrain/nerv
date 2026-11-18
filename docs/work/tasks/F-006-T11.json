@@ -17,7 +17,9 @@
     "Run the placement campaign on the enrolled Mac and mini PC"
   ],
   "dependsOn": [
-    "F-006-T19"
+    "B-077-T01",
+    "F-006-T19",
+    "F-006-T21"
   ],
   "resources": [
     "contract:model-routing",
@@ -44,5 +46,5 @@
     "agentHours": 0,
     "ownerKind": "procedure"
   },
-  "ownerLink": "docs/decisions/placement-campaign.md"
+  "ownerLink": "docs/acceptance/f006-mac-runs.md"
 }

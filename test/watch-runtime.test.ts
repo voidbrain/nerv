@@ -391,7 +391,8 @@ test('F-026: nonproduction writes remain denied through the planner/gate join ev
 
 test(
   'F-026: a process lost during planning is interrupted once after restart, never re-dispatched',
-  { timeout: 15000 },
+  // B-076: 2.5 s here; Windows CI ran 6-9x slower on 2026-11-18 (about 22 s) and passed 15 s on PR #511. 45 s.
+  { timeout: 45000 },
   async () => {
     const t = await setup(['{"reply":"Late fixture reply."}']);
     let release: () => void = () => {};

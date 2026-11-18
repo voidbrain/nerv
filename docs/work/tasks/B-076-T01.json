@@ -45,6 +45,10 @@
     {
       "pr": 508,
       "note": "headless bound"
+    },
+    {
+      "pr": 513,
+      "note": "watch bound"
     }
   ]
 }
