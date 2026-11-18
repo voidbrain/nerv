@@ -2198,11 +2198,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-107-t01"></a>F-107-T01 — Map: green routes, heartbeat mesh lines, names in their case and status colour | 1 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending |
-| 🟡 Medium | <a id="f-107-t02"></a>F-107-T02 — Heartbeats report reachable peers; the map colours each mesh line from both ends | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-107-T01](#f-107-t01) |
-| 🟡 Medium | **Total** | 2.5 h | 0.75 h (1 of 2 steps recorded) | 1.75 h | 0 of 2 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-107-t01"></a>F-107-T01 — Map: green routes, heartbeat mesh lines, names in their case and status colour | 1 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #521](https://github.com/voidbrain/nerv/pull/521) map |
+| 🟡 Medium | <a id="f-107-t02"></a>F-107-T02 — Heartbeats report reachable peers; the map colours each mesh line from both ends | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-107-T01](#f-107-t01) | — |
+| 🟡 Medium | **Total** | 2.5 h | 0.75 h (1 of 2 steps recorded) | 1.75 h | 0 of 2 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2211,7 +2211,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | `test/dashboard.test.ts` (B-065 bases test extended) |
+| PR / evidence | Steps: F-107-T01: [PR #521](https://github.com/voidbrain/nerv/pull/521) map. `test/dashboard.test.ts` (B-065 bases test extended) |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI and a look at the live dashboard. |
 | Reviewed | 2026-11-18 |
