@@ -1,5 +1,9 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-18 — main `3b02485`
+
+PRs #529–#530 merged (docs only; the full suite is skipped by design). #530 closed F-005-T28, B-093, B-094-T01 and F-107-T01 on live checks. B-095-T01 implemented; B-096, F-108, F-109 and F-110 opened from the owner's dashboard review. Reconciled in PR #531.
+
 ## 2026-11-18 — main `228ab45`
 
 PRs #525–#528 merged on green CI. Closed F-005-T11, F-005-T27, F-005-T37, F-006-T13, F-085 and F-097. F-027-T02 also waits on F-049-T05. Reconciled in PR #529.
