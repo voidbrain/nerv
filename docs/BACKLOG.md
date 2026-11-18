@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 5 | 7 | 3 |
+| **This week** | 2 | 5 | 8 | 3 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 11 |
+| **Open** | 41 | 12 |
 | **Require Human 🧑** | 12 | 5 |
 
 ### Require Human 🧑
@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 48.5 h agent + 21.75 h owner across 132 open steps of 40 features and 11 other records. 34 h of actual effort recorded on 77 steps. Generated from the task files.
+**Remaining effort:** 49.5 h agent + 21.75 h owner across 133 open steps of 40 features and 12 other records. 34 h of actual effort recorded on 77 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2263,6 +2263,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | Steps: B-075-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep. Failed: windows job 133087302320 of run 43802969338 (2026-11-16). |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-076"></a>[🐞 B-076](#top)
+
+**CI 2026-11-18: scattered one-off failures in unrelated tests on Windows and Linux**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-076-T01 — Name the cause of each scattered CI failure of 2026-11-18 (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on PR #508 (lifecycle identity memoization only), second attempt of run 44259214063: `windows` failed `test/misato.test.ts:608` ("an action that already ran is never run again…") and `test/node-bootstrap-execution.test.ts:216` and `:230` (F-005, `EPERM, Permission denied` on a `nerv-bootstrap-effects-*` temp folder); `validate` cancelled the headless test "one headless process serves UI and reminders, exits cleanly, and recovers after restart" at 15 s. The headless test passed 3/3 locally on the same branch; each attempt failed different tests. Worker-link failures are B-066, root migration B-074, Telegram B-075. |
+| **Reproduce** | Rerun the CI jobs; intermittent. |
+| **Check** | Each failure is read from its log and named: a code cause gets a failing-first test and a fix (or its own B- record); a runner cause is stated with the bound that absorbs it; the next five CI runs pass without reruns. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-076-t01"></a>B-076-T01 — Name the cause of each scattered CI failure of 2026-11-18 | 1 h | 0 h | 1 h | Ready | [PR #510](https://github.com/voidbrain/nerv/pull/510) opened |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-076.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened. [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
