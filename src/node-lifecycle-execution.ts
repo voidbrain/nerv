@@ -445,6 +445,16 @@ export async function waitFor(check: () => Promise<boolean>): Promise<void> {
   throw Error('Service outcome is unconfirmed; inspect the retained receipt.');
 }
 
+/** Node's folder first on the child's PATH, joined with the platform separator: ':' on Windows broke the first entry,
+ * so schtasks was not found and every lifecycle command failed there (B-080). */
+export function childPath(
+  nodeDir: string,
+  path: string | undefined,
+  platform: NodeJS.Platform = process.platform,
+): string {
+  const separator = platform === 'win32' ? ';' : ':';
+  return path ? nodeDir + separator + path : nodeDir;
+}
 export interface Result {
   status: number | null;
   out: string;
@@ -465,7 +475,7 @@ export async function command(
     ),
     ...extra,
   };
-  env.PATH = dirname(process.execPath) + ':' + (env.PATH ?? '');
+  env.PATH = childPath(dirname(process.execPath), env.PATH);
   return new Promise((done, fail) => {
     const child = spawn(program, args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '',
