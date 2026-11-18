@@ -148,13 +148,19 @@ async function makeLinuxEnv() {
       }
       if (args[1] === 'show') {
         const unit = args[args.length - 1];
-        if (unit !== 'nerv.service' || !registered) {
+        // B-086: like real systemd, a unit whose file exists is loaded (and disabled) before `enable`.
+        const unitFile = join(
+          process.env.XDG_CONFIG_HOME || join(context.userHome, '.config'),
+          'systemd/user/nerv.service',
+        );
+        if (unit !== 'nerv.service' || !(registered || existsSync(unitFile))) {
           return { status: 0, out: 'LoadState=not-found\n', err: '' };
         }
         return {
           status: 0,
           out: [
             'LoadState=loaded',
+            `UnitFileState=${registered ? 'enabled' : 'disabled'}`,
             `ActiveState=${active ? 'active' : 'inactive'}`,
             `SubState=${active ? 'running' : 'dead'}`,
             `MainPID=${active && serviceProc?.pid ? serviceProc.pid : 0}`,
