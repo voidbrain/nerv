@@ -2,11 +2,11 @@
   "version": 1,
   "id": "F-085-T03",
   "parent": "F-085",
-  "title": "Owner check on two real projects",
+  "title": "Live check on two real projects",
   "goal": "The report is useful on a project the owner knows",
   "status": "planned",
   "acceptance": [
-    "Owner checks one repository and one web page and notes what was missing"
+    "The agent checks one repository and one web page and notes what was missing"
   ],
   "dependsOn": [
     "F-085-T02"
@@ -14,26 +14,28 @@
   "resources": [
     "docs/acceptance/**",
     "docs/work/records/F-085.md",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "docs/acceptance/f085-t03-project-report.md"
   ],
   "capabilities": [
     "privacy-review"
   ],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
   "validation": [
-    "Owner-observed check recorded in docs/acceptance"
+    "Agent-run check recorded in docs/acceptance"
   ],
   "escalation": [
-    "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+    "A change of gate class, data leaving the base, or a material effort increase goes to the owner",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
-    "reviewed": "2026-11-14",
-    "ownerHours": 0.25,
-    "agentHours": 0,
-    "ownerKind": "procedure"
-  },
-  "ownerLink": "docs/acceptance/f085-t03-project-report.md"
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent).",
+    "reviewed": "2026-11-18",
+    "ownerHours": 0,
+    "agentHours": 0.25,
+    "estimateAgentHours": 0.25,
+    "baselineAgentHours": 0.25
+  }
 }

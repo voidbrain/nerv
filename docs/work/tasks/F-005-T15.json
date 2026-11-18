@@ -25,27 +25,27 @@
     "test/**",
     "docs/**",
     "generated:backlog-views",
-    "contract:service-lifecycle"
+    "contract:service-lifecycle",
+    "docs/acceptance/f005-t15-forward-upgrade-trial.md"
   ],
   "validation": [
     "Cross-version regressions; independent review; one owner-selected target trial"
   ],
   "escalation": [
-    "Any destructive restore, changed ownership or unresolved physical/worker effects requires explicit reconciliation; general restore remains F-062"
+    "Any destructive restore, changed ownership or unresolved physical/worker effects requires explicit reconciliation; general restore remains F-062",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
   ],
   "effort": {
     "size": "small",
-    "estimate": "0 hours (+ 0.5 h owner)",
-    "basis": "Implemented F-005-T15 forward-migration admission via candidate src/upgrade-contract.ts, verified operation backup gate before checkout, refusal of lifecycle-release and previous-revision startup on forward-migrated data, and explicit owner-invoked recoverServiceUpdate (nodes lifecycle-recover --confirm-backup-restore DIGEST) with independent fresh-context review (docs/reviews/2026-11-14-f005-t15-forward-upgrade-review.md) in 0.75 h agent (stated; PR #419); 0.5 h owner remains for one owner-selected target trial.",
-    "reviewed": "2026-11-14",
+    "estimate": "0.5 h",
+    "basis": "Implemented F-005-T15 forward-migration admission via candidate src/upgrade-contract.ts, verified operation backup gate before checkout, refusal of lifecycle-release and previous-revision startup on forward-migrated data, and explicit owner-invoked recoverServiceUpdate (nodes lifecycle-recover --confirm-backup-restore DIGEST) with independent fresh-context review (docs/reviews/2026-11-14-f005-t15-forward-upgrade-review.md) in 0.75 h agent (stated; PR #419); 0.5 h owner remains for one owner-selected target trial. Moved to the agent 2026-11-18 (0.5 h owner → agent).",
+    "reviewed": "2026-11-18",
     "baselineDays": 3,
-    "agentHours": 0,
+    "agentHours": 0.5,
     "actualAgentHours": 0.75,
     "actualSource": "stated",
-    "ownerHours": 0.5,
+    "ownerHours": 0,
     "baselineAgentHours": 4.5,
-    "estimateAgentHours": 0.75,
-    "ownerKind": "procedure"
-  },
-  "ownerLink": "docs/acceptance/f005-t15-forward-upgrade-trial.md"
+    "estimateAgentHours": 0.75
+  }
 }

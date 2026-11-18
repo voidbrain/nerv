@@ -26,15 +26,17 @@
     "npm run check:fast"
   ],
   "escalation": [
-    "A material scope or effort increase goes to the owner"
+    "A material scope or effort increase goes to the owner",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-15 at agent speed after the calibration of 2026-11-15. Not a measurement.",
-    "reviewed": "2026-11-15",
-    "agentHours": 0,
-    "ownerHours": 0.25,
-    "ownerKind": "procedure"
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-15 at agent speed after the calibration of 2026-11-15. Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent).",
+    "reviewed": "2026-11-18",
+    "agentHours": 0.25,
+    "ownerHours": 0,
+    "estimateAgentHours": 0.25,
+    "baselineAgentHours": 0.25
   }
 }

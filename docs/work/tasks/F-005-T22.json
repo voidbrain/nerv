@@ -34,7 +34,8 @@
     "test/**",
     "docs/**",
     "generated:backlog-views",
-    "contract:service-lifecycle"
+    "contract:service-lifecycle",
+    "docs/acceptance/f005-t22-prerequisites.md"
   ],
   "validation": [
     "Meaningful cross-boundary regressions and required final CI",
@@ -43,17 +44,18 @@
   ],
   "escalation": [
     "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
-    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h owner",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
+    "estimate": "0.5 h",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Moved to the agent 2026-11-18 (0.5 h owner → agent).",
+    "reviewed": "2026-11-18",
     "baselineDays": 0.5,
-    "ownerHours": 0.5,
-    "agentHours": 0,
-    "ownerKind": "procedure"
-  },
-  "ownerLink": "docs/acceptance/f005-t22-prerequisites.md"
+    "ownerHours": 0,
+    "agentHours": 0.5,
+    "estimateAgentHours": 0.5,
+    "baselineAgentHours": 0.5
+  }
 }
