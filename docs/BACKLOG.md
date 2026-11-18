@@ -57,10 +57,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-080-t01"></a>B-080-T01 — Lifecycle commands join PATH with the platform separator | 0.75 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.75 h | 0.75 h | 0.25 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-080-t01"></a>B-080-T01 — Lifecycle commands join PATH with the platform separator | 0.75 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #516](https://github.com/voidbrain/nerv/pull/516) fix |
+| 🟢 Small | **Total** | 0.75 h | 0.75 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -69,7 +69,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/node-lifecycle-execution.test.ts` B-080; Tabgha spawn probe and clone check 2026-11-18 |
+| PR / evidence | Steps: B-080-T01: [PR #516](https://github.com/voidbrain/nerv/pull/516) fix. Test: `test/node-lifecycle-execution.test.ts` B-080; Tabgha spawn probe and clone check 2026-11-18 |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI, then lifecycle-inspect on Tabgha's own checkout after it is updated. |
 | Reviewed | 2026-11-18 |
