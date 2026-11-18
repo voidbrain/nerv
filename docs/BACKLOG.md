@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 41 | 18 |
-| **Require Human 🧑** | 8 | 3 |
+| **Require Human 🧑** | 7 | 3 |
 
 ### Require Human 🧑
 
@@ -22,14 +22,14 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-011](#f-011) | [F-109](#f-109) | [B-057](#b-057) | — |
-| [F-004](#f-004) | [F-110](#f-110) | [B-068](#b-068) |  |
-| [F-060](#f-060) | [F-101](#f-101) | [B-056](#b-056) |  |
+| [F-004](#f-004) | [F-101](#f-101) | [B-068](#b-068) |  |
+| [F-060](#f-060) |  | [B-056](#b-056) |  |
 | [F-007](#f-007) |  |  |  |
 | [F-100](#f-100) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 78 h agent + 10.5 h owner across 137 open steps of 40 features and 18 other records. 48.5 h of actual effort recorded on 93 steps. Generated from the task files.
+**Remaining effort:** 80.5 h agent + 10.25 h owner across 137 open steps of 40 features and 18 other records. 48.5 h of actual effort recorded on 93 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2082,6 +2082,55 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-110"></a>[✨ F-110](#top)
+
+**Owner settings in the dashboard for values that are fixed today**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 7.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-110-T02 — Update schedule settings: mode (apply or notify only), check and apply times, no-apply window (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-18: which settings are fixed in code. Today: automatic updates have an on/off switch in the dashboard, but the check (20:00), the apply time (03:00), the no-apply window (08:00–23:00) and the mode (apply after notice; no notify-only mode) are constants in `src/update-scheduler.ts`; the morning brief time and time zone come from `config.json` (`brief.at`, default 08:00); a watch's quiet hours are set per watch when it is created; MAGI's Sync Ratio threshold (80 %) and the Telegram freshness window (90 s) are code defaults. |
+| **Reproduce** | Dashboard: only the automatic-update switch is editable; `src/update-scheduler.ts` constants. |
+| **Check** | Each chosen setting is saved through a validated backend interface with a regression test, shown and editable in the dashboard, and used by the running service without a restart; the owner confirms one change live. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-110-t02"></a>F-110-T02 — Update schedule settings: mode (apply or notify only), check and apply times, no-apply window | 2 h | 0 h | 2 h | Planned | 🤖 |
+| 🟡 Medium | <a id="f-110-t03"></a>F-110-T03 — Dashboard settings panel for the chosen settings | 2 h | 0 h | 2 h | Planned · waits on [F-110-T02](#f-110-t02) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-110-t04"></a>F-110-T04 — Brief time, time zone, Sync Ratio threshold and Telegram freshness window through the same interface | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-110-T03](#f-110-t03) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-110-t05"></a>F-110-T05 — Common settings for every base, with a per-base override | 2 h | 0 h | 2 h | Planned · waits on [F-110-T04](#f-110-t04) | ⏳ 🤖 |
+| 🔴 Large | **Total** | 7.5 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 7.5 h | 1 of 5 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="f-110-t01"></a>F-110-T01 — Owner decides which fixed values become settings | — | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-110.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Decision in [PR #534](https://github.com/voidbrain/nerv/pull/534); opened in PR #531 |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-098"></a>[✨ F-098](#top)
 
 **FPV fleet diary: crashes, parts, spares and photos**
@@ -2523,47 +2572,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 <summary>Next action, estimates and evidence</summary>
 
 [Full notes & evidence](work/records/F-109.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Opened in PR #531 |
-| Opened | 2026-11-18 |
-| Verification | Pending. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-110"></a>[✨ F-110](#top)
-
-**Owner settings in the dashboard for values that are fixed today**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h agent + 0.25 h owner | — | — | ⏳ | — | 🤔 |
-
-🧑 **→** Choose which fixed values become dashboard settings.
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-18: which settings are fixed in code. Today: automatic updates have an on/off switch in the dashboard, but the check (20:00), the apply time (03:00), the no-apply window (08:00–23:00) and the mode (apply after notice; no notify-only mode) are constants in `src/update-scheduler.ts`; the morning brief time and time zone come from `config.json` (`brief.at`, default 08:00); a watch's quiet hours are set per watch when it is created; MAGI's Sync Ratio threshold (80 %) and the Telegram freshness window (90 s) are code defaults. |
-| **Reproduce** | Dashboard: only the automatic-update switch is editable; `src/update-scheduler.ts` constants. |
-| **Check** | Each chosen setting is saved through a validated backend interface with a regression test, shown and editable in the dashboard, and used by the running service without a restart; the owner confirms one change live. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-110-t01"></a>F-110-T01 — Owner decides which fixed values become settings | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](decisions/dashboard-settings.md) |
-| 🟡 Medium | <a id="f-110-t02"></a>F-110-T02 — Update schedule settings: mode (apply or notify only), check and apply times, no-apply window | 2 h | 0 h | 2 h | Planned · waits on [F-110-T01](#f-110-t01) | ⏳ 🤖 |
-| 🟡 Medium | <a id="f-110-t03"></a>F-110-T03 — Dashboard settings panel for the chosen settings | 2 h | 0 h | 2 h | Planned · waits on [F-110-T02](#f-110-t02) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-110-t04"></a>F-110-T04 — Other chosen settings (brief time, Sync Ratio threshold, …) through the same interface | 1 h | 0 h | 1 h | Planned · waits on [F-110-T03](#f-110-t03) | ⏳ 🤖 |
-| 🔴 Large | **Total** | 5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 5 h agent + 0.25 h owner | 0 of 4 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-110.md)
 
 | Field | Value |
 |---|---|

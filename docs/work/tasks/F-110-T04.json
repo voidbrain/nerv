@@ -2,8 +2,8 @@
   "version": 1,
   "id": "F-110-T04",
   "parent": "F-110",
-  "title": "Other chosen settings (brief time, Sync Ratio threshold, …) through the same interface",
-  "goal": "Each chosen setting saved and used live",
+  "title": "Brief time, time zone, Sync Ratio threshold and Telegram freshness window through the same interface",
+  "goal": "Each of the four is saved, validated and used live",
   "status": "planned",
   "acceptance": [
     "Regression test per setting"
@@ -31,11 +31,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h",
-    "basis": "Estimated 2026-11-18. Not a measurement.",
-    "reviewed": "2026-11-18",
-    "agentHours": 1,
+    "estimate": "1.5 h",
+    "basis": "Re-estimated 2026-11-19 after the owner chose all four (was 1 h). Not a measurement.",
+    "reviewed": "2026-11-19",
+    "agentHours": 1.5,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1.5
   }
 }
