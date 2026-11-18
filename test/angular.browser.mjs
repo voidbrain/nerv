@@ -651,6 +651,17 @@ test(
       );
       await audit('genui-checklist-card');
 
+      // 6c. F-083-T03: Recipe card renders the saved text verbatim and passes AXE
+      await evaluate(
+        `window.__nervSetSurface({ version: 1, component: 'nerv-recipe-card', props: { title: 'Oat cake', category: 'recipes', body: '200 g oats\\n100 ml water', working: '100 g oats -> 50 ml water' } })`,
+      );
+      await until(`document.querySelector('nerv-surface-renderer nerv-recipe-card')!==null`);
+      assert.match(
+        await evaluate(`document.querySelector('nerv-recipe-card').shadowRoot.querySelector('pre').textContent`),
+        /200 g oats/,
+      );
+      await audit('genui-recipe-card');
+
       // 7. Reset back to valid surface
       await evaluate(`window.__nervSetSurface(null)`);
       await until(`document.querySelector('nerv-surface-renderer nerv-status-card')!==null`);

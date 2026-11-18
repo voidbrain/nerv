@@ -4,7 +4,7 @@
   "parent": "F-070",
   "title": "Authenticated discovery and safe resolution",
   "goal": "Authenticated discovery and safe resolution",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Ambiguity asks for clarification; stale or unknown names fail safely; destination never changed silently"
   ],
@@ -33,11 +33,17 @@
   "effort": {
     "size": "small",
     "estimate": "1.75 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). No actual: not timed by the session that closed it.",
+    "reviewed": "2026-11-18",
     "baselineDays": 2,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 3,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 368,
+      "note": "implementation"
+    }
+  ]
 }

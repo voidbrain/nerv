@@ -4,7 +4,7 @@
   "parent": "F-048",
   "title": "Define bounded multi-step specialist orchestration",
   "goal": "A written contract for the 2026-11-07 owner extension: chunking, coder/reviewer consultants, ordered dependencies, review loops, resumable handoff history",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Contract doc with states, limits and failure paths, linked from the record",
     "No execution claim before the contract exists"
@@ -31,10 +31,16 @@
   "effort": {
     "size": "medium",
     "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-15 at agent speed after the calibration of 2026-11-15. Not a measurement.",
-    "reviewed": "2026-11-15",
-    "agentHours": 1.5,
+    "basis": "Estimated 2026-11-15 at agent speed after the calibration of 2026-11-15. Not a measurement. No actual: not timed by the session that closed it.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 471,
+      "note": "implementation"
+    }
+  ]
 }

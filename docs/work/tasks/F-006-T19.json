@@ -4,7 +4,7 @@
   "id": "F-006-T19",
   "title": "Revise the placement campaign for 3 runs per case",
   "goal": "The approved plan runs each case 3 times within restated budgets",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "docs/decisions/placement-campaign.md sets repeat: 3 for every pack and restates the per-pack, per-suite and aggregate budgets (cases, active time about 2 h, wall-clock cap, output tokens) and the stop rules for the longer run",
     "Status line records the owner approval of 2026-11-15 with 3 runs per case; the dry-run plans (Step B) reflect the new repeat"
@@ -32,10 +32,16 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-15: budget arithmetic and dry-run update in one document. Not a measurement.",
-    "reviewed": "2026-11-15",
-    "agentHours": 0.5,
+    "basis": "Estimated 2026-11-15: budget arithmetic and dry-run update in one document. Not a measurement. No actual: not timed by the session that closed it.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 466,
+      "note": "implementation"
+    }
+  ]
 }
