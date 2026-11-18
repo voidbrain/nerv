@@ -44,5 +44,6 @@
     "ownerHours": 0.5,
     "agentHours": 0,
     "ownerKind": "procedure"
-  }
+  },
+  "ownerLink": "docs/acceptance/f007-t05-voice-corpus-procedure.md"
 }

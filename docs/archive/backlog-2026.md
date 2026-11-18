@@ -11,7 +11,8 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 21 | 20 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 3 | 0 |
+| [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
 
@@ -4456,3 +4457,149 @@ Owner extension 2026-11-07: show pilot description, proposal rationale and reque
 
 ---
 
+### F-095
+
+**Source files small enough for an agent to read whole: split runtime.ts first, warn at 600 lines**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🔴 Large |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-15; all six tasks complete.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-14: are code files too long for agent context? `src/` has 29.7k lines; 7 files exceed 1,000 lines. `src/runtime.ts` is 2,965 lines (123 KB, about 30k tokens by characters ÷ 4), more than all the always-loaded and backlog rules together; then `node-lifecycle-execution.ts` 1,766, `cli.ts` 1,515, `store.ts` 1,504, `ledger.ts` 1,381, `pilots.ts` 1,117, `rpc.ts` 1,112. An agent either spends a large part of its context on one file or reads it in pieces and misses connections. The [2026-11-13 architecture reassessment](../../audits/2026-11-13-architecture-reassessment.md) deferred a `runtime.ts` split until repeated conflicts or a defect; agent context cost is new evidence it did not weigh. |
+| **Reproduce** | `wc -l src/*.ts \| sort -n \| tail`. |
+| **Check** | A warn-only check lists source files over 600 lines; `runtime.ts` is split along its responsibilities (for example job admission, approvals and resume, worker dispatch, routing) and `store.ts` per table group, then the other files over 1,000 lines; behaviour does not change: the existing tests pass unchanged and no public export changes meaning; `cli.ts` follows F-080. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-15 in [PR #478](https://github.com/voidbrain/nerv/pull/478): `src/cli.ts` is 893 lines, `src/runtime.ts` 985, and `src/server.ts` 923; the PR confirms no public export changes, and all CI jobs including the full suite passed. F-095-T06 is closed; all six tasks are complete. F-095-T01 closed with dated addendum in `docs/audits/2026-11-13-architecture-reassessment.md` recording context-cost measurements (`wc -lc`), reversing the `runtime.ts` deferral, and naming target modules for `src/runtime.ts` and `src/store.ts`. Opened 2026-11-14 at the owner's request. F-095-T01 revisits the reassessment's deferral with the context-cost evidence before any code moves. Pairs with the harness record on loading rules top-down (project-harness F-076).
+
+**Estimates:** Large, estimated 2026-11-14: 5.5 h agent over six steps, mechanical moves with unchanged tests. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #478](https://github.com/voidbrain/nerv/pull/478) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); — |
+| Opened | 2026-11-14 |
+| Verification | `F-095-T02` verified via `tools/check-source-sizes.mjs`, `test/source-sizes.test.ts`, `tsc`, and `check:fast`. `F-095-T03` split `src/runtime.ts` (3,399 -> 1,015 lines) into 10 modules all under 600 lines (`runtime-api.ts`, `runtime-approvals.ts`, `runtime-bases.ts`, `runtime-chat.ts`, `runtime-dispatch.ts`, `runtime-instrumentality.ts`, `runtime-peers.ts`, `runtime-pilots.ts`, `runtime-planning.ts`, `runtime-routes.ts`), verified with `npm run typecheck`, `npm run check:fast`, `npm test`, and fresh-context review. `F-095-T04` split `src/store.ts` (1,619 -> 570 lines) into 6 table-group modules all under 600 lines (`store-watch.ts`, `store-reminders.ts`, `store-push.ts`, `store-kaji-outbox.ts`, `store-inbox.ts`, `store-sorties.ts`) sharing `sqlite-transaction.ts`, verified with `npm run typecheck`, `npm run check:fast`, and `npm test`. `F-095-T05` split `src/node-lifecycle-execution.ts` (2,076 -> 662 lines into `node-lifecycle-apply.ts`, `node-lifecycle-mac.ts`, `node-lifecycle-linux.ts`, `node-lifecycle-windows.ts`), `src/ledger.ts` (1,401 -> 821 lines into `ledger-queries.ts`, `ledger-approvals.ts`), `src/pilots.ts` (1,204 -> 587 lines into `pilots-qualification.ts`), and `src/rpc.ts` (1,114 -> 227 lines into `rpc-schemas.ts`), leaving `src/cli.ts` to `F-080`, verified with `npm run typecheck`, `npm run check:fast`, and `npm test`. `F-095-T06` verified in PR #478: `cli.ts` 893, `runtime.ts` 985, `server.ts` 923 lines; existing tests passed unchanged, no public exports changed, full CI passed. |
+| Reviewed | 2026-11-16 |
+
+</details>
+
+---
+
+<a id="archive-week-2026-11-16"></a>
+## Closed 2026-11-16
+
+### F-104
+
+**Architecture and token cost compared with outside systems**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-16; all three steps complete.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-15: compare NERV's architecture, structure and functions with frontier and similar agent systems (concepts to keep, integrate or reject, at what level, why and why not), and look outside for better token-cost techniques. The procedure exists (`docs/agents/architecture-review.md`) but has not been run with an outside comparison; the harness cadence for it is the template's work. |
+| **Reproduce** | Read `docs/audits/`: the 2026-11-13 reassessment has no outside comparison. |
+| **Check** | A dated report under `docs/audits/` with a web-sourced comparison table (concept, source, adopt / adapt / reject / watch, level, why) and a token-cost section from measured usage; each adopt or adapt becomes a backlog record and each decision a decision record; nothing changes architecture without its own record. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-16 in [PR #502](https://github.com/voidbrain/nerv/pull/502). F-104-T01 ([PR #487](https://github.com/voidbrain/nerv/pull/487)) and F-104-T02 ([PR #488](https://github.com/voidbrain/nerv/pull/488)) delivered the two reports (`docs/reviews/architecture/2026-11-16.md`, `docs/reviews/token/2026-11-16.md`, moved there from `docs/audits/` so the periodic review windows see them), both merged on green CI. F-104-T03, the owner's review of 2026-11-16: accepted deferred domain tool loading and prompt-prefix stability, measured first (new record F-106); declined SQLite step-boundary checkpoints (only matters once F-048-T04's multi-step orchestration exists; revisit there) and A2A task-state naming over Kaji (cosmetic unless NERV federates with outside agents, which is not planned); archiving over-budget evidence is housekeeping `check:freshness` already lists, no record. The architecture report mostly reconfirmed existing decisions; the token report asserts cost pressure without a measurement, hence F-106-T01 measures first. Two more records came out of the same review session: F-105 (a PR names itself in a record, or CI fails) and B-069.
+
+**Estimates:** 3.5 h agent + 0.5 h owner in three steps. Estimated 2026-11-15. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #487](https://github.com/voidbrain/nerv/pull/487) F-104-T01; [PR #488](https://github.com/voidbrain/nerv/pull/488) F-104-T02 (both merged; CI green); owner review 2026-11-16 in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
+| Opened | 2026-11-15 |
+| Verification | 2026-11-16: both reports merged on green CI (#487, #488); the owner's decisions recorded above. Closed 2026-11-16. |
+| Reviewed | 2026-11-16 |
+
+</details>
+
+---
+
+## Closed 2026-11-18
+
+### F-023
+
+**Misato's apartment: approval cards with TTL, delivered by Pen Pen**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18: Verified 2026-11-15 by the owner on the paired Mac; archived at the 2026-11-18 reconciliation.
+
+| | |
+|---|---|
+| **Issue** | Blue actions and low Sync Ratio need the owner. Without full content an approval is a rubber stamp; without a TTL a sleeping owner stalls the sortie. |
+| **Reproduce** | Follow the [paired Mac approvals procedure](../../acceptance/f023-native-approvals-procedure.md) (create a Blue approval; approve, reject, edit, or leave it to expire; repeat the decision; restart NERV Agency while pending). |
+| **Check** | Card shows action, arguments/diff/recipients, Pattern, Sync Ratio and inputs, reason and remaining TTL; expiry stands down (never approves); a decision is applied once and is idempotent on repeat; pending cards survive restart; the decision and its source are written to Central Dogma; Pen Pen delivery reuses the inbox and later Telegram/native notifications. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** F-023-T04 passed 2026-11-15 (owner, paired Mac; [PR #458](https://github.com/voidbrain/nerv/pull/458)): a Blue card (a reminder on NERV-02) raised one macOS banner; the companion card showed tool, arguments, Pattern, Sync Ratio, reason and TTL, read-only, opening the web workspace without a token; VoiceOver announced labels, countdown and buttons; deciding it removed the card from the companion with no repeat banner. T03 accepted 2026-11-09: [durable approval delivery acceptance](../../acceptance/native-approval-delivery-2026-11-09.md). Each Store proposal and generic inbox notice commit together; a separate additive identity table backfills pending cards once, preserving reminder/brief rowids. Native notifications use the existing persisted cursor and OS identifiers, validate notice identity/expiry and skip settled/expired cards. Telegram consumes the notice cursor without sending a duplicate card. Existing read-only credentials and dashboard/Telegram decision authority remain. Fresh-context review found no blocking runtime/security findings; one stale architecture sentence was corrected. PR232 exact head1b23c68 / CI42588026092 passed all five jobs including full-suite; merged maincdb4f6. T03 is closed; actual menu/VoiceOver/banner acceptance remains an owner action, not a fixture pass.
+
+T02 implemented 2026-11-09: [bounded native cards acceptance](../../acceptance/native-approvals-2026-11-09.md). Pinned HTTPS previews preserve complete arguments, verdicts and Sync inputs; local countdown disables expired review, polling removes decided cards and failed reads clear stale state. Existing dashboard/Telegram paths decide; native credentials remain read-only. Static EN/IT renders inspected, Swift/TLS fixtures and 460 Node tests pass (two platform skips), ad-hoc package builds. PR #229 exact head f3109c1 merged main5933855; CI42584230832 passed plan, validate, Windows, native-macos and full-suite. T02 is closed. T03 implementation and its remaining acceptance are recorded above; actual menu/VoiceOver/banner acceptance stays separate.
+
+2026-11-09 T01: [native approval authority contract](../../decisions/native-approvals.md) chooses read-only preview and the existing dashboard owner decision path. Paired credentials cannot decide or mint sessions; no admin/token URL handoff. That contract did not itself implement cards; T02 implementation evidence is recorded above. T03 implementation is recorded above; live acceptance remains separate.
+
+Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each pending card is sent once to the owner's chat with Approve once / Reject buttons; a tap applies `Store.decide` (source `telegram`), runs the tool once and removes the buttons; expiry still never approves. Implemented in [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals): approval cards (action, args, effect, Pattern, Sync Ratio and inputs, verdicts, reason, TTL), once-only decisions, TTL expiry on scheduler ticks, survival across restart, CLI `approvals`/`approve`/`reject`. API added in [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API): `GET /api/approvals` (read-only clients and socket), `POST /api/approvals/ID` (admin, REST only; grant ID never returned). Current remaining delivery acceptance is recorded above; edit returns through the existing agent loop (F-003). Original plan: Approval table and decision transitions in `src/store.ts`, API/CLI to list and decide, then Telegram buttons via F-003. Edit returns the action to the planner rather than changing it in place.
+
+**Estimates:** Small remaining effort, reassessed 2026-11-09: delivery code, final full CI and fresh-context review are accepted; one focused owner Mac interaction/permission/banner/VoiceOver session remains. Actual OS permission/device findings may widen this estimate.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Acceptance reconcile: [PR #233](https://github.com/voidbrain/nerv/pull/233); T03: [PR #232](https://github.com/voidbrain/nerv/pull/232); Review: [fresh-context report](../../reviews/2026-11-09-native-approval-delivery.md), no blocking findings, stale documentation corrected; Test: test/approval-delivery.test.ts (committed failing contract 1a878ac), native TLS/notification and Telegram joins;  [PR #230](https://github.com/voidbrain/nerv/pull/230) T02 full-CI acceptance, T03 ready; [PR #229](https://github.com/voidbrain/nerv/pull/229) T02 bounded native cards and HTTPS authority join; [PR #228](https://github.com/voidbrain/nerv/pull/228) T01 native authority contract; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](../README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan); [PR #8](https://github.com/voidbrain/nerv/pull/8) (gate, ledger, approvals); [PR #9](https://github.com/voidbrain/nerv/pull/9) (approvals API) |
+| Opened | 2026-11-02 |
+| Verification | 2026-11-09 Unit/integration: PR232 exact head1b23c68, CI42588026092 passed plan, validate, Windows, native-macos and full-suite, merged maincdb4f6. Linux Node467: 466 passed, one platform skip; headless three passed, one Windows skip. Native TLS/Swift and packaging passed in CI; local final Swift/TLS20/20 passed. Browser/accessibility passed in full CI. Human/real-device: actual menu/VoiceOver/banner/sleep acceptance pending. Review: fresh-context report found no blocking issue; stale documentation corrected. |
+| Reviewed | 2026-11-09 |
+
+</details>
+
+---
+
+### F-081
+
+**Native pairing: recovery on the service host with its profile stopped, and the stale client of 2026-11-07**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18: Verified 2026-11-15; archived at the 2026-11-18 reconciliation.
+
+| | |
+|---|---|
+| **Issue** | Split from F-015 when it closed on 2026-11-13. F-015's live trials (T02, T03) ran on an isolated profile; stopped-profile recovery on the host that runs the live service was deferred until the owner chooses that host. T02 also left a 2026-11-07 native client unrevoked on the live service. |
+| **Reproduce** | `npm start -- clients` on the live service lists the 2026-11-07 client; the [renewal and recovery guide](../../../native/README.md#renew-an-unexpired-native-credential) is so far verified only on an isolated profile. |
+| **Check** | The stale client is revoked and the companion still works; on the service host, the stopped-profile rotation in native/README.md keeps the profile's data, gives a new identity and pin, and the companion recovers by pairing again; evidence recorded. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** F-081-T01 passed 2026-11-15 ([PR #459](https://github.com/voidbrain/nerv/pull/459); owner, Neo Tokyo-3, part D of the companion live checks): with the companion and service stopped, the data home was backed up and only the native TLS/auth set (native-cert, native-key, native-tls.cnf, native-auth.sqlite) moved to a private recovery folder; `native-init` and a service start gave a new identity and pin; after forgetting and pairing again, `clients` lists only the new client and the reminders are unchanged. The 2026-11-07 client was not revoked one by one: replacing native-auth.sqlite invalidated every earlier client. F-081-T02 closed the same day (this evidence). F-081-T01. Split from F-015 (archived 2026-11-13).
+
+**Estimates:** Small, estimated 2026-11-13: 0.25 h agent + 0.5 h owner. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [F-015 live failure evidence](../../acceptance/f015-live-failures-2026-11-12.md) |
+| Opened | 2026-11-13 |
+| Verification | Pending. |
+| Reviewed | 2026-11-13 |
+
+</details>
+
+---

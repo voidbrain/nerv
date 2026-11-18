@@ -482,17 +482,6 @@ function featurePlan(text, id, tasks, repository, ownerHref = (link) => link) {
     closed: 'Completed',
   };
   for (const t of steps) validateEffort(t.effort, t.status);
-  // F-066: the next action of a 💻 record whose line says "Next: from tasks." is the first open step whose
-  // prerequisites are done (closed or verified), else the first open step, else a prompt to close the record.
-  if (NEXT_FROM_TASKS.test(text)) {
-    const done = new Set(tasks.filter((t) => ['closed', 'verified'].includes(t.status)).map((t) => t.id));
-    const open = steps.filter((t) => !done.has(t.id));
-    const next = open.find((t) => t.dependsOn.every((d) => done.has(d))) ?? open[0];
-    text = text.replace(
-      NEXT_FROM_TASKS,
-      `$1Next: ${next ? `${next.id} — ${cell(next.title)} (${states[next.status]})` : 'all steps closed; verify and close the record'}.`,
-    );
-  }
   // F-066: a step's PRs and review live in its task file; they lead the record's PR / evidence cell.
   const evidenced = steps.filter((t) => t.prs?.length || t.review);
   if (evidenced.length) {
@@ -541,6 +530,24 @@ function featurePlan(text, id, tasks, repository, ownerHref = (link) => link) {
       .filter(Boolean)
       .join(' ');
   };
+  // F-066: the next action of a 💻 record whose line says "Next: from tasks." is the first open step whose
+  // prerequisites are done (closed or verified), an agent one first, else the first open step, else a prompt to close.
+  // When that step is the owner's turn (its Who cell names only the owner, nothing waiting), the line says 🧑 with the
+  // kind of the step and leads with its linked face, so an owner step never hides behind 💻.
+  if (NEXT_FROM_TASKS.test(text)) {
+    const done = new Set(tasks.filter((t) => ['closed', 'verified'].includes(t.status)).map((t) => t.id));
+    const open = steps.filter((t) => !done.has(t.id));
+    const runnable = open.filter((t) => t.dependsOn.every((d) => done.has(d)));
+    // An agent step that can start comes first, so a record with agent work stays among the agent candidates.
+    const next = runnable.find((t) => who(t).split(' ').includes(AGENT)) ?? runnable[0] ?? open[0];
+    const face = next ? who(next) : '';
+    const owner = face && !face.includes(AGENT) && !face.startsWith(WAITING);
+    const kind = { decision: 'Decision', both: 'Both' }[next?.effort?.ownerKind] ?? 'Procedure';
+    text = text.replace(
+      NEXT_FROM_TASKS,
+      `${owner ? `🧑 **→ Human action required: ${kind}**<br />` : '$1'}Next: ${owner ? face + ' ' : ''}${next ? `${next.id} — ${cell(next.title)} (${states[next.status]})` : 'all steps closed; verify and close the record'}.`,
+    );
+  }
   // F-074 (8.11.0): every open prerequisite is named and linked to its row.
   const status = (t) => {
     const waits = unmet(t);
@@ -1256,15 +1263,16 @@ export function checkWorkItems(root = process.cwd()) {
   }
   // F-071: open owner steps without a page to follow, and authored record-level dependencies that name no step.
   // F-072: only owner steps that are the owner's turn (every prerequisite verified or closed) need their page now; a
-  // waiting step's page is written by the step that makes it runnable.
+  // waiting step's page is written by the step that makes it runnable. An implemented step still owing owner work is
+  // the owner's turn too, and a missing page fails check:work (it was a warning that let unlinked steps through).
   const settled = new Set(catalog.tasks.filter((t) => ['verified', 'closed'].includes(t.status)).map((t) => t.id));
   const ownerStepsWithoutLink = catalog.tasks
     .filter(
       (t) =>
-        ['planned', 'ready'].includes(t.status) &&
         t.effort?.ownerKind &&
         !t.ownerLink &&
-        t.dependsOn.every((d) => settled.has(d)),
+        ((['planned', 'ready'].includes(t.status) && t.dependsOn.every((d) => settled.has(d))) ||
+          (t.status === 'implemented' && (t.effort.ownerHours ?? 0) > 0)),
     )
     .map((t) => t.id);
   // B-045: open steps whose turn it is with ownerHours > 0 and no ownerKind have no page and must be classified or split.
@@ -1341,10 +1349,12 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         console.warn(
           `! ${result.withoutDays.length} open step(s) have no remaining estimate (effort.agentHours/ownerHours, or days), so totals count them as unknown: ${result.withoutDays.slice(0, 10).join(', ')}${result.withoutDays.length > 10 ? ` and ${result.withoutDays.length - 10} more` : ''}`,
         );
-      if (result.ownerStepsWithoutLink)
-        console.warn(
-          `! ${result.ownerStepsWithoutLink.length} open owner step(s) have no ownerLink to the procedure or decision page: ${result.ownerStepsWithoutLink.join(', ')}`,
+      if (result.ownerStepsWithoutLink) {
+        console.error(
+          `✗ ${result.ownerStepsWithoutLink.length} owner step(s) whose turn it is have no ownerLink to the procedure or decision page: ${result.ownerStepsWithoutLink.join(', ')}`,
         );
+        process.exitCode = 1;
+      }
       if (result.ownerStepsWithoutKind)
         console.warn(
           `! ${result.ownerStepsWithoutKind.length} open step(s) whose turn it is owe ownerHours without effort.ownerKind (and so have no page); classify with ownerKind or split: ${result.ownerStepsWithoutKind.join(', ')}`,

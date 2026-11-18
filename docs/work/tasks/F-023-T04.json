@@ -4,7 +4,7 @@
   "parent": "F-023",
   "title": "Owner check: paired Mac approvals (menu, VoiceOver, notification banner)",
   "goal": "The native approval card behaves as accepted on the owner's paired Mac",
-  "status": "verified",
+  "status": "closed",
   "acceptance": [
     "The paired Mac approvals procedure passes: approve, reject, edit and expiry; repeated decision; restart while pending",
     "Menu, VoiceOver and notification banner behaviour recorded in docs/acceptance"
