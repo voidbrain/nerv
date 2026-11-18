@@ -4,7 +4,7 @@
 
 Merged PRs #499–#503, all CI green. Harness 10.0.0 reconciled: owner's-turn Next lines show 🧑 with their page; every open record's Next line comes from its steps (B-071). Archived F-023, F-081, F-095, F-104.
 
-Per-PR mapping: #499: reconciliation; #500: F-098 (F-098-T02); #501: F-102 (F-102-T02); #502: F-104 closed, F-105 and F-106 opened; #503: B-069 (B-069-T01), B-070 opened. Steps implemented by #500, #501 and #503 keep their remaining verification. Reconciled in the B-071 PR.
+Per-PR mapping: #499: reconciliation; #500: F-098 (F-098-T02); #501: F-102 (F-102-T02); #502: F-104 closed, F-105 and F-106 opened; #503: B-069 (B-069-T01), B-070 opened. Steps implemented by #500, #501 and #503 keep their remaining verification. Reconciled in PR #504.
 
 ## 2026-11-16 — main `7a48fb8`
 
