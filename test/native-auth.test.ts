@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { assertPrivateFile } from './fixtures/posix.ts';
-import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { request } from 'node:https';
@@ -145,5 +145,27 @@ test('native TLS pairing enforces trust, read-only scope, revocation and browser
     store.close();
     rmSync(dir, { recursive: true, force: true });
     rmSync(other, { recursive: true, force: true });
+  }
+});
+
+test('B-072: a slow openssl is reported as a timeout, a missing one as missing, and leaves no partial TLS files', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-tls-slow-'));
+  try {
+    assert.throws(
+      () => initializeNativeTLS(join(dir, 'missing'), { openssl: 'nerv-no-such-openssl' }),
+      /openssl was not found/,
+    );
+    if (process.platform === 'win32') return t.skip('the slow fake openssl is a POSIX shell script');
+    const slow = join(dir, 'slow-openssl');
+    writeFileSync(slow, '#!/bin/sh\nfor a in "$@"; do last="$a"; done\necho partial > "$last"\nsleep 5\n', {
+      mode: 0o700,
+    });
+    const home = join(dir, 'home');
+    assert.throws(() => initializeNativeTLS(home, { openssl: slow, timeoutMs: 300 }), /timed out after 0\.3 s/);
+    assert.ok(!existsSync(join(home, 'native-key.pem')) && !existsSync(join(home, 'native-cert.pem')));
+    // A retry is not blocked by "Incomplete native TLS files".
+    assert.ok(initializeNativeTLS(home).fingerprint);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
   }
 });

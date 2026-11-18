@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 3 | 4 | 0 |
+| **This week** | 2 | 3 | 5 | 0 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 43 | 11 |
+| **Open** | 43 | 12 |
 | **Require Human 🧑** | 6 | 2 |
 
 ### Require Human 🧑
@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 72.75 h agent + 21.5 h owner across 165 open steps of 43 features and 11 other records. 33.5 h of actual effort recorded on 76 steps. Generated from the task files.
+**Remaining effort:** 73.25 h agent + 21.5 h owner across 166 open steps of 43 features and 12 other records. 34 h of actual effort recorded on 77 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2422,9 +2422,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-072-T01 — Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI (Ready).
+💻 **→** Next: B-072-T01 — Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2434,10 +2434,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-072-t01"></a>B-072-T01 — Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI | 0.75 h | 0 h | 0.75 h | Ready |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-072-t01"></a>B-072-T01 — Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #507](https://github.com/voidbrain/nerv/pull/507) |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2446,7 +2446,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #505](https://github.com/voidbrain/nerv/pull/505) opened it; CI run 44208231306 (failed, then passed on rerun) |
+| PR / evidence | Steps: B-072-T01: [PR #507](https://github.com/voidbrain/nerv/pull/507). [PR #505](https://github.com/voidbrain/nerv/pull/505) opened it; CI run 44208231306 (failed, then passed on rerun) |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### <a id="b-073"></a>[🐞 B-073](#top)
+
+**Windows CI: the service lifecycle test times out a lifecycle command**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-073-T01 — Find the slow lifecycle command on Windows and fix it or its bound (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on PR #507 (no lifecycle change): the `windows` job failed `test/windows-service-lifecycle.test.ts:104` ("windowsServiceAdapter executes install, status, start, stop and uninstall under the fencing journal") with "Lifecycle command timed out; effects remain uncertain." from `src/node-lifecycle-execution.ts`. First seen; the same day B-072 showed another Windows timing failure. |
+| **Reproduce** | Run `npm test` on the Windows runner; the failure is intermittent. |
+| **Check** | The slow command and its bound are named from the CI log or a local trace; a committed test fails first if the cause is in code, or the bound is set from measured Windows timings; the Windows job passes without reruns. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-073-t01"></a>B-073-T01 — Find the slow lifecycle command on Windows and fix it or its bound | 1 h | 0 h | 1 h | Ready |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-073.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | CI run 44213770369 (windows job failed) |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
