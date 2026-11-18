@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 3 | 7 | 21 | 15 |
+| **This week** | 3 | 7 | 22 | 15 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 40 | 13 |
+| **Open** | 40 | 14 |
 | **Require Human 🧑** | 7 | 3 |
 
 ### Require Human 🧑
@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.5 h agent + 11.75 h owner across 132 open steps of 37 features and 13 other records. 41.5 h of actual effort recorded on 88 steps. Generated from the task files.
+**Remaining effort:** 70.25 h agent + 11.75 h owner across 131 open steps of 37 features and 14 other records. 44.5 h of actual effort recorded on 89 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -46,9 +46,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 5.5 h agent + 0.25 h owner | — | [F-012-T05](#f-012-t05) | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 4.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
+💻 **→** Next: F-005-T11 — Propose the device matrix for final acceptance (Planned).
 
 | | |
 |---|---|
@@ -60,10 +60,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-005-t11"></a>F-005-T11 — Propose the device matrix for final acceptance | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | 🤖 | — |
-| 🟢 Small | <a id="f-005-t24"></a>F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 1 h | 0 h | 1 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-005-t32"></a>F-005-T32 — Record the evidence of F-005-T24 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T24](#f-005-t24) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-005-t11"></a>F-005-T11 — Propose the device matrix for final acceptance | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T32](#f-005-t32) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t37"></a>F-005-T37 — Agree the device matrix | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-005-T11](#f-005-t11) | ⏳ 🤔 | — |
 | 🟢 Small | <a id="f-005-t27"></a>F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 1 h | 0 h | 1 h | Planned · waits on [F-005-T37](#f-005-t37) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t34"></a>F-005-T34 — Record the evidence of F-005-T27 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T27](#f-005-t27) | ⏳ 🤖 | — |
@@ -72,9 +70,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-005-T35](#f-005-t35) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T29](#f-005-t29) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T36](#f-005-t36) | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 23.25 h (30 of 37 steps) | 12.75 h (18 of 37 steps recorded) | 5.5 h agent + 0.25 h owner | 25 of 37 completed | | |
+| 🔴 Large | **Total** | 23.25 h (30 of 37 steps) | 15.75 h (19 of 37 steps recorded) | 4.25 h agent + 0.25 h owner | 27 of 37 completed | | |
 
-<details><summary>Done steps (25)</summary>
+<details><summary>Done steps (27)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -99,9 +97,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-005-t21"></a>F-005-T21 — T08d — Optional start-at-login or on-demand management of selected owned local engines | 1 h | 0.25 h (stated) | Completed | — |
 | — | <a id="f-005-t22"></a>F-005-T22 — T08e — Demonstration of prerequisites and optional engine management on an owner-selected target | 0.5 h | 1.5 h (stated) | Completed | [PR #517](https://github.com/voidbrain/nerv/pull/517) this change |
 | — | <a id="f-005-t23"></a>F-005-T23 — T09b — Windows update and recovery: backup, rehearsal and checkout | 1 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-005-t24"></a>F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 1 h | 3 h (stated) | Completed | — |
 | — | <a id="f-005-t25"></a>F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | Completed | — |
 | — | <a id="f-005-t26"></a>F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 1 h | 2.5 h (stated) | Completed | [PR #525](https://github.com/voidbrain/nerv/pull/525) evidence |
 | — | <a id="f-005-t31"></a>F-005-T31 — Record the evidence of F-005-T22 and close it | 0.25 h | 0 h | Completed | [PR #523](https://github.com/voidbrain/nerv/pull/523) this change |
+| — | <a id="f-005-t32"></a>F-005-T32 — Record the evidence of F-005-T24 and close it | 0.25 h | 0 h | Completed | — |
 | — | <a id="f-005-t33"></a>F-005-T33 — Record the evidence of F-005-T26 and close it | 0.25 h | 0 h | Completed | — |
 
 </details>
@@ -297,7 +297,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.75 h agent + 0.5 h owner | [F-005-T32](#f-005-t32) | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.75 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-012-T04 — Web-chat adapter feasibility (Planned).
 
@@ -312,7 +312,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-012-t04"></a>F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-012-t05"></a>F-012-T05 — Edge cases and real-host acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-005-T32](#f-005-t32), [F-012-T04](#f-012-t04) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-012-t05"></a>F-012-T05 — Edge cases and real-host acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-012-T04](#f-012-t04) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-012-t06"></a>F-012-T06 — Record the evidence of F-012-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-012-T05](#f-012-t05) | ⏳ 🤖 | — |
 | 🟢 Small | **Total** | 2.75 h (5 of 6 steps) | 0.75 h (2 of 6 steps recorded) | 0.75 h agent + 0.5 h owner | 3 of 6 completed | | |
 
@@ -1746,6 +1746,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-066-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #512](https://github.com/voidbrain/nerv/pull/512) fixture budget. [PR #464](https://github.com/voidbrain/nerv/pull/464) (merged; CI green); [PR #414](https://github.com/voidbrain/nerv/pull/414) (opened record & decision doc); prior context: [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02), [PR #293](https://github.com/voidbrain/nerv/pull/293) and [PR #361](https://github.com/voidbrain/nerv/pull/361) (B-046). |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: failing evidence above; B-066-T02 stays implemented until B-066-T03. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-091"></a>[🐞 B-091](#top)
+
+**Windows: a fenced stop ends uncertain after a SQLite "disk I/O error" while recording it**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24), from the desktop session: the fenced stop removed the task and ended NERV-02, then printed "disk I/O error" and left the receipt `uncertain` with `stop:started`. The disk was fine (115 GB free) and the lifecycle journal had been written at 18:43. Likely cause, not confirmed: the stopping `serve` still held the lifecycle journal (`~/.nerv-lifecycle/journal.sqlite`) open when the handler wrote the receipt. A later stop on the same machine completed. |
+| **Reproduce** | On Windows, a fenced stop of a running NERV service from the desktop session; intermittent (once in two stops). |
+| **Check** | The failing write is named (journal and statement); a committed test fails first if the cause is in code (for example a retry on SQLITE_IOERR or BUSY while the stopped process releases the file); a fenced stop on Tabgha completes its receipt. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 1 h | 0 h | 1 h | Ready |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-091.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | F-005-T24 on Tabgha, 2026-11-18 |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
 | Reviewed | 2026-11-18 |
 
 </details>
