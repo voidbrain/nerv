@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 69.5 h agent + 11.75 h owner across 139 open steps of 38 features and 17 other records. 41 h of actual effort recorded on 91 steps. Generated from the task files.
+**Remaining effort:** 69 h agent + 11.75 h owner across 139 open steps of 38 features and 17 other records. 41.5 h of actual effort recorded on 92 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2504,9 +2504,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-084-T01 — Lifecycle inspection names a missing base key or database instead of a raw ENOENT (Ready).
+💻 **→** Next: B-084-T01 — Lifecycle inspection names a missing base key or database instead of a raw ENOENT (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2518,8 +2518,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-084-t01"></a>B-084-T01 — Lifecycle inspection names a missing base key or database instead of a raw ENOENT | 0.75 h | 0 h | 0.75 h | Ready | [PR #517](https://github.com/voidbrain/nerv/pull/517) this change |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed | |
+| 🟢 Small | <a id="b-084-t01"></a>B-084-T01 — Lifecycle inspection names a missing base key or database instead of a raw ENOENT | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #517](https://github.com/voidbrain/nerv/pull/517) this change |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2528,7 +2528,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-084-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) this change. F-005-T22 run on Calvary, 2026-11-18 |
+| PR / evidence | Steps: B-084-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) this change. Test: `test/node-lifecycle-execution.test.ts` B-084; F-005-T22 run on Calvary, 2026-11-18 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
