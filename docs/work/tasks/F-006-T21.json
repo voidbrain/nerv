@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T21",
+  "title": "Owner page for placement P2–P4 on the mini PC and across both bases",
+  "goal": "The owner can run P2–P4 by pasting commands, as P1 on the Mac",
+  "status": "planned",
+  "acceptance": [
+    "A page under docs/acceptance gives tested commands for P2 (mini PC, PowerShell), P3 (mini PC worker with Mac remote inference) and P4 (Mac unavailable, then back), each with an expected result",
+    "Every command is dry-run (plan, zero model calls) before the page is published"
+  ],
+  "dependsOn": [
+    "B-077-T01"
+  ],
+  "resources": [
+    "docs/acceptance/**",
+    "docs/decisions/placement-campaign.md",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-18: the plan doc has no commands for P3 and P4 and mixes the mini PC into the Mac block. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

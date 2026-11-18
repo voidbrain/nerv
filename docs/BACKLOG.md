@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 5 | 8 | 4 |
+| **This week** | 2 | 5 | 9 | 4 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 11 |
-| **Require Human 🧑** | 13 | 5 |
+| **Open** | 41 | 12 |
+| **Require Human 🧑** | 12 | 5 |
 
 ### Require Human 🧑
 
@@ -22,11 +22,10 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-005](#f-005) | [F-101](#f-101) | [B-057](#b-057) | — |
-| [F-006](#f-006) |  | [B-068](#b-068) |  |
-| [F-009](#f-009) |  | [B-069](#b-069) |  |
-| [F-011](#f-011) |  | [B-056](#b-056) |  |
-| [F-004](#f-004) |  | [B-070](#b-070) |  |
-| [F-083](#f-083) |  |  |  |
+| [F-009](#f-009) |  | [B-068](#b-068) |  |
+| [F-011](#f-011) |  | [B-069](#b-069) |  |
+| [F-004](#f-004) |  | [B-056](#b-056) |  |
+| [F-083](#f-083) |  | [B-070](#b-070) |  |
 | [F-097](#f-097) |  |  |  |
 | [F-085](#f-085) |  |  |  |
 | [F-078](#f-078) |  |  |  |
@@ -36,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 45.5 h agent + 21.75 h owner across 131 open steps of 40 features and 11 other records. 35.25 h of actual effort recorded on 81 steps. Generated from the task files.
+**Remaining effort:** 48.5 h agent + 21.75 h owner across 133 open steps of 40 features and 12 other records. 35.25 h of actual effort recorded on 81 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -45,6 +44,111 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 - **Status:** 🔴 Open · 🟠 Investigate · 🟡 Implemented · 🟢 Verified · 🟣 Blocked · 🔵 Closed
 - **Steps:** `effort` = remaining agent time (🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more); `estimate` = latest whole-step estimate; `actual` = effort spent so far; `h` = agent hours (owner time apart); step status is not parent acceptance.
+
+### <a id="b-077"></a>[🐞 B-077](#top)
+
+**Role evaluation runs refuse three repeats, which the approved F-006 campaigns need**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-006-T11](#f-006-t11), [F-006-T13](#f-006-t13), [F-006-T21](#f-006-t21) | 🤖 | — | — |
+
+💻 **→** Next: B-077-T01 — Role bundles run each case the configured number of times (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 while checking the owner's F-006 run: `node tools/gauntlet.mjs role-plan --role=both` with `limits-repeat3.json` stops with "Unsupported role limits repeat; only repeat=1 is supported" (`validateRoleBundleConfig` in `tools/evaluate-model.mjs`, added 2026-11-13). The owner approved three runs per case on 2026-11-15 and both campaign plans (F-006-T19, F-006-T20) use `role-run` with `repeat: 3`, so neither campaign can run. |
+| **Reproduce** | `node tools/gauntlet.mjs role-plan --role=both --profile=<gemma4-12b profile> --limits=<limits with "repeat": 3> --machine-profile=<machine> --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/moderate-load.json` |
+| **Check** | A committed test fails first: a role bundle with `repeat: 3` plans and runs each case three times against a fake Ollama, with per-repeat results and the budgets counted over all repeats; `repeat: 1` behaves as before. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-077-t01"></a>B-077-T01 — Role bundles run each case the configured number of times | 1.5 h | 0 h | 1.5 h | Ready |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-077.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Dry run 2026-11-18 on main, scratch profile copied from the protocol's `gemma4-12b.json` |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-006"></a>[✨ F-006](#top)
+
+**Orchestrate agents and models across nodes**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.5 h agent + 2 h owner | [B-077-T01](#b-077-t01) | — | ⏳ | — | — |
+
+💻 **→** Next: F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC (Planned).
+
+| | |
+|---|---|
+| **Issue** | Local planning, model adapters and bounded worker transport exist; independent cross-node inference/execution selection, capability scheduling and budgets remain incomplete. |
+| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
+| **Check** | Mini PC coder uses Mac inference; policy-approved Claude path; Pi capability route; unavailable Mac waits or expires; bounded budgets and delegation. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | 0 h agent + 1.5 h owner | Planned · waits on [B-077-T01](#b-077-t01) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T13](#f-006-t13) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T16](#f-006-t16) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-006-t21"></a>F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases | 1.5 h | 0 h | 1.5 h | Planned · waits on [B-077-T01](#b-077-t01) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [B-077-T01](#b-077-t01), [F-006-T21](#f-006-t21) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T11](#f-006-t11) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 8.75 h (17 of 21 steps) | 5.25 h (10 of 21 steps recorded) | 2.5 h agent + 2 h owner | 14 of 21 completed | | |
+
+<details><summary>Done steps (14)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-006-t01"></a>F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-006-t02"></a>F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-006-t03"></a>F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-006-t04"></a>F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-006-t06"></a>F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-006-t07"></a>F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t09"></a>F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t10"></a>F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t17"></a>F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | Completed | — |
+| — | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | Completed | — |
+| — | <a id="f-006-t19"></a>F-006-T19 — Revise the placement campaign for 3 runs per case | 0.5 h | 0 h | Completed | [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation |
+| — | <a id="f-006-t20"></a>F-006-T20 — Revise the Mac operating-conditions plan for 3 runs and gemma4:12b | 0.5 h | 0 h | Completed | [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-006.md)
+
+| Field | Value |
+|---|---|
+| Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
+| PR / evidence | Steps: F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation. [PR #466](https://github.com/voidbrain/nerv/pull/466); [PR #468](https://github.com/voidbrain/nerv/pull/468) (merged; CI green); [PR #421](https://github.com/voidbrain/nerv/pull/421) (T03a–T03c combination qualification pack, protected grader, evidence adapter & T04a placement campaign plan, `evals/combination-v1.json`, `tools/evaluate-model.mjs`, `src/pilots.ts`, `test/evaluation-model.test.mjs`, `docs/decisions/placement-campaign.md`); [PR #420](https://github.com/voidbrain/nerv/pull/420) (T02c orchestration wait/retry/token budgets, cloud policy path, and Pi capability route, `src/model.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #418](https://github.com/voidbrain/nerv/pull/418) (T02b scheduler join over signed WorkerLink, `src/model.ts`, `src/worker-link.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #416](https://github.com/voidbrain/nerv/pull/416) (T05a Mac operating-conditions plan and budgets, `docs/decisions/mac-operating-conditions.md`); [PR #348](https://github.com/voidbrain/nerv/pull/348) (T02a independent model/worker selection contract, `src/model.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #347](https://github.com/voidbrain/nerv/pull/347) (T01a agreement & T01b remote inference config validation, `src/model.ts`, `test/remote-inference-config.test.ts`); [PR #296](https://github.com/voidbrain/nerv/pull/296) (T01a remote inference decision: docs/decisions/remote-inference.md); [PR #244](https://github.com/voidbrain/nerv/pull/244) owner-selected queue order; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Ownership correction/adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235);  Host-load plan: [PR #234](https://github.com/voidbrain/nerv/pull/234);  Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-18: F-006-T04 and F-006-T05 closed (were Verified). 2026-11-18: F-006-T19 verified: [PR #466](https://github.com/voidbrain/nerv/pull/466) merged on green CI; F-006-T20 verified: [PR #468](https://github.com/voidbrain/nerv/pull/468) merged on green CI. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 
 ### <a id="f-062"></a>[✨ F-062](#top)
 
@@ -224,7 +328,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #339](https://github.com/voidbrain/nerv/pull/339) F-005-T21 (T08d) optional start-at-login and on-demand engine lifecycle, `src/engine-lifecycle.ts`, test/engine-lifecycle.test.ts (head 2ceb2ab, merged 23af8cf; CI43342617908 passed all five jobs); [PR #337](https://github.com/voidbrain/nerv/pull/337) F-005-T23 (T09b) Windows and F-005-T25 (T10b) Linux update and recovery, test/windows-service-lifecycle.test.ts and test/linux-service-lifecycle.test.ts (head e226321, merged 8da425a; CI43340798309 passed all five jobs); these PRs cited in the full audit of 2026-11-13, PR #374; [PR #330](https://github.com/voidbrain/nerv/pull/330) F-005-T09 (T09a) Windows service lifecycle adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/windows-service-lifecycle.test.ts; [PR #331](https://github.com/voidbrain/nerv/pull/331) F-005-T20 (T08c) engine/provider contract for multiple local and remote instances with Ollama as one adapter (`src/engine-provider.ts`, `src/model-setup.ts`, `src/model.ts`), Test: test/engine-provider.test.ts; [PR #328](https://github.com/voidbrain/nerv/pull/328) F-005-T18 (T07d) opt-in automatic update policy (`src/update-policy.ts`, `src/config.ts`, `GET/POST /api/update/policy`, `POST /api/update/auto`), Test: test/update-policy.test.ts; [PR #327](https://github.com/voidbrain/nerv/pull/327) F-005-T10 (T10a) Linux `systemd --user` service adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/linux-service-lifecycle.test.ts; [PR #324](https://github.com/voidbrain/nerv/pull/324) F-005-T19 (T08b) Node install/upgrade choices with ownership classification and recovery (`src/node-runtime.ts`, `nodes node-runtime-plan/activate/recover`), Test: test/node-runtime.test.ts; [PR #326](https://github.com/voidbrain/nerv/pull/326) F-005-T17 (T07c) manual update action through lifecycle update path (`src/manual-update.ts`, `POST /api/update/apply`, dashboard `live.js`), Test: test/manual-update.test.ts; [PR #323](https://github.com/voidbrain/nerv/pull/323) F-005-T16 (T07b) update availability on `/api/doctor`, `/api/status`, `nerv doctor`, dashboard (`web/public/dashboard/live.js`), Angular doctor view (`web/src/doctor-view.ts`) and macOS companion (`native/NervMenuBar`), Test: test/update-availability.test.ts; [PR #321](https://github.com/voidbrain/nerv/pull/321) F-005-T08 (T08a) prerequisite check (`checkServicePrerequisites` for Node version, executable and non-interactive service environment joined to `install`, `start` and `update`), Test: test/node-lifecycle-execution.test.ts; [PR #320](https://github.com/voidbrain/nerv/pull/320) F-005-T07 (T07a) backend update-availability contract (`src/update-availability.ts`, `GET /api/update`, `nodes update-check`), Test: test/update-availability.test.ts; closes F-005-T06 and F-005-T12; [PR #317](https://github.com/voidbrain/nerv/pull/317) F-005-T14 (T06g) after-start health check in `receipt.health` and ordered `receipt.recovery` on uncertain outcomes; Test: test/upgrade-health.test.ts; fresh-context independent review (no blockers, 3 should-fix items addressed); earlier PRs in [2026 evidence archive](archive/evidence-2026.md#f-005) |
 | Opened | 2026-11-01 |
 | Verification | Recent 2026-11-12/13 update & lifecycle checks on `main`; 2026-11-08–2026-11-10 Mac/Windows acceptance details in [2026 evidence archive](archive/evidence-2026.md#f-005) |
-| Reviewed | 2026-11-13 |
+| Reviewed | 2026-11-18 |
 
 </details>
 
@@ -339,72 +443,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-006"></a>[✨ F-006](#top)
-
-**Orchestrate agents and models across nodes**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h agent + 2 h owner | — | — | ⏳ | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](decisions/placement-campaign.md) F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC (Planned).
-
-| | |
-|---|---|
-| **Issue** | Local planning, model adapters and bounded worker transport exist; independent cross-node inference/execution selection, capability scheduling and budgets remain incomplete. |
-| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
-| **Check** | Mini PC coder uses Mac inference; policy-approved Claude path; Pi capability route; unavailable Mac waits or expires; bounded budgets and delegation. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | — | 0 h | 0 h agent + 0.5 h owner | Planned | [🧑‍🔧](decisions/placement-campaign.md) | — |
-| 🟢 Small | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | 0 h agent + 1.5 h owner | Planned | [🧑‍🔧](decisions/mac-operating-conditions.md) | — |
-| 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T11](#f-006-t11) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T13](#f-006-t13) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T16](#f-006-t16) | ⏳ 🤖 | — |
-| 🟢 Small | **Total** | 7.25 h (16 of 20 steps) | 5.25 h (10 of 20 steps recorded) | 1 h agent + 2 h owner | 14 of 20 completed | | |
-
-<details><summary>Done steps (14)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-006-t01"></a>F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | Completed | — |
-| — | <a id="f-006-t02"></a>F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | Completed | — |
-| — | <a id="f-006-t03"></a>F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-006-t04"></a>F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-006-t06"></a>F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | Completed | — |
-| — | <a id="f-006-t07"></a>F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.75 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t09"></a>F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.75 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t10"></a>F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.75 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t17"></a>F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | Completed | — |
-| — | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | Completed | — |
-| — | <a id="f-006-t19"></a>F-006-T19 — Revise the placement campaign for 3 runs per case | 0.5 h | 0 h | Completed | [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation |
-| — | <a id="f-006-t20"></a>F-006-T20 — Revise the Mac operating-conditions plan for 3 runs and gemma4:12b | 0.5 h | 0 h | Completed | [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-006.md)
-
-| Field | Value |
-|---|---|
-| Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
-| PR / evidence | Steps: F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation. [PR #466](https://github.com/voidbrain/nerv/pull/466); [PR #468](https://github.com/voidbrain/nerv/pull/468) (merged; CI green); [PR #421](https://github.com/voidbrain/nerv/pull/421) (T03a–T03c combination qualification pack, protected grader, evidence adapter & T04a placement campaign plan, `evals/combination-v1.json`, `tools/evaluate-model.mjs`, `src/pilots.ts`, `test/evaluation-model.test.mjs`, `docs/decisions/placement-campaign.md`); [PR #420](https://github.com/voidbrain/nerv/pull/420) (T02c orchestration wait/retry/token budgets, cloud policy path, and Pi capability route, `src/model.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #418](https://github.com/voidbrain/nerv/pull/418) (T02b scheduler join over signed WorkerLink, `src/model.ts`, `src/worker-link.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #416](https://github.com/voidbrain/nerv/pull/416) (T05a Mac operating-conditions plan and budgets, `docs/decisions/mac-operating-conditions.md`); [PR #348](https://github.com/voidbrain/nerv/pull/348) (T02a independent model/worker selection contract, `src/model.ts`, `src/runtime.ts`, `test/orchestration-selection.test.ts`); [PR #347](https://github.com/voidbrain/nerv/pull/347) (T01a agreement & T01b remote inference config validation, `src/model.ts`, `test/remote-inference-config.test.ts`); [PR #296](https://github.com/voidbrain/nerv/pull/296) (T01a remote inference decision: docs/decisions/remote-inference.md); [PR #244](https://github.com/voidbrain/nerv/pull/244) owner-selected queue order; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Ownership correction/adoption: [PR #235](https://github.com/voidbrain/nerv/pull/235);  Host-load plan: [PR #234](https://github.com/voidbrain/nerv/pull/234);  Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #227](https://github.com/voidbrain/nerv/pull/227) staged qualification design and owner resume; [PR #221](https://github.com/voidbrain/nerv/pull/221) schema/reuse assessment; [Gauntlet ownership/reuse proposal](design/gauntlet-protocol-2026-11-08.md), 2026-11-08; the proposal preceded delivered Gauntlet0.1.1 adoption in PR #223 / F-073; automatic routing/qualification remains unimplemented and no consumer work gates upstream releases; [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](work/README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
-| Opened | 2026-11-01 |
-| Verification | 2026-11-18: F-006-T04 and F-006-T05 closed (were Verified). 2026-11-18: F-006-T19 verified: [PR #466](https://github.com/voidbrain/nerv/pull/466) merged on green CI; F-006-T20 verified: [PR #468](https://github.com/voidbrain/nerv/pull/468) merged on green CI. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-
 ### <a id="f-009"></a>[✨ F-009](#top)
 
 **Run NERV Agency headless as one local user service**
