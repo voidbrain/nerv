@@ -48,6 +48,8 @@ export interface RuntimePlanningHost {
   note(sortieId: string, kind: ChatNoteKind, payload: object): Promise<unknown>;
   record(sortieId: string, steps: Step[], step: Step, actionId?: string, durationMs?: number): Promise<void>;
   baseNames(): Promise<{ id: string; name: string }[]>;
+  /** Bases the owner revoked (B-094): named as revoked, never as offline. */
+  revokedBases(): Promise<{ id: string; name: string }[]>;
   pilots(): Pilot[];
   externalTools(): Promise<ExternalTools>;
   getRemoteConsultant(): RemoteConsultant | undefined;
@@ -398,15 +400,24 @@ export class RuntimePlanning {
             !offer && typeof a.base === 'string' && a.base.trim()
               ? await this.host.resolveOperator(a.base, { excludeSelf: true }).catch(() => undefined)
               : undefined;
+          const wanted = typeof a.base === 'string' ? a.base.trim().toLowerCase() : '';
+          const revoked =
+            !offer && wanted
+              ? (await this.host.revokedBases().catch(() => [])).find(
+                  (b) => b.id.toLowerCase() === wanted || b.name.toLowerCase() === wanted,
+                )
+              : undefined;
           await this.host.record(sortieId, steps, {
             tool,
             args,
             outcome: 'invalid',
             error: offer
               ? `${offer.name} does not offer "${String(a.tool)}". It offers: ${offer.tools.join(', ')}.`
-              : opHint && (opHint.status === 'ambiguous' || opHint.status === 'stale')
-                ? opHint.message
-                : `No base by that id is online and offering actions. Online: ${remote.map((r) => r.base).join(', ') || 'none'}.`,
+              : revoked
+                ? `${revoked.id} (${revoked.name}) is revoked: it is no longer one of your bases and runs nothing.`
+                : opHint && (opHint.status === 'ambiguous' || opHint.status === 'stale')
+                  ? opHint.message
+                  : `No base by that id is online and offering actions. Online: ${remote.map((r) => r.base).join(', ') || 'none'}.`,
           });
           continue;
         }
