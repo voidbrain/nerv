@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-005",
   "id": "F-005-T26",
-  "status": "planned",
+  "status": "closed",
   "title": "T10c — Acceptance on an owner-selected mini PC, Pi or equivalent",
   "goal": "Acceptance on an owner-selected mini PC, Pi or equivalent.",
   "capabilities": [
@@ -49,8 +49,16 @@
     "reviewed": "2026-11-18",
     "baselineDays": 0.5,
     "ownerHours": 0,
-    "agentHours": 1,
+    "agentHours": 0,
     "estimateAgentHours": 1,
-    "baselineAgentHours": 1
-  }
+    "baselineAgentHours": 1,
+    "actualAgentHours": 2.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 525,
+      "note": "evidence"
+    }
+  ]
 }

@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-005",
   "id": "F-005-T24",
-  "status": "planned",
+  "status": "closed",
   "title": "T09c — Acceptance on an owner-selected Windows machine",
   "goal": "Acceptance on an owner-selected Windows machine.",
   "capabilities": [
@@ -50,8 +50,10 @@
     "reviewed": "2026-11-18",
     "baselineDays": 0.5,
     "ownerHours": 0,
-    "agentHours": 1,
+    "agentHours": 0,
     "estimateAgentHours": 1,
-    "baselineAgentHours": 1
+    "baselineAgentHours": 1,
+    "actualAgentHours": 3.0,
+    "actualSource": "stated"
   }
 }

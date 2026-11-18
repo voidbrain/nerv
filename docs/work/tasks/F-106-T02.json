@@ -4,7 +4,7 @@
   "parent": "F-106",
   "title": "Prompt prefix stable across turns",
   "goal": "The system text and tool schemas come first and do not change between turns",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test builds two Misato asks a minute apart with the same tools and asserts the prefix (system text and tool schemas) is byte-identical up to the per-turn context",
     "If the prefix moves, the volatile part (clock, inbox, memory) moves after it"

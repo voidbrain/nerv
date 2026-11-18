@@ -4,7 +4,7 @@
   "parent": "F-105",
   "title": "CI fails when the PR names no record",
   "goal": "Every PR is named by a record, a task or the reconciliation log before it merges",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test: a branch naming the PR number in a record, a task `prs` entry or the reconciliation log passes; one naming it nowhere fails and lists the files to edit",
     "`ci.yml` runs `tools/check-pr-record.mjs` on pull_request with the PR number from the event; a push without a PR is skipped; `tools/check-backlog.mjs` (copied) is not changed"
@@ -34,7 +34,7 @@
     "estimate": "1 h",
     "basis": "Estimated 2026-11-16: one script over docs/work and the reconciliation log, a CI step and a test. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   },
