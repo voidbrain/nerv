@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 6 | 7 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 6 | 9 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -4930,6 +4930,74 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) accepted Mac service evidence under F-005; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: Linux target acceptance on Calvary (install/status/start/stop/update/uninstall, reboot start, restart catch-up). 2026-11-10 selected per-user Mac lifecycle operations accepted under F-005-T04; actual session/login and Linux target acceptance remain pending. Earlier2026-11-08: read-only execution-host check confirms no installed/registered launchd service. Existing portable headless checks pass; separate target-host install/status/start/stop/uninstall and login/logout acceptance remain pending. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-085
+
+**Linux: lifecycle commands drop the user session bus, so no user service can be installed**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Calvary (Debian 11): with linger on and `systemctl --user show-environment` working in the SSH shell, `nodes lifecycle-inspect --action install` still reported "Non-interactive service environment is unavailable" and "The selected GUI user session is unavailable". `command()` passed children only PATH, HOME, USER, TMPDIR, LANG and LC_ALL; without `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS`, `systemctl --user` answers "Failed to connect to bus". Tests never saw it: they inject the runner. |
+| **Reproduce** | On Linux with a user session: `env -i PATH=$PATH HOME=$HOME USER=$USER systemctl --user show-environment` fails; with `XDG_RUNTIME_DIR` it succeeds. |
+| **Check** | Test committed failing first: `childEnv` keeps XDG_RUNTIME_DIR and DBUS_SESSION_BUS_ADDRESS and drops unlisted variables; on Calvary the install inspection has no blockers. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Review: fresh-context design review of PR #518 and PR #522 (2026-11-18): no blocking issues; childEnv still drops unlisted variables, and the bus variables give children no power the same user lacked. 2026-11-18: verified live on Calvary: 2026-11-18 on Calvary (NERV-03, Debian 11 arm64, Node 24.22.3, linger on): fenced install, stop, start (all completed); a fenced update `bf1e27ef` → `e61388cf` through NERV's own flow (backup, fetch, rehearse, checkout, dependencies, build, start, verify, all completed; after B-088); fenced uninstall (unit removed, data kept) and reinstall (completed); after `systemctl reboot` the user service started by itself through linger and served within 30 s, Kaji listening and NERV-01/NERV-02 reachable; a reminder due while the service was stopped (17:32:53Z) was delivered once after the fenced start (17:33:38Z). An earlier update attempt was refused safely at the rehearsal (B-088: backup kept, nothing changed). Live: 2026-11-18 on Calvary (NERV-03, Debian 11 arm64, Node 24.22.3, linger on), checkout `main` at `261ad183`: fenced install completed (`definition`, `start`, `verify`), `nerv.service` enabled and active, `http://127.0.0.1:4317/` 200, `doctor` quick_check ok; then a fenced stop (unit inactive, no answer) and a fenced start (active, 200) both completed. Closing needs the fresh-context review (P1). 2026-11-18: B-085-T01 implemented (`childEnv` in `src/node-lifecycle-execution.ts`). Live: with the fix, Calvary's install inspection wrote plan `975e30ca…` with no blockers. Opened 2026-11-18.
+
+**Estimates:** Small, estimated 2026-11-18: 0.75 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/node-lifecycle-execution.test.ts` "B-085: lifecycle commands keep the user session bus…" (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: CI green; verified live on Calvary. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-088
+
+**Every lifecycle update is refused at the rehearsal: the candidate reader runs without dependencies**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 updating NERV-03 on Calvary (F-005-T26): `lifecycle-apply --action update` ran backup, fetch and rehearse, then was refused: "The reader refused or failed on the first open: The candidate reader exited with a failure." The rehearsal exports the candidate with `git archive` into `~/.nerv-lifecycle/staging/<digest>`, outside the checkout, so it has no `node_modules`; the real reader imports `src/rpc.ts`, which imports `ajv`, and Node answered `ERR_MODULE_NOT_FOUND: Cannot find package 'ajv'`. So every update is refused on every host, the Mac's live service and automatic updates (F-102) included; the refusal is safe (backup kept, nothing changed). The adapter test's readers import only Node built-ins, so CI never saw it. |
+| **Reproduce** | On any host: `nodes lifecycle-inspect --action update --revision <newer main>` after a fenced stop, then `lifecycle-apply`. Directly: export a revision into `~/.nerv-lifecycle/staging/x` and run `node src/upgrade-reader.ts <copy.sqlite> <home>` there. |
+| **Check** | Test committed failing first: a candidate reader importing a package present only in the installed checkout's `node_modules` rehearses with no blockers; no tree, archive or link is left; the installed dependencies and checkout stay untouched; an update on Calvary completes. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Review: fresh-context design review of PR #518 and PR #522 (2026-11-18): no blocking issues; cleanup is safe (rmSync does not follow the link; the explicit unlink is extra protection). Its should-fix, candidates whose dependencies differ from the installed ones, is B-090. 2026-11-18: verified live on Calvary: 2026-11-18 on Calvary (NERV-03, Debian 11 arm64, Node 24.22.3, linger on): fenced install, stop, start (all completed); a fenced update `bf1e27ef` → `e61388cf` through NERV's own flow (backup, fetch, rehearse, checkout, dependencies, build, start, verify, all completed; after B-088); fenced uninstall (unit removed, data kept) and reinstall (completed); after `systemctl reboot` the user service started by itself through linger and served within 30 s, Kaji listening and NERV-01/NERV-02 reachable; a reminder due while the service was stopped (17:32:53Z) was delivered once after the fenced start (17:33:38Z). An earlier update attempt was refused safely at the rehearsal (B-088: backup kept, nothing changed). 2026-11-18: B-088-T01 implemented: the rehearsal links the exported tree's `node_modules` to the installed checkout's (a junction on Windows) and unlinks it before removing the tree. Lifecycle and update tests 72/72. The update flow rehearses with the installed code, so each host gets this fix by one `git pull` of its checkout (as Tabgha got B-080), then updates normally. Opened 2026-11-18.
+
+**Estimates:** Small, estimated 2026-11-18: 1 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/upgrade-lifecycle.test.ts` "B-088: the candidate reader resolves packages from the installed checkout…" (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: CI green; verified live on Calvary. Closed 2026-11-18. |
 | Reviewed | 2026-11-18 |
 
 </details>

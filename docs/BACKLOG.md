@@ -9,7 +9,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 3 | 6 | 18 | 7 |
+| **This week** | 3 | 6 | 20 | 9 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 69 h agent + 11.75 h owner across 138 open steps of 38 features and 18 other records. 45.5 h of actual effort recorded on 95 steps. Generated from the task files.
+**Remaining effort:** 72 h agent + 11.75 h owner across 139 open steps of 38 features and 18 other records. 44.25 h of actual effort recorded on 93 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -478,51 +478,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-085"></a>[🐞 B-085](#top)
-
-**Linux: lifecycle commands drop the user session bus, so no user service can be installed**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-085-T01 — Linux: lifecycle commands drop the user session bus, so no user service can be installed (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 on Calvary (Debian 11): with linger on and `systemctl --user show-environment` working in the SSH shell, `nodes lifecycle-inspect --action install` still reported "Non-interactive service environment is unavailable" and "The selected GUI user session is unavailable". `command()` passed children only PATH, HOME, USER, TMPDIR, LANG and LC_ALL; without `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS`, `systemctl --user` answers "Failed to connect to bus". Tests never saw it: they inject the runner. |
-| **Reproduce** | On Linux with a user session: `env -i PATH=$PATH HOME=$HOME USER=$USER systemctl --user show-environment` fails; with `XDG_RUNTIME_DIR` it succeeds. |
-| **Check** | Test committed failing first: `childEnv` keeps XDG_RUNTIME_DIR and DBUS_SESSION_BUS_ADDRESS and drops unlisted variables; on Calvary the install inspection has no blockers. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-085-t01"></a>B-085-T01 — Linux: lifecycle commands drop the user session bus, so no user service can be installed | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #518](https://github.com/voidbrain/nerv/pull/518) fix |
-| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-085.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-085-T01: [PR #518](https://github.com/voidbrain/nerv/pull/518) fix. Test: `test/node-lifecycle-execution.test.ts` "B-085: lifecycle commands keep the user session bus…" (committed failing first) |
-| Opened | 2026-11-18 |
-| Verification | Pending: CI and the NERV-03 install on Calvary. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
 ### <a id="b-086"></a>[🐞 B-086](#top)
 
 **Linux: an install stops at start because a written unit already counts as registered**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: B-086-T01 — Linux: an install stops at start because a written unit already counts as registered (Implemented; verification pending).
 
@@ -537,7 +499,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-086-t01"></a>B-086-T01 — Linux: an install stops at start because a written unit already counts as registered | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #518](https://github.com/voidbrain/nerv/pull/518) fix |
-| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
+| 🟢 Small | <a id="b-086-t02"></a>B-086-T02 — A matching unit that is disabled but still active stays NERV's, so a stop can recover it | 0.5 h | 0 h | 0.5 h | Ready | — |
+| 🟢 Small | **Total** | 1.25 h | 0.5 h (1 of 2 steps recorded) | 0.75 h | 0 of 2 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -549,44 +512,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-086-T01: [PR #518](https://github.com/voidbrain/nerv/pull/518) fix. Test: `test/linux-service-lifecycle.test.ts` fake now loads a written unit (committed failing first: F-005-T10 and F-005-T25 failed) |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI and the NERV-03 install on Calvary. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="b-088"></a>[🐞 B-088](#top)
-
-**Every lifecycle update is refused at the rehearsal: the candidate reader runs without dependencies**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-088-T01 — The rehearsal resolves the candidate reader's packages from the installed checkout (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 updating NERV-03 on Calvary (F-005-T26): `lifecycle-apply --action update` ran backup, fetch and rehearse, then was refused: "The reader refused or failed on the first open: The candidate reader exited with a failure." The rehearsal exports the candidate with `git archive` into `~/.nerv-lifecycle/staging/<digest>`, outside the checkout, so it has no `node_modules`; the real reader imports `src/rpc.ts`, which imports `ajv`, and Node answered `ERR_MODULE_NOT_FOUND: Cannot find package 'ajv'`. So every update is refused on every host, the Mac's live service and automatic updates (F-102) included; the refusal is safe (backup kept, nothing changed). The adapter test's readers import only Node built-ins, so CI never saw it. |
-| **Reproduce** | On any host: `nodes lifecycle-inspect --action update --revision <newer main>` after a fenced stop, then `lifecycle-apply`. Directly: export a revision into `~/.nerv-lifecycle/staging/x` and run `node src/upgrade-reader.ts <copy.sqlite> <home>` there. |
-| **Check** | Test committed failing first: a candidate reader importing a package present only in the installed checkout's `node_modules` rehearses with no blockers; no tree, archive or link is left; the installed dependencies and checkout stay untouched; an update on Calvary completes. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-088-t01"></a>B-088-T01 — The rehearsal resolves the candidate reader's packages from the installed checkout | 1 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #522](https://github.com/voidbrain/nerv/pull/522) fix |
-| 🟢 Small | **Total** | 1 h | 0.75 h | 0.25 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-088.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-088-T01: [PR #522](https://github.com/voidbrain/nerv/pull/522) fix. Test: `test/upgrade-lifecycle.test.ts` "B-088: the candidate reader resolves packages from the installed checkout…" (committed failing first) |
-| Opened | 2026-11-18 |
-| Verification | Pending: CI, then an update completing on Calvary. |
 | Reviewed | 2026-11-18 |
 
 </details>
@@ -1927,6 +1852,82 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-079-T01: [PR #515](https://github.com/voidbrain/nerv/pull/515) fix. Test: `test/gauntlet.test.mjs` B-079 (06e47fc9) |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI and the F-097-T01 run. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-087"></a>[🐞 B-087](#top)
+
+**Windows: a fenced start applied from an SSH session is refused by the startup fence**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-087-T01 — Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24): a fenced install applied over SSH registered the task (after B-082), but `serve`, started by Task Scheduler in the desktop session, stopped with "Lifecycle startup is not authorized by the live selected operation" and the receipt stayed `uncertain`. The same install applied from Tabgha's desktop completed. The fence checks the applying handler's process identity (`processIdentity`, PowerShell `GetProcessById` start time and main module); the SSH session is elevated and in another logon session, so the desktop `serve` most likely cannot read it the same way. Not yet confirmed which part differs. Also seen: a task registered from the elevated SSH session cannot be deleted from the desktop ("Access is denied"). |
+| **Reproduce** | Over SSH on Tabgha: `nodes lifecycle-inspect --action install`, then `lifecycle-apply`; `serve` logs the refusal in `service-error.log`. |
+| **Check** | The differing identity part is named from a probe run in both sessions; a committed test fails first if the cause is in code; a fenced start applied over SSH completes on Tabgha, or the record states why it cannot and `lifecycle-apply` says so before changing anything. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-087-t01"></a>B-087-T01 — Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front | 1.5 h | 0 h | 1.5 h | Ready |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-087.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | F-005-T24 run on Tabgha, 2026-11-18 |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-090"></a>[🐞 B-090](#top)
+
+**Update rehearsal uses the installed dependencies, so a candidate whose dependencies differ is judged wrongly or refused forever**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-090-T01 — Rehearse a candidate with its own dependencies when its lock differs (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 by the fresh-context review of PR #522 (B-088): the candidate reader resolves packages through a link to the installed checkout's `node_modules`, and `dependencies` runs only after `checkout`. If a new revision adds a runtime dependency its reader path needs, every update to it is refused at the rehearsal, safely but forever; if a dependency's version changes (for example an ajv major), the rehearsal runs against the old version and can pass or fail wrongly. |
+| **Reproduce** | A candidate whose `src/upgrade-reader.ts` path imports a package absent from the installed `node_modules`: `lifecycle-apply --action update` is refused at `rehearse`. |
+| **Check** | A committed test fails first: when the candidate's `package-lock.json` differs from the installed one, the rehearsal installs the candidate's own dependencies into the staging tree (`npm ci --ignore-scripts`, bounded) and runs its reader against them, or refuses with a message naming the dependency change; equal locks keep the link. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-090-t01"></a>B-090-T01 — Rehearse a candidate with its own dependencies when its lock differs | 1.5 h | 0 h | 1.5 h | Ready |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-090.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Review of PR #522, 2026-11-18 |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
 | Reviewed | 2026-11-18 |
 
 </details>
