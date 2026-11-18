@@ -4,7 +4,7 @@
   "parent": "B-057",
   "title": "Rotated certificate shows the TLS message, not \"cancelled\"",
   "goal": "After a certificate rotation the companion names the changed certificate and no false service mismatch",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "A committed Swift test fails first, unchanged by the fix: a pinned request rejected after a rotation yields the raw URLError \"cancelled\" in the status line",
     "The status line shows the certificate-changed message in English and Italian",
@@ -31,10 +31,16 @@
   "effort": {
     "size": "small",
     "estimate": "0.75 h",
-    "basis": "Estimated 2026-11-15: find where the raw URLError bypasses NativeConnection.transportError, map it, gate the mismatch line; a test. Not a measurement.",
-    "reviewed": "2026-11-15",
-    "agentHours": 0.75,
+    "basis": "Estimated 2026-11-15: find where the raw URLError bypasses NativeConnection.transportError, map it, gate the mismatch line; a test. Not a measurement. Done 2026-11-15 in PR #465 (CI green); the step was left ready by the 2026-11-16 reconciliation and closed on 2026-11-18.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75
-  }
+  },
+  "prs": [
+    {
+      "pr": 465,
+      "note": "failing-first Swift test cb0a0cd, then the fix dd1ee0c"
+    }
+  ]
 }

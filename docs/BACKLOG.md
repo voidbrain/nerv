@@ -9,20 +9,20 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 3 | 3 | 0 |
+| **This week** | 2 | 3 | 4 | 0 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 43 | 10 |
-| **Require Human 🧑** | 6 | 1 |
+| **Open** | 43 | 11 |
+| **Require Human 🧑** | 6 | 2 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-005](#f-005) | — | [B-056](#b-056) | — |
-| [F-004](#f-004) |  |  |  |
+| [F-005](#f-005) | — | [B-057](#b-057) | — |
+| [F-004](#f-004) |  | [B-056](#b-056) |  |
 | [F-097](#f-097) |  |  |  |
 | [F-078](#f-078) |  |  |  |
 | [F-060](#f-060) |  |  |  |
@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 73.5 h agent + 21.25 h owner across 164 open steps of 43 features and 10 other records. 33 h of actual effort recorded on 75 steps. Generated from the task files.
+**Remaining effort:** 73.5 h agent + 21.25 h owner across 164 open steps of 43 features and 11 other records. 33 h of actual effort recorded on 75 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1800,53 +1800,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-057"></a>[🐞 B-057](#top)
-
-**Companion error messages are Italian only and do not say what went wrong**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-057-T03 — Rotated certificate shows the TLS message, not "cancelled" (Ready).
-
-| | |
-|---|---|
-| **Issue** | 2026-11-12, F-015-T03: with English selected, a revoked credential showed *NERV non disponibile o richiesta rifiutata. Verifica servizio e abbinamento.*: `NativeError` descriptions are Italian strings and `tr()` has no English for them. The same text covers a stopped service, a refused (revoked or expired) credential and any other non-2xx reply, so it does not tell the owner to pair again. After a certificate rotation the pin refusal showed a bare system *cancelled* (the TLS challenge is cancelled), not that the certificate no longer matches the pairing. |
-| **Reproduce** | Select English in the companion; revoke its client with `npm start -- revoke CLIENT_ID` and choose Refresh status; or stop the service; or rotate the native certificate as in native/README.md and refresh. |
-| **Check** | Every companion error text exists in English and Italian; a 401 says the pairing was revoked or expired and to pair again; an unreachable service says so; a certificate that no longer matches says so and that nothing was sent; Swift tests cover each mapping. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="b-057-t03"></a>B-057-T03 — Rotated certificate shows the TLS message, not "cancelled" | 0.75 h | 0 h | 0.75 h | Ready | 🤖 |
-| 🟢 Small | <a id="b-057-t02"></a>B-057-T02 — Owner live check: English and Italian companion errors | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready · waits on [B-057-T03](#b-057-t03) | ⏳ 🧑‍🔧 |
-| 🟢 Small | **Total** | 2.25 h | 0 h (0 of 3 steps recorded) | 0.75 h agent + 0.25 h owner | 1 of 3 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="b-057-t01"></a>B-057-T01 — Translated, specific companion error messages | 1.5 h | 0 h | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-057.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #465](https://github.com/voidbrain/nerv/pull/465) (merged; CI green); [PR #343](https://github.com/voidbrain/nerv/pull/343) fix and Swift regressions (CI43343629031); found in F-015-T03, [evidence](acceptance/f015-live-failures-2026-11-12.md); [PR #325](https://github.com/voidbrain/nerv/pull/325). |
-| Opened | 2026-11-12 |
-| Verification | 2026-11-13 CI: Swift tests passed on native-macos (CI43343629031). Live companion check pending. |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
 ### <a id="b-066"></a>[🐞 B-066](#top)
 
 **Worker-link heartbeat verification awaits nervous SQLite IPC on every frame**
@@ -2019,6 +1972,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-13 |
 | Verification | 2026-11-16: T04/T06 report per-role model outcomes and aggregate metadata; PRs #475/#477 plan, validate, Windows and native-macos passed, full-suite skipped. 35 cases remain pending: 28 under F-078-T08 and seven system-flow cases under F-079. 2026-11-14: T03 recorded 144/144 graded outcomes across the three approved models and three packs; `node tools/gauntlet.mjs pending` exits 0; PR #402 CI run 43595307489 passed plan, validate, Windows, native-macos and full-suite on rerun after one transient Windows temp-directory cleanup failure. |
 | Reviewed | 2026-11-16 |
+
+</details>
+
+---
+### <a id="b-057"></a>[🐞 B-057](#top)
+
+**Companion error messages are Italian only and do not say what went wrong**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
+
+🧑 **→** Next: [🧑‍🔧](acceptance/companion-live-checks.md#part-d--changed-certificate-and-stopped-profile-recovery-b-057-t02-f-081-t01) B-057-T02 — Owner live check: rotated certificate message (part D step 1) (Ready).
+
+| | |
+|---|---|
+| **Issue** | 2026-11-12, F-015-T03: with English selected, a revoked credential showed *NERV non disponibile o richiesta rifiutata. Verifica servizio e abbinamento.*: `NativeError` descriptions are Italian strings and `tr()` has no English for them. The same text covers a stopped service, a refused (revoked or expired) credential and any other non-2xx reply, so it does not tell the owner to pair again. After a certificate rotation the pin refusal showed a bare system *cancelled* (the TLS challenge is cancelled), not that the certificate no longer matches the pairing. |
+| **Reproduce** | Select English in the companion; revoke its client with `npm start -- revoke CLIENT_ID` and choose Refresh status; or stop the service; or rotate the native certificate as in native/README.md and refresh. |
+| **Check** | Every companion error text exists in English and Italian; a 401 says the pairing was revoked or expired and to pair again; an unreachable service says so; a certificate that no longer matches says so and that nothing was sent; Swift tests cover each mapping. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="b-057-t02"></a>B-057-T02 — Owner live check: rotated certificate message (part D step 1) | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | [🧑‍🔧](acceptance/companion-live-checks.md#part-d--changed-certificate-and-stopped-profile-recovery-b-057-t02-f-081-t01) | — |
+| 🟢 Small | **Total** | 2.25 h | 0 h (0 of 3 steps recorded) | 0.25 h owner | 2 of 3 completed | | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-057-t01"></a>B-057-T01 — Translated, specific companion error messages | 1.5 h | 0 h | Completed | — |
+| — | <a id="b-057-t03"></a>B-057-T03 — Rotated certificate shows the TLS message, not "cancelled" | 0.75 h | 0 h | Completed | [PR #465](https://github.com/voidbrain/nerv/pull/465) failing-first Swift test cb0a0cd, then the fix dd1ee0c |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-057.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-057-T03: [PR #465](https://github.com/voidbrain/nerv/pull/465) failing-first Swift test cb0a0cd, then the fix dd1ee0c. [PR #465](https://github.com/voidbrain/nerv/pull/465) (merged; CI green); [PR #343](https://github.com/voidbrain/nerv/pull/343) fix and Swift regressions (CI43343629031); found in F-015-T03, [evidence](acceptance/f015-live-failures-2026-11-12.md); [PR #325](https://github.com/voidbrain/nerv/pull/325). |
+| Opened | 2026-11-12 |
+| Verification | 2026-11-13 CI: Swift tests passed on native-macos (CI43343629031). Live companion check pending. |
+| Reviewed | 2026-11-13 |
 
 </details>
 
@@ -2415,6 +2415,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-072"></a>[🐞 B-072](#top)
+
+**Windows CI: native TLS tests fail when openssl takes over 15 s**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-072-T01 — Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on PR #504 (docs and tools only, no `src/` change): the `windows` job failed `native-auth.test.ts` and `native-recovery.test.ts` with "Native TLS setup failed. Install openssl…", and passed on a rerun of the same commit (same runner image `windows-2025-vs2026` 20261103 as the last green run). `initializeNativeTLS` (`src/native-auth.ts`) runs `openssl req -newkey rsa:2048` with `timeout: 15000` and reports a timeout as a missing openssl. |
+| **Reproduce** | Run `npm test` on the Windows runner under load; or call `initializeNativeTLS` with `openssl` replaced by a script that sleeps 16 s. |
+| **Check** | A committed test fails first: a slow key generation is reported as a timeout, not as missing openssl; the timeout no longer breaks a loaded Windows runner (longer bound or key generated once per test run); the Windows job passes without reruns. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-072-t01"></a>B-072-T01 — Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI | 0.75 h | 0 h | 0.75 h | Ready |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-072.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #505](https://github.com/voidbrain/nerv/pull/505) opened it; CI run 44208231306 (failed, then passed on rerun) |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
 ### <a id="f-060"></a>[✨ F-060](#top)
 
 **Spike: herdr-core as a coding-agent terminal runtime**

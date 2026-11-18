@@ -2,7 +2,7 @@
   "version": 1,
   "id": "B-057-T02",
   "parent": "B-057",
-  "title": "Owner live check: English and Italian companion errors",
+  "title": "Owner live check: rotated certificate message (part D step 1)",
   "goal": "The fix behaves as tested on the real companion",
   "status": "ready",
   "acceptance": [
@@ -37,5 +37,5 @@
     "estimateAgentHours": 0,
     "ownerKind": "procedure"
   },
-  "ownerLink": "docs/acceptance/companion-live-checks.md#part-c"
+  "ownerLink": "docs/acceptance/companion-live-checks.md#part-d--changed-certificate-and-stopped-profile-recovery-b-057-t02-f-081-t01"
 }
