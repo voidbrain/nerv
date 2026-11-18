@@ -548,10 +548,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-085-t01"></a>B-085-T01 — Linux: lifecycle commands drop the user session bus, so no user service can be installed | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-085-t01"></a>B-085-T01 — Linux: lifecycle commands drop the user session bus, so no user service can be installed | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #518](https://github.com/voidbrain/nerv/pull/518) fix |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -560,7 +560,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/node-lifecycle-execution.test.ts` "B-085: lifecycle commands keep the user session bus…" (committed failing first) |
+| PR / evidence | Steps: B-085-T01: [PR #518](https://github.com/voidbrain/nerv/pull/518) fix. Test: `test/node-lifecycle-execution.test.ts` "B-085: lifecycle commands keep the user session bus…" (committed failing first) |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI and the NERV-03 install on Calvary. |
 | Reviewed | 2026-11-18 |
@@ -586,10 +586,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-086-t01"></a>B-086-T01 — Linux: an install stops at start because a written unit already counts as registered | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-086-t01"></a>B-086-T01 — Linux: an install stops at start because a written unit already counts as registered | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #518](https://github.com/voidbrain/nerv/pull/518) fix |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -598,7 +598,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/linux-service-lifecycle.test.ts` fake now loads a written unit (committed failing first: F-005-T10 and F-005-T25 failed) |
+| PR / evidence | Steps: B-086-T01: [PR #518](https://github.com/voidbrain/nerv/pull/518) fix. Test: `test/linux-service-lifecycle.test.ts` fake now loads a written unit (committed failing first: F-005-T10 and F-005-T25 failed) |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI and the NERV-03 install on Calvary. |
 | Reviewed | 2026-11-18 |
