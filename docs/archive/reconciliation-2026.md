@@ -1,5 +1,9 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-18 — main `ec1ed40`
+
+Owner decision: 22 owner steps move to the agent (PR #514); owner remaining 21.75 h → 11.75 h. #508–#512 merged on green CI after reruns; B-073 fixed; B-074 and B-076 bounds raised.
+
 ## 2026-11-18 — main `6c9e27c`
 
 Merged PRs #504–#507, all CI green (#507's windows job passed on rerun: B-073). B-071 verified by #504's CI and closed; F-009-T04 closed; B-073 fixed (identity query through the adapter runner).
