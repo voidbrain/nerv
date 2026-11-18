@@ -2433,10 +2433,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-072-t01"></a>B-072-T01 — Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-072-t01"></a>B-072-T01 — Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #507](https://github.com/voidbrain/nerv/pull/507) |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2445,7 +2445,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #505](https://github.com/voidbrain/nerv/pull/505) opened it; CI run 44208231306 (failed, then passed on rerun) |
+| PR / evidence | Steps: B-072-T01: [PR #507](https://github.com/voidbrain/nerv/pull/507). [PR #505](https://github.com/voidbrain/nerv/pull/505) opened it; CI run 44208231306 (failed, then passed on rerun) |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
