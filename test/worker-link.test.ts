@@ -34,8 +34,9 @@ const item = (n: number) => ({
   args: { title: 'Neutral ' + n, due: '2031-01-01T09:00:00Z' },
 });
 // workerHeartbeatMs lets a test keep the worker side quiet, so only the coordinator heartbeat is in flight.
-// B-066-T02: strict 150 ms heartbeat timing restored; frame verification uses an in-memory registry snapshot.
-async function fixture(heartbeatMs = 150, workerHeartbeatMs = heartbeatMs) {
+// B-046 remedy (a): fixtures use a 500 ms ping budget, above measured store latency (50-270 ms) and Windows scheduling
+// delays. B-066-T02 had set 150 ms again; Windows CI then lost sessions in unrelated tests (B-066-T03).
+async function fixture(heartbeatMs = 500, workerHeartbeatMs = heartbeatMs) {
   const root = keys(),
     a = keys(),
     b = keys(),
@@ -823,7 +824,9 @@ test(
   'B-066-T02: worker-link heartbeats survive slow registry IPC without dropping live sessions',
   { timeout: 30000 },
   async () => {
-    const f = await fixture(120, 120);
+    // B-066-T03: registry IPC 1,200 ms late against a 500 ms budget (more than twice the budget, as 300 against 120 was),
+    // so a frame that waited for the registry would still end the session, while Windows scheduling stays inside it.
+    const f = await fixture(500, 500);
     const send = WebSocket.prototype.send;
     let hellos = 0;
     WebSocket.prototype.send = function (this: WebSocket, data: unknown, ...rest: unknown[]) {
@@ -836,11 +839,11 @@ test(
       for (const rt of [f.ra, f.rb]) {
         const call = rt.nervous.call.bind(rt.nervous);
         rt.nervous.call = async (method, params = {}, timeout) => {
-          if (method === 'kaji.bases' || method === 'kaji.main') await wait(300);
+          if (method === 'kaji.bases' || method === 'kaji.main') await wait(1200);
           return call(method, params, timeout);
         };
       }
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 130; i++) {
         assert.ok(f.main.connected('NERV-02'), 'live session must not drop while registry IPC is slow');
         await wait(12);
       }

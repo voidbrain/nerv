@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T10",
-  "status": "implemented",
+  "status": "closed",
   "title": "Revise the relocation decision after review",
   "prs": [
     {
@@ -46,7 +46,7 @@
     "size": "small",
     "estimate": "0.5 h",
     "basis": "Estimated 2026-11-13: revise one decision record against a review. Not a measurement.",
-    "reviewed": "2026-11-13",
+    "reviewed": "2026-11-18",
     "baselineDays": 0.5,
     "agentHours": 0,
     "baselineAgentHours": 0.5,

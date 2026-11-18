@@ -4,7 +4,7 @@
   "parent": "F-082",
   "title": "Checklist in Telegram",
   "goal": "Aoba sends the list with one toggle button per item and edits the message on tick",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Inline buttons toggle items; the message is edited, not resent",
     "A stale button (item removed) answers that the list changed"
@@ -34,10 +34,16 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement. Re-estimated 2026-11-15 from 1 h to 0.5 h: `node tools/work-items.mjs calibrate` since 2026-11-14 shows F-007-T04, F-050-T02 and F-054-T03 (bounded product steps of the same shape) at 0.08-0.17x their baselines (stated actuals, n=3); security, distributed and isolation steps not revised.",
-    "reviewed": "2026-11-15",
-    "agentHours": 0.5,
+    "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement. Re-estimated 2026-11-15 from 1 h to 0.5 h: `node tools/work-items.mjs calibrate` since 2026-11-14 shows F-007-T04, F-050-T02 and F-054-T03 (bounded product steps of the same shape) at 0.08-0.17x their baselines (stated actuals, n=3); security, distributed and isolation steps not revised. No actual: not timed by the session that closed it.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
     "baselineAgentHours": 1,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 479,
+      "note": "implementation"
+    }
+  ]
 }

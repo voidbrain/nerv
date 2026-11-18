@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 3 | 0 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 5 | 4 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -4599,6 +4599,202 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | Opened | 2026-11-13 |
 | Verification | Pending. |
 | Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+### B-071
+
+**Owner steps shown under 💻 and without their procedure link (F-005-T15, F-007-T05, F-060-T01, F-078-T05)**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18; verified by the green CI of PR #504.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 by the owner, the third or fourth time: F-005 said "💻 Next: F-005-T15 … (Implemented; verification pending)" while only the owner's trial remained, and its 🧑‍🔧 had no link. Causes: the harness `work-items.mjs` kept the authored 💻 whatever the next step's actor; its missing-`ownerLink` report skipped implemented steps and was only a warning (F-007-T05 and F-060-T01 had been warned about, unlinked); and 33 open records carried hand-written Next sentences that drifted as steps changed (F-060 and F-078 said 💻 for an owner step; F-078's source said 💻 with "Procedure"). |
+| **Reproduce** | On `main` before the fix: `npm run work:build` and read F-005, F-060 and F-078; `npm run check:work` exits 0. |
+| **Check** | Harness 10.0.0 (B-047 in the template, test committed failing first): the Next line is 🧑 with the step's linked page when the next step is the owner's and no agent step can start; `check:work` fails on an owner-turn step without `ownerLink`. Every open record here uses `Next: from tasks.`; the four owner steps link a copy-paste page. |
+### B-049
+
+**Misato invents a reminder title instead of asking, when an Italian request gives none**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18; every step verified on green CI.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-12 in the owner-approved B-021 real-model run (gemma4:12b, local): for `Imposta un promemoria per il primo gennaio 2031 alle 09:00 UTC.` (no title), Misato proposed `reminders.add` with an invented title (`Promemoria`, `Promemoria per il primo gennaio 2031`) instead of asking. The prompt for this case is byte-identical to main before B-021's change. The same case passed on 2026-11-08. Misato's prompt already says never to invent a title. |
+| **Reproduce** | `npm run evals:model -- --role=misato --model=gemma4:12b --limit=4` (case `italian-missing-title` in evals/planner-v1.json), or the probe of the same case; 2 of 5 attempts asked on 2026-11-12. |
+| **Check** | A request without a title gets a question in the request's language, never an invented title; measured on the frozen case over repeated runs with its rate recorded, and any deterministic guard covered by a test. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18: every acceptance check is automated and passed in the CI of [PR #504](https://github.com/voidbrain/nerv/pull/504) (run green: plan, validate, windows, native-macos). Review: fresh-context review of the template change in project-harness PR #217, cited in #504; the project side was records and owner pages. Test: template `tools/test-work-items.mjs` "Next line: when the next step is the owner's…", committed failing first in project-harness PR #217 (commit 619fe5a). Opened 2026-11-18. New owner pages: [F-005-T15](../../acceptance/f005-t15-forward-upgrade-trial.md) (runs only once a revision raises `readerSchema` above the live schema; both are 6 on 2026-11-18), [F-007-T05](../../acceptance/f007-t05-voice-corpus-procedure.md), [F-060-T01](../../acceptance/f060-t01-herdr-trial.md). Steps still waiting on agent work and without a page get it in the PR that finishes their last prerequisite; `check:work` now fails otherwise.
+
+**Estimates:** Small, estimated 2026-11-18: 1.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #504](https://github.com/voidbrain/nerv/pull/504); [project-harness PR #217](https://github.com/voidbrain/project-harness/pull/217) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: CI on #504 green (`check:work`, `check:backlog`, `check:harness`). Closed 2026-11-18. |
+**Owner approval 2026-11-12:** real-model reruns for B-049, at most 12 invocations and 60 minutes of model time, gemma4:12b on loopback Ollama, no cloud route and no paid usage (the same limits as B-021). State the exact cases before running. Not started (owner: finish current work first).
+
+**Next action / closure evidence:** Classify the failure: model competence on gemma4:12b (a prompt or model change), or a deterministic guard (for example, a reminder title that occurs nowhere in the request or earlier exchanges goes back to Misato as invalid). Plan a fix with a failing case first. Real-model reruns need the owner's approval and budget.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 1 open step has 1.25 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Small: classification, a guard or prompt change with tests, and an owner-approved rerun. Estimated 2026-11-12, not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | PR #367: failing-first regression test (`3c48c46`) + fix in `src/misato.ts` (`validateReminderTitle` + explicit no-subject reminder prompt rule) and `src/runtime.ts` (rejects missing, generic/date-only, or ungrounded `reminders.add` titles back to Misato as `invalid`). Owner-approved loopback `gemma4:12b` rerun (2026-11-13, 4/12 invocations): 4 of 4 asked in Italian. Prior evidence: `docs/evaluations/2026-11-12-misato-b021.json`. |
+| Opened | 2026-11-12 |
+| Verification | Test: `test/misato.test.ts` (`validateReminderTitle`, PR #367). 2026-11-18: B-049-T01 verified: [PR #367](https://github.com/voidbrain/nerv/pull/367) merged on green CI (live rerun 4/4 recorded). Deterministic: `test/misato.test.ts`, `test/clarification.test.ts`, `test/consultant.test.ts`, `test/resume.test.ts`, `test/telegram.test.ts`, `test/watch-runtime.test.ts` (62/62 pass), `npm run typecheck`, `npm run check:fast`. Live model: 4/4 `gemma4:12b` on `127.0.0.1:11434` (`italian-missing-title`) asked in Italian. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-067
+
+**Snapshot schedule test fails on Windows with EPERM removing its data folder**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18; every step verified on green CI.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-15 on [PR #451](https://github.com/voidbrain/nerv/pull/451) (CI 43748182800, Windows job, first attempt): `test/snapshots.test.ts` "the schedule takes the snapshot once and logs a failure by reason only, without paths" failed with `EPERM, Permission denied` on its fixture folder `nerv-snap-*`; the rerun passed and `main` passed with the same code, so it is intermittent. Likely cause, unconfirmed: cleanup removes the folder while a snapshot started by the schedule still holds a file open (Windows refuses), as in the earlier `nerv-winsvc-*` case in the archive. |
+| **Reproduce** | Run `test/snapshots.test.ts` repeatedly on the Windows CI job; it fails now and then on the first attempt. |
+| **Check** | A committed test fails first (for example by holding the snapshot in flight at `stop()`); `stop()` of the snapshot schedule waits for an in-flight snapshot, or the test awaits it before cleanup; 10 consecutive Windows runs of the file pass. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** B-067-T01 implemented in [PR #463](https://github.com/voidbrain/nerv/pull/463); its committed regression and the Windows/full-suite CI jobs passed. The acceptance still requires 10 consecutive Windows runs of `test/snapshots.test.ts`, so the task is not closed yet.
+
+**Estimates:** Small, estimated 2026-11-15: 0.75 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #463](https://github.com/voidbrain/nerv/pull/463) (merged; CI green); [PR #451](https://github.com/voidbrain/nerv/pull/451) CI 43748182800 (Windows, first attempt) |
+| Opened | 2026-11-15 |
+| Verification | Test: `test/snapshots.test.ts` (PR #463). 2026-11-18: B-067-T01 verified: [PR #463](https://github.com/voidbrain/nerv/pull/463) merged on green CI (test/snapshots.test.ts passed in every Windows run since (20 clean first attempts; the 6 failed ones failed other tests)). Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-059
+
+**Without a web build the browser evaluation case is recorded as a failure, not as an unmet requirement**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18; every step verified on green CI.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-13: in a fresh worktree without `dist/`, `node tools/gauntlet.mjs all --execute --allow-expensive` ran the `browser` case, which declares the `built-browser-assets` requirement, and recorded it in the ledger as a failed critical case ("Adapter incomplete, changed source or failing checks"). After `npm run build` it passed. A missing build is a setup gap, not a product failure; recording it as failed hides the real cause and could be read as a regression. |
+| **Reproduce** | Fresh worktree, `npm ci`, no build; run the command above with a new `--out-dir`. |
+| **Check** | When `dist/web/browser` is missing, the wrapper refuses the browser case (or builds first) and says which requirement is unmet; nothing is written to the ledger for it; a regression covers it. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** The wrapper now blocks an execution whose `built-browser-assets` requirement is unmet and leaves the ledger unchanged. Close after the full suite and required CI pass.
+
+**Estimates:** Small, estimated 2026-11-13: a requirement check before execution and one test. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #390](https://github.com/voidbrain/nerv/pull/390) implementation; [PR #376](https://github.com/voidbrain/nerv/pull/376) found in F-075, 2026-11-13. Test: `B-059: browser case refuses a missing build without writing failed evidence`; committed failing in `4139150`, then passed without editing that regression. A separate build-present regression preserves the prior execution path. |
+| Opened | 2026-11-13 |
+| Verification | 2026-11-18: B-059-T01 verified: [PR #390](https://github.com/voidbrain/nerv/pull/390) merged on green CI. Unit/integration 2026-11-13: the focused missing-build and build-present regressions pass; full suite and CI pending. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### F-070
+
+**Authenticated directory of base communication operators**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18; every step verified on green CI.
+
+| | |
+|---|---|
+| **Issue** | Resolve tell Aoba on another base through configured operator aliases, without guessing from role labels or changing a destination silently. |
+| **Reproduce** | Address an enrolled base by operator alias; rename it; exercise duplicate and unknown aliases. |
+| **Check** | Explicit per-base configurable names/defaults; authenticated discovery; ambiguity asks for clarification; stale/unknown names fail safely; no private channel IDs exposed. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Define operator alias ownership and signed directory contract before changing routing. See [the source assessment](../../design/operator-flow-review-2026-11-07.md). Preserve observed communication separately from step activity; do not infer delivery or execution from a UI state.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 2.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Medium remaining effort. Reassessed 2026-11-07: implementation and integration verification remain; no measured duration available.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #368](https://github.com/voidbrain/nerv/pull/368) F-070-T01 and F-070-T02 implementation (`src/operator-directory.ts`, `src/config.ts`, `src/kaji-link.ts`, `src/runtime.ts`, `src/chat-command.ts`, `src/server.ts`, `test/operator-directory.test.ts`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner report 2026-11-07; source assessment linked above |
+| Opened | 2026-11-07 |
+| Verification | 2026-11-18: F-070-T01 verified: [PR #368](https://github.com/voidbrain/nerv/pull/368) merged on green CI; F-070-T02 verified: [PR #368](https://github.com/voidbrain/nerv/pull/368) merged on green CI. Passed `node --test test/operator-directory.test.ts` (5/5), `npm test`, `npm run typecheck`, `npm run check:fast`. Pending CI and merge. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### F-048
+
+**Parallel work: a visible queue, limits per model, a lock per item**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🔴 Large |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18; every step verified on green CI.
+
+| | |
+|---|---|
+| **Issue** | Owner questions 2026-11-05 on parallelism. Telegram requests run one at a time in order (a queue nobody sees); dashboard and CLI requests run side by side; within a sortie the pilot advises before Misato plans, and the seats vote in parallel; the real limit is the local model server (Ollama serves one model a few requests at a time and swaps models in and out of memory). Two sorties can act on the same item at once (edit and cancel the same reminder). |
+| **Reproduce** | Send two requests on Telegram quickly; send two from the dashboard; edit a reminder in one while another cancels it. |
+| **Check** | Each channel says when a request waits and behind how many ("queued, 2 ahead"); the dashboard shows queued and running sorties; a limit of concurrent model calls per model (a setting, from what the machine can hold) queues the rest instead of overloading; actions on the same item (a reminder, a fact) never run at the same time: the second waits for the first, then re-reads; tests cover the queue order, the limit and two actions on one item. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** 2026-11-16 (F-048-T04): written contract published in [specialist orchestration](../../decisions/specialist-orchestration.md) (states, limits, role separation, ordered dependencies, failure paths, resumable handoff history; no multi-step specialist execution claimed yet). Owner extension 2026-11-07: large plans need bounded chunking, separate coder/reviewer consultants, ordered dependencies, multiple review/refinement loops and resumable handoff history; define orchestration before claiming multi-step specialist execution.  Planned 2026-11-05 (owner).
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 3 open steps total 3.75 h agent (steps table; each task basis gives old → new). Figures after this sentence are dated history. Large remaining effort. Original Medium estimate dated 2026-11-05 is superseded by the expanded orchestration scope. Reassessed 2026-11-07: Large remains valid: chunking, multiple consultants and coder/reviewer handoffs need resumable orchestration and integration evidence.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #471](https://github.com/voidbrain/nerv/pull/471) (merged; CI green); [PR #372](https://github.com/voidbrain/nerv/pull/372) F-048-T01..T03 (visible bounded request queue, per-model budgets, per-item locks); [PR #220](https://github.com/voidbrain/nerv/pull/220) task/capability and evidence reconciliation; 2026-11-08: [authored task capability requirements](../README.md#active-task-capability-requirements); no model qualification or feature acceptance claimed; [Scoped architecture reassessment](../../audits/2026-11-08-architecture-reassessment.md), 2026-11-08; [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; Owner questions 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-18: F-048-T01, F-048-T02 and F-048-T03 closed (were Verified). 2026-11-18: F-048-T04 verified: [PR #471](https://github.com/voidbrain/nerv/pull/471) merged on green CI. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
 
 </details>
 

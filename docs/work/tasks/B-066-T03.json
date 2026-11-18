@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "parent": "B-066",
+  "id": "B-066-T03",
+  "title": "Find why worker-link tests still lose the connection under load",
+  "goal": "The B-066 heartbeat regression and the F-014 expiry test pass under load on Linux and Windows",
+  "status": "implemented",
+  "acceptance": [
+    "The cause of both failures below is named in the record",
+    "A committed test fails first if the cause is in code; the fix keeps the Option A snapshot",
+    "CI passes without reruns"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/worker-link.ts",
+    "test/worker-link.test.ts",
+    "docs/work/records/B-066.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-18: read the CI log, reproduce under load, fix or bound, one test. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0.25,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 510,
+      "note": "verification sweep"
+    },
+    {
+      "pr": 512,
+      "note": "fixture budget"
+    }
+  ]
+}
