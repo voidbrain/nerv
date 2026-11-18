@@ -45,5 +45,11 @@
     "agentHours": 0,
     "ownerKind": "procedure"
   },
-  "ownerLink": "docs/acceptance/f006-mac-runs.md"
+  "ownerLink": "docs/acceptance/f006-mac-runs.md",
+  "prs": [
+    {
+      "pr": 528,
+      "note": "results"
+    }
+  ]
 }
