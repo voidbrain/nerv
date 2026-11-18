@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 48.5 h agent + 21.75 h owner across 133 open steps of 40 features and 12 other records. 35.25 h of actual effort recorded on 81 steps. Generated from the task files.
+**Remaining effort:** 60.5 h agent + 21.75 h owner across 139 open steps of 40 features and 12 other records. 35.25 h of actual effort recorded on 81 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -391,9 +391,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 4.75 h agent + 1 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟣 Very large | 10.5 h agent + 1 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby (Planned).
+💻 **→** Next: F-016-T03 — Step 2a — Signed coordinator state snapshot export (Planned).
 
 | | |
 |---|---|
@@ -407,15 +407,18 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-016-t03"></a>F-016-T03 — Step 2a — Signed state snapshot export and import to a read-only standby | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-016-t04"></a>F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T03](#f-016-t03) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-016-t03"></a>F-016-T03 — Step 2a — Signed coordinator state snapshot export | 1.5 h | 0 h | 1.5 h | Planned | 🤖 | — |
+| 🟡 Medium | <a id="f-016-t13"></a>F-016-T13 — Step 2b — Import a verified snapshot into the read-only standby | 2 h | 0 h | 2 h | Planned · waits on [F-016-T03](#f-016-t03) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-016-t14"></a>F-016-T14 — Step 2c — Serial-monotonic registry merge and worker approval settlement | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-016-T13](#f-016-t13) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-016-t15"></a>F-016-T15 — Step 2d — Quiesce, merge and swap under the serve guard | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-016-T14](#f-016-t14) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-016-t04"></a>F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T15](#f-016-t15) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t05"></a>F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T04](#f-016-t04) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t06"></a>F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T05](#f-016-t05) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t07"></a>F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T06](#f-016-t06) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T07](#f-016-t07) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned · waits on [F-016-T08](#f-016-t08) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 6.5 h (11 of 12 steps) | 1 h (2 of 12 steps recorded) | 4.75 h agent + 1 h owner | 4 of 12 completed | | |
+| 🟣 Very large | **Total** | 12.25 h (14 of 15 steps) | 1 h (2 of 15 steps recorded) | 10.5 h agent + 1 h owner | 4 of 15 completed | | |
 
 <details><summary>Done steps (4)</summary>
 
@@ -651,9 +654,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-105-T01 — CI fails when the PR names no record (Ready).
+💻 **→** Next: F-105-T01 — CI fails when the PR names no record (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -663,10 +666,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-105-t01"></a>F-105-T01 — CI fails when the PR names no record | 1 h | 0 h | 1 h | Ready |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-105-t01"></a>F-105-T01 — CI fails when the PR names no record | 1 h | 0 h | 0.25 h | Implemented; verification pending | [PR #511](https://github.com/voidbrain/nerv/pull/511) check and CI step |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -675,57 +678,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner decision 2026-11-16; [PR #499](https://github.com/voidbrain/nerv/pull/499) the catch-up it prevents; opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
+| PR / evidence | Steps: F-105-T01: [PR #511](https://github.com/voidbrain/nerv/pull/511) check and CI step. Owner decision 2026-11-16; [PR #499](https://github.com/voidbrain/nerv/pull/499) the catch-up it prevents; opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
 | Opened | 2026-11-16 |
 | Verification | Pending. |
-| Reviewed | 2026-11-16 |
-
-</details>
-
----
-### <a id="f-082"></a>[✨ F-082](#top)
-
-**Lists: add items by chat or Telegram, recall them as a checklist card**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-082-T02 — Checklist card in the dashboard chat (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "add milk, pasta and cheese to the shopping list" by chat, Telegram or voice; asking for the list shows a card with a checkbox per item. NERV has no list store (Lilith keeps one-line facts) and no checklist card. |
-| **Reproduce** | `nerv chat "add milk, pasta and cheese to the shopping list"`, then `nerv chat "show the shopping list"`. |
-| **Check** | A named list is created on first use; several items in one request become separate items; showing a list renders a checklist card on the dashboard chat and in Telegram where ticking an item updates the store and every other open card; lists stay local-only by default; tests with invented items cover add, duplicate, tick, untick and remove. Voice input follows F-007. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-082-t02"></a>F-082-T02 — Checklist card in the dashboard chat | 0.5 h | 0 h | 0 h | Implemented; verification pending | 🤖 | [PR #483](https://github.com/voidbrain/nerv/pull/483) implementation |
-| 🟢 Small | <a id="f-082-t04"></a>F-082-T04 — Owner check: add by Telegram, tick on the dashboard | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-082-T02](#f-082-t02) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 2 h (3 of 4 steps) | 0.5 h (1 of 4 steps recorded) | 0.25 h owner | 2 of 4 completed | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-082-t01"></a>F-082-T01 — List store and list tools | 1 h | 0.5 h (stated) | Completed | — |
-| — | <a id="f-082-t03"></a>F-082-T03 — Checklist in Telegram | 0.5 h | 0 h | Completed | [PR #479](https://github.com/voidbrain/nerv/pull/479) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-082.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-082-T02: [PR #483](https://github.com/voidbrain/nerv/pull/483) implementation · F-082-T03: [PR #479](https://github.com/voidbrain/nerv/pull/479) implementation. [PR #479](https://github.com/voidbrain/nerv/pull/479); [PR #483](https://github.com/voidbrain/nerv/pull/483) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-082-T02 not closed: the card, its toggle and its AXE audit passed on green CI (PR #483), but nothing in the dashboard chat ever shows it (only the test hook `__nervSetSurface` does), so the owner check F-082-T04 cannot pass yet; waits on the owner's decision. F-082-T03 verified: [PR #479](https://github.com/voidbrain/nerv/pull/479) merged on green CI. |
 | Reviewed | 2026-11-18 |
 
 </details>
@@ -775,6 +730,55 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-082"></a>[✨ F-082](#top)
+
+**Lists: add items by chat or Telegram, recall them as a checklist card**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-082-T02 — Checklist card in the dashboard chat (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "add milk, pasta and cheese to the shopping list" by chat, Telegram or voice; asking for the list shows a card with a checkbox per item. NERV has no list store (Lilith keeps one-line facts) and no checklist card. |
+| **Reproduce** | `nerv chat "add milk, pasta and cheese to the shopping list"`, then `nerv chat "show the shopping list"`. |
+| **Check** | A named list is created on first use; several items in one request become separate items; showing a list renders a checklist card on the dashboard chat and in Telegram where ticking an item updates the store and every other open card; lists stay local-only by default; tests with invented items cover add, duplicate, tick, untick and remove. Voice input follows F-007. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-082-t02"></a>F-082-T02 — Checklist card in the dashboard chat | 0.5 h | 0 h | 0 h | Implemented; verification pending | 🤖 | [PR #483](https://github.com/voidbrain/nerv/pull/483) implementation |
+| 🟡 Medium | <a id="f-082-t05"></a>F-082-T05 — Show the checklist card in the dashboard chat | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-082-T02](#f-082-t02) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-082-t04"></a>F-082-T04 — Owner check: add by Telegram, tick on the dashboard | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-082-T02](#f-082-t02), [F-082-T05](#f-082-t05) | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 3.5 h (4 of 5 steps) | 0.5 h (1 of 5 steps recorded) | 1.5 h agent + 0.25 h owner | 2 of 5 completed | | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-082-t01"></a>F-082-T01 — List store and list tools | 1 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-082-t03"></a>F-082-T03 — Checklist in Telegram | 0.5 h | 0 h | Completed | [PR #479](https://github.com/voidbrain/nerv/pull/479) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-082.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-082-T02: [PR #483](https://github.com/voidbrain/nerv/pull/483) implementation · F-082-T03: [PR #479](https://github.com/voidbrain/nerv/pull/479) implementation. [PR #479](https://github.com/voidbrain/nerv/pull/479); [PR #483](https://github.com/voidbrain/nerv/pull/483) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-082-T02 not closed: the card, its toggle and its AXE audit passed on green CI (PR #483), but nothing in the dashboard chat ever shows it (only the test hook `__nervSetSurface` does), so the owner check F-082-T04 cannot pass yet; waits on the owner's decision. F-082-T03 verified: [PR #479](https://github.com/voidbrain/nerv/pull/479) merged on green CI. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-083"></a>[✨ F-083](#top)
 
 **Saved recipes: keep them by category, recall them, compute only from saved values**
@@ -1233,7 +1237,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | [F-099-T04](#f-099-t04) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.25 h owner | — | [F-099-T04](#f-099-t04) | 🤖 | — | — |
 
 💻 **→** Next: F-089-T02 — Find and click a named control (Implemented; verification pending).
 
@@ -1248,8 +1252,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 0 h | 0 h | Implemented; verification pending | 🤖 | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
-| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-089-T02](#f-089-t02) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 2 h (2 of 3 steps) | 0.25 h (1 of 3 steps recorded) | 0.25 h owner | 1 of 3 completed | | |
+| 🟡 Medium | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 0 h | 2 h | Planned · waits on [F-089-T02](#f-089-t02) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-089-T02](#f-089-t02), [F-089-T04](#f-089-t04) | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 4 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2 h agent + 0.25 h owner | 1 of 4 completed | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1280,7 +1285,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h agent + 0.25 h owner | — | [F-094-T02](#f-094-t02) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | [F-094-T02](#f-094-t02) | 🤖 | — | — |
 
 💻 **→** Next: F-093-T02 — Find and click a control by name (Implemented; verification pending).
 
@@ -1296,8 +1301,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-093-t02"></a>F-093-T02 — Find and click a control by name | 1.5 h | 0 h | 0 h | Implemented; verification pending | 🤖 | [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation |
 | 🟢 Small | <a id="f-093-t03"></a>F-093-T03 — Shared adapter for F-012 and F-092 | 1 h | 0 h | 1 h | Planned · waits on [F-093-T02](#f-093-t02) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-093-t04"></a>F-093-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-093-T02](#f-093-t02) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 3 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1 h agent + 0.25 h owner | 1 of 4 completed | | |
+| 🟡 Medium | <a id="f-093-t05"></a>F-093-T05 — Bind the macOS accessibility driver to the click adapter | 2 h | 0 h | 2 h | Planned · waits on [F-093-T02](#f-093-t02) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-093-t04"></a>F-093-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-093-T02](#f-093-t02), [F-093-T05](#f-093-t05) | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 5 h (4 of 5 steps) | 0.25 h (1 of 5 steps recorded) | 3 h agent + 0.25 h owner | 1 of 5 completed | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1317,53 +1323,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-093-T02: [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation. [PR #497](https://github.com/voidbrain/nerv/pull/497) (merged; CI green); [Desktop control adapter decision](decisions/desktop-control-adapter.md) (`F-093-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-093-T02 not closed: the adapter logic passed on green CI, but `nerv desktop-click` runs the adapter with a stub driver ("No live desktop accessibility driver bound in CLI"), so the owner check F-093-T04 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/497) merged on green CI. `F-093-T01`: `npm run check:fast` passed. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-090"></a>[✨ F-090](#top)
-
-**Resume interrupted coding work without the editor**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-090-T02 — Headless resume adapter (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: continue a coding agent's interrupted work directly, without VS Code. F-012 covers resuming in the editor (F-012-T03); a headless resume through the coding agent's own command line is a separate adapter. |
-| **Reproduce** | Interrupt a coding-agent session at its limit, then ask NERV to continue it after the reset. |
-| **Check** | NERV identifies the exact session (repository, branch, session ID) and resumes it once through the agent's supported command line after the reset, using the F-012 resume engine; a changed branch, a missing session or an already-resumed job produces needs-attention, not a second run; output and cost come back to the channel. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-090-t02"></a>F-090-T02 — Headless resume adapter | 1 h | 0 h | 0 h | Implemented; verification pending | 🤖 | [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation |
-| 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-090-T02](#f-090-t02) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 1.5 h (2 of 3 steps) | 0.25 h (1 of 3 steps recorded) | 0.25 h owner | 1 of 3 completed | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-090-t01"></a>F-090-T01 — Feasibility: headless resume | 0.5 h | 0.25 h (measured) | Completed | — |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-090.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-090-T02: [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation. [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-090-T02 not closed: the adapter logic passed on green CI, but headless resume runs only as `nerv headless-resume <targets.json>` by hand; nothing in `serve` notices a session limit, so the owner check F-090-T03 ("NERV resumes it") cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/493) merged on green CI. `F-090-T01` feasibility report written in [headless-resume.md](decisions/headless-resume.md) from live CLI probe; verified with `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
 
 </details>
@@ -1404,6 +1363,54 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | Pending. |
 | Reviewed | 2026-11-14 |
+
+</details>
+
+---
+### <a id="f-090"></a>[✨ F-090](#top)
+
+**Resume interrupted coding work without the editor**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-090-T02 — Headless resume adapter (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: continue a coding agent's interrupted work directly, without VS Code. F-012 covers resuming in the editor (F-012-T03); a headless resume through the coding agent's own command line is a separate adapter. |
+| **Reproduce** | Interrupt a coding-agent session at its limit, then ask NERV to continue it after the reset. |
+| **Check** | NERV identifies the exact session (repository, branch, session ID) and resumes it once through the agent's supported command line after the reset, using the F-012 resume engine; a changed branch, a missing session or an already-resumed job produces needs-attention, not a second run; output and cost come back to the channel. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-090-t02"></a>F-090-T02 — Headless resume adapter | 1 h | 0 h | 0 h | Implemented; verification pending | 🤖 | [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation |
+| 🟡 Medium | <a id="f-090-t04"></a>F-090-T04 — Resume automatically when a session limit resets | 2 h | 0 h | 2 h | Planned · waits on [F-090-T02](#f-090-t02) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-090-T02](#f-090-t02), [F-090-T04](#f-090-t04) | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2 h agent + 0.25 h owner | 1 of 4 completed | | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-090-t01"></a>F-090-T01 — Feasibility: headless resume | 0.5 h | 0.25 h (measured) | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-090.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-090-T02: [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation. [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-090-T02 not closed: the adapter logic passed on green CI, but headless resume runs only as `nerv headless-resume <targets.json>` by hand; nothing in `serve` notices a session limit, so the owner check F-090-T03 ("NERV resumes it") cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/493) merged on green CI. `F-090-T01` feasibility report written in [headless-resume.md](decisions/headless-resume.md) from live CLI probe; verified with `npm run check:fast`. |
+| Reviewed | 2026-11-18 |
 
 </details>
 
@@ -1931,9 +1938,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-076-T02 — CI runs on merge&#95;group (Planned).
+💻 **→** Next: F-076-T05 — Push-to-main CI trigger from the template (Planned).
 
 | | |
 |---|---|
@@ -1945,15 +1952,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-076-t02"></a>F-076-T02 — CI runs on merge&#95;group | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-076-t05"></a>F-076-T05 — Push-to-main CI trigger from the template | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟢 Small | **Total** | 1.25 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 0.75 h | 3 of 5 completed | | |
+| 🟢 Small | **Total** | 1.25 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 0.25 h | 4 of 5 completed | | |
 
-<details><summary>Done steps (3)</summary>
+<details><summary>Done steps (4)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-076-t01"></a>F-076-T01 — Choose how merged main is verified | 0 h | 0 h | Completed | — |
+| — | <a id="f-076-t02"></a>F-076-T02 — CI runs on merge&#95;group | 0.5 h | 0 h | Completed | — |
 | — | <a id="f-076-t03"></a>F-076-T03 — Reconcile the queue-aware merge tool | 0.5 h | 0 h | Completed | [PR #382](https://github.com/voidbrain/nerv/pull/382) implementation |
 | — | <a id="f-076-t04"></a>F-076-T04 — Turn on the merge queue for main | — | 0 h | Completed | — |
 

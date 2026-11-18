@@ -13,6 +13,7 @@
     "build": "ng build",
     "dev": "ng serve --proxy-config proxy.conf.json",
     "check:backlog": "node tools/check-backlog.mjs",
+    "check:pr-record": "node tools/check-pr-record.mjs",
     "check:freshness": "node tools/check-freshness.mjs",
     "check:harness": "node tools/check-harness.mjs",
     "check:audits": "node tools/check-audits.mjs",

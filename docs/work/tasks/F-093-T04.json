@@ -9,7 +9,8 @@
     "Owner asks for one click in a visible app and confirms the result"
   ],
   "dependsOn": [
-    "F-093-T02"
+    "F-093-T02",
+    "F-093-T05"
   ],
   "resources": [
     "docs/acceptance/**",
