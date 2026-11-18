@@ -827,7 +827,7 @@ test('B-084: a fresh data home names the files lifecycle needs and how to create
     writeFileSync(join(home, 'token'), 't'.repeat(32));
     const before = readdirSync(home).sort();
     assert.throws(
-      () => lifecycle.requireServiceHome(home),
+      () => lifecycle.requireServiceFiles(home),
       (error: Error) =>
         /base-key/.test(error.message) &&
         /nerv\.sqlite/.test(error.message) &&

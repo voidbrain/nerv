@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 3 | 7 | 22 | 15 |
+| **This week** | 3 | 7 | 25 | 15 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 40 | 14 |
+| **Open** | 40 | 17 |
 | **Require Human 🧑** | 7 | 3 |
 
 ### Require Human 🧑
@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70 h agent + 11.5 h owner across 129 open steps of 37 features and 14 other records. 44.75 h of actual effort recorded on 90 steps. Generated from the task files.
+**Remaining effort:** 70.5 h agent + 11.5 h owner across 131 open steps of 37 features and 17 other records. 47.75 h of actual effort recorded on 94 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -46,7 +46,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 4 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
 
@@ -61,16 +61,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | 🤖 | — |
-| 🟢 Small | <a id="f-005-t27"></a>F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 1 h | 0 h | 1 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-005-t34"></a>F-005-T34 — Record the evidence of F-005-T27 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T27](#f-005-t27) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-005-t28"></a>F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 1 h | 0 h | 1 h | Planned · waits on [F-005-T34](#f-005-t34) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-005-t28"></a>F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 1 h | 0 h | 1 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-005-t35"></a>F-005-T35 — Record the evidence of F-005-T28 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T28](#f-005-t28) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-005-T35](#f-005-t35) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T29](#f-005-t29) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T36](#f-005-t36) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 23.25 h (30 of 37 steps) | 16 h (20 of 37 steps recorded) | 4 h | 29 of 37 completed | | |
+| 🟡 Medium | **Total** | 23.25 h (30 of 37 steps) | 18 h (21 of 37 steps recorded) | 2.75 h | 31 of 37 completed | | |
 
-<details><summary>Done steps (29)</summary>
+<details><summary>Done steps (31)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -99,9 +97,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-005-t24"></a>F-005-T24 — T09c — Acceptance on an owner-selected Windows machine | 1 h | 3 h (stated) | Completed | — |
 | — | <a id="f-005-t25"></a>F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | Completed | — |
 | — | <a id="f-005-t26"></a>F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 1 h | 2.5 h (stated) | Completed | [PR #525](https://github.com/voidbrain/nerv/pull/525) evidence |
+| — | <a id="f-005-t27"></a>F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 1 h | 2 h (stated) | Completed | — |
 | — | <a id="f-005-t31"></a>F-005-T31 — Record the evidence of F-005-T22 and close it | 0.25 h | 0 h | Completed | [PR #523](https://github.com/voidbrain/nerv/pull/523) this change |
 | — | <a id="f-005-t32"></a>F-005-T32 — Record the evidence of F-005-T24 and close it | 0.25 h | 0 h | Completed | — |
 | — | <a id="f-005-t33"></a>F-005-T33 — Record the evidence of F-005-T26 and close it | 0.25 h | 0 h | Completed | — |
+| — | <a id="f-005-t34"></a>F-005-T34 — Record the evidence of F-005-T27 and close it | 0.25 h | 0 h | Completed | — |
 | — | <a id="f-005-t37"></a>F-005-T37 — Agree the device matrix | — | 0 h | Completed | [PR #526](https://github.com/voidbrain/nerv/pull/526) matrix |
 
 </details>
@@ -1789,6 +1789,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-092"></a>[🐞 B-092](#top)
+
+**Every NERV command refused to create a missing base key (regression from B-084)**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-092-T01 — Host construction needs only the data home; planning names missing files (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 re-enrolling NERV-03 after its revocation (F-005-T27): with the old key moved aside, `nerv base pubkey` answered "NERV data home … is not fully initialized (missing base-key, base.pub) … Create them first: nerv base pubkey". B-084 (PR #523) put the file check in `requireServiceHome`, which every host constructor calls, and the startup guard builds a host for every command when `~/.nerv-lifecycle` exists, so no command could create the key. Worked around on Calvary by calling `baseKey()` directly. |
+| **Reproduce** | On a host with `~/.nerv-lifecycle`: move `~/.nerv/base-key` aside, run `nerv base pubkey`. |
+| **Check** | Test committed failing first: `requireServiceHome` (host construction) needs only the data home; `requireServiceFiles`, called by `planService`, names missing files; B-084's test moves to `requireServiceFiles` with its requirement unchanged. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-092-t01"></a>B-092-T01 — Host construction needs only the data home; planning names missing files | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-092.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/node-lifecycle-execution.test.ts` "B-092: building a host needs only the data home…" (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="b-087"></a>[🐞 B-087](#top)
 
 **Windows: a fenced start applied from an SSH session is refused by the startup fence**
@@ -2375,6 +2413,83 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound. [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-093"></a>[🐞 B-093](#top)
+
+**The Revoked bases section closes itself a few seconds after opening**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-093-T01 — The Revoked section keeps its open state across polls (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-18: the folded "Revoked (n)" section (F-107) closed again after a few seconds: the base list is rebuilt from scratch on every poll, so the details element lost its open state. |
+| **Reproduce** | Dashboard with a revoked base: open "Revoked (1)" and wait for the next poll. |
+| **Check** | Test committed failing first: with `state.revokedOpen` the section renders `open`; a `toggle` handler keeps the state in step with the owner's click. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-093-t01"></a>B-093-T01 — The Revoked section keeps its open state across polls | 0.5 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0.25 h | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-093.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/dashboard.test.ts` B-065/B-093 bases test (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-094"></a>[🐞 B-094](#top)
+
+**Remote action wording: a doubled full stop, "queued" for a finished job, "offline" for a revoked base**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟡 Medium | 1.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-094-T01 — One full stop after a refusal reason (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 in F-005-T27: (1) a refusal read "nothing was sent.." because `remoteOutcomeText` added a full stop after a reason that already ended one; (2) after a worker had run the job ("Calvary ran reminders.add …"), Misato replied that the reminder was "queued" / "in the queue for processing", under-claiming a finished action; (3) for revoked NERV-03 the planner said "No base by that id is online" and Misato called it offline, not revoked. |
+| **Reproduce** | Send a job to a stopped worker and cancel it; send one to a worker; send one to a revoked base. |
+| **Check** | (1) Test committed failing first, one full stop (B-094-T01). (2)–(3) The planner tells a revoked base from an offline one, and the reply after a `kaji.result` grant says the worker ran it (B-094-T02). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-094-t01"></a>B-094-T01 — One full stop after a refusal reason | 0.5 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending |
+| 🟢 Small | <a id="b-094-t02"></a>B-094-T02 — Revoked is not offline; a finished remote action is not queued | 1 h | 0 h | 1 h | Ready |
+| 🟡 Medium | **Total** | 1.5 h | 0.25 h (1 of 2 steps recorded) | 1.25 h | 0 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-094.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/remote-outcome-text.test.ts` (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI. |
 | Reviewed | 2026-11-18 |
 
 </details>

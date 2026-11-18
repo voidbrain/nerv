@@ -552,7 +552,7 @@
     const enrolled = list.filter(b => b.status !== "revoked"), revoked = list.filter(b => b.status === "revoked");
     // Revoked bases stay in the signed registry for good (a revocation must outlive the key), but the list keeps them
     // folded away (owner, 2026-11-18).
-    const revokedHtml = revoked.length ? "<details class='revoked-bases'><summary class='tiny muted' style='margin:6px 0 3px'>Revoked (" + revoked.length + ")</summary>" + revoked.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.baseId) + " · " + esc(b.name) + "</span><span class='badge b-muted'>REVOKED</span></div><div class='tiny muted'>" + esc(b.address) + " · key " + esc(b.fingerprint.slice(0, 9)) + "</div></div>").join("") + "</details>" : "";
+    const revokedHtml = revoked.length ? "<details class='revoked-bases'" + (state.revokedOpen ? " open" : "") + "><summary class='tiny muted' style='margin:6px 0 3px'>Revoked (" + revoked.length + ")</summary>" + revoked.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.baseId) + " · " + esc(b.name) + "</span><span class='badge b-muted'>REVOKED</span></div><div class='tiny muted'>" + esc(b.address) + " · key " + esc(b.fingerprint.slice(0, 9)) + "</div></div>").join("") + "</details>" : "";
     if (!enrolled.length) {
       const base = (state.doctor || {}).base || { id:"NERV-01", name:"Neo Tokyo-3" };
       document.getElementById("bases-sub").textContent = BASES[0].status === "online" ? "1/1 online" : "1/1 " + (BASES[0].status === "standby" ? "degraded" : "down");
@@ -569,6 +569,9 @@
       (b.self ? "<div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" : "") +
       (!b.self && b.online && b.health && b.health.reasons.length ? b.health.reasons.map(r => "<div class='tiny warn'>▲ " + esc(r) + "</div>").join("") : "") +
       (!b.self && b.online && !b.health ? "<div class='tiny muted'>health not reported (that base runs an older version)</div>" : "") + channelLine(b) + "</div>").join("") + revokedHtml;
+    // B-093: the list is rebuilt on every poll, so the Revoked section's open state lives in state, not in the DOM.
+    const fold = document.getElementById("bases").querySelector && document.getElementById("bases").querySelector(".revoked-bases");
+    if (fold) fold.addEventListener("toggle", () => { state.revokedOpen = fold.open; });
   };
   // Lilith: the owner's facts, editable here; every change is the owner's and stays in the fact's history.
   window.renderLilith = function () {
