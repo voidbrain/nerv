@@ -44,7 +44,8 @@ export function remoteOutcomeText(
   if (o === 'approval') return `${base} asks for your approval to run ${tool}: its card is waiting for you.`;
   if (o === 'uncertain')
     return `${base} could not confirm whether ${tool} finished; inspect its trace before retrying or releasing its resource.`;
-  if (o === 'reject') return `${base} refused ${tool}: ${String(result.reason ?? 'its gate said no')}.`;
+  if (o === 'reject')
+    return `${base} refused ${tool}: ${String(result.reason ?? 'its gate said no').replace(/[.!?]\s*$/, '')}.`;
   return `${base} answered for ${tool}: ${JSON.stringify(result).slice(0, 400)}`;
 }
 

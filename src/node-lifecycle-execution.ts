@@ -280,6 +280,7 @@ export function blockers(action: Action, o: ServiceObservation, next?: string): 
   return out;
 }
 export async function planService(host: ServiceHost, action: Action, nextRevision?: string): Promise<ServicePlan> {
+  requireServiceFiles(host.context.home);
   if (
     !['install', 'start', 'stop', 'update', 'uninstall'].includes(action) ||
     (nextRevision !== undefined && !/^[a-f0-9]{40}$/.test(nextRevision)) ||
@@ -687,6 +688,11 @@ export function requireServiceHome(home: string): void {
       `NERV data home ${home} does not exist yet; nothing was changed. Initialize it first (for example: nerv setup or nerv doctor).`,
     );
   }
+}
+/** The files a lifecycle plan reads (B-084), checked when planning only: the startup guard builds a host for every
+ * command, so a host must not demand the key `nerv base pubkey` is about to create (B-092). */
+export function requireServiceFiles(home: string): void {
+  requireServiceHome(home);
   const missing = SERVICE_HOME_FILES.filter(([name]) => !present(join(home, name)));
   if (missing.length)
     throw Error(

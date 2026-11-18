@@ -827,7 +827,7 @@ test('B-084: a fresh data home names the files lifecycle needs and how to create
     writeFileSync(join(home, 'token'), 't'.repeat(32));
     const before = readdirSync(home).sort();
     assert.throws(
-      () => lifecycle.requireServiceHome(home),
+      () => lifecycle.requireServiceFiles(home),
       (error: Error) =>
         /base-key/.test(error.message) &&
         /nerv\.sqlite/.test(error.message) &&
@@ -836,6 +836,19 @@ test('B-084: a fresh data home names the files lifecycle needs and how to create
         /nothing was changed/.test(error.message),
     );
     assert.deepEqual(readdirSync(home).sort(), before);
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('B-092: building a host needs only the data home, so nerv base pubkey can create a missing key', () => {
+  const home = mkdtempSync(join(tmpdir(), 'nerv-b092-'));
+  try {
+    writeFileSync(join(home, 'config.json'), '{}');
+    writeFileSync(join(home, 'token'), 't'.repeat(32));
+    // The startup guard builds a host for every command; that must not demand the key it is about to be asked to create.
+    assert.doesNotThrow(() => lifecycle.requireServiceHome(home));
+    assert.throws(() => lifecycle.requireServiceFiles(home), /base-key/, 'planning still names the missing files');
   } finally {
     rmSync(home, { recursive: true, force: true });
   }

@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-005",
   "id": "F-005-T27",
-  "status": "planned",
+  "status": "closed",
   "title": "T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix",
   "goal": "Enrolment, revocation, leases, fencing and cancellation across the device matrix.",
   "capabilities": [
@@ -43,8 +43,16 @@
     "reviewed": "2026-11-18",
     "baselineDays": 1.5,
     "ownerHours": 0,
-    "agentHours": 1,
+    "agentHours": 0,
     "estimateAgentHours": 1,
-    "baselineAgentHours": 1
-  }
+    "baselineAgentHours": 1,
+    "actualAgentHours": 2.0,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 527,
+      "note": "this change"
+    }
+  ]
 }
