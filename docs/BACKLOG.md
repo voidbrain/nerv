@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 80 h agent + 10.25 h owner across 137 open steps of 40 features and 18 other records. 49 h of actual effort recorded on 94 steps. Generated from the task files.
+**Remaining effort:** 80.25 h agent + 10.25 h owner across 138 open steps of 40 features and 18 other records. 49 h of actual effort recorded on 94 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -446,7 +446,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: B-086-T01 — Linux: an install stops at start because a written unit already counts as registered (Implemented; verification pending).
 
@@ -462,7 +462,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-086-t01"></a>B-086-T01 — Linux: an install stops at start because a written unit already counts as registered | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #518](https://github.com/voidbrain/nerv/pull/518) fix |
 | 🟢 Small | <a id="b-086-t02"></a>B-086-T02 — A matching unit that is disabled but still active stays NERV's, so a stop can recover it | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | — |
-| 🟢 Small | **Total** | 1.25 h | 1 h | 0.25 h | 0 of 2 completed | |
+| 🟢 Small | <a id="b-086-t03"></a>B-086-T03 — Rerun the two expensive system cases at this source | 0.25 h | 0 h | 0.25 h | Ready | — |
+| 🟢 Small | **Total** | 1.5 h | 1 h (2 of 3 steps recorded) | 0.5 h | 0 of 3 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
