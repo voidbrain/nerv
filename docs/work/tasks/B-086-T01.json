@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "parent": "B-086",
+  "id": "B-086-T01",
+  "title": "Linux: an install stops at start because a written unit already counts as registered",
+  "goal": "Linux: an install stops at start because a written unit already counts as registered",
+  "status": "implemented",
+  "acceptance": [
+    "Test committed failing first (the systemctl fake loads a unit once its file exists, like systemd): Linux install, stop and update tests pass with registration meaning `UnitFileState=enabled`; the NERV-03 install on Calvary completes."
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/node-lifecycle-linux.ts",
+    "test/**",
+    "docs/work/records/B-086.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-18 from the Calvary finding. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 518,
+      "note": "fix"
+    }
+  ]
+}

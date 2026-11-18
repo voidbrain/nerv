@@ -80,7 +80,7 @@ export function linuxServiceAdapter(
       '--user',
       'show',
       '--no-pager',
-      '--property=LoadState,ActiveState,SubState,MainPID,ExecStart,WorkingDirectory,Environment',
+      '--property=LoadState,UnitFileState,ActiveState,SubState,MainPID,ExecStart,WorkingDirectory,Environment',
       unitName,
     ]);
     if (r.status !== 0) return undefined;
@@ -122,7 +122,9 @@ export function linuxServiceAdapter(
       let registered: ServiceObservation['registration'] = 'absent';
       let managerPid = 0;
       if (manager) {
-        registered = linuxRegistrationMatches(manager.out, context) ? 'owned' : 'foreign';
+        // B-086: systemd loads a unit as soon as its file exists; it is registered only once enabled.
+        const enabled = /^enabled(-runtime)?$/.test(systemdField(manager.out, 'UnitFileState'));
+        registered = linuxRegistrationMatches(manager.out, context) ? (enabled ? 'owned' : 'absent') : 'foreign';
         const rawPid = Number(systemdField(manager.out, 'MainPID'));
         managerPid = Number.isSafeInteger(rawPid) && rawPid > 0 ? rawPid : 0;
       }

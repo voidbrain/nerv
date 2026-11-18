@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 5 | 15 | 4 |
+| **This week** | 2 | 5 | 17 | 4 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 18 |
+| **Open** | 41 | 20 |
 | **Require Human 🧑** | 6 | 3 |
 
 ### Require Human 🧑
@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 72 h agent + 11.75 h owner across 141 open steps of 38 features and 18 other records. 40 h of actual effort recorded on 89 steps. Generated from the task files.
+**Remaining effort:** 72.5 h agent + 11.75 h owner across 143 open steps of 38 features and 20 other records. 41 h of actual effort recorded on 91 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -563,6 +563,82 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-082-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) this change. Test: `test/node-inspection.test.ts` "B-082: the Windows task user is the machine account over SSH…" (committed failing first) |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI and the live check named above. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-085"></a>[🐞 B-085](#top)
+
+**Linux: lifecycle commands drop the user session bus, so no user service can be installed**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-085-T01 — Linux: lifecycle commands drop the user session bus, so no user service can be installed (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Calvary (Debian 11): with linger on and `systemctl --user show-environment` working in the SSH shell, `nodes lifecycle-inspect --action install` still reported "Non-interactive service environment is unavailable" and "The selected GUI user session is unavailable". `command()` passed children only PATH, HOME, USER, TMPDIR, LANG and LC_ALL; without `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS`, `systemctl --user` answers "Failed to connect to bus". Tests never saw it: they inject the runner. |
+| **Reproduce** | On Linux with a user session: `env -i PATH=$PATH HOME=$HOME USER=$USER systemctl --user show-environment` fails; with `XDG_RUNTIME_DIR` it succeeds. |
+| **Check** | Test committed failing first: `childEnv` keeps XDG_RUNTIME_DIR and DBUS_SESSION_BUS_ADDRESS and drops unlisted variables; on Calvary the install inspection has no blockers. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-085-t01"></a>B-085-T01 — Linux: lifecycle commands drop the user session bus, so no user service can be installed | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #518](https://github.com/voidbrain/nerv/pull/518) fix |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-085.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-085-T01: [PR #518](https://github.com/voidbrain/nerv/pull/518) fix. Test: `test/node-lifecycle-execution.test.ts` "B-085: lifecycle commands keep the user session bus…" (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI and the NERV-03 install on Calvary. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-086"></a>[🐞 B-086](#top)
+
+**Linux: an install stops at start because a written unit already counts as registered**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-086-T01 — Linux: an install stops at start because a written unit already counts as registered (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Calvary: the fenced install wrote `~/.config/systemd/user/nerv.service`, then the start step stopped with "Selected service ownership changed." (receipt `uncertain`, `definition:completed,start:started`). systemd loads a unit as soon as its file exists (`LoadState=loaded`, `UnitFileState=disabled`), and the adapter counted any loaded matching unit as registered, while the start step requires it absent before `enable --now`. The same rule would make a stop wait forever for "absent" after `disable`. The test fake answered `not-found` until `enable`, unlike systemd. |
+| **Reproduce** | On Linux: `nodes lifecycle-inspect --action install`, then `lifecycle-apply`. |
+| **Check** | Test committed failing first (the systemctl fake loads a unit once its file exists, like systemd): Linux install, stop and update tests pass with registration meaning `UnitFileState=enabled`; the NERV-03 install on Calvary completes. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-086-t01"></a>B-086-T01 — Linux: an install stops at start because a written unit already counts as registered | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #518](https://github.com/voidbrain/nerv/pull/518) fix |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-086.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-086-T01: [PR #518](https://github.com/voidbrain/nerv/pull/518) fix. Test: `test/linux-service-lifecycle.test.ts` fake now loads a written unit (committed failing first: F-005-T10 and F-005-T25 failed) |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI and the NERV-03 install on Calvary. |
 | Reviewed | 2026-11-18 |
 
 </details>
