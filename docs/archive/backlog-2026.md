@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 5 | 7 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 7 | 15 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -4896,6 +4896,346 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | PR / evidence | [PR #506](https://github.com/voidbrain/nerv/pull/506) (merged; CI green: B-070-T01); local run 2026-11-16 in a fresh worktree; CI on #502 passed the same test |
 | Opened | 2026-11-16 |
 | Verification | 2026-11-18: B-070-T02 run by the agent: `npm-cli.js` was missing from Node 26.12; `npm install -g --prefix ~/.nvm/versions/node/v26.12.0 npm@11` with Node 24.19's npm gave npm and npx 11.21.3; `node --test test/bom.test.ts` 3/3 with that npm. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### F-009
+
+**Run NERV Agency headless as one local user service**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18; Mac and Linux service acceptance done.
+
+| | |
+|---|---|
+| **Issue** | Service commands and definitions implemented. Portable tests validate rendering/process lifecycle; later owner-authorized F-005 Mac default-profile service operations passed. Linux/session acceptance remains incomplete. |
+| **Reproduce** | Follow the [service and login acceptance procedure](../acceptance/f009-service-login-procedure.md) and [docs/INSTALL.md](../INSTALL.md). |
+| **Check** | Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. F-009-T03 (Linux service target, Calvary instead of the VM by owner decision): 2026-11-18 on Calvary (NERV-03, Debian 11 arm64, Node 24.22.3, linger on): fenced install, stop, start (all completed); a fenced update `bf1e27ef` → `e61388cf` through NERV's own flow (backup, fetch, rehearse, checkout, dependencies, build, start, verify, all completed; after B-088); fenced uninstall (unit removed, data kept) and reinstall (completed); after `systemctl reboot` the user service started by itself through linger and served within 30 s, Kaji listening and NERV-01/NERV-02 reachable; a reminder due while the service was stopped (17:32:53Z) was delivered once after the fenced start (17:33:38Z). An earlier update attempt was refused safely at the rehearsal (B-088: backup kept, nothing changed). Mac login/logout was F-009-T02 (2026-11-15). No review: records-only closure; the code changes behind it (B-085, B-086, B-088) get their own fresh-context review. F-009-T03 progress ([PR #520](https://github.com/voidbrain/nerv/pull/520)): 2026-11-18 on Calvary (NERV-03, Debian 11 arm64, Node 24.22.3, linger on), checkout `main` at `261ad183`: fenced install completed (`definition`, `start`, `verify`), `nerv.service` enabled and active, `http://127.0.0.1:4317/` 200, `doctor` quick_check ok; then a fenced stop (unit inactive, no answer) and a fenced start (active, 200) both completed. Left for T03: restart catch-up after a reboot. 2026-11-18: F-009-T03 moved from the owner to the agent. Owner decision 2026-11-18: the agent runs this itself (over SSH to nerv-linux or Tabgha, or the CLI on the Mac) and records the commands and output; the owner page stays as the procedure2026-11-18: the owner found `nerv service status` failing ("Could not find service io.nerv.agent"): launchd had not loaded the agent since about 2026-11-16 14:48 (last `service-error.log` write; the plist is present, enabled, RunAtLoad and KeepAlive; no lifecycle operation since 2026-11-12; boot 2026-11-15), and NERV ran from a manual `nerv launch` started 2026-11-18 10:42. Likely the companion's Stop (`launchctl bootout`), not proven: the system log no longer covers that day. 2026-11-18: F-009-T04 closed; F-009-T02's evidence below was already recorded with PR #455 and no failure needed a B- record. Next: the owner's Linux VM acceptance (F-009-T03). F-009-T02 passed 2026-11-15 (owner, [PR #455](https://github.com/voidbrain/nerv/pull/455)): after logout and login, launchd restarted `io.nerv.agent` unaided (`state = running`, new pid, HTTP 200). 2026-11-13: the owner chose a Linux VM on the Mac as the Linux acceptance target (also F-005-T26). Owner later selected this Mac default installation and authorized service work on2026-11-10 under F-005. [PR #253](https://github.com/voidbrain/nerv/pull/253) / full CI42874665479 and [accepted service evidence](../acceptance/node-service-2026-11-10.md) establish the selected per-user Mac install/status/stop/start/uninstall/reinstall and recovery checks; this is not a system service or linger exception. Actual login/logout and a selected Linux service target remain pending; no fresh owner choice for the already selected Mac is required. The following is earlier history, not a current prohibition: 2026-11-08: read-only launchctl/plist inspection confirms no NERV service is installed or registered on the execution Mac. docs/agents/areas.md prohibits installing services or enabling linger here; a separate target host is required for OS-service/login acceptance. Target choice requested from the owner; no service was installed, started or stopped. Portable process and recent Windows/macOS CI remain distinct from that trial.  Validate launchd/systemd installation and login/logout on target hosts; PR #1 CI is green. Single process serves production UI/API on 4317; config survives init; clean SIGTERM and restart catch-up; private credentials; install/status/start/stop/uninstall on real target OS.
+
+**Estimates:** Re-estimated 2026-11-12 at 0.6x from `work-items calibrate` (harness 6.1.0; median 0.55x over 6 closed steps, bug steps 0.6x over 5): the 2 open steps total 1 h agent + 0.75 h owner (steps table; each task basis gives old → new). Figures after this sentence are dated history. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): the 2 open steps in hours total 1 h agent + 0.75 h owner (steps table; method in each task basis). Day figures below are dated history. Medium remaining validation effort; provisionally 1–2 focused hours per target OS, excluding time waiting for access or troubleshooting. Reassessed 2026-11-08; no completion is inferred from portable tests.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) related-state reconciliation; [PR #254](https://github.com/voidbrain/nerv/pull/254) accepted Mac service evidence under F-005; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #1](https://github.com/voidbrain/nerv/pull/1); 10 regression tests and headless process test pass; CI run 41254646946 green |
+| Opened | 2026-11-01 |
+| Verification | 2026-11-18: Linux target acceptance on Calvary (install/status/start/stop/update/uninstall, reboot start, restart catch-up). 2026-11-10 selected per-user Mac lifecycle operations accepted under F-005-T04; actual session/login and Linux target acceptance remain pending. Earlier2026-11-08: read-only execution-host check confirms no installed/registered launchd service. Existing portable headless checks pass; separate target-host install/status/start/stop/uninstall and login/logout acceptance remain pending. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-085
+
+**Linux: lifecycle commands drop the user session bus, so no user service can be installed**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Calvary (Debian 11): with linger on and `systemctl --user show-environment` working in the SSH shell, `nodes lifecycle-inspect --action install` still reported "Non-interactive service environment is unavailable" and "The selected GUI user session is unavailable". `command()` passed children only PATH, HOME, USER, TMPDIR, LANG and LC_ALL; without `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS`, `systemctl --user` answers "Failed to connect to bus". Tests never saw it: they inject the runner. |
+| **Reproduce** | On Linux with a user session: `env -i PATH=$PATH HOME=$HOME USER=$USER systemctl --user show-environment` fails; with `XDG_RUNTIME_DIR` it succeeds. |
+| **Check** | Test committed failing first: `childEnv` keeps XDG_RUNTIME_DIR and DBUS_SESSION_BUS_ADDRESS and drops unlisted variables; on Calvary the install inspection has no blockers. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Review: fresh-context design review of PR #518 and PR #522 (2026-11-18): no blocking issues; childEnv still drops unlisted variables, and the bus variables give children no power the same user lacked. 2026-11-18: verified live on Calvary: 2026-11-18 on Calvary (NERV-03, Debian 11 arm64, Node 24.22.3, linger on): fenced install, stop, start (all completed); a fenced update `bf1e27ef` → `e61388cf` through NERV's own flow (backup, fetch, rehearse, checkout, dependencies, build, start, verify, all completed; after B-088); fenced uninstall (unit removed, data kept) and reinstall (completed); after `systemctl reboot` the user service started by itself through linger and served within 30 s, Kaji listening and NERV-01/NERV-02 reachable; a reminder due while the service was stopped (17:32:53Z) was delivered once after the fenced start (17:33:38Z). An earlier update attempt was refused safely at the rehearsal (B-088: backup kept, nothing changed). Live: 2026-11-18 on Calvary (NERV-03, Debian 11 arm64, Node 24.22.3, linger on), checkout `main` at `261ad183`: fenced install completed (`definition`, `start`, `verify`), `nerv.service` enabled and active, `http://127.0.0.1:4317/` 200, `doctor` quick_check ok; then a fenced stop (unit inactive, no answer) and a fenced start (active, 200) both completed. Closing needs the fresh-context review (P1). 2026-11-18: B-085-T01 implemented (`childEnv` in `src/node-lifecycle-execution.ts`). Live: with the fix, Calvary's install inspection wrote plan `975e30ca…` with no blockers. Opened 2026-11-18.
+
+**Estimates:** Small, estimated 2026-11-18: 0.75 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/node-lifecycle-execution.test.ts` "B-085: lifecycle commands keep the user session bus…" (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: CI green; verified live on Calvary. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-088
+
+**Every lifecycle update is refused at the rehearsal: the candidate reader runs without dependencies**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 updating NERV-03 on Calvary (F-005-T26): `lifecycle-apply --action update` ran backup, fetch and rehearse, then was refused: "The reader refused or failed on the first open: The candidate reader exited with a failure." The rehearsal exports the candidate with `git archive` into `~/.nerv-lifecycle/staging/<digest>`, outside the checkout, so it has no `node_modules`; the real reader imports `src/rpc.ts`, which imports `ajv`, and Node answered `ERR_MODULE_NOT_FOUND: Cannot find package 'ajv'`. So every update is refused on every host, the Mac's live service and automatic updates (F-102) included; the refusal is safe (backup kept, nothing changed). The adapter test's readers import only Node built-ins, so CI never saw it. |
+| **Reproduce** | On any host: `nodes lifecycle-inspect --action update --revision <newer main>` after a fenced stop, then `lifecycle-apply`. Directly: export a revision into `~/.nerv-lifecycle/staging/x` and run `node src/upgrade-reader.ts <copy.sqlite> <home>` there. |
+| **Check** | Test committed failing first: a candidate reader importing a package present only in the installed checkout's `node_modules` rehearses with no blockers; no tree, archive or link is left; the installed dependencies and checkout stay untouched; an update on Calvary completes. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Review: fresh-context design review of PR #518 and PR #522 (2026-11-18): no blocking issues; cleanup is safe (rmSync does not follow the link; the explicit unlink is extra protection). Its should-fix, candidates whose dependencies differ from the installed ones, is B-090. 2026-11-18: verified live on Calvary: 2026-11-18 on Calvary (NERV-03, Debian 11 arm64, Node 24.22.3, linger on): fenced install, stop, start (all completed); a fenced update `bf1e27ef` → `e61388cf` through NERV's own flow (backup, fetch, rehearse, checkout, dependencies, build, start, verify, all completed; after B-088); fenced uninstall (unit removed, data kept) and reinstall (completed); after `systemctl reboot` the user service started by itself through linger and served within 30 s, Kaji listening and NERV-01/NERV-02 reachable; a reminder due while the service was stopped (17:32:53Z) was delivered once after the fenced start (17:33:38Z). An earlier update attempt was refused safely at the rehearsal (B-088: backup kept, nothing changed). 2026-11-18: B-088-T01 implemented: the rehearsal links the exported tree's `node_modules` to the installed checkout's (a junction on Windows) and unlinks it before removing the tree. Lifecycle and update tests 72/72. The update flow rehearses with the installed code, so each host gets this fix by one `git pull` of its checkout (as Tabgha got B-080), then updates normally. Opened 2026-11-18.
+
+**Estimates:** Small, estimated 2026-11-18: 1 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/upgrade-lifecycle.test.ts` "B-088: the candidate reader resolves packages from the installed checkout…" (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: CI green; verified live on Calvary. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-077
+
+**Role evaluation runs refuse three repeats, which the approved F-006 campaigns need**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 while checking the owner's F-006 run: `node tools/gauntlet.mjs role-plan --role=both` with `limits-repeat3.json` stops with "Unsupported role limits repeat; only repeat=1 is supported" (`validateRoleBundleConfig` in `tools/evaluate-model.mjs`, added 2026-11-13). The owner approved three runs per case on 2026-11-15 and both campaign plans (F-006-T19, F-006-T20) use `role-run` with `repeat: 3`, so neither campaign can run. |
+| **Reproduce** | `node tools/gauntlet.mjs role-plan --role=both --profile=<gemma4-12b profile> --limits=<limits with "repeat": 3> --machine-profile=<machine> --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/moderate-load.json` |
+| **Check** | A committed test fails first: a role bundle with `repeat: 3` plans and runs each case three times against a fake Ollama, with per-repeat results and the budgets counted over all repeats; `repeat: 1` behaves as before. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #519 on green CI; the test covers three repeats per case. 2026-11-18: B-077-T01 implemented: `runRoleBundle` runs each selected case `limits.repeat` times and every result carries its `iteration`; the budgets already counted every call. Test: `test/gauntlet.test.mjs` "B-077: a role bundle with repeat 3 runs each case three times…" (committed failing first with "only repeat=1 is supported"); gauntlet tests 23/23. Next: the owner's F-006 Mac page can run once this merges. Opened 2026-11-18 in [PR #513](https://github.com/voidbrain/nerv/pull/513). The owner's F-006 Mac page ([f006-mac-runs.md](../acceptance/f006-mac-runs.md)) waits on it.
+
+**Estimates:** Small, estimated 2026-11-18: 1.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/gauntlet.test.mjs` B-077; Dry run 2026-11-18 on main, scratch profile copied from the protocol's `gemma4-12b.json` |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: Merged in PR #519 on green CI; the test covers three repeats per case. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-078
+
+**Project report on a web page: script text in the summary and repository-only gaps listed as risks**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 in F-085-T03: `nerv quarantine report https://nodejs.org/en/about --kind page` put the page's inline `<script>` text after its title in `whatItIs.summary`, and reported licence, build/test and commit history as missing for a web page, listing "Missing licence increases reuse and compliance risk" under `visibleRisks`. The repository report on the same run was correct. |
+| **Reproduce** | `nerv quarantine report https://nodejs.org/en/about --kind page` |
+| **Check** | A committed test fails first with an invented page fixture holding an inline script: the summary is the title (and description) without script or style text; a `page` report says which fields do not apply instead of listing them as missing, and adds no licence risk. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #523 on green CI (CodeQL alerts fixed there); live on nodejs.org/about. 2026-11-18: B-078-T01 implemented: scripts, styles and comments are removed before the summary, a page prefers its title and meta description, and a page report marks licence, build and history "Not applicable to a web page" with no licence risk. Test: `test/quarantine.test.ts` "B-078: a page report names the page…" (committed failing first); the older page test's licence expectation changed with this requirement. Live: nodejs.org/about now reads "Node.js — About Node.js® — Node.js® is a free, open-source, cross-platform JavaScript runtime…". Opened 2026-11-18 from F-085-T03.
+
+**Estimates:** Small, estimated 2026-11-18: 1 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/quarantine.test.ts` B-078; F-085-T03 run 2026-11-18 |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: Merged in PR #523 on green CI (CodeQL alerts fixed there); live on nodejs.org/about. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-079
+
+**`gauntlet:all` reused system results recorded at another source, and reported them as passed**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 running F-097-T01: `npm run gauntlet:all -- --allow-expensive --execute` ran nothing and reported `passed: true`, reusing the seven `nerv-system-flows` results of 2026-11-14 (browser among them as failed), while `npm run gauntlet:pending` listed all seven as `source-changed`. `all()` in `tools/gauntlet.mjs` built its pending options without the per-case system source key that `pending` uses, so unless `--source-key` was given a source change never made a system case pending. The documented F-097 rerun could not rerun anything. |
+| **Reproduce** | On main before the fix, with the ledger behind the source: `npm run gauntlet:pending` lists the system cases; `npm run gauntlet:all` plans them as reuse. |
+| **Check** | Test committed failing first: with a ledger at a stale source key, `all` plans the seven system cases with reason `source-changed` and reuses none, as `pending` lists them; the existing test that reuses cases at the current source still passes; F-097-T01's real run executes the seven cases. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #515 on green CI; the F-097-T01 run executed all seven system cases. 2026-11-18: B-079-T01 implemented: `all()` passes the same per-case `systemSourceKey` default as `pending` (an explicit `--source-key` still wins). Test: `test/gauntlet.test.mjs` "B-079: the root command reruns system cases whose source changed…" (06e47fc9, failing first); `test/gauntlet.test.mjs` 22/22. The F-097-T01 run then executed all seven cases (all passed). Opened 2026-11-18.
+
+**Estimates:** Small, estimated 2026-11-18: 0.75 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/gauntlet.test.mjs` B-079 (06e47fc9) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: Merged in PR #515 on green CI; the F-097-T01 run executed all seven system cases. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-083
+
+**Inspecting a target whose Node is older than 14 fails with a generic error**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Calvary (Node 12.22.12): `nodes inspect --ssh Calvary` said "Read-only command failed" instead of naming the version as too old. The probe sent to the target's `node` used `require('node:os')`, which Node 12 lacks, so it crashed before reporting. |
+| **Reproduce** | `nerv nodes inspect --ssh <host with Node 12>` |
+| **Check** | Test committed failing first: the probe uses no `node:` require and no `??` or `?.`; on Calvary the inspection reports "Node.js 12.22.12 on the target is below the version NERV requires (>=24.0.0)". |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #517 on green CI; live on Calvary (Node 12 reported as too old). 2026-11-18: B-083-T01 implemented and checked live on Calvary: "Node.js 12.22.12 on the target is below the version NERV requires (>=24.0.0) … no installation was requested." Opened 2026-11-18.
+
+**Estimates:** Small, estimated 2026-11-18: 0.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/node-inspection.test.ts` "B-083: the read-only probe runs on an old Node…" (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: Merged in PR #517 on green CI; live on Calvary (Node 12 reported as too old). Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-084
+
+**Lifecycle inspection on a fresh data home fails with a raw ENOENT**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Calvary: after `nerv init`, `nodes lifecycle-inspect --action install` stopped with `ENOENT: no such file or directory, lstat '/home/db/.nerv/base-key'`, and after `nerv base pubkey` with the same for `nerv.sqlite`. `init` creates neither; the F-005-T22 page says to initialize with `nerv setup` or `nerv doctor`. |
+| **Reproduce** | Fresh host: `nerv init --base X --name Y --no-model-setup`, then `nerv nodes lifecycle-inspect --action install --out plan.json`. |
+| **Check** | A committed test fails first: on a data home without `base-key` or `nerv.sqlite`, the inspection names what is missing and how to create it (or `init` creates them), and changes nothing. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #523 on green CI. 2026-11-18: B-084-T01 implemented: `requireServiceHome` names each missing file (config.json, token, base-key, base.pub, nerv.sqlite) and the command that creates it (`nerv init`, `nerv base pubkey`, `nerv doctor`), changing nothing. Test: `test/node-lifecycle-execution.test.ts` "B-084: a fresh data home names the files…" (committed failing first). Opened 2026-11-18 from F-005-T22 on Calvary.
+
+**Estimates:** Small, estimated 2026-11-18: 0.75 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/node-lifecycle-execution.test.ts` B-084; F-005-T22 run on Calvary, 2026-11-18 |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: Merged in PR #523 on green CI. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-089
+
+**No check catches merge conflict markers in committed files**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18: conflict markers reached pushed branches twice in one day while `check:fast` passed: in the F-005 record (PR #520, a patch applied with conflicts) and in `evals/gauntlet/ledger.json` (PRs #522 and #523, a merge whose conflicts a shell loop failed to resolve). Both were found by the agent and fixed by follow-up pushes before merging. |
+| **Reproduce** | Commit a file with `<<<<<<<` / `=======` / `>>>>>>>` lines; `npm run check:fast` passes. |
+| **Check** | Test committed failing first: a tracked file with a conflict block fails `check:conflicts` naming file and line; a lone `=======` line passes; the check runs first in `check:fast` and in CI's `validate` job. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #524 on green CI; check:conflicts runs in check:fast and CI. 2026-11-18: B-089-T01 implemented: `tools/check-conflict-markers.mjs` (`npm run check:conflicts`) scans tracked text files for an ordered `<<<<<<<` / `=======` / `>>>>>>>` block. Test: `test/check-conflict-markers.test.mjs` (committed failing first). Opened 2026-11-18.
+
+**Estimates:** Small, estimated 2026-11-18: 0.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/check-conflict-markers.test.mjs` |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: Merged in PR #524 on green CI; check:conflicts runs in check:fast and CI. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### F-105
+
+**A pull request names itself in a record, or CI fails**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-16: 36 of the 40 PRs merged overnight (#457–#498) named no record, so the ledger fell 40 PRs behind `main`; `work:next` kept offering steps already delivered and 21 duplicate branches were started for closed tasks. The rule exists (name the PR by its number in the records it touches, and push that before the checks finish) but nothing enforces it, so the catch-up reconciliation ([PR #499](https://github.com/voidbrain/nerv/pull/499)) was the only thing keeping the ledger honest. |
+| **Reproduce** | Open a PR that changes `src/` without touching `docs/work/`: every check passes. |
+| **Check** | On a `pull_request` run a NERV-owned check (`tools/check-pr-record.mjs`, run from `ci.yml`; `tools/check-backlog.mjs` is a copied harness file and stays untouched) fails unless the PR's number appears in a record, a task file (`prs`) or the reconciliation log on the branch; a PR that touches no product record names itself in the reconciliation log entry instead; the message says which to edit; a committed test covers both outcomes; proposed to the harness template once it has run here. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. Merged in PR #511 on green CI; the check has run on every PR since (#512–#525). 2026-11-18: F-105-T01 implemented in [PR #511](https://github.com/voidbrain/nerv/pull/511): `tools/check-pr-record.mjs` (`npm run check:pr-record`) runs in the `validate` job on pull_request and fails unless the PR number appears in a record, a task `prs` entry or the reconciliation log; bot PRs and pushes are skipped; `test/check-pr-record.test.mjs` covers both outcomes. Started 2026-11-16 in another session and finished here. Its tests failed on Windows CI (job 134689577350): reported paths used `\` there; they are now `/` on every platform. Planned 2026-11-16 with the owner, after the 40-PR catch-up of PR #499: F-105-T01 the check and its CI step. Proposed to the harness template once it has run here.
+
+**Estimates:** 1 h agent in one step. Estimated 2026-11-16. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner decision 2026-11-16; [PR #499](https://github.com/voidbrain/nerv/pull/499) the catch-up it prevents; opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
+| Opened | 2026-11-16 |
+| Verification | 2026-11-18: Merged in PR #511 on green CI; the check has run on every PR since (#512–#525). Closed 2026-11-18. |
 | Reviewed | 2026-11-18 |
 
 </details>

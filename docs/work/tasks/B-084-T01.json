@@ -4,7 +4,7 @@
   "id": "B-084-T01",
   "title": "Lifecycle inspection names a missing base key or database instead of a raw ENOENT",
   "goal": "A fresh data home gets a clear message",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test fails first: missing base-key or nerv.sqlite is named with how to create it; nothing changes"
   ],
@@ -33,7 +33,7 @@
     "estimate": "0.75 h",
     "basis": "Estimated 2026-11-18: one check and a test. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75,
     "actualAgentHours": 0.5,

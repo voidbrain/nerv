@@ -1,5 +1,9 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-18 — main `d8eeba7`
+
+PRs #513–#524 merged on green CI (#513, #514, #520 after reruns). Closed B-077, B-078, B-079, B-083, B-084, B-089, F-105, F-106-T02; B-085, B-088 after review; F-009 and F-005-T26 (Calvary). Reconciled in PR #525.
+
 ## 2026-11-18 — main `ec1ed40`
 
 Owner decision: 22 owner steps move to the agent (PR #514); owner remaining 21.75 h → 11.75 h. #508–#512 merged on green CI after reruns; B-073 fixed; B-074 and B-076 bounds raised.

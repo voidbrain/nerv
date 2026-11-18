@@ -4,7 +4,7 @@
   "id": "B-077-T01",
   "title": "Role bundles run each case the configured number of times",
   "goal": "The F-006 campaigns can run role cases three times each",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test fails first: repeat 3 plans and runs each role case three times against a fake Ollama, results per repeat, budgets over all repeats",
     "repeat 1 unchanged"
@@ -34,7 +34,7 @@
     "estimate": "1.5 h",
     "basis": "Estimated 2026-11-18: repeat loop in the role bundle, budget accounting, one fake-Ollama test. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5,
     "actualAgentHours": 0.5,
