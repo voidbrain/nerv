@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "B-088",
+  "id": "B-088-T01",
+  "title": "The rehearsal resolves the candidate reader's packages from the installed checkout",
+  "goal": "Lifecycle updates can pass the rehearsal",
+  "status": "implemented",
+  "acceptance": [
+    "Test committed failing first: a reader importing an installed-only package rehearses with no blockers; nothing left behind; installed checkout untouched",
+    "An update completes on Calvary"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/node-lifecycle-mac.ts",
+    "test/upgrade-lifecycle.test.ts",
+    "docs/work/records/B-088.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-18: a link, its cleanup and a test. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0.25,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 522,
+      "note": "fix"
+    }
+  ]
+}

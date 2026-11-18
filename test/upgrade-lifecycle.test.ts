@@ -665,3 +665,66 @@ test(
     }
   },
 );
+
+test(
+  'B-088: the candidate reader resolves packages from the installed checkout, as the real reader imports npm packages',
+  supported,
+  async () => {
+    const f = serviceFixture();
+    try {
+      const source = f.host.context.source,
+        git = (args: string[]) =>
+          execFileSync(
+            'git',
+            [
+              '-C',
+              source,
+              '-c',
+              'user.name=Neutral Fixture',
+              '-c',
+              'user.email=fixture@example.invalid',
+              '-c',
+              'commit.gpgsign=false',
+              ...args,
+            ],
+            { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+          ).trim();
+      git(['init']);
+      writeFileSync(join(source, '.gitignore'), 'node_modules/\n');
+      mkdirSync(join(source, 'src'), { recursive: true });
+      writeFileSync(join(source, READER_ENTRY), READER('SELECT 1'));
+      git(['add', '-A']);
+      git(['commit', '-m', 'Neutral installed']);
+      const installed = git(['rev-parse', 'HEAD']);
+      // The installed checkout's dependency, as npm ci leaves it; never committed.
+      mkdirSync(join(source, 'node_modules', 'neutral-dep'), { recursive: true });
+      writeFileSync(
+        join(source, 'node_modules', 'neutral-dep', 'package.json'),
+        JSON.stringify({ name: 'neutral-dep', version: '1.0.0', type: 'module', exports: './index.js' }),
+      );
+      writeFileSync(join(source, 'node_modules', 'neutral-dep', 'index.js'), "export const sql = 'SELECT 1';\n");
+      writeFileSync(
+        join(source, READER_ENTRY),
+        "import {DatabaseSync} from 'node:sqlite';\nimport {sql} from 'neutral-dep';\nconst db=new DatabaseSync(process.argv[2]);db.exec(sql);db.close();\n",
+      );
+      git(['add', '-A']);
+      git(['commit', '-m', 'Neutral reader with a dependency']);
+      const candidate = git(['rev-parse', 'HEAD']);
+      git(['checkout', '--detach', installed]);
+      const host = macServiceAdapter(f.host.context, real(f.host.context.node)),
+        area = join(f.directory, '.nerv-lifecycle');
+      mkdirSync(join(area, 'backups'), { recursive: true, mode: 0o700 });
+      const digest = candidate.padEnd(64, '0'),
+        dest = join(area, 'backups', digest);
+      mkdirSync(dest, { mode: 0o700 });
+      await host.backup(dest);
+      const report = await host.rehearse({ digest, nextRevision: candidate } as ServicePlan, dest);
+      assert.deepEqual(report.blockers, [], 'the candidate reader finds the installed dependency');
+      assert.deepEqual(readdirSync(join(area, 'staging')), [], 'no exported tree, archive or link is left behind');
+      assert.ok(existsSync(join(source, 'node_modules', 'neutral-dep', 'index.js')), 'the installed dependencies stay');
+      assert.equal(git(['status', '--porcelain']), '', 'the installed checkout is untouched');
+    } finally {
+      f.close();
+    }
+  },
+);
