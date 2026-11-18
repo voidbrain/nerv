@@ -140,7 +140,7 @@
       state.upcoming = state.reminders.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder", label:when(r) }));
       state.doctor = doctor; showBuild(doctor.build);
       if (!kajiBases.length && doctor.base) observeTelegram([{baseId:doctor.base.id,status:"enrolled",online:true,channel:doctor.channel,channelFresh:doctor.channelFresh}]);
-      if (doctor.base && BASES[0].name !== doctor.base.name.toUpperCase()) { BASES[0].name = doctor.base.name.toUpperCase(); BASES[0].role = doctor.base.id + " · this machine"; document.getElementById("cages").innerHTML = ""; }
+      if (doctor.base && BASES[0].name !== doctor.base.name) { BASES[0].name = doctor.base.name; BASES[0].role = doctor.base.id + " · this machine"; document.getElementById("cages").innerHTML = ""; }
       // The newest sortie is selected at first; after the owner deselects one, nothing is selected again by itself.
       // Owner, 2026-11-05: by default the dashboard shows the real state. Nothing chosen: a running sortie is selected (F-019),
       // otherwise none; one it picked by itself is let go when it finishes. A sortie the owner clicked stays.
@@ -510,7 +510,7 @@
     // Each other base gets a spot from its ID (owner, 2026-11-05: a column looked dull): scattered, but the same on every reload.
     const seed = id => { let h = 2166136261; for (const c of id) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; };
     const place = (b, i) => { if (b === self) return [35.236, 138.985]; const h = seed(b.baseId); const a = 2 * Math.PI * ((h % 3600) / 3600 + i / Math.max(3, others.length)); const r = 0.6 + ((h >>> 12) % 400) / 1000; return [35.236 + 0.09 * r * Math.sin(a), 138.985 + 0.2 * r * Math.cos(a)]; };
-    const toBase = (b, i) => { const [lat, lon] = place(b, i); return { id:b.baseId.toLowerCase(), name:b.name.toUpperCase(), role:b.baseId + (b.self ? " · this machine" : " · " + b.address), lat, lon, main:!!b.main, self:!!b.self, status:!b.online ? "offline" : b.health && b.health.state === "degraded" ? "standby" : "online", cpu:null, ram:null, gpu:null, rtt:null, models:"—" }; };
+    const toBase = (b, i) => { const [lat, lon] = place(b, i); return { id:b.baseId.toLowerCase(), name:b.name, role:b.baseId + (b.self ? " · this machine" : " · " + b.address), lat, lon, main:!!b.main, self:!!b.self, status:!b.online ? "offline" : b.health && b.health.state === "degraded" ? "standby" : "online", cpu:null, ram:null, gpu:null, rtt:null, models:"—" }; };
     BASES.splice(0, BASES.length, toBase(self, 0), ...others.map((b, i) => toBase(b, i)));
     // This base's pulse and its EVA cage follow its real health; peers show what they last reported in their heartbeat.
     BASES[0].status = health;
@@ -518,9 +518,13 @@
     const mainBase = up.find(b => b.main);
     if (mainBase) {
       const mainId = mainBase.baseId.toLowerCase();
-      up.forEach(b => { const id = b.baseId.toLowerCase(); if (id !== mainId) LINKS.push([id, mainId]); });
+      // Routes (owner, 2026-11-18): requests and Telegram go through the main base. Heartbeats run between every pair of
+      // bases, so peers are also joined by a quieter mesh line; no message is routed along it.
+      up.forEach(b => { const id = b.baseId.toLowerCase(); if (id !== mainId) LINKS.push([id, mainId, "route"]); });
+      const peers = up.filter(b => b !== mainBase);
+      for (let i = 0; i < peers.length; i++) for (let j = i + 1; j < peers.length; j++) LINKS.push([peers[i].baseId.toLowerCase(), peers[j].baseId.toLowerCase(), "mesh"]);
     } else {
-      for (let i = 0; i < up.length; i++) for (let j = i + 1; j < up.length; j++) LINKS.push([up[i].baseId.toLowerCase(), up[j].baseId.toLowerCase()]);
+      for (let i = 0; i < up.length; i++) for (let j = i + 1; j < up.length; j++) LINKS.push([up[i].baseId.toLowerCase(), up[j].baseId.toLowerCase(), "route"]);
     }
     CAGES.forEach(c => { c.base = BASES[0].id; }); document.getElementById("cages").innerHTML = "";
     initMap();
@@ -554,9 +558,11 @@
         (revokedHtml || "<div class='muted small' style='margin-top:4px'>No Kaji line yet: enrol your bases (INSTALL, Kaji line) to see them here.</div>");
       return;
     }
+    // The name takes its base's status colour (owner, 2026-11-18), the same reading as its badge.
+    const baseTone = b => (b.self && BASES[0].status === "offline") || (!b.self && !b.online) ? "muted" : (b.self && BASES[0].status === "standby") || (!b.self && b.health && b.health.state === "degraded") ? "warn" : "ok";
     const midori = enrolled.some(b => telegramApiState(b) === "responding") ? "API live" : enrolled.some(b => telegramApiState(b) === "failed") ? "API failed" : "API unchecked";
     document.getElementById("bases-sub").innerHTML = enrolled.filter(b => b.online).length + "/" + enrolled.length + " online · <span class='" + (midori === "API live" ? "ok" : midori === "API failed" ? "warn" : "muted") + "'>● Midori " + midori + "</span>";
-    document.getElementById("bases").innerHTML = enrolled.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.baseId) + " · " + esc(b.name) + (b.main ? " <span class='badge b-info' title='Main base selected in the signed registry'>MAIN</span>" : "") + "</span><span class='badge " + (b.self && BASES[0].status === "standby" ? "b-warn'>DEGRADED" : b.self && BASES[0].status === "offline" ? "b-danger'>DOWN" : !b.online ? "b-warn'>OFFLINE" : b.health && b.health.state === "degraded" ? "b-warn'>DEGRADED" : "b-ok'>ONLINE") + "</span></div>" +
+    document.getElementById("bases").innerHTML = enrolled.map(b => "<div class='card'><div class='row'><span class='b " + baseTone(b) + "'>" + esc(b.baseId) + " · " + esc(b.name) + (b.main ? " <span class='badge b-info' title='Main base selected in the signed registry'>MAIN</span>" : "") + "</span><span class='badge " + (b.self && BASES[0].status === "standby" ? "b-warn'>DEGRADED" : b.self && BASES[0].status === "offline" ? "b-danger'>DOWN" : !b.online ? "b-warn'>OFFLINE" : b.health && b.health.state === "degraded" ? "b-warn'>DEGRADED" : "b-ok'>ONLINE") + "</span></div>" +
       "<div class='tiny muted'>" + (b.self ? "this machine" : esc(b.address)) + " · key " + esc(b.fingerprint.slice(0, 9)) + " · " + (b.self ? "local" : esc(sinceText(b.lastSeen))) + "</div>" +
       (b.self ? "<div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" : "") +
       (!b.self && b.online && b.health && b.health.reasons.length ? b.health.reasons.map(r => "<div class='tiny warn'>▲ " + esc(r) + "</div>").join("") : "") +

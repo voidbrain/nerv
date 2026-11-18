@@ -1176,7 +1176,7 @@ test('F-051: MAGI detail marks shadow/peer seats, Sephirot debrief shows directi
   assert.match(live, /forwardedTo\.baseIds/);
   assert.match(live, /data-inspect-remote-base=/);
   assert.match(live, /"bases\/" \+ encodeURIComponent\(baseId\) \+ "\/sorties\/" \+ encodeURIComponent\(sortieId\)/);
-  assert.match(live, /const mainBase = up\.find\(b => b\.main\)/, 'hub-and-spoke Kaji links when main base exists');
+  assert.match(live, /const mainBase = up\.find\(b => b\.main\)/, 'routes to the main base when one exists');
 });
 
 test('B-065: revoked bases are excluded from BASES on the map and listed apart from live bases in renderBases', () => {
@@ -1196,7 +1196,7 @@ test('B-065: revoked bases are excluded from BASES on the map and listed apart f
     doctor: { models: { roles: { misato: 'local (gemma4)', casper: 'local (gemma4)' } } },
   };
   const BASES: { id: string; name: string; status: string }[] = [{ id: 'nerv-01', name: 'TOKYO-3', status: 'online' }];
-  const LINKS: [string, string][] = [];
+  const LINKS: string[][] = [];
   const CAGES: { id: string; base: string }[] = [{ id: 'EVA-02', base: 'nerv-01' }];
   const win: { renderBases?: () => void } = {};
   let initMapCalls = 0;
@@ -1264,6 +1264,16 @@ test('B-065: revoked bases are excluded from BASES on the map and listed apart f
       online: true,
     },
     {
+      baseId: 'NERV-03',
+      name: 'Calvary',
+      address: '100.64.0.3:4320',
+      fingerprint: 'aaaabbbbcccc',
+      status: 'enrolled',
+      self: false,
+      main: false,
+      online: false,
+    },
+    {
       baseId: 'MAC-ACCEPTANCE',
       name: 'Local acceptance',
       address: '127.0.0.1:4320',
@@ -1280,12 +1290,21 @@ test('B-065: revoked bases are excluded from BASES on the map and listed apart f
 
   assert.deepEqual(
     BASES.map((b) => b.id),
-    ['nerv-01', 'nerv-02'],
+    ['nerv-01', 'nerv-02', 'nerv-03'],
     'revoked bases must never populate BASES for the map or offline health alerts',
   );
-  assert.deepEqual(LINKS, [['nerv-02', 'nerv-01']]);
+  // Owner 2026-11-18: names keep their case; routes to the main base, plus the heartbeat mesh between peers.
+  assert.deepEqual(
+    BASES.map((b) => b.name),
+    ['Neo Tokyo-3', 'Tabgha', 'Calvary'],
+  );
+  assert.deepEqual(LINKS, [
+    ['nerv-02', 'nerv-01', 'route'],
+    ['nerv-03', 'nerv-01', 'route'],
+    ['nerv-02', 'nerv-03', 'mesh'],
+  ]);
   assert.equal(initMapCalls, 1);
-  assert.match(elements['bases-sub']!.innerHTML, /^2\/2 online/, 'only enrolled bases count in online ratio');
+  assert.match(elements['bases-sub']!.innerHTML, /^2\/3 online/, 'only enrolled bases count in online ratio');
 
   const html = elements.bases!.innerHTML;
   const revokedHeading = html.indexOf('>Revoked<');
@@ -1293,6 +1312,9 @@ test('B-065: revoked bases are excluded from BASES on the map and listed apart f
   const activeHtml = html.slice(0, revokedHeading);
   const revokedHtml = html.slice(revokedHeading);
   assert.doesNotMatch(activeHtml, /MAC-ACCEPTANCE/, 'revoked base does not appear in the live base list');
+  // Owner 2026-11-18: a base's name in the list takes its status colour.
+  assert.match(activeHtml, /<span class='b ok'>NERV-02 · Tabgha/);
+  assert.match(activeHtml, /<span class='b muted'>NERV-03 · Calvary/);
   assert.match(revokedHtml, /MAC-ACCEPTANCE/);
   assert.match(revokedHtml, /REVOKED/);
   assert.doesNotMatch(revokedHtml, /Telegram ·/, 'revoked cards omit live channel/heartbeat lines');
