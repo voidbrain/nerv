@@ -2445,7 +2445,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | CI run 44208231306 (failed, then passed on rerun) |
+| PR / evidence | [PR #505](https://github.com/voidbrain/nerv/pull/505) opened it; CI run 44208231306 (failed, then passed on rerun) |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
