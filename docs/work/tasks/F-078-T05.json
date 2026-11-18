@@ -4,7 +4,7 @@
   "parent": "F-078",
   "title": "Prepare Tabgha for the campaign: download qwen2.5:3b",
   "goal": "Tabgha is ready for the remote-endpoint and small-model campaign",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "The owner allowed the agent to run the campaign on Tabgha over SSH (2026-11-18)",
     "qwen2.5:3b is downloaded on Tabgha"
@@ -41,8 +41,10 @@
     "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Moved to the agent 2026-11-18 (0.25 h owner → agent).",
     "reviewed": "2026-11-18",
     "ownerHours": 0,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "estimateAgentHours": 0.25,
-    "baselineAgentHours": 0.25
+    "baselineAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }

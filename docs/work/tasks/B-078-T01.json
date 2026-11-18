@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "parent": "B-078",
+  "id": "B-078-T01",
+  "title": "Page reports: no script text in the summary; repository fields marked not applicable",
+  "goal": "A web page report is accurate",
+  "status": "ready",
+  "acceptance": [
+    "A committed test fails first with an invented page holding an inline script",
+    "Summary without script/style text; page reports mark repository fields not applicable and add no licence risk"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/quarantine.ts",
+    "test/**",
+    "docs/work/records/B-078.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-18: strip script/style before the summary, kind-aware fields, one test. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": []
+}
