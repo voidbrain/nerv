@@ -995,7 +995,7 @@ function telegramApiState(base, now = Date.now()) {
 function drawTelegram(ctx, now, W, H) {
   const routes = telegramRoutes(telegramBases); const x = W - 36, y = H * 0.65;
   const origins = new Set(routes.map(b => b.channel.mode === "via-main" ? b.channel.destination : b.baseId));
-  // Midori in the bases' status colours (owner, 2026-11-18): green while the Bot API responds, as the header's "API live".
+  // Midori in the bases' status colours (owner, 2026-11-18): green while the Bot API responds, as the header's "Midori live".
   const color = status => cssVar(status === "responding" ? "--ok" : status === "failed" ? "--warn" : "--muted");
   const channelById = id => telegramBases.find(b => b.baseId === id);
   ctx.lineWidth = 1; ctx.globalAlpha = 0.7;

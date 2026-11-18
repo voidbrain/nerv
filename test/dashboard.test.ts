@@ -1308,9 +1308,12 @@ test('B-065: revoked bases are excluded from BASES on the map and listed apart f
   ]);
   assert.equal(initMapCalls, 1);
   assert.match(elements['bases-sub']!.innerHTML, /^2\/3 online/, 'only enrolled bases count in online ratio');
+  assert.match(elements['bases-sub']!.innerHTML, /● Midori live</, 'Midori state without the word API');
 
   const html = elements.bases!.innerHTML;
-  const revokedHeading = html.indexOf('>Revoked<');
+  // Owner 2026-11-18: revoked bases stay in the registry but are folded away in the list.
+  assert.match(html, /<details class='revoked-bases'><summary[^>]*>Revoked \(1\)<\/summary>/);
+  const revokedHeading = html.indexOf('>Revoked (1)<');
   assert.ok(revokedHeading > 0, 'revoked bases render under a separate Revoked section');
   const activeHtml = html.slice(0, revokedHeading);
   const revokedHtml = html.slice(revokedHeading);

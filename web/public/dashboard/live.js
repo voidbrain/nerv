@@ -550,7 +550,9 @@
   window.renderBases = function () {
     const list = state.kajiBases || []; const roles = ((state.doctor || {}).models || {}).roles || {};
     const enrolled = list.filter(b => b.status !== "revoked"), revoked = list.filter(b => b.status === "revoked");
-    const revokedHtml = revoked.length ? "<div class='tiny muted' style='margin:6px 0 3px'>Revoked</div>" + revoked.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.baseId) + " · " + esc(b.name) + "</span><span class='badge b-muted'>REVOKED</span></div><div class='tiny muted'>" + esc(b.address) + " · key " + esc(b.fingerprint.slice(0, 9)) + "</div></div>").join("") : "";
+    // Revoked bases stay in the signed registry for good (a revocation must outlive the key), but the list keeps them
+    // folded away (owner, 2026-11-18).
+    const revokedHtml = revoked.length ? "<details class='revoked-bases'><summary class='tiny muted' style='margin:6px 0 3px'>Revoked (" + revoked.length + ")</summary>" + revoked.map(b => "<div class='card'><div class='row'><span class='b'>" + esc(b.baseId) + " · " + esc(b.name) + "</span><span class='badge b-muted'>REVOKED</span></div><div class='tiny muted'>" + esc(b.address) + " · key " + esc(b.fingerprint.slice(0, 9)) + "</div></div>").join("") + "</details>" : "";
     if (!enrolled.length) {
       const base = (state.doctor || {}).base || { id:"NERV-01", name:"Neo Tokyo-3" };
       document.getElementById("bases-sub").textContent = BASES[0].status === "online" ? "1/1 online" : "1/1 " + (BASES[0].status === "standby" ? "degraded" : "down");
@@ -560,8 +562,8 @@
     }
     // The name takes its base's status colour (owner, 2026-11-18), the same reading as its badge.
     const baseTone = b => (b.self && BASES[0].status === "offline") || (!b.self && !b.online) ? "muted" : (b.self && BASES[0].status === "standby") || (!b.self && b.health && b.health.state === "degraded") ? "warn" : "ok";
-    const midori = enrolled.some(b => telegramApiState(b) === "responding") ? "API live" : enrolled.some(b => telegramApiState(b) === "failed") ? "API failed" : "API unchecked";
-    document.getElementById("bases-sub").innerHTML = enrolled.filter(b => b.online).length + "/" + enrolled.length + " online · <span class='" + (midori === "API live" ? "ok" : midori === "API failed" ? "warn" : "muted") + "'>● Midori " + midori + "</span>";
+    const midori = enrolled.some(b => telegramApiState(b) === "responding") ? "live" : enrolled.some(b => telegramApiState(b) === "failed") ? "failed" : "unchecked";
+    document.getElementById("bases-sub").innerHTML = enrolled.filter(b => b.online).length + "/" + enrolled.length + " online · <span class='" + (midori === "live" ? "ok" : midori === "failed" ? "warn" : "muted") + "'>● Midori " + midori + "</span>";
     document.getElementById("bases").innerHTML = enrolled.map(b => "<div class='card'><div class='row'><span class='b " + baseTone(b) + "'>" + esc(b.baseId) + " · " + esc(b.name) + (b.main ? " <span class='badge b-info' title='Main base selected in the signed registry'>MAIN</span>" : "") + "</span><span class='badge " + (b.self && BASES[0].status === "standby" ? "b-warn'>DEGRADED" : b.self && BASES[0].status === "offline" ? "b-danger'>DOWN" : !b.online ? "b-warn'>OFFLINE" : b.health && b.health.state === "degraded" ? "b-warn'>DEGRADED" : "b-ok'>ONLINE") + "</span></div>" +
       "<div class='tiny muted'>" + (b.self ? "this machine" : esc(b.address)) + " · key " + esc(b.fingerprint.slice(0, 9)) + " · " + (b.self ? "local" : esc(sinceText(b.lastSeen))) + "</div>" +
       (b.self ? "<div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" : "") +
