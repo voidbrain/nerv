@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 5 | 5 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 5 | 7 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -4828,6 +4828,74 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | PR / evidence | Test: `test/node-lifecycle-execution.test.ts` B-080; Tabgha spawn probe and clone check 2026-11-18 |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-18: CI green on PR #516; live on Tabgha (lifecycle-inspect exit 0, fenced install completed from the desktop). Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-069
+
+**Open sortie re-asks an expired or rejected approval every hour, at night too**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-16 by the owner: the Blue test card of 2026-11-15 22:32 ("Ricorda questo fatto di prova…", `memory.remember`, sortie `2683cff6`) came back on Telegram every hour through the night (23:42, 00:43, 01:44 … 09:12). The live store shows each card is a new approval on the same open sortie: every earlier one is `expired` (1 h TTL, source `ttl`) or `reject` (22:37, 22:39, 06:07), and the sortie never closes. The service did not restart (started 22:45, one run), so the overnight merges are unrelated. Likely cause, unconfirmed: after `approval.expired` or `approval.reject` the sortie stays open and the planner proposes the same step again with a fresh approval (`src/store-sorties.ts`, `src/ledger-approvals.ts` around line 103); and `deliverApproval` honours the quiet hours only for watch sorties (`src/store-sorties.ts` line 42), so ordinary cards go out at any hour. |
+| **Reproduce** | `nerv chat "Ricorda questo fatto di prova: il drone di test si chiama Prova"`; leave the Telegram card unanswered: after 1 h a new card arrives; ❌ Reject gives a new card within two minutes. |
+| **Check** | A committed test fails first: an expired or rejected approval does not produce a second approval for the same step; the sortie closes with a reply saying so; owner-initiated cards keep going out at any hour (there is no global quiet-hours setting, and the owner who just asked is awake; proactive cards already bundle overnight), so no quiet-hours change: the loop was the night problem; the owner repeats the reproduction and gets exactly one card. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. B-069-T02 run by the agent on the live service: `docs.save` produced exactly one approval card (Blue); after `nerv reject` and three minutes no second card, and the sortie closed with "Richiesta chiusa: hai rifiutato docs.save e non lo ripropongo." (events: one `approval.requested`, `approval.reject`, `misato.reply`, `sortie.done`). Note: the NERV-02 reminder text no longer makes a card (Misato granted it Green); the test reminder it created was cancelled. 2026-11-18: B-069-T02 moved from the owner to the agent. Owner decision 2026-11-18: the agent runs this itself (over SSH to nerv-linux or Tabgha, or the CLI on the Mac) and records the commands and output; the owner page stays as the procedure. B-069-T01 implemented 2026-11-16 in [PR #503](https://github.com/voidbrain/nerv/pull/503): on resume the owner's refusal or the expiry is recorded structurally (`ownerDeclined` in `src/misato.ts`), and the planning loop refuses in code any later proposal of that tool in the same sortie, closing it with a reply that names the tool and why (`src/runtime-planning.ts`, next to the "already ran" guard). Two tests in `test/resume.test.ts` fail without the fix (a second card after an expiry; after a rejection) and pass with it. Quiet hours left alone, see Check. Opened 2026-11-16 from the owner's report and the live store rows (approvals, actions, deliveries for sortie `2683cff6`). Next: the owner repeats the reproduction once the fix is live (one card, then a closing reply).
+
+**Estimates:** Small, estimated 2026-11-16: 1 h agent + 0.25 h owner. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report 2026-11-16; live store evidence 2026-11-16 (11 approvals on one sortie, all `ttl` or `reject`); opened in [PR #500](https://github.com/voidbrain/nerv/pull/500) |
+| Opened | 2026-11-16 |
+| Verification | 2026-11-18: B-069-T02 run by the agent on the live service: `docs.save` produced exactly one approval card (Blue); after `nerv reject` and three minutes no second card, and the sortie closed with "Richiesta chiusa: hai rifiutato docs.save e non lo ripropongo." (events: one `approval.requested`, `approval.reject`, `misato.reply`, `sortie.done`). Note: the NERV-02 reminder text no longer makes a card (Misato granted it Green); the test reminder it created was cancelled. Closed 2026-11-18. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### B-070
+
+**SBOM test fails locally on a fresh install: duplicate dependency entries from npm sbom**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-16 while verifying B-069: `test/bom.test.ts` ("F-067: npm lock-only dependency SBOM validates…") fails on unmodified `main` in a worktree freshly installed with `npm ci` (Node 26.12, npm 10.8.2): `npm sbom --package-lock-only --sbom-format cyclonedx` returns 13 duplicate `dependencies` entries (e.g. `@inquirer/type@4.2.1` ×10, `ansi-styles@6.2.3` ×3), so the CycloneDX `uniqueItems` validation fails. The same lockfile in a checkout with an older `node_modules` gives no duplicates, and CI (Node 24) passes; removing `node_modules/.package-lock.json` does not change it. Cause unconfirmed: npm's SBOM output may depend on the installed tree or the Node version. **Cause (2026-11-18):** the nvm Node 26.12 install has a broken bundled npm (`npm-cli.js` missing), so `npm` is the old `/usr/local/bin/npm` 10.8.2, which lists packages reached through several paths more than once; the old checkout gives the same 13 duplicates with it, and npm 11 (Node 24.19, as in CI) gives none. |
+| **Reproduce** | `git worktree add ../x origin/main && cd ../x && npm ci && node --test test/bom.test.ts`. |
+| **Check** | The cause is named; either the SBOM export deduplicates `dependencies` before validation (a committed test with a duplicated entry), or the test pins the condition it needs; `npm test` passes on a fresh install under Node 24 and the local Node. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18. B-070-T02 run by the agent: `npm-cli.js` was missing from Node 26.12; `npm install -g --prefix ~/.nvm/versions/node/v26.12.0 npm@11` with Node 24.19's npm gave npm and npx 11.21.3; `node --test test/bom.test.ts` 3/3 with that npm. 2026-11-18: B-070-T02 moved from the owner to the agent. Owner decision 2026-11-18: the agent runs this itself (over SSH to nerv-linux or Tabgha, or the CLI on the Mac) and records the commands and output; the owner page stays as the procedure. 2026-11-18: B-070-T01 implemented: the test asserts npm 11 or later and names the fix; the owner repairs npm under Node 26.12 ([procedure](../acceptance/b070-npm-repair.md), B-070-T02). Opened 2026-11-16 in [PR #503](https://github.com/voidbrain/nerv/pull/503) with the local evidence above; not caused by B-069 (fails with the B-069 change stashed). Next: B-070-T01.
+
+**Estimates:** Small, estimated 2026-11-16: 0.75 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #506](https://github.com/voidbrain/nerv/pull/506) (merged; CI green: B-070-T01); local run 2026-11-16 in a fresh worktree; CI on #502 passed the same test |
+| Opened | 2026-11-16 |
+| Verification | 2026-11-18: B-070-T02 run by the agent: `npm-cli.js` was missing from Node 26.12; `npm install -g --prefix ~/.nvm/versions/node/v26.12.0 npm@11` with Node 24.19's npm gave npm and npx 11.21.3; `node --test test/bom.test.ts` 3/3 with that npm. Closed 2026-11-18. |
 | Reviewed | 2026-11-18 |
 
 </details>
