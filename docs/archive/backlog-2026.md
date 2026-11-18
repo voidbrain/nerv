@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 9 | 15 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 9 | 16 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -5306,6 +5306,42 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | PR / evidence | Opened in [PR #404](https://github.com/voidbrain/nerv/pull/404) |
 | Opened | 2026-11-14 |
 | Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+---
+
+### B-093
+
+**The Revoked bases section closes itself a few seconds after opening**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔹 P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-18.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-18: the folded "Revoked (n)" section (F-107) closed again after a few seconds: the base list is rebuilt from scratch on every poll, so the details element lost its open state. |
+| **Reproduce** | Dashboard with a revoked base: open "Revoked (1)" and wait for the next poll. |
+| **Check** | Test committed failing first: with `state.revokedOpen` the section renders `open`; a `toggle` handler keeps the state in step with the owner's click. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-18 in PR #530: the owner opened Revoked on the live dashboard (NERV-01 at 228ab45) and it stayed open across polls. 2026-11-18: B-093-T01 implemented. Opened 2026-11-18.
+
+**Estimates:** Small, estimated 2026-11-18: 0.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/dashboard.test.ts` B-065/B-093 bases test (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-18: CI green (PR #527) and the owner's live check. |
 | Reviewed | 2026-11-18 |
 
 </details>

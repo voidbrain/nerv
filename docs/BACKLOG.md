@@ -9,7 +9,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 3 | 9 | 25 | 15 |
+| **This week** | 3 | 9 | 26 | 16 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.5 h agent + 10 h owner across 130 open steps of 37 features and 17 other records. 46.5 h of actual effort recorded on 91 steps. Generated from the task files.
+**Remaining effort:** 69.5 h agent + 10 h owner across 128 open steps of 37 features and 17 other records. 47.75 h of actual effort recorded on 91 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -45,7 +45,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
 
@@ -60,14 +60,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | 🤖 | — |
-| 🟢 Small | <a id="f-005-t28"></a>F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 1 h | 0 h | 1 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-005-t35"></a>F-005-T35 — Record the evidence of F-005-T28 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T28](#f-005-t28) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-005-t35"></a>F-005-T35 — Record the evidence of F-005-T28 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-005-T35](#f-005-t35) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T29](#f-005-t29) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T36](#f-005-t36) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 23.25 h (30 of 37 steps) | 18 h (21 of 37 steps recorded) | 2.75 h | 31 of 37 completed | | |
+| 🟡 Medium | **Total** | 23.75 h (30 of 37 steps) | 19.5 h (22 of 37 steps recorded) | 1.75 h | 32 of 37 completed | | |
 
-<details><summary>Done steps (31)</summary>
+<details><summary>Done steps (32)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -97,6 +96,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-005-t25"></a>F-005-T25 — T10b — Linux update and recovery | 1 h | 0.25 h (stated) | Completed | — |
 | — | <a id="f-005-t26"></a>F-005-T26 — T10c — Acceptance on an owner-selected mini PC, Pi or equivalent | 1 h | 2.5 h (stated) | Completed | [PR #525](https://github.com/voidbrain/nerv/pull/525) evidence |
 | — | <a id="f-005-t27"></a>F-005-T27 — T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix | 1 h | 2 h (stated) | Completed | [PR #527](https://github.com/voidbrain/nerv/pull/527) this change |
+| — | <a id="f-005-t28"></a>F-005-T28 — T11c — Reconnect, locks and uncertain physical results across the device matrix | 1.5 h | 1.5 h (stated) | Completed | [PR #530](https://github.com/voidbrain/nerv/pull/530) this change |
 | — | <a id="f-005-t31"></a>F-005-T31 — Record the evidence of F-005-T22 and close it | 0.25 h | 0 h | Completed | [PR #523](https://github.com/voidbrain/nerv/pull/523) this change |
 | — | <a id="f-005-t32"></a>F-005-T32 — Record the evidence of F-005-T24 and close it | 0.25 h | 0 h | Completed | — |
 | — | <a id="f-005-t33"></a>F-005-T33 — Record the evidence of F-005-T26 and close it | 0.25 h | 0 h | Completed | — |
@@ -113,7 +113,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Queue order | 1 — Owner-selected next NERV work, 2026-11-10 |
-| PR / evidence | Steps: F-005-T11: [PR #526](https://github.com/voidbrain/nerv/pull/526) matrix · F-005-T22: [PR #517](https://github.com/voidbrain/nerv/pull/517) this change · F-005-T26: [PR #525](https://github.com/voidbrain/nerv/pull/525) evidence · F-005-T27: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change · F-005-T31: [PR #523](https://github.com/voidbrain/nerv/pull/523) this change · F-005-T37: [PR #526](https://github.com/voidbrain/nerv/pull/526) matrix. [PR #339](https://github.com/voidbrain/nerv/pull/339) F-005-T21 (T08d) optional start-at-login and on-demand engine lifecycle, `src/engine-lifecycle.ts`, test/engine-lifecycle.test.ts (head 2ceb2ab, merged 23af8cf; CI43342617908 passed all five jobs); [PR #337](https://github.com/voidbrain/nerv/pull/337) F-005-T23 (T09b) Windows and F-005-T25 (T10b) Linux update and recovery, test/windows-service-lifecycle.test.ts and test/linux-service-lifecycle.test.ts (head e226321, merged 8da425a; CI43340798309 passed all five jobs); these PRs cited in the full audit of 2026-11-13, PR #374; [PR #330](https://github.com/voidbrain/nerv/pull/330) F-005-T09 (T09a) Windows service lifecycle adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/windows-service-lifecycle.test.ts; [PR #331](https://github.com/voidbrain/nerv/pull/331) F-005-T20 (T08c) engine/provider contract for multiple local and remote instances with Ollama as one adapter (`src/engine-provider.ts`, `src/model-setup.ts`, `src/model.ts`), Test: test/engine-provider.test.ts; [PR #328](https://github.com/voidbrain/nerv/pull/328) F-005-T18 (T07d) opt-in automatic update policy (`src/update-policy.ts`, `src/config.ts`, `GET/POST /api/update/policy`, `POST /api/update/auto`), Test: test/update-policy.test.ts; [PR #327](https://github.com/voidbrain/nerv/pull/327) F-005-T10 (T10a) Linux `systemd --user` service adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/linux-service-lifecycle.test.ts; [PR #324](https://github.com/voidbrain/nerv/pull/324) F-005-T19 (T08b) Node install/upgrade choices with ownership classification and recovery (`src/node-runtime.ts`, `nodes node-runtime-plan/activate/recover`), Test: test/node-runtime.test.ts; [PR #326](https://github.com/voidbrain/nerv/pull/326) F-005-T17 (T07c) manual update action through lifecycle update path (`src/manual-update.ts`, `POST /api/update/apply`, dashboard `live.js`), Test: test/manual-update.test.ts; [PR #323](https://github.com/voidbrain/nerv/pull/323) F-005-T16 (T07b) update availability on `/api/doctor`, `/api/status`, `nerv doctor`, dashboard (`web/public/dashboard/live.js`), Angular doctor view (`web/src/doctor-view.ts`) and macOS companion (`native/NervMenuBar`), Test: test/update-availability.test.ts; [PR #321](https://github.com/voidbrain/nerv/pull/321) F-005-T08 (T08a) prerequisite check (`checkServicePrerequisites` for Node version, executable and non-interactive service environment joined to `install`, `start` and `update`), Test: test/node-lifecycle-execution.test.ts; [PR #320](https://github.com/voidbrain/nerv/pull/320) F-005-T07 (T07a) backend update-availability contract (`src/update-availability.ts`, `GET /api/update`, `nodes update-check`), Test: test/update-availability.test.ts; closes F-005-T06 and F-005-T12; [PR #317](https://github.com/voidbrain/nerv/pull/317) F-005-T14 (T06g) after-start health check in `receipt.health` and ordered `receipt.recovery` on uncertain outcomes; Test: test/upgrade-health.test.ts; fresh-context independent review (no blockers, 3 should-fix items addressed); earlier PRs in [2026 evidence archive](archive/evidence-2026.md#f-005) |
+| PR / evidence | Steps: F-005-T11: [PR #526](https://github.com/voidbrain/nerv/pull/526) matrix · F-005-T22: [PR #517](https://github.com/voidbrain/nerv/pull/517) this change · F-005-T26: [PR #525](https://github.com/voidbrain/nerv/pull/525) evidence · F-005-T27: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change · F-005-T28: [PR #530](https://github.com/voidbrain/nerv/pull/530) this change · F-005-T31: [PR #523](https://github.com/voidbrain/nerv/pull/523) this change · F-005-T37: [PR #526](https://github.com/voidbrain/nerv/pull/526) matrix. [PR #339](https://github.com/voidbrain/nerv/pull/339) F-005-T21 (T08d) optional start-at-login and on-demand engine lifecycle, `src/engine-lifecycle.ts`, test/engine-lifecycle.test.ts (head 2ceb2ab, merged 23af8cf; CI43342617908 passed all five jobs); [PR #337](https://github.com/voidbrain/nerv/pull/337) F-005-T23 (T09b) Windows and F-005-T25 (T10b) Linux update and recovery, test/windows-service-lifecycle.test.ts and test/linux-service-lifecycle.test.ts (head e226321, merged 8da425a; CI43340798309 passed all five jobs); these PRs cited in the full audit of 2026-11-13, PR #374; [PR #330](https://github.com/voidbrain/nerv/pull/330) F-005-T09 (T09a) Windows service lifecycle adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/windows-service-lifecycle.test.ts; [PR #331](https://github.com/voidbrain/nerv/pull/331) F-005-T20 (T08c) engine/provider contract for multiple local and remote instances with Ollama as one adapter (`src/engine-provider.ts`, `src/model-setup.ts`, `src/model.ts`), Test: test/engine-provider.test.ts; [PR #328](https://github.com/voidbrain/nerv/pull/328) F-005-T18 (T07d) opt-in automatic update policy (`src/update-policy.ts`, `src/config.ts`, `GET/POST /api/update/policy`, `POST /api/update/auto`), Test: test/update-policy.test.ts; [PR #327](https://github.com/voidbrain/nerv/pull/327) F-005-T10 (T10a) Linux `systemd --user` service adapter (`src/node-lifecycle-execution.ts`, `src/nodes-cli.ts`), Test: test/linux-service-lifecycle.test.ts; [PR #324](https://github.com/voidbrain/nerv/pull/324) F-005-T19 (T08b) Node install/upgrade choices with ownership classification and recovery (`src/node-runtime.ts`, `nodes node-runtime-plan/activate/recover`), Test: test/node-runtime.test.ts; [PR #326](https://github.com/voidbrain/nerv/pull/326) F-005-T17 (T07c) manual update action through lifecycle update path (`src/manual-update.ts`, `POST /api/update/apply`, dashboard `live.js`), Test: test/manual-update.test.ts; [PR #323](https://github.com/voidbrain/nerv/pull/323) F-005-T16 (T07b) update availability on `/api/doctor`, `/api/status`, `nerv doctor`, dashboard (`web/public/dashboard/live.js`), Angular doctor view (`web/src/doctor-view.ts`) and macOS companion (`native/NervMenuBar`), Test: test/update-availability.test.ts; [PR #321](https://github.com/voidbrain/nerv/pull/321) F-005-T08 (T08a) prerequisite check (`checkServicePrerequisites` for Node version, executable and non-interactive service environment joined to `install`, `start` and `update`), Test: test/node-lifecycle-execution.test.ts; [PR #320](https://github.com/voidbrain/nerv/pull/320) F-005-T07 (T07a) backend update-availability contract (`src/update-availability.ts`, `GET /api/update`, `nodes update-check`), Test: test/update-availability.test.ts; closes F-005-T06 and F-005-T12; [PR #317](https://github.com/voidbrain/nerv/pull/317) F-005-T14 (T06g) after-start health check in `receipt.health` and ordered `receipt.recovery` on uncertain outcomes; Test: test/upgrade-health.test.ts; fresh-context independent review (no blockers, 3 should-fix items addressed); earlier PRs in [2026 evidence archive](archive/evidence-2026.md#f-005) |
 | Opened | 2026-11-01 |
 | Verification | Recent 2026-11-12/13 update & lifecycle checks on `main`; 2026-11-08–2026-11-10 Mac/Windows acceptance details in [2026 evidence archive](archive/evidence-2026.md#f-005) |
 | Reviewed | 2026-11-18 |
@@ -2004,9 +2004,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-107-T01 — Map: green routes, heartbeat mesh lines, names in their case and status colour (Implemented; verification pending).
+💻 **→** Next: F-107-T02 — Heartbeats report reachable peers; the map colours each mesh line from both ends (Planned).
 
 | | |
 |---|---|
@@ -2018,9 +2018,16 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-107-t01"></a>F-107-T01 — Map: green routes, heartbeat mesh lines, names in their case and status colour | 1 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #521](https://github.com/voidbrain/nerv/pull/521) map |
-| 🟡 Medium | <a id="f-107-t02"></a>F-107-T02 — Heartbeats report reachable peers; the map colours each mesh line from both ends | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-107-T01](#f-107-t01) | — |
-| 🟡 Medium | **Total** | 2.5 h | 0.75 h (1 of 2 steps recorded) | 1.75 h | 0 of 2 completed | |
+| 🟡 Medium | <a id="f-107-t02"></a>F-107-T02 — Heartbeats report reachable peers; the map colours each mesh line from both ends | 1.5 h | 0 h | 1.5 h | Planned | — |
+| 🟡 Medium | **Total** | 2.5 h | 0.75 h (1 of 2 steps recorded) | 1.5 h | 1 of 2 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-107-t01"></a>F-107-T01 — Map: green routes, heartbeat mesh lines, names in their case and status colour | 1 h | 0.75 h (stated) | Completed | [PR #521](https://github.com/voidbrain/nerv/pull/521) map; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the owner live check |
+
+</details>
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2029,9 +2036,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-107-T01: [PR #521](https://github.com/voidbrain/nerv/pull/521) map. `test/dashboard.test.ts` (B-065 bases test extended) |
+| PR / evidence | Steps: F-107-T01: [PR #521](https://github.com/voidbrain/nerv/pull/521) map; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the owner live check. `test/dashboard.test.ts` (B-065 bases test extended) |
 | Opened | 2026-11-18 |
-| Verification | Pending: CI and a look at the live dashboard. |
+| Verification | 2026-11-18: CI green (PR #521) and the owner's live dashboard check. |
 | Reviewed | 2026-11-18 |
 
 </details>
@@ -2325,39 +2332,39 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-093"></a>[🐞 B-093](#top)
+### <a id="b-095"></a>[🐞 B-095](#top)
 
-**The Revoked bases section closes itself a few seconds after opening**
+**On the map Midori looks like a base: it lost its own blue**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-093-T01 — The Revoked section keeps its open state across polls (Implemented; verification pending).
+💻 **→** Next: B-095-T01 — Midori keeps its blue node; only its status dot and label change colour (Ready).
 
 | | |
 |---|---|
-| **Issue** | Owner report 2026-11-18: the folded "Revoked (n)" section (F-107) closed again after a few seconds: the base list is rebuilt from scratch on every poll, so the details element lost its open state. |
-| **Reproduce** | Dashboard with a revoked base: open "Revoked (1)" and wait for the next poll. |
-| **Check** | Test committed failing first: with `state.revokedOpen` the section renders `open`; a `toggle` handler keeps the state in step with the owner's click. |
+| **Issue** | Owner report 2026-11-18 after F-107: Midori now takes the bases' status colours (green while live), so on the map it reads as one more base. It is the Telegram channel, not a base. |
+| **Reproduce** | Live dashboard with Midori live: its node and dots are green like the bases. |
+| **Check** | Test committed failing first: Midori's node keeps the `--info` blue; only its status dot and label take green, amber or grey. The owner confirms on the live dashboard. |
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-093-t01"></a>B-093-T01 — The Revoked section keeps its open state across polls | 0.5 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #527](https://github.com/voidbrain/nerv/pull/527) this change |
-| 🟢 Small | **Total** | 0.5 h | 0.25 h | 0.25 h | 0 of 1 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-095-t01"></a>B-095-T01 — Midori keeps its blue node; only its status dot and label change colour | 0.5 h | 0 h | 0.5 h | Ready |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-[Full notes & evidence](work/records/B-093.md)
+[Full notes & evidence](work/records/B-095.md)
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-093-T01: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change. Test: `test/dashboard.test.ts` B-065/B-093 bases test (committed failing first) |
+| PR / evidence | Opened in PR #530 |
 | Opened | 2026-11-18 |
-| Verification | Pending: CI. |
+| Verification | Pending. |
 | Reviewed | 2026-11-18 |
 
 </details>
