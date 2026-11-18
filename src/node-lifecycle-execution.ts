@@ -673,12 +673,26 @@ export async function compatibleServiceRevision(
   }
 }
 
+/** The files a lifecycle operation reads, and the command that creates each (B-084: a raw ENOENT before). */
+const SERVICE_HOME_FILES: [string, string][] = [
+  ['config.json', 'nerv init'],
+  ['token', 'nerv init'],
+  ['base-key', 'nerv base pubkey'],
+  ['base.pub', 'nerv base pubkey'],
+  ['nerv.sqlite', 'nerv doctor'],
+];
 export function requireServiceHome(home: string): void {
   if (!present(home)) {
     throw Error(
       `NERV data home ${home} does not exist yet; nothing was changed. Initialize it first (for example: nerv setup or nerv doctor).`,
     );
   }
+  const missing = SERVICE_HOME_FILES.filter(([name]) => !present(join(home, name)));
+  if (missing.length)
+    throw Error(
+      `NERV data home ${home} is not fully initialized (missing ${missing.map(([n]) => n).join(', ')}); nothing was changed. ` +
+        `Create them first: ${[...new Set(missing.map(([, c]) => c))].join(', then ')}.`,
+    );
 }
 
 export { applyService, releaseService, releaseObservedService, recoverServiceUpdate } from './node-lifecycle-apply.ts';
