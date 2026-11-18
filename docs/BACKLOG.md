@@ -631,7 +631,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #504](https://github.com/voidbrain/nerv/pull/504); [project-harness PR #217](https://github.com/voidbrain/project-harness/pull/217) |
 | Opened | 2026-11-18 |
-| Verification | Pending: CI on this PR (`check:work`, `check:backlog`, `check:harness`). |
+| Verification | Pending: CI on #504 (`check:work`, `check:backlog`, `check:harness`). |
 | Reviewed | 2026-11-18 |
 
 </details>
