@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-109-T03",
+  "parent": "F-109",
+  "title": "Persona card layout with one Apply for every change",
+  "goal": "One card per pilot; one Apply saves names and model together",
+  "status": "planned",
+  "acceptance": [
+    "Test on the card markup and the combined save",
+    "Owner confirms on the live dashboard"
+  ],
+  "dependsOn": [
+    "F-109-T02"
+  ],
+  "resources": [
+    "web/public/dashboard/dashboard.js",
+    "web/public/dashboard/live.js",
+    "web/public/dashboard/index.html",
+    "test/**",
+    "docs/design/dashboard-and-native-ui.md",
+    "docs/STYLE-GUIDE.md",
+    "docs/work/records/F-109.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-18. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

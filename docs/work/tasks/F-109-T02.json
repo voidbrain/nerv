@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-109-T02",
+  "parent": "F-109",
+  "title": "Store a pilot's call name and second name through a validated interface",
+  "goal": "Names saved, validated and returned by the pilots API",
+  "status": "planned",
+  "acceptance": [
+    "Regression test on the interface and on the API"
+  ],
+  "dependsOn": [
+    "F-109-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-109.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-18. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

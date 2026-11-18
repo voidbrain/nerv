@@ -995,12 +995,13 @@ function telegramApiState(base, now = Date.now()) {
 function drawTelegram(ctx, now, W, H) {
   const routes = telegramRoutes(telegramBases); const x = W - 36, y = H * 0.65;
   const origins = new Set(routes.map(b => b.channel.mode === "via-main" ? b.channel.destination : b.baseId));
-  // Midori in the bases' status colours (owner, 2026-11-18): green while the Bot API responds, as the header's "Midori live".
+  // Midori is the channel, not a base (owner, 2026-11-18, B-095): node and links keep --info blue; only its status dot
+  // and label take the bases' status colours (green while the Bot API responds, as the header's "Midori live").
   const color = status => cssVar(status === "responding" ? "--ok" : status === "failed" ? "--warn" : "--muted");
   const channelById = id => telegramBases.find(b => b.baseId === id);
   ctx.lineWidth = 1; ctx.globalAlpha = 0.7;
   origins.forEach(id => { const base = BASES.find(b => b.id === String(id).toLowerCase()); if (!base) return;
-    const [bx,by] = map.proj([base.lon,base.lat]); const api = telegramApiState(channelById(id)); ctx.strokeStyle = color(api); ctx.setLineDash([2,3]); ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(x,y); ctx.stroke(); ctx.setLineDash([]);
+    const [bx,by] = map.proj([base.lon,base.lat]); ctx.strokeStyle = cssVar("--info"); ctx.setLineDash([2,3]); ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(x,y); ctx.stroke(); ctx.setLineDash([]);
   });
   ctx.globalAlpha = 1;
   for (let i = telegramPulses.length - 1; i >= 0; i--) {
@@ -1012,8 +1013,9 @@ function drawTelegram(ctx, now, W, H) {
   const states = [...origins].map(id => telegramApiState(channelById(id)));
   const status = states.includes("responding") ? "responding" : states.includes("failed") ? "failed" : "unknown";
 
-  ctx.strokeStyle = color(status); ctx.fillStyle = cssVar("--panel"); ctx.lineWidth = 2;
+  ctx.strokeStyle = cssVar("--info"); ctx.fillStyle = cssVar("--panel"); ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = color(status); ctx.beginPath(); ctx.arc(x+8,y-3,2,0,Math.PI*2); ctx.fill();
   ctx.font = "11px " + (cssVar("--font") || "monospace"); ctx.textAlign = "center"; ctx.fillStyle = color(status); ctx.fillText("Midori",x,y-12); ctx.textAlign = "start";
 }
 
