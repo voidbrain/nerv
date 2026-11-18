@@ -775,3 +775,12 @@ test('the handler identity of the running process is queried once, and a failed 
   assert.equal(await own(), 'identity-a');
   assert.deepEqual(pids, [process.pid, process.pid]);
 });
+
+test('B-080: lifecycle commands put Node first on PATH with the platform separator', () => {
+  assert.equal(
+    lifecycle.childPath('C:\\nvm\\v24', 'C:\\Windows\\system32;C:\\Program Files\\Git\\cmd', 'win32'),
+    'C:\\nvm\\v24;C:\\Windows\\system32;C:\\Program Files\\Git\\cmd',
+  );
+  assert.equal(lifecycle.childPath('/opt/node/bin', '/usr/bin:/bin', 'darwin'), '/opt/node/bin:/usr/bin:/bin');
+  assert.equal(lifecycle.childPath('/opt/node/bin', undefined, 'linux'), '/opt/node/bin');
+});
