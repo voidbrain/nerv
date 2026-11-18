@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 69.25 h agent + 10 h owner across 127 open steps of 37 features and 17 other records. 47.75 h of actual effort recorded on 91 steps. Generated from the task files.
+**Remaining effort:** 69 h agent + 10 h owner across 126 open steps of 37 features and 17 other records. 48 h of actual effort recorded on 92 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -45,7 +45,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
 
@@ -60,13 +60,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | 🤖 | — |
-| 🟢 Small | <a id="f-005-t35"></a>F-005-T35 — Record the evidence of F-005-T28 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-005-T35](#f-005-t35) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T29](#f-005-t29) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T36](#f-005-t36) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 23.75 h (30 of 37 steps) | 19.5 h (22 of 37 steps recorded) | 1.75 h | 32 of 37 completed | | |
+| 🟡 Medium | **Total** | 23.75 h (30 of 37 steps) | 19.75 h (23 of 37 steps recorded) | 1.5 h | 33 of 37 completed | | |
 
-<details><summary>Done steps (32)</summary>
+<details><summary>Done steps (33)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -101,6 +100,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-005-t32"></a>F-005-T32 — Record the evidence of F-005-T24 and close it | 0.25 h | 0 h | Completed | — |
 | — | <a id="f-005-t33"></a>F-005-T33 — Record the evidence of F-005-T26 and close it | 0.25 h | 0 h | Completed | — |
 | — | <a id="f-005-t34"></a>F-005-T34 — Record the evidence of F-005-T27 and close it | 0.25 h | 0 h | Completed | — |
+| — | <a id="f-005-t35"></a>F-005-T35 — Record the evidence of F-005-T28 and close it | 0.25 h | 0.25 h (stated) | Completed | — |
 | — | <a id="f-005-t37"></a>F-005-T37 — Agree the device matrix | — | 0 h | Completed | [PR #526](https://github.com/voidbrain/nerv/pull/526) matrix |
 
 </details>
