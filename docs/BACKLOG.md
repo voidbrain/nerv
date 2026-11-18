@@ -2536,7 +2536,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-094-T01: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the live check. Test: `test/remote-outcome-text.test.ts` (committed failing first) |
+| PR / evidence | Steps: B-094-T01: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the live check. [PR #535](https://github.com/voidbrain/nerv/pull/535) B-094-T02 (`test/kaji-run.test.ts`); Test: `test/remote-outcome-text.test.ts` (committed failing first) |
 | Opened | 2026-11-18 |
 | Verification | Pending: CI. |
 | Reviewed | 2026-11-18 |
