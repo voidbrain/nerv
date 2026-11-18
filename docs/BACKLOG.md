@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 49.5 h agent + 21.75 h owner across 133 open steps of 40 features and 12 other records. 34 h of actual effort recorded on 77 steps. Generated from the task files.
+**Remaining effort:** 48.75 h agent + 21.75 h owner across 133 open steps of 40 features and 12 other records. 34.75 h of actual effort recorded on 78 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1606,7 +1606,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: B-066-T02 — Decouple worker-link frame verification from per-frame nervous IPC (Implemented; verification pending).
 
@@ -1621,8 +1621,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="b-066-t02"></a>B-066-T02 — Decouple worker-link frame verification from per-frame nervous IPC | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 | — |
-| 🟢 Small | <a id="b-066-t03"></a>B-066-T03 — Find why worker-link tests still lose the connection under load | 1 h | 0 h | 1 h | Ready | 🤖 | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
-| 🟡 Medium | **Total** | 1.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 1.5 h | 1 of 3 completed | | |
+| 🟢 Small | <a id="b-066-t03"></a>B-066-T03 — Find why worker-link tests still lose the connection under load | 1 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending | 🤖 | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #512](https://github.com/voidbrain/nerv/pull/512) fixture budget |
+| 🟢 Small | **Total** | 1.5 h (2 of 3 steps) | 0.75 h (1 of 3 steps recorded) | 0.75 h | 1 of 3 completed | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1639,7 +1639,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-066-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep. [PR #464](https://github.com/voidbrain/nerv/pull/464) (merged; CI green); [PR #414](https://github.com/voidbrain/nerv/pull/414) (opened record & decision doc); prior context: [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02), [PR #293](https://github.com/voidbrain/nerv/pull/293) and [PR #361](https://github.com/voidbrain/nerv/pull/361) (B-046). |
+| PR / evidence | Steps: B-066-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #512](https://github.com/voidbrain/nerv/pull/512) fixture budget. [PR #464](https://github.com/voidbrain/nerv/pull/464) (merged; CI green); [PR #414](https://github.com/voidbrain/nerv/pull/414) (opened record & decision doc); prior context: [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02), [PR #293](https://github.com/voidbrain/nerv/pull/293) and [PR #361](https://github.com/voidbrain/nerv/pull/361) (B-046). |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: failing evidence above; B-066-T02 stays implemented until B-066-T03. |
 | Reviewed | 2026-11-18 |
