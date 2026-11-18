@@ -200,16 +200,17 @@ function parsePackageJson(
 /** Markup that is never text: scripts, styles and comments go before tags are stripped (B-078). */
 const withoutCode = (content: string) =>
   content
-    .replace(/<script\b[\s\S]*?<\/script\s*>/gi, ' ')
-    .replace(/<style\b[\s\S]*?<\/style\s*>/gi, ' ')
+    .replace(/<script\b[\s\S]*?<\/script[^>]*>/gi, ' ')
+    .replace(/<style\b[\s\S]*?<\/style[^>]*>/gi, ' ')
     .replace(/<!--[\s\S]*?-->/g, ' ');
+// `&amp;` is decoded last, so `&amp;lt;` stays the literal text `&lt;` (CodeQL: no double unescaping).
 const decode = (s: string) =>
   s
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ')
     .trim();
 /** A web page's own name: its title, with its meta description when it has one (B-078). */

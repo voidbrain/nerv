@@ -185,3 +185,33 @@ it('B-078: a page report names the page, not its scripts, and marks repository f
     assert.match(field.summary, /^Not applicable to a web page/);
   assert.ok(!report.visibleRisks.some((r) => /licence/i.test(r.summary)), 'no licence risk for a page');
 });
+
+it('B-078: script end tags with whitespace or attributes are removed, and entities are decoded once', () => {
+  const html =
+    '<html><head><title>Tea &amp;lt;b&amp;gt; notes</title></head><body><script>var hidden=1</script\t\n bar>' +
+    '<p>Visible text</p></body></html>';
+  const report = buildProjectReport({
+    target: 'https://example.invalid/tea',
+    kind: 'page',
+    tainted: true,
+    trust: 'tainted',
+    jobDir: '/nonexistent',
+    discarded: true,
+    files: [{ path: 'page.txt', content: html }],
+    text: html,
+  } as Parameters<typeof buildProjectReport>[0]);
+  assert.equal(report.whatItIs.summary, 'Tea &lt;b&gt; notes', 'decoded once, never into markup');
+  const noTitle = '<html><body><script>var hidden=1</script\t\n bar><p>Visible text</p></body></html>';
+  const second = buildProjectReport({
+    target: 'https://example.invalid/tea2',
+    kind: 'page',
+    tainted: true,
+    trust: 'tainted',
+    jobDir: '/nonexistent',
+    discarded: true,
+    files: [{ path: 'page.txt', content: noTitle }],
+    text: noTitle,
+  } as Parameters<typeof buildProjectReport>[0]);
+  assert.doesNotMatch(second.whatItIs.summary, /hidden/);
+  assert.equal(second.whatItIs.summary, 'Visible text');
+});
