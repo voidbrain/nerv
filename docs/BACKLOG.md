@@ -9,28 +9,27 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 2 | 5 | 8 | 4 |
+| **This week** | 2 | 5 | 9 | 4 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 11 |
-| **Require Human 🧑** | 7 | 3 |
+| **Open** | 41 | 12 |
+| **Require Human 🧑** | 6 | 3 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-006](#f-006) | [F-101](#f-101) | [B-057](#b-057) | — |
-| [F-011](#f-011) |  | [B-068](#b-068) |  |
-| [F-004](#f-004) |  | [B-056](#b-056) |  |
-| [F-060](#f-060) |  |  |  |
+| [F-011](#f-011) | [F-101](#f-101) | [B-057](#b-057) | — |
+| [F-004](#f-004) |  | [B-068](#b-068) |  |
+| [F-060](#f-060) |  | [B-056](#b-056) |  |
 | [F-007](#f-007) |  |  |  |
 | [F-100](#f-100) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 68.25 h agent + 11.75 h owner across 137 open steps of 40 features and 11 other records. 34.75 h of actual effort recorded on 80 steps. Generated from the task files.
+**Remaining effort:** 70.5 h agent + 11.75 h owner across 139 open steps of 40 features and 12 other records. 35.25 h of actual effort recorded on 81 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -123,13 +122,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="b-077"></a>[🐞 B-077](#top)
+
+**Role evaluation runs refuse three repeats, which the approved F-006 campaigns need**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-006-T11](#f-006-t11), [F-006-T13](#f-006-t13), [F-006-T21](#f-006-t21) | 🤖 | — | — |
+
+💻 **→** Next: B-077-T01 — Role bundles run each case the configured number of times (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 while checking the owner's F-006 run: `node tools/gauntlet.mjs role-plan --role=both` with `limits-repeat3.json` stops with "Unsupported role limits repeat; only repeat=1 is supported" (`validateRoleBundleConfig` in `tools/evaluate-model.mjs`, added 2026-11-13). The owner approved three runs per case on 2026-11-15 and both campaign plans (F-006-T19, F-006-T20) use `role-run` with `repeat: 3`, so neither campaign can run. |
+| **Reproduce** | `node tools/gauntlet.mjs role-plan --role=both --profile=<gemma4-12b profile> --limits=<limits with "repeat": 3> --machine-profile=<machine> --scenario=node_modules/@voidbrain/gauntlet-protocol/examples/scenarios/moderate-load.json` |
+| **Check** | A committed test fails first: a role bundle with `repeat: 3` plans and runs each case three times against a fake Ollama, with per-repeat results and the budgets counted over all repeats; `repeat: 1` behaves as before. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-077-t01"></a>B-077-T01 — Role bundles run each case the configured number of times | 1.5 h | 0 h | 1.5 h | Ready |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-077.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Dry run 2026-11-18 on main, scratch profile copied from the protocol's `gemma4-12b.json` |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-006"></a>[✨ F-006](#top)
 
 **Orchestrate agents and models across nodes**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.5 h agent + 1.5 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 3 h agent + 1.5 h owner | [B-077-T01](#b-077-t01) | — | ⏳ | — | — |
 
 💻 **→** Next: F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC (Planned).
 
@@ -143,13 +180,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | 0 h agent + 1.5 h owner | Planned | [🧑‍🔧](decisions/mac-operating-conditions.md) | — |
-| 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T11](#f-006-t11) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | 0 h agent + 1.5 h owner | Planned · waits on [B-077-T01](#b-077-t01) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T13](#f-006-t13) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T16](#f-006-t16) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 7.75 h (17 of 20 steps) | 5.25 h (10 of 20 steps recorded) | 1.5 h agent + 1.5 h owner | 14 of 20 completed | | |
+| 🟡 Medium | <a id="f-006-t21"></a>F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases | 1.5 h | 0 h | 1.5 h | Planned · waits on [B-077-T01](#b-077-t01) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 0.5 h | 0 h | 0.5 h | Planned · waits on [B-077-T01](#b-077-t01), [F-006-T21](#f-006-t21) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T11](#f-006-t11) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 9.25 h (18 of 21 steps) | 5.25 h (10 of 21 steps recorded) | 3 h agent + 1.5 h owner | 14 of 21 completed | | |
 
 <details><summary>Done steps (14)</summary>
 
@@ -2247,9 +2285,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-075-T01 — Read the failed Telegram tests on Windows and name the cause (Ready).
+💻 **→** Next: B-075-T01 — Read the failed Telegram tests on Windows and name the cause (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2261,8 +2299,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-075-t01"></a>B-075-T01 — Read the failed Telegram tests on Windows and name the cause | 1 h | 0 h | 1 h | Ready | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
+| 🟢 Small | <a id="b-075-t01"></a>B-075-T01 — Read the failed Telegram tests on Windows and name the cause | 1 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound |
+| 🟢 Small | **Total** | 1 h | 0.5 h | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2271,7 +2309,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-075-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep. Failed: windows job 133087302320 of run 43802969338 (2026-11-16). |
+| PR / evidence | Steps: B-075-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound. Failed: windows job 133087302320 of run 43802969338 (2026-11-16). |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
@@ -2299,7 +2337,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-076-t01"></a>B-076-T01 — Name the cause of each scattered CI failure of 2026-11-18 | 1 h | 0 h | 1 h | Ready | [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound |
+| 🟢 Small | <a id="b-076-t01"></a>B-076-T01 — Name the cause of each scattered CI failure of 2026-11-18 | 1 h | 0 h | 1 h | Ready | [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound |
 | 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
 
 <details>
@@ -2309,7 +2347,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound. [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2 |
+| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound. [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |

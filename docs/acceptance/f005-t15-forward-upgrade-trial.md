@@ -9,9 +9,9 @@ The trial needs a revision on `main` whose `readerSchema` is above the live sche
 ```bash
 cd ~/Projects/NERV/NERV && git fetch -q origin main
 git show origin/main:src/upgrade-contract.ts | grep -o 'readerSchema: [0-9]*'
-sqlite3 -readonly ~/.nerv/nerv.sqlite 'PRAGMA user_version;'
+node -e 'const {DatabaseSync}=require("node:sqlite");const d=new DatabaseSync(process.env.HOME+"/.nerv/nerv.sqlite",{readOnly:true});console.log(d.prepare("PRAGMA user_version").get().user_version)'
 ```
-Expected: `readerSchema: N` and the live schema `M`.
+Expected: `readerSchema: N` and the live schema `M` (a number). The schema is read with Node, read-only: a `sqlite3` other than `/usr/bin/sqlite3` on the PATH failed to open the file on 2026-11-18.
 - `N` equal to `M` (on 2026-11-18 both are 6): **stop here** and reply `F-005-T15: no schema-raising candidate yet`. The step stays open until a reviewed migration reaches `main`.
 - `N` greater than `M`: go on.
 

@@ -17,7 +17,9 @@
     "Run the placement campaign on the enrolled Mac and mini PC"
   ],
   "dependsOn": [
-    "F-006-T19"
+    "B-077-T01",
+    "F-006-T19",
+    "F-006-T21"
   ],
   "resources": [
     "contract:model-routing",
@@ -26,7 +28,8 @@
     "docs/work/tasks/F-006-T01.json",
     "docs/work/records/F-006.md",
     "generated:backlog-views",
-    "docs/decisions/placement-campaign.md"
+    "docs/decisions/placement-campaign.md",
+    "docs/acceptance/f006-mac-runs.md"
   ],
   "validation": [
     "Directed regressions or recorded evidence for this slice; final required CI"

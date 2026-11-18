@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "parent": "B-077",
+  "id": "B-077-T01",
+  "title": "Role bundles run each case the configured number of times",
+  "goal": "The F-006 campaigns can run role cases three times each",
+  "status": "ready",
+  "acceptance": [
+    "A committed test fails first: repeat 3 plans and runs each role case three times against a fake Ollama, results per repeat, budgets over all repeats",
+    "repeat 1 unchanged"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "tools/evaluate-model.mjs",
+    "tools/gauntlet.mjs",
+    "test/**",
+    "docs/work/records/B-077.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-18: repeat loop in the role bundle, budget accounting, one fake-Ollama test. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

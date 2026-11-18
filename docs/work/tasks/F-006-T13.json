@@ -17,6 +17,7 @@
     "Three Mac operating-condition runs"
   ],
   "dependsOn": [
+    "B-077-T01",
     "F-006-T20"
   ],
   "resources": [
@@ -44,5 +45,5 @@
     "agentHours": 0,
     "ownerKind": "procedure"
   },
-  "ownerLink": "docs/decisions/mac-operating-conditions.md"
+  "ownerLink": "docs/acceptance/f006-mac-runs.md"
 }

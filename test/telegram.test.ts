@@ -630,7 +630,9 @@ test(
 
 test(
   'F-026: Telegram defers proactive cards and resumed replies during quiet hours while owner/due delivery stays normal',
-  { timeout: 20000 },
+  // B-075: 0.84 s here; on Windows each of its waits may take 15 s (until) and CI ran 6-9x slower on 2026-11-18, so
+  // 20 s ended it twice (2026-11-16, PR #511). Windows gets 60 s.
+  { timeout: process.platform === 'win32' ? 60000 : 20000 },
   async () => {
     const token = '123456:' + 'w'.repeat(35),
       tg = await fakeTelegram(token),
