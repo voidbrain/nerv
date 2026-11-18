@@ -161,3 +161,25 @@ describe('F-085-T02 sourced project report', () => {
     assert.ok(report.visibleRisks.some((r) => r.source === url && /instruction-override/.test(r.summary)));
   });
 });
+
+test('B-078: a page report names the page, not its scripts, and marks repository fields not applicable', () => {
+  const html =
+    '<!doctype html><html><head><title>Neutral Fixture Page</title><meta name="description" content="An invented page about tea.">' +
+    '<script>(()=>{let i=document.documentElement;window.track=1})()</script><style>body{color:red}</style></head>' +
+    '<body><!-- note --><h1>Neutral heading</h1><p>Some text.</p></body></html>';
+  const report = buildProjectReport({
+    target: 'https://example.invalid/about',
+    kind: 'page',
+    tainted: true,
+    trust: 'tainted',
+    jobDir: '/nonexistent',
+    discarded: true,
+    files: [{ path: 'page.txt', content: html }],
+    text: html,
+  } as Parameters<typeof buildProjectReport>[0]);
+  assert.equal(report.whatItIs.summary, 'Neutral Fixture Page — An invented page about tea.');
+  assert.doesNotMatch(report.whatItIs.summary, /document|window|color/);
+  for (const field of [report.activity, report.licence, report.buildAndTest])
+    assert.match(field.summary, /^Not applicable to a web page/);
+  assert.ok(!report.visibleRisks.some((r) => /licence/i.test(r.summary)), 'no licence risk for a page');
+});
