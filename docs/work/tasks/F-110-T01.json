@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-110-T01",
+  "parent": "F-110",
+  "title": "Owner decides which fixed values become settings",
+  "goal": "The list of settings and their defaults is chosen",
+  "status": "ready",
+  "acceptance": [
+    "The decision is written in docs/decisions/dashboard-settings.md"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/decisions/dashboard-settings.md",
+    "docs/work/records/F-110.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "ownerLink": "docs/decisions/dashboard-settings.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-18. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "decision"
+  }
+}
