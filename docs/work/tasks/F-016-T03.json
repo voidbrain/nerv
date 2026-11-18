@@ -3,8 +3,8 @@
   "parent": "F-016",
   "id": "F-016-T03",
   "status": "planned",
-  "title": "Step 2a — Signed state snapshot export and import to a read-only standby",
-  "goal": "Signed state snapshot export and import to a read-only standby.",
+  "title": "Step 2a — Signed coordinator state snapshot export",
+  "goal": "main exports the replicated coordinator tables as a signed, size-bounded snapshot",
   "capabilities": [
     "bounded-edit",
     "structured-tools",
@@ -14,7 +14,7 @@
   ],
   "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
   "acceptance": [
-    "Signed state snapshot export and import to a read-only standby"
+    "The tables of the decision's replicated inventory export with exact `deliveries.rowid`, signed by the base key, sized or chunked within the MAX_BACKUP_BODY class; host-local secrets and stores never included (test)"
   ],
   "dependsOn": [
     "F-016-T12"
@@ -36,12 +36,12 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 h agent",
-    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
-    "reviewed": "2026-11-14",
+    "estimate": "1.5 h",
+    "basis": "Split 2026-11-18 with the owner's approval into T03, T13, T14 and T15 (6.5 h in total, near the 1.5-day baseline): the 0.75 h estimate covered one fifth of the decision's scope. Not a measurement.",
+    "reviewed": "2026-11-18",
     "baselineDays": 1.5,
-    "agentHours": 0.75,
+    "agentHours": 1.5,
     "baselineAgentHours": 2.25,
-    "estimateAgentHours": 0.75
+    "estimateAgentHours": 1.5
   }
 }
