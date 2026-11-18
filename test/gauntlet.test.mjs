@@ -1496,3 +1496,49 @@ test('F-079-T01: per-case input paths invalidate only on changes inside declared
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('B-079: the root command reruns system cases whose source changed, as pending lists them', async () => {
+  const { caseHash } = await import('@voidbrain/gauntlet-protocol');
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-b079-'));
+  const ledger = join(dir, 'ledger.json');
+  const tasks = join(dir, 'tasks');
+  mkdirSync(tasks);
+  process.env.NERV_GAUNTLET_LEDGER = ledger;
+  process.env.NERV_GAUNTLET_TASKS = tasks;
+  try {
+    const system = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
+    writeFileSync(
+      ledger,
+      JSON.stringify({
+        schemaVersion: 2,
+        entries: system.cases.map((c) => ({
+          pack: system.id,
+          packVersion: system.version,
+          case: c.id,
+          caseHash: caseHash(c),
+          profileHash: null,
+          status: 'passed',
+          reportHash: 'c'.repeat(64),
+          finished: new Date().toISOString(),
+          modelDigest: null,
+          runtimeHash: 'a'.repeat(64),
+          scenarioHash: null,
+          sourceKey: '0'.repeat(64),
+        })),
+      }),
+    );
+    const pending = (await main(['pending'])).pendingLines.filter((l) => l.startsWith('nerv-system-flows/'));
+    assert.equal(pending.length, 7);
+    const plan = (await main(['all'])).plan.find((p) => p.pack === 'nerv-system-flows');
+    assert.deepEqual(
+      plan.run.map((r) => r.reason),
+      Array(7).fill('source-changed'),
+      'a result recorded at another source is not reused',
+    );
+    assert.equal(plan.reuse.length, 0);
+  } finally {
+    delete process.env.NERV_GAUNTLET_LEDGER;
+    delete process.env.NERV_GAUNTLET_TASKS;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
