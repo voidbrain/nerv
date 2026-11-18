@@ -63,6 +63,14 @@ Revoking the companion's own credential ends its pairing; step 3 pairs it again.
 
 Follow [Recover a changed, expired or compromised native certificate](../../native/README.md#recover-a-changed-expired-or-compromised-native-certificate) on Neo Tokyo-3, steps 1–3: stop the service and the companion, back up the data home, move only the native TLS/auth set aside, run `npm start -- native-init`, start the service.
 
+0. The fix for step 1 merged on 2026-11-15 (PR #465). Rebuild the companion from the live checkout first, so the app you test has it:
+
+   ```bash
+   git log -1 --format=%h c2669409 && git merge-base --is-ancestor c2669409 HEAD && echo has-fix
+   sh native/build-app.sh && open dist/NERV.app
+   ```
+
+   Expected: `c266940`, then `has-fix`, then the build finishes and the companion opens. No `has-fix`: stop and tell the agent (the service checkout is older than the fix).
 1. Start the companion **before** pairing again and choose **Refresh status**.
    Expected: a message saying the service's certificate no longer matches the pairing and that nothing was sent.
 2. Then step 4 of the README: `npm start -- pair`, forget the local pairing in the companion, paste the new invitation.
