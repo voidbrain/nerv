@@ -995,7 +995,8 @@ function telegramApiState(base, now = Date.now()) {
 function drawTelegram(ctx, now, W, H) {
   const routes = telegramRoutes(telegramBases); const x = W - 36, y = H * 0.65;
   const origins = new Set(routes.map(b => b.channel.mode === "via-main" ? b.channel.destination : b.baseId));
-  const color = status => cssVar(status === "responding" ? "--info" : status === "failed" ? "--warn" : "--muted");
+  // Midori in the bases' status colours (owner, 2026-11-18): green while the Bot API responds, as the header's "API live".
+  const color = status => cssVar(status === "responding" ? "--ok" : status === "failed" ? "--warn" : "--muted");
   const channelById = id => telegramBases.find(b => b.baseId === id);
   ctx.lineWidth = 1; ctx.globalAlpha = 0.7;
   origins.forEach(id => { const base = BASES.find(b => b.id === String(id).toLowerCase()); if (!base) return;
@@ -1006,7 +1007,7 @@ function drawTelegram(ctx, now, W, H) {
     const pulse = telegramPulses[i]; const t = (now - pulse.t0) / 1500;
     if (t > 1) { telegramPulses.splice(i,1); continue; }
     const base = BASES.find(b => b.id === String(pulse.baseId).toLowerCase()); if (!base || !origins.has(pulse.baseId)) continue;
-    const [bx,by] = map.proj([base.lon,base.lat]); ctx.fillStyle = cssVar("--ok"); ctx.beginPath(); const progress = pulse.direction === "inbound" ? 1-t : t; ctx.arc(bx+(x-bx)*progress,by+(y-by)*progress,3,0,Math.PI*2); ctx.fill();
+    const [bx,by] = map.proj([base.lon,base.lat]); ctx.fillStyle = cssVar("--info"); ctx.beginPath(); const progress = pulse.direction === "inbound" ? 1-t : t; ctx.arc(bx+(x-bx)*progress,by+(y-by)*progress,3,0,Math.PI*2); ctx.fill();
   }
   const states = [...origins].map(id => telegramApiState(channelById(id)));
   const status = states.includes("responding") ? "responding" : states.includes("failed") ? "failed" : "unknown";

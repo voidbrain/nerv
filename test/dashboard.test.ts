@@ -1177,6 +1177,9 @@ test('F-051: MAGI detail marks shadow/peer seats, Sephirot debrief shows directi
   assert.match(live, /data-inspect-remote-base=/);
   assert.match(live, /"bases\/" \+ encodeURIComponent\(baseId\) \+ "\/sorties\/" \+ encodeURIComponent\(sortieId\)/);
   assert.match(live, /const mainBase = up\.find\(b => b\.main\)/, 'routes to the main base when one exists');
+  // F-107 (owner, 2026-11-18): Midori uses the bases' status colours; its message dots are --info.
+  assert.match(js, /status === "responding" \? "--ok" : status === "failed" \? "--warn" : "--muted"/);
+  assert.match(js, /ctx\.fillStyle = cssVar\("--info"\); ctx\.beginPath\(\); const progress/);
 });
 
 test('B-065: revoked bases are excluded from BASES on the map and listed apart from live bases in renderBases', () => {
