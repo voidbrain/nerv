@@ -222,6 +222,10 @@ async function makeLinuxEnv() {
     setFailBuild: (fail: boolean) => {
       failBuild = fail;
     },
+    /** `systemctl --user disable` without --now: the unit file is disabled, the service keeps running (B-086-T02). */
+    disableOnly: () => {
+      registered = false;
+    },
     close: async () => {
       if (serviceProc && !serviceProc.killed) serviceProc.kill('SIGKILL');
       await new Promise<void>((resolve) => server.close(() => resolve()));
@@ -394,3 +398,28 @@ try {
     await env.close();
   }
 });
+
+test(
+  "B-086-T02: a matching unit that is disabled but still active stays NERV's, so a fenced stop recovers it",
+  supported,
+  async () => {
+    const env = await makeLinuxEnv();
+    try {
+      const installPlan = await planService(env.host, 'install');
+      assert.equal((await applyService(env.host, installPlan, installPlan.digest)).state, 'completed');
+      env.disableOnly();
+      const stopPlan = await planService(env.host, 'stop');
+      assert.deepEqual(stopPlan.blockers, [], 'disabled but active reads as owned');
+      const stopped = await applyService(env.host, stopPlan, stopPlan.digest);
+      assert.equal(stopped.state, 'completed');
+      assert.ok(
+        env.systemctlCalls.some((a) => a.join(' ') === '--user disable --now nerv.service'),
+        'the stop disables and stops it',
+      );
+      const after = await planService(env.host, 'install');
+      assert.deepEqual(after.blockers, [], 'a loaded, disabled, inactive matching unit still reads absent');
+    } finally {
+      await env.close();
+    }
+  },
+);
