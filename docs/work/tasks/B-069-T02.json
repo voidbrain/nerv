@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "parent": "B-069",
+  "id": "B-069-T02",
+  "title": "Owner repeats the reproduction and gets exactly one card",
+  "goal": "A rejected approval on the live service ends the step with one card and a reply",
+  "status": "planned",
+  "acceptance": [
+    "After ❌ Reject, no second card within three minutes; one inbox reply names the tool and the rejection"
+  ],
+  "dependsOn": [
+    "B-069-T01"
+  ],
+  "resources": [
+    "docs/acceptance/b069-one-card.md"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "Owner paste of steps 1 and 2"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "ownerLink": "docs/acceptance/b069-one-card.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0 h (+ 0.25 h owner)",
+    "basis": "Estimated 2026-11-18: the owner check the record's Check names, which had no step. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure",
+    "baselineAgentHours": 0
+  },
+  "prs": [
+    {
+      "pr": 510,
+      "note": "verification sweep"
+    }
+  ]
+}

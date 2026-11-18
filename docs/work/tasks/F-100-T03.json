@@ -4,7 +4,7 @@
   "parent": "F-100",
   "title": "Vibration report from a blackbox log",
   "goal": "A report with candidate causes and evidence",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Per-axis and per-motor spectrum summary; candidate causes ranked with the evidence; limits stated",
     "Invented or owner-supplied test logs"
@@ -31,10 +31,16 @@
   "effort": {
     "size": "small",
     "estimate": "0.75 h agent",
-    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement.",
-    "reviewed": "2026-11-14",
-    "agentHours": 0.75,
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. No actual: not timed by the session that closed it.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75
-  }
+  },
+  "prs": [
+    {
+      "pr": 486,
+      "note": "implementation"
+    }
+  ]
 }
