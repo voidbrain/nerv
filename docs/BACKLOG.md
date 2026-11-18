@@ -2395,11 +2395,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="b-070-t01"></a>B-070-T01 — SBOM test names the npm it needs | 0.75 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | 🤖 |
-| 🟢 Small | <a id="b-070-t02"></a>B-070-T02 — Owner repairs npm under Node 26.12 (npm 11) | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [B-070-T01](#b-070-t01) | ⏳ 🧑‍🔧 |
-| 🟢 Small | **Total** | 0.75 h | 0.5 h (1 of 2 steps recorded) | 0.25 h owner | 0 of 2 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="b-070-t01"></a>B-070-T01 — SBOM test names the npm it needs | 0.75 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | 🤖 | [PR #506](https://github.com/voidbrain/nerv/pull/506) |
+| 🟢 Small | <a id="b-070-t02"></a>B-070-T02 — Owner repairs npm under Node 26.12 (npm 11) | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [B-070-T01](#b-070-t01) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 0.75 h | 0.5 h (1 of 2 steps recorded) | 0.25 h owner | 0 of 2 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2408,7 +2408,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local run 2026-11-16 in a fresh worktree; CI on #502 passed the same test |
+| PR / evidence | Steps: B-070-T01: [PR #506](https://github.com/voidbrain/nerv/pull/506). Local run 2026-11-16 in a fresh worktree; CI on #502 passed the same test |
 | Opened | 2026-11-16 |
 | Verification | Pending. |
 | Reviewed | 2026-11-16 |
