@@ -7,7 +7,7 @@
   "status": "implemented",
   "acceptance": [
     "Worker-link heartbeats survive slow registry IPC without dropping live sessions",
-    "A regression with a delayed RegistryPort / IPC stub fails before the fix and passes after it, with strict heartbeat timing restored in test/worker-link.test.ts"
+    "A regression with a delayed RegistryPort / IPC stub fails before the fix and passes after it, with the registry delay more than twice the heartbeat budget in test/worker-link.test.ts (changed 2026-11-18, B-066-T03: the strict 150 ms budget lost sessions on Windows CI)"
   ],
   "dependsOn": [
     "B-066-T01"
