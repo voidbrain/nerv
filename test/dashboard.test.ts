@@ -1443,6 +1443,7 @@ test('a sortie whose action the owner declined draws its route from Misato apart
   assert.equal(api.edgeShown(ran, declined), false, 'not drawn when the action ran through the plug');
   const plain = { status: 'done', phase: 'debrief', done, actions: [] };
   assert.equal(api.edgeShown(plain, declined), false, 'not drawn for an answer with no action');
+});
 test('the flow header names the sortie by its code only; every EVA cage shows its status on its own line (F-108)', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');

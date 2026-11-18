@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 78.25 h agent + 10.5 h owner across 138 open steps of 40 features and 18 other records. 48.25 h of actual effort recorded on 92 steps. Generated from the task files.
+**Remaining effort:** 77 h agent + 10.5 h owner across 138 open steps of 40 features and 18 other records. 49.5 h of actual effort recorded on 94 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2050,9 +2050,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-108-T01 — Flow header shows only the sortie code; cage status on its own line (Ready).
+💻 **→** Next: F-108-T01 — Flow header shows only the sortie code; cage status on its own line (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2064,8 +2064,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-108-t01"></a>F-108-T01 — Flow header shows only the sortie code; cage status on its own line | 0.5 h | 0 h | 0.5 h | Ready |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+| 🟢 Small | <a id="f-108-t01"></a>F-108-T01 — Flow header shows only the sortie code; cage status on its own line | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2076,7 +2076,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Opened in PR #531 |
 | Opened | 2026-11-18 |
-| Verification | Pending. |
+| Verification | 2026-11-19: Unit: dashboard suite 38 pass. Owner live check pending. |
 | Reviewed | 2026-11-18 |
 
 </details>
@@ -2461,9 +2461,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-096-T01 — Draw the apartment → Debrief route for a sortie that ends at the owner's decision (Ready).
+💻 **→** Next: B-096-T01 — Draw the apartment → Debrief route for a sortie that ends at the owner's decision (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2475,8 +2475,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-096-t01"></a>B-096-T01 — Draw the apartment → Debrief route for a sortie that ends at the owner's decision | 0.75 h | 0 h | 0.75 h | Ready |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed |
+| 🟢 Small | <a id="b-096-t01"></a>B-096-T01 — Draw the apartment → Debrief route for a sortie that ends at the owner's decision | 0.75 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.75 h | 0.75 h | 0 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2487,7 +2487,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Opened in PR #531 |
 | Opened | 2026-11-18 |
-| Verification | Pending. |
+| Verification | 2026-11-19: Unit: dashboard suite 38 pass. Owner live check pending. |
 | Reviewed | 2026-11-18 |
 
 </details>
