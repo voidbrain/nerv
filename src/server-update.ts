@@ -139,6 +139,11 @@ export function createUpdateHandlers(params: {
         value.channels = ['main'];
       if (value.enabled === true && Array.isArray(value.targets) && value.targets.length === 0)
         value.targets = [options.base?.id ?? 'local'];
+      // F-110-T02: a body without a schedule (the dashboard switch) keeps the saved one.
+      if (value.schedule === undefined) {
+        const saved = readPolicy().schedule;
+        if (saved) value.schedule = saved;
+      }
       const validated = validateAutoUpdatePolicy(value);
       const nextPolicy: AutoUpdatePolicy =
         validated.enabled && !validated.acceptedAt ? { ...validated, acceptedAt: new Date().toISOString() } : validated;

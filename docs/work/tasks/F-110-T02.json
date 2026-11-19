@@ -4,7 +4,7 @@
   "parent": "F-110",
   "title": "Update schedule settings: mode (apply or notify only), check and apply times, no-apply window",
   "goal": "Saved, validated and used by the update scheduler",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Regression test: the scheduler uses the saved times and the notify-only mode never applies"
   ],
@@ -33,9 +33,11 @@
     "size": "small",
     "estimate": "2 h",
     "basis": "Estimated 2026-11-18. Not a measurement.",
-    "reviewed": "2026-11-18",
-    "agentHours": 2,
+    "reviewed": "2026-11-19",
+    "agentHours": 0,
     "baselineAgentHours": 2,
-    "estimateAgentHours": 2
+    "estimateAgentHours": 2,
+    "actualAgentHours": 2,
+    "actualSource": "stated"
   }
 }

@@ -1,16 +1,21 @@
 import { parseUpdateChannel, type UpdateAvailability, type UpdateChannel } from './update-availability.ts';
-import type { AutoUpdateEvaluation, AutoUpdatePolicy } from './update-policy.ts';
+import {
+  DEFAULT_UPDATE_SCHEDULE,
+  isQuietHour,
+  type AutoUpdateEvaluation,
+  type AutoUpdatePolicy,
+  type UpdateSchedule,
+} from './update-policy.ts';
 
 /**
  * F-102-T02: the scheduled automatic update with advance notice, under the owner's decision (F-102-T01): check once a
- * day at 20:00, announce an available revision with its apply time, apply at 03:00 unless the owner says "aspetta" or
- * "wait", never apply between 08:00 and 23:00, and report the result. Nothing runs while the opt-in policy is off.
- * Times are in the configured time zone. State lives in memory: after a restart the next 20:00 check announces again.
+ * day, announce an available revision with its apply time, apply it at the apply hour unless the owner says "aspetta"
+ * or "wait", never apply in the no-apply window, and report the result. Nothing runs while the opt-in policy is off.
+ * F-110-T02: the hours and the mode (apply, or notify only) come from the saved policy's schedule, read on every tick
+ * (defaults 20:00, 03:00, 08:00–23:00). Times are in the configured time zone. State lives in memory: after a restart
+ * the next check announces again.
  */
-export const UPDATE_CHECK_HOUR = 20;
-export const UPDATE_APPLY_HOUR = 3;
-/** No automatic apply from 08:00 until 23:00, the owner's waking hours. */
-export const UPDATE_QUIET = { from: 8, until: 23 };
+export { isQuietHour };
 
 export interface UpdateSchedulerSettings {
   timeZone: string;
@@ -79,21 +84,17 @@ export function zonedTime(day: string, hour: number, timeZone: string): Date {
   return new Date(guess);
 }
 
-/** The next 03:00 in `timeZone` strictly after `from`. */
-export function nextApplyWindow(from: Date, timeZone: string): Date {
+/** The next apply hour (03:00 unless the schedule says otherwise) in `timeZone` strictly after `from`. */
+export function nextApplyWindow(from: Date, timeZone: string, applyHour = DEFAULT_UPDATE_SCHEDULE.applyHour): Date {
   const local = localParts(from, timeZone);
-  let candidate = zonedTime(local.day, UPDATE_APPLY_HOUR, timeZone);
+  let candidate = zonedTime(local.day, applyHour, timeZone);
   while (candidate.getTime() <= from.getTime()) {
     const [y, m, d] = local.day.split('-').map(Number) as [number, number, number];
     const next = new Date(Date.UTC(y, m - 1, d) + candidate.getTime() - zonedTime(local.day, 0, timeZone).getTime());
     local.day = new Date(next.getTime() + 86_400_000).toISOString().slice(0, 10);
-    candidate = zonedTime(local.day, UPDATE_APPLY_HOUR, timeZone);
+    candidate = zonedTime(local.day, applyHour, timeZone);
   }
   return candidate;
-}
-
-export function isQuietHour(hour: number): boolean {
-  return hour >= UPDATE_QUIET.from && hour < UPDATE_QUIET.until;
 }
 
 /** The owner's postponement, deliberately narrow: the bare word, so "wait, what is…" still reaches Misato. */
@@ -122,6 +123,18 @@ export function announceText(s: ScheduledUpdate, timeZone: string, language: 'en
   return language === 'it'
     ? `🔄 Aggiornamento ${rev7(s.revision)} disponibile (${s.channel}). Lo applico ${at} salvo tu dica "aspetta".`
     : `🔄 Update ${rev7(s.revision)} available (${s.channel}). Applying ${at} unless you say "wait".`;
+}
+
+export function notifyOnlyText(s: { revision: string; channel: UpdateChannel }, language: 'en' | 'it'): string {
+  return language === 'it'
+    ? `🔄 Aggiornamento ${rev7(s.revision)} disponibile (${s.channel}). Solo avviso: applicalo dalla dashboard.`
+    : `🔄 Update ${rev7(s.revision)} available (${s.channel}). Notify only: apply it from the dashboard.`;
+}
+
+function cancelledText(s: ScheduledUpdate, language: 'en' | 'it'): string {
+  return language === 'it'
+    ? `⏹ L'aggiornamento ${rev7(s.revision)} non sarà applicato automaticamente (solo avviso).`
+    : `⏹ Update ${rev7(s.revision)} will not be applied automatically (notify only).`;
 }
 
 export function postponedText(s: ScheduledUpdate, timeZone: string, language: 'en' | 'it'): string {
@@ -169,6 +182,7 @@ export function resultText(
 export class AutoUpdateScheduler {
   private scheduled: ScheduledUpdate | undefined;
   private lastCheckDay: string | undefined;
+  private notified: string | undefined;
   private running = false;
   private readonly deps: UpdateSchedulerDeps;
 
@@ -191,14 +205,19 @@ export class AutoUpdateScheduler {
     }
   }
 
-  /** "aspetta" / "wait": the announced update moves to the next 03:00. Undefined when the text is not that command. */
+  /** "aspetta" / "wait": the announced update moves to the next apply hour. Undefined when the text is not that command. */
   postpone(text: string, now = new Date()): PostponeResult | undefined {
     if (!isPostponeCommand(text)) return undefined;
     if (!this.scheduled) return { postponed: false };
     const { timeZone, language } = this.deps.settings();
+    const { applyHour } = this.schedule();
     const from = new Date(Math.max(now.getTime(), Date.parse(this.scheduled.applyAt)));
-    this.scheduled = { ...this.scheduled, applyAt: nextApplyWindow(from, timeZone).toISOString() };
+    this.scheduled = { ...this.scheduled, applyAt: nextApplyWindow(from, timeZone, applyHour).toISOString() };
     return { postponed: true, reply: postponedText(this.scheduled, timeZone, language) };
+  }
+
+  private schedule(): UpdateSchedule {
+    return this.deps.readPolicy().schedule ?? DEFAULT_UPDATE_SCHEDULE;
   }
 
   private async step(now: Date): Promise<UpdateSchedulerTick> {
@@ -207,12 +226,20 @@ export class AutoUpdateScheduler {
       this.scheduled = undefined;
       return { action: 'disabled' };
     }
+    const schedule = policy.schedule ?? DEFAULT_UPDATE_SCHEDULE;
     const { timeZone, language, target } = this.deps.settings();
     const local = localParts(now, timeZone);
+    if (schedule.mode === 'notify' && this.scheduled) {
+      // Switched to notify only after an announcement: the announced apply is cancelled, and the owner told.
+      const cancelled = this.scheduled;
+      this.scheduled = undefined;
+      this.notified = cancelled.revision;
+      await this.deps.notify(cancelledText(cancelled, language));
+    }
     if (this.scheduled && now.getTime() >= Date.parse(this.scheduled.applyAt)) {
-      if (isQuietHour(local.hour)) {
+      if (isQuietHour(local.hour, schedule)) {
         // A window missed while the service was down is never caught up during the day.
-        const applyAt = nextApplyWindow(now, timeZone).toISOString();
+        const applyAt = nextApplyWindow(now, timeZone, schedule.applyHour).toISOString();
         this.scheduled = { ...this.scheduled, applyAt };
         return { action: 'postponed', applyAt };
       }
@@ -235,18 +262,31 @@ export class AutoUpdateScheduler {
       }
       let nextApplyAt: string | undefined;
       if (evaluation.outcome === 'refused') {
-        nextApplyAt = nextApplyWindow(now, timeZone).toISOString();
+        nextApplyAt = nextApplyWindow(now, timeZone, schedule.applyHour).toISOString();
         this.scheduled = { ...scheduled, applyAt: nextApplyAt };
       }
       await this.deps.notify(resultText(evaluation, scheduled, nextApplyAt, timeZone, language));
       return { action: 'evaluated', evaluation, ...(nextApplyAt ? { nextApplyAt } : {}) };
     }
-    if (local.hour >= UPDATE_CHECK_HOUR && this.lastCheckDay !== local.day) {
+    if (local.hour >= schedule.checkHour && this.lastCheckDay !== local.day) {
       const channel = policy.channels[0] ?? parseUpdateChannel(undefined);
       // A failed check (network) is retried on the next minute until the day ends; a successful one is once a day.
       const availability = await this.deps.check(channel);
       this.lastCheckDay = local.day;
       if (
+        schedule.mode === 'notify' &&
+        availability.status === 'update-available' &&
+        availability.availableRevision &&
+        this.notified !== availability.availableRevision
+      ) {
+        this.notified = availability.availableRevision;
+        await this.deps.notify(
+          notifyOnlyText({ revision: availability.availableRevision, channel: availability.channel }, language),
+        );
+        return { action: 'checked', status: availability.status };
+      }
+      if (
+        schedule.mode === 'apply' &&
         availability.status === 'update-available' &&
         availability.availableRevision &&
         this.scheduled?.revision !== availability.availableRevision
@@ -254,7 +294,7 @@ export class AutoUpdateScheduler {
         const scheduled: ScheduledUpdate = {
           revision: availability.availableRevision,
           channel: availability.channel,
-          applyAt: nextApplyWindow(now, timeZone).toISOString(),
+          applyAt: nextApplyWindow(now, timeZone, schedule.applyHour).toISOString(),
         };
         this.scheduled = scheduled;
         await this.deps.notify(announceText(scheduled, timeZone, language));

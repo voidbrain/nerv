@@ -68,8 +68,7 @@ import {
   setting,
 } from './config.ts';
 import { STAGES, addPilot, describePilots, setPilotFlag, updatePilot, type EvaClass, type Stage } from './pilots.ts';
-import { defaultAutoUpdatePolicy } from './update-policy.ts';
-import { UPDATE_APPLY_HOUR, UPDATE_CHECK_HOUR } from './update-scheduler.ts';
+import { DEFAULT_UPDATE_SCHEDULE, defaultAutoUpdatePolicy } from './update-policy.ts';
 import { McpClient, fingerprint as toolFingerprint, grantRefusal, toolName, type Eva, type McpTool } from './mcp.ts';
 import { TelegramApi, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 
@@ -868,11 +867,16 @@ export async function tryRunCliCommand(
         channels: mode === 'on' ? [channel] : current.channels,
         targets: mode === 'on' ? [target] : current.targets,
         ...(mode === 'on' ? { acceptedAt: current.acceptedAt ?? new Date().toISOString() } : {}),
+        ...(current.schedule ? { schedule: current.schedule } : {}),
       });
+      const sched = next.schedule ?? DEFAULT_UPDATE_SCHEDULE;
+      const hh = (h: number) => String(h).padStart(2, '0') + ':00';
       console.log(JSON.stringify(next, null, 2));
       console.log(
         mode === 'on'
-          ? `Automatic updates on for ${target} (${channel}): checked at ${UPDATE_CHECK_HOUR}:00, applied at 0${UPDATE_APPLY_HOUR}:00 unless you say "aspetta"; never between 08:00 and 23:00.`
+          ? sched.mode === 'notify'
+            ? `Automatic updates on for ${target} (${channel}): checked at ${hh(sched.checkHour)}; notify only, never applied automatically.`
+            : `Automatic updates on for ${target} (${channel}): checked at ${hh(sched.checkHour)}, applied at ${hh(sched.applyHour)} unless you say "aspetta"; never between ${hh(sched.quietFrom)} and ${hh(sched.quietUntil)}.`
           : 'Automatic updates off; nothing is scheduled.',
       );
     } else {
