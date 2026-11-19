@@ -4,7 +4,7 @@
   "parent": "F-008",
   "title": "Health advice from resistance trends",
   "goal": "NERV advises when a cell grows too much or reaches retirement",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Per-cell comparison with the first record and with the pack's other cells; the decided limits",
     "Advice names the battery, the cell and the values; no advice without records"
@@ -13,8 +13,12 @@
     "F-008-T08"
   ],
   "resources": [
-    "src/**",
-    "test/**"
+    "src/battery-health.ts",
+    "src/batteries.ts",
+    "test/battery-health.test.ts",
+    "docs/work/tasks/F-008-T10.json",
+    "docs/work/records/F-008.md",
+    "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",
