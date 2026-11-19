@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 78 h agent + 10.5 h owner across 138 open steps of 40 features and 19 other records. 52 h of actual effort recorded on 97 steps. Generated from the task files.
+**Remaining effort:** 78.25 h agent + 10.5 h owner across 139 open steps of 40 features and 19 other records. 52 h of actual effort recorded on 97 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2127,7 +2127,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 5.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🔴 Large | 5.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-110-T02 — Update schedule settings: mode (apply or notify only), check and apply times, no-apply window (Implemented; verification pending).
 
@@ -2142,10 +2142,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="f-110-t02"></a>F-110-T02 — Update schedule settings: mode (apply or notify only), check and apply times, no-apply window | 2 h | 2 h so far (stated) | 0 h | Implemented; verification pending | 🤖 |
+| 🟢 Small | <a id="f-110-t06"></a>F-110-T06 — Rerun the two expensive system cases at this source | 0.25 h | 0 h | 0.25 h | Ready | 🤖 |
 | 🟡 Medium | <a id="f-110-t03"></a>F-110-T03 — Dashboard settings panel for the chosen settings | 2 h | 0 h | 2 h | Planned · waits on [F-110-T02](#f-110-t02) | ⏳ 🤖 |
 | 🟡 Medium | <a id="f-110-t04"></a>F-110-T04 — Brief time, time zone, Sync Ratio threshold and Telegram freshness window through the same interface | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-110-T03](#f-110-t03) | ⏳ 🤖 |
 | 🟡 Medium | <a id="f-110-t05"></a>F-110-T05 — Common settings for every base, with a per-base override | 2 h | 0 h | 2 h | Planned · waits on [F-110-T04](#f-110-t04) | ⏳ 🤖 |
-| 🔴 Large | **Total** | 7.5 h (4 of 5 steps) | 2 h (1 of 5 steps recorded) | 5.5 h | 1 of 5 completed | |
+| 🔴 Large | **Total** | 7.75 h (5 of 6 steps) | 2 h (1 of 6 steps recorded) | 5.75 h | 1 of 6 completed | |
 
 <details><summary>Done steps (1)</summary>
 
