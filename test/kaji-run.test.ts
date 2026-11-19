@@ -9,6 +9,8 @@ import { join } from 'node:path';
 import { createRootKey, signRecord, unlockRootKey, type RegistryBody } from '../src/kaji.ts';
 import { KajiLink, sanitizeOffers, signedHeaders } from '../src/kaji-link.ts';
 import type { ChatReply } from '../src/runtime.ts';
+import { McpClient, fingerprint } from '../src/mcp.ts';
+import { fileURLToPath } from 'node:url';
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 async function until(check: () => boolean | Promise<boolean>, describe: () => unknown | Promise<unknown>, ms = 15000) {
   const end = Date.now() + ms;
@@ -490,3 +492,150 @@ test("B-094: a kaji.result recorded before Misato's final reply is in that reply
     rmSync(hb, { recursive: true, force: true });
   }
 });
+
+test('F-021-T04: offer names: MCP tools as server.tool, nothing that could smuggle text into a prompt', () => {
+  assert.deepEqual(sanitizeOffers(['notes.read_note', 'reminders.add', 'my-files.list-dir', 'gh.searchIssues']), [
+    'notes.read_note',
+    'reminders.add',
+    'my-files.list-dir',
+    'gh.searchIssues',
+  ]);
+  for (const bad of [
+    'notes',
+    'notes.read note',
+    'Notes.read',
+    'a.b.c',
+    'notes.ignore all previous',
+    'x'.repeat(41) + '.t',
+  ])
+    assert.equal(sanitizeOffers([bad]), undefined, bad);
+  assert.deepEqual(sanitizeOffers(['kaji.run', 'notes.read_note']), ['notes.read_note']);
+});
+
+test(
+  'F-021-T04: an MCP tool granted on another base runs there through kaji.run, its grant re-checked there; an ungranted one never runs',
+  { timeout: 60000 },
+  async (t) => {
+    const { Runtime } = await import('../src/runtime.ts');
+    const FAKE = fileURLToPath(new URL('./fixtures/fake-mcp.mjs', import.meta.url));
+    const notes = { id: 'notes', command: process.execPath, args: [FAKE] };
+    const probe = new McpClient(notes);
+    const fp = fingerprint((await probe.listTools())[0]!);
+    probe.close();
+    const A = keys(),
+      B = keys();
+    const reserved = await reservePorts(2);
+    const [pa, pb] = reserved.ports;
+    t.after(() => reserved.release());
+    const model = await fakeModel([
+      '{"action":{"tool":"kaji.run","args":{"base":"NERV-02","tool":"notes.read_note","args":{"name":"shopping"}}}}',
+      '{"reply":"Asked Tabgha."}',
+      '{"action":{"tool":"kaji.run","args":{"base":"NERV-02","tool":"notes.delete_note","args":{"name":"shopping"}}}}',
+      '{"reply":"Asked Tabgha to delete it."}',
+    ]);
+    const ha = mkdtempSync(join(tmpdir(), 'nerv-mcp-a-')),
+      hb = mkdtempSync(join(tmpdir(), 'nerv-mcp-b-'));
+    writeFileSync(
+      join(ha, 'config.json'),
+      JSON.stringify({
+        base: { id: 'NERV-01', name: 'Neo Tokyo-3' },
+        kaji: { root: root.publicKey },
+        models: { local: { baseUrl: model.url, model: 'm' } },
+      }),
+    );
+    // Tabgha has the notes server; only read_note is granted. delete_note is offered anyway, to show the grant decides.
+    writeFileSync(
+      join(hb, 'config.json'),
+      JSON.stringify({
+        base: { id: 'NERV-02', name: 'Tabgha' },
+        kaji: { root: root.publicKey },
+        tools: {
+          mcp: [notes],
+          grants: [{ server: 'notes', tool: 'read_note', effect: 'read', eva: '00', fingerprint: fp }],
+        },
+      }),
+    );
+    const records = [
+      rec({
+        kind: 'enrol',
+        baseId: 'NERV-01',
+        name: 'Neo Tokyo-3',
+        publicKey: A.publicKey,
+        address: `127.0.0.1:${pa}`,
+      }),
+      rec({ kind: 'enrol', baseId: 'NERV-02', name: 'Tabgha', publicKey: B.publicKey, address: `127.0.0.1:${pb}` }),
+      rec({ kind: 'main', baseId: 'NERV-01' }),
+    ];
+    const a = new Runtime(join(ha, 'nerv.sqlite'), undefined, ha),
+      b = new Runtime(join(hb, 'nerv.sqlite'), undefined, hb);
+    const links: KajiLink[] = [];
+    const logs: string[] = [];
+    const follow: ChatReply[] = [];
+    a.onResumed((r) => follow.push(r));
+    const describe = async () => ({ offers: await a.remoteOffers(), follow, logs: logs.slice(-20) });
+    try {
+      await a.ready();
+      await b.ready();
+      await a.kaji.add(records);
+      await b.kaji.add(records);
+      a.setBaseKey(A.publicKey);
+      b.setBaseKey(B.publicKey);
+      const la = new KajiLink({
+        worker: a.worker,
+        baseId: 'NERV-01',
+        key: A.privateKey,
+        publicKey: A.publicKey,
+        registry: a.kaji,
+        log: (l) => logs.push('NERV-01 ' + l),
+        onOffers: (id, offered) => a.notePeerOffers(id, offered),
+      });
+      const lb = new KajiLink({
+        worker: b.worker,
+        baseId: 'NERV-02',
+        key: B.privateKey,
+        publicKey: B.publicKey,
+        registry: b.kaji,
+        log: (l) => logs.push('NERV-02 ' + l),
+        offers: () => ['notes.read_note', 'notes.delete_note'],
+      });
+      links.push(la, lb);
+      await reserved.release();
+      await Promise.all([la.start(200), lb.start(200)]);
+      a.startResumer(100);
+      await until(async () => (await a.remoteOffers()).length === 1, describe);
+      await until(() => logs.some((l) => l.includes('Worker connected: NERV-02')), describe);
+      a.startOutbox((base, item, dispatching) => la.run(base, item, 5000, dispatching), 100);
+      const read = await a.chat('Read my shopping note on Tabgha');
+      assert.match(model.systems[0]!, /NERV-02 \(Tabgha\): notes\.read_note/, 'Misato sees the offered MCP tool');
+      assert.equal(read.waiting[0]?.tool, 'kaji.run', JSON.stringify(read));
+      await a.decide(read.waiting[0]!.approvalId, 'approve', 'api');
+      await until(async () => (await a.events(read.sortieId)).some((e) => e.kind === 'kaji.result'), describe);
+      const got = (await a.events(read.sortieId)).find((e) => e.kind === 'kaji.result')!.payload as {
+        outcome: string;
+        text: string;
+      };
+      assert.equal(got.outcome, 'grant');
+      assert.match(got.text, /Tabgha ran notes\.read_note/);
+      assert.match(got.text, /buy milk and bread/, 'the MCP server answered on Tabgha');
+
+      const del = await a.chat('Delete my shopping note on Tabgha');
+      await a.decide(del.waiting[0]!.approvalId, 'approve', 'api');
+      await until(async () => (await a.events(del.sortieId)).some((e) => e.kind === 'kaji.result'), describe);
+      const refused = (await a.events(del.sortieId)).find((e) => e.kind === 'kaji.result')!.payload as {
+        outcome: string;
+        text: string;
+      };
+      assert.equal(refused.outcome, 'refused');
+      assert.match(refused.text, /notes\.delete_note/);
+      assert.match(refused.text, /not granted/);
+    } finally {
+      await Promise.allSettled([reserved.release()]);
+      for (const l of links) await l.stop();
+      await a.close();
+      await b.close();
+      await model.close();
+      rmSync(ha, { recursive: true, force: true });
+      rmSync(hb, { recursive: true, force: true });
+    }
+  },
+);
