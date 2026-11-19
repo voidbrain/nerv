@@ -3,6 +3,7 @@ import { ClaudeCodeResumeAdapter } from './claude-resume-adapter.ts';
 import { decideHitlThroughPersona, explainClassificationThroughPersona, formatMisatoPendingHitl } from './persona.ts';
 import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-classes.ts';
 import { runToolsProcessInEva03 } from './eva-runner.ts';
+import { EvaPool, defaultEvaLimits } from './eva-pool.ts';
 
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
@@ -306,16 +307,19 @@ export async function tryRunCliCommand(
     } else if (sub === 'admit' && args[1]) {
       const req = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as EvaAdmissionRequest;
       console.log(JSON.stringify(admitEvaJob(req), null, 2));
+    } else if (sub === 'limits') {
+      // F-049-T06: what this machine gives EVA jobs (config.json eva.limits, or the defaults).
+      console.log(JSON.stringify(readConfig(home).eva?.limits ?? defaultEvaLimits(), null, 2));
     } else if (sub === 'run-tools-03') {
-      const result = await runToolsProcessInEva03({
-        jobId: `cli-${Date.now()}`,
-        home,
-        repoRoot: resolve(import.meta.dirname, '..'),
-      });
+      const jobId = `cli-${Date.now()}`;
+      const pool = new EvaPool(readConfig(home).eva?.limits ?? defaultEvaLimits());
+      const result = await pool.run({ jobId, evaClass: 'eva-03' }, () =>
+        runToolsProcessInEva03({ jobId, home, repoRoot: resolve(import.meta.dirname, '..') }),
+      );
       console.log(JSON.stringify(result, null, 2));
       if (result.exitCode !== 0 || result.timedOut || result.cancelled) process.exitCode = 1;
     } else {
-      throw new Error('Usage: eva classes | eva admit <request.json> | eva run-tools-03');
+      throw new Error('Usage: eva classes | eva limits | eva admit <request.json> | eva run-tools-03');
     }
   } else if (command === 'credentials') {
     if (args[0] !== 'rotate' || !['admin', 'telegram', 'cloud'].includes(args[1] ?? ''))

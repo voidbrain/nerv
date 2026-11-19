@@ -25,7 +25,8 @@
     "docs/work/tasks/F-049-T05.json",
     "docs/archive/reconciliation-2026.md",
     "evals/gauntlet/ledger.json",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "src/cli-commands.ts"
   ],
   "capabilities": [
     "bounded-edit",

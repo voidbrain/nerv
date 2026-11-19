@@ -1,4 +1,5 @@
 // F-049-T06: EVA instances run within per-machine limits; over a limit a job waits, never refused silently.
+import { spawnSync } from 'node:child_process';
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -29,6 +30,16 @@ describe('F-049-T06: per-machine EVA limits', () => {
       writeFileSync(join(home, 'config.json'), JSON.stringify({ eva: { limits: { instances: 2, modelSlots: 0 } } }));
       assert.equal(readConfig(home).eva?.limits.instances, 2);
       assert.equal(readConfig(home).eva?.limits.modelSlots, 0);
+      const cli = spawnSync(process.execPath, ['src/cli.ts', 'eva', 'limits'], {
+        env: { ...process.env, NERV_HOME: home, NERV_OLLAMA: 'http://127.0.0.1:9' },
+        encoding: 'utf8',
+      });
+      assert.equal(cli.status, 0, cli.stderr);
+      assert.deepEqual(
+        JSON.parse(cli.stdout),
+        { ...defaultEvaLimits(), instances: 2, modelSlots: 0 },
+        'nerv eva limits',
+      );
       writeFileSync(join(home, 'config.json'), JSON.stringify({ eva: { limits: { instances: 'many' } } }));
       assert.throws(() => readConfig(home), /eva\.limits\.instances/);
     } finally {
