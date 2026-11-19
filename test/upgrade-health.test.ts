@@ -198,11 +198,10 @@ test(
   'B-060: the fixture service keeps its port even when another socket holds the port it would draw',
   { ...supported, timeout: 20_000 },
   async () => {
-    // Another process (an outgoing connection in CI) holds the port the fixture would pick at random.
+    // Another socket holds a port while the fixture runs a stop and a start (B-076: it no longer takes the fixed port
+    // 44500, which a CI runner may already use; the fixture's port comes from the kernel since B-060).
     const blocker = createServer();
-    await new Promise<void>((done) => blocker.listen(44500, '127.0.0.1', done));
-    const random = Math.random;
-    Math.random = () => 0.51; // 43990 + 510 = 44500
+    await new Promise<void>((done) => blocker.listen(0, '127.0.0.1', done));
     let f: ReturnType<typeof adapterFixture> | undefined;
     try {
       f = adapterFixture((revision) => ({
@@ -215,13 +214,11 @@ test(
           models: { misato: 'neutral-local' },
         },
       }));
-      Math.random = random;
       const host = (await f).host;
       const plan = await planService(host, 'update', NEXT);
       const receipt = await applyService(host, plan, plan.digest);
       assert.equal(receipt.state, 'completed');
     } finally {
-      Math.random = random;
       await (await f)?.close();
       await new Promise<void>((done) => blocker.close(() => done()));
     }

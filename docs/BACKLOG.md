@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 78.75 h agent + 10.5 h owner across 139 open steps of 40 features and 19 other records. 51 h of actual effort recorded on 97 steps. Generated from the task files.
+**Remaining effort:** 78.25 h agent + 10.5 h owner across 140 open steps of 40 features and 19 other records. 52 h of actual effort recorded on 98 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2427,9 +2427,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-076-T01 — Name the cause of each scattered CI failure of 2026-11-18 (Ready).
+💻 **→** Next: B-076-T01 — Name the cause of each scattered CI failure of 2026-11-18 (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2441,8 +2441,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-076-t01"></a>B-076-T01 — Name the cause of each scattered CI failure of 2026-11-18 | 1 h | 0 h | 1 h | Ready | [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
+| 🟢 Small | <a id="b-076-t01"></a>B-076-T01 — Name the cause of each scattered CI failure of 2026-11-18 | 1.25 h | 1 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound |
+| 🟢 Small | <a id="b-076-t02"></a>B-076-T02 — Rerun the two expensive system cases at this source | 0.25 h | 0 h | 0.25 h | Ready | — |
+| 🟢 Small | **Total** | 1.5 h | 1 h (1 of 2 steps recorded) | 0.5 h | 0 of 2 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2451,7 +2452,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound. [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2 |
+| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound. [PR #540](https://github.com/voidbrain/nerv/pull/540) B-076-T01; [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |

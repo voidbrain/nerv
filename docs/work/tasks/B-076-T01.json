@@ -4,7 +4,7 @@
   "id": "B-076-T01",
   "title": "Name the cause of each scattered CI failure of 2026-11-18",
   "goal": "CI passes without reruns",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Each failure is named in the record; a code cause gets a failing-first test",
     "The next five CI runs pass without reruns"
@@ -31,11 +31,13 @@
   "effort": {
     "size": "small",
     "estimate": "1 h",
-    "basis": "Estimated 2026-11-18: read the CI log, reproduce under load, fix or bound, one test. Not a measurement.",
-    "reviewed": "2026-11-18",
-    "agentHours": 1,
+    "basis": "Estimated 2026-11-18: read the CI log, reproduce under load, fix or bound, one test. Not a measurement. Re-estimated 2026-11-19 to 1.25 h: 0.25 h left to watch the next five CI runs.",
+    "reviewed": "2026-11-19",
+    "agentHours": 0.25,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1.25,
+    "actualAgentHours": 1,
+    "actualSource": "stated"
   },
   "prs": [
     {
