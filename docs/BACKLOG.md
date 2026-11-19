@@ -1575,7 +1575,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-106-T03 — Domain tool schemas offered by intent (Planned).
+💻 **→** Next: F-106-T03 — Domain tool schemas offered by intent (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1587,7 +1587,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-106-t03"></a>F-106-T03 — Domain tool schemas offered by intent | 2 h | 0 h | 2 h | Planned | — |
+| 🟡 Medium | <a id="f-106-t03"></a>F-106-T03 — Domain tool schemas offered by intent | 2 h | 0 h | 2 h | Implemented; verification pending | — |
 | 🟡 Medium | **Total** | 3.5 h | 0.25 h (1 of 3 steps recorded) | 2 h | 2 of 3 completed | |
 
 <details><summary>Done steps (2)</summary>
