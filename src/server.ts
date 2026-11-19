@@ -1,4 +1,5 @@
 import { DashboardFeed } from './dashboard-feed.ts';
+import { toolListing } from './tool-listing.ts';
 import { createServer, type IncomingMessage, type RequestListener } from 'node:http';
 import { createServer as createHttpsServer } from 'node:https';
 import type { NativeAuth } from './native-auth.ts';
@@ -544,6 +545,9 @@ export function makeServer(
         res.once('finish', () => req.socket.setTimeout(15000));
         const r = await store.consolidate();
         reply(r.error ? 502 : 200, r);
+      } else if (req.method === 'GET' && path === '/api/tools') {
+        // F-021-T05: NERV's tools and the MCP tools granted now, with versions; a failed MCP listing shows NERV's alone.
+        reply(200, toolListing(store.externalTools ? await store.externalTools().catch(() => undefined) : undefined));
       } else if (req.method === 'GET' && path === '/api/pilots') {
         reply(200, {
           pilots: store.pilotRoster ? await store.pilotRoster() : [],

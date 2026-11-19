@@ -519,3 +519,7 @@ Reruns: #554's Windows test step hit its 18-minute limit once (no test failed); 
 ## 2026-11-19 — main `1bc73812`
 
 PR #557 merged with green CI. B-091-T01 waits on its live check on Tabgha. F-049-T07 reviewed and fixed in PR #558.
+
+## 2026-11-19 — main `37e0a248`
+
+PR #559 merged with green CI: B-101-T01 waits to be seen on NERV-01's dashboard (#558 and #561 are reconciled in #565). #560 (B-100-T01) closed unmerged. F-021-T05 implemented.

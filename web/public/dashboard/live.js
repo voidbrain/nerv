@@ -83,7 +83,7 @@
       // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
       const byId = new Map(); for (const x of [...latest20, ...older, ...matches]) if (!byId.has(x.id)) byId.set(x.id, x);
       const list = [...byId.values()].sort((a, b) => b.created.localeCompare(a.created)); shown = list;
-      applyBases(kajiBases, healthOf(doctor)); void loadModels();
+      applyBases(kajiBases, healthOf(doctor)); void loadModels(); void loadTools();
       state.pilots = pilots && Array.isArray(pilots.pilots) ? pilots.pilots : null;
       state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
       // Reminders delivered (briefs live in the inbox too since F-028, and are shown on their own in Debrief).
@@ -320,6 +320,23 @@
   // Models (F-038): each role's model, picked from what Ollama has; the cloud route on or off. The key is never asked here:
   // it is typed in a terminal (models key). The list is re-read every 30 s, and never while the owner is choosing.
   let modelsData = null, modelsAt = 0, modelsBusy = false, modelsDraft = false;
+  /** F-021-T05: the Tools panel: granted MCP tools and suspended grants first, then NERV's own tools with versions. */
+  function toolsHtml(data) {
+    if (!data) return "<div class='muted small'>Reading tools…</div>";
+    if (data.error) return "<div class='small danger'>" + esc(data.error) + "</div>";
+    const tools = data.tools || [];
+    const granted = tools.filter(t => t.grant === "granted"), own = tools.filter(t => t.grant !== "granted");
+    const card = t => "<div class='card'><div class='row'><span class='b'>" + esc(t.name) + "</span><span class='tiny muted'>" + esc("granted · " + t.source + (t.eva ? " · EVA-" + t.eva : "")) + "</span></div><div class='row tiny muted'><span>" + esc(t.effect) + "</span><span>version " + esc(String(t.version).slice(0, 12)) + "</span></div></div>";
+    const suspended = (data.suspended || []).map(s => "<div class='card'><div class='row'><span class='b'>" + esc(s.name) + "</span><span class='tiny warn'>suspended</span></div><div class='tiny muted'>" + esc(s.why) + "</div></div>");
+    const ownList = own.length
+      ? "<details><summary class='small'>NERV's own tools (" + own.length + ")</summary><ul class='tiny' style='margin:4px 0 0 16px;padding:0'>" + own.map(t => "<li><span class='b'>" + esc(t.name) + "</span> <span class='muted'>· " + esc(t.effect) + " · version " + esc(String(t.version).slice(0, 12)) + "</span></li>").join("") + "</ul></details>"
+      : "";
+    const none = granted.length || suspended.length ? "" : "<div class='muted small'>No MCP tools granted on this base.</div>";
+    return granted.map(card).join("") + suspended.join("") + none + ownList;
+  }
+  // end F-021-T05 toolsHtml
+  let toolsData, toolsAt = 0;
+  const loadTools = async (force) => { if (!force && Date.now() - toolsAt < 60000) return; toolsAt = Date.now(); try { toolsData = await api("tools"); } catch (e) { toolsData = { error:e.message }; } const box = document.getElementById("tools-list"); if (box) box.innerHTML = toolsHtml(toolsData); };
   const loadModels = async (force) => { if (!force && Date.now() - modelsAt < 30000) return; modelsAt = Date.now(); try { modelsData = await api("models"); } catch (e) { modelsData = { error:e.message }; } renderModels(); renderMelons(); };
   window.renderModels = function () {
     const box = document.getElementById("models"); const sub = document.getElementById("models-sub"); const d = modelsData;
