@@ -69,6 +69,8 @@ async function makeLinuxEnv() {
 
   let active = false;
   let registered = false;
+  let activeStateOverride: string | undefined;
+  let execStartOverride: string | undefined;
   let serviceProc: ChildProcess | null = null;
   const server = createServer((req, res) => {
     if (!active) {
@@ -162,10 +164,10 @@ async function makeLinuxEnv() {
           out: [
             'LoadState=loaded',
             `UnitFileState=${registered ? 'enabled' : 'disabled'}`,
-            `ActiveState=${active ? 'active' : 'inactive'}`,
+            `ActiveState=${active ? (activeStateOverride ?? 'active') : 'inactive'}`,
             `SubState=${active ? 'running' : 'dead'}`,
             `MainPID=${active && serviceProc?.pid ? serviceProc.pid : 0}`,
-            `ExecStart=${context.node} ${join(context.source, 'src/cli.ts')} serve`,
+            `ExecStart=${execStartOverride ?? `${context.node} ${join(context.source, 'src/cli.ts')} serve`}`,
             `WorkingDirectory=${context.source}`,
             `Environment=NERV_HOME=${context.home}`,
           ].join('\n'),
@@ -226,6 +228,14 @@ async function makeLinuxEnv() {
     /** `systemctl --user disable` without --now: the unit file is disabled, the service keeps running (B-086-T02). */
     disableOnly: () => {
       registered = false;
+    },
+    /** A running unit's ActiveState other than `active`, such as `activating` or `reloading` (B-086-T04). */
+    setActiveState: (state: string) => {
+      activeStateOverride = state;
+    },
+    /** The loaded unit runs another program than NERV's `serve` (B-086-T04). */
+    setExecStart: (execStart: string) => {
+      execStartOverride = execStart;
     },
     close: async () => {
       if (serviceProc && !serviceProc.killed) serviceProc.kill('SIGKILL');
@@ -419,6 +429,51 @@ test(
       );
       const after = await planService(env.host, 'start');
       assert.deepEqual(after.blockers, [], 'a loaded, disabled, inactive matching unit still reads absent');
+    } finally {
+      await env.close();
+    }
+  },
+);
+
+for (const state of ['activating', 'reloading']) {
+  test(
+    `B-086-T04: a matching, disabled unit that is ${state} reads as NERV's, but its runtime is unknown so nothing acts on it`,
+    supported,
+    async () => {
+      const env = await makeLinuxEnv();
+      try {
+        const installPlan = await planService(env.host, 'install');
+        assert.equal((await applyService(env.host, installPlan, installPlan.digest)).state, 'completed');
+        env.disableOnly();
+        env.setActiveState(state);
+        const stopPlan = await planService(env.host, 'stop');
+        assert.equal(stopPlan.before.registration, 'owned', `a ${state} unit still counts as registered`);
+        assert.equal(stopPlan.before.runtime, 'unknown', `a ${state} unit is not a running NERV`);
+        assert.notDeepEqual(stopPlan.blockers, [], 'no fenced stop of a unit in transition');
+      } finally {
+        await env.close();
+      }
+    },
+  );
+}
+
+test(
+  'B-086-T04: a disabled, running unit that runs another program reads as foreign and the stop is blocked',
+  supported,
+  async () => {
+    const env = await makeLinuxEnv();
+    try {
+      const installPlan = await planService(env.host, 'install');
+      assert.equal((await applyService(env.host, installPlan, installPlan.digest)).state, 'completed');
+      env.disableOnly();
+      env.setExecStart('/usr/bin/python3 /opt/other/app.py');
+      const stopPlan = await planService(env.host, 'stop');
+      assert.equal(stopPlan.before.registration, 'foreign');
+      assert.notDeepEqual(stopPlan.blockers, [], 'a foreign unit is never stopped');
+      assert.ok(
+        !env.systemctlCalls.some((a) => a.includes('disable') && a.includes('--now')),
+        'only the install touched systemd; nothing was disabled',
+      );
     } finally {
       await env.close();
     }

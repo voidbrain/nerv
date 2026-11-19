@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 76.75 h agent + 10.5 h owner across 135 open steps of 40 features and 19 other records. 55.75 h of actual effort recorded on 105 steps. Generated from the task files.
+**Remaining effort:** 76.25 h agent + 10.5 h owner across 135 open steps of 40 features and 19 other records. 56.25 h of actual effort recorded on 106 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -447,9 +447,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-086-T04 — Tests for the PR #536 review: activating and reloading units, and a running disabled unit that is not NERV’s (Ready).
+💻 **→** Next: B-086-T04 — Tests for the PR #536 review: activating and reloading units, and a running disabled unit that is not NERV’s (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -461,8 +461,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-086-t04"></a>B-086-T04 — Tests for the PR #536 review: activating and reloading units, and a running disabled unit that is not NERV’s | 0.5 h | 0 h | 0.5 h | Ready | — |
-| 🟢 Small | **Total** | 2 h | 1.25 h (3 of 4 steps recorded) | 0.5 h | 3 of 4 completed | |
+| 🟢 Small | <a id="b-086-t04"></a>B-086-T04 — Tests for the PR #536 review: activating and reloading units, and a running disabled unit that is not NERV’s | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | — |
+| 🟢 Small | **Total** | 2 h | 1.75 h | 0 h | 3 of 4 completed | |
 
 <details><summary>Done steps (3)</summary>
 
