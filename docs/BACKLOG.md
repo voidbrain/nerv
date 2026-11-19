@@ -1751,9 +1751,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-098-T01 — A dependency install refuses a linked node&#95;modules; the worktree procedure unlinks first (Ready).
+💻 **→** Next: B-098-T01 — A dependency install refuses a linked node&#95;modules; the worktree procedure unlinks first (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1765,7 +1765,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-098-t01"></a>B-098-T01 — A dependency install refuses a linked node&#95;modules; the worktree procedure unlinks first | 1 h | 0 h | 1 h | Ready |
+| 🟢 Small | <a id="b-098-t01"></a>B-098-T01 — A dependency install refuses a linked node&#95;modules; the worktree procedure unlinks first | 1 h | 0 h | 1 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
 
 <details>

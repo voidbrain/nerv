@@ -29,7 +29,7 @@ describe('B-098: dependency install guard for symlinked node_modules', () => {
               return { status: 0 };
             },
           }),
-        (err: unknown) => {
+        (err) => {
           const msg = err instanceof Error ? err.message : String(err);
           return /node_modules/i.test(msg) && /symbolic link/i.test(msg);
         },
@@ -45,11 +45,11 @@ describe('B-098: dependency install guard for symlinked node_modules', () => {
     const root = mkdtempSync(join(tmpdir(), 'nerv-b098-ok-'));
     try {
       const { installDependencies } = await import('../tools/install-deps.mjs');
-      const calls: Array<{ program: string; args: string[]; cwd: string }> = [];
+      const calls = [];
       installDependencies({
         cwd: root,
         args: ['--ignore-scripts'],
-        runner: (program: string, args: string[], options: { cwd: string }) => {
+        runner: (program, args, options) => {
           calls.push({ program, args, cwd: options.cwd });
           return { status: 0 };
         },
@@ -74,10 +74,9 @@ describe('B-098: dependency install guard for symlinked node_modules', () => {
       let stderr = '';
       try {
         execFileSync(process.execPath, [TOOL_PATH], { cwd: worktree, encoding: 'utf8', stdio: 'pipe' });
-      } catch (err: unknown) {
-        const e = err as { status?: number; stderr?: string };
-        exitCode = e.status ?? 1;
-        stderr = e.stderr ?? '';
+      } catch (err) {
+        exitCode = err?.status ?? 1;
+        stderr = err?.stderr ?? '';
       }
       assert.notEqual(exitCode, 0);
       assert.match(stderr, /node_modules/i);

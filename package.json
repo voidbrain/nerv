@@ -71,6 +71,7 @@
     "check:threats": "node tools/check-threat-map.mjs",
     "check:fast": "npm run check:conflicts && npm run format:check && npm run lint && npm run typecheck && npm run check:work && npm run check:backlog && npm run check:recap && npm run check:roadmap && npm run check:dependencies && npm run check:queue && npm run check:rules && npm run check:maintenance && npm run check:source-sizes && npm run check:threats",
     "worktree:link": "ln -sfn ../NERV/node_modules node_modules",
+    "deps:install": "node tools/install-deps.mjs",
     "work:usage": "node tools/work-usage.mjs",
     "work:launch": "node tools/usage-launch.mjs",
     "rule-load": "node tools/rule-load.mjs",
