@@ -4,6 +4,7 @@ import { readConfig } from './config.ts';
 import { toolName, type McpTool } from './mcp.ts';
 import { parsePrices, type Price, type UsageObservation } from './model-usage.ts';
 import type { ProcessClient } from './process-client.ts';
+import type { PromptMetrics } from './prompt-samples.ts';
 import { RpcFault, type Method } from './rpc.ts';
 import type { ExternalTools } from './runtime-api.ts';
 
@@ -14,6 +15,7 @@ export async function callModelWithUsage(options: {
   method: Method;
   params: Record<string, unknown>;
   timeoutMs: number;
+  onPromptMetrics?: (metrics: PromptMetrics) => void;
 }): Promise<unknown> {
   const id = (await options.nervous.call('usage.begin', { operation: options.method })) as string;
   const reply = (await options.brain.call(options.method, options.params, options.timeoutMs)) as {
@@ -22,6 +24,14 @@ export async function callModelWithUsage(options: {
     accounting?: UsageObservation | null;
   };
   if (!('accounting' in reply)) return reply;
+  const promptMetrics = (reply.value as { promptMetrics?: PromptMetrics } | undefined)?.promptMetrics;
+  if (promptMetrics && options.onPromptMetrics) {
+    try {
+      options.onPromptMetrics(promptMetrics);
+    } catch {
+      /* Prompt size sampling is best-effort and never blocks planning. */
+    }
+  }
   let prices: Price[] = [];
   if (options.home) {
     try {

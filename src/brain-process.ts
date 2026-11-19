@@ -39,6 +39,7 @@ import {
 } from './misato.ts';
 import { toolDocs } from './executors.ts';
 import { digestAsk, factLimit, parseDigest, type Exchange } from './instrumentality.ts';
+import { measureMisatoPrompt } from './prompt-samples.ts';
 // Execution boundary: model routes, the Casper seat and Misato's planning step. It plans and reviews; it never executes a tool.
 // The data home arrives as argv; the cloud key is read here from its private file, never passed in env or argv.
 const home = process.argv[2];
@@ -187,16 +188,17 @@ process.on('message', (value: unknown) => {
               'No model route for Misato: add models.local (or enable models.cloud) in config.json, then run nerv reload. See docs/INSTALL.md, section "Model routes".',
           };
         const remote = Array.isArray(params.remote) ? (params.remote as RemoteOffer[]) : [];
+        const tools = [
+          ...toolDocs.filter((t) => !proactive?.readOnly || t.effect === 'read'),
+          ...((params.external as ToolDoc[] | undefined) ?? []),
+          ...(remote.length ? [remoteToolDoc(remote)] : []),
+        ];
         const ask = misatoAsk(
           {
             ...(params.clarification === true ? { clarification: true } : {}),
             request: params.request as string,
             history: params.history as Step[],
-            tools: [
-              ...toolDocs.filter((t) => !proactive?.readOnly || t.effect === 'read'),
-              ...((params.external as ToolDoc[] | undefined) ?? []),
-              ...(remote.length ? [remoteToolDoc(remote)] : []),
-            ],
+            tools,
             now: new Date().toISOString(),
             timeZone,
             ...(params.context ? { context: params.context as Turn[] } : {}),
@@ -209,6 +211,7 @@ process.on('message', (value: unknown) => {
           },
           route,
         );
+        const promptMetrics = measureMisatoPrompt(ask, tools);
         try {
           const on =
             proactive && proactive.model && models.local
@@ -216,9 +219,11 @@ process.on('message', (value: unknown) => {
               : forRole(models, 'misato');
           const reply = await run(ask, on);
           const plan = parsePlan(reply.text);
-          return plan ? { plan, model: reply.model } : { invalid: true, model: reply.model };
+          return plan
+            ? { plan, model: reply.model, promptMetrics }
+            : { invalid: true, model: reply.model, promptMetrics };
         } catch (e) {
-          return { error: e instanceof ModelError ? e.message : 'Model route failed.' };
+          return { error: e instanceof ModelError ? e.message : 'Model route failed.', promptMetrics };
         }
       }
       if (method === 'consultant.advise') {
