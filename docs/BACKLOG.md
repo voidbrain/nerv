@@ -1934,7 +1934,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | Opened in [PR #537](https://github.com/voidbrain/nerv/pull/537) |
 | Opened | 2026-11-19 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |
