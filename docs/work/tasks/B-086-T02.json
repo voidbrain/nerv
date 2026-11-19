@@ -4,7 +4,7 @@
   "id": "B-086-T02",
   "title": "A matching unit that is disabled but still active stays NERV's, so a stop can recover it",
   "goal": "NERV can stop its own unit after a disable without --now",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test fails first: a matching unit with UnitFileState=disabled and ActiveState=active reads as owned; a fenced stop disables and stops it",
     "A foreign unit still reads foreign; a loaded, disabled, inactive matching unit still reads absent"
@@ -31,7 +31,7 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-18 from the review: one condition and one test. Not a measurement.",
+    "basis": "Estimated 2026-11-18 from the review: one condition and one test. Not a measurement. Closed 2026-11-19: PR #536 merged with its committed regression; CI run 44483736523 passed every job.",
     "reviewed": "2026-11-19",
     "agentHours": 0,
     "baselineAgentHours": 0.5,
@@ -39,5 +39,10 @@
     "actualAgentHours": 0.5,
     "actualSource": "stated"
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 536,
+      "note": "the fix; CI green"
+    }
+  ]
 }
