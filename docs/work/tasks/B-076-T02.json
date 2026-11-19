@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "parent": "B-076",
+  "id": "B-076-T02",
+  "title": "Rerun the two expensive system cases at this source",
+  "goal": "nerv-system-flows/stress and nerv-system-flows/browser have a covering run at the B-076 source",
+  "status": "ready",
+  "acceptance": [
+    "npm run gauntlet:all -- --execute --allow-expensive records passing runs for nerv-system-flows/stress and nerv-system-flows/browser",
+    "node tools/gauntlet.mjs pending lists neither"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "evals/gauntlet/ledger.json",
+    "docs/work/records/B-076.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run check:gauntlet-runs"
+  ],
+  "escalation": [
+    "The expensive run is started by the owner (the session's permission check blocks it for the agent)"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-19 from B-095-T02. Not a measurement.",
+    "reviewed": "2026-11-19",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}

@@ -152,8 +152,17 @@ jobs:
         run: npm run typecheck
       - if: needs.plan.outputs.frontend == 'true' || needs.plan.outputs.service == 'true'
         run: npm run build
+      # B-076: a hung suite stops here, before the job limit, and its report (written as tests finish) is kept, so the
+      # test that hung is the one after the last line of the report.
       - if: needs.plan.outputs.full == 'true'
         run: npm test
+        timeout-minutes: 18
+      - if: always() && needs.plan.outputs.full == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-test-report
+          path: .test-report.txt
+          if-no-files-found: ignore
       - name: Affected Node regressions
         if: needs.plan.outputs.full != 'true' && needs.plan.outputs.unit == 'true'
         run: node tools/selected-tests.mjs

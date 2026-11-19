@@ -728,3 +728,109 @@ test(
     }
   },
 );
+
+test(
+  'B-090: a candidate whose lockfile differs is rehearsed with its own dependencies; equal locks keep the link',
+  supported,
+  async () => {
+    const f = serviceFixture();
+    try {
+      const source = f.host.context.source,
+        git = (args: string[]) =>
+          execFileSync(
+            'git',
+            [
+              '-C',
+              source,
+              '-c',
+              'user.name=Neutral Fixture',
+              '-c',
+              'user.email=fixture@example.invalid',
+              '-c',
+              'commit.gpgsign=false',
+              ...args,
+            ],
+            { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+          ).trim();
+      const npm = (args: string[]) =>
+        execFileSync('npm', [...args, '--offline', '--no-audit', '--no-fund'], { cwd: source, stdio: 'ignore' });
+      // A local dependency (file:), so npm needs no registry: version 1 exports `sql`, version 2 exports `sql2`.
+      const dep = (version: string, name: string) => {
+        mkdirSync(join(source, 'vendor', 'neutral-dep'), { recursive: true });
+        writeFileSync(
+          join(source, 'vendor', 'neutral-dep', 'package.json'),
+          JSON.stringify({ name: 'neutral-dep', version, type: 'module', exports: './index.js' }),
+        );
+        writeFileSync(join(source, 'vendor', 'neutral-dep', 'index.js'), `export const ${name} = 'SELECT 1';\n`);
+        npm(['install', '--package-lock-only', '--ignore-scripts']);
+      };
+      git(['init']);
+      writeFileSync(join(source, '.gitignore'), 'node_modules/\n');
+      writeFileSync(
+        join(source, 'package.json'),
+        JSON.stringify({
+          name: 'neutral-app',
+          version: '0.0.0',
+          dependencies: { 'neutral-dep': 'file:vendor/neutral-dep' },
+        }),
+      );
+      mkdirSync(join(source, 'src'), { recursive: true });
+      dep('1.0.0', 'sql');
+      writeFileSync(
+        join(source, READER_ENTRY),
+        "import {DatabaseSync} from 'node:sqlite';\nimport {sql} from 'neutral-dep';\nconst db=new DatabaseSync(process.argv[2]);db.exec(sql);db.close();\n",
+      );
+      git(['add', '-A']);
+      git(['commit', '-m', 'Neutral installed']);
+      const installed = git(['rev-parse', 'HEAD']);
+      dep('2.0.0', 'sql2');
+      writeFileSync(
+        join(source, READER_ENTRY),
+        "import {DatabaseSync} from 'node:sqlite';\nimport {sql2} from 'neutral-dep';\nconst db=new DatabaseSync(process.argv[2]);db.exec(sql2);db.close();\n",
+      );
+      git(['add', '-A']);
+      git(['commit', '-m', 'Neutral candidate with a changed dependency']);
+      const candidate = git(['rev-parse', 'HEAD']);
+      git(['checkout', '--detach', installed]);
+      npm(['ci', '--ignore-scripts']);
+      const calls: string[] = [];
+      const runner = real(f.host.context.node);
+      const host = macServiceAdapter(f.host.context, async (program, args, cwd, timeout, extra) => {
+        calls.push(program + ' ' + args.join(' '));
+        if (program === 'npm' || /npm ci/.test(args.join(' '))) {
+          const r = spawnSync(program, args, { cwd, env: { PATH: process.env.PATH ?? '' }, encoding: 'utf8' });
+          return { status: r.status, out: r.stdout, err: r.stderr };
+        }
+        return runner(program, args, cwd, timeout, extra);
+      });
+      const area = join(f.directory, '.nerv-lifecycle');
+      mkdirSync(join(area, 'backups'), { recursive: true, mode: 0o700 });
+      const rehearse = async (revision: string) => {
+        const digest = revision.padEnd(64, '0'),
+          dest = join(area, 'backups', digest);
+        mkdirSync(dest, { mode: 0o700 });
+        await host.backup(dest);
+        return host.rehearse({ digest, nextRevision: revision } as ServicePlan, dest);
+      };
+      const changed = await rehearse(candidate);
+      assert.deepEqual(changed.blockers, [], 'the candidate reader runs against its own neutral-dep 2.0.0');
+      assert.ok(
+        calls.some((c) => /\bci\b.*--ignore-scripts/.test(c)),
+        'the candidate dependencies are installed in staging',
+      );
+      assert.deepEqual(readdirSync(join(area, 'staging')), [], 'no exported tree, archive or link is left behind');
+      assert.equal(
+        JSON.parse(readFileSync(join(source, 'node_modules', 'neutral-dep', 'package.json'), 'utf8')).version,
+        '1.0.0',
+        'the installed dependencies stay',
+      );
+      calls.length = 0;
+      const same = await rehearse(installed);
+      assert.deepEqual(same.blockers, []);
+      assert.ok(!calls.some((c) => /\bci\b/.test(c)), 'equal locks keep the link, with no install');
+      assert.equal(git(['status', '--porcelain']), '', 'the installed checkout is untouched');
+    } finally {
+      f.close();
+    }
+  },
+);
