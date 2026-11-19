@@ -406,6 +406,7 @@ export class Runtime implements StoreApi {
       note: (sortieId, kind, payload) => this.note(sortieId, kind, payload),
       record: (sortieId, steps, step, actionId, durationMs) => this.record(sortieId, steps, step, actionId, durationMs),
       baseNames: () => this.baseNames(),
+      revokedBases: () => this.revokedBases(),
       pilots: () => this.pilots?.() ?? [],
       externalTools: () => this.externalTools(),
       getRemoteConsultant: () => this.approvalsController.getRemoteConsultant(),
@@ -507,6 +508,16 @@ export class Runtime implements StoreApi {
     return res.value;
   }
   /** Every enrolled base by id and name (this one included), for Casper and the consultant (B-012); none without the Kaji line. */
+  async revokedBases(): Promise<{ id: string; name: string }[]> {
+    try {
+      return (await this.bases())
+        .filter((b) => b.status === 'revoked')
+        .slice(0, 20)
+        .map((b) => ({ id: b.baseId.slice(0, 16), name: b.name.slice(0, 60) }));
+    } catch {
+      return [];
+    }
+  }
   async baseNames(): Promise<{ id: string; name: string }[]> {
     try {
       return (await this.bases())

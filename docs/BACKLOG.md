@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 76.25 h agent + 10.5 h owner across 142 open steps of 40 features and 19 other records. 54.5 h of actual effort recorded on 100 steps. Generated from the task files.
+**Remaining effort:** 76.75 h agent + 10.5 h owner across 143 open steps of 40 features and 19 other records. 55.75 h of actual effort recorded on 102 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -128,9 +128,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.75 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-006-T16 — Record the evidence of F-006-T13 and close it (Planned).
+💻 **→** Next: F-006-T14 — T05c — Mac operating-conditions report (Planned).
 
 | | |
 |---|---|
@@ -142,15 +142,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
 | 🟡 Medium | <a id="f-006-t21"></a>F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases | 1.5 h | 0 h | 1.5 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-006-T21](#f-006-t21) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T16](#f-006-t16) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T11](#f-006-t11) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 9.25 h (18 of 21 steps) | 5.25 h (10 of 21 steps recorded) | 3 h | 15 of 21 completed | | |
+| 🟡 Medium | **Total** | 9.25 h (18 of 21 steps) | 5.5 h (11 of 21 steps recorded) | 2.75 h | 16 of 21 completed | | |
 
-<details><summary>Done steps (15)</summary>
+<details><summary>Done steps (16)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -165,6 +164,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-006-t09"></a>F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.75 h | 0.75 h (stated) | Completed | — |
 | — | <a id="f-006-t10"></a>F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.75 h | 0.75 h (stated) | Completed | — |
 | — | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | Completed | [PR #528](https://github.com/voidbrain/nerv/pull/528) results |
+| — | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0.25 h (stated) | Completed | — |
 | — | <a id="f-006-t17"></a>F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | Completed | — |
 | — | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | Completed | — |
 | — | <a id="f-006-t19"></a>F-006-T19 — Revise the placement campaign for 3 runs per case | 0.5 h | 0 h | Completed | [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation |
@@ -2462,52 +2462,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-094"></a>[🐞 B-094](#top)
-
-**Remote action wording: a doubled full stop, "queued" for a finished job, "offline" for a revoked base**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-094-T02 — Revoked is not offline; a finished remote action is not queued (Ready).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 in F-005-T27: (1) a refusal read "nothing was sent.." because `remoteOutcomeText` added a full stop after a reason that already ended one; (2) after a worker had run the job ("Calvary ran reminders.add …"), Misato replied that the reminder was "queued" / "in the queue for processing", under-claiming a finished action; (3) for revoked NERV-03 the planner said "No base by that id is online" and Misato called it offline, not revoked. |
-| **Reproduce** | Send a job to a stopped worker and cancel it; send one to a worker; send one to a revoked base. |
-| **Check** | (1) Test committed failing first, one full stop (B-094-T01). (2)–(3) The planner tells a revoked base from an offline one, and the reply after a `kaji.result` grant says the worker ran it (B-094-T02). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-094-t02"></a>B-094-T02 — Revoked is not offline; a finished remote action is not queued | 1 h | 0 h | 1 h | Ready | — |
-| 🟢 Small | **Total** | 1.5 h | 0.25 h (1 of 2 steps recorded) | 1 h | 1 of 2 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="b-094-t01"></a>B-094-T01 — One full stop after a refusal reason | 0.5 h | 0.25 h (stated) | Completed | [PR #527](https://github.com/voidbrain/nerv/pull/527) this change; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the live check |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-094.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-094-T01: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the live check. Test: `test/remote-outcome-text.test.ts` (committed failing first) |
-| Opened | 2026-11-18 |
-| Verification | Pending: CI. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
 ### <a id="b-095"></a>[🐞 B-095](#top)
 
 **On the map Midori looks like a base: it lost its own blue**
@@ -2587,6 +2541,54 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #533](https://github.com/voidbrain/nerv/pull/533) (`test/dashboard.test.ts`); opened in PR #531 |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: Unit: dashboard suite 38 pass. Owner live check pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-094"></a>[🐞 B-094](#top)
+
+**Remote action wording: a doubled full stop, "queued" for a finished job, "offline" for a revoked base**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-094-T02 — Revoked is not offline (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 in F-005-T27: (1) a refusal read "nothing was sent.." because `remoteOutcomeText` added a full stop after a reason that already ended one; (2) after a worker had run the job ("Calvary ran reminders.add …"), Misato replied that the reminder was "queued" / "in the queue for processing", under-claiming a finished action; (3) for revoked NERV-03 the planner said "No base by that id is online" and Misato called it offline, not revoked. |
+| **Reproduce** | Send a job to a stopped worker and cancel it; send one to a worker; send one to a revoked base. |
+| **Check** | (1) Test committed failing first, one full stop (B-094-T01). (3) The planner tells a revoked base from an offline one (B-094-T02). (2) The reply after a `kaji.result` grant says the worker ran it (B-094-T03). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-094-t02"></a>B-094-T02 — Revoked is not offline | 1 h | 1 h so far (stated) | 0 h | Implemented; verification pending | — |
+| 🟢 Small | <a id="b-094-t04"></a>B-094-T04 — Rerun the two expensive system cases at this source | 0.25 h | 0 h | 0.25 h | Ready | — |
+| 🟡 Medium | <a id="b-094-t03"></a>B-094-T03 — A remote result that arrived before Misato's reply is in that reply | 1.5 h | 0 h | 1.5 h | Ready · waits on [B-094-T02](#b-094-t02) | — |
+| 🟡 Medium | **Total** | 3.25 h | 1.25 h (2 of 4 steps recorded) | 1.75 h | 1 of 4 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-094-t01"></a>B-094-T01 — One full stop after a refusal reason | 0.5 h | 0.25 h (stated) | Completed | [PR #527](https://github.com/voidbrain/nerv/pull/527) this change; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the live check |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-094.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-094-T01: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the live check. [PR #535](https://github.com/voidbrain/nerv/pull/535) B-094-T02 (`test/kaji-run.test.ts`); Test: `test/remote-outcome-text.test.ts` (committed failing first) |
+| Opened | 2026-11-18 |
+| Verification | Pending: CI. |
 | Reviewed | 2026-11-18 |
 
 </details>
