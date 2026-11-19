@@ -2464,7 +2464,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-075-t01"></a>B-075-T01 — Read the failed Telegram tests on Windows and name the cause | 1 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound |
-| 🟢 Small | <a id="b-075-t02"></a>B-075-T02 — Give the F-003 checkpoint test the same Windows bound | 0.5 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending | — |
+| 🟢 Small | <a id="b-075-t02"></a>B-075-T02 — Give the F-003 checkpoint test the same Windows bound | 0.5 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #571](https://github.com/voidbrain/nerv/pull/571) bound |
 | 🟢 Small | **Total** | 1.5 h | 0.75 h | 0.5 h | 0 of 2 completed | |
 
 <details>
@@ -2474,7 +2474,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-075-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound. Failed: windows job 133087302320 of run 43802969338 (2026-11-16). |
+| PR / evidence | Steps: B-075-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound · B-075-T02: [PR #571](https://github.com/voidbrain/nerv/pull/571) bound. Failed: windows job 133087302320 of run 43802969338 (2026-11-16). |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |

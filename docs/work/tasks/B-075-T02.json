@@ -40,5 +40,10 @@
     "actualAgentHours": 0.25,
     "actualSource": "stated"
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 571,
+      "note": "bound"
+    }
+  ]
 }
