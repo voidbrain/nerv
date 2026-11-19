@@ -7,6 +7,15 @@ import type { Step } from './misato.ts';
  * A new kind does not bump it: readers skip kinds they do not know.
  */
 export const EVENT_SCHEMA_VERSION = 2;
+/** F-049-T13: what the ledger keeps of one EVA-03 job event. */
+export interface EvaJobEvent {
+  jobId: string;
+  evaClass: 'eva-03';
+  uncertainExternalEffect: boolean;
+  rollbackClaimed: false;
+  containment: 'best-effort';
+  detail?: string;
+}
 /** Bounded so a page of 50 events stays well under one IPC frame (rpc.ts MAX_FRAME_BYTES). */
 export const MAX_EVENT_PAYLOAD_BYTES = 16_384;
 /** The Spear lists at most this many executed effects in its event; the count is always exact. */
@@ -65,6 +74,16 @@ export interface EventPayloads {
     durationMs?: number;
     transferMs?: number;
   };
+  /** F-049-T13: an EVA-03 job's lifecycle on its sortie. Discarding the instance never claims rollback of an effect. */
+  'eva03.started': EvaJobEvent;
+  'eva03.completed': EvaJobEvent;
+  'eva03.failed': EvaJobEvent;
+  'eva03.timed_out': EvaJobEvent;
+  'eva03.cancelled': EvaJobEvent;
+  /** A job found still running after a restart: its effect is uncertain and its lock stays until the owner reconciles. */
+  'eva03.recovered': EvaJobEvent;
+  /** The owner reconciled an uncertain job and released its lock; `detail` says what they confirmed. */
+  'eva03.reconciled': EvaJobEvent;
   /** F-052: a shadow seat's vote that arrived after the gate decided; it never changes the outcome. */
   'ballot.shadow': {
     seat: string;
@@ -107,6 +126,13 @@ export const EVENT_KINDS = [
   'pilot.unmatched',
   'kaji.result',
   'ballot.shadow',
+  'eva03.started',
+  'eva03.completed',
+  'eva03.failed',
+  'eva03.timed_out',
+  'eva03.cancelled',
+  'eva03.recovered',
+  'eva03.reconciled',
   'misato.resumed',
   'action.done',
   'action.failed',
