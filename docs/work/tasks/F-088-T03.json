@@ -4,7 +4,7 @@
   "parent": "F-088",
   "title": "Report and conflicts",
   "goal": "The owner learns what happened",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Report of copied, skipped and conflicting files; a partial copy resumes next insert"
   ],
