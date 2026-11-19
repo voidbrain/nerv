@@ -1689,7 +1689,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Review of PR #522, 2026-11-18 |
+| PR / evidence | [PR #538](https://github.com/voidbrain/nerv/pull/538) B-090-T01 (`test/upgrade-lifecycle.test.ts`); Review of PR #522, 2026-11-18 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
