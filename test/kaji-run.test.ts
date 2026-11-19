@@ -355,3 +355,40 @@ test('B-029: a failed wait reports the observed connection and offer state', asy
     },
   );
 });
+test('B-094: kaji.run to a revoked base says it is revoked, not offline', { timeout: 30000 }, async (t) => {
+  const { Runtime } = await import('../src/runtime.ts');
+  const A = keys(),
+    C = keys();
+  const model = await fakeModel([
+    '{"action":{"tool":"kaji.run","args":{"base":"NERV-03","tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T09:00:00Z"}}}}',
+    '{"reply":"Done."}',
+  ]);
+  const home = mkdtempSync(join(tmpdir(), 'nerv-run-revoked-'));
+  writeFileSync(
+    join(home, 'config.json'),
+    JSON.stringify({
+      base: { id: 'NERV-01', name: 'Neo Tokyo-3' },
+      kaji: { root: root.publicKey },
+      models: { local: { baseUrl: model.url, model: 'm' } },
+    }),
+  );
+  const a = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+  t.after(async () => {
+    await a.close();
+    await model.close();
+    rmSync(home, { recursive: true, force: true });
+  });
+  await a.ready();
+  await a.kaji.add([
+    rec({ kind: 'enrol', baseId: 'NERV-01', name: 'Neo Tokyo-3', publicKey: A.publicKey, address: '127.0.0.1:1' }),
+    rec({ kind: 'enrol', baseId: 'NERV-03', name: 'Calvary', publicKey: C.publicKey, address: '127.0.0.1:2' }),
+    rec({ kind: 'revoke', baseId: 'NERV-03', publicKey: C.publicKey }),
+  ]);
+  a.setBaseKey(A.publicKey);
+  const chat = await a.chat('Remind me on Calvary to stretch');
+  const step = chat.steps.find((s) => s.tool === 'kaji.run');
+  assert.ok(step, JSON.stringify(chat));
+  assert.equal(step.outcome, 'invalid');
+  assert.match(step.error!, /NERV-03 \(Calvary\) is revoked/);
+  assert.doesNotMatch(step.error!, /online/i);
+});
