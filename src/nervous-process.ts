@@ -266,6 +266,14 @@ process.on('message', (value: unknown) => {
       case 'memory.history':
         return store.memory.historyOf(params.id as string);
       // Kaji registry for the coordinator's link: the root is re-read from config so an import while running applies.
+      // F-083-T06: one saved document by exact title or id, else the only one a recall finds; null when unclear.
+      case 'documents.find': {
+        const q = params.query as string;
+        const exact = store.documents.get(q);
+        if (exact) return { title: exact.title, body: exact.body };
+        const found = store.documents.recall(q);
+        return found.length === 1 ? { title: found[0]!.title, body: found[0]!.body } : null;
+      }
       case 'kaji.bases':
         return registry().bases();
       case 'kaji.records':
