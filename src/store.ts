@@ -7,6 +7,13 @@ import {
   type ImportStandbySnapshotInput,
   type PromoteStandbySwapInput,
 } from './coordinator-snapshot.ts';
+import {
+  appendReplicationBatch,
+  applyReplicationBatch,
+  type AppendReplicationBatchInput,
+  type ApplyReplicationBatchOptions,
+  type ReplicationBatch,
+} from './coordinator-replication.ts';
 import { transaction } from './sqlite-transaction.ts';
 import type { WorkerLease } from './worker-jobs.ts';
 import { credentialAges, readConfig } from './config.ts';
@@ -615,6 +622,12 @@ export class Store {
   }
   static promoteStandby(input: PromoteStandbySwapInput) {
     return promoteStandbyDatabase(input);
+  }
+  appendReplicationBatch(input: AppendReplicationBatchInput) {
+    return appendReplicationBatch(this.db, input);
+  }
+  applyStandbyReplicationBatch(batch: ReplicationBatch, options: ApplyReplicationBatchOptions) {
+    return applyReplicationBatch(this.db, batch, options);
   }
   close() {
     this.db.close();

@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T04",
-  "status": "planned",
+  "status": "implemented",
   "title": "Step 2b — Incremental log shipping to the standby",
   "goal": "Incremental log shipping to the standby.",
   "capabilities": [
@@ -14,18 +14,21 @@
   ],
   "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
   "acceptance": [
-    "Incremental log shipping to the standby"
+    "Active main appends ordered (coordinatorEpoch, seq) batches with prevDigest and batchDigest",
+    "Signed POST /kaji/replicate applies batches to coordinator-standby.sqlite, preserving deliveries.rowid and updating FTS5",
+    "Sequence gaps or prevDigest mismatches fail with 409 need_resync (expectedSeq) without mutating standby; stale epoch, non-main sender, or expired lease rejected"
   ],
   "dependsOn": [
     "F-016-T15"
   ],
   "resources": [
-    "src/**",
-    "shared/**",
-    "test/**",
-    "docs/**",
-    "generated:backlog-views",
-    "contract:coordinator-authority"
+    "src/coordinator-replication.ts",
+    "src/kaji-link.ts",
+    "src/store.ts",
+    "test/coordinator-replication.test.ts",
+    "docs/work/tasks/F-016-T15.json",
+    "docs/work/tasks/F-016-T04.json",
+    "docs/work/records/F-016.md"
   ],
   "validation": [
     "Directed regressions or recorded evidence for this slice; final required CI"
@@ -43,5 +46,11 @@
     "agentHours": 0.75,
     "baselineAgentHours": 2.25,
     "estimateAgentHours": 0.75
-  }
+  },
+  "prs": [
+    {
+      "pr": 555,
+      "note": "implementation"
+    }
+  ]
 }
