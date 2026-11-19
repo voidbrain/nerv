@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 83.5 h agent + 10.5 h owner across 127 open steps of 40 features and 21 other records. 78.5 h of actual effort recorded on 119 steps. Generated from the task files.
+**Remaining effort:** 83.75 h agent + 10.5 h owner across 128 open steps of 40 features and 21 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2445,18 +2445,18 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 ---
 ### <a id="b-075"></a>[🐞 B-075](#top)
 
-**Windows CI: Telegram checkpoint and quiet-hours tests failed once**
+**Windows CI: Telegram checkpoint and quiet-hours tests time out**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: B-075-T01 — Read the failed Telegram tests on Windows and name the cause (Implemented; verification pending).
 
 | | |
 |---|---|
 | **Issue** | Found 2026-11-18 in the history of the `windows` job: on 2026-11-16 (PR branch `feat/f-089-t02-browser-click`, no Telegram change) two tests failed in one run: "F-003: failed Bot delivery keeps its checkpoint across restart, retries once accepted, and is not replayed" and "F-026: Telegram defers proactive cards and resumed replies during quiet hours…". Not seen since in 20 clean Windows runs; recorded so it is not lost. |
-| **Reproduce** | Run `npm test` on the Windows runner; seen once. |
+| **Reproduce** | Run `npm test` on a slow Windows runner; F-003 timed out in five runs on 2026-11-18 and 2026-11-19. |
 | **Check** | The failure messages are read from the CI log and the cause named; a committed test fails first if it is in code; otherwise the record closes with the investigation and the remaining uncertainty stated. |
 
 **Steps**
@@ -2464,7 +2464,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-075-t01"></a>B-075-T01 — Read the failed Telegram tests on Windows and name the cause | 1 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound |
-| 🟢 Small | **Total** | 1 h | 0.5 h | 0.25 h | 0 of 1 completed | |
+| 🟢 Small | <a id="b-075-t02"></a>B-075-T02 — Give the F-003 checkpoint test the same Windows bound | 0.5 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #571](https://github.com/voidbrain/nerv/pull/571) bound |
+| 🟢 Small | **Total** | 1.5 h | 0.75 h | 0.5 h | 0 of 2 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2473,7 +2474,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-075-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound. Failed: windows job 133087302320 of run 43802969338 (2026-11-16). |
+| PR / evidence | Steps: B-075-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound · B-075-T02: [PR #571](https://github.com/voidbrain/nerv/pull/571) bound. Failed: windows job 133087302320 of run 43802969338 (2026-11-16). |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
