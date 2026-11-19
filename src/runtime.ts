@@ -196,6 +196,9 @@ export class Runtime implements StoreApi {
   async approvals(limit = 5) {
     return (await this.nervous.call('approvals.pending', { limit })) as Approval[];
   }
+  async batteryCards() {
+    return (await this.nervous.call('batteries.cards', {})) as ReturnType<import('./store.ts').Store['batteryCards']>;
+  }
   async decide(
     id: string,
     decision: Decision,

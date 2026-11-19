@@ -161,6 +161,8 @@ process.on('message', (value: unknown) => {
         return store.pendingApprovalIds(params.ids as string[]);
       case 'approvals.pending':
         return store.approvals(params.limit as number | undefined);
+      case 'batteries.cards':
+        return store.batteryCards();
       case 'approvals.decide':
         return store.decide(
           params.id as string,
