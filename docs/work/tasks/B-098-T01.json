@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "B-098-T01",
+  "parent": "B-098",
+  "title": "A dependency install refuses a linked node_modules; the worktree procedure unlinks first",
+  "goal": "No install in a worktree can empty the primary checkout’s node_modules",
+  "status": "ready",
+  "acceptance": [
+    "Test committed failing first: the install guard refuses when node_modules is a symbolic link, naming it",
+    "The worktree guidance says to remove the link before npm ci"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "package.json",
+    "tools/**",
+    "test/**",
+    "docs/**",
+    "docs/work/records/B-098.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A change to a harness file follows AGENTS, Changing a harness file"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-19. Not a measurement.",
+    "reviewed": "2026-11-19",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": []
+}

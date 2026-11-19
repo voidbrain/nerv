@@ -475,3 +475,7 @@ Closed: F-020, F-044, F-050, F-054, F-064, F-065, F-077, F-080, F-096 (six PRs s
 ## 2026-11-15 — main `abe2f3b6`
 
 PRs #451–#455 merged with green CI (reconcile 8.16.0, B-067, F-006-T04/T05, eight owner decisions, B-068). Harness 8.17.0 reconciled: `check:freshness` empty-backlog/roadmap check, `work-usage` suggested pauses, and `feature-plans.md`.
+
+## 2026-11-19 — main `16bfcc0f`
+
+PRs #531–#540 merged with green CI. Closed B-090; B-094-T02, B-086-T01/T02, F-110-T02 and five expensive reruns closed. F-005-T29 updates on NERV-01 and NERV-03. B-086-T04 from review; B-098 opened.

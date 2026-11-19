@@ -4,7 +4,7 @@
   "id": "B-090-T02",
   "title": "Rerun the two expensive system cases at this source",
   "goal": "nerv-system-flows/stress and nerv-system-flows/browser have a covering run at the B-090 source",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "npm run gauntlet:all -- --execute --allow-expensive records passing runs for nerv-system-flows/stress and nerv-system-flows/browser",
     "node tools/gauntlet.mjs pending lists neither"
@@ -28,10 +28,12 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h",
-    "basis": "Estimated 2026-11-19 from B-095-T02. Not a measurement.",
+    "basis": "Estimated 2026-11-19 from B-095-T02. Not a measurement. Closed 2026-11-19: at main 16bfcc0f, gauntlet:all --execute --allow-expensive recorded passing runs for nerv-system-flows/stress and nerv-system-flows/browser (owner-approved); gauntlet pending lists neither.",
     "reviewed": "2026-11-19",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }

@@ -4,7 +4,7 @@
   "id": "B-090-T01",
   "title": "Rehearse a candidate with its own dependencies when its lock differs",
   "goal": "A dependency change does not block or mislead updates",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test fails first: a candidate lock differing from the installed one gets its own dependencies in staging, or a refusal naming the change; equal locks keep the link"
   ],
@@ -30,7 +30,7 @@
   "effort": {
     "size": "small",
     "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-18: lock comparison, a bounded npm ci in staging and a test. Not a measurement.",
+    "basis": "Estimated 2026-11-18: lock comparison, a bounded npm ci in staging and a test. Not a measurement. Closed 2026-11-19: PR #538 merged with its committed regression; CI run 44429968461 passed every job.",
     "reviewed": "2026-11-19",
     "agentHours": 0,
     "baselineAgentHours": 1.5,
@@ -38,5 +38,10 @@
     "actualAgentHours": 1,
     "actualSource": "stated"
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 538,
+      "note": "the fix; CI green"
+    }
+  ]
 }

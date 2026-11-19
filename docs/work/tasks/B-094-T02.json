@@ -4,7 +4,7 @@
   "id": "B-094-T02",
   "title": "Revoked is not offline",
   "goal": "The planner names a revoked base as revoked (registry status)",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Test committed failing first (test/kaji-run.test.ts, B-094): kaji.run to a revoked base answers \"NERV-03 (Calvary) is revoked\", never offline"
   ],
@@ -30,7 +30,7 @@
   "effort": {
     "size": "small",
     "estimate": "1 h",
-    "basis": "Estimated 2026-11-18. Not a measurement. Split 2026-11-19: the reply-after-result half moved to B-094-T03.",
+    "basis": "Estimated 2026-11-18. Not a measurement. Split 2026-11-19: the reply-after-result half moved to B-094-T03. Closed 2026-11-19: PR #535 merged with its committed regression; CI run 44486070427 passed every job.",
     "reviewed": "2026-11-19",
     "agentHours": 0,
     "baselineAgentHours": 1,
@@ -38,5 +38,10 @@
     "actualAgentHours": 1,
     "actualSource": "stated"
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 535,
+      "note": "the fix; CI green"
+    }
+  ]
 }

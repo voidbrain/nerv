@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 9 | 16 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 9 | 17 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -5347,5 +5347,41 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 </details>
 
 ---
+
+---
+
+## Closed 2026-11-19
+
+### B-090
+
+**Update rehearsal uses the installed dependencies, so a candidate whose dependencies differ is judged wrongly or refused forever**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-19.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 by the fresh-context review of PR #522 (B-088): the candidate reader resolves packages through a link to the installed checkout's `node_modules`, and `dependencies` runs only after `checkout`. If a new revision adds a runtime dependency its reader path needs, every update to it is refused at the rehearsal, safely but forever; if a dependency's version changes (for example an ajv major), the rehearsal runs against the old version and can pass or fail wrongly. |
+| **Reproduce** | A candidate whose `src/upgrade-reader.ts` path imports a package absent from the installed `node_modules`: `lifecycle-apply --action update` is refused at `rehearse`. |
+| **Check** | A committed test fails first: when the candidate's `package-lock.json` differs from the installed one, the rehearsal installs the candidate's own dependencies into the staging tree (`npm ci --ignore-scripts`, bounded) and runs its reader against them, or refuses with a message naming the dependency change; equal locks keep the link. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** 2026-11-19: verified and closed: B-090-T01 by PR #538 (test committed failing first in `test/upgrade-lifecycle.test.ts`), CI run 44429968461 passed every job; B-090-T02: stress and browser system cases passed at main `16bfcc0f`. Used live the same day: the NERV-03 update `e61388cf` → `9613f0df` and the NERV-01 update `9613f0df` → `477d6afc` both rehearsed and completed (F-005-T29). 2026-11-19: B-090-T01 implemented: the rehearsal compares the candidate's `package-lock.json` with the installed one; when they differ it runs `npm ci --engine-strict --ignore-scripts` in the staging tree (bounded, 600 s) and the candidate reader uses those dependencies, or the update is refused naming the lockfile change; equal locks keep the B-088 link. Test committed failing first (`test/upgrade-lifecycle.test.ts`, B-090: a local `file:` dependency at 1.0.0 installed, 2.0.0 in the candidate). Shared by the Mac, Linux and Windows adapters. Opened 2026-11-18 from the review of PR #522.
+
+**Estimates:** Small, estimated 2026-11-18: 1.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #538](https://github.com/voidbrain/nerv/pull/538) B-090-T01 (`test/upgrade-lifecycle.test.ts`); Review of PR #522, 2026-11-18 |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-19: CI run 44429968461 (PR #538); live updates on NERV-01 and NERV-03 (F-005-T29). |
+| Reviewed | 2026-11-19 |
+
+</details>
 
 ---
