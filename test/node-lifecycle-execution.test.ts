@@ -14,7 +14,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { DatabaseSync } from 'node:sqlite';
 import { createHash, generateKeyPairSync } from 'node:crypto';
 import * as lifecycle from '../src/node-lifecycle-execution.ts';
@@ -853,3 +853,49 @@ test('B-092: building a host needs only the data home, so nerv base pubkey can c
     rmSync(home, { recursive: true, force: true });
   }
 });
+
+test(
+  'B-091: a fenced stop completes its receipt when journal.sqlite encounters transient lock contention after unregister',
+  supported,
+  async () => {
+    const f = serviceFixture();
+    let locker: ReturnType<typeof spawn> | undefined;
+    try {
+      const installPlan = await planService(f.host, 'install');
+      await applyService(f.host, installPlan, installPlan.digest);
+      const stopPlan = await planService(f.host, 'stop');
+      const journalPath = join(f.directory, '.nerv-lifecycle/journal.sqlite');
+      const origCommand = f.host.command;
+      f.host.command = async (cmd, p) => {
+        await origCommand(cmd, p);
+        if (cmd === 'unregister') {
+          locker = spawn(
+            process.execPath,
+            [
+              '-e',
+              `const { DatabaseSync } = require('node:sqlite');
+               const db = new DatabaseSync(process.argv[1]);
+               db.exec('BEGIN EXCLUSIVE');
+               process.stdout.write('locked\\n');
+               setTimeout(() => { db.exec('COMMIT'); db.close(); }, 5250);`,
+              journalPath,
+            ],
+            { stdio: ['ignore', 'pipe', 'inherit'] },
+          );
+          await new Promise<void>((resolve, reject) => {
+            locker!.stdout!.on('data', (chunk) => {
+              if (String(chunk).includes('locked')) resolve();
+            });
+            locker!.on('error', reject);
+          });
+        }
+      };
+      const receipt = await applyService(f.host, stopPlan, stopPlan.digest);
+      assert.equal(receipt.state, 'completed');
+      assert.deepEqual(receipt.steps, ['stop:completed']);
+    } finally {
+      locker?.kill();
+      f.close();
+    }
+  },
+);
