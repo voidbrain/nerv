@@ -511,3 +511,7 @@ PR #553 merged with green CI after two reruns (GitHub had no macOS runner; nothi
 PRs #554–#556 merged with green CI. F-008-T11, F-016-T04 and F-021-T04 closed. F-049-T07 narrowed and implemented; F-049-T14 opened.
 
 Reruns: #554's Windows test step hit its 18-minute limit once (no test failed); #556 and #553 waited on GitHub macOS capacity.
+
+## 2026-11-19 — main `1bc73812`
+
+PR #557 merged with green CI. B-091-T01 waits on its live check on Tabgha. F-049-T07 reviewed and fixed in PR #558.
