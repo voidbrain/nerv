@@ -1,8 +1,9 @@
 import { execFile, spawn } from 'node:child_process';
 import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join, relative } from 'node:path';
 import { EVA_CLASS_SPECS } from './eva-classes.ts';
+import type { EvaClass } from './pilots.ts';
 
 export const DEFAULT_SANDBOX_EXEC_PATH = '/usr/bin/sandbox-exec';
 
@@ -36,6 +37,35 @@ export interface Eva03JobSpec {
   /** Lists processes for B-099's tracking; tests point it at a missing binary to see tracking fail. */
   readonly psPath?: string;
 }
+
+/** F-049-T07: what a job of any EVA class asks of its instance, beyond the EVA-03 fields. */
+export interface EvaJobSpec extends Omit<Eva03JobSpec, 'onLedgerEvent'> {
+  readonly evaClass: EvaClass;
+  /** EVA-01 and EVA-02 only: directories the grant lets the job write besides its workspace. */
+  readonly writablePaths?: readonly string[];
+  /**
+   * EVA-01 and EVA-02 only: where the job may connect. Seatbelt filters by port only, on `localhost` or on any host:
+   * EVA-01 takes `localhost` ports (an egress proxy that checks destinations), EVA-02 also ports on any host.
+   */
+  readonly egress?: { readonly localhost?: readonly number[]; readonly anyHost?: readonly number[] };
+  readonly onEvent?: (event: EvaJobEvent) => void;
+}
+
+export type EvaPhase = 'started' | 'completed' | 'failed' | 'cancelled' | 'timed_out';
+
+/** F-049-T07: a job's lifecycle as the runner reports it, for any class. */
+export interface EvaJobEvent {
+  readonly jobId: string;
+  readonly phase: EvaPhase;
+  readonly evaClass: EvaClass;
+  readonly rollbackClaimed: false;
+  readonly uncertainExternalEffect: boolean;
+  readonly containment: 'best-effort';
+  readonly detail?: string;
+}
+
+/** Ports no class reaches, whatever its grant: NERV's own admin and native ports on this machine. */
+export const EVA_DENIED_LOCAL_PORTS: readonly number[] = [4317, 4319];
 
 export interface Eva03LedgerEvent {
   readonly jobId: string;
@@ -79,29 +109,68 @@ function canonicalExistingPath(target: string): string {
   return existsSync(target) ? realpathSync(target) : target;
 }
 
+const validPort = (p: number) => Number.isInteger(p) && p >= 1 && p <= 65535;
+
 /**
- * Builds a canonicalized macOS Seatbelt profile for an ephemeral EVA-03 job (F-049-T04).
- * Enforces read-only/ephemeral-workspace filesystem isolation, zero network egress,
- * and credential/Keychain denial.
+ * F-049-T07: the Seatbelt profile for one job of a class (decisions/eva-runner.md). Every class: writes only in its
+ * workspace, no NERV state, no $HOME, no Keychain, no inbound connections. EVA-03 and EVA-00: no network. EVA-01:
+ * writes also in its granted paths, connections only to granted `localhost` ports. EVA-02: as EVA-01, plus granted
+ * ports on any host. No class reaches NERV's admin ports. A class's network or writes it may not have are refused.
  */
-export function buildEva03SeatbeltProfile(options: Eva03SeatbeltOptions): string {
+export function buildEvaSeatbeltProfile(
+  evaClass: EvaClass,
+  options: Eva03SeatbeltOptions & Pick<EvaJobSpec, 'writablePaths' | 'egress'>,
+): string {
+  const spec = EVA_CLASS_SPECS[evaClass];
+  const egress = options.egress ?? {};
+  const writable = (options.writablePaths ?? []).map(canonicalExistingPath);
+  if (spec.filesystem.mode === 'ephemeral-ro-inputs' || spec.filesystem.mode === 'ephemeral-workspace') {
+    if (writable.length) throw new Error(`${evaClass} writes only in its own workspace.`);
+  }
+  if (spec.network.mode === 'deny' && (egress.localhost?.length || egress.anyHost?.length))
+    throw new Error(`${evaClass} has no network.`);
+  if (spec.network.mode === 'grant-allowlist' && egress.anyHost?.length)
+    throw new Error(`${evaClass} connects only to localhost ports (an egress proxy), never to any host directly.`);
+  const ports = [...(egress.localhost ?? []), ...(egress.anyHost ?? [])];
+  if (ports.some((p) => !validPort(p))) throw new Error('Egress ports must be whole numbers from 1 to 65535.');
+  if (ports.some((p) => EVA_DENIED_LOCAL_PORTS.includes(p)))
+    throw new Error(`No EVA class reaches NERV's own ports (${EVA_DENIED_LOCAL_PORTS.join(', ')}).`);
+
   const workspace = canonicalExistingPath(options.workspaceDir);
   const homeDir = canonicalExistingPath(options.hostHomeDir);
   const stateDir = options.nervStateDir ? canonicalExistingPath(options.nervStateDir) : undefined;
   const readOnly = (options.readOnlyPaths ?? []).map(canonicalExistingPath);
-  const deniedReads = [
-    homeDir,
-    ...(stateDir ? [stateDir] : []),
-    ...(options.deniedReadPaths ?? []).map(canonicalExistingPath),
-  ];
+  const denied = (options.deniedReadPaths ?? []).map(canonicalExistingPath);
+  const deniedReads = [homeDir, ...(stateDir ? [stateDir] : []), ...denied];
+  // Later Seatbelt rules win: an allow for a path that holds a denied one would re-open it (review of PR #558).
+  // path.relative handles both separators and drive roots, so this holds on every platform.
+  const within = (path: string, root: string) => {
+    const rel = relative(root, path);
+    return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel));
+  };
+  const overlaps = (a: string, b: string) => within(a, b) || within(b, a);
+  for (const w of writable)
+    if (deniedReads.some((d) => overlaps(w, d)))
+      throw new Error(`${w}: no EVA class writes in $HOME, NERV state or a denied path, or in a folder holding one.`);
+  // A read-only input may sit inside $HOME (a checkout), never hold it, and never touch state or a denied path.
+  const neverRead = [...(stateDir ? [stateDir] : []), ...denied];
+  for (const r of readOnly)
+    if (within(homeDir, r) || neverRead.some((d) => overlaps(r, d)))
+      throw new Error(`${r} re-opens NERV state or a denied path (or holds $HOME); it cannot be a read-only input.`);
 
   const lines: string[] = [
     '(version 1)',
     '(allow default)',
     '(deny network-outbound)',
     '(deny network-inbound)',
+    ...(egress.localhost ?? []).map((p) => `(allow network-outbound (remote ip "localhost:${p}"))`),
+    ...(egress.anyHost ?? []).map((p) => `(allow network-outbound (remote ip "*:${p}"))`),
+    // Name lookups go through mDNSResponder; a class with no host ports needs none.
+    ...(egress.anyHost?.length ? [] : ['(deny mach-lookup (global-name "com.apple.dnssd.service"))']),
+    ...EVA_DENIED_LOCAL_PORTS.map((p) => `(deny network-outbound (remote ip "localhost:${p}"))`),
     '(deny file-write*)',
     `(allow file-write* (subpath "${escapeSbString(workspace)}"))`,
+    ...writable.map((w) => `(allow file-write* (subpath "${escapeSbString(w)}"))`),
     '(allow file-write* (literal "/dev/null"))',
     '(deny mach-lookup (global-name "com.apple.SecurityServer") (global-name "com.apple.securityd"))',
   ];
@@ -113,6 +182,12 @@ export function buildEva03SeatbeltProfile(options: Eva03SeatbeltOptions): string
     lines.push(`(allow file-read* (subpath "${escapeSbString(p)}"))`);
   }
   lines.push(`(allow file-read* (subpath "${escapeSbString(workspace)}"))`);
+  for (const w of writable) lines.push(`(allow file-read* (subpath "${escapeSbString(w)}"))`);
+  // State and denied paths stay denied after every allow, whatever was granted.
+  for (const d of neverRead) {
+    lines.push(`(deny file-read* (subpath "${escapeSbString(d)}"))`);
+    lines.push(`(deny file-write* (subpath "${escapeSbString(d)}"))`);
+  }
   return `${lines.join('\n')}\n`;
 }
 
@@ -262,26 +337,37 @@ function terminateProcessGroup(pid: number): void {
  * Runs a single job in a fresh EVA-03 Seatbelt instance, discards its ephemeral workspace
  * and profile on completion, and records outcome/uncertainty without claiming rollback.
  */
-export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
+export function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
+  const { onLedgerEvent, ...rest } = spec;
+  return runEvaJob({
+    ...rest,
+    evaClass: 'eva-03',
+    onEvent: ({ phase, ...e }) => onLedgerEvent?.({ ...e, kind: `eva03.${phase}`, evaClass: 'eva-03' }),
+  });
+}
+
+/**
+ * F-049-T07: runs one job of any EVA class in a fresh Seatbelt instance of that class's profile, discards it after,
+ * and reports its outcome and uncertainty without claiming rollback. Its limits are the class's.
+ */
+export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
   if (process.platform !== 'darwin') {
-    throw new EvaSandboxUnavailableError(`EVA-03 Seatbelt runner requires macOS (got ${process.platform}).`);
+    throw new EvaSandboxUnavailableError(`The EVA Seatbelt runner requires macOS (got ${process.platform}).`);
   }
   const sandboxExec = spec.sandboxExecPath ?? DEFAULT_SANDBOX_EXEC_PATH;
   if (!existsSync(sandboxExec)) {
-    throw new EvaSandboxUnavailableError(`EVA-03 confinement binary missing: ${sandboxExec}`);
+    throw new EvaSandboxUnavailableError(`EVA confinement binary missing: ${sandboxExec}`);
   }
 
-  const eva03 = EVA_CLASS_SPECS['eva-03'];
-  const timeoutMs = Math.min(spec.timeoutMs ?? eva03.resources.maxWallMs, eva03.resources.maxWallMs);
-  const maxOutputBytes = Math.min(
-    spec.maxOutputBytes ?? eva03.resources.maxOutputBytes,
-    eva03.resources.maxOutputBytes,
-  );
+  const cls = EVA_CLASS_SPECS[spec.evaClass];
+  const timeoutMs = Math.min(spec.timeoutMs ?? cls.resources.maxWallMs, cls.resources.maxWallMs);
+  const maxOutputBytes = Math.min(spec.maxOutputBytes ?? cls.resources.maxOutputBytes, cls.resources.maxOutputBytes);
   const hostHomeDir = process.env.HOME || tmpdir();
 
-  const instanceDir = realpathSync(mkdtempSync(join(realpathSync(tmpdir()), `nerv-eva03-${spec.jobId}-`)));
+  const tag = spec.evaClass.replace('-', '');
+  const instanceDir = realpathSync(mkdtempSync(join(realpathSync(tmpdir()), `nerv-${tag}-${spec.jobId}-`)));
   const workspaceDir = join(instanceDir, 'workspace');
-  const profilePath = join(instanceDir, 'eva03.sb');
+  const profilePath = join(instanceDir, `${tag}.sb`);
   const startedAt = Date.now();
 
   let workspaceDiscarded = false;
@@ -289,19 +375,21 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
   try {
     const { mkdirSync } = await import('node:fs');
     mkdirSync(workspaceDir, { recursive: true });
-    const profile = buildEva03SeatbeltProfile({
+    const profile = buildEvaSeatbeltProfile(spec.evaClass, {
       workspaceDir,
       hostHomeDir,
       nervStateDir: spec.nervStateDir,
       readOnlyPaths: spec.readOnlyPaths,
       deniedReadPaths: spec.deniedReadPaths,
+      writablePaths: spec.writablePaths,
+      egress: spec.egress,
     });
     writeFileSync(profilePath, profile, 'utf8');
 
-    spec.onLedgerEvent?.({
+    spec.onEvent?.({
       jobId: spec.jobId,
-      kind: 'eva03.started',
-      evaClass: 'eva-03',
+      phase: 'started',
+      evaClass: spec.evaClass,
       rollbackClaimed: false,
       uncertainExternalEffect: false,
       containment: 'best-effort',
@@ -393,13 +481,13 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
     // B-099: whatever the job started and left running ends with it, whether it timed out, was cancelled or exited.
     const ended = tracker ? await tracker.endAll() : { killed: 0, survivors: [] };
     const tracked = tracker?.tracked ?? false;
-    const kind = outcome.cancelled
-      ? 'eva03.cancelled'
+    const phase: EvaPhase = outcome.cancelled
+      ? 'cancelled'
       : outcome.timedOut
-        ? 'eva03.timed_out'
+        ? 'timed_out'
         : outcome.exitCode === 0
-          ? 'eva03.completed'
-          : 'eva03.failed';
+          ? 'completed'
+          : 'failed';
     // A job that left processes running, or whose processes could not be listed, did not end cleanly either.
     const uncertain =
       outcome.cancelled ||
@@ -415,10 +503,10 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
     ]
       .filter(Boolean)
       .join(' ');
-    spec.onLedgerEvent?.({
+    spec.onEvent?.({
       jobId: spec.jobId,
-      kind,
-      evaClass: 'eva-03',
+      phase,
+      evaClass: spec.evaClass,
       rollbackClaimed: false,
       uncertainExternalEffect: uncertain,
       containment: 'best-effort',

@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "F-049-T14",
+  "parent": "F-049",
+  "title": "Actions run in EVA instances; the in-process executor goes",
+  "goal": "The scheduler no longer runs actions in process: each runs in an instance of its class, and the in-process path and its tests are removed",
+  "status": "planned",
+  "acceptance": [
+    "Every action runs in an EVA instance of its admitted class, with its receipt, events and limits; the scheduler runs none in process",
+    "The dead in-process path and its tests go",
+    "Planned in steps of at most a day before work starts (owner rule), including the Linux and Windows bases"
+  ],
+  "dependsOn": [
+    "F-049-T07",
+    "B-099-T02",
+    "F-049-T10"
+  ],
+  "resources": [
+    "src/executors.ts",
+    "src/store-sorties.ts",
+    "src/eva-runner.ts",
+    "docs/decisions/eva-runner.md",
+    "docs/work/records/F-049.md",
+    "docs/work/tasks/F-049-T14.json"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Join tests across scheduler, runner and ledger per class; npm test"
+  ],
+  "escalation": [
+    "Its step plan and any change to which bases can run actions go to the owner first"
+  ],
+  "effort": {
+    "size": "large",
+    "estimate": "16 h agent",
+    "basis": "Estimated 2026-11-19 when split from F-049-T07 (owner decision): every executor leaves the nervous process, which runs them today with direct database access. Not a measurement.",
+    "reviewed": "2026-11-19",
+    "agentHours": 16,
+    "baselineAgentHours": 16,
+    "estimateAgentHours": 16
+  },
+  "prs": []
+}
