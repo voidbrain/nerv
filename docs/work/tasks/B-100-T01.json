@@ -12,11 +12,13 @@
   "dependsOn": [],
   "resources": [
     "src/eva-runner.ts",
+    "src/tools-process.ts",
     "test/eva-runner.test.ts",
-    "test/eva-gate.test.ts",
     "docs/decisions/eva-runner.md",
     "docs/work/records/B-100.md",
-    "docs/work/tasks/B-100-T01.json"
+    "docs/work/tasks/B-100-T01.json",
+    "docs/work/records/F-005.md",
+    "docs/work/tasks/F-005-T38.json"
   ],
   "capabilities": [
     "bounded-edit",
