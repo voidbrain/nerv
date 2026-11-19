@@ -2,7 +2,7 @@
   "version": 1,
   "id": "F-109-T04",
   "parent": "F-109",
-  "title": "Silhouette image on the persona card, if chosen",
+  "title": "Silhouette image on the persona card",
   "goal": "The chosen silhouette shows on every card",
   "status": "planned",
   "acceptance": [
