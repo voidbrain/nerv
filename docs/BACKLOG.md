@@ -1049,7 +1049,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-049-t07"></a>F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-049-t10"></a>F-049-T10 — Linux host enforcement and join tests in CI | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
-| 🟡 Medium | <a id="f-049-t13"></a>F-049-T13 — EVA-03 events in the ledger and the recovery join test | 4 h | 0 h | 4 h | Implemented; verification pending | 🤖 | — |
+| 🟡 Medium | <a id="f-049-t13"></a>F-049-T13 — EVA-03 events in the ledger and the recovery join test | 4 h | 0 h | 4 h | Implemented; verification pending | 🤖 | [PR #553](https://github.com/voidbrain/nerv/pull/553) receipts and recovery join; CI pending |
 | 🟢 Small | <a id="f-049-t08"></a>F-049-T08 — Pilot trust stage caps the class | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T07](#f-049-t07) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-049-t09"></a>F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-049-T07](#f-049-t07) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-049-t12"></a>F-049-T12 — Run the first EVA job on the Linux host | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-049-T10](#f-049-t10) | ⏳ 🤖 | — |
@@ -1077,7 +1077,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Depends on | [F-045](archive/backlog-2026.md#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](archive/backlog-2026.md#f-025) — Pilot trust-stage limits for sandbox class admission |
-| PR / evidence | Steps: F-049-T04: [PR #474](https://github.com/voidbrain/nerv/pull/474) implementation · F-049-T05: [PR #549](https://github.com/voidbrain/nerv/pull/549) gate tests; CI green · F-049-T06: [PR #551](https://github.com/voidbrain/nerv/pull/551) the pool; CI green. [PR #474](https://github.com/voidbrain/nerv/pull/474) (merged; CI green); [PR #365](https://github.com/voidbrain/nerv/pull/365) F-049-T01 deterministic EVA runner contract and threat model; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
+| PR / evidence | Steps: F-049-T04: [PR #474](https://github.com/voidbrain/nerv/pull/474) implementation · F-049-T05: [PR #549](https://github.com/voidbrain/nerv/pull/549) gate tests; CI green · F-049-T06: [PR #551](https://github.com/voidbrain/nerv/pull/551) the pool; CI green · F-049-T13: [PR #553](https://github.com/voidbrain/nerv/pull/553) receipts and recovery join; CI pending. [PR #474](https://github.com/voidbrain/nerv/pull/474) (merged; CI green); [PR #365](https://github.com/voidbrain/nerv/pull/365) F-049-T01 deterministic EVA runner contract and threat model; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-18: F-049-T04 verified: [PR #474](https://github.com/voidbrain/nerv/pull/474) merged on green CI. 2026-11-13 F-049-T01: `npm run work:build && npm run backlog:recap && npm run roadmap:status` and `npm run check:fast` passed; contract/architecture documentation only, no runtime confinement claimed. |
 | Reviewed | 2026-11-18 |
@@ -1860,7 +1860,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Found in F-049-T13 |
+| PR / evidence | Found in F-049-T13 ([PR #553](https://github.com/voidbrain/nerv/pull/553)) |
 | Opened | 2026-11-19 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |

@@ -52,5 +52,10 @@
     "baselineAgentHours": 4,
     "estimateAgentHours": 4
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 553,
+      "note": "receipts and recovery join; CI pending"
+    }
+  ]
 }
