@@ -383,6 +383,8 @@ PRs #374–#382 merged with required CI green; scoped full-suite jobs skipped on
 
 **Harness reconciliations & assessments, 2026-11-08 – 2026-11-11 ([PR #256](https://github.com/voidbrain/nerv/pull/256), [PR #255](https://github.com/voidbrain/nerv/pull/255), [PR #237](https://github.com/voidbrain/nerv/pull/237), [PR #231](https://github.com/voidbrain/nerv/pull/231), [PR #241](https://github.com/voidbrain/nerv/pull/241)).** Usage/allowance tooling (v4.8.0), F-005 initial plan (v4.7.0), task-context guide (v4.3.0), execution-boundary assessment, B-046 CI evidence, and external-project references.
 
+**Harness v6.0.0 reconciliation, 2026-11-12.** Template F-059 (owner request): `tools/work-items.mjs`, `tools/check-backlog.mjs` and `tools/backlog-queue.mjs` copied byte-identically from v6.0.0; the Record and evidence requirements, Optional upfront feature plans and Optional work queue paragraphs of BACKLOG-RULES carried from the template diff v5.6.0..v6.0.0; CI clones the template at v6.0.0. Bugs and features are one `Work items` list (`{"records": "all"}`); each record's summary table now reads Status, Priority, Effort, Remaining, Depends on, Unlocks, Procedures, Decision. [PR #295](https://github.com/voidbrain/nerv/pull/295).
+
 ## 2026-11-13 — main `ee11385`
 
 41 PRs (#332–#373) passed CI; full audit archived 11 closed records, cited #337, #339, #342–#345, and opened F-075 (evals), F-076 (main CI) and F-077 (alerts).

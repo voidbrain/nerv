@@ -58,10 +58,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-087-t01"></a>B-087-T01 — Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front | 1.5 h | 0 h | 1.5 h | Ready |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-087-t01"></a>B-087-T01 — Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front | 1.5 h | 0 h | 1.5 h | Ready | — | [F-005-T29](#f-005-t29) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -96,13 +96,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | 🤖 | — |
-| 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned · waits on [B-087-T01](#b-087-t01) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T29](#f-005-t29) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T36](#f-005-t36) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 23.75 h (30 of 38 steps) | 19.75 h (23 of 38 steps recorded) | 1.5 h | 34 of 38 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned | [B-087-T01](#b-087-t01) | [F-005-T36](#f-005-t36) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-005-T29](#f-005-t29) | [F-005-T30](#f-005-t30) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned | [F-005-T36](#f-005-t36) | — | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 23.75 h (30 of 38 steps) | 19.75 h (23 of 38 steps recorded) | 1.5 h | 34 of 38 completed | | | | |
 
 <details><summary>Done steps (34)</summary>
 
@@ -180,14 +180,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟡 Medium | <a id="f-006-t21"></a>F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases | 1.5 h | 0 h | 1.5 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-006-T21](#f-006-t21) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T11](#f-006-t11) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-006-T15](#f-006-t15) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 9.25 h (18 of 21 steps) | 5.5 h (11 of 21 steps recorded) | 2.75 h | 16 of 21 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0 h | 0.25 h | Planned | — | — | 🤖 | — |
+| 🟡 Medium | <a id="f-006-t21"></a>F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases | 1.5 h | 0 h | 1.5 h | Planned | — | [F-006-T11](#f-006-t11) | 🤖 | — |
+| 🟢 Small | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 0.5 h | 0 h | 0.5 h | Planned | [F-006-T21](#f-006-t21) | [F-006-T15](#f-006-t15) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-006-T11](#f-006-t11) | [F-006-T12](#f-006-t12) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned | [F-006-T15](#f-006-t15) | — | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 9.25 h (18 of 21 steps) | 5.5 h (11 of 21 steps recorded) | 2.75 h | 16 of 21 completed | | | | |
 
 <details><summary>Done steps (16)</summary>
 
@@ -298,10 +298,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-021-t05"></a>F-021-T05 — Dashboard tool listing | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [PR #563](https://github.com/voidbrain/nerv/pull/563) tool listing; CI pending |
-| 🟢 Small | **Total** | 4.75 h (4 of 5 steps) | 3.75 h (3 of 5 steps recorded) | 0.25 h | 4 of 5 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-021-t05"></a>F-021-T05 — Dashboard tool listing | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | — | [F-056-T01](#f-056-t01) | [PR #563](https://github.com/voidbrain/nerv/pull/563) tool listing; CI pending |
+| 🟢 Small | **Total** | 4.75 h (4 of 5 steps) | 3.75 h (3 of 5 steps recorded) | 0.25 h | 4 of 5 completed | | | |
 
 <details><summary>Done steps (4)</summary>
 
@@ -348,12 +348,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-012-t04"></a>F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-012-t05"></a>F-012-T05 — Edge cases and real-host acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-012-T04](#f-012-t04) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | <a id="f-012-t06"></a>F-012-T06 — Record the evidence of F-012-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-012-T05](#f-012-t05) | ⏳ 🤖 | — |
-| 🟢 Small | **Total** | 2.75 h (5 of 6 steps) | 0.75 h (2 of 6 steps recorded) | 0.75 h agent + 0.5 h owner | 3 of 6 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-012-t04"></a>F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned | — | [F-012-T05](#f-012-t05) | 🤖 | — |
+| 🟢 Small | <a id="f-012-t05"></a>F-012-T05 — Edge cases and real-host acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-012-T04](#f-012-t04) | [F-012-T06](#f-012-t06) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-012-t06"></a>F-012-T06 — Record the evidence of F-012-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-012-T05](#f-012-t05) | — | ⏳ 🤖 | — |
+| 🟢 Small | **Total** | 2.75 h (5 of 6 steps) | 0.75 h (2 of 6 steps recorded) | 0.75 h agent + 0.5 h owner | 3 of 6 completed | | | | |
 
 <details><summary>Done steps (3)</summary>
 
@@ -401,14 +401,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-016-t06"></a>F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | 🤖 | [PR #567](https://github.com/voidbrain/nerv/pull/567) implementation |
-| 🟢 Small | <a id="f-016-t07"></a>F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T06](#f-016-t06) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T07](#f-016-t07) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned · waits on [F-016-T08](#f-016-t08) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 12.25 h (14 of 15 steps) | 8.25 h (7 of 15 steps recorded) | 2.5 h agent + 1 h owner | 10 of 15 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-016-t06"></a>F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | — | [F-016-T07](#f-016-t07) | 🤖 | [PR #567](https://github.com/voidbrain/nerv/pull/567) implementation |
+| 🟢 Small | <a id="f-016-t07"></a>F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.75 h | 0 h | 0.75 h | Planned | [F-016-T06](#f-016-t06) | [F-016-T08](#f-016-t08) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned | [F-016-T07](#f-016-t07) | [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | [F-016-T08](#f-016-t08) | [F-016-T11](#f-016-t11) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-016-T09](#f-016-t09) | — | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 12.25 h (14 of 15 steps) | 8.25 h (7 of 15 steps recorded) | 2.5 h agent + 1 h owner | 10 of 15 completed | | | | |
 
 <details><summary>Done steps (10)</summary>
 
@@ -547,13 +547,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-011-t02"></a>F-011-T02 — Live menu, service-button and login acceptance on the Mac | — | 0 h | 0 h agent + 0.5 h owner | Planned | [🧑‍🔧](acceptance/f011-companion-acceptance-procedure.md#part-1--companion-ui-notifications-and-service-controls-neo-tokyo-3-terminal--ui) |
-| 🟢 Small | <a id="f-011-t05"></a>F-011-T05 — Record the evidence of F-011-T02 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-011-T02](#f-011-t02) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-011-t03"></a>F-011-T03 — Live notification permission acceptance | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-011-T05](#f-011-t05) | ⏳ 🧑‍🔧 |
-| 🟢 Small | <a id="f-011-t06"></a>F-011-T06 — Record the evidence of F-011-T03 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-011-T03](#f-011-t03) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 0.75 h (3 of 6 steps) | 0 h (0 of 6 steps recorded) | 0.5 h agent + 0.75 h owner | 2 of 6 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-011-t02"></a>F-011-T02 — Live menu, service-button and login acceptance on the Mac | — | 0 h | 0 h agent + 0.5 h owner | Planned | — | [F-011-T05](#f-011-t05) | [🧑‍🔧](acceptance/f011-companion-acceptance-procedure.md#part-1--companion-ui-notifications-and-service-controls-neo-tokyo-3-terminal--ui) |
+| 🟢 Small | <a id="f-011-t05"></a>F-011-T05 — Record the evidence of F-011-T02 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-011-T02](#f-011-t02) | [F-011-T03](#f-011-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-011-t03"></a>F-011-T03 — Live notification permission acceptance | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-011-T05](#f-011-t05) | [F-011-T06](#f-011-t06) | ⏳ 🧑‍🔧 |
+| 🟢 Small | <a id="f-011-t06"></a>F-011-T06 — Record the evidence of F-011-T03 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-011-T03](#f-011-t03) | — | ⏳ 🤖 |
+| 🟢 Small | **Total** | 0.75 h (3 of 6 steps) | 0 h (0 of 6 steps recorded) | 0.5 h agent + 0.75 h owner | 2 of 6 completed | | | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -598,11 +598,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) |
-| 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-004-T06](#f-004-t06) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 12.25 h (6 of 7 steps) | 3 h (5 of 7 steps recorded) | 0.25 h agent + 0.5 h owner | 5 of 7 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | — | [F-004-T07](#f-004-t07) | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) |
+| 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-004-T06](#f-004-t06) | — | ⏳ 🤖 |
+| 🟢 Small | **Total** | 12.25 h (6 of 7 steps) | 3 h (5 of 7 steps recorded) | 0.25 h agent + 0.5 h owner | 5 of 7 completed | | | |
 
 <details><summary>Done steps (5)</summary>
 
@@ -697,14 +697,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-056-t01"></a>F-056-T01 — Shared command catalog and deterministic router | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-021-T05](#f-021-t05) |
-| 🟢 Small | <a id="f-056-t02"></a>F-056-T02 — Read-only commands | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-056-T01](#f-056-t01) |
-| 🟢 Small | <a id="f-056-t03"></a>F-056-T03 — /spear and /log | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-056-T02](#f-056-t02) |
-| 🟢 Small | <a id="f-056-t04"></a>F-056-T04 — Telegram menu registration and dashboard slash menu | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-056-T03](#f-056-t03) |
-| 🟢 Small | <a id="f-056-t05"></a>F-056-T05 — Group and connected-account assessment | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-056-T04](#f-056-t04) |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 5 steps recorded) | 2 h | 0 of 5 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-056-t01"></a>F-056-T01 — Shared command catalog and deterministic router | 0.5 h | 0 h | 0.5 h | Planned | [F-021-T05](#f-021-t05) | [F-056-T02](#f-056-t02) |
+| 🟢 Small | <a id="f-056-t02"></a>F-056-T02 — Read-only commands | 0.5 h | 0 h | 0.5 h | Planned | [F-056-T01](#f-056-t01) | [F-056-T03](#f-056-t03) |
+| 🟢 Small | <a id="f-056-t03"></a>F-056-T03 — /spear and /log | 0.5 h | 0 h | 0.5 h | Planned | [F-056-T02](#f-056-t02) | [F-056-T04](#f-056-t04) |
+| 🟢 Small | <a id="f-056-t04"></a>F-056-T04 — Telegram menu registration and dashboard slash menu | 0.25 h | 0 h | 0.25 h | Planned | [F-056-T03](#f-056-t03) | [F-056-T05](#f-056-t05) |
+| 🟢 Small | <a id="f-056-t05"></a>F-056-T05 — Group and connected-account assessment | 0.25 h | 0 h | 0.25 h | Planned | [F-056-T04](#f-056-t04) | — |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 5 steps recorded) | 2 h | 0 of 5 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -741,12 +741,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-082-t02"></a>F-082-T02 — Checklist card in the dashboard chat | 0.5 h | 0 h | 0 h | Implemented; verification pending | 🤖 | [PR #483](https://github.com/voidbrain/nerv/pull/483) implementation |
-| 🟡 Medium | <a id="f-082-t05"></a>F-082-T05 — Show the checklist card in the dashboard chat | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-082-T02](#f-082-t02) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-082-t04"></a>F-082-T04 — Owner check: add by Telegram, tick on the dashboard | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-082-T02](#f-082-t02), [F-082-T05](#f-082-t05) | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 3.5 h (4 of 5 steps) | 0.5 h (1 of 5 steps recorded) | 1.5 h agent + 0.25 h owner | 2 of 5 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-082-t02"></a>F-082-T02 — Checklist card in the dashboard chat | 0.5 h | 0 h | 0 h | Implemented; verification pending | — | [F-082-T04](#f-082-t04), [F-082-T05](#f-082-t05) | 🤖 | [PR #483](https://github.com/voidbrain/nerv/pull/483) implementation |
+| 🟡 Medium | <a id="f-082-t05"></a>F-082-T05 — Show the checklist card in the dashboard chat | 1.5 h | 0 h | 1.5 h | Planned | [F-082-T02](#f-082-t02) | [F-082-T04](#f-082-t04) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-082-t04"></a>F-082-T04 — Owner check: add by Telegram, tick on the dashboard | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-082-T02](#f-082-t02), [F-082-T05](#f-082-t05) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 3.5 h (4 of 5 steps) | 0.5 h (1 of 5 steps recorded) | 1.5 h agent + 0.25 h owner | 2 of 5 completed | | | | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -790,14 +790,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-083-t04"></a>F-083-T04 — Live check with a real saved recipe | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-083-t07"></a>F-083-T07 — Timers in a cooking session | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-083-t10"></a>F-083-T10 — Recipe photos | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-083-T07](#f-083-t07) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-083-t09"></a>F-083-T09 — Owner check: a recipe cooked hands-free | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-083-T07](#f-083-t07) | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 5.25 h | 0.75 h (2 of 10 steps recorded) | 1.75 h agent + 0.25 h owner | 5 of 10 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-083-t04"></a>F-083-T04 — Live check with a real saved recipe | 0.25 h | 0 h | 0.25 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-083-t07"></a>F-083-T07 — Timers in a cooking session | 0.5 h | 0 h | 0.5 h | Planned | — | [F-083-T08](#f-083-t08), [F-083-T09](#f-083-t09) | 🤖 | — |
+| 🟢 Small | <a id="f-083-t10"></a>F-083-T10 — Recipe photos | 0.5 h | 0 h | 0.5 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned | [F-083-T07](#f-083-t07) | — | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-083-t09"></a>F-083-T09 — Owner check: a recipe cooked hands-free | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-083-T07](#f-083-t07) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 5.25 h | 0.75 h (2 of 10 steps recorded) | 1.75 h agent + 0.25 h owner | 5 of 10 completed | | | | |
 
 <details><summary>Done steps (5)</summary>
 
@@ -844,11 +844,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-086-t03"></a>F-086-T03 — Draft and send behind approval | 1 h | 0 h | 1 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-086-t04"></a>F-086-T04 — Owner check with the owner's account | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-086-T03](#f-086-t03) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1 h agent + 0.5 h owner | 2 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-086-t03"></a>F-086-T03 — Draft and send behind approval | 1 h | 0 h | 1 h | Planned | — | [F-086-T04](#f-086-t04) | 🤖 | — |
+| 🟢 Small | <a id="f-086-t04"></a>F-086-T04 — Owner check with the owner's account | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-086-T03](#f-086-t03) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1 h agent + 0.5 h owner | 2 of 4 completed | | | | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -892,11 +892,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-087-t03"></a>F-087-T03 — Hand off to Bambu Connect with the owner checklist | 1 h | 0 h | 1 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-087-t04"></a>F-087-T04 — Owner check on the real printer | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-087-T03](#f-087-t03) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1 h agent + 0.5 h owner | 2 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-087-t03"></a>F-087-T03 — Hand off to Bambu Connect with the owner checklist | 1 h | 0 h | 1 h | Planned | — | [F-087-T04](#f-087-t04) | 🤖 | — |
+| 🟢 Small | <a id="f-087-t04"></a>F-087-T04 — Owner check on the real printer | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-087-T03](#f-087-t03) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1 h agent + 0.5 h owner | 2 of 4 completed | | | | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -940,11 +940,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-088-t03"></a>F-088-T03 — Report and conflicts | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 | [PR #566](https://github.com/voidbrain/nerv/pull/566) resume and report; CI pending |
-| 🟢 Small | <a id="f-088-t04"></a>F-088-T04 — Owner check on the storage base | — | 0 h | 0 h agent + 0.5 h owner | Planned · waits on [F-088-T03](#f-088-t03) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 0.5 h agent + 0.5 h owner | 2 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-088-t03"></a>F-088-T03 — Report and conflicts | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-088-T04](#f-088-t04) | 🤖 | [PR #566](https://github.com/voidbrain/nerv/pull/566) resume and report; CI pending |
+| 🟢 Small | <a id="f-088-t04"></a>F-088-T04 — Owner check on the storage base | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-088-T03](#f-088-t03) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 0.5 h agent + 0.5 h owner | 2 of 4 completed | | | | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -988,11 +988,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-102-t03"></a>F-102-T03 — Apply at the announced time and report | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-102-t04"></a>F-102-T04 — Live check: one automatic update | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-102-T03](#f-102-t03) | ⏳ 🤖 | — |
-| 🟢 Small | **Total** | 1.75 h | 0 h (0 of 4 steps recorded) | 1 h | 2 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-102-t03"></a>F-102-T03 — Apply at the announced time and report | 0.75 h | 0 h | 0.75 h | Planned | — | [F-102-T04](#f-102-t04) | 🤖 | — |
+| 🟢 Small | <a id="f-102-t04"></a>F-102-T04 — Live check: one automatic update | 0.25 h | 0 h | 0.25 h | Planned | [F-102-T03](#f-102-t03) | — | ⏳ 🤖 | — |
+| 🟢 Small | **Total** | 1.75 h | 0 h (0 of 4 steps recorded) | 1 h | 2 of 4 completed | | | | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -1036,12 +1036,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-103-t02"></a>F-103-T02 — Per-link load between bases | 1.5 h | 0 h | 1.5 h | Planned | — |
-| 🟡 Medium | <a id="f-103-t03"></a>F-103-T03 — Health view and warnings | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-103-T02](#f-103-t02) | — |
-| 🟢 Small | <a id="f-103-t04"></a>F-103-T04 — 24-hour baseline with both bases | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-103-T03](#f-103-t03) | — |
-| 🟡 Medium | **Total** | 4.75 h | 0 h (0 of 4 steps recorded) | 3.25 h | 1 of 4 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-103-t02"></a>F-103-T02 — Per-link load between bases | 1.5 h | 0 h | 1.5 h | Planned | — | [F-103-T03](#f-103-t03) | — |
+| 🟡 Medium | <a id="f-103-t03"></a>F-103-T03 — Health view and warnings | 1.5 h | 0 h | 1.5 h | Planned | [F-103-T02](#f-103-t02) | [F-103-T04](#f-103-t04) | — |
+| 🟢 Small | <a id="f-103-t04"></a>F-103-T04 — 24-hour baseline with both bases | 0.25 h | 0 h | 0.25 h | Planned | [F-103-T03](#f-103-t03) | — | — |
+| 🟡 Medium | **Total** | 4.75 h | 0 h (0 of 4 steps recorded) | 3.25 h | 1 of 4 completed | | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1084,10 +1084,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-099-t02"></a>B-099-T02 — A boundary an EVA-03 job cannot leave: a dedicated job user | 4 h | 0 h | 4 h | Planned | — |
-| 🟡 Medium | **Total** | 5 h | 1.5 h (1 of 2 steps recorded) | 4 h | 1 of 2 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-099-t02"></a>B-099-T02 — A boundary an EVA-03 job cannot leave: a dedicated job user | 4 h | 0 h | 4 h | Planned | — | [F-049-T14](#f-049-t14) | — |
+| 🟡 Medium | **Total** | 5 h | 1.5 h (1 of 2 steps recorded) | 4 h | 1 of 2 completed | | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1130,14 +1130,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-049-t08"></a>F-049-T08 — Pilot trust stage caps the class | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-049-t09"></a>F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-049-t10"></a>F-049-T10 — Linux host enforcement and join tests in CI | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-049-t12"></a>F-049-T12 — Run the first EVA job on the Linux host | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-049-T10](#f-049-t10) | ⏳ 🤖 | — |
-| 🟣 Very large | <a id="f-049-t14"></a>F-049-T14 — Actions run in EVA instances; the in-process executor goes | 16 h | 0 h | 16 h | Planned · waits on [B-099-T02](#b-099-t02), [F-049-T10](#f-049-t10) | ⏳ 🤖 | — |
-| 🟣 Very large | **Total** | 29.75 h (13 of 14 steps) | 10 h (6 of 14 steps recorded) | 18.25 h | 9 of 14 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-049-t08"></a>F-049-T08 — Pilot trust stage caps the class | 0.75 h | 0 h | 0.75 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-049-t09"></a>F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Planned | — | [F-051-T06](#f-051-t06) | 🤖 | — |
+| 🟢 Small | <a id="f-049-t10"></a>F-049-T10 — Linux host enforcement and join tests in CI | 0.75 h | 0 h | 0.75 h | Planned | — | [F-049-T12](#f-049-t12), [F-049-T14](#f-049-t14) | 🤖 | — |
+| 🟢 Small | <a id="f-049-t12"></a>F-049-T12 — Run the first EVA job on the Linux host | 0.5 h | 0 h | 0.5 h | Planned | [F-049-T10](#f-049-t10) | — | ⏳ 🤖 | — |
+| 🟣 Very large | <a id="f-049-t14"></a>F-049-T14 — Actions run in EVA instances; the in-process executor goes | 16 h | 0 h | 16 h | Planned | [B-099-T02](#b-099-t02), [F-049-T10](#f-049-t10) | — | ⏳ 🤖 | — |
+| 🟣 Very large | **Total** | 29.75 h (13 of 14 steps) | 10 h (6 of 14 steps recorded) | 18.25 h | 9 of 14 completed | | | | |
 
 <details><summary>Done steps (9)</summary>
 
@@ -1190,10 +1190,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-051-t06"></a>F-051-T06 — EVA cage pilot labels from real instance data | 1 h | 0 h | 1 h | Planned · waits on [F-049-T09](#f-049-t09) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 3.5 h | 1.5 h (5 of 7 steps recorded) | 1 h | 6 of 7 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-051-t06"></a>F-051-T06 — EVA cage pilot labels from real instance data | 1 h | 0 h | 1 h | Planned | [F-049-T09](#f-049-t09) | — | ⏳ 🤖 |
+| 🟢 Small | **Total** | 3.5 h | 1.5 h (5 of 7 steps recorded) | 1 h | 6 of 7 completed | | | |
 
 <details><summary>Done steps (6)</summary>
 
@@ -1242,11 +1242,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-084-t03"></a>F-084-T03 — Push and open the PR behind approval | 1 h | 0 h | 1 h | Planned | — |
-| 🟢 Small | <a id="f-084-t04"></a>F-084-T04 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-084-T03](#f-084-t03) | — |
-| 🟡 Medium | **Total** | 3.25 h | 0.25 h (1 of 4 steps recorded) | 1.25 h | 2 of 4 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-084-t03"></a>F-084-T03 — Push and open the PR behind approval | 1 h | 0 h | 1 h | Planned | — | [F-084-T04](#f-084-t04), [F-091-T01](#f-091-t01) | — |
+| 🟢 Small | <a id="f-084-t04"></a>F-084-T04 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned | [F-084-T03](#f-084-t03) | — | — |
+| 🟡 Medium | **Total** | 3.25 h | 0.25 h (1 of 4 steps recorded) | 1.25 h | 2 of 4 completed | | | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -1290,12 +1290,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 0 h | 0 h | Implemented; verification pending | 🤖 | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
-| 🟡 Medium | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 0 h | 2 h | Planned · waits on [F-089-T02](#f-089-t02) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-089-T02](#f-089-t02), [F-089-T04](#f-089-t04) | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 4 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2 h agent + 0.25 h owner | 1 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 0 h | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03), [F-089-T04](#f-089-t04), [F-099-T04](#f-099-t04) | 🤖 | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
+| 🟡 Medium | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 0 h | 2 h | Planned | [F-089-T02](#f-089-t02) | [F-089-T03](#f-089-t03) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T02](#f-089-t02), [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 4 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2 h agent + 0.25 h owner | 1 of 4 completed | | | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1338,13 +1338,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-093-t02"></a>F-093-T02 — Find and click a control by name | 1.5 h | 0 h | 0 h | Implemented; verification pending | 🤖 | [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation |
-| 🟢 Small | <a id="f-093-t03"></a>F-093-T03 — Shared adapter for F-012 and F-092 | 1 h | 0 h | 1 h | Planned · waits on [F-093-T02](#f-093-t02) | ⏳ 🤖 | — |
-| 🟡 Medium | <a id="f-093-t05"></a>F-093-T05 — Bind the macOS accessibility driver to the click adapter | 2 h | 0 h | 2 h | Planned · waits on [F-093-T02](#f-093-t02) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-093-t04"></a>F-093-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-093-T02](#f-093-t02), [F-093-T05](#f-093-t05) | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 5 h (4 of 5 steps) | 0.25 h (1 of 5 steps recorded) | 3 h agent + 0.25 h owner | 1 of 5 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-093-t02"></a>F-093-T02 — Find and click a control by name | 1.5 h | 0 h | 0 h | Implemented; verification pending | — | [F-093-T03](#f-093-t03), [F-093-T04](#f-093-t04), [F-093-T05](#f-093-t05), [F-094-T02](#f-094-t02) | 🤖 | [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation |
+| 🟢 Small | <a id="f-093-t03"></a>F-093-T03 — Shared adapter for F-012 and F-092 | 1 h | 0 h | 1 h | Planned | [F-093-T02](#f-093-t02) | — | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-093-t05"></a>F-093-T05 — Bind the macOS accessibility driver to the click adapter | 2 h | 0 h | 2 h | Planned | [F-093-T02](#f-093-t02) | [F-093-T04](#f-093-t04) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-093-t04"></a>F-093-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-093-T02](#f-093-t02), [F-093-T05](#f-093-t05) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 5 h (4 of 5 steps) | 0.25 h (1 of 5 steps recorded) | 3 h agent + 0.25 h owner | 1 of 5 completed | | | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1387,11 +1387,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-091-t01"></a>F-091-T01 — Harness job template | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-084-T03](#f-084-t03) |
-| 🟢 Small | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-091-T01](#f-091-t01) |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h | 0 of 2 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-091-t01"></a>F-091-T01 — Harness job template | 0.5 h | 0 h | 0.5 h | Planned | [F-084-T03](#f-084-t03) | [F-091-T02](#f-091-t02) |
+| 🟢 Small | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned | [F-091-T01](#f-091-t01) | — |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h | 0 of 2 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1426,12 +1426,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T09](#f-078-t09) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-078-T07](#f-078-t07) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 3.75 h | 0.75 h (2 of 9 steps recorded) | 1.5 h | 6 of 9 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 0.5 h | 0 h | 0.5 h | Planned | — | [F-078-T07](#f-078-t07) | 🤖 | — |
+| 🟢 Small | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned | [F-078-T09](#f-078-t09) | [F-078-T08](#f-078-t08) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned | [F-078-T07](#f-078-t07) | — | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 3.75 h | 0.75 h (2 of 9 steps recorded) | 1.5 h | 6 of 9 completed | | | | |
 
 <details><summary>Done steps (6)</summary>
 
@@ -1480,12 +1480,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-090-t02"></a>F-090-T02 — Headless resume adapter | 1 h | 0 h | 0 h | Implemented; verification pending | 🤖 | [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation |
-| 🟡 Medium | <a id="f-090-t04"></a>F-090-T04 — Resume automatically when a session limit resets | 2 h | 0 h | 2 h | Planned · waits on [F-090-T02](#f-090-t02) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-090-T02](#f-090-t02), [F-090-T04](#f-090-t04) | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2 h agent + 0.25 h owner | 1 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-090-t02"></a>F-090-T02 — Headless resume adapter | 1 h | 0 h | 0 h | Implemented; verification pending | — | [F-090-T03](#f-090-t03), [F-090-T04](#f-090-t04) | 🤖 | [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation |
+| 🟡 Medium | <a id="f-090-t04"></a>F-090-T04 — Resume automatically when a session limit resets | 2 h | 0 h | 2 h | Planned | [F-090-T02](#f-090-t02) | [F-090-T03](#f-090-t03) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-090-T02](#f-090-t02), [F-090-T04](#f-090-t04) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2 h agent + 0.25 h owner | 1 of 4 completed | | | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1528,11 +1528,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-092-t03"></a>F-092-T03 — Replay as a Blue action with preconditions | 1.5 h | 0 h | 1.5 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-092-t04"></a>F-092-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-092-T03](#f-092-t03) | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1.5 h agent + 0.25 h owner | 2 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-092-t03"></a>F-092-T03 — Replay as a Blue action with preconditions | 1.5 h | 0 h | 1.5 h | Planned | — | [F-092-T04](#f-092-t04) | 🤖 | — |
+| 🟢 Small | <a id="f-092-t04"></a>F-092-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-092-T03](#f-092-t03) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1.5 h agent + 0.25 h owner | 2 of 4 completed | | | | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -1576,12 +1576,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-094-t02"></a>F-094-T02 — Open app and file, save as, step by step | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-093-T02](#f-093-t02) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-094-t03"></a>F-094-T03 — Report and recovery | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-094-T02](#f-094-t02) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-094-t04"></a>F-094-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [F-094-T03](#f-094-t03) | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2 h agent + 0.25 h owner | 1 of 4 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-094-t02"></a>F-094-T02 — Open app and file, save as, step by step | 1.5 h | 0 h | 1.5 h | Planned | [F-093-T02](#f-093-t02) | [F-094-T03](#f-094-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-094-t03"></a>F-094-T03 — Report and recovery | 0.5 h | 0 h | 0.5 h | Planned | [F-094-T02](#f-094-t02) | [F-094-T04](#f-094-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-094-t04"></a>F-094-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-094-T03](#f-094-t03) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 2 h agent + 0.25 h owner | 1 of 4 completed | | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -2019,11 +2019,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="b-097-t01"></a>B-097-T01 — Owner approves fixing merge-when-green in the template | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](work/records/B-097.md) |
-| 🟢 Small | <a id="b-097-t02"></a>B-097-T02 — merge-when-green runs gh outside any checkout, in the template and here | 1 h | 0 h | 1 h | Planned · waits on [B-097-T01](#b-097-t01) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 1 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 1 h agent + 0.25 h owner | 0 of 2 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-097-t01"></a>B-097-T01 — Owner approves fixing merge-when-green in the template | — | 0 h | 0 h agent + 0.25 h owner | Ready | — | [B-097-T02](#b-097-t02) | [🤔](work/records/B-097.md) |
+| 🟢 Small | <a id="b-097-t02"></a>B-097-T02 — merge-when-green runs gh outside any checkout, in the template and here | 1 h | 0 h | 1 h | Planned | [B-097-T01](#b-097-t01) | — | ⏳ 🤖 |
+| 🟢 Small | **Total** | 1 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 1 h agent + 0.25 h owner | 0 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2199,12 +2199,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-110-t03"></a>F-110-T03 — Dashboard settings panel for the chosen settings | 2 h | 0 h | 2 h | Planned | 🤖 | — |
-| 🟡 Medium | <a id="f-110-t04"></a>F-110-T04 — Brief time, time zone, Sync Ratio threshold and Telegram freshness window through the same interface | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-110-T03](#f-110-t03) | ⏳ 🤖 | — |
-| 🟡 Medium | <a id="f-110-t05"></a>F-110-T05 — Common settings for every base, with a per-base override | 2 h | 0 h | 2 h | Planned · waits on [F-110-T04](#f-110-t04) | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 7.75 h (5 of 6 steps) | 2.25 h (2 of 6 steps recorded) | 5.5 h | 3 of 6 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-110-t03"></a>F-110-T03 — Dashboard settings panel for the chosen settings | 2 h | 0 h | 2 h | Planned | — | [F-110-T04](#f-110-t04) | 🤖 | — |
+| 🟡 Medium | <a id="f-110-t04"></a>F-110-T04 — Brief time, time zone, Sync Ratio threshold and Telegram freshness window through the same interface | 1.5 h | 0 h | 1.5 h | Planned | [F-110-T03](#f-110-t03) | [F-110-T05](#f-110-t05) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-110-t05"></a>F-110-T05 — Common settings for every base, with a per-base override | 2 h | 0 h | 2 h | Planned | [F-110-T04](#f-110-t04) | — | ⏳ 🤖 | — |
+| 🔴 Large | **Total** | 7.75 h (5 of 6 steps) | 2.25 h (2 of 6 steps recorded) | 5.5 h | 3 of 6 completed | | | | |
 
 <details><summary>Done steps (3)</summary>
 
@@ -2249,11 +2249,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.5 h | 0 h | 0.5 h | Planned | — |
-| 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-098-T03](#f-098-t03) | — |
-| 🟢 Small | **Total** | 2 h | 0.25 h (1 of 4 steps recorded) | 0.75 h | 2 of 4 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.5 h | 0 h | 0.5 h | Planned | — | [F-098-T04](#f-098-t04) | — |
+| 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0.25 h | 0 h | 0.25 h | Planned | [F-098-T03](#f-098-t03) | — | — |
+| 🟢 Small | **Total** | 2 h | 0.25 h (1 of 4 steps recorded) | 0.75 h | 2 of 4 completed | | | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -2297,10 +2297,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-099-t04"></a>F-099-T04 — Read a diyfpv.com build through the browser adapter | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-089-T02](#f-089-t02) | ⏳ 🤖 | — |
-| 🟢 Small | **Total** | 2.25 h | 0.25 h (1 of 4 steps recorded) | 0.75 h | 3 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-099-t04"></a>F-099-T04 — Read a diyfpv.com build through the browser adapter | 0.75 h | 0 h | 0.75 h | Planned | [F-089-T02](#f-089-t02) | — | ⏳ 🤖 | — |
+| 🟢 Small | **Total** | 2.25 h | 0.25 h (1 of 4 steps recorded) | 0.75 h | 3 of 4 completed | | | | |
 
 <details><summary>Done steps (3)</summary>
 
@@ -2631,13 +2631,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-109-t01"></a>F-109-T01 — Owner decides the persona card's fields and the silhouette | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](decisions/pilot-persona-cards.md) |
-| 🟢 Small | <a id="f-109-t02"></a>F-109-T02 — Store a pilot's call name and second name through a validated interface | 1 h | 0 h | 1 h | Planned · waits on [F-109-T01](#f-109-t01) | ⏳ 🤖 |
-| 🟡 Medium | <a id="f-109-t03"></a>F-109-T03 — Persona card layout with one Apply for every change | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-109-T02](#f-109-t02) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-109-t04"></a>F-109-T04 — Silhouette image on the persona card, if chosen | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-109-T03](#f-109-t03) | ⏳ 🤖 |
-| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h agent + 0.25 h owner | 0 of 4 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-109-t01"></a>F-109-T01 — Owner decides the persona card's fields and the silhouette | — | 0 h | 0 h agent + 0.25 h owner | Ready | — | [F-109-T02](#f-109-t02) | [🤔](decisions/pilot-persona-cards.md) |
+| 🟢 Small | <a id="f-109-t02"></a>F-109-T02 — Store a pilot's call name and second name through a validated interface | 1 h | 0 h | 1 h | Planned | [F-109-T01](#f-109-t01) | [F-109-T03](#f-109-t03) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-109-t03"></a>F-109-T03 — Persona card layout with one Apply for every change | 1.5 h | 0 h | 1.5 h | Planned | [F-109-T02](#f-109-t02) | [F-109-T04](#f-109-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-109-t04"></a>F-109-T04 — Silhouette image on the persona card, if chosen | 0.5 h | 0 h | 0.5 h | Planned | [F-109-T03](#f-109-t03) | — | ⏳ 🤖 |
+| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h agent + 0.25 h owner | 0 of 4 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2672,12 +2672,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-060-t01"></a>F-060-T01 — herdr-core trial in the development workspace | — | 0 h | 0 h agent + 2 h owner | Planned | [🧑‍🔧](acceptance/f060-t01-herdr-trial.md) |
-| 🟢 Small | <a id="f-060-t03"></a>F-060-T03 — Record the evidence of F-060-T01 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-060-T01](#f-060-t01) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-060-t02"></a>F-060-T02 — Answer the five questions and per-record outcomes | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-060-T03](#f-060-t03) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 0.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.5 h agent + 2 h owner | 0 of 3 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-060-t01"></a>F-060-T01 — herdr-core trial in the development workspace | — | 0 h | 0 h agent + 2 h owner | Planned | — | [F-060-T03](#f-060-t03) | [🧑‍🔧](acceptance/f060-t01-herdr-trial.md) |
+| 🟢 Small | <a id="f-060-t03"></a>F-060-T03 — Record the evidence of F-060-T01 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-060-T01](#f-060-t01) | [F-060-T02](#f-060-t02) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-060-t02"></a>F-060-T02 — Answer the five questions and per-record outcomes | 0.25 h | 0 h | 0.25 h | Planned | [F-060-T03](#f-060-t03) | — | ⏳ 🤖 |
+| 🟢 Small | **Total** | 0.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.5 h agent + 2 h owner | 0 of 3 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2713,11 +2713,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-007-t05"></a>F-007-T05 — Step 2c — Voice corpus evaluation run and report | — | 0 h | 0 h agent + 0.5 h owner | Planned | [🧑‍🔧](acceptance/f007-t05-voice-corpus-procedure.md) |
-| 🟢 Small | <a id="f-007-t10"></a>F-007-T10 — Record the evidence of F-007-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-007-T05](#f-007-t05) | ⏳ 🤖 |
-| 🟢 Small | **Total** | 4 h (9 of 10 steps) | 1.75 h (7 of 10 steps recorded) | 0.25 h agent + 0.5 h owner | 8 of 10 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-007-t05"></a>F-007-T05 — Step 2c — Voice corpus evaluation run and report | — | 0 h | 0 h agent + 0.5 h owner | Planned | — | [F-007-T10](#f-007-t10) | [🧑‍🔧](acceptance/f007-t05-voice-corpus-procedure.md) |
+| 🟢 Small | <a id="f-007-t10"></a>F-007-T10 — Record the evidence of F-007-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-007-T05](#f-007-t05) | — | ⏳ 🤖 |
+| 🟢 Small | **Total** | 4 h (9 of 10 steps) | 1.75 h (7 of 10 steps recorded) | 0.25 h agent + 0.5 h owner | 8 of 10 completed | | | |
 
 <details><summary>Done steps (8)</summary>
 
@@ -2977,6 +2977,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ## Other changes
 
-Earlier reconciliations and assessments (2026-11-08 – 2026-11-11) are archived in [Reconciliation log](archive/reconciliation-2026.md#archived-other-changes-moved-from-backlogmd-on-2026-11-13).
+Earlier reconciliations and assessments (2026-11-08 – 2026-11-12) are archived in [Reconciliation log](archive/reconciliation-2026.md#archived-other-changes-moved-from-backlogmd-on-2026-11-13).
 
-**Harness v6.0.0 reconciliation, 2026-11-12.** Template F-059 (owner request): `tools/work-items.mjs`, `tools/check-backlog.mjs` and `tools/backlog-queue.mjs` copied byte-identically from v6.0.0; the Record and evidence requirements, Optional upfront feature plans and Optional work queue paragraphs of BACKLOG-RULES carried from the template diff v5.6.0..v6.0.0; CI clones the template at v6.0.0. Bugs and features are one `Work items` list (`{"records": "all"}`); each record's summary table now reads Status, Priority, Effort, Remaining, Depends on, Unlocks, Procedures, Decision. [PR #295](https://github.com/voidbrain/nerv/pull/295).
+**Harness v10.1.0 reconciliation, 2026-11-20.** Template F-085, asked from NERV on 2026-11-19: `tools/work-items.mjs` copied from v10.1.0; `docs/backlog/steps.md` and `docs/backlog/ordering.md` carried from the template diff v10.0.0..v10.1.0. Each open step now shows its Depends on and Unlocks steps in the steps table, and `check:work` warns on a blocker named only in prose. Its first run flagged B-068 → F-011 and F-012 → F-006; both are false positives (B-068's text says F-011 waits on B-068, and F-012's match is in 2026-11-13 history whose date format the warning does not split on; F-012-T03's prerequisite, F-006-T07, is closed), so nothing changed. PR pending.
