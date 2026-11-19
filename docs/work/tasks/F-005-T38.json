@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-005-T38",
+  "parent": "F-005",
+  "title": "Owner decision: automatic updates on NERV-01",
+  "goal": "The owner decides whether NERV-01 takes automatic updates, so F-005-T29 can record the update policy on the device matrix",
+  "status": "ready",
+  "acceptance": [
+    "The owner runs `nerv update-policy on` or `nerv update-policy off` on NERV-01 (or uses the dashboard switch) and the choice is recorded on F-005"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/work/records/F-005.md",
+    "docs/work/tasks/F-005-T38.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures only; no real host names, keys or tokens in Git.",
+  "validation": [
+    "npm run check:work",
+    "npm run check:backlog"
+  ],
+  "escalation": [
+    "Turning automatic updates on is the owner's call (F-005 record)"
+  ],
+  "ownerLink": "docs/INSTALL.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Split 2026-11-19 from F-005-T29, whose record named the NERV-01 update policy as an open owner call only in prose. Not a measurement.",
+    "reviewed": "2026-11-19",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "decision"
+  },
+  "prs": []
+}
