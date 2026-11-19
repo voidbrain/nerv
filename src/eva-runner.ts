@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -55,6 +55,10 @@ export interface Eva03JobResult {
   readonly workspaceDiscarded: boolean;
   readonly rollbackClaimed: false;
   readonly durationMs: number;
+  /** B-099: processes the job started that were still running at its end and were killed. */
+  readonly descendantsKilled: number;
+  /** B-099: processes the job started that could not be killed; their effects are uncertain. */
+  readonly survivors: readonly number[];
 }
 
 function escapeSbString(value: string): string {
@@ -113,6 +117,93 @@ export function buildEva03CleanEnv(workspaceDir: string, commandPath: string): N
   };
 }
 
+/** One process as `ps` lists it; `started` tells a reused pid from the process that had it before. */
+interface ProcessEntry {
+  readonly pid: number;
+  readonly ppid: number;
+  readonly started: string;
+}
+
+function listProcesses(): Promise<ProcessEntry[]> {
+  return new Promise((resolve) => {
+    execFile('/bin/ps', ['-A', '-o', 'pid=,ppid=,lstart='], { maxBuffer: 8 * 1024 * 1024 }, (err, out) => {
+      if (err) return resolve([]);
+      resolve(
+        out
+          .split('\n')
+          .map((line) => /^\s*(\d+)\s+(\d+)\s+(.+?)\s*$/.exec(line))
+          .filter((m): m is RegExpExecArray => m !== null)
+          .map((m) => ({ pid: Number(m[1]), ppid: Number(m[2]), started: m[3]! })),
+      );
+    });
+  });
+}
+
+/**
+ * B-099: every process a job started, including one in its own session (setsid) that its process-group kill misses.
+ * The job's process tree is sampled while it runs; a process whose parent has exited is still known from an earlier
+ * sample. A pid is only signalled while its start time matches, so a reused pid is never touched.
+ */
+class DescendantTracker {
+  private readonly known = new Map<number, string>();
+  private timer: NodeJS.Timeout | undefined;
+  private sampling: Promise<void> = Promise.resolve();
+  private readonly rootPid: number;
+  constructor(rootPid: number, intervalMs = 100) {
+    this.rootPid = rootPid;
+    this.timer = setInterval(() => void this.sample(), intervalMs);
+    this.timer.unref();
+    void this.sample();
+  }
+  sample(): Promise<void> {
+    this.sampling = this.sampling.then(async () => {
+      const table = await listProcesses();
+      const live = new Map(table.map((e) => [e.pid, e.started]));
+      for (const [pid, started] of this.known) if (live.get(pid) !== started) this.known.delete(pid);
+      const parents = new Set([this.rootPid, ...this.known.keys()]);
+      for (let grew = true; grew;) {
+        grew = false;
+        for (const e of table)
+          if (parents.has(e.ppid) && !parents.has(e.pid) && e.pid !== process.pid) {
+            parents.add(e.pid);
+            this.known.set(e.pid, e.started);
+            grew = true;
+          }
+      }
+    });
+    return this.sampling;
+  }
+  private async running(): Promise<number[]> {
+    const live = new Map((await listProcesses()).map((e) => [e.pid, e.started]));
+    return [...this.known].filter(([pid, started]) => live.get(pid) === started).map(([pid]) => pid);
+  }
+  private ended?: Promise<{ killed: number; survivors: number[] }>;
+  /** Stops sampling, ends every known descendant (TERM, a grace period, KILL) and returns how many ran and which survived. */
+  endAll(graceMs = 250): Promise<{ killed: number; survivors: number[] }> {
+    return (this.ended ??= this.end(graceMs));
+  }
+  private async end(graceMs: number): Promise<{ killed: number; survivors: number[] }> {
+    clearInterval(this.timer);
+    await this.sample();
+    const signal = (pids: number[], sig: NodeJS.Signals) => {
+      for (const pid of pids)
+        try {
+          process.kill(pid, sig);
+        } catch {
+          // already gone
+        }
+    };
+    const first = await this.running();
+    if (!first.length) return { killed: 0, survivors: [] };
+    signal(first, 'SIGTERM');
+    await new Promise((done) => setTimeout(done, graceMs));
+    signal(await this.running(), 'SIGKILL');
+    await new Promise((done) => setTimeout(done, 50));
+    const survivors = await this.running();
+    return { killed: first.length - survivors.length, survivors };
+  }
+}
+
 function terminateProcessGroup(pid: number): void {
   try {
     process.kill(-pid, 'SIGTERM');
@@ -156,6 +247,7 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
   const startedAt = Date.now();
 
   let workspaceDiscarded = false;
+  let tracker: DescendantTracker | undefined;
   try {
     const { mkdirSync } = await import('node:fs');
     mkdirSync(workspaceDir, { recursive: true });
@@ -190,6 +282,7 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
         detached: true,
         stdio: ['ignore', 'pipe', 'pipe'],
       });
+      if (child.pid) tracker = new DescendantTracker(child.pid);
 
       const stdoutChunks: Buffer[] = [];
       const stderrChunks: Buffer[] = [];
@@ -258,6 +351,8 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
       });
     });
 
+    // B-099: whatever the job started and left running ends with it, whether it timed out, was cancelled or exited.
+    const ended = tracker ? await tracker.endAll() : { killed: 0, survivors: [] };
     const kind = outcome.cancelled
       ? 'eva03.cancelled'
       : outcome.timedOut
@@ -265,14 +360,17 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
         : outcome.exitCode === 0
           ? 'eva03.completed'
           : 'eva03.failed';
-    const uncertain = outcome.cancelled || outcome.timedOut || outcome.exitCode !== 0;
+    const uncertain = outcome.cancelled || outcome.timedOut || outcome.exitCode !== 0 || ended.survivors.length > 0;
+    const survivorNote = ended.survivors.length
+      ? `Processes still running after the job ended: ${ended.survivors.join(', ')}.`
+      : '';
     spec.onLedgerEvent?.({
       jobId: spec.jobId,
       kind,
       evaClass: 'eva-03',
       rollbackClaimed: false,
       uncertainExternalEffect: uncertain,
-      detail: outcome.stderr.slice(0, 400) || undefined,
+      detail: [survivorNote, outcome.stderr.slice(0, 400)].filter(Boolean).join(' ') || undefined,
     });
 
     rmSync(instanceDir, { recursive: true, force: true });
@@ -283,9 +381,13 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
       ...outcome,
       workspaceDiscarded,
       rollbackClaimed: false,
+      descendantsKilled: ended.killed,
+      survivors: ended.survivors,
       durationMs: Date.now() - startedAt,
     };
   } finally {
+    // A launch error never reached endAll: stop sampling and end anything it started.
+    if (tracker) await tracker.endAll().catch(() => undefined);
     if (!workspaceDiscarded && existsSync(instanceDir)) {
       rmSync(instanceDir, { recursive: true, force: true });
     }
