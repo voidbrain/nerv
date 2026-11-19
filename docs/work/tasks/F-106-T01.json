@@ -4,17 +4,21 @@
   "parent": "F-106",
   "title": "Prompt size per Misato turn, measured",
   "goal": "A bounded local sample says how large a local-route turn is and how much of it is tool schemas",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Each Misato call records route, estimated prompt tokens and the tool-schema share into a bounded SQLite sample (rate and retention bounded, no request text); a committed test",
     "`nerv doctor` or a report command prints the last day's median and maximum per route"
   ],
   "dependsOn": [],
   "resources": [
-    "src/**",
-    "test/**",
+    "src/prompt-samples.ts",
+    "src/brain-process.ts",
+    "src/runtime-tools.ts",
+    "src/runtime.ts",
+    "src/store.ts",
+    "test/prompt-samples.test.ts",
     "docs/work/records/F-106.md",
-    "generated:backlog-views"
+    "docs/work/tasks/F-106-T01.json"
   ],
   "capabilities": [
     "bounded-edit",

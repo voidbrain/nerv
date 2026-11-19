@@ -1528,7 +1528,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-106-T01 — Prompt size per Misato turn, measured (Ready).
+💻 **→** Next: F-106-T01 — Prompt size per Misato turn, measured (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1540,7 +1540,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-106-t01"></a>F-106-T01 — Prompt size per Misato turn, measured | 1 h | 0 h | 1 h | Ready | — |
+| 🟢 Small | <a id="f-106-t01"></a>F-106-T01 — Prompt size per Misato turn, measured | 1 h | 0 h | 1 h | Implemented; verification pending | — |
 | 🟡 Medium | <a id="f-106-t03"></a>F-106-T03 — Domain tool schemas offered by intent | 2 h | 0 h | 2 h | Planned · waits on [F-106-T01](#f-106-t01) | — |
 | 🟡 Medium | **Total** | 3.5 h | 0.25 h (1 of 3 steps recorded) | 3 h | 1 of 3 completed | |
 

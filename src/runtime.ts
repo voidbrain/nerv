@@ -77,15 +77,19 @@ import { RuntimeRoutes } from './runtime-routes.ts';
 import type { RemoteOffer, Step, Turn } from './misato.ts';
 import type { Episode, Fact } from './memory.ts';
 import type { BaseEntry, SignedRecord } from './kaji.ts';
+import { DatabaseSync } from 'node:sqlite';
 import type { OperatorResolution, PublicOperatorInfo, SignedOperatorEntry } from './operator-directory.ts';
 import type { PeerVerdict, RunItem, VerdictAsk, BaseHealth, HeardHealth, RegistryPort } from './kaji-link.ts';
+import { PromptSampleStore, type PromptMetrics } from './prompt-samples.ts';
 export class Runtime implements StoreApi {
   readonly nervous: ProcessClient;
   readonly brain: ProcessClient;
   readonly requestQueue = new RequestQueue();
   private readonly itemLocks = new ItemLockManager();
+  private readonly database: string;
   private readonly home: string | undefined;
   constructor(database: string, brainEntry = new URL('./brain-process.ts', import.meta.url), home?: string) {
+    this.database = database;
     this.home = home;
     this.nervous = new ProcessClient(
       new URL('./nervous-process.ts', import.meta.url),
@@ -94,9 +98,27 @@ export class Runtime implements StoreApi {
     );
     this.brain = new ProcessClient(brainEntry, home ? [home] : [], 'brain', 1500);
   }
+  private recordPromptSample(metrics: PromptMetrics): void {
+    if (this.database === ':memory:') return;
+    const db = new DatabaseSync(this.database);
+    try {
+      db.exec('PRAGMA busy_timeout = 5000');
+      new PromptSampleStore(db).record({ ...metrics, sampledAtMs: Date.now() });
+    } finally {
+      db.close();
+    }
+  }
   /** Persist before dispatch. Missing/late brain replies keep a durable unknown record. */
   private async modelCall(method: Method, params: Record<string, unknown>, timeoutMs: number): Promise<unknown> {
-    return callModelWithUsage({ home: this.home, nervous: this.nervous, brain: this.brain, method, params, timeoutMs });
+    return callModelWithUsage({
+      home: this.home,
+      nervous: this.nervous,
+      brain: this.brain,
+      method,
+      params,
+      timeoutMs,
+      onPromptMetrics: (m) => this.recordPromptSample(m),
+    });
   }
   async modelUsage(before?: number, limit?: number) {
     return (await this.nervous.call('usage.page', {

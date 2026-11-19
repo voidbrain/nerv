@@ -32,6 +32,7 @@ import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circuits.ts';
 import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
 import { buildBatteryDashboardCards } from './battery-health.ts';
+import { PromptSampleStore } from './prompt-samples.ts';
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
 import { FPV_BUILDS_SCHEMA, FpvBuildStore } from './fpv-builds.ts';
 import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
@@ -615,6 +616,7 @@ export class Store {
         .prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL')
         .get(),
       policy: { source: this.policySource, ...this.ledger.policy },
+      promptSizes: new PromptSampleStore(this.db).summarizeLastDay(),
     };
   }
   exportCoordinatorSnapshot(input: Omit<ExportCoordinatorSnapshotInput, 'db'>) {
