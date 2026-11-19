@@ -1763,10 +1763,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-098-t01"></a>B-098-T01 — A dependency install refuses a linked node&#95;modules; the worktree procedure unlinks first | 1 h | 0 h | 1 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-098-t01"></a>B-098-T01 — A dependency install refuses a linked node&#95;modules; the worktree procedure unlinks first | 1 h | 0 h | 1 h | Implemented; verification pending | [PR #543](https://github.com/voidbrain/nerv/pull/543) implementation |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1775,7 +1775,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #541](https://github.com/voidbrain/nerv/pull/541); primary `node_modules` mtime 09:12:06 = the worktree `npm ci` |
+| PR / evidence | Steps: B-098-T01: [PR #543](https://github.com/voidbrain/nerv/pull/543) implementation. Opened in [PR #541](https://github.com/voidbrain/nerv/pull/541); [PR #543](https://github.com/voidbrain/nerv/pull/543) B-098-T01 (`tools/install-deps.mjs`, `test/install-deps.test.mjs`, `docs/INSTALL.md`); primary `node_modules` mtime 09:12:06 = the worktree `npm ci` |
 | Opened | 2026-11-19 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |
