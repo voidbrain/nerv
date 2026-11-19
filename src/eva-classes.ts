@@ -1,5 +1,5 @@
 import { WORKER_RESULT_BYTES } from './worker-jobs.ts';
-import { pilotExecutor, stageExecutor, type EvaClass, type Stage } from './pilots.ts';
+import { pilotExecutor, stageExecutor, type EvaClass, type Pilot, type PilotRegistry, type Stage } from './pilots.ts';
 import { stricter, type Effect, type Trust } from './policy.ts';
 
 export interface EvaFilesystemSpec {
@@ -171,7 +171,12 @@ export interface EvaAdmissionRequest {
   readonly tool: string;
   readonly effect: Effect;
   readonly trust: Trust;
-  readonly pilotStage: Stage;
+  readonly pilotStage?: Stage;
+  readonly pilotId?: string;
+  readonly pilotBaseId?: string;
+  readonly pilots?: readonly Pilot[];
+  readonly pilotRegistry?: PilotRegistry;
+  readonly pilot?: Pick<Pilot, 'id' | 'stage' | 'evaClass' | 'retired'>;
   readonly pilotEvaClass?: EvaClass;
   readonly toolEvaClass?: EvaClass;
   readonly requestedClass?: EvaClass;
@@ -200,6 +205,40 @@ function minimumClassForJob(effect: Effect, trust: Trust): EvaClass {
   return 'eva-02';
 }
 
+function resolvePilotForAdmission(
+  request: EvaAdmissionRequest,
+):
+  | { ok: true; pilot?: Pick<Pilot, 'id' | 'stage' | 'evaClass' | 'retired'>; stage: Stage }
+  | { ok: false; reason: string } {
+  let pilot: Pick<Pilot, 'id' | 'stage' | 'evaClass' | 'retired'> | undefined = request.pilot;
+  if (!pilot && request.pilotId !== undefined) {
+    if (request.pilotRegistry) {
+      const baseId = request.pilotBaseId ?? request.pilotRegistry.localBaseId;
+      pilot = request.pilotRegistry.get(baseId, request.pilotId, { includeRetired: true });
+    } else if (request.pilots) {
+      pilot = request.pilots.find((p) => p.id === request.pilotId);
+    }
+    if (!pilot) {
+      return { ok: false, reason: `Unknown pilot "${request.pilotId}".` };
+    }
+  }
+  if (pilot?.retired) {
+    return { ok: false, reason: `Pilot "${pilot.id}" is retired.` };
+  }
+  if (pilot) {
+    const stage: Stage =
+      request.pilotStage &&
+      stricter(stageExecutor(pilot.stage), stageExecutor(request.pilotStage)) !== stageExecutor(pilot.stage)
+        ? request.pilotStage
+        : pilot.stage;
+    return { ok: true, pilot, stage };
+  }
+  if (request.pilotStage !== undefined) {
+    return { ok: true, stage: request.pilotStage };
+  }
+  return { ok: false, reason: 'Missing pilot or pilot stage.' };
+}
+
 /**
  * Deterministic least-class admission using existing NERV grants and the F-049-T01 contract.
  * Never acts as an approval authority and fails closed when a job asks above its grant or pilot stage.
@@ -220,11 +259,19 @@ export function admitEvaJob(request: EvaAdmissionRequest): EvaAdmissionDecision 
     };
   }
 
-  const pilotCap = pilotExecutor({
-    stage: request.pilotStage,
-    ...(request.pilotEvaClass ? { evaClass: request.pilotEvaClass } : {}),
-  });
-  let ceiling = stricter(stageExecutor(request.pilotStage), pilotCap);
+  const resolvedPilot = resolvePilotForAdmission(request);
+  if (!resolvedPilot.ok) {
+    return { admitted: false, blocked: 'isolation', reason: resolvedPilot.reason };
+  }
+
+  // F-049-T08: the pilot's trust stage (F-025) and declared EVA class (F-045) only lower, never raise, the ceiling.
+  let ceiling = stageExecutor(resolvedPilot.stage);
+  if (resolvedPilot.pilot?.evaClass) {
+    ceiling = stricter(ceiling, pilotExecutor({ stage: resolvedPilot.stage, evaClass: resolvedPilot.pilot.evaClass }));
+  }
+  if (request.pilotEvaClass) {
+    ceiling = stricter(ceiling, pilotExecutor({ stage: resolvedPilot.stage, evaClass: request.pilotEvaClass }));
+  }
   if (request.toolEvaClass) ceiling = stricter(ceiling, request.toolEvaClass);
   if (request.trust === 'tainted' && (request.effect === 'read' || request.effect === 'write-local')) {
     ceiling = 'eva-03';
