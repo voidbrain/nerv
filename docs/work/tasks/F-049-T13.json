@@ -4,7 +4,7 @@
   "parent": "F-049",
   "title": "EVA-03 events in the ledger and the recovery join test",
   "goal": "The runner's EVA-03 events are appended to the NERV ledger, and gate test 6 (recovery join) passes before execution is enabled",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "eva03.started/completed/failed/timed_out/cancelled are ledger events on the job's sortie, never erased; uncertain outcomes say so and claim no rollback",
     "Recovery join: a crash or disconnect mid-job keeps the durable receipt and the uncertain lock, blocks a duplicate replay, and reconciles cleanly on restart (decisions/eva-runner.md, test 6)"
@@ -13,12 +13,26 @@
     "F-049-T05"
   ],
   "resources": [
-    "src/eva-runner.ts",
     "src/events.ts",
     "src/ledger.ts",
-    "test/eva-gate.test.ts",
+    "src/eva-jobs.ts",
+    "test/eva-jobs.test.ts",
+    "test/fixtures/eva/**",
+    "docs/decisions/eva-runner.md",
     "docs/work/records/F-049.md",
-    "docs/work/tasks/F-049-T13.json"
+    "docs/work/tasks/F-049-T13.json",
+    "src/cli-commands.ts",
+    "contract:backlog-ids",
+    "docs/work/records/B-100.md",
+    "docs/work/tasks/B-100-T01.json",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views",
+    "docs/work/records/F-016.md",
+    "docs/work/tasks/F-016-T03.json",
+    "docs/work/tasks/F-016-T13.json",
+    "docs/work/tasks/F-016-T14.json",
+    "docs/work/tasks/F-016-T15.json",
+    "docs/archive/reconciliation-2026.md"
   ],
   "capabilities": [
     "bounded-edit",
@@ -44,5 +58,10 @@
     "baselineAgentHours": 4,
     "estimateAgentHours": 4
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 553,
+      "note": "receipts and recovery join; CI pending"
+    }
+  ]
 }

@@ -680,6 +680,22 @@ export class Ledger {
         .all(sortieId) as { payload: string }[]
     ).map((r) => (JSON.parse(r.payload) as { text: string }).text);
   }
+  /** F-049-T13: an EVA-03 job event on its sortie, appended and never erased. */
+  evaJob(
+    sortieId: string,
+    kind:
+      | 'eva03.started'
+      | 'eva03.completed'
+      | 'eva03.failed'
+      | 'eva03.timed_out'
+      | 'eva03.cancelled'
+      | 'eva03.recovered'
+      | 'eva03.reconciled',
+    payload: EventPayloads['eva03.started'],
+    now = new Date(),
+  ): void {
+    this.tx(() => this.event(sortieId, null, kind, payload, now));
+  }
   /** F-045: requests since `since` that no pilot fitted, for one domain, and the state of a pilots.create proposal for it. */
   unmatched(
     domain: string,
