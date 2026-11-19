@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 9 | 17 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 9 | 18 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -5380,6 +5380,40 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | PR / evidence | [PR #538](https://github.com/voidbrain/nerv/pull/538) B-090-T01 (`test/upgrade-lifecycle.test.ts`); Review of PR #522, 2026-11-18 |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: CI run 44429968461 (PR #538); live updates on NERV-01 and NERV-03 (F-005-T29). |
+| Reviewed | 2026-11-19 |
+
+</details>
+
+---
+
+### B-098
+
+**`npm ci` in a worktree whose `node_modules` links to the primary checkout empties the primary's**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-19.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-19 in F-005-T29: the agent ran `npm ci` in two existing worktrees under `.claude/worktrees/` to merge `main` into their PRs. Their `node_modules` was most likely a symlink to the primary checkout's (`npm run worktree:link` makes one); `npm ci` removed the contents through the link and left a real folder in the worktree. The primary's `node_modules` was empty from 09:12:06, while the live service ran from it: a restart or a lifecycle command would have failed (`ng: command not found`, `Cannot find package 'ajv'`). The owner restored it with `npm ci --ignore-scripts` (lockfile identical for the running and the checked-out revision). |
+| **Reproduce** | In a worktree: `npm run worktree:link`, then `npm ci`; the linked `node_modules` of the primary checkout is empty afterwards. |
+| **Check** | Test committed failing first: dependency installs run by NERV's tools refuse when `node_modules` is a symbolic link, naming the link, and the worktree procedure says to remove the link (`rm node_modules`, not its contents) before `npm ci`. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** 2026-11-19: verified and closed: B-098-T01 by PR #543, CI run 44508528108 passed every job on the first attempt; `docs/INSTALL.md` names the unlink step and `npm run deps:install` refuses a linked `node_modules`. 2026-11-19: B-098-T01 implemented: `tools/install-deps.mjs` (`npm run deps:install`) refuses when `node_modules` is a symbolic link, naming the link and target; failing test committed first in `test/install-deps.test.mjs` (3 pass after fix); worktree unlink guidance added to `docs/INSTALL.md`. Awaiting CI and merge to verify/close. Opened 2026-11-19.
+
+**Estimates:** Small, estimated 2026-11-19: 1 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #541](https://github.com/voidbrain/nerv/pull/541); [PR #543](https://github.com/voidbrain/nerv/pull/543) B-098-T01 (`tools/install-deps.mjs`, `test/install-deps.test.mjs`, `docs/INSTALL.md`); primary `node_modules` mtime 09:12:06 = the worktree `npm ci` |
+| Opened | 2026-11-19 |
+| Verification | 2026-11-19: CI run 44508528108 (PR #543). |
 | Reviewed | 2026-11-19 |
 
 </details>

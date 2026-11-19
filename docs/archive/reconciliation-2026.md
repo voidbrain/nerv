@@ -479,3 +479,7 @@ PRs #451–#455 merged with green CI (reconcile 8.16.0, B-067, F-006-T04/T05, ei
 ## 2026-11-19 — main `16bfcc0f`
 
 PRs #531–#540 merged with green CI. Closed B-090; B-094-T02, B-086-T01/T02, F-110-T02 and five expensive reruns closed. F-005-T29 updates on NERV-01 and NERV-03. B-086-T04 from review; B-098 opened.
+
+## 2026-11-19 — main `f66efbcc`
+
+PRs #541–#545 merged with green CI (#545 after Windows reruns: B-066 worker-link, then a Dummy Plug timeout). Closed B-098; B-086-T04 and F-008-T10 closed. B-094-T03 merged, waits on the owner's live check. F-021-T03 implemented.
