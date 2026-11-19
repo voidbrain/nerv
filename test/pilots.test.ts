@@ -601,6 +601,11 @@ test('F-045-T05: remote pilots chosen, granted, and run through the authenticate
   assert.equal(canRunRemotePilot(remotePilot, ['kaji.run'], 'kaji.run').allowed, false);
   assert.equal(canRunRemotePilot(remotePilot, ['reminders.list'], 'notes.search').allowed, false);
   assert.equal(canRunRemotePilot(remotePilot, ['notes.search', 'notes.add'], 'notes.add').allowed, false);
+  // F-021-T03: deny by default: a pilot that lists no tools may use none, whatever its base offers.
+  const bare = canRunRemotePilot({ id: 'bare-helper', retired: false }, ['notes.search'], 'notes.search');
+  assert.equal(bare.allowed, false);
+  assert.match(bare.reason ?? '', /Pilot bare-helper grants no tools/);
+  assert.equal(canRunRemotePilot({ id: 'bare-helper', tools: [] }, ['notes.search'], 'notes.search').allowed, false);
 
   const onlineOffers = new Map<string, readonly string[]>([['MAGI-02', ['notes.search', 'notes.add']]]);
   const allowedChoice = selectRemotePilotRun('summary of notes', [remotePilot], onlineOffers, generic, 'notes.search', {
@@ -647,7 +652,10 @@ test('F-045-T05: remote pilots chosen, granted, and run through the authenticate
         base: { id: 'MAGI-02', name: 'Tabgha' },
         kaji: { root: root.publicKey },
         models: { local: { baseUrl: 'http://127.0.0.1:1/v1', model: 'm' }, roles: { misato: { route: 'local' } } },
-        pilots: [pilot({ id: 'notes-helper', keywords: ['notes'], tools: ['reminders.list'] })],
+        pilots: [
+          pilot({ id: 'notes-helper', keywords: ['notes'], tools: ['reminders.list'] }),
+          pilot({ id: 'bare-helper', keywords: ['bare'] }),
+        ],
       }),
     );
     const rt = new Runtime(dbPath, undefined, home);
@@ -714,6 +722,23 @@ test('F-045-T05: remote pilots chosen, granted, and run through the authenticate
         { session, epoch: 1, expires: Date.now() + 60_000, ownerKey },
       )) as { refused?: string };
       assert.match(missingPilot.refused ?? '', /does not have pilot unknown-pilot/);
+
+      // F-021-T03: the executing base refuses a pilot of its own that grants no tools, and runs nothing.
+      const before = (await rt.list()).length;
+      const ungrantedBare = (await rt.runFromPeer(
+        'MAGI-01',
+        {
+          id: '00000000-0000-4000-8000-000000000014',
+          request: 'list reminders',
+          tool: 'reminders.list',
+          args: {},
+          pilot: 'bare-helper',
+        },
+        ['reminders.list'],
+        { session, epoch: 1, expires: Date.now() + 60_000, ownerKey },
+      )) as { refused?: string };
+      assert.match(ungrantedBare.refused ?? '', /Pilot bare-helper grants no tools/);
+      assert.equal((await rt.list()).length, before);
 
       const allowedRun = (await rt.runFromPeer(
         'MAGI-01',
