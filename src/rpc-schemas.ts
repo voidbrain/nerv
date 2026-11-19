@@ -449,6 +449,12 @@ export const methodSchemas = {
     properties: { sortieId: { type: 'string', minLength: 1, maxLength: 100 } },
     additionalProperties: false,
   },
+  'documents.find': {
+    type: 'object',
+    required: ['query'],
+    properties: { query: { type: 'string', minLength: 1, maxLength: 200 } },
+    additionalProperties: false,
+  },
   'sorties.finish': {
     type: 'object',
     required: ['sortieId'],

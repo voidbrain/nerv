@@ -754,7 +754,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-083-t04"></a>F-083-T04 — Live check with a real saved recipe | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-083-t06"></a>F-083-T06 — Cooking session: ingredients and steps | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-083-t06"></a>F-083-T06 — Cooking session: ingredients and steps | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 | — |
 | 🟢 Small | <a id="f-083-t10"></a>F-083-T10 — Recipe photos | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-083-t07"></a>F-083-T07 — Timers in a cooking session | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-083-T06](#f-083-t06) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-083-T07](#f-083-t07) | ⏳ 🤖 | — |

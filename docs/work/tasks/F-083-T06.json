@@ -4,7 +4,7 @@
   "parent": "F-083",
   "title": "Cooking session: ingredients and steps",
   "goal": "A saved recipe is walked through one step at a time",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Ingredients, then \"vai col primo step\", \"avanti\", \"ripeti\", \"indietro\" in Italian and English",
     "Only saved steps; Telegram text first"
@@ -13,8 +13,16 @@
     "F-083-T03"
   ],
   "resources": [
-    "src/**",
-    "test/**"
+    "src/cooking-session.ts",
+    "src/runtime-chat.ts",
+    "src/rpc.ts",
+    "src/rpc-schemas.ts",
+    "src/nervous-process.ts",
+    "test/cooking-session.test.ts",
+    "docs/work/records/F-083.md",
+    "docs/work/tasks/F-083-T06.json",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",

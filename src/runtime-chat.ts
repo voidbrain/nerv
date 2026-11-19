@@ -1,5 +1,6 @@
 import { channelIsFresh, type ChannelState } from './channel-state.ts';
 import { readCommand, statusText, type StatusBase } from './chat-command.ts';
+import { CookingSessions, readCookingCommand } from './cooking-session.ts';
 import { readConfig } from './config.ts';
 import type { SortieEvent } from './events.ts';
 import { ONLINE_MS, type BaseHealth, type RegistryPort } from './kaji-link.ts';
@@ -53,6 +54,8 @@ export interface RuntimeChatHost {
  */
 export class RuntimeChat {
   private readonly host: RuntimeChatHost;
+  /** F-083-T06: a saved recipe walked through step by step, per conversation. */
+  private readonly cooking = new CookingSessions();
 
   constructor(host: RuntimeChatHost) {
     this.host = host;
@@ -114,6 +117,20 @@ export class RuntimeChat {
           (command.name === 'unknown' ? (it ? 'Comando non supportato. ' : 'Unknown command. ') : '') +
           (it ? 'Comandi disponibili: /status [base], /help.' : 'Available commands: /status [base], /help.');
       return { command: true, sortieId: '', reply, steps: [], waiting: [] };
+    }
+    // F-083-T06: a cooking session answers from the saved recipe only; with no session or no such recipe, it is chat.
+    const cooking = readCookingCommand(message);
+    if (cooking) {
+      const at = conversation ?? 'cli';
+      let reply: string | undefined;
+      if (cooking.kind === 'start') {
+        const doc = (await this.host.nervous.call('documents.find', { query: cooking.recipe }).catch(() => null)) as {
+          title: string;
+          body: string;
+        } | null;
+        if (doc) reply = this.cooking.start(at, doc.title, doc.body, cooking.it);
+      } else reply = this.cooking.move(at, cooking.kind);
+      if (reply) return { command: true, sortieId: '', reply, steps: [], waiting: [] };
     }
     const key = conversation ?? 'cli';
     const addressed =
