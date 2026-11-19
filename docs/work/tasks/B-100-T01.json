@@ -4,7 +4,7 @@
   "parent": "B-100",
   "title": "Decide what the tools process may read in EVA-03, and make eva run-tools-03 start",
   "goal": "`nerv eva run-tools-03` lists the tools from a checkout under $HOME, reading only what the decision allows",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Test committed failing first: runToolsProcessInEva03 from a checkout under the denied $HOME exits 0 and lists tools",
     "The profile allows only what the tools process needs (directory metadata above its read-only paths, the checkout's package.json, the config it is given); NERV state, keys and the rest of $HOME stay denied, and the gate tests still pass"
@@ -12,11 +12,15 @@
   "dependsOn": [],
   "resources": [
     "src/eva-runner.ts",
+    "src/tools-process.ts",
     "test/eva-runner.test.ts",
-    "test/eva-gate.test.ts",
     "docs/decisions/eva-runner.md",
     "docs/work/records/B-100.md",
-    "docs/work/tasks/B-100-T01.json"
+    "docs/work/tasks/B-100-T01.json",
+    "docs/work/records/F-005.md",
+    "docs/work/tasks/F-005-T38.json",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",
@@ -41,5 +45,10 @@
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 568,
+      "note": "the fix; CI pending"
+    }
+  ]
 }
