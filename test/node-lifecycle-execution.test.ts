@@ -892,10 +892,46 @@ test(
       };
       const receipt = await applyService(f.host, stopPlan, stopPlan.digest);
       assert.equal(receipt.state, 'completed');
-      assert.deepEqual(receipt.steps, ['stop:completed']);
+      assert.deepEqual(receipt.steps, ['stop:completed', 'verify:completed']);
     } finally {
       locker?.kill();
       f.close();
     }
   },
 );
+
+test('B-091: journalTransaction retries transient SQLITE_IOERR (disk I/O error) and succeeds without rollback corruption', () => {
+  const db = new DatabaseSync(':memory:');
+  try {
+    db.exec('CREATE TABLE t(v INTEGER)');
+    let attempts = 0;
+    const sleeps: number[] = [];
+    const origExec = db.exec.bind(db);
+    db.exec = ((sql: string) => {
+      if (sql === 'BEGIN IMMEDIATE' && attempts < 2) {
+        attempts += 1;
+        const err = Object.assign(new Error('disk I/O error'), {
+          code: 'ERR_SQLITE_ERROR',
+          errcode: 10,
+          errstr: 'disk I/O error',
+        });
+        throw err;
+      }
+      return origExec(sql);
+    }) as typeof db.exec;
+    const result = lifecycle.journalTransaction(
+      db,
+      () => {
+        db.prepare('INSERT INTO t VALUES (1)').run();
+        return 'ok';
+      },
+      { delaysMs: [1, 2, 3], sleep: (ms) => sleeps.push(ms) },
+    );
+    assert.equal(result, 'ok');
+    assert.equal(attempts, 2);
+    assert.deepEqual(sleeps, [1, 2]);
+    assert.equal((db.prepare('SELECT COUNT(*) AS n FROM t').get() as { n: number }).n, 1);
+  } finally {
+    db.close();
+  }
+});

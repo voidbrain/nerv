@@ -1678,7 +1678,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete (Ready).
+💻 **→** Next: B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1690,7 +1690,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 1 h | 0 h | 1 h | Ready |
+| 🟢 Small | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 1 h | 0 h | 1 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
 
 <details>

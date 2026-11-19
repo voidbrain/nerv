@@ -19,7 +19,6 @@ import { databasePath } from './config.ts';
 import { canonical, ROOT_KEY_FILE } from './kaji.ts';
 import { WINDOWS_TASK, windowsLauncher } from './service.ts';
 import { lifecycleRecovery } from './node-lifecycle.ts';
-import { transaction } from './sqlite-transaction.ts';
 
 import {
   area,
@@ -33,6 +32,7 @@ import {
   held,
   hostKind,
   journal,
+  journalTransaction,
   object,
   planOf,
   present,
@@ -189,18 +189,32 @@ export async function applyService(
   const save = () =>
     db!.prepare('UPDATE operations SET receipt=? WHERE digest=?').run(JSON.stringify(receipt), p.digest);
   const step = async (name: string, effect: () => Promise<void> | void) => {
-    transaction(db!, () => {
-      owns();
-      receipt!.steps.push(name + ':started');
-      save();
-    });
+    const startSteps = [...receipt!.steps];
+    try {
+      journalTransaction(db!, () => {
+        owns();
+        receipt!.steps = [...startSteps, name + ':started'];
+        save();
+      });
+    } catch (error) {
+      receipt!.steps = startSteps;
+      throw error;
+    }
     onStep?.(name + ':started');
     await effect();
-    transaction(db!, () => {
-      owns();
-      receipt!.steps[receipt!.steps.length - 1] = name + ':completed';
-      save();
-    });
+    const startedSteps = [...receipt!.steps];
+    const doneSteps = [...startedSteps];
+    doneSteps[doneSteps.length - 1] = name + ':completed';
+    try {
+      journalTransaction(db!, () => {
+        owns();
+        receipt!.steps = [...doneSteps];
+        save();
+      });
+    } catch (error) {
+      receipt!.steps = startedSteps;
+      throw error;
+    }
     onStep?.(name + ':completed');
   };
   const inspectOwned = async (registered: boolean) => {
@@ -218,7 +232,7 @@ export async function applyService(
     return current;
   };
   try {
-    const cached = transaction(db, () => {
+    const cached = journalTransaction(db, () => {
       const previous = stored(db, p.digest);
       if (previous) return previous;
       if (held(db)) throw Error('Another lifecycle operation holds the user service.');
@@ -332,7 +346,7 @@ export async function applyService(
       });
       // A reported blocker is a determinate end: source, data and service are as planned, so the claim is released without uncertainty.
       if (refused) {
-        transaction(db, () => {
+        journalTransaction(db, () => {
           owns();
           receipt!.state = 'refused';
           save();
@@ -371,7 +385,7 @@ export async function applyService(
       if (['install', 'start', 'update'].includes(p.action) && (host.health || p.action === 'update')) {
         if (!host.health) throw Error('Post-start health check is required for updates.');
         const health = await host.health(p);
-        transaction(db!, () => {
+        journalTransaction(db!, () => {
           owns();
           receipt!.health = health;
           save();
@@ -392,7 +406,7 @@ export async function applyService(
       )
         throw Error('Final service state did not match the operation.');
     });
-    transaction(db, () => {
+    journalTransaction(db, () => {
       owns();
       receipt!.state = 'completed';
       save();
@@ -402,7 +416,7 @@ export async function applyService(
   } catch (error) {
     if (receipt)
       try {
-        transaction(db, () => {
+        journalTransaction(db, () => {
           owns();
           receipt!.state = 'uncertain';
           if (['install', 'start', 'update'].includes(p.action))
@@ -423,7 +437,7 @@ export function releaseService(host: ServiceHost, snapshot: unknown, evidence: u
   db.close();
   const writable = journal(host.context, true)!;
   try {
-    return transaction(writable, () => {
+    return journalTransaction(writable, () => {
       const old = stored(writable, decision.snapshot.digest);
       if (!old) throw Error('No lifecycle receipt.');
       if (decision.action === 'return-receipt') return old;
@@ -605,7 +619,7 @@ export async function recoverServiceUpdate(
   db.close();
   const writable = journal(host.context, true)!;
   try {
-    return transaction(writable, () => {
+    return journalTransaction(writable, () => {
       const old = stored(writable, decision.snapshot.digest);
       if (!old) throw Error('No lifecycle receipt.');
       if (decision.action === 'return-receipt') {
