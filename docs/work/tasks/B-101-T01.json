@@ -4,7 +4,7 @@
   "parent": "B-101",
   "title": "The dashboard names why the base is degraded, and calls a model down only when one is",
   "goal": "The DEGRADED banner lists the reasons; its model-failure sentence and the map's standby state appear only when a model route or the brain is down",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Test committed failing first: a failed overnight Instrumentality run shows as its own reason, without the model-failure sentence and without marking the base standby",
     "A route or brain reason keeps the sentence and the standby state; every reason is shown, escaped"
@@ -15,7 +15,9 @@
     "test/degraded-banner.test.mjs",
     "contract:backlog-ids",
     "docs/work/records/B-101.md",
-    "docs/work/tasks/B-101-T01.json"
+    "docs/work/tasks/B-101-T01.json",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",

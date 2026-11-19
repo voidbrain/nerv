@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 6 | 9 | 31 | 18 |
+| **This week** | 6 | 9 | 32 | 18 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 20 |
+| **Open** | 41 | 21 |
 | **Require Human 🧑** | 8 | 6 |
 
 ### Require Human 🧑
@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 73.75 h agent + 10.5 h owner across 128 open steps of 40 features and 20 other records. 74.75 h of actual effort recorded on 116 steps. Generated from the task files.
+**Remaining effort:** 74.25 h agent + 10.5 h owner across 129 open steps of 40 features and 21 other records. 74.75 h of actual effort recorded on 116 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1742,6 +1742,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | Pending: CI. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-101"></a>[🐞 B-101](#top)
+
+**The dashboard says a model is down when the base is degraded for another reason, and never shows the reason**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-101-T01 — The dashboard names why the base is degraded, and calls a model down only when one is (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Reported by the owner 2026-11-19 on NERV-01: the health card read "DEGRADED · Dummy Plug: reminders and rule-based actions keep running; requests that need a model fail with the reason below until it is back" while every route was reachable. The reason was the 03:02 Instrumentality run, which failed because the local route was down at night (it came back at 09:24); a failed latest run stays a degraded reason until a later one succeeds. The banner text is fixed in `web/public/dashboard/live.js`, the reasons it points to are never listed, and the bases map marks the base standby for any reason. |
+| **Reproduce** | A failed Instrumentality run with all model routes reachable: the dashboard shows the model-failure banner with no reason, and the base as standby. |
+| **Check** | Test committed failing first: the banner lists each reason; its model-failure sentence and the standby state appear only for a down model route or brain (B-101-T01). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-101-t01"></a>B-101-T01 — The dashboard names why the base is degraded, and calls a model down only when one is | 0.5 h | 0 h | 0.5 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-101.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner report, NERV-01 dashboard, 2026-11-19 |
+| Opened | 2026-11-19 |
+| Verification | Pending. |
+| Reviewed | 2026-11-19 |
 
 </details>
 

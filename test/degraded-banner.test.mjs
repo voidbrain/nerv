@@ -8,9 +8,9 @@ const start = source.indexOf('  /** B-101: a reason that means');
 const end = source.indexOf('  // Real heartbeats on the Kaji line');
 assert.ok(start > 0 && end > start, 'the B-101 helpers sit before the heartbeat code in live.js');
 const esc = (s) => String(s).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-const { degradedBanner, healthOf } = new Function(
+const { degradedBanner, degradedSummary, healthOf } = new Function(
   'esc',
-  source.slice(start, end) + ';return { degradedBanner, healthOf };',
+  source.slice(start, end) + ';return { degradedBanner, degradedSummary, healthOf };',
 )(esc);
 
 const up = { processes: { nervous: 1, brainAlive: true }, models: { roles: { misato: 'local (gemma4:12b)' } } };
@@ -40,4 +40,10 @@ test('B-101: no reason, no banner; every reason is listed and escaped', () => {
   const html = degradedBanner([nightRun, '<script>x</script>']);
   assert.ok(html.includes('&lt;script&gt;'), 'escaped');
   assert.equal((html.match(/<li>/g) ?? []).length, 2);
+});
+
+test('B-101: the overview tile says a model is down only when one is, and otherwise names the reason', () => {
+  assert.equal(degradedSummary([routeDown]), 'a model route is down · reminders still run');
+  assert.match(degradedSummary([nightRun]), /^Instrumentality: did not complete/);
+  assert.ok(degradedSummary([nightRun]).length <= 60);
 });
