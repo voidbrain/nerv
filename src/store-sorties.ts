@@ -150,7 +150,10 @@ export class StoreSorties {
     transaction(this.host.db, () => {
       if (!confirmedStopped) throw new Error('Explicit owner confirmation required.');
       for (const pending of this.host.workerJobs.waitingApprovals())
-        if (pending.lease.id === id && !pending.decision) this.decideCore(pending.id, 'reject', 'worker-release');
+        if (pending.lease.id === id && !pending.decision) {
+          if (pending.hasApproval) this.decideCore(pending.id, 'reject', 'worker-release');
+          this.host.workerJobs.persistApprovalDecision(pending.id, 'reject');
+        }
       this.host.workerJobs.release(id, reason, confirmedStopped);
     });
   }
@@ -430,7 +433,10 @@ export class StoreSorties {
           invalid = true;
         }
         if (invalid) {
-          if (!pending.decision) this.decideCore(pending.id, 'reject', 'worker-fence');
+          if (!pending.decision) {
+            if (pending.hasApproval) this.decideCore(pending.id, 'reject', 'worker-fence');
+            this.host.workerJobs.persistApprovalDecision(pending.id, 'reject');
+          }
           this.host.workerJobs.finish(pending.lease, {
             outcome: 'reject',
             error: 'Worker approval expired or its lease/authority ended; nothing ran.',

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { createHash, generateKeyPairSync, verify, type KeyObject } from 'node:crypto';
+import { createHash, generateKeyPairSync, randomUUID, verify, type KeyObject } from 'node:crypto';
 import { describe, it } from 'node:test';
 import {
   REPLICATED_COORDINATOR_TABLES,
@@ -302,6 +302,153 @@ describe('F-016-T13: standby snapshot import into coordinator-standby.sqlite', (
       mainStore.close();
       standbyStore.close();
       localHostStore.close();
+    }
+  });
+});
+
+describe('F-016-T14: serial-monotonic registry merge and worker approval settlement', () => {
+  it('merges registry and registry_roots by serial so a newer local revoke survives an older snapshot', () => {
+    const mainStore = new Store(':memory:');
+    const standbyStore = new Store(':memory:');
+    try {
+      const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+      // Main snapshot has registry records serial 1 and 2.
+      mainStore.db
+        .prepare(
+          "INSERT INTO registry(id, serial, kind, base_id, body, signature, received) VALUES ('reg-1', 1, 'enroll', 'NERV-01', '{}', 'sig1', '2026-11-19T08:00:00Z')",
+        )
+        .run();
+      mainStore.db
+        .prepare(
+          "INSERT INTO registry(id, serial, kind, base_id, body, signature, received) VALUES ('reg-2', 2, 'enroll', 'NERV-02', '{}', 'sig2', '2026-11-19T08:01:00Z')",
+        )
+        .run();
+      mainStore.db.prepare("INSERT INTO registry_roots(id, root) VALUES ('reg-1', 'root-fp-1')").run();
+
+      // Standby already learned serial 1, 2 AND a newer serial 3 revoke via heartbeat.
+      standbyStore.db
+        .prepare(
+          "INSERT INTO registry(id, serial, kind, base_id, body, signature, received) VALUES ('reg-1', 1, 'enroll', 'NERV-01', '{}', 'sig1', '2026-11-19T08:00:00Z')",
+        )
+        .run();
+      standbyStore.db
+        .prepare(
+          "INSERT INTO registry(id, serial, kind, base_id, body, signature, received) VALUES ('reg-2', 2, 'enroll', 'NERV-02', '{}', 'sig2', '2026-11-19T08:01:00Z')",
+        )
+        .run();
+      standbyStore.db
+        .prepare(
+          "INSERT INTO registry(id, serial, kind, base_id, body, signature, received) VALUES ('reg-3', 3, 'revoke', 'NERV-02', '{}', 'sig3', '2026-11-19T09:00:00Z')",
+        )
+        .run();
+      standbyStore.db.prepare("INSERT INTO registry_roots(id, root) VALUES ('reg-1', 'root-fp-1')").run();
+
+      const exported = mainStore.exportCoordinatorSnapshot({
+        root: 'root-fp-1',
+        sourceBaseId: 'NERV-01',
+        coordinatorEpoch: 2,
+        coordinatorFence: 5,
+        headSeq: 10,
+        privateKey,
+      });
+
+      standbyStore.importStandbySnapshot({
+        frames: exported.chunks,
+        publicKey,
+        expectedRoot: 'root-fp-1',
+        expectedMainBaseId: 'NERV-01',
+      });
+
+      const rows = standbyStore.db.prepare('SELECT id, serial, kind FROM registry ORDER BY serial ASC').all() as Array<{
+        id: string;
+        serial: number;
+        kind: string;
+      }>;
+      assert.deepEqual(
+        rows.map((r) => ({ id: r.id, serial: r.serial, kind: r.kind })),
+        [
+          { id: 'reg-1', serial: 1, kind: 'enroll' },
+          { id: 'reg-2', serial: 2, kind: 'enroll' },
+          { id: 'reg-3', serial: 3, kind: 'revoke' },
+        ],
+      );
+    } finally {
+      mainStore.close();
+      standbyStore.close();
+    }
+  });
+
+  it('uses worker_approvals.persisted_decision with hasApproval LEFT JOIN so expire, cancelWorker and releaseWorker settle once', () => {
+    const store = new Store(':memory:');
+    try {
+      const makeJobAndApproval = (jobId: string, approvalId: string, persistedDecision: string | null) => {
+        const expires = Date.now() - 1000;
+        const inserted = store.db
+          .prepare(
+            "INSERT INTO worker_jobs(id, owner, sequence, hash, session, epoch, expires, state, worker_key, owner_key) VALUES (?, ?, NULL, NULL, 'sess-1', 1, ?, 'running', 'k1', 'ok1')",
+          )
+          .run(jobId, 'NERV-01', expires);
+        const lease = {
+          id: jobId,
+          owner: 'NERV-01',
+          fence: Number(inserted.lastInsertRowid),
+          session: 'sess-1',
+          epoch: 1,
+          expires,
+          key: 'k1',
+          ownerKey: 'ok1',
+        };
+        store.db
+          .prepare('INSERT INTO worker_approvals(approval_id, lease, persisted_decision) VALUES (?, ?, ?)')
+          .run(approvalId, JSON.stringify(lease), persistedDecision);
+      };
+
+      const jobApprovedId = randomUUID();
+      const jobExpireId = randomUUID();
+      const jobCancelId = randomUUID();
+      const jobReleaseId = randomUUID();
+
+      // Case A: promoted standby with missing approvals row (hasApproval=false) and persisted_decision='approve'
+      // Store.expire must NOT throw "No approval with that ID." and must preserve uncertainty (stay running).
+      makeJobAndApproval(jobApprovedId, 'app-approved', 'approve');
+
+      // Case B: promoted standby with missing approvals row (hasApproval=false) and persisted_decision=NULL
+      // Store.expire settles it once as 'reject' without calling decideCore.
+      makeJobAndApproval(jobExpireId, 'app-expire', null);
+
+      // Case C: cancelWorker on a job with missing approvals row (hasApproval=false) settles once without throwing.
+      makeJobAndApproval(jobCancelId, 'app-cancel', null);
+
+      // Case D: releaseWorker on a job with missing approvals row (hasApproval=false) settles once without throwing.
+      makeJobAndApproval(jobReleaseId, 'app-release', null);
+
+      const before = store.workerJobs.waitingApprovals();
+      const approvedItem = before.find((w) => w.id === 'app-approved');
+      assert.equal(approvedItem?.hasApproval, false);
+      assert.equal(approvedItem?.decision, 'approve');
+
+      // cancelWorker & releaseWorker settle their targets cleanly.
+      store.cancelWorker('NERV-01', jobCancelId, 'Cancelled after promotion', 'cli');
+      store.releaseWorker(jobReleaseId, 'Confirmed stopped', true);
+
+      // expire settles jobExpireId once and leaves jobApprovedId alone.
+      store.expire(new Date());
+      store.expire(new Date());
+
+      const jobApproved = store.db.prepare('SELECT state FROM worker_jobs WHERE id = ?').get(jobApprovedId) as {
+        state: string;
+      };
+      const jobExpire = store.db.prepare('SELECT state FROM worker_jobs WHERE id = ?').get(jobExpireId) as {
+        state: string;
+      };
+      const appExpire = store.db
+        .prepare("SELECT persisted_decision FROM worker_approvals WHERE approval_id = 'app-expire'")
+        .get() as { persisted_decision: string | null };
+      assert.equal(jobApproved.state, 'running');
+      assert.equal(jobExpire.state, 'completed');
+      assert.equal(appExpire.persisted_decision, 'reject');
+    } finally {
+      store.close();
     }
   });
 });

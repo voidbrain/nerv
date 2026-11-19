@@ -144,7 +144,8 @@ export class StoreKajiOutbox {
       if (existingOwner && existingOwner !== owner) throw new Error('Worker cancellation owner differs.');
       const pending = this.host.workerJobs.waitingApprovals().find((p) => p.lease.id === id && !p.decision);
       if (pending) {
-        this.host.decideCore(pending.id, 'reject', 'worker-cancel');
+        if (pending.hasApproval) this.host.decideCore(pending.id, 'reject', 'worker-cancel');
+        this.host.workerJobs.persistApprovalDecision(pending.id, 'reject');
         this.host.workerJobs.finish(pending.lease, {
           outcome: 'reject',
           reason: 'Owner cancelled the pending worker approval; no execution occurred.',
