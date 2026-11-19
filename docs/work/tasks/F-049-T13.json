@@ -25,7 +25,8 @@
     "contract:backlog-ids",
     "docs/work/records/B-100.md",
     "docs/work/tasks/B-100-T01.json",
-    "evals/gauntlet/ledger.json"
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",
