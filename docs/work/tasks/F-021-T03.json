@@ -16,7 +16,8 @@
     "src/pilots.ts",
     "test/pilots.test.ts",
     "docs/work/records/F-021.md",
-    "docs/work/tasks/F-021-T03.json"
+    "docs/work/tasks/F-021-T03.json",
+    "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",
