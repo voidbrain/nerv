@@ -122,6 +122,25 @@ describe('F-049-T04: EVA-03 instance per job', () => {
         });
         assert.equal(rTools.workspaceDiscarded, true);
         assert.equal(rTools.rollbackClaimed, false);
+
+        // B-100: runToolsProcessInEva03 from a checkout under $HOME with a NERV home exits 0.
+        const nervHome = realpathSync(mkdtempSync(join(tmpdir(), 'nerv-b100-state-')));
+        try {
+          writeFileSync(join(nervHome, 'config.json'), JSON.stringify({ tools: { mcp: [] } }), 'utf8');
+          writeFileSync(join(nervHome, 'base-key'), 'secret-key', 'utf8');
+          writeFileSync(join(nervHome, 'nerv.sqlite'), 'secret-db', 'utf8');
+          const rB100 = await runToolsProcessInEva03({
+            jobId: 'b100-tools',
+            home: nervHome,
+            repoRoot: process.cwd(),
+            timeoutMs: 5000,
+          });
+          assert.equal(rB100.exitCode, 0, `expected exit 0, got ${rB100.exitCode}: ${rB100.stderr}`);
+          assert.equal(rB100.timedOut, false);
+          assert.equal(rB100.workspaceDiscarded, true);
+        } finally {
+          rmSync(nervHome, { recursive: true, force: true });
+        }
       } finally {
         rmSync(secretDir, { recursive: true, force: true });
       }
