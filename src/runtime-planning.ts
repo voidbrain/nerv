@@ -462,7 +462,7 @@ export class RuntimePlanning {
           tool,
           args,
           outcome: 'invalid',
-          error: `${tool} is granted for EVA-03 (quarantine), which needs a sandbox NERV does not have yet (F-049): it does not run.`,
+          error: `${tool} is granted for EVA-03 (quarantine), which needs a sandbox NERV does not have yet: it does not run.`,
         });
         continue;
       }

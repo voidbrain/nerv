@@ -126,7 +126,7 @@ export class WholeJobHandoffStore {
       throw new Error('Receiving base Scrolls cannot be looser than the main base.');
     }
     if (input.selectionReason === 'load' && input.loadForwardingAccepted !== true) {
-      throw new Error('Load-based forwarding requires F-048 acceptance.');
+      throw new Error('Load-based forwarding is not accepted yet.');
     }
 
     const digest = argsHash(input.args);
