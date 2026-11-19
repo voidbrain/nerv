@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "B-099-T02",
+  "parent": "B-099",
+  "title": "A boundary an EVA-03 job cannot leave: a dedicated job user",
+  "goal": "Every process an EVA-03 job starts runs as a dedicated macOS user, and everything that user runs ends with the job",
+  "status": "planned",
+  "acceptance": [
+    "Test committed failing first: a quick exit after detaching a child, and a double fork after setsid, leave nothing running after the job",
+    "The job runs as its own user; at the end every process of that user is killed and the table is checked; a fork bomb fills only that user's process limit",
+    "The owner's one-time setup (the service user and the runner's permission to switch to it) is a copy-paste procedure with its expected result"
+  ],
+  "dependsOn": [
+    "B-099-T01"
+  ],
+  "resources": [
+    "src/eva-runner.ts",
+    "test/eva-gate.test.ts",
+    "docs/decisions/eva-runner.md",
+    "docs/work/records/B-099.md",
+    "docs/work/tasks/B-099-T02.json"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design",
+    "typescript",
+    "privacy-review"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "The service user and its permission need the owner's setup on each Mac; a material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "4 h",
+    "basis": "Estimated 2026-11-19 from the review of PR #549; owner setup apart. Not a measurement.",
+    "reviewed": "2026-11-19",
+    "agentHours": 4,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  },
+  "prs": []
+}

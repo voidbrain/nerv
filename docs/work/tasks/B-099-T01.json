@@ -14,7 +14,11 @@
     "src/eva-runner.ts",
     "test/eva-gate.test.ts",
     "docs/work/records/B-099.md",
-    "docs/work/tasks/B-099-T01.json"
+    "docs/work/tasks/B-099-T01.json",
+    "docs/decisions/eva-runner.md",
+    "docs/work/tasks/B-099-T02.json",
+    "test/fixtures/eva/**",
+    "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",
@@ -32,7 +36,7 @@
   "effort": {
     "size": "small",
     "estimate": "1 h",
-    "basis": "Estimated 2026-11-19 after the probe (two child processes, timeout and cancel). Not a measurement.",
+    "basis": "Estimated 2026-11-19 after the probe (two child processes, timeout and cancel). Not a measurement. Review of PR #549 (2026-11-19) fixed in the same PR; containment stated as best effort.",
     "reviewed": "2026-11-19",
     "agentHours": 1,
     "baselineAgentHours": 1,

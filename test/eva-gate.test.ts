@@ -1,6 +1,7 @@
 // F-049-T05: the T01 gate (docs/decisions/eva-runner.md, "Required test gate") on the EVA-03 runner.
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { createSocket } from 'node:dgram';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
@@ -142,22 +143,31 @@ describe('F-049-T05: EVA-03 gate', { skip: !isDarwinWithSandbox }, () => {
       }
     });
 
-    it(`3. credentials: environment secrets never reach the job; listing the Keychain ${outcome}`, async () => {
+    it(`3. credentials: environment secrets never reach the job; reading a Keychain item ${outcome}`, async () => {
       const planted = { ANTHROPIC_API_KEY: 'sk-fixture', NERV_TOKEN: 'token-fixture', KAJI_KEY: 'kaji-fixture' };
+      // A keychain of the test's own, with one item the job tries to read (never the owner's keychains).
+      const dir = scratch('keychain'),
+        keychain = join(dir, 'gate.keychain-db');
+      const security = (...args: string[]) => execFileSync('/usr/bin/security', args, { stdio: 'ignore' });
+      security('create-keychain', '-p', 'gate-fixture', keychain);
       Object.assign(process.env, planted);
       try {
+        security('unlock-keychain', '-p', 'gate-fixture', keychain);
+        security('add-generic-password', '-a', 'gate', '-s', 'nerv-gate', '-w', 'KC-FIXTURE', '-A', keychain);
         const r = await probe(
           [
             `t('env', () => Object.keys(process.env).filter((k) => ${JSON.stringify(Object.keys(planted))}.includes(k)).join(',') || 'NONE');`,
-            `t('keychain', () => cp.execFileSync('/usr/bin/security', ['list-keychains'], { stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim() ? 'LISTED' : 'LISTED');`,
+            `t('keychain', () => cp.execFileSync('/usr/bin/security', ['find-generic-password', '-s', 'nerv-gate', '-w', ${JSON.stringify(keychain)}], { stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim());`,
           ].join('\n'),
           { sandboxExecPath: mode.sandboxExecPath },
         );
         // The environment is the runner's own (buildEva03CleanEnv), not the profile's: clean in both modes.
         assert.equal(r.env, 'NONE');
-        expect(r.keychain, 'LISTED', 'listing the Keychain');
+        expect(r.keychain, 'KC-FIXTURE', 'reading a Keychain item');
       } finally {
         for (const k of Object.keys(planted)) delete process.env[k];
+        security('delete-keychain', keychain);
+        rmSync(dir, { recursive: true, force: true });
       }
     });
 
@@ -209,9 +219,50 @@ describe('F-049-T05: EVA-03 gate', { skip: !isDarwinWithSandbox }, () => {
         assert.equal(alive(pids.own), false, 'the child in its own session is gone');
         assert.equal(events.at(-1)?.kind, end === 'timeout' ? 'eva03.timed_out' : 'eva03.cancelled');
         assert.equal(events.at(-1)?.rollbackClaimed, false);
+        assert.equal(events.at(-1)?.uncertainExternalEffect, true);
       } finally {
         for (const pid of [pids.same, pids.own]) if (alive(pid)) process.kill(pid, 'SIGKILL');
       }
     });
   }
+
+  it('B-099: a job that exits at once after detaching a child is never reported as cleanly contained', async () => {
+    // The tracker can miss such a child (it loses its parent before the first sample): containment is best effort.
+    const events: Eva03LedgerEvent[] = [];
+    const result = await runEva03Job({
+      jobId: 'quick-exit',
+      command: process.execPath,
+      args: [
+        '-e',
+        'const c = require("node:child_process").spawn(process.execPath, ["-e", "setTimeout(() => {}, 30000)"], { stdio: "ignore", detached: true }); c.unref(); console.log(c.pid);',
+      ],
+      onLedgerEvent: (e) => events.push(e),
+    });
+    const pid = Number(result.stdout.trim());
+    try {
+      assert.equal(result.exitCode, 0, result.stderr);
+      assert.equal(result.containment, 'best-effort');
+      assert.ok(events.length === 2 && events.every((e) => e.containment === 'best-effort'));
+      // Seen or not, a child that was still running makes the end uncertain; only an unseen one is missed.
+      if (result.descendantsKilled > 0) assert.equal(events.at(-1)?.uncertainExternalEffect, true);
+    } finally {
+      if (pid && alive(pid)) process.kill(pid, 'SIGKILL');
+    }
+  });
+
+  it('B-099: when the process table cannot be read, what the job left running is unknown, never clean', async () => {
+    const events: Eva03LedgerEvent[] = [];
+    const result = await runEva03Job({
+      jobId: 'no-ps',
+      command: process.execPath,
+      args: ['-e', 'console.log("ok")'],
+      psPath: '/nonexistent/ps',
+      onLedgerEvent: (e) => events.push(e),
+    });
+    assert.equal(result.exitCode, 0, result.stderr);
+    assert.equal(result.tracked, false);
+    assert.equal(events.at(-1)?.kind, 'eva03.completed');
+    assert.equal(events.at(-1)?.uncertainExternalEffect, true);
+    assert.match(events.at(-1)?.detail ?? '', /could not be read/);
+  });
 });

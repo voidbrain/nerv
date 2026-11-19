@@ -33,6 +33,8 @@ export interface Eva03JobSpec {
   readonly signal?: AbortSignal;
   readonly sandboxExecPath?: string;
   readonly onLedgerEvent?: (event: Eva03LedgerEvent) => void;
+  /** Lists processes for B-099's tracking; tests point it at a missing binary to see tracking fail. */
+  readonly psPath?: string;
 }
 
 export interface Eva03LedgerEvent {
@@ -41,6 +43,11 @@ export interface Eva03LedgerEvent {
   readonly evaClass: 'eva-03';
   readonly rollbackClaimed: false;
   readonly uncertainExternalEffect: boolean;
+  /**
+   * B-099: ending every process a job started is best effort on macOS: one that detaches and loses its parent between
+   * two samples is never seen. No EVA-03 end claims that nothing the job started is still running.
+   */
+  readonly containment: 'best-effort';
   readonly detail?: string;
 }
 
@@ -59,6 +66,9 @@ export interface Eva03JobResult {
   readonly descendantsKilled: number;
   /** B-099: processes the job started that could not be killed; their effects are uncertain. */
   readonly survivors: readonly number[];
+  /** B-099: false when the process table could not be read, so what survived is unknown. */
+  readonly tracked: boolean;
+  readonly containment: 'best-effort';
 }
 
 function escapeSbString(value: string): string {
@@ -124,10 +134,11 @@ interface ProcessEntry {
   readonly started: string;
 }
 
-function listProcesses(): Promise<ProcessEntry[]> {
+/** The process table, or null when it could not be read (a missing or hung `ps`, a full process table). */
+function listProcesses(psPath: string): Promise<ProcessEntry[] | null> {
   return new Promise((resolve) => {
-    execFile('/bin/ps', ['-A', '-o', 'pid=,ppid=,lstart='], { maxBuffer: 8 * 1024 * 1024 }, (err, out) => {
-      if (err) return resolve([]);
+    execFile(psPath, ['-A', '-o', 'pid=,ppid=,lstart='], { maxBuffer: 8 * 1024 * 1024, timeout: 2000 }, (err, out) => {
+      if (err) return resolve(null);
       resolve(
         out
           .split('\n')
@@ -140,24 +151,36 @@ function listProcesses(): Promise<ProcessEntry[]> {
 }
 
 /**
- * B-099: every process a job started, including one in its own session (setsid) that its process-group kill misses.
+ * B-099: the processes a job started, including one in its own session (setsid) that its process-group kill misses.
  * The job's process tree is sampled while it runs; a process whose parent has exited is still known from an earlier
- * sample. A pid is only signalled while its start time matches, so a reused pid is never touched.
+ * sample. Best effort: a process that detaches and loses its parent between two samples is never seen. A pid is only
+ * signalled while its start time matches.
  */
 class DescendantTracker {
   private readonly known = new Map<number, string>();
   private timer: NodeJS.Timeout | undefined;
   private sampling: Promise<void> = Promise.resolve();
   private readonly rootPid: number;
-  constructor(rootPid: number, intervalMs = 100) {
+  private readonly psPath: string;
+  /** False once the process table could not be read: what the job left running is then unknown. */
+  tracked = true;
+  constructor(rootPid: number, psPath: string, intervalMs = 100) {
     this.rootPid = rootPid;
+    this.psPath = psPath;
     this.timer = setInterval(() => void this.sample(), intervalMs);
     this.timer.unref();
     void this.sample();
   }
-  sample(): Promise<void> {
-    this.sampling = this.sampling.then(async () => {
-      const table = await listProcesses();
+  /** Adds the job's descendants; returns how many were new, or null when the table could not be read. */
+  sample(): Promise<number | null> {
+    const next = this.sampling.then(async () => {
+      const table = await listProcesses(this.psPath);
+      // A failed listing keeps what is known: it never counts as "everything ended".
+      if (!table) {
+        this.tracked = false;
+        return null;
+      }
+      let added = 0;
       const live = new Map(table.map((e) => [e.pid, e.started]));
       for (const [pid, started] of this.known) if (live.get(pid) !== started) this.known.delete(pid);
       const parents = new Set([this.rootPid, ...this.known.keys()]);
@@ -167,24 +190,35 @@ class DescendantTracker {
           if (parents.has(e.ppid) && !parents.has(e.pid) && e.pid !== process.pid) {
             parents.add(e.pid);
             this.known.set(e.pid, e.started);
+            added++;
             grew = true;
           }
       }
+      return added;
     });
-    return this.sampling;
+    this.sampling = next.then(() => undefined);
+    return next;
   }
-  private async running(): Promise<number[]> {
-    const live = new Map((await listProcesses()).map((e) => [e.pid, e.started]));
+  /** The known descendants still running, or null when the table could not be read. */
+  private async running(): Promise<number[] | null> {
+    const table = await listProcesses(this.psPath);
+    if (!table) {
+      this.tracked = false;
+      return null;
+    }
+    const live = new Map(table.map((e) => [e.pid, e.started]));
     return [...this.known].filter(([pid, started]) => live.get(pid) === started).map(([pid]) => pid);
   }
   private ended?: Promise<{ killed: number; survivors: number[] }>;
-  /** Stops sampling, ends every known descendant (TERM, a grace period, KILL) and returns how many ran and which survived. */
-  endAll(graceMs = 250): Promise<{ killed: number; survivors: number[] }> {
-    return (this.ended ??= this.end(graceMs));
+  /**
+   * Stops sampling and ends every known descendant: each is stopped first (SIGSTOP, so it can start nothing more), the
+   * tree is sampled again until nothing new appears, then all are killed (SIGKILL) and the table is read once more.
+   */
+  endAll(): Promise<{ killed: number; survivors: number[] }> {
+    return (this.ended ??= this.end());
   }
-  private async end(graceMs: number): Promise<{ killed: number; survivors: number[] }> {
+  private async end(): Promise<{ killed: number; survivors: number[] }> {
     clearInterval(this.timer);
-    await this.sample();
     const signal = (pids: number[], sig: NodeJS.Signals) => {
       for (const pid of pids)
         try {
@@ -193,13 +227,17 @@ class DescendantTracker {
           // already gone
         }
     };
-    const first = await this.running();
-    if (!first.length) return { killed: 0, survivors: [] };
-    signal(first, 'SIGTERM');
-    await new Promise((done) => setTimeout(done, graceMs));
-    signal(await this.running(), 'SIGKILL');
+    for (let round = 0; round < 10; round++) {
+      const added = await this.sample();
+      const now = await this.running();
+      if (now) signal(now, 'SIGSTOP');
+      if (!added) break;
+    }
+    const first = (await this.running()) ?? [...this.known.keys()];
+    signal(first, 'SIGKILL');
+    signal(first, 'SIGCONT');
     await new Promise((done) => setTimeout(done, 50));
-    const survivors = await this.running();
+    const survivors = (await this.running()) ?? [];
     return { killed: first.length - survivors.length, survivors };
   }
 }
@@ -266,6 +304,7 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
       evaClass: 'eva-03',
       rollbackClaimed: false,
       uncertainExternalEffect: false,
+      containment: 'best-effort',
     });
 
     const outcome = await new Promise<{
@@ -282,7 +321,7 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
         detached: true,
         stdio: ['ignore', 'pipe', 'pipe'],
       });
-      if (child.pid) tracker = new DescendantTracker(child.pid);
+      if (child.pid) tracker = new DescendantTracker(child.pid, spec.psPath ?? '/bin/ps');
 
       const stdoutChunks: Buffer[] = [];
       const stderrChunks: Buffer[] = [];
@@ -353,6 +392,7 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
 
     // B-099: whatever the job started and left running ends with it, whether it timed out, was cancelled or exited.
     const ended = tracker ? await tracker.endAll() : { killed: 0, survivors: [] };
+    const tracked = tracker?.tracked ?? false;
     const kind = outcome.cancelled
       ? 'eva03.cancelled'
       : outcome.timedOut
@@ -360,16 +400,28 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
         : outcome.exitCode === 0
           ? 'eva03.completed'
           : 'eva03.failed';
-    const uncertain = outcome.cancelled || outcome.timedOut || outcome.exitCode !== 0 || ended.survivors.length > 0;
-    const survivorNote = ended.survivors.length
-      ? `Processes still running after the job ended: ${ended.survivors.join(', ')}.`
-      : '';
+    // A job that left processes running, or whose processes could not be listed, did not end cleanly either.
+    const uncertain =
+      outcome.cancelled ||
+      outcome.timedOut ||
+      outcome.exitCode !== 0 ||
+      ended.survivors.length > 0 ||
+      ended.killed > 0 ||
+      !tracked;
+    const survivorNote = [
+      !tracked ? 'The process table could not be read: what the job left running is unknown.' : '',
+      ended.killed ? `Ended ${ended.killed} process(es) the job left running.` : '',
+      ended.survivors.length ? `Processes still running after the job ended: ${ended.survivors.join(', ')}.` : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
     spec.onLedgerEvent?.({
       jobId: spec.jobId,
       kind,
       evaClass: 'eva-03',
       rollbackClaimed: false,
       uncertainExternalEffect: uncertain,
+      containment: 'best-effort',
       detail: [survivorNote, outcome.stderr.slice(0, 400)].filter(Boolean).join(' ') || undefined,
     });
 
@@ -383,6 +435,8 @@ export async function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
       rollbackClaimed: false,
       descendantsKilled: ended.killed,
       survivors: ended.survivors,
+      tracked,
+      containment: 'best-effort',
       durationMs: Date.now() - startedAt,
     };
   } finally {

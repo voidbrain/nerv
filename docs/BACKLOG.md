@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 80.25 h agent + 10.5 h owner across 134 open steps of 40 features and 19 other records. 57.75 h of actual effort recorded on 108 steps. Generated from the task files.
+**Remaining effort:** 84.25 h agent + 10.5 h owner across 135 open steps of 40 features and 19 other records. 57.75 h of actual effort recorded on 108 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1746,44 +1746,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-099"></a>[🐞 B-099](#top)
-
-**An EVA-03 job's child in its own session survives the job's timeout and cancellation**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-099-T01 — Kill every process an EVA-03 job started at timeout, cancellation and exit (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-19 while writing F-049-T05: `runEva03Job` (`src/eva-runner.ts`) kills the job's process group only. A child started in its own session (`spawn(..., { detached: true })`, `setsid`) is outside that group and keeps running after the job timed out or was cancelled; a child in the group is killed. The T01 contract (`docs/decisions/eva-runner.md`, test 5) requires zero surviving processes. EVA execution is not enabled yet, so no live job is affected. |
-| **Reproduce** | An EVA-03 job that spawns `node -e "setInterval(()=>{},1000)"` detached, then hangs: after the timeout (or an abort) that child's pid is still alive. |
-| **Check** | Test committed failing first: after timeout and after cancellation no process the job started is alive, including one in its own session (B-099-T01). Owner decision 2026-11-19: track descendants while the job runs; a survivor is recorded as an uncertain effect, never as a clean end. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-099-t01"></a>B-099-T01 — Kill every process an EVA-03 job started at timeout, cancellation and exit | 1 h | 0 h | 1 h | Implemented; verification pending | [PR #549](https://github.com/voidbrain/nerv/pull/549) the fix; CI pending |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-099.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-099-T01: [PR #549](https://github.com/voidbrain/nerv/pull/549) the fix; CI pending. Found in F-049-T05; [PR #549](https://github.com/voidbrain/nerv/pull/549) B-099-T01 (`test/eva-gate.test.ts`) |
-| Opened | 2026-11-19 |
-| Verification | Pending. |
-| Reviewed | 2026-11-19 |
-
-</details>
-
----
 ### <a id="b-087"></a>[🐞 B-087](#top)
 
 **Windows: a fenced start applied from an SSH session is refused by the startup fence**
@@ -1818,6 +1780,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="b-099"></a>[🐞 B-099](#top)
+
+**An EVA-03 job's child in its own session survives the job's timeout and cancellation**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-099-T01 — Kill every process an EVA-03 job started at timeout, cancellation and exit (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-19 while writing F-049-T05: `runEva03Job` (`src/eva-runner.ts`) kills the job's process group only. A child started in its own session (`spawn(..., { detached: true })`, `setsid`) is outside that group and keeps running after the job timed out or was cancelled; a child in the group is killed. The T01 contract (`docs/decisions/eva-runner.md`, test 5) requires zero surviving processes. EVA execution is not enabled yet, so no live job is affected. |
+| **Reproduce** | An EVA-03 job that spawns `node -e "setInterval(()=>{},1000)"` detached, then hangs: after the timeout (or an abort) that child's pid is still alive. |
+| **Check** | Test committed failing first: after timeout and after cancellation no process the job started is alive, including one in its own session (B-099-T01). Owner decision 2026-11-19: track descendants while the job runs; a survivor is recorded as an uncertain effect, never as a clean end. Owner decision 2026-11-19 after review: tracking is best effort and every EVA-03 event says so; a boundary the job cannot leave (a dedicated job user) follows in B-099-T02. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-099-t01"></a>B-099-T01 — Kill every process an EVA-03 job started at timeout, cancellation and exit | 1 h | 0 h | 1 h | Implemented; verification pending | [PR #549](https://github.com/voidbrain/nerv/pull/549) the fix; CI pending |
+| 🟡 Medium | <a id="b-099-t02"></a>B-099-T02 — A boundary an EVA-03 job cannot leave: a dedicated job user | 4 h | 0 h | 4 h | Planned · waits on [B-099-T01](#b-099-t01) | — |
+| 🔴 Large | **Total** | 5 h | 0 h (0 of 2 steps recorded) | 5 h | 0 of 2 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-099.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-099-T01: [PR #549](https://github.com/voidbrain/nerv/pull/549) the fix; CI pending. Found in F-049-T05; [PR #549](https://github.com/voidbrain/nerv/pull/549) B-099-T01 (`test/eva-gate.test.ts`) |
+| Opened | 2026-11-19 |
+| Verification | Pending. Review: design-reviewer, 2026-11-19, PR #549 (one blocker answered by owner decision; three should-fix fixed). |
+| Reviewed | 2026-11-19 |
 
 </details>
 
