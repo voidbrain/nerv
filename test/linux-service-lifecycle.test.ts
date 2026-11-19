@@ -153,7 +153,8 @@ async function makeLinuxEnv() {
           process.env.XDG_CONFIG_HOME || join(context.userHome, '.config'),
           'systemd/user/nerv.service',
         );
-        if (unit !== 'nerv.service' || !(registered || existsSync(unitFile))) {
+        // A running unit stays loaded whatever its file state (B-086-T02).
+        if (unit !== 'nerv.service' || !(registered || active || existsSync(unitFile))) {
           return { status: 0, out: 'LoadState=not-found\n', err: '' };
         }
         return {
