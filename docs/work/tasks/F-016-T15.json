@@ -4,7 +4,7 @@
   "id": "F-016-T15",
   "title": "Step 2d — Quiesce, merge and swap under the serve guard",
   "goal": "Promoting a standby swaps state safely while base-local tables stay",
-  "status": "implemented",
+  "status": "verified",
   "acceptance": [
     "The 5-step quiesce-merge-swap runs under the serve swap-quiesce guard, keeps nerv.sqlite-resident base-local tables and `PRAGMA user_version`, and a crash at each step leaves a recoverable state (tests)",
     "No coordinator loop runs during the swap; two coordinators never act"
@@ -41,7 +41,8 @@
     "estimate": "1.5 h",
     "basis": "Split from F-016-T03 on 2026-11-18 with the owner's approval. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 1.5,
+    "agentHours": 0,
+    "ownerHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },

@@ -4,6 +4,7 @@ import { sanitizePilotOffers, type PilotOffer } from './pilots.ts';
 import { verifyOperatorEntry, type SignedOperatorEntry } from './operator-directory.ts';
 import type { KeyObject } from 'node:crypto';
 import { KAJI_CLOCK_SKEW_MS, signedHeaders, verifySigned, Nonces, type RootTrust } from './kaji-auth.ts';
+import type { ApplyReplicationBatchResult, ReplicationBatch } from './coordinator-replication.ts';
 export { signedHeaders, verifySigned, Nonces } from './kaji-auth.ts';
 import { createServer, request as httpRequest, type IncomingMessage, type Server } from 'node:http';
 import { type BaseEntry, type SignedRecord } from './kaji.ts';
@@ -238,6 +239,8 @@ export class KajiLink {
     onSortie?: (from: string, sortieId: string) => Promise<{ sortie: unknown; events: unknown[] } | null>;
     /** F-062-T06: stores an encrypted backup copy from an enrolled base, if this base accepts copies from it. */
     onBackup?: (from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>;
+    /** F-016-T04: applies an incremental coordinator replication batch on a standby base. */
+    onReplicate?: (from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>;
   }) {
     this.trust = options.trust;
     this.baseId = options.baseId;
@@ -251,6 +254,7 @@ export class KajiLink {
     this.onHealth = options.onHealth;
     this.onRelay = options.onRelay;
     this.onBackup = options.onBackup;
+    this.onReplicate = options.onReplicate;
     this.onDecide = options.onDecide;
     this.onPendingApprovals = options.onPendingApprovals;
     this.onSortie = options.onSortie;
@@ -308,6 +312,8 @@ export class KajiLink {
   private readonly onPendingApprovals: ((ids: string[]) => Promise<string[]>) | undefined;
   private readonly onRelay: ((from: string, relay: Relay) => Promise<boolean>) | undefined;
   private readonly onBackup: ((from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>) | undefined;
+  private readonly onReplicate:
+    ((from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>) | undefined;
   private readonly onDecide: ((approvalId: string, decision: 'approve' | 'reject') => Promise<string>) | undefined;
   private readonly onSortie:
     ((from: string, sortieId: string) => Promise<{ sortie: unknown; events: unknown[] } | null>) | undefined;
@@ -441,7 +447,10 @@ export class KajiLink {
     };
     try {
       let body = '';
-      const limit = req.method === 'POST' && req.url === '/kaji/backup' ? MAX_BACKUP_BODY : MAX_BODY;
+      const limit =
+        req.method === 'POST' && (req.url === '/kaji/backup' || req.url === '/kaji/replicate')
+          ? MAX_BACKUP_BODY
+          : MAX_BODY;
       for await (const chunk of req) {
         body += chunk;
         if (body.length > limit) throw new Error('too large');
@@ -592,6 +601,28 @@ export class KajiLink {
           return;
         }
         reply(200, { ids: await this.onPendingApprovals(value.ids) });
+        return;
+      }
+      if (req.method === 'POST' && req.url === '/kaji/replicate') {
+        if ((await this.port.main?.()) !== from || !this.onReplicate) {
+          reply(403, { error: 'only the main base replicates here' });
+          return;
+        }
+        const epochHdr = Number(req.headers['x-kaji-coordinator-epoch']);
+        const leaseExpiresAt = Number(req.headers['x-kaji-lease-expires-at']);
+        const batch = JSON.parse(body) as ReplicationBatch;
+        if (
+          !Number.isInteger(epochHdr) ||
+          epochHdr < 1 ||
+          epochHdr !== batch.coordinatorEpoch ||
+          !Number.isFinite(leaseExpiresAt) ||
+          Date.now() - KAJI_CLOCK_SKEW_MS > leaseExpiresAt
+        ) {
+          reply(409, { error: 'stale_coordinator_lease' });
+          return;
+        }
+        const result = await this.onReplicate(from, batch);
+        reply(result.ok ? 200 : result.reason === 'need_resync' ? 409 : 400, result);
         return;
       }
       if (req.method === 'POST' && req.url === '/kaji/decide') {
@@ -814,6 +845,61 @@ export class KajiLink {
           e instanceof Error && /timeout|aborted/i.test(e.message) ? 'did not answer in time' : 'could not be reached',
       };
     }
+  }
+  /** Ships an incremental coordinator replication batch to an enrolled standby base (F-016-T04). */
+  async replicate(
+    baseId: string,
+    batch: ReplicationBatch,
+    leaseExpiresAt: number,
+  ): Promise<ApplyReplicationBatchResult> {
+    const peer = (await this.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
+    if (!peer) throw new Error(`Base ${baseId} is not enrolled.`);
+    const body = JSON.stringify(batch);
+    const { host, port } = endpoint(peer.address);
+    const res = await send(
+      host,
+      port,
+      'POST',
+      '/kaji/replicate',
+      {
+        'content-type': 'application/json',
+        'x-kaji-coordinator-epoch': String(batch.coordinatorEpoch),
+        'x-kaji-coordinator-fence': String(batch.coordinatorFence),
+        'x-kaji-lease-expires-at': String(leaseExpiresAt),
+        ...signedHeaders(
+          this.baseId,
+          this.key,
+          'req',
+          'POST',
+          '/kaji/replicate',
+          body,
+          undefined,
+          this.trust?.required ? this.trust.root : undefined,
+        ),
+      },
+      body,
+      10000,
+    );
+    const replyFrom = verifySigned(
+      res.headers,
+      'res',
+      'POST',
+      '/kaji/replicate',
+      res.text,
+      [peer],
+      this.nonces,
+      undefined,
+      this.trust,
+    );
+    if (replyFrom !== peer.baseId) throw new Error('Unexpected base answered replication.');
+    if (res.status === 200) {
+      return JSON.parse(res.text) as ApplyReplicationBatchResult;
+    }
+    if (res.status === 409) {
+      const parsed = JSON.parse(res.text) as ApplyReplicationBatchResult & { reason?: string; error?: string };
+      if (parsed.reason === 'need_resync') return parsed;
+    }
+    throw new Error(`${peer.baseId} refused (${res.status}): ${res.text}`);
   }
   /** Authoritative status for relayed cards; an unavailable/older peer leaves cleanup pending. */
   async pendingApprovalIds(baseId: string, ids: string[]): Promise<string[]> {
