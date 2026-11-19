@@ -5,6 +5,7 @@ import { verifyOperatorEntry, type SignedOperatorEntry } from './operator-direct
 import type { KeyObject } from 'node:crypto';
 import { KAJI_CLOCK_SKEW_MS, signedHeaders, verifySigned, Nonces, type RootTrust } from './kaji-auth.ts';
 import type { ApplyReplicationBatchResult, ReplicationBatch } from './coordinator-replication.ts';
+import type { ActiveCoordinatorCheckResult } from './coordinator-authority.ts';
 export { signedHeaders, verifySigned, Nonces } from './kaji-auth.ts';
 import { createServer, request as httpRequest, type IncomingMessage, type Server } from 'node:http';
 import { type BaseEntry, type SignedRecord } from './kaji.ts';
@@ -238,6 +239,10 @@ export class KajiLink {
     onBackup?: (from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>;
     /** F-016-T04: applies an incremental coordinator replication batch on a standby base. */
     onReplicate?: (from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>;
+    /** F-016-T05: synchronous coordinator authority check for coordinator-hosted endpoints. */
+    checkCoordinatorAuthority?: () => ActiveCoordinatorCheckResult;
+    /** F-016-T05: minimum seen coordinatorEpoch enforced on incoming coordinator-authenticated RPCs. */
+    minCoordinatorEpoch?: () => number;
   }) {
     this.trust = options.trust;
     this.baseId = options.baseId;
@@ -252,6 +257,8 @@ export class KajiLink {
     this.onRelay = options.onRelay;
     this.onBackup = options.onBackup;
     this.onReplicate = options.onReplicate;
+    this.checkCoordinatorAuthority = options.checkCoordinatorAuthority;
+    this.minCoordinatorEpoch = options.minCoordinatorEpoch;
     this.onDecide = options.onDecide;
     this.onPendingApprovals = options.onPendingApprovals;
     this.onSortie = options.onSortie;
@@ -308,6 +315,32 @@ export class KajiLink {
     ((from: string, message: string, conversation?: string) => Promise<DispatchedReply>) | undefined;
   private readonly onPendingApprovals: ((ids: string[]) => Promise<string[]>) | undefined;
   private readonly onRelay: ((from: string, relay: Relay) => Promise<boolean>) | undefined;
+  private readonly checkCoordinatorAuthority: (() => ActiveCoordinatorCheckResult) | undefined;
+  private readonly minCoordinatorEpoch: (() => number) | undefined;
+  private staleEpochReply(
+    headers: IncomingMessage['headers'],
+    reply: (status: number, value: unknown) => void,
+  ): boolean {
+    const raw = headers['x-kaji-coordinator-epoch'];
+    const minEpoch = this.minCoordinatorEpoch?.() ?? 0;
+    if (raw === undefined && minEpoch <= 0) return false;
+    const hdr = typeof raw === 'string' && /^\d+$/.test(raw) ? Number(raw) : undefined;
+    if (raw !== undefined && hdr === undefined) {
+      reply(400, { error: 'invalid coordinator epoch header' });
+      return true;
+    }
+    if (hdr !== undefined && hdr < minEpoch) {
+      reply(409, { error: 'stale_coordinator_epoch', minCoordinatorEpoch: minEpoch });
+      return true;
+    }
+    return false;
+  }
+  private coordinatorUnavailableReply(reply: (status: number, value: unknown) => void): boolean {
+    const auth = this.checkCoordinatorAuthority?.();
+    if (!auth || auth.ok) return false;
+    reply(auth.reason === 'coordinator_not_active' ? 503 : 409, { error: auth.reason, detail: auth.detail });
+    return true;
+  }
   private readonly onBackup: ((from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>) | undefined;
   private readonly onReplicate:
     ((from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>) | undefined;
@@ -522,6 +555,7 @@ export class KajiLink {
           reply(409, { error: 'not the main base' });
           return;
         }
+        if (this.coordinatorUnavailableReply(reply) || this.staleEpochReply(req.headers, reply)) return;
         reply(200, { delivered: await this.onRelay(from, relay) });
         return;
       }
@@ -542,6 +576,7 @@ export class KajiLink {
           reply(409, { error: 'not the main base' });
           return;
         }
+        if (this.coordinatorUnavailableReply(reply) || this.staleEpochReply(req.headers, reply)) return;
         reply(200, await this.onChat(from, c.message, c.conversation as string | undefined));
         return;
       }
@@ -565,6 +600,7 @@ export class KajiLink {
           reply(403, { error: 'only the main base asks for votes here' });
           return;
         }
+        if (this.staleEpochReply(req.headers, reply)) return;
         reply(200, {
           verdict: await this.onVerdict(from, {
             request: a.request,
@@ -636,6 +672,7 @@ export class KajiLink {
           reply(403, { error: 'only the main base decides here' });
           return;
         }
+        if (this.staleEpochReply(req.headers, reply)) return;
         reply(200, { outcome: await this.onDecide(d.approvalId, d.decision) });
         return;
       }
