@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "B-101-T01",
+  "parent": "B-101",
+  "title": "The dashboard names why the base is degraded, and calls a model down only when one is",
+  "goal": "The DEGRADED banner lists the reasons; its model-failure sentence and the map's standby state appear only when a model route or the brain is down",
+  "status": "implemented",
+  "acceptance": [
+    "Test committed failing first: a failed overnight Instrumentality run shows as its own reason, without the model-failure sentence and without marking the base standby",
+    "A route or brain reason keeps the sentence and the standby state; every reason is shown, escaped"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/live.js",
+    "test/degraded-banner.test.mjs",
+    "contract:backlog-ids",
+    "docs/work/records/B-101.md",
+    "docs/work/tasks/B-101-T01.json",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-19 from the owner's report on NERV-01's dashboard. Not a measurement.",
+    "reviewed": "2026-11-19",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": [
+    {
+      "pr": 559,
+      "note": "the fix; CI pending"
+    }
+  ]
+}

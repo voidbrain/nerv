@@ -455,7 +455,7 @@
                 : ["warn", "unknown"];
       rows.push(["Update availability", label[0], label[1]]);
     }
-    const degraded = (d.degraded || []).length ? "<div class='small warn' style='margin-bottom:4px'>DEGRADED · Dummy Plug: reminders and rule-based actions keep running; requests that need a model fail with the reason below until it is back.</div>" : "";
+    const degraded = degradedBanner(d.degraded);
     const mu = state.manualUpdate;
     const updateActionHtml = u && u.status === "update-available"
       ? "<div class='row small' style='margin-top:6px'><span class='muted'>Update ready (" + esc(short(u.availableRevision)) + " · " + esc(u.channel || "main") + ")</span><button class='btn sm' id='btn-apply-update'" + (state.manualUpdateBusy ? " disabled" : "") + ">" + (state.manualUpdateBusy ? "Applying…" : "Apply update") + "</button></div>"
@@ -483,11 +483,28 @@
   // Kaji bases (F-036): every enrolled base with its real status; positions are a fixed layout around this base
   // (no real coordinates exist), redrawn when the set of bases or their status changes.
   let basesKey = "";
-  /** This base's health from doctor: online (all well), standby (degraded: brain down or no model route for Misato), offline (scheduler down). */
+  /** B-101: a reason that means requests needing a model fail now: a model route or the brain is down. */
+  function modelDown(reasons) {
+    return (reasons || []).some(r => / route down since |brain process not answering/.test(String(r)));
+  }
+  /** B-101: the DEGRADED banner lists every reason; it says model requests fail only when a route or the brain is down. */
+  function degradedBanner(reasons) {
+    if (!(reasons || []).length) return "";
+    return "<div class='small warn' style='margin-bottom:4px'>DEGRADED" +
+      (modelDown(reasons) ? " · Dummy Plug: reminders and rule-based actions keep running; requests that need a model fail until it is back." : "") +
+      "<ul style='margin:2px 0 0 16px;padding:0'>" + reasons.map(r => "<li>" + esc(r) + "</li>").join("") + "</ul></div>";
+  }
+  /** B-101: the overview tile's line for a degraded base: a down model, or the first reason the health card lists. */
+  function degradedSummary(reasons) {
+    if (modelDown(reasons)) return "a model route is down · reminders still run";
+    const first = String((reasons || [])[0] || "");
+    return (first.length > 60 ? first.slice(0, 59) + "…" : first) || "see the health card";
+  }
+  /** This base's health from doctor: online (all well), standby (brain down or no model route for Misato), offline (scheduler down). */
   function healthOf(d) {
     const p = (d && d.processes) || {}; const roles = ((d && d.models) || {}).roles || {};
     if (!p.nervous) return "offline";
-    return p.brainAlive === false || (d.degraded || []).length || !roles.misato || /not set|not configured/.test(roles.misato) ? "standby" : "online";
+    return p.brainAlive === false || modelDown(d.degraded) || !roles.misato || /not set|not configured/.test(roles.misato) ? "standby" : "online";
   }
   // Real heartbeats on the Kaji line: when a peer's last-seen time moves, a pulse travels from it to this base.
   const heard = {};
@@ -835,7 +852,7 @@
     const next = state.upcoming.filter(u => u.at > Date.now()).sort((a, b) => a.at - b.at)[0];
     document.getElementById("qv-next").textContent = next ? (next.label || hhmm(next.at)) : "—"; document.getElementById("qd-next").textContent = next ? next.title : "nothing scheduled";
     const p = (state.doctor || {}).processes || {}; const bad = !p.nervous || p.brainAlive === false; const degraded = ((state.doctor || {}).degraded || []).length > 0;
-    document.getElementById("qv-health").textContent = bad ? "issue" : degraded ? "degraded" : "OK"; document.getElementById("qd-health").textContent = bad ? "a process is down" : degraded ? "a model route is down · reminders still run" : "all checks pass";
+    document.getElementById("qv-health").textContent = bad ? "issue" : degraded ? "degraded" : "OK"; document.getElementById("qd-health").textContent = bad ? "a process is down" : degraded ? degradedSummary(state.doctor.degraded) : "all checks pass";
     document.getElementById("q-health").classList.toggle("alert", bad); document.getElementById("q-health").classList.toggle("attn", !bad && degraded);
     const usage = usageView(usagePage); document.querySelector('[data-l="qBudget"]').textContent = "Model usage"; document.getElementById("qv-budget").textContent = usagePage ? usagePage.items.length + " calls" : "—"; document.getElementById("qd-budget").textContent = usageError ? "Accounting refresh unavailable" : "Loaded page · " + usage.heading;
   };
