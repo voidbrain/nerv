@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 78.25 h agent + 10.5 h owner across 133 open steps of 40 features and 19 other records. 61.75 h of actual effort recorded on 110 steps. Generated from the task files.
+**Remaining effort:** 76.75 h agent + 10.5 h owner across 133 open steps of 40 features and 19 other records. 61.75 h of actual effort recorded on 110 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -348,9 +348,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 7 h agent + 1 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 5.5 h agent + 1 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-016-T14 — Step 2c — Serial-monotonic registry merge and worker approval settlement (Implemented; verification pending).
+💻 **→** Next: F-016-T15 — Step 2d — Quiesce, merge and swap under the serve guard (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -364,8 +364,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-016-t14"></a>F-016-T14 — Step 2c — Serial-monotonic registry merge and worker approval settlement | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | 🤖 | [PR #550](https://github.com/voidbrain/nerv/pull/550) implementation |
-| 🟡 Medium | <a id="f-016-t15"></a>F-016-T15 — Step 2d — Quiesce, merge and swap under the serve guard | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-016-T14](#f-016-t14) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-016-t15"></a>F-016-T15 — Step 2d — Quiesce, merge and swap under the serve guard | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | 🤖 | — |
 | 🟢 Small | <a id="f-016-t04"></a>F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T15](#f-016-t15) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t05"></a>F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T04](#f-016-t04) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t06"></a>F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T05](#f-016-t05) | ⏳ 🤖 | — |
@@ -373,9 +372,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T07](#f-016-t07) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned · waits on [F-016-T08](#f-016-t08) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 12.25 h (14 of 15 steps) | 1 h (2 of 15 steps recorded) | 7 h agent + 1 h owner | 6 of 15 completed | | |
+| 🔴 Large | **Total** | 12.25 h (14 of 15 steps) | 1 h (2 of 15 steps recorded) | 5.5 h agent + 1 h owner | 7 of 15 completed | | |
 
-<details><summary>Done steps (6)</summary>
+<details><summary>Done steps (7)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -385,6 +384,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-016-t10"></a>F-016-T10 — Revise the relocation decision after review | 0.5 h | 0.5 h (stated) | Completed | [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review |
 | — | <a id="f-016-t12"></a>F-016-T12 — Revise the decision: local chat fallback on a non-main base | 0.5 h | 0 h | Completed | — |
 | 🟢 Small | <a id="f-016-t13"></a>F-016-T13 — Step 2b — Import a verified snapshot into the read-only standby | 2 h | 0 h | Verified | [PR #548](https://github.com/voidbrain/nerv/pull/548) implementation |
+| 🟢 Small | <a id="f-016-t14"></a>F-016-T14 — Step 2c — Serial-monotonic registry merge and worker approval settlement | 1.5 h | 0 h | Verified | [PR #550](https://github.com/voidbrain/nerv/pull/550) implementation |
 
 </details>
 

@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
 import { createHash, generateKeyPairSync, randomUUID, verify, type KeyObject } from 'node:crypto';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, it } from 'node:test';
 import {
   REPLICATED_COORDINATOR_TABLES,
@@ -449,6 +452,167 @@ describe('F-016-T14: serial-monotonic registry merge and worker approval settlem
       assert.equal(appExpire.persisted_decision, 'reject');
     } finally {
       store.close();
+    }
+  });
+});
+
+describe('F-016-T15: 5-step quiesce-merge-swap under serve guard', () => {
+  function setupSwapFixture(dir: string) {
+    const mainDbPath = join(dir, 'nerv.sqlite');
+    const standbyDbPath = join(dir, 'coordinator-standby.sqlite');
+    const archivePath = join(dir, 'nerv.pre-standby.sqlite');
+    const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+
+    // Source coordinator snapshot
+    const source = new Store(':memory:');
+    source.db
+      .prepare(
+        "INSERT INTO deliveries(rowid, id, reminder_id, kind, message, created, read_at) VALUES (88, 'del-88', NULL, 'brief', 'From main', '2026-11-19T08:00:00Z', NULL)",
+      )
+      .run();
+    source.db
+      .prepare(
+        "INSERT INTO registry(id, serial, kind, base_id, body, signature, received) VALUES ('reg-1', 1, 'enroll', 'NERV-01', '{}', 'sig1', '2026-11-19T08:00:00Z')",
+      )
+      .run();
+    const exported = source.exportCoordinatorSnapshot({
+      root: 'root-fp-1',
+      sourceBaseId: 'NERV-01',
+      coordinatorEpoch: 4,
+      coordinatorFence: 10,
+      headSeq: 50,
+      privateKey,
+    });
+    source.close();
+
+    // Standby DB holds imported snapshot
+    const standby = new Store(standbyDbPath);
+    standby.importStandbySnapshot({
+      frames: exported.chunks,
+      publicKey,
+      expectedRoot: 'root-fp-1',
+      expectedMainBaseId: 'NERV-01',
+    });
+    standby.db.exec('PRAGMA user_version = 4');
+    standby.close();
+
+    // Local nerv.sqlite holds base-local tables, user_version = 6, and a newer serial-2 revoke
+    const local = new Store(mainDbPath);
+    local.db.exec('PRAGMA user_version = 6');
+    local.db
+      .prepare(
+        "INSERT INTO push_vapid(id, public_key, private_key, created) VALUES ('1', 'pub', 'LOCAL-VAPID-PRIV', '2026-11-19T08:00:00Z')",
+      )
+      .run();
+    local.db.prepare("INSERT INTO kaji_seen(base_id, last_seen) VALUES ('NERV-01', '2026-11-19T09:00:00Z')").run();
+    local.db
+      .prepare(
+        "INSERT INTO registry(id, serial, kind, base_id, body, signature, received) VALUES ('reg-2', 2, 'revoke', 'NERV-01', '{}', 'sig2', '2026-11-19T09:00:00Z')",
+      )
+      .run();
+    local.close();
+
+    return { mainDbPath, standbyDbPath, archivePath };
+  }
+
+  it('runs the 5-step quiesce-merge-swap, preserves base-local tables and user_version, and keeps loops quiesced during swap', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-f016-t15-'));
+    try {
+      const { mainDbPath, standbyDbPath, archivePath } = setupSwapFixture(dir);
+      const events: string[] = [];
+      const result = Store.promoteStandby({
+        mainDbPath,
+        standbyDbPath,
+        preStandbyArchivePath: archivePath,
+        newCoordinatorEpoch: 5,
+        quiesce: () => events.push('quiesce'),
+        restart: () => events.push('restart'),
+      });
+
+      assert.deepEqual(events, ['quiesce', 'restart']);
+      assert.equal(result.promoted, true);
+      assert.equal(result.coordinatorEpoch, 5);
+      assert.equal(result.replicationMode, 'active');
+      assert.equal(result.preservedUserVersion, 6);
+      assert.ok(result.preservedLocalTables.includes('push_vapid'));
+      assert.ok(result.preservedLocalTables.includes('kaji_seen'));
+      assert.equal(existsSync(archivePath), true);
+      assert.equal(existsSync(standbyDbPath), false);
+
+      const promoted = new Store(mainDbPath);
+      try {
+        const uv = (promoted.db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version;
+        assert.equal(uv, 6);
+        const del = promoted.db.prepare('SELECT rowid, id FROM deliveries').get() as { rowid: number; id: string };
+        assert.equal(del.rowid, 88);
+        assert.equal(del.id, 'del-88');
+        const vapid = promoted.db.prepare('SELECT private_key FROM push_vapid').get() as { private_key: string };
+        assert.equal(vapid.private_key, 'LOCAL-VAPID-PRIV');
+        const reg = promoted.db.prepare('SELECT id, serial, kind FROM registry ORDER BY serial ASC').all() as Array<{
+          id: string;
+          serial: number;
+          kind: string;
+        }>;
+        assert.equal(reg.length, 2);
+        assert.equal(reg[1]!.kind, 'revoke');
+        const cs = promoted.db
+          .prepare('SELECT coordinator_epoch, replication_mode FROM coordinator_state WHERE id = 1')
+          .get() as { coordinator_epoch: number; replication_mode: string };
+        assert.equal(cs.coordinator_epoch, 5);
+        assert.equal(cs.replication_mode, 'active');
+      } finally {
+        promoted.close();
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('recovers cleanly from an injected crash after each step (1..5)', () => {
+    for (const failAfterStep of [1, 2, 3, 4, 5] as const) {
+      const dir = mkdtempSync(join(tmpdir(), `nerv-f016-t15-crash-${failAfterStep}-`));
+      try {
+        const { mainDbPath, standbyDbPath, archivePath } = setupSwapFixture(dir);
+        let restartedDuringCrash = false;
+        assert.throws(
+          () =>
+            Store.promoteStandby({
+              mainDbPath,
+              standbyDbPath,
+              preStandbyArchivePath: archivePath,
+              newCoordinatorEpoch: 5,
+              failAfterStep,
+              restart: () => {
+                restartedDuringCrash = true;
+              },
+            }),
+          /Injected crash/,
+        );
+        assert.equal(restartedDuringCrash, false);
+
+        // Recovery run completes without losing base-local tables or user_version.
+        const recovered = Store.promoteStandby({
+          mainDbPath,
+          standbyDbPath,
+          preStandbyArchivePath: archivePath,
+          newCoordinatorEpoch: 5,
+        });
+        assert.equal(recovered.promoted, true);
+        assert.equal(recovered.replicationMode, 'active');
+        assert.equal(recovered.preservedUserVersion, 6);
+
+        const promoted = new Store(mainDbPath);
+        try {
+          const vapid = promoted.db.prepare('SELECT private_key FROM push_vapid').get() as { private_key: string };
+          assert.equal(vapid.private_key, 'LOCAL-VAPID-PRIV');
+          const del = promoted.db.prepare('SELECT rowid, id FROM deliveries').get() as { rowid: number; id: string };
+          assert.equal(del.rowid, 88);
+        } finally {
+          promoted.close();
+        }
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
     }
   });
 });

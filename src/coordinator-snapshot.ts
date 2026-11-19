@@ -1,5 +1,6 @@
 import { createHash, sign, verify, type KeyObject } from 'node:crypto';
-import type { DatabaseSync } from 'node:sqlite';
+import { existsSync, renameSync, rmSync } from 'node:fs';
+import { DatabaseSync } from 'node:sqlite';
 import { canonical } from './kaji.ts';
 import { MAX_BACKUP_BODY } from './kaji-link.ts';
 
@@ -460,5 +461,267 @@ export function importCoordinatorSnapshotToStandby(input: ImportStandbySnapshotI
     manifest: payload.manifest,
     replicationMode: 'standby',
     importedTables,
+  };
+}
+
+/** Strictly base-local SQLite tables in `nerv.sqlite` preserved across standby promotion swap (F-016-T15). */
+export const BASE_LOCAL_SQLITE_TABLES = [
+  'worker_sessions',
+  'worker_jobs',
+  'worker_approvals',
+  'worker_cancellations',
+  'worker_releases',
+  'standby_lease_state',
+  'push_vapid',
+  'push_subscriptions',
+  'model_usage',
+  'registry_seen',
+  'kaji_seen',
+] as const;
+
+export const ROOT_MIGRATION_TABLES = [
+  'root_migrations',
+  'root_migration_resource',
+  'root_migration_clock',
+  'root_migration_recovery',
+] as const;
+
+export interface PromoteStandbySwapInput {
+  mainDbPath: string;
+  standbyDbPath: string;
+  preStandbyArchivePath?: string;
+  newCoordinatorEpoch: number;
+  newCoordinatorFence?: number;
+  quiesce?: () => void;
+  settlePendingApprovals?: (mainDb: DatabaseSync) => void;
+  restart?: () => void;
+  /** Test-only crash injection after completing step N (1..5). */
+  failAfterStep?: 1 | 2 | 3 | 4 | 5;
+}
+
+export interface PromoteStandbySwapResult {
+  promoted: boolean;
+  coordinatorEpoch: number;
+  coordinatorFence: number;
+  replicationMode: 'active';
+  preservedUserVersion: number;
+  preservedLocalTables: string[];
+}
+
+function sqliteEscapePath(p: string): string {
+  return p.replace(/'/g, "''");
+}
+
+function tableExists(db: DatabaseSync, name: string, schema = 'main'): boolean {
+  const row = db
+    .prepare(`SELECT 1 AS ok FROM "${schema}".sqlite_master WHERE type = 'table' AND name = ?`)
+    .get(name) as { ok?: number } | undefined;
+  return Boolean(row?.ok);
+}
+
+function copyTableRows(db: DatabaseSync, table: string, fromSchema: string, toSchema: string): void {
+  if (!tableExists(db, table, fromSchema) || !tableExists(db, table, toSchema)) return;
+  const cols = (db.prepare(`PRAGMA "${toSchema}".table_info("${table}")`).all() as Array<{ name: string }>).map(
+    (c) => c.name,
+  );
+  const srcCols = new Set(
+    (db.prepare(`PRAGMA "${fromSchema}".table_info("${table}")`).all() as Array<{ name: string }>).map((c) => c.name),
+  );
+  const common = cols.filter((c) => srcCols.has(c));
+  if (common.length === 0) return;
+  const colList = common.map((c) => `"${c.replace(/"/g, '""')}"`).join(', ');
+  db.exec(`DELETE FROM "${toSchema}"."${table}"`);
+  db.exec(`INSERT INTO "${toSchema}"."${table}" (${colList}) SELECT ${colList} FROM "${fromSchema}"."${table}"`);
+}
+
+function removeWalSidecars(dbPath: string): void {
+  for (const suffix of ['-wal', '-shm']) {
+    const p = `${dbPath}${suffix}`;
+    if (existsSync(p)) rmSync(p, { force: true });
+  }
+}
+
+/**
+ * Executes the 5-step quiesce-merge-swap promotion sequence (`F-016-T15`):
+ * 1. Quiesce loops/handles & settle undecided standby `worker_approvals`.
+ * 2. WAL checkpoint (`TRUNCATE`) on both `nerv.sqlite` and `coordinator-standby.sqlite`.
+ * 3. Preserve base-local tables, serial-merge `registry`/`registry_roots`, and preserve `PRAGMA user_version`.
+ * 4. Archive prior `nerv.sqlite` -> `nerv.pre-standby.sqlite` and atomically rename standby -> `nerv.sqlite`.
+ * 5. Activate `coordinator_state` (`replication_mode = 'active'`, `newCoordinatorEpoch`), revoke old-epoch grants, and restart.
+ * Recoverable if interrupted at any step.
+ */
+export function promoteStandbyDatabase(input: PromoteStandbySwapInput): PromoteStandbySwapResult {
+  const archivePath = input.preStandbyArchivePath ?? `${input.mainDbPath}.pre-standby`;
+  const hasMain = existsSync(input.mainDbPath);
+  const hasStandby = existsSync(input.standbyDbPath);
+  const hasArchive = existsSync(archivePath);
+
+  if (!hasStandby && !hasMain) {
+    throw new Error('Cannot promote standby: neither coordinator-standby.sqlite nor nerv.sqlite exists.');
+  }
+
+  // Step 1: Quiesce open loops & settle undecided worker approvals on local DB while still open.
+  if (input.quiesce) input.quiesce();
+  const localSourcePath = hasMain ? input.mainDbPath : hasArchive ? archivePath : undefined;
+  if (hasMain && input.settlePendingApprovals) {
+    const mainDb = new DatabaseSync(input.mainDbPath);
+    try {
+      input.settlePendingApprovals(mainDb);
+    } finally {
+      mainDb.close();
+    }
+  }
+  if (input.failAfterStep === 1) throw new Error('Injected crash after step 1');
+
+  // Step 2: WAL checkpoint both databases.
+  if (hasMain) {
+    const mainDb = new DatabaseSync(input.mainDbPath);
+    try {
+      mainDb.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+    } finally {
+      mainDb.close();
+    }
+    removeWalSidecars(input.mainDbPath);
+  }
+  if (hasStandby) {
+    const standbyDb = new DatabaseSync(input.standbyDbPath);
+    try {
+      standbyDb.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+    } finally {
+      standbyDb.close();
+    }
+    removeWalSidecars(input.standbyDbPath);
+  }
+  if (input.failAfterStep === 2) throw new Error('Injected crash after step 2');
+
+  // Step 3: Preserve base-local tables, trust state, and user_version from local DB into standby DB.
+  const preservedLocalTables: string[] = [];
+  let preservedUserVersion = 0;
+  if (hasStandby && localSourcePath) {
+    const standbyDb = new DatabaseSync(input.standbyDbPath);
+    try {
+      standbyDb.exec(COORDINATOR_STATE_SCHEMA);
+      standbyDb.exec(`ATTACH DATABASE '${sqliteEscapePath(localSourcePath)}' AS local_db`);
+      const localUv = Number(
+        (standbyDb.prepare('PRAGMA local_db.user_version').get() as { user_version?: number })?.user_version ?? 0,
+      );
+      const standbyUv = Number(
+        (standbyDb.prepare('PRAGMA main.user_version').get() as { user_version?: number })?.user_version ?? 0,
+      );
+      preservedUserVersion = Math.max(localUv, standbyUv);
+
+      standbyDb.exec('PRAGMA foreign_keys = OFF');
+      standbyDb.exec('BEGIN IMMEDIATE');
+      try {
+        for (const table of BASE_LOCAL_SQLITE_TABLES) {
+          if (tableExists(standbyDb, table, 'local_db') && tableExists(standbyDb, table, 'main')) {
+            copyTableRows(standbyDb, table, 'local_db', 'main');
+            preservedLocalTables.push(table);
+          }
+        }
+        for (const table of ROOT_MIGRATION_TABLES) {
+          if (tableExists(standbyDb, table, 'local_db') && tableExists(standbyDb, table, 'main')) {
+            copyTableRows(standbyDb, table, 'local_db', 'main');
+            preservedLocalTables.push(table);
+          }
+        }
+        if (tableExists(standbyDb, 'registry', 'local_db') && tableExists(standbyDb, 'registry', 'main')) {
+          const maxStandby =
+            (standbyDb.prepare('SELECT COALESCE(MAX(serial), 0) AS m FROM main.registry').get() as { m: number }).m ??
+            0;
+          standbyDb
+            .prepare(
+              'INSERT OR IGNORE INTO main.registry(id, serial, kind, base_id, body, signature, received) SELECT id, serial, kind, base_id, body, signature, received FROM local_db.registry WHERE serial > ?',
+            )
+            .run(maxStandby);
+        }
+        if (tableExists(standbyDb, 'registry_roots', 'local_db') && tableExists(standbyDb, 'registry_roots', 'main')) {
+          standbyDb.exec(
+            'INSERT OR IGNORE INTO main.registry_roots(id, root) SELECT id, root FROM local_db.registry_roots',
+          );
+        }
+        standbyDb.exec(`PRAGMA main.user_version = ${preservedUserVersion}`);
+        standbyDb.exec('COMMIT');
+      } catch (err) {
+        try {
+          standbyDb.exec('ROLLBACK');
+        } catch {
+          // Ignore rollback error.
+        }
+        throw err;
+      } finally {
+        standbyDb.exec('PRAGMA foreign_keys = ON');
+      }
+      standbyDb.exec('DETACH DATABASE local_db');
+      standbyDb.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+    } finally {
+      standbyDb.close();
+    }
+    removeWalSidecars(input.standbyDbPath);
+  }
+  if (input.failAfterStep === 3) throw new Error('Injected crash after step 3');
+
+  // Step 4: Atomic file swap (archive prior nerv.sqlite, rename standby -> nerv.sqlite).
+  if (hasStandby) {
+    if (hasMain) {
+      if (hasArchive) rmSync(archivePath, { force: true });
+      renameSync(input.mainDbPath, archivePath);
+    }
+    renameSync(input.standbyDbPath, input.mainDbPath);
+  }
+  if (input.failAfterStep === 4) throw new Error('Injected crash after step 4');
+
+  // Step 5: Activation transaction & restart.
+  const promotedDb = new DatabaseSync(input.mainDbPath);
+  let finalFence: number;
+  try {
+    promotedDb.exec(COORDINATOR_STATE_SCHEMA);
+    if (!preservedUserVersion) {
+      preservedUserVersion = Number(
+        (promotedDb.prepare('PRAGMA user_version').get() as { user_version?: number })?.user_version ?? 0,
+      );
+    }
+    promotedDb.exec('BEGIN IMMEDIATE');
+    try {
+      const existing = promotedDb.prepare('SELECT coordinator_fence FROM coordinator_state WHERE id = 1').get() as
+        { coordinator_fence?: number } | undefined;
+      finalFence = input.newCoordinatorFence ?? Number(existing?.coordinator_fence ?? 0) + 1;
+      promotedDb
+        .prepare(
+          `INSERT INTO coordinator_state(id, coordinator_epoch, coordinator_fence, replication_mode)
+           VALUES (1, ?, ?, 'active')
+           ON CONFLICT(id) DO UPDATE SET
+             coordinator_epoch = excluded.coordinator_epoch,
+             coordinator_fence = excluded.coordinator_fence,
+             replication_mode = 'active'`,
+        )
+        .run(input.newCoordinatorEpoch, finalFence);
+      if (tableExists(promotedDb, 'grants', 'main')) {
+        promotedDb
+          .prepare('UPDATE grants SET revoked = COALESCE(revoked, ?) WHERE used IS NULL AND revoked IS NULL')
+          .run(new Date().toISOString());
+      }
+      promotedDb.exec('COMMIT');
+    } catch (err) {
+      try {
+        promotedDb.exec('ROLLBACK');
+      } catch {
+        // Ignore rollback error.
+      }
+      throw err;
+    }
+  } finally {
+    promotedDb.close();
+  }
+  if (input.failAfterStep === 5) throw new Error('Injected crash after step 5');
+
+  if (input.restart) input.restart();
+  return {
+    promoted: true,
+    coordinatorEpoch: input.newCoordinatorEpoch,
+    coordinatorFence: finalFence,
+    replicationMode: 'active',
+    preservedUserVersion,
+    preservedLocalTables,
   };
 }
