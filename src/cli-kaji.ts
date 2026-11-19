@@ -19,6 +19,7 @@ import {
 } from './kaji.ts';
 
 import { builtinTools } from './executors.ts';
+import { OFFER_NAME, toolName } from './mcp.ts';
 
 export async function runKajiCommand(
   args: string[],
@@ -98,8 +99,15 @@ export async function runKajiCommand(
     );
   } else if (sub === 'offer') {
     // Slice 3b: the actions this base lets the main base run here; each still passes this base's own gate.
+    // F-021-T04: a granted MCP tool can be offered too; it runs only while its grant still matches the tool.
     const names = args.slice(1);
-    const offerable = builtinTools.map((t) => t.name).filter((n) => n !== 'kaji.run');
+    const offerable = [
+      ...builtinTools.map((t) => t.name).filter((n) => n !== 'kaji.run'),
+      ...(config.tools?.grants ?? [])
+        .filter((g) => g.eva !== '03')
+        .map((g) => toolName(g.server, g.tool))
+        .filter((n) => OFFER_NAME.test(n)),
+    ];
     if (!names.length) {
       const o = config.kaji?.offers ?? [];
       console.log(

@@ -524,6 +524,9 @@ export class Store {
   ): { decision: string; result?: unknown; error?: string } {
     return this.sortiesController.decide(id, decision, source, options);
   }
+  refuseWorkerApproval(id: string, reason: string): { refused: string } {
+    return this.sortiesController.refuseWorkerApproval(id, reason);
+  }
   /** One owner action through the gate (F-017): ballot, then on a grant the executor runs at once; otherwise it waits for the owner or stops. */
   runAction(sortieId: string, proposal: Proposal, worker?: WorkerLease, agency?: AgencySnapshot): ActResult {
     return this.sortiesController.runAction(sortieId, proposal, worker, agency);

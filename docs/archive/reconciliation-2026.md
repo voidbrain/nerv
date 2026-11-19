@@ -501,3 +501,7 @@ PRs #550 and #551 merged with green CI. F-049-T06 closed; F-016-T14 left to the 
 ## 2026-11-19 — main `a5d88c65`
 
 PR #552 merged with green CI. F-016-T03, F-016-T13, F-016-T14 and F-016-T15 closed (#546, #548, #550, #552). F-049-T13 implemented after a fresh-context review.
+
+## 2026-11-19 — main `fc53e05c`
+
+PR #553 merged with green CI after two reruns (GitHub had no macOS runner; nothing ran). F-049-T13 closed. F-021-T04 implemented.

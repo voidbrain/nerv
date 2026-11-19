@@ -4,7 +4,7 @@
   "parent": "F-021",
   "title": "Remote (other-machine) endpoints",
   "goal": "Remote (other-machine) endpoints",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Tools on another base are callable through the authenticated Kaji line with the same grant checks"
   ],
@@ -12,10 +12,32 @@
     "F-021-T03"
   ],
   "resources": [
-    "src/**",
-    "test/**",
-    "docs/**",
-    "generated:backlog-views"
+    "src/kaji-link.ts",
+    "src/executors.ts",
+    "src/cli-kaji.ts",
+    "src/runtime-peers.ts",
+    "src/runtime.ts",
+    "test/kaji-run.test.ts",
+    "test/kaji-mcp.test.ts",
+    "docs/work/records/F-021.md",
+    "docs/work/tasks/F-021-T04.json",
+    "src/config.ts",
+    "src/worker-link.ts",
+    "src/worker-jobs.ts",
+    "src/rpc-schemas.ts",
+    "docs/guides/kaji-and-nodes.md",
+    "docs/work/records/F-049.md",
+    "docs/work/tasks/F-049-T13.json",
+    "docs/archive/reconciliation-2026.md",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views",
+    "src/store-kaji-outbox.ts",
+    "src/store-sorties.ts",
+    "src/nervous-process.ts",
+    "src/ledger.ts",
+    "src/policy.ts",
+    "src/store.ts",
+    "src/rpc.ts"
   ],
   "capabilities": [
     "bounded-edit",
@@ -32,12 +54,18 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 h agent",
-    "basis": "Re-estimated 2026-11-14 from 0.5 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
-    "reviewed": "2026-11-14",
+    "estimate": "2.5 h agent",
+    "basis": "Re-estimated 2026-11-14 from 0.5 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio. Re-estimated 2026-11-19 from 0.75 h to 2.5 h (owner approved): MCP tools over Kaji need offer names, a grant re-check on the base that runs them and a two-base join test.",
+    "reviewed": "2026-11-19",
     "baselineDays": 2,
-    "agentHours": 0.75,
+    "agentHours": 2.5,
     "baselineAgentHours": 3,
-    "estimateAgentHours": 0.75
-  }
+    "estimateAgentHours": 2.5
+  },
+  "prs": [
+    {
+      "pr": 556,
+      "note": "MCP over Kaji; CI pending"
+    }
+  ]
 }

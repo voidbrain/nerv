@@ -8,6 +8,7 @@ import type { ApplyReplicationBatchResult, ReplicationBatch } from './coordinato
 export { signedHeaders, verifySigned, Nonces } from './kaji-auth.ts';
 import { createServer, request as httpRequest, type IncomingMessage, type Server } from 'node:http';
 import { type BaseEntry, type SignedRecord } from './kaji.ts';
+import { OFFER_NAME } from './mcp.ts';
 /**
  * The Kaji line's live link (F-036, phase 1b). Each base listens on its enrolled address only (the Tailscale IP),
  * speaks only to enrolled bases, and signs every request and reply with its own base key. Heartbeats every 30 s give
@@ -65,13 +66,9 @@ export function sanitizeHealth(value: unknown): BaseHealth | undefined {
 }
 /** Missed heartbeats in a row before a peer is logged unreachable: as many as fit in the online window (3 at 30 s / 90 s). */
 export const missesToLog = (everyMs: number) => Math.max(1, Math.ceil(ONLINE_MS / everyMs));
-/** The actions a base offers the main base (F-036 slice 3b): action names only, at most 20. */
+/** The actions a base offers the main base (F-036 slice 3b; MCP tools F-021-T04): action names only, at most 20. */
 export function sanitizeOffers(value: unknown): string[] | undefined {
-  if (
-    !Array.isArray(value) ||
-    value.length > 20 ||
-    value.some((v) => typeof v !== 'string' || !/^[a-z]+\.[a-z]+$/.test(v))
-  )
+  if (!Array.isArray(value) || value.length > 20 || value.some((v) => typeof v !== 'string' || !OFFER_NAME.test(v)))
     return undefined;
   return [...new Set(value as string[])].filter((t) => t !== 'kaji.run');
 }
@@ -555,7 +552,7 @@ export class KajiLink {
           typeof a.request !== 'string' ||
           a.request.length > 4000 ||
           typeof a.tool !== 'string' ||
-          !/^[a-z]+\.[a-z]+$/.test(a.tool) ||
+          !OFFER_NAME.test(a.tool) ||
           !a.args ||
           typeof a.args !== 'object' ||
           Array.isArray(a.args) ||

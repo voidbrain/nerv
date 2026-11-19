@@ -4,6 +4,7 @@ import type { Decision, Ledger } from './ledger.ts';
 import { transaction } from './sqlite-transaction.ts';
 import type { Watch } from './watch.ts';
 import { WORKER_LEASE_MS, WORKER_RESULT_BYTES, type WorkerJobs } from './worker-jobs.ts';
+import { builtinTools } from './executors.ts';
 
 export interface StoreKajiOutboxHost {
   readonly db: DatabaseSync;
@@ -339,6 +340,9 @@ export class StoreKajiOutbox {
           outcome: typeof r.refused === 'string' ? 'refused' : typeof r.outcome === 'string' ? r.outcome : 'answered',
           text: said.text.slice(0, 600),
         });
+        // F-021-T04: what another base's MCP tool returned is outside content here as it is there: the sortie is tainted.
+        if (!builtinTools.some((t) => t.name === row.tool))
+          this.host.ledger.taintLate(row.sortie_id, `kaji:${said.base}:${row.tool}`.slice(0, 100));
       }
       return true;
     });

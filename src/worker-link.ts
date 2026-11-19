@@ -1,3 +1,4 @@
+import { OFFER_NAME } from './mcp.ts';
 import { createPublicKey, randomUUID, type KeyObject } from 'node:crypto';
 import type { Server, IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
@@ -608,7 +609,7 @@ export class WorkerLink {
     if (
       !Array.isArray(offers) ||
       offers.length > 20 ||
-      offers.some((v) => typeof v !== 'string' || !/^[a-z]+\.[a-z]+$/.test(v) || v === 'kaji.run')
+      offers.some((v) => typeof v !== 'string' || !OFFER_NAME.test(v) || v === 'kaji.run')
     )
       throw Error('Invalid worker capabilities.');
     const unique = [...new Set(offers as string[])];

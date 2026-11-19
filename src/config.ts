@@ -1,7 +1,7 @@
 import { keyIdentity } from './kaji.ts';
 import { validateWatch, type WatchConfig } from './watch.ts';
 import { validatePilots, type Pilot } from './pilots.ts';
-import { validateTools, type ToolsConfig } from './mcp.ts';
+import { OFFER_NAME, validateTools, type ToolsConfig } from './mcp.ts';
 import {
   existsSync,
   readdirSync,
@@ -155,9 +155,11 @@ export function readConfig(home: string): Config {
       k.offers !== undefined &&
       (!Array.isArray(k.offers) ||
         k.offers.length > 20 ||
-        k.offers.some((o) => typeof o !== 'string' || !/^[a-z]+\.[a-z]+$/.test(o)))
+        k.offers.some((o) => typeof o !== 'string' || !OFFER_NAME.test(o)))
     )
-      throw new Error('Invalid kaji.offers: a list of action names such as "reminders.add" (set with kaji offer).');
+      throw new Error(
+        'Invalid kaji.offers: a list of action names such as "reminders.add" or a granted MCP tool "notes.read_note" (set with kaji offer).',
+      );
     // F-036 phase 2: how the other bases' Casper votes on this base's actions; a base not listed is a shadow seat.
     if (
       k.seats !== undefined &&
@@ -409,7 +411,7 @@ export function setKajiSeat(home: string, baseId: string, mode: 'shadow' | 'veto
 }
 function validateKajiOffersOnly(c: Record<string, unknown>) {
   const o = (c.kaji as { offers?: unknown }).offers;
-  if (o !== undefined && (!Array.isArray(o) || o.some((x) => typeof x !== 'string' || !/^[a-z]+\.[a-z]+$/.test(x))))
+  if (o !== undefined && (!Array.isArray(o) || o.some((x) => typeof x !== 'string' || !OFFER_NAME.test(x))))
     throw new Error('Invalid action names.');
 }
 /** Writes the pilot roster (F-045); validated first, so a bad change leaves config.json as it was. */

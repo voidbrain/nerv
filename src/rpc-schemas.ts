@@ -1,3 +1,4 @@
+import { OFFER_NAME } from './mcp.ts';
 import { HISTORY_LIMIT } from './history.ts';
 
 const history = {
@@ -41,7 +42,7 @@ const workerItem = {
     id: { type: 'string', pattern: '^[a-f0-9-]{36}$' },
     sequence: { type: 'integer', minimum: 1, maximum: Number.MAX_SAFE_INTEGER },
     request: { type: 'string', maxLength: 500 },
-    tool: { type: 'string', pattern: '^[a-z]+\\.[a-z]+$' },
+    tool: { type: 'string', pattern: OFFER_NAME.source },
     args: { type: 'object', maxProperties: 50 },
     pilot: { type: 'string', pattern: '^[a-z0-9-]{1,40}$' },
   },
@@ -346,6 +347,15 @@ export const methodSchemas = {
       tool: { type: 'string', pattern: '^[A-Za-z0-9_-]{1,64}$' },
       args: { type: 'object', maxProperties: 50 },
       fingerprint: { type: 'string', pattern: '^[0-9a-f]{16}$' },
+    },
+    additionalProperties: false,
+  },
+  'worker.refuseApproval': {
+    type: 'object',
+    required: ['id', 'reason'],
+    properties: {
+      id: { type: 'string', minLength: 1, maxLength: 100 },
+      reason: { type: 'string', minLength: 1, maxLength: 500 },
     },
     additionalProperties: false,
   },

@@ -195,6 +195,20 @@ export class StoreSorties {
     });
   }
 
+  /**
+   * F-021-T04: a worker-bound approval for an MCP tool another base asked for: rejected here, and the worker job ends with
+   * the same refusal the main base hears (also on a resend). Nothing would make the call after an approval.
+   */
+  refuseWorkerApproval(id: string, reason: string): { refused: string } {
+    return transaction(this.host.db, () => {
+      const lease = this.host.workerJobs.approval(id);
+      this.decideCore(id, 'reject', 'kaji-mcp');
+      const refused = { refused: reason.slice(0, 500) };
+      if (lease) this.host.workerJobs.finish(lease, refused);
+      return refused;
+    });
+  }
+
   decideCore(
     id: string,
     decision: Decision,

@@ -14,7 +14,7 @@ import { readConfig, savePilots, setSchedule } from './config.ts';
 import { STAGES, applyPilotToolChange, mergePilots, nextStage, splitPilot, updatePilot, type Stage } from './pilots.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
 import { explainRecord, type WhyRecord } from './why.ts';
-import { descriptorVersion, type ToolDescriptor } from './mcp.ts';
+import { OFFER_NAME, descriptorVersion, type ToolDescriptor } from './mcp.ts';
 export interface AgencyBaseSnapshot {
   baseId: string;
   name: string;
@@ -851,7 +851,7 @@ export function execute(
         throw new Error('kaji.run pilot must be a valid pilot id (lowercase letters, digits, hyphens).');
       if (
         !/^[A-Z0-9-]{2,16}$/.test(base) ||
-        !/^[a-z]+\.[a-z]+$/.test(tool) ||
+        !OFFER_NAME.test(tool) ||
         tool === 'kaji.run' ||
         !args.args ||
         typeof args.args !== 'object' ||
