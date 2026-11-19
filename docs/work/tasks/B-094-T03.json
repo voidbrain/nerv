@@ -24,7 +24,8 @@
     "test/remote-outcome-text.test.ts",
     "docs/work/records/B-094.md",
     "docs/work/tasks/B-094-T03.json",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "evals/gauntlet/ledger.json"
   ],
   "capabilities": [
     "bounded-edit",
