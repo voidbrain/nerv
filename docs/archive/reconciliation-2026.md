@@ -497,3 +497,7 @@ PRs #548 and #549 merged with green CI. F-016-T03 (#546) and F-016-T13 (#548) ar
 ## 2026-11-19 — main `161f32d4`
 
 PRs #550 and #551 merged with green CI. F-049-T06 closed; F-016-T14 left to the F-016 work that holds that record. F-049-T13 implemented; B-100 opened.
+
+## 2026-11-19 — main `a5d88c65`
+
+PR #552 merged with green CI. F-016-T03, F-016-T13, F-016-T14 and F-016-T15 closed (#546, #548, #550, #552). F-049-T13 implemented after a fresh-context review.

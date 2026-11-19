@@ -26,7 +26,13 @@
     "docs/work/records/B-100.md",
     "docs/work/tasks/B-100-T01.json",
     "evals/gauntlet/ledger.json",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "docs/work/records/F-016.md",
+    "docs/work/tasks/F-016-T03.json",
+    "docs/work/tasks/F-016-T13.json",
+    "docs/work/tasks/F-016-T14.json",
+    "docs/work/tasks/F-016-T15.json",
+    "docs/archive/reconciliation-2026.md"
   ],
   "capabilities": [
     "bounded-edit",
