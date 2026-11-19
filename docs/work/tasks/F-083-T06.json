@@ -44,5 +44,11 @@
     "agentHours": 0.5,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 561,
+      "note": "cooking session; CI pending"
+    }
+  ]
 }
