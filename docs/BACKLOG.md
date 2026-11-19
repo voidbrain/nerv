@@ -261,7 +261,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-021-t03"></a>F-021-T03 — Per-pilot tool binding | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — |
+| 🟢 Small | <a id="f-021-t03"></a>F-021-T03 — Per-pilot tool binding | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [PR #547](https://github.com/voidbrain/nerv/pull/547) the fix; CI pending |
 | 🟢 Small | <a id="f-021-t04"></a>F-021-T04 — Remote (other-machine) endpoints | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-021-T03](#f-021-t03) | — |
 | 🟢 Small | <a id="f-021-t05"></a>F-021-T05 — Dashboard tool listing | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-021-T04](#f-021-t04) | — |
 | 🟡 Medium | **Total** | 3 h (4 of 5 steps) | 0.25 h (1 of 5 steps recorded) | 1.5 h | 2 of 5 completed | |
@@ -282,7 +282,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-021-T02: [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors. [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool descriptors; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links. |
+| PR / evidence | Steps: F-021-T02: [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors · F-021-T03: [PR #547](https://github.com/voidbrain/nerv/pull/547) the fix; CI pending. [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool descriptors; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links. |
 | Opened | 2026-11-02 |
 | Verification | Unit/integration and CI 2026-11-13: every built-in registration has a stable versioned descriptor; MCP fingerprints remain compatible; PR #381 CI 43496658350 passed validate, native-macos, windows, plan and full-suite. Remaining parent acceptance is pending. |
 | Reviewed | 2026-11-13 |
