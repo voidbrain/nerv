@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import type { DatabaseSync } from 'node:sqlite';
 import type { Ledger } from './ledger.ts';
 import { transaction } from './sqlite-transaction.ts';
@@ -50,6 +51,7 @@ export class EvaLockedError extends Error {
 
 interface Row {
   runner: number;
+  runner_started: string;
   id: string;
   sortie_id: string;
   lock_key: string;
@@ -75,7 +77,8 @@ export class EvaJobs {
   constructor(db: DatabaseSync) {
     this.db = db;
     db.exec(`CREATE TABLE IF NOT EXISTS eva_jobs(id TEXT PRIMARY KEY,sortie_id TEXT NOT NULL,lock_key TEXT NOT NULL,
-      hash TEXT NOT NULL,state TEXT NOT NULL,started TEXT NOT NULL,ended TEXT,detail TEXT,runner INTEGER NOT NULL DEFAULT 0);
+      hash TEXT NOT NULL,state TEXT NOT NULL,started TEXT NOT NULL,ended TEXT,detail TEXT,runner INTEGER NOT NULL DEFAULT 0,
+      runner_started TEXT NOT NULL DEFAULT '');
       CREATE INDEX IF NOT EXISTS eva_jobs_lock ON eva_jobs(lock_key,state);`);
   }
 
@@ -103,36 +106,60 @@ export class EvaJobs {
         .get(job.key, ...HOLDS_LOCK) as Row | undefined;
       if (holder) throw new EvaLockedError(toReceipt(holder));
       this.db
-        .prepare("INSERT INTO eva_jobs VALUES(?,?,?,?,'running',?,NULL,NULL,?)")
-        .run(job.id, job.sortieId, job.key, job.hash, now.toISOString(), process.pid);
+        .prepare("INSERT INTO eva_jobs VALUES(?,?,?,?,'running',?,NULL,NULL,?,?)")
+        .run(
+          job.id,
+          job.sortieId,
+          job.key,
+          job.hash,
+          now.toISOString(),
+          process.pid,
+          processStarted(process.pid) ?? '',
+        );
       return this.receipt(job.id)!;
     });
   }
 
-  /** Ends a running job; an uncertain effect keeps the lock (state `uncertain`) until the owner reconciles it. */
-  finish(id: string, state: Exclude<EvaReceiptState, 'running' | 'reconciled'>, detail?: string, now = new Date()) {
-    const changed = this.db
-      .prepare("UPDATE eva_jobs SET state=?,ended=?,detail=? WHERE id=? AND state='running'")
-      .run(state, now.toISOString(), detail?.slice(0, 600) ?? null, id).changes;
-    if (!changed) throw new Error(`EVA job ${id} is not running.`);
+  /**
+   * Ends a running job; an uncertain effect keeps the lock (state `uncertain`) until the owner reconciles it. Returns
+   * false when the receipt was already settled (recovery marked it uncertain): that settlement stands.
+   */
+  finish(
+    id: string,
+    state: Exclude<EvaReceiptState, 'running' | 'reconciled'>,
+    detail?: string,
+    now = new Date(),
+  ): boolean {
+    return (
+      this.db
+        .prepare("UPDATE eva_jobs SET state=?,ended=?,detail=? WHERE id=? AND state='running'")
+        .run(state, now.toISOString(), detail?.slice(0, 600) ?? null, id).changes > 0
+    );
   }
 
   /**
-   * At startup: a job still marked running whose runner process is gone was interrupted; its effect is unknown, so it
-   * keeps its lock. A job whose runner is still alive (another `nerv` process) is left running.
+   * A job still marked running whose runner is gone was interrupted; its effect is unknown, so it keeps its lock and its
+   * sortie closes as failed. The runner is the process with the recorded pid and start time: a pid reused by another
+   * process does not count, and a job whose runner still runs (this process or another `nerv`) is left running.
    */
-  recover(ledger: Ledger, now = new Date(), runnerAlive: (pid: number) => boolean = processAlive): EvaReceipt[] {
+  recover(
+    ledger: Ledger,
+    now = new Date(),
+    runnerRunning: (pid: number, started: string) => boolean = sameProcessRunning,
+  ): EvaReceipt[] {
     return transaction(this.db, () => {
       const rows = (this.db.prepare("SELECT * FROM eva_jobs WHERE state='running'").all() as unknown as Row[]).filter(
-        (r) => r.runner === process.pid || !runnerAlive(r.runner),
+        (r) => !runnerRunning(r.runner, r.runner_started),
       );
       const note =
-        'Interrupted by a restart: what the job did is unknown and its lock stays until the owner reconciles it.';
+        'Interrupted: its runner stopped, so what the job did is unknown and its processes may still be running; ' +
+        'its lock stays until the owner reconciles it.';
       for (const r of rows) {
         this.db
           .prepare("UPDATE eva_jobs SET state='uncertain',ended=?,detail=? WHERE id=?")
           .run(now.toISOString(), note, r.id);
         ledger.evaJob(r.sortie_id, 'eva03.recovered', event(r.id, true, note), now);
+        ledger.close(r.sortie_id, 'failed', now);
       }
       return rows.map((r) => this.receipt(r.id)!);
     });
@@ -154,15 +181,21 @@ export class EvaJobs {
   }
 }
 
-function processAlive(pid: number): boolean {
-  if (!pid) return false;
+/** A process's start time as `ps` prints it, or undefined when it is not running or cannot be read. */
+function processStarted(pid: number): string | undefined {
+  if (!pid) return undefined;
   try {
-    process.kill(pid, 0);
-    return true;
-  } catch (e) {
-    // Gone (ESRCH), or another user's process (EPERM): either way not a live runner of this base.
-    return false;
+    const out = execFileSync('/bin/ps', ['-o', 'lstart=', '-p', String(pid)], { encoding: 'utf8', timeout: 2000 });
+    return out.trim() || undefined;
+  } catch {
+    return undefined;
   }
+}
+
+/** The recorded runner still runs: same pid and, when recorded, the same start time (a reused pid does not count). */
+function sameProcessRunning(pid: number, started: string): boolean {
+  const now = processStarted(pid);
+  return now !== undefined && (started === '' || now === started);
 }
 
 const event = (jobId: string, uncertain: boolean, detail?: string) => ({
@@ -171,7 +204,8 @@ const event = (jobId: string, uncertain: boolean, detail?: string) => ({
   uncertainExternalEffect: uncertain,
   rollbackClaimed: false as const,
   containment: 'best-effort' as const,
-  ...(detail ? { detail } : {}),
+  // Bounded: an event stays far below the ledger's payload limit whatever the runner reported.
+  ...(detail ? { detail: detail.slice(0, 600) } : {}),
 });
 
 /**
@@ -191,19 +225,21 @@ export async function runEva03Durably(options: {
   const { jobs, ledger, sortieId, jobId } = options;
   jobs.begin({ id: jobId, sortieId, key: options.key, hash: options.hash });
   let last: Eva03LedgerEvent | undefined;
+  let result: Eva03JobResult;
   try {
-    const result = await options.run((e) => {
+    result = await options.run((e) => {
       last = e;
       ledger.evaJob(sortieId, e.kind, event(e.jobId, e.uncertainExternalEffect, e.detail));
     });
-    const outcome = last?.kind.replace('eva03.', '') as 'completed' | 'failed' | 'timed_out' | 'cancelled' | undefined;
-    jobs.finish(jobId, !outcome || last!.uncertainExternalEffect ? 'uncertain' : outcome, last?.detail);
-    return result;
   } catch (e) {
     // The runner threw before it could report an end: nothing proves the job did not act.
-    const detail = `The runner failed: ${e instanceof Error ? e.message : String(e)}`.slice(0, 600);
+    const detail = `The runner failed: ${e instanceof Error ? e.message : String(e)}`;
     ledger.evaJob(sortieId, 'eva03.failed', event(jobId, true, detail));
     jobs.finish(jobId, 'uncertain', detail);
     throw e;
   }
+  const outcome = last?.kind.replace('eva03.', '') as 'completed' | 'failed' | 'timed_out' | 'cancelled' | undefined;
+  // False when recovery already settled the receipt while the job ran: that settlement stands, the result is kept.
+  jobs.finish(jobId, !outcome || last!.uncertainExternalEffect ? 'uncertain' : outcome, last?.detail);
+  return result;
 }

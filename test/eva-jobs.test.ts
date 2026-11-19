@@ -9,6 +9,14 @@ import { OWNER_SOURCE, Store } from '../src/store.ts';
 import { EvaJobs, EvaLockedError, EvaReplayError, runEva03Durably } from '../src/eva-jobs.ts';
 import { runEva03Job } from '../src/eva-runner.ts';
 
+const alive = (pid: number) => {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+};
 const isDarwinWithSandbox = process.platform === 'darwin' && existsSync('/usr/bin/sandbox-exec');
 const evaKinds = (store: Store, sortieId: string) =>
   store.ledger
@@ -63,6 +71,7 @@ describe('F-049-T13: EVA-03 receipts and the recovery join', () => {
       f.store.db.prepare("UPDATE eva_jobs SET runner=? WHERE id='gone'").run(999_001);
       f.store.db.prepare("UPDATE eva_jobs SET runner=? WHERE id='live'").run(999_002);
       const recovered = f.jobs.recover(f.store.ledger, new Date(), (pid) => pid === 999_002);
+      assert.equal(f.store.ledger.sortie(s)?.status, 'failed', 'the interrupted job’s sortie does not stay open');
       assert.deepEqual(
         recovered.map((r) => [r.id, r.state]),
         [['gone', 'uncertain']],
@@ -85,6 +94,60 @@ describe('F-049-T13: EVA-03 receipts and the recovery join', () => {
         containment: 'best-effort',
         detail: 'Owner: checked the notes: nothing was written',
       });
+    } finally {
+      f.done();
+    }
+  });
+
+  it('a pid reused by another process is not the runner: its job is recovered', () => {
+    const f = fixture();
+    try {
+      const s = f.sortie();
+      f.jobs.begin({ id: 'reused', sortieId: s, key: 'notes', hash: 'h' });
+      // This test process is alive, but it did not start at that time: it is not the job's runner.
+      f.store.db
+        .prepare("UPDATE eva_jobs SET runner=?, runner_started='Mon Jan  1 00:00:00 2001' WHERE id='reused'")
+        .run(process.pid);
+      assert.deepEqual(
+        f.jobs.recover(f.store.ledger).map((r) => r.id),
+        ['reused'],
+      );
+      f.jobs.begin({ id: 'mine', sortieId: f.sortie(), key: 'calendar', hash: 'h' });
+      assert.deepEqual(f.jobs.recover(f.store.ledger), [], 'a job whose runner is this very process stays running');
+    } finally {
+      f.done();
+    }
+  });
+
+  it('when recovery settles a job while it runs, that settlement stands and the job’s result is kept', async () => {
+    const f = fixture();
+    try {
+      const s = f.sortie();
+      const ev = (kind: 'eva03.started' | 'eva03.completed') => ({
+        jobId: 'settled',
+        kind,
+        evaClass: 'eva-03' as const,
+        rollbackClaimed: false as const,
+        uncertainExternalEffect: false,
+        containment: 'best-effort' as const,
+      });
+      const result = await runEva03Durably({
+        jobs: f.jobs,
+        ledger: f.store.ledger,
+        sortieId: s,
+        jobId: 'settled',
+        key: 'notes',
+        hash: 'h',
+        run: async (onLedgerEvent) => {
+          onLedgerEvent(ev('eva03.started'));
+          f.jobs.recover(f.store.ledger, new Date(), () => false);
+          onLedgerEvent(ev('eva03.completed'));
+          return { jobId: 'settled', exitCode: 0 } as never;
+        },
+      });
+      assert.equal((result as { exitCode: number }).exitCode, 0);
+      assert.equal(f.jobs.receipt('settled')?.state, 'uncertain');
+      assert.deepEqual(evaKinds(f.store, s), ['eva03.started', 'eva03.recovered', 'eva03.completed']);
     } finally {
       f.done();
     }
@@ -155,18 +218,16 @@ describe('F-049-T13: EVA-03 receipts and the recovery join', () => {
           stdio: ['ignore', 'pipe', 'pipe'],
         });
         let out = '';
-        runner.stderr.on('data', (c: Buffer) => {
-          const m = /"jobPid":(\d+)/.exec(String(c));
-          if (m) jobPid = Number(m[1]);
-        });
-        const started = await new Promise<{ sortieId: string }>((resolve, reject) => {
+        const started = await new Promise<{ sortieId: string; jobPid: number }>((resolve, reject) => {
           runner.stdout.on('data', (c: Buffer) => {
             out += String(c);
             const line = out.split('\n').find((l) => l.startsWith('{'));
-            if (line) resolve(JSON.parse(line) as { sortieId: string });
+            if (line) resolve(JSON.parse(line) as { sortieId: string; jobPid: number });
           });
           runner.on('exit', (code) => reject(new Error(`runner exited early (${code}): ${out}`)));
         });
+        jobPid = started.jobPid;
+        assert.ok(jobPid > 0 && alive(jobPid), 'the job is running when its runner is killed');
         runner.kill('SIGKILL');
         await new Promise((done) => runner.once('exit', done));
 

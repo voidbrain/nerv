@@ -320,7 +320,7 @@ export async function tryRunCliCommand(
         const recovered = jobs.recover(store.ledger);
         if (recovered.length)
           console.error(
-            `Interrupted EVA jobs, now uncertain: ${recovered.map((r) => r.id).join(', ')} (nerv eva jobs).`,
+            `Interrupted EVA jobs, now uncertain (their processes may still be running): ${recovered.map((r) => r.id).join(', ')}. See nerv eva jobs; release one with nerv eva reconcile.`,
           );
         if (sub === 'jobs') {
           console.log(JSON.stringify(jobs.list(), null, 2));
@@ -329,29 +329,35 @@ export async function tryRunCliCommand(
             throw new Error('Usage: eva reconcile <jobId> <what you confirmed it did or did not do>');
           console.log(JSON.stringify(jobs.reconcile(store.ledger, args[1], args.slice(2).join(' ')), null, 2));
         } else {
-          const jobId = `cli-${Date.now()}`;
+          const jobId = `cli-${randomUUID()}`;
           const sortieId = store.ledger.openSortie(
             OWNER_SOURCE,
             'EVA-03: list tools (nerv eva run-tools-03)',
             'trusted',
           );
-          const pool = new EvaPool(readConfig(home).eva?.limits ?? defaultEvaLimits());
-          const result = await pool.run({ jobId, evaClass: 'eva-03' }, () =>
-            runEva03Durably({
-              jobs,
-              ledger: store.ledger,
-              sortieId,
-              jobId,
-              // Listing tools changes nothing outside the instance: no resource to hold for later jobs.
-              key: `eva03:tools-process:${jobId}`,
-              hash: argsHash({ command: 'run-tools-03' }),
-              run: (onLedgerEvent) =>
-                runToolsProcessInEva03({ jobId, home, repoRoot: resolve(import.meta.dirname, '..'), onLedgerEvent }),
-            }),
-          );
-          store.ledger.close(sortieId, result.exitCode === 0 ? 'done' : 'failed');
-          console.log(JSON.stringify({ sortieId, ...result }, null, 2));
-          if (result.exitCode !== 0 || result.timedOut || result.cancelled) process.exitCode = 1;
+          let ok = false;
+          try {
+            const pool = new EvaPool(readConfig(home).eva?.limits ?? defaultEvaLimits());
+            const result = await pool.run({ jobId, evaClass: 'eva-03' }, () =>
+              runEva03Durably({
+                jobs,
+                ledger: store.ledger,
+                sortieId,
+                jobId,
+                // Listing tools changes nothing outside the instance: no resource to hold for later jobs.
+                key: `eva03:tools-process:${jobId}`,
+                hash: argsHash({ command: 'run-tools-03' }),
+                run: (onLedgerEvent) =>
+                  runToolsProcessInEva03({ jobId, home, repoRoot: resolve(import.meta.dirname, '..'), onLedgerEvent }),
+              }),
+            );
+            ok = result.exitCode === 0 && !result.timedOut && !result.cancelled;
+            console.log(JSON.stringify({ sortieId, ...result }, null, 2));
+            if (!ok) process.exitCode = 1;
+          } finally {
+            // Whatever happened (refused, the runner threw, the job failed), the sortie does not stay open.
+            store.ledger.close(sortieId, ok ? 'done' : 'failed');
+          }
         }
       } finally {
         store.close();
