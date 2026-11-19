@@ -350,7 +350,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟡 Medium | 2.5 h agent + 1 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake (Planned).
+💻 **→** Next: F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -364,7 +364,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-016-t06"></a>F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-016-t06"></a>F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | 🤖 | — |
 | 🟢 Small | <a id="f-016-t07"></a>F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T06](#f-016-t06) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T07](#f-016-t07) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned · waits on [F-016-T08](#f-016-t08) | ⏳ 🧑‍🔧 | — |

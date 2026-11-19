@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T06",
-  "status": "planned",
+  "status": "implemented",
   "title": "Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake",
   "goal": "Lease renewal and expiry; an asleep old leader is refused on wake.",
   "capabilities": [
@@ -20,12 +20,13 @@
     "F-016-T05"
   ],
   "resources": [
-    "src/**",
-    "shared/**",
-    "test/**",
-    "docs/**",
-    "generated:backlog-views",
-    "contract:coordinator-authority"
+    "src/coordinator-lease.ts",
+    "src/kaji-link.ts",
+    "src/store.ts",
+    "src/cli-kaji.ts",
+    "test/coordinator-lease.test.ts",
+    "docs/work/tasks/F-016-T06.json",
+    "docs/work/records/F-016.md"
   ],
   "validation": [
     "Directed regressions or recorded evidence for this slice; final required CI"
