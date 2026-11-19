@@ -4,7 +4,7 @@
   "parent": "F-021",
   "title": "Per-pilot tool binding",
   "goal": "Per-pilot tool binding",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "A pilot lists the tools it may use (F-045); binding is deny-by-default; escalation impossible without a grant"
   ],
