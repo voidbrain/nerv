@@ -4,7 +4,7 @@
   "id": "B-090-T01",
   "title": "Rehearse a candidate with its own dependencies when its lock differs",
   "goal": "A dependency change does not block or mislead updates",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "A committed test fails first: a candidate lock differing from the installed one gets its own dependencies in staging, or a refusal naming the change; equal locks keep the link"
   ],
@@ -31,10 +31,12 @@
     "size": "small",
     "estimate": "1.5 h",
     "basis": "Estimated 2026-11-18: lock comparison, a bounded npm ci in staging and a test. Not a measurement.",
-    "reviewed": "2026-11-18",
-    "agentHours": 1.5,
+    "reviewed": "2026-11-19",
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 1.5
+    "estimateAgentHours": 1.5,
+    "actualAgentHours": 1,
+    "actualSource": "stated"
   },
   "prs": []
 }
