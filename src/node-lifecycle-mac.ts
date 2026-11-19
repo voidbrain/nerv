@@ -345,8 +345,27 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
           throw Error('The pinned revision could not be exported for rehearsal.');
         // B-088: the exported tree has no dependencies; its reader imports npm packages (ajv), so it resolves them from
         // the installed checkout through a link (a junction on Windows). The installed node_modules are never changed.
+        // B-090: when the candidate's lockfile differs from the installed one, its reader runs against its own
+        // dependencies, installed into the staging tree (no install scripts, bounded); equal locks keep the link.
         const installedModules = join(context.source, 'node_modules');
-        if (present(installedModules))
+        const lock = (dir: string) => {
+          const file = join(dir, 'package-lock.json');
+          return present(file) ? hash(readFileSync(file)) : '';
+        };
+        if (lock(tree) !== lock(context.source)) {
+          const ci = await run(
+            process.platform === 'win32' ? process.env.ComSpec || 'cmd.exe' : 'npm',
+            process.platform === 'win32'
+              ? ['/d', '/s', '/c', 'npm ci --engine-strict --ignore-scripts --no-audit --no-fund']
+              : ['ci', '--engine-strict', '--ignore-scripts', '--no-audit', '--no-fund'],
+            tree,
+            600000,
+          );
+          if (ci.status !== 0)
+            throw Error(
+              "The candidate's dependencies differ from the installed ones (package-lock.json changed) and could not be installed for rehearsal.",
+            );
+        } else if (present(installedModules))
           symlinkSync(installedModules, modulesLink, process.platform === 'win32' ? 'junction' : 'dir');
         let candidateContract: UpgradeContractBounds = UPGRADE_CONTRACT;
         const contractPath = join(tree, CONTRACT_ENTRY);
