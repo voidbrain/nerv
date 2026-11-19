@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
+import { evaluateBatteryHealth, type BatteryHealthReport } from './battery-health.ts';
 
 export type BatteryChargeState = 'charged' | 'stored' | 'discharged';
 
@@ -463,6 +464,14 @@ export class BatteryRegistry {
       cyclesAtRecord: r.cycles_at_record,
       recordedAt: r.recorded_at,
     }));
+  }
+
+  /** Evaluates per-cell resistance health advice for one or all active batteries (`F-008-T10`). */
+  healthAdvice(batteryId?: string, language: 'it' | 'en' = 'en'): BatteryHealthReport[] {
+    const targets = batteryId
+      ? [this.get(batteryId)].filter((b): b is BatteryRecord => Boolean(b))
+      : this.list().filter((b) => !b.retiredAt);
+    return targets.map((battery) => evaluateBatteryHealth(battery, this.resistanceHistory(battery.id), { language }));
   }
 
   importOneMoreBattery(payload: OneMoreBatteryExport): BatteryImportResult {
