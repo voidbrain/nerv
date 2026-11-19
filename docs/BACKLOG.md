@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 76.75 h agent + 10.5 h owner across 135 open steps of 40 features and 19 other records. 55.75 h of actual effort recorded on 105 steps. Generated from the task files.
+**Remaining effort:** 76.5 h agent + 10.5 h owner across 136 open steps of 40 features and 19 other records. 56.25 h of actual effort recorded on 106 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -447,9 +447,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-086-T04 — Tests for the PR #536 review: activating and reloading units, and a running disabled unit that is not NERV’s (Ready).
+💻 **→** Next: B-086-T04 — Tests for the PR #536 review: activating and reloading units, and a running disabled unit that is not NERV’s (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -461,8 +461,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-086-t04"></a>B-086-T04 — Tests for the PR #536 review: activating and reloading units, and a running disabled unit that is not NERV’s | 0.5 h | 0 h | 0.5 h | Ready | — |
-| 🟢 Small | **Total** | 2 h | 1.25 h (3 of 4 steps recorded) | 0.5 h | 3 of 4 completed | |
+| 🟢 Small | <a id="b-086-t04"></a>B-086-T04 — Tests for the PR #536 review: activating and reloading units, and a running disabled unit that is not NERV’s | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | [PR #542](https://github.com/voidbrain/nerv/pull/542) the tests |
+| 🟢 Small | <a id="b-086-t05"></a>B-086-T05 — Rerun the two expensive system cases at this source | 0.25 h | 0 h | 0.25 h | Ready | — |
+| 🟢 Small | **Total** | 2.25 h | 1.75 h (4 of 5 steps recorded) | 0.25 h | 3 of 5 completed | |
 
 <details><summary>Done steps (3)</summary>
 
@@ -481,7 +482,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-086-T01: [PR #518](https://github.com/voidbrain/nerv/pull/518) fix · B-086-T02: [PR #536](https://github.com/voidbrain/nerv/pull/536) the fix; CI green. [PR #536](https://github.com/voidbrain/nerv/pull/536) B-086-T02 (`test/linux-service-lifecycle.test.ts`); Test: `test/linux-service-lifecycle.test.ts` fake now loads a written unit (committed failing first: F-005-T10 and F-005-T25 failed) |
+| PR / evidence | Steps: B-086-T01: [PR #518](https://github.com/voidbrain/nerv/pull/518) fix · B-086-T02: [PR #536](https://github.com/voidbrain/nerv/pull/536) the fix; CI green · B-086-T04: [PR #542](https://github.com/voidbrain/nerv/pull/542) the tests. [PR #542](https://github.com/voidbrain/nerv/pull/542) B-086-T04 (tests); [PR #536](https://github.com/voidbrain/nerv/pull/536) B-086-T02 (`test/linux-service-lifecycle.test.ts`); Test: `test/linux-service-lifecycle.test.ts` fake now loads a written unit (committed failing first: F-005-T10 and F-005-T25 failed) |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: CI run 44483736523 (PR #536); live on Calvary 2026-11-18 (install) and 2026-11-19 (stop, update). |
 | Reviewed | 2026-11-19 |
