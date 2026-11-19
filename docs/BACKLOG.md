@@ -350,7 +350,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟣 Very large | 10.5 h agent + 1 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-016-T03 — Step 2a — Signed coordinator state snapshot export (Planned).
+💻 **→** Next: F-016-T03 — Step 2a — Signed coordinator state snapshot export (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -364,7 +364,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-016-t03"></a>F-016-T03 — Step 2a — Signed coordinator state snapshot export | 1.5 h | 0 h | 1.5 h | Planned | 🤖 | — |
+| 🟡 Medium | <a id="f-016-t03"></a>F-016-T03 — Step 2a — Signed coordinator state snapshot export | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | 🤖 | — |
 | 🟡 Medium | <a id="f-016-t13"></a>F-016-T13 — Step 2b — Import a verified snapshot into the read-only standby | 2 h | 0 h | 2 h | Planned · waits on [F-016-T03](#f-016-t03) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-016-t14"></a>F-016-T14 — Step 2c — Serial-monotonic registry merge and worker approval settlement | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-016-T13](#f-016-t13) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-016-t15"></a>F-016-T15 — Step 2d — Quiesce, merge and swap under the serve guard | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-016-T14](#f-016-t14) | ⏳ 🤖 | — |
