@@ -1540,7 +1540,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-106-t01"></a>F-106-T01 — Prompt size per Misato turn, measured | 1 h | 0 h | 1 h | Implemented; verification pending | — |
+| 🟢 Small | <a id="f-106-t01"></a>F-106-T01 — Prompt size per Misato turn, measured | 1 h | 0 h | 1 h | Implemented; verification pending | [PR #562](https://github.com/voidbrain/nerv/pull/562) implementation |
 | 🟡 Medium | <a id="f-106-t03"></a>F-106-T03 — Domain tool schemas offered by intent | 2 h | 0 h | 2 h | Planned · waits on [F-106-T01](#f-106-t01) | — |
 | 🟡 Medium | **Total** | 3.5 h | 0.25 h (1 of 3 steps recorded) | 3 h | 1 of 3 completed | |
 
@@ -1559,7 +1559,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-106-T02: [PR #509](https://github.com/voidbrain/nerv/pull/509) stable prefix. Owner decision 2026-11-16 (F-104-T03); [token-cost review](reviews/token/2026-11-16.md); opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
+| PR / evidence | Steps: F-106-T01: [PR #562](https://github.com/voidbrain/nerv/pull/562) implementation · F-106-T02: [PR #509](https://github.com/voidbrain/nerv/pull/509) stable prefix. [PR #562](https://github.com/voidbrain/nerv/pull/562) F-106-T01 (`src/prompt-samples.ts`, `src/brain-process.ts`, `src/runtime-tools.ts`, `src/runtime.ts`, `src/store.ts`, `test/prompt-samples.test.ts`); owner decision 2026-11-16 (F-104-T03); [token-cost review](reviews/token/2026-11-16.md); opened in [PR #502](https://github.com/voidbrain/nerv/pull/502) |
 | Opened | 2026-11-16 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
