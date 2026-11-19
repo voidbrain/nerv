@@ -84,38 +84,43 @@ describe('F-049-T07: each class gets only what its profile allows', () => {
     }
   });
 
-  it('a granted path never re-opens $HOME, NERV state or a denied path (review of PR #558)', () => {
-    const home = scratch('home');
-    const state = join(home, '.nerv');
-    const secret = scratch('secret');
-    try {
-      const base = { workspaceDir: '/tmp/w', hostHomeDir: home, nervStateDir: state, deniedReadPaths: [secret] };
-      // The root of the filesystem $HOME is on (`/`, or its drive on Windows): it holds $HOME.
-      const root = parse(realpathSync(home)).root;
-      for (const w of [home, state, root, join(home, 'Documents'), secret, join(secret, 'inner')])
-        assert.throws(
-          () => buildEvaSeatbeltProfile('eva-01', { ...base, writablePaths: [w] }),
-          /no EVA class writes in \$HOME, NERV state or a denied path/,
-          w,
+  // Seatbelt profiles exist only on macOS; the paths and profile text this checks are macOS ones.
+  it(
+    'a granted path never re-opens $HOME, NERV state or a denied path (review of PR #558)',
+    { skip: !isDarwinWithSandbox },
+    () => {
+      const home = scratch('home');
+      const state = join(home, '.nerv');
+      const secret = scratch('secret');
+      try {
+        const base = { workspaceDir: '/tmp/w', hostHomeDir: home, nervStateDir: state, deniedReadPaths: [secret] };
+        // The root of the filesystem $HOME is on (`/`, or its drive on Windows): it holds $HOME.
+        const root = parse(realpathSync(home)).root;
+        for (const w of [home, state, root, join(home, 'Documents'), secret, join(secret, 'inner')])
+          assert.throws(
+            () => buildEvaSeatbeltProfile('eva-01', { ...base, writablePaths: [w] }),
+            /no EVA class writes in \$HOME, NERV state or a denied path/,
+            w,
+          );
+        for (const r of [root, state, join(state, 'keys'), secret])
+          assert.throws(
+            () => buildEvaSeatbeltProfile('eva-03', { ...base, readOnlyPaths: [r] }),
+            /re-opens NERV state or a denied path/,
+            r,
+          );
+        // A read-only path inside $HOME (the checkout, for instance) is still allowed, and state stays denied after it.
+        const p = buildEvaSeatbeltProfile('eva-03', { ...base, readOnlyPaths: [join(home, 'repo')] });
+        assert.ok(
+          p.lastIndexOf(`(deny file-read* (subpath "${join(realpathSync(home), '.nerv').replaceAll('\\', '\\\\')}"))`) >
+            p.lastIndexOf('(allow file-read*'),
+          'state is denied after every allow',
         );
-      for (const r of [root, state, join(state, 'keys'), secret])
-        assert.throws(
-          () => buildEvaSeatbeltProfile('eva-03', { ...base, readOnlyPaths: [r] }),
-          /re-opens NERV state or a denied path/,
-          r,
-        );
-      // A read-only path inside $HOME (the checkout, for instance) is still allowed, and state stays denied after it.
-      const p = buildEvaSeatbeltProfile('eva-03', { ...base, readOnlyPaths: [join(home, 'repo')] });
-      assert.ok(
-        p.lastIndexOf(`(deny file-read* (subpath "${join(realpathSync(home), '.nerv')}"))`) >
-          p.lastIndexOf('(allow file-read*'),
-        'state is denied after every allow',
-      );
-    } finally {
-      rmSync(home, { recursive: true, force: true });
-      rmSync(secret, { recursive: true, force: true });
-    }
-  });
+      } finally {
+        rmSync(home, { recursive: true, force: true });
+        rmSync(secret, { recursive: true, force: true });
+      }
+    },
+  );
 
   for (const unconfined of [false, true]) {
     const how = unconfined ? 'get through the unconfined fixture' : 'are refused';
