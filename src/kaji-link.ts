@@ -6,6 +6,7 @@ import type { KeyObject } from 'node:crypto';
 import { KAJI_CLOCK_SKEW_MS, signedHeaders, verifySigned, Nonces, type RootTrust } from './kaji-auth.ts';
 import type { ApplyReplicationBatchResult, ReplicationBatch } from './coordinator-replication.ts';
 import type { ActiveCoordinatorCheckResult } from './coordinator-authority.ts';
+import type { LeaseRenewRequest, LeaseRenewResult } from './coordinator-lease.ts';
 export { signedHeaders, verifySigned, Nonces } from './kaji-auth.ts';
 import { createServer, request as httpRequest, type IncomingMessage, type Server } from 'node:http';
 import { type BaseEntry, type SignedRecord } from './kaji.ts';
@@ -239,6 +240,8 @@ export class KajiLink {
     onBackup?: (from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>;
     /** F-016-T04: applies an incremental coordinator replication batch on a standby base. */
     onReplicate?: (from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>;
+    /** F-016-T06: handles standby-acked coordinator lease renewal on a standby base. */
+    onLeaseRenew?: (from: string, req: LeaseRenewRequest) => Promise<LeaseRenewResult>;
     /** F-016-T05: synchronous coordinator authority check for coordinator-hosted endpoints. */
     checkCoordinatorAuthority?: () => ActiveCoordinatorCheckResult;
     /** F-016-T05: minimum seen coordinatorEpoch enforced on incoming coordinator-authenticated RPCs. */
@@ -257,6 +260,7 @@ export class KajiLink {
     this.onRelay = options.onRelay;
     this.onBackup = options.onBackup;
     this.onReplicate = options.onReplicate;
+    this.onLeaseRenew = options.onLeaseRenew;
     this.checkCoordinatorAuthority = options.checkCoordinatorAuthority;
     this.minCoordinatorEpoch = options.minCoordinatorEpoch;
     this.onDecide = options.onDecide;
@@ -344,6 +348,7 @@ export class KajiLink {
   private readonly onBackup: ((from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>) | undefined;
   private readonly onReplicate:
     ((from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>) | undefined;
+  private readonly onLeaseRenew: ((from: string, req: LeaseRenewRequest) => Promise<LeaseRenewResult>) | undefined;
   private readonly onDecide: ((approvalId: string, decision: 'approve' | 'reject') => Promise<string>) | undefined;
   private readonly onSortie:
     ((from: string, sortieId: string) => Promise<{ sortie: unknown; events: unknown[] } | null>) | undefined;
@@ -676,6 +681,35 @@ export class KajiLink {
         reply(200, { outcome: await this.onDecide(d.approvalId, d.decision) });
         return;
       }
+      if (req.method === 'POST' && req.url === '/kaji/lease/renew') {
+        if ((await this.port.main?.()) !== from || !this.onLeaseRenew) {
+          reply(403, { error: 'only the main base may renew its lease' });
+          return;
+        }
+        const parsed = JSON.parse(body) as Partial<LeaseRenewRequest>;
+        if (
+          typeof parsed.coordinatorEpoch !== 'number' ||
+          !Number.isSafeInteger(parsed.coordinatorEpoch) ||
+          parsed.coordinatorEpoch < 1 ||
+          typeof parsed.leaseSeq !== 'number' ||
+          !Number.isSafeInteger(parsed.leaseSeq) ||
+          parsed.leaseSeq < 1
+        ) {
+          reply(400, { error: 'invalid lease renewal request' });
+          return;
+        }
+        const epochHdr = Number(req.headers['x-kaji-coordinator-epoch']);
+        if (!Number.isSafeInteger(epochHdr) || epochHdr !== parsed.coordinatorEpoch) {
+          reply(400, { error: 'mismatched coordinator epoch header' });
+          return;
+        }
+        const result = await this.onLeaseRenew(from, {
+          coordinatorEpoch: parsed.coordinatorEpoch,
+          leaseSeq: parsed.leaseSeq,
+        });
+        reply(result.ok ? 200 : 409, result);
+        return;
+      }
       if (req.method === 'POST' && req.url === '/kaji/sortie') {
         const s = JSON.parse(body) as { sortieId?: unknown };
         if (typeof s.sortieId !== 'string' || !UUID.test(s.sortieId)) {
@@ -932,6 +966,51 @@ export class KajiLink {
     if (res.status === 409) {
       const parsed = JSON.parse(res.text) as ApplyReplicationBatchResult & { reason?: string; error?: string };
       if (parsed.reason === 'need_resync') return parsed;
+    }
+    throw new Error(`${peer.baseId} refused (${res.status}): ${res.text}`);
+  }
+  /** F-016-T06: requests a standby-acked lease renewal for the active coordinator. */
+  async renewLease(baseId: string, req: LeaseRenewRequest): Promise<LeaseRenewResult> {
+    const peer = (await this.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
+    if (!peer) throw new Error(`Base ${baseId} is not enrolled.`);
+    const body = JSON.stringify(req);
+    const { host, port } = endpoint(peer.address);
+    const res = await send(
+      host,
+      port,
+      'POST',
+      '/kaji/lease/renew',
+      {
+        'content-type': 'application/json',
+        'x-kaji-coordinator-epoch': String(req.coordinatorEpoch),
+        ...signedHeaders(
+          this.baseId,
+          this.key,
+          'req',
+          'POST',
+          '/kaji/lease/renew',
+          body,
+          undefined,
+          this.trust?.required ? this.trust.root : undefined,
+        ),
+      },
+      body,
+      5000,
+    );
+    const replyFrom = verifySigned(
+      res.headers,
+      'res',
+      'POST',
+      '/kaji/lease/renew',
+      res.text,
+      [peer],
+      this.nonces,
+      undefined,
+      this.trust,
+    );
+    if (replyFrom !== peer.baseId) throw new Error('Unexpected base answered lease renewal.');
+    if (res.status === 200 || res.status === 409) {
+      return JSON.parse(res.text) as LeaseRenewResult;
     }
     throw new Error(`${peer.baseId} refused (${res.status}): ${res.text}`);
   }
