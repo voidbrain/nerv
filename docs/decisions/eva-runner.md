@@ -56,7 +56,7 @@ Execution in `eva-03` (and subsequently `eva-00`–`eva-02`) must not be enabled
 5. **Timeout and cancellation:** Hung or forking children terminate within the deadline or Spear cancellation window with zero surviving orphans and an explicit ledger timeout/cancel event.
 6. **Recovery join:** Mid-job crash/disconnect preserves durable receipt and uncertain lock, blocks duplicate replay, and reconciles cleanly on restart.
 
-Tests 1–5 run on the macOS EVA-03 runner in `test/eva-gate.test.ts` (test 5 within the best-effort limit above), each also through a fixture `sandbox-exec` that drops the profile, where the attack must succeed. Test 6 needs the runner's events in the ledger first (`F-049-T13`).
+Tests 1–5 run on the macOS EVA-03 runner in `test/eva-gate.test.ts` (test 5 within the best-effort limit above), each also through a fixture `sandbox-exec` that drops the profile, where the attack must succeed. Test 6 runs in `test/eva-jobs.test.ts`: each EVA-03 job has a durable receipt and resource lock before it runs (`eva_jobs`), its events are on its sortie, and a runner killed mid-job leaves the receipt and lock; on restart the job is uncertain until the owner reconciles it (`nerv eva reconcile`). A killed runner cannot end its sandboxed job; that job's effect is part of what the owner reconciles.
 
 ## Sequencing and prerequisites
 
