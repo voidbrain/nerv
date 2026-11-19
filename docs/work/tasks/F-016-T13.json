@@ -4,7 +4,7 @@
   "id": "F-016-T13",
   "title": "Step 2b — Import a verified snapshot into the read-only standby",
   "goal": "A standby holds main's state in coordinator-standby.sqlite without touching its own nerv.sqlite",
-  "status": "implemented",
+  "status": "verified",
   "acceptance": [
     "Signature, digest and head checked before any write; import into `coordinator-standby.sqlite` only, `replication_mode = standby`; FTS5 tables rebuilt locally; exact rowids kept (test)"
   ],
@@ -40,7 +40,8 @@
     "estimate": "2 h",
     "basis": "Split from F-016-T03 on 2026-11-18 with the owner's approval. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 2,
+    "agentHours": 0,
+    "ownerHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
   },

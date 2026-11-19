@@ -4,7 +4,7 @@
   "id": "F-016-T14",
   "title": "Step 2c — Serial-monotonic registry merge and worker approval settlement",
   "goal": "Import never rolls back trust state or settles a worker approval twice",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "`registry`/`registry_roots` merge by serial; a newer local revoke survives an older snapshot (test)",
     "`worker_approvals.persisted_decision` with the `hasApproval` LEFT JOIN settles once across Store.expire, cancelWorker and releaseWorker (test)"
@@ -13,11 +13,12 @@
     "F-016-T13"
   ],
   "resources": [
-    "src/**",
-    "shared/**",
-    "test/**",
-    "docs/**",
-    "contract:coordinator-authority",
+    "src/coordinator-snapshot.ts",
+    "src/worker-jobs.ts",
+    "src/store.ts",
+    "test/coordinator-snapshot.test.ts",
+    "docs/work/tasks/F-016-T13.json",
+    "docs/work/tasks/F-016-T14.json",
     "docs/work/records/F-016.md",
     "generated:backlog-views"
   ],
@@ -44,5 +45,11 @@
     "agentHours": 1.5,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 550,
+      "note": "implementation"
+    }
+  ]
 }
