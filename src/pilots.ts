@@ -546,7 +546,7 @@ export interface RemotePilotGrant {
   allowed: boolean;
   reason?: string;
 }
-/** Checks grant rules for a remote pilot: active, non-recursive, offered by its base, and within its tool grants. */
+/** Checks grant rules for a remote pilot: active, non-recursive, offered by its base, and within its tool grants (none listed, none granted). */
 export function canRunRemotePilot(
   pilot: Pick<Pilot, 'id' | 'retired' | 'tools'>,
   offeredTools: readonly string[],
@@ -556,7 +556,13 @@ export function canRunRemotePilot(
   if (tool) {
     if (tool === 'kaji.run') return { allowed: false, reason: 'Remote pilots cannot chain kaji.run.' };
     if (!offeredTools.includes(tool)) return { allowed: false, reason: `Base does not offer "${tool}".` };
-    if (pilot.tools && pilot.tools.length > 0 && !pilot.tools.includes(tool))
+    // F-021-T03: deny by default: a pilot may use only the tools it lists, and one that lists none may use none.
+    if (!pilot.tools?.length)
+      return {
+        allowed: false,
+        reason: `Pilot ${pilot.id} grants no tools; the owner grants them with pilots.tools.`,
+      };
+    if (!pilot.tools.includes(tool))
       return { allowed: false, reason: `Pilot ${pilot.id} does not grant tool "${tool}".` };
   }
   return { allowed: true };

@@ -51,7 +51,7 @@
   "prs": [
     {
       "pr": 545,
-      "note": "the fix; CI pending"
+      "note": "the fix; CI green on rerun"
     }
   ]
 }

@@ -4,7 +4,7 @@
   "parent": "F-021",
   "title": "Per-pilot tool binding",
   "goal": "Per-pilot tool binding",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A pilot lists the tools it may use (F-045); binding is deny-by-default; escalation impossible without a grant"
   ],
@@ -13,10 +13,12 @@
     "F-049-T04"
   ],
   "resources": [
-    "src/**",
-    "test/**",
-    "docs/**",
-    "generated:backlog-views"
+    "src/pilots.ts",
+    "test/pilots.test.ts",
+    "docs/work/records/F-021.md",
+    "docs/work/tasks/F-021-T03.json",
+    "generated:backlog-views",
+    "evals/gauntlet/ledger.json"
   ],
   "capabilities": [
     "bounded-edit",
@@ -40,5 +42,11 @@
     "agentHours": 0.5,
     "baselineAgentHours": 3,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 547,
+      "note": "the fix; CI pending"
+    }
+  ]
 }
