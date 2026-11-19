@@ -53,5 +53,10 @@
     "baselineAgentHours": 4,
     "estimateAgentHours": 4
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 570,
+      "note": "job user; CI pending"
+    }
+  ]
 }

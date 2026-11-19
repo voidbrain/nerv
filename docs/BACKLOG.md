@@ -1086,7 +1086,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="b-099-t02"></a>B-099-T02 — EVA jobs can run as a dedicated job user; everything it runs ends with the job | 4 h | 0 h | 4 h | Implemented; verification pending | 🤖 | — |
+| 🟡 Medium | <a id="b-099-t02"></a>B-099-T02 — EVA jobs can run as a dedicated job user; everything it runs ends with the job | 4 h | 0 h | 4 h | Implemented; verification pending | 🤖 | [PR #570](https://github.com/voidbrain/nerv/pull/570) job user; CI pending |
 | 🟢 Small | <a id="b-099-t03"></a>B-099-T03 — Owner setup on NERV-01: the &#95;nervjob user, the shared folder and the sudo rule | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [B-099-T02](#b-099-t02) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="b-099-t04"></a>B-099-T04 — Live check on NERV-01: the escapes the review found leave nothing running | 0.5 h | 0 h | 0.5 h | Planned · waits on [B-099-T03](#b-099-t03) | ⏳ 🤖 | — |
 | 🔴 Large | **Total** | 5.5 h (3 of 4 steps) | 1.5 h (1 of 4 steps recorded) | 4.5 h agent + 0.25 h owner | 1 of 4 completed | | |
@@ -1106,7 +1106,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-099-T01: [PR #549](https://github.com/voidbrain/nerv/pull/549) the fix; CI green. Found in F-049-T05; [PR #549](https://github.com/voidbrain/nerv/pull/549) B-099-T01 (`test/eva-gate.test.ts`) |
+| PR / evidence | Steps: B-099-T01: [PR #549](https://github.com/voidbrain/nerv/pull/549) the fix; CI green · B-099-T02: [PR #570](https://github.com/voidbrain/nerv/pull/570) job user; CI pending. Found in F-049-T05; [PR #549](https://github.com/voidbrain/nerv/pull/549) B-099-T01 (`test/eva-gate.test.ts`) |
 | Opened | 2026-11-19 |
 | Verification | 2026-11-19: B-099-T01 by CI run 44532892249 (PR #549); B-099-T02 pending. Review: design-reviewer, 2026-11-19, PR #549 (one blocker answered by owner decision; three should-fix fixed). |
 | Reviewed | 2026-11-19 |
