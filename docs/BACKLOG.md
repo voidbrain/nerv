@@ -1575,7 +1575,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-008-T11 — Battery cards on the dashboard (Planned).
+💻 **→** Next: F-008-T11 — Battery cards on the dashboard (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1587,7 +1587,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-008-t11"></a>F-008-T11 — Battery cards on the dashboard | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-008-t11"></a>F-008-T11 — Battery cards on the dashboard | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 | — |
 | 🟢 Small | <a id="f-008-t12"></a>F-008-T12 — Live check with real batteries | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-008-T11](#f-008-t11) | ⏳ 🤖 | — |
 | 🟢 Small | **Total** | 4.75 h (11 of 12 steps) | 1.25 h (3 of 12 steps recorded) | 0.75 h | 10 of 12 completed | | |
 

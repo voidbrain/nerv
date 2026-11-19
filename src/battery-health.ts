@@ -1,4 +1,10 @@
-import type { BatteryRecord, BatteryResistanceEntry } from './batteries.ts';
+import {
+  RESISTANCE_CHECK_INTERVAL_DAYS,
+  type BatteryChargeState,
+  type BatteryRecord,
+  type BatteryRegistry,
+  type BatteryResistanceEntry,
+} from './batteries.ts';
 
 export type BatteryHealthSeverity = 'warning' | 'strong_warning' | 'retire';
 
@@ -288,4 +294,71 @@ export function evaluateBatteryHealth(
     findings,
     lines,
   };
+}
+
+export interface BatteryDashboardCard {
+  id: string;
+  packNumber: number;
+  series?: string;
+  seriesColor?: string;
+  label: string;
+  brand: string;
+  batteryType: string;
+  cellCount: number;
+  capacityMah: number;
+  currentState: BatteryChargeState;
+  cycles: number;
+  lastResistance: {
+    valuesMohm: number[];
+    recordedAt: string;
+    cyclesAtRecord: number;
+  } | null;
+  resistanceDueAt: string | null;
+  resistanceOverdue: boolean;
+  resistanceDueReasons: Array<'days' | 'cycles'>;
+  storageReminderActive: boolean;
+  healthStatus: BatteryHealthReport['status'];
+}
+
+/** Builds dashboard battery cards with state, cycles, last resistance, and due dates (F-008-T11). */
+export function buildBatteryDashboardCards(registry: BatteryRegistry, now = new Date()): BatteryDashboardCard[] {
+  const dueById = new Map(registry.dueResistanceChecks(now).map((c) => [c.battery.id, c]));
+  return registry
+    .list()
+    .filter((b) => !b.retiredAt)
+    .map((b) => {
+      const records = registry.resistanceHistory(b.id);
+      const latest = records.at(-1) ?? null;
+      const due = dueById.get(b.id);
+      const report = evaluateBatteryHealth(b, records);
+      const lastMs = latest ? Date.parse(latest.recordedAt) : Number.NaN;
+      const resistanceDueAt = Number.isFinite(lastMs)
+        ? new Date(lastMs + RESISTANCE_CHECK_INTERVAL_DAYS * 86_400_000).toISOString()
+        : null;
+      return {
+        id: b.id,
+        packNumber: b.packNumber,
+        ...(b.series ? { series: b.series } : {}),
+        ...(b.seriesColor ? { seriesColor: b.seriesColor } : {}),
+        label: b.label,
+        brand: b.brand,
+        batteryType: b.batteryType,
+        cellCount: b.cellCount,
+        capacityMah: b.capacityMah,
+        currentState: b.currentState,
+        cycles: b.cycles,
+        lastResistance: latest
+          ? {
+              valuesMohm: latest.valuesMohm,
+              recordedAt: latest.recordedAt,
+              cyclesAtRecord: latest.cyclesAtRecord,
+            }
+          : null,
+        resistanceDueAt,
+        resistanceOverdue: Boolean(due),
+        resistanceDueReasons: due?.reasons ?? [],
+        storageReminderActive: b.currentState !== 'stored',
+        healthStatus: report.status,
+      };
+    });
 }

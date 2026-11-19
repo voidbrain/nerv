@@ -4,7 +4,7 @@
   "parent": "F-008",
   "title": "Battery cards on the dashboard",
   "goal": "Each battery shows state, cycles, last resistance and due dates",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Card per battery, filter by series and type; accessible (AXE)"
   ],
@@ -12,9 +12,21 @@
     "F-008-T10"
   ],
   "resources": [
-    "web/**",
-    "src/**",
-    "test/**"
+    "src/battery-health.ts",
+    "src/runtime-api.ts",
+    "src/store.ts",
+    "src/runtime.ts",
+    "src/nervous-process.ts",
+    "src/rpc-schemas.ts",
+    "src/server.ts",
+    "web/src/battery-cards.ts",
+    "web/src/main.ts",
+    "web/src/i18n.ts",
+    "web/src/styles.css",
+    "test/battery-cards.test.ts",
+    "test/angular.browser.mjs",
+    "docs/work/tasks/F-008-T11.json",
+    "docs/work/records/F-008.md"
   ],
   "capabilities": [
     "bounded-edit",
