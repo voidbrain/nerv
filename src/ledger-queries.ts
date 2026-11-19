@@ -8,6 +8,7 @@ import type { ActionDetail, SortieSummary } from './ledger.ts';
 export interface LedgerQueryHost {
   readonly db: DatabaseSync;
   events(sortieId: string, after?: number, limit?: number): SortieEvent[];
+  remoteResults(sortieId: string): string[];
 }
 
 export class LedgerQueries {
@@ -400,11 +401,7 @@ export class LedgerQueries {
         ...(done?.kind === 'action.failed' ? { error: (JSON.parse(done.payload) as { error?: string }).error } : {}),
       };
     });
-    const remote = (
-      this.host.db
-        .prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='kaji.result' ORDER BY sequence LIMIT 5")
-        .all(s.id) as { payload: string }[]
-    ).map((r) => (JSON.parse(r.payload) as { text: string }).text);
+    const remote = this.host.remoteResults(s.id);
     const timings = this.collectTimings(s.id);
     return {
       found: 'one',

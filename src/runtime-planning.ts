@@ -32,6 +32,7 @@ import {
   type ChatReply,
   type ExternalTools,
   type OwnerAction,
+  withRemoteResults,
 } from './runtime-api.ts';
 import type { RemoteConsultant } from './runtime-approvals.ts';
 import type { ChatNoteKind } from './runtime-chat.ts';
@@ -119,6 +120,12 @@ export class RuntimePlanning {
       error?: string,
       durationMs?: number,
     ): Promise<ChatReply> => {
+      // B-094: a worker can answer a kaji.run while Misato is still writing; her reply then carries that result.
+      if (reply && !waiting.length && steps.some((s) => s.tool === 'kaji.run' && s.outcome === 'grant' && !s.error))
+        reply = withRemoteResults(
+          reply,
+          (await this.host.nervous.call('sorties.remoteResults', { sortieId }).catch(() => [])) as string[],
+        ).slice(0, 4000);
       if (waiting.length && reply) {
         // Not finished: the reply is recorded, the sortie waits for the owner's decisions and then resumes.
         await this.host.nervous.call('sorties.finish', { sortieId, reply });

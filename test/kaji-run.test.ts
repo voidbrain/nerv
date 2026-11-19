@@ -402,8 +402,7 @@ test("B-094: a kaji.result recorded before Misato's final reply is in that reply
   const [pa, pb] = reserved.ports;
   t.after(() => reserved.release());
   let sortieId = '';
-  let a: InstanceType<typeof Runtime> | undefined;
-  const resultRecorded = async () => !!sortieId && (await a!.events(sortieId)).some((e) => e.kind === 'kaji.result');
+  const resultRecorded = async () => !!sortieId && (await a.events(sortieId)).some((e) => e.kind === 'kaji.result');
   const model = await fakeModel([
     '{"action":{"tool":"kaji.run","args":{"base":"NERV-02","tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T09:00:00Z"}}}}',
     // As in the live trace: the worker answers while Misato is still writing her reply.
@@ -434,13 +433,13 @@ test("B-094: a kaji.result recorded before Misato's final reply is in that reply
     rec({ kind: 'enrol', baseId: 'NERV-02', name: 'Tabgha', publicKey: B.publicKey, address: `127.0.0.1:${pb}` }),
     rec({ kind: 'main', baseId: 'NERV-01' }),
   ];
-  a = new Runtime(join(ha, 'nerv.sqlite'), undefined, ha);
+  const a = new Runtime(join(ha, 'nerv.sqlite'), undefined, ha);
   const b = new Runtime(join(hb, 'nerv.sqlite'), undefined, hb);
   const links: KajiLink[] = [];
   const logs: string[] = [];
   const follow: ChatReply[] = [];
   a.onResumed((r) => follow.push(r));
-  const describe = async () => ({ offers: await a!.remoteOffers(), follow, logs: logs.slice(-20) });
+  const describe = async () => ({ offers: await a.remoteOffers(), follow, logs: logs.slice(-20) });
   try {
     await a.ready();
     await b.ready();
@@ -455,7 +454,7 @@ test("B-094: a kaji.result recorded before Misato's final reply is in that reply
       publicKey: A.publicKey,
       registry: a.kaji,
       log: (l) => logs.push('NERV-01 ' + l),
-      onOffers: (id, offered) => a!.notePeerOffers(id, offered),
+      onOffers: (id, offered) => a.notePeerOffers(id, offered),
     });
     const lb = new KajiLink({
       worker: b.worker,
@@ -470,7 +469,7 @@ test("B-094: a kaji.result recorded before Misato's final reply is in that reply
     await reserved.release();
     await Promise.all([la.start(200), lb.start(200)]);
     a.startResumer(100);
-    await until(async () => (await a!.remoteOffers()).length === 1, describe);
+    await until(async () => (await a.remoteOffers()).length === 1, describe);
     await until(() => logs.some((l) => l.includes('Worker connected: NERV-02')), describe);
     const chat = await a.chat('Remind me on Tabgha to stretch');
     sortieId = chat.sortieId;

@@ -4,7 +4,7 @@
   "id": "B-094-T03",
   "title": "A remote result that arrived before Misato's reply is in that reply",
   "goal": "Misato's final reply after a kaji.run reports the worker's outcome when its kaji.result is already recorded, instead of \"queued\"",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Test committed failing first across planner and store: a kaji.result recorded before the final reply makes that reply carry the result text (ran, refused or uncertain); with no result yet the reply keeps saying the result follows",
     "Design: a read-only nervous RPC returns the sortie's kaji.result texts; the planner's finish appends them to Misato's reply for a sortie with a queued kaji.run step"
