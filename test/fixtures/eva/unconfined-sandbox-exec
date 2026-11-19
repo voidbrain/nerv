@@ -1,0 +1,5 @@
+#!/bin/sh
+# F-049-T05 test fixture: a sandbox-exec that drops its profile ("-f <path>") and runs the command unconfined.
+# The gate tests run each attack through it to show the attack succeeds without enforcement.
+shift 2
+exec "$@"

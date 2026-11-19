@@ -35,7 +35,7 @@ Supported hosts are **macOS** (primary local base; mechanism chosen in `F-049-T0
 | **Filesystem mounts** | Ephemeral per-job writable workspace/scratch directory, discarded on teardown. Explicit read-only mounts only for pinned inputs and required runtime binaries. Explicit denial of NERV data/SQLite directories, Kaji/provider/native keys, user credential stores, and grader/promotion directories. |
 | **Network egress** | Default-deny for `eva-03` and `eva-00` (no outbound TCP/UDP/DNS; bounded coordinator IPC only over an explicit pre-opened channel). For `eva-01` / `eva-02`, allow only endpoints/ports explicitly matching the admitted grant; deny link-local, cloud metadata, and local admin ports (`4317`, `4319`) unless explicitly granted. |
 | **Credentials** | Zero ambient credentials in `env`, `argv`, mounted config files, or Keychain/token stores (extending `src/process-client.ts`). Any credentialed external call remains outside the sandbox in an authorized host boundary or behind a single-action scoped proxy. |
-| **Cancellation & deadlines** | Hard wall-clock deadline per job. Timeout or Spear/owner cancellation terminates the entire process group / sandbox instance (`SIGTERM`, bounded grace, `SIGKILL` + instance teardown) and verifies no orphan processes or open handles remain. |
+| **Cancellation & deadlines** | Hard wall-clock deadline per job. Timeout or Spear/owner cancellation terminates the entire process group / sandbox instance (`SIGTERM`, bounded grace, `SIGKILL` + instance teardown) and verifies no orphan processes or open handles remain. On macOS this is best effort today: the runner samples the job's process tree while it runs and, at the end, stops every process it knows, samples again, then kills them, so a child in its own session (`setsid`) usually ends with the job. A process that detaches and loses its parent between two samples is never seen; every EVA-03 event says containment is best effort, and a job that left processes running, or whose processes could not be listed, is recorded as uncertain. A boundary the job cannot leave (a dedicated job user) replaces it before execution is enabled. |
 | **CPU, memory & output** | Bounded CPU shares/time, memory cap, process/FD limits, and capped stdout/stderr/artifact sizes compatible with NERV's IPC limits (`MAX_FRAME_BYTES`). Coordinator enforces per-machine concurrency caps (CPU, memory, model slots; `F-049-T06`) before spawning. |
 
 ## Protected grading, promotion, and ledger invariants
@@ -55,6 +55,8 @@ Execution in `eva-03` (and subsequently `eva-00`–`eva-02`) must not be enabled
 4. **Grader tampering:** Candidate attempts to read hidden grader data or alter grader/promotion outputs fail.
 5. **Timeout and cancellation:** Hung or forking children terminate within the deadline or Spear cancellation window with zero surviving orphans and an explicit ledger timeout/cancel event.
 6. **Recovery join:** Mid-job crash/disconnect preserves durable receipt and uncertain lock, blocks duplicate replay, and reconciles cleanly on restart.
+
+Tests 1–5 run on the macOS EVA-03 runner in `test/eva-gate.test.ts` (test 5 within the best-effort limit above), each also through a fixture `sandbox-exec` that drops the profile, where the attack must succeed. Test 6 needs the runner's events in the ledger first (`F-049-T13`).
 
 ## Sequencing and prerequisites
 

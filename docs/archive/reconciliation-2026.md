@@ -483,3 +483,7 @@ PRs #531–#540 merged with green CI. Closed B-090; B-094-T02, B-086-T01/T02, F-
 ## 2026-11-19 — main `f66efbcc`
 
 PRs #541–#545 merged with green CI (#545 after Windows reruns: B-066 worker-link, then a Dummy Plug timeout). Closed B-098; B-086-T04 and F-008-T10 closed. B-094-T03 merged, waits on the owner's live check. F-021-T03 implemented.
+
+## 2026-11-19 — main `3cc599a`
+
+PRs #546 and #547 merged with green CI (#546 after a Windows rerun, B-066 worker-link). F-021-T03 closed. F-016-T03 stays for its open follow-up PR #548, which edits the same record. B-099 opened (EVA-03 orphan escape) and implemented; F-049-T05 narrowed and implemented, F-049-T13 opened.

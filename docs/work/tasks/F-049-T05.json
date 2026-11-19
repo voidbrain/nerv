@@ -2,23 +2,30 @@
   "version": 1,
   "id": "F-049-T05",
   "parent": "F-049",
-  "title": "Escape and recovery join tests",
-  "goal": "The T01 join tests across runtime, ledger and runner before execution is enabled",
-  "status": "planned",
+  "title": "Escape and timeout gate tests on the EVA-03 runner",
+  "goal": "Gate tests 1–5 of the T01 contract on the EVA-03 runner, each proved to fail on an unconfined runner",
+  "status": "implemented",
   "acceptance": [
-    "Escape (filesystem, network), credential denial, grader tampering, timeout and cancellation, worker recovery with uncertain effects",
-    "Each test fails on an unconfined runner (proved once with the enforcement turned off in a fixture)"
+    "Filesystem escape (NERV state, keys, $HOME, writes outside the workspace, symlink and hardlink traversal), network egress (TCP, UDP, DNS, loopback port probe), credential denial (environment, Keychain), grader tampering (read hidden grader data, write grader outputs), timeout and cancellation (no surviving process, including one in its own session; explicit timed_out/cancelled event)",
+    "Each confinement test also runs against a fixture sandbox-exec that drops the profile and shows the breach there"
   ],
   "dependsOn": [
     "F-049-T04"
   ],
   "resources": [
-    "src/**",
-    "test/**",
-    "docs/architecture/**",
-    "docs/decisions/**",
+    "src/eva-runner.ts",
+    "test/eva-gate.test.ts",
+    "test/fixtures/eva/**",
+    "docs/decisions/eva-runner.md",
     "docs/work/records/F-049.md",
-    "generated:backlog-views"
+    "docs/work/tasks/F-049-T05.json",
+    "contract:backlog-ids",
+    "docs/work/records/B-099.md",
+    "docs/work/tasks/B-099-T01.json",
+    "docs/work/tasks/F-049-T13.json",
+    "docs/work/layout.json",
+    "generated:backlog-views",
+    "evals/gauntlet/ledger.json"
   ],
   "capabilities": [
     "bounded-edit",
@@ -37,12 +44,18 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 h agent",
-    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
-    "reviewed": "2026-11-14",
+    "estimate": "1.5 h agent",
+    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio. Re-estimated 2026-11-19 from 0.75 h to 1.5 h and narrowed (owner decision): the recovery join test moved to F-049-T13; the orphan escape found while writing it is B-099. Review of PR #549 (2026-11-19) fixed in the same PR; containment stated as best effort.",
+    "reviewed": "2026-11-19",
     "baselineDays": 1.5,
-    "agentHours": 0.75,
+    "agentHours": 1.5,
     "baselineAgentHours": 2.25,
-    "estimateAgentHours": 0.75
-  }
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 549,
+      "note": "gate tests; CI pending"
+    }
+  ]
 }
