@@ -1,5 +1,5 @@
 import { execFile, spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { EVA_CLASS_SPECS } from './eva-classes.ts';
@@ -109,8 +109,22 @@ export function buildEva03SeatbeltProfile(options: Eva03SeatbeltOptions): string
   for (const p of deniedReads) {
     lines.push(`(deny file-read* (subpath "${escapeSbString(p)}"))`);
   }
+  // Allow stat/lstat metadata on ancestor directories above allowed paths so Node can resolve
+  // realpath/ESM modules under a denied $HOME without granting directory listing or file reads.
+  const ancestorDirs = new Set<string>();
+  for (const p of [...readOnly, workspace]) {
+    let cur = dirname(p);
+    while (cur && cur !== '/' && cur !== dirname(cur)) {
+      ancestorDirs.add(cur);
+      cur = dirname(cur);
+    }
+  }
+  for (const dir of ancestorDirs) {
+    lines.push(`(allow file-read-metadata (literal "${escapeSbString(dir)}"))`);
+  }
   for (const p of readOnly) {
-    lines.push(`(allow file-read* (subpath "${escapeSbString(p)}"))`);
+    const matcher = existsSync(p) && statSync(p).isFile() ? 'literal' : 'subpath';
+    lines.push(`(allow file-read* (${matcher} "${escapeSbString(p)}"))`);
   }
   lines.push(`(allow file-read* (subpath "${escapeSbString(workspace)}"))`);
   return `${lines.join('\n')}\n`;
@@ -462,12 +476,21 @@ export async function runToolsProcessInEva03(options: {
 }): Promise<Eva03JobResult> {
   const toolsEntry = join(options.repoRoot, 'src', 'tools-process.ts');
   const args = options.home ? [toolsEntry, options.home] : [toolsEntry];
+  const readOnlyPaths = [
+    join(options.repoRoot, 'src'),
+    join(options.repoRoot, 'node_modules'),
+    join(options.repoRoot, 'package.json'),
+  ];
+  if (options.home) {
+    const configPath = join(options.home, 'config.json');
+    if (existsSync(configPath)) readOnlyPaths.push(configPath);
+  }
   return runEva03Job({
     jobId: options.jobId,
     command: process.execPath,
     args,
     nervStateDir: options.home,
-    readOnlyPaths: [join(options.repoRoot, 'src'), join(options.repoRoot, 'node_modules')],
+    readOnlyPaths,
     timeoutMs: options.timeoutMs,
     signal: options.signal,
     onLedgerEvent: options.onLedgerEvent,

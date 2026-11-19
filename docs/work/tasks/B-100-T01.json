@@ -4,7 +4,7 @@
   "parent": "B-100",
   "title": "Decide what the tools process may read in EVA-03, and make eva run-tools-03 start",
   "goal": "`nerv eva run-tools-03` lists the tools from a checkout under $HOME, reading only what the decision allows",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Test committed failing first: runToolsProcessInEva03 from a checkout under the denied $HOME exits 0 and lists tools",
     "The profile allows only what the tools process needs (directory metadata above its read-only paths, the checkout's package.json, the config it is given); NERV state, keys and the rest of $HOME stay denied, and the gate tests still pass"
