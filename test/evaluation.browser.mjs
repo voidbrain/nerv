@@ -84,6 +84,16 @@ test(
           [],
           'waiting flow accessibility',
         );
+        // F-021-T05: the Tools panel lists this base's tools with versions, and passes axe.
+        await until(`document.querySelector('#tools-list').textContent.includes("NERV's own tools")`);
+        await evaluate(`document.querySelector('#tools-list details').open=true`);
+        assert.deepEqual(
+          await evaluate(
+            `axe.run(document.querySelector('#tools-list').closest('.panel')).then(r=>r.violations.map(v=>v.id))`,
+          ),
+          [],
+          'tools panel accessibility',
+        );
         plans.push(
           '{"action":{"tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T09:00:00Z"}}}',
           '{"reply":"Reminder added"}',
