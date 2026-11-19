@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 80 h agent + 10.5 h owner across 138 open steps of 40 features and 19 other records. 50 h of actual effort recorded on 96 steps. Generated from the task files.
+**Remaining effort:** 78.75 h agent + 10.5 h owner across 139 open steps of 40 features and 19 other records. 51 h of actual effort recorded on 97 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1658,6 +1658,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-090"></a>[🐞 B-090](#top)
+
+**Update rehearsal uses the installed dependencies, so a candidate whose dependencies differ is judged wrongly or refused forever**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-090-T01 — Rehearse a candidate with its own dependencies when its lock differs (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 by the fresh-context review of PR #522 (B-088): the candidate reader resolves packages through a link to the installed checkout's `node_modules`, and `dependencies` runs only after `checkout`. If a new revision adds a runtime dependency its reader path needs, every update to it is refused at the rehearsal, safely but forever; if a dependency's version changes (for example an ajv major), the rehearsal runs against the old version and can pass or fail wrongly. |
+| **Reproduce** | A candidate whose `src/upgrade-reader.ts` path imports a package absent from the installed `node_modules`: `lifecycle-apply --action update` is refused at `rehearse`. |
+| **Check** | A committed test fails first: when the candidate's `package-lock.json` differs from the installed one, the rehearsal installs the candidate's own dependencies into the staging tree (`npm ci --ignore-scripts`, bounded) and runs its reader against them, or refuses with a message naming the dependency change; equal locks keep the link. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-090-t01"></a>B-090-T01 — Rehearse a candidate with its own dependencies when its lock differs | 1.5 h | 1 h so far (stated) | 0 h | Implemented; verification pending |
+| 🟢 Small | <a id="b-090-t02"></a>B-090-T02 — Rerun the two expensive system cases at this source | 0.25 h | 0 h | 0.25 h | Ready |
+| 🟢 Small | **Total** | 1.75 h | 1 h (1 of 2 steps recorded) | 0.25 h | 0 of 2 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-090.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Review of PR #522, 2026-11-18 |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="b-091"></a>[🐞 B-091](#top)
 
 **Windows: a fenced stop ends uncertain after a SQLite "disk I/O error" while recording it**
@@ -1765,44 +1804,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | F-005-T24 run on Tabgha, 2026-11-18 |
-| Opened | 2026-11-18 |
-| Verification | Pending. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="b-090"></a>[🐞 B-090](#top)
-
-**Update rehearsal uses the installed dependencies, so a candidate whose dependencies differ is judged wrongly or refused forever**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-090-T01 — Rehearse a candidate with its own dependencies when its lock differs (Ready).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 by the fresh-context review of PR #522 (B-088): the candidate reader resolves packages through a link to the installed checkout's `node_modules`, and `dependencies` runs only after `checkout`. If a new revision adds a runtime dependency its reader path needs, every update to it is refused at the rehearsal, safely but forever; if a dependency's version changes (for example an ajv major), the rehearsal runs against the old version and can pass or fail wrongly. |
-| **Reproduce** | A candidate whose `src/upgrade-reader.ts` path imports a package absent from the installed `node_modules`: `lifecycle-apply --action update` is refused at `rehearse`. |
-| **Check** | A committed test fails first: when the candidate's `package-lock.json` differs from the installed one, the rehearsal installs the candidate's own dependencies into the staging tree (`npm ci --ignore-scripts`, bounded) and runs its reader against them, or refuses with a message naming the dependency change; equal locks keep the link. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-090-t01"></a>B-090-T01 — Rehearse a candidate with its own dependencies when its lock differs | 1.5 h | 0 h | 1.5 h | Ready |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-090.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Review of PR #522, 2026-11-18 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
