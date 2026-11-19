@@ -181,21 +181,39 @@ export class EvaJobs {
   }
 }
 
-/** A process's start time as `ps` prints it, or undefined when it is not running or cannot be read. */
-function processStarted(pid: number): string | undefined {
-  if (!pid) return undefined;
+/**
+ * A process's start time as `ps` prints it; null when no process has that pid; undefined when it cannot be read
+ * (no `ps`, as on Windows, or it failed).
+ */
+function processStarted(pid: number): string | null | undefined {
+  if (!pid) return null;
   try {
     const out = execFileSync('/bin/ps', ['-o', 'lstart=', '-p', String(pid)], { encoding: 'utf8', timeout: 2000 });
-    return out.trim() || undefined;
-  } catch {
-    return undefined;
+    return out.trim() || null;
+  } catch (e) {
+    // ps exits 1 with no output when the pid is not running; anything else means it could not tell.
+    return (e as { status?: number }).status === 1 ? null : undefined;
   }
 }
 
-/** The recorded runner still runs: same pid and, when recorded, the same start time (a reused pid does not count). */
+function pidAlive(pid: number): boolean {
+  if (!pid) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The recorded runner still runs: same pid and, when both are known, the same start time (a reused pid does not
+ * count). Where start times cannot be read, a live pid counts as the runner: a job is never taken from a live runner.
+ */
 function sameProcessRunning(pid: number, started: string): boolean {
   const now = processStarted(pid);
-  return now !== undefined && (started === '' || now === started);
+  if (now === undefined) return pidAlive(pid);
+  return now !== null && (started === '' || now === started);
 }
 
 const event = (jobId: string, uncertain: boolean, detail?: string) => ({

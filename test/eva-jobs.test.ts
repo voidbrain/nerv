@@ -99,21 +99,35 @@ describe('F-049-T13: EVA-03 receipts and the recovery join', () => {
     }
   });
 
-  it('a pid reused by another process is not the runner: its job is recovered', () => {
+  it(
+    'a pid reused by another process is not the runner: its job is recovered',
+    // Start times come from ps; without it (Windows) a live pid counts as the runner, as the next assertion shows.
+    { skip: !existsSync('/bin/ps') },
+    () => {
+      const f = fixture();
+      try {
+        const s = f.sortie();
+        f.jobs.begin({ id: 'reused', sortieId: s, key: 'notes', hash: 'h' });
+        // This test process is alive, but it did not start at that time: it is not the job's runner.
+        f.store.db
+          .prepare("UPDATE eva_jobs SET runner=?, runner_started='Mon Jan  1 00:00:00 2001' WHERE id='reused'")
+          .run(process.pid);
+        assert.deepEqual(
+          f.jobs.recover(f.store.ledger).map((r) => r.id),
+          ['reused'],
+        );
+      } finally {
+        f.done();
+      }
+    },
+  );
+
+  it('a job whose runner still runs is never taken from it, on every platform', () => {
     const f = fixture();
     try {
-      const s = f.sortie();
-      f.jobs.begin({ id: 'reused', sortieId: s, key: 'notes', hash: 'h' });
-      // This test process is alive, but it did not start at that time: it is not the job's runner.
-      f.store.db
-        .prepare("UPDATE eva_jobs SET runner=?, runner_started='Mon Jan  1 00:00:00 2001' WHERE id='reused'")
-        .run(process.pid);
-      assert.deepEqual(
-        f.jobs.recover(f.store.ledger).map((r) => r.id),
-        ['reused'],
-      );
       f.jobs.begin({ id: 'mine', sortieId: f.sortie(), key: 'calendar', hash: 'h' });
       assert.deepEqual(f.jobs.recover(f.store.ledger), [], 'a job whose runner is this very process stays running');
+      assert.equal(f.jobs.receipt('mine')?.state, 'running');
     } finally {
       f.done();
     }
