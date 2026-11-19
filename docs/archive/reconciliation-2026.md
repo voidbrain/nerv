@@ -522,4 +522,4 @@ PR #557 merged with green CI. B-091-T01 waits on its live check on Tabgha. F-049
 
 ## 2026-11-19 — main `37e0a248`
 
-PRs #558, #559 and #561 merged with green CI (#558 after waiting for a macOS runner). F-049-T07 and F-083-T06 closed; B-101-T01 waits to be seen on NERV-01's dashboard. #560 (B-100-T01) closed unmerged. F-021-T05 implemented.
+PR #559 merged with green CI: B-101-T01 waits to be seen on NERV-01's dashboard (#558 and #561 are reconciled in #565). #560 (B-100-T01) closed unmerged. F-021-T05 implemented.
