@@ -253,3 +253,140 @@ test('through the server: the switch, the scheduled check, the inbox notice, "as
     await runtime.close();
   }
 });
+
+test('F-110-T02: the update schedule is validated; an apply hour inside the no-apply window is refused', async () => {
+  const { validateUpdateSchedule, validateAutoUpdatePolicy, DEFAULT_UPDATE_SCHEDULE } =
+    await import('../src/update-policy.ts');
+  assert.deepEqual(DEFAULT_UPDATE_SCHEDULE, {
+    mode: 'apply',
+    checkHour: 20,
+    applyHour: 3,
+    quietFrom: 8,
+    quietUntil: 23,
+  });
+  assert.deepEqual(
+    validateUpdateSchedule({ mode: 'notify', checkHour: 18, applyHour: 4, quietFrom: 9, quietUntil: 22 }),
+    {
+      mode: 'notify',
+      checkHour: 18,
+      applyHour: 4,
+      quietFrom: 9,
+      quietUntil: 22,
+    },
+  );
+  for (const bad of [
+    { ...DEFAULT_UPDATE_SCHEDULE, mode: 'later' },
+    { ...DEFAULT_UPDATE_SCHEDULE, checkHour: 24 },
+    { ...DEFAULT_UPDATE_SCHEDULE, applyHour: 2.5 },
+    { ...DEFAULT_UPDATE_SCHEDULE, applyHour: 12 },
+    { ...DEFAULT_UPDATE_SCHEDULE, extra: true },
+  ])
+    assert.throws(() => validateUpdateSchedule(bad), /updatePolicy\.schedule/);
+  const policy = validateAutoUpdatePolicy({
+    enabled: true,
+    channels: ['main'],
+    targets: ['NERV-01'],
+    schedule: { ...DEFAULT_UPDATE_SCHEDULE, applyHour: 4 },
+  });
+  assert.equal(policy.schedule?.applyHour, 4);
+});
+
+test('F-110-T02: the scheduler uses the saved check and apply hours and the no-apply window, read on every tick', async () => {
+  let policy: AutoUpdatePolicy = {
+    ...enabled,
+    schedule: { mode: 'apply', checkHour: 18, applyHour: 4, quietFrom: 9, quietUntil: 22 },
+  };
+  const h = harness(() => policy);
+  // 18:00 in Rome is 17:00Z in November; the apply is 04:00 local, 03:00Z.
+  assert.deepEqual(await h.scheduler.tick(at('2026-11-16T16:59:00Z')), { action: 'idle' });
+  assert.deepEqual(await h.scheduler.tick(at('2026-11-16T17:00:00Z')), {
+    action: 'announced',
+    revision: B,
+    applyAt: '2026-11-17T03:00:00.000Z',
+  });
+  assert.match(h.notices[0]!, /04:00/);
+  assert.deepEqual(await h.scheduler.tick(at('2026-11-17T02:00:00Z')), { action: 'idle' }, 'not at the old 03:00');
+  assert.equal((await h.scheduler.tick(at('2026-11-17T03:00:00Z'))).action, 'evaluated');
+  // A changed window applies at once: 21:00 local is now quiet, so a missed apply waits for the next night.
+  policy = { ...enabled, schedule: { mode: 'apply', checkHour: 18, applyHour: 4, quietFrom: 6, quietUntil: 23 } };
+  assert.equal((await h.scheduler.tick(at('2026-11-17T17:00:00Z'))).action, 'announced');
+  assert.deepEqual(await h.scheduler.tick(at('2026-11-18T20:00:00Z')), {
+    action: 'postponed',
+    applyAt: '2026-11-19T03:00:00.000Z',
+  });
+});
+
+test('F-110-T02: in notify-only mode the update is announced and never applied; switching to it cancels an announced apply', async () => {
+  let policy: AutoUpdatePolicy = {
+    ...enabled,
+    schedule: { mode: 'notify', checkHour: 20, applyHour: 3, quietFrom: 8, quietUntil: 23 },
+  };
+  const h = harness(() => policy);
+  assert.equal((await h.scheduler.tick(at('2026-11-16T19:00:00Z'))).action, 'checked');
+  assert.match(h.notices[0]!, /Update bbbbbbb available \(main\)\. Notify only: apply it from the dashboard/);
+  assert.deepEqual(await h.scheduler.tick(at('2026-11-17T02:00:00Z')), { action: 'idle' });
+  assert.equal(h.evaluations.length, 0, 'never applied');
+  assert.equal((await h.scheduler.tick(at('2026-11-17T19:00:00Z'))).action, 'checked');
+  assert.equal(h.notices.length, 1, 'the same revision is announced once');
+  // From apply to notify after an announcement: the announced apply is cancelled, with a notice.
+  policy = { ...enabled };
+  const h2 = harness(() => policy, { check: () => availability('update-available', 'c'.repeat(40)) });
+  assert.equal((await h2.scheduler.tick(at('2026-11-16T19:00:00Z'))).action, 'announced');
+  policy = { ...enabled, schedule: { mode: 'notify', checkHour: 20, applyHour: 3, quietFrom: 8, quietUntil: 23 } };
+  assert.deepEqual(await h2.scheduler.tick(at('2026-11-17T02:00:00Z')), { action: 'idle' });
+  assert.equal(h2.evaluations.length, 0);
+  assert.match(h2.notices.at(-1)!, /Update ccccccc will not be applied automatically \(notify only\)/);
+  assert.equal(h2.scheduler.state().scheduled, undefined);
+});
+
+test('F-110-T02: through the server, the dashboard switch keeps the saved schedule and a new schedule is used live', async () => {
+  const runtime = new Runtime(':memory:');
+  const token = 'c'.repeat(32);
+  let control: UpdateControl | undefined;
+  let saved: AutoUpdatePolicy = { enabled: false, channels: [], targets: [] };
+  const server = makeServer(runtime, token, {
+    base: { id: 'NERV-01', name: 'Test base' },
+    updateCheck: async () => availability(),
+    readUpdatePolicy: () => saved,
+    saveUpdatePolicy: (policy) => {
+      saved = policy;
+      return policy;
+    },
+    exposeUpdateControl: (c) => {
+      control = c;
+    },
+  });
+  try {
+    await runtime.ready();
+    await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
+    const base = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
+    const post = async (body: unknown) =>
+      fetch(base + '/api/update/policy', {
+        method: 'POST',
+        headers: { authorization: 'Bearer ' + token, 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    const schedule = { mode: 'apply', checkHour: 18, applyHour: 4, quietFrom: 9, quietUntil: 22 };
+    assert.equal((await post({ enabled: false, channels: [], targets: [], schedule })).status, 200);
+    // The dashboard switch sends no schedule: the saved one stays.
+    assert.equal((await post({ enabled: true, channels: [], targets: [] })).status, 200);
+    assert.deepEqual(saved.schedule, schedule);
+    const bad = await post({ enabled: true, channels: [], targets: [], schedule: { ...schedule, applyHour: 12 } });
+    assert.equal(bad.status, 400);
+    const scheduler = new AutoUpdateScheduler({
+      readPolicy: () => control!.readPolicy(),
+      check: (channel) => control!.check(channel),
+      evaluate: (input) => control!.evaluate(input),
+      notify: (message) => runtime.notice(message),
+      settings: () => ({ timeZone: TZ, language: 'en', target: 'NERV-01' }),
+    });
+    assert.deepEqual(await scheduler.tick(at('2026-11-16T17:00:00Z')), {
+      action: 'announced',
+      revision: B,
+      applyAt: '2026-11-17T03:00:00.000Z',
+    });
+  } finally {
+    server.close();
+    await runtime.close();
+  }
+});
