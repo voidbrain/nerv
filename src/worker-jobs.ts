@@ -52,9 +52,13 @@ export class WorkerJobs {
     this.db = db;
     db.exec(`CREATE TABLE IF NOT EXISTS worker_sessions(owner TEXT PRIMARY KEY,session TEXT NOT NULL,epoch INTEGER NOT NULL,active INTEGER NOT NULL,worker_key TEXT NOT NULL,owner_key TEXT NOT NULL);
    CREATE TABLE IF NOT EXISTS worker_jobs(fence INTEGER PRIMARY KEY AUTOINCREMENT,id TEXT NOT NULL UNIQUE,owner TEXT NOT NULL,sequence INTEGER,hash TEXT,session TEXT NOT NULL,epoch INTEGER NOT NULL,expires INTEGER NOT NULL,state TEXT NOT NULL,result TEXT,worker_key TEXT NOT NULL DEFAULT '',owner_key TEXT NOT NULL DEFAULT '',legacy_original TEXT,UNIQUE(owner,sequence));
-   CREATE TABLE IF NOT EXISTS worker_approvals(approval_id TEXT PRIMARY KEY,lease TEXT NOT NULL);
+   CREATE TABLE IF NOT EXISTS worker_approvals(approval_id TEXT PRIMARY KEY,lease TEXT NOT NULL,persisted_decision TEXT);
    CREATE TABLE IF NOT EXISTS worker_cancellations(id TEXT NOT NULL,owner TEXT NOT NULL,reason TEXT NOT NULL,source TEXT NOT NULL,created TEXT NOT NULL);
    CREATE TABLE IF NOT EXISTS worker_releases(id TEXT NOT NULL,fence INTEGER NOT NULL,reason TEXT NOT NULL,source TEXT NOT NULL,created TEXT NOT NULL);`);
+    const approvalCols = db.prepare('PRAGMA table_info(worker_approvals)').all() as Array<{ name: string }>;
+    if (approvalCols.length > 0 && !approvalCols.some((c) => c.name === 'persisted_decision')) {
+      db.exec('ALTER TABLE worker_approvals ADD COLUMN persisted_decision TEXT');
+    }
     // Older Kaji receipts already represent completed work; keep them as non-executable tombstones.
     if (db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='kaji_runs'").get())
       this.tx(() => {
@@ -223,24 +227,34 @@ export class WorkerJobs {
   }
   bindApproval(lease: WorkerLease, approvalId: string, result: unknown): void {
     this.assertLease(lease);
-    this.db.prepare('INSERT INTO worker_approvals VALUES(?,?)').run(approvalId, JSON.stringify(lease));
+    this.db
+      .prepare('INSERT INTO worker_approvals(approval_id,lease) VALUES(?,?)')
+      .run(approvalId, JSON.stringify(lease));
     this.db
       .prepare('UPDATE worker_jobs SET result=? WHERE id=? AND fence=?')
       .run(JSON.stringify(result), lease.id, lease.fence);
+  }
+  persistApprovalDecision(approvalId: string, decision: string): void {
+    this.db.prepare('UPDATE worker_approvals SET persisted_decision=? WHERE approval_id=?').run(decision, approvalId);
   }
   approval(approvalId: string): WorkerLease | undefined {
     const row = this.db.prepare('SELECT lease FROM worker_approvals WHERE approval_id=?').get(approvalId) as
       { lease: string } | undefined;
     return row ? (JSON.parse(row.lease) as WorkerLease) : undefined;
   }
-  waitingApprovals(): { id: string; lease: WorkerLease; decision: string | null }[] {
+  waitingApprovals(): { id: string; lease: WorkerLease; decision: string | null; hasApproval: boolean }[] {
     return (
       this.db
         .prepare(
-          "SELECT a.approval_id AS id,a.lease,p.decision FROM worker_approvals a JOIN worker_jobs j ON j.id=json_extract(a.lease,'$.id') JOIN approvals p ON p.id=a.approval_id WHERE j.state IN ('running','cancelling') LIMIT 20",
+          "SELECT a.approval_id AS id,a.lease,COALESCE(p.decision,a.persisted_decision) AS decision,(p.id IS NOT NULL) AS has_approval FROM worker_approvals a JOIN worker_jobs j ON j.id=json_extract(a.lease,'$.id') LEFT JOIN approvals p ON p.id=a.approval_id WHERE j.state IN ('running','cancelling') LIMIT 20",
         )
-        .all() as { id: string; lease: string; decision: string | null }[]
-    ).map((r) => ({ ...r, lease: JSON.parse(r.lease) as WorkerLease }));
+        .all() as { id: string; lease: string; decision: string | null; has_approval: number }[]
+    ).map((r) => ({
+      id: r.id,
+      lease: JSON.parse(r.lease) as WorkerLease,
+      decision: r.decision,
+      hasApproval: Boolean(r.has_approval),
+    }));
   }
   finish(lease: WorkerLease, result: unknown): void {
     const encoded = JSON.stringify(result);
