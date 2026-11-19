@@ -1875,9 +1875,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start (Ready).
+💻 **→** Next: B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1889,7 +1889,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-100-t01"></a>B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start | 1.5 h | 0 h | 1.5 h | Ready |
+| 🟡 Medium | <a id="b-100-t01"></a>B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start | 1.5 h | 0 h | 1.5 h | Implemented; verification pending |
 | 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
 
 <details>
