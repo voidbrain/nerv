@@ -7,6 +7,65 @@ export interface AutoUpdatePolicy {
   channels: UpdateChannel[];
   targets: string[];
   acceptedAt?: string;
+  /** F-110-T02: when the scheduled update checks and applies; absent means DEFAULT_UPDATE_SCHEDULE. */
+  schedule?: UpdateSchedule;
+}
+
+/**
+ * F-110-T02 (owner decision 2026-11-19): the owner's update schedule. `notify` announces an available update and never
+ * applies it; hours are local hours (0–23) in the configured time zone; no automatic apply from `quietFrom` until
+ * `quietUntil` (the window may wrap midnight; equal hours mean no window).
+ */
+export interface UpdateSchedule {
+  mode: 'apply' | 'notify';
+  checkHour: number;
+  applyHour: number;
+  quietFrom: number;
+  quietUntil: number;
+}
+
+export const DEFAULT_UPDATE_SCHEDULE: UpdateSchedule = {
+  mode: 'apply',
+  checkHour: 20,
+  applyHour: 3,
+  quietFrom: 8,
+  quietUntil: 23,
+};
+
+/** Whether `hour` falls in the no-apply window of `schedule`. */
+export function isQuietHour(hour: number, schedule: UpdateSchedule = DEFAULT_UPDATE_SCHEDULE): boolean {
+  const { quietFrom: from, quietUntil: until } = schedule;
+  if (from === until) return false;
+  return from < until ? hour >= from && hour < until : hour >= from || hour < until;
+}
+
+export function validateUpdateSchedule(raw: unknown): UpdateSchedule {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+    throw new Error('Invalid updatePolicy.schedule: expected a JSON object.');
+  const value = raw as Record<string, unknown>;
+  for (const key of Object.keys(value))
+    if (!['mode', 'checkHour', 'applyHour', 'quietFrom', 'quietUntil'].includes(key))
+      throw new Error(`Unsupported updatePolicy.schedule field: ${key}`);
+  if (value.mode !== 'apply' && value.mode !== 'notify')
+    throw new Error('Invalid updatePolicy.schedule.mode: expected "apply" or "notify".');
+  const hour = (key: string): number => {
+    const h = value[key];
+    if (typeof h !== 'number' || !Number.isInteger(h) || h < 0 || h > 23)
+      throw new Error(`Invalid updatePolicy.schedule.${key}: expected a whole hour from 0 to 23.`);
+    return h;
+  };
+  const schedule: UpdateSchedule = {
+    mode: value.mode,
+    checkHour: hour('checkHour'),
+    applyHour: hour('applyHour'),
+    quietFrom: hour('quietFrom'),
+    quietUntil: hour('quietUntil'),
+  };
+  if (isQuietHour(schedule.applyHour, schedule))
+    throw new Error(
+      'Invalid updatePolicy.schedule.applyHour: it falls in the no-apply window, so nothing would apply.',
+    );
+  return schedule;
 }
 
 export interface AutoUpdateSchemaCheck {
@@ -60,7 +119,7 @@ export function validateAutoUpdatePolicy(raw: unknown): AutoUpdatePolicy {
   }
   const value = raw as Record<string, unknown>;
   for (const key of Object.keys(value)) {
-    if (!['enabled', 'channels', 'targets', 'acceptedAt'].includes(key)) {
+    if (!['enabled', 'channels', 'targets', 'acceptedAt', 'schedule'].includes(key)) {
       throw new Error(`Unsupported updatePolicy field: ${key}`);
     }
   }
@@ -99,11 +158,14 @@ export function validateAutoUpdatePolicy(raw: unknown): AutoUpdatePolicy {
     throw new Error('Automatic updates require at least one opted-in channel and one opted-in target.');
   }
 
+  const schedule = value.schedule === undefined ? undefined : validateUpdateSchedule(value.schedule);
+
   return {
     enabled: value.enabled,
     channels,
     targets,
     ...(acceptedAt !== undefined ? { acceptedAt } : {}),
+    ...(schedule ? { schedule } : {}),
   };
 }
 
