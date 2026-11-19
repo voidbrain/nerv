@@ -350,7 +350,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟡 Medium | 3.25 h agent + 1 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token (Planned).
+💻 **→** Next: F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -364,7 +364,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-016-t05"></a>F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-016-t05"></a>F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | 🤖 | — |
 | 🟢 Small | <a id="f-016-t06"></a>F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T05](#f-016-t05) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t07"></a>F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T06](#f-016-t06) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T07](#f-016-t07) | ⏳ 🤖 | — |

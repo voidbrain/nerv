@@ -145,6 +145,7 @@ export async function runKajiCommand(
       signRecord(root.privateKey, {
         kind: 'main',
         serial: registry.nextSerial(),
+        coordinatorEpoch: registry.nextMainEpoch(),
         baseId: id,
         issued: new Date().toISOString(),
       }),
