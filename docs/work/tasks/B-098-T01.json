@@ -4,7 +4,7 @@
   "parent": "B-098",
   "title": "A dependency install refuses a linked node_modules; the worktree procedure unlinks first",
   "goal": "No install in a worktree can empty the primary checkout’s node_modules",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Test committed failing first: the install guard refuses when node_modules is a symbolic link, naming it",
     "The worktree guidance says to remove the link before npm ci"
@@ -12,9 +12,10 @@
   "dependsOn": [],
   "resources": [
     "package.json",
-    "tools/**",
-    "test/**",
-    "docs/**",
+    "tools/install-deps.mjs",
+    "test/install-deps.test.mjs",
+    "docs/INSTALL.md",
+    "docs/work/tasks/B-098-T01.json",
     "docs/work/records/B-098.md",
     "generated:backlog-views"
   ],
@@ -40,5 +41,10 @@
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 543,
+      "note": "implementation"
+    }
+  ]
 }
