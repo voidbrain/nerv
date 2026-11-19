@@ -25,7 +25,12 @@ const PLAIN_PATH = /^\/[A-Za-z0-9 ._/-]{1,200}$/;
 export function validateJobUser(raw: unknown): EvaJobUser | undefined {
   if (raw === undefined) return undefined;
   const r = raw as { name?: unknown; sharedRoot?: unknown };
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw) || Object.keys(raw).some((k) => k !== 'name' && k !== 'sharedRoot'))
+  if (
+    !raw ||
+    typeof raw !== 'object' ||
+    Array.isArray(raw) ||
+    Object.keys(raw).some((k) => k !== 'name' && k !== 'sharedRoot')
+  )
     throw new Error('Invalid eva.jobUser: {"name": "_nervjob", "sharedRoot": "/Users/Shared/nerv-eva"}.');
   if (typeof r.name !== 'string' || !USER_NAME.test(r.name))
     throw new Error('Invalid eva.jobUser.name: a plain user name such as "_nervjob".');
@@ -65,8 +70,11 @@ function userProcesses(user: EvaJobUser): Promise<number[] | null> {
  */
 export async function endJobUser(user: EvaJobUser): Promise<{ survivors: number[]; tracked: boolean }> {
   await new Promise<void>((done) =>
-    execFile(user.sudoPath ?? '/usr/bin/sudo', ['-n', '-u', user.name, '--', '/bin/kill', '-KILL', '-1'], { timeout: 5000 }, () =>
-      done(),
+    execFile(
+      user.sudoPath ?? '/usr/bin/sudo',
+      ['-n', '-u', user.name, '--', '/bin/kill', '-KILL', '-1'],
+      { timeout: 5000 },
+      () => done(),
     ),
   );
   for (let i = 0; i < 10; i++) {
@@ -94,7 +102,9 @@ export function stageRuntime(
     }
   })();
   const key = createHash('sha256')
-    .update([revision, process.execPath, process.version, readFileSync(join(repoRoot, 'package.json'), 'utf8')].join('\n'))
+    .update(
+      [revision, process.execPath, process.version, readFileSync(join(repoRoot, 'package.json'), 'utf8')].join('\n'),
+    )
     .digest('hex')
     .slice(0, 16);
   const dir = join(user.sharedRoot, 'runtime', key);

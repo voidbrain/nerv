@@ -69,6 +69,7 @@ import {
   rotateCredential,
   setBase,
   setting,
+  setEvaJobUser,
 } from './config.ts';
 import { STAGES, addPilot, describePilots, setPilotFlag, updatePilot, type EvaClass, type Stage } from './pilots.ts';
 import { DEFAULT_UPDATE_SCHEDULE, defaultAutoUpdatePolicy } from './update-policy.ts';
@@ -312,6 +313,18 @@ export async function tryRunCliCommand(
     } else if (sub === 'limits') {
       // F-049-T06: what this machine gives EVA jobs (config.json eva.limits, or the defaults).
       console.log(JSON.stringify(readConfig(home).eva?.limits ?? defaultEvaLimits(), null, 2));
+    } else if (sub === 'job-user') {
+      // B-099-T02: EVA jobs run as a dedicated user once the owner set it up (docs/guides/eva-job-user.md).
+      if (args[1] === 'off') {
+        setEvaJobUser(home, null);
+        console.log('EVA jobs run as you again.');
+      } else if (args[1] && args[2]) {
+        setEvaJobUser(home, { name: args[1], sharedRoot: args[2] });
+        console.log(`EVA jobs run as ${args[1]} in ${args[2]}.`);
+      } else {
+        const u = readConfig(home).eva?.jobUser;
+        console.log(u ? `EVA jobs run as ${u.name} in ${u.sharedRoot}.` : 'EVA jobs run as you (no job user set).');
+      }
     } else if (sub === 'run-tools-03' || sub === 'jobs' || sub === 'reconcile') {
       // F-049-T13: EVA-03 jobs leave a durable receipt and their events on a sortie; an interrupted one is uncertain.
       const store = new Store(databasePath(home), readScrolls(home), { home });
@@ -348,7 +361,13 @@ export async function tryRunCliCommand(
                 key: `eva03:tools-process:${jobId}`,
                 hash: argsHash({ command: 'run-tools-03' }),
                 run: (onLedgerEvent) =>
-                  runToolsProcessInEva03({ jobId, home, repoRoot: resolve(import.meta.dirname, '..'), onLedgerEvent }),
+                  runToolsProcessInEva03({
+                    jobId,
+                    home,
+                    repoRoot: resolve(import.meta.dirname, '..'),
+                    onLedgerEvent,
+                    ...(readConfig(home).eva?.jobUser ? { jobUser: readConfig(home).eva!.jobUser! } : {}),
+                  }),
               }),
             );
             ok = result.exitCode === 0 && !result.timedOut && !result.cancelled;
@@ -364,7 +383,7 @@ export async function tryRunCliCommand(
       }
     } else {
       throw new Error(
-        'Usage: eva classes | eva limits | eva admit <request.json> | eva run-tools-03 | eva jobs | eva reconcile <jobId> <confirmed>',
+        'Usage: eva classes | eva limits | eva job-user [<user> <folder> | off] | eva admit <request.json> | eva run-tools-03 | eva jobs | eva reconcile <jobId> <confirmed>',
       );
     }
   } else if (command === 'credentials') {

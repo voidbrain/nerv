@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 83.5 h agent + 10.5 h owner across 127 open steps of 40 features and 21 other records. 78.5 h of actual effort recorded on 119 steps. Generated from the task files.
+**Remaining effort:** 84 h agent + 10.75 h owner across 129 open steps of 40 features and 21 other records. 78.5 h of actual effort recorded on 119 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1033,9 +1033,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 4 h | — | [F-049-T14](#f-049-t14) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h agent + 0.25 h owner | — | [F-049-T14](#f-049-t14) | 🤖 | — | — |
 
-💻 **→** Next: B-099-T02 — A boundary an EVA-03 job cannot leave: a dedicated job user (Planned).
+💻 **→** Next: B-099-T02 — EVA jobs can run as a dedicated job user; everything it runs ends with the job (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1045,10 +1045,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-099-t02"></a>B-099-T02 — A boundary an EVA-03 job cannot leave: a dedicated job user | 4 h | 0 h | 4 h | Planned | — |
-| 🟡 Medium | **Total** | 5 h | 1.5 h (1 of 2 steps recorded) | 4 h | 1 of 2 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="b-099-t02"></a>B-099-T02 — EVA jobs can run as a dedicated job user; everything it runs ends with the job | 4 h | 0 h | 4 h | Implemented; verification pending | 🤖 | — |
+| 🟢 Small | <a id="b-099-t03"></a>B-099-T03 — Owner setup on NERV-01: the &#95;nervjob user, the shared folder and the sudo rule | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [B-099-T02](#b-099-t02) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="b-099-t04"></a>B-099-T04 — Live check on NERV-01: the escapes the review found leave nothing running | 0.5 h | 0 h | 0.5 h | Planned · waits on [B-099-T03](#b-099-t03) | ⏳ 🤖 | — |
+| 🔴 Large | **Total** | 5.5 h (3 of 4 steps) | 1.5 h (1 of 4 steps recorded) | 4.5 h agent + 0.25 h owner | 1 of 4 completed | | |
 
 <details><summary>Done steps (1)</summary>
 
