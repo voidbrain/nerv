@@ -153,6 +153,19 @@ export async function runKajiCommand(
     console.log(
       `Main base: ${id}. While it is online, the other bases send their cards, reminders and briefs through its Aoba and keep their own bots quiet.`,
     );
+  } else if (sub === 'lease-rearm') {
+    const confirmSole = args.includes('--confirm-sole-coordinator');
+    const ownPub = baseKey(home).publicKey;
+    const enrolledOthers = registry.bases().filter((b) => b.status === 'enrolled' && b.publicKey !== ownPub);
+    const epoch = store.coordinatorFencingState()?.coordinatorEpoch ?? registry.mainEpoch();
+    const applied = store.rearmSoleCoordinatorLease({
+      coordinatorEpoch: epoch,
+      hasEnrolledStandby: enrolledOthers.length > 0,
+      confirmSoleCoordinator: confirmSole,
+    });
+    console.log(
+      `Re-armed sole coordinator lease at epoch ${epoch} until ${new Date(applied.leaseExpiresAt).toISOString()}.`,
+    );
   } else if (sub === 'list' || !sub) {
     const bases = registry.bases();
     if (!config.kaji?.root) console.log('No root pinned yet: key init (main base) or kaji import --root FINGERPRINT.');

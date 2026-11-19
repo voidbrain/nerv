@@ -37,6 +37,14 @@ import {
   assertActiveCoordinator,
   readCoordinatorFencingState,
 } from './coordinator-authority.ts';
+import {
+  applyCoordinatorLease,
+  handleStandbyLeaseRenew,
+  rearmSoleCoordinatorLease,
+  selfFenceCoordinator,
+  type ApplyCoordinatorLeaseInput,
+  type HandleStandbyLeaseRenewInput,
+} from './coordinator-lease.ts';
 import { PromptSampleStore } from './prompt-samples.ts';
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
 import { FPV_BUILDS_SCHEMA, FpvBuildStore } from './fpv-builds.ts';
@@ -652,6 +660,24 @@ export class Store {
   }
   advanceCoordinatorFence(expectedEpoch?: number, nowMs = Date.now()) {
     return advanceCoordinatorFence(this.db, expectedEpoch, nowMs);
+  }
+  handleStandbyLeaseRenew(input: HandleStandbyLeaseRenewInput) {
+    return handleStandbyLeaseRenew(this.db, input);
+  }
+  applyCoordinatorLease(input: ApplyCoordinatorLeaseInput) {
+    return applyCoordinatorLease(this.db, input);
+  }
+  selfFenceCoordinator() {
+    return selfFenceCoordinator(this.db);
+  }
+  rearmSoleCoordinatorLease(input: {
+    coordinatorEpoch: number;
+    hasEnrolledStandby: boolean;
+    confirmSoleCoordinator: boolean;
+    nowMs?: number;
+    nowMonoNs?: bigint;
+  }) {
+    return rearmSoleCoordinatorLease(this.db, input);
   }
   close() {
     this.db.close();
