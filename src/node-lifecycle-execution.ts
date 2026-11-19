@@ -26,6 +26,7 @@ import { READER_ENTRY, type RehearsalReport } from './upgrade-rehearsal.ts';
 import { macServiceHost } from './node-lifecycle-mac.ts';
 import { linuxServiceHost } from './node-lifecycle-linux.ts';
 import { windowsServiceHost } from './node-lifecycle-windows.ts';
+import { transaction } from './sqlite-transaction.ts';
 
 export const SERVICE_LIFECYCLE_PROTOCOL = 1;
 export const SERVICE_READER_SCHEMA = UPGRADE_CONTRACT.readerSchema;
@@ -219,7 +220,10 @@ export function journal(c: ServiceContext, write = false): DatabaseSync | undefi
     throw Error('Unknown lifecycle journal; do not reset ownership.');
   const db = new DatabaseSync(file, { readOnly: !write });
   db.exec('PRAGMA busy_timeout=5000');
-  if (write) db.exec('PRAGMA synchronous=FULL');
+  if (write) {
+    db.exec('PRAGMA synchronous=FULL');
+    db.exec('PRAGMA journal_mode=TRUNCATE');
+  }
   if (created)
     db.exec(
       "CREATE TABLE IF NOT EXISTS operations(digest TEXT PRIMARY KEY,plan TEXT NOT NULL,receipt TEXT NOT NULL);CREATE TABLE IF NOT EXISTS resource(id INTEGER PRIMARY KEY CHECK(id=1),digest TEXT NOT NULL,fence INTEGER NOT NULL,nonce TEXT NOT NULL,pid INTEGER NOT NULL);CREATE TABLE IF NOT EXISTS clock(id INTEGER PRIMARY KEY CHECK(id=1),value INTEGER NOT NULL);INSERT OR IGNORE INTO clock VALUES(1,0);CREATE TABLE IF NOT EXISTS releases(id INTEGER PRIMARY KEY,digest TEXT NOT NULL,reason TEXT NOT NULL,created TEXT NOT NULL);CREATE TRIGGER IF NOT EXISTS operations_no_delete BEFORE DELETE ON operations BEGIN SELECT RAISE(ABORT,'lifecycle history is retained');END;",
@@ -239,6 +243,39 @@ export function journal(c: ServiceContext, write = false): DatabaseSync | undefi
     throw Error('Lifecycle fencing history is missing or rolled back.');
   }
   return db;
+}
+
+function transientJournalError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const e = error as { code?: unknown; errcode?: unknown; message?: unknown };
+  if (typeof e.errcode === 'number') {
+    const base = e.errcode & 0xff;
+    if (base === 5 || base === 10) return true; // SQLITE_BUSY (5) or SQLITE_IOERR (10)
+  }
+  const msg = typeof e.message === 'string' ? e.message : '';
+  return /disk i\/o error|database is locked|database table is locked/i.test(msg);
+}
+
+/**
+ * Run a lifecycle journal transaction, retrying transient SQLite I/O or lock errors
+ * (for example Windows Defender/process-exit contention on journal.sqlite).
+ */
+export function journalTransaction<T>(
+  db: DatabaseSync,
+  work: () => T,
+  options?: { delaysMs?: number[]; sleep?: (ms: number) => void },
+): T {
+  const delays = options?.delaysMs ?? [50, 150, 350, 750, 1500];
+  const sleep = options?.sleep ?? ((ms: number) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms));
+  let attempt = 0;
+  for (;;) {
+    try {
+      return transaction(db, work);
+    } catch (error) {
+      if (!transientJournalError(error) || attempt >= delays.length) throw error;
+      sleep(delays[attempt++]!);
+    }
+  }
 }
 export function stored(db: DatabaseSync | undefined, digest: string): ServiceReceipt | undefined {
   if (!db || !db.prepare("SELECT 1 FROM sqlite_master WHERE name='operations'").get()) return;

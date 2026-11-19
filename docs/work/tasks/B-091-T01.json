@@ -4,7 +4,7 @@
   "id": "B-091-T01",
   "title": "Name the failing journal write in a Windows stop and make the receipt complete",
   "goal": "A Windows fenced stop records its receipt",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "The failing write is named",
     "A committed test fails first if the cause is in code",
@@ -14,9 +14,10 @@
   "resources": [
     "src/node-lifecycle-apply.ts",
     "src/node-lifecycle-execution.ts",
-    "test/**",
+    "test/node-lifecycle-execution.test.ts",
     "docs/work/records/B-091.md",
-    "generated:backlog-views"
+    "docs/work/tasks/B-091-T01.json",
+    "evals/gauntlet/ledger.json"
   ],
   "capabilities": [
     "bounded-edit",
@@ -39,5 +40,10 @@
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 557,
+      "note": "implementation"
+    }
+  ]
 }
