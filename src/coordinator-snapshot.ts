@@ -1,4 +1,4 @@
-import { createHash, sign, verify, type KeyObject } from 'node:crypto';
+import { createHash, sign, type KeyObject } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
 import { canonical } from './kaji.ts';
 import { MAX_BACKUP_BODY } from './kaji-link.ts';
@@ -211,60 +211,4 @@ export function exportCoordinatorSnapshot(input: ExportCoordinatorSnapshotInput)
     totalBytes: payloadBytes.length,
     chunks,
   };
-}
-
-/** Verifies the manifest signature and table digest of an exported snapshot payload. */
-export function verifyCoordinatorSnapshot(payload: CoordinatorSnapshotPayload, publicKey: KeyObject): void {
-  const ok = verify(
-    null,
-    Buffer.from(canonical(payload.manifest), 'utf8'),
-    publicKey,
-    Buffer.from(payload.signature, 'base64'),
-  );
-  if (!ok) {
-    throw new Error('Coordinator snapshot signature verification failed.');
-  }
-  const actualSha256 = sha256Hex(canonical(payload.tables));
-  if (actualSha256 !== payload.manifest.sha256) {
-    throw new Error('Coordinator snapshot digest mismatch.');
-  }
-}
-
-/** Reassembles either a single-frame payload or chunked frames and verifies signature + digest. */
-export function reassembleCoordinatorSnapshot(
-  frames: readonly Buffer[],
-  publicKey: KeyObject,
-): CoordinatorSnapshotPayload {
-  if (frames.length === 0) throw new Error('No snapshot frames provided.');
-  let payload: CoordinatorSnapshotPayload;
-  if (frames.length === 1) {
-    const parsed = JSON.parse(frames[0]!.toString('utf8')) as CoordinatorSnapshotPayload | CoordinatorSnapshotChunk;
-    if ('dataBase64' in parsed) {
-      payload = JSON.parse(Buffer.from(parsed.dataBase64, 'base64').toString('utf8')) as CoordinatorSnapshotPayload;
-    } else {
-      payload = parsed;
-    }
-  } else {
-    const parsedChunks = frames.map((f) => JSON.parse(f.toString('utf8')) as CoordinatorSnapshotChunk);
-    const total = parsedChunks[0]!.totalChunks;
-    const expectedHash = parsedChunks[0]!.snapshotSha256;
-    if (parsedChunks.length !== total) {
-      throw new Error(`Expected ${total} snapshot chunks, received ${parsedChunks.length}.`);
-    }
-    const ordered = [...parsedChunks].sort((a, b) => a.chunkIndex - b.chunkIndex);
-    const buffers: Buffer[] = [];
-    for (let i = 0; i < total; i += 1) {
-      const c = ordered[i]!;
-      if (c.chunkIndex !== i || c.totalChunks !== total || c.snapshotSha256 !== expectedHash) {
-        throw new Error(`Invalid snapshot chunk at index ${i}.`);
-      }
-      buffers.push(Buffer.from(c.dataBase64, 'base64'));
-    }
-    payload = JSON.parse(Buffer.concat(buffers).toString('utf8')) as CoordinatorSnapshotPayload;
-    if (payload.manifest.sha256 !== expectedHash) {
-      throw new Error('Chunked snapshot hash mismatch.');
-    }
-  }
-  verifyCoordinatorSnapshot(payload, publicKey);
-  return payload;
 }

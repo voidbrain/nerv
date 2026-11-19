@@ -1,4 +1,5 @@
 import { Watch, type WatchWork } from './watch.ts';
+import { exportCoordinatorSnapshot, type ExportCoordinatorSnapshotInput } from './coordinator-snapshot.ts';
 import { transaction } from './sqlite-transaction.ts';
 import type { WorkerLease } from './worker-jobs.ts';
 import { credentialAges, readConfig } from './config.ts';
@@ -594,6 +595,9 @@ export class Store {
         .get(),
       policy: { source: this.policySource, ...this.ledger.policy },
     };
+  }
+  exportCoordinatorSnapshot(input: Omit<ExportCoordinatorSnapshotInput, 'db'>) {
+    return exportCoordinatorSnapshot({ ...input, db: this.db });
   }
   close() {
     this.db.close();

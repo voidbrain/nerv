@@ -1,14 +1,57 @@
 import assert from 'node:assert/strict';
-import { generateKeyPairSync } from 'node:crypto';
+import { createHash, generateKeyPairSync, verify, type KeyObject } from 'node:crypto';
 import { describe, it } from 'node:test';
 import {
-  exportCoordinatorSnapshot,
-  reassembleCoordinatorSnapshot,
   REPLICATED_COORDINATOR_TABLES,
-  verifyCoordinatorSnapshot,
+  type CoordinatorSnapshotChunk,
+  type CoordinatorSnapshotPayload,
 } from '../src/coordinator-snapshot.ts';
+import { canonical } from '../src/kaji.ts';
 import { MAX_BACKUP_BODY } from '../src/kaji-link.ts';
 import { Store } from '../src/store.ts';
+
+function verifyCoordinatorSnapshot(payload: CoordinatorSnapshotPayload, publicKey: KeyObject): void {
+  const ok = verify(
+    null,
+    Buffer.from(canonical(payload.manifest), 'utf8'),
+    publicKey,
+    Buffer.from(payload.signature, 'base64'),
+  );
+  if (!ok) {
+    throw new Error('Coordinator snapshot signature verification failed.');
+  }
+  const actualSha256 = createHash('sha256').update(canonical(payload.tables), 'utf8').digest('hex');
+  if (actualSha256 !== payload.manifest.sha256) {
+    throw new Error('Coordinator snapshot digest mismatch.');
+  }
+}
+
+function reassembleCoordinatorSnapshot(frames: readonly Buffer[], publicKey: KeyObject): CoordinatorSnapshotPayload {
+  let payload: CoordinatorSnapshotPayload;
+  if (frames.length === 1) {
+    const parsed = JSON.parse(frames[0]!.toString('utf8')) as CoordinatorSnapshotPayload | CoordinatorSnapshotChunk;
+    payload =
+      'dataBase64' in parsed
+        ? (JSON.parse(Buffer.from(parsed.dataBase64, 'base64').toString('utf8')) as CoordinatorSnapshotPayload)
+        : parsed;
+  } else {
+    const parsedChunks = frames.map((f) => JSON.parse(f.toString('utf8')) as CoordinatorSnapshotChunk);
+    const total = parsedChunks[0]!.totalChunks;
+    const expectedHash = parsedChunks[0]!.snapshotSha256;
+    assert.equal(parsedChunks.length, total);
+    const ordered = [...parsedChunks].sort((a, b) => a.chunkIndex - b.chunkIndex);
+    const buffers = ordered.map((c, i) => {
+      assert.equal(c.chunkIndex, i);
+      assert.equal(c.totalChunks, total);
+      assert.equal(c.snapshotSha256, expectedHash);
+      return Buffer.from(c.dataBase64, 'base64');
+    });
+    payload = JSON.parse(Buffer.concat(buffers).toString('utf8')) as CoordinatorSnapshotPayload;
+    assert.equal(payload.manifest.sha256, expectedHash);
+  }
+  verifyCoordinatorSnapshot(payload, publicKey);
+  return payload;
+}
 
 describe('F-016-T03: signed coordinator state snapshot export', () => {
   it('exports replicated inventory with exact deliveries.rowid, signed by base key, excluding base-local tables and secrets', () => {
@@ -34,8 +77,7 @@ describe('F-016-T03: signed coordinator state snapshot export', () => {
         .run();
       store.db.prepare("INSERT INTO kaji_seen(base_id, last_seen) VALUES ('NERV-02', '2026-11-19T08:00:00Z')").run();
 
-      const exported = exportCoordinatorSnapshot({
-        db: store.db,
+      const exported = store.exportCoordinatorSnapshot({
         root: 'root-fingerprint-test',
         sourceBaseId: 'NERV-01',
         coordinatorEpoch: 3,
@@ -94,8 +136,7 @@ describe('F-016-T03: signed coordinator state snapshot export', () => {
       }
 
       const maxBodyBytes = 1024;
-      const exported = exportCoordinatorSnapshot({
-        db: store.db,
+      const exported = store.exportCoordinatorSnapshot({
         root: 'root-fingerprint-test',
         sourceBaseId: 'NERV-01',
         coordinatorEpoch: 1,
