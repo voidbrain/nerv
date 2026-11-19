@@ -613,7 +613,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-049-t05"></a>F-049-T05 — Escape and timeout gate tests on the EVA-03 runner | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | 🤖 | — |
+| 🟡 Medium | <a id="f-049-t05"></a>F-049-T05 — Escape and timeout gate tests on the EVA-03 runner | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | 🤖 | [PR #549](https://github.com/voidbrain/nerv/pull/549) gate tests; CI pending |
 | 🟢 Small | <a id="f-049-t06"></a>F-049-T06 — Concurrent instances within per-machine limits | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-049-t07"></a>F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T05](#f-049-t05), [F-049-T06](#f-049-t06) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-049-t08"></a>F-049-T08 — Pilot trust stage caps the class | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T07](#f-049-t07) | ⏳ 🤖 | — |
@@ -643,7 +643,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Depends on | [F-045](archive/backlog-2026.md#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](archive/backlog-2026.md#f-025) — Pilot trust-stage limits for sandbox class admission |
-| PR / evidence | Steps: F-049-T04: [PR #474](https://github.com/voidbrain/nerv/pull/474) implementation. [PR #474](https://github.com/voidbrain/nerv/pull/474) (merged; CI green); [PR #365](https://github.com/voidbrain/nerv/pull/365) F-049-T01 deterministic EVA runner contract and threat model; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
+| PR / evidence | Steps: F-049-T04: [PR #474](https://github.com/voidbrain/nerv/pull/474) implementation · F-049-T05: [PR #549](https://github.com/voidbrain/nerv/pull/549) gate tests; CI pending. [PR #474](https://github.com/voidbrain/nerv/pull/474) (merged; CI green); [PR #365](https://github.com/voidbrain/nerv/pull/365) F-049-T01 deterministic EVA runner contract and threat model; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-18: F-049-T04 verified: [PR #474](https://github.com/voidbrain/nerv/pull/474) merged on green CI. 2026-11-13 F-049-T01: `npm run work:build && npm run backlog:recap && npm run roadmap:status` and `npm run check:fast` passed; contract/architecture documentation only, no runtime confinement claimed. |
 | Reviewed | 2026-11-18 |
@@ -1764,10 +1764,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-099-t01"></a>B-099-T01 — Kill every process an EVA-03 job started at timeout, cancellation and exit | 1 h | 0 h | 1 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-099-t01"></a>B-099-T01 — Kill every process an EVA-03 job started at timeout, cancellation and exit | 1 h | 0 h | 1 h | Implemented; verification pending | [PR #549](https://github.com/voidbrain/nerv/pull/549) the fix; CI pending |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1776,7 +1776,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Found in F-049-T05 |
+| PR / evidence | Steps: B-099-T01: [PR #549](https://github.com/voidbrain/nerv/pull/549) the fix; CI pending. Found in F-049-T05; [PR #549](https://github.com/voidbrain/nerv/pull/549) B-099-T01 (`test/eva-gate.test.ts`) |
 | Opened | 2026-11-19 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |

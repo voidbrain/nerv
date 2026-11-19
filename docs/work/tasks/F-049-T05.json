@@ -51,5 +51,11 @@
     "agentHours": 1.5,
     "baselineAgentHours": 2.25,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 549,
+      "note": "gate tests; CI pending"
+    }
+  ]
 }
