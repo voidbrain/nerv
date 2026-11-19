@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T03",
-  "status": "planned",
+  "status": "implemented",
   "title": "Step 2a — Signed coordinator state snapshot export",
   "goal": "main exports the replicated coordinator tables as a signed, size-bounded snapshot",
   "capabilities": [
@@ -20,12 +20,11 @@
     "F-016-T12"
   ],
   "resources": [
-    "src/**",
-    "shared/**",
-    "test/**",
-    "docs/**",
-    "generated:backlog-views",
-    "contract:coordinator-authority"
+    "src/coordinator-snapshot.ts",
+    "test/coordinator-snapshot.test.ts",
+    "docs/work/tasks/F-016-T03.json",
+    "docs/work/records/F-016.md",
+    "generated:backlog-views"
   ],
   "validation": [
     "Directed regressions or recorded evidence for this slice; final required CI"
@@ -43,5 +42,11 @@
     "agentHours": 1.5,
     "baselineAgentHours": 2.25,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 546,
+      "note": "implementation"
+    }
+  ]
 }
