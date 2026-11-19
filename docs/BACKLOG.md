@@ -29,7 +29,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 80.5 h agent + 10.25 h owner across 137 open steps of 40 features and 18 other records. 48.5 h of actual effort recorded on 93 steps. Generated from the task files.
+**Remaining effort:** 79 h agent + 10.25 h owner across 136 open steps of 40 features and 18 other records. 50 h of actual effort recorded on 96 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2050,9 +2050,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-108-T01 — Flow header shows only the sortie code; cage status on its own line (Ready).
+💻 **→** Next: F-108-T01 — Flow header shows only the sortie code; cage status on its own line (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2064,8 +2064,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-108-t01"></a>F-108-T01 — Flow header shows only the sortie code; cage status on its own line | 0.5 h | 0 h | 0.5 h | Ready |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+| 🟢 Small | <a id="f-108-t01"></a>F-108-T01 — Flow header shows only the sortie code; cage status on its own line | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2074,9 +2074,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in PR #531 |
+| PR / evidence | [PR #533](https://github.com/voidbrain/nerv/pull/533) (`test/dashboard.test.ts`); opened in PR #531 |
 | Opened | 2026-11-18 |
-| Verification | Pending. |
+| Verification | 2026-11-19: Unit: dashboard suite 38 pass. Owner live check pending. |
 | Reviewed | 2026-11-18 |
 
 </details>
@@ -2471,7 +2471,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: B-095-T01 — Midori keeps its blue node; only its status dot and label change colour (Implemented; verification pending).
 
@@ -2486,8 +2486,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
 | 🟢 Small | <a id="b-095-t01"></a>B-095-T01 — Midori keeps its blue node; only its status dot and label change colour | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | <a id="b-095-t02"></a>B-095-T02 — Rerun the two expensive system cases at this source | 0.25 h | 0 h | 0.25 h | Ready |
-| 🟢 Small | **Total** | 0.75 h | 0.5 h (1 of 2 steps recorded) | 0.25 h | 0 of 2 completed |
+| 🟢 Small | **Total** | 0.75 h | 0.75 h | 0 h | 1 of 2 completed |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="b-095-t02"></a>B-095-T02 — Rerun the two expensive system cases at this source | 0.25 h | 0.25 h (stated) | Completed |
+
+</details>
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2510,9 +2517,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-096-T01 — Draw the apartment → Debrief route for a sortie that ends at the owner's decision (Ready).
+💻 **→** Next: B-096-T01 — Draw the apartment → Debrief route for a sortie that ends at the owner's decision (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2524,8 +2531,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-096-t01"></a>B-096-T01 — Draw the apartment → Debrief route for a sortie that ends at the owner's decision | 0.75 h | 0 h | 0.75 h | Ready |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed |
+| 🟢 Small | <a id="b-096-t01"></a>B-096-T01 — Draw the apartment → Debrief route for a sortie that ends at the owner's decision | 0.75 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.75 h | 0.75 h | 0 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2534,9 +2541,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in PR #531 |
+| PR / evidence | [PR #533](https://github.com/voidbrain/nerv/pull/533) (`test/dashboard.test.ts`); opened in PR #531 |
 | Opened | 2026-11-18 |
-| Verification | Pending. |
+| Verification | 2026-11-19: Unit: dashboard suite 38 pass. Owner live check pending. |
 | Reviewed | 2026-11-18 |
 
 </details>

@@ -593,11 +593,18 @@ test('an answer without an action: Misato passed, a green route straight to Debr
     'B-021 (changed on purpose): a pending question also means Misato planned',
   );
   assert.match(js, /\["plan","debrief","answer"\]/);
-  assert.match(
-    js,
-    /const edges = EDGES\.filter\(e => e\[2\] === "relay" \? !!\(s && s\.forwarded\) : e\[2\] !== "answer" \|\| \(s && !s\.actions\.length && !s\.forwarded\)\);/,
-    'drawn only for an answer-only sortie (F-051 slice 2 added the relay route)',
-  );
+  // Same requirement, read through edgeShown since B-096 moved the route filter there.
+  assert.match(js, /const edges = EDGES\.filter\(e => edgeShown\(s, e\)\);/);
+  const shownAt = js.indexOf('function edgeShown(');
+  const shown = new Function(js.slice(shownAt, js.indexOf('\n}\n', shownAt) + 2) + '\nreturn edgeShown;')() as (
+    s: unknown,
+    e: unknown,
+  ) => boolean;
+  const answer = ['plan', 'debrief', 'answer'];
+  assert.equal(shown({ actions: [] }, answer), true, 'drawn only for an answer-only sortie');
+  assert.equal(shown({ actions: [{ status: 'done' }] }, answer), false, 'not with an action');
+  assert.equal(shown({ actions: [], forwarded: 'Tabgha' }, answer), false, 'not for a forwarded sortie (F-051 relay)');
+  assert.equal(shown({ actions: [], forwarded: 'Tabgha' }, ['detect', 'debrief', 'relay']), true, 'the relay instead');
   assert.doesNotMatch(
     js,
     /function liveEdges\(/,
@@ -944,7 +951,7 @@ test('B-040: an active planning step alone never renders a continuously communic
     'EDGES',
     'nodeEl',
     'passedEdge',
-    `${take('liveEdges')}\n${take('drawEdges')}\nreturn drawEdges;`,
+    `${take('liveEdges')}\n${take('edgeShown')}\n${take('drawEdges')}\nreturn drawEdges;`,
   )(
     document,
     () => true,
@@ -1392,4 +1399,60 @@ test('B-065: revoked bases are excluded from BASES on the map and listed apart f
   assert.match(revokedHtml, /MAC-ACCEPTANCE/);
   assert.match(revokedHtml, /REVOKED/);
   assert.doesNotMatch(revokedHtml, /Telegram ·/, 'revoked cards omit live channel/heartbeat lines');
+});
+test('a sortie whose action the owner declined draws its route from Misato apartment to Debrief (B-096)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const fn = (name: string) => {
+    const i = src.indexOf('function ' + name + '(');
+    return src.slice(i, src.indexOf('\n}\n', i) + 2);
+  };
+  const edgesSrc = src.slice(src.indexOf('const EDGES = ['), src.indexOf('];', src.indexOf('const EDGES = [')) + 2);
+  const api = new Function(
+    `${edgesSrc}\n${fn('stepState')}\n${fn('passedEdge')}\n${fn('edgeShown')}\nreturn { EDGES, passedEdge, edgeShown };`,
+  )() as {
+    EDGES: [string, string, string?][];
+    passedEdge: (s: unknown, e: unknown) => string;
+    edgeShown: (s: unknown, e: unknown) => boolean;
+  };
+  const declined = api.EDGES.find((e) => e[0] === 'apt' && e[1] === 'debrief');
+  assert.ok(declined, 'an apartment → Debrief route exists');
+  const done = {
+    detect: true,
+    intake: true,
+    route: true,
+    plan: true,
+    magi: true,
+    sync: true,
+    apt: true,
+    debrief: true,
+  };
+  const rejected = {
+    status: 'done',
+    phase: 'debrief',
+    done,
+    actions: [{ status: 'rejected', ballot: { outcome: 'approval' } }],
+  };
+  assert.equal(api.edgeShown(rejected, declined), true, 'drawn when no action ran');
+  assert.equal(api.passedEdge(rejected, declined), 'passed owner', 'in the owner decision colour');
+  const ran = {
+    ...rejected,
+    done: { ...done, plug: true, eva: true },
+    actions: [{ status: 'done', ballot: { outcome: 'approval' } }],
+  };
+  assert.equal(api.edgeShown(ran, declined), false, 'not drawn when the action ran through the plug');
+  const plain = { status: 'done', phase: 'debrief', done, actions: [] };
+  assert.equal(api.edgeShown(plain, declined), false, 'not drawn for an answer with no action');
+});
+test('the flow header names the sortie by its code only; every EVA cage shows its status on its own line (F-108)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const line = src.split('\n').find((l) => l.includes('getElementById("flow-sub").textContent'))!;
+  const el = { textContent: '' };
+  new Function('document', 's', line)({ getElementById: () => el }, { id: 'S-6E26', title: 'Remind me at 9' });
+  assert.equal(el.textContent, 'S-6E26');
+  const html = readFileSync('web/public/dashboard/index.html', 'utf8');
+  const rule = /\.cage \.ch \{([^}]*)\}/.exec(html)![1]!;
+  assert.match(rule, /flex-direction:\s*column/, 'name and status stack in every cage');
+  assert.doesNotMatch(rule, /flex-wrap:\s*wrap/, 'no width-dependent wrapping');
 });
