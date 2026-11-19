@@ -487,3 +487,9 @@ PRs #541–#545 merged with green CI (#545 after Windows reruns: B-066 worker-li
 ## 2026-11-19 — main `3cc599a`
 
 PRs #546 and #547 merged with green CI (#546 after a Windows rerun, B-066 worker-link). F-021-T03 closed. F-016-T03 stays for its open follow-up PR #548, which edits the same record. B-099 opened (EVA-03 orphan escape) and implemented; F-049-T05 narrowed and implemented, F-049-T13 opened.
+
+## 2026-11-19 — main `f7e7a43f`
+
+PRs #548 and #549 merged with green CI. F-016-T03 (#546) and F-016-T13 (#548) are left to the open F-016-T14 work, which holds that record; F-049-T05 and B-099-T01 closed. F-049-T06 implemented.
+
+#549 had a fresh-context review: EVA-03 process containment is best effort; B-099-T02 for a dedicated job user. An earlier #549 run failed `test/evaluation.browser.mjs` once (axe `color-contrast` on the waiting flow, a surface #549 does not touch); it passed on the next push. A second occurrence opens a B- record.

@@ -4,7 +4,7 @@
   "parent": "B-099",
   "title": "Kill every process an EVA-03 job started at timeout, cancellation and exit",
   "goal": "No process started by an EVA-03 job survives its timeout, cancellation or exit, including one in its own session",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Test committed failing first: a job's child in its own session (detached, setsid) is gone after timeout and after cancellation",
     "The runner tracks the job's descendants while it runs, kills every one at the end, verifies none survive, and records a survivor as an uncertain effect instead of claiming a clean end"
@@ -36,16 +36,18 @@
   "effort": {
     "size": "small",
     "estimate": "1 h",
-    "basis": "Estimated 2026-11-19 after the probe (two child processes, timeout and cancel). Not a measurement. Review of PR #549 (2026-11-19) fixed in the same PR; containment stated as best effort.",
+    "basis": "Estimated 2026-11-19 after the probe (two child processes, timeout and cancel). Not a measurement. Review of PR #549 (2026-11-19) fixed in the same PR; containment stated as best effort. Closed 2026-11-19: PR #549, CI run 44532892249 passed every job on the first attempt; actual about 1.5 h (stated).",
     "reviewed": "2026-11-19",
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
   },
   "prs": [
     {
       "pr": 549,
-      "note": "the fix; CI pending"
+      "note": "the fix; CI green"
     }
   ]
 }
