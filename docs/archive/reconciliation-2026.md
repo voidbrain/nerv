@@ -2,7 +2,7 @@
 
 ## 2026-11-19 — main `64db43a`
 
-PRs #558, #559, #561, #562, and #564 merged on green CI (#558: F-049-T07 / F-049-T14; #559: B-101; #561: F-083-T06; #562: F-106-T01; #564: F-016-T05). Marked F-049-T07, F-083-T06, F-106-T01, and F-016-T05 verified, unblocking F-016-T06 and F-106-T03.
+PRs #558, #559, #561, #562, and #564 merged on green CI (#558: F-049-T07 / F-049-T14; #559: B-101; #561: F-083-T06; #562: F-106-T01; #564: F-016-T05). Marked F-049-T07, F-083-T06, F-106-T01, and F-016-T05 verified, unblocking F-016-T06 and F-106-T03. Reconciled in PR #565.
 
 ## 2026-11-18 — main `3b02485`
 
