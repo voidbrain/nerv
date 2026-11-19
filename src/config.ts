@@ -21,6 +21,7 @@ import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
 import { validateAutoUpdatePolicy, type AutoUpdatePolicy } from './update-policy.ts';
 import { validateSeatPool, type SeatPoolEntry } from './seat-pool.ts';
 import { validateOperatorConfig, type OperatorConfig } from './operator-directory.ts';
+import { validateEvaLimits, type EvaLimits } from './eva-pool.ts';
 import { validateBackup, type BackupConfig } from './offhost.ts';
 import { validatePersonas, type PersonaConfig } from './persona.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
@@ -41,6 +42,8 @@ export interface Config {
   updatePolicy?: AutoUpdatePolicy;
   seats?: SeatPoolEntry[];
   operator?: OperatorConfig;
+  /** F-049-T06: how many EVA instances, how much memory and how many model slots this machine gives EVA jobs. */
+  eva?: { limits: EvaLimits };
   backup?: BackupConfig;
   personas?: PersonaConfig;
 }
@@ -210,6 +213,12 @@ export function readConfig(home: string): Config {
   }
   if ('operator' in raw) {
     config.operator = validateOperatorConfig((raw as Record<string, unknown>).operator);
+  }
+  if ('eva' in raw) {
+    const e = (raw as Record<string, unknown>).eva;
+    if (!e || typeof e !== 'object' || Array.isArray(e) || Object.keys(e).some((k) => k !== 'limits'))
+      throw new Error('Invalid eva: {"limits": {...}}.');
+    config.eva = { limits: validateEvaLimits((e as Record<string, unknown>).limits) };
   }
   if (config.port === (config.nativePort ?? 4319)) throw new Error('Web and native ports must differ.');
   if (!Number.isInteger(config.port) || config.port < 1 || config.port > 65535)
