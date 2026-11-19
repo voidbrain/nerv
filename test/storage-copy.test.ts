@@ -71,3 +71,65 @@ describe('F-088-T02 storage base card copy rule', () => {
     assert.equal(existsSync(join(archiveRoot, 'note.txt')), false);
   });
 });
+
+describe('F-088-T03 copy report and resuming a partial copy', () => {
+  const setup = () => {
+    const card = makeDir('nerv-card-');
+    const archive = makeDir('nerv-archive-');
+    mkdirSync(join(card, 'DCIM'), { recursive: true });
+    writeFileSync(join(card, 'DCIM', 'a.jpg'), 'image-a');
+    writeFileSync(join(card, 'DCIM', 'b.jpg'), 'image-b');
+    writeFileSync(join(card, 'DCIM', 'c.jpg'), 'image-c');
+    const rules: CopyRule[] = [{ label: 'CAM_01', sourceSubdir: 'DCIM', destinationDir: archive, approved: true }];
+    return { card, archive, rules };
+  };
+
+  it('a copy cut off mid-file leaves no partial file under its name, is reported as interrupted, and resumes next insert', () => {
+    const { card, archive, rules } = setup();
+    // The card is pulled while b.jpg is being copied: the copy dies after writing part of it.
+    let calls = 0;
+    const pulled = (src: string, dst: string) => {
+      calls++;
+      if (calls === 2) {
+        writeFileSync(dst, 'ima');
+        throw Object.assign(new Error('EIO: card removed'), { code: 'EIO' });
+      }
+      writeFileSync(dst, readFileSync(src));
+    };
+    const first = runCardCopyRule(card, 'CAM_01', rules, { copyFile: pulled });
+    assert.deepEqual(first.copied, ['a.jpg']);
+    assert.deepEqual(first.interrupted, ['b.jpg', 'c.jpg']);
+    assert.deepEqual(first.conflicts, []);
+    assert.equal(first.verified, false);
+    assert.equal(existsSync(join(archive, 'b.jpg')), false, 'never a partial file under its real name');
+    assert.match(first.summary, /Copied 1, skipped 0, interrupted 2 \(they resume on the next insert\), conflicts 0\./);
+
+    const second = runCardCopyRule(card, 'CAM_01', rules);
+    assert.deepEqual(second.copied, ['b.jpg', 'c.jpg'], 'the next insert resumes');
+    assert.deepEqual(second.skipped, ['a.jpg']);
+    assert.deepEqual(second.conflicts, []);
+    assert.equal(second.verified, true);
+    assert.equal(readFileSync(join(archive, 'b.jpg'), 'utf8'), 'image-b');
+    assert.equal(existsSync(join(archive, 'b.jpg.nerv-partial')), false, 'the leftover partial file is gone');
+  });
+
+  it('the report names copied, skipped and conflicting files in one line the owner can read', () => {
+    const { card, archive, rules } = setup();
+    writeFileSync(join(archive, 'c.jpg'), 'a different picture');
+    const r = runCardCopyRule(card, 'CAM_01', rules);
+    assert.deepEqual(r.conflicts, [{ path: 'c.jpg', reason: 'Destination file exists with different content' }]);
+    assert.equal(
+      r.summary,
+      'CAM_01: Copied 2, skipped 0, interrupted 0, conflicts 1 (c.jpg: Destination file exists with different content).',
+    );
+    assert.equal(
+      readFileSync(join(archive, 'c.jpg'), 'utf8'),
+      'a different picture',
+      'a conflict is never overwritten',
+    );
+    assert.equal(
+      runCardCopyRule(card, 'NOPE', rules).summary,
+      'NOPE: no approved copy rule for this card; nothing copied.',
+    );
+  });
+});
