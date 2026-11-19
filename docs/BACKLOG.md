@@ -1764,10 +1764,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-101-t01"></a>B-101-T01 — The dashboard names why the base is degraded, and calls a model down only when one is | 0.5 h | 0 h | 0.5 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-101-t01"></a>B-101-T01 — The dashboard names why the base is degraded, and calls a model down only when one is | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [PR #559](https://github.com/voidbrain/nerv/pull/559) the fix; CI pending |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1776,7 +1776,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report, NERV-01 dashboard, 2026-11-19 |
+| PR / evidence | Steps: B-101-T01: [PR #559](https://github.com/voidbrain/nerv/pull/559) the fix; CI pending. Owner report, NERV-01 dashboard, 2026-11-19; [PR #559](https://github.com/voidbrain/nerv/pull/559) B-101-T01 (`test/degraded-banner.test.mjs`) |
 | Opened | 2026-11-19 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |

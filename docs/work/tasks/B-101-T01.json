@@ -40,5 +40,10 @@
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 559,
+      "note": "the fix; CI pending"
+    }
+  ]
 }
