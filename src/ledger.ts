@@ -644,6 +644,7 @@ export class Ledger {
     return (this._queries ??= new LedgerQueries({
       db: this.db,
       events: (sortieId, after, limit) => this.events(sortieId, after, limit),
+      remoteResults: (sortieId) => this.remoteResults(sortieId),
     }));
   }
   sorties(limit = 20, before?: string, q?: string): SortieSummary[] {
@@ -670,6 +671,14 @@ export class Ledger {
   /** B-011: another base's outcome for an action this sortie sent it, kept with the sortie (also after it closed). */
   remoteResult(sortieId: string, payload: EventPayloads['kaji.result'], now = new Date()): void {
     this.tx(() => this.event(sortieId, null, 'kaji.result', payload, now));
+  }
+  /** B-094: the plain-words results other bases sent for this sortie, oldest first (at most five). */
+  remoteResults(sortieId: string): string[] {
+    return (
+      this.db
+        .prepare("SELECT payload FROM events WHERE sortie_id=? AND kind='kaji.result' ORDER BY sequence LIMIT 5")
+        .all(sortieId) as { payload: string }[]
+    ).map((r) => (JSON.parse(r.payload) as { text: string }).text);
   }
   /** F-045: requests since `since` that no pilot fitted, for one domain, and the state of a pilots.create proposal for it. */
   unmatched(

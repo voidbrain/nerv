@@ -238,6 +238,8 @@ process.on('message', (value: unknown) => {
           );
         return params.status ? store.ledger.close(id, params.status as 'done' | 'failed') : false;
       }
+      case 'sorties.remoteResults':
+        return store.ledger.remoteResults(params.sortieId as string);
       case 'sorties.timings':
         return store.timingSummary(params.since as string);
       case 'misato.note':

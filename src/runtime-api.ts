@@ -23,6 +23,10 @@ export interface ExternalTools {
   suspended: { name: string; why: string }[];
 }
 
+/** B-094: Misato's reply after a kaji.run, with the results other bases already sent for that sortie; unchanged when none arrived. */
+export function withRemoteResults(reply: string, results: string[]): string {
+  return results.length ? `${reply}\n\n${results.join('\n')}` : reply;
+}
 /** What the owner reads when another base answered a kaji.run (F-036 slice 3b). */
 export function remoteOutcomeText(
   base: string,

@@ -63,18 +63,20 @@ let serial = 0;
 const rec = (body: Omit<RegistryBody, 'serial' | 'issued'>) =>
   signRecord(root.privateKey, { ...body, serial: ++serial, issued: new Date().toISOString() } as RegistryBody);
 /** A fake local model: Misato follows a script and its system prompt is kept; Casper always approves. */
-async function fakeModel(script: string[]) {
+async function fakeModel(script: (string | (() => Promise<string>))[]) {
   const systems: string[] = [];
   const casperPrompts: string[] = [];
   const s = httpServer((req, res) => {
     let raw = '';
     req
       .on('data', (c) => (raw += c))
-      .on('end', () => {
+      .on('end', async () => {
         const r = JSON.parse(raw) as { messages: { content: string }[] };
         const casper = r.messages[0]!.content.startsWith('You are Casper');
         if (!casper) systems.push(r.messages[0]!.content);
         else casperPrompts.push(r.messages.at(-1)!.content);
+        const next = casper ? undefined : script.shift();
+        const content = typeof next === 'function' ? await next() : next;
         res.setHeader('content-type', 'application/json');
         res.end(
           JSON.stringify({
@@ -83,7 +85,7 @@ async function fakeModel(script: string[]) {
                 message: {
                   content: casper
                     ? '{"vote":"approve","reason":"Matches.","confidence":0.9}'
-                    : (script.shift() ?? '{"reply":"ok"}'),
+                    : (content ?? '{"reply":"ok"}'),
                 },
                 finish_reason: 'stop',
               },
@@ -391,4 +393,100 @@ test('B-094: kaji.run to a revoked base says it is revoked, not offline', { time
   assert.equal(step.outcome, 'invalid');
   assert.match(step.error!, /NERV-03 \(Calvary\) is revoked/);
   assert.doesNotMatch(step.error!, /online/i);
+});
+test("B-094: a kaji.result recorded before Misato's final reply is in that reply", { timeout: 60000 }, async (t) => {
+  const { Runtime } = await import('../src/runtime.ts');
+  const A = keys(),
+    B = keys();
+  const reserved = await reservePorts(2);
+  const [pa, pb] = reserved.ports;
+  t.after(() => reserved.release());
+  let sortieId = '';
+  const resultRecorded = async () => !!sortieId && (await a.events(sortieId)).some((e) => e.kind === 'kaji.result');
+  const model = await fakeModel([
+    '{"action":{"tool":"kaji.run","args":{"base":"NERV-02","tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T09:00:00Z"}}}}',
+    // As in the live trace: the worker answers while Misato is still writing her reply.
+    async () => {
+      await until(resultRecorded, () => 'no kaji.result recorded');
+      return '{"reply":"Sent to Tabgha; the result follows."}';
+    },
+  ]);
+  const ha = mkdtempSync(join(tmpdir(), 'nerv-run-a-')),
+    hb = mkdtempSync(join(tmpdir(), 'nerv-run-b-'));
+  writeFileSync(
+    join(ha, 'config.json'),
+    JSON.stringify({
+      base: { id: 'NERV-01', name: 'Neo Tokyo-3' },
+      kaji: { root: root.publicKey },
+      models: { local: { baseUrl: model.url, model: 'm' } },
+    }),
+  );
+  writeFileSync(
+    join(hb, 'config.json'),
+    JSON.stringify({
+      base: { id: 'NERV-02', name: 'Tabgha' },
+      kaji: { root: root.publicKey, offers: ['reminders.add'] },
+    }),
+  );
+  const records = [
+    rec({ kind: 'enrol', baseId: 'NERV-01', name: 'Neo Tokyo-3', publicKey: A.publicKey, address: `127.0.0.1:${pa}` }),
+    rec({ kind: 'enrol', baseId: 'NERV-02', name: 'Tabgha', publicKey: B.publicKey, address: `127.0.0.1:${pb}` }),
+    rec({ kind: 'main', baseId: 'NERV-01' }),
+  ];
+  const a = new Runtime(join(ha, 'nerv.sqlite'), undefined, ha);
+  const b = new Runtime(join(hb, 'nerv.sqlite'), undefined, hb);
+  const links: KajiLink[] = [];
+  const logs: string[] = [];
+  const follow: ChatReply[] = [];
+  a.onResumed((r) => follow.push(r));
+  const describe = async () => ({ offers: await a.remoteOffers(), follow, logs: logs.slice(-20) });
+  try {
+    await a.ready();
+    await b.ready();
+    await a.kaji.add(records);
+    await b.kaji.add(records);
+    a.setBaseKey(A.publicKey);
+    b.setBaseKey(B.publicKey);
+    const la = new KajiLink({
+      worker: a.worker,
+      baseId: 'NERV-01',
+      key: A.privateKey,
+      publicKey: A.publicKey,
+      registry: a.kaji,
+      log: (l) => logs.push('NERV-01 ' + l),
+      onOffers: (id, offered) => a.notePeerOffers(id, offered),
+    });
+    const lb = new KajiLink({
+      worker: b.worker,
+      baseId: 'NERV-02',
+      key: B.privateKey,
+      publicKey: B.publicKey,
+      registry: b.kaji,
+      log: (l) => logs.push('NERV-02 ' + l),
+      offers: () => ['reminders.add'],
+    });
+    links.push(la, lb);
+    await reserved.release();
+    await Promise.all([la.start(200), lb.start(200)]);
+    a.startResumer(100);
+    await until(async () => (await a.remoteOffers()).length === 1, describe);
+    await until(() => logs.some((l) => l.includes('Worker connected: NERV-02')), describe);
+    const chat = await a.chat('Remind me on Tabgha to stretch');
+    sortieId = chat.sortieId;
+    assert.equal(chat.waiting[0]?.tool, 'kaji.run', JSON.stringify(chat));
+    a.startOutbox((base, item, dispatching) => la.run(base, item, 5000, dispatching), 100);
+    await a.decide(chat.waiting[0]!.approvalId, 'approve', 'api');
+    await until(() => follow.some((f) => f.sortieId === sortieId && f.reply?.startsWith('Sent to Tabgha')), describe);
+    const reply = follow.find((f) => f.sortieId === sortieId && f.reply?.startsWith('Sent to Tabgha'))!.reply!;
+    assert.equal(reply, 'Sent to Tabgha; the result follows.\n\nTabgha ran reminders.add (“Stretch”).');
+    const replied = (await a.events(sortieId)).filter((e) => e.kind === 'misato.reply').at(-1);
+    assert.match(JSON.stringify(replied?.payload), /Tabgha ran reminders\.add/, 'the recorded reply carries it too');
+  } finally {
+    for (const l of links) await l.stop();
+    await a.close();
+    await b.close();
+    await model.close();
+    rmSync(ha, { recursive: true, force: true });
+    rmSync(hb, { recursive: true, force: true });
+  }
 });

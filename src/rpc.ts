@@ -110,6 +110,7 @@ export const communicationGraph = [
       'sorties.spear',
       'sorties.open',
       'sorties.finish',
+      'sorties.remoteResults',
       'actions.preview',
       'actions.act',
       'misato.note',

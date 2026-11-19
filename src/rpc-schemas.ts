@@ -428,6 +428,12 @@ export const methodSchemas = {
     },
     additionalProperties: false,
   },
+  'sorties.remoteResults': {
+    type: 'object',
+    required: ['sortieId'],
+    properties: { sortieId: { type: 'string', minLength: 1, maxLength: 100 } },
+    additionalProperties: false,
+  },
   'sorties.finish': {
     type: 'object',
     required: ['sortieId'],
