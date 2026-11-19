@@ -4,14 +4,13 @@
   "parent": "F-049",
   "title": "Escape and timeout gate tests on the EVA-03 runner",
   "goal": "Gate tests 1–5 of the T01 contract on the EVA-03 runner, each proved to fail on an unconfined runner",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Filesystem escape (NERV state, keys, $HOME, writes outside the workspace, symlink and hardlink traversal), network egress (TCP, UDP, DNS, loopback port probe), credential denial (environment, Keychain), grader tampering (read hidden grader data, write grader outputs), timeout and cancellation (no surviving process, including one in its own session; explicit timed_out/cancelled event)",
     "Each confinement test also runs against a fixture sandbox-exec that drops the profile and shows the breach there"
   ],
   "dependsOn": [
-    "F-049-T04",
-    "B-099-T01"
+    "F-049-T04"
   ],
   "resources": [
     "src/eva-runner.ts",
@@ -24,7 +23,9 @@
     "docs/work/records/B-099.md",
     "docs/work/tasks/B-099-T01.json",
     "docs/work/tasks/F-049-T13.json",
-    "docs/work/layout.json"
+    "docs/work/layout.json",
+    "generated:backlog-views",
+    "evals/gauntlet/ledger.json"
   ],
   "capabilities": [
     "bounded-edit",
