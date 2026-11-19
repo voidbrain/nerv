@@ -13,10 +13,17 @@
     "B-094-T02"
   ],
   "resources": [
-    "src/**",
-    "test/**",
+    "src/runtime-planning.ts",
+    "src/runtime-api.ts",
+    "src/rpc.ts",
+    "src/rpc-schemas.ts",
+    "src/nervous-process.ts",
+    "src/ledger.ts",
+    "src/ledger-queries.ts",
+    "test/kaji-run.test.ts",
+    "test/remote-outcome-text.test.ts",
     "docs/work/records/B-094.md",
-    "generated:backlog-views"
+    "docs/work/tasks/B-094-T03.json"
   ],
   "capabilities": [
     "bounded-edit",
