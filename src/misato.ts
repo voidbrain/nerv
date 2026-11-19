@@ -434,6 +434,68 @@ export function matchExistingReminders<T extends { title: string; due: string }>
   scored.sort((a, b) => b.score - a.score || a.item.due.localeCompare(b.item.due));
   return scored.slice(0, limit).map((s) => s.item);
 }
+export type ToolDomain = 'fpv' | 'pantry' | 'gmail' | 'batteries' | 'fleet';
+
+const DOMAIN_INTENT_PATTERNS: Record<ToolDomain, RegExp> = {
+  fpv: /\b(fpv|drone|droni|quad|blackbox|bbl|fc|esc|vtx|rx|tx|betaflight|inav|elrs|pid|gyro|wiring|cablaggio|sald|elica|eliche|prop|props|motore|motori|motor|motors|frame|telaio)\b/i,
+  pantry:
+    /\b(pantry|dispensa|scad|scadenza|scadut[oaie]|comprato|comprata|acquist|spesa|supermercato|frigo|fridge|expir|expired|expiry|shelf|shelf[- ]life|latte|milk|uova|eggs|yogurt|ingredient|ricett|recipe|cucin)\b/i,
+  gmail:
+    /\b(gmail|email|e-mail|mail|posta|inbox|messagg[io]\s+di\s+posta|ricevut[oae]|spedizion|ordine|fattura|invoice|newsletter)\b/i,
+  batteries:
+    /\b(batter[iy]|batteri[ae]|lipo|li-ion|liion|celle|cell|voltag|tension|storage|scarica|ricarica|carica|mah|resistenz|resistance|pack|packs|1s|2s|3s|4s|6s)\b/i,
+  fleet:
+    /\b(fleet|flotta|droni|drone|velivoli|aircraft|hangar|manutenzion|maintenance|crash|voli|flight|flights|parti|ricambi|spare|parts)\b/i,
+};
+
+const DOMAIN_PREFIXES: readonly ToolDomain[] = ['fpv', 'pantry', 'gmail', 'batteries', 'fleet'];
+
+/**
+ * Detects which deferred tool domains are named by the request, conversation context,
+ * or earlier steps in the current sortie (F-106-T03).
+ */
+export function detectToolDomains(input: {
+  readonly request: string;
+  readonly history?: readonly Step[];
+  readonly context?: readonly Turn[];
+}): Set<ToolDomain> {
+  const active = new Set<ToolDomain>();
+  const texts: string[] = [input.request];
+  for (const turn of input.context ?? []) {
+    if (turn.request) texts.push(turn.request);
+    if (turn.reply) texts.push(turn.reply);
+  }
+  for (const step of input.history ?? []) {
+    if (step.tool) {
+      for (const domain of DOMAIN_PREFIXES) {
+        if (step.tool.startsWith(`${domain}.`)) active.add(domain);
+      }
+    }
+    if (step.args) texts.push(JSON.stringify(step.args));
+  }
+  const combined = texts.join('\n');
+  for (const domain of DOMAIN_PREFIXES) {
+    if (!active.has(domain) && DOMAIN_INTENT_PATTERNS[domain].test(combined)) {
+      active.add(domain);
+    }
+  }
+  return active;
+}
+
+/**
+ * Keeps all core tools and any domain toolsets whose domain was detected in the turn (F-106-T03),
+ * preserving exact catalog order for prefix stability.
+ */
+export function filterToolsByIntent<T extends { name: string }>(
+  tools: readonly T[],
+  domains: ReadonlySet<ToolDomain>,
+): T[] {
+  return tools.filter((t) => {
+    const domain = DOMAIN_PREFIXES.find((d) => t.name.startsWith(`${d}.`));
+    return !domain || domains.has(domain);
+  });
+}
+
 export function misatoAsk(input: StepInput, preferredRoute: RouteName): Ask {
   const route = input.history.some((step) => step.tool === 'fleet.chat') ? 'local' : preferredRoute;
   // Keep the newest steps when the history is long: the planner needs the latest outcome most.
