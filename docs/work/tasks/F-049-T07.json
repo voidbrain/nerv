@@ -55,5 +55,11 @@
     "agentHours": 3,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3
-  }
+  },
+  "prs": [
+    {
+      "pr": 558,
+      "note": "class profiles; CI pending"
+    }
+  ]
 }
