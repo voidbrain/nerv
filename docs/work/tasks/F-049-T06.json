@@ -51,5 +51,11 @@
     "agentHours": 0.75,
     "baselineAgentHours": 2.25,
     "estimateAgentHours": 0.75
-  }
+  },
+  "prs": [
+    {
+      "pr": 551,
+      "note": "the pool; CI pending"
+    }
+  ]
 }
