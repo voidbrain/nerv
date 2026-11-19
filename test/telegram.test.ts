@@ -539,7 +539,8 @@ test(
 );
 test(
   'F-003: failed Bot delivery keeps its checkpoint across restart, retries once accepted, and is not replayed',
-  { timeout: 15000 },
+  // Three Runtime restarts and two `until` waits (15 s each on Windows) do not fit 15 s on a slow Windows runner (B-075-T02).
+  { timeout: process.platform === 'win32' ? 60000 : 15000 },
   async () => {
     const token = '123456:' + 'r'.repeat(35),
       tg = await fakeTelegram(token);
