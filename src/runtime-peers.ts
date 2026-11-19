@@ -3,7 +3,13 @@ import { ONLINE_MS, type RunItem } from './kaji-link.ts';
 import type { RemoteOffer } from './misato.ts';
 import { canRunRemotePilot, type Pilot, type PilotOffer, type PilotRegistry, type RegisteredPilot } from './pilots.ts';
 import type { ProcessClient } from './process-client.ts';
-import { remoteOutcomeText, type ActReply, type ChatReply, type OwnerAction } from './runtime-api.ts';
+import {
+  remoteOutcomeText,
+  type ActReply,
+  type ChatReply,
+  type ExternalTools,
+  type OwnerAction,
+} from './runtime-api.ts';
 import { WORKER_RESULT_BYTES, type WorkerClaim, type WorkerContext, type WorkerLease } from './worker-jobs.ts';
 
 export interface RuntimePeersHost {
@@ -17,6 +23,9 @@ export interface RuntimePeersHost {
   getPilotRegistry(): PilotRegistry;
   pilotRoster(): Pilot[];
   act(action: OwnerAction, worker?: WorkerLease): Promise<ActReply>;
+  /** F-021-T04: the MCP tools granted on this base now (a changed or vanished tool is suspended, not listed). */
+  externalTools(): Promise<ExternalTools>;
+  toolsProcess(): ProcessClient;
 }
 
 /**
@@ -227,6 +236,49 @@ export class RuntimePeers {
     void tick();
   }
 
+  /**
+   * F-021-T04: an MCP tool this base's gate granted for another base: the tools process makes the call, as for Misato
+   * here. One the gate sends to the owner here is refused instead: nothing would make the call after an approval.
+   */
+  private async callGranted(
+    r: ActReply | { outcome: string; error: string },
+    item: RunItem,
+    granted: { server: string; tool: string; fingerprint: string },
+  ): Promise<unknown> {
+    if ('approvalId' in r && r.approvalId) {
+      await this.host.nervous
+        .call('approvals.decide', { id: r.approvalId, decision: 'reject', source: 'kaji-mcp' })
+        .catch(() => undefined);
+      return {
+        refused: `${item.tool} needs the owner's approval on this base; MCP tools asked for by another base run only when this base's gate grants them`,
+        settled: true,
+      };
+    }
+    if (!('external' in r) || !r.external || r.outcome !== 'grant') return r;
+    const out = (await this.host
+      .toolsProcess()
+      .call(
+        'tools.call',
+        { server: granted.server, tool: granted.tool, args: item.args, fingerprint: granted.fingerprint },
+        120_000,
+      )
+      .catch((e) => ({ error: e instanceof Error ? e.message : 'The tools process did not answer.' }))) as {
+      text?: string;
+      error?: string;
+    };
+    await this.host.nervous
+      .call('actions.finished', {
+        sortieId: r.sortieId,
+        actionId: r.actionId,
+        tool: item.tool,
+        ...(out.error ? { error: out.error.slice(0, 1000) } : { text: (out.text ?? '').slice(0, 8000) }),
+      })
+      .catch(() => undefined);
+    return out.error
+      ? { ...r, error: out.error.slice(0, 1000) }
+      : { ...r, result: { text: (out.text ?? '').slice(0, WORKER_RESULT_BYTES / 2) } };
+  }
+
   async runFromPeer(from: string, item: RunItem, offered: string[], context: WorkerContext): Promise<unknown> {
     if (!context.ownerKey) throw new Error('Negotiated worker authority required.');
     const ownerKey = context.ownerKey;
@@ -250,27 +302,46 @@ export class RuntimePeers {
         if (!grant.allowed) pilotRefusal = grant.reason;
       }
     }
+    // F-021-T04: an offered MCP tool runs only while it is granted here and its description still matches the grant.
+    const builtin = builtinTools.some((t) => t.name === item.tool);
+    const granted =
+      builtin || !offered.includes(item.tool)
+        ? undefined
+        : (await this.host.externalTools().catch(() => undefined))?.byName.get(item.tool);
+    const mcpRefusal =
+      builtin || !offered.includes(item.tool)
+        ? undefined
+        : !granted
+          ? `${item.tool} is not granted on this base now (a changed or removed tool is suspended; on it: grant it again)`
+          : granted.eva === '03'
+            ? `${item.tool} is granted for EVA-03 (quarantine), which does not run tools yet`
+            : undefined;
     const result = pilotRefusal
       ? { refused: pilotRefusal }
-      : !offered.includes(item.tool) || item.tool === 'kaji.run' || !builtinTools.some((t) => t.name === item.tool)
-        ? { refused: `this base does not offer ${item.tool} (on it: kaji offer)` }
-        : await this.host
-            .act(
-              {
-                request:
-                  `From ${from}${item.pilot ? ` (pilot ${item.pilot})` : ''}: ${item.request || item.tool}`.slice(
-                    0,
-                    4000,
-                  ),
-                tool: item.tool,
-                args: item.args,
-              },
-              lease,
-            )
-            .catch(() => ({
-              outcome: 'invalid',
-              error: 'Worker action failed or its lease/authority changed; inspect the local trace.',
-            }));
+      : mcpRefusal
+        ? { refused: mcpRefusal }
+        : !offered.includes(item.tool) || item.tool === 'kaji.run' || (!builtin && !granted)
+          ? { refused: `this base does not offer ${item.tool} (on it: kaji offer)` }
+          : await this.host
+              .act(
+                {
+                  request:
+                    `From ${from}${item.pilot ? ` (pilot ${item.pilot})` : ''}: ${item.request || item.tool}`.slice(
+                      0,
+                      4000,
+                    ),
+                  tool: item.tool,
+                  args: item.args,
+                },
+                lease,
+              )
+              .catch(() => ({
+                outcome: 'invalid',
+                error: 'Worker action failed or its lease/authority changed; inspect the local trace.',
+              }))
+              .then((r) => (granted ? this.callGranted(r, item, granted) : r) as Promise<Record<string, unknown>>);
+    // Rejecting the approval card already settled this job's receipt: report the refusal, record nothing twice.
+    if ('settled' in result) return { refused: result.refused };
     if ('approvalId' in result && result.approvalId) return result;
     try {
       await this.host.nervous.call('worker.finish', { lease, result: result as Record<string, unknown> });

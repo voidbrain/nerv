@@ -11,6 +11,7 @@ import { KajiLink, sanitizeOffers, signedHeaders } from '../src/kaji-link.ts';
 import type { ChatReply } from '../src/runtime.ts';
 import { McpClient, fingerprint } from '../src/mcp.ts';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 async function until(check: () => boolean | Promise<boolean>, describe: () => unknown | Promise<unknown>, ms = 15000) {
   const end = Date.now() + ms;
@@ -548,7 +549,7 @@ test(
       join(hb, 'config.json'),
       JSON.stringify({
         base: { id: 'NERV-02', name: 'Tabgha' },
-        kaji: { root: root.publicKey },
+        kaji: { root: root.publicKey, offers: ['notes.read_note', 'notes.delete_note'] },
         tools: {
           mcp: [notes],
           grants: [{ server: 'notes', tool: 'read_note', effect: 'read', eva: '00', fingerprint: fp }],
@@ -639,3 +640,32 @@ test(
     }
   },
 );
+
+test('F-021-T04: kaji offer accepts a granted MCP tool and refuses one that is not granted', () => {
+  const home = mkdtempSync(join(tmpdir(), 'nerv-offer-mcp-'));
+  try {
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({
+        kaji: { root: root.publicKey },
+        tools: {
+          mcp: [{ id: 'notes', command: process.execPath, args: ['-e', ''] }],
+          grants: [{ server: 'notes', tool: 'read_note', effect: 'read', eva: '00', fingerprint: '0123456789abcdef' }],
+        },
+      }),
+    );
+    const cli = (...args: string[]) =>
+      spawnSync(process.execPath, ['src/cli.ts', 'kaji', 'offer', ...args], {
+        env: { ...process.env, NERV_HOME: home, NERV_OLLAMA: 'http://127.0.0.1:9' },
+        encoding: 'utf8',
+      });
+    const ok = cli('notes.read_note', 'reminders.add');
+    assert.equal(ok.status, 0, ok.stderr);
+    assert.match(ok.stdout, /now offers: notes\.read_note, reminders\.add/);
+    const bad = cli('notes.delete_note');
+    assert.notEqual(bad.status, 0);
+    assert.match(bad.stderr, /Not an action this base can offer: notes\.delete_note/);
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});

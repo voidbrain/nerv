@@ -84,6 +84,11 @@ export function fingerprint(t: McpTool): string {
 }
 /** The name Misato and the ledger use: server id, a dot, the tool's own name. */
 export const toolName = (server: string, tool: string) => `${server}.${tool}`;
+/**
+ * F-021-T04: a tool name another base may offer or be asked to run: NERV's own (`reminders.add`) or a granted MCP tool
+ * (`server.tool`). Offers arrive from another base and are shown to Misato, so no spaces or other text fit in one.
+ */
+export const OFFER_NAME = /^[a-z][a-z0-9-]{0,39}\.[A-Za-z][A-Za-z0-9_-]{0,63}$/;
 
 export function validateTools(value: unknown): ToolsConfig {
   const v = value as Record<string, unknown>;

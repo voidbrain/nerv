@@ -1,3 +1,4 @@
+import { OFFER_NAME } from './mcp.ts';
 import { transaction } from './sqlite-transaction.ts';
 import type { DatabaseSync } from 'node:sqlite';
 import { argsHash } from './ledger.ts';
@@ -127,7 +128,7 @@ export class WorkerJobs {
       typeof item.request !== 'string' ||
       item.request.length > 500 ||
       typeof item.tool !== 'string' ||
-      !/^[a-z]+\.[a-z]+$/.test(item.tool) ||
+      !OFFER_NAME.test(item.tool) ||
       !item.args ||
       typeof item.args !== 'object' ||
       Array.isArray(item.args) ||

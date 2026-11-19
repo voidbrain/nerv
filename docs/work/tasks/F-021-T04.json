@@ -4,7 +4,7 @@
   "parent": "F-021",
   "title": "Remote (other-machine) endpoints",
   "goal": "Remote (other-machine) endpoints",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Tools on another base are callable through the authenticated Kaji line with the same grant checks"
   ],
@@ -20,7 +20,17 @@
     "test/kaji-run.test.ts",
     "test/kaji-mcp.test.ts",
     "docs/work/records/F-021.md",
-    "docs/work/tasks/F-021-T04.json"
+    "docs/work/tasks/F-021-T04.json",
+    "src/config.ts",
+    "src/worker-link.ts",
+    "src/worker-jobs.ts",
+    "src/rpc-schemas.ts",
+    "docs/guides/kaji-and-nodes.md",
+    "docs/work/records/F-049.md",
+    "docs/work/tasks/F-049-T13.json",
+    "docs/archive/reconciliation-2026.md",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",

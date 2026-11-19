@@ -607,6 +607,8 @@ export class Runtime implements StoreApi {
         getPilotRegistry: () => this.getPilotRegistry(),
         pilotRoster: () => this.pilotRoster(),
         act: (action, worker) => this.act(action, worker),
+        externalTools: () => this.externalTools(),
+        toolsProcess: () => this.toolsProcess(),
       });
     }
     return this._peersController;

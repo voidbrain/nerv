@@ -1,3 +1,4 @@
+import { OFFER_NAME } from './mcp.ts';
 import { HISTORY_LIMIT } from './history.ts';
 
 const history = {
@@ -41,7 +42,7 @@ const workerItem = {
     id: { type: 'string', pattern: '^[a-f0-9-]{36}$' },
     sequence: { type: 'integer', minimum: 1, maximum: Number.MAX_SAFE_INTEGER },
     request: { type: 'string', maxLength: 500 },
-    tool: { type: 'string', pattern: '^[a-z]+\\.[a-z]+$' },
+    tool: { type: 'string', pattern: OFFER_NAME.source },
     args: { type: 'object', maxProperties: 50 },
     pilot: { type: 'string', pattern: '^[a-z0-9-]{1,40}$' },
   },
