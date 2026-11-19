@@ -16,7 +16,9 @@
     "Upgrades, prerequisites, update policy and platform lifecycle on the device matrix"
   ],
   "dependsOn": [
-    "F-005-T35"
+    "F-005-T35",
+    "B-087-T01",
+    "F-005-T38"
   ],
   "resources": [
     "src/**",
