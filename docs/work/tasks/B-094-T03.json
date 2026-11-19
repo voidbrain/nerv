@@ -48,6 +48,9 @@
     "estimateAgentHours": 1.5
   },
   "prs": [
-    545
+    {
+      "pr": 545,
+      "note": "the fix; CI pending"
+    }
   ]
 }
