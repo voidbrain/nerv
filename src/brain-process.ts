@@ -25,6 +25,8 @@ import { ModelBudget } from './model-budget.ts';
 import { casperAsk, parseCasper, type CasperInput } from './casper.ts';
 import {
   consultantAsk,
+  detectToolDomains,
+  filterToolsByIntent,
   parseConsult,
   misatoAsk,
   parseAdvice,
@@ -188,11 +190,19 @@ process.on('message', (value: unknown) => {
               'No model route for Misato: add models.local (or enable models.cloud) in config.json, then run nerv reload. See docs/INSTALL.md, section "Model routes".',
           };
         const remote = Array.isArray(params.remote) ? (params.remote as RemoteOffer[]) : [];
-        const tools = [
-          ...toolDocs.filter((t) => !proactive?.readOnly || t.effect === 'read'),
-          ...((params.external as ToolDoc[] | undefined) ?? []),
-          ...(remote.length ? [remoteToolDoc(remote)] : []),
-        ];
+        const domains = detectToolDomains({
+          request: params.request as string,
+          history: params.history as Step[],
+          context: params.context as Turn[] | undefined,
+        });
+        const tools = filterToolsByIntent(
+          [
+            ...toolDocs.filter((t) => !proactive?.readOnly || t.effect === 'read'),
+            ...((params.external as ToolDoc[] | undefined) ?? []),
+            ...(remote.length ? [remoteToolDoc(remote)] : []),
+          ],
+          domains,
+        );
         const ask = misatoAsk(
           {
             ...(params.clarification === true ? { clarification: true } : {}),

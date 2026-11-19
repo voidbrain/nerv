@@ -4,7 +4,15 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { misatoAsk, parsePlan, validateReminderTitle, MAX_STEPS } from '../src/misato.ts';
+import {
+  detectToolDomains,
+  filterToolsByIntent,
+  misatoAsk,
+  parsePlan,
+  validateReminderTitle,
+  MAX_STEPS,
+} from '../src/misato.ts';
+import { measureMisatoPrompt } from '../src/prompt-samples.ts';
 import { toolDocs } from '../src/executors.ts';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
@@ -875,4 +883,61 @@ test('F-106: the system text and tool schemas are a byte-identical prefix across
     assert.ok(prefix.includes(`- ${t.name} (${t.effect}):`), `${t.name} schema in the stable prefix`);
   assert.ok(prefix.includes('Never invent an action or its details'), 'the fixed rules are in the stable prefix');
   assert.equal(a.system.slice(same).split('\n').length <= 4, true, 'only the clock, language and topic lines follow');
+});
+
+test('F-106-T03: core tools stay always offered; domain toolsets load only when request or history names them and shrink prompt size', () => {
+  const coreOnly = filterToolsByIntent(toolDocs, detectToolDomains({ request: 'Ricordami di chiamare Ada' }));
+  const coreNames = new Set(coreOnly.map((t) => t.name));
+  assert.ok(coreNames.has('reminders.add'));
+  assert.ok(coreNames.has('memory.remember'));
+  assert.ok(coreNames.has('docs.list'));
+  assert.ok(coreNames.has('lists.show'));
+  for (const prefix of ['fpv.', 'pantry.', 'gmail.', 'batteries.', 'fleet.']) {
+    assert.equal(
+      coreOnly.some((t) => t.name.startsWith(prefix)),
+      false,
+      `deferred ${prefix} tools omitted on unrelated request`,
+    );
+  }
+
+  // Measure F-106-T01 prompt size before vs after deferring domain tools.
+  const input = {
+    request: 'Ricordami di chiamare Ada',
+    history: [],
+    now: '2030-01-01T08:00:00.000Z',
+    timeZone: 'Europe/Rome',
+    language: 'it' as const,
+  };
+  const before = measureMisatoPrompt(misatoAsk({ ...input, tools: toolDocs }, 'local'), toolDocs);
+  const after = measureMisatoPrompt(misatoAsk({ ...input, tools: coreOnly }, 'local'), coreOnly);
+  assert.ok(after.promptTokens < before.promptTokens, `expected ${after.promptTokens} < ${before.promptTokens}`);
+  assert.ok(after.toolSchemaTokens < before.toolSchemaTokens);
+
+  // Each domain is reached when named in request (IT/EN) or prior step history.
+  const cases: Array<{ domain: string; tool: string; request: string }> = [
+    { domain: 'fpv', tool: 'fpv.blackbox_report', request: 'Analizza il log blackbox del quad FPV' },
+    { domain: 'pantry', tool: 'pantry.check', request: 'Controlla la scadenza del latte in dispensa' },
+    { domain: 'gmail', tool: 'gmail.search', request: 'Cerca una email su Gmail con la fattura' },
+    { domain: 'batteries', tool: 'batteries.list', request: 'Quali batterie LiPo sono da mettere in storage?' },
+    { domain: 'fleet', tool: 'fleet.chat', request: 'Registra manutenzione sulla flotta' },
+  ];
+  for (const c of cases) {
+    const byReq = filterToolsByIntent(toolDocs, detectToolDomains({ request: c.request }));
+    assert.ok(
+      byReq.some((t) => t.name === c.tool),
+      `${c.domain} reached from request`,
+    );
+
+    const byHist = filterToolsByIntent(
+      toolDocs,
+      detectToolDomains({
+        request: 'continua pure',
+        history: [{ tool: c.tool, args: {}, outcome: 'grant' }],
+      }),
+    );
+    assert.ok(
+      byHist.some((t) => t.name === c.tool),
+      `${c.domain} reached from history`,
+    );
+  }
 });
