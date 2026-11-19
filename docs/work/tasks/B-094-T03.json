@@ -23,7 +23,8 @@
     "test/kaji-run.test.ts",
     "test/remote-outcome-text.test.ts",
     "docs/work/records/B-094.md",
-    "docs/work/tasks/B-094-T03.json"
+    "docs/work/tasks/B-094-T03.json",
+    "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",

@@ -2448,7 +2448,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-094-T03 — A remote result that arrived before Misato's reply is in that reply (Ready).
+💻 **→** Next: B-094-T03 — A remote result that arrived before Misato's reply is in that reply (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2460,7 +2460,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-094-t03"></a>B-094-T03 — A remote result that arrived before Misato's reply is in that reply | 1.5 h | 0 h | 1.5 h | Ready | — |
+| 🟡 Medium | <a id="b-094-t03"></a>B-094-T03 — A remote result that arrived before Misato's reply is in that reply | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — |
 | 🟡 Medium | **Total** | 3.25 h | 1.5 h (3 of 4 steps recorded) | 1.5 h | 3 of 4 completed | |
 
 <details><summary>Done steps (3)</summary>
@@ -2480,9 +2480,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-094-T01: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the live check · B-094-T02: [PR #535](https://github.com/voidbrain/nerv/pull/535) the fix; CI green. [PR #535](https://github.com/voidbrain/nerv/pull/535) B-094-T02 (`test/kaji-run.test.ts`); Test: `test/remote-outcome-text.test.ts` (committed failing first) |
+| PR / evidence | Steps: B-094-T01: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the live check · B-094-T02: [PR #535](https://github.com/voidbrain/nerv/pull/535) the fix; CI green. [PR #535](https://github.com/voidbrain/nerv/pull/535) B-094-T02 (`test/kaji-run.test.ts`); B-094-T03: `test/kaji-run.test.ts`, `test/remote-outcome-text.test.ts`; Test: `test/remote-outcome-text.test.ts` (committed failing first) |
 | Opened | 2026-11-18 |
-| Verification | 2026-11-19: B-094-T02 by CI run 44486070427 (PR #535). B-094-T03 pending. |
+| Verification | 2026-11-19: B-094-T02 by CI run 44486070427 (PR #535). B-094-T03 implemented, CI pending. |
 | Reviewed | 2026-11-19 |
 
 </details>
