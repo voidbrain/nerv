@@ -105,7 +105,8 @@ describe('F-049-T07: each class gets only what its profile allows', () => {
       // A read-only path inside $HOME (the checkout, for instance) is still allowed, and state stays denied after it.
       const p = buildEvaSeatbeltProfile('eva-03', { ...base, readOnlyPaths: [join(home, 'repo')] });
       assert.ok(
-        p.lastIndexOf(`(deny file-read* (subpath "${realpathSync(home)}/.nerv"))`) > p.lastIndexOf('(allow file-read*'),
+        p.lastIndexOf(`(deny file-read* (subpath "${join(realpathSync(home), '.nerv')}"))`) >
+          p.lastIndexOf('(allow file-read*'),
         'state is denied after every allow',
       );
     } finally {

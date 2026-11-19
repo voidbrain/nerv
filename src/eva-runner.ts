@@ -1,7 +1,7 @@
 import { execFile, spawn } from 'node:child_process';
 import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join, relative } from 'node:path';
 import { EVA_CLASS_SPECS } from './eva-classes.ts';
 import type { EvaClass } from './pilots.ts';
 
@@ -143,8 +143,11 @@ export function buildEvaSeatbeltProfile(
   const denied = (options.deniedReadPaths ?? []).map(canonicalExistingPath);
   const deniedReads = [homeDir, ...(stateDir ? [stateDir] : []), ...denied];
   // Later Seatbelt rules win: an allow for a path that holds a denied one would re-open it (review of PR #558).
-  const within = (path: string, root: string) =>
-    path === root || path.startsWith(root.endsWith('/') ? root : root + '/');
+  // path.relative handles both separators and drive roots, so this holds on every platform.
+  const within = (path: string, root: string) => {
+    const rel = relative(root, path);
+    return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel));
+  };
   const overlaps = (a: string, b: string) => within(a, b) || within(b, a);
   for (const w of writable)
     if (deniedReads.some((d) => overlaps(w, d)))
