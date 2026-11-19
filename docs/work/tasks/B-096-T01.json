@@ -4,7 +4,7 @@
   "parent": "B-096",
   "title": "Draw the apartment → Debrief route for a sortie that ends at the owner's decision",
   "goal": "A refused, expired or question-ended sortie shows its route from Misato's apartment to Debrief",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Test committed failing first",
     "Owner confirms on the live dashboard"
@@ -35,8 +35,10 @@
     "estimate": "0.75 h",
     "basis": "Estimated 2026-11-18. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 0.75,
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
-    "estimateAgentHours": 0.75
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
   }
 }
