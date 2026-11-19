@@ -1876,9 +1876,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start (Ready).
+💻 **→** Next: B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1888,10 +1888,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-100-t01"></a>B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start | 1.5 h | 0 h | 1.5 h | Ready |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-100-t01"></a>B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [PR #568](https://github.com/voidbrain/nerv/pull/568) the fix; CI pending |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1900,7 +1900,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Found in F-049-T13 ([PR #553](https://github.com/voidbrain/nerv/pull/553)) |
+| PR / evidence | Steps: B-100-T01: [PR #568](https://github.com/voidbrain/nerv/pull/568) the fix; CI pending. Found in F-049-T13 ([PR #553](https://github.com/voidbrain/nerv/pull/553)); [PR #568](https://github.com/voidbrain/nerv/pull/568) B-100-T01 (`test/eva-runner.test.ts`) |
 | Opened | 2026-11-19 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |

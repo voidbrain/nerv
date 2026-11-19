@@ -33,31 +33,41 @@ const forget = (id: string) => {
   clients.delete(id);
   specs.delete(id);
 };
+/** Every configured server's tools, as `tools.list` returns them. */
+async function listAll() {
+  const out: { server: string; tools?: (McpTool & { fingerprint: string })[]; error?: string }[] = [];
+  for (const s of servers()) {
+    try {
+      out.push({
+        server: s.id,
+        tools: (await client(s.id).listTools()).slice(0, 100).map((t) => ({
+          name: t.name,
+          ...(t.description ? { description: t.description.slice(0, 600) } : {}),
+          ...(t.inputSchema ? { inputSchema: t.inputSchema } : {}),
+          ...(t.annotations ? { annotations: t.annotations } : {}),
+          fingerprint: fingerprint(t),
+        })),
+      });
+    } catch (e) {
+      forget(s.id);
+      out.push({ server: s.id, error: e instanceof Error ? e.message : 'Could not list its tools.' });
+    }
+  }
+  return out;
+}
+// B-100: `--list` prints one listing and exits; an EVA-03 instance has no IPC channel to the coordinator.
+if (process.argv.includes('--list')) {
+  void listAll().then((out) => {
+    process.stdout.write(JSON.stringify(out) + '\n');
+    for (const id of [...clients.keys()]) forget(id);
+    process.exit(0);
+  });
+}
 process.on('message', (value: unknown) => {
   if (Buffer.byteLength(JSON.stringify(value)) > MAX_FRAME_BYTES) return;
   void dispatchRpc(value, async (method, params) => {
     if (method === 'runtime.ping') return { role: 'tools', pid: process.pid, servers: servers().map((s) => s.id) };
-    if (method === 'tools.list') {
-      const out: { server: string; tools?: (McpTool & { fingerprint: string })[]; error?: string }[] = [];
-      for (const s of servers()) {
-        try {
-          out.push({
-            server: s.id,
-            tools: (await client(s.id).listTools()).slice(0, 100).map((t) => ({
-              name: t.name,
-              ...(t.description ? { description: t.description.slice(0, 600) } : {}),
-              ...(t.inputSchema ? { inputSchema: t.inputSchema } : {}),
-              ...(t.annotations ? { annotations: t.annotations } : {}),
-              fingerprint: fingerprint(t),
-            })),
-          });
-        } catch (e) {
-          forget(s.id);
-          out.push({ server: s.id, error: e instanceof Error ? e.message : 'Could not list its tools.' });
-        }
-      }
-      return out;
-    }
+    if (method === 'tools.list') return listAll();
     if (method === 'tools.call') {
       const id = params.server as string,
         name = params.tool as string;

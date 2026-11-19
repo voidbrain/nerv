@@ -128,3 +128,53 @@ describe('F-049-T04: EVA-03 instance per job', () => {
     },
   );
 });
+
+describe('B-100: the tools process starts in EVA-03 from a checkout under $HOME', () => {
+  it(
+    'lists the granted MCP servers’ tools, reading config.json and nothing else of the NERV home (owner decision (b))',
+    { skip: !isDarwinWithSandbox, timeout: 60_000 },
+    async () => {
+      const home = realpathSync(mkdtempSync(join(tmpdir(), 'nerv-b100-home-')));
+      const fixtures = join(process.cwd(), 'test', 'fixtures');
+      writeFileSync(
+        join(home, 'config.json'),
+        JSON.stringify({
+          tools: { mcp: [{ id: 'notes', command: process.execPath, args: [join(fixtures, 'fake-mcp.mjs')] }] },
+        }),
+        { mode: 0o600 },
+      );
+      writeFileSync(join(home, 'nerv.sqlite'), 'STATE-FIXTURE');
+      writeFileSync(join(home, 'base-key'), 'KEY-FIXTURE');
+      try {
+        const r = await runToolsProcessInEva03({
+          jobId: 'b100',
+          home,
+          repoRoot: process.cwd(),
+          readOnlyPaths: [fixtures],
+          timeoutMs: 30_000,
+        });
+        assert.equal(r.exitCode, 0, r.stderr);
+        const listed = JSON.parse(r.stdout.trim()) as { server: string; tools?: { name: string }[]; error?: string }[];
+        assert.deepEqual(
+          listed.map((s) => [s.server, (s.tools ?? []).map((t) => t.name)]),
+          [['notes', ['read_note', 'delete_note']]],
+        );
+        // The same profile still denies the rest of the NERV home: the job cannot read the database or the key.
+        const probe = await runEva03Job({
+          jobId: 'b100-probe',
+          command: process.execPath,
+          args: [
+            '-e',
+            `const fs=require('fs');const r=(p)=>{try{fs.readFileSync(p);return 'READ'}catch(e){return 'DENIED'}};console.log(JSON.stringify({config:r(${JSON.stringify(join(home, 'config.json'))}),db:r(${JSON.stringify(join(home, 'nerv.sqlite'))}),key:r(${JSON.stringify(join(home, 'base-key'))})}))`,
+          ],
+          nervStateDir: home,
+          readableStateFiles: ['config.json'],
+        });
+        assert.deepEqual(JSON.parse(r.stdout.trim()).length, 1);
+        assert.deepEqual(JSON.parse(probe.stdout.trim()), { config: 'READ', db: 'DENIED', key: 'DENIED' });
+      } finally {
+        rmSync(home, { recursive: true, force: true });
+      }
+    },
+  );
+});

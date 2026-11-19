@@ -20,6 +20,11 @@ export interface Eva03SeatbeltOptions {
   readonly nervStateDir?: string;
   readonly readOnlyPaths?: readonly string[];
   readonly deniedReadPaths?: readonly string[];
+  /**
+   * B-100 (owner decision (b)): file names inside the NERV state directory a job may read, nothing else of it; the
+   * tools process reads its `config.json`. The database, keys and every other file there stay denied.
+   */
+  readonly readableStateFiles?: readonly string[];
 }
 
 export interface Eva03JobSpec {
@@ -29,6 +34,7 @@ export interface Eva03JobSpec {
   readonly nervStateDir?: string;
   readonly readOnlyPaths?: readonly string[];
   readonly deniedReadPaths?: readonly string[];
+  readonly readableStateFiles?: readonly string[];
   readonly timeoutMs?: number;
   readonly maxOutputBytes?: number;
   readonly signal?: AbortSignal;
@@ -188,6 +194,19 @@ export function buildEvaSeatbeltProfile(
     lines.push(`(deny file-read* (subpath "${escapeSbString(d)}"))`);
     lines.push(`(deny file-write* (subpath "${escapeSbString(d)}"))`);
   }
+  // B-100 (owner decision (b)): the named files of the state directory, read-only, one by one; nothing else of it.
+  const stateFiles = (options.readableStateFiles ?? []).map((name) => {
+    if (!stateDir) throw new Error('readableStateFiles needs nervStateDir.');
+    if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(name)) throw new Error(`Not a plain file name: ${name}`);
+    return join(stateDir, name);
+  });
+  for (const f of stateFiles) lines.push(`(allow file-read* (literal "${escapeSbString(f)}"))`);
+  // Resolving a path (Node's realpath) stats every directory above it, which may sit inside the denied $HOME or state:
+  // the metadata of those directories only, never their listing or any other file in them.
+  const ancestors = new Set<string>();
+  for (const p of [...readOnly, ...stateFiles])
+    for (let d = dirname(p); d !== dirname(d); d = dirname(d)) ancestors.add(d);
+  for (const d of ancestors) lines.push(`(allow file-read-metadata (literal "${escapeSbString(d)}"))`);
   return `${lines.join('\n')}\n`;
 }
 
@@ -381,6 +400,7 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
       nervStateDir: spec.nervStateDir,
       readOnlyPaths: spec.readOnlyPaths,
       deniedReadPaths: spec.deniedReadPaths,
+      readableStateFiles: spec.readableStateFiles,
       writablePaths: spec.writablePaths,
       egress: spec.egress,
     });
@@ -544,18 +564,28 @@ export async function runToolsProcessInEva03(options: {
   readonly jobId: string;
   readonly home?: string;
   readonly repoRoot: string;
+  /** Where the granted MCP servers' own files live (read-only); the tools process starts them inside the instance. */
+  readonly readOnlyPaths?: readonly string[];
   readonly timeoutMs?: number;
   readonly signal?: AbortSignal;
   readonly onLedgerEvent?: (event: Eva03LedgerEvent) => void;
 }): Promise<Eva03JobResult> {
   const toolsEntry = join(options.repoRoot, 'src', 'tools-process.ts');
-  const args = options.home ? [toolsEntry, options.home] : [toolsEntry];
+  // B-100: one listing, printed, then exit: the instance has no IPC channel to the coordinator.
+  const args = options.home ? [toolsEntry, options.home, '--list'] : [toolsEntry, '--list'];
   return runEva03Job({
     jobId: options.jobId,
     command: process.execPath,
     args,
     nervStateDir: options.home,
-    readOnlyPaths: [join(options.repoRoot, 'src'), join(options.repoRoot, 'node_modules')],
+    // B-100 (owner decision (b)): config.json is the one file of the NERV home the tools process reads.
+    ...(options.home ? { readableStateFiles: ['config.json'] } : {}),
+    readOnlyPaths: [
+      join(options.repoRoot, 'src'),
+      join(options.repoRoot, 'node_modules'),
+      join(options.repoRoot, 'package.json'),
+      ...(options.readOnlyPaths ?? []),
+    ],
     timeoutMs: options.timeoutMs,
     signal: options.signal,
     onLedgerEvent: options.onLedgerEvent,
