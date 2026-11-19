@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 75 h agent + 10.5 h owner across 133 open steps of 40 features and 18 other records. 56.75 h of actual effort recorded on 107 steps. Generated from the task files.
+**Remaining effort:** 80.75 h agent + 10.5 h owner across 135 open steps of 40 features and 19 other records. 56.75 h of actual effort recorded on 107 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -593,15 +593,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="b-099"></a>[🐞 B-099](#top)
+
+**An EVA-03 job's child in its own session survives the job's timeout and cancellation**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | [F-049-T05](#f-049-t05) | 🤖 | — | — |
+
+💻 **→** Next: B-099-T01 — Kill every process an EVA-03 job started at timeout, cancellation and exit (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-19 while writing F-049-T05: `runEva03Job` (`src/eva-runner.ts`) kills the job's process group only. A child started in its own session (`spawn(..., { detached: true })`, `setsid`) is outside that group and keeps running after the job timed out or was cancelled; a child in the group is killed. The T01 contract (`docs/decisions/eva-runner.md`, test 5) requires zero surviving processes. EVA execution is not enabled yet, so no live job is affected. |
+| **Reproduce** | An EVA-03 job that spawns `node -e "setInterval(()=>{},1000)"` detached, then hangs: after the timeout (or an abort) that child's pid is still alive. |
+| **Check** | Test committed failing first: after timeout and after cancellation no process the job started is alive, including one in its own session (B-099-T01). Owner decision 2026-11-19: track descendants while the job runs; a survivor is recorded as an uncertain effect, never as a clean end. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-099-t01"></a>B-099-T01 — Kill every process an EVA-03 job started at timeout, cancellation and exit | 1 h | 0 h | 1 h | Ready |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-099.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found in F-049-T05 |
+| Opened | 2026-11-19 |
+| Verification | Pending. |
+| Reviewed | 2026-11-19 |
+
+</details>
+
+---
 ### <a id="f-049"></a>[✨ F-049](#top)
 
 **EVA instances: an EVA is a class, each job gets a fresh sandbox**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h | — | [F-027-T02](#f-027-t02), [F-051-T06](#f-051-t06) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 9.25 h | [B-099-T01](#b-099-t01) | [F-027-T02](#f-027-t02), [F-051-T06](#f-051-t06) | 🤖 | — | — |
 
-💻 **→** Next: F-049-T05 — Escape and recovery join tests (Planned).
+💻 **→** Next: F-049-T06 — Concurrent instances within per-machine limits (Planned).
 
 | | |
 |---|---|
@@ -613,14 +651,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-049-t05"></a>F-049-T05 — Escape and recovery join tests | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-049-t06"></a>F-049-T06 — Concurrent instances within per-machine limits | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
+| 🟡 Medium | <a id="f-049-t05"></a>F-049-T05 — Escape and timeout gate tests on the EVA-03 runner | 1.5 h | 0 h | 1.5 h | Ready · waits on [B-099-T01](#b-099-t01) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-049-t07"></a>F-049-T07 — EVA-00, EVA-01 and EVA-02 on the runner | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T05](#f-049-t05), [F-049-T06](#f-049-t06) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-049-t08"></a>F-049-T08 — Pilot trust stage caps the class | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T07](#f-049-t07) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-049-t09"></a>F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-049-T07](#f-049-t07) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-049-t10"></a>F-049-T10 — Linux host enforcement and join tests in CI | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-049-T05](#f-049-t05) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-049-t12"></a>F-049-T12 — Run the first EVA job on the Linux host | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-049-T10](#f-049-t10) | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 6.75 h (11 of 12 steps) | 1 h (3 of 12 steps recorded) | 4.5 h | 5 of 12 completed | | |
+| 🟡 Medium | <a id="f-049-t13"></a>F-049-T13 — EVA-03 events in the ledger and the recovery join test | 4 h | 0 h | 4 h | Planned · waits on [F-049-T05](#f-049-t05) | ⏳ 🤖 | — |
+| 🟣 Very large | **Total** | 11.5 h (12 of 13 steps) | 1 h (3 of 13 steps recorded) | 9.25 h | 5 of 13 completed | | |
 
 <details><summary>Done steps (5)</summary>
 

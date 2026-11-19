@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-049-T13",
+  "parent": "F-049",
+  "title": "EVA-03 events in the ledger and the recovery join test",
+  "goal": "The runner's EVA-03 events are appended to the NERV ledger, and gate test 6 (recovery join) passes before execution is enabled",
+  "status": "planned",
+  "acceptance": [
+    "eva03.started/completed/failed/timed_out/cancelled are ledger events on the job's sortie, never erased; uncertain outcomes say so and claim no rollback",
+    "Recovery join: a crash or disconnect mid-job keeps the durable receipt and the uncertain lock, blocks a duplicate replay, and reconciles cleanly on restart (decisions/eva-runner.md, test 6)"
+  ],
+  "dependsOn": [
+    "F-049-T05"
+  ],
+  "resources": [
+    "src/eva-runner.ts",
+    "src/events.ts",
+    "src/ledger.ts",
+    "test/eva-gate.test.ts",
+    "docs/work/records/F-049.md",
+    "docs/work/tasks/F-049-T13.json"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Join tests across runner, ledger and worker protocol; npm test"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "4 h agent",
+    "basis": "Estimated 2026-11-19 when split from F-049-T05 (owner decision): the runner reports events only through a callback today and has no receipt or lock. Not a measurement.",
+    "reviewed": "2026-11-19",
+    "agentHours": 4,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  },
+  "prs": []
+}
