@@ -137,6 +137,7 @@ export type RecordKind = 'enrol' | 'revoke' | 'main';
 export interface RegistryBody {
   kind: RecordKind;
   serial: number;
+  coordinatorEpoch?: number;
   baseId: string;
   name?: string;
   publicKey?: string;
@@ -215,6 +216,11 @@ function checkBody(b: RegistryBody): void {
     !Number.isFinite(Date.parse(b.issued))
   )
     throw new Error('Malformed registry record.');
+  if (
+    b.coordinatorEpoch !== undefined &&
+    (b.kind !== 'main' || !Number.isSafeInteger(b.coordinatorEpoch) || b.coordinatorEpoch < 1)
+  )
+    throw new Error('Coordinator epoch must be a positive integer on a main record.');
   if (b.kind === 'enrol') {
     if (
       typeof b.name !== 'string' ||
@@ -257,6 +263,16 @@ export class Registry {
     const id = createHash('sha256').update(canonical(record)).digest('hex');
     return transaction(this.db, () => {
       if (this.db.prepare('SELECT 1 FROM registry WHERE id=?').get(id)) return 'known';
+      if (record.body.kind === 'main' && record.body.coordinatorEpoch !== undefined) {
+        const prevMain = this.latestMainRecord();
+        if (
+          prevMain &&
+          (record.body.serial <= prevMain.body.serial ||
+            record.body.coordinatorEpoch <= (prevMain.body.coordinatorEpoch ?? 0))
+        ) {
+          throw new Error('A new main record must advance both serial and coordinatorEpoch.');
+        }
+      }
       this.db
         .prepare('INSERT INTO registry VALUES(?,?,?,?,?,?,?)')
         .run(
@@ -373,11 +389,22 @@ export class Registry {
       if (revoked.has(e.baseId + ':*') || revoked.has(e.baseId + ':' + e.publicKey)) e.status = 'revoked';
     return [...out.values()].sort((a, b) => a.baseId.localeCompare(b.baseId));
   }
+  private latestMainRecord(): SignedRecord | undefined {
+    return this.records()
+      .filter((r) => r.body.kind === 'main')
+      .sort((a, b) => b.body.serial - a.body.serial)[0];
+  }
   /** The owner's main base: the newest main record, while that base is enrolled and not revoked. No election: unset until the owner names one. */
   main(): string | undefined {
-    const latest = this.records()
-      .filter((r) => r.body.kind === 'main')
-      .sort((a, b) => b.body.serial - a.body.serial)[0]?.body.baseId;
+    const latest = this.latestMainRecord()?.body.baseId;
     return latest && this.bases().some((b) => b.baseId === latest && b.status === 'enrolled') ? latest : undefined;
+  }
+  /** Monotonic coordinator epoch from the newest main record (0 for legacy main records without the field). */
+  mainEpoch(): number {
+    return this.latestMainRecord()?.body.coordinatorEpoch ?? 0;
+  }
+  /** Next monotonic coordinatorEpoch to embed when signing a new main record. */
+  nextMainEpoch(): number {
+    return this.mainEpoch() + 1;
   }
 }

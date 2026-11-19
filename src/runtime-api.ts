@@ -243,6 +243,8 @@ export interface StoreApi {
   onResumed?(listener: (reply: ChatReply) => void): void;
   reloadModels?(): Promise<{ error?: string; kept?: boolean; models: unknown }>;
   modelSetup?(): Promise<ModelSetup>;
+  /** F-021-T05: the MCP tools granted on this base now, and the suspended ones, for the dashboard's tool list. */
+  externalTools?(): Promise<ExternalTools>;
   /** F-045/F-051: the pilot roster for the dashboard (config.json pilots, read now). */
   pilotRoster?(): Pilot[] | Promise<Pilot[]>;
   genericPilot?(): Pilot | Promise<Pilot>;

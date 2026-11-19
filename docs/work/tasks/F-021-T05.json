@@ -4,7 +4,7 @@
   "parent": "F-021",
   "title": "Dashboard tool listing",
   "goal": "Dashboard tool listing",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Registered tools, versions and grants listed in the dashboard; axe passes"
   ],
@@ -12,10 +12,25 @@
     "F-021-T04"
   ],
   "resources": [
-    "web/**",
-    "test/**",
-    "docs/**",
-    "generated:backlog-views"
+    "src/server.ts",
+    "src/tool-listing.ts",
+    "test/tool-listing.test.ts",
+    "docs/work/records/F-021.md",
+    "docs/work/tasks/F-021-T05.json",
+    "docs/work/records/F-049.md",
+    "docs/work/records/F-083.md",
+    "docs/work/records/B-101.md",
+    "docs/work/tasks/F-049-T07.json",
+    "docs/work/tasks/F-083-T06.json",
+    "docs/work/tasks/B-101-T01.json",
+    "docs/archive/reconciliation-2026.md",
+    "evals/gauntlet/ledger.json",
+    "src/runtime-api.ts",
+    "web/public/dashboard/index.html",
+    "web/public/dashboard/live.js",
+    "test/evaluation.browser.mjs",
+    "generated:backlog-views",
+    "test/dashboard-poll.test.ts"
   ],
   "capabilities": [
     "bounded-edit",
@@ -39,5 +54,11 @@
     "agentHours": 0.25,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 563,
+      "note": "tool listing; CI pending"
+    }
+  ]
 }
