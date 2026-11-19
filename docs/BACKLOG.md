@@ -14,23 +14,23 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 41 | 21 |
-| **Require Human 🧑** | 9 | 6 |
+| **Require Human 🧑** | 8 | 6 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-011](#f-011) | [F-005](#f-005) | [B-057](#b-057) | [B-097](#b-097) |
-| [F-004](#f-004) | [F-109](#f-109) | [B-068](#b-068) |  |
-| [F-108](#f-108) | [F-101](#f-101) | [B-056](#b-056) |  |
+| [F-011](#f-011) | [F-109](#f-109) | [B-057](#b-057) | [B-097](#b-097) |
+| [F-004](#f-004) | [F-101](#f-101) | [B-068](#b-068) |  |
+| [F-108](#f-108) |  | [B-056](#b-056) |  |
 | [F-060](#f-060) |  | [B-095](#b-095) |  |
 | [F-007](#f-007) |  | [B-096](#b-096) |  |
 | [F-100](#f-100) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 83.5 h agent + 10.75 h owner across 128 open steps of 40 features and 21 other records. 78.5 h of actual effort recorded on 119 steps. Generated from the task files.
+**Remaining effort:** 83.5 h agent + 10.5 h owner across 127 open steps of 40 features and 21 other records. 78.5 h of actual effort recorded on 119 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -84,7 +84,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.5 h agent + 0.25 h owner | [B-087-T01](#b-087-t01) | — | 🤖 | — | 🤔 |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.5 h | [B-087-T01](#b-087-t01) | — | 🤖 | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
 
@@ -99,13 +99,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 0.75 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | 🤖 | — |
-| 🟢 Small | <a id="f-005-t38"></a>F-005-T38 — Owner decision: automatic updates on NERV-01 | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](INSTALL.md) | — |
-| 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned · waits on [B-087-T01](#b-087-t01), [F-005-T38](#f-005-t38) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 0.5 h | 0 h | 0.5 h | Planned · waits on [B-087-T01](#b-087-t01) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T29](#f-005-t29) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-005-T36](#f-005-t36) | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 23.75 h (30 of 38 steps) | 19.75 h (23 of 38 steps recorded) | 1.5 h agent + 0.25 h owner | 33 of 38 completed | | |
+| 🟡 Medium | **Total** | 23.75 h (30 of 38 steps) | 19.75 h (23 of 38 steps recorded) | 1.5 h | 34 of 38 completed | | |
 
-<details><summary>Done steps (33)</summary>
+<details><summary>Done steps (34)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -142,6 +141,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-005-t34"></a>F-005-T34 — Record the evidence of F-005-T27 and close it | 0.25 h | 0 h | Completed | — |
 | — | <a id="f-005-t35"></a>F-005-T35 — Record the evidence of F-005-T28 and close it | 0.25 h | 0.25 h (stated) | Completed | — |
 | — | <a id="f-005-t37"></a>F-005-T37 — Agree the device matrix | — | 0 h | Completed | [PR #526](https://github.com/voidbrain/nerv/pull/526) matrix |
+| — | <a id="f-005-t38"></a>F-005-T38 — Owner decision: automatic updates on NERV-01 | — | 0 h | Completed | — |
 
 </details>
 
