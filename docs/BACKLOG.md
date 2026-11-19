@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 75 h agent + 10.5 h owner across 133 open steps of 40 features and 18 other records. 56.75 h of actual effort recorded on 107 steps. Generated from the task files.
+**Remaining effort:** 73.5 h agent + 10.5 h owner across 133 open steps of 40 features and 18 other records. 56.75 h of actual effort recorded on 107 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -348,9 +348,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟣 Very large | 10.5 h agent + 1 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟣 Very large | 9 h agent + 1 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-016-T03 — Step 2a — Signed coordinator state snapshot export (Implemented; verification pending).
+💻 **→** Next: F-016-T13 — Step 2b — Import a verified snapshot into the read-only standby (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -364,8 +364,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-016-t03"></a>F-016-T03 — Step 2a — Signed coordinator state snapshot export | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | 🤖 | [PR #546](https://github.com/voidbrain/nerv/pull/546) implementation |
-| 🟡 Medium | <a id="f-016-t13"></a>F-016-T13 — Step 2b — Import a verified snapshot into the read-only standby | 2 h | 0 h | 2 h | Planned · waits on [F-016-T03](#f-016-t03) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-016-t13"></a>F-016-T13 — Step 2b — Import a verified snapshot into the read-only standby | 2 h | 0 h | 2 h | Implemented; verification pending | 🤖 | — |
 | 🟡 Medium | <a id="f-016-t14"></a>F-016-T14 — Step 2c — Serial-monotonic registry merge and worker approval settlement | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-016-T13](#f-016-t13) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-016-t15"></a>F-016-T15 — Step 2d — Quiesce, merge and swap under the serve guard | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-016-T14](#f-016-t14) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t04"></a>F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T15](#f-016-t15) | ⏳ 🤖 | — |
@@ -375,14 +374,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned · waits on [F-016-T07](#f-016-t07) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned · waits on [F-016-T08](#f-016-t08) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
-| 🟣 Very large | **Total** | 12.25 h (14 of 15 steps) | 1 h (2 of 15 steps recorded) | 10.5 h agent + 1 h owner | 4 of 15 completed | | |
+| 🟣 Very large | **Total** | 12.25 h (14 of 15 steps) | 1 h (2 of 15 steps recorded) | 9 h agent + 1 h owner | 5 of 15 completed | | |
 
-<details><summary>Done steps (4)</summary>
+<details><summary>Done steps (5)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-016-t01"></a>F-016-T01 — Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore | 0.5 h | 0.5 h (stated) | Completed | — |
 | — | <a id="f-016-t02"></a>F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.25 h | 0 h | Completed | — |
+| 🟢 Small | <a id="f-016-t03"></a>F-016-T03 — Step 2a — Signed coordinator state snapshot export | 1.5 h | 0 h | Verified | [PR #546](https://github.com/voidbrain/nerv/pull/546) implementation |
 | — | <a id="f-016-t10"></a>F-016-T10 — Revise the relocation decision after review | 0.5 h | 0.5 h (stated) | Completed | [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review |
 | — | <a id="f-016-t12"></a>F-016-T12 — Revise the decision: local chat fallback on a non-main base | 0.5 h | 0 h | Completed | — |
 

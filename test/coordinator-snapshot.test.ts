@@ -160,3 +160,148 @@ describe('F-016-T03: signed coordinator state snapshot export', () => {
     }
   });
 });
+
+describe('F-016-T13: standby snapshot import into coordinator-standby.sqlite', () => {
+  it('verifies signature, root, sourceBaseId and epoch before any write; imports with exact rowids, standby mode, and FTS5 rebuild', () => {
+    const mainStore = new Store(':memory:');
+    const standbyStore = new Store(':memory:');
+    const localHostStore = new Store(':memory:');
+    try {
+      const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+      mainStore.db
+        .prepare(
+          "INSERT INTO deliveries(rowid, id, reminder_id, kind, message, created, read_at) VALUES (?, ?, NULL, 'brief', ?, ?, NULL)",
+        )
+        .run(77, 'del-77', 'Standby delivery 77', '2026-11-19T08:00:00Z');
+      mainStore.db
+        .prepare(
+          "INSERT INTO facts(id, text, status, source, sortie_id, tainted, shareable, created, updated) VALUES ('fact-1', 'Standby drone uses 6S packs', 'active', 'user', NULL, 0, 0, '2026-11-19T08:00:00Z', '2026-11-19T08:00:00Z')",
+        )
+        .run();
+      mainStore.db
+        .prepare(
+          "INSERT INTO episodes(id, since, until, summary, exchanges, proposed, created) VALUES ('ep-1', '2026-11-19T07:00:00Z', '2026-11-19T08:00:00Z', 'Calibrated compass on Tabgha', 2, 0, '2026-11-19T08:00:00Z')",
+        )
+        .run();
+
+      // Host's own nerv.sqlite has its own local delivery rowid 1 that must stay untouched.
+      localHostStore.db
+        .prepare(
+          "INSERT INTO deliveries(rowid, id, reminder_id, kind, message, created, read_at) VALUES (1, 'local-del-1', NULL, 'worker', 'Local worker notice', '2026-11-19T08:00:00Z', NULL)",
+        )
+        .run();
+
+      const exported = mainStore.exportCoordinatorSnapshot({
+        root: 'root-fp-1',
+        sourceBaseId: 'NERV-01',
+        coordinatorEpoch: 4,
+        coordinatorFence: 19,
+        headSeq: 205,
+        privateKey,
+      });
+
+      // Pre-write verification failures must leave standby untouched.
+      const wrongKey = generateKeyPairSync('ed25519').publicKey;
+      assert.throws(
+        () =>
+          standbyStore.importStandbySnapshot({
+            frames: exported.chunks,
+            publicKey: wrongKey,
+            expectedRoot: 'root-fp-1',
+            expectedMainBaseId: 'NERV-01',
+          }),
+        /signature/i,
+      );
+      assert.throws(
+        () =>
+          standbyStore.importStandbySnapshot({
+            frames: exported.chunks,
+            publicKey,
+            expectedRoot: 'wrong-root',
+            expectedMainBaseId: 'NERV-01',
+          }),
+        /root/i,
+      );
+      assert.throws(
+        () =>
+          standbyStore.importStandbySnapshot({
+            frames: exported.chunks,
+            publicKey,
+            expectedRoot: 'root-fp-1',
+            expectedMainBaseId: 'NERV-02',
+          }),
+        /active main/i,
+      );
+      assert.throws(
+        () =>
+          standbyStore.importStandbySnapshot({
+            frames: exported.chunks,
+            publicKey,
+            expectedRoot: 'root-fp-1',
+            expectedMainBaseId: 'NERV-01',
+            minCoordinatorEpoch: 5,
+          }),
+        /stale/i,
+      );
+      const beforeCount = (standbyStore.db.prepare('SELECT count(*) AS n FROM deliveries').get() as { n: number }).n;
+      assert.equal(beforeCount, 0);
+
+      // Valid import into standbyStore succeeds.
+      const imported = standbyStore.importStandbySnapshot({
+        frames: exported.chunks,
+        publicKey,
+        expectedRoot: 'root-fp-1',
+        expectedMainBaseId: 'NERV-01',
+        minCoordinatorEpoch: 4,
+      });
+      assert.equal(imported.replicationMode, 'standby');
+
+      const coordState = standbyStore.db.prepare('SELECT * FROM coordinator_state WHERE id = 1').get() as {
+        replication_mode: string;
+        coordinator_epoch: number;
+        coordinator_fence: number;
+        head_seq: number;
+        state_digest: string;
+      };
+      assert.equal(coordState.replication_mode, 'standby');
+      assert.equal(coordState.coordinator_epoch, 4);
+      assert.equal(coordState.coordinator_fence, 19);
+      assert.equal(coordState.head_seq, 205);
+      assert.equal(coordState.state_digest, exported.manifest.sha256);
+
+      // Exact deliveries.rowid preserved in standby, while host nerv.sqlite stayed untouched.
+      const standbyDel = standbyStore.db.prepare('SELECT rowid, id FROM deliveries').get() as {
+        rowid: number;
+        id: string;
+      };
+      assert.equal(standbyDel.rowid, 77);
+      assert.equal(standbyDel.id, 'del-77');
+      const localDel = localHostStore.db.prepare('SELECT rowid, id FROM deliveries').get() as {
+        rowid: number;
+        id: string;
+      };
+      assert.equal(localDel.rowid, 1);
+      assert.equal(localDel.id, 'local-del-1');
+
+      // FTS5 tables rebuilt locally and searchable.
+      const factHits = standbyStore.db
+        .prepare("SELECT fact_id FROM facts_fts WHERE facts_fts MATCH '6S'")
+        .all() as Array<{ fact_id: string }>;
+      assert.deepEqual(
+        factHits.map((r) => r.fact_id),
+        ['fact-1'],
+      );
+      const epHits = standbyStore.db
+        .prepare("SELECT episode_id FROM episodes_fts WHERE episodes_fts MATCH 'Tabgha'")
+        .all() as Array<{ episode_id: string }>;
+      assert.deepEqual(
+        epHits.map((r) => r.episode_id),
+        ['ep-1'],
+      );
+    } finally {
+      mainStore.close();
+      standbyStore.close();
+      localHostStore.close();
+    }
+  });
+});

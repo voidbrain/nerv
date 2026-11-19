@@ -4,7 +4,7 @@
   "id": "F-016-T13",
   "title": "Step 2b — Import a verified snapshot into the read-only standby",
   "goal": "A standby holds main's state in coordinator-standby.sqlite without touching its own nerv.sqlite",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Signature, digest and head checked before any write; import into `coordinator-standby.sqlite` only, `replication_mode = standby`; FTS5 tables rebuilt locally; exact rowids kept (test)"
   ],
@@ -12,11 +12,11 @@
     "F-016-T03"
   ],
   "resources": [
-    "src/**",
-    "shared/**",
-    "test/**",
-    "docs/**",
-    "contract:coordinator-authority",
+    "src/coordinator-snapshot.ts",
+    "src/store.ts",
+    "test/coordinator-snapshot.test.ts",
+    "docs/work/tasks/F-016-T03.json",
+    "docs/work/tasks/F-016-T13.json",
     "docs/work/records/F-016.md",
     "generated:backlog-views"
   ],
