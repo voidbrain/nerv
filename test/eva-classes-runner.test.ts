@@ -12,13 +12,13 @@ import type { EvaClass } from '../src/pilots.ts';
 const isDarwinWithSandbox = process.platform === 'darwin' && existsSync('/usr/bin/sandbox-exec');
 const UNCONFINED = join(import.meta.dirname, 'fixtures', 'eva', 'unconfined-sandbox-exec');
 const scratch = (name: string) => realpathSync(mkdtempSync(join(tmpdir(), `nerv-class-${name}-`)));
-async function listener(): Promise<{ server: Server; port: number; heard: () => number }> {
+async function listener(host = '127.0.0.1'): Promise<{ server: Server; port: number; heard: () => number }> {
   let n = 0;
   const server = createServer((s) => {
     n++;
     s.end();
   });
-  await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
+  await new Promise<void>((done) => server.listen(0, host, done));
   return { server, port: (server.address() as { port: number }).port, heard: () => n };
 }
 
@@ -33,7 +33,7 @@ async function probe(
     'const fs = require("node:fs"), net = require("node:net");',
     'const r = {};',
     'const t = (k, f) => { try { r[k] = String(f()); } catch (e) { r[k] = "DENIED:" + (e.code ?? e.message); } };',
-    'const connect = (k, port) => { const s = net.connect(port, "127.0.0.1"); s.on("connect", () => { r[k] = "CONNECTED"; s.destroy(); }); s.on("error", (e) => { r[k] = "DENIED:" + e.code; }); };',
+    'const connect = (k, port, host = "127.0.0.1") => { const s = net.connect(port, host); s.on("connect", () => { r[k] = "CONNECTED"; s.destroy(); }); s.on("error", (e) => { r[k] = "DENIED:" + e.code; }); };',
     attempts,
     'setTimeout(() => { console.log(JSON.stringify(r)); process.exit(0); }, 800);',
   ].join('\n');
@@ -84,6 +84,36 @@ describe('F-049-T07: each class gets only what its profile allows', () => {
     }
   });
 
+  it('a granted path never re-opens $HOME, NERV state or a denied path (review of PR #558)', () => {
+    const home = scratch('home');
+    const state = join(home, '.nerv');
+    const secret = scratch('secret');
+    try {
+      const base = { workspaceDir: '/tmp/w', hostHomeDir: home, nervStateDir: state, deniedReadPaths: [secret] };
+      for (const w of [home, state, '/', join(home, 'Documents'), secret, join(secret, 'inner')])
+        assert.throws(
+          () => buildEvaSeatbeltProfile('eva-01', { ...base, writablePaths: [w] }),
+          /no EVA class writes in \$HOME, NERV state or a denied path/,
+          w,
+        );
+      for (const r of ['/', state, join(state, 'keys'), secret])
+        assert.throws(
+          () => buildEvaSeatbeltProfile('eva-03', { ...base, readOnlyPaths: [r] }),
+          /re-opens NERV state or a denied path/,
+          r,
+        );
+      // A read-only path inside $HOME (the checkout, for instance) is still allowed, and state stays denied after it.
+      const p = buildEvaSeatbeltProfile('eva-03', { ...base, readOnlyPaths: [join(home, 'repo')] });
+      assert.ok(
+        p.lastIndexOf(`(deny file-read* (subpath "${realpathSync(home)}/.nerv"))`) > p.lastIndexOf('(allow file-read*'),
+        'state is denied after every allow',
+      );
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+      rmSync(secret, { recursive: true, force: true });
+    }
+  });
+
   for (const unconfined of [false, true]) {
     const how = unconfined ? 'get through the unconfined fixture' : 'are refused';
     it(`EVA-00: network and writes outside its workspace ${how}`, { skip: !isDarwinWithSandbox }, async () => {
@@ -114,7 +144,7 @@ describe('F-049-T07: each class gets only what its profile allows', () => {
       { skip: !isDarwinWithSandbox },
       async () => {
         const proxy = await listener(),
-          other = await listener();
+          other = await listener('::');
         const granted = scratch('granted'),
           outside = scratch('outside');
         try {
@@ -125,6 +155,7 @@ describe('F-049-T07: each class gets only what its profile allows', () => {
               `t('outside', () => { fs.writeFileSync(${JSON.stringify(join(outside, 'x'))}, 'x'); return 'WROTE'; });`,
               `connect('proxy', ${proxy.port});`,
               `connect('other', ${other.port});`,
+              `connect('other6', ${other.port}, '::1');`,
             ].join('\n'),
             { unconfined, writablePaths: [granted], egress: { localhost: [proxy.port] } },
           );
@@ -133,6 +164,7 @@ describe('F-049-T07: each class gets only what its profile allows', () => {
           assert.equal(r.proxy, 'CONNECTED', 'the granted localhost port (its egress proxy) is reachable');
           assert.equal(r.outside === 'WROTE', unconfined);
           assert.equal(r.other === 'CONNECTED', unconfined);
+          assert.equal(r.other6 === 'CONNECTED', unconfined, 'IPv6 loopback on a port it was not granted');
           assert.equal(other.heard() > 0, unconfined);
         } finally {
           proxy.server.close();
