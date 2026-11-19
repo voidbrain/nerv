@@ -4,7 +4,7 @@
   "parent": "F-049",
   "title": "Concurrent instances within per-machine limits",
   "goal": "Several instances at once within CPU, memory and model-slot limits per machine; the same pilot can run two jobs, each in its own instance",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Per-machine limits as configuration; a job over the limit waits in the queue, it is not refused silently",
     "Two jobs of one pilot run in two instances with separate state",
@@ -46,17 +46,19 @@
   "effort": {
     "size": "small",
     "estimate": "0.75 h agent",
-    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
+    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio. Closed 2026-11-19: PR #551, CI run 44539887768 passed every job on the first attempt; actual about 1.5 h with the CLI wiring (stated).",
     "reviewed": "2026-11-14",
     "baselineDays": 1.5,
-    "agentHours": 0.75,
+    "agentHours": 0,
     "baselineAgentHours": 2.25,
-    "estimateAgentHours": 0.75
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
   },
   "prs": [
     {
       "pr": 551,
-      "note": "the pool; CI pending"
+      "note": "the pool; CI green"
     }
   ]
 }

@@ -4,6 +4,7 @@ import { decideHitlThroughPersona, explainClassificationThroughPersona, formatMi
 import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-classes.ts';
 import { runToolsProcessInEva03 } from './eva-runner.ts';
 import { EvaPool, defaultEvaLimits } from './eva-pool.ts';
+import { EvaJobs, runEva03Durably } from './eva-jobs.ts';
 
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
@@ -47,7 +48,8 @@ import { formatQueuedMessage } from './request-queue.ts';
 import { requestLanguage } from './misato.ts';
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
-import { Store } from './store.ts';
+import { OWNER_SOURCE, Store } from './store.ts';
+import { argsHash } from './ledger.ts';
 
 import {
   savePilots,
@@ -310,16 +312,60 @@ export async function tryRunCliCommand(
     } else if (sub === 'limits') {
       // F-049-T06: what this machine gives EVA jobs (config.json eva.limits, or the defaults).
       console.log(JSON.stringify(readConfig(home).eva?.limits ?? defaultEvaLimits(), null, 2));
-    } else if (sub === 'run-tools-03') {
-      const jobId = `cli-${Date.now()}`;
-      const pool = new EvaPool(readConfig(home).eva?.limits ?? defaultEvaLimits());
-      const result = await pool.run({ jobId, evaClass: 'eva-03' }, () =>
-        runToolsProcessInEva03({ jobId, home, repoRoot: resolve(import.meta.dirname, '..') }),
-      );
-      console.log(JSON.stringify(result, null, 2));
-      if (result.exitCode !== 0 || result.timedOut || result.cancelled) process.exitCode = 1;
+    } else if (sub === 'run-tools-03' || sub === 'jobs' || sub === 'reconcile') {
+      // F-049-T13: EVA-03 jobs leave a durable receipt and their events on a sortie; an interrupted one is uncertain.
+      const store = new Store(databasePath(home), readScrolls(home), { home });
+      try {
+        const jobs = new EvaJobs(store.db);
+        const recovered = jobs.recover(store.ledger);
+        if (recovered.length)
+          console.error(
+            `Interrupted EVA jobs, now uncertain (their processes may still be running): ${recovered.map((r) => r.id).join(', ')}. See nerv eva jobs; release one with nerv eva reconcile.`,
+          );
+        if (sub === 'jobs') {
+          console.log(JSON.stringify(jobs.list(), null, 2));
+        } else if (sub === 'reconcile') {
+          if (!args[1] || !args[2])
+            throw new Error('Usage: eva reconcile <jobId> <what you confirmed it did or did not do>');
+          console.log(JSON.stringify(jobs.reconcile(store.ledger, args[1], args.slice(2).join(' ')), null, 2));
+        } else {
+          const jobId = `cli-${randomUUID()}`;
+          const sortieId = store.ledger.openSortie(
+            OWNER_SOURCE,
+            'EVA-03: list tools (nerv eva run-tools-03)',
+            'trusted',
+          );
+          let ok = false;
+          try {
+            const pool = new EvaPool(readConfig(home).eva?.limits ?? defaultEvaLimits());
+            const result = await pool.run({ jobId, evaClass: 'eva-03' }, () =>
+              runEva03Durably({
+                jobs,
+                ledger: store.ledger,
+                sortieId,
+                jobId,
+                // Listing tools changes nothing outside the instance: no resource to hold for later jobs.
+                key: `eva03:tools-process:${jobId}`,
+                hash: argsHash({ command: 'run-tools-03' }),
+                run: (onLedgerEvent) =>
+                  runToolsProcessInEva03({ jobId, home, repoRoot: resolve(import.meta.dirname, '..'), onLedgerEvent }),
+              }),
+            );
+            ok = result.exitCode === 0 && !result.timedOut && !result.cancelled;
+            console.log(JSON.stringify({ sortieId, ...result }, null, 2));
+            if (!ok) process.exitCode = 1;
+          } finally {
+            // Whatever happened (refused, the runner threw, the job failed), the sortie does not stay open.
+            store.ledger.close(sortieId, ok ? 'done' : 'failed');
+          }
+        }
+      } finally {
+        store.close();
+      }
     } else {
-      throw new Error('Usage: eva classes | eva limits | eva admit <request.json> | eva run-tools-03');
+      throw new Error(
+        'Usage: eva classes | eva limits | eva admit <request.json> | eva run-tools-03 | eva jobs | eva reconcile <jobId> <confirmed>',
+      );
     }
   } else if (command === 'credentials') {
     if (args[0] !== 'rotate' || !['admin', 'telegram', 'cloud'].includes(args[1] ?? ''))

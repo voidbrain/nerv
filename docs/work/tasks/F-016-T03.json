@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T03",
-  "status": "verified",
+  "status": "closed",
   "title": "Step 2a — Signed coordinator state snapshot export",
   "goal": "main exports the replicated coordinator tables as a signed, size-bounded snapshot",
   "capabilities": [
@@ -36,18 +36,20 @@
   "effort": {
     "size": "small",
     "estimate": "1.5 h",
-    "basis": "Split 2026-11-18 with the owner's approval into T03, T13, T14 and T15 (6.5 h in total, near the 1.5-day baseline): the 0.75 h estimate covered one fifth of the decision's scope. Not a measurement.",
+    "basis": "Split 2026-11-18 with the owner's approval into T03, T13, T14 and T15 (6.5 h in total, near the 1.5-day baseline): the 0.75 h estimate covered one fifth of the decision's scope. Not a measurement. Closed 2026-11-19: PR #546, CI run 44524009209 passed every job on attempt 2 (attempt 1: B-066 worker-link on Windows); actual stated as the estimate.",
     "reviewed": "2026-11-18",
     "baselineDays": 1.5,
     "agentHours": 0,
     "ownerHours": 0,
     "baselineAgentHours": 2.25,
-    "estimateAgentHours": 1.5
+    "estimateAgentHours": 1.5,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
   },
   "prs": [
     {
       "pr": 546,
-      "note": "implementation"
+      "note": "implementation; CI green"
     }
   ]
 }
