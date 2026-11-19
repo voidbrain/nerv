@@ -2,8 +2,10 @@ import { Watch, type WatchWork } from './watch.ts';
 import {
   exportCoordinatorSnapshot,
   importCoordinatorSnapshotToStandby,
+  promoteStandbyDatabase,
   type ExportCoordinatorSnapshotInput,
   type ImportStandbySnapshotInput,
+  type PromoteStandbySwapInput,
 } from './coordinator-snapshot.ts';
 import { transaction } from './sqlite-transaction.ts';
 import type { WorkerLease } from './worker-jobs.ts';
@@ -606,6 +608,9 @@ export class Store {
   }
   importStandbySnapshot(input: Omit<ImportStandbySnapshotInput, 'standbyDb'>) {
     return importCoordinatorSnapshotToStandby({ ...input, standbyDb: this.db });
+  }
+  static promoteStandby(input: PromoteStandbySwapInput) {
+    return promoteStandbyDatabase(input);
   }
   close() {
     this.db.close();
