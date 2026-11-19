@@ -98,7 +98,7 @@ test('F-027: tainted local outside code selects EVA-03 and fails closed even wit
   );
   assert.equal(result.executor, 'eva-03');
   assert.equal(result.outcome, 'reject');
-  assert.match(result.reason, /F-049/);
+  assert.match(result.reason, /requires isolation; it does not run/);
 });
 
 test('F-027: repeated quarantine denials never become owner approvals at the reject limit', () => {
