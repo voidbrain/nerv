@@ -32,6 +32,11 @@ import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circuits.ts';
 import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
 import { buildBatteryDashboardCards } from './battery-health.ts';
+import {
+  advanceCoordinatorFence,
+  assertActiveCoordinator,
+  readCoordinatorFencingState,
+} from './coordinator-authority.ts';
 import { PromptSampleStore } from './prompt-samples.ts';
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
 import { FPV_BUILDS_SCHEMA, FpvBuildStore } from './fpv-builds.ts';
@@ -311,6 +316,7 @@ export class Store {
     return this.remindersController.reminderDefaults();
   }
   add(title: string, due: string, now = new Date(), options: ReminderInput = {}): Reminder & { existing?: true } {
+    this.assertActiveCoordinator(now.getTime());
     return this.remindersController.add(title, due, now, options);
   }
   list(): Reminder[] {
@@ -364,6 +370,7 @@ export class Store {
     return this.lists.setDoneById(itemId, done, now);
   }
   tick(now = new Date()): number {
+    this.assertActiveCoordinator(now.getTime());
     const count = this.remindersController.tick(now);
     const lang = this.remindersController.reminderDefaults().language;
     this.batteries.deliverDueResistancePrompts(now, lang);
@@ -396,6 +403,7 @@ export class Store {
     return this.pushController.getPushSubscription(endpoint);
   }
   async dispatchPushReminders(reminders: Reminder[]): Promise<void> {
+    this.assertActiveCoordinator();
     return this.pushController.dispatchPushReminders(reminders);
   }
   private _kajiOutboxController?: StoreKajiOutbox;
@@ -523,6 +531,7 @@ export class Store {
     source = 'api',
     options?: { useSuggestedFix?: boolean },
   ): { decision: string; result?: unknown; error?: string } {
+    if (!this.workerJobs.approval(id)) this.assertActiveCoordinator();
     return this.sortiesController.decide(id, decision, source, options);
   }
   refuseWorkerApproval(id: string, reason: string): { refused: string } {
@@ -530,6 +539,7 @@ export class Store {
   }
   /** One owner action through the gate (F-017): ballot, then on a grant the executor runs at once; otherwise it waits for the owner or stops. */
   runAction(sortieId: string, proposal: Proposal, worker?: WorkerLease, agency?: AgencySnapshot): ActResult {
+    if (!worker) this.assertActiveCoordinator();
     return this.sortiesController.runAction(sortieId, proposal, worker, agency);
   }
   /**
@@ -633,6 +643,15 @@ export class Store {
   }
   applyStandbyReplicationBatch(batch: ReplicationBatch, options: ApplyReplicationBatchOptions) {
     return applyReplicationBatch(this.db, batch, options);
+  }
+  coordinatorFencingState() {
+    return readCoordinatorFencingState(this.db);
+  }
+  assertActiveCoordinator(nowMs = Date.now()) {
+    return assertActiveCoordinator({ db: this.db, nowMs });
+  }
+  advanceCoordinatorFence(expectedEpoch?: number, nowMs = Date.now()) {
+    return advanceCoordinatorFence(this.db, expectedEpoch, nowMs);
   }
   close() {
     this.db.close();
