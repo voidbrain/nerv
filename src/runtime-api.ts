@@ -13,6 +13,7 @@ import type { Pilot, PilotPatch } from './pilots.ts';
 import type { Effect, Pattern, Stage } from './policy.ts';
 import type { QueueSnapshot } from './request-queue.ts';
 import type { ListItem, ListView, OwnerList } from './lists.ts';
+import type { BatteryDashboardCard } from './battery-health.ts';
 import type { ActResult, InboxEntry, InboxPage, PushSubscriptionRecord, Reminder, ReminderInput } from './store.ts';
 import type { RoleTimingStats } from './timing.ts';
 
@@ -182,6 +183,7 @@ export interface StoreApi {
     | null
     | Promise<{ list: OwnerList; items: ListItem[]; item: ListItem } | null>;
   listsShow?(name: string): ListView | null | Promise<ListView | null>;
+  batteryCards?(): BatteryDashboardCard[] | Promise<BatteryDashboardCard[]>;
   listsToggle?(
     itemId: string,
     done?: boolean,

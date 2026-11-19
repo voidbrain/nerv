@@ -261,6 +261,11 @@ export const methodSchemas = {
     properties: { limit: { type: 'integer', minimum: 1, maximum: 20 } },
     additionalProperties: false,
   },
+  'batteries.cards': {
+    type: 'object',
+    properties: {},
+    additionalProperties: false,
+  },
   'approvals.decide': {
     type: 'object',
     required: ['id', 'decision', 'source'],
