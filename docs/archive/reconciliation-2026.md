@@ -505,3 +505,9 @@ PR #552 merged with green CI. F-016-T03, F-016-T13, F-016-T14 and F-016-T15 clos
 ## 2026-11-19 — main `fc53e05c`
 
 PR #553 merged with green CI after two reruns (GitHub had no macOS runner; nothing ran). F-049-T13 closed. F-021-T04 implemented.
+
+## 2026-11-19 — main `09c8579c`
+
+PRs #554–#556 merged with green CI. F-008-T11, F-016-T04 and F-021-T04 closed. F-049-T07 narrowed and implemented; F-049-T14 opened.
+
+Reruns: #554's Windows test step hit its 18-minute limit once (no test failed); #556 and #553 waited on GitHub macOS capacity.
