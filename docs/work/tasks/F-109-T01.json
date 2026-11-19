@@ -34,5 +34,10 @@
     "ownerHours": 0,
     "ownerKind": "decision"
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 574,
+      "note": "decision recorded"
+    }
+  ]
 }

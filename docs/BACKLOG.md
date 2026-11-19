@@ -2199,18 +2199,18 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-109-t02"></a>F-109-T02 — Store a pilot's call name and second name through a validated interface | 1 h | 0 h | 1 h | Ready | 🤖 |
-| 🟡 Medium | <a id="f-109-t03"></a>F-109-T03 — Persona card layout with one Apply for every change | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-109-T02](#f-109-t02) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-109-t04"></a>F-109-T04 — Silhouette image on the persona card | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-109-T03](#f-109-t03) | ⏳ 🤖 |
-| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h | 1 of 4 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-109-t02"></a>F-109-T02 — Store a pilot's call name and second name through a validated interface | 1 h | 0 h | 1 h | Ready | 🤖 | — |
+| 🟡 Medium | <a id="f-109-t03"></a>F-109-T03 — Persona card layout with one Apply for every change | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-109-T02](#f-109-t02) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-109-t04"></a>F-109-T04 — Silhouette image on the persona card | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-109-T03](#f-109-t03) | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h | 1 of 4 completed | | |
 
 <details><summary>Done steps (1)</summary>
 
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-109-t01"></a>F-109-T01 — Owner decides the persona card's fields and the silhouette | — | 0 h | Completed |
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-109-t01"></a>F-109-T01 — Owner decides the persona card's fields and the silhouette | — | 0 h | Completed | [PR #574](https://github.com/voidbrain/nerv/pull/574) decision recorded |
 
 </details>
 
@@ -2221,7 +2221,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in PR #531 |
+| PR / evidence | Steps: F-109-T01: [PR #574](https://github.com/voidbrain/nerv/pull/574) decision recorded. Opened in PR #531 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |
