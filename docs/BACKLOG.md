@@ -1888,10 +1888,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-102-t01"></a>B-102-T01 — No backlog ID in a string the owner or a model sees | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-102-t01"></a>B-102-T01 — No backlog ID in a string the owner or a model sees | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | [PR #573](https://github.com/voidbrain/nerv/pull/573) the fix |
+| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1900,7 +1900,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report, dashboard Skills tab, 2026-11-20; `test/user-text-ids.test.ts` |
+| PR / evidence | Steps: B-102-T01: [PR #573](https://github.com/voidbrain/nerv/pull/573) the fix. Owner report, dashboard Skills tab, 2026-11-20; `test/user-text-ids.test.ts` |
 | Opened | 2026-11-20 |
 | Verification | Pending. |
 | Reviewed | 2026-11-20 |
