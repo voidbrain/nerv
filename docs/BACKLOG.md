@@ -1848,10 +1848,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-100-t01"></a>B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start | 1.5 h | 0 h | 1.5 h | Implemented; verification pending |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-100-t01"></a>B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [PR #560](https://github.com/voidbrain/nerv/pull/560) implementation |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1860,7 +1860,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Found in F-049-T13 ([PR #553](https://github.com/voidbrain/nerv/pull/553)) |
+| PR / evidence | Steps: B-100-T01: [PR #560](https://github.com/voidbrain/nerv/pull/560) implementation. [PR #560](https://github.com/voidbrain/nerv/pull/560) B-100-T01 (`src/eva-runner.ts`, `test/eva-runner.test.ts`, `docs/decisions/eva-runner.md`); found in F-049-T13 ([PR #553](https://github.com/voidbrain/nerv/pull/553)) |
 | Opened | 2026-11-19 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |
