@@ -246,15 +246,16 @@ export class RuntimePeers {
     granted: { server: string; tool: string; fingerprint: string },
   ): Promise<unknown> {
     if ('approvalId' in r && r.approvalId) {
-      await this.host.nervous
-        .call('approvals.decide', { id: r.approvalId, decision: 'reject', source: 'kaji-mcp' })
-        .catch(() => undefined);
-      return {
-        refused: `${item.tool} needs the owner's approval on this base; MCP tools asked for by another base run only when this base's gate grants them`,
-        settled: true,
-      };
+      const refused = `${item.tool} needs the owner's approval on this base; MCP tools asked for by another base run only when this base's gate grants them`;
+      // Card rejected and worker job finished with this refusal in one step; if that fails, the caller finishes it.
+      const done = await this.host.nervous
+        .call('worker.refuseApproval', { id: r.approvalId, reason: refused })
+        .then(() => true)
+        .catch(() => false);
+      return done ? { refused, settled: true } : { refused };
     }
     if (!('external' in r) || !r.external || r.outcome !== 'grant') return r;
+    const t0 = performance.now();
     const out = (await this.host
       .toolsProcess()
       .call(
@@ -271,8 +272,13 @@ export class RuntimePeers {
         sortieId: r.sortieId,
         actionId: r.actionId,
         tool: item.tool,
+        durationMs: Math.max(0, Math.round(performance.now() - t0)),
         ...(out.error ? { error: out.error.slice(0, 1000) } : { text: (out.text ?? '').slice(0, 8000) }),
       })
+      .catch(() => undefined);
+    // No planner closes this sortie here: the job is over, so it closes with the call's outcome.
+    await this.host.nervous
+      .call('sorties.finish', { sortieId: r.sortieId, status: out.error ? 'failed' : 'done' })
       .catch(() => undefined);
     return out.error
       ? { ...r, error: out.error.slice(0, 1000) }

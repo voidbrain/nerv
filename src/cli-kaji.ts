@@ -19,7 +19,7 @@ import {
 } from './kaji.ts';
 
 import { builtinTools } from './executors.ts';
-import { toolName } from './mcp.ts';
+import { OFFER_NAME, toolName } from './mcp.ts';
 
 export async function runKajiCommand(
   args: string[],
@@ -103,7 +103,10 @@ export async function runKajiCommand(
     const names = args.slice(1);
     const offerable = [
       ...builtinTools.map((t) => t.name).filter((n) => n !== 'kaji.run'),
-      ...(config.tools?.grants ?? []).filter((g) => g.eva !== '03').map((g) => toolName(g.server, g.tool)),
+      ...(config.tools?.grants ?? [])
+        .filter((g) => g.eva !== '03')
+        .map((g) => toolName(g.server, g.tool))
+        .filter((n) => OFFER_NAME.test(n)),
     ];
     if (!names.length) {
       const o = config.kaji?.offers ?? [];

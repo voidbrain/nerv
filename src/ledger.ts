@@ -246,6 +246,17 @@ export class Ledger {
       this.event(sortieId, null, 'context.intake', { source, trust }, now);
     });
   }
+  /**
+   * F-021-T04: outside content that reached a sortie after it may have closed (another base's MCP result): the sortie is
+   * marked tainted and the intake recorded, whatever its status, so later context that cites it is not trusted.
+   */
+  taintLate(sortieId: string, source: string, now = new Date()): void {
+    if (typeof source !== 'string' || !source.trim() || source.length > 100) throw new Error('Invalid context source.');
+    this.tx(() => {
+      if (!this.db.prepare("UPDATE sorties SET trust='tainted' WHERE id=?").run(sortieId).changes) return;
+      this.event(sortieId, null, 'context.intake', { source, trust: 'tainted' }, now);
+    });
+  }
   trust(sortieId: string): Trust {
     const s = this.db.prepare('SELECT trust FROM sorties WHERE id=?').get(sortieId) as { trust: Trust } | undefined;
     if (!s) throw new Error('No sortie with that ID.');

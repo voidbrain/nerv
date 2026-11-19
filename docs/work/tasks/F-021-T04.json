@@ -30,7 +30,14 @@
     "docs/work/tasks/F-049-T13.json",
     "docs/archive/reconciliation-2026.md",
     "evals/gauntlet/ledger.json",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "src/store-kaji-outbox.ts",
+    "src/store-sorties.ts",
+    "src/nervous-process.ts",
+    "src/ledger.ts",
+    "src/policy.ts",
+    "src/store.ts",
+    "src/rpc.ts"
   ],
   "capabilities": [
     "bounded-edit",

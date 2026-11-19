@@ -12,6 +12,7 @@ import type { ChatReply } from '../src/runtime.ts';
 import { McpClient, fingerprint } from '../src/mcp.ts';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { DatabaseSync } from 'node:sqlite';
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 async function until(check: () => boolean | Promise<boolean>, describe: () => unknown | Promise<unknown>, ms = 15000) {
   const end = Date.now() + ms;
@@ -513,38 +514,46 @@ test('F-021-T04: offer names: MCP tools as server.tool, nothing that could smugg
   assert.deepEqual(sanitizeOffers(['kaji.run', 'notes.read_note']), ['notes.read_note']);
 });
 
-test(
-  'F-021-T04: an MCP tool granted on another base runs there through kaji.run, its grant re-checked there; an ungranted one never runs',
-  { timeout: 60000 },
-  async (t) => {
-    const { Runtime } = await import('../src/runtime.ts');
-    const FAKE = fileURLToPath(new URL('./fixtures/fake-mcp.mjs', import.meta.url));
-    const notes = { id: 'notes', command: process.execPath, args: [FAKE] };
-    const probe = new McpClient(notes);
-    const fp = fingerprint((await probe.listTools())[0]!);
-    probe.close();
-    const A = keys(),
-      B = keys();
-    const reserved = await reservePorts(2);
-    const [pa, pb] = reserved.ports;
-    t.after(() => reserved.release());
-    const model = await fakeModel([
-      '{"action":{"tool":"kaji.run","args":{"base":"NERV-02","tool":"notes.read_note","args":{"name":"shopping"}}}}',
-      '{"reply":"Asked Tabgha."}',
-      '{"action":{"tool":"kaji.run","args":{"base":"NERV-02","tool":"notes.delete_note","args":{"name":"shopping"}}}}',
-      '{"reply":"Asked Tabgha to delete it."}',
-    ]);
-    const ha = mkdtempSync(join(tmpdir(), 'nerv-mcp-a-')),
-      hb = mkdtempSync(join(tmpdir(), 'nerv-mcp-b-'));
-    writeFileSync(
-      join(ha, 'config.json'),
-      JSON.stringify({
-        base: { id: 'NERV-01', name: 'Neo Tokyo-3' },
-        kaji: { root: root.publicKey },
-        models: { local: { baseUrl: model.url, model: 'm' } },
-      }),
-    );
-    // Tabgha has the notes server; only read_note is granted. delete_note is offered anyway, to show the grant decides.
+/**
+ * F-021-T04: two bases where Tabgha (NERV-02) runs the fake MCP server and offers notes.read_note and notes.delete_note
+ * (only read_note granted). Runs `body`, then tears everything down.
+ */
+async function withMcpBases(
+  t: { after(fn: () => unknown): void },
+  opts: { script: string[]; scrolls?: unknown },
+  body: (env: {
+    a: InstanceType<typeof import('../src/runtime.ts').Runtime>;
+    b: InstanceType<typeof import('../src/runtime.ts').Runtime>;
+    hb: string;
+    fp: string;
+    model: Awaited<ReturnType<typeof fakeModel>>;
+    ask: (text: string) => Promise<{ sortieId: string; outcome: string; text: string }>;
+    setGrant: (grant: { fingerprint?: string; eva?: string }) => Promise<void>;
+  }) => Promise<void>,
+) {
+  const { Runtime } = await import('../src/runtime.ts');
+  const FAKE = fileURLToPath(new URL('./fixtures/fake-mcp.mjs', import.meta.url));
+  const notes = { id: 'notes', command: process.execPath, args: [FAKE] };
+  const probe = new McpClient(notes);
+  const fp = fingerprint((await probe.listTools())[0]!);
+  probe.close();
+  const A = keys(),
+    B = keys();
+  const reserved = await reservePorts(2);
+  const [pa, pb] = reserved.ports;
+  t.after(() => reserved.release());
+  const model = await fakeModel(opts.script);
+  const ha = mkdtempSync(join(tmpdir(), 'nerv-mcp-a-')),
+    hb = mkdtempSync(join(tmpdir(), 'nerv-mcp-b-'));
+  writeFileSync(
+    join(ha, 'config.json'),
+    JSON.stringify({
+      base: { id: 'NERV-01', name: 'Neo Tokyo-3' },
+      kaji: { root: root.publicKey },
+      models: { local: { baseUrl: model.url, model: 'm' } },
+    }),
+  );
+  const tabghaConfig = (grant: { fingerprint?: string; eva?: string } = {}) =>
     writeFileSync(
       join(hb, 'config.json'),
       JSON.stringify({
@@ -552,92 +561,174 @@ test(
         kaji: { root: root.publicKey, offers: ['notes.read_note', 'notes.delete_note'] },
         tools: {
           mcp: [notes],
-          grants: [{ server: 'notes', tool: 'read_note', effect: 'read', eva: '00', fingerprint: fp }],
+          grants: [
+            {
+              server: 'notes',
+              tool: 'read_note',
+              effect: 'read',
+              eva: grant.eva ?? '00',
+              fingerprint: grant.fingerprint ?? fp,
+            },
+          ],
         },
       }),
     );
-    const records = [
-      rec({
-        kind: 'enrol',
-        baseId: 'NERV-01',
-        name: 'Neo Tokyo-3',
-        publicKey: A.publicKey,
-        address: `127.0.0.1:${pa}`,
-      }),
-      rec({ kind: 'enrol', baseId: 'NERV-02', name: 'Tabgha', publicKey: B.publicKey, address: `127.0.0.1:${pb}` }),
-      rec({ kind: 'main', baseId: 'NERV-01' }),
-    ];
-    const a = new Runtime(join(ha, 'nerv.sqlite'), undefined, ha),
-      b = new Runtime(join(hb, 'nerv.sqlite'), undefined, hb);
-    const links: KajiLink[] = [];
-    const logs: string[] = [];
-    const follow: ChatReply[] = [];
-    a.onResumed((r) => follow.push(r));
-    const describe = async () => ({ offers: await a.remoteOffers(), follow, logs: logs.slice(-20) });
-    try {
-      await a.ready();
-      await b.ready();
-      await a.kaji.add(records);
-      await b.kaji.add(records);
-      a.setBaseKey(A.publicKey);
-      b.setBaseKey(B.publicKey);
-      const la = new KajiLink({
-        worker: a.worker,
-        baseId: 'NERV-01',
-        key: A.privateKey,
-        publicKey: A.publicKey,
-        registry: a.kaji,
-        log: (l) => logs.push('NERV-01 ' + l),
-        onOffers: (id, offered) => a.notePeerOffers(id, offered),
-      });
-      const lb = new KajiLink({
-        worker: b.worker,
-        baseId: 'NERV-02',
-        key: B.privateKey,
-        publicKey: B.publicKey,
-        registry: b.kaji,
-        log: (l) => logs.push('NERV-02 ' + l),
-        offers: () => ['notes.read_note', 'notes.delete_note'],
-      });
-      links.push(la, lb);
-      await reserved.release();
-      await Promise.all([la.start(200), lb.start(200)]);
-      a.startResumer(100);
-      await until(async () => (await a.remoteOffers()).length === 1, describe);
-      await until(() => logs.some((l) => l.includes('Worker connected: NERV-02')), describe);
-      a.startOutbox((base, item, dispatching) => la.run(base, item, 5000, dispatching), 100);
-      const read = await a.chat('Read my shopping note on Tabgha');
-      assert.match(model.systems[0]!, /NERV-02 \(Tabgha\): notes\.read_note/, 'Misato sees the offered MCP tool');
-      assert.equal(read.waiting[0]?.tool, 'kaji.run', JSON.stringify(read));
-      await a.decide(read.waiting[0]!.approvalId, 'approve', 'api');
-      await until(async () => (await a.events(read.sortieId)).some((e) => e.kind === 'kaji.result'), describe);
-      const got = (await a.events(read.sortieId)).find((e) => e.kind === 'kaji.result')!.payload as {
+  tabghaConfig();
+  if (opts.scrolls) writeFileSync(join(hb, 'scrolls.json'), JSON.stringify(opts.scrolls), { mode: 0o600 });
+  const records = [
+    rec({ kind: 'enrol', baseId: 'NERV-01', name: 'Neo Tokyo-3', publicKey: A.publicKey, address: `127.0.0.1:${pa}` }),
+    rec({ kind: 'enrol', baseId: 'NERV-02', name: 'Tabgha', publicKey: B.publicKey, address: `127.0.0.1:${pb}` }),
+    rec({ kind: 'main', baseId: 'NERV-01' }),
+  ];
+  const a = new Runtime(join(ha, 'nerv.sqlite'), undefined, ha),
+    b = new Runtime(join(hb, 'nerv.sqlite'), undefined, hb);
+  const links: KajiLink[] = [];
+  const logs: string[] = [];
+  const describe = async () => ({ offers: await a.remoteOffers(), logs: logs.slice(-20) });
+  try {
+    await a.ready();
+    await b.ready();
+    await a.kaji.add(records);
+    await b.kaji.add(records);
+    a.setBaseKey(A.publicKey);
+    b.setBaseKey(B.publicKey);
+    const la = new KajiLink({
+      worker: a.worker,
+      baseId: 'NERV-01',
+      key: A.privateKey,
+      publicKey: A.publicKey,
+      registry: a.kaji,
+      log: (l) => logs.push('NERV-01 ' + l),
+      onOffers: (id, offered) => a.notePeerOffers(id, offered),
+    });
+    const lb = new KajiLink({
+      worker: b.worker,
+      baseId: 'NERV-02',
+      key: B.privateKey,
+      publicKey: B.publicKey,
+      registry: b.kaji,
+      log: (l) => logs.push('NERV-02 ' + l),
+      offers: () => ['notes.read_note', 'notes.delete_note'],
+    });
+    links.push(la, lb);
+    await reserved.release();
+    await Promise.all([la.start(200), lb.start(200)]);
+    a.startResumer(100);
+    await until(async () => (await a.remoteOffers()).length === 1, describe);
+    await until(() => logs.some((l) => l.includes('Worker connected: NERV-02')), describe);
+    a.startOutbox((base, item, dispatching) => la.run(base, item, 5000, dispatching), 100);
+    // One request on the main base: the owner approves its kaji.run there, and the other base's answer comes back.
+    const ask = async (text: string) => {
+      const chat = await a.chat(text);
+      assert.equal(chat.waiting[0]?.tool, 'kaji.run', JSON.stringify(chat));
+      await a.decide(chat.waiting[0]!.approvalId, 'approve', 'api');
+      await until(async () => (await a.events(chat.sortieId)).some((e) => e.kind === 'kaji.result'), describe);
+      const got = (await a.events(chat.sortieId)).find((e) => e.kind === 'kaji.result')!.payload as {
         outcome: string;
         text: string;
       };
-      assert.equal(got.outcome, 'grant');
-      assert.match(got.text, /Tabgha ran notes\.read_note/);
-      assert.match(got.text, /buy milk and bread/, 'the MCP server answered on Tabgha');
+      return { sortieId: chat.sortieId, ...got };
+    };
+    const setGrant = async (grant: { fingerprint?: string; eva?: string }) => {
+      tabghaConfig(grant);
+      await b.externalTools(true);
+    };
+    await body({ a, b, hb, fp, model, ask, setGrant });
+  } finally {
+    await Promise.allSettled([reserved.release()]);
+    for (const l of links) await l.stop();
+    await a.close();
+    await b.close();
+    await model.close();
+    rmSync(ha, { recursive: true, force: true });
+    rmSync(hb, { recursive: true, force: true });
+  }
+}
+const readOn = (base: string, tool: string) =>
+  `{"action":{"tool":"kaji.run","args":{"base":"${base}","tool":"${tool}","args":{"name":"shopping"}}}}`;
 
-      const del = await a.chat('Delete my shopping note on Tabgha');
-      await a.decide(del.waiting[0]!.approvalId, 'approve', 'api');
-      await until(async () => (await a.events(del.sortieId)).some((e) => e.kind === 'kaji.result'), describe);
-      const refused = (await a.events(del.sortieId)).find((e) => e.kind === 'kaji.result')!.payload as {
-        outcome: string;
-        text: string;
-      };
-      assert.equal(refused.outcome, 'refused');
-      assert.match(refused.text, /notes\.delete_note/);
-      assert.match(refused.text, /not granted/);
-    } finally {
-      await Promise.allSettled([reserved.release()]);
-      for (const l of links) await l.stop();
-      await a.close();
-      await b.close();
-      await model.close();
-      rmSync(ha, { recursive: true, force: true });
-      rmSync(hb, { recursive: true, force: true });
-    }
+test(
+  'F-021-T04: an MCP tool granted on another base runs there through kaji.run, its grant re-checked there; an ungranted, changed or EVA-03 one never runs',
+  { timeout: 90000 },
+  async (t) => {
+    await withMcpBases(
+      t,
+      {
+        script: [
+          readOn('NERV-02', 'notes.read_note'),
+          '{"reply":"Asked Tabgha."}',
+          readOn('NERV-02', 'notes.delete_note'),
+          '{"reply":"Asked Tabgha to delete it."}',
+          readOn('NERV-02', 'notes.read_note'),
+          '{"reply":"Asked again."}',
+          readOn('NERV-02', 'notes.read_note'),
+          '{"reply":"And again."}',
+        ],
+      },
+      async ({ a, b, model, ask, setGrant }) => {
+        const read = await ask('Read my shopping note on Tabgha');
+        assert.match(model.systems[0]!, /NERV-02 \(Tabgha\): notes\.read_note/, 'Misato sees the offered MCP tool');
+        assert.equal(read.outcome, 'grant');
+        assert.match(read.text, /Tabgha ran notes\.read_note/);
+        assert.match(read.text, /buy milk and bread/, 'the MCP server answered on Tabgha');
+        // Outside content on both bases: the asking sortie here, and the job's sortie there, which is closed.
+        assert.equal((await a.sortie(read.sortieId))?.trust, 'tainted');
+        const there = (await b.sorties()).find(
+          (s) => s.title.includes('notes.read_note') || s.title.includes('From NERV-01'),
+        );
+        assert.ok(there, JSON.stringify(await b.sorties()));
+        assert.equal(there.trust, 'tainted');
+        assert.equal(there.status, 'done', 'the job’s sortie on Tabgha closes');
+        const evThere = (await b.events(there.id)).map((e) => e.kind);
+        assert.ok(evThere.includes('grant.used') && evThere.includes('action.done'), evThere.join(', '));
+
+        const del = await ask('Delete my shopping note on Tabgha');
+        assert.equal(del.outcome, 'refused');
+        assert.match(del.text, /notes\.delete_note is not granted on this base/);
+
+        await setGrant({ fingerprint: 'ffffffffffffffff' });
+        const stale = await ask('Read it again');
+        assert.equal(stale.outcome, 'refused', 'a grant whose description no longer matches is suspended there');
+        assert.match(stale.text, /notes\.read_note is not granted on this base now/);
+
+        await setGrant({ eva: '03' });
+        const quarantined = await ask('Read it once more');
+        assert.equal(quarantined.outcome, 'refused');
+        assert.match(quarantined.text, /granted for EVA-03/);
+      },
+    );
+  },
+);
+
+test(
+  "F-021-T04: an MCP job the other base's gate would send to its owner is refused there, its card rejected and its receipt saying so",
+  { timeout: 60000 },
+  async (t) => {
+    await withMcpBases(
+      t,
+      {
+        script: [readOn('NERV-02', 'notes.read_note'), '{"reply":"Asked Tabgha."}'],
+        scrolls: { deny: [], blue: ['notes.read_note'], syncThreshold: 80, maxRejects: 3, budget: 1 },
+      },
+      async ({ b, hb, ask }) => {
+        const r = await ask('Read my shopping note on Tabgha');
+        assert.equal(r.outcome, 'refused');
+        assert.match(r.text, /needs the owner's approval on this base/);
+        assert.deepEqual(await b.approvals(), [], 'no card is left waiting on Tabgha');
+        const db = new DatabaseSync(join(hb, 'nerv.sqlite'), { readOnly: true });
+        try {
+          const job = db.prepare('SELECT state, result FROM worker_jobs').get() as { state: string; result: string };
+          assert.match(job.result, /needs the owner's approval on this base/, 'a resend hears the same refusal');
+          const card = db.prepare('SELECT decision, source FROM approvals').get() as {
+            decision: string;
+            source: string;
+          };
+          assert.deepEqual({ ...card }, { decision: 'reject', source: 'kaji-mcp' });
+        } finally {
+          db.close();
+        }
+      },
+    );
   },
 );
 

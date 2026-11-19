@@ -345,6 +345,15 @@ export const methodSchemas = {
     },
     additionalProperties: false,
   },
+  'worker.refuseApproval': {
+    type: 'object',
+    required: ['id', 'reason'],
+    properties: {
+      id: { type: 'string', minLength: 1, maxLength: 100 },
+      reason: { type: 'string', minLength: 1, maxLength: 500 },
+    },
+    additionalProperties: false,
+  },
   'actions.finished': {
     type: 'object',
     required: ['sortieId', 'actionId', 'tool'],
