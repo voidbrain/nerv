@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync } from 'node:fs';
 import { createServer, type Server } from 'node:net';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, parse } from 'node:path';
 import { EVA_DENIED_LOCAL_PORTS, buildEvaSeatbeltProfile, runEvaJob, type EvaJobEvent } from '../src/eva-runner.ts';
 import type { EvaClass } from '../src/pilots.ts';
 
@@ -90,13 +90,15 @@ describe('F-049-T07: each class gets only what its profile allows', () => {
     const secret = scratch('secret');
     try {
       const base = { workspaceDir: '/tmp/w', hostHomeDir: home, nervStateDir: state, deniedReadPaths: [secret] };
-      for (const w of [home, state, '/', join(home, 'Documents'), secret, join(secret, 'inner')])
+      // The root of the filesystem $HOME is on (`/`, or its drive on Windows): it holds $HOME.
+      const root = parse(realpathSync(home)).root;
+      for (const w of [home, state, root, join(home, 'Documents'), secret, join(secret, 'inner')])
         assert.throws(
           () => buildEvaSeatbeltProfile('eva-01', { ...base, writablePaths: [w] }),
           /no EVA class writes in \$HOME, NERV state or a denied path/,
           w,
         );
-      for (const r of ['/', state, join(state, 'keys'), secret])
+      for (const r of [root, state, join(state, 'keys'), secret])
         assert.throws(
           () => buildEvaSeatbeltProfile('eva-03', { ...base, readOnlyPaths: [r] }),
           /re-opens NERV state or a denied path/,
