@@ -140,11 +140,20 @@ export function buildEvaSeatbeltProfile(
   const homeDir = canonicalExistingPath(options.hostHomeDir);
   const stateDir = options.nervStateDir ? canonicalExistingPath(options.nervStateDir) : undefined;
   const readOnly = (options.readOnlyPaths ?? []).map(canonicalExistingPath);
-  const deniedReads = [
-    homeDir,
-    ...(stateDir ? [stateDir] : []),
-    ...(options.deniedReadPaths ?? []).map(canonicalExistingPath),
-  ];
+  const denied = (options.deniedReadPaths ?? []).map(canonicalExistingPath);
+  const deniedReads = [homeDir, ...(stateDir ? [stateDir] : []), ...denied];
+  // Later Seatbelt rules win: an allow for a path that holds a denied one would re-open it (review of PR #558).
+  const within = (path: string, root: string) =>
+    path === root || path.startsWith(root.endsWith('/') ? root : root + '/');
+  const overlaps = (a: string, b: string) => within(a, b) || within(b, a);
+  for (const w of writable)
+    if (deniedReads.some((d) => overlaps(w, d)))
+      throw new Error(`${w}: no EVA class writes in $HOME, NERV state or a denied path, or in a folder holding one.`);
+  // A read-only input may sit inside $HOME (a checkout), never hold it, and never touch state or a denied path.
+  const neverRead = [...(stateDir ? [stateDir] : []), ...denied];
+  for (const r of readOnly)
+    if (within(homeDir, r) || neverRead.some((d) => overlaps(r, d)))
+      throw new Error(`${r} re-opens NERV state or a denied path (or holds $HOME); it cannot be a read-only input.`);
 
   const lines: string[] = [
     '(version 1)',
@@ -171,6 +180,11 @@ export function buildEvaSeatbeltProfile(
   }
   lines.push(`(allow file-read* (subpath "${escapeSbString(workspace)}"))`);
   for (const w of writable) lines.push(`(allow file-read* (subpath "${escapeSbString(w)}"))`);
+  // State and denied paths stay denied after every allow, whatever was granted.
+  for (const d of neverRead) {
+    lines.push(`(deny file-read* (subpath "${escapeSbString(d)}"))`);
+    lines.push(`(deny file-write* (subpath "${escapeSbString(d)}"))`);
+  }
   return `${lines.join('\n')}\n`;
 }
 
@@ -325,7 +339,7 @@ export function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
   return runEvaJob({
     ...rest,
     evaClass: 'eva-03',
-    onEvent: (e) => onLedgerEvent?.({ ...e, kind: `eva03.${e.phase}`, evaClass: 'eva-03' }),
+    onEvent: ({ phase, ...e }) => onLedgerEvent?.({ ...e, kind: `eva03.${phase}`, evaClass: 'eva-03' }),
   });
 }
 
