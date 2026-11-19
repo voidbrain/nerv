@@ -1575,7 +1575,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-008-T11 — Battery cards on the dashboard (Planned).
+💻 **→** Next: F-008-T11 — Battery cards on the dashboard (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1587,7 +1587,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-008-t11"></a>F-008-T11 — Battery cards on the dashboard | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-008-t11"></a>F-008-T11 — Battery cards on the dashboard | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | 🤖 | [PR #554](https://github.com/voidbrain/nerv/pull/554) implementation |
 | 🟢 Small | <a id="f-008-t12"></a>F-008-T12 — Live check with real batteries | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-008-T11](#f-008-t11) | ⏳ 🤖 | — |
 | 🟢 Small | **Total** | 4.75 h (11 of 12 steps) | 1.25 h (3 of 12 steps recorded) | 0.75 h | 10 of 12 completed | | |
 
@@ -1615,7 +1615,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-008-T08: [PR #472](https://github.com/voidbrain/nerv/pull/472) implementation · F-008-T09: [PR #476](https://github.com/voidbrain/nerv/pull/476) implementation · F-008-T10: [PR #544](https://github.com/voidbrain/nerv/pull/544) implementation. [PR #544](https://github.com/voidbrain/nerv/pull/544) F-008-T10 (`src/battery-health.ts`, `src/batteries.ts`, `test/battery-health.test.ts`); [PR #472](https://github.com/voidbrain/nerv/pull/472); [PR #476](https://github.com/voidbrain/nerv/pull/476) (merged; CI green); F-008-T07 Italian/English battery charge-state & cycle chat (`applyChatPhrase`, `parseBatteryChatCommand`, `formatBatteryStateLines` in `src/batteries.ts`, `batteries.list`/`batteries.chat` in `src/executors.ts`, `batteries status` and `batteries chat` in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); F-008-T06 battery registry and `one-more-battery` importer (`src/batteries.ts`, `Store.batteries` in `src/store.ts`, `batteries` CLI in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); Rescoped by the owner 2026-11-14 ([plan](design/fpv-and-cooking-plan-2026-11-14.md), [PR #408](https://github.com/voidbrain/nerv/pull/408)); earlier: [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment, PR #313 priority |
+| PR / evidence | Steps: F-008-T08: [PR #472](https://github.com/voidbrain/nerv/pull/472) implementation · F-008-T09: [PR #476](https://github.com/voidbrain/nerv/pull/476) implementation · F-008-T10: [PR #544](https://github.com/voidbrain/nerv/pull/544) implementation · F-008-T11: [PR #554](https://github.com/voidbrain/nerv/pull/554) implementation. [PR #554](https://github.com/voidbrain/nerv/pull/554) F-008-T11 (`src/battery-health.ts`, `src/server.ts`, `web/src/battery-cards.ts`, `test/battery-cards.test.ts`, `test/angular.browser.mjs`); [PR #544](https://github.com/voidbrain/nerv/pull/544) F-008-T10 (`src/battery-health.ts`, `src/batteries.ts`, `test/battery-health.test.ts`); [PR #472](https://github.com/voidbrain/nerv/pull/472); [PR #476](https://github.com/voidbrain/nerv/pull/476) (merged; CI green); F-008-T07 Italian/English battery charge-state & cycle chat (`applyChatPhrase`, `parseBatteryChatCommand`, `formatBatteryStateLines` in `src/batteries.ts`, `batteries.list`/`batteries.chat` in `src/executors.ts`, `batteries status` and `batteries chat` in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); F-008-T06 battery registry and `one-more-battery` importer (`src/batteries.ts`, `Store.batteries` in `src/store.ts`, `batteries` CLI in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); Rescoped by the owner 2026-11-14 ([plan](design/fpv-and-cooking-plan-2026-11-14.md), [PR #408](https://github.com/voidbrain/nerv/pull/408)); earlier: [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment, PR #313 priority |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-008-T08 verified: [PR #472](https://github.com/voidbrain/nerv/pull/472) merged on green CI; F-008-T09 verified: [PR #476](https://github.com/voidbrain/nerv/pull/476) merged on green CI. `npx tsc --noEmit`, `npm run check:conventions`, `node --test test/batteries.test.ts`, and `npm run check:fast` passed 2026-11-15; remote CI pending PR |
 | Reviewed | 2026-11-18 |

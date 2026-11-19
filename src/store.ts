@@ -24,6 +24,7 @@ import { builtinTools, type AgencySnapshot } from './executors.ts';
 import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circuits.ts';
 import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
+import { buildBatteryDashboardCards } from './battery-health.ts';
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
 import { FPV_BUILDS_SCHEMA, FpvBuildStore } from './fpv-builds.ts';
 import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
@@ -590,6 +591,9 @@ export class Store {
   }
   health() {
     return { integrityCheck: 'not-run', instrumentality: this.instrumentality.latest() };
+  }
+  batteryCards() {
+    return buildBatteryDashboardCards(this.batteries);
   }
   doctor() {
     return {

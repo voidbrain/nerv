@@ -245,6 +245,7 @@ export function makeServer(
           '/api/sorties',
           '/api/queue',
           '/api/lists/show',
+          '/api/batteries',
         ].includes(path) ||
           /^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path) ||
           /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path))
@@ -376,6 +377,9 @@ export function makeServer(
             Number(url.searchParams.get('limit') ?? 50),
           ),
         );
+      } else if (req.method === 'GET' && path === '/api/batteries') {
+        if (url.search) throw new Error('Unknown batteries query.');
+        reply(200, { items: store.batteryCards ? await store.batteryCards() : [] });
       } else if (req.method === 'GET' && path === '/api/lists/show') {
         if (!store.listsShow) {
           reply(404, { error: 'Lists unavailable.' });

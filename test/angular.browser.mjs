@@ -31,6 +31,30 @@ test(
     const store = new Store(':memory:');
     store.modelUsage = async (before, limit) => store.usage.page(before, limit);
     store.lilith = { list: async () => store.memory.list(), episodes: async () => store.memory.episodes() };
+    const bat1 = store.batteries.register({
+      packNumber: 7,
+      series: 'blu',
+      seriesColor: 'blu',
+      brand: 'Tattu',
+      batteryType: 'LiPo 6S',
+      cellCount: 6,
+      capacityMah: 1480,
+      purchaseDate: '2026-01-10',
+      initialResistanceMohm: [2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+    });
+    store.batteries.recordResistance(bat1.id, [2.0, 2.0, 2.0, 2.0, 2.0, 2.0], '2031-04-01T10:00:00Z');
+    const bat2 = store.batteries.register({
+      packNumber: 2,
+      series: 'rossa',
+      seriesColor: 'rossa',
+      brand: 'GNB',
+      batteryType: 'LiHV 3S',
+      cellCount: 3,
+      capacityMah: 450,
+      purchaseDate: '2026-02-10',
+      initialResistanceMohm: [3.1, 3.2, 3.1],
+    });
+    store.batteries.recordResistance(bat2.id, [3.1, 3.2, 3.1], '2031-04-01T10:00:00Z');
     const token = 'e'.repeat(32);
     const server = makeServer(store, token, {
       webRoot: resolve('dist/web/browser'),
@@ -248,6 +272,20 @@ test(
           await evaluate(`document.querySelector('label:has(input[type="datetime-local"]) small').textContent`),
           lang === 'it' ? 'Ora locale del browser' : 'Browser local time',
         );
+        // F-008-T11: battery cards render and filter by series and type.
+        await until('document.querySelectorAll("article.battery-card").length===2');
+        await evaluate(
+          `(()=>{const s=document.querySelector('#bat-filter-series');s.value='blu';s.dispatchEvent(new Event('change'));})()`,
+        );
+        await until('document.querySelectorAll("article.battery-card").length===1');
+        await evaluate(
+          `(()=>{const s=document.querySelector('#bat-filter-series');s.value='';s.dispatchEvent(new Event('change'));const t=document.querySelector('#bat-filter-type');t.value='LiHV 3S';t.dispatchEvent(new Event('change'));})()`,
+        );
+        await until('document.querySelectorAll("article.battery-card").length===1');
+        await evaluate(
+          `(()=>{const t=document.querySelector('#bat-filter-type');t.value='';t.dispatchEvent(new Event('change'));})()`,
+        );
+        await until('document.querySelectorAll("article.battery-card").length===2');
         for (const [width, height] of [
           [1440, 1000],
           [390, 844],
