@@ -15,7 +15,12 @@
     "src/storage-copy.ts",
     "test/storage-copy.test.ts",
     "docs/work/records/F-088.md",
-    "docs/work/tasks/F-088-T03.json"
+    "docs/work/tasks/F-088-T03.json",
+    "docs/work/records/F-005.md",
+    "docs/work/tasks/F-005-T29.json",
+    "docs/work/tasks/F-005-T38.json",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",
