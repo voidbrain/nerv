@@ -29,7 +29,8 @@
     "web/public/dashboard/index.html",
     "web/public/dashboard/live.js",
     "test/evaluation.browser.mjs",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "test/dashboard-poll.test.ts"
   ],
   "capabilities": [
     "bounded-edit",
