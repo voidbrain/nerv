@@ -127,6 +127,7 @@ export const communicationGraph = [
       'misato.claim',
       'memory.recall',
       'kaji.bases',
+      'documents.find',
       'kaji.records',
       'kaji.lastSeen',
       'kaji.main',
