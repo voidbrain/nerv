@@ -148,10 +148,15 @@ export class RuntimePlanning {
           ...(reply ? { reply } : {}),
           ...(durationMs !== undefined ? { durationMs } : {}),
         });
+      const surfaceStep = [...steps]
+        .reverse()
+        .find((s) => s.outcome === 'grant' && s.result && typeof s.result === 'object' && 'surface' in s.result);
+      const surface = surfaceStep ? (surfaceStep.result as { surface?: unknown }).surface : undefined;
       return {
         ...(proactive ? { proactive: true as const } : {}),
         sortieId,
         ...(reply ? { reply } : {}),
+        ...(surface !== undefined ? { surface } : {}),
         ...(error ? { error } : {}),
         steps,
         waiting,

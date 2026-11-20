@@ -747,7 +747,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-082-t02"></a>F-082-T02 — Checklist card in the dashboard chat | 0.5 h | 0 h | 0 h | Implemented; verification pending | — | [F-082-T04](#f-082-t04), [F-082-T05](#f-082-t05) | 🤖 | [PR #483](https://github.com/voidbrain/nerv/pull/483) implementation |
-| 🟡 Medium | <a id="f-082-t05"></a>F-082-T05 — Show the checklist card in the dashboard chat | 1.5 h | 0 h | 1.5 h | Planned | [F-082-T02](#f-082-t02) | [F-082-T04](#f-082-t04) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-082-t05"></a>F-082-T05 — Show the checklist card in the dashboard chat | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [F-082-T02](#f-082-t02) | [F-082-T04](#f-082-t04) | 🤖 | [PR #606](https://github.com/voidbrain/nerv/pull/606) Show checklist card in dashboard chat and sync toggles |
 | 🟢 Small | <a id="f-082-t04"></a>F-082-T04 — Owner check: add by Telegram, tick on the dashboard | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-082-T02](#f-082-t02), [F-082-T05](#f-082-t05) | — | ⏳ 🧑‍🔧 | — |
 | 🟡 Medium | **Total** | 3.5 h (4 of 5 steps) | 0.5 h (1 of 5 steps recorded) | 1.5 h agent + 0.25 h owner | 2 of 5 completed | | | | |
 
@@ -767,7 +767,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-082-T02: [PR #483](https://github.com/voidbrain/nerv/pull/483) implementation · F-082-T03: [PR #479](https://github.com/voidbrain/nerv/pull/479) implementation. [PR #479](https://github.com/voidbrain/nerv/pull/479); [PR #483](https://github.com/voidbrain/nerv/pull/483) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-082-T02: [PR #483](https://github.com/voidbrain/nerv/pull/483) implementation · F-082-T03: [PR #479](https://github.com/voidbrain/nerv/pull/479) implementation · F-082-T05: [PR #606](https://github.com/voidbrain/nerv/pull/606) Show checklist card in dashboard chat and sync toggles. [PR #606](https://github.com/voidbrain/nerv/pull/606) (F-082-T05); [PR #479](https://github.com/voidbrain/nerv/pull/479); [PR #483](https://github.com/voidbrain/nerv/pull/483) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-082-T02 not closed: the card, its toggle and its AXE audit passed on green CI (PR #483), but nothing in the dashboard chat ever shows it (only the test hook `__nervSetSurface` does), so the owner check F-082-T04 cannot pass yet; waits on the owner's decision. F-082-T03 verified: [PR #479](https://github.com/voidbrain/nerv/pull/479) merged on green CI. |
 | Reviewed | 2026-11-18 |
