@@ -167,6 +167,10 @@ test('Instrumentality runs once a local day at its time, and a failed digest is 
   try {
     await t.runtime.chat('hello', 'cli');
     t.runtime.startInstrumentality(() => ({ mode: { at: '00:00' }, timeZone: 'Europe/Rome' }), 50);
+    // B-104: until both attempts happened (a fixed 400 ms saw none on a slow Windows runner), then a settle time in
+    // which a looping retry would show up.
+    const digests = () => t.asked.filter((a) => a === 'digest').length;
+    for (let i = 0; i < 200 && digests() < 2; i++) await wait(50);
     await wait(400);
     assert.equal(
       t.asked.filter((a) => a === 'digest').length,
