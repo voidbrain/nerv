@@ -335,7 +335,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟢 Small | 0.75 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-012-T04 — Web-chat adapter feasibility (Planned).
+💻 **→** Next: F-012-T04 — Web-chat adapter feasibility (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -347,7 +347,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-012-t04"></a>F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned | — | [F-012-T05](#f-012-t05) | 🤖 | — |
+| 🟢 Small | <a id="f-012-t04"></a>F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-012-T05](#f-012-t05) | 🤖 | [PR #602](https://github.com/voidbrain/nerv/pull/602) implementation |
 | 🟢 Small | <a id="f-012-t05"></a>F-012-T05 — Edge cases and real-host acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-012-T04](#f-012-t04) | [F-012-T06](#f-012-t06) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-012-t06"></a>F-012-T06 — Record the evidence of F-012-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-012-T05](#f-012-t05) | — | ⏳ 🤖 | — |
 | 🟢 Small | **Total** | 2.75 h (5 of 6 steps) | 0.75 h (2 of 6 steps recorded) | 0.75 h agent + 0.5 h owner | 3 of 6 completed | | | | |
@@ -369,7 +369,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-012-T03: [PR #473](https://github.com/voidbrain/nerv/pull/473) implementation. [PR #473](https://github.com/voidbrain/nerv/pull/473); [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
+| PR / evidence | Steps: F-012-T03: [PR #473](https://github.com/voidbrain/nerv/pull/473) implementation · F-012-T04: [PR #602](https://github.com/voidbrain/nerv/pull/602) implementation. [PR #602](https://github.com/voidbrain/nerv/pull/602) F-012-T04 (`src/web-chat-resume-adapter.ts`, `docs/evaluations/2026-11-20-f012-t04-web-chat-feasibility.md`, `test/web-chat-resume-adapter.test.ts`); [PR #473](https://github.com/voidbrain/nerv/pull/473); [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-012-T03 verified: [PR #473](https://github.com/voidbrain/nerv/pull/473) merged on green CI (adapter plus observed VS Code infeasibility). Pending adapter feasibility, regression and live host tests |
 | Reviewed | 2026-11-18 |
@@ -447,7 +447,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟢 Small | 1 h | [B-087-T01](#b-087-t01) | — | 🤖 | — | — |
 
-💻 **→** Next: B-082-T02 — Windows: keep the logon account for Entra ID and domain users (Ready).
+💻 **→** Next: B-082-T02 — Windows: keep the logon account for Entra ID and domain users (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -460,7 +460,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-082-t01"></a>B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [B-087-T01](#b-087-t01) | — | [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded |
-| 🟢 Small | <a id="b-082-t02"></a>B-082-T02 — Windows: keep the logon account for Entra ID and domain users | 0.75 h | 0 h | 0.75 h | Ready | — | — | [PR #591](https://github.com/voidbrain/nerv/pull/591) opened |
+| 🟢 Small | <a id="b-082-t02"></a>B-082-T02 — Windows: keep the logon account for Entra ID and domain users | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | — | — | [PR #591](https://github.com/voidbrain/nerv/pull/591) opened; [PR #601](https://github.com/voidbrain/nerv/pull/601) implementation |
 | 🟢 Small | **Total** | 1.5 h | 0.5 h (1 of 2 steps recorded) | 1 h | 0 of 2 completed | | | |
 
 <details>
@@ -470,9 +470,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-082-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded · B-082-T02: [PR #591](https://github.com/voidbrain/nerv/pull/591) opened. Test: `test/node-inspection.test.ts` "B-082: the Windows task user is the machine account over SSH…" (committed failing first) |
+| PR / evidence | Steps: B-082-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded · B-082-T02: [PR #591](https://github.com/voidbrain/nerv/pull/591) opened; [PR #601](https://github.com/voidbrain/nerv/pull/601) implementation. [PR #601](https://github.com/voidbrain/nerv/pull/601) (B-082-T02); Test: `test/node-inspection.test.ts` "B-082: the Windows task user keeps Entra and domain accounts but repairs workgroup users" (committed failing first in B-082-T02); Review: fresh-context P1 review found no blocking code, security, privacy or compliance issue and confirmed the later test edit is formatting-only; prior T01 test committed failing first |
 | Opened | 2026-11-18 |
-| Verification | 2026-11-18: CI green on PR #517. 2026-11-20: review done. Pending: the live SSH install on Tabgha (after B-087-T01) and B-082-T02. |
+| Verification | 2026-11-20 local: B-082 targeted regression 2/2 passes; full tests 1,041 pass / 2 platform skips; build, `check:fast` and headless integration pass (5 pass / 1 Windows skip). Fresh-context review passed; CI pending. 2026-11-18: T01 CI green on PR #517. Pending: the live SSH install on Tabgha after B-087-T01. |
 | Reviewed | 2026-11-20 |
 
 </details>
