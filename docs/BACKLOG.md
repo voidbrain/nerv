@@ -2387,7 +2387,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
+| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587); F-111-T01 in [PR #611](https://github.com/voidbrain/nerv/pull/611) |
 | Opened | 2026-11-20 |
 | Verification | Pending |
 | Reviewed | 2026-11-20 |
