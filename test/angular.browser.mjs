@@ -812,7 +812,12 @@ test(
       const { toChecklistSurface } = await import('../src/lists.ts');
       const listTime = new Date(Date.now() - 5000);
       const listSortie = store.ledger.openSortie('misato', 'Show shopping list', 'trusted', listTime);
-      store.ledger.note(listSortie, 'misato.request', { text: 'show shopping list', conversation: 'dashboard' }, listTime);
+      store.ledger.note(
+        listSortie,
+        'misato.request',
+        { text: 'show shopping list', conversation: 'dashboard' },
+        listTime,
+      );
       store.ledger.note(
         listSortie,
         'misato.step',

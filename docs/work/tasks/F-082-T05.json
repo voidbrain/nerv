@@ -5,6 +5,12 @@
   "title": "Show the checklist card in the dashboard chat",
   "goal": "When Misato shows or changes a list, the dashboard chat shows its checklist card",
   "status": "implemented",
+  "prs": [
+    {
+      "pr": 606,
+      "note": "Show checklist card in dashboard chat and sync toggles"
+    }
+  ],
   "acceptance": [
     "A chat reply that shows or changes a list carries the checklist surface and the dashboard chat renders it",
     "Ticking it there updates the store and Telegram (browser test, AXE passes)"
