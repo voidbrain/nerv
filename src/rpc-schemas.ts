@@ -267,6 +267,28 @@ export const methodSchemas = {
     properties: {},
     additionalProperties: false,
   },
+  'batteries.register': {
+    type: 'object',
+    required: ['packNumber', 'brand', 'batteryType', 'cellCount', 'capacityMah', 'purchaseDate'],
+    properties: {
+      packNumber: { type: 'integer', minimum: 1, maximum: 9999 },
+      series: { type: 'string', minLength: 1, maxLength: 64 },
+      seriesColor: { type: 'string', minLength: 1, maxLength: 64 },
+      brand: { type: 'string', minLength: 1, maxLength: 64 },
+      batteryType: { type: 'string', minLength: 1, maxLength: 64 },
+      cellCount: { type: 'integer', minimum: 1, maximum: 12 },
+      capacityMah: { type: 'integer', minimum: 50, maximum: 50000 },
+      purchaseDate: { type: 'string', minLength: 4, maxLength: 32 },
+      initialResistanceMohm: {
+        type: 'array',
+        items: { type: 'number', minimum: 0.05, maximum: 500 },
+        minItems: 1,
+        maxItems: 12,
+      },
+      allowPendingResistance: { type: 'boolean' },
+    },
+    additionalProperties: false,
+  },
   'approvals.decide': {
     type: 'object',
     required: ['id', 'decision', 'source'],
