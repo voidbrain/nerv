@@ -47,8 +47,35 @@ export function validateEvaLimits(raw: unknown, defaults: EvaLimits = defaultEva
 export interface EvaSlotRequest {
   readonly jobId: string;
   readonly evaClass: EvaClass;
+  readonly pilot?: string;
+  readonly sortieId?: string;
   readonly needsModel?: boolean;
   readonly signal?: AbortSignal;
+}
+
+export type EvaInstanceState = 'running' | 'waiting' | 'uncertain';
+
+export interface EvaInstanceInfo {
+  readonly jobId: string;
+  readonly evaClass: EvaClass;
+  readonly pilot: string | null;
+  readonly state: EvaInstanceState;
+  readonly sortieId?: string | null;
+  readonly started?: string;
+}
+
+export interface EvaMachineInstances {
+  readonly machineId: string;
+  readonly machineName: string;
+  readonly self: boolean;
+  readonly online: boolean;
+  readonly reported: boolean;
+  readonly limits?: EvaLimits;
+  readonly instances: readonly EvaInstanceInfo[];
+}
+
+export interface EvaInstancesSnapshot {
+  readonly machines: readonly EvaMachineInstances[];
 }
 
 /** A job that can never fit these limits, whatever finishes: refused with its reason, never left waiting. */
@@ -74,6 +101,7 @@ export class EvaPool {
   private running = 0;
   private memoryMb = 0;
   private modelSlots = 0;
+  private readonly active = new Map<string, EvaInstanceInfo>();
   private readonly queue: Waiting[] = [];
   constructor(limits: EvaLimits) {
     this.limits = limits;
@@ -82,6 +110,20 @@ export class EvaPool {
   /** Instances running and waiting now, for the dashboard and tests. */
   status(): { running: number; waiting: number; memoryMb: number; modelSlots: number } {
     return { running: this.running, waiting: this.queue.length, memoryMb: this.memoryMb, modelSlots: this.modelSlots };
+  }
+
+  /** Live running and waiting instances with class, pilot, job and state (F-049-T09). */
+  instances(): EvaInstanceInfo[] {
+    return [
+      ...this.active.values(),
+      ...this.queue.map((w) => ({
+        jobId: w.request.jobId,
+        evaClass: w.request.evaClass,
+        pilot: w.request.pilot ?? null,
+        state: 'waiting' as const,
+        ...(w.request.sortieId !== undefined ? { sortieId: w.request.sortieId } : {}),
+      })),
+    ];
   }
 
   /** Waits for room, runs `job` in it and frees the room afterwards, whether the job succeeded or not. */
@@ -97,6 +139,7 @@ export class EvaPool {
     try {
       return await job();
     } finally {
+      this.active.delete(request.jobId);
       this.running--;
       this.memoryMb -= memoryMb;
       if (request.needsModel) this.modelSlots--;
@@ -116,6 +159,14 @@ export class EvaPool {
     this.running++;
     this.memoryMb += memoryMb;
     if (request.needsModel) this.modelSlots++;
+    this.active.set(request.jobId, {
+      jobId: request.jobId,
+      evaClass: request.evaClass,
+      pilot: request.pilot ?? null,
+      state: 'running',
+      ...(request.sortieId !== undefined ? { sortieId: request.sortieId } : {}),
+      started: new Date().toISOString(),
+    });
   }
 
   private admit(request: EvaSlotRequest, memoryMb: number): Promise<void> {

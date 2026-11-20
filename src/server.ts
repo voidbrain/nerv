@@ -553,6 +553,8 @@ export function makeServer(
           pilots: store.pilotRoster ? await store.pilotRoster() : [],
           ...(store.genericPilot ? { generic: await store.genericPilot() } : {}),
         });
+      } else if (req.method === 'GET' && path === '/api/eva/instances') {
+        reply(200, store.evaInstances ? await store.evaInstances() : { machines: [] });
       } else if (req.method === 'POST' && path === '/api/pilots') {
         if (!store.addPilot) {
           reply(503, { error: 'Pilot setup unavailable.' });

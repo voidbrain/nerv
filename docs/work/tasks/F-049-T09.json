@@ -4,7 +4,13 @@
   "parent": "F-049",
   "title": "Dashboard shows instances per class",
   "goal": "Replace the drawn EVA cages with live instances per class, per machine",
-  "status": "planned",
+  "status": "implemented",
+  "prs": [
+    {
+      "pr": 580,
+      "note": "implementation"
+    }
+  ],
   "acceptance": [
     "Instances per class with pilot, job and state; empty classes say so",
     "Follows docs/STYLE-GUIDE.md; passes AXE and WCAG AA",

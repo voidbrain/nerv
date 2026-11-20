@@ -53,11 +53,11 @@ const BASES = [
   { id:"nerv02", name:"NERV-02", role:"branch · vault · EVA cage", lat:35.160, lon:139.240, status:"standby", cpu:4, gpu:null, ram:18, rtt:null, models:"—" }
 ];
 const LINKS = [["tokyo3","nerv01"],["tokyo3","nerv02"],["nerv01","nerv02"]];
-const CAGES = [
-  { id:"EVA-00", label:"PROTOTYPE · shadow", base:"tokyo3", color:"#2a7fff" },
-  { id:"EVA-01", label:"TEST TYPE · bounded", base:"nerv01", color:"#9b5cff" },
-  { id:"EVA-02", label:"PRODUCTION · full grant", base:"tokyo3", color:"#ff3b30" },
-  { id:"EVA-03", label:"QUARANTINE · tainted", base:"nerv02", color:"#8a8a8a" }
+const EVA_CLASSES = [
+  { id:"eva-00", name:"EVA-00", label:"Shadow", css:"--eva00" },
+  { id:"eva-01", name:"EVA-01", label:"Bounded", css:"--eva01" },
+  { id:"eva-02", name:"EVA-02", label:"Full grant", css:"--eva02" },
+  { id:"eva-03", name:"EVA-03", label:"Quarantine", css:"--eva03" }
 ];
 const PILOTS = [
   { id:"mail-brief", stage:"production", runs:41, rejects:0, overrides:1 },
@@ -87,7 +87,7 @@ const LABELS = {
   eva:{ brandTitle:"TACTICAL COMMAND", brandTag:"SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY",
     needs:"Misato's apartment · needs you", sorties:"Sorties", next:"Coming up", flow:"Sephirot · sortie flow",
     detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health",
-    bases:"NERV bases · Kaji line", cages:"EVA cages · heartbeat", budget:"Battery · budget", melons:"Marduk Institute · Pilots", skills:"Kaji's watermelons · skills", skillStages:"seed → sprout → ripe", lilith:"Terminal Dogma · Lilith",
+    bases:"NERV bases · Kaji line", cages:"EVA · instances per class", budget:"Battery · budget", melons:"Marduk Institute · Pilots", skills:"Kaji's watermelons · skills", skillStages:"seed → sprout → ripe", lilith:"Terminal Dogma · Lilith",
     spear:"SPEAR OF LONGINUS", dummy:"DUMMY PLUG ACTIVE", launch:"Launch",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Battery today",
     steps:{ detect:"Detect", intake:"Naoko", route:"Gendo", consult:"Consult", plan:"Misato", magi:"MAGI", sync:"Sync", apt:"Apartment", plug:"Plug", eva:"EVA", debrief:"Debrief" },
@@ -95,7 +95,7 @@ const LABELS = {
   neutral:{ brandTitle:"OPERATIONS", brandTag:"owner rules enforced · append-only ledger · long-term memory",
     needs:"Needs your approval", sorties:"Jobs", next:"Coming up", flow:"Decision timeline",
     detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health",
-    bases:"Machines · mesh", cages:"Sandboxes · heartbeat", budget:"Budget", melons:"Pilots", skills:"Skills", skillStages:"create → try → use", lilith:"Memory",
+    bases:"Machines · mesh", cages:"Sandboxes · instances per class", budget:"Budget", melons:"Pilots", skills:"Skills", skillStages:"create → try → use", lilith:"Memory",
     spear:"STOP EVERYTHING", dummy:"MODELS UNAVAILABLE", launch:"Run",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Budget today",
     steps:{ detect:"Ingress", intake:"Intake", route:"Route", consult:"Consult", plan:"Plan", magi:"Review", sync:"Confidence", apt:"Approval", plug:"Grant", eva:"Sandbox", debrief:"Done" },
@@ -275,12 +275,8 @@ async function runFrom(s) { // resume the loop at the current action after an ed
 async function execute(s, a, b) {
   if (s.status === "stood-down") return;
   setPhase(s, "plug", "Ritsuko signs the A.T. Field: " + a.tool + " · single use · 60 s · args hash bound"); await wait(380);
-  const cage = CAGES.find(c => c.id === b.executor) || CAGES.find(c => c.id === "EVA-02");
-  const base = BASES.find(x => x.id === cage.base);
-  if (base.id !== "tokyo3") sendPacket("tokyo3", base.id, "plug");
-  activeCage[cage.id] = Date.now() + 1600;
+  const base = BASES[0];
   setPhase(s, "eva", b.executor + " @ " + base.name + " executes " + a.tool + " · field checked at the executor"); await wait(700);
-  if (base.id !== "tokyo3") sendPacket(base.id, "tokyo3", "result");
   a.status = "done"; s.spent += a.cost; state.spentToday += a.cost;
   if (a.casper) { state.routeSpend.umbilical += 0.004; state.spentToday += 0.004; }
   if (!isLocal(TOOLS[a.tool].effect)) s.happened.push({ tool:a.tool, inverse:TOOLS[a.tool].inverse || null });
@@ -780,9 +776,55 @@ function renderBases() {
     "<div class='tiny muted'>" + b.models + "</div>" +
     "<div style='margin-top:3px'><button class='btn sm' data-toggle='" + b.id + "'>" + (b.status === "online" ? "Simulate offline" : "Bring online") + "</button></div></div>").join("");
 }
+function evaMachinesForView() {
+  if (Array.isArray(state.evaMachines)) return state.evaMachines;
+  if (LIVE) {
+    const base = BASES[0] || { id:"local", name:"this machine", status:"online" };
+    return [{ machineId:base.id, machineName:base.name, self:true, online:base.status !== "offline", reported:true, instances:[] }];
+  }
+  const active = state.sorties.filter(s => s.status === "active" && s.phase === "eva").map(s => ({
+    jobId: s.id,
+    evaClass: pilotStage(s.pilot) === "prototype" ? "eva-00" : pilotStage(s.pilot) === "test" ? "eva-01" : "eva-02",
+    pilot: s.pilot || "unassigned",
+    state: "running",
+    sortieId: s.title
+  }));
+  return BASES.map((b, i) => ({
+    machineId: b.id,
+    machineName: b.name,
+    self: i === 0,
+    online: b.status !== "offline",
+    reported: true,
+    instances: i === 0 ? active : []
+  }));
+}
+function evaStateBadge(st) {
+  return st === "running" ? "b-ok" : st === "waiting" ? "b-warn" : st === "uncertain" ? "b-bad" : "b-muted";
+}
 function renderCages() {
   const box = document.getElementById("cages");
-  if (!box.children.length) box.innerHTML = CAGES.map(c => "<div class='cage" + (c.planned ? " planned" : "") + "'><div class='ch'><span style='color:var(--eva" + c.id.slice(4) + ")'>" + c.id + "</span><span class='tiny' id='cs-" + c.id + "'>IDLE</span></div><img class='eva-img' data-av='" + c.id.toLowerCase() + "' alt='" + c.id + "'/><canvas id='cv-" + c.id + "' height='30'></canvas><div class='cd' title='" + esc(c.label + " · @" + BASES.find(b => b.id === c.base).name) + "'>" + c.label + " · @" + BASES.find(b => b.id === c.base).name + "</div></div>").join("");
+  if (!box) return;
+  const machines = evaMachinesForView();
+  const total = machines.reduce((n, m) => n + (Array.isArray(m.instances) ? m.instances.length : 0), 0);
+  const sub = document.getElementById("cages-sub");
+  if (sub) sub.textContent = total + " active · " + machines.length + (machines.length === 1 ? " machine" : " machines");
+  box.innerHTML = machines.map(m => {
+    const insts = Array.isArray(m.instances) ? m.instances : [];
+    const statusText = m.self ? "this machine" : (m.online ? "online" : "offline");
+    const limitText = m.limits ? " · " + insts.length + "/" + m.limits.instances + " slots" : "";
+    const body = m.reported === false
+      ? "<div class='eva-empty'>Not reported by this machine</div>"
+      : "<div class='eva-classes'>" + EVA_CLASSES.map(c => {
+          const items = insts.filter(x => x.evaClass === c.id);
+          return "<div class='eva-class' data-eva-class='" + c.id + "'>" +
+            "<div class='eva-class-hdr'><span style='color:var(" + c.css + ")'>" + c.name + "</span><span class='tiny muted'>" + c.label + " · " + (items.length ? items.length + " active" : "empty") + "</span></div>" +
+            (items.length
+              ? items.map(inst => "<div class='eva-inst'><div class='eva-inst-meta'><span class='b'>" + esc(inst.pilot || "unassigned") + "</span><span class='tiny muted'>" + esc(inst.jobId) + (inst.sortieId ? " · " + esc(inst.sortieId) : "") + "</span></div><span class='badge " + evaStateBadge(inst.state) + "'>" + esc(inst.state.toUpperCase()) + "</span></div>").join("")
+              : "<div class='eva-empty'>Empty · no active instances</div>") +
+            "</div>";
+        }).join("") + "</div>";
+    return "<div class='eva-machine' data-machine='" + esc(m.machineId) + "'><div class='eva-machine-hdr'><span class='b " + (m.online ? "ok" : "muted") + "'>" + esc(m.machineName) + "</span><span class='tiny muted'>" + esc(statusText + limitText) + "</span></div>" + body + "</div>";
+  }).join("") || "<div class='eva-empty'>No machines reported.</div>";
 }
 function renderLog() {
   const el = document.getElementById("log"); if (!el) return;
@@ -822,7 +864,6 @@ function renderAll() { renderSkills(); fillAvatars(); renderQuestions(); renderN
 
 /* ================= MAP: zoomed regional topography (procedural hills and valleys) ================= */
 const map = { ready:false, w:540, h:250, proj:null, contours:[], base:null, linkPaths:{} };
-const activeCage = {};
 function sendPacket(from, to, kind) { state.packets.push({ from, to, kind, t0:performance.now(), dur:1400 }); }
 function noise(x, y) { // smooth deterministic pseudo-terrain
   return Math.sin(x * 0.021 + 1.3) * Math.cos(y * 0.027) + 0.6 * Math.sin(x * 0.051 + y * 0.034) + 0.35 * Math.cos(x * 0.093 - y * 0.071 + 2) + 0.2 * Math.sin(x * 0.17 + y * 0.13);
@@ -1031,32 +1072,10 @@ function drawTelegram(ctx, now, W, H) {
   ctx.font = "11px " + (cssVar("--font") || "monospace"); ctx.textAlign = "center"; ctx.fillStyle = color(status); ctx.fillText("Midori",x,y-12); ctx.textAlign = "start";
 }
 
-/* ================= EVA heartbeats ================= */
-function drawHeartbeats(now) {
-  CAGES.forEach((c, i) => {
-    const cv = document.getElementById("cv-" + c.id); if (!cv) return;
-    const base = BASES.find(b => b.id === c.base); const off = base.status === "offline" || !!c.planned; const busy = (activeCage[c.id] || 0) > Date.now();
-    const st = document.getElementById("cs-" + c.id); st.textContent = c.planned ? "PLANNED" : off ? "OFFLINE" : busy ? "ACTIVE" : base.status === "standby" ? "STANDBY" : "IDLE"; st.className = "tiny " + (off ? "muted" : busy ? "ok" : base.status === "standby" ? "warn" : "muted");
-    const dpr = window.devicePixelRatio || 1; const w = cv.clientWidth || 120, h = 30;
-    if (cv.width !== Math.floor(w * dpr)) { cv.width = Math.floor(w * dpr); cv.height = Math.floor(h * dpr); }
-    const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = "#000"; ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = "rgba(255,102,0,.12)"; ctx.lineWidth = 1; for (let gx = 0; gx < w; gx += 10) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke(); }
-    ctx.strokeStyle = off ? "#555" : busy ? cssVar("--ok") : base.status === "standby" ? cssVar("--warn") : c.color; ctx.lineWidth = 1.3; ctx.beginPath();
-    const period = busy ? 34 : base.status === "standby" ? 110 : 70; const shift = off ? 0 : (now / (busy ? 9 : 16)) % period;
-    for (let x = 0; x <= w; x++) {
-      let y = h / 2;
-      if (!off) { const p = ((x + shift + i * 13) % period) / period; const amp = busy ? 12 : 8;
-        if (p > 0.40 && p < 0.44) y -= amp * 0.3; else if (p >= 0.46 && p < 0.49) y += amp * 0.35; else if (p >= 0.49 && p < 0.52) y -= amp; else if (p >= 0.52 && p < 0.55) y += amp * 0.6; else if (p > 0.62 && p < 0.7) y -= amp * 0.22 * Math.sin((p - 0.62) / 0.08 * Math.PI); }
-      x ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-    }
-    ctx.stroke();
-  });
-}
-
 /* ================= LOOP + EVENTS ================= */
 let lastFrame = 0;
 function frame(now) {
-  if (now - lastFrame > 33) { updateCrtMotion(); drawCrtNoise(now); drawMap(now); drawHeartbeats(now); lastFrame = now; }
+  if (now - lastFrame > 33) { updateCrtMotion(); drawCrtNoise(now); drawMap(now); lastFrame = now; }
   requestAnimationFrame(frame);
 }
 setInterval(() => {
@@ -1254,7 +1273,7 @@ function setTheme(theme, mode, accent) {
 }
 
 // Live: only this machine is a base; simulated cages and pilots would point at bases that do not exist.
-if (LIVE) { state = freshState(); state.upcoming = []; BASES.splice(1); LINKS.length = 0; CAGES.forEach(c => { c.base = "tokyo3"; c.planned = c.id !== "EVA-02"; if (c.id === "EVA-02") c.label = "PRODUCTION · in-process executor, not sandboxed yet"; else c.label = c.label.split(" · ")[0] + " · planned"; }); PILOTS.length = 0; PILOTS.push({ id:"owner", stage:"production" }, { id:"misato", stage:"production" }); } else seed();
+if (LIVE) { state = freshState(); state.upcoming = []; BASES.splice(1); LINKS.length = 0; PILOTS.length = 0; PILOTS.push({ id:"owner", stage:"production" }, { id:"misato", stage:"production" }); } else seed();
 // ?theme= (and ?mode=, ?accent=) in the address win; otherwise what this browser last chose; an older single theme name
 // is mapped to its nearest Theme · Mode · Accent.
 { const prefs = readPrefs(), q = new URLSearchParams(location.search); const t = q.get("theme") || prefs.theme; const old = migrateTheme(t);

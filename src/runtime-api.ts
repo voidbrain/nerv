@@ -1,4 +1,5 @@
 import type { HistoryPage } from './history.ts';
+import type { EvaInstancesSnapshot } from './eva-pool.ts';
 import { sanitizeVerdict, type PeerVerdict, type VerdictAsk } from './kaji-link.ts';
 import type { BaseEntry } from './kaji.ts';
 import type { ActionDetail, Approval, Decision, SortieSummary } from './ledger.ts';
@@ -247,6 +248,8 @@ export interface StoreApi {
   externalTools?(): Promise<ExternalTools>;
   /** F-045/F-051: the pilot roster for the dashboard (config.json pilots, read now). */
   pilotRoster?(): Pilot[] | Promise<Pilot[]>;
+  /** F-049-T09: live EVA instances per class, per machine, for the dashboard. */
+  evaInstances?(): EvaInstancesSnapshot | Promise<EvaInstancesSnapshot>;
   genericPilot?(): Pilot | Promise<Pilot>;
   changePilotModel?(id: string, model: string): Promise<Pilot[]>;
   addPilot?(entry: Pilot): Promise<Pilot[]>;
