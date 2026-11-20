@@ -616,7 +616,7 @@ function seatMetric(seat, s, a) {
 function renderMagiPending(s) { if (state.selected === s.id) renderFlow(); }
 const EDGES = [
   ["detect","intake"],["detect","route"],["intake","route"],["route","plan"],["consult","plan","loop"],["plan","magi"],
-  ["magi","sync"],["magi","apt"],["sync","apt"],["sync","plug"],["apt","plug"],["plug","eva"],["eva","debrief"],
+  ["magi","sync"],["sync","apt"],["sync","plug"],["apt","plug"],["plug","eva"],["eva","debrief"],
   ["magi","plan","loop"],["apt","plan","loop"],["eva","plan","loop"],
   // Misato answered without an action: straight to Debrief (drawn only for such a sortie).
   ["plan","debrief","answer"],
@@ -631,7 +631,7 @@ const EDGES = [
 function edgeShown(s, e) {
   if (e[2] === "relay") return !!(s && s.forwarded);
   if (e[2] === "answer") return !!(s && !s.actions.length && !s.forwarded);
-  if (e[2] === "declined") return !!(s && !s.forwarded && s.actions.length && !s.actions.some(a => a.status === "done" || a.status === "failed"));
+  if (e[2] === "declined") return !!(s && !s.forwarded && s.status !== "active" && s.status !== "waiting" && s.status !== "queued" && s.done && s.done.apt && s.actions.length && !s.actions.some(a => a.status === "done" || a.status === "failed"));
   return true;
 }
 function nodeEl(id) { return id === "magi" ? document.getElementById("magi-big") : document.querySelector(".snode[data-n='" + id + "']"); }
