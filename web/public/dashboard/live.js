@@ -183,6 +183,13 @@
     if (direction === "newer" && usageBack.length) return loadUsage(usageBack[usageBack.length - 1], usageBack.slice(0,-1));
     return false;
   }
+  document.addEventListener("click", async e => {
+    const button = e.target.closest("[data-usage-page]"); if (!button || usageBusy) return;
+    const direction = button.dataset.usagePage;
+    try { await moveUsage(direction); }
+    catch (e) { if (e.status === 401) { token = ""; forgetSession(); signIn(SESSION_ENDED); } return; }
+    button.blur(); renderBudget(); const nextButton = document.querySelector('[data-usage-page="' + direction + '"]:not(:disabled)') || document.querySelector('[data-usage-page]:not(:disabled)'); if (nextButton) nextButton.focus();
+  });
   document.addEventListener("change", async e => {
     const chk = e.target && e.target.closest && e.target.closest("input[data-checklist-toggle]");
     if (!chk) return;
@@ -206,13 +213,6 @@
     } finally {
       chk.disabled = false;
     }
-  });
-  document.addEventListener("click", async e => {
-    const button = e.target.closest("[data-usage-page]"); if (!button || usageBusy) return;
-    const direction = button.dataset.usagePage;
-    try { await moveUsage(direction); }
-    catch (e) { if (e.status === 401) { token = ""; forgetSession(); signIn(SESSION_ENDED); } return; }
-    button.blur(); renderBudget(); const nextButton = document.querySelector('[data-usage-page="' + direction + '"]:not(:disabled)') || document.querySelector('[data-usage-page]:not(:disabled)'); if (nextButton) nextButton.focus();
   });
   const seen = new Set();
   const phaseOf = new Map(), phaseStarted = new Map(), nodeTimings = new Map(), advisedBy = new Map(), forwardedTo = new Map(), originOf = new Map(), remoteSorties = new Map();
