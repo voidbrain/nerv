@@ -64,8 +64,10 @@ describe('F-083-T10: recipe photos', () => {
       const got = store.photos.get(saved.id);
       assert.ok(got);
       assert.deepEqual(got.bytes, PNG_HEADER);
-      const mode = statSync(join(home, 'photos', `${saved.id}.png`)).mode & 0o777;
-      assert.equal(mode, 0o600);
+      if (process.platform !== 'win32') {
+        const mode = statSync(join(home, 'photos', `${saved.id}.png`)).mode & 0o777;
+        assert.equal(mode, 0o600);
+      }
     } finally {
       cleanup();
     }
