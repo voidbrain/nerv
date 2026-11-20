@@ -2415,7 +2415,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-098-T04](#f-098-t04) | — |
+| 🟢 Small | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-098-T04](#f-098-t04) | [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation |
 | 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0.25 h | 0 h | 0.25 h | Planned | [F-098-T03](#f-098-t03) | — | — |
 | 🟢 Small | **Total** | 2 h | 0.25 h (1 of 4 steps recorded) | 0.75 h | 2 of 4 completed | | | |
 
@@ -2435,7 +2435,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation. Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation · F-098-T03: [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation. [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-20: `node --test test/photos.test.ts test/fleet.test.ts test/batteries.test.ts test/battery-cards.test.ts test/telegram.test.ts`, `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-098-T02 verified: [PR #500](https://github.com/voidbrain/nerv/pull/500) merged on green CI. |
 | Reviewed | 2026-11-20 |

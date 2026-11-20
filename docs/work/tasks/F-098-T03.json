@@ -5,6 +5,12 @@
   "title": "Photos on crashes, parts and batteries",
   "goal": "A photo sent in Telegram or the dashboard is kept with the record it shows",
   "status": "implemented",
+  "prs": [
+    {
+      "pr": 588,
+      "note": "implementation"
+    }
+  ],
   "acceptance": [
     "Stored locally with size and type checks; private by default",
     "Shown with the crash, part or battery"
