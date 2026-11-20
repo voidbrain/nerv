@@ -5,6 +5,12 @@
   "title": "Shared command catalog and deterministic router",
   "goal": "Shared command catalog and deterministic router",
   "status": "implemented",
+  "prs": [
+    {
+      "pr": 608,
+      "note": "Shared command catalog and deterministic router"
+    }
+  ],
   "acceptance": [
     "Commands answered before Misato and without a model; read-only commands open no sortie"
   ],
