@@ -24,7 +24,30 @@ import type { ModelChange } from './model-setup.ts';
 import { MODEL_TIMEOUT_MS } from './model.ts';
 import { MAX_STEPS } from './misato.ts';
 import type { DocumentStore } from './documents.ts';
-import { MAX_PHOTO_BYTES, type PhotoStore } from './photos.ts';
+import type { BatteryRegistry } from './batteries.ts';
+import type { FleetStore } from './fleet.ts';
+import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.ts';
+
+type PhotoStoreHost = StoreApi & {
+  photos?: PhotoStore;
+  documents?: DocumentStore;
+  fleet?: FleetStore;
+  batteries?: BatteryRegistry;
+};
+
+const PHOTO_ROUTE_KINDS: Readonly<Record<string, PhotoOwnerKind>> = {
+  recipes: 'recipe',
+  crashes: 'crash',
+  parts: 'part',
+  batteries: 'battery',
+};
+
+function resolvePhotoOwner(s: PhotoStoreHost, kind: PhotoOwnerKind, id: string): string | undefined {
+  if (kind === 'recipe') return s.documents?.get(id)?.id;
+  if (kind === 'crash') return s.fleet?.getCrash(id)?.id;
+  if (kind === 'part') return s.fleet?.getPart(id)?.id;
+  return s.batteries?.get(id)?.id;
+}
 async function body(req: IncomingMessage, limit = 8192): Promise<Record<string, unknown>> {
   let text = '';
   for await (const chunk of req) {
@@ -249,6 +272,7 @@ export function makeServer(
           '/api/queue',
           '/api/lists/show',
           '/api/batteries',
+          '/api/fleet',
         ].includes(path) ||
           /^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path) ||
           /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path) ||
@@ -922,25 +946,45 @@ export function makeServer(
           'x-content-type-options': 'nosniff',
         });
         res.end(found.bytes);
-      } else if (req.method === 'GET' && /^\/api\/recipes\/([^/]+)\/photos$/.test(path)) {
-        const recipeId = decodeURIComponent(/^\/api\/recipes\/([^/]+)\/photos$/.exec(path)![1]!);
-        const s = store as StoreApi & { photos?: PhotoStore; documents?: DocumentStore };
-        const doc = s.documents?.get(recipeId);
-        if (!doc) {
-          reply(404, { error: 'Recipe not found.' });
+      } else if (req.method === 'GET' && path === '/api/fleet') {
+        const s = store as PhotoStoreHost;
+        if (!s.fleet) {
+          reply(200, { drones: [], parts: [], spares: [], crashes: [] });
           return;
         }
-        reply(200, s.photos?.list('recipe', doc.id) ?? []);
-      } else if (req.method === 'POST' && /^\/api\/recipes\/([^/]+)\/photos$/.test(path)) {
-        const recipeId = decodeURIComponent(/^\/api\/recipes\/([^/]+)\/photos$/.exec(path)![1]!);
-        const s = store as StoreApi & { photos?: PhotoStore; documents?: DocumentStore };
-        if (!s.photos || !s.documents) {
+        const drones = s.fleet.listDrones();
+        const parts = drones.flatMap((d) =>
+          s.fleet!.listParts(d.id).map((p) => ({
+            ...p,
+            photos: s.photos?.list('part', p.id) ?? [],
+          })),
+        );
+        const spares = s.fleet.listSpares();
+        const crashes = s.fleet.listCrashes().map((c) => ({
+          ...c,
+          photos: s.photos?.list('crash', c.id) ?? [],
+        }));
+        reply(200, { drones, parts, spares, crashes });
+      } else if (/^\/api\/(recipes|crashes|parts|batteries)\/([^/]+)\/photos$/.test(path)) {
+        const m = /^\/api\/(recipes|crashes|parts|batteries)\/([^/]+)\/photos$/.exec(path)!;
+        const ownerKind = PHOTO_ROUTE_KINDS[m[1]!]!;
+        const rawId = decodeURIComponent(m[2]!);
+        const s = store as PhotoStoreHost;
+        const ownerId = resolvePhotoOwner(s, ownerKind, rawId);
+        if (!ownerId) {
+          reply(404, { error: 'Target record not found.' });
+          return;
+        }
+        if (req.method === 'GET') {
+          reply(200, s.photos?.list(ownerKind, ownerId) ?? []);
+          return;
+        }
+        if (req.method !== 'POST') {
+          reply(405, { error: 'Method not allowed.' });
+          return;
+        }
+        if (!s.photos) {
           reply(400, { error: 'Photo storage is not available.' });
-          return;
-        }
-        const doc = s.documents.get(recipeId);
-        if (!doc) {
-          reply(404, { error: 'Recipe not found.' });
           return;
         }
         const b = await body(req, Math.ceil((MAX_PHOTO_BYTES * 4) / 3) + 16_384);
@@ -957,9 +1001,9 @@ export function makeServer(
         }
         const bytes = Buffer.from(b.dataBase64, 'base64');
         const saved = s.photos.attach({
-          ownerKind: 'recipe',
-          ownerId: doc.id,
-          stepIndex: (b.stepIndex as number | null | undefined) ?? null,
+          ownerKind,
+          ownerId,
+          stepIndex: ownerKind === 'recipe' ? ((b.stepIndex as number | null | undefined) ?? null) : null,
           bytes,
           ...(b.mimeType !== undefined ? { mimeType: b.mimeType as string } : {}),
           ...(b.caption !== undefined ? { caption: b.caption as string } : {}),

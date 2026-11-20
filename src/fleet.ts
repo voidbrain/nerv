@@ -319,6 +319,12 @@ export class FleetStore {
     });
   }
 
+  getCrash(id: string): CrashRecord | undefined {
+    const row = this.db.prepare('SELECT * FROM drone_crashes WHERE id = ?').get(id) as
+      Record<string, unknown> | undefined;
+    return row ? mapCrash(row) : undefined;
+  }
+
   listCrashes(filter: { droneName?: string; category?: string; position?: string } = {}): CrashRecord[] {
     const clauses: string[] = [];
     const params: string[] = [];

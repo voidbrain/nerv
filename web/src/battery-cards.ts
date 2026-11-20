@@ -22,6 +22,7 @@ export interface BatteryCardItem {
   resistanceDueReasons: Array<'days' | 'cycles'>;
   storageReminderActive: boolean;
   healthStatus: 'no_records' | 'healthy' | 'warning' | 'strong_warning' | 'retire';
+  photos?: Array<{ id: string; url: string; caption?: string }>;
 }
 
 export interface BatteryCardsLabels {
@@ -104,6 +105,13 @@ export interface BatteryCardsLabels {
               }
               @if (b.storageReminderActive) {
                 <p class="battery-storage">{{ t().batteriesStorageDue }}</p>
+              }
+              @if (b.photos?.length) {
+                <div class="battery-photos">
+                  @for (p of b.photos; track p.id) {
+                    <img class="battery-photo" [src]="p.url" [alt]="p.caption || b.label" loading="lazy" />
+                  }
+                </div>
               }
             </article>
           }

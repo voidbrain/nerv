@@ -1,7 +1,9 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import type { StoreApi } from './runtime.ts';
+import type { BatteryRegistry } from './batteries.ts';
 import type { DocumentStore } from './documents.ts';
-import { MAX_PHOTO_BYTES, type PhotoStore } from './photos.ts';
+import type { FleetStore } from './fleet.ts';
+import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.ts';
 import { formatTelegramChecklist } from './lists.ts';
 import { ONLINE_MS } from './kaji-link.ts';
 import type { ChannelState } from './channel-state.ts';
@@ -811,21 +813,26 @@ export class TelegramChannel {
     sizes: { file_id: string; file_size?: number; width: number; height: number }[],
     rawCaption: string,
   ) {
-    const parsed = parseRecipePhotoCaption(rawCaption);
+    const parsed = parsePhotoCaption(rawCaption);
     if (!parsed) {
-      await this.sendLocal('Caption a recipe photo with "recipe: <name>" (optional "step N").');
+      await this.sendLocal(
+        'Caption a photo with "recipe: <name>" (optional "step N"), "crash: <drone|id>", "part: <drone> <position>", or "battery: <number|label>".',
+      );
       return;
     }
-    const s = this.store as StoreApi & { documents?: DocumentStore; photos?: PhotoStore };
-    if (!s.documents || !s.photos) {
-      await this.sendLocal('Recipe photo storage is not available here.');
+    const s = this.store as StoreApi & {
+      documents?: DocumentStore;
+      fleet?: FleetStore;
+      batteries?: BatteryRegistry;
+      photos?: PhotoStore;
+    };
+    if (!s.photos) {
+      await this.sendLocal('Photo storage is not available here.');
       return;
     }
-    const exact = s.documents.get(parsed.recipe);
-    const matches = exact ? [exact] : s.documents.recall(parsed.recipe);
-    const doc = exact ?? (matches.length === 1 ? matches[0]! : undefined);
-    if (!doc) {
-      await this.sendLocal(`No unique saved recipe matching "${parsed.recipe}".`);
+    const target = resolveTelegramPhotoTarget(s, parsed);
+    if (!target) {
+      await this.sendLocal(`No unique ${parsed.ownerKind} matching "${parsed.query}".`);
       return;
     }
     const eligible = sizes
@@ -839,36 +846,99 @@ export class TelegramChannel {
     try {
       const bytes = await this.api.downloadFile(chosen.file_id, MAX_PHOTO_BYTES, this.stopping.signal);
       const saved = s.photos.attach({
-        ownerKind: 'recipe',
-        ownerId: doc.id,
+        ownerKind: parsed.ownerKind,
+        ownerId: target.id,
         stepIndex: parsed.stepIndex,
         bytes,
         caption: parsed.caption,
       });
       const where = saved.stepIndex !== null ? ` (step ${saved.stepIndex + 1})` : '';
-      await this.sendLocal(`Attached photo to "${doc.title}"${where}: ${saved.url}`);
+      await this.sendLocal(`Attached photo to "${target.label}"${where}: ${saved.url}`);
     } catch (e) {
       await this.sendLocal(`Photo could not be attached: ${e instanceof Error ? e.message : 'invalid photo'}`);
     }
   }
 }
 
-/** Parses a Telegram photo caption like `"recipe: Tiramisu step 2"` or `"ricetta: Pesto"`. */
-export function parseRecipePhotoCaption(
-  raw: string,
-): { recipe: string; stepIndex: number | null; caption: string } | null {
+export interface ParsedPhotoCaption {
+  ownerKind: PhotoOwnerKind;
+  query: string;
+  stepIndex: number | null;
+  caption: string;
+}
+
+const CAPTION_KIND: Readonly<Record<string, PhotoOwnerKind>> = {
+  recipe: 'recipe',
+  ricetta: 'recipe',
+  crash: 'crash',
+  part: 'part',
+  parte: 'part',
+  battery: 'battery',
+  batteria: 'battery',
+};
+
+/** Parses a Telegram photo caption for a recipe, crash, part, or battery. */
+export function parsePhotoCaption(raw: string): ParsedPhotoCaption | null {
   const trimmed = raw.trim();
-  const m = /^(?:recipe|ricetta)\s*:\s*(.+)$/i.exec(trimmed);
+  const m = /^(recipe|ricetta|crash|part|parte|battery|batteria)\s*:\s*(.+)$/i.exec(trimmed);
   if (!m) return null;
-  let rest = m[1]!.trim();
+  const ownerKind = CAPTION_KIND[m[1]!.toLowerCase()]!;
+  let rest = m[2]!.trim();
   let stepIndex: number | null = null;
-  const stepMatch = /\s+(?:step|passaggio)\s+(\d+)\s*$/i.exec(rest);
-  if (stepMatch) {
-    const n = Number(stepMatch[1]);
-    if (!Number.isInteger(n) || n < 1) return null;
-    stepIndex = n - 1;
-    rest = rest.slice(0, stepMatch.index).trim();
+  if (ownerKind === 'recipe') {
+    const stepMatch = /\s+(?:step|passaggio)\s+(\d+)\s*$/i.exec(rest);
+    if (stepMatch) {
+      const n = Number(stepMatch[1]);
+      if (!Number.isInteger(n) || n < 1) return null;
+      stepIndex = n - 1;
+      rest = rest.slice(0, stepMatch.index).trim();
+    }
   }
   if (!rest) return null;
-  return { recipe: rest, stepIndex, caption: trimmed };
+  return { ownerKind, query: rest, stepIndex, caption: trimmed };
+}
+
+function resolveTelegramPhotoTarget(
+  s: { documents?: DocumentStore; fleet?: FleetStore; batteries?: BatteryRegistry },
+  parsed: ParsedPhotoCaption,
+): { id: string; label: string } | undefined {
+  if (parsed.ownerKind === 'recipe' && s.documents) {
+    const exact = s.documents.get(parsed.query);
+    const matches = exact ? [exact] : s.documents.recall(parsed.query);
+    const doc = exact ?? (matches.length === 1 ? matches[0]! : undefined);
+    return doc ? { id: doc.id, label: doc.title } : undefined;
+  }
+  if (parsed.ownerKind === 'crash' && s.fleet) {
+    const exact = s.fleet.getCrash(parsed.query);
+    if (exact) return { id: exact.id, label: `${exact.position} crash` };
+    const byDrone = s.fleet.listCrashes({ droneName: parsed.query });
+    return byDrone[0] ? { id: byDrone[0].id, label: `${parsed.query} ${byDrone[0].position} crash` } : undefined;
+  }
+  if (parsed.ownerKind === 'part' && s.fleet) {
+    const exact = s.fleet.getPart(parsed.query);
+    if (exact) return { id: exact.id, label: `${exact.position} (${exact.componentModel})` };
+    const space = parsed.query.indexOf(' ');
+    if (space > 0) {
+      const drone = parsed.query.slice(0, space).trim();
+      const pos = parsed.query
+        .slice(space + 1)
+        .trim()
+        .toLowerCase();
+      const parts = s.fleet.listParts(drone).filter((p) => p.position.toLowerCase() === pos);
+      if (parts.length === 1) return { id: parts[0]!.id, label: `${drone} ${parts[0]!.position}` };
+    }
+    return undefined;
+  }
+  if (parsed.ownerKind === 'battery' && s.batteries) {
+    const exact = s.batteries.get(parsed.query);
+    if (exact) return { id: exact.id, label: exact.label };
+    const numMatch = /^(\d+)(?:\s+(.+))?$/.exec(parsed.query);
+    if (numMatch) {
+      const hits = s.batteries.findByNumberAndSeries(Number(numMatch[1]), numMatch[2]);
+      if (hits.length === 1) return { id: hits[0]!.id, label: hits[0]!.label };
+    }
+    const byLabel = s.batteries.list().filter((b) => b.label.toLowerCase() === parsed.query.toLowerCase());
+    return byLabel.length === 1 ? { id: byLabel[0]!.id, label: byLabel[0]!.label } : undefined;
+  }
+  return undefined;
 }

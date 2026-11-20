@@ -11,7 +11,7 @@ import { execute } from '../src/executors.ts';
 import { detectPhotoMime, MAX_PHOTO_BYTES, validatePhotoBuffer } from '../src/photos.ts';
 import { makeServer } from '../src/server.ts';
 import { Store } from '../src/store.ts';
-import { parseRecipePhotoCaption, TelegramApi, TelegramChannel } from '../src/telegram.ts';
+import { parsePhotoCaption, TelegramApi, TelegramChannel } from '../src/telegram.ts';
 
 const PNG_HEADER = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d]);
 const JPEG_HEADER = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46]);
@@ -198,17 +198,19 @@ describe('F-083-T10: recipe photos', () => {
   });
 
   it('attaches a photo sent via Telegram with a recipe caption', async () => {
-    assert.deepEqual(parseRecipePhotoCaption('recipe: Tiramisu step 2'), {
-      recipe: 'Tiramisu',
+    assert.deepEqual(parsePhotoCaption('recipe: Tiramisu step 2'), {
+      ownerKind: 'recipe',
+      query: 'Tiramisu',
       stepIndex: 1,
       caption: 'recipe: Tiramisu step 2',
     });
-    assert.deepEqual(parseRecipePhotoCaption('ricetta: Pesto'), {
-      recipe: 'Pesto',
+    assert.deepEqual(parsePhotoCaption('ricetta: Pesto'), {
+      ownerKind: 'recipe',
+      query: 'Pesto',
       stepIndex: null,
       caption: 'ricetta: Pesto',
     });
-    assert.equal(parseRecipePhotoCaption('hello world'), null);
+    assert.equal(parsePhotoCaption('hello world'), null);
 
     const { home, store, cleanup } = openTempStore();
     const doc = store.documents.save({
@@ -272,6 +274,135 @@ describe('F-083-T10: recipe photos', () => {
       assert.equal(attached[0]?.mimeType, 'image/jpeg');
       assert.match(sentMessages[0] ?? '', /Attached photo to "Tiramisu" \(step 1\)/);
     } finally {
+      await new Promise<void>((resolve) => fakeTg.close(() => resolve()));
+      cleanup();
+    }
+  });
+});
+
+describe('F-098-T03: photos on crashes, parts and batteries', () => {
+  it('attaches and serves photos on crashes, parts, and batteries via dashboard API and Telegram', async () => {
+    const { home, store, cleanup } = openTempStore();
+    const token = 'test-admin-token-0123456789';
+    const drone = store.fleet.addDrone({ name: 'Smoke', frame: '5-inch' });
+    const part = store.fleet.setPart({
+      droneIdOrName: drone.id,
+      category: 'motor',
+      position: 'front-left',
+      componentModel: 'XNova 2207',
+    });
+    const crash = store.fleet.recordCrash({
+      droneName: 'Smoke',
+      category: 'motor',
+      position: 'front-left',
+      damage: 'bent bell',
+    });
+    const battery = store.batteries.register({
+      packNumber: 7,
+      series: 'blu',
+      label: 'Pack 7 Blu',
+      brand: 'Tattu',
+      batteryType: 'LiPo',
+      cellCount: 6,
+      capacityMah: 1300,
+      purchaseDate: '2026-11-01',
+      initialResistanceMohm: [12, 12, 13, 12, 12, 13],
+    });
+
+    const server = makeServer(store as never, token);
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const port = (server.address() as { port: number }).port;
+    const base = `http://127.0.0.1:${port}`;
+
+    const sentMessages: string[] = [];
+    const fakeTg = createHttpServer((req, res) => {
+      const url = req.url ?? '';
+      if (url.endsWith('/getFile')) {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, result: { file_path: 'photos/fleet.webp' } }));
+        return;
+      }
+      if (url.includes('/file/bot')) {
+        res.writeHead(200, { 'content-type': 'image/webp' });
+        res.end(WEBP_HEADER);
+        return;
+      }
+      if (url.endsWith('/sendMessage')) {
+        let b = '';
+        req.on('data', (c) => {
+          b += c;
+        });
+        req.on('end', () => {
+          const parsed = JSON.parse(b) as { text?: string };
+          if (parsed.text) sentMessages.push(parsed.text);
+          res.writeHead(200, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ ok: true, result: { message_id: 1 } }));
+        });
+        return;
+      }
+      res.writeHead(404);
+      res.end();
+    });
+    await new Promise<void>((resolve) => fakeTg.listen(0, '127.0.0.1', resolve));
+    const tgPort = (fakeTg.address() as { port: number }).port;
+
+    try {
+      for (const [kind, id, bytes, mime] of [
+        ['crashes', crash.id, PNG_HEADER, 'image/png'],
+        ['parts', part.id, JPEG_HEADER, 'image/jpeg'],
+        ['batteries', battery.id, PNG_HEADER, 'image/png'],
+      ] as const) {
+        const up = await fetch(`${base}/api/${kind}/${id}/photos`, {
+          method: 'POST',
+          headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+          body: JSON.stringify({ dataBase64: bytes.toString('base64'), mimeType: mime, caption: `${kind} photo` }),
+        });
+        assert.equal(up.status, 201);
+      }
+
+      const fleetRes = await fetch(`${base}/api/fleet`, { headers: { authorization: `Bearer ${token}` } });
+      assert.equal(fleetRes.status, 200);
+      const fleet = (await fleetRes.json()) as {
+        parts: { id: string; photos: { url: string }[] }[];
+        crashes: { id: string; photos: { url: string }[] }[];
+      };
+      assert.equal(fleet.parts.find((p) => p.id === part.id)?.photos.length, 1);
+      assert.equal(fleet.crashes.find((c) => c.id === crash.id)?.photos.length, 1);
+
+      const batRes = await fetch(`${base}/api/batteries`, { headers: { authorization: `Bearer ${token}` } });
+      assert.equal(batRes.status, 200);
+      const bats = (await batRes.json()) as { items: { id: string; photos?: { url: string }[] }[] };
+      assert.equal(bats.items.find((b) => b.id === battery.id)?.photos?.length, 1);
+
+      assert.equal(parsePhotoCaption('crash: Smoke')?.ownerKind, 'crash');
+      assert.equal(parsePhotoCaption('part: Smoke front-left')?.ownerKind, 'part');
+      assert.equal(parsePhotoCaption('batteria: 7 blu')?.ownerKind, 'battery');
+
+      const api = new TelegramApi('123456:fake_token_abcdefghijklmnopqrstuvwxyz123456', `http://127.0.0.1:${tgPort}`);
+      const bot = new TelegramChannel({
+        api,
+        store: store as never,
+        chatId: 42,
+        statePath: join(home, 'tg-fleet-state.json'),
+      });
+      for (const caption of ['crash: Smoke', 'part: Smoke front-left', 'batteria: 7 blu']) {
+        await (bot as unknown as { handle(u: unknown): Promise<void> }).handle({
+          update_id: 2,
+          message: {
+            date: Math.floor(Date.now() / 1000),
+            chat: { id: 42, type: 'private' },
+            from: { id: 42 },
+            caption,
+            photo: [{ file_id: 'f-fleet', width: 200, height: 200, file_size: 100 }],
+          },
+        });
+      }
+      assert.equal(store.photos.list('crash', crash.id).length, 2);
+      assert.equal(store.photos.list('part', part.id).length, 2);
+      assert.equal(store.photos.list('battery', battery.id).length, 2);
+      assert.equal(sentMessages.length, 3);
+    } finally {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
       await new Promise<void>((resolve) => fakeTg.close(() => resolve()));
       cleanup();
     }
