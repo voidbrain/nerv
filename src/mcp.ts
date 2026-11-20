@@ -127,9 +127,7 @@ export function validateTools(value: unknown): ToolsConfig {
     if (typeof g.tool !== 'string' || !/^[A-Za-z0-9_-]{1,64}$/.test(g.tool))
       throw new Error('Tool grant: a tool name.');
     if (g.effect !== 'read')
-      throw new Error(
-        `Tool grant ${g.server}.${g.tool}: only "read" for now (writes come with the approval path, F-021 slice 2).`,
-      );
+      throw new Error(`Tool grant ${g.server}.${g.tool}: only "read" for now (writes come with the approval path).`);
     if (!['00', '01', '02', '03'].includes(g.eva as string))
       throw new Error(`Tool grant ${g.server}.${g.tool}: eva is 00, 01, 02 or 03.`);
     if (typeof g.fingerprint !== 'string' || !/^[0-9a-f]{16}$/.test(g.fingerprint))
@@ -142,8 +140,7 @@ export function validateTools(value: unknown): ToolsConfig {
 }
 /** Why a tool may not be granted as a read, or undefined when it may. */
 export function grantRefusal(t: McpTool, effect: string, eva: string): string | undefined {
-  if (effect !== 'read')
-    return 'only "read" can be granted for now (writes come with the approval path, F-021 slice 2)';
+  if (effect !== 'read') return 'only "read" can be granted for now (writes come with the approval path)';
   if (t.annotations?.destructiveHint === true || t.annotations?.readOnlyHint === false)
     return 'the server says this tool changes or removes things: it cannot be granted as a read';
   if (!['00', '01', '02', '03'].includes(eva)) return 'eva is 00, 01, 02 or 03';

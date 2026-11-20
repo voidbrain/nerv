@@ -171,8 +171,8 @@ export function ballot(
       vote: 'reject',
       reason:
         executor === 'eva-03'
-          ? 'EVA-03 outside code requires isolation (F-049); it does not run.'
-          : 'Proactive outside code requires EVA-00 isolation (F-049); it does not run.',
+          ? 'EVA-03 outside code requires isolation; it does not run.'
+          : 'Proactive outside code requires EVA-00 isolation; it does not run.',
     });
   const needsCasper = intentChecked(pattern, tool);
   if (needsCasper && casper) verdicts.push({ ...casper, seat: 'casper' });
