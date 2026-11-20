@@ -44,7 +44,7 @@ const tasksPath = () => resolve(process.env.NERV_GAUNTLET_TASKS ?? here('docs/wo
 const systemPath = () => resolve(process.env.NERV_GAUNTLET_SYSTEM ?? here(systemFile));
 const releaseTag = () => readJSON(here('vendor/gauntlet-protocol.json')).releaseTag;
 
-function readSystemPackWithInputs() {
+export function readSystemPackWithInputs() {
   const raw = readJSON(systemPath());
   const caseInputs = new Map();
   const cases = Array.isArray(raw?.cases)

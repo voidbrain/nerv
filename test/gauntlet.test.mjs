@@ -53,7 +53,8 @@ function native(overrides = {}) {
   };
 }
 test('NERV owns seven group adapters and keeps costly groups explicit', async () => {
-  const pack = validatePack(JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8')));
+  const { readSystemPackWithInputs } = await import('../tools/gauntlet.mjs');
+  const pack = readSystemPackWithInputs().pack;
   assert.deepEqual(
     pack.cases.map((c) => c.id),
     suite.groups.map((g) => g.id),
@@ -757,7 +758,7 @@ test('every pack the pinned Gauntlet release ships is consumed unless excluded w
 
 test('B-059: browser case refuses a missing build without writing failed evidence', async () => {
   const { caseHash } = await import('@voidbrain/gauntlet-protocol');
-  const { systemSourceKey } = await import('../tools/gauntlet.mjs');
+  const { readSystemPackWithInputs, systemSourceKey } = await import('../tools/gauntlet.mjs');
   const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-b059-'));
   const ledger = join(dir, 'ledger.json');
   const previousLedger = process.env.NERV_GAUNTLET_LEDGER;
@@ -767,8 +768,7 @@ test('B-059: browser case refuses a missing build without writing failed evidenc
   const backup = resolve('dist/web/browser.b059-backup');
   try {
     if (hadBuild) renameSync(browserBuild, backup);
-    const system = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
-    const sourceKey = systemSourceKey(system);
+    const system = readSystemPackWithInputs().pack;
     writeFileSync(
       ledger,
       JSON.stringify({
@@ -787,7 +787,7 @@ test('B-059: browser case refuses a missing build without writing failed evidenc
             modelDigest: null,
             runtimeHash: 'a'.repeat(64),
             scenarioHash: null,
-            sourceKey,
+            sourceKey: systemSourceKey(system, candidate.id),
           })),
       }),
     );
@@ -909,7 +909,8 @@ test('the root command runs only uncovered cases, records them and reports nothi
   process.env.NERV_GAUNTLET_TASKS = tasks;
   try {
     // Schema 1 entries have unknown identity and do NOT silently cover when sourceKey is checked.
-    const system = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
+    const { readSystemPackWithInputs } = await import('../tools/gauntlet.mjs');
+    const system = readSystemPackWithInputs().pack;
     writeFileSync(
       ledger,
       JSON.stringify({
@@ -950,7 +951,7 @@ test('the root command runs only uncovered cases, records them and reports nothi
           modelDigest: null,
           runtimeHash: 'a'.repeat(64),
           scenarioHash: null,
-          sourceKey: systemSourceKey(system),
+          sourceKey: systemSourceKey(system, c.id),
         })),
       }),
     );
@@ -1132,7 +1133,8 @@ test('F-074-T10: identity-bound ledger coverage detects source, model, runtime a
   const ledger = join(dir, 'ledger.json');
   process.env.NERV_GAUNTLET_LEDGER = ledger;
   try {
-    const system = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
+    const { readSystemPackWithInputs } = await import('../tools/gauntlet.mjs');
+    const system = readSystemPackWithInputs().pack;
     const profilePath = 'node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json';
     const profile = JSON.parse(readFileSync(profilePath, 'utf8'));
     const profileHash = hash(evidenceProfile(profile));
@@ -1158,7 +1160,7 @@ test('F-074-T10: identity-bound ledger coverage detects source, model, runtime a
             modelDigest: null,
             runtimeHash,
             scenarioHash,
-            sourceKey: currentSourceKey,
+            sourceKey: systemSourceKey(system, c.id),
           })),
           ...packs.flatMap((p) =>
             p.cases.map((c) => ({
@@ -1259,7 +1261,7 @@ writeFileSync(process.argv[1].slice(6), JSON.stringify({
     await main(['ledger', '--report=' + reportPath, '--pack=' + system.id]);
     const updated = JSON.parse(readFileSync(ledger, 'utf8'));
     const recordedPolicy = updated.entries.find((e) => e.pack === system.id && e.case === 'policy');
-    assert.equal(recordedPolicy.sourceKey, currentSourceKey);
+    assert.equal(recordedPolicy.sourceKey, systemSourceKey(system, 'policy'));
   } finally {
     delete process.env.NERV_GAUNTLET_LEDGER;
     rmSync(dir, { recursive: true, force: true });
@@ -1506,7 +1508,8 @@ test('B-079: the root command reruns system cases whose source changed, as pendi
   process.env.NERV_GAUNTLET_LEDGER = ledger;
   process.env.NERV_GAUNTLET_TASKS = tasks;
   try {
-    const system = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
+    const { readSystemPackWithInputs } = await import('../tools/gauntlet.mjs');
+    const system = readSystemPackWithInputs().pack;
     writeFileSync(
       ledger,
       JSON.stringify({
@@ -1619,4 +1622,31 @@ test('B-077: a role bundle with repeat 3 runs each case three times and reports 
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('F-079-T02: committed system-v1.json declarations catch a seeded change inside a declared path while ignoring outside paths', async () => {
+  const { systemSourceKey } = await import('../tools/gauntlet.mjs');
+  const system = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
+  const baseInputs = {
+    'evals/suite.json': 'suite-1',
+    'evals/gauntlet/system-v1.json': 'sys-1',
+    'src/policy.ts': 'policy-1',
+    'test/evaluation.test.ts': 'eval-test-1',
+    'src/telegram.ts': 'tg-1',
+    'test/telegram.test.ts': 'tg-test-1',
+    'web/src/main.ts': 'web-1',
+  };
+  const policyBefore = systemSourceKey(system, 'policy', baseInputs);
+  const policyUnrelated = systemSourceKey(system, 'policy', { ...baseInputs, 'web/src/main.ts': 'web-2' });
+  assert.equal(policyUnrelated, policyBefore, 'outside change must not invalidate policy');
+
+  const policySeeded = systemSourceKey(system, 'policy', { ...baseInputs, 'src/policy.ts': 'policy-regression' });
+  assert.notEqual(policySeeded, policyBefore, 'seeded regression inside src/policy.ts must invalidate policy');
+
+  const channelsBefore = systemSourceKey(system, 'channels', baseInputs);
+  const channelsSeeded = systemSourceKey(system, 'channels', {
+    ...baseInputs,
+    'test/telegram.test.ts': 'tg-test-regression',
+  });
+  assert.notEqual(channelsSeeded, channelsBefore, 'seeded change inside declared test must invalidate channels');
 });
