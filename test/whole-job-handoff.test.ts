@@ -98,7 +98,10 @@ describe('whole-job handoff receipt-bound reconciliation (F-050-T02)', () => {
 
     assert.throws(() => store.dispatch({ ...baseInput, containsLocalOnlyOrTainted: true }), /local-only or tainted/);
     assert.throws(() => store.dispatch({ ...baseInput, targetScrollFloorDigest: 'looser-scroll' }), /looser/);
-    assert.throws(() => store.dispatch({ ...baseInput, selectionReason: 'load' }), /F-048 acceptance/);
+    assert.throws(
+      () => store.dispatch({ ...baseInput, selectionReason: 'load' }),
+      /Load-based forwarding is not accepted yet/,
+    );
 
     const loadOk = store.dispatch({
       ...baseInput,

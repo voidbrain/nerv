@@ -192,7 +192,7 @@ export function bootstrapPlan(value: unknown, options: BootstrapOptions, now = n
       'On a failed or timed-out step, report the observed completed steps and reconcile the target before retrying.',
       'If a service was installed by this operation, stop/uninstall that service using the same NERV_HOME after verifying its runtime paths.',
       'Retain data, keys, logs and checkout for inspection; this plan deletes nothing and does not claim effects were undone.',
-      'A downgrade/database restore requires reconciliation and backup validation under F-062; do not restore an old receipt journal blindly.',
+      'A downgrade/database restore requires reconciliation and backup validation first; do not restore an old receipt journal blindly.',
     ],
     execution: 'explicit-confirmation-required' as const,
   };
