@@ -142,8 +142,58 @@ const only = (args: Record<string, unknown>, keys: string[]) => {
   if (Object.keys(args).some((k) => !keys.includes(k)))
     throw new Error(`Arguments allowed: ${keys.join(', ') || 'none'}.`);
 };
+/** Subject groups for built-in tools (F-113-T01). */
+export type ToolSubject =
+  'reminders' | 'memory' | 'lists' | 'docs' | 'gmail' | 'pantry' | 'batteries' | 'fleet' | 'fpv' | 'pilots' | 'agency';
+
+export const BUILTIN_TOOL_SUBJECTS: Readonly<Record<string, ToolSubject>> = {
+  'reminders.list': 'reminders',
+  'reminders.add': 'reminders',
+  'reminders.update': 'reminders',
+  'reminders.cancel': 'reminders',
+  'reminders.restore': 'reminders',
+  'memory.recall': 'memory',
+  'memory.remember': 'memory',
+  'memory.edit': 'memory',
+  'memory.forget': 'memory',
+  'lists.add_items': 'lists',
+  'lists.show': 'lists',
+  'lists.set_done': 'lists',
+  'lists.remove_item': 'lists',
+  'docs.list': 'docs',
+  'docs.show': 'docs',
+  'docs.compute': 'docs',
+  'docs.save': 'docs',
+  'docs.edit': 'docs',
+  'docs.forget': 'docs',
+  'gmail.search': 'gmail',
+  'gmail.read': 'gmail',
+  'pantry.purchase': 'pantry',
+  'pantry.shelf_life': 'pantry',
+  'pantry.check': 'pantry',
+  'batteries.list': 'batteries',
+  'batteries.chat': 'batteries',
+  'batteries.due': 'batteries',
+  'batteries.resistance': 'batteries',
+  'fleet.chat': 'fleet',
+  'fpv.blackbox_report': 'fpv',
+  'fpv.import_build': 'fpv',
+  'fpv.add_doc': 'fpv',
+  'fpv.wiring_answer': 'fpv',
+  'pilots.create': 'pilots',
+  'pilots.promote': 'pilots',
+  'pilots.split': 'pilots',
+  'pilots.merge': 'pilots',
+  'pilots.tools': 'pilots',
+  'sorties.explain': 'agency',
+  'approvals.list': 'agency',
+  'agency.status': 'agency',
+  'settings.schedule': 'agency',
+  'kaji.run': 'agency',
+};
+
 /** What Misato is told about each built-in tool. */
-export const toolDocs: ToolDoc[] = [
+const rawToolDocs: ToolDoc[] = [
   {
     name: 'reminders.list',
     effect: 'read',
@@ -419,6 +469,11 @@ export const toolDocs: ToolDoc[] = [
     args: '{"item"?: string, "documentId"?: string}',
   },
 ];
+/** What Misato is told about each built-in tool, each assigned to one subject (F-113-T01). */
+export const toolDocs: ToolDoc[] = rawToolDocs.map((doc) => ({
+  ...doc,
+  subject: BUILTIN_TOOL_SUBJECTS[doc.name],
+}));
 /** Versioned descriptors for NERV's own tools, on the same shape used for registered MCP tools (F-021). */
 export const builtinToolDescriptors: ToolDescriptor[] = builtinTools.map((tool) => {
   const doc = toolDocs.find((candidate) => candidate.name === tool.name);

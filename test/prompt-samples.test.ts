@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 import { describe, it } from 'node:test';
 import { misatoAsk, type ToolDoc } from '../src/misato.ts';
+import { BUILTIN_TOOL_SUBJECTS, builtinTools, toolDocs } from '../src/executors.ts';
 import { PromptSampleStore, measureMisatoPrompt } from '../src/prompt-samples.ts';
 import { callModelWithUsage } from '../src/runtime-tools.ts';
 import { Store } from '../src/store.ts';
@@ -212,5 +213,30 @@ describe('F-106-T01: Misato prompt size sampling and doctor report', () => {
     } finally {
       store.close();
     }
+  });
+});
+
+describe('F-113-T01: built-in tool subject grouping and tool-doc share', () => {
+  it('assigns every built-in tool to one subject and measures tool-doc share on neutral samples', () => {
+    for (const tool of builtinTools) {
+      assert.ok(BUILTIN_TOOL_SUBJECTS[tool.name], `missing subject for ${tool.name}`);
+    }
+    for (const doc of toolDocs) {
+      assert.equal(doc.subject, BUILTIN_TOOL_SUBJECTS[doc.name]);
+      assert.ok(doc.subject, `missing subject on toolDoc ${doc.name}`);
+    }
+    const ask = misatoAsk(
+      {
+        request: 'Hello, how are you today?',
+        history: [],
+        tools: toolDocs,
+        now: '2026-11-20T18:00:00.000Z',
+        timeZone: 'Europe/Rome',
+      },
+      'local',
+    );
+    const metrics = measureMisatoPrompt(ask, toolDocs);
+    assert.ok(metrics.toolSchemaTokens > 2000);
+    assert.ok(metrics.toolSchemaShare > 0.5 && metrics.toolSchemaShare < 1);
   });
 });
