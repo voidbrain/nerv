@@ -2374,12 +2374,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-113-t01"></a>F-113-T01 — Measure the tool-doc share of the planner prompt and group tools by subject | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-113-T02](#f-113-t02) |
-| 🟡 Medium | <a id="f-113-t02"></a>F-113-T02 — Compact subject index in the planner prompt and a read tool for one subject's docs | 2.5 h | 0 h | 2.5 h | Planned | [F-113-T01](#f-113-t01) | [F-113-T03](#f-113-t03) |
-| 🟢 Small | <a id="f-113-t03"></a>F-113-T03 — Gauntlet comparison of prompt size and task success with the compact index | 1 h | 0 h | 1 h | Planned | [F-113-T02](#f-113-t02) | — |
-| 🔴 Large | **Total** | 4.5 h | 0 h (0 of 3 steps recorded) | 4.5 h | 0 of 3 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-113-t01"></a>F-113-T01 — Measure the tool-doc share of the planner prompt and group tools by subject | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-113-T02](#f-113-t02) | [PR #592](https://github.com/voidbrain/nerv/pull/592) implementation |
+| 🟡 Medium | <a id="f-113-t02"></a>F-113-T02 — Compact subject index in the planner prompt and a read tool for one subject's docs | 2.5 h | 0 h | 2.5 h | Planned | [F-113-T01](#f-113-t01) | [F-113-T03](#f-113-t03) | — |
+| 🟢 Small | <a id="f-113-t03"></a>F-113-T03 — Gauntlet comparison of prompt size and task success with the compact index | 1 h | 0 h | 1 h | Planned | [F-113-T02](#f-113-t02) | — | — |
+| 🔴 Large | **Total** | 4.5 h | 0 h (0 of 3 steps recorded) | 4.5 h | 0 of 3 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2388,7 +2388,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587); [F-113-T01 report](evaluations/2026-11-20-f113-t01-tool-doc-share.md) |
+| PR / evidence | Steps: F-113-T01: [PR #592](https://github.com/voidbrain/nerv/pull/592) implementation. [PR #592](https://github.com/voidbrain/nerv/pull/592) (F-113-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587); [F-113-T01 report](evaluations/2026-11-20-f113-t01-tool-doc-share.md) |
 | Opened | 2026-11-20 |
 | Verification | F-113-T01: `node --test test/prompt-samples.test.ts` and `npm run check:fast` passed. |
 | Reviewed | 2026-11-20 |
