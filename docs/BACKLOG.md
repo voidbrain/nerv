@@ -470,9 +470,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-082-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded · B-082-T02: [PR #591](https://github.com/voidbrain/nerv/pull/591) opened. Test: `test/node-inspection.test.ts` "B-082: the Windows task user keeps Entra and domain accounts but repairs workgroup users" (committed failing first in B-082-T02); prior T01 test committed failing first |
+| PR / evidence | Steps: B-082-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded · B-082-T02: [PR #591](https://github.com/voidbrain/nerv/pull/591) opened. Test: `test/node-inspection.test.ts` "B-082: the Windows task user keeps Entra and domain accounts but repairs workgroup users" (committed failing first in B-082-T02); Review: fresh-context P1 review found no blocking code, security, privacy or compliance issue and confirmed the later test edit is formatting-only; prior T01 test committed failing first |
 | Opened | 2026-11-18 |
-| Verification | 2026-11-20 local: B-082 targeted regression 2/2 passes; fresh-context review and CI pending. 2026-11-18: T01 CI green on PR #517. Pending: the live SSH install on Tabgha after B-087-T01. |
+| Verification | 2026-11-20 local: B-082 targeted regression 2/2 passes; full tests 1,041 pass / 2 platform skips; build, `check:fast` and headless integration pass (5 pass / 1 Windows skip). Fresh-context review passed; CI pending. 2026-11-18: T01 CI green on PR #517. Pending: the live SSH install on Tabgha after B-087-T01. |
 | Reviewed | 2026-11-20 |
 
 </details>
