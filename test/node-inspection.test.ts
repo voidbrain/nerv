@@ -8,7 +8,7 @@ test('B-083: the read-only probe runs on an old Node, so it can report the versi
   assert.doesNotMatch(NODE_PROBE, /\?\?|\?\./);
 });
 
-test('B-082: the Windows task user is the machine account over SSH, the domain account on a domain', async () => {
+test('B-082: the Windows task user keeps Entra and domain accounts but repairs workgroup users', async () => {
   const { windowsServiceUser } = await import('../src/service.ts');
   // An SSH session on a workgroup machine reports USERDOMAIN=WORKGROUP, which names no account.
   assert.equal(
@@ -20,6 +20,14 @@ test('B-082: the Windows task user is the machine account over SSH, the domain a
     'KITCHEN\\tester',
   );
   assert.equal(
+    windowsServiceUser({ USERDOMAIN: 'AzureAD', COMPUTERNAME: 'PC1', USERNAME: 'tester' }),
+    'AzureAD\\tester',
+  );
+  assert.equal(
+    windowsServiceUser({ USERDOMAIN: 'CORP', COMPUTERNAME: 'PC1', USERNAME: 'tester' }),
+    'CORP\\tester',
+  );
+  assert.equal(
     windowsServiceUser({
       USERDOMAIN: 'CORP',
       USERDNSDOMAIN: 'corp.example.test',
@@ -27,6 +35,10 @@ test('B-082: the Windows task user is the machine account over SSH, the domain a
       USERNAME: 'tester',
     }),
     'CORP\\tester',
+  );
+  assert.equal(
+    windowsServiceUser({ USERDOMAIN: '', COMPUTERNAME: 'KITCHEN', USERNAME: 'tester' }),
+    'KITCHEN\\tester',
   );
   assert.equal(windowsServiceUser({ USERNAME: 'tester' }), 'tester');
 });
