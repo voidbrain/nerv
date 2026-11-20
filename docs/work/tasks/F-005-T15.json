@@ -38,14 +38,14 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 h",
-    "basis": "Implemented F-005-T15 forward-migration admission via candidate src/upgrade-contract.ts, verified operation backup gate before checkout, refusal of lifecycle-release and previous-revision startup on forward-migrated data, and explicit owner-invoked recoverServiceUpdate (nodes lifecycle-recover --confirm-backup-restore DIGEST) with independent fresh-context review (docs/reviews/2026-11-14-f005-t15-forward-upgrade-review.md) in 0.75 h agent (stated; PR #419); 0.5 h owner remains for one owner-selected target trial. Moved to the agent 2026-11-18 (0.5 h owner → agent).",
-    "reviewed": "2026-11-18",
+    "basis": "Implemented F-005-T15 forward-migration admission via candidate src/upgrade-contract.ts, verified operation backup gate before checkout, refusal of lifecycle-release and previous-revision startup on forward-migrated data, and explicit owner-invoked recoverServiceUpdate (nodes lifecycle-recover --confirm-backup-restore DIGEST) with independent fresh-context review (docs/reviews/2026-11-14-f005-t15-forward-upgrade-review.md) in 0.75 h agent (stated; PR #419); 0.5 h owner remains for one owner-selected target trial. Moved to the agent 2026-11-18 (0.5 h owner → agent). Re-estimated 2026-11-20: 0.75 h spent plus 0.5 h left, 1.25 h.",
+    "reviewed": "2026-11-20",
     "baselineDays": 3,
     "agentHours": 0.5,
     "actualAgentHours": 0.75,
     "actualSource": "stated",
     "ownerHours": 0,
     "baselineAgentHours": 4.5,
-    "estimateAgentHours": 0.75
+    "estimateAgentHours": 1.25
   }
 }

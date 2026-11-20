@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-062-T07",
+  "parent": "F-062",
+  "title": "Owner runs the restore drill on NERV-01 from a real off-host copy",
+  "goal": "A real encrypted off-host copy restores into a new folder within the agreed bounds, with identities, grants, reminders and checkpoints intact",
+  "status": "ready",
+  "acceptance": [
+    "Steps 3\u20135 of the procedure pasted back: a copy exists, restore within 1 h, equal counts on every table"
+  ],
+  "dependsOn": [
+    "F-062-T04",
+    "F-062-T03"
+  ],
+  "resources": [
+    "docs/acceptance/f062-t07-restore-drill.md",
+    "docs/work/records/F-062.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-20: one-time setup and one drill, about 15 minutes. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f062-t07-restore-drill.md",
+  "prs": []
+}
