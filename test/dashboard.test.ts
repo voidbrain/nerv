@@ -1597,6 +1597,19 @@ test('F-110-T03: settings panel renders schedule controls, preserves drafts acro
   assert.doesNotMatch(settingsBlock, /\b[FB]-\d{3}(?:-T\d{2})?\b/);
 });
 
+test('F-103-T03: live health view renders samples, link load, deduplicated warnings, and threshold settings', () => {
+  const live = readFileSync('web/public/dashboard/live.js', 'utf8');
+  assert.match(live, /id='health-sample-row'/);
+  assert.match(live, /data-link-peer=/);
+  assert.match(live, /data-health-warning=/);
+  assert.match(live, /id='set-rss-mb'/);
+  assert.match(live, /id='set-loop-ms'/);
+  assert.match(live, /id='set-link-ms'/);
+  assert.match(live, /id='set-in-flight'/);
+  assert.match(live, /id='set-reconnects'/);
+  assert.match(live, /api\("health\/thresholds"/);
+});
+
 test('F-051-T06: Sephirot EVA cage shows recorded pilot and instance, none when absent, distinct from unavailable', () => {
   const store = new Store(':memory:');
   try {

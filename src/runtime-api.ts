@@ -1,4 +1,5 @@
 import type { HistoryPage } from './history.ts';
+import type { HealthMetricsSnapshot, HealthThresholds } from './health-samples.ts';
 import type { EvaInstancesSnapshot } from './eva-pool.ts';
 import { sanitizeVerdict, type PeerVerdict, type VerdictAsk } from './kaji-link.ts';
 import type { BaseEntry } from './kaji.ts';
@@ -255,6 +256,9 @@ export interface StoreApi {
   pilotRoster?(): Pilot[] | Promise<Pilot[]>;
   /** F-049-T09: live EVA instances per class, per machine, for the dashboard. */
   evaInstances?(): EvaInstancesSnapshot | Promise<EvaInstancesSnapshot>;
+  /** F-103-T03: process health samples, per-peer link load, thresholds, and deduplicated warnings. */
+  healthMetrics?(): HealthMetricsSnapshot | Promise<HealthMetricsSnapshot>;
+  setHealthThresholds?(thresholds: unknown): HealthThresholds | Promise<HealthThresholds>;
   genericPilot?(): Pilot | Promise<Pilot>;
   changePilotModel?(id: string, model: string): Promise<Pilot[]>;
   addPilot?(entry: Pilot): Promise<Pilot[]>;

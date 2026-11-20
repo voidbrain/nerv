@@ -256,6 +256,7 @@ export function makeServer(
         ([
           '/api/status',
           '/api/doctor',
+          '/api/health/metrics',
           '/api/update',
           '/api/update/policy',
           '/api/push/key',
@@ -610,6 +611,22 @@ export function makeServer(
         });
       } else if (req.method === 'GET' && path === '/api/eva/instances') {
         reply(200, store.evaInstances ? await store.evaInstances() : { machines: [] });
+      } else if (req.method === 'GET' && path === '/api/health/metrics') {
+        reply(
+          200,
+          store.healthMetrics
+            ? await store.healthMetrics()
+            : { latestSample: null, recentSamples: [], links: [], thresholds: null, warnings: [] },
+        );
+      } else if (req.method === 'PUT' && path === '/api/health/thresholds') {
+        if (!store.setHealthThresholds) {
+          reply(503, { error: 'Health threshold settings unavailable.' });
+          return;
+        }
+        const b = await body(req);
+        const thresholds = await store.setHealthThresholds(b);
+        const metrics = store.healthMetrics ? await store.healthMetrics() : undefined;
+        reply(200, { ok: true, thresholds, warnings: metrics?.warnings ?? [] });
       } else if (req.method === 'POST' && path === '/api/pilots') {
         if (!store.addPilot) {
           reply(503, { error: 'Pilot setup unavailable.' });
