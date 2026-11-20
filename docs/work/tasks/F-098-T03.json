@@ -4,7 +4,7 @@
   "parent": "F-098",
   "title": "Photos on crashes, parts and batteries",
   "goal": "A photo sent in Telegram or the dashboard is kept with the record it shows",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Stored locally with size and type checks; private by default",
     "Shown with the crash, part or battery"

@@ -631,7 +631,14 @@ export class Store {
     return { integrityCheck: 'not-run', instrumentality: this.instrumentality.latest() };
   }
   batteryCards() {
-    return buildBatteryDashboardCards(this.batteries);
+    return buildBatteryDashboardCards(this.batteries).map((card) => {
+      const photos = this.photos.list('battery', card.id).map((p) => ({
+        id: p.id,
+        url: p.url,
+        ...(p.caption ? { caption: p.caption } : {}),
+      }));
+      return photos.length ? { ...card, photos } : card;
+    });
   }
   doctor() {
     return {
