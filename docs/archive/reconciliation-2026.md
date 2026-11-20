@@ -1,5 +1,11 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-20 — main `c2150218`
+
+PRs #573, #575, #577 and #578 merged on green CI. F-062 gets F-062-T07, the owner's real restore drill; F-005-T15 re-estimated to 1.25 h.
+
+B-102, B-103 and B-104 stay implemented until seen: B-102 on NERV-01's Skills tab after its next update, B-103 and B-104 on CI without reruns. F-062 had every step closed but no real drill, and off-host copies are not configured on NERV-01.
+
 ## 2026-11-20 — main `45be5940`
 
 Harness v10.1.0 reconciled in [PR #575](https://github.com/voidbrain/nerv/pull/575): steps tables show Depends on and Unlocks; `check:work` warns on blockers named only in prose (two false positives on its first run, B-068 and F-012, left as they are).
