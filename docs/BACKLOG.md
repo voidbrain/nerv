@@ -2921,9 +2921,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [Full audit 2026-11-20](audits/2026-11-20-full.md); GHSA-g3hv-75wg-m249 reported by `npm audit`; `package-lock.json` resolves `typescript-eslint` 8.73.0 |
+| PR / evidence | [Full audit 2026-11-20](audits/2026-11-20-full.md); GHSA-g3hv-75wg-m249 reported by `npm audit`; `package-lock.json` resolves `typescript-eslint` 8.73.0; Review: fresh-context dependency/security review, three findings corrected before PR |
 | Opened | 2026-11-20 |
-| Verification | 2026-11-20 local: `npm audit` reports 0 vulnerabilities; lint and typecheck pass; full tests pass (1,041 pass, 2 platform skips); `check:fast` passes after regenerating the source-owned ledger. PR CI pending. |
+| Verification | 2026-11-20 local: `npm audit` reports 0 vulnerabilities; lint, typecheck, build and `check:fast` pass; full tests pass (1,041 pass, 2 platform skips); browser evaluation passes 5/5; CycloneDX/SBOM tests pass 3/3. Full dependency-risk CI and fresh-context review pending. |
 | Reviewed | 2026-11-20 |
 
 </details>
