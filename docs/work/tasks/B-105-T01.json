@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "B-105-T01",
+  "parent": "B-105",
+  "title": "Name configuration version skew instead of a raw validator error",
+  "goal": "The dashboard and doctor say when the running service is older than its configuration or its checkout",
+  "status": "planned",
+  "acceptance": [
+    "Test committed failing first: a config field from a newer NERV gives a message naming the cause, not `Unsupported updatePolicy field`; a field no version knows is still rejected",
+    "`nerv doctor` reports a running revision different from the checkout HEAD"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/update-policy.ts",
+    "src/config.ts",
+    "src/server.ts",
+    "src/store.ts",
+    "src/cli.ts",
+    "test/**",
+    "docs/work/records/B-105.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-20: a known-fields registry by version and one doctor check. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}
