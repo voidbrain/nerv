@@ -33,7 +33,7 @@
   function toSortie(s) {
     const d = detailCache[s.id]; const actions = d ? d.detail.map(a => {
       TOOLS[a.tool] = TOOLS[a.tool] || { effect:a.ballot.effect };
-      return { tool:a.tool, args:a.args, status:a.status, ballot:a.ballot, rejects:0, ...(a.durationMs != null ? { durationMs:a.durationMs } : {}) };
+      return { tool:a.tool, args:a.args, status:a.status, ballot:a.ballot, rejects:0, ...(a.durationMs != null ? { durationMs:a.durationMs } : {}), ...(a.evaInstance ? { evaInstance:a.evaInstance } : {}) };
     }) : s.patterns.map(p => ({ tool:"", args:{}, status:"proposed", ballot:{ pattern:p } }));
     const status = mapStatus(s);
     // One pass through the flow is one action: after the plan, only the latest action counts, so a step an earlier

@@ -25,6 +25,11 @@ export interface Happened {
   tool: string;
   inverse: string | null;
 }
+export interface EvaInstanceRef {
+  jobId: string;
+  evaClass: 'eva-00' | 'eva-01' | 'eva-02' | 'eva-03';
+  pilot: string | null;
+}
 export interface EventPayloads {
   'sortie.opened': { source: string; title: string; trust: Trust };
   'sortie.proactive': { trigger: string; slot: string; stage: string; maxActions: number };
@@ -93,8 +98,8 @@ export interface EventPayloads {
     durationMs?: number;
     transferMs?: number;
   };
-  'action.done': { tool: string; result: unknown; durationMs?: number };
-  'action.failed': { tool: string; error: string; durationMs?: number };
+  'action.done': { tool: string; result: unknown; durationMs?: number; evaInstance?: EvaInstanceRef };
+  'action.failed': { tool: string; error: string; durationMs?: number; evaInstance?: EvaInstanceRef };
   'sortie.done': Record<string, never>;
   'sortie.failed': Record<string, never>;
 }
