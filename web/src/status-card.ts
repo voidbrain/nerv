@@ -182,6 +182,7 @@ export class NervRecipeCard extends HTMLElement {
   private categoryNode: HTMLElement;
   private titleNode: HTMLElement;
   private bodyNode: HTMLElement;
+  private photosNode: HTMLElement;
   private workingNode: HTMLElement;
 
   constructor() {
@@ -200,11 +201,14 @@ export class NervRecipeCard extends HTMLElement {
     this.bodyNode = document.createElement('pre');
     this.bodyNode.style.cssText =
       'margin:0;font-family:inherit;white-space:pre-wrap;line-height:1.5;font-size:14px;color:var(--text)';
+    this.photosNode = document.createElement('div');
+    this.photosNode.style.cssText = 'display:flex;flex-wrap:wrap;gap:12px;margin-top:12px';
+    this.photosNode.hidden = true;
     this.workingNode = document.createElement('p');
     this.workingNode.style.cssText =
       'margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)';
     this.workingNode.hidden = true;
-    this.panelNode.append(this.categoryNode, this.titleNode, this.bodyNode, this.workingNode);
+    this.panelNode.append(this.categoryNode, this.titleNode, this.bodyNode, this.photosNode, this.workingNode);
     root.append(this.panelNode);
   }
 
@@ -217,6 +221,31 @@ export class NervRecipeCard extends HTMLElement {
       this.categoryNode.textContent = p.category;
       this.titleNode.textContent = p.title;
       this.bodyNode.textContent = p.body;
+      this.photosNode.replaceChildren();
+      if (p.photos && p.photos.length > 0) {
+        for (const photo of p.photos) {
+          const fig = document.createElement('figure');
+          fig.style.cssText = 'margin:0;max-width:220px';
+          const img = document.createElement('img');
+          img.src = photo.url;
+          img.alt = photo.caption || p.title;
+          img.loading = 'lazy';
+          img.style.cssText = 'display:block;max-width:100%;height:auto;border-radius:6px;border:1px solid var(--line)';
+          fig.append(img);
+          if (photo.caption || (photo.stepIndex !== undefined && photo.stepIndex !== null)) {
+            const cap = document.createElement('figcaption');
+            cap.style.cssText = 'margin-top:4px;font-size:12px;color:var(--muted)';
+            const stepLabel =
+              photo.stepIndex !== undefined && photo.stepIndex !== null ? `Step ${photo.stepIndex + 1}` : '';
+            cap.textContent = [stepLabel, photo.caption].filter(Boolean).join(' — ');
+            fig.append(cap);
+          }
+          this.photosNode.append(fig);
+        }
+        this.photosNode.hidden = false;
+      } else {
+        this.photosNode.hidden = true;
+      }
       if (p.working) {
         this.workingNode.textContent = p.working;
         this.workingNode.hidden = false;
@@ -229,6 +258,8 @@ export class NervRecipeCard extends HTMLElement {
       this.categoryNode.textContent = 'ERROR';
       this.titleNode.textContent = 'Recipe';
       this.bodyNode.textContent = 'Invalid surface';
+      this.photosNode.replaceChildren();
+      this.photosNode.hidden = true;
       this.workingNode.hidden = true;
     }
   }

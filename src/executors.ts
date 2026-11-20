@@ -8,6 +8,7 @@ import type { GmailClient } from './gmail.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
 import type { FpvBuildStore, BuildComponentInput, BuildWiringInput, PinoutEntry } from './fpv-builds.ts';
 import { toRecipeSurface, type DocumentStore } from './documents.ts';
+import type { PhotoStore } from './photos.ts';
 import type { PantryStore } from './pantry.ts';
 import { handleFleetChat, type FleetStore } from './fleet.ts';
 import { readConfig, savePilots, setSchedule } from './config.ts';
@@ -64,6 +65,7 @@ export interface ReminderBackend {
   gmail?: GmailClient;
   fpvBuilds?: FpvBuildStore;
   documents?: DocumentStore;
+  photos?: PhotoStore;
   pantry?: PantryStore;
   home?: string;
   /** F-036 slice 3b: queues one action for another base; the coordinator sends it over the Kaji line. */
@@ -776,7 +778,13 @@ export function execute(
       const category = args.category === undefined ? undefined : text(args, 'category');
       const doc = backend.documents.get(key, category);
       if (!doc) throw new Error(`No saved document matching "${key}".`);
-      return { ...doc, surface: toRecipeSurface(doc) };
+      const photos = backend.photos?.list('recipe', doc.id).map((p) => ({
+        id: p.id,
+        url: p.url,
+        ...(p.caption ? { caption: p.caption } : {}),
+        stepIndex: p.stepIndex,
+      }));
+      return { ...doc, ...(photos?.length ? { photos } : {}), surface: toRecipeSurface(doc, undefined, photos) };
     }
     case 'docs.compute': {
       only(args, [

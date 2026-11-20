@@ -270,9 +270,16 @@ process.on('message', (value: unknown) => {
       case 'documents.find': {
         const q = params.query as string;
         const exact = store.documents.get(q);
-        if (exact) return { title: exact.title, body: exact.body };
-        const found = store.documents.recall(q);
-        return found.length === 1 ? { title: found[0]!.title, body: found[0]!.body } : null;
+        const found = exact ? [exact] : store.documents.recall(q);
+        const doc = exact ?? (found.length === 1 ? found[0]! : null);
+        if (!doc) return null;
+        const photos = store.photos.list('recipe', doc.id).map((p) => ({
+          id: p.id,
+          url: p.url,
+          ...(p.caption ? { caption: p.caption } : {}),
+          stepIndex: p.stepIndex,
+        }));
+        return { title: doc.title, body: doc.body, ...(photos.length ? { photos } : {}) };
       }
       case 'kaji.bases':
         return registry().bases();

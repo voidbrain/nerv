@@ -31,10 +31,17 @@ export interface ChecklistSurface {
   props: { listId: string; name: string; items: ChecklistSurfaceItem[] };
 }
 
+export interface RecipePhoto {
+  id: string;
+  url: string;
+  caption?: string;
+  stepIndex?: number | null;
+}
+
 export interface RecipeSurface {
   version: 1;
   component: 'nerv-recipe-card';
-  props: { title: string; category: string; body: string; working?: string };
+  props: { title: string; category: string; body: string; working?: string; photos?: RecipePhoto[] };
 }
 
 export type Surface = StatusSurface | NoticeSurface | ChecklistSurface | RecipeSurface;
@@ -298,10 +305,10 @@ export function validateSurfaceResult(value: unknown): SurfaceValidationResult {
   }
 
   if (comp === 'nerv-recipe-card') {
-    const allowedKeys = ['title', 'category', 'body', 'working'];
+    const allowedKeys = ['title', 'category', 'body', 'working', 'photos'];
     if (
       propKeys.length < 3 ||
-      propKeys.length > 4 ||
+      propKeys.length > 5 ||
       propKeys.some((k) => !allowedKeys.includes(k)) ||
       !('title' in p) ||
       !('category' in p) ||
@@ -309,7 +316,7 @@ export function validateSurfaceResult(value: unknown): SurfaceValidationResult {
     ) {
       return {
         ok: false,
-        reason: 'Invalid surface props: recipe card requires [title, category, body] and optional [working].',
+        reason: 'Invalid surface props: recipe card requires [title, category, body] and optional [working, photos].',
       };
     }
     if (typeof p['title'] !== 'string' || p['title'].length === 0 || p['title'].length > 160) {
@@ -324,6 +331,38 @@ export function validateSurfaceResult(value: unknown): SurfaceValidationResult {
     if ('working' in p && (typeof p['working'] !== 'string' || p['working'].length > 4000)) {
       return { ok: false, reason: 'Invalid surface props: working must be a string up to 4000 characters.' };
     }
+    let photos: RecipePhoto[] | undefined;
+    if ('photos' in p && p['photos'] !== undefined) {
+      if (!Array.isArray(p['photos']) || p['photos'].length > 20) {
+        return { ok: false, reason: 'Invalid surface props: photos must be an array of at most 20 items.' };
+      }
+      photos = [];
+      for (const raw of p['photos']) {
+        if (!record(raw) || typeof raw['id'] !== 'string' || typeof raw['url'] !== 'string') {
+          return { ok: false, reason: 'Invalid surface props: photo requires string id and url.' };
+        }
+        if (!/^\/api\/photos\/[A-Za-z0-9-]+$/.test(raw['url'])) {
+          return { ok: false, reason: 'Invalid surface props: photo url must be /api/photos/<id>.' };
+        }
+        if ('caption' in raw && raw['caption'] !== undefined && (typeof raw['caption'] !== 'string' || raw['caption'].length > 200)) {
+          return { ok: false, reason: 'Invalid surface props: photo caption must be a string up to 200 characters.' };
+        }
+        if (
+          'stepIndex' in raw &&
+          raw['stepIndex'] !== undefined &&
+          raw['stepIndex'] !== null &&
+          (!Number.isInteger(raw['stepIndex']) || (raw['stepIndex'] as number) < 0)
+        ) {
+          return { ok: false, reason: 'Invalid surface props: photo stepIndex must be a non-negative integer or null.' };
+        }
+        photos.push({
+          id: raw['id'],
+          url: raw['url'],
+          ...(typeof raw['caption'] === 'string' && raw['caption'].length > 0 ? { caption: raw['caption'] } : {}),
+          ...(raw['stepIndex'] !== undefined ? { stepIndex: raw['stepIndex'] as number | null } : {}),
+        });
+      }
+    }
     return {
       ok: true,
       surface: {
@@ -334,6 +373,7 @@ export function validateSurfaceResult(value: unknown): SurfaceValidationResult {
           category: p['category'],
           body: p['body'],
           ...(typeof p['working'] === 'string' && p['working'].length > 0 ? { working: p['working'] } : {}),
+          ...(photos && photos.length > 0 ? { photos } : {}),
         },
       },
     };

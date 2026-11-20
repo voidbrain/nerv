@@ -1,5 +1,7 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import type { StoreApi } from './runtime.ts';
+import type { DocumentStore } from './documents.ts';
+import { MAX_PHOTO_BYTES, type PhotoStore } from './photos.ts';
 import { formatTelegramChecklist } from './lists.ts';
 import { ONLINE_MS } from './kaji-link.ts';
 import type { ChannelState } from './channel-state.ts';
@@ -27,7 +29,14 @@ const MAX_TEXT = 4000;
 const STALE_SECONDS = 600;
 interface Update {
   update_id: number;
-  message?: { date: number; text?: string; chat: { id: number; type: string }; from?: { id: number } };
+  message?: {
+    date: number;
+    text?: string;
+    caption?: string;
+    photo?: { file_id: string; file_size?: number; width: number; height: number }[];
+    chat: { id: number; type: string };
+    from?: { id: number };
+  };
   callback_query?: {
     id: string;
     data?: string;
@@ -67,6 +76,27 @@ export class TelegramApi {
       { ...(offset !== undefined ? { offset } : {}), timeout, allowed_updates: ['message', 'callback_query'] },
       signal ?? AbortSignal.timeout((timeout + 10) * 1000),
     );
+  }
+  async downloadFile(fileId: string, maxBytes: number, signal?: AbortSignal): Promise<Buffer> {
+    const info = await this.call<{ file_path?: string }>('getFile', { file_id: fileId }, signal);
+    const filePath = info.file_path;
+    if (!filePath || filePath.startsWith('/') || filePath.includes('..')) {
+      throw new Error('Telegram getFile returned an invalid file path.');
+    }
+    const token = typeof this.token === 'function' ? this.token() : this.token;
+    const response = await fetch(`${this.base}/file/bot${token}/${filePath}`, {
+      method: 'GET',
+      signal: signal ?? AbortSignal.timeout(15000),
+      redirect: 'error',
+    });
+    if (!response.ok) throw new Error(`Telegram file download failed: HTTP ${response.status}`);
+    const lenHeader = response.headers.get('content-length');
+    if (lenHeader && Number(lenHeader) > maxBytes) {
+      throw new Error(`Photo exceeds ${maxBytes} byte limit.`);
+    }
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.length > maxBytes) throw new Error(`Photo exceeds ${maxBytes} byte limit (${bytes.length} bytes).`);
+    return bytes;
   }
   send(chatId: number, text: string, buttons?: Button[][]) {
     return this.call<{ message_id: number }>('sendMessage', {
@@ -636,7 +666,7 @@ export class TelegramChannel {
       return;
     }
     const m = u.message;
-    if (!m?.text) return;
+    if (!m || (!m.text && !m.photo?.length)) return;
     if (m.chat.type !== 'private' || !this.owner(m.chat.id) || (m.from && !this.owner(m.from.id))) {
       this.log('Telegram: ignored a message from another chat.');
       return;
@@ -647,6 +677,11 @@ export class TelegramChannel {
       await this.sendLocal('I was offline when you sent that; send it again if it still matters.');
       return;
     }
+    if (!m.text && m.photo?.length) {
+      await this.handlePhoto(m.photo, m.caption ?? '');
+      return;
+    }
+    if (!m.text) return;
     const text = m.text.trim();
     if (text === '/start') {
       await this.sendLocal('Aoba here. Write what you need; actions that need you arrive with buttons.');
@@ -771,4 +806,69 @@ export class TelegramChannel {
       this.log(`Telegram delivery: ${e instanceof Error ? e.message : 'failed'}.`);
     }
   }
+
+  private async handlePhoto(
+    sizes: { file_id: string; file_size?: number; width: number; height: number }[],
+    rawCaption: string,
+  ) {
+    const parsed = parseRecipePhotoCaption(rawCaption);
+    if (!parsed) {
+      await this.sendLocal('Caption a recipe photo with "recipe: <name>" (optional "step N").');
+      return;
+    }
+    const s = this.store as StoreApi & { documents?: DocumentStore; photos?: PhotoStore };
+    if (!s.documents || !s.photos) {
+      await this.sendLocal('Recipe photo storage is not available here.');
+      return;
+    }
+    const exact = s.documents.get(parsed.recipe);
+    const matches = exact ? [exact] : s.documents.recall(parsed.recipe);
+    const doc = exact ?? (matches.length === 1 ? matches[0]! : undefined);
+    if (!doc) {
+      await this.sendLocal(`No unique saved recipe matching "${parsed.recipe}".`);
+      return;
+    }
+    const eligible = sizes
+      .filter((p) => p.file_size === undefined || p.file_size <= MAX_PHOTO_BYTES)
+      .sort((a, b) => b.width * b.height - a.width * a.height);
+    const chosen = eligible[0];
+    if (!chosen) {
+      await this.sendLocal(`Photo exceeds the ${MAX_PHOTO_BYTES} byte limit.`);
+      return;
+    }
+    try {
+      const bytes = await this.api.downloadFile(chosen.file_id, MAX_PHOTO_BYTES, this.stopping.signal);
+      const saved = s.photos.attach({
+        ownerKind: 'recipe',
+        ownerId: doc.id,
+        stepIndex: parsed.stepIndex,
+        bytes,
+        caption: parsed.caption,
+      });
+      const where = saved.stepIndex !== null ? ` (step ${saved.stepIndex + 1})` : '';
+      await this.sendLocal(`Attached photo to "${doc.title}"${where}: ${saved.url}`);
+    } catch (e) {
+      await this.sendLocal(`Photo could not be attached: ${e instanceof Error ? e.message : 'invalid photo'}`);
+    }
+  }
+}
+
+/** Parses a Telegram photo caption like `"recipe: Tiramisu step 2"` or `"ricetta: Pesto"`. */
+export function parseRecipePhotoCaption(
+  raw: string,
+): { recipe: string; stepIndex: number | null; caption: string } | null {
+  const trimmed = raw.trim();
+  const m = /^(?:recipe|ricetta)\s*:\s*(.+)$/i.exec(trimmed);
+  if (!m) return null;
+  let rest = m[1]!.trim();
+  let stepIndex: number | null = null;
+  const stepMatch = /\s+(?:step|passaggio)\s+(\d+)\s*$/i.exec(rest);
+  if (stepMatch) {
+    const n = Number(stepMatch[1]);
+    if (!Number.isInteger(n) || n < 1) return null;
+    stepIndex = n - 1;
+    rest = rest.slice(0, stepMatch.index).trim();
+  }
+  if (!rest) return null;
+  return { recipe: rest, stepIndex, caption: trimmed };
 }

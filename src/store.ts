@@ -27,7 +27,7 @@ import { UsageStore } from './model-usage.ts';
 import type { HistoryPage } from './history.ts';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
 import { builtinTools, type AgencySnapshot } from './executors.ts';
 import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
@@ -51,6 +51,7 @@ import { PromptSampleStore } from './prompt-samples.ts';
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
 import { FPV_BUILDS_SCHEMA, FpvBuildStore } from './fpv-builds.ts';
 import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
+import { PHOTOS_SCHEMA, PhotoStore } from './photos.ts';
 import { PANTRY_SCHEMA, PantryStore } from './pantry.ts';
 import { FLEET_SCHEMA, FleetStore } from './fleet.ts';
 import { REGISTRY_SCHEMA } from './kaji.ts';
@@ -137,6 +138,7 @@ export class Store {
   readonly lists: ListStore;
   readonly fpvBuilds: FpvBuildStore;
   readonly documents: DocumentStore;
+  readonly photos: PhotoStore;
   readonly pantry: PantryStore;
   readonly policySource: string;
   pushFetch: typeof fetch = fetch;
@@ -244,6 +246,11 @@ export class Store {
     this.fpvBuilds = new FpvBuildStore(this.db);
     this.db.exec(DOCUMENTS_SCHEMA);
     this.documents = new DocumentStore(this.db);
+    this.db.exec(PHOTOS_SCHEMA);
+    this.photos = new PhotoStore(
+      this.db,
+      options.home ? join(options.home, 'photos') : path !== ':memory:' ? join(dirname(path), 'photos') : undefined,
+    );
     this.db.exec(PANTRY_SCHEMA);
     this.pantry = new PantryStore(this.db);
     this.watch = new Watch(this.db, this.ledger);
