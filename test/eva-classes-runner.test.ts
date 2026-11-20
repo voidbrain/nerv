@@ -6,7 +6,13 @@ import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync } from 'nod
 import { createServer, type Server } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join, parse } from 'node:path';
-import { EVA_DENIED_LOCAL_PORTS, buildEvaSeatbeltProfile, runEvaJob, type EvaJobEvent } from '../src/eva-runner.ts';
+import {
+  EVA_DENIED_LOCAL_PORTS,
+  buildEvaBwrapArgs,
+  buildEvaSeatbeltProfile,
+  runEvaJob,
+  type EvaJobEvent,
+} from '../src/eva-runner.ts';
 import type { EvaClass } from '../src/pilots.ts';
 
 const isDarwinWithSandbox = process.platform === 'darwin' && existsSync('/usr/bin/sandbox-exec');
@@ -214,4 +220,20 @@ describe('F-049-T07: each class gets only what its profile allows', () => {
       },
     );
   }
+
+  it('F-049-T10: buildEvaBwrapArgs enforces class network, PID, and path boundaries on Linux', () => {
+    const base = { workspaceDir: '/tmp/w', hostHomeDir: '/tmp/h', command: '/usr/bin/node', args: ['-v'] };
+    for (const cls of ['eva-03', 'eva-00'] as const) {
+      const args = buildEvaBwrapArgs(cls, base);
+      assert.ok(args.includes('--unshare-net'), `${cls} unshares network`);
+      assert.ok(args.includes('--unshare-pid'), `${cls} unshares pid`);
+      assert.ok(args.includes('--die-with-parent'), `${cls} dies with parent`);
+      assert.throws(() => buildEvaBwrapArgs(cls, { ...base, egress: { localhost: [8080] } }), /has no network/);
+      assert.throws(() => buildEvaBwrapArgs(cls, { ...base, writablePaths: ['/tmp/x'] }), /own workspace/);
+    }
+    const eva01 = buildEvaBwrapArgs('eva-01', { ...base, writablePaths: ['/tmp/granted'] });
+    assert.ok(!eva01.includes('--unshare-net'), 'eva-01 allows localhost proxy');
+    assert.ok(eva01.includes('/tmp/granted'), 'eva-01 binds granted writable path');
+    assert.throws(() => buildEvaBwrapArgs('eva-01', { ...base, writablePaths: ['/tmp/h'] }), /writes in \$HOME/);
+  });
 });

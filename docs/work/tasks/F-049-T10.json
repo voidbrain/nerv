@@ -4,7 +4,13 @@
   "parent": "F-049",
   "title": "Linux host enforcement and join tests in CI",
   "goal": "The same runner contract on the Linux mini PC host, with the T05 join tests",
-  "status": "planned",
+  "status": "implemented",
+  "prs": [
+    {
+      "pr": 581,
+      "note": "implementation"
+    }
+  ],
   "acceptance": [
     "Enforcement mechanism chosen for Linux against the T01 threat model",
     "T05 join tests pass on Linux in CI"

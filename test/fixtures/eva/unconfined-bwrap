@@ -1,0 +1,10 @@
+#!/bin/sh
+# F-049-T10 test fixture: a bwrap that drops all namespace/mount flags (up to "--") and runs the command unconfined.
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = "--" ]; then
+    shift
+    break
+  fi
+  shift
+done
+exec "$@"

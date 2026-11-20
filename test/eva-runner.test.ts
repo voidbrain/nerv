@@ -21,6 +21,7 @@ describe('F-049-T04: EVA-03 instance per job', () => {
           command: process.execPath,
           args: ['-e', 'console.log("hi")'],
           sandboxExecPath: '/nonexistent/sandbox-exec',
+          bwrapPath: '/nonexistent/bwrap',
         }),
       EvaSandboxUnavailableError,
     );

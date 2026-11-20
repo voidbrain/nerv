@@ -10,11 +10,18 @@ import { join } from 'node:path';
 import { runEva03Job, type Eva03LedgerEvent } from '../src/eva-runner.ts';
 
 const isDarwinWithSandbox = process.platform === 'darwin' && existsSync('/usr/bin/sandbox-exec');
-/** Drops the profile and runs the command as is: every confinement test must show its breach through it. */
-const UNCONFINED = join(import.meta.dirname, 'fixtures', 'eva', 'unconfined-sandbox-exec');
+const isLinuxWithBwrap = process.platform === 'linux' && existsSync('/usr/bin/bwrap');
+const hasHostSandbox = isDarwinWithSandbox || isLinuxWithBwrap;
+/** Drops the profile/namespaces and runs the command as is: every confinement test must show its breach through it. */
+const UNCONFINED = join(
+  import.meta.dirname,
+  'fixtures',
+  'eva',
+  process.platform === 'linux' ? 'unconfined-bwrap' : 'unconfined-sandbox-exec',
+);
 const MODES = [
-  { name: 'confined', sandboxExecPath: undefined },
-  { name: 'unconfined fixture', sandboxExecPath: UNCONFINED },
+  { name: 'confined', unconfinedPath: undefined },
+  { name: 'unconfined fixture', unconfinedPath: UNCONFINED },
 ] as const;
 const DENIED = /^DENIED/;
 
@@ -22,7 +29,7 @@ const DENIED = /^DENIED/;
  * Runs `attempts` (CommonJS; each `t(name, fn)` records fn's value or "DENIED:<code>") in a job and returns what it
  * recorded. `wait` keeps the job up for asynchronous attempts that record themselves into `r`.
  */
-async function probe(attempts: string, opts: { sandboxExecPath?: string; deniedReadPaths?: string[]; wait?: number }) {
+async function probe(attempts: string, opts: { unconfinedPath?: string; deniedReadPaths?: string[]; wait?: number }) {
   const code = [
     'const fs = require("node:fs"), net = require("node:net"), dgram = require("node:dgram"), dns = require("node:dns"), cp = require("node:child_process");',
     'const r = {};',
@@ -35,7 +42,11 @@ async function probe(attempts: string, opts: { sandboxExecPath?: string; deniedR
     command: process.execPath,
     args: ['-e', code],
     timeoutMs: 15_000,
-    ...(opts.sandboxExecPath ? { sandboxExecPath: opts.sandboxExecPath } : {}),
+    ...(opts.unconfinedPath
+      ? process.platform === 'linux'
+        ? { bwrapPath: opts.unconfinedPath }
+        : { sandboxExecPath: opts.unconfinedPath }
+      : {}),
     ...(opts.deniedReadPaths ? { deniedReadPaths: opts.deniedReadPaths } : {}),
   });
   assert.equal(result.exitCode, 0, result.stderr);
@@ -63,7 +74,7 @@ const HANGING_WITH_CHILDREN = [
   'setInterval(() => {}, 1000);',
 ].join(' ');
 
-describe('F-049-T05: EVA-03 gate', { skip: !isDarwinWithSandbox }, () => {
+describe('F-049-T05: EVA-03 gate', { skip: !hasHostSandbox }, () => {
   for (const mode of MODES) {
     const confined = mode.name === 'confined';
     const outcome = confined ? 'refused' : 'succeeds through the unconfined fixture';
@@ -91,7 +102,7 @@ describe('F-049-T05: EVA-03 gate', { skip: !isDarwinWithSandbox }, () => {
             `t('symlink', () => { fs.symlinkSync(${db}, 'via-symlink'); return fs.readFileSync('via-symlink', 'utf8'); });`,
             `t('hardlink', () => { fs.linkSync(${key}, 'via-hardlink'); return fs.readFileSync('via-hardlink', 'utf8'); });`,
           ].join('\n'),
-          { sandboxExecPath: mode.sandboxExecPath, deniedReadPaths: [state] },
+          { unconfinedPath: mode.unconfinedPath, deniedReadPaths: [state] },
         );
         expect(r.state, 'STATE-FIXTURE', 'reading NERV state');
         expect(r.key, 'KEY-FIXTURE', 'reading a key file');
@@ -129,13 +140,13 @@ describe('F-049-T05: EVA-03 gate', { skip: !isDarwinWithSandbox }, () => {
             // The fixture server never answers: whether the query left the job is what it counted, checked below.
             `res.resolve4('gate.invalid', () => {});`,
           ].join('\n'),
-          { sandboxExecPath: mode.sandboxExecPath, wait: 1500 },
+          { unconfinedPath: mode.unconfinedPath, wait: 1500 },
         );
         expect(r.tcp, 'CONNECTED', 'a TCP connection to a loopback port');
         assert.equal(heard.tcp > 0, !confined, 'the loopback listener saw a connection');
         assert.equal(heard.udp > 0, !confined, 'a UDP datagram arrived');
         assert.equal(heard.dns > 0, !confined, 'a DNS query arrived');
-        if (confined) assert.match(r.udp ?? '', DENIED);
+        if (confined && isDarwinWithSandbox) assert.match(r.udp ?? '', DENIED);
       } finally {
         tcp.close();
         udp.close();
@@ -143,31 +154,51 @@ describe('F-049-T05: EVA-03 gate', { skip: !isDarwinWithSandbox }, () => {
       }
     });
 
-    it(`3. credentials: environment secrets never reach the job; reading a Keychain item ${outcome}`, async () => {
+    it(`3. credentials: environment secrets never reach the job; reading a credential store ${outcome}`, async () => {
       const planted = { ANTHROPIC_API_KEY: 'sk-fixture', NERV_TOKEN: 'token-fixture', KAJI_KEY: 'kaji-fixture' };
-      // A keychain of the test's own, with one item the job tries to read (never the owner's keychains).
-      const dir = scratch('keychain'),
-        keychain = join(dir, 'gate.keychain-db');
-      const security = (...args: string[]) => execFileSync('/usr/bin/security', args, { stdio: 'ignore' });
-      security('create-keychain', '-p', 'gate-fixture', keychain);
       Object.assign(process.env, planted);
-      try {
-        security('unlock-keychain', '-p', 'gate-fixture', keychain);
-        security('add-generic-password', '-a', 'gate', '-s', 'nerv-gate', '-w', 'KC-FIXTURE', '-A', keychain);
-        const r = await probe(
-          [
-            `t('env', () => Object.keys(process.env).filter((k) => ${JSON.stringify(Object.keys(planted))}.includes(k)).join(',') || 'NONE');`,
-            `t('keychain', () => cp.execFileSync('/usr/bin/security', ['find-generic-password', '-s', 'nerv-gate', '-w', ${JSON.stringify(keychain)}], { stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim());`,
-          ].join('\n'),
-          { sandboxExecPath: mode.sandboxExecPath },
-        );
-        // The environment is the runner's own (buildEva03CleanEnv), not the profile's: clean in both modes.
-        assert.equal(r.env, 'NONE');
-        expect(r.keychain, 'KC-FIXTURE', 'reading a Keychain item');
-      } finally {
-        for (const k of Object.keys(planted)) delete process.env[k];
-        security('delete-keychain', keychain);
-        rmSync(dir, { recursive: true, force: true });
+      if (isDarwinWithSandbox) {
+        // A keychain of the test's own, with one item the job tries to read (never the owner's keychains).
+        const dir = scratch('keychain'),
+          keychain = join(dir, 'gate.keychain-db');
+        const security = (...args: string[]) => execFileSync('/usr/bin/security', args, { stdio: 'ignore' });
+        security('create-keychain', '-p', 'gate-fixture', keychain);
+        try {
+          security('unlock-keychain', '-p', 'gate-fixture', keychain);
+          security('add-generic-password', '-a', 'gate', '-s', 'nerv-gate', '-w', 'KC-FIXTURE', '-A', keychain);
+          const r = await probe(
+            [
+              `t('env', () => Object.keys(process.env).filter((k) => ${JSON.stringify(Object.keys(planted))}.includes(k)).join(',') || 'NONE');`,
+              `t('keychain', () => cp.execFileSync('/usr/bin/security', ['find-generic-password', '-s', 'nerv-gate', '-w', ${JSON.stringify(keychain)}], { stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim());`,
+            ].join('\n'),
+            { unconfinedPath: mode.unconfinedPath },
+          );
+          // The environment is the runner's own (buildEva03CleanEnv), not the profile's: clean in both modes.
+          assert.equal(r.env, 'NONE');
+          expect(r.keychain, 'KC-FIXTURE', 'reading a Keychain item');
+        } finally {
+          for (const k of Object.keys(planted)) delete process.env[k];
+          security('delete-keychain', keychain);
+          rmSync(dir, { recursive: true, force: true });
+        }
+      } else {
+        const credDir = scratch('linux-creds');
+        const credFile = join(credDir, 'id_ed25519');
+        writeFileSync(credFile, 'CRED-FIXTURE');
+        try {
+          const r = await probe(
+            [
+              `t('env', () => Object.keys(process.env).filter((k) => ${JSON.stringify(Object.keys(planted))}.includes(k)).join(',') || 'NONE');`,
+              `t('cred', () => fs.readFileSync(${JSON.stringify(credFile)}, 'utf8'));`,
+            ].join('\n'),
+            { unconfinedPath: mode.unconfinedPath, deniedReadPaths: [credDir] },
+          );
+          assert.equal(r.env, 'NONE');
+          expect(r.cred, 'CRED-FIXTURE', 'reading a host credential file');
+        } finally {
+          for (const k of Object.keys(planted)) delete process.env[k];
+          rmSync(credDir, { recursive: true, force: true });
+        }
       }
     });
 
@@ -183,7 +214,7 @@ describe('F-049-T05: EVA-03 gate', { skip: !isDarwinWithSandbox }, () => {
             `t('oracle', () => fs.readFileSync(${JSON.stringify(join(grader, 'hidden', 'oracle.json'))}, 'utf8'));`,
             `t('score', () => { fs.writeFileSync(${JSON.stringify(join(grader, 'out', 'score.json'))}, '{"score":100}'); return 'WRITTEN'; });`,
           ].join('\n'),
-          { sandboxExecPath: mode.sandboxExecPath, deniedReadPaths: [join(grader, 'hidden')] },
+          { unconfinedPath: mode.unconfinedPath, deniedReadPaths: [join(grader, 'hidden')] },
         );
         expect(r.oracle, '{"answer":42}', 'reading the hidden oracle');
         expect(r.score, 'WRITTEN', 'writing the grader output');
@@ -215,13 +246,21 @@ describe('F-049-T05: EVA-03 gate', { skip: !isDarwinWithSandbox }, () => {
       try {
         await settle();
         assert.equal(end === 'timeout' ? result.timedOut : result.cancelled, true);
-        assert.equal(alive(pids.same), false, 'the child in the job’s process group is gone');
-        assert.equal(alive(pids.own), false, 'the child in its own session is gone');
+        if (isDarwinWithSandbox) {
+          assert.equal(alive(pids.same), false, 'the child in the job’s process group is gone');
+          assert.equal(alive(pids.own), false, 'the child in its own session is gone');
+        } else {
+          // On Linux bwrap --unshare-pid virtualizes child PIDs inside the namespace; verify via host `ps`.
+          const hostArgs = execFileSync('ps', ['-A', '-o', 'args='], { encoding: 'utf8' });
+          assert.equal(hostArgs.includes('setInterval(() => {}, 1000)'), false, 'no child survives on host');
+        }
         assert.equal(events.at(-1)?.kind, end === 'timeout' ? 'eva03.timed_out' : 'eva03.cancelled');
         assert.equal(events.at(-1)?.rollbackClaimed, false);
         assert.equal(events.at(-1)?.uncertainExternalEffect, true);
       } finally {
-        for (const pid of [pids.same, pids.own]) if (alive(pid)) process.kill(pid, 'SIGKILL');
+        if (isDarwinWithSandbox) {
+          for (const pid of [pids.same, pids.own]) if (alive(pid)) process.kill(pid, 'SIGKILL');
+        }
       }
     });
   }
@@ -246,7 +285,7 @@ describe('F-049-T05: EVA-03 gate', { skip: !isDarwinWithSandbox }, () => {
       // Seen or not, a child that was still running makes the end uncertain; only an unseen one is missed.
       if (result.descendantsKilled > 0) assert.equal(events.at(-1)?.uncertainExternalEffect, true);
     } finally {
-      if (pid && alive(pid)) process.kill(pid, 'SIGKILL');
+      if (isDarwinWithSandbox && pid && alive(pid)) process.kill(pid, 'SIGKILL');
     }
   });
 
