@@ -44,6 +44,10 @@
     {
       "pr": 517,
       "note": "implementation (merged on green CI 2026-11-18)"
+    },
+    {
+      "pr": 591,
+      "note": "review recorded"
     }
   ]
 }

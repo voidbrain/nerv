@@ -459,8 +459,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-082-t01"></a>B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [B-087-T01](#b-087-t01) | — | [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18) |
-| 🟢 Small | <a id="b-082-t02"></a>B-082-T02 — Windows: keep the logon account for Entra ID and domain users | 0.75 h | 0 h | 0.75 h | Ready | — | — | — |
+| 🟢 Small | <a id="b-082-t01"></a>B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [B-087-T01](#b-087-t01) | — | [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded |
+| 🟢 Small | <a id="b-082-t02"></a>B-082-T02 — Windows: keep the logon account for Entra ID and domain users | 0.75 h | 0 h | 0.75 h | Ready | — | — | [PR #591](https://github.com/voidbrain/nerv/pull/591) opened |
 | 🟢 Small | **Total** | 1.5 h | 0.5 h (1 of 2 steps recorded) | 1 h | 0 of 2 completed | | | |
 
 <details>
@@ -470,7 +470,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-082-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18). Test: `test/node-inspection.test.ts` "B-082: the Windows task user is the machine account over SSH…" (committed failing first) |
+| PR / evidence | Steps: B-082-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded · B-082-T02: [PR #591](https://github.com/voidbrain/nerv/pull/591) opened. Test: `test/node-inspection.test.ts` "B-082: the Windows task user is the machine account over SSH…" (committed failing first) |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-18: CI green on PR #517. 2026-11-20: review done. Pending: the live SSH install on Tabgha (after B-087-T01) and B-082-T02. |
 | Reviewed | 2026-11-20 |
