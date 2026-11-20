@@ -7,9 +7,10 @@ import { asJobUser, endJobUser, stageRuntime, type EvaJobUser } from './eva-job-
 import type { EvaClass } from './pilots.ts';
 
 export const DEFAULT_SANDBOX_EXEC_PATH = '/usr/bin/sandbox-exec';
+export const DEFAULT_BWRAP_PATH = '/usr/bin/bwrap';
 
 export class EvaSandboxUnavailableError extends Error {
-  constructor(message = 'EVA-03 confinement requires /usr/bin/sandbox-exec on macOS.') {
+  constructor(message = 'EVA confinement requires /usr/bin/sandbox-exec on macOS or /usr/bin/bwrap on Linux.') {
     super(message);
     this.name = 'EvaSandboxUnavailableError';
   }
@@ -42,6 +43,8 @@ export interface Eva03JobSpec {
   readonly maxOutputBytes?: number;
   readonly signal?: AbortSignal;
   readonly sandboxExecPath?: string;
+  /** F-049-T10: Linux Bubblewrap binary path; tests point it at unconfined-bwrap. */
+  readonly bwrapPath?: string;
   readonly onLedgerEvent?: (event: Eva03LedgerEvent) => void;
   /** Lists processes for B-099's tracking; tests point it at a missing binary to see tracking fail. */
   readonly psPath?: string;
@@ -125,16 +128,16 @@ function canonicalExistingPath(target: string): string {
 
 const validPort = (p: number) => Number.isInteger(p) && p >= 1 && p <= 65535;
 
-/**
- * F-049-T07: the Seatbelt profile for one job of a class (decisions/eva-runner.md). Every class: writes only in its
- * workspace, no NERV state, no $HOME, no Keychain, no inbound connections. EVA-03 and EVA-00: no network. EVA-01:
- * writes also in its granted paths, connections only to granted `localhost` ports. EVA-02: as EVA-01, plus granted
- * ports on any host. No class reaches NERV's admin ports. A class's network or writes it may not have are refused.
- */
-export function buildEvaSeatbeltProfile(
+const within = (path: string, root: string) => {
+  const rel = relative(root, path);
+  return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel));
+};
+const overlaps = (a: string, b: string) => within(a, b) || within(b, a);
+
+function validateEvaSandboxOptions(
   evaClass: EvaClass,
   options: Eva03SeatbeltOptions & Pick<EvaJobSpec, 'writablePaths' | 'egress'>,
-): string {
+) {
   const spec = EVA_CLASS_SPECS[evaClass];
   const egress = options.egress ?? {};
   const writable = (options.writablePaths ?? []).map(canonicalExistingPath);
@@ -156,21 +159,35 @@ export function buildEvaSeatbeltProfile(
   const readOnly = (options.readOnlyPaths ?? []).map(canonicalExistingPath);
   const denied = (options.deniedReadPaths ?? []).map(canonicalExistingPath);
   const deniedReads = [homeDir, ...(stateDir ? [stateDir] : []), ...denied];
-  // Later Seatbelt rules win: an allow for a path that holds a denied one would re-open it (review of PR #558).
-  // path.relative handles both separators and drive roots, so this holds on every platform.
-  const within = (path: string, root: string) => {
-    const rel = relative(root, path);
-    return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel));
-  };
-  const overlaps = (a: string, b: string) => within(a, b) || within(b, a);
   for (const w of writable)
     if (deniedReads.some((d) => overlaps(w, d)))
       throw new Error(`${w}: no EVA class writes in $HOME, NERV state or a denied path, or in a folder holding one.`);
-  // A read-only input may sit inside $HOME (a checkout), never hold it, and never touch state or a denied path.
   const neverRead = [...(stateDir ? [stateDir] : []), ...denied];
   for (const r of readOnly)
     if (within(homeDir, r) || neverRead.some((d) => overlaps(r, d)))
       throw new Error(`${r} re-opens NERV state or a denied path (or holds $HOME); it cannot be a read-only input.`);
+  const stateFiles = (options.readableStateFiles ?? []).map((name) => {
+    if (!stateDir) throw new Error('readableStateFiles needs nervStateDir.');
+    if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(name)) throw new Error(`Not a plain file name: ${name}`);
+    return join(stateDir, name);
+  });
+  return { spec, egress, writable, workspace, homeDir, stateDir, readOnly, deniedReads, neverRead, stateFiles };
+}
+
+/**
+ * F-049-T07: the Seatbelt profile for one job of a class (decisions/eva-runner.md). Every class: writes only in its
+ * workspace, no NERV state, no $HOME, no Keychain, no inbound connections. EVA-03 and EVA-00: no network. EVA-01:
+ * writes also in its granted paths, connections only to granted `localhost` ports. EVA-02: as EVA-01, plus granted
+ * ports on any host. No class reaches NERV's admin ports. A class's network or writes it may not have are refused.
+ */
+export function buildEvaSeatbeltProfile(
+  evaClass: EvaClass,
+  options: Eva03SeatbeltOptions & Pick<EvaJobSpec, 'writablePaths' | 'egress'>,
+): string {
+  const { egress, writable, workspace, readOnly, deniedReads, neverRead, stateFiles } = validateEvaSandboxOptions(
+    evaClass,
+    options,
+  );
 
   const lines: string[] = [
     '(version 1)',
@@ -203,11 +220,6 @@ export function buildEvaSeatbeltProfile(
     lines.push(`(deny file-write* (subpath "${escapeSbString(d)}"))`);
   }
   // B-100 (owner decision (b)): the named files of the state directory, read-only, one by one; nothing else of it.
-  const stateFiles = (options.readableStateFiles ?? []).map((name) => {
-    if (!stateDir) throw new Error('readableStateFiles needs nervStateDir.');
-    if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(name)) throw new Error(`Not a plain file name: ${name}`);
-    return join(stateDir, name);
-  });
   for (const f of stateFiles) lines.push(`(allow file-read* (literal "${escapeSbString(f)}"))`);
   // Resolving a path (Node's realpath) stats every directory above it, which may sit inside the denied $HOME or state:
   // the metadata of those directories only, never their listing or any other file in them.
@@ -216,6 +228,50 @@ export function buildEvaSeatbeltProfile(
     for (let d = dirname(p); d !== dirname(d); d = dirname(d)) ancestors.add(d);
   for (const d of ancestors) lines.push(`(allow file-read-metadata (literal "${escapeSbString(d)}"))`);
   return `${lines.join('\n')}\n`;
+}
+
+/**
+ * F-049-T10: Bubblewrap (`bwrap`) arguments for one job of a class on Linux (decisions/eva-linux-enforcement.md).
+ * Starts from an empty rootfs, isolates PIDs (`--unshare-pid --die-with-parent`), and drops networking (`--unshare-net`)
+ * for EVA-03 and EVA-00.
+ */
+export function buildEvaBwrapArgs(
+  evaClass: EvaClass,
+  options: Eva03SeatbeltOptions &
+    Pick<EvaJobSpec, 'writablePaths' | 'egress'> & { command: string; args: readonly string[] },
+): string[] {
+  const { spec, writable, workspace, homeDir, neverRead, readOnly, stateFiles } = validateEvaSandboxOptions(
+    evaClass,
+    options,
+  );
+  const args: string[] = ['--die-with-parent', '--unshare-pid', '--new-session'];
+  if (spec.network.mode === 'deny') args.push('--unshare-net');
+  args.push('--proc', '/proc', '--dev', '/dev', '--tmpfs', '/tmp');
+
+  const sysRo = ['/usr', '/lib', '/lib64', '/bin', '/sbin', '/etc/ld.so.cache', '/etc/alternatives'];
+  if (spec.network.mode !== 'deny') sysRo.push('/etc/resolv.conf', '/etc/hosts', '/etc/nsswitch.conf', '/etc/ssl');
+  for (const p of sysRo) args.push('--ro-bind-try', p, p);
+
+  // Bind the executable's runtime prefix (e.g. setup-node's /opt/hostedtoolcache/...) when outside /usr.
+  const cmdReal = canonicalExistingPath(options.command);
+  const cmdDir = dirname(cmdReal);
+  const cmdRoot = cmdDir.endsWith('/bin') ? dirname(cmdDir) : cmdDir;
+  if (
+    isAbsolute(cmdRoot) &&
+    cmdRoot !== '/' &&
+    !sysRo.some((s) => within(cmdRoot, s)) &&
+    !within(homeDir, cmdRoot) &&
+    !neverRead.some((d) => overlaps(cmdRoot, d))
+  ) {
+    args.push('--ro-bind', cmdRoot, cmdRoot);
+  }
+
+  for (const p of readOnly) args.push('--ro-bind', p, p);
+  args.push('--dir', workspace, '--bind', workspace, workspace, '--chdir', workspace);
+  for (const w of writable) args.push('--bind', w, w);
+  for (const f of stateFiles) if (existsSync(f)) args.push('--ro-bind', f, f);
+  args.push('--', options.command, ...options.args);
+  return args;
 }
 
 export function buildEva03CleanEnv(workspaceDir: string, commandPath: string): NodeJS.ProcessEnv {
@@ -378,12 +434,19 @@ export function runEva03Job(spec: Eva03JobSpec): Promise<Eva03JobResult> {
  * and reports its outcome and uncertainty without claiming rollback. Its limits are the class's.
  */
 export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
-  if (process.platform !== 'darwin') {
-    throw new EvaSandboxUnavailableError(`The EVA Seatbelt runner requires macOS (got ${process.platform}).`);
+  const isDarwin = process.platform === 'darwin';
+  const isLinux = process.platform === 'linux';
+  if (!isDarwin && !isLinux) {
+    throw new EvaSandboxUnavailableError(`The EVA runner requires macOS or Linux (got ${process.platform}).`);
   }
-  const sandboxExec = spec.sandboxExecPath ?? DEFAULT_SANDBOX_EXEC_PATH;
-  if (!existsSync(sandboxExec)) {
-    throw new EvaSandboxUnavailableError(`EVA confinement binary missing: ${sandboxExec}`);
+  const sandboxBin = isDarwin
+    ? (spec.sandboxExecPath ?? DEFAULT_SANDBOX_EXEC_PATH)
+    : (spec.bwrapPath ?? DEFAULT_BWRAP_PATH);
+  if (!existsSync(sandboxBin)) {
+    throw new EvaSandboxUnavailableError(`EVA confinement binary missing: ${sandboxBin}`);
+  }
+  if (isLinux && spec.jobUser) {
+    throw new EvaSandboxUnavailableError('jobUser (_nervjob) is macOS-only; Linux uses bwrap namespaces.');
   }
 
   const cls = EVA_CLASS_SPECS[spec.evaClass];
@@ -409,17 +472,33 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
       chmodSync(instanceDir, 0o711);
       chmodSync(workspaceDir, 0o777);
     }
-    const profile = buildEvaSeatbeltProfile(spec.evaClass, {
-      workspaceDir,
-      hostHomeDir,
-      nervStateDir: spec.nervStateDir,
-      readOnlyPaths: spec.readOnlyPaths,
-      deniedReadPaths: spec.deniedReadPaths,
-      readableStateFiles: spec.readableStateFiles,
-      writablePaths: spec.writablePaths,
-      egress: spec.egress,
-    });
-    writeFileSync(profilePath, profile, 'utf8');
+    const sandboxArgs = isDarwin
+      ? (() => {
+          const profile = buildEvaSeatbeltProfile(spec.evaClass, {
+            workspaceDir,
+            hostHomeDir,
+            nervStateDir: spec.nervStateDir,
+            readOnlyPaths: spec.readOnlyPaths,
+            deniedReadPaths: spec.deniedReadPaths,
+            readableStateFiles: spec.readableStateFiles,
+            writablePaths: spec.writablePaths,
+            egress: spec.egress,
+          });
+          writeFileSync(profilePath, profile, 'utf8');
+          return ['-f', profilePath, spec.command, ...spec.args];
+        })()
+      : buildEvaBwrapArgs(spec.evaClass, {
+          workspaceDir,
+          hostHomeDir,
+          nervStateDir: spec.nervStateDir,
+          readOnlyPaths: spec.readOnlyPaths,
+          deniedReadPaths: spec.deniedReadPaths,
+          readableStateFiles: spec.readableStateFiles,
+          writablePaths: spec.writablePaths,
+          egress: spec.egress,
+          command: spec.command,
+          args: spec.args,
+        });
 
     spec.onEvent?.({
       jobId: spec.jobId,
@@ -439,8 +518,8 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
       outputTruncated: boolean;
     }>((resolve, reject) => {
       const launch = spec.jobUser
-        ? asJobUser(spec.jobUser, sandboxExec, ['-f', profilePath, spec.command, ...spec.args])
-        : { command: sandboxExec, args: ['-f', profilePath, spec.command, ...spec.args] };
+        ? asJobUser(spec.jobUser, sandboxBin, sandboxArgs)
+        : { command: sandboxBin, args: sandboxArgs };
       const child = spawn(launch.command, launch.args, {
         cwd: workspaceDir,
         env: buildEva03CleanEnv(workspaceDir, spec.command),
@@ -557,7 +636,7 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
       detail: [survivorNote, outcome.stderr.slice(0, 400)].filter(Boolean).join(' ') || undefined,
     });
 
-    if (spec.jobUser) await removeAsJobUser(spec.jobUser, sandboxExec, instanceDir, workspaceDir);
+    if (spec.jobUser) await removeAsJobUser(spec.jobUser, sandboxBin, instanceDir, workspaceDir);
     rmSync(instanceDir, { recursive: true, force: true });
     workspaceDiscarded = !existsSync(instanceDir);
 
@@ -577,7 +656,7 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
     if (tracker) await tracker.endAll().catch(() => undefined);
     if (spec.jobUser && !workspaceDiscarded) {
       await endJobUser(spec.jobUser).catch(() => undefined);
-      await removeAsJobUser(spec.jobUser, sandboxExec, instanceDir, workspaceDir).catch(() => undefined);
+      await removeAsJobUser(spec.jobUser, sandboxBin, instanceDir, workspaceDir).catch(() => undefined);
     }
     if (!workspaceDiscarded && existsSync(instanceDir)) {
       rmSync(instanceDir, { recursive: true, force: true });

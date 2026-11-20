@@ -53,6 +53,9 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Install Linux EVA sandbox (bubblewrap)
+        if: needs.plan.outputs.full == 'true' || needs.plan.outputs.unit == 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq bubblewrap
       - name: Backlog prerequisite validation
         run: npm run check:dependencies
       - name: Source-owned records, tasks and model profiles

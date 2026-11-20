@@ -1138,7 +1138,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-049-t08"></a>F-049-T08 — Pilot trust stage caps the class | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | — | — | 🤖 | [PR #572](https://github.com/voidbrain/nerv/pull/572) implementation |
 | 🟢 Small | <a id="f-049-t09"></a>F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | — | [F-051-T06](#f-051-t06) | 🤖 | [PR #580](https://github.com/voidbrain/nerv/pull/580) implementation |
-| 🟢 Small | <a id="f-049-t10"></a>F-049-T10 — Linux host enforcement and join tests in CI | 0.75 h | 0 h | 0.75 h | Planned | — | [F-049-T12](#f-049-t12), [F-049-T14](#f-049-t14) | 🤖 | — |
+| 🟢 Small | <a id="f-049-t10"></a>F-049-T10 — Linux host enforcement and join tests in CI | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | — | [F-049-T12](#f-049-t12), [F-049-T14](#f-049-t14) | 🤖 | — |
 | 🟢 Small | <a id="f-049-t12"></a>F-049-T12 — Run the first EVA job on the Linux host | 0.5 h | 0 h | 0.5 h | Planned | [F-049-T10](#f-049-t10) | — | ⏳ 🤖 | — |
 | 🟣 Very large | <a id="f-049-t14"></a>F-049-T14 — Actions run in EVA instances; the in-process executor goes | 16 h | 0 h | 16 h | Planned | [B-099-T02](#b-099-t02), [F-049-T10](#f-049-t10) | — | ⏳ 🤖 | — |
 | 🟣 Very large | **Total** | 29.75 h (13 of 14 steps) | 10 h (6 of 14 steps recorded) | 18.25 h | 9 of 14 completed | | | | |
