@@ -14,15 +14,15 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 41 | 21 |
-| **Require Human 🧑** | 8 | 6 |
+| **Require Human 🧑** | 7 | 6 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-011](#f-011) | [F-109](#f-109) | [B-057](#b-057) | [B-097](#b-097) |
-| [F-004](#f-004) | [F-101](#f-101) | [B-068](#b-068) |  |
+| [F-011](#f-011) | [F-101](#f-101) | [B-057](#b-057) | [B-097](#b-097) |
+| [F-004](#f-004) |  | [B-068](#b-068) |  |
 | [F-108](#f-108) |  | [B-056](#b-056) |  |
 | [F-060](#f-060) |  | [B-095](#b-095) |  |
 | [F-007](#f-007) |  | [B-096](#b-096) |  |
@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 84.25 h agent + 10.75 h owner across 130 open steps of 40 features and 21 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
+**Remaining effort:** 84.25 h agent + 10.5 h owner across 129 open steps of 40 features and 21 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2183,6 +2183,54 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-109"></a>[✨ F-109](#top)
+
+**Pilots as persona cards with editable names and one Apply**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-109-T02 — Store a pilot's call name and second name through a validated interface (Ready).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-18: each pilot in the Pilots panel reads like a persona card: a call name (editable) and a second, real name (editable), the model, and one Apply button for every change on the card instead of one per field; possibly a silhouette image. |
+| **Reproduce** | Dashboard, Pilots panel. |
+| **Check** | Names are stored through a validated backend interface with a regression test; one Apply saves every changed field of a card; the owner confirms on the live dashboard. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-109-t02"></a>F-109-T02 — Store a pilot's call name and second name through a validated interface | 1 h | 0 h | 1 h | Ready | 🤖 | — |
+| 🟡 Medium | <a id="f-109-t03"></a>F-109-T03 — Persona card layout with one Apply for every change | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-109-T02](#f-109-t02) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-109-t04"></a>F-109-T04 — Silhouette image on the persona card | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-109-T03](#f-109-t03) | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h | 1 of 4 completed | | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-109-t01"></a>F-109-T01 — Owner decides the persona card's fields and the silhouette | — | 0 h | Completed | [PR #574](https://github.com/voidbrain/nerv/pull/574) decision recorded |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-109.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-109-T01: [PR #574](https://github.com/voidbrain/nerv/pull/574) decision recorded. Opened in PR #531 |
+| Opened | 2026-11-18 |
+| Verification | Pending. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-110"></a>[✨ F-110](#top)
 
 **Owner settings in the dashboard for values that are fixed today**
@@ -2612,47 +2660,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: Unit: dashboard suite 38 pass. Owner live check pending. |
 | Reviewed | 2026-11-19 |
-
-</details>
-
----
-### <a id="f-109"></a>[✨ F-109](#top)
-
-**Pilots as persona cards with editable names and one Apply**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | ⏳ | — | 🤔 |
-
-🧑 **→** Choose the persona card's fields and whether it shows a silhouette.
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-18: each pilot in the Pilots panel reads like a persona card: a call name (editable) and a second, real name (editable), the model, and one Apply button for every change on the card instead of one per field; possibly a silhouette image. |
-| **Reproduce** | Dashboard, Pilots panel. |
-| **Check** | Names are stored through a validated backend interface with a regression test; one Apply saves every changed field of a card; the owner confirms on the live dashboard. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-109-t01"></a>F-109-T01 — Owner decides the persona card's fields and the silhouette | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🤔](decisions/pilot-persona-cards.md) |
-| 🟢 Small | <a id="f-109-t02"></a>F-109-T02 — Store a pilot's call name and second name through a validated interface | 1 h | 0 h | 1 h | Planned · waits on [F-109-T01](#f-109-t01) | ⏳ 🤖 |
-| 🟡 Medium | <a id="f-109-t03"></a>F-109-T03 — Persona card layout with one Apply for every change | 1.5 h | 0 h | 1.5 h | Planned · waits on [F-109-T02](#f-109-t02) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-109-t04"></a>F-109-T04 — Silhouette image on the persona card, if chosen | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-109-T03](#f-109-t03) | ⏳ 🤖 |
-| 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h agent + 0.25 h owner | 0 of 4 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-109.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Opened in PR #531 |
-| Opened | 2026-11-18 |
-| Verification | Pending. |
-| Reviewed | 2026-11-18 |
 
 </details>
 

@@ -1,6 +1,8 @@
 # Pilot persona cards (F-109-T01)
 
-Owner decision, open since 2026-11-18. Answer by replying with one letter per question, for example `1A 2B 3A`.
+**Decided 2026-11-20 by the owner: 1A, 2A, 3A.** Call name and second name are both editable display labels (the pilot ID stays fixed); one Apply per card saves every changed field together and is disabled until something changes; each card shows a neutral silhouette in the existing avatar set's style, the same size on every card. F-109-T02 to T04 follow; T04 stays.
+
+The options as they were put (open since 2026-11-18):
 
 **1. Names on the card**
 - **A** (proposed): call name as the title (editable), second name under it (editable). Both are display labels; the pilot ID stays fixed.
@@ -14,4 +16,4 @@ Owner decision, open since 2026-11-18. Answer by replying with one letter per qu
 - **A**: a neutral silhouette image per pilot, from the existing avatar set's style, same size on every card.
 - **B** (proposed): no image for now; revisit after the layout is live.
 
-Expected result once decided: F-109-T02 to T04 follow the chosen options; T04 is dropped with 3B.
+With 3B, T04 would have been dropped.

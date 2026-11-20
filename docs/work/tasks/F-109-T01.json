@@ -4,7 +4,7 @@
   "parent": "F-109",
   "title": "Owner decides the persona card's fields and the silhouette",
   "goal": "Fields, editability and silhouette chosen",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "The decision is written in docs/decisions/pilot-persona-cards.md"
   ],
@@ -31,7 +31,13 @@
     "basis": "Estimated 2026-11-18. Not a measurement.",
     "reviewed": "2026-11-18",
     "agentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision"
-  }
+  },
+  "prs": [
+    {
+      "pr": 574,
+      "note": "decision recorded"
+    }
+  ]
 }
