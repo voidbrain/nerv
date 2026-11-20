@@ -1,4 +1,13 @@
 import { Watch, type WatchWork } from './watch.ts';
+import {
+  DEFAULT_HEALTH_THRESHOLDS,
+  HealthSampleStore,
+  evaluateHealthWarnings,
+  validateHealthThresholds,
+  type HealthMetricsSnapshot,
+  type HealthThresholds,
+} from './health-samples.ts';
+import { LinkLoadTracker } from './link-load.ts';
 import { EvaJobs } from './eva-jobs.ts';
 import { defaultEvaLimits, type EvaInstanceInfo, type EvaInstancesSnapshot } from './eva-pool.ts';
 import {
@@ -722,6 +731,25 @@ export class Store {
         },
       ],
     };
+  }
+  readonly linkLoad = new LinkLoadTracker();
+  private healthThresholds: HealthThresholds = { ...DEFAULT_HEALTH_THRESHOLDS };
+  healthMetrics(): HealthMetricsSnapshot {
+    const recentSamples = new HealthSampleStore(this.db).list(60);
+    const latestSample = recentSamples[0] ?? null;
+    const links = this.linkLoad.snapshot();
+    const warnings = evaluateHealthWarnings(latestSample, links, this.healthThresholds);
+    return {
+      latestSample,
+      recentSamples,
+      links,
+      thresholds: this.healthThresholds,
+      warnings,
+    };
+  }
+  setHealthThresholds(thresholds: unknown): HealthThresholds {
+    this.healthThresholds = validateHealthThresholds(thresholds);
+    return this.healthThresholds;
   }
   close() {
     this.db.close();
