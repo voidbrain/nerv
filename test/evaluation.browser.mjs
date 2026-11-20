@@ -51,7 +51,15 @@ test(
     try {
       await runtime.ready();
       runtime.startResumer(100);
-      server = makeServer(runtime, token, { webRoot: resolve('dist/web/browser') });
+      let browserPolicy = { enabled: false, channels: [], targets: [] };
+      server = makeServer(runtime, token, {
+        webRoot: resolve('dist/web/browser'),
+        readUpdatePolicy: () => browserPolicy,
+        saveUpdatePolicy: (p) => {
+          browserPolicy = p;
+          return p;
+        },
+      });
       await new Promise((done) => server.listen(0, '127.0.0.1', done));
       const origin = `http://127.0.0.1:${server.address().port}`;
       const code = await (
