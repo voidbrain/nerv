@@ -1679,7 +1679,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-008-t13"></a>F-008-T13 — Register a battery by chat, CLI and dashboard | 1 h | 0 h | 1 h | Planned | — | [F-008-T12](#f-008-t12) | 🤖 | — |
-| 🟢 Small | <a id="f-008-t14"></a>F-008-T14 — Battery status list in Telegram | 0.5 h | 0 h | 0.5 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-008-t14"></a>F-008-T14 — Battery status list in Telegram | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | — | 🤖 | — |
 | 🟢 Small | <a id="f-008-t12"></a>F-008-T12 — Live check with real batteries | 0.25 h | 0 h | 0.25 h | Planned | [F-008-T13](#f-008-t13) | — | ⏳ 🤖 | — |
 | 🟡 Medium | **Total** | 6.25 h (13 of 14 steps) | 1.75 h (4 of 14 steps recorded) | 1.75 h | 11 of 14 completed | | | | |
 

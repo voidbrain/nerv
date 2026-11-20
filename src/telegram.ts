@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import type { StoreApi } from './runtime.ts';
-import type { BatteryRegistry } from './batteries.ts';
+import { formatBatteryStateLines, parseBatteryStatusPhrase, type BatteryRegistry } from './batteries.ts';
 import type { DocumentStore } from './documents.ts';
 import type { FleetStore } from './fleet.ts';
 import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.ts';
@@ -694,6 +694,12 @@ export class TelegramChannel {
       if (!name || !(await this.sendChecklist(name))) {
         await this.sendLocal(`List "${name}" not found.`);
       }
+      return;
+    }
+    const batteryStatusLang = parseBatteryStatusPhrase(text);
+    if (batteryStatusLang && this.store.batteryCards) {
+      const cards = await this.store.batteryCards();
+      await this.sendLocal(formatBatteryStateLines(cards, batteryStatusLang));
       return;
     }
     if (!this.store.chat) {

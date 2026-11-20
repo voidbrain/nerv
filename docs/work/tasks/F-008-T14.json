@@ -4,7 +4,7 @@
   "parent": "F-008",
   "title": "Battery status list in Telegram",
   "goal": "\"stato batterie\" in Telegram answers with the formatted list the CLI prints",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Test: the phrase returns the same lines as `nerv batteries status`, in Italian or English, without a model call"
   ],
