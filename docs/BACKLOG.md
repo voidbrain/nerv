@@ -2899,7 +2899,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-106-T01 — Update lint tooling past the minimatch advisory (Ready).
+💻 **→** Next: B-106-T01 — Update lint tooling past the minimatch advisory (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2911,7 +2911,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-106-t01"></a>B-106-T01 — Update lint tooling past the minimatch advisory | 0.25 h | 0 h | 0.25 h | Ready |
+| 🟢 Small | <a id="b-106-t01"></a>B-106-T01 — Update lint tooling past the minimatch advisory | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
 
 <details>
@@ -2921,9 +2921,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [Full audit 2026-11-20](audits/2026-11-20-full.md); GHSA-g3hv-75wg-m249 reported by `npm audit` |
+| PR / evidence | [Full audit 2026-11-20](audits/2026-11-20-full.md); GHSA-g3hv-75wg-m249 reported by `npm audit`; `package-lock.json` resolves `typescript-eslint` 8.73.0 |
 | Opened | 2026-11-20 |
-| Verification | 2026-11-20: `npm audit` reports 7 moderate dependency-path findings rooted in one `minimatch` advisory; fix available through `typescript-eslint` 8.73.0. |
+| Verification | 2026-11-20 local: `npm audit` reports 0 vulnerabilities; lint and typecheck pass; full tests pass (1,041 pass, 2 platform skips); `check:fast` passes after regenerating the source-owned ledger. PR CI pending. |
 | Reviewed | 2026-11-20 |
 
 </details>
