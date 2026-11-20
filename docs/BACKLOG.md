@@ -2348,7 +2348,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-110-T02: [PR #539](https://github.com/voidbrain/nerv/pull/539) the fix; CI green · F-110-T03: [PR #583](https://github.com/voidbrain/nerv/pull/583) implementation. [PR #539](https://github.com/voidbrain/nerv/pull/539) F-110-T02 (`test/update-scheduler.test.ts`); Decision in [PR #534](https://github.com/voidbrain/nerv/pull/534); opened in PR #531 |
+| PR / evidence | Steps: F-110-T02: [PR #539](https://github.com/voidbrain/nerv/pull/539) the fix; CI green · F-110-T03: [PR #583](https://github.com/voidbrain/nerv/pull/583) implementation. [PR #596](https://github.com/voidbrain/nerv/pull/596) (compact 1-row Settings + remove backlog ID); [PR #539](https://github.com/voidbrain/nerv/pull/539) F-110-T02 (`test/update-scheduler.test.ts`); Decision in [PR #534](https://github.com/voidbrain/nerv/pull/534); opened in PR #531 |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: F-110-T02 by CI run 44489977085 (PR #539). |
 | Reviewed | 2026-11-19 |
