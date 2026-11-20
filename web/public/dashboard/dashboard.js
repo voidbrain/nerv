@@ -87,7 +87,7 @@ const LABELS = {
   eva:{ brandTitle:"TACTICAL COMMAND", brandTag:"SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY",
     needs:"Misato's apartment · needs you", sorties:"Sorties", next:"Coming up", flow:"Sephirot · sortie flow",
     detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health", settings:"Settings",
-    bases:"NERV bases · Kaji line", cages:"EVA · instances per class", budget:"Battery · budget", melons:"Marduk Institute · Pilots", skills:"Kaji's watermelons · skills", skillStages:"seed → sprout → ripe", lilith:"Terminal Dogma · Lilith",
+    bases:"NERV bases · Kaji line", cages:"EVA cages · heartbeat", budget:"Battery · budget", melons:"Marduk Institute · Pilots", skills:"Kaji's watermelons · skills", skillStages:"seed → sprout → ripe", lilith:"Terminal Dogma · Lilith",
     spear:"SPEAR OF LONGINUS", dummy:"DUMMY PLUG ACTIVE", launch:"Launch",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Battery today",
     steps:{ detect:"Detect", intake:"Naoko", route:"Gendo", consult:"Consult", plan:"Misato", magi:"MAGI", sync:"Sync", apt:"Apartment", plug:"Plug", eva:"EVA", debrief:"Debrief" },
@@ -95,7 +95,7 @@ const LABELS = {
   neutral:{ brandTitle:"OPERATIONS", brandTag:"owner rules enforced · append-only ledger · long-term memory",
     needs:"Needs your approval", sorties:"Jobs", next:"Coming up", flow:"Decision timeline",
     detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health", settings:"Settings",
-    bases:"Machines · mesh", cages:"Sandboxes · instances per class", budget:"Budget", melons:"Pilots", skills:"Skills", skillStages:"create → try → use", lilith:"Memory",
+    bases:"Machines · mesh", cages:"Sandboxes · heartbeat", budget:"Budget", melons:"Pilots", skills:"Skills", skillStages:"create → try → use", lilith:"Memory",
     spear:"STOP EVERYTHING", dummy:"MODELS UNAVAILABLE", launch:"Run",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Budget today",
     steps:{ detect:"Ingress", intake:"Intake", route:"Route", consult:"Consult", plan:"Plan", magi:"Review", sync:"Confidence", apt:"Approval", plug:"Grant", eva:"Sandbox", debrief:"Done" },
@@ -808,23 +808,34 @@ function renderCages() {
   const total = machines.reduce((n, m) => n + (Array.isArray(m.instances) ? m.instances.length : 0), 0);
   const sub = document.getElementById("cages-sub");
   if (sub) sub.textContent = total + " active · " + machines.length + (machines.length === 1 ? " machine" : " machines");
-  box.innerHTML = machines.map(m => {
-    const insts = Array.isArray(m.instances) ? m.instances : [];
-    const statusText = m.self ? "this machine" : (m.online ? "online" : "offline");
-    const limitText = m.limits ? " · " + insts.length + "/" + m.limits.instances + " slots" : "";
-    const body = m.reported === false
-      ? "<div class='eva-empty'>Not reported by this machine</div>"
-      : "<div class='eva-classes'>" + EVA_CLASSES.map(c => {
-          const items = insts.filter(x => x.evaClass === c.id);
-          return "<div class='eva-class' data-eva-class='" + c.id + "'>" +
-            "<div class='eva-class-hdr'><span style='color:var(" + c.css + ")'>" + c.name + "</span><span class='tiny muted'>" + c.label + " · " + (items.length ? items.length + " active" : "empty") + "</span></div>" +
-            (items.length
-              ? items.map(inst => "<div class='eva-inst'><div class='eva-inst-meta'><span class='b'>" + esc(inst.pilot || "unassigned") + "</span><span class='tiny muted'>" + esc(inst.jobId) + (inst.sortieId ? " · " + esc(inst.sortieId) : "") + "</span></div><span class='badge " + evaStateBadge(inst.state) + "'>" + esc(inst.state.toUpperCase()) + "</span></div>").join("")
-              : "<div class='eva-empty'>Empty · no active instances</div>") +
-            "</div>";
-        }).join("") + "</div>";
-    return "<div class='eva-machine' data-machine='" + esc(m.machineId) + "'><div class='eva-machine-hdr'><span class='b " + (m.online ? "ok" : "muted") + "'>" + esc(m.machineName) + "</span><span class='tiny muted'>" + esc(statusText + limitText) + "</span></div>" + body + "</div>";
-  }).join("") || "<div class='eva-empty'>No machines reported.</div>";
+  const cagesHtml = "<div class='cages'>" + EVA_CLASSES.map(c => {
+    const items = [];
+    machines.forEach(m => {
+      if (m.reported === false || !Array.isArray(m.instances)) return;
+      m.instances.forEach(x => { if (x.evaClass === c.id) items.push({ inst: x, machine: m.machineName }); });
+    });
+    const instHtml = items.length
+      ? items.map(({ inst, machine }) => "<div class='eva-inst'><div class='eva-inst-meta'><span class='b'>" + esc(inst.pilot || "unassigned") + "</span><span class='tiny muted'>" + esc(inst.jobId) + (inst.sortieId ? " · " + esc(inst.sortieId) : "") + (machines.length > 1 ? " · @" + esc(machine) : "") + "</span></div><span class='badge " + evaStateBadge(inst.state) + "'>" + esc(inst.state.toUpperCase()) + "</span></div>").join("")
+      : "<div class='eva-empty'>Empty · no active instances</div>";
+    return "<div class='cage' data-eva-class='" + c.id + "'>" +
+      "<div class='ch eva-class-hdr'><span style='color:var(" + c.css + ")'>" + c.name + "</span><span class='tiny muted' id='cs-" + c.name + "'>" + (items.length ? items.length + " ACTIVE" : "IDLE") + "</span></div>" +
+      "<img class='eva-img' data-av='" + c.id + "' alt='" + c.name + "'/>" +
+      "<canvas id='cv-" + c.name + "' height='30'></canvas>" +
+      "<div class='cd' title='" + esc(c.label) + "'>" + esc(c.label) + " · " + (items.length ? items.length + " active" : "idle") + "</div>" +
+      instHtml +
+      "</div>";
+  }).join("") + "</div>";
+  const machinesHtml = machines.length
+    ? "<div class='eva-machines-bar'>" + machines.map(m => {
+        const insts = Array.isArray(m.instances) ? m.instances : [];
+        const statusText = m.self ? "this machine" : (m.online ? "online" : "offline");
+        const limitText = m.limits ? " · " + insts.length + "/" + m.limits.instances + " slots" : "";
+        const note = m.reported === false ? "<div class='eva-empty'>Not reported by this machine</div>" : "";
+        return "<div class='eva-machine' data-machine='" + esc(m.machineId) + "'><div class='eva-machine-hdr'><span class='b " + (m.online ? "ok" : "muted") + "'>" + esc(m.machineName) + "</span><span class='tiny muted'>" + esc(statusText + limitText) + "</span></div>" + note + "</div>";
+      }).join("") + "</div>"
+    : "<div class='eva-empty'>No machines reported.</div>";
+  box.innerHTML = cagesHtml + machinesHtml;
+  if (typeof fillAvatars === "function") fillAvatars(box);
 }
 function renderLog() {
   const el = document.getElementById("log"); if (!el) return;
@@ -1076,10 +1087,43 @@ function drawTelegram(ctx, now, W, H) {
   ctx.font = "11px " + (cssVar("--font") || "monospace"); ctx.textAlign = "center"; ctx.fillStyle = color(status); ctx.fillText("Midori",x,y-12); ctx.textAlign = "start";
 }
 
+/* ================= EVA heartbeats ================= */
+function drawHeartbeats(now) {
+  const machines = evaMachinesForView();
+  const anyOnline = machines.some(m => m.online);
+  EVA_CLASSES.forEach((c, i) => {
+    const cv = document.getElementById("cv-" + c.name); if (!cv) return;
+    const items = [];
+    machines.forEach(m => { if (m.reported !== false && Array.isArray(m.instances)) m.instances.forEach(x => { if (x.evaClass === c.id) items.push(x); }); });
+    const busy = items.some(x => x.state === "running" || x.state === "waiting");
+    const off = !anyOnline;
+    const st = document.getElementById("cs-" + c.name);
+    if (st) {
+      st.textContent = off ? "OFFLINE" : busy ? items.length + " ACTIVE" : "IDLE";
+      st.className = "tiny " + (off ? "muted" : busy ? "ok" : "muted");
+    }
+    const dpr = window.devicePixelRatio || 1; const w = cv.clientWidth || 120, h = 30;
+    if (cv.width !== Math.floor(w * dpr)) { cv.width = Math.floor(w * dpr); cv.height = Math.floor(h * dpr); }
+    const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = "#000"; ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = "rgba(255,102,0,.12)"; ctx.lineWidth = 1; for (let gx = 0; gx < w; gx += 10) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke(); }
+    ctx.strokeStyle = off ? "#555" : busy ? cssVar("--ok") : cssVar(c.css); ctx.lineWidth = 1.3; ctx.beginPath();
+    const period = busy ? 34 : 70; const shift = off ? 0 : (now / (busy ? 9 : 16)) % period;
+    for (let x = 0; x <= w; x++) {
+      let y = h / 2;
+      if (!off) {
+        const p = ((x + shift + i * 13) % period) / period; const amp = busy ? 12 : 8;
+        if (p > 0.40 && p < 0.44) y -= amp * 0.3; else if (p >= 0.46 && p < 0.49) y += amp * 0.35; else if (p >= 0.49 && p < 0.52) y -= amp; else if (p >= 0.52 && p < 0.55) y += amp * 0.6; else if (p > 0.62 && p < 0.7) y -= amp * 0.22 * Math.sin((p - 0.62) / 0.08 * Math.PI);
+      }
+      x ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.stroke();
+  });
+}
+
 /* ================= LOOP + EVENTS ================= */
 let lastFrame = 0;
 function frame(now) {
-  if (now - lastFrame > 33) { updateCrtMotion(); drawCrtNoise(now); drawMap(now); lastFrame = now; }
+  if (now - lastFrame > 33) { updateCrtMotion(); drawCrtNoise(now); drawMap(now); drawHeartbeats(now); lastFrame = now; }
   requestAnimationFrame(frame);
 }
 setInterval(() => {

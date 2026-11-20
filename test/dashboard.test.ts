@@ -1568,6 +1568,12 @@ test('F-049-T09: dashboard renders live EVA instances per class, per machine, an
   assert.match(cages.innerHTML, /Empty · no active instances/);
   assert.match(cages.innerHTML, /NERV-01/);
   assert.match(cages.innerHTML, /Not reported by this machine/);
+  assert.match(cages.innerHTML, /class=['"]cages['"]/);
+  assert.match(cages.innerHTML, /id=['"]cv-EVA-00['"]/);
+  assert.match(cages.innerHTML, /id=['"]cv-EVA-01['"]/);
+  assert.match(cages.innerHTML, /id=['"]cv-EVA-02['"]/);
+  assert.match(cages.innerHTML, /id=['"]cv-EVA-03['"]/);
+  assert.match(cages.innerHTML, /class=['"]eva-img['"]/);
 });
 
 test('F-110-T03: settings panel renders schedule controls, preserves drafts across polls, and health reflects saved hours', () => {
