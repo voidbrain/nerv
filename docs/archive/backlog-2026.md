@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 10 | 18 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 10 | 19 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -5421,6 +5421,42 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 ---
 
 ## Closed 2026-11-20
+
+### B-106
+
+**Development tooling includes a vulnerable minimatch release**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-20.
+
+| | |
+|---|---|
+| **Issue** | `npm audit` on main reports GHSA-g3hv-75wg-m249 through `typescript-eslint` 8.72.2: `minimatch` before 11.0.1 can consume excessive resources for crafted glob patterns. The affected path is development lint tooling, not the shipped runtime. |
+| **Reproduce** | On main, run `npm ci && npm audit`. |
+| **Check** | `npm audit` reports zero vulnerabilities after the non-major `typescript-eslint` update; lint, typecheck and the full test suite pass. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Exact-pinned `typescript-eslint` 8.72.2 → 8.73.0 updates the transitive `minimatch` dependency past GHSA-g3hv-75wg-m249 without changing lint configuration. Harness classification: project-only dependency setting; no template change. No test: third-party development-tool advisory; `npm audit` is the failing check, committed in the preceding audit commit. Fresh-context review found the initial caret range and stale audit wording; both were corrected before merge.
+
+**Resolution:** Closed 2026-11-20 as Verified. PR #598 merged after CI run 44809792450 passed plan, validate, Windows, native-macos and full-suite; CodeQL's Actions, JavaScript/TypeScript and Swift analyses passed. `npm audit` reports zero vulnerabilities.
+
+**Estimates:** Closed; 0.25 h estimated. Closed 2026-11-20.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #600](https://github.com/voidbrain/nerv/pull/600) (closure); [PR #598](https://github.com/voidbrain/nerv/pull/598); [Full audit 2026-11-20](../../audits/2026-11-20-full.md); GHSA-g3hv-75wg-m249 reported by `npm audit`; `package-lock.json` resolves `typescript-eslint` 8.73.0; Review: fresh-context dependency/security review, three findings corrected before PR |
+| Opened | 2026-11-20 |
+| Verification | 2026-11-20: CI run 44809792450 passed all five jobs/full-suite; CodeQL passed all three analyses. Local: `npm audit` 0 vulnerabilities; lint, typecheck, build and `check:fast` passed; full tests 1,041 pass / 2 platform skips; browser 5/5; SBOM 3/3. |
+| Reviewed | 2026-11-20 (closed) |
+
+</details>
+
+---
 
 ### F-079
 

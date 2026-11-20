@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 11 | 10 | 37 | 18 |
+| **This week** | 11 | 10 | 37 | 19 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 45 | 26 |
+| **Open** | 45 | 25 |
 | **Require Human 🧑** | 8 | 6 |
 
 ### Require Human 🧑
@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 119 h agent + 11 h owner across 157 open steps of 45 features and 26 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
+**Remaining effort:** 118.75 h agent + 11 h owner across 156 open steps of 45 features and 25 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2886,44 +2886,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-104-T01: [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix. CI run 44650057242 (Windows); [PR #578](https://github.com/voidbrain/nerv/pull/578) |
 | Opened | 2026-11-20 |
 | Verification | Pending. |
-| Reviewed | 2026-11-20 |
-
-</details>
-
----
-### <a id="b-106"></a>[🐞 B-106](#top)
-
-**Development tooling includes a vulnerable minimatch release**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-106-T01 — Update lint tooling past the minimatch advisory (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | `npm audit` on main reports GHSA-g3hv-75wg-m249 through `typescript-eslint` 8.72.2: `minimatch` before 11.0.1 can consume excessive resources for crafted glob patterns. The affected path is development lint tooling, not the shipped runtime. |
-| **Reproduce** | On main, run `npm ci && npm audit`. |
-| **Check** | `npm audit` reports zero vulnerabilities after the non-major `typescript-eslint` update; lint, typecheck and the full test suite pass. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-106-t01"></a>B-106-T01 — Update lint tooling past the minimatch advisory | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [PR #598](https://github.com/voidbrain/nerv/pull/598) audit evidence and implementation |
-| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-106.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-106-T01: [PR #598](https://github.com/voidbrain/nerv/pull/598) audit evidence and implementation. [PR #598](https://github.com/voidbrain/nerv/pull/598); [Full audit 2026-11-20](audits/2026-11-20-full.md); GHSA-g3hv-75wg-m249 reported by `npm audit`; `package-lock.json` resolves `typescript-eslint` 8.73.0; Review: fresh-context dependency/security review, three findings corrected before PR |
-| Opened | 2026-11-20 |
-| Verification | 2026-11-20 local: `npm audit` reports 0 vulnerabilities; lint, typecheck, build and `check:fast` pass; full tests pass (1,041 pass, 2 platform skips); browser evaluation passes 5/5; CycloneDX/SBOM tests pass 3/3. Full dependency-risk CI and fresh-context review pending. |
 | Reviewed | 2026-11-20 |
 
 </details>
