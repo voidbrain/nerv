@@ -10,6 +10,7 @@ import { Runtime } from '../src/runtime.ts';
 import { TelegramApi, TelegramChannel, startChats, telegramBase, BUNDLE_WAIT_MS } from '../src/telegram.ts';
 import { Store } from '../src/store.ts';
 import type { StoreApi } from '../src/runtime.ts';
+import { formatBatteryStateLines } from '../src/batteries.ts';
 const OWNER = 1111,
   STRANGER = 2222;
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
@@ -764,6 +765,59 @@ test('F-082-T03: Telegram checklist toggles items by editing in place and answer
     await until(() => tg.calls.filter((c) => c.method === 'answerCallbackQuery').length > answersBefore);
     const staleAnswer = tg.calls.filter((c) => c.method === 'answerCallbackQuery').at(-1)!;
     assert.equal(staleAnswer.body.text, 'The list changed.');
+  } finally {
+    await channel.stop();
+    store.close();
+    await tg.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('F-008-T14: Telegram "stato batterie" and "battery status" return formatted CLI lines without a model call', async () => {
+  const token = '123456:' + 'x'.repeat(35);
+  const tg = await fakeTelegram(token);
+  const home = mkdtempSync(join(tmpdir(), 'nerv-tg-batteries-'));
+  const store = new Store(join(home, 'nerv.sqlite'));
+  let chatCalled = false;
+  store.batteries.register({
+    packNumber: 7,
+    series: 'blu',
+    seriesColor: 'blu',
+    brand: 'Tattu',
+    batteryType: 'LiPo 6S',
+    cellCount: 6,
+    capacityMah: 1300,
+    purchaseDate: '2026-10-01',
+    initialResistanceMohm: [2.1, 2.2, 2.1, 2.3, 2.2, 2.1],
+  });
+  store.batteries.recordState(store.batteries.list()[0]!.id, 'charged', '2026-11-20T10:00:00Z');
+  const expectedIt = formatBatteryStateLines(store.batteries.list(), 'it');
+  const expectedEn = formatBatteryStateLines(store.batteries.list(), 'en');
+  const apiStore = {
+    inboxPage: store.inboxPage.bind(store),
+    approvals: store.approvals.bind(store),
+    pendingApprovalIds: store.pendingApprovalIds.bind(store),
+    decide: store.decide.bind(store),
+    batteryCards: store.batteryCards.bind(store),
+    chat: async () => {
+      chatCalled = true;
+      return { sortieId: '', reply: 'should not be called', steps: [], waiting: [] };
+    },
+  } as unknown as StoreApi;
+  const channel = new TelegramChannel({
+    api: new TelegramApi(token, tg.base),
+    store: apiStore,
+    chatId: OWNER,
+    statePath: join(home, 'telegram-state.json'),
+    log: () => {},
+  });
+  try {
+    await channel.start(50);
+    tg.text(OWNER, 'stato batterie');
+    await until(() => tg.sent().some((m) => m.text === expectedIt));
+    tg.text(OWNER, 'battery status');
+    await until(() => tg.sent().some((m) => m.text === expectedEn));
+    assert.equal(chatCalled, false);
   } finally {
     await channel.stop();
     store.close();

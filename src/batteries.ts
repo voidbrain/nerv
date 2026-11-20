@@ -724,8 +724,46 @@ export function parseBatteryChatCommand(text: string): ParsedBatteryChatCommand 
   };
 }
 
+export type BatteryStateSummaryRow = Pick<
+  BatteryRecord,
+  'packNumber' | 'series' | 'seriesColor' | 'currentState' | 'cycles'
+>;
+
+/** Recognizes Italian/English phrases asking for the full battery status list without a model call (F-008-T14). */
+export function parseBatteryStatusPhrase(text: string): 'it' | 'en' | null {
+  const normalized = text
+    .trim()
+    .toLowerCase()
+    .replace(/^\/+/, '')
+    .replace(/[?!.]+$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (
+    normalized === 'stato batterie' ||
+    normalized === 'stato delle batterie' ||
+    normalized === 'lista batterie' ||
+    normalized === 'elenco batterie' ||
+    normalized === 'come sono le batterie'
+  ) {
+    return 'it';
+  }
+  if (
+    normalized === 'battery status' ||
+    normalized === 'batteries status' ||
+    normalized === 'status of batteries' ||
+    normalized === 'list batteries' ||
+    normalized === 'battery list'
+  ) {
+    return 'en';
+  }
+  return null;
+}
+
 /** Formats battery charge states and cycle counts for Telegram and dashboard summaries (F-008-T07). */
-export function formatBatteryStateLines(batteries: readonly BatteryRecord[], language: 'it' | 'en' = 'en'): string {
+export function formatBatteryStateLines(
+  batteries: readonly BatteryStateSummaryRow[],
+  language: 'it' | 'en' = 'en',
+): string {
   if (batteries.length === 0) {
     return language === 'it' ? 'Nessuna batteria registrata.' : 'No batteries registered.';
   }
