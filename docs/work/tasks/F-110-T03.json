@@ -5,6 +5,12 @@
   "title": "Dashboard settings panel for the chosen settings",
   "goal": "The owner reads and edits each setting, with one Apply",
   "status": "implemented",
+  "prs": [
+    {
+      "pr": 583,
+      "note": "implementation"
+    }
+  ],
   "acceptance": [
     "Test on the panel and its save",
     "Owner confirms one change on the live dashboard"
