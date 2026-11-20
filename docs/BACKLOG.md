@@ -335,7 +335,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟢 Small | 0.75 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-012-T04 — Web-chat adapter feasibility (Planned).
+💻 **→** Next: F-012-T04 — Web-chat adapter feasibility (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -347,7 +347,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-012-t04"></a>F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned | — | [F-012-T05](#f-012-t05) | 🤖 | — |
+| 🟢 Small | <a id="f-012-t04"></a>F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-012-T05](#f-012-t05) | 🤖 | [PR #602](https://github.com/voidbrain/nerv/pull/602) implementation |
 | 🟢 Small | <a id="f-012-t05"></a>F-012-T05 — Edge cases and real-host acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-012-T04](#f-012-t04) | [F-012-T06](#f-012-t06) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-012-t06"></a>F-012-T06 — Record the evidence of F-012-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-012-T05](#f-012-t05) | — | ⏳ 🤖 | — |
 | 🟢 Small | **Total** | 2.75 h (5 of 6 steps) | 0.75 h (2 of 6 steps recorded) | 0.75 h agent + 0.5 h owner | 3 of 6 completed | | | | |
@@ -369,7 +369,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-012-T03: [PR #473](https://github.com/voidbrain/nerv/pull/473) implementation. [PR #473](https://github.com/voidbrain/nerv/pull/473); [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
+| PR / evidence | Steps: F-012-T03: [PR #473](https://github.com/voidbrain/nerv/pull/473) implementation · F-012-T04: [PR #602](https://github.com/voidbrain/nerv/pull/602) implementation. [PR #602](https://github.com/voidbrain/nerv/pull/602) F-012-T04 (`src/web-chat-resume-adapter.ts`, `docs/evaluations/2026-11-20-f012-t04-web-chat-feasibility.md`, `test/web-chat-resume-adapter.test.ts`); [PR #473](https://github.com/voidbrain/nerv/pull/473); [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #2](https://github.com/voidbrain/nerv/pull/2); plan only, no runtime implementation |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-012-T03 verified: [PR #473](https://github.com/voidbrain/nerv/pull/473) merged on green CI (adapter plus observed VS Code infeasibility). Pending adapter feasibility, regression and live host tests |
 | Reviewed | 2026-11-18 |
