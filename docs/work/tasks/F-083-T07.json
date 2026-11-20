@@ -4,7 +4,7 @@
   "parent": "F-083",
   "title": "Timers in a cooking session",
   "goal": "Timers set and stopped by chat, announced during a step",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "\"imposta un timer di 10 minuti\", \"stoppa il timer\"; a timer that ends interrupts with its own line",
     "A step needing a timer asks \"dimmi quando pronto che avvio il timer\""
@@ -13,8 +13,13 @@
     "F-083-T06"
   ],
   "resources": [
-    "src/**",
-    "test/**"
+    "src/cooking-session.ts",
+    "src/runtime-chat.ts",
+    "src/runtime.ts",
+    "test/cooking-session.test.ts",
+    "docs/work/records/F-083.md",
+    "docs/work/tasks/F-083-T07.json",
+    "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",
