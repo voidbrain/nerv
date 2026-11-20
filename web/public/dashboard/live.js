@@ -912,13 +912,14 @@
     const busy = !!state.settingsBusy;
     const msg = state.settingsMsg;
     box.innerHTML = "<form id='settings-form' class='list'>" +
-      "<div class='row small'><label for='set-auto-enabled'>Automatic updates</label><input type='checkbox' id='set-auto-enabled'" + (m.enabled ? " checked" : "") + (busy ? " disabled" : "") + "></div>" +
-      "<div class='row small'><label for='set-update-mode'>Update mode</label><select id='set-update-mode'" + (busy ? " disabled" : "") + "><option value='apply'" + (m.mode === "apply" ? " selected" : "") + ">Apply after notice</option><option value='notify'" + (m.mode === "notify" ? " selected" : "") + ">Notify only</option></select></div>" +
-      "<div class='row small'><label for='set-check-hour'>Check hour (0–23)</label><input id='set-check-hour' type='number' min='0' max='23' step='1' value='" + esc(m.checkHour) + "'" + (busy ? " disabled" : "") + " style='width:64px'></div>" +
-      "<div class='row small'><label for='set-apply-hour'>Apply hour (0–23)</label><input id='set-apply-hour' type='number' min='0' max='23' step='1' value='" + esc(m.applyHour) + "'" + (busy ? " disabled" : "") + " style='width:64px'></div>" +
-      "<div class='row small'><label for='set-quiet-from'>No-apply from (0–23)</label><input id='set-quiet-from' type='number' min='0' max='23' step='1' value='" + esc(m.quietFrom) + "'" + (busy ? " disabled" : "") + " style='width:64px'></div>" +
-      "<div class='row small'><label for='set-quiet-until'>No-apply until (0–23)</label><input id='set-quiet-until' type='number' min='0' max='23' step='1' value='" + esc(m.quietUntil) + "'" + (busy ? " disabled" : "") + " style='width:64px'></div>" +
-      "<div class='tiny muted'>Brief 08:00 · Time zone Europe/Rome · Sync Ratio 80% · Telegram 90 s (editable in F-110-T04)</div>" +
+      "<div class='row small' style='flex-wrap:wrap;gap:6px;align-items:center'>" +
+      "<label style='display:inline-flex;align-items:center;gap:4px'><input type='checkbox' id='set-auto-enabled'" + (m.enabled ? " checked" : "") + (busy ? " disabled" : "") + "> Automatic updates</label>" +
+      "<select id='set-update-mode' aria-label='Update mode'" + (busy ? " disabled" : "") + "><option value='apply'" + (m.mode === "apply" ? " selected" : "") + ">Apply after notice</option><option value='notify'" + (m.mode === "notify" ? " selected" : "") + ">Notify only</option></select>" +
+      "<span>· check</span><input id='set-check-hour' aria-label='Check hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.checkHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'>" +
+      "<span>apply</span><input id='set-apply-hour' aria-label='Apply hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.applyHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'>" +
+      "<span>quiet</span><input id='set-quiet-from' aria-label='No-apply from (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietFrom) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>–</span><input id='set-quiet-until' aria-label='No-apply until (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietUntil) + "'" + (busy ? " disabled" : "") + " style='width:48px'>" +
+      "</div>" +
+      "<div class='tiny muted'>Brief 08:00 · Time zone Europe/Rome · Sync Ratio 80% · Telegram 90 s</div>" +
       "<div class='row' style='margin-top:4px'><button class='btn sm primary' id='btn-save-settings' type='submit'" + (busy ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button>" +
       "<span id='settings-status' role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : (state.settingsDraft ? "Unsaved changes" : "")) + "</span></div>" +
       "</form>";

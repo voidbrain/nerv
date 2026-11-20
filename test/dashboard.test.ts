@@ -1590,4 +1590,9 @@ test('F-110-T03: settings panel renders schedule controls, preserves drafts acro
   assert.match(live, /id='btn-save-settings'/);
   assert.match(live, /if \(state\.settingsDraft\) return state\.settingsDraft;/);
   assert.match(live, /· checked " \+ pad2\(sch\.checkHour\) \+ ":00, "/);
+  const settingsBlock = live.slice(
+    live.indexOf('window.renderSettings ='),
+    live.indexOf('function readSettingsDraft()', live.indexOf('window.renderSettings =')),
+  );
+  assert.doesNotMatch(settingsBlock, /\b[FB]-\d{3}(?:-T\d{2})?\b/);
 });
