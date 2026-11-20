@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 9 | 10 | 35 | 18 |
+| **This week** | 10 | 10 | 35 | 18 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 43 | 24 |
+| **Open** | 44 | 24 |
 | **Require Human 🧑** | 8 | 6 |
 
 ### Require Human 🧑
@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 103.5 h agent + 11 h owner across 142 open steps of 43 features and 24 other records. 79.75 h of actual effort recorded on 123 steps. Generated from the task files.
+**Remaining effort:** 116.75 h agent + 11 h owner across 152 open steps of 44 features and 24 other records. 79.75 h of actual effort recorded on 123 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1664,9 +1664,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-008-T12 — Live check with real batteries (Planned).
+💻 **→** Next: F-008-T13 — Register a battery by chat, CLI and dashboard (Planned).
 
 | | |
 |---|---|
@@ -1676,10 +1676,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-008-t12"></a>F-008-T12 — Live check with real batteries | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟢 Small | **Total** | 4.75 h (11 of 12 steps) | 1.75 h (4 of 12 steps recorded) | 0.25 h | 11 of 12 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-008-t13"></a>F-008-T13 — Register a battery by chat, CLI and dashboard | 1 h | 0 h | 1 h | Planned | — | [F-008-T12](#f-008-t12) | 🤖 | — |
+| 🟢 Small | <a id="f-008-t14"></a>F-008-T14 — Battery status list in Telegram | 0.5 h | 0 h | 0.5 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-008-t12"></a>F-008-T12 — Live check with real batteries | 0.25 h | 0 h | 0.25 h | Planned | [F-008-T13](#f-008-t13) | — | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 6.25 h (13 of 14 steps) | 1.75 h (4 of 14 steps recorded) | 1.75 h | 11 of 14 completed | | | | |
 
 <details><summary>Done steps (11)</summary>
 
@@ -1709,7 +1711,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-008-T08: [PR #472](https://github.com/voidbrain/nerv/pull/472) implementation · F-008-T09: [PR #476](https://github.com/voidbrain/nerv/pull/476) implementation · F-008-T10: [PR #544](https://github.com/voidbrain/nerv/pull/544) implementation · F-008-T11: [PR #554](https://github.com/voidbrain/nerv/pull/554) implementation; CI green. [PR #554](https://github.com/voidbrain/nerv/pull/554) F-008-T11 (`src/battery-health.ts`, `src/server.ts`, `web/src/battery-cards.ts`, `test/battery-cards.test.ts`, `test/angular.browser.mjs`); [PR #544](https://github.com/voidbrain/nerv/pull/544) F-008-T10 (`src/battery-health.ts`, `src/batteries.ts`, `test/battery-health.test.ts`); [PR #472](https://github.com/voidbrain/nerv/pull/472); [PR #476](https://github.com/voidbrain/nerv/pull/476) (merged; CI green); F-008-T07 Italian/English battery charge-state & cycle chat (`applyChatPhrase`, `parseBatteryChatCommand`, `formatBatteryStateLines` in `src/batteries.ts`, `batteries.list`/`batteries.chat` in `src/executors.ts`, `batteries status` and `batteries chat` in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); F-008-T06 battery registry and `one-more-battery` importer (`src/batteries.ts`, `Store.batteries` in `src/store.ts`, `batteries` CLI in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); Rescoped by the owner 2026-11-14 ([plan](design/fpv-and-cooking-plan-2026-11-14.md), [PR #408](https://github.com/voidbrain/nerv/pull/408)); earlier: [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment, PR #313 priority |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-008-T08 verified: [PR #472](https://github.com/voidbrain/nerv/pull/472) merged on green CI; F-008-T09 verified: [PR #476](https://github.com/voidbrain/nerv/pull/476) merged on green CI. `npx tsc --noEmit`, `npm run check:conventions`, `node --test test/batteries.test.ts`, and `npm run check:fast` passed 2026-11-15; remote CI pending PR |
-| Reviewed | 2026-11-18 |
+| Reviewed | 2026-11-20 |
 
 </details>
 
@@ -2402,7 +2404,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | [F-101-T04](#f-101-t04) | 🤖 | — | — |
 
 💻 **→** Next: F-098-T03 — Photos on crashes, parts and batteries (Implemented; verification pending).
 
@@ -2417,7 +2419,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-098-T04](#f-098-t04) | [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation |
-| 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0.25 h | 0 h | 0.25 h | Planned | [F-098-T03](#f-098-t03) | — | — |
+| 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0.25 h | 0 h | 0.25 h | Planned | [F-098-T03](#f-098-t03) | [F-101-T04](#f-101-t04) | — |
 | 🟢 Small | **Total** | 2 h | 0.25 h (1 of 4 steps recorded) | 0.75 h | 2 of 4 completed | | | |
 
 <details><summary>Done steps (2)</summary>
@@ -2439,6 +2441,48 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation · F-098-T03: [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation. [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-20: `node --test test/photos.test.ts test/fleet.test.ts test/batteries.test.ts test/battery-cards.test.ts test/telegram.test.ts`, `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-098-T02 verified: [PR #500](https://github.com/voidbrain/nerv/pull/500) merged on green CI. |
+| Reviewed | 2026-11-20 |
+
+</details>
+
+---
+### <a id="f-114"></a>[✨ F-114](#top)
+
+**Domain packs: turn FPV and Cooking on and off**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 6.75 h | — | [F-101-T04](#f-101-t04) | 🤖 | — | — |
+
+💻 **→** Next: F-114-T01 — Pack manifest and registry, on and off in config (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-20: FPV and cooking are personal to the owner, not NERV core, and should be packs that can be switched on and off, with NERV as the hub. Today their stores, tools and chat phrases are wired straight into `store.ts`, `runtime-chat.ts`, `telegram.ts`, `server.ts` and `executors.ts`. |
+| **Reproduce** | `grep -c -iE "batter\|fleet\|recipe\|cooking" src/store.ts src/runtime-chat.ts` on main 2026-11-20: 18 each. |
+| **Check** | A pack manifest declares tools with effect classes, tables, chat phrases, Telegram captions and dashboard panels; `config.json` turns a pack on or off; a pack switched off offers no tools to Misato and shows no panel, and its data stays; reminders, todos, timers and photos stay in the core and packs use them; a phrase two packs claim is never silently routed to one; join tests across the registry, the planner tool list and the dashboard API; a live off-and-on check on the main base. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-114-t01"></a>F-114-T01 — Pack manifest and registry, on and off in config | 2 h | 0 h | 2 h | Planned | — | [F-114-T02](#f-114-t02), [F-114-T03](#f-114-t03), [F-114-T04](#f-114-t04) |
+| 🟡 Medium | <a id="f-114-t02"></a>F-114-T02 — FPV pack: batteries, fleet, builds and blackbox behind the manifest | 2 h | 0 h | 2 h | Planned | [F-114-T01](#f-114-t01) | [F-101-T04](#f-101-t04), [F-114-T05](#f-114-t05) |
+| 🟡 Medium | <a id="f-114-t03"></a>F-114-T03 — Cooking pack: recipes, cooking sessions and pantry behind the manifest | 1.5 h | 0 h | 1.5 h | Planned | [F-114-T01](#f-114-t01) | [F-114-T05](#f-114-t05) |
+| 🟢 Small | <a id="f-114-t04"></a>F-114-T04 — Chat routing when two packs claim the same message | 1 h | 0 h | 1 h | Planned | [F-114-T01](#f-114-t01) | [F-114-T05](#f-114-t05) |
+| 🟢 Small | <a id="f-114-t05"></a>F-114-T05 — Live check: turn FPV off and on | 0.25 h | 0 h | 0.25 h | Planned | [F-114-T02](#f-114-t02), [F-114-T03](#f-114-t03), [F-114-T04](#f-114-t04) | — |
+| 🔴 Large | **Total** | 6.75 h | 0 h (0 of 5 steps recorded) | 6.75 h | 0 of 5 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-114.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [FPV packs decision](decisions/fpv-packs.md); opened in [PR #593](https://github.com/voidbrain/nerv/pull/593) |
+| Opened | 2026-11-20 |
+| Verification | Pending |
 | Reviewed | 2026-11-20 |
 
 </details>
@@ -3005,9 +3049,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h owner | — | — | — | — | 🤔 |
+| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h agent + 0.25 h owner | [F-098-T04](#f-098-t04), [F-114-T02](#f-114-t02) | — | ⏳ | — | 🤔 |
 
-🧑 **→** Next: [🤔](design/fpv-and-cooking-plan-2026-11-14.md) F-101-T02 — Owner decides how to share (Planned).
+🧑 **→** Next: [🤔](decisions/fpv-packs.md) F-101-T03 — Owner names the FPV core repository and its visibility (Planned).
 
 | | |
 |---|---|
@@ -3017,16 +3061,20 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-101-t02"></a>F-101-T02 — Owner decides how to share | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🤔](design/fpv-and-cooking-plan-2026-11-14.md) | — |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-101-t03"></a>F-101-T03 — Owner names the FPV core repository and its visibility | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | — | [F-101-T04](#f-101-t04) | [🤔](decisions/fpv-packs.md) | — |
+| 🟡 Medium | <a id="f-101-t04"></a>F-101-T04 — Create the FPV core repository and move the core into it | 2 h | 0 h | 2 h | Planned | [F-101-T03](#f-101-t03), [F-098-T04](#f-098-t04), [F-114-T02](#f-114-t02) | [F-101-T05](#f-101-t05) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-101-t05"></a>F-101-T05 — NERV FPV pack uses the FPV core package | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T04](#f-101-t04) | [F-101-T06](#f-101-t06) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-101-t06"></a>F-101-T06 — Dashboard uses the FPV core's web components | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T05](#f-101-t05) | — | ⏳ 🤖 | — |
+| 🔴 Large | **Total** | 5.75 h | 0 h (0 of 6 steps recorded) | 5 h agent + 0.25 h owner | 2 of 6 completed | | | | |
 
-<details><summary>Done steps (1)</summary>
+<details><summary>Done steps (2)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-101-t01"></a>F-101-T01 — Compare ways to share the battery manager | 0.75 h | 0 h | Completed | [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation |
+| — | <a id="f-101-t02"></a>F-101-T02 — Owner decides how to share | 0 h | 0 h | Completed | — |
 
 </details>
 
@@ -3040,7 +3088,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-101-T01: [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation. [PR #484](https://github.com/voidbrain/nerv/pull/484) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-101-T01 verified: [PR #484](https://github.com/voidbrain/nerv/pull/484) merged on green CI. |
-| Reviewed | 2026-11-18 |
+| Reviewed | 2026-11-20 |
 
 </details>
 

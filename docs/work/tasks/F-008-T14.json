@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-008-T14",
+  "parent": "F-008",
+  "title": "Battery status list in Telegram",
+  "goal": "\"stato batterie\" in Telegram answers with the formatted list the CLI prints",
+  "status": "planned",
+  "acceptance": [
+    "Test: the phrase returns the same lines as `nerv batteries status`, in Italian or English, without a model call"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/batteries.ts",
+    "src/telegram.ts",
+    "test/**",
+    "docs/work/records/F-008.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-20: route one phrase to the existing formatter. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": []
+}
