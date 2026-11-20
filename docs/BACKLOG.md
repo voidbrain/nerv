@@ -248,16 +248,16 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-027-t02"></a>F-027-T02 — Enforce Scrolls egress at the execution boundary | 0.75 h | 0 h | 0.75 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.75 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0.75 h | 1 of 2 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-027-t02"></a>F-027-T02 — Enforce Scrolls egress at the execution boundary | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | [PR #584](https://github.com/voidbrain/nerv/pull/584) implementation |
+| 🟢 Small | **Total** | 0.75 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0.75 h | 1 of 2 completed | |
 
 <details><summary>Done steps (1)</summary>
 
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-027-t01"></a>F-027-T01 — Carry durable context provenance into the gate and memory | — | 0 days | Completed |
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-027-t01"></a>F-027-T01 — Carry durable context provenance into the gate and memory | — | 0 days | Completed | — |
 
 </details>
 
@@ -268,7 +268,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Acceptance: [PR #238](https://github.com/voidbrain/nerv/pull/238); [PR #237](https://github.com/voidbrain/nerv/pull/237); Review: independent fresh-context report in [provenance boundary](reviews/2026-11-09-provenance-boundary.md), finding fixed and rechecked; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| PR / evidence | Steps: F-027-T02: [PR #584](https://github.com/voidbrain/nerv/pull/584) implementation. [PR #584](https://github.com/voidbrain/nerv/pull/584) (T02 implementation); [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Acceptance: [PR #238](https://github.com/voidbrain/nerv/pull/238); [PR #237](https://github.com/voidbrain/nerv/pull/237); Review: independent fresh-context report in [provenance boundary](reviews/2026-11-09-provenance-boundary.md), finding fixed and rechecked; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
 | Opened | 2026-11-04 |
 | Verification | 2026-11-20: `node --test test/egress-proxy.test.ts test/eva-classes-runner.test.ts test/eva-gate.test.ts test/eva-runner.test.ts test/ledger.test.ts test/gate.test.ts` (58/58 passed, including live macOS Seatbelt `eva-01` join test + unconfined fixture proof), `npm run check:fast`, `npm run check:conventions`, and `npm run check:evals` passed. 2026-11-09 Unit/integration and Browser/accessibility: PR237 exact head be60c19 / CI42614209749 passed plan, validate (coverage, browser/axe, headless), Windows, native-macos and full-suite. |
 | Reviewed | 2026-11-20 |
