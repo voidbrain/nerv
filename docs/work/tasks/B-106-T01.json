@@ -46,6 +46,10 @@
     {
       "pr": 598,
       "note": "audit evidence and implementation"
+    },
+    {
+      "pr": 600,
+      "note": "verification and closure"
     }
   ]
 }

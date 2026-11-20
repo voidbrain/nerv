@@ -5449,7 +5449,7 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #598](https://github.com/voidbrain/nerv/pull/598); [Full audit 2026-11-20](../../audits/2026-11-20-full.md); GHSA-g3hv-75wg-m249 reported by `npm audit`; `package-lock.json` resolves `typescript-eslint` 8.73.0; Review: fresh-context dependency/security review, three findings corrected before PR |
+| PR / evidence | [PR #600](https://github.com/voidbrain/nerv/pull/600) (closure); [PR #598](https://github.com/voidbrain/nerv/pull/598); [Full audit 2026-11-20](../../audits/2026-11-20-full.md); GHSA-g3hv-75wg-m249 reported by `npm audit`; `package-lock.json` resolves `typescript-eslint` 8.73.0; Review: fresh-context dependency/security review, three findings corrected before PR |
 | Opened | 2026-11-20 |
 | Verification | 2026-11-20: CI run 44809792450 passed all five jobs/full-suite; CodeQL passed all three analyses. Local: `npm audit` 0 vulnerabilities; lint, typecheck, build and `check:fast` passed; full tests 1,041 pass / 2 platform skips; browser 5/5; SBOM 3/3. |
 | Reviewed | 2026-11-20 (closed) |
