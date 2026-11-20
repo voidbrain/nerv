@@ -309,7 +309,9 @@ export async function tryRunCliCommand(
       console.log(JSON.stringify(EVA_CLASS_SPECS, null, 2));
     } else if (sub === 'admit' && args[1]) {
       const req = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as EvaAdmissionRequest;
-      console.log(JSON.stringify(admitEvaJob(req), null, 2));
+      const withPilots =
+        req.pilotId && !req.pilots && !req.pilotRegistry ? { ...req, pilots: readConfig(home).pilots } : req;
+      console.log(JSON.stringify(admitEvaJob(withPilots), null, 2));
     } else if (sub === 'limits') {
       // F-049-T06: what this machine gives EVA jobs (config.json eva.limits, or the defaults).
       console.log(JSON.stringify(readConfig(home).eva?.limits ?? defaultEvaLimits(), null, 2));
