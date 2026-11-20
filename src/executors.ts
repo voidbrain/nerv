@@ -4,6 +4,7 @@ import type { Reminder, ReminderInput } from './store.ts';
 import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
 import type { ListStore } from './lists.ts';
+import { replayDesktopRecording, type DesktopRecordingFile, type DesktopReplayDriver } from './desktop-recording.ts';
 import type { GmailClient } from './gmail.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
 import type { FpvBuildStore, BuildComponentInput, BuildWiringInput, PinoutEntry } from './fpv-builds.ts';
@@ -63,6 +64,7 @@ export interface ReminderBackend {
   fleet?: FleetStore;
   lists?: ListStore;
   gmail?: GmailClient;
+  desktopReplayDriver?: DesktopReplayDriver;
   fpvBuilds?: FpvBuildStore;
   documents?: DocumentStore;
   photos?: PhotoStore;
@@ -128,6 +130,8 @@ export const builtinTools: Tool[] = [
   { name: 'pantry.check', effect: 'read' },
   // F-100-T03: local FPV blackbox vibration report.
   { name: 'fpv.blackbox_report', effect: 'read' },
+  // F-092-T03: desktop input replay is always Blue (owner confirmation + precondition check).
+  { name: 'desktop.replay', effect: 'physical', owner: true },
   // F-099-T03: FPV build notes and cited wiring answers.
   { name: 'fpv.import_build', effect: 'write-local' },
   { name: 'fpv.add_doc', effect: 'write-local' },
@@ -190,6 +194,7 @@ export const BUILTIN_TOOL_SUBJECTS: Readonly<Record<string, ToolSubject>> = {
   'agency.status': 'agency',
   'settings.schedule': 'agency',
   'kaji.run': 'agency',
+  'desktop.replay': 'agency',
 };
 
 /** What Misato is told about each built-in tool. */
@@ -467,6 +472,13 @@ const rawToolDocs: ToolDoc[] = [
     effect: 'read',
     about: 'Checks whether an ingredient or saved recipe has ingredients that might be expired.',
     args: '{"item"?: string, "documentId"?: string}',
+  },
+  {
+    name: 'desktop.replay',
+    effect: 'physical',
+    about:
+      'Replays a bounded local desktop recording as a Blue action after verifying display, app, and window preconditions and stopping on owner input.',
+    args: '{"recording": DesktopRecordingFile, "approved": boolean}',
   },
 ];
 /** What Misato is told about each built-in tool, each assigned to one subject (F-113-T01). */
@@ -1004,6 +1016,14 @@ export function execute(
     case 'fpv.blackbox_report': {
       only(args, ['csv']);
       return analyzeBlackboxVibration(text(args, 'csv'));
+    }
+    case 'desktop.replay': {
+      only(args, ['recording', 'approved']);
+      if (!backend.desktopReplayDriver) throw new Error('Desktop replay driver is not available.');
+      return replayDesktopRecording(backend.desktopReplayDriver, {
+        recording: args.recording as DesktopRecordingFile,
+        approved: args.approved === true,
+      });
     }
     case 'fpv.import_build': {
       only(args, ['name', 'sourceRef', 'components', 'wiring', 'notes']);

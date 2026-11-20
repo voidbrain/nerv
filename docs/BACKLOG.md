@@ -1523,7 +1523,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-092-T03 — Replay as a Blue action with preconditions (Planned).
+💻 **→** Next: F-092-T03 — Replay as a Blue action with preconditions (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1535,7 +1535,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-092-t03"></a>F-092-T03 — Replay as a Blue action with preconditions | 1.5 h | 0 h | 1.5 h | Planned | — | [F-092-T04](#f-092-t04) | 🤖 | — |
+| 🟡 Medium | <a id="f-092-t03"></a>F-092-T03 — Replay as a Blue action with preconditions | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [F-092-T04](#f-092-t04) | 🤖 | — |
 | 🟢 Small | <a id="f-092-t04"></a>F-092-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-092-T03](#f-092-t03) | — | ⏳ 🧑‍🔧 | — |
 | 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1.5 h agent + 0.25 h owner | 2 of 4 completed | | | | |
 
