@@ -487,8 +487,12 @@
     // F-102-T02: the automatic update switch (20:00 check, notice, 03:00 apply unless the owner says wait).
     const up = state.updatePolicy && state.updatePolicy.policy;
     const la = state.updatePolicy && state.updatePolicy.lastAttempt;
+    const sch = (up && up.schedule) || { mode:"apply", checkHour:20, applyHour:3 };
+    const pad2 = n => String(n).padStart(2, "0");
+    const policyLabel = "Automatic updates · checked " + pad2(sch.checkHour) + ":00, " +
+      (sch.mode === "notify" ? "notify only" : "applied " + pad2(sch.applyHour) + ":00 unless you say wait");
     const policyHtml = up
-      ? "<div class='row small' style='margin-top:6px'><label for='chk-auto-update' class='muted'>Automatic updates · checked 20:00, applied 03:00 unless you say wait</label><input type='checkbox' id='chk-auto-update'" + (up.enabled ? " checked" : "") + (state.updatePolicyBusy ? " disabled" : "") + "></div>" +
+      ? "<div class='row small' style='margin-top:6px'><label for='chk-auto-update' class='muted'>" + esc(policyLabel) + "</label><input type='checkbox' id='chk-auto-update'" + (up.enabled ? " checked" : "") + (state.updatePolicyBusy ? " disabled" : "") + "></div>" +
         (la ? "<div class='small " + (la.outcome === "completed" ? "ok" : la.outcome === "refused" ? "warn" : "muted") + "'>Last automatic attempt: " + esc(la.outcome) + (la.revision ? " · " + esc(la.revision.slice(0, 7)) : "") + ((la.reasons || []).length ? " · " + esc(la.reasons.join("; ")) : "") + "</div>" : "")
       : "";
     document.getElementById("health").innerHTML = degraded + rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span></div>").join("") +
@@ -829,6 +833,74 @@
     e.preventDefault();
     void window.liveApplyUpdate();
   });
+  const DEFAULT_SCHEDULE = { mode:"apply", checkHour:20, applyHour:3, quietFrom:8, quietUntil:23 };
+  function settingsModel() {
+    if (state.settingsDraft) return state.settingsDraft;
+    const up = (state.updatePolicy && state.updatePolicy.policy) || { enabled:false };
+    const s = Object.assign({}, DEFAULT_SCHEDULE, up.schedule || {});
+    return { enabled:!!up.enabled, mode:s.mode, checkHour:s.checkHour, applyHour:s.applyHour, quietFrom:s.quietFrom, quietUntil:s.quietUntil };
+  }
+  window.renderSettings = function () {
+    const box = document.getElementById("settings"); if (!box) return;
+    const m = settingsModel();
+    const busy = !!state.settingsBusy;
+    const msg = state.settingsMsg;
+    box.innerHTML = "<form id='settings-form' class='list'>" +
+      "<div class='row small'><label for='set-auto-enabled'>Automatic updates</label><input type='checkbox' id='set-auto-enabled'" + (m.enabled ? " checked" : "") + (busy ? " disabled" : "") + "></div>" +
+      "<div class='row small'><label for='set-update-mode'>Update mode</label><select id='set-update-mode'" + (busy ? " disabled" : "") + "><option value='apply'" + (m.mode === "apply" ? " selected" : "") + ">Apply after notice</option><option value='notify'" + (m.mode === "notify" ? " selected" : "") + ">Notify only</option></select></div>" +
+      "<div class='row small'><label for='set-check-hour'>Check hour (0–23)</label><input id='set-check-hour' type='number' min='0' max='23' step='1' value='" + esc(m.checkHour) + "'" + (busy ? " disabled" : "") + " style='width:64px'></div>" +
+      "<div class='row small'><label for='set-apply-hour'>Apply hour (0–23)</label><input id='set-apply-hour' type='number' min='0' max='23' step='1' value='" + esc(m.applyHour) + "'" + (busy ? " disabled" : "") + " style='width:64px'></div>" +
+      "<div class='row small'><label for='set-quiet-from'>No-apply from (0–23)</label><input id='set-quiet-from' type='number' min='0' max='23' step='1' value='" + esc(m.quietFrom) + "'" + (busy ? " disabled" : "") + " style='width:64px'></div>" +
+      "<div class='row small'><label for='set-quiet-until'>No-apply until (0–23)</label><input id='set-quiet-until' type='number' min='0' max='23' step='1' value='" + esc(m.quietUntil) + "'" + (busy ? " disabled" : "") + " style='width:64px'></div>" +
+      "<div class='tiny muted'>Brief 08:00 · Time zone Europe/Rome · Sync Ratio 80% · Telegram 90 s (editable in F-110-T04)</div>" +
+      "<div class='row' style='margin-top:4px'><button class='btn sm primary' id='btn-save-settings' type='submit'" + (busy ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button>" +
+      "<span id='settings-status' role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : (state.settingsDraft ? "Unsaved changes" : "")) + "</span></div>" +
+      "</form>";
+  };
+  function readSettingsDraft() {
+    const enabled = !!document.getElementById("set-auto-enabled").checked;
+    const mode = document.getElementById("set-update-mode").value;
+    const num = id => Number(document.getElementById(id).value);
+    return { enabled, mode, checkHour:num("set-check-hour"), applyHour:num("set-apply-hour"), quietFrom:num("set-quiet-from"), quietUntil:num("set-quiet-until") };
+  }
+  document.addEventListener("input", e => {
+    if (e.target && e.target.closest && e.target.closest("#settings-form")) { state.settingsDraft = readSettingsDraft(); state.settingsMsg = null; }
+  });
+  document.addEventListener("change", e => {
+    if (e.target && e.target.closest && e.target.closest("#settings-form")) { state.settingsDraft = readSettingsDraft(); state.settingsMsg = null; }
+  });
+  document.addEventListener("submit", async e => {
+    const form = e.target && e.target.closest && e.target.closest("#settings-form");
+    if (!form) return;
+    e.preventDefault();
+    if (state.settingsBusy) return;
+    const draft = readSettingsDraft();
+    state.settingsDraft = draft;
+    state.settingsBusy = true;
+    state.settingsMsg = null;
+    renderSettings();
+    try {
+      const current = (state.updatePolicy && state.updatePolicy.policy) || { channels: [], targets: [] };
+      const r = await api("update/policy", {
+        method:"POST",
+        body:JSON.stringify({
+          enabled: draft.enabled,
+          channels: current.channels || [],
+          targets: current.targets || [],
+          schedule: { mode:draft.mode, checkHour:draft.checkHour, applyHour:draft.applyHour, quietFrom:draft.quietFrom, quietUntil:draft.quietUntil }
+        })
+      });
+      state.updatePolicy = Object.assign({}, state.updatePolicy, { policy: r.policy });
+      state.settingsDraft = null;
+      state.settingsMsg = { kind:"ok", text:"Settings saved." };
+      renderHealth();
+    } catch (err) {
+      state.settingsMsg = { kind:"danger", text:err.message };
+    } finally {
+      state.settingsBusy = false;
+      renderSettings();
+    }
+  });
   // F-102-T02: the switch posts the policy; an empty selection means this base on main (the server fills it in).
   window.liveSetAutoUpdate = async function (enabled) {
     if (state.updatePolicyBusy) return;
@@ -844,6 +916,7 @@
     } finally {
       state.updatePolicyBusy = false;
       renderHealth();
+      if (!state.settingsDraft && typeof renderSettings === "function") renderSettings();
     }
   };
   document.addEventListener("change", e => {

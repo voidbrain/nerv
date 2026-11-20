@@ -1557,3 +1557,19 @@ test('F-049-T09: dashboard renders live EVA instances per class, per machine, an
   assert.match(cages.innerHTML, /NERV-01/);
   assert.match(cages.innerHTML, /Not reported by this machine/);
 });
+
+test('F-110-T03: settings panel renders schedule controls, preserves drafts across polls, and health reflects saved hours', () => {
+  const html = readFileSync('web/public/dashboard/index.html', 'utf8');
+  assert.match(html, /id="p-settings"/);
+  assert.match(html, /id="settings"/);
+  const live = readFileSync('web/public/dashboard/live.js', 'utf8');
+  assert.match(live, /id='settings-form'/);
+  assert.match(live, /id='set-check-hour'/);
+  assert.match(live, /id='set-apply-hour'/);
+  assert.match(live, /id='set-quiet-from'/);
+  assert.match(live, /id='set-quiet-until'/);
+  assert.match(live, /id='set-update-mode'/);
+  assert.match(live, /id='btn-save-settings'/);
+  assert.match(live, /if \(state\.settingsDraft\) return state\.settingsDraft;/);
+  assert.match(live, /· checked " \+ pad2\(sch\.checkHour\) \+ ":00, "/);
+});
