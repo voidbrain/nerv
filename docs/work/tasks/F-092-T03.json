@@ -4,7 +4,13 @@
  "parent": "F-092",
  "title": "Replay as a Blue action with preconditions",
  "goal": "Replay runs only after confirmation and stops on mismatch",
- "status": "planned",
+ "status": "implemented",
+ "prs": [
+  {
+   "pr": 607,
+   "note": "Desktop replay as Blue action with preconditions"
+  }
+ ],
  "acceptance": [
   "Blue approval; preconditions checked; stops on mismatch or owner input; result read back"
  ],

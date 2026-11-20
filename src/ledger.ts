@@ -25,6 +25,7 @@ import {
   EVENT_SCHEMA_VERSION,
   encodePayload,
   readPayload,
+  type EvaInstanceRef,
   type EventKind,
   type EventPayloads,
   type SortieEvent,
@@ -90,6 +91,7 @@ export interface ActionDetail {
   created: string;
   status: 'proposed' | 'waiting' | 'done' | 'failed' | 'rejected' | 'stood-down';
   durationMs?: number;
+  evaInstance?: EvaInstanceRef;
 }
 export interface Proposed {
   actionId: string;
@@ -756,6 +758,7 @@ export class Ledger {
     outcome: { result: unknown } | { error: string },
     now = new Date(),
     durationMs?: number,
+    evaInstance?: EvaInstanceRef,
   ): void {
     this.tx(() => {
       if ('error' in outcome)
@@ -763,7 +766,12 @@ export class Ledger {
           sortieId,
           actionId,
           'action.failed',
-          { tool, error: outcome.error.slice(0, 500), ...(durationMs !== undefined ? { durationMs } : {}) },
+          {
+            tool,
+            error: outcome.error.slice(0, 500),
+            ...(durationMs !== undefined ? { durationMs } : {}),
+            ...(evaInstance ? { evaInstance } : {}),
+          },
           now,
         );
       else
@@ -771,7 +779,12 @@ export class Ledger {
           sortieId,
           actionId,
           'action.done',
-          { tool, result: outcome.result, ...(durationMs !== undefined ? { durationMs } : {}) },
+          {
+            tool,
+            result: outcome.result,
+            ...(durationMs !== undefined ? { durationMs } : {}),
+            ...(evaInstance ? { evaInstance } : {}),
+          },
           now,
         );
     });

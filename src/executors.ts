@@ -3,7 +3,8 @@ import type { Approval, SortieSummary } from './ledger.ts';
 import type { Reminder, ReminderInput } from './store.ts';
 import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
-import type { ListStore } from './lists.ts';
+import { toChecklistSurface, type ListStore } from './lists.ts';
+import { replayDesktopRecording, type DesktopRecordingFile, type DesktopReplayDriver } from './desktop-recording.ts';
 import type { GmailClient } from './gmail.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
 import type { FpvBuildStore, BuildComponentInput, BuildWiringInput, PinoutEntry } from './fpv-builds.ts';
@@ -63,6 +64,7 @@ export interface ReminderBackend {
   fleet?: FleetStore;
   lists?: ListStore;
   gmail?: GmailClient;
+  desktopReplayDriver?: DesktopReplayDriver;
   fpvBuilds?: FpvBuildStore;
   documents?: DocumentStore;
   photos?: PhotoStore;
@@ -130,6 +132,8 @@ export const builtinTools: Tool[] = [
   { name: 'pantry.check', effect: 'read' },
   // F-100-T03: local FPV blackbox vibration report.
   { name: 'fpv.blackbox_report', effect: 'read' },
+  // F-092-T03: desktop input replay is always Blue (owner confirmation + precondition check).
+  { name: 'desktop.replay', effect: 'physical', owner: true },
   // F-099-T03: FPV build notes and cited wiring answers.
   { name: 'fpv.import_build', effect: 'write-local' },
   { name: 'fpv.add_doc', effect: 'write-local' },
@@ -194,6 +198,7 @@ export const BUILTIN_TOOL_SUBJECTS: Readonly<Record<string, ToolSubject>> = {
   'agency.status': 'agency',
   'settings.schedule': 'agency',
   'kaji.run': 'agency',
+  'desktop.replay': 'agency',
 };
 
 /** What Misato is told about each built-in tool. */
@@ -483,6 +488,13 @@ const rawToolDocs: ToolDoc[] = [
     effect: 'read',
     about: 'Checks whether an ingredient or saved recipe has ingredients that might be expired.',
     args: '{"item"?: string, "documentId"?: string}',
+  },
+  {
+    name: 'desktop.replay',
+    effect: 'physical',
+    about:
+      'Replays a bounded local desktop recording as a Blue action after verifying display, app, and window preconditions and stopping on owner input.',
+    args: '{"recording": DesktopRecordingFile, "approved": boolean}',
   },
 ];
 /** What Misato is told about each built-in tool, each assigned to one subject (F-113-T01). */
@@ -956,24 +968,31 @@ export function execute(
       if (!Array.isArray(args.items) || args.items.some((x) => typeof x !== 'string')) {
         throw new Error('items must be an array of strings.');
       }
-      return backend.lists.addItems(list, args.items as string[]);
+      const res = backend.lists.addItems(list, args.items as string[]);
+      const view = backend.lists.show(res.list.name);
+      return { ...res, ...(view ? { surface: toChecklistSurface(view) } : {}) };
     }
     case 'lists.show': {
       only(args, ['list']);
       if (!backend.lists) throw new Error('Lists store is not available.');
       if (args.list === undefined) return { lists: backend.lists.listAll() };
-      return backend.lists.show(text(args, 'list')) ?? { list: null, items: [] };
+      const view = backend.lists.show(text(args, 'list'));
+      return view ? { ...view, surface: toChecklistSurface(view) } : { list: null, items: [] };
     }
     case 'lists.set_done': {
       only(args, ['list', 'item', 'done']);
       if (!backend.lists) throw new Error('Lists store is not available.');
       if (typeof args.done !== 'boolean') throw new Error('done must be a boolean.');
-      return backend.lists.setDone(text(args, 'list'), text(args, 'item'), args.done);
+      const res = backend.lists.setDone(text(args, 'list'), text(args, 'item'), args.done);
+      const view = backend.lists.show(res.list.name);
+      return { ...res, ...(view ? { surface: toChecklistSurface(view) } : {}) };
     }
     case 'lists.remove_item': {
       only(args, ['list', 'item']);
       if (!backend.lists) throw new Error('Lists store is not available.');
-      return backend.lists.removeItem(text(args, 'list'), text(args, 'item'));
+      const res = backend.lists.removeItem(text(args, 'list'), text(args, 'item'));
+      const view = backend.lists.show(res.list.name);
+      return { ...res, ...(view ? { surface: toChecklistSurface(view) } : {}) };
     }
     case 'pantry.purchase': {
       only(args, ['phrase', 'item', 'purchasedAt']);
@@ -1039,6 +1058,14 @@ export function execute(
     case 'fpv.blackbox_report': {
       only(args, ['csv']);
       return analyzeBlackboxVibration(text(args, 'csv'));
+    }
+    case 'desktop.replay': {
+      only(args, ['recording', 'approved']);
+      if (!backend.desktopReplayDriver) throw new Error('Desktop replay driver is not available.');
+      return replayDesktopRecording(backend.desktopReplayDriver, {
+        recording: args.recording as DesktopRecordingFile,
+        approved: args.approved === true,
+      });
     }
     case 'fpv.import_build': {
       only(args, ['name', 'sourceRef', 'components', 'wiring', 'notes']);

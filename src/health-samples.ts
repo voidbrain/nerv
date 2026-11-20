@@ -1,5 +1,6 @@
 import { monitorEventLoopDelay, type IntervalHistogram } from 'node:perf_hooks';
 import type { DatabaseSync } from 'node:sqlite';
+import type { BaseLinkMetrics } from './link-load.ts';
 
 export interface HealthSample {
   readonly sampledAtMs: number;
@@ -164,4 +165,148 @@ export function startLocalHealthSampler(
       histogram.disable();
     },
   };
+}
+
+export interface HealthThresholds {
+  readonly rssMb: number;
+  readonly eventLoopDelayMs: number;
+  readonly linkLatencyMs: number;
+  readonly inFlight: number;
+  readonly reconnects: number;
+}
+
+export const DEFAULT_HEALTH_THRESHOLDS: HealthThresholds = {
+  rssMb: 512,
+  eventLoopDelayMs: 100,
+  linkLatencyMs: 500,
+  inFlight: 10,
+  reconnects: 5,
+};
+
+export interface HealthWarning {
+  readonly key: string;
+  readonly kind: 'sample' | 'link';
+  readonly metric: keyof HealthThresholds;
+  readonly peerId?: string;
+  readonly actual: number;
+  readonly threshold: number;
+  readonly message: string;
+}
+
+export interface HealthMetricsSnapshot {
+  readonly latestSample: HealthSample | null;
+  readonly recentSamples: readonly HealthSample[];
+  readonly links: readonly BaseLinkMetrics[];
+  readonly thresholds: HealthThresholds;
+  readonly warnings: readonly HealthWarning[];
+}
+
+const THRESHOLD_LIMITS: Record<keyof HealthThresholds, { min: number; max: number; integer: boolean }> = {
+  rssMb: { min: 16, max: 65536, integer: true },
+  eventLoopDelayMs: { min: 1, max: 60000, integer: false },
+  linkLatencyMs: { min: 1, max: 60000, integer: false },
+  inFlight: { min: 1, max: 1000, integer: true },
+  reconnects: { min: 1, max: 1000, integer: true },
+};
+
+export function validateHealthThresholds(raw: unknown): HealthThresholds {
+  if (raw === undefined) return { ...DEFAULT_HEALTH_THRESHOLDS };
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    throw new Error('Invalid health thresholds: expected an object.');
+  }
+  const rec = raw as Record<string, unknown>;
+  const unknown = Object.keys(rec).filter((k) => !(k in THRESHOLD_LIMITS));
+  if (unknown.length) throw new Error(`Unknown health threshold(s): ${unknown.join(', ')}.`);
+  const out: Record<keyof HealthThresholds, number> = { ...DEFAULT_HEALTH_THRESHOLDS };
+  for (const key of Object.keys(THRESHOLD_LIMITS) as (keyof HealthThresholds)[]) {
+    if (rec[key] === undefined) continue;
+    const val = Number(rec[key]);
+    const spec = THRESHOLD_LIMITS[key];
+    if (!Number.isFinite(val) || (spec.integer && !Number.isInteger(val)) || val < spec.min || val > spec.max) {
+      throw new Error(`Invalid health threshold ${key}: expected ${spec.min}–${spec.max}.`);
+    }
+    out[key] = val;
+  }
+  return out;
+}
+
+/**
+ * Evaluates current service samples and peer link metrics against thresholds,
+ * returning one deduplicated warning per crossed metric (and per peer for link metrics).
+ */
+export function evaluateHealthWarnings(
+  sample: HealthSample | null | undefined,
+  links: readonly BaseLinkMetrics[],
+  thresholds: HealthThresholds,
+): HealthWarning[] {
+  const warnings = new Map<string, HealthWarning>();
+  if (sample) {
+    const rssMb = Math.round((sample.rssBytes / (1024 * 1024)) * 10) / 10;
+    if (rssMb > thresholds.rssMb) {
+      warnings.set('sample:rssMb', {
+        key: 'sample:rssMb',
+        kind: 'sample',
+        metric: 'rssMb',
+        actual: rssMb,
+        threshold: thresholds.rssMb,
+        message: `Memory RSS ${rssMb} MB exceeds ${thresholds.rssMb} MB`,
+      });
+    }
+    if (sample.eventLoopDelayMs > thresholds.eventLoopDelayMs) {
+      warnings.set('sample:eventLoopDelayMs', {
+        key: 'sample:eventLoopDelayMs',
+        kind: 'sample',
+        metric: 'eventLoopDelayMs',
+        actual: sample.eventLoopDelayMs,
+        threshold: thresholds.eventLoopDelayMs,
+        message: `Event-loop delay ${sample.eventLoopDelayMs} ms exceeds ${thresholds.eventLoopDelayMs} ms`,
+      });
+    }
+  }
+  for (const link of links) {
+    const latency = link.lastLatencyMs ?? link.avgLatencyMs;
+    if (latency !== null && latency > thresholds.linkLatencyMs) {
+      const key = `link:${link.peerId}:linkLatencyMs`;
+      if (!warnings.has(key)) {
+        warnings.set(key, {
+          key,
+          kind: 'link',
+          metric: 'linkLatencyMs',
+          peerId: link.peerId,
+          actual: latency,
+          threshold: thresholds.linkLatencyMs,
+          message: `Link ${link.peerId} latency ${latency} ms exceeds ${thresholds.linkLatencyMs} ms`,
+        });
+      }
+    }
+    if (link.inFlight > thresholds.inFlight) {
+      const key = `link:${link.peerId}:inFlight`;
+      if (!warnings.has(key)) {
+        warnings.set(key, {
+          key,
+          kind: 'link',
+          metric: 'inFlight',
+          peerId: link.peerId,
+          actual: link.inFlight,
+          threshold: thresholds.inFlight,
+          message: `Link ${link.peerId} has ${link.inFlight} in-flight calls (threshold ${thresholds.inFlight})`,
+        });
+      }
+    }
+    if (link.reconnects > thresholds.reconnects) {
+      const key = `link:${link.peerId}:reconnects`;
+      if (!warnings.has(key)) {
+        warnings.set(key, {
+          key,
+          kind: 'link',
+          metric: 'reconnects',
+          peerId: link.peerId,
+          actual: link.reconnects,
+          threshold: thresholds.reconnects,
+          message: `Link ${link.peerId} recorded ${link.reconnects} reconnects (threshold ${thresholds.reconnects})`,
+        });
+      }
+    }
+  }
+  return [...warnings.values()];
 }

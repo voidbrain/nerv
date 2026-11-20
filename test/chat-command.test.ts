@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readCommand, statusText } from '../src/chat-command.ts';
+import { COMMAND_CATALOG, helpText, readCommand, statusText } from '../src/chat-command.ts';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
 test('status commands and the reported prose alias resolve only registered identities, with no model interpretation', () => {
@@ -51,12 +51,27 @@ test('authenticated status/help/unknown commands answer before dispatch and plan
       ).status,
       401,
     );
-    for (const message of ['/status', '/help', '/unknown', 'Ask Tabgha his /status']) {
+    for (const message of [
+      '/status',
+      '/help',
+      '/cards',
+      '/reminders',
+      '/why S-1A2B',
+      '/brief',
+      '/pilots',
+      '/bases',
+      '/spear',
+      '/log steps',
+      '/unknown',
+      'Ask Tabgha his /status',
+    ]) {
       const reply = await send(message);
       assert.equal(reply.command, true);
       assert.ok(reply.reply);
       assert.equal(reply.sortieId, '');
     }
+    assert.equal(COMMAND_CATALOG.length, 10);
+    assert.match(helpText('en'), /\/cards/);
     assert.equal(dispatched, 0);
     assert.deepEqual(await runtime.sorties(), []);
   } finally {
