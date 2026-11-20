@@ -390,3 +390,107 @@ test('F-110-T02: through the server, the dashboard switch keeps the saved schedu
     await runtime.close();
   }
 });
+
+test('F-102-T03: resultText reports applied (with restart & after-start health check), refused (with next try), and failed (with recovery)', async () => {
+  const { resultText } = await import('../src/update-scheduler.ts');
+  const scheduled = { revision: B, channel: 'main' as const, applyAt: '2026-11-17T02:00:00.000Z' };
+  const baseReceipt = {
+    digest: 'd'.repeat(64),
+    resource: 'service',
+    fence: 1,
+    nonce: 'n1',
+    pid: 1234,
+    identity: 'test',
+    state: 'completed' as const,
+    steps: ['backup', 'fetch', 'checkout', 'build', 'restart', 'health'],
+    health: {
+      ok: true,
+      checkedAt: '2026-11-17T02:00:05.000Z',
+      commit: B,
+      baseId: 'NERV-01',
+      database: 'ok',
+      nervous: true,
+      brain: true,
+      failures: [],
+    },
+  };
+
+  const enOk = resultText(
+    {
+      outcome: 'completed',
+      enabled: true,
+      target: 'NERV-01',
+      channel: 'main',
+      revision: B,
+      reasons: [],
+      recovery: [],
+      receipt: baseReceipt,
+    },
+    scheduled,
+    undefined,
+    TZ,
+    'en',
+  );
+  assert.match(enOk, /Update bbbbbbb applied: restarted, after-start health check OK \(bbbbbbb\)/);
+
+  const itOk = resultText(
+    {
+      outcome: 'completed',
+      enabled: true,
+      target: 'NERV-01',
+      channel: 'main',
+      revision: B,
+      reasons: [],
+      recovery: [],
+      receipt: baseReceipt,
+    },
+    scheduled,
+    undefined,
+    TZ,
+    'it',
+  );
+  assert.match(itOk, /Aggiornamento bbbbbbb applicato: riavvio eseguito, verifica dopo avvio OK \(bbbbbbb\)/);
+
+  const enRefused = resultText(
+    {
+      outcome: 'refused',
+      enabled: true,
+      target: 'NERV-01',
+      channel: 'main',
+      revision: B,
+      reasons: ['1 active run(s) in progress.'],
+      recovery: [],
+    },
+    scheduled,
+    '2026-11-18T02:00:00.000Z',
+    TZ,
+    'en',
+  );
+  assert.match(enRefused, /Update bbbbbbb refused: 1 active run\(s\) in progress\. Next try/);
+
+  const enFailed = resultText(
+    {
+      outcome: 'uncertain',
+      enabled: true,
+      target: 'NERV-01',
+      channel: 'main',
+      revision: B,
+      reasons: ["Lifecycle update ended in state 'failed'."],
+      recovery: ['Inspect nerv nodes lifecycle-status.'],
+      receipt: {
+        ...baseReceipt,
+        state: 'uncertain' as const,
+        health: { ...baseReceipt.health, ok: false, failures: ['brain down'] },
+        restoredBackup: { digest: 'e'.repeat(64), schema: 1, revision: A },
+      },
+    },
+    scheduled,
+    undefined,
+    TZ,
+    'en',
+  );
+  assert.match(enFailed, /Update bbbbbbb failed:/);
+  assert.match(enFailed, /After-start health check failed: brain down\./);
+  assert.match(enFailed, /Restored backup aaaaaaa\./);
+  assert.match(enFailed, /Recovery: Inspect nerv nodes lifecycle-status\./);
+});
