@@ -700,7 +700,7 @@ test('the bases map draws: drawMap runs to the end and draws every base and its 
     { id: 'nerv-02', name: 'Tabgha', status: 'offline', lon: 300, lat: 150 },
   ];
   const document = { getElementById: () => ({ getContext: () => ctx, clientWidth: 270 }) };
-  const helper = src.slice(src.indexOf('const telegramObserved'), src.indexOf('/* ================= EVA heartbeats'));
+  const helper = src.slice(src.indexOf('const telegramObserved'), src.indexOf('/* ================= LOOP + EVENTS'));
   const drawMap = new Function(
     'map',
     'BASES',
@@ -732,7 +732,7 @@ test('the bases map draws: drawMap runs to the end and draws every base and its 
 test('Midori keeps its blue node and links; only its status dot and label take the status colour (B-095)', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
-  const helper = src.slice(src.indexOf('const telegramObserved'), src.indexOf('/* ================= EVA heartbeats'));
+  const helper = src.slice(src.indexOf('const telegramObserved'), src.indexOf('/* ================= LOOP + EVENTS'));
   const draw = (apiState: 'responding' | 'failed') => {
     const calls: { m: string; a: unknown[]; stroke: string; fill: string }[] = [];
     const style = { stroke: '', fill: '' };
@@ -1485,7 +1485,10 @@ test('F-049-T09: GET /api/eva/instances requires auth and returns live instances
     assert.equal(body.machines[0]!.instances[0]!.evaClass, 'eva-03');
     assert.equal(body.machines[0]!.instances[0]!.state, 'running');
   } finally {
-    await new Promise<void>((done) => srv.close(() => done()));
+    await new Promise<void>((done) => {
+      srv.close(() => done());
+      srv.closeAllConnections();
+    });
     store.close();
   }
 });
