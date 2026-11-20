@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 102.75 h agent + 11 h owner across 141 open steps of 43 features and 24 other records. 79.75 h of actual effort recorded on 123 steps. Generated from the task files.
+**Remaining effort:** 103.5 h agent + 11 h owner across 142 open steps of 43 features and 24 other records. 79.75 h of actual effort recorded on 123 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -47,7 +47,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-005-T29](#f-005-t29) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [B-082-T01](#b-082-t01), [F-005-T29](#f-005-t29) | 🤖 | — | — |
 
 💻 **→** Next: B-087-T01 — Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front (Ready).
 
@@ -61,7 +61,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-087-t01"></a>B-087-T01 — Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front | 1.5 h | 0 h | 1.5 h | Ready | — | [F-005-T29](#f-005-t29) |
+| 🟡 Medium | <a id="b-087-t01"></a>B-087-T01 — Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front | 1.5 h | 0 h | 1.5 h | Ready | — | [B-082-T01](#b-082-t01), [F-005-T29](#f-005-t29) |
 | 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | |
 
 <details>
@@ -445,9 +445,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h | [B-087-T01](#b-087-t01) | — | 🤖 | — | — |
 
-💻 **→** Next: B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task (Implemented; verification pending).
+💻 **→** Next: B-082-T02 — Windows: keep the logon account for Entra ID and domain users (Ready).
 
 | | |
 |---|---|
@@ -457,10 +457,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-082-t01"></a>B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #517](https://github.com/voidbrain/nerv/pull/517) this change |
-| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-082-t01"></a>B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [B-087-T01](#b-087-t01) | — | [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded |
+| 🟢 Small | <a id="b-082-t02"></a>B-082-T02 — Windows: keep the logon account for Entra ID and domain users | 0.75 h | 0 h | 0.75 h | Ready | — | — | [PR #591](https://github.com/voidbrain/nerv/pull/591) opened |
+| 🟢 Small | **Total** | 1.5 h | 0.5 h (1 of 2 steps recorded) | 1 h | 0 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -469,10 +470,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-082-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) this change. Test: `test/node-inspection.test.ts` "B-082: the Windows task user is the machine account over SSH…" (committed failing first) |
+| PR / evidence | Steps: B-082-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded · B-082-T02: [PR #591](https://github.com/voidbrain/nerv/pull/591) opened. Test: `test/node-inspection.test.ts` "B-082: the Windows task user is the machine account over SSH…" (committed failing first) |
 | Opened | 2026-11-18 |
-| Verification | Pending: CI and the live check named above. |
-| Reviewed | 2026-11-18 |
+| Verification | 2026-11-18: CI green on PR #517. 2026-11-20: review done. Pending: the live SSH install on Tabgha (after B-087-T01) and B-082-T02. |
+| Reviewed | 2026-11-20 |
 
 </details>
 

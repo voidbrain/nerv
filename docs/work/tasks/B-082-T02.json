@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "parent": "B-082",
+  "id": "B-082-T02",
+  "title": "Windows: keep the logon account for Entra ID and domain users",
+  "goal": "The task user names the account that runs the service for Entra ID (AzureAD) and domain sessions too, not only local accounts",
+  "status": "ready",
+  "acceptance": [
+    "Test committed failing first: with USERDOMAIN=AzureAD and no USERDNSDOMAIN, windowsServiceUser keeps AzureAD\\\\user; a domain user whose SSH session lacks USERDNSDOMAIN keeps USERDOMAIN\\\\user; WORKGROUP or empty USERDOMAIN still gives COMPUTERNAME\\\\user"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/service.ts",
+    "test/**",
+    "docs/work/records/B-082.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-20: narrow the account rule (keep USERDOMAIN unless WORKGROUP or empty, or ask the OS) and extend the B-082 test. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  },
+  "prs": [
+    {
+      "pr": 591,
+      "note": "opened"
+    }
+  ]
+}
