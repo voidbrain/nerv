@@ -4,7 +4,7 @@
   "id": "B-082-T02",
   "title": "Windows: keep the logon account for Entra ID and domain users",
   "goal": "The task user names the account that runs the service for Entra ID (AzureAD) and domain sessions too, not only local accounts",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Test committed failing first: with USERDOMAIN=AzureAD and no USERDNSDOMAIN, windowsServiceUser keeps AzureAD\\\\user; a domain user whose SSH session lacks USERDNSDOMAIN keeps USERDOMAIN\\\\user; WORKGROUP or empty USERDOMAIN still gives COMPUTERNAME\\\\user"
   ],
@@ -13,6 +13,7 @@
     "src/service.ts",
     "test/**",
     "docs/work/records/B-082.md",
+    "docs/work/tasks/B-082-T02.json",
     "generated:backlog-views"
   ],
   "capabilities": [

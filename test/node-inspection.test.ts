@@ -23,10 +23,7 @@ test('B-082: the Windows task user keeps Entra and domain accounts but repairs w
     windowsServiceUser({ USERDOMAIN: 'AzureAD', COMPUTERNAME: 'PC1', USERNAME: 'tester' }),
     'AzureAD\\tester',
   );
-  assert.equal(
-    windowsServiceUser({ USERDOMAIN: 'CORP', COMPUTERNAME: 'PC1', USERNAME: 'tester' }),
-    'CORP\\tester',
-  );
+  assert.equal(windowsServiceUser({ USERDOMAIN: 'CORP', COMPUTERNAME: 'PC1', USERNAME: 'tester' }), 'CORP\\tester');
   assert.equal(
     windowsServiceUser({
       USERDOMAIN: 'CORP',
@@ -36,9 +33,6 @@ test('B-082: the Windows task user keeps Entra and domain accounts but repairs w
     }),
     'CORP\\tester',
   );
-  assert.equal(
-    windowsServiceUser({ USERDOMAIN: '', COMPUTERNAME: 'KITCHEN', USERNAME: 'tester' }),
-    'KITCHEN\\tester',
-  );
+  assert.equal(windowsServiceUser({ USERDOMAIN: '', COMPUTERNAME: 'KITCHEN', USERNAME: 'tester' }), 'KITCHEN\\tester');
   assert.equal(windowsServiceUser({ USERNAME: 'tester' }), 'tester');
 });
