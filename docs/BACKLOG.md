@@ -2306,7 +2306,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in this PR |
+| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
 | Opened | 2026-11-20 |
 | Verification | Pending |
 | Reviewed | 2026-11-20 |
@@ -2347,7 +2347,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in this PR |
+| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
 | Opened | 2026-11-20 |
 | Verification | Pending |
 | Reviewed | 2026-11-20 |
@@ -2387,7 +2387,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in this PR |
+| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
 | Opened | 2026-11-20 |
 | Verification | Pending |
 | Reviewed | 2026-11-20 |
