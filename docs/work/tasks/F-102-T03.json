@@ -5,6 +5,12 @@
   "title": "Apply at the announced time and report",
   "goal": "At the time, the update runs through the safe lifecycle path and the result is reported",
   "status": "implemented",
+  "prs": [
+    {
+      "pr": 577,
+      "note": "implementation"
+    }
+  ],
   "acceptance": [
     "Uses the existing automatic policy and lifecycle update; reports applied, refused (with reason and next try) or failed (with recovery)",
     "Restart and after-start health check in the report"
