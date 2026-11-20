@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "B-099-T04",
+  "parent": "B-099",
+  "title": "Live check on NERV-01: the escapes the review found leave nothing running",
+  "goal": "With _nervjob set up, a quick exit after detaching a child and a double fork after setsid leave no process of _nervjob after the job",
+  "status": "planned",
+  "acceptance": [
+    "On NERV-01, both escape jobs end with `ps -U _nervjob` empty and the receipt not uncertain; the commands and output are recorded on B-099"
+  ],
+  "dependsOn": [
+    "B-099-T03"
+  ],
+  "resources": [
+    "docs/work/records/B-099.md",
+    "docs/work/tasks/B-099-T04.json"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "A survivor after kill -1 is a finding, recorded, not retried away"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Planned 2026-11-19. Not a measurement.",
+    "reviewed": "2026-11-19",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": []
+}

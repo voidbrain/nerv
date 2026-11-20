@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 83.5 h agent + 10.25 h owner across 126 open steps of 40 features and 21 other records. 78.5 h of actual effort recorded on 119 steps. Generated from the task files.
+**Remaining effort:** 84.25 h agent + 10.5 h owner across 129 open steps of 40 features and 21 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1072,9 +1072,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 4 h | — | [F-049-T14](#f-049-t14) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h agent + 0.25 h owner | — | [F-049-T14](#f-049-t14) | 🤖 | — | — |
 
-💻 **→** Next: B-099-T02 — A boundary an EVA-03 job cannot leave: a dedicated job user (Planned).
+💻 **→** Next: B-099-T02 — EVA jobs can run as a dedicated job user; everything it runs ends with the job (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1084,10 +1084,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-099-t02"></a>B-099-T02 — A boundary an EVA-03 job cannot leave: a dedicated job user | 4 h | 0 h | 4 h | Planned | — |
-| 🟡 Medium | **Total** | 5 h | 1.5 h (1 of 2 steps recorded) | 4 h | 1 of 2 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="b-099-t02"></a>B-099-T02 — EVA jobs can run as a dedicated job user; everything it runs ends with the job | 4 h | 0 h | 4 h | Implemented; verification pending | 🤖 | [PR #570](https://github.com/voidbrain/nerv/pull/570) job user; CI pending |
+| 🟢 Small | <a id="b-099-t03"></a>B-099-T03 — Owner setup on NERV-01: the &#95;nervjob user, the shared folder and the sudo rule | — | 0 h | 0 h agent + 0.25 h owner | Planned · waits on [B-099-T02](#b-099-t02) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="b-099-t04"></a>B-099-T04 — Live check on NERV-01: the escapes the review found leave nothing running | 0.5 h | 0 h | 0.5 h | Planned · waits on [B-099-T03](#b-099-t03) | ⏳ 🤖 | — |
+| 🔴 Large | **Total** | 5.5 h (3 of 4 steps) | 1.5 h (1 of 4 steps recorded) | 4.5 h agent + 0.25 h owner | 1 of 4 completed | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1104,7 +1106,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-099-T01: [PR #549](https://github.com/voidbrain/nerv/pull/549) the fix; CI green. Found in F-049-T05; [PR #549](https://github.com/voidbrain/nerv/pull/549) B-099-T01 (`test/eva-gate.test.ts`) |
+| PR / evidence | Steps: B-099-T01: [PR #549](https://github.com/voidbrain/nerv/pull/549) the fix; CI green · B-099-T02: [PR #570](https://github.com/voidbrain/nerv/pull/570) job user; CI pending. Found in F-049-T05; [PR #549](https://github.com/voidbrain/nerv/pull/549) B-099-T01 (`test/eva-gate.test.ts`) |
 | Opened | 2026-11-19 |
 | Verification | 2026-11-19: B-099-T01 by CI run 44532892249 (PR #549); B-099-T02 pending. Review: design-reviewer, 2026-11-19, PR #549 (one blocker answered by owner decision; three should-fix fixed). |
 | Reviewed | 2026-11-19 |
@@ -1120,7 +1122,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟣 Very large | 18.25 h | [B-099-T02](#b-099-t02) | [F-051-T06](#f-051-t06) | 🤖 | — | — |
 
-💻 **→** Next: F-049-T08 — Pilot trust stage caps the class (Planned).
+💻 **→** Next: F-049-T08 — Pilot trust stage caps the class (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1132,7 +1134,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-049-t08"></a>F-049-T08 — Pilot trust stage caps the class | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-049-t08"></a>F-049-T08 — Pilot trust stage caps the class | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | 🤖 | [PR #572](https://github.com/voidbrain/nerv/pull/572) implementation |
 | 🟢 Small | <a id="f-049-t09"></a>F-049-T09 — Dashboard shows instances per class | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-049-t10"></a>F-049-T10 — Linux host enforcement and join tests in CI | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
 | 🟢 Small | <a id="f-049-t12"></a>F-049-T12 — Run the first EVA job on the Linux host | 0.5 h | 0 h | 0.5 h | Planned · waits on [F-049-T10](#f-049-t10) | ⏳ 🤖 | — |
@@ -1163,7 +1165,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Depends on | [F-045](archive/backlog-2026.md#f-045) — Pilot identity and EVA class for per-job execution<br />[F-025](archive/backlog-2026.md#f-025) — Pilot trust-stage limits for sandbox class admission |
-| PR / evidence | Steps: F-049-T04: [PR #474](https://github.com/voidbrain/nerv/pull/474) implementation · F-049-T05: [PR #549](https://github.com/voidbrain/nerv/pull/549) gate tests; CI green · F-049-T06: [PR #551](https://github.com/voidbrain/nerv/pull/551) the pool; CI green · F-049-T07: [PR #558](https://github.com/voidbrain/nerv/pull/558) class profiles; CI pending · F-049-T13: [PR #553](https://github.com/voidbrain/nerv/pull/553) receipts and recovery join; CI green. [PR #474](https://github.com/voidbrain/nerv/pull/474) (merged; CI green); [PR #365](https://github.com/voidbrain/nerv/pull/365) F-049-T01 deterministic EVA runner contract and threat model; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
+| PR / evidence | Steps: F-049-T04: [PR #474](https://github.com/voidbrain/nerv/pull/474) implementation · F-049-T05: [PR #549](https://github.com/voidbrain/nerv/pull/549) gate tests; CI green · F-049-T06: [PR #551](https://github.com/voidbrain/nerv/pull/551) the pool; CI green · F-049-T07: [PR #558](https://github.com/voidbrain/nerv/pull/558) class profiles; CI pending · F-049-T08: [PR #572](https://github.com/voidbrain/nerv/pull/572) implementation · F-049-T13: [PR #553](https://github.com/voidbrain/nerv/pull/553) receipts and recovery join; CI green. [PR #572](https://github.com/voidbrain/nerv/pull/572) (F-049-T08); [PR #474](https://github.com/voidbrain/nerv/pull/474) (merged; CI green); [PR #365](https://github.com/voidbrain/nerv/pull/365) F-049-T01 deterministic EVA runner contract and threat model; [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Assessment: [PR #231](https://github.com/voidbrain/nerv/pull/231);  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  Owner questions 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-18: F-049-T04 verified: [PR #474](https://github.com/voidbrain/nerv/pull/474) merged on green CI. 2026-11-13 F-049-T01: `npm run work:build && npm run backlog:recap && npm run roadmap:status` and `npm run check:fast` passed; contract/architecture documentation only, no runtime confinement claimed. |
 | Reviewed | 2026-11-18 |
@@ -2493,18 +2495,18 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 ---
 ### <a id="b-075"></a>[🐞 B-075](#top)
 
-**Windows CI: Telegram checkpoint and quiet-hours tests failed once**
+**Windows CI: Telegram checkpoint and quiet-hours tests time out**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: B-075-T01 — Read the failed Telegram tests on Windows and name the cause (Implemented; verification pending).
 
 | | |
 |---|---|
 | **Issue** | Found 2026-11-18 in the history of the `windows` job: on 2026-11-16 (PR branch `feat/f-089-t02-browser-click`, no Telegram change) two tests failed in one run: "F-003: failed Bot delivery keeps its checkpoint across restart, retries once accepted, and is not replayed" and "F-026: Telegram defers proactive cards and resumed replies during quiet hours…". Not seen since in 20 clean Windows runs; recorded so it is not lost. |
-| **Reproduce** | Run `npm test` on the Windows runner; seen once. |
+| **Reproduce** | Run `npm test` on a slow Windows runner; F-003 timed out in five runs on 2026-11-18 and 2026-11-19. |
 | **Check** | The failure messages are read from the CI log and the cause named; a committed test fails first if it is in code; otherwise the record closes with the investigation and the remaining uncertainty stated. |
 
 **Steps**
@@ -2512,7 +2514,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-075-t01"></a>B-075-T01 — Read the failed Telegram tests on Windows and name the cause | 1 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound |
-| 🟢 Small | **Total** | 1 h | 0.5 h | 0.25 h | 0 of 1 completed | |
+| 🟢 Small | <a id="b-075-t02"></a>B-075-T02 — Give the F-003 checkpoint test the same Windows bound | 0.5 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #571](https://github.com/voidbrain/nerv/pull/571) bound |
+| 🟢 Small | **Total** | 1.5 h | 0.75 h | 0.5 h | 0 of 2 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2521,7 +2524,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-075-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound. Failed: windows job 133087302320 of run 43802969338 (2026-11-16). |
+| PR / evidence | Steps: B-075-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound · B-075-T02: [PR #571](https://github.com/voidbrain/nerv/pull/571) bound. Failed: windows job 133087302320 of run 43802969338 (2026-11-16). |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-18 |

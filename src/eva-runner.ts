@@ -1,8 +1,9 @@
 import { execFile, spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, copyFileSync, existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative } from 'node:path';
 import { EVA_CLASS_SPECS } from './eva-classes.ts';
+import { asJobUser, endJobUser, stageRuntime, type EvaJobUser } from './eva-job-user.ts';
 import type { EvaClass } from './pilots.ts';
 
 export const DEFAULT_SANDBOX_EXEC_PATH = '/usr/bin/sandbox-exec';
@@ -35,6 +36,8 @@ export interface Eva03JobSpec {
   readonly readOnlyPaths?: readonly string[];
   readonly deniedReadPaths?: readonly string[];
   readonly readableStateFiles?: readonly string[];
+  /** B-099-T02: see EvaJobSpec.jobUser. */
+  readonly jobUser?: EvaJobUser;
   readonly timeoutMs?: number;
   readonly maxOutputBytes?: number;
   readonly signal?: AbortSignal;
@@ -55,6 +58,11 @@ export interface EvaJobSpec extends Omit<Eva03JobSpec, 'onLedgerEvent'> {
    */
   readonly egress?: { readonly localhost?: readonly number[]; readonly anyHost?: readonly number[] };
   readonly onEvent?: (event: EvaJobEvent) => void;
+  /**
+   * B-099-T02: run the job as this dedicated user (docs/guides/eva-job-user.md). Its instance lives in the shared
+   * folder, and at the end every process of that user is killed and the table is checked.
+   */
+  readonly jobUser?: EvaJobUser;
 }
 
 export type EvaPhase = 'started' | 'completed' | 'failed' | 'cancelled' | 'timed_out';
@@ -384,7 +392,9 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
   const hostHomeDir = process.env.HOME || tmpdir();
 
   const tag = spec.evaClass.replace('-', '');
-  const instanceDir = realpathSync(mkdtempSync(join(realpathSync(tmpdir()), `nerv-${tag}-${spec.jobId}-`)));
+  // B-099-T02: a job user cannot open the owner's temp folder; its instances live in the shared folder.
+  const instanceRoot = spec.jobUser ? realpathSync(spec.jobUser.sharedRoot) : realpathSync(tmpdir());
+  const instanceDir = realpathSync(mkdtempSync(join(instanceRoot, `nerv-${tag}-${spec.jobId}-`)));
   const workspaceDir = join(instanceDir, 'workspace');
   const profilePath = join(instanceDir, `${tag}.sb`);
   const startedAt = Date.now();
@@ -394,6 +404,11 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
   try {
     const { mkdirSync } = await import('node:fs');
     mkdirSync(workspaceDir, { recursive: true });
+    if (spec.jobUser) {
+      // The job user reads the profile and writes only its workspace; the instance folder stays the owner's.
+      chmodSync(instanceDir, 0o711);
+      chmodSync(workspaceDir, 0o777);
+    }
     const profile = buildEvaSeatbeltProfile(spec.evaClass, {
       workspaceDir,
       hostHomeDir,
@@ -423,7 +438,10 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
       cancelled: boolean;
       outputTruncated: boolean;
     }>((resolve, reject) => {
-      const child = spawn(sandboxExec, ['-f', profilePath, spec.command, ...spec.args], {
+      const launch = spec.jobUser
+        ? asJobUser(spec.jobUser, sandboxExec, ['-f', profilePath, spec.command, ...spec.args])
+        : { command: sandboxExec, args: ['-f', profilePath, spec.command, ...spec.args] };
+      const child = spawn(launch.command, launch.args, {
         cwd: workspaceDir,
         env: buildEva03CleanEnv(workspaceDir, spec.command),
         detached: true,
@@ -499,8 +517,14 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
     });
 
     // B-099: whatever the job started and left running ends with it, whether it timed out, was cancelled or exited.
-    const ended = tracker ? await tracker.endAll() : { killed: 0, survivors: [] };
-    const tracked = tracker?.tracked ?? false;
+    const sampled = tracker ? await tracker.endAll() : { killed: 0, survivors: [] };
+    // B-099-T02: with a job user, everything it runs is killed and the table checked: nothing it started can hide.
+    const byUser = spec.jobUser ? await endJobUser(spec.jobUser) : undefined;
+    const ended = {
+      killed: sampled.killed,
+      survivors: [...new Set([...sampled.survivors, ...(byUser?.survivors ?? [])])],
+    };
+    const tracked = (tracker?.tracked ?? false) && (byUser?.tracked ?? true);
     const phase: EvaPhase = outcome.cancelled
       ? 'cancelled'
       : outcome.timedOut
@@ -533,6 +557,7 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
       detail: [survivorNote, outcome.stderr.slice(0, 400)].filter(Boolean).join(' ') || undefined,
     });
 
+    if (spec.jobUser) await removeAsJobUser(spec.jobUser, sandboxExec, instanceDir, workspaceDir);
     rmSync(instanceDir, { recursive: true, force: true });
     workspaceDiscarded = !existsSync(instanceDir);
 
@@ -550,10 +575,34 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
   } finally {
     // A launch error never reached endAll: stop sampling and end anything it started.
     if (tracker) await tracker.endAll().catch(() => undefined);
+    if (spec.jobUser && !workspaceDiscarded) {
+      await endJobUser(spec.jobUser).catch(() => undefined);
+      await removeAsJobUser(spec.jobUser, sandboxExec, instanceDir, workspaceDir).catch(() => undefined);
+    }
     if (!workspaceDiscarded && existsSync(instanceDir)) {
       rmSync(instanceDir, { recursive: true, force: true });
     }
   }
+}
+
+/**
+ * B-099-T02: files the job user wrote belong to it, so it removes them itself, through sandbox-exec (the only command
+ * the sudo rule allows besides kill) with writes limited to the workspace.
+ */
+async function removeAsJobUser(user: EvaJobUser, sandboxExec: string, instanceDir: string, workspaceDir: string) {
+  if (!existsSync(workspaceDir)) return;
+  const profile = join(instanceDir, 'cleanup.sb');
+  writeFileSync(
+    profile,
+    `(version 1)\n(allow default)\n(deny network*)\n(deny file-write*)\n(allow file-write* (subpath "${escapeSbString(workspaceDir)}"))\n`,
+  );
+  chmodSync(profile, 0o644);
+  const { command, args } = asJobUser(user, sandboxExec, ['-f', profile, '/bin/rm', '-rf', workspaceDir]);
+  await new Promise<void>((done) => {
+    const c = spawn(command, args, { stdio: 'ignore' });
+    c.on('close', () => done());
+    c.on('error', () => done());
+  });
 }
 
 /**
@@ -569,7 +618,10 @@ export async function runToolsProcessInEva03(options: {
   readonly timeoutMs?: number;
   readonly signal?: AbortSignal;
   readonly onLedgerEvent?: (event: Eva03LedgerEvent) => void;
+  /** B-099-T02: run as the job user, from a read-only runtime copy in the shared folder. */
+  readonly jobUser?: EvaJobUser;
 }): Promise<Eva03JobResult> {
+  if (options.jobUser) return runToolsAsJobUser({ ...options, jobUser: options.jobUser });
   const toolsEntry = join(options.repoRoot, 'src', 'tools-process.ts');
   // B-100: one listing, printed, then exit: the instance has no IPC channel to the coordinator.
   const args = options.home ? [toolsEntry, options.home, '--list'] : [toolsEntry, '--list'];
@@ -590,4 +642,40 @@ export async function runToolsProcessInEva03(options: {
     signal: options.signal,
     onLedgerEvent: options.onLedgerEvent,
   });
+}
+
+/**
+ * B-099-T02: the tools process as the job user. It cannot open the owner's home, so it runs from the runtime copy in
+ * the shared folder, and reads a copy of config.json alone (owner decision (b), B-100), removed after the job.
+ */
+async function runToolsAsJobUser(
+  options: Parameters<typeof runToolsProcessInEva03>[0] & { jobUser: EvaJobUser },
+): Promise<Eva03JobResult> {
+  const runtime = stageRuntime(options.jobUser, options.repoRoot);
+  const configDir = options.home
+    ? realpathSync(mkdtempSync(join(realpathSync(options.jobUser.sharedRoot), 'nerv-config-')))
+    : undefined;
+  try {
+    if (configDir) {
+      chmodSync(configDir, 0o711);
+      const source = join(options.home!, 'config.json');
+      if (existsSync(source)) {
+        copyFileSync(source, join(configDir, 'config.json'));
+        chmodSync(join(configDir, 'config.json'), 0o644);
+      }
+    }
+    return await runEva03Job({
+      jobId: options.jobId,
+      command: runtime.node,
+      args: [join(runtime.src, 'tools-process.ts'), ...(configDir ? [configDir] : []), '--list'],
+      readOnlyPaths: [runtime.dir, ...(configDir ? [configDir] : []), ...(options.readOnlyPaths ?? [])],
+      ...(options.home ? { nervStateDir: options.home } : {}),
+      jobUser: options.jobUser,
+      timeoutMs: options.timeoutMs,
+      signal: options.signal,
+      onLedgerEvent: options.onLedgerEvent,
+    });
+  } finally {
+    if (configDir) rmSync(configDir, { recursive: true, force: true });
+  }
 }
