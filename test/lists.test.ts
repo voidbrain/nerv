@@ -105,4 +105,44 @@ describe('F-082-T01: list store and list tools', () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  it('F-082-T05: lists tools return a checklist surface for chat replies', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-lists-'));
+    try {
+      const store = new Store(join(dir, 'nerv.sqlite'));
+      const added = (await store.runAction(store.ledger.openSortie('owner', 'add list', 'trusted'), {
+        tool: 'lists.add_items',
+        args: { list: 'shopping', items: ['milk', 'pasta'] },
+        stage: 'production',
+      })) as {
+        result?: { surface?: { component: string; props: { name: string; items: { text: string; done: boolean }[] } } };
+      };
+      assert.equal(added.result?.surface?.component, 'nerv-checklist-card');
+      assert.equal(added.result?.surface?.props.name, 'shopping');
+      assert.equal(added.result?.surface?.props.items.length, 2);
+
+      const shown = (await store.runAction(store.ledger.openSortie('owner', 'show list', 'trusted'), {
+        tool: 'lists.show',
+        args: { list: 'shopping' },
+        stage: 'production',
+      })) as {
+        result?: { surface?: { component: string; props: { items: { text: string; done: boolean }[] } } };
+      };
+      assert.equal(shown.result?.surface?.component, 'nerv-checklist-card');
+      assert.equal(shown.result?.surface?.props.items.length, 2);
+
+      const doneRes = (await store.runAction(store.ledger.openSortie('owner', 'set done', 'trusted'), {
+        tool: 'lists.set_done',
+        args: { list: 'shopping', item: 'milk', done: true },
+        stage: 'production',
+      })) as {
+        result?: { surface?: { component: string; props: { items: { text: string; done: boolean }[] } } };
+      };
+      assert.equal(doneRes.result?.surface?.component, 'nerv-checklist-card');
+      assert.equal(doneRes.result?.surface?.props.items[0]?.done, true);
+      store.close();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

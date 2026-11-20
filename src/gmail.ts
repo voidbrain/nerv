@@ -99,14 +99,17 @@ export class GmailClient {
     this.fetchFn = options.fetchFn ?? fetch;
   }
 
-  private async requestJson<T>(pathAndQuery: string): Promise<T> {
+  private async requestJson<T>(pathAndQuery: string, init?: { method?: string; body?: unknown }): Promise<T> {
     const token = typeof this.accessToken === 'function' ? await this.accessToken() : this.accessToken;
     if (!token) throw new Error('Gmail access token is not configured.');
     const res = await this.fetchFn(`${this.baseUrl}${pathAndQuery}`, {
+      method: init?.method ?? 'GET',
       headers: {
         authorization: `Bearer ${token}`,
         accept: 'application/json',
+        ...(init?.body !== undefined ? { 'content-type': 'application/json' } : {}),
       },
+      ...(init?.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
     });
     if (!res.ok) {
       throw new Error(`Gmail API request failed with status ${res.status}.`);
@@ -166,4 +169,64 @@ export class GmailClient {
       body: body.slice(0, 8000),
     };
   }
+
+  async createDraft(input: { to: string; subject: string; body: string }): Promise<{
+    id: string;
+    messageId?: string;
+    to: string;
+    subject: string;
+  }> {
+    const raw = encodeRfc2822Raw(input);
+    const created = await this.requestJson<{ id: string; message?: { id?: string } }>('/users/me/drafts', {
+      method: 'POST',
+      body: { message: { raw } },
+    });
+    return {
+      id: created.id,
+      ...(created.message?.id ? { messageId: created.message.id } : {}),
+      to: input.to.trim(),
+      subject: input.subject.trim(),
+    };
+  }
+
+  async send(input: { draftId?: string; to?: string; subject?: string; body?: string }): Promise<{
+    sentId: string;
+    threadId?: string;
+    readBack: TaintedGmailMessage;
+  }> {
+    let sent: { id: string; threadId?: string };
+    if (input.draftId !== undefined) {
+      const draftId = input.draftId.trim();
+      if (!SAFE_MESSAGE_ID.test(draftId)) throw new Error('Invalid Gmail draft ID.');
+      sent = await this.requestJson<{ id: string; threadId?: string }>('/users/me/drafts/send', {
+        method: 'POST',
+        body: { id: draftId },
+      });
+    } else {
+      const raw = encodeRfc2822Raw({
+        to: input.to ?? '',
+        subject: input.subject ?? '',
+        body: input.body ?? '',
+      });
+      sent = await this.requestJson<{ id: string; threadId?: string }>('/users/me/messages/send', {
+        method: 'POST',
+        body: { raw },
+      });
+    }
+    const readBack = await this.read(sent.id);
+    return {
+      sentId: sent.id,
+      ...(sent.threadId ? { threadId: sent.threadId } : {}),
+      readBack,
+    };
+  }
+}
+
+function encodeRfc2822Raw(input: { to: string; subject: string; body: string }): string {
+  const to = input.to.trim();
+  const subject = input.subject.trim();
+  if (!to || /[\r\n]/.test(to)) throw new Error('Invalid recipient address.');
+  if (!subject || /[\r\n]/.test(subject)) throw new Error('Invalid email subject.');
+  const mime = `To: ${to}\r\nSubject: ${subject}\r\nContent-Type: text/plain; charset="UTF-8"\r\n\r\n${input.body}`;
+  return Buffer.from(mime, 'utf8').toString('base64url');
 }

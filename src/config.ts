@@ -18,6 +18,7 @@ import { randomBytes } from 'node:crypto';
 import { statSync } from 'node:fs';
 import { validateModels, type Models } from './model.ts';
 import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
+import { validateHealthThresholds, type HealthThresholds } from './health-samples.ts';
 import { validateAutoUpdatePolicy, type AutoUpdatePolicy } from './update-policy.ts';
 import { validateSeatPool, type SeatPoolEntry } from './seat-pool.ts';
 import { validateOperatorConfig, type OperatorConfig } from './operator-directory.ts';
@@ -41,6 +42,7 @@ export interface Config {
   tools?: ToolsConfig;
   watch?: WatchConfig;
   updatePolicy?: AutoUpdatePolicy;
+  health?: { thresholds: HealthThresholds };
   seats?: SeatPoolEntry[];
   operator?: OperatorConfig;
   /** F-049-T06: how many EVA instances, how much memory and how many model slots this machine gives EVA jobs. */
@@ -206,6 +208,13 @@ export function readConfig(home: string): Config {
   if ('watch' in raw) config.watch = validateWatch((raw as Record<string, unknown>).watch);
   if ('updatePolicy' in raw)
     config.updatePolicy = validateAutoUpdatePolicy((raw as Record<string, unknown>).updatePolicy);
+  if ('health' in raw) {
+    const h = (raw as Record<string, unknown>).health;
+    if (!h || typeof h !== 'object' || Array.isArray(h) || Object.keys(h).some((k) => k !== 'thresholds')) {
+      throw new Error('Invalid health: {"thresholds": {...}}.');
+    }
+    config.health = { thresholds: validateHealthThresholds((h as Record<string, unknown>).thresholds) };
+  }
   if ('pilots' in raw) {
     const list = validatePilots((raw as Record<string, unknown>).pilots);
     if (list.length) config.pilots = list;
@@ -365,6 +374,19 @@ export function setUpdatePolicy(home: string, policy: unknown): AutoUpdatePolicy
     : { ...defaults };
   mkdirSync(home, { recursive: true, mode: 0o700 });
   writeFileSync(path, JSON.stringify({ ...current, updatePolicy: valid }, null, 2) + '\n', { mode: 0o600 });
+  chmodSync(path, 0o600);
+  readConfig(home);
+  return valid;
+}
+/** Persists health threshold settings in config.json, keeping every other setting. */
+export function setHealthThresholds(home: string, thresholds: unknown): HealthThresholds {
+  const path = join(home, 'config.json');
+  const valid = validateHealthThresholds(thresholds);
+  const current = existsSync(path)
+    ? (JSON.parse(readFileSync(path, 'utf8')) as Record<string, unknown>)
+    : { ...defaults };
+  mkdirSync(home, { recursive: true, mode: 0o700 });
+  writeFileSync(path, JSON.stringify({ ...current, health: { thresholds: valid } }, null, 2) + '\n', { mode: 0o600 });
   chmodSync(path, 0o600);
   readConfig(home);
   return valid;

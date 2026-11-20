@@ -4,7 +4,13 @@
  "parent": "F-051",
  "title": "EVA cage pilot labels from real instance data",
  "goal": "The Sephirot EVA cage names the pilot and instance that ran each action, from F-049 instance data",
- "status": "planned",
+ "status": "implemented",
+ "prs": [
+  {
+   "pr": 604,
+   "note": "Sephirot EVA cage pilot and instance labels"
+  }
+ ],
  "acceptance": [
   "The EVA cage shows the pilot and EVA instance of a running or finished action from recorded instance data, never a guess",
   "An action with no instance data shows none, distinct from unavailable",

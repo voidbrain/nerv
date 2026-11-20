@@ -140,8 +140,19 @@ export class LedgerQueries {
     }[];
     const detail = actions.map((x): ActionDetail => {
       const ballot = JSON.parse(x.ballot) as Ballot;
-      const ranPayload = x.ran_payload ? (JSON.parse(x.ran_payload) as { durationMs?: number }) : undefined;
+      const ranPayload = x.ran_payload
+        ? (JSON.parse(x.ran_payload) as {
+            durationMs?: number;
+            evaInstance?: ActionDetail['evaInstance'];
+          })
+        : undefined;
       const durationMs = typeof ranPayload?.durationMs === 'number' ? ranPayload.durationMs : undefined;
+      const evaInstance =
+        ranPayload?.evaInstance &&
+        typeof ranPayload.evaInstance.jobId === 'string' &&
+        typeof ranPayload.evaInstance.evaClass === 'string'
+          ? ranPayload.evaInstance
+          : undefined;
       const status: ActionDetail['status'] =
         x.ran === 'action.done'
           ? 'done'
@@ -162,6 +173,7 @@ export class LedgerQueries {
         created: x.created,
         status,
         ...(durationMs !== undefined ? { durationMs } : {}),
+        ...(evaInstance ? { evaInstance } : {}),
       };
     });
     const timings = this.collectTimings(id);

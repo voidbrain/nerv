@@ -33,7 +33,7 @@
   function toSortie(s) {
     const d = detailCache[s.id]; const actions = d ? d.detail.map(a => {
       TOOLS[a.tool] = TOOLS[a.tool] || { effect:a.ballot.effect };
-      return { tool:a.tool, args:a.args, status:a.status, ballot:a.ballot, rejects:0, ...(a.durationMs != null ? { durationMs:a.durationMs } : {}) };
+      return { tool:a.tool, args:a.args, status:a.status, ballot:a.ballot, rejects:0, ...(a.durationMs != null ? { durationMs:a.durationMs } : {}), ...(a.evaInstance ? { evaInstance:a.evaInstance } : {}) };
     }) : s.patterns.map(p => ({ tool:"", args:{}, status:"proposed", ballot:{ pattern:p } }));
     const status = mapStatus(s);
     // One pass through the flow is one action: after the plan, only the latest action counts, so a step an earlier
@@ -76,8 +76,9 @@
     if (polling || !token) return; polling = true;
     const historySince = state.lastVisit;
     try {
-      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy, evaData] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null), api("eva/instances").catch(() => null)]);
+      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy, evaData, healthMetrics] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null), api("eva/instances").catch(() => null), api("health/metrics").catch(() => null)]);
       state.evaMachines = evaData && Array.isArray(evaData.machines) ? evaData.machines : null;
+      state.healthMetrics = healthMetrics || null;
       state.update = update || doctor.update || null;
       state.updatePolicy = updatePolicy || null;
       await loadUsage();
@@ -190,8 +191,33 @@
     catch (e) { if (e.status === 401) { token = ""; forgetSession(); signIn(SESSION_ENDED); } return; }
     button.blur(); renderBudget(); const nextButton = document.querySelector('[data-usage-page="' + direction + '"]:not(:disabled)') || document.querySelector('[data-usage-page]:not(:disabled)'); if (nextButton) nextButton.focus();
   });
+  document.addEventListener("change", async e => {
+    const chk = e.target && e.target.closest && e.target.closest("input[data-checklist-toggle]");
+    if (!chk) return;
+    const itemId = chk.dataset.checklistToggle;
+    const listId = chk.dataset.listId || "";
+    const done = !!chk.checked;
+    chk.disabled = true;
+    try {
+      const r = await api("lists/toggle", { method: "POST", body: JSON.stringify({ itemId, done }) });
+      if (r && r.surface) {
+        for (const entry of state.log) {
+          if (entry.surface && entry.surface.props && entry.surface.props.listId === listId) {
+            entry.surface = r.surface;
+          }
+        }
+        renderLog();
+      }
+    } catch (err) {
+      chk.checked = !done;
+      log("Could not update list item: " + err.message, "danger", null, "misato");
+    } finally {
+      chk.disabled = false;
+    }
+  });
   const seen = new Set();
   const phaseOf = new Map(), phaseStarted = new Map(), nodeTimings = new Map(), advisedBy = new Map(), forwardedTo = new Map(), originOf = new Map(), remoteSorties = new Map();
+  const sortieSurfaces = new Map();
   const addNodeTiming = (id, node, ms) => { if (typeof ms !== "number") return; const nt = nodeTimings.get(id) || {}; nt[node] = (nt[node] || 0) + ms; nodeTimings.set(id, nt); };
   const generic = () => { const r = modelsData && modelsData.models && modelsData.models.roles; return !!(r && r.consultant && r.consultant.model); };
   async function loadEvents(id) {
@@ -220,6 +246,9 @@
       if (e.kind === "misato.request" && /^kaji:/.test(p.conversation || "")) originOf.set(id, baseName(String(p.conversation).slice(5).split("-").slice(0, 2).join("-")));
       const noteTiming = (node, ms) => { if (typeof addNodeTiming === "function") addNodeTiming(id, node, ms); };
       if (e.kind === "misato.consult") { consulted.add(id); advisedBy.set(id, (p.pilot && p.pilot.name ? p.pilot.name : "Generic pilot") + (p.model ? " · " + p.model : "")); noteTiming("consult", p.durationMs); }
+      if (e.kind === "misato.step" && p.step && p.step.outcome === "grant" && p.step.result && p.step.result.surface && p.step.result.surface.component === "nerv-checklist-card") {
+        sortieSurfaces.set(id, p.step.result.surface);
+      }
       if (e.kind === "misato.step" || e.kind === "misato.reply" || e.kind === "misato.asked") noteTiming("plan", p.durationMs);
       if (e.kind === "ballot" && Array.isArray(p.verdicts)) {
         const magiMs = p.verdicts.filter(v => !v.shadow && typeof v.durationMs === "number").reduce((m, v) => Math.max(m, v.durationMs), 0);
@@ -230,7 +259,11 @@
       // F-051: the step a running sortie is on, from its latest event (not always MAGI).
       const step = { "misato.request":generic() ? "consult" : "plan", "misato.consult":"plan", "misato.resumed":"plan", "misato.asked":"apt", "misato.answered":"plan", "action.done":"plan", "action.failed":"plan", "approval.requested":"apt", "approval.approve":"plug", "misato.reply":"debrief" }[e.kind] || (e.kind === "ballot" ? (p.outcome === "grant" ? "plug" : p.outcome === "approval" ? "apt" : "plan") : null);
       if (step) { phaseOf.set(id, step); if (typeof phaseStarted !== "undefined") phaseStarted.set(id, t); }
-      if (line) { state.log.push({ t, msg:line[0], cls:line[1], s:s.id, who:line[2], chat:e.kind.startsWith("misato.") }); added++; }
+      if (line) {
+        const surface = e.kind === "misato.reply" ? sortieSurfaces.get(id) : undefined;
+        state.log.push({ t, msg:line[0], cls:line[1], s:s.id, who:line[2], chat:e.kind.startsWith("misato."), ...(surface ? { surface } : {}) });
+        added++;
+      }
     }
     state.log.sort((a, b) => a.t - b.t); if (state.log.length > 300) state.log.splice(0, state.log.length - 300);
     return added;
@@ -418,7 +451,15 @@
       // Dispatched (F-036): the main base answered; its sortie and cards are there, so only the reply is shown here.
       if (r.command) { followNew = null; log(r.reply || r.error || "No command result", r.error ? "danger" : "ok", null, "maya"); }
       else if (r.base) log((r.reply || ("Could not finish: " + (r.error || "no reply"))) + " · answered by " + r.base.name + (r.waiting && r.waiting.length ? "; decide its card on Aoba or on " + r.base.name + "'s dashboard" : ""), r.reply ? "ok" : "danger", null, "misato");
-      else state.selected = short(r.sortieId); }
+      else {
+        state.selected = short(r.sortieId);
+        if (r.surface && r.surface.component === "nerv-checklist-card") {
+          sortieSurfaces.set(r.sortieId, r.surface);
+          const sid = short(r.sortieId);
+          const hit = [...state.log].reverse().find(x => x.s === sid && x.who === "misato" && x.chat);
+          if (hit) { hit.surface = r.surface; renderLog(); }
+        }
+      } }
     catch (e) { log("Misato could not answer: " + e.message, "danger", null, "misato"); }
     finally { settled = true; if (queueTimer) clearTimeout(queueTimer); poll(); }
   };
@@ -495,7 +536,22 @@
       ? "<div class='row small' style='margin-top:6px'><label for='chk-auto-update' class='muted'>" + esc(policyLabel) + "</label><input type='checkbox' id='chk-auto-update'" + (up.enabled ? " checked" : "") + (state.updatePolicyBusy ? " disabled" : "") + "></div>" +
         (la ? "<div class='small " + (la.outcome === "completed" ? "ok" : la.outcome === "refused" ? "warn" : "muted") + "'>Last automatic attempt: " + esc(la.outcome) + (la.revision ? " · " + esc(la.revision.slice(0, 7)) : "") + ((la.reasons || []).length ? " · " + esc(la.reasons.join("; ")) : "") + "</div>" : "")
       : "";
+    const hm = state.healthMetrics;
+    const sampleHtml = hm && hm.latestSample
+      ? "<div class='row small' id='health-sample-row'><span>Service sample</span><span class='muted'>RSS " + (hm.latestSample.rssBytes / 1048576).toFixed(1) + " MB · Heap " + (hm.latestSample.heapUsedBytes / 1048576).toFixed(1) + " MB · Loop " + hm.latestSample.eventLoopDelayMs + " ms · Polls " + hm.latestSample.pollCount + "</span></div>"
+      : "<div class='row small muted' id='health-sample-row'><span>Service sample</span><span>No health samples yet.</span></div>";
+    const links = hm && Array.isArray(hm.links) ? hm.links : [];
+    const linksHtml = links.length
+      ? links.map(l => "<div class='row small' data-link-peer='" + esc(l.peerId) + "'><span>Link · " + esc(l.peerId) + "</span><span class='muted'>" + l.bytesSent + "B↑ / " + l.bytesReceived + "B↓ · " + (l.lastLatencyMs == null ? "—" : l.lastLatencyMs + " ms") + " · in-flight " + l.inFlight + " · reconnects " + l.reconnects + "</span></div>").join("")
+      : "<div class='row small muted' id='health-links-empty'><span>Link load</span><span>No peer link traffic recorded.</span></div>";
+    const warnings = hm && Array.isArray(hm.warnings) ? hm.warnings : [];
+    const warningsHtml = warnings.length
+      ? "<div id='health-warnings' style='margin-top:4px'>" + warnings.map(w => "<div class='small warn' data-health-warning='" + esc(w.key) + "'>▲ " + esc(w.message) + "</div>").join("") + "</div>"
+      : "";
     document.getElementById("health").innerHTML = degraded + rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span></div>").join("") +
+      sampleHtml +
+      linksHtml +
+      warningsHtml +
       updateActionHtml +
       policyHtml +
       updateResultHtml +
@@ -900,11 +956,25 @@
     void window.liveApplyUpdate();
   });
   const DEFAULT_SCHEDULE = { mode:"apply", checkHour:20, applyHour:3, quietFrom:8, quietUntil:23 };
+  const DEFAULT_HEALTH_THRESHOLDS = { rssMb:512, eventLoopDelayMs:100, linkLatencyMs:500, inFlight:10, reconnects:5 };
   function settingsModel() {
     if (state.settingsDraft) return state.settingsDraft;
     const up = (state.updatePolicy && state.updatePolicy.policy) || { enabled:false };
     const s = Object.assign({}, DEFAULT_SCHEDULE, up.schedule || {});
-    return { enabled:!!up.enabled, mode:s.mode, checkHour:s.checkHour, applyHour:s.applyHour, quietFrom:s.quietFrom, quietUntil:s.quietUntil };
+    const th = Object.assign({}, DEFAULT_HEALTH_THRESHOLDS, (state.healthMetrics && state.healthMetrics.thresholds) || {});
+    return {
+      enabled:!!up.enabled,
+      mode:s.mode,
+      checkHour:s.checkHour,
+      applyHour:s.applyHour,
+      quietFrom:s.quietFrom,
+      quietUntil:s.quietUntil,
+      rssMb:th.rssMb,
+      eventLoopDelayMs:th.eventLoopDelayMs,
+      linkLatencyMs:th.linkLatencyMs,
+      inFlight:th.inFlight,
+      reconnects:th.reconnects
+    };
   }
   window.renderSettings = function () {
     const box = document.getElementById("settings"); if (!box) return;
@@ -919,6 +989,13 @@
       "<span>apply</span><input id='set-apply-hour' aria-label='Apply hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.applyHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'>" +
       "<span>quiet</span><input id='set-quiet-from' aria-label='No-apply from (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietFrom) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>–</span><input id='set-quiet-until' aria-label='No-apply until (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietUntil) + "'" + (busy ? " disabled" : "") + " style='width:48px'>" +
       "</div>" +
+      "<div class='row small' style='flex-wrap:wrap;gap:6px;align-items:center'>" +
+      "<span>Health warnings · RSS MB</span><input id='set-rss-mb' aria-label='RSS threshold (MB)' type='number' min='16' max='65536' step='1' value='" + esc(m.rssMb) + "'" + (busy ? " disabled" : "") + " style='width:60px'>" +
+      "<span>loop ms</span><input id='set-loop-ms' aria-label='Event loop delay threshold (ms)' type='number' min='1' max='60000' step='1' value='" + esc(m.eventLoopDelayMs) + "'" + (busy ? " disabled" : "") + " style='width:60px'>" +
+      "<span>link ms</span><input id='set-link-ms' aria-label='Link latency threshold (ms)' type='number' min='1' max='60000' step='1' value='" + esc(m.linkLatencyMs) + "'" + (busy ? " disabled" : "") + " style='width:60px'>" +
+      "<span>in-flight</span><input id='set-in-flight' aria-label='In-flight threshold' type='number' min='1' max='1000' step='1' value='" + esc(m.inFlight) + "'" + (busy ? " disabled" : "") + " style='width:52px'>" +
+      "<span>reconnects</span><input id='set-reconnects' aria-label='Reconnects threshold' type='number' min='1' max='1000' step='1' value='" + esc(m.reconnects) + "'" + (busy ? " disabled" : "") + " style='width:52px'>" +
+      "</div>" +
       "<div class='tiny muted'>Brief 08:00 · Time zone Europe/Rome · Sync Ratio 80% · Telegram 90 s</div>" +
       "<div class='row' style='margin-top:4px'><button class='btn sm primary' id='btn-save-settings' type='submit'" + (busy ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button>" +
       "<span id='settings-status' role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : (state.settingsDraft ? "Unsaved changes" : "")) + "</span></div>" +
@@ -928,7 +1005,19 @@
     const enabled = !!document.getElementById("set-auto-enabled").checked;
     const mode = document.getElementById("set-update-mode").value;
     const num = id => Number(document.getElementById(id).value);
-    return { enabled, mode, checkHour:num("set-check-hour"), applyHour:num("set-apply-hour"), quietFrom:num("set-quiet-from"), quietUntil:num("set-quiet-until") };
+    return {
+      enabled,
+      mode,
+      checkHour:num("set-check-hour"),
+      applyHour:num("set-apply-hour"),
+      quietFrom:num("set-quiet-from"),
+      quietUntil:num("set-quiet-until"),
+      rssMb:num("set-rss-mb"),
+      eventLoopDelayMs:num("set-loop-ms"),
+      linkLatencyMs:num("set-link-ms"),
+      inFlight:num("set-in-flight"),
+      reconnects:num("set-reconnects")
+    };
   }
   document.addEventListener("input", e => {
     if (e.target && e.target.closest && e.target.closest("#settings-form")) { state.settingsDraft = readSettingsDraft(); state.settingsMsg = null; }
@@ -957,7 +1046,18 @@
           schedule: { mode:draft.mode, checkHour:draft.checkHour, applyHour:draft.applyHour, quietFrom:draft.quietFrom, quietUntil:draft.quietUntil }
         })
       });
+      const th = await api("health/thresholds", {
+        method:"PUT",
+        body:JSON.stringify({
+          rssMb: draft.rssMb,
+          eventLoopDelayMs: draft.eventLoopDelayMs,
+          linkLatencyMs: draft.linkLatencyMs,
+          inFlight: draft.inFlight,
+          reconnects: draft.reconnects
+        })
+      });
       state.updatePolicy = Object.assign({}, state.updatePolicy, { policy: r.policy });
+      state.healthMetrics = Object.assign({}, state.healthMetrics || {}, { thresholds: th.thresholds, warnings: th.warnings });
       state.settingsDraft = null;
       state.settingsMsg = { kind:"ok", text:"Settings saved." };
       renderHealth();
