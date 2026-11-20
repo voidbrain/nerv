@@ -760,7 +760,7 @@ function stageTabs(section, tabs, counts) {
 function currentTab(section, first) { return state.tabs && state.tabs[section] || first; }
 function renderSkills() {
   const eva = state.theme === "eva"; const tabs = eva ? [["seed","Seed"],["sprout","Sprout"],["ripe","Ripe"],["dropped","Dropped"]] : [["seed","Create"],["sprout","Try"],["ripe","Use"],["dropped","Dropped"]];
-  document.getElementById("skills").innerHTML = stageTabs("skills", tabs, {}) + "<div class='muted small'>Planned · not connected yet. Skills are the procedures a pilot uses: each is versioned, approved by you and grows through its own stages (F-045).</div>";
+  document.getElementById("skills").innerHTML = stageTabs("skills", tabs, {}) + "<div class='muted small'>Planned · not connected yet. Skills are the procedures a pilot uses: each is versioned, approved by you and grows through its own stages.</div>";
 }
 function renderMelons() {
   const m = { prototype:"b-info", test:"b-orange", production:"b-ok" };

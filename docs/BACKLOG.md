@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 6 | 9 | 32 | 18 |
+| **This week** | 6 | 9 | 33 | 18 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 21 |
+| **Open** | 41 | 22 |
 | **Require Human 🧑** | 7 | 6 |
 
 ### Require Human 🧑
@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 84.25 h agent + 10.5 h owner across 129 open steps of 40 features and 21 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
+**Remaining effort:** 84.25 h agent + 10.5 h owner across 130 open steps of 40 features and 22 other records. 79.25 h of actual effort recorded on 121 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1868,6 +1868,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-19 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |
+
+</details>
+
+---
+### <a id="b-102"></a>[🐞 B-102](#top)
+
+**Backlog IDs appear in text the owner sees: "(F-045)" on the dashboard's Skills tab, and in denial reasons and errors**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-102-T01 — No backlog ID in a string the owner or a model sees (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Reported by the owner 2026-11-20: the dashboard's Skills tab read "…grows through its own stages (F-045)." A scan of every string and template literal found ten more: EVA-03 and proactive-code denial reasons and a granted-tool reason ("(F-049)"), MCP write-grant errors ("F-021 slice 2"), a Misato prompt line a model could repeat ("(B-024)"), a restore warning ("under F-062"), the Windows launcher header ("(F-037)") and a load-forwarding error ("requires F-048 acceptance"). Backlog IDs belong to the repository, not to what the owner reads. |
+| **Reproduce** | Open the dashboard's Skills tab, or be denied an EVA-03 tool: the text names a backlog ID. |
+| **Check** | Test committed failing first: no string or template literal in `src/` or the dashboard script names a backlog ID (B-102-T01). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-102-t01"></a>B-102-T01 — No backlog ID in a string the owner or a model sees | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | [PR #573](https://github.com/voidbrain/nerv/pull/573) the fix |
+| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-102.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-102-T01: [PR #573](https://github.com/voidbrain/nerv/pull/573) the fix. Owner report, dashboard Skills tab, 2026-11-20; `test/user-text-ids.test.ts` |
+| Opened | 2026-11-20 |
+| Verification | Pending. |
+| Reviewed | 2026-11-20 |
 
 </details>
 
