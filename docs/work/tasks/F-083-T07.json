@@ -5,6 +5,12 @@
   "title": "Timers in a cooking session",
   "goal": "Timers set and stopped by chat, announced during a step",
   "status": "implemented",
+  "prs": [
+    {
+      "pr": 576,
+      "note": "implementation"
+    }
+  ],
   "acceptance": [
     "\"imposta un timer di 10 minuti\", \"stoppa il timer\"; a timer that ends interrupts with its own line",
     "A step needing a timer asks \"dimmi quando pronto che avvio il timer\""
