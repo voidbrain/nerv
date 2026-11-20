@@ -15,6 +15,7 @@ export interface ToolDoc {
   effect: string;
   args: string;
   about: string;
+  subject?: string;
   version?: string;
   source?: 'nerv' | `mcp:${string}`;
 }

@@ -4,7 +4,7 @@
   "parent": "F-113",
   "title": "Measure the tool-doc share of the planner prompt and group tools by subject",
   "goal": "Know whether a compact index is worth it",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Tool-doc share of the planner prompt recorded from promptMetrics for neutral sample requests",
     "Each built-in tool assigned to one subject"
