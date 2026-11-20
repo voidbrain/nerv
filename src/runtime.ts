@@ -390,6 +390,7 @@ export class Runtime implements StoreApi {
       baseHealth: () => this.baseHealth(),
       channelState: () => this.channelState(),
       updatePostpone: (text) => this.updatePostpone?.(text),
+      notice: (message) => this.notice(message),
       resolveOperator: (query, opts) => this.resolveOperator(query, opts),
       loop: (sortieId, request, steps, context, opts) => this.loop(sortieId, request, steps, context, opts),
     }));

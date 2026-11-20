@@ -38,6 +38,8 @@ export interface RuntimeChatHost {
   channelState(): ChannelState;
   /** F-102-T02: "aspetta"/"wait" postpones an announced automatic update; undefined when nothing is scheduled. */
   updatePostpone?(text: string): { postponed: boolean; reply?: string } | undefined;
+  /** Delivers a proactive notice line (e.g. an expired cooking timer) into the owner's inbox. */
+  notice?(message: string): Promise<void>;
   resolveOperator(query: string, opts: { excludeSelf?: boolean }): Promise<OperatorResolution>;
   loop(
     sortieId: string,
@@ -118,10 +120,13 @@ export class RuntimeChat {
           (it ? 'Comandi disponibili: /status [base], /help.' : 'Available commands: /status [base], /help.');
       return { command: true, sortieId: '', reply, steps: [], waiting: [] };
     }
-    // F-083-T06: a cooking session answers from the saved recipe only; with no session or no such recipe, it is chat.
+    // F-083-T06 / F-083-T07: a cooking session answers from the saved recipe and manages session timers; with no session or no such recipe, it is chat.
     const cooking = readCookingCommand(message);
     if (cooking) {
       const at = conversation ?? 'cli';
+      const onExpire = (line: string) => {
+        void this.host.notice?.(line).catch(() => {});
+      };
       let reply: string | undefined;
       if (cooking.kind === 'start') {
         const doc = (await this.host.nervous.call('documents.find', { query: cooking.recipe }).catch(() => null)) as {
@@ -129,6 +134,12 @@ export class RuntimeChat {
           body: string;
         } | null;
         if (doc) reply = this.cooking.start(at, doc.title, doc.body, cooking.it);
+      } else if (cooking.kind === 'timer-set') {
+        reply = this.cooking.setTimer(at, cooking.seconds, onExpire);
+      } else if (cooking.kind === 'timer-confirm') {
+        reply = this.cooking.confirmTimer(at, onExpire);
+      } else if (cooking.kind === 'timer-stop') {
+        reply = this.cooking.stopTimer(at);
       } else reply = this.cooking.move(at, cooking.kind);
       if (reply) return { command: true, sortieId: '', reply, steps: [], waiting: [] };
     }

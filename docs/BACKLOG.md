@@ -793,7 +793,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-083-t04"></a>F-083-T04 — Live check with a real saved recipe | 0.25 h | 0 h | 0.25 h | Planned | — | — | 🤖 | — |
-| 🟢 Small | <a id="f-083-t07"></a>F-083-T07 — Timers in a cooking session | 0.5 h | 0 h | 0.5 h | Planned | — | [F-083-T08](#f-083-t08), [F-083-T09](#f-083-t09) | 🤖 | — |
+| 🟢 Small | <a id="f-083-t07"></a>F-083-T07 — Timers in a cooking session | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-083-T08](#f-083-t08), [F-083-T09](#f-083-t09) | 🤖 | [PR #576](https://github.com/voidbrain/nerv/pull/576) implementation |
 | 🟢 Small | <a id="f-083-t10"></a>F-083-T10 — Recipe photos | 0.5 h | 0 h | 0.5 h | Planned | — | — | 🤖 | — |
 | 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned | [F-083-T07](#f-083-t07) | — | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-083-t09"></a>F-083-T09 — Owner check: a recipe cooked hands-free | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-083-T07](#f-083-t07) | — | ⏳ 🧑‍🔧 | — |
@@ -818,7 +818,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-083-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep · F-083-T05: [PR #481](https://github.com/voidbrain/nerv/pull/481) implementation · F-083-T06: [PR #561](https://github.com/voidbrain/nerv/pull/561) cooking session; CI pending. [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #481](https://github.com/voidbrain/nerv/pull/481); [PR #489](https://github.com/voidbrain/nerv/pull/489) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-083-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep · F-083-T05: [PR #481](https://github.com/voidbrain/nerv/pull/481) implementation · F-083-T06: [PR #561](https://github.com/voidbrain/nerv/pull/561) cooking session; CI pending · F-083-T07: [PR #576](https://github.com/voidbrain/nerv/pull/576) implementation. [PR #576](https://github.com/voidbrain/nerv/pull/576) (F-083-T07); [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #481](https://github.com/voidbrain/nerv/pull/481); [PR #489](https://github.com/voidbrain/nerv/pull/489) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-083-T05 verified: [PR #481](https://github.com/voidbrain/nerv/pull/481) merged on green CI (test/pantry.test.ts). `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history). `F-083-T02` added `computeFromSavedDocument` / `DocumentStore.compute` in `src/documents.ts` and read-only tool `docs.compute` in `src/executors.ts` (cites saved values & arithmetic, asks instead of guessing on missing ratio/setting/unit mismatch); verified with `node --test test/documents.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
