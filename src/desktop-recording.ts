@@ -156,3 +156,136 @@ export class DesktopRecordingSession {
     return { recording, filePath };
   }
 }
+
+export interface DesktopReplayDriver {
+  checkAccessibilityPermission(): boolean;
+  getDisplayBounds(): Promise<DisplayBounds>;
+  getFrontmostApp(): Promise<FrontmostAppMetadata>;
+  dispatchEvent(event: DesktopInputEvent): Promise<void>;
+  hasOwnerInput(): boolean | Promise<boolean>;
+  readBackSummary?(): Promise<string>;
+}
+
+export interface ReplayRecordingRequest {
+  recording: DesktopRecordingFile;
+  approved: boolean;
+  maxDurationMs?: number;
+  windowFrameTolerancePx?: number;
+}
+
+export interface ReplayRecordingResult {
+  status: 'completed' | 'stopped';
+  stopReason?: 'owner-input' | 'window-changed' | 'max-duration';
+  replayedEvents: number;
+  totalEvents: number;
+  preconditionsChecked: {
+    displayMatched: boolean;
+    appMatched: boolean;
+    windowMatched: boolean;
+  };
+  beforeFrontmost: FrontmostAppMetadata;
+  afterFrontmost: FrontmostAppMetadata;
+  afterSummary?: string;
+}
+
+function framesMatch(
+  expected: FrontmostAppMetadata['windowFrame'],
+  actual: FrontmostAppMetadata['windowFrame'],
+  tolerancePx: number,
+): boolean {
+  return (
+    Math.abs(expected.x - actual.x) <= tolerancePx &&
+    Math.abs(expected.y - actual.y) <= tolerancePx &&
+    Math.abs(expected.width - actual.width) <= tolerancePx &&
+    Math.abs(expected.height - actual.height) <= tolerancePx
+  );
+}
+
+/**
+ * Replays a recorded desktop input sequence as a Blue action (F-092-T03):
+ * requires owner confirmation, verifies display/app/window preconditions before acting,
+ * stops immediately on owner input or mid-replay window change, and reads back the result.
+ */
+export async function replayDesktopRecording(
+  driver: DesktopReplayDriver,
+  request: ReplayRecordingRequest,
+): Promise<ReplayRecordingResult> {
+  if (!driver.checkAccessibilityPermission()) {
+    throw new Error(
+      'Accessibility permission is not granted. Enable it in System Settings > Privacy & Security > Accessibility.',
+    );
+  }
+  if (!request.approved) {
+    throw new Error('Replaying desktop input is a Blue action and requires explicit owner confirmation.');
+  }
+
+  const { recording } = request;
+  const expectedDisplay = recording.header.displayBounds;
+  const actualDisplay = await driver.getDisplayBounds();
+  if (
+    actualDisplay.width !== expectedDisplay.width ||
+    actualDisplay.height !== expectedDisplay.height ||
+    actualDisplay.scaleFactor !== expectedDisplay.scaleFactor
+  ) {
+    throw new Error(
+      `Replay precondition mismatch: expected display ${expectedDisplay.width}x${expectedDisplay.height}@${expectedDisplay.scaleFactor}x, got ${actualDisplay.width}x${actualDisplay.height}@${actualDisplay.scaleFactor}x.`,
+    );
+  }
+
+  const expectedApp = recording.header.frontmostApp;
+  const beforeFrontmost = await driver.getFrontmostApp();
+  if (beforeFrontmost.bundleId !== expectedApp.bundleId || beforeFrontmost.appName !== expectedApp.appName) {
+    throw new Error(
+      `Replay precondition mismatch: expected frontmost app ${expectedApp.appName} (${expectedApp.bundleId}), got ${beforeFrontmost.appName} (${beforeFrontmost.bundleId}).`,
+    );
+  }
+  const tolerance = Math.max(0, request.windowFrameTolerancePx ?? 0);
+  if (
+    beforeFrontmost.windowTitle !== expectedApp.windowTitle ||
+    !framesMatch(expectedApp.windowFrame, beforeFrontmost.windowFrame, tolerance)
+  ) {
+    throw new Error(
+      `Replay precondition mismatch: expected window "${expectedApp.windowTitle}" (${JSON.stringify(expectedApp.windowFrame)}), got "${beforeFrontmost.windowTitle}" (${JSON.stringify(beforeFrontmost.windowFrame)}).`,
+    );
+  }
+
+  const maxDurationMs = Math.max(100, request.maxDurationMs ?? DEFAULT_MAX_DURATION_MS);
+  let replayedEvents = 0;
+  let stopReason: ReplayRecordingResult['stopReason'];
+
+  for (const ev of recording.events) {
+    if (await driver.hasOwnerInput()) {
+      stopReason = 'owner-input';
+      break;
+    }
+    if (ev.dtMs > maxDurationMs) {
+      stopReason = 'max-duration';
+      break;
+    }
+    const currentApp = await driver.getFrontmostApp();
+    if (currentApp.bundleId !== expectedApp.bundleId || currentApp.windowTitle !== expectedApp.windowTitle) {
+      stopReason = 'window-changed';
+      break;
+    }
+    await driver.dispatchEvent(ev);
+    replayedEvents += 1;
+  }
+
+  const afterFrontmost = await driver.getFrontmostApp();
+  const afterSummary = driver.readBackSummary ? await driver.readBackSummary() : undefined;
+
+  return {
+    status: stopReason ? 'stopped' : 'completed',
+    ...(stopReason ? { stopReason } : {}),
+    replayedEvents,
+    totalEvents: recording.events.length,
+    preconditionsChecked: {
+      displayMatched: true,
+      appMatched: true,
+      windowMatched: true,
+    },
+    beforeFrontmost,
+    afterFrontmost,
+    ...(afterSummary !== undefined ? { afterSummary } : {}),
+  };
+}

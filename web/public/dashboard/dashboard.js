@@ -546,6 +546,39 @@ function startReplay(id) {
     renderFlow();
   }, REPLAY_MS);
 }
+function sephirotEvaLabel(s, a, b) {
+  if (a && a.evaInstance && a.evaInstance.jobId && a.evaInstance.evaClass) {
+    const inst = a.evaInstance;
+    return {
+      text: "pilot " + (inst.pilot || "unassigned") + " · " + inst.evaClass.toUpperCase() + " (" + inst.jobId + ")",
+      avatar: inst.evaClass.toLowerCase()
+    };
+  }
+  if (s && s.status === "active") {
+    if (Array.isArray(state.evaMachines)) {
+      for (const m of state.evaMachines) {
+        if (m.reported === false || !Array.isArray(m.instances)) continue;
+        const hit = m.instances.find(x => x.sortieId === s.id);
+        if (hit) {
+          return {
+            text: "pilot " + (hit.pilot || "unassigned") + " · " + hit.evaClass.toUpperCase() + " (" + hit.jobId + ")",
+            avatar: hit.evaClass.toLowerCase()
+          };
+        }
+      }
+      if (s.phase === "eva") {
+        const missingLocal = !state.evaMachines.length || state.evaMachines.some(m => m.self && m.reported === false);
+        return { text: missingLocal ? "instance data unavailable" : "pilot none · instance none", avatar: null };
+      }
+    } else if (s.phase === "eva") {
+      return { text: LIVE ? "instance data unavailable" : "pilot none · instance none", avatar: null };
+    }
+  }
+  if (a && (a.status === "done" || a.status === "failed")) {
+    return { text: "pilot none · instance none", avatar: null };
+  }
+  return { text: b ? b.executor + " · field enforced" : "sandbox · field enforced", avatar: null };
+}
 function renderFlow() {
   const real = state.sorties.find(x => x.id === state.selected);
   const s = real && state.replay && state.replay.id === real.id && state.replay.k < replayOrder(real).length ? replayFrame(real, state.replay.k) : real;
@@ -600,8 +633,9 @@ function renderFlow() {
   document.getElementById("sd-plan").textContent = s ? "action " + Math.min(s.current + 1, s.actions.length) + "/" + s.actions.length : "next action";
   document.getElementById("sd-route").textContent = s ? (s.status === "waiting-route" ? "no route · waits" : "S² local · $" + s.battery.toFixed(2) + " battery") : "route · battery";
   document.getElementById("sd-intake").textContent = s ? "provenance: " + s.trust : "intake · provenance";
-  document.getElementById("sd-eva").textContent = b ? b.executor + " · field enforced" : "sandbox · field enforced";
-  { const img = document.getElementById("av-eva-node"); const k = b ? b.executor.toLowerCase() : "eva-01"; if (img.dataset.av !== k) { img.dataset.av = k; fillAvatars(img.parentNode); } }
+  const evaInfo = sephirotEvaLabel(s, a, b);
+  document.getElementById("sd-eva").textContent = evaInfo.text;
+  { const img = document.getElementById("av-eva-node"); const k = evaInfo.avatar || (b ? b.executor.toLowerCase() : "eva-01"); if (img.dataset.av !== k) { img.dataset.av = k; fillAvatars(img.parentNode); } }
   drawEdges(s);
   renderDetail(s);
 }
@@ -837,12 +871,21 @@ function renderCages() {
   box.innerHTML = cagesHtml + machinesHtml;
   if (typeof fillAvatars === "function") fillAvatars(box);
 }
+function renderChatSurface(surface) {
+  if (!surface || surface.component !== "nerv-checklist-card" || !surface.props) return "";
+  const p = surface.props;
+  const items = Array.isArray(p.items) ? p.items : [];
+  const rows = items.map(it =>
+    "<li style='margin:2px 0'><label style='display:inline-flex;align-items:center;gap:6px;cursor:pointer'><input type='checkbox' data-checklist-toggle='" + esc(it.id) + "' data-list-id='" + esc(p.listId || "") + "'" + (it.done ? " checked" : "") + "><span>" + esc(it.text) + "</span></label></li>"
+  ).join("");
+  return "<div class='card checklist-card' data-list-id='" + esc(p.listId || "") + "' role='group' aria-label='" + esc(p.name || "Checklist") + "' style='margin-top:4px;padding:6px 8px'><div class='b small'>" + esc(p.name || "Checklist") + "</div>" + (rows ? "<ul style='list-style:none;margin:4px 0 0;padding:0'>" + rows + "</ul>" : "<div class='tiny muted'>No items.</div>") + "</div>";
+}
 function renderLog() {
   const el = document.getElementById("log"); if (!el) return;
   const f = state.logFilter || "all";
   const query = (state.search || "").trim().toLowerCase();
   const rows = state.log.filter(e => !query || (e.msg + " " + (e.s || "")).toLowerCase().includes(query)).filter(e => f === "all" || (f === "sortie" && (e.s === state.selected || e.who === "you" || e.chat)) || (f === "chat" && (e.who === "you" || e.chat))).slice(-150);
-  el.innerHTML = rows.map(e => "<div class='msg " + (e.who === "you" ? "you " : "") + e.cls + "'><img class='av' data-av='" + e.who + "' alt=''/><div><span class='ts'>" + new Date(e.t).toTimeString().slice(0, 8) + "</span><b class='who'>" + esc(speakerName(e.who)) + "</b>" + (e.s ? "<span class='muted'>" + e.s + " · </span>" : "") + highlight(e.msg, state.search) + "</div></div>").join("") || "<div class='muted'>" + (query ? "No loaded messages match your search." : f === "all" ? "No messages yet. Ask Misato something below: its steps, the MAGI's votes and its reply show here." : f === "sortie" ? "Nothing for this sortie yet. Pick another one in Sorties, or show all." : "No chat yet. Type below to talk to Misato.") + "</div>";
+  el.innerHTML = rows.map(e => "<div class='msg " + (e.who === "you" ? "you " : "") + e.cls + "'><img class='av' data-av='" + e.who + "' alt=''/><div><span class='ts'>" + new Date(e.t).toTimeString().slice(0, 8) + "</span><b class='who'>" + esc(speakerName(e.who)) + "</b>" + (e.s ? "<span class='muted'>" + e.s + " · </span>" : "") + highlight(e.msg, state.search) + (e.surface ? renderChatSurface(e.surface) : "") + "</div></div>").join("") || "<div class='muted'>" + (query ? "No loaded messages match your search." : f === "all" ? "No messages yet. Ask Misato something below: its steps, the MAGI's votes and its reply show here." : f === "sortie" ? "Nothing for this sortie yet. Pick another one in Sorties, or show all." : "No chat yet. Type below to talk to Misato.") + "</div>";
   fillAvatars(el); el.scrollTop = el.scrollHeight;
 }
 function applyLabels() { const p = L(); document.querySelectorAll("[data-l]").forEach(el => { const k = el.dataset.l; if (p[k]) el.textContent = p[k]; }); }
