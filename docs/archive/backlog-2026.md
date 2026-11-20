@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 9 | 18 |
+| [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 10 | 18 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
 <!-- archive-recap:end -->
@@ -5415,6 +5415,42 @@ Telegram delivery in [PR #32](https://github.com/voidbrain/nerv/pull/32): each p
 | Opened | 2026-11-19 |
 | Verification | 2026-11-19: CI run 44508528108 (PR #543). |
 | Reviewed | 2026-11-19 |
+
+</details>
+
+---
+
+## Closed 2026-11-20
+
+### F-079
+
+**Experiment: each system evaluation case covers only the source it exercises**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-20.
+
+| | |
+|---|---|
+| **Issue** | The Gauntlet system source key is one hash over `src`, `test`, `shared`, `web`, `evals` and the evaluation tools. 100 of the 155 merges between 2026-11-08 and 2026-11-13 changed it, and each one made all seven `nerv-system-flows` cases (stress and browser included) pending again, so the ledger is stale almost all the time ([architecture reassessment](../../audits/2026-11-13-architecture-reassessment.md), finding 4). |
+| **Reproduce** | Count merges since `1869340` whose diff touches the inputs of `systemSourceKey` in `tools/gauntlet.mjs`. |
+| **Check** | A case may declare the paths it exercises; its key hashes only those plus the runner, adapter and dependency pin; a case without a declaration keeps the whole-tree key. A measured comparison over recent merges shows how many reruns are saved, and a seeded change inside a declared path makes its case pending. If a scoped case misses a real regression, that case returns to the whole-tree key. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** 2026-11-20: verified and closed: F-079-T02 by PR #585, CI run 44732108271 passed every job; every acceptance check was automated (replay report, seeded-regression test). Closed 2026-11-20. F-079-T01 closed in [PR #469](https://github.com/voidbrain/nerv/pull/469). F-079-T02 implemented 2026-11-20: declared per-case `inputs` on all 7 cases in `evals/gauntlet/system-v1.json`, measured the `1869340..origin/main` replay (362 merges: 1568 reruns without declarations → 1088 with declarations, saving 480 reruns / 30.6%, `policy` 224 → 13 / 94.2%) in [the F-079-T02 report](../../evaluations/2026-11-20-f079-t02-system-case-paths.md), and added a seeded-regression test in `test/gauntlet.test.mjs`. Awaiting CI before closure. Proposed by the [architecture reassessment of 2026-11-13](../../audits/2026-11-13-architecture-reassessment.md).
+
+**Estimates:** Small, estimated 2026-11-13: 1 h agent over two steps. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #585](https://github.com/voidbrain/nerv/pull/585) (T02 implementation; merged, CI run 44732108271 green); [PR #469](https://github.com/voidbrain/nerv/pull/469) (merged; CI green); [PR #377](https://github.com/voidbrain/nerv/pull/377) (its `.harness.json` bump alone made all seven cases pending again; rerun 7/7 on the branch) [Architecture reassessment 2026-11-13](../../audits/2026-11-13-architecture-reassessment.md) |
+| Opened | 2026-11-13 |
+| Verification | 2026-11-20: CI run 44732108271 (PR #585). Before merge: `node --test test/gauntlet.test.mjs` (24/24 passed), `npm run check:fast`, and `npm run check:gauntlet-runs` passed. F-079-T01 verified in PR #469. |
+| Reviewed | 2026-11-20 |
 
 </details>
 
