@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "full",
+  "reviewed": "2026-11-20T20:06:45.000Z",
+  "baseline": "b12c44206c067324f31a65cb51ac9250282b036f",
+  "report": "docs/audits/2026-11-20-full.md",
+  "areas": {
+    "code": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-20-full.md: check:fast, build, conventions, marker and unused-export review",
+      "limits": "Boundary and high-change review, not a line-by-line review"
+    },
+    "logic": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-20-full.md: 1042 tests and representative lifecycle/link/API joins",
+      "limits": "No live remote-base or device run"
+    },
+    "tests": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-20-full.md: 1040 pass, 2 platform skips; pending Gauntlet ownership checked",
+      "limits": "No real-model, browser-device or field campaign"
+    },
+    "documentation": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-20-full.md: generated ledger, roadmap and recap checks; PR reconciliation",
+      "limits": "Screenshots and field procedures not re-recorded"
+    },
+    "harness": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-20-full.md: harness v10.1.0 match, maintenance and rule checks",
+      "limits": "No harness file changed"
+    },
+    "security": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-20-full.md: GitHub security settings, secret scan and npm audit; B-106",
+      "limits": "No dynamic, dependency-source or penetration testing"
+    },
+    "delivery": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-20-full.md: CI for PRs #586-#596, main run and branch protection",
+      "limits": "No hosted deployment; optional jobs are not required checks"
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-20-full.md: 70 records, 483 tasks, queue/dependency checks and reconciliation",
+      "limits": "No device-dependent record was inferred verified"
+    }
+  }
+}

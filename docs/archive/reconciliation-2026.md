@@ -1,5 +1,9 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-20 — main `5c6e5a0`
+
+PRs #586–#597 reconciled: 11 of 12 own CI runs green; #587 failed Windows/full-suite, while later combined #595 and #597 passed all five jobs. #591 belongs to B-082, #596 to F-110 and #597 to F-008. Full audit opened B-106 for the lint-tooling advisory.
+
 ## 2026-11-20 — main `224e0e8`
 
 PRs #584 and #585 merged on green CI. F-079 closed (F-079-T02, run 44732108271); F-027-T02 waits on its confinement review. Five device-run steps re-estimated to 1.5 h; F-111–F-113 opened from the Agentica review.

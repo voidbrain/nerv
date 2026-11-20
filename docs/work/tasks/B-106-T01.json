@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "B-106-T01",
+  "parent": "B-106",
+  "title": "Update lint tooling past the minimatch advisory",
+  "goal": "Development dependencies contain no version affected by GHSA-g3hv-75wg-m249",
+  "status": "ready",
+  "acceptance": [
+    "npm audit reports zero vulnerabilities",
+    "The typescript-eslint update is patch/minor only and does not weaken lint rules",
+    "Lint, typecheck and the full test suite pass"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "package.json",
+    "package-lock.json",
+    "docs/work/records/B-106.md",
+    "docs/work/tasks/B-106-T01.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "security-review"
+  ],
+  "privacy": "Public package metadata and neutral repository tests only; no credentials or private data.",
+  "validation": [
+    "npm audit",
+    "npm run lint",
+    "npm run typecheck",
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A major dependency update or lint-policy change requires separate scope"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-20: one non-major development dependency update and the full local verification set. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  },
+  "prs": []
+}
