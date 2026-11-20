@@ -22,6 +22,7 @@ import { validateAutoUpdatePolicy, type AutoUpdatePolicy } from './update-policy
 import { validateSeatPool, type SeatPoolEntry } from './seat-pool.ts';
 import { validateOperatorConfig, type OperatorConfig } from './operator-directory.ts';
 import { validateEvaLimits, type EvaLimits } from './eva-pool.ts';
+import { validateJobUser, type EvaJobUser } from './eva-job-user.ts';
 import { validateBackup, type BackupConfig } from './offhost.ts';
 import { validatePersonas, type PersonaConfig } from './persona.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
@@ -43,7 +44,7 @@ export interface Config {
   seats?: SeatPoolEntry[];
   operator?: OperatorConfig;
   /** F-049-T06: how many EVA instances, how much memory and how many model slots this machine gives EVA jobs. */
-  eva?: { limits: EvaLimits };
+  eva?: { limits: EvaLimits; jobUser?: EvaJobUser };
   backup?: BackupConfig;
   personas?: PersonaConfig;
 }
@@ -218,9 +219,15 @@ export function readConfig(home: string): Config {
   }
   if ('eva' in raw) {
     const e = (raw as Record<string, unknown>).eva;
-    if (!e || typeof e !== 'object' || Array.isArray(e) || Object.keys(e).some((k) => k !== 'limits'))
-      throw new Error('Invalid eva: {"limits": {...}}.');
-    config.eva = { limits: validateEvaLimits((e as Record<string, unknown>).limits) };
+    if (
+      !e ||
+      typeof e !== 'object' ||
+      Array.isArray(e) ||
+      Object.keys(e).some((k) => k !== 'limits' && k !== 'jobUser')
+    )
+      throw new Error('Invalid eva: {"limits": {...}, "jobUser": {...}}.');
+    const jobUser = validateJobUser((e as Record<string, unknown>).jobUser);
+    config.eva = { limits: validateEvaLimits((e as Record<string, unknown>).limits), ...(jobUser ? { jobUser } : {}) };
   }
   if (config.port === (config.nativePort ?? 4319)) throw new Error('Web and native ports must differ.');
   if (!Number.isInteger(config.port) || config.port < 1 || config.port > 65535)
@@ -386,6 +393,20 @@ export function pinKajiRoot(home: string, root: string, rootBinding = false): vo
   readConfig(home);
 }
 /** The actions this base offers to the main base (F-036 slice 3b); an empty list offers nothing. */
+/** B-099-T02: EVA jobs run as this user in this shared folder (docs/guides/eva-job-user.md), or as the owner (null). */
+export function setEvaJobUser(home: string, jobUser: { name: string; sharedRoot: string } | null): void {
+  const path = join(home, 'config.json');
+  const current = (existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : {}) as Record<string, unknown>;
+  const eva = { ...((current.eva as Record<string, unknown> | undefined) ?? {}) };
+  if (jobUser) eva.jobUser = jobUser;
+  else delete eva.jobUser;
+  const next: Record<string, unknown> = { ...current, eva };
+  if (!Object.keys(eva).length) delete next.eva;
+  validateJobUser(jobUser ?? undefined);
+  writeFileSync(path, JSON.stringify(next, null, 2) + '\n', { mode: 0o600 });
+  chmodSync(path, 0o600);
+  readConfig(home);
+}
 export function setKajiOffers(home: string, offers: string[]): void {
   const path = join(home, 'config.json');
   const current = JSON.parse(readFileSync(path, 'utf8')) as Record<string, unknown>;

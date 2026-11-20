@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { EVA_CLASS_SPECS, admitEvaJob } from '../src/eva-classes.ts';
+import { PilotRegistry, type EvaClass, type Pilot, type Stage } from '../src/pilots.ts';
 
 describe('F-049-T02: EVA class definitions and least-class admission', () => {
   it('defines eva-00..03 as data with filesystem, network, credential, and resource fields', () => {
@@ -145,5 +146,175 @@ describe('F-049-T02: EVA class definitions and least-class admission', () => {
       blocked: 'grant',
       reason: 'NERV grant has expired.',
     });
+  });
+
+  it('F-049-T08: reads pilot and stage from F-045/F-025 and caps every stage x class without ever raising', () => {
+    const now = 1_760_000_000_000;
+    const makePilot = (id: string, stage: Stage, evaClass?: EvaClass, retired = false): Pilot => ({
+      id,
+      name: id,
+      role: 'specialist',
+      domain: 'test',
+      keywords: ['test'],
+      model: 'qwen3:8b',
+      stage,
+      ...(evaClass ? { evaClass } : {}),
+      ...(retired ? { retired: true } : {}),
+    });
+
+    const roster: Pilot[] = [
+      makePilot('proto-overclaimed', 'prototype', 'eva-02'),
+      makePilot('test-pilot', 'test'),
+      makePilot('prod-pilot', 'production'),
+      makePilot('prod-bounded', 'production', 'eva-01'),
+      makePilot('test-shadow', 'test', 'eva-00'),
+      makePilot('retired-prod', 'production', 'eva-02', true),
+    ];
+    const registry = new PilotRegistry('BASE-A', () => roster);
+
+    const matrix: {
+      pilotId: string;
+      requestedClass: EvaClass;
+      effect: 'read' | 'write-external' | 'irreversible';
+      trust: 'trusted' | 'tainted';
+      allowed: boolean;
+    }[] = [
+      { pilotId: 'proto-overclaimed', requestedClass: 'eva-03', effect: 'read', trust: 'tainted', allowed: true },
+      { pilotId: 'proto-overclaimed', requestedClass: 'eva-00', effect: 'read', trust: 'trusted', allowed: true },
+      {
+        pilotId: 'proto-overclaimed',
+        requestedClass: 'eva-01',
+        effect: 'write-external',
+        trust: 'trusted',
+        allowed: false,
+      },
+      {
+        pilotId: 'proto-overclaimed',
+        requestedClass: 'eva-02',
+        effect: 'irreversible',
+        trust: 'trusted',
+        allowed: false,
+      },
+      { pilotId: 'test-pilot', requestedClass: 'eva-03', effect: 'read', trust: 'tainted', allowed: true },
+      { pilotId: 'test-pilot', requestedClass: 'eva-00', effect: 'read', trust: 'trusted', allowed: true },
+      { pilotId: 'test-pilot', requestedClass: 'eva-01', effect: 'write-external', trust: 'trusted', allowed: true },
+      { pilotId: 'test-pilot', requestedClass: 'eva-02', effect: 'irreversible', trust: 'trusted', allowed: false },
+      { pilotId: 'prod-pilot', requestedClass: 'eva-03', effect: 'read', trust: 'tainted', allowed: true },
+      { pilotId: 'prod-pilot', requestedClass: 'eva-00', effect: 'read', trust: 'trusted', allowed: true },
+      { pilotId: 'prod-pilot', requestedClass: 'eva-01', effect: 'write-external', trust: 'trusted', allowed: true },
+      { pilotId: 'prod-pilot', requestedClass: 'eva-02', effect: 'irreversible', trust: 'trusted', allowed: true },
+    ];
+
+    for (const row of matrix) {
+      const decision = admitEvaJob({
+        grantId: `grant-${row.pilotId}-${row.requestedClass}`,
+        grantExpiresMs: now + 60_000,
+        grantTool: 'test.tool',
+        tool: 'test.tool',
+        effect: row.effect,
+        trust: row.trust,
+        pilotId: row.pilotId,
+        pilotRegistry: registry,
+        requestedClass: row.requestedClass,
+        hostEnforced: true,
+        nowMs: now,
+      });
+      assert.equal(decision.admitted, row.allowed, `${row.pilotId} x ${row.requestedClass}`);
+      if (decision.admitted) {
+        assert.equal(decision.evaClass, row.requestedClass);
+      } else {
+        assert.equal(decision.blocked, 'isolation');
+      }
+    }
+
+    // Cap only lowers, never raises: production pilot running read stays at eva-00.
+    const prodRead = admitEvaJob({
+      grantId: 'grant-prod-read',
+      grantExpiresMs: now + 60_000,
+      grantTool: 'memory.recall',
+      tool: 'memory.recall',
+      effect: 'read',
+      trust: 'trusted',
+      pilotId: 'prod-pilot',
+      pilots: roster,
+      nowMs: now,
+    });
+    assert.equal(prodRead.admitted, true);
+    if (prodRead.admitted) {
+      assert.equal(prodRead.evaClass, 'eva-00');
+      assert.equal(prodRead.ceiling, 'eva-02');
+    }
+
+    // Production pilot with evaClass eva-01 is lowered to eva-01, never raised to eva-02.
+    const prodBounded = admitEvaJob({
+      grantId: 'grant-prod-bounded',
+      grantExpiresMs: now + 60_000,
+      grantTool: 'admin.exec',
+      tool: 'admin.exec',
+      effect: 'irreversible',
+      trust: 'trusted',
+      pilotId: 'prod-bounded',
+      pilots: roster,
+      nowMs: now,
+    });
+    assert.equal(prodBounded.admitted, false);
+    if (!prodBounded.admitted) assert.equal(prodBounded.blocked, 'isolation');
+
+    // Test pilot with evaClass eva-00 is lowered to eva-00, never raised to eva-01.
+    const testShadow = admitEvaJob({
+      grantId: 'grant-test-shadow',
+      grantExpiresMs: now + 60_000,
+      grantTool: 'web.post',
+      tool: 'web.post',
+      effect: 'write-external',
+      trust: 'trusted',
+      pilotId: 'test-shadow',
+      pilots: roster,
+      nowMs: now,
+    });
+    assert.equal(testShadow.admitted, false);
+    if (!testShadow.admitted) assert.equal(testShadow.blocked, 'isolation');
+
+    // Caller cannot raise a prototype pilot by passing pilotStage: 'production'.
+    const spoofedStage = admitEvaJob({
+      grantId: 'grant-spoof',
+      grantExpiresMs: now + 60_000,
+      grantTool: 'admin.exec',
+      tool: 'admin.exec',
+      effect: 'irreversible',
+      trust: 'trusted',
+      pilotId: 'proto-overclaimed',
+      pilotStage: 'production',
+      pilotRegistry: registry,
+      nowMs: now,
+    });
+    assert.equal(spoofedStage.admitted, false);
+
+    // Unknown or retired pilots fail closed.
+    const unknownPilot = admitEvaJob({
+      grantId: 'grant-unknown',
+      grantExpiresMs: now + 60_000,
+      grantTool: 'memory.recall',
+      tool: 'memory.recall',
+      effect: 'read',
+      trust: 'trusted',
+      pilotId: 'missing-pilot',
+      pilotRegistry: registry,
+      nowMs: now,
+    });
+    assert.equal(unknownPilot.admitted, false);
+
+    const retiredPilot = admitEvaJob({
+      grantId: 'grant-retired',
+      grantExpiresMs: now + 60_000,
+      grantTool: 'memory.recall',
+      tool: 'memory.recall',
+      effect: 'read',
+      trust: 'trusted',
+      pilotId: 'retired-prod',
+      pilotRegistry: registry,
+      nowMs: now,
+    });
+    assert.equal(retiredPilot.admitted, false);
   });
 });

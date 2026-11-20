@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-099-T03",
+  "parent": "B-099",
+  "title": "Owner setup on NERV-01: the _nervjob user, the shared folder and the sudo rule",
+  "goal": "The owner runs a copy-paste procedure once, with admin rights, and its expected result shows",
+  "status": "planned",
+  "acceptance": [
+    "The procedure page names each command and its expected output: a hidden service user `_nervjob` (no password, no login, no home), `/Users/Shared/nerv-eva`, and a sudoers file allowing only `/usr/bin/sandbox-exec` and `/bin/kill` as `_nervjob`",
+    "`sudo -n -u _nervjob /usr/bin/true` is refused and `sudo -n -u _nervjob /bin/kill -0 -1` is allowed, as the page says"
+  ],
+  "dependsOn": [
+    "B-099-T02"
+  ],
+  "resources": [
+    "docs/guides/eva-job-user.md",
+    "docs/work/records/B-099.md",
+    "docs/work/tasks/B-099-T03.json"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "The machine is office-monitored: the owner decided to set it up and see whether it is noticed (2026-11-19)"
+  ],
+  "ownerLink": "docs/guides/eva-job-user.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Planned 2026-11-19. Not a measurement.",
+    "reviewed": "2026-11-19",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  },
+  "prs": []
+}
