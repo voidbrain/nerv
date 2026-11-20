@@ -132,8 +132,9 @@ export class RuntimeChat {
         const doc = (await this.host.nervous.call('documents.find', { query: cooking.recipe }).catch(() => null)) as {
           title: string;
           body: string;
+          photos?: import('../shared/surface.ts').RecipePhoto[];
         } | null;
-        if (doc) reply = this.cooking.start(at, doc.title, doc.body, cooking.it);
+        if (doc) reply = this.cooking.start(at, doc.title, doc.body, cooking.it, doc.photos);
       } else if (cooking.kind === 'timer-set') {
         reply = this.cooking.setTimer(at, cooking.seconds, onExpire);
       } else if (cooking.kind === 'timer-confirm') {

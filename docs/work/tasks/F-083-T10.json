@@ -4,7 +4,7 @@
   "parent": "F-083",
   "title": "Recipe photos",
   "goal": "Photos attached to a saved recipe and shown with it",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A photo sent in Telegram or the dashboard attaches to a recipe (or one of its steps); local, size and type checked",
     "Shown on the recipe card and during the cooking session"

@@ -129,14 +129,23 @@ const DEFAULT_SCHEDULER: TimerScheduler = {
   cancel: (handle) => clearTimeout(handle as ReturnType<typeof setTimeout>),
 };
 
+import type { RecipePhoto } from '../shared/surface.ts';
+
 interface Session {
   readonly title: string;
   /** The language the session started in: a one-word "avanti" or "next" does not tell. */
   readonly it: boolean;
   readonly parts: RecipeParts;
+  readonly photos: readonly RecipePhoto[];
   step: number; // -1 before the first step
   pendingTimerSeconds?: number;
   timerHandle?: unknown;
+}
+
+function formatPhotoLines(photos: readonly RecipePhoto[], label: string): string {
+  if (!photos.length) return '';
+  const items = photos.map((p) => (p.caption ? `${p.url} (${p.caption})` : p.url));
+  return `\n\n${label}: ${items.join(', ')}`;
 }
 
 /** One cooking session per conversation, in memory: a restart ends it, and nothing about it is stored. */
@@ -166,7 +175,7 @@ export class CookingSessions {
   }
 
   /** Starts a session on a saved recipe and lists its ingredients; a recipe with no saved steps is not walked through. */
-  start(conversation: string, title: string, body: string, it: boolean): string {
+  start(conversation: string, title: string, body: string, it: boolean, photos: readonly RecipePhoto[] = []): string {
     const parts = recipeParts(body);
     if (!parts.steps.length) {
       this.endSession(conversation);
@@ -175,17 +184,19 @@ export class CookingSessions {
         : `"${title}" has no saved steps as a list ("Steps:" then "1. …"), so I cannot walk you through it.`;
     }
     this.endSession(conversation);
-    this.sessions.set(conversation, { title, it, parts, step: -1 });
+    this.sessions.set(conversation, { title, it, parts, photos, step: -1 });
     const head = it ? `${title} — ingredienti:` : `${title} — ingredients:`;
     const list = parts.ingredients.length
       ? parts.ingredients.map((i) => `• ${i}`).join('\n')
       : it
         ? '(nessun ingrediente salvato come lista)'
         : '(no ingredients saved as a list)';
+    const recipePhotos = photos.filter((p) => p.stepIndex === null || p.stepIndex === undefined);
+    const photoText = formatPhotoLines(recipePhotos, it ? 'Foto' : 'Photos');
     const next = it
       ? `${parts.steps.length} passaggi. Di' "vai col primo step" quando sei pronto.`
       : `${parts.steps.length} steps. Say "first step" when you are ready.`;
-    return `${head}\n${list}\n\n${next}`;
+    return `${head}\n${list}${photoText}\n\n${next}`;
   }
 
   /** Moves through the saved steps; undefined when this conversation has no session (the message is not for it). */
@@ -214,9 +225,11 @@ export class CookingSessions {
     const timerSecs = stepTimerSeconds(stepText);
     s.pendingTimerSeconds = timerSecs;
     const line = `${it ? 'Passaggio' : 'Step'} ${n}/${s.parts.steps.length}: ${stepText}`;
-    if (!timerSecs) return line;
+    const stepPhotos = s.photos.filter((p) => p.stepIndex === s.step);
+    const photoText = formatPhotoLines(stepPhotos, it ? 'Foto passaggio' : 'Step photo');
+    if (!timerSecs) return `${line}${photoText}`;
     const ask = it ? 'dimmi quando pronto che avvio il timer' : 'tell me when ready to start the timer';
-    return `${line}\n\n${ask} (${formatDuration(timerSecs, it)}).`;
+    return `${line}${photoText}\n\n${ask} (${formatDuration(timerSecs, it)}).`;
   }
 
   /** Sets a timer in an active cooking session; announces completion with its own line via onExpire. */

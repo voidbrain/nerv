@@ -23,6 +23,8 @@ import { confirmPushToTalkDraft, preparePushToTalkDraft, prepareSpokenReply, typ
 import type { ModelChange } from './model-setup.ts';
 import { MODEL_TIMEOUT_MS } from './model.ts';
 import { MAX_STEPS } from './misato.ts';
+import type { DocumentStore } from './documents.ts';
+import { MAX_PHOTO_BYTES, type PhotoStore } from './photos.ts';
 async function body(req: IncomingMessage, limit = 8192): Promise<Record<string, unknown>> {
   let text = '';
   for await (const chunk of req) {
@@ -249,7 +251,8 @@ export function makeServer(
           '/api/batteries',
         ].includes(path) ||
           /^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path) ||
-          /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path))
+          /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path) ||
+          /^\/api\/photos\/[a-f0-9-]+$/.test(path))
       )
     ) {
       reply(403, { error: 'Read-only client.' });
@@ -905,7 +908,64 @@ export function makeServer(
           timeZone: options.timeZone ?? 'Europe/Rome',
           ...(options.native ? { runtimeId: options.native.auth.runtimeId, home: options.native.auth.home } : {}),
         });
-      else if (await handleUpdateRoute(req, path, url, reply)) {
+      else if (req.method === 'GET' && /^\/api\/photos\/([a-f0-9-]+)$/.test(path)) {
+        const photoId = /^\/api\/photos\/([a-f0-9-]+)$/.exec(path)![1]!;
+        const photos = (store as StoreApi & { photos?: PhotoStore }).photos;
+        const found = photos?.get(photoId);
+        if (!found) {
+          reply(404, { error: 'Photo not found.' });
+          return;
+        }
+        res.writeHead(200, {
+          'content-type': found.photo.mimeType,
+          'cache-control': 'private, no-store',
+          'x-content-type-options': 'nosniff',
+        });
+        res.end(found.bytes);
+      } else if (req.method === 'GET' && /^\/api\/recipes\/([^/]+)\/photos$/.test(path)) {
+        const recipeId = decodeURIComponent(/^\/api\/recipes\/([^/]+)\/photos$/.exec(path)![1]!);
+        const s = store as StoreApi & { photos?: PhotoStore; documents?: DocumentStore };
+        const doc = s.documents?.get(recipeId);
+        if (!doc) {
+          reply(404, { error: 'Recipe not found.' });
+          return;
+        }
+        reply(200, s.photos?.list('recipe', doc.id) ?? []);
+      } else if (req.method === 'POST' && /^\/api\/recipes\/([^/]+)\/photos$/.test(path)) {
+        const recipeId = decodeURIComponent(/^\/api\/recipes\/([^/]+)\/photos$/.exec(path)![1]!);
+        const s = store as StoreApi & { photos?: PhotoStore; documents?: DocumentStore };
+        if (!s.photos || !s.documents) {
+          reply(400, { error: 'Photo storage is not available.' });
+          return;
+        }
+        const doc = s.documents.get(recipeId);
+        if (!doc) {
+          reply(404, { error: 'Recipe not found.' });
+          return;
+        }
+        const b = await body(req, Math.ceil((MAX_PHOTO_BYTES * 4) / 3) + 16_384);
+        if (
+          typeof b.dataBase64 !== 'string' ||
+          Object.keys(b).some((k) => !['dataBase64', 'mimeType', 'stepIndex', 'caption'].includes(k)) ||
+          (b.mimeType !== undefined && typeof b.mimeType !== 'string') ||
+          (b.stepIndex !== undefined &&
+            b.stepIndex !== null &&
+            (!Number.isInteger(b.stepIndex) || (b.stepIndex as number) < 0)) ||
+          (b.caption !== undefined && typeof b.caption !== 'string')
+        ) {
+          throw new Error('Expected dataBase64 and optional mimeType, stepIndex, caption.');
+        }
+        const bytes = Buffer.from(b.dataBase64, 'base64');
+        const saved = s.photos.attach({
+          ownerKind: 'recipe',
+          ownerId: doc.id,
+          stepIndex: (b.stepIndex as number | null | undefined) ?? null,
+          bytes,
+          ...(b.mimeType !== undefined ? { mimeType: b.mimeType as string } : {}),
+          ...(b.caption !== undefined ? { caption: b.caption as string } : {}),
+        });
+        reply(201, saved);
+      } else if (await handleUpdateRoute(req, path, url, reply)) {
         // Handled by server-update.ts
       } else reply(404, { error: 'Unknown operation.' });
     } catch (e) {
