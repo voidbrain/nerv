@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, it } from 'node:test';
 import { makeServer } from '../src/server.ts';
 import { Store } from '../src/store.ts';
@@ -58,6 +61,47 @@ describe('F-008-T11: battery cards API', () => {
     } finally {
       server.close();
       store.close();
+    }
+  });
+
+  it('F-008-T13: POST /api/batteries registers a battery with pending resistance and returns updated cards', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-bat-api-'));
+    const store = new Store(join(dir, 'nerv.sqlite'));
+    const token = 't'.repeat(32);
+    const server = makeServer(store, token);
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const port = (server.address() as { port: number }).port;
+    const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/api/batteries`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          packNumber: 9,
+          series: 'blu',
+          brand: 'Tattu',
+          batteryType: 'LiPo 6S',
+          cellCount: 6,
+          capacityMah: 1300,
+        }),
+      });
+      assert.equal(res.status, 201);
+      const data = (await res.json()) as {
+        battery: { packNumber: number; series?: string; cellCount: number; capacityMah: number };
+        items: Array<{ packNumber: number; lastResistance: unknown }>;
+      };
+      assert.equal(data.battery.packNumber, 9);
+      assert.equal(data.battery.series, 'blu');
+      assert.equal(data.battery.cellCount, 6);
+      assert.equal(data.items.length, 1);
+      assert.equal(data.items[0]!.lastResistance, null);
+    } finally {
+      await new Promise<void>((resolve) => {
+        server.close(() => resolve());
+        server.closeAllConnections();
+      });
+      store.close();
+      rmSync(dir, { recursive: true, force: true });
     }
   });
 });
