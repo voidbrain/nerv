@@ -2909,10 +2909,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-106-t01"></a>B-106-T01 — Update lint tooling past the minimatch advisory | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-106-t01"></a>B-106-T01 — Update lint tooling past the minimatch advisory | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [PR #598](https://github.com/voidbrain/nerv/pull/598) audit evidence and implementation |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2921,7 +2921,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [Full audit 2026-11-20](audits/2026-11-20-full.md); GHSA-g3hv-75wg-m249 reported by `npm audit`; `package-lock.json` resolves `typescript-eslint` 8.73.0; Review: fresh-context dependency/security review, three findings corrected before PR |
+| PR / evidence | Steps: B-106-T01: [PR #598](https://github.com/voidbrain/nerv/pull/598) audit evidence and implementation. [PR #598](https://github.com/voidbrain/nerv/pull/598); [Full audit 2026-11-20](audits/2026-11-20-full.md); GHSA-g3hv-75wg-m249 reported by `npm audit`; `package-lock.json` resolves `typescript-eslint` 8.73.0; Review: fresh-context dependency/security review, three findings corrected before PR |
 | Opened | 2026-11-20 |
 | Verification | 2026-11-20 local: `npm audit` reports 0 vulnerabilities; lint, typecheck, build and `check:fast` pass; full tests pass (1,041 pass, 2 platform skips); browser evaluation passes 5/5; CycloneDX/SBOM tests pass 3/3. Full dependency-risk CI and fresh-context review pending. |
 | Reviewed | 2026-11-20 |

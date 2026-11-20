@@ -42,5 +42,10 @@
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 598,
+      "note": "audit evidence and implementation"
+    }
+  ]
 }
