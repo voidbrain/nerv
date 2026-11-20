@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "B-103-T01",
+  "parent": "B-103",
+  "title": "Fixture chat ID that no timestamp can contain",
+  "goal": "The channel-state privacy test no longer depends on the clock",
+  "status": "implemented",
+  "acceptance": [
+    "The fixture chat ID cannot occur in an ISO timestamp, and the privacy assertion matches it"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/channel-state.test.ts",
+    "docs/work/records/B-103.md",
+    "docs/work/tasks/B-103-T01.json",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-20 from the CI log. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 0,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": []
+}
