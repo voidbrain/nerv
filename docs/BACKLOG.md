@@ -1523,7 +1523,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-092-T03 — Replay as a Blue action with preconditions (Planned).
+💻 **→** Next: F-092-T03 — Replay as a Blue action with preconditions (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1535,7 +1535,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-092-t03"></a>F-092-T03 — Replay as a Blue action with preconditions | 1.5 h | 0 h | 1.5 h | Planned | — | [F-092-T04](#f-092-t04) | 🤖 | — |
+| 🟡 Medium | <a id="f-092-t03"></a>F-092-T03 — Replay as a Blue action with preconditions | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [F-092-T04](#f-092-t04) | 🤖 | [PR #607](https://github.com/voidbrain/nerv/pull/607) Desktop replay as Blue action with preconditions |
 | 🟢 Small | <a id="f-092-t04"></a>F-092-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-092-T03](#f-092-t03) | — | ⏳ 🧑‍🔧 | — |
 | 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1.5 h agent + 0.25 h owner | 2 of 4 completed | | | | |
 
@@ -1555,7 +1555,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-092-T02: [PR #496](https://github.com/voidbrain/nerv/pull/496) implementation. [PR #496](https://github.com/voidbrain/nerv/pull/496) (merged; CI green); [Desktop input recording feasibility](decisions/desktop-input-recording.md) (`F-092-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-092-T02: [PR #496](https://github.com/voidbrain/nerv/pull/496) implementation · F-092-T03: [PR #607](https://github.com/voidbrain/nerv/pull/607) Desktop replay as Blue action with preconditions. [PR #607](https://github.com/voidbrain/nerv/pull/607) (F-092-T03); [PR #496](https://github.com/voidbrain/nerv/pull/496) (merged; CI green); [Desktop input recording feasibility](decisions/desktop-input-recording.md) (`F-092-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-092-T02 verified: [PR #496](https://github.com/voidbrain/nerv/pull/496) merged on green CI. `F-092-T01`: `npm run check:fast` passed. |
 | Reviewed | 2026-11-18 |
