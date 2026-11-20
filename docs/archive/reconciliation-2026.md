@@ -547,3 +547,7 @@ PR #557 merged with green CI. B-091-T01 waits on its live check on Tabgha. F-049
 ## 2026-11-19 — main `37e0a248`
 
 PR #559 merged with green CI: B-101-T01 waits to be seen on NERV-01's dashboard (#558 and #561 are reconciled in #565). #560 (B-100-T01) closed unmerged. F-021-T05 implemented.
+
+## 2026-11-20 — PR #610 (harness PR conventions)
+
+Reconciled `docs/agents/pull-requests.md` from `voidbrain/project-harness#224` in [PR #610](https://github.com/voidbrain/nerv/pull/610) (PR title backlog ID and agent signature rules); fresh-context review passed with no findings.
