@@ -2596,10 +2596,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-103-t01"></a>B-103-T01 — Fixture chat ID that no timestamp can contain | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.25 h | 0.25 h | 0 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-103-t01"></a>B-103-T01 — Fixture chat ID that no timestamp can contain | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix |
+| 🟢 Small | **Total** | 0.25 h | 0.25 h | 0 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2608,7 +2608,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | CI run 44647978230 (PR #575) |
+| PR / evidence | Steps: B-103-T01: [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix. CI run 44647978230 (PR #575); [PR #578](https://github.com/voidbrain/nerv/pull/578) |
 | Opened | 2026-11-20 |
 | Verification | Pending. |
 | Reviewed | 2026-11-20 |
