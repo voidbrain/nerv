@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 118.5 h agent + 11 h owner across 155 open steps of 45 features and 25 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
+**Remaining effort:** 118.75 h agent + 11 h owner across 156 open steps of 45 features and 25 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2179,7 +2179,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-115-T01 — Grouped, alphabetical CLI help (Implemented; verification pending).
 
@@ -2194,7 +2194,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
 | 🟢 Small | <a id="f-115-t01"></a>F-115-T01 — Grouped, alphabetical CLI help | 0.75 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | [PR #595](https://github.com/voidbrain/nerv/pull/595) implementation |
-| 🟢 Small | **Total** | 0.75 h | 0.75 h | 0 h | 0 of 1 completed | |
+| 🟢 Small | <a id="f-115-t02"></a>F-115-T02 — Rerun the system flow cases at the F-115 source | 0.25 h | 0 h | 0.25 h | Planned | — |
+| 🟢 Small | **Total** | 1 h | 0.75 h (1 of 2 steps recorded) | 0.25 h | 0 of 2 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
