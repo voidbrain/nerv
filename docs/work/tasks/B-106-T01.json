@@ -4,7 +4,7 @@
   "parent": "B-106",
   "title": "Update lint tooling past the minimatch advisory",
   "goal": "Development dependencies contain no version affected by GHSA-g3hv-75wg-m249",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "npm audit reports zero vulnerabilities",
     "The typescript-eslint update is patch/minor only and does not weaken lint rules",
@@ -38,7 +38,7 @@
     "estimate": "0.25 h",
     "basis": "Estimated 2026-11-20: one non-major development dependency update and the full local verification set. Not a measurement.",
     "reviewed": "2026-11-20",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
   },
