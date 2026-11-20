@@ -4,7 +4,7 @@
   "parent": "F-056",
   "title": "Shared command catalog and deterministic router",
   "goal": "Shared command catalog and deterministic router",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Commands answered before Misato and without a model; read-only commands open no sortie"
   ],

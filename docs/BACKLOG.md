@@ -688,9 +688,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | [F-021-T05](#f-021-t05) | — | ⏳ | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | [F-021-T05](#f-021-t05) | — | 🤖 | — | — |
 
-💻 **→** Next: F-056-T01 — Shared command catalog and deterministic router (Planned).
+💻 **→** Next: F-056-T01 — Shared command catalog and deterministic router (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -702,7 +702,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-056-t01"></a>F-056-T01 — Shared command catalog and deterministic router | 0.5 h | 0 h | 0.5 h | Planned | [F-021-T05](#f-021-t05) | [F-056-T02](#f-056-t02) |
+| 🟢 Small | <a id="f-056-t01"></a>F-056-T01 — Shared command catalog and deterministic router | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [F-021-T05](#f-021-t05) | [F-056-T02](#f-056-t02) |
 | 🟢 Small | <a id="f-056-t02"></a>F-056-T02 — Read-only commands | 0.5 h | 0 h | 0.5 h | Planned | [F-056-T01](#f-056-t01) | [F-056-T03](#f-056-t03) |
 | 🟢 Small | <a id="f-056-t03"></a>F-056-T03 — /spear and /log | 0.5 h | 0 h | 0.5 h | Planned | [F-056-T02](#f-056-t02) | [F-056-T04](#f-056-t04) |
 | 🟢 Small | <a id="f-056-t04"></a>F-056-T04 — Telegram menu registration and dashboard slash menu | 0.25 h | 0 h | 0.25 h | Planned | [F-056-T03](#f-056-t03) | [F-056-T05](#f-056-t05) |
