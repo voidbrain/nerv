@@ -18,5 +18,6 @@ Decisions preserve rationale and alternatives. A date alone does not make them s
 | [Evaluation and improvement](evaluation-and-improvement.md) | Evidence, browser/channel parity and bounded improvement | New flow branches, repeated failures, new model configuration or changed promotion rules |
 | [Specialist orchestration](specialist-orchestration.md) | Bounded chunking, separate coder/reviewer consultants, ordered DAG dependencies, bounded review loops and resumable handoff history; F-048-T04 proposed, not yet implemented | Multi-host chunk placement changes or measured campaign results require limit tuning |
 | [EVA runner](eva-runner.md) | Deterministic isolated runner threat model, least-class admission, host boundaries and pre-execution test gate; F-049-T01 | Host enforcement mechanism choice (T03), admission/runtime changes or new supported OS targets |
+| [FPV packs](fpv-packs.md) | One FPV core repository, web-component pages hosted by NERV and a standalone page, domain packs on and off, Claude skill before MCP; F-101-T02 decided, F-114 open | Pilots need builds or synced data, MCP write grants arrive, or the two page hosts diverge |
 
 No decision in this folder was found to be wholly superseded in this reorganization. Their latest review evidence and rerun conditions are in the [review register](../reviews/README.md).

@@ -11,7 +11,8 @@
   ],
   "dependsOn": [
     "F-008-T09",
-    "F-008-T11"
+    "F-008-T11",
+    "F-008-T13"
   ],
   "resources": [
     "docs/work/records/F-008.md",
