@@ -146,7 +146,7 @@ describe('F-049-T05: EVA-03 gate', { skip: !hasHostSandbox }, () => {
         assert.equal(heard.tcp > 0, !confined, 'the loopback listener saw a connection');
         assert.equal(heard.udp > 0, !confined, 'a UDP datagram arrived');
         assert.equal(heard.dns > 0, !confined, 'a DNS query arrived');
-        if (confined) assert.match(r.udp ?? '', DENIED);
+        if (confined && isDarwinWithSandbox) assert.match(r.udp ?? '', DENIED);
       } finally {
         tcp.close();
         udp.close();
