@@ -4,7 +4,7 @@
  "parent": "F-086",
  "title": "Draft and send behind approval",
  "goal": "Drafts need approval; sending is Blue",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "Draft is Orange, send is Blue; expiry never sends; the sent message is read back"
  ],

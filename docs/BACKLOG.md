@@ -837,7 +837,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟢 Small | 1 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-086-T03 — Draft and send behind approval (Planned).
+💻 **→** Next: F-086-T03 — Draft and send behind approval (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -849,7 +849,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-086-t03"></a>F-086-T03 — Draft and send behind approval | 1 h | 0 h | 1 h | Planned | — | [F-086-T04](#f-086-t04) | 🤖 | — |
+| 🟢 Small | <a id="f-086-t03"></a>F-086-T03 — Draft and send behind approval | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-086-T04](#f-086-t04) | 🤖 | — |
 | 🟢 Small | <a id="f-086-t04"></a>F-086-T04 — Owner check with the owner's account | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-086-T03](#f-086-t03) | — | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1 h agent + 0.5 h owner | 2 of 4 completed | | | | |
 
