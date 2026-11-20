@@ -120,6 +120,7 @@ test(
         body: JSON.stringify({
           id: 'artist',
           name: 'Artist',
+          secondName: 'Aria Vance',
           domain: 'image editing',
           keywords: ['image'],
           model: 'first',
@@ -127,13 +128,47 @@ test(
         }),
       });
       assert.equal(created.status, 201);
+      const createdJson = (await created.json()) as { pilots: { id: string; name: string; secondName?: string }[] };
+      const createdArtist = createdJson.pilots.find((p) => p.id === 'artist');
+      assert.equal(createdArtist?.name, 'Artist');
+      assert.equal(createdArtist?.secondName, 'Aria Vance');
+
       const renamed = await fetch(base + '/api/pilots/artist', {
         method: 'PATCH',
         headers,
-        body: JSON.stringify({ name: 'Image Master' }),
+        body: JSON.stringify({ name: 'Image Master', secondName: 'Kai Lin' }),
       });
       assert.equal(renamed.status, 200);
+      const renamedJson = (await renamed.json()) as { pilots: { id: string; name: string; secondName?: string }[] };
+      const renamedArtist = renamedJson.pilots.find((p) => p.id === 'artist');
+      assert.equal(renamedArtist?.name, 'Image Master');
+      assert.equal(renamedArtist?.secondName, 'Kai Lin');
       assert.equal(readConfig(home).pilots!.find((p) => p.id === 'artist')?.name, 'Image Master');
+      assert.equal(readConfig(home).pilots!.find((p) => p.id === 'artist')?.secondName, 'Kai Lin');
+
+      const listAfter = (await (await fetch(base + '/api/pilots', { headers })).json()) as {
+        pilots: { id: string; name: string; secondName?: string }[];
+      };
+      assert.equal(listAfter.pilots.find((p) => p.id === 'artist')?.secondName, 'Kai Lin');
+
+      const snapshotBeforeBad = readFileSync(join(home, 'config.json'), 'utf8');
+      for (const bad of [{ secondName: 'x'.repeat(41) }, { secondName: '   ' }, { name: '' }, { id: 'renamed' }]) {
+        const res = await fetch(base + '/api/pilots/artist', {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify(bad),
+        });
+        assert.equal(res.status, 400);
+      }
+      assert.equal(readFileSync(join(home, 'config.json'), 'utf8'), snapshotBeforeBad);
+
+      const clearedSecond = await fetch(base + '/api/pilots/artist', {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ secondName: '' }),
+      });
+      assert.equal(clearedSecond.status, 200);
+      assert.equal(readConfig(home).pilots!.find((p) => p.id === 'artist')?.secondName, undefined);
       for (const [action, field, val] of [
         ['pin', 'pinned', true],
         ['unpin', 'pinned', undefined],

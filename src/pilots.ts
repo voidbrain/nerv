@@ -15,6 +15,7 @@ export const EVA_CLASSES: readonly EvaClass[] = ['eva-00', 'eva-01', 'eva-02', '
 export interface Pilot {
   id: string;
   name: string;
+  secondName?: string;
   role?: string;
   domain: string;
   keywords: string[];
@@ -36,6 +37,7 @@ export interface Pilot {
 export interface PilotOffer {
   id: string;
   name: string;
+  secondName?: string;
   role?: string;
   domain: string;
   keywords: string[];
@@ -121,19 +123,49 @@ export type PilotPatch = Partial<
     | 'pinned'
     | 'retired'
   >
->;
+> & { secondName?: string | null };
+const PATCH_KEYS: readonly string[] = [
+  'name',
+  'secondName',
+  'role',
+  'domain',
+  'keywords',
+  'skills',
+  'tools',
+  'model',
+  'route',
+  'provider',
+  'memoryScope',
+  'evaClass',
+  'stage',
+  'version',
+  'lineage',
+  'pinned',
+  'retired',
+];
 /** Adds a pilot to a roster and validates the result. */
 export function addPilot(roster: readonly Pilot[], entry: Pilot): Pilot[] {
   return validatePilots([...roster, entry]);
 }
 /** Updates (including renaming) an existing pilot in a roster and validates the result. */
 export function updatePilot(roster: readonly Pilot[], id: string, patch: PilotPatch): Pilot[] {
+  if (
+    !patch ||
+    typeof patch !== 'object' ||
+    Array.isArray(patch) ||
+    Object.keys(patch).some((k) => !PATCH_KEYS.includes(k))
+  )
+    throw new Error('Invalid pilot update.');
   const idx = roster.findIndex((p) => p.id === id);
   if (idx < 0) throw new Error(`Unknown specialist pilot: ${id}.`);
   const next = roster.map((p) => {
     if (p.id !== id) return p;
     const updated: Pilot = { ...p };
     if (patch.name !== undefined) updated.name = patch.name;
+    if (patch.secondName !== undefined) {
+      if (patch.secondName === null || patch.secondName === '') delete updated.secondName;
+      else updated.secondName = patch.secondName;
+    }
     if (patch.role !== undefined) updated.role = patch.role;
     if (patch.domain !== undefined) updated.domain = patch.domain;
     if (patch.keywords !== undefined) updated.keywords = patch.keywords;
@@ -185,6 +217,7 @@ export function overlappingDomains(left: string, right: string): boolean {
 const PILOT_KEYS = [
   'id',
   'name',
+  'secondName',
   'role',
   'domain',
   'keywords',
@@ -229,6 +262,11 @@ function parsePilotEntry(raw: unknown, out: readonly Pilot[], allowLocalFlags: b
   if (out.some((o) => o.id === p.id)) throw new Error(`Pilot ${p.id} is listed twice.`);
   if (typeof p.name !== 'string' || !cleanText(p.name) || p.name.length > 40)
     throw new Error(`Pilot ${p.id}: a name up to 40 characters.`);
+  if (
+    p.secondName !== undefined &&
+    (typeof p.secondName !== 'string' || !cleanText(p.secondName) || p.secondName.length > 40)
+  )
+    throw new Error(`Pilot ${p.id}: secondName up to 40 characters.`);
   if (p.role !== undefined && (typeof p.role !== 'string' || !cleanText(p.role) || p.role.length > 40))
     throw new Error(`Pilot ${p.id}: role up to 40 characters.`);
   if (typeof p.domain !== 'string' || !cleanText(p.domain) || p.domain.length > 200)
@@ -265,6 +303,7 @@ function parsePilotEntry(raw: unknown, out: readonly Pilot[], allowLocalFlags: b
   return {
     id: p.id,
     name: cleanText(p.name),
+    ...(p.secondName !== undefined ? { secondName: cleanText(p.secondName as string) } : {}),
     ...(p.role !== undefined ? { role: cleanText(p.role as string) } : {}),
     domain: cleanText(p.domain),
     keywords: [...new Set((p.keywords as string[]).map(words))],
