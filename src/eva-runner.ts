@@ -3,6 +3,13 @@ import { chmodSync, copyFileSync, existsSync, mkdtempSync, realpathSync, rmSync,
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative } from 'node:path';
 import { EVA_CLASS_SPECS } from './eva-classes.ts';
+import { EVA_DENIED_LOCAL_PORTS } from './policy.ts';
+import {
+  startEgressProxy,
+  type EgressDecision,
+  type EgressLookupResult,
+  type EgressProxyHandle,
+} from './egress-proxy.ts';
 import { asJobUser, endJobUser, stageRuntime, type EvaJobUser } from './eva-job-user.ts';
 import type { EvaClass } from './pilots.ts';
 
@@ -60,6 +67,10 @@ export interface EvaJobSpec extends Omit<Eva03JobSpec, 'onLedgerEvent'> {
    * EVA-01 takes `localhost` ports (an egress proxy that checks destinations), EVA-02 also ports on any host.
    */
   readonly egress?: { readonly localhost?: readonly number[]; readonly anyHost?: readonly number[] };
+  /** F-027-T02: Scrolls `egressAllow` destinations enforced via a per-job localhost egress proxy. */
+  readonly scrollsEgressAllow?: readonly string[];
+  readonly onEgressDecision?: (decision: EgressDecision) => void;
+  readonly egressLookup?: (host: string) => Promise<readonly EgressLookupResult[]>;
   readonly onEvent?: (event: EvaJobEvent) => void;
   /**
    * B-099-T02: run the job as this dedicated user (docs/guides/eva-job-user.md). Its instance lives in the shared
@@ -82,7 +93,7 @@ export interface EvaJobEvent {
 }
 
 /** Ports no class reaches, whatever its grant: NERV's own admin and native ports on this machine. */
-export const EVA_DENIED_LOCAL_PORTS: readonly number[] = [4317, 4319];
+export { EVA_DENIED_LOCAL_PORTS };
 
 export interface Eva03LedgerEvent {
   readonly jobId: string;
@@ -274,7 +285,11 @@ export function buildEvaBwrapArgs(
   return args;
 }
 
-export function buildEva03CleanEnv(workspaceDir: string, commandPath: string): NodeJS.ProcessEnv {
+export function buildEva03CleanEnv(
+  workspaceDir: string,
+  commandPath: string,
+  extraEnv?: Readonly<Record<string, string>>,
+): NodeJS.ProcessEnv {
   const cmdDir = dirname(commandPath);
   const basePath = process.env.PATH ?? '/usr/local/bin:/usr/bin:/bin';
   return {
@@ -282,6 +297,7 @@ export function buildEva03CleanEnv(workspaceDir: string, commandPath: string): N
     HOME: workspaceDir,
     TMPDIR: workspaceDir,
     NODE_NO_WARNINGS: '1',
+    ...extraEnv,
   };
 }
 
@@ -464,7 +480,38 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
 
   let workspaceDiscarded = false;
   let tracker: DescendantTracker | undefined;
+  let egressProxy: EgressProxyHandle | undefined;
   try {
+    if (spec.scrollsEgressAllow !== undefined) {
+      if (cls.network.mode === 'deny') {
+        if (spec.scrollsEgressAllow.length > 0) throw new Error(`${spec.evaClass} has no network.`);
+      } else {
+        if (isLinux) {
+          throw new EvaSandboxUnavailableError(
+            'Scrolls egress confinement for eva-01/eva-02 is not enforced on Linux bwrap (host network namespace cannot block direct sockets).',
+          );
+        }
+        if (spec.egress?.anyHost?.length || spec.egress?.localhost?.length) {
+          throw new Error('scrollsEgressAllow cannot be combined with raw egress port grants.');
+        }
+        egressProxy = await startEgressProxy({
+          allowedDestinations: spec.scrollsEgressAllow,
+          lookup: spec.egressLookup,
+          onDecision: spec.onEgressDecision,
+        });
+      }
+    }
+    const effectiveEgress = egressProxy ? { localhost: [egressProxy.port] } : spec.egress;
+    const proxyEnv = egressProxy
+      ? {
+          HTTP_PROXY: egressProxy.url,
+          HTTPS_PROXY: egressProxy.url,
+          http_proxy: egressProxy.url,
+          https_proxy: egressProxy.url,
+          NO_PROXY: '',
+        }
+      : undefined;
+
     const { mkdirSync } = await import('node:fs');
     mkdirSync(workspaceDir, { recursive: true });
     if (spec.jobUser) {
@@ -482,7 +529,7 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
             deniedReadPaths: spec.deniedReadPaths,
             readableStateFiles: spec.readableStateFiles,
             writablePaths: spec.writablePaths,
-            egress: spec.egress,
+            egress: effectiveEgress,
           });
           writeFileSync(profilePath, profile, 'utf8');
           return ['-f', profilePath, spec.command, ...spec.args];
@@ -495,7 +542,7 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
           deniedReadPaths: spec.deniedReadPaths,
           readableStateFiles: spec.readableStateFiles,
           writablePaths: spec.writablePaths,
-          egress: spec.egress,
+          egress: effectiveEgress,
           command: spec.command,
           args: spec.args,
         });
@@ -522,7 +569,7 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
         : { command: sandboxBin, args: sandboxArgs };
       const child = spawn(launch.command, launch.args, {
         cwd: workspaceDir,
-        env: buildEva03CleanEnv(workspaceDir, spec.command),
+        env: buildEva03CleanEnv(workspaceDir, spec.command, proxyEnv),
         detached: true,
         stdio: ['ignore', 'pipe', 'pipe'],
       });
@@ -652,6 +699,7 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
       durationMs: Date.now() - startedAt,
     };
   } finally {
+    if (egressProxy) await egressProxy.close().catch(() => undefined);
     // A launch error never reached endAll: stop sampling and end anything it started.
     if (tracker) await tracker.endAll().catch(() => undefined);
     if (spec.jobUser && !workspaceDiscarded) {
