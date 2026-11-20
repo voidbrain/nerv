@@ -4,7 +4,7 @@
  "parent": "F-079",
  "title": "Measure the saving and declare paths where it holds",
  "goal": "Declarations only where a replay of recent merges shows they are safe and save reruns",
- "status": "planned",
+ "status": "implemented",
  "acceptance": [
   "Replay of the merges since 1869340 reports reruns with and without declarations",
   "A seeded regression inside a declared path is caught"

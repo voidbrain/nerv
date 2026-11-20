@@ -2137,9 +2137,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-079-T02 — Measure the saving and declare paths where it holds (Planned).
+💻 **→** Next: F-079-T02 — Measure the saving and declare paths where it holds (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2151,7 +2151,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-079-t02"></a>F-079-T02 — Measure the saving and declare paths where it holds | 0.5 h | 0 h | 0.5 h | Planned |
+| 🟢 Small | <a id="f-079-t02"></a>F-079-T02 — Measure the saving and declare paths where it holds | 0.5 h | 0 h | 0.5 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 0.5 h | 1 of 2 completed |
 
 <details><summary>Done steps (1)</summary>
@@ -2171,8 +2171,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #469](https://github.com/voidbrain/nerv/pull/469) (merged; CI green); [PR #377](https://github.com/voidbrain/nerv/pull/377) (its `.harness.json` bump alone made all seven cases pending again; rerun 7/7 on the branch) [Architecture reassessment 2026-11-13](audits/2026-11-13-architecture-reassessment.md) |
 | Opened | 2026-11-13 |
-| Verification | F-079-T01 verified in PR #469 with regression coverage and green full-suite CI; the seven system evaluation cases remain pending. |
-| Reviewed | 2026-11-16 |
+| Verification | 2026-11-20: `node --test test/gauntlet.test.mjs` (24/24 passed), `npm run check:fast`, and `npm run check:gauntlet-runs` passed. F-079-T01 verified in PR #469. |
+| Reviewed | 2026-11-20 |
 
 </details>
 

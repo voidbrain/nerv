@@ -21,6 +21,12 @@
       "area": "security-permissions",
       "requirements": [
         "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/policy.ts",
+        "test/evaluation.test.ts"
       ]
     },
     {
@@ -45,6 +51,18 @@
       "area": "security-permissions",
       "requirements": [
         "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/",
+        "shared/",
+        "test/ledger.test.ts",
+        "test/gate.test.ts",
+        "test/brief.test.ts",
+        "test/brief-recovery.test.ts",
+        "test/watch.test.ts",
+        "test/fixtures/posix.ts"
       ]
     },
     {
@@ -69,6 +87,17 @@
       "area": "conversation-memory",
       "requirements": [
         "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/",
+        "shared/",
+        "test/clarification.test.ts",
+        "test/misato.test.ts",
+        "test/resume.test.ts",
+        "test/why.test.ts",
+        "test/watch-runtime.test.ts"
       ]
     },
     {
@@ -89,6 +118,16 @@
       "area": "distributed-coordination",
       "requirements": [
         "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/",
+        "shared/",
+        "test/telegram.test.ts",
+        "test/one-channel.test.ts",
+        "test/telegram-reconcile.test.ts",
+        "test/fixtures/posix.ts"
       ]
     },
     {
@@ -116,6 +155,18 @@
       "area": "distributed-coordination",
       "requirements": [
         "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/",
+        "shared/",
+        "test/kaji-run.test.ts",
+        "test/kaji-seats.test.ts",
+        "test/worker-jobs.test.ts",
+        "test/worker-link.test.ts",
+        "test/worker-outbox.test.ts",
+        "test/protocol.test.ts"
       ]
     },
     {
@@ -135,6 +186,14 @@
       "area": "ci-operations",
       "requirements": [
         "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/",
+        "shared/",
+        "test/runtime-load.test.ts",
+        "test/process-client.test.ts"
       ]
     },
     {
@@ -155,6 +214,17 @@
       "requirements": [
         "posix-process-groups",
         "built-browser-assets"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/",
+        "shared/",
+        "web/",
+        "test/angular.browser.mjs",
+        "test/evaluation.browser.mjs",
+        "test/pwa.browser.mjs",
+        "test/fixtures/browser.mjs"
       ]
     }
   ]
