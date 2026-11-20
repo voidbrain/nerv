@@ -747,45 +747,111 @@
     // B-017: GET /api/models nests the roles under models (it said "off" with a consultant set).
     const roles = modelsData && modelsData.models && modelsData.models.roles; const generic = roles && roles.consultant && roles.consultant.model;
     const local = modelsData && modelsData.ollama ? modelsData.ollama.models.map(m => m.name) : [];
-    const selector = (id, current, fallback, name = "Generic pilot") => {
+    const draftFor = id => {
+      const d = pilotDrafts.get(id);
+      if (typeof d === "string") return { model: d };
+      return d && typeof d === "object" ? d : {};
+    };
+    const modelControl = (id, current, fallback, name = "Generic pilot", extraFields = "", extraChanged = false, extraValid = true) => {
       if (!modelsData) return "<div class='tiny muted'>Reading local models…</div>";
       if (modelsData.error) return "<div class='tiny danger'>" + esc(modelsData.error) + "</div>";
-      const selected = pilotDrafts.has(id) ? pilotDrafts.get(id) : current || "off";
+      const d = draftFor(id);
+      const selected = d.model !== undefined ? d.model : current || "off";
       const option = (value, label, disabled) => "<option value='" + esc(value) + "'" + (selected === value ? " selected" : "") + (disabled ? " disabled" : "") + ">" + esc(label) + "</option>";
       const options = (fallback ? option("off", "Off", false) : "") + local.map(n => option(n, n + " · local", false)).join("") +
         (current && !local.includes(current) ? option(current, current + " · unavailable locally", true) : "") + (selected !== "off" && selected !== current && !local.includes(selected) ? option(selected, selected + " · unavailable locally", true) : "");
       const busy = pilotBusy.has(id); const disabled = busy || (!fallback && !local.length);
-      const unchanged = selected === (current || "off"); const unavailable = selected !== "off" && !local.includes(selected);
-      return "<form class='pilot-model-form' data-pilot='" + esc(id) + "' data-current='" + esc(current || "off") + "'><label class='small' for='pilot-model-" + esc(id) + "'>Model</label><select id='pilot-model-" + esc(id) + "' aria-label='Model for " + esc(name) + "'" + (disabled ? " disabled" : "") + ">" + options + "</select><button class='btn sm' type='submit'" + (disabled || unchanged || unavailable ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button></form>";
+      const modelChanged = selected !== (current || "off");
+      const unavailable = modelChanged && selected !== "off" && !local.includes(selected);
+      const canApply = !busy && extraValid && (modelChanged || extraChanged) && !unavailable && (!modelChanged || fallback || local.length > 0);
+      const curName = d.savedName !== undefined ? d.savedName : name;
+      const curSecond = d.savedSecond !== undefined ? d.savedSecond : "";
+      return "<form class='pilot-model-form' data-pilot='" + esc(id) + "' data-current='" + esc(current || "off") + "' data-current-name='" + esc(curName) + "' data-current-second='" + esc(curSecond) + "'>" +
+        extraFields +
+        "<div class='pilot-field'><label class='small' for='pilot-model-" + esc(id) + "'>Model</label><select id='pilot-model-" + esc(id) + "' aria-label='Model for " + esc(name) + "'" + (disabled ? " disabled" : "") + ">" + options + "</select></div>" +
+        "<div class='pilot-actions'><button class='btn sm' type='submit'" + (!canApply ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button></div></form>";
     };
-    const card = (name, sub, right, line, control = "") => "<div class='card'><div class='row'><span class='b'>" + esc(name) + "</span>" + right + "</div><div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + control + "</div>";
+    const specialistControl = p => {
+      const d = draftFor(p.id);
+      const savedName = p.name || "";
+      const savedSecond = p.secondName || "";
+      const nameVal = d.name !== undefined ? d.name : savedName;
+      const secondVal = d.secondName !== undefined ? d.secondName : savedSecond;
+      const busy = pilotBusy.has(p.id);
+      const dis = busy ? " disabled" : "";
+      const fields = "<div class='pilot-field'><label class='small' for='pilot-name-" + esc(p.id) + "'>Call name</label><input id='pilot-name-" + esc(p.id) + "' class='pilot-name-input' type='text' maxlength='40' aria-label='Call name for " + esc(savedName) + "' value='" + esc(nameVal) + "'" + dis + "/></div>" +
+        "<div class='pilot-field'><label class='small' for='pilot-second-" + esc(p.id) + "'>Second name</label><input id='pilot-second-" + esc(p.id) + "' class='pilot-second-input' type='text' maxlength='40' placeholder='Optional' aria-label='Second name for " + esc(savedName) + "' value='" + esc(secondVal) + "'" + dis + "/></div>";
+      const changed = nameVal.trim() !== savedName || secondVal.trim() !== savedSecond;
+      const valid = nameVal.trim().length > 0 && nameVal.trim().length <= 40 && secondVal.trim().length <= 40;
+      if (d.savedName === undefined) d.savedName = savedName;
+      if (d.savedSecond === undefined) d.savedSecond = savedSecond;
+      return modelControl(p.id, p.model, false, savedName, fields, changed, valid);
+    };
+    const card = (name, second, sub, right, line, control = "") => "<div class='card'><div class='row'><span class='b'>" + esc(name) + (second ? " <span class='tiny muted'>(" + esc(second) + ")</span>" : "") + "</span>" + right + "</div><div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + control + "</div>";
     const stageOf = p => p.retired ? "retired" : p.stage; const counts = {}; roster.forEach(p => { counts[stageOf(p)] = (counts[stageOf(p)] || 0) + 1; });
     const tab = currentTab("pilots", "prototype"); const shown = roster.filter(p => stageOf(p) === tab);
-    box.innerHTML = card("Generic pilot", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", "", selector("generic", generic, true)) +
+    box.innerHTML = card("Generic pilot", "", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", "", modelControl("generic", generic, true)) +
       stageTabs("pilots", [["prototype","Proto"],["test","Test"],["production","Prod"],["retired","Retired"]], counts) +
-      shown.map(p => card(p.name, p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "), selector(p.id, p.model, false, p.name))).join("") +
+      shown.map(p => card(p.name, p.secondName || "", p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "), specialistControl(p))).join("") +
       (roster.length ? (shown.length ? "" : "<div class='muted small'>No pilot at this stage.</div>") : "<div class='muted small'>No specialists yet. Add one: nerv pilots add ID --name … --domain … --keywords … --model …, or approve a proposal from the Marduk Institute.</div>");
   };
+  const syncPilotForm = form => {
+    const id = form.dataset.pilot;
+    const nameEl = form.querySelector(".pilot-name-input");
+    const secondEl = form.querySelector(".pilot-second-input");
+    const selectEl = form.querySelector("select");
+    const prev = pilotDrafts.get(id);
+    const next = typeof prev === "string" ? { model: prev } : prev && typeof prev === "object" ? { ...prev } : {};
+    if (nameEl) next.name = nameEl.value;
+    if (secondEl) next.secondName = secondEl.value;
+    if (selectEl) next.model = selectEl.value;
+    const curName = form.dataset.currentName || "";
+    const curSecond = form.dataset.currentSecond || "";
+    const curModel = form.dataset.current || "off";
+    const nameChanged = nameEl ? nameEl.value.trim() !== curName : false;
+    const secondChanged = secondEl ? secondEl.value.trim() !== curSecond : false;
+    const modelChanged = selectEl ? selectEl.value !== curModel : false;
+    if (!nameChanged && !secondChanged && !modelChanged) pilotDrafts.delete(id);
+    else pilotDrafts.set(id, next);
+    const option = selectEl && selectEl.options[selectEl.selectedIndex];
+    const modelBad = modelChanged && (!selectEl.value || (option && option.disabled));
+    const nameValid = !nameEl || (nameEl.value.trim().length > 0 && nameEl.value.trim().length <= 40);
+    const secondValid = !secondEl || secondEl.value.trim().length <= 40;
+    form.querySelector("button").disabled = pilotBusy.has(id) || !(nameChanged || secondChanged || modelChanged) || modelBad || !nameValid || !secondValid;
+  };
+  document.addEventListener("input", e => {
+    const form = e.target.closest && e.target.closest(".pilot-model-form");
+    if (form) syncPilotForm(form);
+  });
   document.addEventListener("change", e => {
     const form = e.target.closest && e.target.closest(".pilot-model-form");
-    if (form) {
-      const id = form.dataset.pilot; const value = e.target.value;
-      if (value === form.dataset.current) pilotDrafts.delete(id); else pilotDrafts.set(id, value);
-      const option = e.target.options[e.target.selectedIndex];
-      form.querySelector("button").disabled = pilotBusy.has(id) || !value || value === form.dataset.current || !!(option && option.disabled);
-    }
+    if (form) syncPilotForm(form);
   });
   document.addEventListener("submit", async e => {
     const form = e.target; if (!form.matches(".pilot-model-form")) return; e.preventDefault();
     const id = form.dataset.pilot; if (pilotBusy.has(id)) return; const restoreFocus = form.contains(document.activeElement);
-    const value = form.querySelector("select").value; if (!value || value === form.dataset.current || form.querySelector("button").disabled) return;
-    pilotBusy.add(id); renderMelons(true);
+    const btn = form.querySelector("button"); if (!btn || btn.disabled) return;
+    const selectEl = form.querySelector("select");
+    const nameEl = form.querySelector(".pilot-name-input");
+    const secondEl = form.querySelector(".pilot-second-input");
+    const value = selectEl ? selectEl.value : "";
+    pilotBusy.add(id); window.renderMelons(true);
     try {
-      if (id === "generic") await api("models", { method:"PUT", body:JSON.stringify({ consultant:value === "off" ? null : { model:value } }) });
-      else { const result = await api("pilots/" + encodeURIComponent(id) + "/model", { method:"PATCH", body:JSON.stringify({ model:value }) }); state.pilots = result.pilots; }
-      pilotDrafts.delete(id); log("Pilot model applied: " + id + " · " + value, "ok", null, "maya");
-    } catch (error) { log("Pilot model: " + error.message, "danger", null, "maya"); }
-    finally { pilotBusy.delete(id); await loadModels(true); renderMelons(true); if (restoreFocus) { const next = [...document.querySelectorAll(".pilot-model-form")].find(f => f.dataset.pilot === id); if (next) next.querySelector("select").focus(); } }
+      if (id === "generic") {
+        await api("models", { method:"PUT", body:JSON.stringify({ consultant:value === "off" ? null : { model:value } }) });
+        log("Pilot model applied: " + id + " · " + value, "ok", null, "maya");
+      } else {
+        const patch = {};
+        if (nameEl && nameEl.value.trim() !== (form.dataset.currentName || "")) patch.name = nameEl.value.trim();
+        if (secondEl && secondEl.value.trim() !== (form.dataset.currentSecond || "")) patch.secondName = secondEl.value.trim();
+        if (selectEl && value !== (form.dataset.current || "off")) patch.model = value;
+        const result = await api("pilots/" + encodeURIComponent(id), { method:"PATCH", body:JSON.stringify(patch) });
+        state.pilots = result.pilots;
+        log("Pilot updated: " + id, "ok", null, "maya");
+      }
+      pilotDrafts.delete(id);
+    } catch (error) { log("Pilot update: " + error.message, "danger", null, "maya"); }
+    finally { pilotBusy.delete(id); await loadModels(true); window.renderMelons(true); if (restoreFocus) { const next = [...document.querySelectorAll(".pilot-model-form")].find(f => f.dataset.pilot === id); if (next) (next.querySelector("select") || next.querySelector("input"))?.focus(); } }
   });
   // While you were away: from real sorties and deliveries since your last visit, remembered in this browser only.
   const VISIT = "nerv.dashboard.lastVisit";

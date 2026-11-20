@@ -260,17 +260,23 @@ mark { background:color-mix(in srgb,var(--accent) 35%,transparent); color:inheri
 [hidden] { display:none !important; }
 .sq { display:inline-block; width:7px; height:7px; margin-right:3px; vertical-align:middle; }
 
-/* EVA instances per class, per machine */
-.eva-machines { display:flex; flex-direction:column; gap:8px; }
-.eva-machine { border:1px solid var(--border); padding:6px; background:var(--panel2); display:flex; flex-direction:column; gap:5px; }
+/* EVA cages + live instances per class, per machine */
+.cages { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; }
+@media (max-width:720px) { .cages { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.cage { border:1px solid var(--border); padding:4px; min-width:0; background:var(--panel2); display:flex; flex-direction:column; gap:3px; }
+.cage .ch, .eva-class-hdr { display:flex; flex-direction:column; align-items:flex-start; gap:1px; font-size:10px; font-weight:900; letter-spacing:.06em; }
+.cage canvas { width:100%; height:30px; display:block; background:#000; border:1px solid var(--border); margin-top:2px; }
+.cage .cd { font-size:9px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eva-machines-bar { display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+.eva-machine { border:1px solid var(--border); padding:5px 6px; background:var(--panel2); display:flex; flex-direction:column; gap:3px; }
 .eva-machine-hdr { display:flex; align-items:center; justify-content:space-between; gap:6px; flex-wrap:wrap; }
-.eva-classes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px; }
-@media (max-width:720px) { .eva-classes { grid-template-columns:minmax(0,1fr); } }
-.eva-class { border:1px solid var(--border); padding:5px; min-width:0; background:var(--panel); display:flex; flex-direction:column; gap:4px; }
-.eva-class-hdr { display:flex; flex-direction:column; align-items:flex-start; gap:1px; font-size:10px; font-weight:900; letter-spacing:.06em; }
-.eva-inst { display:flex; align-items:center; justify-content:space-between; gap:6px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:3px; font-size:10px; }
+.eva-inst { display:flex; align-items:center; justify-content:space-between; gap:4px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:3px; font-size:10px; }
 .eva-inst-meta { display:flex; flex-direction:column; min-width:0; }
 .eva-empty { font-size:10px; color:var(--muted); }
+.pilot-model-form { display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+.pilot-field { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.pilot-field input, .pilot-field select { flex:1; min-width:0; }
+.pilot-actions { display:flex; justify-content:flex-end; margin-top:2px; }
 
 /* log */
 details > summary { cursor:pointer; list-style:none; }
@@ -494,8 +500,8 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
       </section>
 
       <section class="panel" id="p-eva">
-        <div class="hdr"><span data-l="cages">EVA · instances per class</span><span class="sub" id="cages-sub">by machine</span></div>
-        <div class="pad eva-machines" id="cages"></div>
+        <div class="hdr"><span data-l="cages">EVA cages · heartbeat</span><span class="sub" id="cages-sub">by machine</span></div>
+        <div class="pad" id="cages"></div>
       </section>
 
 
