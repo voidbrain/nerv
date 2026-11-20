@@ -1,5 +1,6 @@
 import { runResumeEngineTick, type CreateResumeIntentInput, type ResumeIntentStatus } from './resume-intent.ts';
 import { ClaudeCodeResumeAdapter } from './claude-resume-adapter.ts';
+import { createWebChatResumeDeps } from './web-chat-resume-adapter.ts';
 import { decideHitlThroughPersona, explainClassificationThroughPersona, formatMisatoPendingHitl } from './persona.ts';
 import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-classes.ts';
 import { runToolsProcessInEva03 } from './eva-runner.ts';
@@ -267,12 +268,25 @@ export async function tryRunCliCommand(
         const owner = ctx.flag('--owner') ?? 'cli';
         const deps = args.includes('--claude-code')
           ? new ClaudeCodeResumeAdapter().toEngineDeps(owner)
-          : {
-              owner,
-              checkAvailability: () => ({ available: false, reason: 'Live adapter readiness probe required.' }),
-              verifyIdentity: () => null,
-              executeResume: () => ({ kind: 'failed' as const, reason: 'No live adapter bound in CLI tick.' }),
-            };
+          : args.includes('--web-chat')
+            ? createWebChatResumeDeps({
+                owner,
+                allowedOrigins: [],
+                driver: {
+                  getActiveTab: async () => {
+                    throw new Error('No live browser-worker driver bound in CLI tick.');
+                  },
+                  clickControl: async () => {
+                    throw new Error('No live browser-worker driver bound in CLI tick.');
+                  },
+                },
+              })
+            : {
+                owner,
+                checkAvailability: () => ({ available: false, reason: 'Live adapter readiness probe required.' }),
+                verifyIdentity: () => null,
+                executeResume: () => ({ kind: 'failed' as const, reason: 'No live adapter bound in CLI tick.' }),
+              };
         const res = await runResumeEngineTick(store.resumeIntents, deps);
         console.log(JSON.stringify(res, null, 2));
       } else {
