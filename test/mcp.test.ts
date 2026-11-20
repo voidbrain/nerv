@@ -197,7 +197,7 @@ test(
       script.push('{"action":{"tool":"notes.read_note","args":{"name":"x"}}}', '{"reply":"not now"}');
       const three = await r.chat('Read note x');
       assert.equal(three.steps[0]?.outcome, 'invalid');
-      assert.match(three.steps[0]?.error ?? '', /EVA-03 .*F-049/);
+      assert.match(three.steps[0]?.error ?? '', /EVA-03 .*needs a sandbox NERV does not have yet/);
     } finally {
       await r.close();
       await m.close();

@@ -664,7 +664,7 @@ export async function tryRunCliCommand(
           ],
         });
         console.log(
-          `${toolName(server, tool)} granted as a read (Pattern Green), EVA-${eva}${eva === '03' ? ': it will not run until EVAs exist (F-049)' : ''}. Pinned to its current description: if the server changes it, the grant is suspended.`,
+          `${toolName(server, tool)} granted as a read (Pattern Green), EVA-${eva}${eva === '03' ? ': it will not run until EVAs exist' : ''}. Pinned to its current description: if the server changes it, the grant is suspended.`,
         );
       }
     } else throw new Error(usage);

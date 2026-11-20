@@ -275,7 +275,7 @@ export function consultantAsk(
         ]
       : []),
     'Read the request (and the earlier exchanges, when present) and give Misato short, practical advice: what the owner most likely wants, what to check first, what could go wrong, what to ask if something is unclear.',
-    '"tools" (when present) lists the actions Misato can take, NERV\'s own and those the owner granted: advise within them, and never tell Misato she cannot do something one of them does (B-024).',
+    '"tools" (when present) lists the actions Misato can take, NERV\'s own and those the owner granted: advise within them, and never tell Misato she cannot do something one of them does.',
     '"bases" (when present) lists the owner\'s NERV bases, the machines the agent runs on: a request naming one ("on Tabgha") means that base, not a place.',
     ...(pilot
       ? []

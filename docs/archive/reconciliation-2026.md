@@ -1,5 +1,9 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-20 — main `45be5940`
+
+Harness v10.1.0 reconciled in [PR #575](https://github.com/voidbrain/nerv/pull/575): steps tables show Depends on and Unlocks; `check:work` warns on blockers named only in prose (two false positives on its first run, B-068 and F-012, left as they are).
+
 ## 2026-11-19 — main `64db43a`
 
 PRs #558, #559, #561, #562, and #564 merged on green CI (#558: F-049-T07 / F-049-T14; #559: B-101; #561: F-083-T06; #562: F-106-T01; #564: F-016-T05). Marked F-049-T07, F-083-T06, F-106-T01, and F-016-T05 verified, unblocking F-016-T06 and F-106-T03. Reconciled in PR #565.
@@ -382,6 +386,8 @@ PRs #374–#382 merged with required CI green; scoped full-suite jobs skipped on
 **Formatter, 2026-11-11 ([PR #260](https://github.com/voidbrain/nerv/pull/260)).** Prettier 3.9.10 added for `src/`, `test/`, and `web/src`.
 
 **Harness reconciliations & assessments, 2026-11-08 – 2026-11-11 ([PR #256](https://github.com/voidbrain/nerv/pull/256), [PR #255](https://github.com/voidbrain/nerv/pull/255), [PR #237](https://github.com/voidbrain/nerv/pull/237), [PR #231](https://github.com/voidbrain/nerv/pull/231), [PR #241](https://github.com/voidbrain/nerv/pull/241)).** Usage/allowance tooling (v4.8.0), F-005 initial plan (v4.7.0), task-context guide (v4.3.0), execution-boundary assessment, B-046 CI evidence, and external-project references.
+
+**Harness v6.0.0 reconciliation, 2026-11-12.** Template F-059 (owner request): `tools/work-items.mjs`, `tools/check-backlog.mjs` and `tools/backlog-queue.mjs` copied byte-identically from v6.0.0; the Record and evidence requirements, Optional upfront feature plans and Optional work queue paragraphs of BACKLOG-RULES carried from the template diff v5.6.0..v6.0.0; CI clones the template at v6.0.0. Bugs and features are one `Work items` list (`{"records": "all"}`); each record's summary table now reads Status, Priority, Effort, Remaining, Depends on, Unlocks, Procedures, Decision. [PR #295](https://github.com/voidbrain/nerv/pull/295).
 
 ## 2026-11-13 — main `ee11385`
 
