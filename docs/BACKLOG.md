@@ -1040,7 +1040,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-103-t02"></a>F-103-T02 — Per-link load between bases | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [F-103-T03](#f-103-t03) | — |
+| 🟡 Medium | <a id="f-103-t02"></a>F-103-T02 — Per-link load between bases | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [F-103-T03](#f-103-t03) | [PR #589](https://github.com/voidbrain/nerv/pull/589) implementation |
 | 🟡 Medium | <a id="f-103-t03"></a>F-103-T03 — Health view and warnings | 1.5 h | 0 h | 1.5 h | Planned | [F-103-T02](#f-103-t02) | [F-103-T04](#f-103-t04) | — |
 | 🟢 Small | <a id="f-103-t04"></a>F-103-T04 — 24-hour baseline with both bases | 0.25 h | 0 h | 0.25 h | Planned | [F-103-T03](#f-103-t03) | — | — |
 | 🟡 Medium | **Total** | 4.75 h | 0 h (0 of 4 steps recorded) | 3.25 h | 1 of 4 completed | | | |
@@ -1060,7 +1060,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-103-T01: [PR #498](https://github.com/voidbrain/nerv/pull/498) implementation. [PR #498](https://github.com/voidbrain/nerv/pull/498) (merged; CI green); — |
+| PR / evidence | Steps: F-103-T01: [PR #498](https://github.com/voidbrain/nerv/pull/498) implementation · F-103-T02: [PR #589](https://github.com/voidbrain/nerv/pull/589) implementation. [PR #589](https://github.com/voidbrain/nerv/pull/589) (F-103-T02); [PR #498](https://github.com/voidbrain/nerv/pull/498) (merged; CI green); — |
 | Opened | 2026-11-15 |
 | Verification | 2026-11-20: `node --test test/link-load.test.ts test/kaji-link.test.ts test/worker-link.test.ts`, `npm run check:fast`, and `npm run check:conventions` passed. 2026-11-18: F-103-T01 verified: [PR #498](https://github.com/voidbrain/nerv/pull/498) merged on green CI. |
 | Reviewed | 2026-11-20 |
