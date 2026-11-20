@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 6 | 9 | 33 | 18 |
+| **This week** | 6 | 9 | 35 | 18 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 22 |
+| **Open** | 41 | 24 |
 | **Require Human 🧑** | 7 | 6 |
 
 ### Require Human 🧑
@@ -30,7 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 84.25 h agent + 10.5 h owner across 130 open steps of 40 features and 22 other records. 79.25 h of actual effort recorded on 121 steps. Generated from the task files.
+**Remaining effort:** 84.25 h agent + 10.5 h owner across 132 open steps of 40 features and 24 other records. 79.75 h of actual effort recorded on 123 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2612,6 +2612,82 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |
+
+</details>
+
+---
+### <a id="b-103"></a>[🐞 B-103](#top)
+
+**A channel-state privacy test fails whenever a timestamp contains "123"**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-103-T01 — Fixture chat ID that no timestamp can contain (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-20 in CI run 44647978230 (PR #575, a docs and tooling reconcile): "failed relay and failed own-bot sends report failure without private error data…" (`test/channel-state.test.ts`) asserts the channel state never contains the fixture's private values, one of them the chat ID 123. The state carries ISO timestamps, and this one was `00:44:43.123Z`, so the check failed with no private data present. It fails whenever a timestamp in the state contains "123". |
+| **Reproduce** | Run the test when a delivery timestamp's seconds or milliseconds produce "123" (for example `…:43.123Z`). |
+| **Check** | The fixture chat ID is one no ISO timestamp can contain (987654321) and the privacy assertion matches it; the test passes. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-103-t01"></a>B-103-T01 — Fixture chat ID that no timestamp can contain | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix |
+| 🟢 Small | **Total** | 0.25 h | 0.25 h | 0 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-103.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-103-T01: [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix. CI run 44647978230 (PR #575); [PR #578](https://github.com/voidbrain/nerv/pull/578) |
+| Opened | 2026-11-20 |
+| Verification | Pending. |
+| Reviewed | 2026-11-20 |
+
+</details>
+
+---
+### <a id="b-104"></a>[🐞 B-104](#top)
+
+**The Instrumentality daily-run test waits a fixed 400 ms and fails on a slow Windows runner**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-104-T01 — Wait for the Instrumentality attempts instead of a fixed 400 ms (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-20 on Windows in CI run 44650057242 (PR #578, a test-only change): "Instrumentality runs once a local day at its time, and a failed digest is not retried in a loop" (`test/instrumentality.test.ts`) found 0 digest attempts where it expects 2, after a fixed 400 ms wait. The idle-mode test below it had the same fixed wait and was changed to wait until the run happens. |
+| **Reproduce** | Run the test on a loaded Windows runner: the scheduler has not run within 400 ms. |
+| **Check** | The test waits until both attempts happened (up to 10 s), then 400 ms more in which a looping retry would show, and still expects exactly 2. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-104-t01"></a>B-104-T01 — Wait for the Instrumentality attempts instead of a fixed 400 ms | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix |
+| 🟢 Small | **Total** | 0.25 h | 0.25 h | 0 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-104.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-104-T01: [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix. CI run 44650057242 (Windows); [PR #578](https://github.com/voidbrain/nerv/pull/578) |
+| Opened | 2026-11-20 |
+| Verification | Pending. |
+| Reviewed | 2026-11-20 |
 
 </details>
 
