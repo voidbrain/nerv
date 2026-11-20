@@ -3,7 +3,7 @@
 | Milestone | Scope | Records | Acceptance |
 |---|---|---|---|
 | 0 — Harness and contracts | v4.0.0 core + Angular adoption; project Node conventions; protocol and privacy boundaries; ledger tooling (recaps, archives, coverage) | F-001, F-031, F-032, F-055, F-058, F-059, F-061, F-068, F-069, F-071, F-072, F-073, F-074, F-076, F-077, F-079, F-095, F-096, F-097, F-104, F-105 | Harness checks, current review evidence, explicit upstream Node gap F-001; pinned Gauntlet evidence adapter with no automatic qualification |
-| 1 — Reliable local core | CLI, SQLite reminders, local inbox, cancellation, doctor, restart recovery; reminder time ranges; backup and restore | F-002, F-043, F-062 | Restart and duplicate regression tests; authenticated API; F-002 tracks remaining hardening; recovery bounds and a restore drill in F-062 once accepted |
+| 1 — Reliable local core | CLI, SQLite reminders, local inbox, cancellation, doctor, restart recovery; reminder time ranges; backup and restore | F-002, F-043, F-062, F-115 | Restart and duplicate regression tests; authenticated API; F-002 tracks remaining hardening; recovery bounds and a restore drill in F-062 once accepted |
 | 1a — Headless and bilingual workspace | Single process on 4317, dev 4318, private configuration, Italian/English UI, launchd/systemd user services, base identity, Windows bases, browser sessions | F-009, F-010, F-034, F-035, F-037, F-039 | Local process/restart and configuration tests; actual OS service acceptance F-009; localization F-010: [scoped browser acceptance](acceptance/angular-2026-11-06.md) |
 | 1a.1 — Isolated runtime foundation | A scheduler/SQLite child, B execution boundary, C API/static supervisor, validated local IPC and versioned JSON-RPC | F-013, F-014 | Brain CPU stall/crash does not stop reminders; A death triggers supervisor recovery; version/frame/backpressure limits |
 | 1b — Native macOS companion | SwiftUI MenuBarExtra and native bridge; no Electron; Keychain client pairing, scoped credentials, independent lifecycle, health, notifications and OS controls | F-011, F-081 | Pairing replay/revocation/runtime-identity tests; build/sign/package on macOS; Quit companion leaves service running |
@@ -24,7 +24,7 @@ Status per milestone, derived from the records (Delivered: all closed; Awaiting 
 | Milestone | Status | Closed | Implemented / verified | Open | Still open |
 |---|---|---:|---:|---:|---|
 | 0 — Harness and contracts | In progress | 20 | 0 | 1 | F-076 |
-| 1 — Reliable local core | In progress | 2 | 0 | 1 | F-062 |
+| 1 — Reliable local core | In progress | 2 | 0 | 2 | F-062, F-115 |
 | 1a — Headless and bilingual workspace | Delivered | 6 | 0 | 0 | — |
 | 1a.1 — Isolated runtime foundation | Delivered | 2 | 0 | 0 | — |
 | 1b — Native macOS companion | Awaiting verification | 1 | 1 | 0 | — |

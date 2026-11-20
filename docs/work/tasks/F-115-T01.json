@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-115-T01",
+  "parent": "F-115",
+  "title": "Grouped, alphabetical CLI help",
+  "goal": "`nerv help` is grouped by theme, sorted and aligned; `nerv help COMMAND` gives full usage",
+  "status": "implemented",
+  "acceptance": [
+    "A test fails when a dispatched command is missing from help or help lists one the CLI does not handle"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/cli-help.ts",
+    "src/cli.ts",
+    "test/cli-help.test.ts",
+    "docs/work/records/F-115.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-20: one module, its wiring and a test. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 0,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 595,
+      "note": "implementation"
+    }
+  ]
+}

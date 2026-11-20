@@ -20,6 +20,7 @@ import { clickDesktopControl, type DesktopAccessibilityDriver } from './desktop-
 import { SeatPool } from './seat-pool.ts';
 
 import { assertRootMigrationReady, rootMigrationCommand } from './root-migration.ts';
+import { formatCommandHelp, formatHelp } from './cli-help.ts';
 import { nodesCommand } from './nodes-cli.ts';
 import { backupCommand } from './backup-cli.ts';
 import { storeReceived } from './offhost.ts';
@@ -234,11 +235,11 @@ try {
   } else if (command === 'service') service(args[0] ?? '', home);
   else if (await tryRunCliCommand(command, args, home, { readSecret, openPage, reloadIfRunning, flag })) {
     // Handled by cli-commands.ts
-  } else if (!command || command === 'help')
-    console.log(
-      'NERV Agency\nCommands: root-migration plan|apply|status | init [--base ID --name "Name"] [--no-model-setup] [--fresh] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | nodes discover|inspect|plan|apply|status|release | workers pending|history|held|result|cancel|cancel-outbox|release|retry-outbox|abandon-outbox | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | backup keygen|status|decrypt | credentials rotate admin|telegram|cloud | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | chronicle [DAYS] | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall',
-    );
-  else {
+  } else if (!command || command === 'help') {
+    const detail = args[0] ? formatCommandHelp(args[0]) : undefined;
+    if (args[0] && !detail) throw new Error(`Unknown command: ${args[0]}. Run nerv help for the list.`);
+    console.log(detail ?? formatHelp(Math.min(process.stdout.columns || 100, 100)));
+  } else {
     const config = readConfig(home);
     const scrolls = readScrolls(home);
     if (command !== 'serve' && command !== 'launch') store = new Store(databasePath(home), scrolls, { home });

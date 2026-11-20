@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 10 | 10 | 35 | 18 |
+| **This week** | 11 | 10 | 36 | 18 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 44 | 24 |
+| **Open** | 45 | 25 |
 | **Require Human 🧑** | 8 | 6 |
 
 ### Require Human 🧑
@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 116.75 h agent + 11 h owner across 152 open steps of 44 features and 24 other records. 79.75 h of actual effort recorded on 123 steps. Generated from the task files.
+**Remaining effort:** 118.75 h agent + 11 h owner across 156 open steps of 45 features and 25 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1953,6 +1953,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-105"></a>[🐞 B-105](#top)
+
+**An older running service rejects configuration written by newer code: `/api/models` fails**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-105-T01 — Name configuration version skew instead of a raw validator error (Planned).
+
+| | |
+|---|---|
+| **Issue** | Seen 2026-11-20 on the main base: the dashboard showed `GET /api/models: Unsupported updatePolicy field: schedule`. The service had started 2026-11-19 09:24 on `477d6afc`, before F-110-T02 (`48d4e74c`) taught `validateAutoUpdatePolicy` the `schedule` field; `config.json` was rewritten 2026-11-20 11:07 by newer code and now holds `updatePolicy.schedule`. Meanwhile the primary checkout moved six times by `git pull --tags origin main` (outside the `nodes lifecycle-*` flow), so the files on disk no longer matched the running process and nothing said so. |
+| **Reproduce** | Run a service from a revision before `48d4e74c`; save the update schedule with current code against the same home; open the dashboard. |
+| **Check** | Test committed failing first: a service whose validator predates a field in `config.json` answers the dashboard with a message naming the cause (configuration written by a newer NERV; update this base) instead of a raw validator error, and strict validation still rejects a field no NERV version knows; `nerv doctor` reports when the running service's revision differs from its checkout's HEAD; on the main base after an update through the lifecycle flow, `/api/models` loads. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-105-t01"></a>B-105-T01 — Name configuration version skew instead of a raw validator error | 1.5 h | 0 h | 1.5 h | Planned | — | [B-105-T02](#b-105-t02) |
+| 🟢 Small | <a id="b-105-t02"></a>B-105-T02 — Live check on the main base | 0.25 h | 0 h | 0.25 h | Planned | [B-105-T01](#b-105-t01) | — |
+| 🟡 Medium | **Total** | 1.75 h | 0 h (0 of 2 steps recorded) | 1.75 h | 0 of 2 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-105.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #595](https://github.com/voidbrain/nerv/pull/595); owner report 2026-11-20; process start time and checkout reflog read on the main base |
+| Opened | 2026-11-20 |
+| Verification | Pending |
+| Reviewed | 2026-11-20 |
+
+</details>
+
+---
 ### <a id="b-057"></a>[🐞 B-057](#top)
 
 **Companion error messages are Italian only and do not say what went wrong**
@@ -2130,6 +2169,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-13 |
 | Verification | 2026-11-18: F-076-T03 verified: [PR #382](https://github.com/voidbrain/nerv/pull/382) merged on green CI. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-115"></a>[✨ F-115](#top)
+
+**Grouped, alphabetical CLI help**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-115-T01 — Grouped, alphabetical CLI help (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-20: `nerv help` printed every command on one long line, in no order and without themes, and it had drifted: `batteries`, `fleet`, `skills`, `eva`, `seats` and others were missing. |
+| **Reproduce** | `nerv help` on main before this change. |
+| **Check** | `nerv help` groups commands by theme, sorts them alphabetically within each group and aligns the descriptions in one column within 100 characters; `nerv help COMMAND` prints that command's full usage and an unknown command says so; a test fails when a command the CLI dispatches is missing from the help or the help lists one it does not handle. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-115-t01"></a>F-115-T01 — Grouped, alphabetical CLI help | 0.75 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | [PR #595](https://github.com/voidbrain/nerv/pull/595) implementation |
+| 🟢 Small | <a id="f-115-t02"></a>F-115-T02 — Rerun the system flow cases at the F-115 source | 0.25 h | 0 h | 0.25 h | Planned | — |
+| 🟢 Small | **Total** | 1 h | 0.75 h (1 of 2 steps recorded) | 0.25 h | 0 of 2 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-115.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-115-T01: [PR #595](https://github.com/voidbrain/nerv/pull/595) implementation. [PR #595](https://github.com/voidbrain/nerv/pull/595); `test/cli-help.test.ts` |
+| Opened | 2026-11-20 |
+| Verification | Pending: CI |
+| Reviewed | 2026-11-20 |
 
 </details>
 
