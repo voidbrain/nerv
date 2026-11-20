@@ -1984,7 +1984,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner report 2026-11-20; process start time and checkout reflog read on the main base |
+| PR / evidence | Opened in [PR #595](https://github.com/voidbrain/nerv/pull/595); owner report 2026-11-20; process start time and checkout reflog read on the main base |
 | Opened | 2026-11-20 |
 | Verification | Pending |
 | Reviewed | 2026-11-20 |
@@ -2191,10 +2191,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-115-t01"></a>F-115-T01 — Grouped, alphabetical CLI help | 0.75 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.75 h | 0.75 h | 0 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-115-t01"></a>F-115-T01 — Grouped, alphabetical CLI help | 0.75 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | [PR #595](https://github.com/voidbrain/nerv/pull/595) implementation |
+| 🟢 Small | **Total** | 0.75 h | 0.75 h | 0 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2203,7 +2203,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | `test/cli-help.test.ts` |
+| PR / evidence | Steps: F-115-T01: [PR #595](https://github.com/voidbrain/nerv/pull/595) implementation. [PR #595](https://github.com/voidbrain/nerv/pull/595); `test/cli-help.test.ts` |
 | Opened | 2026-11-20 |
 | Verification | Pending: CI |
 | Reviewed | 2026-11-20 |
