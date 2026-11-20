@@ -61,7 +61,13 @@ import {
 } from './chronicle.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
-import { guardLocalService } from './node-lifecycle-execution.ts';
+import {
+  guardLocalService,
+  linuxServiceHost,
+  macServiceHost,
+  windowsServiceHost,
+  type ServiceHost,
+} from './node-lifecycle-execution.ts';
 import { ROOT_KEY_FILE, baseKey, createRootKey, fingerprint } from './kaji.ts';
 import { service } from './service.ts';
 import { initializeNativeTLS, loadNativeTLS, nativeAdmin, NativeAuth, type Invitation } from './native-auth.ts';
@@ -531,6 +537,11 @@ try {
           const c = live();
           return { ...(c.instrumentality ? { mode: c.instrumentality } : {}), timeZone: c.timeZone };
         });
+        const localServiceHost = (): ServiceHost => {
+          if (process.platform === 'win32') return windowsServiceHost(home);
+          if (process.platform === 'linux') return linuxServiceHost(home);
+          return macServiceHost(home);
+        };
         let server: ReturnType<typeof makeServer>;
         let native: ReturnType<typeof makeServer> | undefined;
         let close: () => void = () => {};
@@ -540,6 +551,7 @@ try {
             webRoot,
             ...config,
             onStop: () => close(),
+            lifecycleHost: localServiceHost,
             readUpdatePolicy: () => readConfig(home).updatePolicy ?? defaultAutoUpdatePolicy(),
             saveUpdatePolicy: (policy) => setUpdatePolicy(home, policy),
             exposeUpdateControl: (control) => {
