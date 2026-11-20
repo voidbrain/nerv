@@ -163,6 +163,8 @@ process.on('message', (value: unknown) => {
         return store.approvals(params.limit as number | undefined);
       case 'batteries.cards':
         return store.batteryCards();
+      case 'batteries.register':
+        return store.registerBattery(params as unknown as import('./batteries.ts').RegisterBatteryInput);
       case 'approvals.decide':
         return store.decide(
           params.id as string,

@@ -224,6 +224,34 @@ export async function tryRunCliCommand(
         console.log(JSON.stringify(store.batteries.recordResistance(args[1], args.slice(2).join(' ')), null, 2));
       } else if (sub === 'chat' && args[1]) {
         console.log(JSON.stringify(store.batteries.applyChatPhrase(args.slice(1).join(' ')), null, 2));
+      } else if (sub === 'add' && args[1]) {
+        const packNumber = Number(args[1]);
+        const series = ctx.flag('--series');
+        const brand = ctx.flag('--brand') ?? 'Generic';
+        const cellFlag = ctx.flag('--cells');
+        const typeFlag = ctx.flag('--type');
+        const cells = cellFlag ? Number(cellFlag) : Number(/(\d+)s/i.exec(typeFlag ?? '')?.[1] ?? 6);
+        const batteryType = typeFlag ?? `LiPo ${cells}S`;
+        const capacityMah = Number(ctx.flag('--mah') ?? 1300);
+        const purchaseDate = ctx.flag('--date') ?? new Date().toISOString().slice(0, 10);
+        const resFlag = ctx.flag('--resistance');
+        const initialResistanceMohm = resFlag
+          ? resFlag
+              .split(',')
+              .map((v) => Number(v.trim()))
+              .filter(Number.isFinite)
+          : undefined;
+        const created = store.batteries.register({
+          packNumber,
+          ...(series ? { series, seriesColor: series } : {}),
+          brand,
+          batteryType,
+          cellCount: cells,
+          capacityMah,
+          purchaseDate,
+          ...(initialResistanceMohm ? { initialResistanceMohm } : { allowPendingResistance: true }),
+        });
+        console.log(JSON.stringify(created, null, 2));
       } else if (sub === 'import' && args[1]) {
         const payload = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as OneMoreBatteryExport;
         console.log(JSON.stringify(store.batteries.importOneMoreBattery(payload), null, 2));

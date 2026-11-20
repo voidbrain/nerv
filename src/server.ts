@@ -408,6 +408,34 @@ export function makeServer(
       } else if (req.method === 'GET' && path === '/api/batteries') {
         if (url.search) throw new Error('Unknown batteries query.');
         reply(200, { items: store.batteryCards ? await store.batteryCards() : [] });
+      } else if (req.method === 'POST' && path === '/api/batteries') {
+        if (!store.registerBattery) {
+          reply(503, { error: 'Battery registration unavailable.' });
+          return;
+        }
+        const b = await body(req);
+        const allowPendingResistance =
+          b.initialResistanceMohm === undefined ||
+          (Array.isArray(b.initialResistanceMohm) && b.initialResistanceMohm.length === 0);
+        const created = await store.registerBattery({
+          packNumber: Number(b.packNumber),
+          ...(typeof b.series === 'string' && b.series.trim()
+            ? { series: b.series.trim(), seriesColor: b.series.trim() }
+            : {}),
+          brand: typeof b.brand === 'string' && b.brand.trim() ? b.brand.trim() : 'Generic',
+          batteryType: typeof b.batteryType === 'string' ? b.batteryType.trim() : '',
+          cellCount: Number(b.cellCount),
+          capacityMah: Number(b.capacityMah),
+          purchaseDate:
+            typeof b.purchaseDate === 'string' && b.purchaseDate.trim()
+              ? b.purchaseDate.trim()
+              : new Date().toISOString().slice(0, 10),
+          ...(Array.isArray(b.initialResistanceMohm) && b.initialResistanceMohm.length > 0
+            ? { initialResistanceMohm: b.initialResistanceMohm.map(Number) }
+            : {}),
+          ...(allowPendingResistance ? { allowPendingResistance: true } : {}),
+        });
+        reply(201, created);
       } else if (req.method === 'GET' && path === '/api/lists/show') {
         if (!store.listsShow) {
           reply(404, { error: 'Lists unavailable.' });
