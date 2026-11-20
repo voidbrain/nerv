@@ -1443,6 +1443,18 @@ test('a sortie whose action the owner declined draws its route from Misato apart
   assert.equal(api.edgeShown(ran, declined), false, 'not drawn when the action ran through the plug');
   const plain = { status: 'done', phase: 'debrief', done, actions: [] };
   assert.equal(api.edgeShown(plain, declined), false, 'not drawn for an answer with no action');
+  const waiting = {
+    status: 'waiting',
+    phase: 'apt',
+    done: { ...done, apt: false, debrief: false },
+    actions: [{ status: 'waiting', ballot: { outcome: 'approval' } }],
+  };
+  assert.equal(api.edgeShown(waiting, declined), false, 'not drawn while still waiting at Misato apartment');
+  assert.equal(
+    api.EDGES.some((e) => e[0] === 'magi' && e[1] === 'apt'),
+    false,
+    'no redundant direct magi -> apt edge',
+  );
 });
 test('the flow header names the sortie by its code only; every EVA class header stacks its name and status (F-108, F-049-T09)', async () => {
   const { readFileSync } = await import('node:fs');
