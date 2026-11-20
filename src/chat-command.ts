@@ -1,6 +1,100 @@
 import type { ChannelState } from './channel-state.ts';
+
+export type ChatCommandName =
+  'help' | 'status' | 'cards' | 'reminders' | 'why' | 'brief' | 'pilots' | 'bases' | 'spear' | 'log';
+
+export interface CommandCatalogEntry {
+  readonly name: ChatCommandName;
+  readonly usage: string;
+  readonly summaryEn: string;
+  readonly summaryIt: string;
+  readonly readOnly: boolean;
+}
+
+export const COMMAND_CATALOG: readonly CommandCatalogEntry[] = [
+  {
+    name: 'help',
+    usage: '/help',
+    summaryEn: 'List available commands',
+    summaryIt: 'Elenca i comandi disponibili',
+    readOnly: true,
+  },
+  {
+    name: 'status',
+    usage: '/status [base]',
+    summaryEn: 'Show base health and Midori status',
+    summaryIt: 'Mostra stato della base e di Midori',
+    readOnly: true,
+  },
+  {
+    name: 'cards',
+    usage: '/cards',
+    summaryEn: 'List pending approval cards',
+    summaryIt: 'Mostra le schede in attesa di approvazione',
+    readOnly: true,
+  },
+  {
+    name: 'reminders',
+    usage: '/reminders',
+    summaryEn: 'List pending reminders',
+    summaryIt: 'Mostra i promemoria in attesa',
+    readOnly: true,
+  },
+  {
+    name: 'why',
+    usage: '/why S-XXXX',
+    summaryEn: 'Explain a sortie or action from the ledger',
+    summaryIt: 'Spiega una sortita o azione dal registro',
+    readOnly: true,
+  },
+  {
+    name: 'brief',
+    usage: '/brief',
+    summaryEn: 'Show brief schedule and latest summary',
+    summaryIt: 'Mostra orario del brief e stato recente',
+    readOnly: true,
+  },
+  {
+    name: 'pilots',
+    usage: '/pilots',
+    summaryEn: 'List configured specialist pilots',
+    summaryIt: 'Elenca i piloti specialistici configurati',
+    readOnly: true,
+  },
+  {
+    name: 'bases',
+    usage: '/bases',
+    summaryEn: 'List enrolled bases in the mesh',
+    summaryIt: 'Elenca le basi registrate nella rete',
+    readOnly: true,
+  },
+  {
+    name: 'spear',
+    usage: '/spear [S-XXXX]',
+    summaryEn: 'Stop an active or waiting sortie',
+    summaryIt: 'Ferma una sortita attiva o in attesa',
+    readOnly: false,
+  },
+  {
+    name: 'log',
+    usage: '/log conversation|steps|all',
+    summaryEn: 'Set trace verbosity for chat replies',
+    summaryIt: 'Imposta il dettaglio della traccia in chat',
+    readOnly: false,
+  },
+];
+
+const KNOWN_COMMANDS = new Set<string>(COMMAND_CATALOG.map((c) => c.name));
+
+export function helpText(language: 'en' | 'it'): string {
+  const it = language === 'it';
+  const header = it ? 'Comandi disponibili:' : 'Available commands:';
+  const lines = COMMAND_CATALOG.map((c) => `${c.usage} — ${it ? c.summaryIt : c.summaryEn}`);
+  return `${header}\n${lines.join('\n')}`;
+}
+
 /** Read commands are recognized before planning/dispatch; prose aliases are deliberately narrow. */
-export function readCommand(text: string): { name: 'status' | 'help' | 'unknown'; target?: string } | undefined {
+export function readCommand(text: string): { name: ChatCommandName | 'unknown'; target?: string } | undefined {
   const value = text.trim();
   const alias = /^ask (.{1,60}?) (?:his |her |its |for )?\/status[.!?]?$/i.exec(value);
   if (alias) return { name: 'status', target: alias[1]!.trim() };
@@ -8,7 +102,7 @@ export function readCommand(text: string): { name: 'status' | 'help' | 'unknown'
   if (!match) return value.startsWith('/') ? { name: 'unknown' } : undefined;
   const name = match[1]!.toLowerCase();
   return {
-    name: name === 'status' || name === 'help' ? name : 'unknown',
+    name: KNOWN_COMMANDS.has(name) ? (name as ChatCommandName) : 'unknown',
     ...(match[2] ? { target: match[2].trim() } : {}),
   };
 }

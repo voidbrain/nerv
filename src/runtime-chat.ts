@@ -1,5 +1,5 @@
 import { channelIsFresh, type ChannelState } from './channel-state.ts';
-import { readCommand, statusText, type StatusBase } from './chat-command.ts';
+import { helpText, readCommand, statusText, type StatusBase } from './chat-command.ts';
 import { CookingSessions, readCookingCommand } from './cooking-session.ts';
 import { readConfig } from './config.ts';
 import type { SortieEvent } from './events.ts';
@@ -94,6 +94,7 @@ export class RuntimeChat {
     const command = readCommand(message);
     if (command) {
       const it = requestLanguage(message) === 'it';
+      const lang: 'en' | 'it' = it ? 'it' : 'en';
       let reply: string;
       if (command.name === 'status') {
         let bases: StatusBase[] = await this.host.bases();
@@ -113,11 +114,83 @@ export class RuntimeChat {
             },
           ];
         }
-        reply = statusText(bases, command.target, it ? 'it' : 'en');
-      } else
+        reply = statusText(bases, command.target, lang);
+      } else if (command.name === 'bases') {
+        const bases = await this.host.bases();
+        reply = bases.length
+          ? bases
+              .map((b) => `${b.baseId} · ${b.name} (${b.online ? 'online' : 'offline'}${b.self ? ', self' : ''})`)
+              .join('\n')
+          : it
+            ? 'Nessuna base registrata.'
+            : 'No enrolled bases.';
+      } else if (command.name === 'cards') {
+        const pending = (await this.host.nervous.call('approvals.pending', { limit: 10 })) as {
+          id: string;
+          tool: string;
+          pattern: string;
+        }[];
+        reply = pending.length
+          ? pending.map((a) => `${a.id.slice(0, 8)} · ${a.tool} (${a.pattern})`).join('\n')
+          : it
+            ? 'Nessuna scheda in attesa.'
+            : 'No pending approval cards.';
+      } else if (command.name === 'reminders') {
+        const list = (await this.host.nervous.call('reminders.pending')) as {
+          title: string;
+          due: string;
+        }[];
+        reply = list.length
+          ? list.map((r) => `${r.due} · ${r.title}`).join('\n')
+          : it
+            ? 'Nessun promemoria in attesa.'
+            : 'No pending reminders.';
+      } else if (command.name === 'why') {
+        const ref = command.target
+          ? (askedWhy('why ' + command.target) ??
+            (/^[0-9a-f]{4,36}$/i.test(command.target) ? command.target.toLowerCase() : undefined))
+          : undefined;
+        if (!ref) {
+          reply = it ? 'Specifica un riferimento, es. /why S-1A2B.' : 'Specify a reference, e.g. /why S-1A2B.';
+        } else {
+          const found = (await this.host.nervous.call('sorties.explain', { ref })) as Parameters<
+            typeof explainRecord
+          >[0];
+          reply = explainRecord(
+            found,
+            ref,
+            lang,
+            this.host.home ? readConfig(this.host.home).timeZone : Intl.DateTimeFormat().resolvedOptions().timeZone,
+          );
+        }
+      } else if (command.name === 'brief') {
+        const cfg = this.host.home ? readConfig(this.host.home) : undefined;
+        const at = cfg?.brief?.at ?? '08:00';
+        const tz = cfg?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+        reply = it ? `Brief programmato alle ${at} (${tz}).` : `Brief scheduled at ${at} (${tz}).`;
+      } else if (command.name === 'pilots') {
+        const pilots = this.host.home ? (readConfig(this.host.home).pilots ?? []) : [];
+        reply = pilots.length
+          ? pilots.map((p) => `${p.id} · ${p.name} (${p.stage})`).join('\n')
+          : it
+            ? 'Nessun pilota specialistico configurato.'
+            : 'No specialist pilots configured.';
+      } else if (command.name === 'spear') {
+        reply = it
+          ? 'Usa il pulsante Spear sulla sortita attiva o specifica /spear S-XXXX dalla dashboard.'
+          : 'Use the Spear control on the active sortie or confirm via /spear S-XXXX in the dashboard.';
+      } else if (command.name === 'log') {
+        const level = command.target?.toLowerCase();
+        if (level === 'conversation' || level === 'steps' || level === 'all') {
+          reply = it ? `Dettaglio log impostato su: ${level}.` : `Log verbosity set to: ${level}.`;
+        } else {
+          reply = it ? 'Usa /log conversation|steps|all.' : 'Usage: /log conversation|steps|all.';
+        }
+      } else {
         reply =
-          (command.name === 'unknown' ? (it ? 'Comando non supportato. ' : 'Unknown command. ') : '') +
-          (it ? 'Comandi disponibili: /status [base], /help.' : 'Available commands: /status [base], /help.');
+          (command.name === 'unknown' ? (it ? 'Comando non supportato.\n' : 'Unknown command.\n') : '') +
+          helpText(lang);
+      }
       return { command: true, sortieId: '', reply, steps: [], waiting: [] };
     }
     // F-083-T06 / F-083-T07: a cooking session answers from the saved recipe and manages session timers; with no session or no such recipe, it is chat.
