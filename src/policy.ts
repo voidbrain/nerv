@@ -19,9 +19,174 @@ export interface Policy {
   deny: string[];
   blue: string[];
   localOnly?: string[];
+  egressAllow?: string[];
   syncThreshold: number;
   maxRejects: number;
   budget: number;
+}
+export interface EgressDestination {
+  readonly host: string;
+  readonly port: number;
+}
+export const EVA_DENIED_LOCAL_PORTS: readonly number[] = [4317, 4319];
+const DENIED_EGRESS_PORTS = new Set(EVA_DENIED_LOCAL_PORTS);
+
+function parseIpv4Strict(ip: string): number | null {
+  const parts = ip.split('.');
+  if (parts.length !== 4) return null;
+  let num = 0;
+  for (const part of parts) {
+    if (!/^(0|[1-9]\d{0,2})$/.test(part)) return null;
+    const n = Number(part);
+    if (n < 0 || n > 255) return null;
+    num = (num << 8) | n;
+  }
+  return num >>> 0;
+}
+
+function parseIpv6ToBigInt(ip: string): bigint | null {
+  const lower = ip.toLowerCase();
+  const dbl = lower.indexOf('::');
+  if (dbl !== -1 && lower.indexOf('::', dbl + 2) !== -1) return null;
+
+  const parseSide = (side: string): number[] | null => {
+    if (!side) return [];
+    const parts = side.split(':');
+    const out: number[] = [];
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (part.includes('.')) {
+        if (i !== parts.length - 1) return null;
+        const v4 = parseIpv4Strict(part);
+        if (v4 === null) return null;
+        out.push((v4 >>> 16) & 0xffff, v4 & 0xffff);
+      } else {
+        if (!/^[0-9a-f]{1,4}$/.test(part)) return null;
+        out.push(Number.parseInt(part, 16));
+      }
+    }
+    return out;
+  };
+
+  let hextets: number[];
+  if (dbl !== -1) {
+    const left = parseSide(lower.slice(0, dbl));
+    const right = parseSide(lower.slice(dbl + 2));
+    if (!left || !right) return null;
+    const missing = 8 - (left.length + right.length);
+    if (missing < 1) return null;
+    hextets = [...left, ...new Array<number>(missing).fill(0), ...right];
+  } else {
+    const full = parseSide(lower);
+    if (!full || full.length !== 8) return null;
+    hextets = full;
+  }
+
+  let val = 0n;
+  for (const h of hextets) val = (val << 16n) | BigInt(h);
+  return val;
+}
+
+function isBlockedIpv4Number(n: number, allowExplicitLoopback: boolean): string | null {
+  const inCidr = (base: number, prefix: number) => {
+    const mask = prefix === 0 ? 0 : (~0 << (32 - prefix)) >>> 0;
+    return (n & mask) === (base & mask);
+  };
+  if (inCidr(0x00000000, 8)) return 'Unspecified IPv4 range is blocked.';
+  if (inCidr(0xa9fe0000, 16)) return 'Link-local / cloud metadata range (169.254.0.0/16) is blocked.';
+  if (inCidr(0x7f000000, 8)) return allowExplicitLoopback ? null : 'Loopback address is blocked.';
+  if (inCidr(0x0a000000, 8) || inCidr(0xac100000, 12) || inCidr(0xc0a80000, 16)) {
+    return 'Private IPv4 network is blocked.';
+  }
+  if (inCidr(0x64400000, 10)) return 'Shared address space (100.64.0.0/10) is blocked.';
+  if (inCidr(0xe0000000, 4) || inCidr(0xf0000000, 4)) return 'Multicast or reserved IPv4 range is blocked.';
+  return null;
+}
+
+/**
+ * Returns a human-readable block reason when `ip` is link-local, metadata, unspecified, multicast, private,
+ * or (unless `allowExplicitLoopback` is true) loopback. Parses IPv6 into 128-bit values to catch all
+ * mapped/compatible/NAT64/6to4/non-canonical encodings.
+ */
+export function isBlockedEgressIp(ip: string, allowExplicitLoopback = false): string | null {
+  const lower = ip.toLowerCase().replace(/^\[|\]$/g, '');
+  const v4 = parseIpv4Strict(lower);
+  if (v4 !== null) return isBlockedIpv4Number(v4, allowExplicitLoopback);
+
+  const v6 = parseIpv6ToBigInt(lower);
+  if (v6 === null) return `Unsupported address format: ${ip}`;
+  if (v6 === 0n) return 'Unspecified IPv6 address is blocked.';
+  if (v6 === 1n) return allowExplicitLoopback ? null : 'Loopback IPv6 address is blocked.';
+  const prefix96 = v6 >> 32n;
+  if (prefix96 === 0xffffn || prefix96 === 0n || prefix96 === 0x0064ff9b_00000000_00000000n) {
+    return isBlockedIpv4Number(Number(v6 & 0xffffffffn) >>> 0, allowExplicitLoopback);
+  }
+  if (v6 >> 112n === 0x2002n) {
+    return isBlockedIpv4Number(Number((v6 >> 80n) & 0xffffffffn) >>> 0, allowExplicitLoopback);
+  }
+  if (v6 >> 118n === 0x3fan) return 'Link-local IPv6 range is blocked.';
+  if (v6 >> 121n === 0x7en) return 'Unique-local / cloud metadata IPv6 range is blocked.';
+  if (v6 >> 120n === 0xffn) return 'Multicast IPv6 range is blocked.';
+  return null;
+}
+
+const isBlockedLiteralHost = (host: string): boolean => {
+  const h = host.toLowerCase();
+  if (h === 'metadata' || h === 'metadata.google.internal') return true;
+  if (parseIpv4Strict(h) !== null || parseIpv6ToBigInt(h) !== null) {
+    return isBlockedEgressIp(h, true) !== null;
+  }
+  return false;
+};
+/** Parses and validates a Scrolls egress destination (`host`, `host:port`, `[ipv6]`, or `[ipv6]:port`). */
+export function parseEgressDestination(raw: string): EgressDestination {
+  if (typeof raw !== 'string' || raw.length === 0 || raw.length > 253)
+    throw new Error('Egress destination must be a non-empty string (max 253 chars).');
+  if (/[\s*@#/?\\]/.test(raw) || /[\u0000-\u001f\u007f]/.test(raw) || raw.includes('://'))
+    throw new Error(`Invalid egress destination: ${raw}`);
+  let host: string;
+  let port = 443;
+  if (raw.startsWith('[')) {
+    const close = raw.indexOf(']');
+    if (close <= 1) throw new Error(`Invalid IPv6 egress destination: ${raw}`);
+    host = raw.slice(1, close).toLowerCase();
+    if (parseIpv6ToBigInt(host) === null) throw new Error(`Invalid IPv6 egress destination: ${raw}`);
+    const rest = raw.slice(close + 1);
+    if (rest.length > 0) {
+      if (!rest.startsWith(':') || !/^\d+$/.test(rest.slice(1)))
+        throw new Error(`Invalid port in egress destination: ${raw}`);
+      port = Number(rest.slice(1));
+    }
+  } else {
+    const firstColon = raw.indexOf(':');
+    const lastColon = raw.lastIndexOf(':');
+    if (firstColon !== lastColon) throw new Error(`IPv6 egress destination must use brackets: ${raw}`);
+    if (firstColon !== -1) {
+      host = raw.slice(0, lastColon).toLowerCase();
+      const portStr = raw.slice(lastColon + 1);
+      if (!/^\d+$/.test(portStr)) throw new Error(`Invalid port in egress destination: ${raw}`);
+      port = Number(portStr);
+    } else {
+      host = raw.toLowerCase();
+    }
+    if ((/^[\d.]+$/.test(host) || /^0x[\da-f]+$/i.test(host)) && parseIpv4Strict(host) === null) {
+      throw new Error(`Invalid numeric host in egress destination: ${raw}`);
+    }
+  }
+  if (!host || !Number.isInteger(port) || port < 1 || port > 65535)
+    throw new Error(`Invalid egress destination: ${raw}`);
+  if (DENIED_EGRESS_PORTS.has(port)) throw new Error(`Egress destination cannot target NERV port ${port}.`);
+  if (isBlockedLiteralHost(host))
+    throw new Error(`Egress destination cannot target link-local or metadata host: ${host}`);
+  return { host, port };
+}
+export function isEgressDestinationAllowed(
+  host: string,
+  port: number,
+  allowlist: readonly EgressDestination[],
+): boolean {
+  const normalized = host.replace(/^\[|\]$/g, '').toLowerCase();
+  return allowlist.some((d) => d.host === normalized && d.port === port);
 }
 export interface Action {
   tool: string;
@@ -51,7 +216,15 @@ export interface Ballot {
   blocked?: 'isolation' | 'proactive' | 'budget';
 }
 export const effects: readonly Effect[] = ['read', 'write-local', 'write-external', 'irreversible', 'physical'];
-export const defaultPolicy: Policy = { deny: [], blue: [], localOnly: [], syncThreshold: 80, maxRejects: 3, budget: 1 };
+export const defaultPolicy: Policy = {
+  deny: [],
+  blue: [],
+  localOnly: [],
+  egressAllow: [],
+  syncThreshold: 80,
+  maxRejects: 3,
+  budget: 1,
+};
 const local = (e: Effect) => e === 'read' || e === 'write-local';
 /** True only when the Scrolls and action trust allow sending the action's request/args to a cloud seat (F-025-T02). */
 export function canLeaveMachine(action: { tool: string; effect: Effect; trust: Trust }, policy: Policy): boolean {
@@ -79,7 +252,10 @@ export function validatePolicy(value: unknown): Policy {
   if (
     !names(merged.deny) ||
     !names(merged.blue) ||
+    ('localOnly' in p && !Array.isArray(p.localOnly)) ||
     !names(merged.localOnly ?? []) ||
+    ('egressAllow' in p && !Array.isArray(p.egressAllow)) ||
+    !Array.isArray(merged.egressAllow ?? []) ||
     !Number.isInteger(merged.syncThreshold) ||
     merged.syncThreshold < 0 ||
     merged.syncThreshold > 100 ||
@@ -91,6 +267,7 @@ export function validatePolicy(value: unknown): Policy {
     merged.budget < 0
   )
     throw new Error('Invalid policy values.');
+  for (const dest of merged.egressAllow ?? []) parseEgressDestination(dest);
   return merged;
 }
 export function patternOf(effect: Effect, trust: Trust, tool: string, policy: Policy, ownerOnly = false): Pattern {

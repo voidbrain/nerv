@@ -1,5 +1,9 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-20 — main `53b7671`
+
+PRs #579, #580, #581, #582 and #583 merged on green CI. #579 reconciled the backlog (docs-only); #580 implemented F-049-T09, #581 implemented F-049-T10, #582 fixed B-096, and #583 implemented F-110-T03.
+
 ## 2026-11-20 — main `c2150218`
 
 PRs #573, #575, #577 and #578 merged on green CI. F-062 gets F-062-T07, the owner's real restore drill; F-005-T15 re-estimated to 1.25 h.
