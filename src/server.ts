@@ -256,6 +256,7 @@ export function makeServer(
         ([
           '/api/status',
           '/api/doctor',
+          '/api/health/metrics',
           '/api/update',
           '/api/update/policy',
           '/api/push/key',
@@ -408,6 +409,34 @@ export function makeServer(
       } else if (req.method === 'GET' && path === '/api/batteries') {
         if (url.search) throw new Error('Unknown batteries query.');
         reply(200, { items: store.batteryCards ? await store.batteryCards() : [] });
+      } else if (req.method === 'POST' && path === '/api/batteries') {
+        if (!store.registerBattery) {
+          reply(503, { error: 'Battery registration unavailable.' });
+          return;
+        }
+        const b = await body(req);
+        const allowPendingResistance =
+          b.initialResistanceMohm === undefined ||
+          (Array.isArray(b.initialResistanceMohm) && b.initialResistanceMohm.length === 0);
+        const created = await store.registerBattery({
+          packNumber: Number(b.packNumber),
+          ...(typeof b.series === 'string' && b.series.trim()
+            ? { series: b.series.trim(), seriesColor: b.series.trim() }
+            : {}),
+          brand: typeof b.brand === 'string' && b.brand.trim() ? b.brand.trim() : 'Generic',
+          batteryType: typeof b.batteryType === 'string' ? b.batteryType.trim() : '',
+          cellCount: Number(b.cellCount),
+          capacityMah: Number(b.capacityMah),
+          purchaseDate:
+            typeof b.purchaseDate === 'string' && b.purchaseDate.trim()
+              ? b.purchaseDate.trim()
+              : new Date().toISOString().slice(0, 10),
+          ...(Array.isArray(b.initialResistanceMohm) && b.initialResistanceMohm.length > 0
+            ? { initialResistanceMohm: b.initialResistanceMohm.map(Number) }
+            : {}),
+          ...(allowPendingResistance ? { allowPendingResistance: true } : {}),
+        });
+        reply(201, created);
       } else if (req.method === 'GET' && path === '/api/lists/show') {
         if (!store.listsShow) {
           reply(404, { error: 'Lists unavailable.' });
@@ -582,6 +611,22 @@ export function makeServer(
         });
       } else if (req.method === 'GET' && path === '/api/eva/instances') {
         reply(200, store.evaInstances ? await store.evaInstances() : { machines: [] });
+      } else if (req.method === 'GET' && path === '/api/health/metrics') {
+        reply(
+          200,
+          store.healthMetrics
+            ? await store.healthMetrics()
+            : { latestSample: null, recentSamples: [], links: [], thresholds: null, warnings: [] },
+        );
+      } else if (req.method === 'PUT' && path === '/api/health/thresholds') {
+        if (!store.setHealthThresholds) {
+          reply(503, { error: 'Health threshold settings unavailable.' });
+          return;
+        }
+        const b = await body(req);
+        const thresholds = await store.setHealthThresholds(b);
+        const metrics = store.healthMetrics ? await store.healthMetrics() : undefined;
+        reply(200, { ok: true, thresholds, warnings: metrics?.warnings ?? [] });
       } else if (req.method === 'POST' && path === '/api/pilots') {
         if (!store.addPilot) {
           reply(503, { error: 'Pilot setup unavailable.' });

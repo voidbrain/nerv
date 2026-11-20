@@ -1,4 +1,4 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 
 export interface BatteryCardItem {
   id: string;
@@ -28,6 +28,12 @@ export interface BatteryCardItem {
 export interface BatteryCardsLabels {
   batteriesTitle: string;
   batteriesEmpty: string;
+  batteriesAdd?: string;
+  batteriesAddHint?: string;
+  batteriesPackNumber?: string;
+  batteriesBrand?: string;
+  batteriesCells?: string;
+  batteriesMah?: string;
   batteriesFilterSeries: string;
   batteriesFilterType: string;
   batteriesAll: string;
@@ -76,7 +82,37 @@ export interface BatteryCardsLabels {
         }
       </div>
 
-      @if (filteredCards().length === 0) {
+      <form class="battery-add-form" (submit)="submitAdd($event)">
+        <label>
+          {{ t().batteriesPackNumber ?? 'Pack #' }}
+          <input type="number" min="1" required [value]="newPack()" (input)="newPack.set($any($event.target).value)" />
+        </label>
+        <label>
+          {{ t().batteriesFilterSeries }}
+          <input type="text" [value]="newSeries()" (input)="newSeries.set($any($event.target).value)" placeholder="blu" />
+        </label>
+        <label>
+          {{ t().batteriesFilterType }}
+          <input type="text" required [value]="newType()" (input)="newType.set($any($event.target).value)" placeholder="LiPo 6S" />
+        </label>
+        <label>
+          {{ t().batteriesCells ?? 'Cells' }}
+          <input type="number" min="1" max="12" required [value]="newCells()" (input)="newCells.set($any($event.target).value)" />
+        </label>
+        <label>
+          {{ t().batteriesMah ?? 'mAh' }}
+          <input type="number" min="50" required [value]="newMah()" (input)="newMah.set($any($event.target).value)" />
+        </label>
+        <label>
+          {{ t().batteriesBrand ?? 'Brand' }}
+          <input type="text" required [value]="newBrand()" (input)="newBrand.set($any($event.target).value)" placeholder="Tattu" />
+        </label>
+        <button type="submit">{{ t().batteriesAdd ?? 'Add battery' }}</button>
+      </form>
+
+      @if (cards().length === 0) {
+        <p class="empty">{{ t().batteriesAddHint ?? t().batteriesEmpty }}</p>
+      } @else if (filteredCards().length === 0) {
         <p class="empty">{{ t().batteriesEmpty }}</p>
       } @else {
         <div class="battery-grid">
@@ -124,9 +160,42 @@ export class BatteryCards {
   readonly cards = input<readonly BatteryCardItem[]>([]);
   readonly t = input.required<BatteryCardsLabels>();
   readonly language = input<'it' | 'en'>('en');
+  readonly addBattery = output<{
+    packNumber: number;
+    series?: string;
+    batteryType: string;
+    cellCount: number;
+    capacityMah: number;
+    brand: string;
+  }>();
 
   readonly seriesFilter = signal('');
   readonly typeFilter = signal('');
+  readonly newPack = signal('1');
+  readonly newSeries = signal('');
+  readonly newType = signal('LiPo 6S');
+  readonly newCells = signal('6');
+  readonly newMah = signal('1300');
+  readonly newBrand = signal('Generic');
+
+  submitAdd(event: Event): void {
+    event.preventDefault();
+    const packNumber = Number(this.newPack());
+    const cellCount = Number(this.newCells());
+    const capacityMah = Number(this.newMah());
+    const batteryType = this.newType().trim();
+    const brand = this.newBrand().trim() || 'Generic';
+    const series = this.newSeries().trim();
+    if (!Number.isInteger(packNumber) || packNumber < 1 || !batteryType) return;
+    this.addBattery.emit({
+      packNumber,
+      ...(series ? { series } : {}),
+      batteryType,
+      cellCount,
+      capacityMah,
+      brand,
+    });
+  }
 
   readonly seriesOptions = computed(() => {
     const set = new Set<string>();

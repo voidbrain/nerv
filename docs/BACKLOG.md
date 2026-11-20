@@ -747,7 +747,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-082-t02"></a>F-082-T02 — Checklist card in the dashboard chat | 0.5 h | 0 h | 0 h | Implemented; verification pending | — | [F-082-T04](#f-082-t04), [F-082-T05](#f-082-t05) | 🤖 | [PR #483](https://github.com/voidbrain/nerv/pull/483) implementation |
-| 🟡 Medium | <a id="f-082-t05"></a>F-082-T05 — Show the checklist card in the dashboard chat | 1.5 h | 0 h | 1.5 h | Planned | [F-082-T02](#f-082-t02) | [F-082-T04](#f-082-t04) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-082-t05"></a>F-082-T05 — Show the checklist card in the dashboard chat | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [F-082-T02](#f-082-t02) | [F-082-T04](#f-082-t04) | 🤖 | [PR #606](https://github.com/voidbrain/nerv/pull/606) Show checklist card in dashboard chat and sync toggles |
 | 🟢 Small | <a id="f-082-t04"></a>F-082-T04 — Owner check: add by Telegram, tick on the dashboard | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-082-T02](#f-082-t02), [F-082-T05](#f-082-t05) | — | ⏳ 🧑‍🔧 | — |
 | 🟡 Medium | **Total** | 3.5 h (4 of 5 steps) | 0.5 h (1 of 5 steps recorded) | 1.5 h agent + 0.25 h owner | 2 of 5 completed | | | | |
 
@@ -767,7 +767,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-082-T02: [PR #483](https://github.com/voidbrain/nerv/pull/483) implementation · F-082-T03: [PR #479](https://github.com/voidbrain/nerv/pull/479) implementation. [PR #479](https://github.com/voidbrain/nerv/pull/479); [PR #483](https://github.com/voidbrain/nerv/pull/483) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-082-T02: [PR #483](https://github.com/voidbrain/nerv/pull/483) implementation · F-082-T03: [PR #479](https://github.com/voidbrain/nerv/pull/479) implementation · F-082-T05: [PR #606](https://github.com/voidbrain/nerv/pull/606) Show checklist card in dashboard chat and sync toggles. [PR #606](https://github.com/voidbrain/nerv/pull/606) (F-082-T05); [PR #479](https://github.com/voidbrain/nerv/pull/479); [PR #483](https://github.com/voidbrain/nerv/pull/483) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-082-T02 not closed: the card, its toggle and its AXE audit passed on green CI (PR #483), but nothing in the dashboard chat ever shows it (only the test hook `__nervSetSurface` does), so the owner check F-082-T04 cannot pass yet; waits on the owner's decision. F-082-T03 verified: [PR #479](https://github.com/voidbrain/nerv/pull/479) merged on green CI. |
 | Reviewed | 2026-11-18 |
@@ -1042,7 +1042,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟡 Medium | <a id="f-103-t02"></a>F-103-T02 — Per-link load between bases | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [F-103-T03](#f-103-t03) | [PR #589](https://github.com/voidbrain/nerv/pull/589) implementation |
-| 🟡 Medium | <a id="f-103-t03"></a>F-103-T03 — Health view and warnings | 1.5 h | 0 h | 1.5 h | Planned | [F-103-T02](#f-103-t02) | [F-103-T04](#f-103-t04) | — |
+| 🟡 Medium | <a id="f-103-t03"></a>F-103-T03 — Health view and warnings | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [F-103-T02](#f-103-t02) | [F-103-T04](#f-103-t04) | [PR #605](https://github.com/voidbrain/nerv/pull/605) Dashboard health samples, link load, thresholds and deduplicated warnings |
 | 🟢 Small | <a id="f-103-t04"></a>F-103-T04 — 24-hour baseline with both bases | 0.25 h | 0 h | 0.25 h | Planned | [F-103-T03](#f-103-t03) | — | — |
 | 🟡 Medium | **Total** | 4.75 h | 0 h (0 of 4 steps recorded) | 3.25 h | 1 of 4 completed | | | |
 
@@ -1061,7 +1061,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-103-T01: [PR #498](https://github.com/voidbrain/nerv/pull/498) implementation · F-103-T02: [PR #589](https://github.com/voidbrain/nerv/pull/589) implementation. [PR #589](https://github.com/voidbrain/nerv/pull/589) (F-103-T02); [PR #498](https://github.com/voidbrain/nerv/pull/498) (merged; CI green); — |
+| PR / evidence | Steps: F-103-T01: [PR #498](https://github.com/voidbrain/nerv/pull/498) implementation · F-103-T02: [PR #589](https://github.com/voidbrain/nerv/pull/589) implementation · F-103-T03: [PR #605](https://github.com/voidbrain/nerv/pull/605) Dashboard health samples, link load, thresholds and deduplicated warnings. [PR #605](https://github.com/voidbrain/nerv/pull/605) (F-103-T03); [PR #589](https://github.com/voidbrain/nerv/pull/589) (F-103-T02); [PR #498](https://github.com/voidbrain/nerv/pull/498) (merged; CI green); — |
 | Opened | 2026-11-15 |
 | Verification | 2026-11-20: `node --test test/link-load.test.ts test/kaji-link.test.ts test/worker-link.test.ts`, `npm run check:fast`, and `npm run check:conventions` passed. 2026-11-18: F-103-T01 verified: [PR #498](https://github.com/voidbrain/nerv/pull/498) merged on green CI. |
 | Reviewed | 2026-11-20 |
@@ -1183,9 +1183,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [F-049-T09](#f-049-t09) | — | ⏳ | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [F-049-T09](#f-049-t09) | — | 🤖 | — | — |
 
-💻 **→** Next: F-051-T06 — EVA cage pilot labels from real instance data (Planned).
+💻 **→** Next: F-051-T06 — EVA cage pilot labels from real instance data (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1195,21 +1195,21 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-051-t06"></a>F-051-T06 — EVA cage pilot labels from real instance data | 1 h | 0 h | 1 h | Planned | [F-049-T09](#f-049-t09) | — | ⏳ 🤖 |
-| 🟢 Small | **Total** | 3.5 h | 1.5 h (5 of 7 steps recorded) | 1 h | 6 of 7 completed | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-051-t06"></a>F-051-T06 — EVA cage pilot labels from real instance data | 1 h | 0 h | 1 h | Implemented; verification pending | [F-049-T09](#f-049-t09) | — | 🤖 | [PR #604](https://github.com/voidbrain/nerv/pull/604) Sephirot EVA cage pilot and instance labels |
+| 🟢 Small | **Total** | 3.5 h | 1.5 h (5 of 7 steps recorded) | 1 h | 6 of 7 completed | | | | |
 
 <details><summary>Done steps (6)</summary>
 
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-051-t01"></a>F-051-T01 — Chat line and relay visibility | 0.25 h | 0.25 h (stated) | Completed |
-| — | <a id="f-051-t02"></a>F-051-T02 — Running sortie selection and phase label | 0.25 h | 0.25 h (stated) | Completed |
-| — | <a id="f-051-t03"></a>F-051-T03 — MAGI and pilot contributors | 0.25 h | 0.25 h (stated) | Completed |
-| — | <a id="f-051-t04"></a>F-051-T04 — Skipped versus unavailable nodes and relay step | 0.25 h | 0.25 h (stated) | Completed |
-| — | <a id="f-051-t05"></a>F-051-T05 — Authenticated cross-base inspection | 0.5 h | 0.5 h (stated) | Completed |
-| — | <a id="f-051-t07"></a>F-051-T07 — Decide which sorties a peer base may inspect | 1 h | 0 h | Completed |
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-051-t01"></a>F-051-T01 — Chat line and relay visibility | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-051-t02"></a>F-051-T02 — Running sortie selection and phase label | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-051-t03"></a>F-051-T03 — MAGI and pilot contributors | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-051-t04"></a>F-051-T04 — Skipped versus unavailable nodes and relay step | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-051-t05"></a>F-051-T05 — Authenticated cross-base inspection | 0.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-051-t07"></a>F-051-T07 — Decide which sorties a peer base may inspect | 1 h | 0 h | Completed | — |
 
 </details>
 
@@ -1220,7 +1220,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) peer inspection scope (F-051-T07) and the missing step for EVA cage labels (F-051-T06); [PR #371](https://github.com/voidbrain/nerv/pull/371) authenticated cross-base inspection and directional contributor topology (T01–T05); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
+| PR / evidence | Steps: F-051-T06: [PR #604](https://github.com/voidbrain/nerv/pull/604) Sephirot EVA cage pilot and instance labels. [PR #604](https://github.com/voidbrain/nerv/pull/604) (F-051-T06); [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) peer inspection scope (F-051-T07) and the missing step for EVA cage labels (F-051-T06); [PR #371](https://github.com/voidbrain/nerv/pull/371) authenticated cross-base inspection and directional contributor topology (T01–T05); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #195](https://github.com/voidbrain/nerv/pull/195) project tuning and regressions;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #163](https://github.com/voidbrain/nerv/pull/163) channel telemetry and CI reconciliation;  [PR #162](https://github.com/voidbrain/nerv/pull/162) relay detail and acceptance review; Owner test on Tabgha 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Ledger-to-live-detail regression passed for remote answer/reference, waiting, no answer, local continuation, escaping and local empty states. Chrome: real service/session and ledger fixture showed the answering base and full reference; scoped axe found zero violations and screenshot inspected. Full suite: 196 passed, one platform skip; build, typecheck, conventions and integrations passed. Merged PR #162 CI passed validate, windows and both native-macos runs (ci:status, runs 42247286378/42247282316); cross-base link and EVA labels remain unimplemented. |
 | Reviewed | 2026-11-13 |
@@ -1666,7 +1666,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-008-T13 — Register a battery by chat, CLI and dashboard (Planned).
+💻 **→** Next: F-008-T13 — Register a battery by chat, CLI and dashboard (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1678,7 +1678,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-008-t13"></a>F-008-T13 — Register a battery by chat, CLI and dashboard | 1 h | 0 h | 1 h | Planned | — | [F-008-T12](#f-008-t12) | 🤖 | — |
+| 🟢 Small | <a id="f-008-t13"></a>F-008-T13 — Register a battery by chat, CLI and dashboard | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-008-T12](#f-008-t12) | 🤖 | [PR #603](https://github.com/voidbrain/nerv/pull/603) implementation |
 | 🟢 Small | <a id="f-008-t14"></a>F-008-T14 — Battery status list in Telegram | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | — | 🤖 | [PR #597](https://github.com/voidbrain/nerv/pull/597) implementation |
 | 🟢 Small | <a id="f-008-t12"></a>F-008-T12 — Live check with real batteries | 0.25 h | 0 h | 0.25 h | Planned | [F-008-T13](#f-008-t13) | — | ⏳ 🤖 | — |
 | 🟡 Medium | **Total** | 6.25 h (13 of 14 steps) | 1.75 h (4 of 14 steps recorded) | 1.75 h | 11 of 14 completed | | | | |
@@ -1708,7 +1708,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-008-T08: [PR #472](https://github.com/voidbrain/nerv/pull/472) implementation · F-008-T09: [PR #476](https://github.com/voidbrain/nerv/pull/476) implementation · F-008-T10: [PR #544](https://github.com/voidbrain/nerv/pull/544) implementation · F-008-T11: [PR #554](https://github.com/voidbrain/nerv/pull/554) implementation; CI green · F-008-T14: [PR #597](https://github.com/voidbrain/nerv/pull/597) implementation. [PR #597](https://github.com/voidbrain/nerv/pull/597) F-008-T14 (`src/batteries.ts`, `src/telegram.ts`, `test/telegram.test.ts`); [PR #554](https://github.com/voidbrain/nerv/pull/554) F-008-T11 (`src/battery-health.ts`, `src/server.ts`, `web/src/battery-cards.ts`, `test/battery-cards.test.ts`, `test/angular.browser.mjs`); [PR #544](https://github.com/voidbrain/nerv/pull/544) F-008-T10 (`src/battery-health.ts`, `src/batteries.ts`, `test/battery-health.test.ts`); [PR #472](https://github.com/voidbrain/nerv/pull/472); [PR #476](https://github.com/voidbrain/nerv/pull/476) (merged; CI green); F-008-T07 Italian/English battery charge-state & cycle chat (`applyChatPhrase`, `parseBatteryChatCommand`, `formatBatteryStateLines` in `src/batteries.ts`, `batteries.list`/`batteries.chat` in `src/executors.ts`, `batteries status` and `batteries chat` in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); F-008-T06 battery registry and `one-more-battery` importer (`src/batteries.ts`, `Store.batteries` in `src/store.ts`, `batteries` CLI in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); Rescoped by the owner 2026-11-14 ([plan](design/fpv-and-cooking-plan-2026-11-14.md), [PR #408](https://github.com/voidbrain/nerv/pull/408)); earlier: [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment, PR #313 priority |
+| PR / evidence | Steps: F-008-T08: [PR #472](https://github.com/voidbrain/nerv/pull/472) implementation · F-008-T09: [PR #476](https://github.com/voidbrain/nerv/pull/476) implementation · F-008-T10: [PR #544](https://github.com/voidbrain/nerv/pull/544) implementation · F-008-T11: [PR #554](https://github.com/voidbrain/nerv/pull/554) implementation; CI green · F-008-T13: [PR #603](https://github.com/voidbrain/nerv/pull/603) implementation · F-008-T14: [PR #597](https://github.com/voidbrain/nerv/pull/597) implementation. [PR #603](https://github.com/voidbrain/nerv/pull/603) F-008-T13 (`src/batteries.ts`, `src/cli-commands.ts`, `src/server.ts`, `web/src/battery-cards.ts`, `test/batteries.test.ts`, `test/battery-cards.test.ts`); [PR #597](https://github.com/voidbrain/nerv/pull/597) F-008-T14 (`src/batteries.ts`, `src/telegram.ts`, `test/telegram.test.ts`); [PR #554](https://github.com/voidbrain/nerv/pull/554) F-008-T11 (`src/battery-health.ts`, `src/server.ts`, `web/src/battery-cards.ts`, `test/battery-cards.test.ts`, `test/angular.browser.mjs`); [PR #544](https://github.com/voidbrain/nerv/pull/544) F-008-T10 (`src/battery-health.ts`, `src/batteries.ts`, `test/battery-health.test.ts`); [PR #472](https://github.com/voidbrain/nerv/pull/472); [PR #476](https://github.com/voidbrain/nerv/pull/476) (merged; CI green); F-008-T07 Italian/English battery charge-state & cycle chat (`applyChatPhrase`, `parseBatteryChatCommand`, `formatBatteryStateLines` in `src/batteries.ts`, `batteries.list`/`batteries.chat` in `src/executors.ts`, `batteries status` and `batteries chat` in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); F-008-T06 battery registry and `one-more-battery` importer (`src/batteries.ts`, `Store.batteries` in `src/store.ts`, `batteries` CLI in `src/cli.ts`, verified in `test/batteries.test.ts`, 2026-11-15); Rescoped by the owner 2026-11-14 ([plan](design/fpv-and-cooking-plan-2026-11-14.md), [PR #408](https://github.com/voidbrain/nerv/pull/408)); earlier: [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment, PR #313 priority |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-008-T08 verified: [PR #472](https://github.com/voidbrain/nerv/pull/472) merged on green CI; F-008-T09 verified: [PR #476](https://github.com/voidbrain/nerv/pull/476) merged on green CI. `npx tsc --noEmit`, `npm run check:conventions`, `node --test test/batteries.test.ts`, and `npm run check:fast` passed 2026-11-15; remote CI pending PR |
 | Reviewed | 2026-11-20 |

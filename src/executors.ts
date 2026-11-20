@@ -3,7 +3,7 @@ import type { Approval, SortieSummary } from './ledger.ts';
 import type { Reminder, ReminderInput } from './store.ts';
 import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
-import type { ListStore } from './lists.ts';
+import { toChecklistSurface, type ListStore } from './lists.ts';
 import { replayDesktopRecording, type DesktopRecordingFile, type DesktopReplayDriver } from './desktop-recording.ts';
 import type { GmailClient } from './gmail.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
@@ -952,24 +952,31 @@ export function execute(
       if (!Array.isArray(args.items) || args.items.some((x) => typeof x !== 'string')) {
         throw new Error('items must be an array of strings.');
       }
-      return backend.lists.addItems(list, args.items as string[]);
+      const res = backend.lists.addItems(list, args.items as string[]);
+      const view = backend.lists.show(res.list.name);
+      return { ...res, ...(view ? { surface: toChecklistSurface(view) } : {}) };
     }
     case 'lists.show': {
       only(args, ['list']);
       if (!backend.lists) throw new Error('Lists store is not available.');
       if (args.list === undefined) return { lists: backend.lists.listAll() };
-      return backend.lists.show(text(args, 'list')) ?? { list: null, items: [] };
+      const view = backend.lists.show(text(args, 'list'));
+      return view ? { ...view, surface: toChecklistSurface(view) } : { list: null, items: [] };
     }
     case 'lists.set_done': {
       only(args, ['list', 'item', 'done']);
       if (!backend.lists) throw new Error('Lists store is not available.');
       if (typeof args.done !== 'boolean') throw new Error('done must be a boolean.');
-      return backend.lists.setDone(text(args, 'list'), text(args, 'item'), args.done);
+      const res = backend.lists.setDone(text(args, 'list'), text(args, 'item'), args.done);
+      const view = backend.lists.show(res.list.name);
+      return { ...res, ...(view ? { surface: toChecklistSurface(view) } : {}) };
     }
     case 'lists.remove_item': {
       only(args, ['list', 'item']);
       if (!backend.lists) throw new Error('Lists store is not available.');
-      return backend.lists.removeItem(text(args, 'list'), text(args, 'item'));
+      const res = backend.lists.removeItem(text(args, 'list'), text(args, 'item'));
+      const view = backend.lists.show(res.list.name);
+      return { ...res, ...(view ? { surface: toChecklistSurface(view) } : {}) };
     }
     case 'pantry.purchase': {
       only(args, ['phrase', 'item', 'purchasedAt']);

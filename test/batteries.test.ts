@@ -298,4 +298,30 @@ describe('F-008-T06: battery registry and one-more-battery import', () => {
       store.close();
     }
   });
+
+  it('F-008-T13: registers a new battery from Italian and English chat phrases and asks for per-cell resistance', () => {
+    const store = new Store(':memory:');
+    try {
+      const itRes = store.batteries.applyChatPhrase('nuova batteria 9 blu LiPo 6S 1300 mAh', '2026-11-20T10:00:00Z');
+      assert.equal(itRes.status, 'registered');
+      assert.match(itRes.message, /#9 \(blu\)/);
+      assert.match(itRes.message, /6.*mΩ/i);
+
+      const enRes = store.batteries.applyChatPhrase('new battery 10 red LiHV 3S 550 mAh', '2026-11-20T10:05:00Z');
+      assert.equal(enRes.status, 'registered');
+      assert.match(enRes.message, /#10 \(red\)/);
+      assert.match(enRes.message, /3.*mΩ/i);
+
+      const list = store.batteries.list();
+      assert.equal(list.length, 2);
+      assert.equal(list[0]!.packNumber, 9);
+      assert.equal(list[0]!.cellCount, 6);
+      assert.equal(list[0]!.capacityMah, 1300);
+      assert.equal(list[1]!.packNumber, 10);
+      assert.equal(list[1]!.cellCount, 3);
+      assert.equal(list[1]!.capacityMah, 550);
+    } finally {
+      store.close();
+    }
+  });
 });
