@@ -978,7 +978,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-102-T03 — Apply at the announced time and report (Planned).
+💻 **→** Next: F-102-T03 — Apply at the announced time and report (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -990,7 +990,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-102-t03"></a>F-102-T03 — Apply at the announced time and report | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-102-t03"></a>F-102-T03 — Apply at the announced time and report | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | 🤖 | — |
 | 🟢 Small | <a id="f-102-t04"></a>F-102-T04 — Live check: one automatic update | 0.25 h | 0 h | 0.25 h | Planned · waits on [F-102-T03](#f-102-t03) | ⏳ 🤖 | — |
 | 🟢 Small | **Total** | 1.75 h | 0 h (0 of 4 steps recorded) | 1 h | 2 of 4 completed | | |
 

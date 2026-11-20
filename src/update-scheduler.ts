@@ -161,19 +161,59 @@ export function resultText(
   const rev = rev7(s.revision);
   const reasons = evaluation.reasons.join(' ');
   const recovery = evaluation.recovery.join(' ');
+  const receipt = evaluation.receipt;
+  const restarted = receipt?.steps.includes('restart') || receipt?.steps.includes('start');
+  const health = receipt?.health;
   switch (evaluation.outcome) {
-    case 'completed':
-      return it ? `✅ Aggiornamento ${rev} applicato.` : `✅ Update ${rev} applied.`;
+    case 'completed': {
+      const parts: string[] = [];
+      if (restarted) parts.push(it ? 'riavvio eseguito' : 'restarted');
+      if (health) {
+        if (health.ok) {
+          parts.push(
+            it
+              ? `verifica dopo avvio OK${health.commit ? ` (${rev7(health.commit)})` : ''}`
+              : `after-start health check OK${health.commit ? ` (${rev7(health.commit)})` : ''}`,
+          );
+        } else {
+          parts.push(
+            it
+              ? `verifica dopo avvio fallita (${health.failures.join(', ')})`
+              : `after-start health check failed (${health.failures.join(', ')})`,
+          );
+        }
+      }
+      return it
+        ? `✅ Aggiornamento ${rev} applicato${parts.length ? `: ${parts.join(', ')}` : ''}.`
+        : `✅ Update ${rev} applied${parts.length ? `: ${parts.join(', ')}` : ''}.`;
+    }
     case 'refused': {
       const next = nextApplyAt ? when(nextApplyAt, timeZone, language) : undefined;
       return it
         ? `⛔ Aggiornamento ${rev} rinviato: ${reasons}${next ? ` Prossimo tentativo ${next}.` : ''}`
         : `⛔ Update ${rev} refused: ${reasons}${next ? ` Next try ${next}.` : ''}`;
     }
-    case 'uncertain':
+    case 'uncertain': {
+      const details: string[] = [];
+      if (reasons) details.push(reasons);
+      if (health && !health.ok && health.failures.length) {
+        details.push(
+          it
+            ? `Verifica dopo avvio fallita: ${health.failures.join(', ')}.`
+            : `After-start health check failed: ${health.failures.join(', ')}.`,
+        );
+      }
+      if (receipt?.restoredBackup) {
+        details.push(
+          it
+            ? `Ripristinato backup ${rev7(receipt.restoredBackup.revision)}.`
+            : `Restored backup ${rev7(receipt.restoredBackup.revision)}.`,
+        );
+      }
       return it
-        ? `⚠️ Aggiornamento ${rev}: esito incerto. ${reasons}${recovery ? ` Ripristino: ${recovery}` : ''}`
-        : `⚠️ Update ${rev}: uncertain outcome. ${reasons}${recovery ? ` Recovery: ${recovery}` : ''}`;
+        ? `⚠️ Aggiornamento ${rev} non riuscito: ${details.join(' ')}${recovery ? ` Ripristino: ${recovery}` : ''}`
+        : `⚠️ Update ${rev} failed: ${details.join(' ')}${recovery ? ` Recovery: ${recovery}` : ''}`;
+    }
     default:
       return it ? `Aggiornamento ${rev} saltato: ${reasons}` : `Update ${rev} skipped: ${reasons}`;
   }
