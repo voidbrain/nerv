@@ -94,6 +94,27 @@ test(
           [],
           'tools panel accessibility',
         );
+        // F-049-T09: EVA panel shows live instances per class, per machine, empty classes say so, and passes axe.
+        let releaseEva;
+        const heldEva = runtime.evaPool.run(
+          { jobId: 'eva-browser-job', evaClass: 'eva-01', pilot: 'mail-brief', sortieId: 'S-TEST' },
+          () => new Promise((r) => (releaseEva = r)),
+        );
+        await until(`document.querySelector('#cages').textContent.includes('eva-browser-job')`);
+        assert.equal(
+          await evaluate(
+            `document.querySelector('#cages [data-eva-class="eva-01"]').textContent.includes('mail-brief') && document.querySelector('#cages [data-eva-class="eva-01"]').textContent.includes('RUNNING') && document.querySelector('#cages [data-eva-class="eva-00"]').textContent.includes('Empty · no active instances')`,
+          ),
+          true,
+          'EVA panel shows live instance with pilot, job, state and empty classes',
+        );
+        assert.deepEqual(
+          await evaluate(`axe.run(document.querySelector('#p-eva')).then(r=>r.violations.map(v=>v.id))`),
+          [],
+          'EVA instances panel accessibility',
+        );
+        releaseEva();
+        await heldEva;
         plans.push(
           '{"action":{"tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T09:00:00Z"}}}',
           '{"reply":"Reminder added"}',

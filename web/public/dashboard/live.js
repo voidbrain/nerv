@@ -76,7 +76,8 @@
     if (polling || !token) return; polling = true;
     const historySince = state.lastVisit;
     try {
-      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null)]);
+      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy, evaData] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null), api("eva/instances").catch(() => null)]);
+      state.evaMachines = evaData && Array.isArray(evaData.machines) ? evaData.machines : null;
       state.update = update || doctor.update || null;
       state.updatePolicy = updatePolicy || null;
       await loadUsage();
@@ -92,9 +93,8 @@
       const selected = state.sorties.find(x => x.id === state.selected);
       const want = list.filter(s => (selected && s.id === selected.realId) || s.waiting || !detailCache[s.id] || s.status === "open").slice(0, 8);
       await Promise.all(want.map(async s => { detailCache[s.id] = await api("sorties/" + s.id); }));
-      // The one live "cage": the in-process executor beats when an action newly ran.
       const ran = Object.values(detailCache).flatMap(d => d.detail).filter(a => a.status === "done" || a.status === "failed").map(a => a.created).sort().pop();
-      if (ran && lastRan && ran > lastRan) activeCage["EVA-02"] = Date.now() + 4000; if (ran) lastRan = ran;
+      if (ran) lastRan = ran;
       // Comms: the first refresh loads the five most recent sorties' traces (so the panel is not empty at start); later
       // ones keep the selected sortie and every running or waiting one up to date.
       const traced = new Set([...(firstTrace ? latest20.slice(0, 5) : latest20.filter(s => s.status === "open")).map(s => s.id), ...(selected ? [selected.realId] : [])]);
@@ -140,7 +140,7 @@
       state.upcoming = state.reminders.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder", label:when(r) }));
       state.doctor = doctor; showBuild(doctor.build);
       if (!kajiBases.length && doctor.base) observeTelegram([{baseId:doctor.base.id,status:"enrolled",online:true,channel:doctor.channel,channelFresh:doctor.channelFresh}]);
-      if (doctor.base && BASES[0].name !== doctor.base.name) { BASES[0].name = doctor.base.name; BASES[0].role = doctor.base.id + " · this machine"; document.getElementById("cages").innerHTML = ""; }
+      if (doctor.base && BASES[0].name !== doctor.base.name) { BASES[0].name = doctor.base.name; BASES[0].role = doctor.base.id + " · this machine"; }
       // The newest sortie is selected at first; after the owner deselects one, nothing is selected again by itself.
       // Owner, 2026-11-05: by default the dashboard shows the real state. Nothing chosen: a running sortie is selected (F-019),
       // otherwise none; one it picked by itself is let go when it finishes. A sortie the owner clicked stays.
@@ -538,7 +538,7 @@
     const enrolled = list.filter(b => b.status !== "revoked");
     observeTelegram(enrolled);
     const key = list.map(b => b.baseId + ":" + b.status + ":" + b.online + ":" + (b.health ? b.health.state : "")).join("|") + "|" + health; if (key === basesKey) return; basesKey = key;
-    if (!enrolled.length) { BASES.splice(1); BASES[0].status = health; LINKS.length = 0; CAGES.forEach(c => { c.base = BASES[0].id; }); document.getElementById("cages").innerHTML = ""; initMap(); return; }
+    if (!enrolled.length) { BASES.splice(1); BASES[0].status = health; LINKS.length = 0; initMap(); return; }
     pulseHeartbeats(enrolled);
     const self = enrolled.find(b => b.self) || enrolled[0]; const others = enrolled.filter(b => b !== self);
     // Each other base gets a spot from its ID (owner, 2026-11-05: a column looked dull): scattered, but the same on every reload.
@@ -560,7 +560,6 @@
     } else {
       for (let i = 0; i < up.length; i++) for (let j = i + 1; j < up.length; j++) LINKS.push([up[i].baseId.toLowerCase(), up[j].baseId.toLowerCase(), "route"]);
     }
-    CAGES.forEach(c => { c.base = BASES[0].id; }); document.getElementById("cages").innerHTML = "";
     initMap();
   }
   const sinceText = t => { if (!t) return "never heard"; const s = Math.round((Date.now() - Date.parse(t)) / 1000); return s < 90 ? "seen " + s + " s ago" : s < 5400 ? "last seen " + Math.round(s / 60) + " min ago" : "last seen " + new Date(t).toLocaleString(); };

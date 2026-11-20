@@ -1,4 +1,6 @@
 import { Watch, type WatchWork } from './watch.ts';
+import { EvaJobs } from './eva-jobs.ts';
+import { defaultEvaLimits, type EvaInstanceInfo, type EvaInstancesSnapshot } from './eva-pool.ts';
 import {
   exportCoordinatorSnapshot,
   importCoordinatorSnapshotToStandby,
@@ -678,6 +680,34 @@ export class Store {
     nowMonoNs?: bigint;
   }) {
     return rearmSoleCoordinatorLease(this.db, input);
+  }
+  evaInstances(): EvaInstancesSnapshot {
+    const jobs = new EvaJobs(this.db)
+      .list(50)
+      .filter(
+        (r): r is typeof r & { state: 'running' | 'uncertain' } => r.state === 'running' || r.state === 'uncertain',
+      )
+      .map((r): EvaInstanceInfo => ({
+        jobId: r.id,
+        evaClass: 'eva-03',
+        pilot: null,
+        state: r.state,
+        sortieId: r.sortieId,
+        started: r.started,
+      }));
+    return {
+      machines: [
+        {
+          machineId: 'local',
+          machineName: 'this machine',
+          self: true,
+          online: true,
+          reported: true,
+          limits: defaultEvaLimits(),
+          instances: jobs,
+        },
+      ],
+    };
   }
   close() {
     this.db.close();

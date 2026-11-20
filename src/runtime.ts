@@ -1,4 +1,5 @@
 import type { WatchWork } from './watch.ts';
+import { EvaPool, defaultEvaLimits, type EvaInstancesSnapshot, type EvaMachineInstances } from './eva-pool.ts';
 import type { SeatPool } from './seat-pool.ts';
 import type { WorkerContext, WorkerLease } from './worker-jobs.ts';
 import type { InstrumentalityRun } from './instrumentality-runs.ts';
@@ -812,6 +813,36 @@ export class Runtime implements StoreApi {
   /** This base's health as it reports it to its peers: degraded with the reasons doctor and status give. */
   async baseHealth(): Promise<BaseHealth> {
     return this.basesController.baseHealth();
+  }
+  private _evaPool?: EvaPool;
+  get evaPool(): EvaPool {
+    return (this._evaPool ??= new EvaPool(
+      (this.home ? readConfig(this.home).eva?.limits : undefined) ?? defaultEvaLimits(),
+    ));
+  }
+  async evaInstances(): Promise<EvaInstancesSnapshot> {
+    const enrolled = (await this.bases().catch(() => [])).filter((b) => b.status !== 'revoked');
+    const selfBase = enrolled.find((b) => b.self);
+    const localMachine: EvaMachineInstances = {
+      machineId: selfBase?.baseId ?? 'local',
+      machineName: selfBase?.name ?? 'this machine',
+      self: true,
+      online: true,
+      reported: true,
+      limits: this.evaPool.limits,
+      instances: this.evaPool.instances(),
+    };
+    const peers: EvaMachineInstances[] = enrolled
+      .filter((b) => !b.self)
+      .map((b) => ({
+        machineId: b.baseId,
+        machineName: b.name,
+        self: false,
+        online: b.online,
+        reported: false,
+        instances: [],
+      }));
+    return { machines: [localMachine, ...peers] };
   }
   async bases() {
     return this.basesController.bases();

@@ -1444,7 +1444,7 @@ test('a sortie whose action the owner declined draws its route from Misato apart
   const plain = { status: 'done', phase: 'debrief', done, actions: [] };
   assert.equal(api.edgeShown(plain, declined), false, 'not drawn for an answer with no action');
 });
-test('the flow header names the sortie by its code only; every EVA cage shows its status on its own line (F-108)', async () => {
+test('the flow header names the sortie by its code only; every EVA class header stacks its name and status (F-108, F-049-T09)', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
   const line = src.split('\n').find((l) => l.includes('getElementById("flow-sub").textContent'))!;
@@ -1452,7 +1452,105 @@ test('the flow header names the sortie by its code only; every EVA cage shows it
   new Function('document', 's', line)({ getElementById: () => el }, { id: 'S-6E26', title: 'Remind me at 9' });
   assert.equal(el.textContent, 'S-6E26');
   const html = readFileSync('web/public/dashboard/index.html', 'utf8');
-  const rule = /\.cage \.ch \{([^}]*)\}/.exec(html)![1]!;
-  assert.match(rule, /flex-direction:\s*column/, 'name and status stack in every cage');
+  const rule = /\.eva-class-hdr \{([^}]*)\}/.exec(html)![1]!;
+  assert.match(rule, /flex-direction:\s*column/, 'name and status stack in every EVA class');
   assert.doesNotMatch(rule, /flex-wrap:\s*wrap/, 'no width-dependent wrapping');
+});
+
+test('F-049-T09: GET /api/eva/instances requires auth and returns live instances per machine', async () => {
+  const store = new Store(':memory:');
+  const { EvaJobs } = await import('../src/eva-jobs.ts');
+  new EvaJobs(store.db).begin({ id: 'eva-job-1', sortieId: 'S-AAAA', key: 'notes', hash: 'h1' });
+  const srv = makeServer(store, 'e'.repeat(32));
+  await new Promise<void>((done) => srv.listen(0, '127.0.0.1', done));
+  try {
+    const port = (srv.address() as { port: number }).port;
+    const unauth = await fetch(`http://127.0.0.1:${port}/api/eva/instances`);
+    assert.equal(unauth.status, 401);
+    const res = await fetch(`http://127.0.0.1:${port}/api/eva/instances`, {
+      headers: { Authorization: 'Bearer ' + 'e'.repeat(32) },
+    });
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      machines: {
+        machineId: string;
+        reported: boolean;
+        instances: { jobId: string; evaClass: string; state: string }[];
+      }[];
+    };
+    assert.equal(body.machines.length, 1);
+    assert.equal(body.machines[0]!.reported, true);
+    assert.equal(body.machines[0]!.instances.length, 1);
+    assert.equal(body.machines[0]!.instances[0]!.jobId, 'eva-job-1');
+    assert.equal(body.machines[0]!.instances[0]!.evaClass, 'eva-03');
+    assert.equal(body.machines[0]!.instances[0]!.state, 'running');
+  } finally {
+    await new Promise<void>((done) => srv.close(() => done()));
+    store.close();
+  }
+});
+
+test('F-049-T09: dashboard renders live EVA instances per class, per machine, and empty classes say so', () => {
+  const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const classesSrc = src.slice(
+    src.indexOf('const EVA_CLASSES = ['),
+    src.indexOf('];', src.indexOf('const EVA_CLASSES = [')) + 2,
+  );
+  const fnStart = src.indexOf('function evaMachinesForView()');
+  const fnEnd = src.indexOf('function renderLog()');
+  const block = src.slice(fnStart, fnEnd);
+  const cages = { innerHTML: '' };
+  const sub = { textContent: '' };
+  const state = {
+    evaMachines: [
+      {
+        machineId: 'tokyo3',
+        machineName: 'TOKYO-3',
+        self: true,
+        online: true,
+        reported: true,
+        limits: { instances: 4, memoryMb: 4096, modelSlots: 1 },
+        instances: [{ jobId: 'job-99', evaClass: 'eva-01', pilot: 'mail-brief', state: 'running', sortieId: 'S-99AA' }],
+      },
+      {
+        machineId: 'nerv01',
+        machineName: 'NERV-01',
+        self: false,
+        online: true,
+        reported: false,
+        instances: [],
+      },
+    ],
+    sorties: [],
+  };
+  const renderCages = new Function(
+    'LIVE',
+    'BASES',
+    'state',
+    'pilotStage',
+    'esc',
+    'document',
+    `${classesSrc}\n${block}\nreturn renderCages;`,
+  )(
+    true,
+    [{ id: 'tokyo3', name: 'TOKYO-3', status: 'online' }],
+    state,
+    () => 'test',
+    (v: unknown) =>
+      String(v ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;'),
+    { getElementById: (id: string) => (id === 'cages' ? cages : id === 'cages-sub' ? sub : null) },
+  ) as () => void;
+  renderCages();
+  assert.equal(sub.textContent, '1 active · 2 machines');
+  assert.match(cages.innerHTML, /TOKYO-3/);
+  assert.match(cages.innerHTML, /1\/4 slots/);
+  assert.match(cages.innerHTML, /mail-brief/);
+  assert.match(cages.innerHTML, /job-99 · S-99AA/);
+  assert.match(cages.innerHTML, /RUNNING/);
+  assert.match(cages.innerHTML, /Empty · no active instances/);
+  assert.match(cages.innerHTML, /NERV-01/);
+  assert.match(cages.innerHTML, /Not reported by this machine/);
 });
