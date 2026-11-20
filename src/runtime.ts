@@ -222,6 +222,11 @@ export class Runtime implements StoreApi {
   async batteryCards() {
     return (await this.nervous.call('batteries.cards', {})) as ReturnType<import('./store.ts').Store['batteryCards']>;
   }
+  async registerBattery(input: import('./batteries.ts').RegisterBatteryInput) {
+    return (await this.nervous.call('batteries.register', input as unknown as Record<string, unknown>)) as ReturnType<
+      import('./store.ts').Store['registerBattery']
+    >;
+  }
   async decide(
     id: string,
     decision: Decision,

@@ -640,6 +640,10 @@ export class Store {
       return photos.length ? { ...card, photos } : card;
     });
   }
+  registerBattery(input: import('./batteries.ts').RegisterBatteryInput) {
+    const battery = this.batteries.register(input);
+    return { battery, items: this.batteryCards() };
+  }
   doctor() {
     return {
       ...(this.home ? { credentials: credentialAges(this.home) } : {}),

@@ -185,6 +185,11 @@ export interface StoreApi {
     | Promise<{ list: OwnerList; items: ListItem[]; item: ListItem } | null>;
   listsShow?(name: string): ListView | null | Promise<ListView | null>;
   batteryCards?(): BatteryDashboardCard[] | Promise<BatteryDashboardCard[]>;
+  registerBattery?(
+    input: import('./batteries.ts').RegisterBatteryInput,
+  ):
+    | { battery: import('./batteries.ts').BatteryRecord; items: BatteryDashboardCard[] }
+    | Promise<{ battery: import('./batteries.ts').BatteryRecord; items: BatteryDashboardCard[] }>;
   listsToggle?(
     itemId: string,
     done?: boolean,
