@@ -1183,9 +1183,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [F-049-T09](#f-049-t09) | — | ⏳ | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [F-049-T09](#f-049-t09) | — | 🤖 | — | — |
 
-💻 **→** Next: F-051-T06 — EVA cage pilot labels from real instance data (Planned).
+💻 **→** Next: F-051-T06 — EVA cage pilot labels from real instance data (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1197,7 +1197,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
 |---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-051-t06"></a>F-051-T06 — EVA cage pilot labels from real instance data | 1 h | 0 h | 1 h | Planned | [F-049-T09](#f-049-t09) | — | ⏳ 🤖 |
+| 🟢 Small | <a id="f-051-t06"></a>F-051-T06 — EVA cage pilot labels from real instance data | 1 h | 0 h | 1 h | Implemented; verification pending | [F-049-T09](#f-049-t09) | — | 🤖 |
 | 🟢 Small | **Total** | 3.5 h | 1.5 h (5 of 7 steps recorded) | 1 h | 6 of 7 completed | | | |
 
 <details><summary>Done steps (6)</summary>

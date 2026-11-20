@@ -1596,3 +1596,73 @@ test('F-110-T03: settings panel renders schedule controls, preserves drafts acro
   );
   assert.doesNotMatch(settingsBlock, /\b[FB]-\d{3}(?:-T\d{2})?\b/);
 });
+
+test('F-051-T06: Sephirot EVA cage shows recorded pilot and instance, none when absent, distinct from unavailable', () => {
+  const store = new Store(':memory:');
+  try {
+    const s1 = store.ledger.openSortie('misato', 'With EVA instance', 'trusted');
+    const p1 = store.ledger.propose(s1, { tool: 'notes.read', args: { path: 'a', limit: 1 }, stage: 'test' });
+    store.ledger.finished(s1, p1.actionId, 'notes.read', { result: { ok: true } }, new Date(), 42, {
+      jobId: 'job-42',
+      evaClass: 'eva-01',
+      pilot: 'mail-brief',
+    });
+    const d1 = store.ledger.sortie(s1);
+    assert.deepEqual(d1?.detail[0]?.evaInstance, {
+      jobId: 'job-42',
+      evaClass: 'eva-01',
+      pilot: 'mail-brief',
+    });
+
+    const s2 = store.ledger.openSortie('misato', 'Without EVA instance', 'trusted');
+    const p2 = store.ledger.propose(s2, { tool: 'notes.read', args: { path: 'b', limit: 1 }, stage: 'test' });
+    store.ledger.finished(s2, p2.actionId, 'notes.read', { result: { ok: true } }, new Date(), 15);
+    const d2 = store.ledger.sortie(s2);
+    assert.equal(d2?.detail[0]?.evaInstance, undefined);
+  } finally {
+    store.close();
+  }
+
+  const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const fnStart = src.indexOf('function sephirotEvaLabel(s, a, b)');
+  const fnEnd = src.indexOf('function renderFlow(', fnStart);
+  const block = src.slice(fnStart, fnEnd);
+  const makeLabelFn = (live: boolean, evaMachines: unknown) =>
+    new Function('LIVE', 'state', `${block}\nreturn sephirotEvaLabel;`)(live, { evaMachines }) as (
+      s: unknown,
+      a: unknown,
+      b: unknown,
+    ) => { text: string; avatar: string | null };
+
+  const fn = makeLabelFn(true, []);
+  const withData = fn(
+    { id: 'S-1', status: 'done' },
+    {
+      status: 'done',
+      evaInstance: { jobId: 'job-42', evaClass: 'eva-01', pilot: 'mail-brief' },
+    },
+    { executor: 'EVA-01' },
+  );
+  assert.equal(withData.text, 'pilot mail-brief · EVA-01 (job-42)');
+  assert.equal(withData.avatar, 'eva-01');
+
+  const noData = fn({ id: 'S-2', status: 'done' }, { status: 'done' }, { executor: 'EVA-01' });
+  assert.equal(noData.text, 'pilot none · instance none');
+
+  const liveRunning = makeLabelFn(true, [
+    {
+      machineId: 'local',
+      reported: true,
+      instances: [{ jobId: 'job-77', evaClass: 'eva-02', pilot: 'fpv-charger', sortieId: 'S-3', state: 'running' }],
+    },
+  ])({ id: 'S-3', status: 'active', phase: 'eva' }, { status: 'proposed' }, { executor: 'EVA-02' });
+  assert.equal(liveRunning.text, 'pilot fpv-charger · EVA-02 (job-77)');
+
+  const unavailable = makeLabelFn(true, null)(
+    { id: 'S-4', status: 'active', phase: 'eva' },
+    { status: 'proposed' },
+    { executor: 'EVA-02' },
+  );
+  assert.equal(unavailable.text, 'instance data unavailable');
+  assert.notEqual(noData.text, unavailable.text);
+});
