@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-113-T02",
+  "parent": "F-113",
+  "title": "Compact subject index in the planner prompt and a read tool for one subject's docs",
+  "goal": "The planner loads tool details only when it needs them",
+  "status": "planned",
+  "acceptance": [
+    "The planner prompt lists subjects with one line each",
+    "A read tool returns one subject's full tool docs",
+    "Join test: the planner fetches a subject before calling one of its tools; a call to an unfetched tool still goes through the gate"
+  ],
+  "dependsOn": [
+    "F-113-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-113.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck"
+  ],
+  "escalation": [
+    "Drop or narrow this step if F-113-T01 shows a small share; tell the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2.5 h",
+    "basis": "Estimated 2026-11-20 from the Agentica review. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 2.5,
+    "baselineAgentHours": 2.5,
+    "estimateAgentHours": 2.5
+  }
+}

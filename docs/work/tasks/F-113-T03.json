@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-113-T03",
+  "parent": "F-113",
+  "title": "Gauntlet comparison of prompt size and task success with the compact index",
+  "goal": "The change keeps task success while shrinking the prompt",
+  "status": "planned",
+  "acceptance": [
+    "Prompt size and task success recorded before and after on the same cases"
+  ],
+  "dependsOn": [
+    "F-113-T02"
+  ],
+  "resources": [
+    "evals/gauntlet/**",
+    "docs/evaluations/**",
+    "docs/work/records/F-113.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node tools/gauntlet.mjs pending"
+  ],
+  "escalation": [
+    "Running real models needs the owner's approval (BACKLOG-RULES, Evaluation dependencies)"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-20 from the Agentica review. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

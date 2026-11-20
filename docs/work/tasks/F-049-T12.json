@@ -36,14 +36,14 @@
     "Anything that needs a human sense, account or device goes back to the owner as its own step"
   ],
   "effort": {
-    "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Moved to the agent 2026-11-18 (0.5 h owner → agent).",
-    "reviewed": "2026-11-18",
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Re-estimated 2026-11-20 from 0.5 h to 1.5 h (work-items calibrate since 2026-11-15: median 1.0 over 53 steps, but real-device runs took 1.5–3 h): a first job on the Linux host, like F-009-T03 (Linux service acceptance, 1.5 h against 0.5 h).",
+    "reviewed": "2026-11-20",
     "baselineDays": 2,
     "ownerHours": 0,
-    "agentHours": 0.5,
-    "estimateAgentHours": 0.5,
+    "agentHours": 1.5,
+    "estimateAgentHours": 1.5,
     "baselineAgentHours": 0.5
   }
 }

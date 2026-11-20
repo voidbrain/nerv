@@ -1,5 +1,9 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-20 — main `224e0e8`
+
+PRs #584 and #585 merged on green CI. F-079 closed (F-079-T02, run 44732108271); F-027-T02 waits on its confinement review. Five device-run steps re-estimated to 1.5 h; F-111–F-113 opened from the Agentica review.
+
 ## 2026-11-20 — main `53b7671`
 
 PRs #579, #580, #581, #582 and #583 merged on green CI. #579 reconciled the backlog (docs-only); #580 implemented F-049-T09, #581 implemented F-049-T10, #582 fixed B-096, and #583 implemented F-110-T03.
