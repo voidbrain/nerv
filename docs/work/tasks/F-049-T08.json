@@ -4,7 +4,13 @@
   "parent": "F-049",
   "title": "Pilot trust stage caps the class",
   "goal": "A job's class is capped by its pilot's stage (a Prototype pilot never runs in EVA-02)",
-  "status": "planned",
+  "status": "implemented",
+  "prs": [
+    {
+      "pr": 572,
+      "note": "implementation"
+    }
+  ],
   "acceptance": [
     "Admission reads the pilot and stage from F-045 and F-025; the cap only lowers, never raises, a class",
     "Tests for each stage and class"
@@ -15,11 +21,11 @@
     "F-025-T04"
   ],
   "resources": [
-    "src/**",
-    "test/**",
-    "docs/architecture/**",
-    "docs/decisions/**",
+    "src/eva-classes.ts",
+    "src/cli-commands.ts",
+    "test/eva-classes.test.ts",
     "docs/work/records/F-049.md",
+    "docs/work/tasks/F-049-T08.json",
     "generated:backlog-views"
   ],
   "capabilities": [
