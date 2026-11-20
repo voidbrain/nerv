@@ -343,3 +343,33 @@ test('server /api/update/policy and /api/update/auto enforce auth, opt-in policy
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('B-105-T01: updatePolicy field from a newer NERV names version skew; unknown field is still rejected', () => {
+  const validateOlder = validateAutoUpdatePolicy as (raw: unknown, supportedFields?: readonly string[]) => unknown;
+  assert.throws(
+    () =>
+      validateOlder(
+        {
+          enabled: true,
+          channels: ['main'],
+          targets: ['NERV-01'],
+          schedule: { mode: 'apply', checkHour: 20, applyHour: 3, quietFrom: 8, quietUntil: 23 },
+        },
+        ['enabled', 'channels', 'targets', 'acceptedAt'],
+      ),
+    /newer NERV/i,
+  );
+  assert.throws(
+    () =>
+      validateOlder(
+        {
+          enabled: true,
+          channels: ['main'],
+          targets: ['NERV-01'],
+          unknownFutureField: 1,
+        },
+        ['enabled', 'channels', 'targets', 'acceptedAt'],
+      ),
+    /Unsupported updatePolicy field: unknownFutureField/,
+  );
+});

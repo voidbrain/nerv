@@ -1961,7 +1961,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-105-T01 — Name configuration version skew instead of a raw validator error (Planned).
+💻 **→** Next: B-105-T01 — Name configuration version skew instead of a raw validator error (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1971,11 +1971,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-105-t01"></a>B-105-T01 — Name configuration version skew instead of a raw validator error | 1.5 h | 0 h | 1.5 h | Planned | — | [B-105-T02](#b-105-t02) |
-| 🟢 Small | <a id="b-105-t02"></a>B-105-T02 — Live check on the main base | 0.25 h | 0 h | 0.25 h | Planned | [B-105-T01](#b-105-t01) | — |
-| 🟡 Medium | **Total** | 1.75 h | 0 h (0 of 2 steps recorded) | 1.75 h | 0 of 2 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-105-t01"></a>B-105-T01 — Name configuration version skew instead of a raw validator error | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [B-105-T02](#b-105-t02) | [PR #599](https://github.com/voidbrain/nerv/pull/599) implementation |
+| 🟢 Small | <a id="b-105-t02"></a>B-105-T02 — Live check on the main base | 0.25 h | 0 h | 0.25 h | Planned | [B-105-T01](#b-105-t01) | — | — |
+| 🟡 Medium | **Total** | 1.75 h | 0 h (0 of 2 steps recorded) | 1.75 h | 0 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1984,7 +1984,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #595](https://github.com/voidbrain/nerv/pull/595); owner report 2026-11-20; process start time and checkout reflog read on the main base |
+| PR / evidence | Steps: B-105-T01: [PR #599](https://github.com/voidbrain/nerv/pull/599) implementation. [PR #599](https://github.com/voidbrain/nerv/pull/599) B-105-T01 (`src/update-policy.ts`, `src/build.ts`, `src/server.ts`, `src/cli.ts`, `test/update-policy.test.ts`, `test/build.test.ts`); opened in [PR #595](https://github.com/voidbrain/nerv/pull/595); owner report 2026-11-20; process start time and checkout reflog read on the main base |
 | Opened | 2026-11-20 |
 | Verification | Pending |
 | Reviewed | 2026-11-20 |

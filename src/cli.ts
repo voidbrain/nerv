@@ -13,6 +13,7 @@ import { runCodingJobInWorktree, type AllowedCodingRepo } from './coding-job.ts'
 import { DesktopRecordingSession, type DesktopRecordingHeader } from './desktop-recording.ts';
 import { defaultAutoUpdatePolicy } from './update-policy.ts';
 import { startAutoUpdateScheduler } from './update-scheduler.ts';
+import { buildInfo, checkRevisionSkew, type BuildInfo } from './build.ts';
 import type { UpdateControl } from './server-update.ts';
 import { clickNamedControl, type BrowserAdapterDriver } from './browser-control.ts';
 import { clickDesktopControl, type DesktopAccessibilityDriver } from './desktop-control.ts';
@@ -445,7 +446,20 @@ try {
       case 'spear':
         console.log(JSON.stringify(local().spear(args[0] ?? '', args[1] ?? 'cli'), null, 2));
         break;
-      case 'doctor':
+      case 'doctor': {
+        let runningBuild: BuildInfo = buildInfo();
+        try {
+          const res = await fetch(`http://127.0.0.1:${config.port}/api/doctor`, {
+            headers: { authorization: `Bearer ${readToken(home)}` },
+            signal: AbortSignal.timeout(500),
+          });
+          if (res.ok) {
+            const live = (await res.json()) as { build?: BuildInfo };
+            if (live.build) runningBuild = live.build;
+          }
+        } catch {
+          /* service not running locally: compare against local buildInfo */
+        }
         console.log(
           JSON.stringify(
             {
@@ -455,6 +469,8 @@ try {
               language: config.language,
               timeZone: config.timeZone,
               hostTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              build: runningBuild,
+              revisionSkew: checkRevisionSkew(runningBuild),
               ...local().doctor(),
               update: await checkUpdateAvailability({ offline: true }),
               delivery: 'Durable local inbox; phone notifications not configured.',
@@ -470,6 +486,7 @@ try {
           ),
         );
         break;
+      }
       case 'serve':
       case 'launch': {
         const webRoot = resolve(fileURLToPath(new URL('../dist/web/browser', import.meta.url)));
