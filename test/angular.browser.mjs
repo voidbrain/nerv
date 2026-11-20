@@ -832,6 +832,29 @@ test(
         listTime,
       );
       store.ledger.reply(listSortie, 'Here is your shopping list.', listTime);
+      const evaWithInst = store.ledger.openSortie('misato', 'EVA instance fixture', 'trusted');
+      store.ledger.note(evaWithInst, 'misato.request', { text: 'EVA instance fixture', conversation: 'dashboard' });
+      const evaProp1 = store.ledger.propose(evaWithInst, {
+        tool: 'notes.read',
+        args: { path: 'a', limit: 1 },
+        stage: 'test',
+      });
+      store.ledger.finished(evaWithInst, evaProp1.actionId, 'notes.read', { result: { ok: true } }, new Date(), 21, {
+        jobId: 'job-browser-1',
+        evaClass: 'eva-01',
+        pilot: 'mail-brief',
+      });
+      store.ledger.reply(evaWithInst, 'Done.');
+
+      const evaNoInst = store.ledger.openSortie('misato', 'EVA no instance fixture', 'trusted');
+      store.ledger.note(evaNoInst, 'misato.request', { text: 'EVA no instance fixture', conversation: 'dashboard' });
+      const evaProp2 = store.ledger.propose(evaNoInst, {
+        tool: 'notes.read',
+        args: { path: 'b', limit: 1 },
+        stage: 'test',
+      });
+      store.ledger.finished(evaNoInst, evaProp2.actionId, 'notes.read', { result: { ok: true } }, new Date(), 11);
+      store.ledger.reply(evaNoInst, 'Done.');
 
       const advised = store.ledger.openSortie('misato', 'Advice route fixture', 'trusted');
       store.ledger.note(advised, 'misato.request', { text: 'Advice route fixture', conversation: 'dashboard' });
@@ -873,6 +896,13 @@ test(
         true,
         'ticking dashboard chat checklist updates store',
       );
+      // F-051-T06: Sephirot EVA cage shows recorded pilot + instance, and 'none' when absent.
+      await evaluate(`document.querySelector('[data-s="S-${evaWithInst.slice(0, 4).toUpperCase()}"]')?.click()`);
+      await until(
+        `document.querySelector('#sd-eva')?.textContent.includes('pilot mail-brief · EVA-01 (job-browser-1)')`,
+      );
+      await evaluate(`document.querySelector('[data-s="S-${evaNoInst.slice(0, 4).toUpperCase()}"]')?.click()`);
+      await until(`document.querySelector('#sd-eva')?.textContent.includes('pilot none · instance none')`);
       // F-057: exercise the actual header button and browser clipboard, not only the helper.
       await until(`document.querySelector('#build').dataset.commit.length>=7`);
       const reportedBuild = await (

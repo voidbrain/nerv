@@ -4,7 +4,13 @@
   "parent": "F-103",
   "title": "Health view and warnings",
   "goal": "The dashboard shows the samples and link load with threshold warnings",
-  "status": "planned",
+  "status": "implemented",
+  "prs": [
+    {
+      "pr": 605,
+      "note": "Dashboard health samples, link load, thresholds and deduplicated warnings"
+    }
+  ],
   "acceptance": [
     "Thresholds are settings; a crossed threshold gives one deduplicated warning"
   ],

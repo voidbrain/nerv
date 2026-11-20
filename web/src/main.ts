@@ -36,7 +36,7 @@ interface Reminder {
 @if(connected()){<nerv-surface-renderer [surface]="statusSurface()" [t]="t()" (checklistToggle)="onChecklistToggle($event)"></nerv-surface-renderer>
 @if(view()!=='doctor'){<div class="section-heading"><h2>{{view()==='home'?t().horizon:t().reminders}}</h2><span>{{reminders().length}} {{t().recorded}}</span></div><div class="grid"><section class="panel"><h3>{{t().keep}}</h3><label>{{t().what}}<input #title [placeholder]="t().example" maxlength="500"></label><label>{{t().when}} <small>{{t().browserTime}}</small><input #due type="datetime-local"></label><button (click)="add(title.value,due.value,title,due)">{{t().tie}}</button><p class="hint">{{t().delivery}}</p></section><section class="panel"><h3>{{t().horizon}}</h3>@for(r of reminders();track r.id){@if(editingId()!==r.id){<article class="reminder" [attr.data-reminder-id]="r.id"><div><strong>{{r.title}}</strong><p>{{formatReminder(r)}}</p><small>{{r.cancelled?t().cancelled:r.delivered?t().delivered:t().scheduled}}</small></div>@if(!r.cancelled&&!r.delivered){<div class="reminder-actions"><button class="quiet cancel-btn" (click)="cancel(r.id)" [attr.aria-label]="t().cancel+' '+r.title">×</button><button class="quiet edit-btn" (click)="startEdit(r)" [attr.aria-label]="t().edit+' '+r.title">{{t().edit}}</button></div>}</article>}@if(editingId()===r.id){<article class="reminder editing" [attr.data-reminder-id]="r.id"><form class="rem-edit" (submit)="saveEdit($event,r.id)" novalidate><label [attr.for]="'rem-edit-title-'+r.id">{{t().what}}</label><input [id]="'rem-edit-title-'+r.id" type="text" [value]="editTitle()" (input)="editTitle.set($any($event.target).value)" maxlength="500"><label [attr.for]="'rem-edit-due-'+r.id">{{t().when}} <small>{{t().browserTime}}</small></label><input [id]="'rem-edit-due-'+r.id" type="datetime-local" [value]="editDue()" (input)="editDue.set($any($event.target).value)"><div class="edit-actions"><button type="submit" class="save-btn">{{t().save}}</button><button type="button" class="quiet keep-btn" (click)="cancelEdit(r.id)">{{t().keepAsIs}}</button></div></form></article>}}@empty{<p class="empty">{{t().empty}}</p>}<div role="group" data-history="reminders" [attr.aria-label]="t().reminderPages"><button class="quiet" (click)="pageReminders(false)" [disabled]="reminderBefore().length===1" [attr.aria-disabled]="paging()||reminderBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageReminders(true)" [disabled]="reminderNext()===null" [attr.aria-disabled]="paging()||reminderNext()===null">{{t().next}}</button></div></section></div><section class="panel inbox"><h3>{{t().inbox}}</h3>@for(message of inbox();track $index){<p>{{message}}</p>}@empty{<p class="hint">{{t().inboxHint}}</p>}<div role="group" data-history="inbox" [attr.aria-label]="t().inboxPages"><button class="quiet" (click)="pageInbox(false)" [disabled]="inboxBefore().length===1" [attr.aria-disabled]="paging()||inboxBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageInbox(true)" [disabled]="inboxNext()===null" [attr.aria-disabled]="paging()||inboxNext()===null">{{t().next}}</button></div><div role="status">{{paging()?t().loading:t().pageReady}}</div></section>}
 @if(view()==='doctor'){<nerv-doctor-view [t]="t()" [raw]="doctorRaw()"></nerv-doctor-view>}
-@if(batteries().length>0){<nerv-battery-cards [cards]="batteries()" [t]="t()" [language]="language()" />}
+<nerv-battery-cards [cards]="batteries()" [t]="t()" [language]="language()" (addBattery)="onAddBattery($event)" />
 <section class="panel ptt" aria-label="Push to talk"><h3>{{t().pttTitle}}</h3><div class="ptt-controls"><button type="button" class="quiet ptt-btn" (click)="startPushToTalk()">{{pttListening()?t().pttListening:t().pttHold}}</button><input type="text" class="ptt-input" [value]="pttTranscript()" (input)="pttTranscript.set($any($event.target).value)" [placeholder]="t().pttPlaceholder" maxlength="4000"><button type="button" class="quiet" (click)="preparePttDraft()" [disabled]="!pttTranscript().trim()">{{t().pttReview}}</button><label class="tts-toggle"><input type="checkbox" [checked]="spokenReplies()" (change)="toggleSpokenReplies()"> {{t().ttsToggle}}</label>@if(ttsSpeaking()){<button type="button" class="quiet" (click)="stopSpeaking()">{{t().ttsStop}}</button>}</div>@if(pttDraft(); as d){<div class="ptt-confirm" role="region" aria-live="polite"><p><strong>{{d.intent}}</strong> ({{d.language}}) — {{d.reason}}</p><div class="ptt-actions"><button type="button" class="ptt-confirm-btn" [disabled]="d.refused" (click)="confirmPttDraft()">{{t().pttConfirm}}</button><button type="button" class="quiet" (click)="cancelPttDraft()">{{t().pttCancel}}</button></div></div>}</section>
 <section class="roadmap"><span class="eyebrow">{{t().network}}</span><h2>{{t().room}}</h2><div class="cards"><article><span>01 / MAC</span><h3>{{t().models}}</h3><p>{{t().modelsHint}}</p><small>{{t().planned}}</small></article><article><span>02 / MINI PC</span><h3>{{t().home}}</h3><p>{{t().homeHint}}</p><small>{{t().planned}}</small></article><article><span>03 / RASPBERRY PI</span><h3>{{t().devices}}</h3><p>{{t().devicesHint}}</p><small>{{t().planned}}</small></article></div></section>}
 <footer>NERV Agency <span>{{t().control}}</span></footer></main></div>`,
@@ -242,6 +242,23 @@ class App {
           items: cur.props.items.map((it) => (it.id === itemId ? { ...it, done } : it)),
         },
       });
+    }
+  }
+  async onAddBattery(payload: {
+    packNumber: number;
+    series?: string;
+    batteryType: string;
+    cellCount: number;
+    capacityMah: number;
+    brand: string;
+  }) {
+    try {
+      const r = (await this.request('batteries', { method: 'POST', body: JSON.stringify(payload) })) as {
+        items?: BatteryCardItem[];
+      };
+      if (Array.isArray(r.items)) this.batteries.set(r.items);
+    } catch (e) {
+      this.error.set(e instanceof Error ? e.message : 'Failed to add battery.');
     }
   }
   async onChecklistToggle(ev: { listId: string; itemId: string; done: boolean }) {

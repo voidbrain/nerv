@@ -546,6 +546,39 @@ function startReplay(id) {
     renderFlow();
   }, REPLAY_MS);
 }
+function sephirotEvaLabel(s, a, b) {
+  if (a && a.evaInstance && a.evaInstance.jobId && a.evaInstance.evaClass) {
+    const inst = a.evaInstance;
+    return {
+      text: "pilot " + (inst.pilot || "unassigned") + " · " + inst.evaClass.toUpperCase() + " (" + inst.jobId + ")",
+      avatar: inst.evaClass.toLowerCase()
+    };
+  }
+  if (s && s.status === "active") {
+    if (Array.isArray(state.evaMachines)) {
+      for (const m of state.evaMachines) {
+        if (m.reported === false || !Array.isArray(m.instances)) continue;
+        const hit = m.instances.find(x => x.sortieId === s.id);
+        if (hit) {
+          return {
+            text: "pilot " + (hit.pilot || "unassigned") + " · " + hit.evaClass.toUpperCase() + " (" + hit.jobId + ")",
+            avatar: hit.evaClass.toLowerCase()
+          };
+        }
+      }
+      if (s.phase === "eva") {
+        const missingLocal = !state.evaMachines.length || state.evaMachines.some(m => m.self && m.reported === false);
+        return { text: missingLocal ? "instance data unavailable" : "pilot none · instance none", avatar: null };
+      }
+    } else if (s.phase === "eva") {
+      return { text: LIVE ? "instance data unavailable" : "pilot none · instance none", avatar: null };
+    }
+  }
+  if (a && (a.status === "done" || a.status === "failed")) {
+    return { text: "pilot none · instance none", avatar: null };
+  }
+  return { text: b ? b.executor + " · field enforced" : "sandbox · field enforced", avatar: null };
+}
 function renderFlow() {
   const real = state.sorties.find(x => x.id === state.selected);
   const s = real && state.replay && state.replay.id === real.id && state.replay.k < replayOrder(real).length ? replayFrame(real, state.replay.k) : real;
@@ -600,8 +633,9 @@ function renderFlow() {
   document.getElementById("sd-plan").textContent = s ? "action " + Math.min(s.current + 1, s.actions.length) + "/" + s.actions.length : "next action";
   document.getElementById("sd-route").textContent = s ? (s.status === "waiting-route" ? "no route · waits" : "S² local · $" + s.battery.toFixed(2) + " battery") : "route · battery";
   document.getElementById("sd-intake").textContent = s ? "provenance: " + s.trust : "intake · provenance";
-  document.getElementById("sd-eva").textContent = b ? b.executor + " · field enforced" : "sandbox · field enforced";
-  { const img = document.getElementById("av-eva-node"); const k = b ? b.executor.toLowerCase() : "eva-01"; if (img.dataset.av !== k) { img.dataset.av = k; fillAvatars(img.parentNode); } }
+  const evaInfo = sephirotEvaLabel(s, a, b);
+  document.getElementById("sd-eva").textContent = evaInfo.text;
+  { const img = document.getElementById("av-eva-node"); const k = evaInfo.avatar || (b ? b.executor.toLowerCase() : "eva-01"); if (img.dataset.av !== k) { img.dataset.av = k; fillAvatars(img.parentNode); } }
   drawEdges(s);
   renderDetail(s);
 }

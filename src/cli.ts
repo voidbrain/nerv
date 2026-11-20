@@ -752,6 +752,7 @@ try {
             // Phase 2, on the base asked: this base's Casper votes on the main base's action.
             onVerdict: (_from, ask) => runtime.peerVerdict(ask),
           });
+          runtime.setLinkMetricsProvider(() => kaji?.linkMetrics() ?? []);
           if (kaji) {
             const link = kaji;
             runtime.setRemoteSortie(
