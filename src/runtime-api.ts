@@ -61,6 +61,7 @@ export interface ChatReply {
   sortieId: string;
   question?: { text: string; expires: string };
   reply?: string;
+  surface?: unknown;
   error?: string;
   steps: Step[];
   waiting: { approvalId: string; tool: string; reason: string }[];

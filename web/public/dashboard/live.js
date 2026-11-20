@@ -183,6 +183,30 @@
     if (direction === "newer" && usageBack.length) return loadUsage(usageBack[usageBack.length - 1], usageBack.slice(0,-1));
     return false;
   }
+  document.addEventListener("change", async e => {
+    const chk = e.target && e.target.closest && e.target.closest("input[data-checklist-toggle]");
+    if (!chk) return;
+    const itemId = chk.dataset.checklistToggle;
+    const listId = chk.dataset.listId || "";
+    const done = !!chk.checked;
+    chk.disabled = true;
+    try {
+      const r = await api("lists/toggle", { method: "POST", body: JSON.stringify({ itemId, done }) });
+      if (r && r.surface) {
+        for (const entry of state.log) {
+          if (entry.surface && entry.surface.props && entry.surface.props.listId === listId) {
+            entry.surface = r.surface;
+          }
+        }
+        renderLog();
+      }
+    } catch (err) {
+      chk.checked = !done;
+      log("Could not update list item: " + err.message, "danger", null, "misato");
+    } finally {
+      chk.disabled = false;
+    }
+  });
   document.addEventListener("click", async e => {
     const button = e.target.closest("[data-usage-page]"); if (!button || usageBusy) return;
     const direction = button.dataset.usagePage;
@@ -192,6 +216,7 @@
   });
   const seen = new Set();
   const phaseOf = new Map(), phaseStarted = new Map(), nodeTimings = new Map(), advisedBy = new Map(), forwardedTo = new Map(), originOf = new Map(), remoteSorties = new Map();
+  const sortieSurfaces = new Map();
   const addNodeTiming = (id, node, ms) => { if (typeof ms !== "number") return; const nt = nodeTimings.get(id) || {}; nt[node] = (nt[node] || 0) + ms; nodeTimings.set(id, nt); };
   const generic = () => { const r = modelsData && modelsData.models && modelsData.models.roles; return !!(r && r.consultant && r.consultant.model); };
   async function loadEvents(id) {
@@ -220,6 +245,9 @@
       if (e.kind === "misato.request" && /^kaji:/.test(p.conversation || "")) originOf.set(id, baseName(String(p.conversation).slice(5).split("-").slice(0, 2).join("-")));
       const noteTiming = (node, ms) => { if (typeof addNodeTiming === "function") addNodeTiming(id, node, ms); };
       if (e.kind === "misato.consult") { consulted.add(id); advisedBy.set(id, (p.pilot && p.pilot.name ? p.pilot.name : "Generic pilot") + (p.model ? " · " + p.model : "")); noteTiming("consult", p.durationMs); }
+      if (e.kind === "misato.step" && p.step && p.step.outcome === "grant" && p.step.result && p.step.result.surface && p.step.result.surface.component === "nerv-checklist-card") {
+        sortieSurfaces.set(id, p.step.result.surface);
+      }
       if (e.kind === "misato.step" || e.kind === "misato.reply" || e.kind === "misato.asked") noteTiming("plan", p.durationMs);
       if (e.kind === "ballot" && Array.isArray(p.verdicts)) {
         const magiMs = p.verdicts.filter(v => !v.shadow && typeof v.durationMs === "number").reduce((m, v) => Math.max(m, v.durationMs), 0);
@@ -230,7 +258,11 @@
       // F-051: the step a running sortie is on, from its latest event (not always MAGI).
       const step = { "misato.request":generic() ? "consult" : "plan", "misato.consult":"plan", "misato.resumed":"plan", "misato.asked":"apt", "misato.answered":"plan", "action.done":"plan", "action.failed":"plan", "approval.requested":"apt", "approval.approve":"plug", "misato.reply":"debrief" }[e.kind] || (e.kind === "ballot" ? (p.outcome === "grant" ? "plug" : p.outcome === "approval" ? "apt" : "plan") : null);
       if (step) { phaseOf.set(id, step); if (typeof phaseStarted !== "undefined") phaseStarted.set(id, t); }
-      if (line) { state.log.push({ t, msg:line[0], cls:line[1], s:s.id, who:line[2], chat:e.kind.startsWith("misato.") }); added++; }
+      if (line) {
+        const surface = e.kind === "misato.reply" ? sortieSurfaces.get(id) : undefined;
+        state.log.push({ t, msg:line[0], cls:line[1], s:s.id, who:line[2], chat:e.kind.startsWith("misato."), ...(surface ? { surface } : {}) });
+        added++;
+      }
     }
     state.log.sort((a, b) => a.t - b.t); if (state.log.length > 300) state.log.splice(0, state.log.length - 300);
     return added;
@@ -418,7 +450,15 @@
       // Dispatched (F-036): the main base answered; its sortie and cards are there, so only the reply is shown here.
       if (r.command) { followNew = null; log(r.reply || r.error || "No command result", r.error ? "danger" : "ok", null, "maya"); }
       else if (r.base) log((r.reply || ("Could not finish: " + (r.error || "no reply"))) + " · answered by " + r.base.name + (r.waiting && r.waiting.length ? "; decide its card on Aoba or on " + r.base.name + "'s dashboard" : ""), r.reply ? "ok" : "danger", null, "misato");
-      else state.selected = short(r.sortieId); }
+      else {
+        state.selected = short(r.sortieId);
+        if (r.surface && r.surface.component === "nerv-checklist-card") {
+          sortieSurfaces.set(r.sortieId, r.surface);
+          const sid = short(r.sortieId);
+          const hit = [...state.log].reverse().find(x => x.s === sid && x.who === "misato" && x.chat);
+          if (hit) { hit.surface = r.surface; renderLog(); }
+        }
+      } }
     catch (e) { log("Misato could not answer: " + e.message, "danger", null, "misato"); }
     finally { settled = true; if (queueTimer) clearTimeout(queueTimer); poll(); }
   };

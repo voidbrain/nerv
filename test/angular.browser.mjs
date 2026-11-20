@@ -807,6 +807,27 @@ test(
           );
       }
       store.memory.add('accounting-lilith fact', 'owner');
+      const listAdded = store.lists.addItems('shopping', ['milk', 'pasta']);
+      const listView = store.lists.show('shopping');
+      const { toChecklistSurface } = await import('../src/lists.ts');
+      const listTime = new Date(Date.now() - 5000);
+      const listSortie = store.ledger.openSortie('misato', 'Show shopping list', 'trusted', listTime);
+      store.ledger.note(listSortie, 'misato.request', { text: 'show shopping list', conversation: 'dashboard' }, listTime);
+      store.ledger.note(
+        listSortie,
+        'misato.step',
+        {
+          step: {
+            outcome: 'grant',
+            tool: 'lists.show',
+            args: { list: 'shopping' },
+            result: { ...listView, surface: toChecklistSurface(listView) },
+          },
+        },
+        listTime,
+      );
+      store.ledger.reply(listSortie, 'Here is your shopping list.', listTime);
+
       const advised = store.ledger.openSortie('misato', 'Advice route fixture', 'trusted');
       store.ledger.note(advised, 'misato.request', { text: 'Advice route fixture', conversation: 'dashboard' });
       store.ledger.note(advised, 'misato.consult', {
@@ -832,6 +853,21 @@ test(
         'completed advice route is painted as passed',
       );
       await screenshot('dashboard-advise-route');
+      // F-082-T05: dashboard chat renders the checklist card and ticking it updates the store.
+      await until(`document.querySelector('#log .checklist-card input[data-checklist-toggle]')!==null`);
+      const milkItemId = listAdded.items[0].id;
+      await evaluate(
+        `document.querySelector('#log .checklist-card input[data-checklist-toggle="${milkItemId}"]')?.click()`,
+      );
+      await until(
+        `document.querySelector('#log .checklist-card input[data-checklist-toggle="${milkItemId}"]')?.checked===true`,
+      );
+      const updatedList = store.lists.show('shopping');
+      assert.equal(
+        updatedList?.items.find((x) => x.id === milkItemId)?.done,
+        true,
+        'ticking dashboard chat checklist updates store',
+      );
       // F-057: exercise the actual header button and browser clipboard, not only the helper.
       await until(`document.querySelector('#build').dataset.commit.length>=7`);
       const reportedBuild = await (
