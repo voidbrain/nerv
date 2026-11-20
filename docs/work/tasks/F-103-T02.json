@@ -4,7 +4,7 @@
   "parent": "F-103",
   "title": "Per-link load between bases",
   "goal": "Each base link records latency, bytes each way, in-flight calls and reconnects",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A join test across two bases: counters move on both sides",
     "Counters carry no message content"
