@@ -86,7 +86,7 @@ const STEP_IDS = ["detect","intake","route","consult","plan","magi","sync","apt"
 const LABELS = {
   eva:{ brandTitle:"TACTICAL COMMAND", brandTag:"SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY",
     needs:"Misato's apartment · needs you", sorties:"Sorties", next:"Coming up", flow:"Sephirot · sortie flow",
-    detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health",
+    detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health", settings:"Settings",
     bases:"NERV bases · Kaji line", cages:"EVA · instances per class", budget:"Battery · budget", melons:"Marduk Institute · Pilots", skills:"Kaji's watermelons · skills", skillStages:"seed → sprout → ripe", lilith:"Terminal Dogma · Lilith",
     spear:"SPEAR OF LONGINUS", dummy:"DUMMY PLUG ACTIVE", launch:"Launch",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Battery today",
@@ -94,7 +94,7 @@ const LABELS = {
     seats:{ melchior:"MELCHIOR", balthasar:"BALTHASAR", casper:"CASPER" }, short:{ melchior:"MEL", balthasar:"BAL", casper:"CAS" } },
   neutral:{ brandTitle:"OPERATIONS", brandTag:"owner rules enforced · append-only ledger · long-term memory",
     needs:"Needs your approval", sorties:"Jobs", next:"Coming up", flow:"Decision timeline",
-    detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health",
+    detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health", settings:"Settings",
     bases:"Machines · mesh", cages:"Sandboxes · instances per class", budget:"Budget", melons:"Pilots", skills:"Skills", skillStages:"create → try → use", lilith:"Memory",
     spear:"STOP EVERYTHING", dummy:"MODELS UNAVAILABLE", launch:"Run",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Budget today",
@@ -860,7 +860,11 @@ function renderChronicle() {
     ? days.map(d => "<div class='row small'><div><strong>" + esc(d.day) + "</strong>" + (d.version ? " <span class='tiny muted'>" + esc(d.version) + "</span>" : "") + "<div>" + esc(d.text) + "</div>" + (Array.isArray(d.sources) && d.sources.length ? "<div class='tiny muted'>" + d.sources.map(esc).join(" · ") + "</div>" : "") + "</div></div>").join("")
     : "<div class='tiny muted'>Entries appear here from recorded registry, pilot, and route milestones.</div>";
 }
-function renderAll() { renderSkills(); fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderChronicle(); renderCages(); renderLilith(); renderModels(); }
+function renderSettings() {
+  const box = document.getElementById("settings"); if (!box) return;
+  box.innerHTML = "<div class='tiny muted'>Simulation · live mode edits automatic update schedule (mode, check 20:00, apply 03:00, no-apply 08:00–23:00).</div>";
+}
+function renderAll() { renderSkills(); fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderSettings(); renderBudget(); renderMelons(); renderBases(); renderChronicle(); renderCages(); renderLilith(); renderModels(); }
 
 /* ================= MAP: zoomed regional topography (procedural hills and valleys) ================= */
 const map = { ready:false, w:540, h:250, proj:null, contours:[], base:null, linkPaths:{} };

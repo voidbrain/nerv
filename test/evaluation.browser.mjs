@@ -51,7 +51,15 @@ test(
     try {
       await runtime.ready();
       runtime.startResumer(100);
-      server = makeServer(runtime, token, { webRoot: resolve('dist/web/browser') });
+      let browserPolicy = { enabled: false, channels: [], targets: [] };
+      server = makeServer(runtime, token, {
+        webRoot: resolve('dist/web/browser'),
+        readUpdatePolicy: () => browserPolicy,
+        saveUpdatePolicy: (p) => {
+          browserPolicy = p;
+          return p;
+        },
+      });
       await new Promise((done) => server.listen(0, '127.0.0.1', done));
       const origin = `http://127.0.0.1:${server.address().port}`;
       const code = await (
@@ -115,6 +123,26 @@ test(
         );
         releaseEva();
         await heldEva;
+        // F-110-T03: Settings panel edits update schedule, saves via Apply, and passes axe.
+        await until(`document.querySelector('#set-check-hour') && document.querySelector('#btn-save-settings')`);
+        await evaluate(`{
+          const ch = document.querySelector('#set-check-hour');
+          const ap = document.querySelector('#set-apply-hour');
+          ch.value = '21'; ch.dispatchEvent(new Event('input', { bubbles: true }));
+          ap.value = '4'; ap.dispatchEvent(new Event('input', { bubbles: true }));
+          document.querySelector('#btn-save-settings').click();
+        }`);
+        await until(`document.querySelector('#settings-status')?.textContent.includes('Settings saved.')`);
+        const savedPolicy = await (
+          await fetch(origin + '/api/update/policy', { headers: { authorization: 'Bearer ' + token } })
+        ).json();
+        assert.equal(savedPolicy.policy.schedule.checkHour, 21);
+        assert.equal(savedPolicy.policy.schedule.applyHour, 4);
+        assert.deepEqual(
+          await evaluate(`axe.run(document.querySelector('#p-settings')).then(r=>r.violations.map(v=>v.id))`),
+          [],
+          'settings panel accessibility',
+        );
         plans.push(
           '{"action":{"tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T09:00:00Z"}}}',
           '{"reply":"Reminder added"}',

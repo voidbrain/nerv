@@ -2279,7 +2279,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🔴 Large | 5.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-110-T03 — Dashboard settings panel for the chosen settings (Planned).
+💻 **→** Next: F-110-T03 — Dashboard settings panel for the chosen settings (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2291,7 +2291,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-110-t03"></a>F-110-T03 — Dashboard settings panel for the chosen settings | 2 h | 0 h | 2 h | Planned | — | [F-110-T04](#f-110-t04) | 🤖 | — |
+| 🟡 Medium | <a id="f-110-t03"></a>F-110-T03 — Dashboard settings panel for the chosen settings | 2 h | 0 h | 2 h | Implemented; verification pending | — | [F-110-T04](#f-110-t04) | 🤖 | [PR #583](https://github.com/voidbrain/nerv/pull/583) implementation |
 | 🟡 Medium | <a id="f-110-t04"></a>F-110-T04 — Brief time, time zone, Sync Ratio threshold and Telegram freshness window through the same interface | 1.5 h | 0 h | 1.5 h | Planned | [F-110-T03](#f-110-t03) | [F-110-T05](#f-110-t05) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-110-t05"></a>F-110-T05 — Common settings for every base, with a per-base override | 2 h | 0 h | 2 h | Planned | [F-110-T04](#f-110-t04) | — | ⏳ 🤖 | — |
 | 🔴 Large | **Total** | 7.75 h (5 of 6 steps) | 2.25 h (2 of 6 steps recorded) | 5.5 h | 3 of 6 completed | | | | |
@@ -2313,7 +2313,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-110-T02: [PR #539](https://github.com/voidbrain/nerv/pull/539) the fix; CI green. [PR #539](https://github.com/voidbrain/nerv/pull/539) F-110-T02 (`test/update-scheduler.test.ts`); Decision in [PR #534](https://github.com/voidbrain/nerv/pull/534); opened in PR #531 |
+| PR / evidence | Steps: F-110-T02: [PR #539](https://github.com/voidbrain/nerv/pull/539) the fix; CI green · F-110-T03: [PR #583](https://github.com/voidbrain/nerv/pull/583) implementation. [PR #539](https://github.com/voidbrain/nerv/pull/539) F-110-T02 (`test/update-scheduler.test.ts`); Decision in [PR #534](https://github.com/voidbrain/nerv/pull/534); opened in PR #531 |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: F-110-T02 by CI run 44489977085 (PR #539). |
 | Reviewed | 2026-11-19 |

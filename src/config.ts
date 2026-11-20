@@ -363,6 +363,7 @@ export function setUpdatePolicy(home: string, policy: unknown): AutoUpdatePolicy
   const current = existsSync(path)
     ? (JSON.parse(readFileSync(path, 'utf8')) as Record<string, unknown>)
     : { ...defaults };
+  mkdirSync(home, { recursive: true, mode: 0o700 });
   writeFileSync(path, JSON.stringify({ ...current, updatePolicy: valid }, null, 2) + '\n', { mode: 0o600 });
   chmodSync(path, 0o600);
   readConfig(home);
