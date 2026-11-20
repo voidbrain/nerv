@@ -335,7 +335,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟢 Small | 0.75 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-012-T04 — Web-chat adapter feasibility (Planned).
+💻 **→** Next: F-012-T04 — Web-chat adapter feasibility (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -347,7 +347,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-012-t04"></a>F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Planned | — | [F-012-T05](#f-012-t05) | 🤖 | — |
+| 🟢 Small | <a id="f-012-t04"></a>F-012-T04 — Web-chat adapter feasibility | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-012-T05](#f-012-t05) | 🤖 | — |
 | 🟢 Small | <a id="f-012-t05"></a>F-012-T05 — Edge cases and real-host acceptance | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-012-T04](#f-012-t04) | [F-012-T06](#f-012-t06) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-012-t06"></a>F-012-T06 — Record the evidence of F-012-T05 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-012-T05](#f-012-t05) | — | ⏳ 🤖 | — |
 | 🟢 Small | **Total** | 2.75 h (5 of 6 steps) | 0.75 h (2 of 6 steps recorded) | 0.75 h agent + 0.5 h owner | 3 of 6 completed | | | | |

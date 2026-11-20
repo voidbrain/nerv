@@ -4,7 +4,7 @@
   "parent": "F-012",
   "title": "Web-chat adapter feasibility",
   "goal": "Web-chat adapter feasibility",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Narrow browser-worker approach assessed; no stale clicks after sleep; adapter or documented infeasibility"
   ],
