@@ -5,6 +5,12 @@
  "title": "Draft and send behind approval",
  "goal": "Drafts need approval; sending is Blue",
  "status": "implemented",
+ "prs": [
+  {
+   "pr": 609,
+   "note": "Gmail draft and send behind approval"
+  }
+ ],
  "acceptance": [
   "Draft is Orange, send is Blue; expiry never sends; the sent message is read back"
  ],

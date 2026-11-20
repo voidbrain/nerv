@@ -849,7 +849,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-086-t03"></a>F-086-T03 — Draft and send behind approval | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-086-T04](#f-086-t04) | 🤖 | — |
+| 🟢 Small | <a id="f-086-t03"></a>F-086-T03 — Draft and send behind approval | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-086-T04](#f-086-t04) | 🤖 | [PR #609](https://github.com/voidbrain/nerv/pull/609) Gmail draft and send behind approval |
 | 🟢 Small | <a id="f-086-t04"></a>F-086-T04 — Owner check with the owner's account | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-086-T03](#f-086-t03) | — | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1 h agent + 0.5 h owner | 2 of 4 completed | | | | |
 
@@ -869,7 +869,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-086-T02: [PR #480](https://github.com/voidbrain/nerv/pull/480) implementation. [PR #480](https://github.com/voidbrain/nerv/pull/480) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-086-T02: [PR #480](https://github.com/voidbrain/nerv/pull/480) implementation · F-086-T03: [PR #609](https://github.com/voidbrain/nerv/pull/609) Gmail draft and send behind approval. [PR #609](https://github.com/voidbrain/nerv/pull/609) (F-086-T03); [PR #480](https://github.com/voidbrain/nerv/pull/480) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-086-T02 verified: [PR #480](https://github.com/voidbrain/nerv/pull/480) merged on green CI. `F-086-T01` decision written in [gmail-connector.md](decisions/gmail-connector.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
