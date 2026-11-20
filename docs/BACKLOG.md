@@ -2185,7 +2185,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-109-T02 — Store a pilot's call name and second name through a validated interface (Ready).
+💻 **→** Next: F-109-T02 — Store a pilot's call name and second name through a validated interface (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2197,7 +2197,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-109-t02"></a>F-109-T02 — Store a pilot's call name and second name through a validated interface | 1 h | 0 h | 1 h | Ready | — | [F-109-T03](#f-109-t03) | 🤖 | — |
+| 🟢 Small | <a id="f-109-t02"></a>F-109-T02 — Store a pilot's call name and second name through a validated interface | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-109-T03](#f-109-t03) | 🤖 | — |
 | 🟡 Medium | <a id="f-109-t03"></a>F-109-T03 — Persona card layout with one Apply for every change | 1.5 h | 0 h | 1.5 h | Planned | [F-109-T02](#f-109-t02) | [F-109-T04](#f-109-t04) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-109-t04"></a>F-109-T04 — Silhouette image on the persona card | 0.5 h | 0 h | 0.5 h | Planned | [F-109-T03](#f-109-t03) | — | ⏳ 🤖 | — |
 | 🟡 Medium | **Total** | 3 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h | 1 of 4 completed | | | | |
@@ -2219,8 +2219,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Steps: F-109-T01: [PR #574](https://github.com/voidbrain/nerv/pull/574) decision recorded. Opened in PR #531 |
 | Opened | 2026-11-18 |
-| Verification | Pending. |
-| Reviewed | 2026-11-18 |
+| Verification | F-109-T02: `node --test test/pilots.test.ts test/pilot-model.test.ts test/pilot-controls.test.mjs` (19/19 passed); `npm run check:fast` passed. |
+| Reviewed | 2026-11-20 |
 
 </details>
 
