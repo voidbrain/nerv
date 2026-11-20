@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
+import { checkRevisionSkew } from '../src/build.ts';
 
 const moduleUrl = new URL('../src/build.ts', import.meta.url).href;
 const info = (root: string) =>
@@ -127,6 +128,29 @@ test('F-057: the running commit uses Git’s unique abbreviation, including real
       full,
       'copied identifier resolves to the actual running commit',
     );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('B-105-T01: checkRevisionSkew reports when running service revision differs from checkout HEAD', () => {
+  const root = mkdtempSync(join(tmpdir(), 'nerv-skew-'));
+  try {
+    git(root, 'init', '-b', 'main');
+    writeFileSync(join(root, 'package.json'), '{"version":"0.1.0"}');
+    git(root, 'add', 'package.json');
+    commit(root);
+    const first = info(root);
+    const same = checkRevisionSkew(first, root);
+    assert.equal(same.skewed, false);
+
+    commit(root);
+    const second = info(root);
+    const skewed = checkRevisionSkew(first, root);
+    assert.equal(skewed.skewed, true);
+    assert.equal(skewed.runningCommit, first.commit);
+    assert.equal(skewed.checkoutCommit, second.commit);
+    assert.match(skewed.message ?? '', /differs from checkout HEAD/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

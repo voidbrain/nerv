@@ -11,7 +11,7 @@ import { QueueCancelledError, QueueFullError } from './request-queue.ts';
 import type { Pilot, PilotPatch } from './pilots.ts';
 import { attachRpcSocket } from './socket.ts';
 import { toChecklistSurface } from './lists.ts';
-import { buildInfo } from './build.ts';
+import { buildInfo, checkRevisionSkew } from './build.ts';
 import type { UpdateAvailability } from './update-availability.ts';
 import type { ManualUpdateResult } from './manual-update.ts';
 import type { AutoUpdatePolicy, AutoUpdateSchemaCheck } from './update-policy.ts';
@@ -924,6 +924,7 @@ export function makeServer(
           name: 'NERV Agency',
           mode: 'local-core',
           build,
+          revisionSkew: checkRevisionSkew(build),
           ...(options.base ? { base: options.base } : {}),
           ...(await store.doctor()),
           update: await statusUpdate(),

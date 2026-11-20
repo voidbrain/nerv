@@ -1961,7 +1961,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-105-T01 — Name configuration version skew instead of a raw validator error (Planned).
+💻 **→** Next: B-105-T01 — Name configuration version skew instead of a raw validator error (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1973,7 +1973,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-105-t01"></a>B-105-T01 — Name configuration version skew instead of a raw validator error | 1.5 h | 0 h | 1.5 h | Planned | — | [B-105-T02](#b-105-t02) |
+| 🟡 Medium | <a id="b-105-t01"></a>B-105-T01 — Name configuration version skew instead of a raw validator error | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [B-105-T02](#b-105-t02) |
 | 🟢 Small | <a id="b-105-t02"></a>B-105-T02 — Live check on the main base | 0.25 h | 0 h | 0.25 h | Planned | [B-105-T01](#b-105-t01) | — |
 | 🟡 Medium | **Total** | 1.75 h | 0 h (0 of 2 steps recorded) | 1.75 h | 0 of 2 completed | | |
 

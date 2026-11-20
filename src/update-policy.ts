@@ -113,13 +113,28 @@ export function validateAutoUpdateTarget(raw: unknown): string {
   return target;
 }
 
-export function validateAutoUpdatePolicy(raw: unknown): AutoUpdatePolicy {
+const UPDATE_POLICY_FIELDS_BY_VERSION: readonly { readonly since: string; readonly fields: readonly string[] }[] = [
+  { since: '1.0', fields: ['enabled', 'channels', 'targets', 'acceptedAt'] },
+  { since: '1.1', fields: ['schedule'] },
+];
+const CURRENT_UPDATE_POLICY_FIELDS = UPDATE_POLICY_FIELDS_BY_VERSION.flatMap((entry) => entry.fields);
+
+export function validateAutoUpdatePolicy(
+  raw: unknown,
+  supportedFields: readonly string[] = CURRENT_UPDATE_POLICY_FIELDS,
+): AutoUpdatePolicy {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
     throw new Error('Invalid updatePolicy: expected a JSON object.');
   }
   const value = raw as Record<string, unknown>;
   for (const key of Object.keys(value)) {
-    if (!['enabled', 'channels', 'targets', 'acceptedAt', 'schedule'].includes(key)) {
+    if (!supportedFields.includes(key)) {
+      const newer = UPDATE_POLICY_FIELDS_BY_VERSION.find((entry) => entry.fields.includes(key));
+      if (newer) {
+        throw new Error(
+          `Configuration field updatePolicy.${key} was written by a newer NERV (since ${newer.since}); update this base before running this code.`,
+        );
+      }
       throw new Error(`Unsupported updatePolicy field: ${key}`);
     }
   }
