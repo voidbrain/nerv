@@ -8,6 +8,7 @@ import { formatTelegramChecklist } from './lists.ts';
 import { ONLINE_MS } from './kaji-link.ts';
 import type { ChannelState } from './channel-state.ts';
 import type { Approval } from './ledger.ts';
+import { readCommand } from './chat-command.ts';
 import { requestLanguage } from './misato.ts';
 import { formatQueuedMessage, formatQueueFullMessage, QueueCancelledError, QueueFullError } from './request-queue.ts';
 /**
@@ -700,6 +701,19 @@ export class TelegramChannel {
     if (batteryStatusLang && this.store.batteryCards) {
       const cards = await this.store.batteryCards();
       await this.sendLocal(formatBatteryStateLines(cards, batteryStatusLang));
+      return;
+    }
+    if (readCommand(text)?.name === 'cards') {
+      const lang = requestLanguage(text);
+      const pending = await this.store.approvals(10);
+      if (!pending.length) {
+        await this.sendLocal(lang === 'it' ? 'Nessuna scheda in attesa.' : 'No pending approval cards.');
+        return;
+      }
+      for (const a of pending) {
+        const c = card(a);
+        await this.sendLocal(c.text, c.buttons);
+      }
       return;
     }
     if (!this.store.chat) {
