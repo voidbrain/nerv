@@ -42,5 +42,10 @@
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 621,
+      "note": "Pack manifest and registry, on and off in config"
+    }
+  ]
 }
