@@ -34,5 +34,10 @@
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 616,
+      "note": "live acceptance and closure"
+    }
+  ]
 }

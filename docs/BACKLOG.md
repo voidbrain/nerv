@@ -3275,7 +3275,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="b-105-t01"></a>B-105-T01 — Name configuration version skew instead of a raw validator error | 1.5 h | 0 h | Completed | [PR #599](https://github.com/voidbrain/nerv/pull/599) implementation |
-| — | <a id="b-105-t02"></a>B-105-T02 — Live check on the main base | 0.25 h | 0 h | Completed | — |
+| — | <a id="b-105-t02"></a>B-105-T02 — Live check on the main base | 0.25 h | 0 h | Completed | [PR #616](https://github.com/voidbrain/nerv/pull/616) live acceptance and closure |
 
 </details>
 
@@ -3286,9 +3286,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-105-T01: [PR #599](https://github.com/voidbrain/nerv/pull/599) implementation. [PR #599](https://github.com/voidbrain/nerv/pull/599) B-105-T01 (`src/update-policy.ts`, `src/build.ts`, `src/server.ts`, `src/cli.ts`, `test/update-policy.test.ts`, `test/build.test.ts`); opened in [PR #595](https://github.com/voidbrain/nerv/pull/595); owner report 2026-11-20; process start time and checkout reflog read on the main base |
+| PR / evidence | Steps: B-105-T01: [PR #599](https://github.com/voidbrain/nerv/pull/599) implementation · B-105-T02: [PR #616](https://github.com/voidbrain/nerv/pull/616) live acceptance and closure. [PR #599](https://github.com/voidbrain/nerv/pull/599) B-105-T01 (`src/update-policy.ts`, `src/build.ts`, `src/server.ts`, `src/cli.ts`, `test/update-policy.test.ts`, `test/build.test.ts`); opened in [PR #595](https://github.com/voidbrain/nerv/pull/595); owner report 2026-11-20; process start time and checkout reflog read on the main base |
 | Opened | 2026-11-20 |
-| Verification | 2026-11-21 Real-device: authenticated foreground stop; fenced start receipt `5a5d4615…` completed `start` and `verify`; `/api/models` HTTP 200; doctor `skewed: false` at `9b69150b`; launchd service running. Unit/integration: PR #599 green with the failing-first version-skew and doctor regressions. |
+| Verification | 2026-11-21 Real-device: authenticated foreground stop; fenced start receipt `5a5d4615…` completed `start` and `verify`; `/api/models` HTTP 200; doctor `skewed: false` at `9b69150b`; launchd service running. Test: PR #599's failing-first version-skew and doctor regressions passed on green CI. Closure: PR #616. |
 | Reviewed | 2026-11-21 |
 
 </details>
