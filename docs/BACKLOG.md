@@ -2372,7 +2372,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🔴 Large | 6.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-112-T01 — Design note: script subset, EVA placement, per-call gate and limits (Ready).
+💻 **→** Next: F-112-T01 — Design note: script subset, EVA placement, per-call gate and limits (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2384,7 +2384,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
 |---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-112-t01"></a>F-112-T01 — Design note: script subset, EVA placement, per-call gate and limits | 1.5 h | 0 h | 1.5 h | Ready | — | [F-112-T02](#f-112-t02) | 🤖 |
+| 🟡 Medium | <a id="f-112-t01"></a>F-112-T01 — Design note: script subset, EVA placement, per-call gate and limits | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [F-112-T02](#f-112-t02) | 🤖 |
 | 🟢 Small | <a id="f-112-t02"></a>F-112-T02 — Owner decides whether to adopt script plans and their scope | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-112-T01](#f-112-t01) | [F-112-T03](#f-112-t03) | ⏳ 🤔 |
 | 🟡 Medium | <a id="f-112-t03"></a>F-112-T03 — Read-only script executor inside EVA with a gate decision per call | 4 h | 0 h | 4 h | Planned | [F-112-T02](#f-112-t02) | [F-112-T04](#f-112-t04) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-112-t04"></a>F-112-T04 — Gauntlet case comparing planner steps and tokens with and without scripts | 1 h | 0 h | 1 h | Planned | [F-112-T03](#f-112-t03) | — | ⏳ 🤖 |
@@ -2399,8 +2399,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
 | Opened | 2026-11-20 |
-| Verification | Pending |
-| Reviewed | 2026-11-20 |
+| Verification | 2026-11-21: `check:fast`, work and backlog checks pass (existing advisory warnings only); fresh-context design review found no remaining blockers. |
+| Reviewed | 2026-11-21 |
 
 </details>
 

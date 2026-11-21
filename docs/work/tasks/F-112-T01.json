@@ -4,7 +4,7 @@
   "parent": "F-112",
   "title": "Design note: script subset, EVA placement, per-call gate and limits",
   "goal": "The owner can decide on script plans from one page",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "docs/design/script-plans.md names the allowed subset, where scripts run, how each call is gated, budgets and failure modes",
     "A fresh-context design review of the note is recorded"
