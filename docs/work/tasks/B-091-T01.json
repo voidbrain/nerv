@@ -48,6 +48,10 @@
     {
       "pr": 617,
       "note": "live recurrence and recovery evidence"
+    },
+    {
+      "pr": 620,
+      "note": "recurrence fix"
     }
   ]
 }
