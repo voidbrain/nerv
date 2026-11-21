@@ -35,6 +35,12 @@ export function windowsRegistrationMatches(output: string, c: ServiceContext): b
   return hasTaskName && hasWscript && hasLauncher;
 }
 
+/** Launcher comments are non-executable metadata and may change across a fenced update. */
+function windowsLauncherMatches(actual: Buffer, expected: string): boolean {
+  const executableBody = (value: string) => value.replace(/^\uFEFF?'[^\r\n]*(?:\r?\n|$)/, '');
+  return executableBody(actual.toString('utf8')) === executableBody(expected);
+}
+
 /** Production Windows adapter: current unprivileged Windows user, current checkout and default `.nerv` data home. */
 export function windowsServiceHost(home: string): ServiceHost {
   if (process.platform !== 'win32') {
@@ -235,7 +241,7 @@ export function windowsServiceAdapter(
         present(taskPath) &&
         present(vbsPath) &&
         hash(readFileSync(taskPath)) === hash(expectedTask) &&
-        hash(readFileSync(vbsPath)) === hash(expectedVbs)
+        windowsLauncherMatches(readFileSync(vbsPath), expectedVbs)
       );
     },
     command: async (step, p) => {
