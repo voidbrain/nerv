@@ -23,6 +23,7 @@ import { validateAutoUpdatePolicy, type AutoUpdatePolicy } from './update-policy
 import { validateSeatPool, type SeatPoolEntry } from './seat-pool.ts';
 import { validateOperatorConfig, type OperatorConfig } from './operator-directory.ts';
 import { validateEvaLimits, type EvaLimits } from './eva-pool.ts';
+import { validatePacksConfig, type PacksConfig } from './packs.ts';
 import { validateJobUser, type EvaJobUser } from './eva-job-user.ts';
 import { validateBackup, type BackupConfig } from './offhost.ts';
 import { validatePersonas, type PersonaConfig } from './persona.ts';
@@ -49,6 +50,7 @@ export interface Config {
   eva?: { limits: EvaLimits; jobUser?: EvaJobUser };
   backup?: BackupConfig;
   personas?: PersonaConfig;
+  packs?: PacksConfig;
 }
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
 export interface Base {
@@ -116,6 +118,7 @@ export function readConfig(home: string): Config {
     config.nativePort = native;
   }
   if ('personas' in raw) config.personas = validatePersonas(raw.personas);
+  if ('packs' in raw) config.packs = validatePacksConfig(raw.packs);
   if ('telegram' in raw) {
     const t = raw.telegram as Record<string, unknown>;
     if (

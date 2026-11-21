@@ -1,6 +1,7 @@
 import { channelIsFresh, type ChannelState } from './channel-state.ts';
 import { helpText, readCommand, statusText, type StatusBase } from './chat-command.ts';
 import { CookingSessions, readCookingCommand } from './cooking-session.ts';
+import { builtinPackRegistry } from './packs.ts';
 import { readConfig } from './config.ts';
 import type { SortieEvent } from './events.ts';
 import { ONLINE_MS, type BaseHealth, type RegistryPort } from './kaji-link.ts';
@@ -243,7 +244,8 @@ export class RuntimeChat {
       return { command: true, sortieId: '', reply, steps: [], waiting: [] };
     }
     // F-083-T06 / F-083-T07: a cooking session answers from the saved recipe and manages session timers; with no session or no such recipe, it is chat.
-    const cooking = readCookingCommand(message);
+    const packsConfig = this.host.home ? readConfig(this.host.home).packs : undefined;
+    const cooking = builtinPackRegistry.isEnabled('cooking', packsConfig) ? readCookingCommand(message) : undefined;
     if (cooking) {
       const at = conversation ?? 'cli';
       const onExpire = (line: string) => {
