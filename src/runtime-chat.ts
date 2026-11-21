@@ -1,6 +1,5 @@
 import { channelIsFresh, type ChannelState } from './channel-state.ts';
 import { helpText, readCommand, statusText, type StatusBase } from './chat-command.ts';
-import { CookingSessions, readCookingCommand } from './cooking-session.ts';
 import { builtinPackRegistry, type PackRegistry } from './packs.ts';
 import { readConfig } from './config.ts';
 import type { SortieEvent } from './events.ts';
@@ -58,8 +57,6 @@ export interface RuntimeChatHost {
  */
 export class RuntimeChat {
   private readonly host: RuntimeChatHost;
-  /** F-083-T06: a saved recipe walked through step by step, per conversation. */
-  private readonly cooking = new CookingSessions();
   /** F-056-T03: per-conversation trace verbosity set via /log. */
   private readonly logLevels = new Map<string, LogVerbosity>();
 
@@ -255,29 +252,16 @@ export class RuntimeChat {
         : `Multiple packs match this message (${names}). Which one did you mean?`;
       return { command: true, sortieId: '', reply, steps: [], waiting: [] };
     }
-    const cooking = builtinPackRegistry.isEnabled('cooking', packsConfig) ? readCookingCommand(message) : undefined;
-    if (cooking) {
-      const at = conversation ?? 'cli';
-      const onExpire = (line: string) => {
-        void this.host.notice?.(line).catch(() => {});
-      };
-      let reply: string | undefined;
-      if (cooking.kind === 'start') {
-        const doc = (await this.host.nervous.call('documents.find', { query: cooking.recipe }).catch(() => null)) as {
-          title: string;
-          body: string;
-          photos?: import('../shared/surface.ts').RecipePhoto[];
-        } | null;
-        if (doc) reply = this.cooking.start(at, doc.title, doc.body, cooking.it, doc.photos);
-      } else if (cooking.kind === 'timer-set') {
-        reply = this.cooking.setTimer(at, cooking.seconds, onExpire);
-      } else if (cooking.kind === 'timer-confirm') {
-        reply = this.cooking.confirmTimer(at, onExpire);
-      } else if (cooking.kind === 'timer-stop') {
-        reply = this.cooking.stopTimer(at);
-      } else reply = this.cooking.move(at, cooking.kind);
-      if (reply) return { command: true, sortieId: '', reply, steps: [], waiting: [] };
-    }
+    const packReply = await (this.host.packRegistry ?? builtinPackRegistry).handleChatMessage(
+      message,
+      conversation ?? 'cli',
+      {
+        findDocument: (query) => this.host.nervous.call('documents.find', { query }).catch(() => null),
+        notice: this.host.notice,
+      },
+      packsConfig,
+    );
+    if (packReply) return { command: true, sortieId: '', reply: packReply, steps: [], waiting: [] };
     const key = conversation ?? 'cli';
     const addressed =
       /^(?:tell|ask)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,31})(?:\s+on\s+(another\s+base|[A-Za-z0-9][A-Za-z0-9._-]{0,39}))?\b/i.exec(
