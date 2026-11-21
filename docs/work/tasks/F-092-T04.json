@@ -5,6 +5,7 @@
  "title": "Owner check on the Mac",
  "goal": "A short recording replays correctly",
  "status": "planned",
+ "ownerLink": "docs/acceptance/f092-desktop-replay.md",
  "acceptance": [
   "Owner records and replays a short sequence and tries a mismatch"
  ],

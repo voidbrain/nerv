@@ -5,6 +5,7 @@
  "title": "Owner check with the owner's account",
  "goal": "The connector works on the real mailbox",
  "status": "planned",
+ "ownerLink": "docs/acceptance/f086-gmail.md",
  "acceptance": [
   "Owner connects the account, searches, approves one draft to themself"
  ],

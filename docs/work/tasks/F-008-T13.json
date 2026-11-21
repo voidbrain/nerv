@@ -4,7 +4,7 @@
   "parent": "F-008",
   "title": "Register a battery by chat, CLI and dashboard",
   "goal": "A new battery can be added without an export from the old app",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Test committed first: \"nuova batteria 9 blu LiPo 6S 1300 mAh\" (and the English form) registers it and asks for per-cell resistance",
     "`nerv batteries add` does the same from the CLI; the dashboard has an add form",
@@ -37,7 +37,7 @@
     "estimate": "1 h",
     "basis": "Estimated 2026-11-20: a chat phrase, a CLI subcommand and a small form over the existing register(). Not a measurement.",
     "reviewed": "2026-11-20",
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   },
