@@ -28,6 +28,7 @@ import type { BatteryRegistry } from './batteries.ts';
 import type { FleetStore } from './fleet.ts';
 import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.ts';
 import { readConfig } from './config.ts';
+import { COMMAND_CATALOG } from './chat-command.ts';
 import { builtinPackRegistry } from './packs.ts';
 
 type PhotoStoreHost = StoreApi & {
@@ -277,6 +278,7 @@ export function makeServer(
           '/api/batteries',
           '/api/fleet',
           '/api/packs',
+          '/api/commands',
         ].includes(path) ||
           /^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path) ||
           /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path) ||
@@ -325,6 +327,8 @@ export function makeServer(
         }
         if (!feed.connect(res, () => root || (sessions.get(bearer) ?? 0) > Date.now()))
           reply(503, { error: 'Dashboard stream capacity reached.' });
+      } else if (req.method === 'GET' && path === '/api/commands') {
+        reply(200, { commands: COMMAND_CATALOG });
       } else if (req.method === 'GET' && path === '/api/packs') {
         const home = (store as { home?: string }).home;
         const packsConfig = home ? readConfig(home).packs : undefined;

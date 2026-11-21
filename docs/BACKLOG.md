@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 100.75 h agent + 11 h owner across 138 open steps of 43 features and 22 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
+**Remaining effort:** 100.5 h agent + 11 h owner across 137 open steps of 43 features and 22 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -649,9 +649,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-056-T04 — Telegram menu registration and dashboard slash menu (Planned).
+💻 **→** Next: F-056-T05 — Group and connected-account assessment (Planned).
 
 | | |
 |---|---|
@@ -661,19 +661,19 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-056-t04"></a>F-056-T04 — Telegram menu registration and dashboard slash menu | 0.25 h | 0 h | 0.25 h | Planned | — | [F-056-T05](#f-056-t05) | — |
-| 🟢 Small | <a id="f-056-t05"></a>F-056-T05 — Group and connected-account assessment | 0.25 h | 0 h | 0.25 h | Planned | [F-056-T04](#f-056-t04) | — | — |
-| 🟢 Small | **Total** | 2 h | 0 h (0 of 5 steps recorded) | 0.5 h | 3 of 5 completed | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-056-t05"></a>F-056-T05 — Group and connected-account assessment | 0.25 h | 0 h | 0.25 h | Planned | — |
+| 🟢 Small | **Total** | 2 h | 0 h (0 of 5 steps recorded) | 0.25 h | 4 of 5 completed | |
 
-<details><summary>Done steps (3)</summary>
+<details><summary>Done steps (4)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-056-t01"></a>F-056-T01 — Shared command catalog and deterministic router | 0.5 h | 0 h | Completed | [PR #608](https://github.com/voidbrain/nerv/pull/608) Shared command catalog and deterministic router |
 | — | <a id="f-056-t02"></a>F-056-T02 — Read-only commands | 0.5 h | 0 h | Completed | [PR #619](https://github.com/voidbrain/nerv/pull/619) Read-only commands |
 | — | <a id="f-056-t03"></a>F-056-T03 — /spear and /log | 0.5 h | 0 h | Completed | [PR #624](https://github.com/voidbrain/nerv/pull/624) /spear and /log |
+| — | <a id="f-056-t04"></a>F-056-T04 — Telegram menu registration and dashboard slash menu | 0.25 h | 0 h | Completed | — |
 
 </details>
 

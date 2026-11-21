@@ -863,6 +863,9 @@ test('F-056-T02: Telegram /cards sends pending cards with inline buttons and rea
       log: () => {},
     });
     await channel.start(50);
+    await until(() => tg.calls.some((c) => c.method === 'setMyCommands'));
+    const menuCall = tg.calls.find((c) => c.method === 'setMyCommands')!;
+    assert.ok(Array.isArray(menuCall.body.commands) && (menuCall.body.commands as unknown[]).length >= 10);
     tg.text(OWNER, '/cards');
     await until(() =>
       tg.sent().some((m) => m.text.includes('memory.remember') && !!m.reply_markup?.inline_keyboard?.length),

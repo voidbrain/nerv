@@ -8,7 +8,7 @@ import { formatTelegramChecklist } from './lists.ts';
 import { ONLINE_MS } from './kaji-link.ts';
 import type { ChannelState } from './channel-state.ts';
 import type { Approval } from './ledger.ts';
-import { readCommand } from './chat-command.ts';
+import { readCommand, telegramCommands } from './chat-command.ts';
 import { requestLanguage } from './misato.ts';
 import { formatQueuedMessage, formatQueueFullMessage, QueueCancelledError, QueueFullError } from './request-queue.ts';
 /**
@@ -547,6 +547,9 @@ export class TelegramChannel {
         .catch((e) => this.log(`Telegram: ${e instanceof Error ? e.message : 'follow-up failed'}.`));
     });
     void this.poll();
+    void this.api.call('setMyCommands', { commands: telegramCommands() }).catch((e) => {
+      this.log(`Telegram setMyCommands: ${e instanceof Error ? e.message : 'failed'}.`);
+    });
     this.timer = setInterval(() => this.tick(), deliverEveryMs);
     await this.deliver();
   }

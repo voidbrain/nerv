@@ -93,6 +93,14 @@ export function helpText(language: 'en' | 'it'): string {
   return `${header}\n${lines.join('\n')}`;
 }
 
+/** Command menu entries for Telegram `setMyCommands`, generated from `COMMAND_CATALOG` (F-056-T04). */
+export function telegramCommands(language: 'en' | 'it' = 'en'): { command: string; description: string }[] {
+  return COMMAND_CATALOG.map((c) => ({
+    command: c.name,
+    description: language === 'it' ? c.summaryIt : c.summaryEn,
+  }));
+}
+
 /** Read commands are recognized before planning/dispatch; prose aliases are deliberately narrow. */
 export function readCommand(text: string): { name: ChatCommandName | 'unknown'; target?: string } | undefined {
   const value = text.trim();

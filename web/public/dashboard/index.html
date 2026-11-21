@@ -292,6 +292,11 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
 .msg.you { background:color-mix(in srgb,var(--accent) 7%,transparent); }
 .chat { display:flex; gap:6px; align-items:center; padding:8px; border-top:1px solid var(--border); }
 .chat input { flex:1; min-width:0; }
+.slash-menu { background:var(--panel2); border-top:1px solid var(--border); padding:4px 8px; display:flex; flex-direction:column; gap:2px; max-height:180px; overflow-y:auto; }
+.slash-menu[hidden] { display:none; }
+.slash-item { display:flex; justify-content:space-between; gap:8px; width:100%; text-align:left; background:transparent; border:1px solid transparent; color:var(--text); padding:4px 6px; font:inherit; font-size:11px; cursor:pointer; }
+.slash-item:hover, .slash-item:focus-visible { border-color:var(--accent); outline:none; }
+.slash-item .slash-desc { color:var(--muted); }
 .log { background:var(--panel2); border-top:1px solid var(--border); padding:8px; height:300px; overflow-y:auto; font-size:10px; line-height:1.5; }
 .log .ts { color:var(--muted); margin-right:6px; }
 .timeline-up { position:relative; padding-left:12px; }
@@ -436,6 +441,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
         <div class="hdr"><span data-l="log">Comms · Misato &amp; Maya trace</span>
           <span class="filters" role="group" aria-label="Filter messages"><button class="btn sm on" data-lf="all" style="color:inherit;border-color:currentColor">All</button><button class="btn sm" data-lf="sortie" style="color:inherit;border-color:currentColor">This sortie</button><button class="btn sm" data-lf="chat" style="color:inherit;border-color:currentColor">Chat only</button></span></div>
         <div class="log" id="log" role="log" aria-live="polite"></div>
+        <div id="slash-menu" class="slash-menu" role="listbox" aria-label="Slash commands" hidden></div>
         <form class="chat" id="chat-form">
           <img class="av" data-av="you" alt="" />
           <label class="sr" for="chat-in">Message Misato</label>
