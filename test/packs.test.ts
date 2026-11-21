@@ -172,4 +172,49 @@ describe('F-114-T01: pack manifest, registry, CoreServices interface, and config
       rmSync(home, { recursive: true, force: true });
     }
   });
+
+  it('F-114-T04: asks the owner back when two enabled packs claim the same chat phrase', async () => {
+    const { RuntimeChat } = await import('../src/runtime-chat.ts');
+    const registry = new PackRegistry();
+    registry.register({
+      id: 'alpha',
+      name: 'Alpha',
+      tools: ['alpha.read'],
+      tables: ['alpha_items'],
+      chatPhrases: [{ id: 'check', pattern: /^check items$/i }],
+      telegramCaptions: ['alpha'],
+      dashboardPanels: [],
+    });
+    registry.register({
+      id: 'beta',
+      name: 'Beta',
+      tools: ['beta.read'],
+      tables: ['beta_items'],
+      chatPhrases: [{ id: 'check', pattern: /^check items$/i }],
+      telegramCaptions: ['beta'],
+      dashboardPanels: [],
+    });
+    let loopCalled = 0;
+    const chat = new RuntimeChat({
+      home: undefined,
+      packRegistry: registry,
+      nervous: { call: async () => null } as never,
+      bases: async () => [],
+      baseHealth: async () => ({ state: 'online', reasons: [] }),
+      channelState: () => ({ mode: 'local', checkedAt: new Date().toISOString() }),
+      kaji: {} as never,
+      requestQueue: {} as never,
+      operatorDirectoryState: {} as never,
+      getDispatch: () => undefined,
+      resolveOperator: async () => ({ kind: 'none' }) as never,
+      loop: async () => {
+        loopCalled++;
+        return { sortieId: 's1', reply: 'should not route', steps: [], waiting: [] };
+      },
+    });
+    const res = await chat.chatOnce('check items', 'dashboard');
+    assert.equal(loopCalled, 0);
+    assert.equal(res.command, true);
+    assert.match(res.reply ?? '', /alpha.*beta/i);
+  });
 });

@@ -4,7 +4,7 @@
   "parent": "F-114",
   "title": "Chat routing when two packs claim the same message",
   "goal": "A message two enabled packs both claim is resolved predictably",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Test committed first: a phrase two packs match is asked back to the owner (or settled by a recorded rule), never silently routed to one"
   ],
@@ -34,9 +34,14 @@
     "estimate": "1 h",
     "basis": "Estimated 2026-11-20: a claim step per pack and one conflict rule. Not a measurement.",
     "reviewed": "2026-11-20",
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 627,
+      "note": "Chat routing when two packs claim the same message"
+    }
+  ]
 }
