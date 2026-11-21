@@ -4,7 +4,7 @@
   "parent": "F-111",
   "title": "Show result shapes in the planner's tool docs and measure the prompt change",
   "goal": "The planner knows what each call returns",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Tool docs given to the planner include each read tool's result shape",
     "Planner prompt size before and after is recorded from promptMetrics"
@@ -34,7 +34,7 @@
     "estimate": "1 h",
     "basis": "Estimated 2026-11-20 from the Agentica review. Not a measurement.",
     "reviewed": "2026-11-20",
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   }
