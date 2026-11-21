@@ -38,5 +38,10 @@
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 627,
+      "note": "Chat routing when two packs claim the same message"
+    }
+  ]
 }

@@ -2314,7 +2314,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-114-t01"></a>F-114-T01 — Pack manifest and registry, on and off in config | 2 h | 0 h | Completed | [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config |
-| — | <a id="f-114-t04"></a>F-114-T04 — Chat routing when two packs claim the same message | 1 h | 0 h | Completed | — |
+| — | <a id="f-114-t04"></a>F-114-T04 — Chat routing when two packs claim the same message | 1 h | 0 h | Completed | [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message |
 
 </details>
 
@@ -2325,7 +2325,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-114-T01: [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config. [FPV packs decision](decisions/fpv-packs.md); opened in [PR #593](https://github.com/voidbrain/nerv/pull/593); F-114-T01 in [PR #621](https://github.com/voidbrain/nerv/pull/621) |
+| PR / evidence | Steps: F-114-T01: [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config · F-114-T04: [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message. [FPV packs decision](decisions/fpv-packs.md); opened in [PR #593](https://github.com/voidbrain/nerv/pull/593); F-114-T01 in [PR #621](https://github.com/voidbrain/nerv/pull/621); F-114-T04 in [PR #627](https://github.com/voidbrain/nerv/pull/627) |
 | Opened | 2026-11-20 |
 | Verification | Pending |
 | Reviewed | 2026-11-20 |
