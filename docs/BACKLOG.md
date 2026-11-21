@@ -13,7 +13,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 44 | 24 |
+| **Open** | 44 | 23 |
 | **Require Human 🧑** | 12 | 6 |
 
 ### Require Human 🧑
@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 103 h agent + 11 h owner across 143 open steps of 44 features and 24 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
+**Remaining effort:** 102.75 h agent + 11 h owner across 142 open steps of 44 features and 23 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1746,52 +1746,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-105"></a>[🐞 B-105](#top)
-
-**An older running service rejects configuration written by newer code: `/api/models` fails**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-105-T02 — Live check on the main base (Planned).
-
-| | |
-|---|---|
-| **Issue** | Seen 2026-11-20 on the main base: the dashboard showed `GET /api/models: Unsupported updatePolicy field: schedule`. The service had started 2026-11-19 09:24 on `477d6afc`, before F-110-T02 (`48d4e74c`) taught `validateAutoUpdatePolicy` the `schedule` field; `config.json` was rewritten 2026-11-20 11:07 by newer code and now holds `updatePolicy.schedule`. Meanwhile the primary checkout moved six times by `git pull --tags origin main` (outside the `nodes lifecycle-*` flow), so the files on disk no longer matched the running process and nothing said so. |
-| **Reproduce** | Run a service from a revision before `48d4e74c`; save the update schedule with current code against the same home; open the dashboard. |
-| **Check** | Test committed failing first: a service whose validator predates a field in `config.json` answers the dashboard with a message naming the cause (configuration written by a newer NERV; update this base) instead of a raw validator error, and strict validation still rejects a field no NERV version knows; `nerv doctor` reports when the running service's revision differs from its checkout's HEAD; on the main base after an update through the lifecycle flow, `/api/models` loads. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-105-t02"></a>B-105-T02 — Live check on the main base | 0.25 h | 0 h | 0.25 h | Planned | — |
-| 🟢 Small | **Total** | 1.75 h | 0 h (0 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="b-105-t01"></a>B-105-T01 — Name configuration version skew instead of a raw validator error | 1.5 h | 0 h | Completed | [PR #599](https://github.com/voidbrain/nerv/pull/599) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-105.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-105-T01: [PR #599](https://github.com/voidbrain/nerv/pull/599) implementation. [PR #599](https://github.com/voidbrain/nerv/pull/599) B-105-T01 (`src/update-policy.ts`, `src/build.ts`, `src/server.ts`, `src/cli.ts`, `test/update-policy.test.ts`, `test/build.test.ts`); opened in [PR #595](https://github.com/voidbrain/nerv/pull/595); owner report 2026-11-20; process start time and checkout reflog read on the main base |
-| Opened | 2026-11-20 |
-| Verification | 2026-11-21 Unit/integration: PR #599 merged with green CI; the failing-first version-skew and doctor regressions passed. The main-base lifecycle update remains B-105-T02. |
-| Reviewed | 2026-11-21 |
-
-</details>
-
----
 ### <a id="b-100"></a>[🐞 B-100](#top)
 
 **`nerv eva run-tools-03` never starts when the checkout is under `$HOME`**
@@ -3289,6 +3243,52 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-087-T01: [PR #612](https://github.com/voidbrain/nerv/pull/612) implementation. [PR #612](https://github.com/voidbrain/nerv/pull/612); F-005-T24 run on Tabgha, 2026-11-18; Test: `test/windows-service-lifecycle.test.ts` refuses an SSH-applied install before Task Scheduler or definition changes (committed failing first); read-only two-session probe 2026-11-21 |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-21: PR #612 plan, validate, Windows, native-macOS, full-suite and all CodeQL analyses passed. Local: Windows lifecycle targeted suite 4/4; full suite 1,059 passed / 2 skipped; headless integration 5 passed / 1 Windows-only skipped; `check:fast` and production build pass. Live probe confirmed both process-identity parts are inaccessible from the desktop session. |
+| Reviewed | 2026-11-21 |
+
+</details>
+
+---
+### <a id="b-105"></a>[🐞 B-105](#top)
+
+**An older running service rejects configuration written by newer code: `/api/models` fails**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Seen 2026-11-20 on the main base: the dashboard showed `GET /api/models: Unsupported updatePolicy field: schedule`. The service had started 2026-11-19 09:24 on `477d6afc`, before F-110-T02 (`48d4e74c`) taught `validateAutoUpdatePolicy` the `schedule` field; `config.json` was rewritten 2026-11-20 11:07 by newer code and now holds `updatePolicy.schedule`. Meanwhile the primary checkout moved six times by `git pull --tags origin main` (outside the `nodes lifecycle-*` flow), so the files on disk no longer matched the running process and nothing said so. |
+| **Reproduce** | Run a service from a revision before `48d4e74c`; save the update schedule with current code against the same home; open the dashboard. |
+| **Check** | Test committed failing first: a service whose validator predates a field in `config.json` answers the dashboard with a message naming the cause (configuration written by a newer NERV; update this base) instead of a raw validator error, and strict validation still rejects a field no NERV version knows; `nerv doctor` reports when the running service's revision differs from its checkout's HEAD; on the main base after an update through the lifecycle flow, `/api/models` loads. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 1.75 h | 0 h (0 of 2 steps recorded) | 0 h | 2 of 2 completed | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-105-t01"></a>B-105-T01 — Name configuration version skew instead of a raw validator error | 1.5 h | 0 h | Completed | [PR #599](https://github.com/voidbrain/nerv/pull/599) implementation |
+| — | <a id="b-105-t02"></a>B-105-T02 — Live check on the main base | 0.25 h | 0 h | Completed | [PR #616](https://github.com/voidbrain/nerv/pull/616) live acceptance and closure |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-105.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-105-T01: [PR #599](https://github.com/voidbrain/nerv/pull/599) implementation · B-105-T02: [PR #616](https://github.com/voidbrain/nerv/pull/616) live acceptance and closure. [PR #599](https://github.com/voidbrain/nerv/pull/599) B-105-T01 (`src/update-policy.ts`, `src/build.ts`, `src/server.ts`, `src/cli.ts`, `test/update-policy.test.ts`, `test/build.test.ts`); opened in [PR #595](https://github.com/voidbrain/nerv/pull/595); owner report 2026-11-20; process start time and checkout reflog read on the main base |
+| Opened | 2026-11-20 |
+| Verification | 2026-11-21 Real-device: authenticated foreground stop; fenced start receipt `5a5d4615…` completed `start` and `verify`; `/api/models` HTTP 200; doctor `skewed: false` at `9b69150b`; launchd service running. Test: PR #599's failing-first version-skew and doctor regressions passed on green CI. Closure: PR #616. |
 | Reviewed | 2026-11-21 |
 
 </details>

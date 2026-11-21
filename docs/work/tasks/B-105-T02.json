@@ -4,7 +4,7 @@
   "parent": "B-105",
   "title": "Live check on the main base",
   "goal": "After an update through the lifecycle flow, `/api/models` loads and doctor shows no skew",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Owner-visible result recorded with the commands used"
   ],
@@ -30,9 +30,14 @@
     "estimate": "0.25 h",
     "basis": "Estimated 2026-11-20: one update and a dashboard check. Not a measurement.",
     "reviewed": "2026-11-20",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 616,
+      "note": "live acceptance and closure"
+    }
+  ]
 }
