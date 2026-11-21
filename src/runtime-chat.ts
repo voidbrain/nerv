@@ -127,11 +127,10 @@ export class RuntimeChat {
       } else if (command.name === 'cards') {
         const pending = (await this.host.nervous.call('approvals.pending', { limit: 10 })) as {
           id: string;
-          tool: string;
-          pattern: string;
+          card: { tool: string; pattern: string };
         }[];
         reply = pending.length
-          ? pending.map((a) => `${a.id.slice(0, 8)} · ${a.tool} (${a.pattern})`).join('\n')
+          ? pending.map((a) => `${a.id.slice(0, 8)} · ${a.card.tool} (${a.card.pattern})`).join('\n')
           : it
             ? 'Nessuna scheda in attesa.'
             : 'No pending approval cards.';
@@ -139,9 +138,10 @@ export class RuntimeChat {
         const list = (await this.host.nervous.call('reminders.pending')) as {
           title: string;
           due: string;
+          dueLocal?: string;
         }[];
         reply = list.length
-          ? list.map((r) => `${r.due} · ${r.title}`).join('\n')
+          ? list.map((r) => `${r.dueLocal ?? r.due} · ${r.title}`).join('\n')
           : it
             ? 'Nessun promemoria in attesa.'
             : 'No pending reminders.';
@@ -167,7 +167,13 @@ export class RuntimeChat {
         const cfg = this.host.home ? readConfig(this.host.home) : undefined;
         const at = cfg?.brief?.at ?? '08:00';
         const tz = cfg?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
-        reply = it ? `Brief programmato alle ${at} (${tz}).` : `Brief scheduled at ${at} (${tz}).`;
+        const history = (await this.host.nervous
+          .call('dashboard.history', { since: new Date(0).toISOString() })
+          .catch(() => null)) as { brief?: { message: string; created: string } | null } | null;
+        const scheduleLine = it ? `Brief programmato alle ${at} (${tz}).` : `Brief scheduled at ${at} (${tz}).`;
+        reply = history?.brief?.message
+          ? `${scheduleLine}\n\n${history.brief.message}`
+          : `${scheduleLine} ${it ? 'Nessun brief recente.' : 'No recent brief.'}`;
       } else if (command.name === 'pilots') {
         const pilots = this.host.home ? (readConfig(this.host.home).pilots ?? []) : [];
         reply = pilots.length
