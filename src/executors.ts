@@ -5,6 +5,7 @@ import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
 import { toChecklistSurface, type ListStore } from './lists.ts';
 import { replayDesktopRecording, type DesktopRecordingFile, type DesktopReplayDriver } from './desktop-recording.ts';
+import { handOffToBambuConnect, type BambuConnectLauncher } from './slicer.ts';
 import type { GmailClient } from './gmail.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
 import type { FpvBuildStore, BuildComponentInput, BuildWiringInput, PinoutEntry } from './fpv-builds.ts';
@@ -65,6 +66,7 @@ export interface ReminderBackend {
   lists?: ListStore;
   gmail?: GmailClient;
   desktopReplayDriver?: DesktopReplayDriver;
+  bambuLauncher?: BambuConnectLauncher;
   fpvBuilds?: FpvBuildStore;
   documents?: DocumentStore;
   photos?: PhotoStore;
@@ -138,6 +140,8 @@ export const builtinTools: Tool[] = [
   { name: 'fpv.import_build', effect: 'write-local' },
   { name: 'fpv.add_doc', effect: 'write-local' },
   { name: 'fpv.wiring_answer', effect: 'read' },
+  // F-087-T03: opening Bambu Connect on the owner's desktop is an Orange action.
+  { name: 'bambu.handoff', effect: 'write-external' },
 ];
 const text = (args: Record<string, unknown>, key: string) => {
   const v = args[key];
@@ -199,6 +203,7 @@ export const BUILTIN_TOOL_SUBJECTS: Readonly<Record<string, ToolSubject>> = {
   'settings.schedule': 'agency',
   'kaji.run': 'agency',
   'desktop.replay': 'agency',
+  'bambu.handoff': 'agency',
 };
 
 /** What Misato is told about each built-in tool. */
@@ -495,6 +500,13 @@ const rawToolDocs: ToolDoc[] = [
     about:
       'Replays a bounded local desktop recording as a Blue action after verifying display, app, and window preconditions and stopping on owner input.',
     args: '{"recording": DesktopRecordingFile, "approved": boolean}',
+  },
+  {
+    name: 'bambu.handoff',
+    effect: 'write-external',
+    about:
+      'Opens a sliced .gcode.3mf file in Bambu Connect via import link behind Orange approval and returns the owner checklist.',
+    args: '{"gcode3mfPath": string, "profileName": string, "printTimeText"?: string, "filamentGrams"?: number, "printerName"?: string, "plateType"?: string, "nozzleSize"?: string, "amsMapping"?: string}',
   },
 ];
 export type ResultShapeField = 'string' | 'number' | 'boolean' | 'array' | 'object' | 'object|null' | 'string|null';
@@ -1154,6 +1166,31 @@ function executeRaw(
         recording: args.recording as DesktopRecordingFile,
         approved: args.approved === true,
       });
+    }
+    case 'bambu.handoff': {
+      only(args, [
+        'gcode3mfPath',
+        'profileName',
+        'printTimeText',
+        'filamentGrams',
+        'printerName',
+        'plateType',
+        'nozzleSize',
+        'amsMapping',
+      ]);
+      return handOffToBambuConnect(
+        {
+          gcode3mfPath: text(args, 'gcode3mfPath'),
+          profileName: text(args, 'profileName'),
+          ...(args.printTimeText !== undefined ? { printTimeText: text(args, 'printTimeText') } : {}),
+          ...(typeof args.filamentGrams === 'number' ? { filamentGrams: args.filamentGrams } : {}),
+          ...(args.printerName !== undefined ? { printerName: text(args, 'printerName') } : {}),
+          ...(args.plateType !== undefined ? { plateType: text(args, 'plateType') } : {}),
+          ...(args.nozzleSize !== undefined ? { nozzleSize: text(args, 'nozzleSize') } : {}),
+          ...(args.amsMapping !== undefined ? { amsMapping: text(args, 'amsMapping') } : {}),
+        },
+        backend.bambuLauncher,
+      );
     }
     case 'fpv.import_build': {
       only(args, ['name', 'sourceRef', 'components', 'wiring', 'notes']);

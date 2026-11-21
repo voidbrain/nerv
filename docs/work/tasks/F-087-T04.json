@@ -5,6 +5,7 @@
   "title": "Owner check on the real printer",
   "goal": "A small print runs end to end",
   "status": "planned",
+  "ownerLink": "docs/decisions/bambu-print-handoff.md",
   "acceptance": [
     "Owner slices a small test model through NERV, starts it from Bambu Connect and confirms the checklist was right"
   ],

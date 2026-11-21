@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 42 | 22 |
-| **Require Human 🧑** | 12 | 6 |
+| **Require Human 🧑** | 13 | 6 |
 
 ### Require Human 🧑
 
@@ -26,6 +26,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-004](#f-004) |  | [B-056](#b-056) |  |
 | [F-012](#f-012) |  | [B-095](#b-095) |  |
 | [F-086](#f-086) |  | [B-096](#b-096) |  |
+| [F-087](#f-087) |  |  |  |
 | [F-092](#f-092) |  |  |  |
 | [F-108](#f-108) |  |  |  |
 | [F-060](#f-060) |  |  |  |
@@ -34,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 97.25 h agent + 11 h owner across 134 open steps of 42 features and 22 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
+**Remaining effort:** 96.25 h agent + 11 h owner across 133 open steps of 42 features and 22 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -741,54 +742,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-083-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep · F-083-T05: [PR #481](https://github.com/voidbrain/nerv/pull/481) implementation · F-083-T06: [PR #561](https://github.com/voidbrain/nerv/pull/561) cooking session; CI pending · F-083-T07: [PR #576](https://github.com/voidbrain/nerv/pull/576) implementation · F-083-T10: [PR #586](https://github.com/voidbrain/nerv/pull/586) implementation. [PR #586](https://github.com/voidbrain/nerv/pull/586) (F-083-T10); [PR #576](https://github.com/voidbrain/nerv/pull/576) (F-083-T07); [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #481](https://github.com/voidbrain/nerv/pull/481); [PR #489](https://github.com/voidbrain/nerv/pull/489) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-20: `node --test test/photos.test.ts test/documents.test.ts test/cooking-session.test.ts test/telegram.test.ts` (26/26 passed), `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-083-T05 verified: [PR #481](https://github.com/voidbrain/nerv/pull/481) merged on green CI (test/pantry.test.ts). `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history). `F-083-T02` added `computeFromSavedDocument` / `DocumentStore.compute` in `src/documents.ts` and read-only tool `docs.compute` in `src/executors.ts` (cites saved values & arithmetic, asks instead of guessing on missing ratio/setting/unit mismatch); verified with `node --test test/documents.test.ts` and `npm run check:fast`. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-087"></a>[✨ F-087](#top)
-
-**3D printing: slice a model with a material profile and send it to the printer**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h agent + 0.5 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-087-T03 — Hand off to Bambu Connect with the owner checklist (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "print that STL with PLA settings". The owner's printer takes jobs from other software only through the vendor's desktop app (Bambu Connect, Bambu Lab's official path for third-party tools). Starting a print or reading its status from outside needs the firmware's Developer Mode, which is LAN-only and disconnects the printer from the vendor cloud. So NERV prepares and hands off the job; the owner presses Print in the app. The signed-in vendor app runs on Tabgha (NERV-02, Windows 11), where NERV runs as a background service with no window: the job goes to Tabgha (F-050), and opening the app needs the owner's logged-in desktop session. |
-| **Reproduce** | Ask to print an STL with a named material. |
-| **Check** | The model is sliced with a named material profile (Bambu Studio or OrcaSlicer, on the base that has the app); time and material are reported; the sliced file opens in Bambu Connect (`bambu-connect://import-file` link) with a checklist for the owner (printer, plate, nozzle, filament and AMS mapping, clear plate, someone nearby for the first layer); NERV never reports a print as started, because it cannot see the printer; an unknown profile is refused. Developer Mode control is out of scope unless the owner chooses it in T01. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-087-t03"></a>F-087-T03 — Hand off to Bambu Connect with the owner checklist | 1 h | 0 h | 1 h | Planned | — | [F-087-T04](#f-087-t04) | 🤖 | — |
-| 🟢 Small | <a id="f-087-t04"></a>F-087-T04 — Owner check on the real printer | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-087-T03](#f-087-t03) | — | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 1 h agent + 0.5 h owner | 2 of 4 completed | | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-087-t01"></a>F-087-T01 — Decision: slicer, Bambu Connect hand-off and base | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-087-t02"></a>F-087-T02 — Slice with a material profile | 1 h | 0 h | Completed | [PR #491](https://github.com/voidbrain/nerv/pull/491) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-087.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-087-T02: [PR #491](https://github.com/voidbrain/nerv/pull/491) implementation. [PR #491](https://github.com/voidbrain/nerv/pull/491) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-087-T02 verified: [PR #491](https://github.com/voidbrain/nerv/pull/491) merged on green CI. `F-087-T01` decision written in [bambu-print-handoff.md](decisions/bambu-print-handoff.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
 
 </details>
@@ -1728,6 +1681,54 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-086-T02 verified: [PR #480](https://github.com/voidbrain/nerv/pull/480) merged on green CI. `F-086-T01` decision written in [gmail-connector.md](decisions/gmail-connector.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-21 |
+
+</details>
+
+---
+### <a id="f-087"></a>[✨ F-087](#top)
+
+**3D printing: slice a model with a material profile and send it to the printer**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h owner | — | — | — | 🧑‍🔧 | — |
+
+🧑 **→** Next: [🧑‍🔧](decisions/bambu-print-handoff.md) F-087-T04 — Owner check on the real printer (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "print that STL with PLA settings". The owner's printer takes jobs from other software only through the vendor's desktop app (Bambu Connect, Bambu Lab's official path for third-party tools). Starting a print or reading its status from outside needs the firmware's Developer Mode, which is LAN-only and disconnects the printer from the vendor cloud. So NERV prepares and hands off the job; the owner presses Print in the app. The signed-in vendor app runs on Tabgha (NERV-02, Windows 11), where NERV runs as a background service with no window: the job goes to Tabgha (F-050), and opening the app needs the owner's logged-in desktop session. |
+| **Reproduce** | Ask to print an STL with a named material. |
+| **Check** | The model is sliced with a named material profile (Bambu Studio or OrcaSlicer, on the base that has the app); time and material are reported; the sliced file opens in Bambu Connect (`bambu-connect://import-file` link) with a checklist for the owner (printer, plate, nozzle, filament and AMS mapping, clear plate, someone nearby for the first layer); NERV never reports a print as started, because it cannot see the printer; an unknown profile is refused. Developer Mode control is out of scope unless the owner chooses it in T01. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-087-t04"></a>F-087-T04 — Owner check on the real printer | — | 0 h | 0 h agent + 0.5 h owner | Planned | [🧑‍🔧](decisions/bambu-print-handoff.md) | — |
+| 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 0.5 h owner | 3 of 4 completed | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-087-t01"></a>F-087-T01 — Decision: slicer, Bambu Connect hand-off and base | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-087-t02"></a>F-087-T02 — Slice with a material profile | 1 h | 0 h | Completed | [PR #491](https://github.com/voidbrain/nerv/pull/491) implementation |
+| — | <a id="f-087-t03"></a>F-087-T03 — Hand off to Bambu Connect with the owner checklist | 1 h | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-087.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-087-T02: [PR #491](https://github.com/voidbrain/nerv/pull/491) implementation. [PR #491](https://github.com/voidbrain/nerv/pull/491) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-087-T02 verified: [PR #491](https://github.com/voidbrain/nerv/pull/491) merged on green CI. `F-087-T01` decision written in [bambu-print-handoff.md](decisions/bambu-print-handoff.md); verified with `npm run check:fast`. 2026-11-22: F-087-T03 verified (`bambu.handoff` Orange gate + `handOffToBambuConnect` + owner checklist); `node --test test/slicer.test.ts` and `npm run check:fast`. |
+| Reviewed | 2026-11-18 |
 
 </details>
 
