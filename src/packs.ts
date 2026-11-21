@@ -35,6 +35,11 @@ export interface PackPhraseDeclaration {
   readonly pattern: RegExp;
 }
 
+export interface PackChatContext {
+  readonly findDocument: (query: string) => Promise<unknown>;
+  readonly notice?: (message: string) => Promise<void>;
+}
+
 export interface PackManifest {
   readonly id: string;
   readonly name: string;
@@ -44,6 +49,11 @@ export interface PackManifest {
   readonly telegramCaptions: readonly string[];
   readonly dashboardPanels: readonly PackPanelDeclaration[];
   readonly init?: (core: CoreServices) => void;
+  readonly handleChatMessage?: (
+    message: string,
+    conversation: string,
+    ctx: PackChatContext,
+  ) => Promise<string | undefined>;
   readonly handleTelegramText?: (text: string, store: unknown) => Promise<string | undefined>;
   readonly resolveTelegramPhoto?: (
     store: unknown,
@@ -179,6 +189,21 @@ export class PackRegistry {
     return matches[0];
   }
 
+  async handleChatMessage(
+    message: string,
+    conversation: string,
+    ctx: PackChatContext,
+    config?: PacksConfig,
+  ): Promise<string | undefined> {
+    for (const pack of this.enabledPacks(config)) {
+      if (pack.handleChatMessage) {
+        const reply = await pack.handleChatMessage(message, conversation, ctx);
+        if (reply !== undefined) return reply;
+      }
+    }
+    return undefined;
+  }
+
   async handleTelegramText(text: string, store: unknown, config?: PacksConfig): Promise<string | undefined> {
     for (const pack of this.enabledPacks(config)) {
       if (pack.handleTelegramText) {
@@ -239,12 +264,8 @@ export const builtinPackRegistry = new PackRegistry();
 
 builtinPackRegistry.register(fpvPackManifest);
 
-builtinPackRegistry.register({
-  id: 'cooking',
-  name: 'Cooking',
-  tools: ['pantry.purchase', 'pantry.shelf_life', 'pantry.check'],
-  tables: ['pantry_items'],
-  chatPhrases: [{ id: 'cooking-session', pattern: /^\s*(?:inizia a cucinare|start cooking)\b/i }],
-  telegramCaptions: ['recipe'],
-  dashboardPanels: [{ id: 'pantry', title: 'Pantry', route: '/pantry' }],
-});
+import { cookingPackManifest, createCookingStoreSlice, type CookingStoreSlice } from './cooking-pack.ts';
+
+export { createCookingStoreSlice, type CookingStoreSlice };
+
+builtinPackRegistry.register(cookingPackManifest);
