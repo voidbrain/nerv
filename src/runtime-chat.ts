@@ -1,7 +1,7 @@
 import { channelIsFresh, type ChannelState } from './channel-state.ts';
 import { helpText, readCommand, statusText, type StatusBase } from './chat-command.ts';
 import { CookingSessions, readCookingCommand } from './cooking-session.ts';
-import { builtinPackRegistry } from './packs.ts';
+import { builtinPackRegistry, type PackRegistry } from './packs.ts';
 import { readConfig } from './config.ts';
 import type { SortieEvent } from './events.ts';
 import { ONLINE_MS, type BaseHealth, type RegistryPort } from './kaji-link.ts';
@@ -41,6 +41,7 @@ export interface RuntimeChatHost {
   updatePostpone?(text: string): { postponed: boolean; reply?: string } | undefined;
   /** Delivers a proactive notice line (e.g. an expired cooking timer) into the owner's inbox. */
   notice?(message: string): Promise<void>;
+  packRegistry?: PackRegistry;
   resolveOperator(query: string, opts: { excludeSelf?: boolean }): Promise<OperatorResolution>;
   loop(
     sortieId: string,
@@ -245,6 +246,15 @@ export class RuntimeChat {
     }
     // F-083-T06 / F-083-T07: a cooking session answers from the saved recipe and manages session timers; with no session or no such recipe, it is chat.
     const packsConfig = this.host.home ? readConfig(this.host.home).packs : undefined;
+    const phraseMatch = (this.host.packRegistry ?? builtinPackRegistry).resolveChatPhrase(message, packsConfig);
+    if (phraseMatch && 'ambiguous' in phraseMatch) {
+      const it = requestLanguage(message) === 'it';
+      const names = phraseMatch.ambiguous.join(', ');
+      const reply = it
+        ? `Più pacchetti corrispondono a questo messaggio (${names}). Quale vuoi usare?`
+        : `Multiple packs match this message (${names}). Which one did you mean?`;
+      return { command: true, sortieId: '', reply, steps: [], waiting: [] };
+    }
     const cooking = builtinPackRegistry.isEnabled('cooking', packsConfig) ? readCookingCommand(message) : undefined;
     if (cooking) {
       const at = conversation ?? 'cli';
