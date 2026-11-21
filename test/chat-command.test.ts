@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { COMMAND_CATALOG, helpText, readCommand, statusText } from '../src/chat-command.ts';
+import { COMMAND_CATALOG, helpText, readCommand, statusText, telegramCommands } from '../src/chat-command.ts';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
 test('status commands and the reported prose alias resolve only registered identities, with no model interpretation', () => {
@@ -183,6 +183,20 @@ test('F-056-T02: read-only commands (/cards, /reminders, /why, /brief, /pilots, 
       assert.ok(
         (await runtime.sorties()).some((s) => s.title.includes('Log verbosity set to steps') && s.status === 'done'),
       );
+
+      // F-056-T04: telegramCommands() and GET /api/commands expose the shared COMMAND_CATALOG.
+      const tgCmds = telegramCommands('en');
+      assert.equal(tgCmds.length, COMMAND_CATALOG.length);
+      assert.deepEqual(
+        tgCmds.map((c) => c.command),
+        COMMAND_CATALOG.map((c) => c.name),
+      );
+      const apiCmdsRes = await fetch(url.replace('/api/chat', '/api/commands'), {
+        headers: { authorization: 'Bearer ' + token },
+      });
+      assert.equal(apiCmdsRes.status, 200);
+      const apiCmds = (await apiCmdsRes.json()) as { commands: { name: string; usage: string }[] };
+      assert.equal(apiCmds.commands.length, COMMAND_CATALOG.length);
     } finally {
       seed.close();
     }

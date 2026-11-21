@@ -1253,7 +1253,46 @@ function chat(text) {
     launch(key, text); say("On it: opened " + state.sorties[0].id + ". The MAGI decide each action's Pattern; anything that needs you comes to the apartment.");
   }, 250);
 }
-document.getElementById("chat-form").addEventListener("submit", e => { e.preventDefault(); const i = document.getElementById("chat-in"); const v = i.value.trim(); if (v) { chat(v); i.value = ""; } });
+const DEFAULT_COMMANDS = [
+  { name: "help", usage: "/help", summaryEn: "List available commands", summaryIt: "Elenca i comandi disponibili" },
+  { name: "status", usage: "/status [base]", summaryEn: "Show base health and Midori status", summaryIt: "Mostra stato della base e di Midori" },
+  { name: "cards", usage: "/cards", summaryEn: "List pending approval cards", summaryIt: "Mostra le schede in attesa di approvazione" },
+  { name: "reminders", usage: "/reminders", summaryEn: "List pending reminders", summaryIt: "Mostra i promemoria in attesa" },
+  { name: "why", usage: "/why S-XXXX", summaryEn: "Explain a sortie or action from the ledger", summaryIt: "Spiega una sortita o azione dal registro" },
+  { name: "brief", usage: "/brief", summaryEn: "Show brief schedule and latest summary", summaryIt: "Mostra orario del brief e stato recente" },
+  { name: "pilots", usage: "/pilots", summaryEn: "List configured specialist pilots", summaryIt: "Elenca i piloti specialistici configurati" },
+  { name: "bases", usage: "/bases", summaryEn: "List enrolled bases in the mesh", summaryIt: "Elenca le basi registrate nella rete" },
+  { name: "spear", usage: "/spear [S-XXXX]", summaryEn: "Stop an active or waiting sortie", summaryIt: "Ferma una sortita attiva o in attesa" },
+  { name: "log", usage: "/log conversation|steps|all", summaryEn: "Set trace verbosity for chat replies", summaryIt: "Imposta il dettaglio della traccia in chat" }
+];
+function renderSlashMenu() {
+  const input = document.getElementById("chat-in");
+  const menu = document.getElementById("slash-menu");
+  if (!input || !menu) return;
+  const raw = input.value;
+  if (!raw.startsWith("/")) { menu.hidden = true; menu.innerHTML = ""; return; }
+  const q = raw.slice(1).split(/\s+/)[0].toLowerCase();
+  const list = (Array.isArray(state.commands) && state.commands.length ? state.commands : DEFAULT_COMMANDS)
+    .filter(c => !q || c.name.startsWith(q));
+  if (!list.length) { menu.hidden = true; menu.innerHTML = ""; return; }
+  const it = state.lang === "it";
+  menu.innerHTML = list.map(c => "<button type='button' class='slash-item' role='option' data-cmd='" + esc(c.name) + "' data-has-args='" + (c.usage.includes(" ") ? "1" : "") + "'><span><b>" + esc(c.usage) + "</b></span><span class='slash-desc'>" + esc(it && c.summaryIt ? c.summaryIt : c.summaryEn) + "</span></button>").join("");
+  menu.hidden = false;
+}
+document.getElementById("chat-in").addEventListener("input", renderSlashMenu);
+document.getElementById("chat-in").addEventListener("keydown", e => {
+  if (e.key === "Escape") { const m = document.getElementById("slash-menu"); if (m) { m.hidden = true; m.innerHTML = ""; } }
+});
+document.getElementById("slash-menu").addEventListener("click", e => {
+  const btn = e.target.closest("[data-cmd]");
+  if (!btn) return;
+  const i = document.getElementById("chat-in");
+  i.value = "/" + btn.dataset.cmd + (btn.dataset.hasArgs ? " " : "");
+  const m = document.getElementById("slash-menu");
+  m.hidden = true; m.innerHTML = "";
+  i.focus();
+});
+document.getElementById("chat-form").addEventListener("submit", e => { e.preventDefault(); const m = document.getElementById("slash-menu"); if (m) { m.hidden = true; m.innerHTML = ""; } const i = document.getElementById("chat-in"); const v = i.value.trim(); if (v) { chat(v); i.value = ""; } });
 function guessPreset(t) { t = t.toLowerCase(); if (/mail|inbox|summar/.test(t)) return "brief"; if (/reply|tell|write to|email/.test(t)) return "reply"; if (/branch|repo/.test(t)) return "branches"; if (/charg|battery|fpv/.test(t)) return "charger"; if (/note|clip|page|web/.test(t)) return "note"; return null; }
 /* palette:start · F-047: Theme (eva | simple) × Mode (dark | light) × Accent. Every colour a text sits on reaches WCAG AA
    (test/dashboard.test.ts checks all 20); Eva · Dark · Orange is the original EVA Full, also the stylesheet's :root. */
