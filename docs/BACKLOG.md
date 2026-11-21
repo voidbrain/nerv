@@ -13,7 +13,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 44 | 23 |
+| **Open** | 43 | 23 |
 | **Require Human 🧑** | 12 | 6 |
 
 ### Require Human 🧑
@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 104.25 h agent + 11 h owner across 141 open steps of 44 features and 23 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
+**Remaining effort:** 103.25 h agent + 11 h owner across 140 open steps of 43 features and 23 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2244,52 +2244,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-111"></a>[✨ F-111](#top)
-
-**Typed results for tool calls**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-111-T02 — Show result shapes in the planner's tool docs and measure the prompt change (Planned).
-
-| | |
-|---|---|
-| **Issue** | A tool call's result is `unknown` (`execute` in `src/executors.ts`) and its arguments are described in prose (`toolDocs`); a malformed result reaches the planner unchecked, and the planner is not told what a call returns. |
-| **Reproduce** | Call any read tool (for example `reminders.list`) through the runtime and inspect the value handed back to the planner: nothing checks its shape. |
-| **Check** | Every built-in read tool declares its result shape; the tool boundary refuses a result that does not match it with a named error; a join test runs planner → gate → executor → planner with a valid and a malformed result; the planner's tool docs show each result shape, and the prompt-size change is recorded. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-111-t02"></a>F-111-T02 — Show result shapes in the planner's tool docs and measure the prompt change | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 1 h | 1 of 2 completed |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-111-t01"></a>F-111-T01 — Declare result shapes for read tools and check them at the tool boundary | 2 h | 0 h | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-111.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587); F-111-T01 in [PR #611](https://github.com/voidbrain/nerv/pull/611) |
-| Opened | 2026-11-20 |
-| Verification | 2026-11-21 Unit/integration: PR #611 merged with green CI; descriptor, validation-error and planner/gate/executor join tests passed. |
-| Reviewed | 2026-11-21 |
-
-</details>
-
----
 ### <a id="f-113"></a>[✨ F-113](#top)
 
 **Compact tool index with details on request**
@@ -3346,6 +3300,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-111"></a>[✨ F-111](#top)
+
+**Typed results for tool calls**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P3 | 🟡 Medium | 0 h | — | — | — | — | — |
+
+💻 **→** Next: —.
+
+| | |
+|---|---|
+| **Issue** | A tool call's result is `unknown` (`execute` in `src/executors.ts`) and its arguments are described in prose (`toolDocs`); a malformed result reaches the planner unchecked, and the planner is not told what a call returns. |
+| **Reproduce** | Call any read tool (for example `reminders.list`) through the runtime and inspect the value handed back to the planner: nothing checks its shape. |
+| **Check** | Every built-in read tool declares its result shape; the tool boundary refuses a result that does not match it with a named error; a join test runs planner → gate → executor → planner with a valid and a malformed result; the planner's tool docs show each result shape, and the prompt-size change is recorded. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 0 h | 2 of 2 completed | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-111-t01"></a>F-111-T01 — Declare result shapes for read tools and check them at the tool boundary | 2 h | 0 h | Completed | — |
+| — | <a id="f-111-t02"></a>F-111-T02 — Show result shapes in the planner's tool docs and measure the prompt change | 1 h | 0 h | Completed | [PR #618](https://github.com/voidbrain/nerv/pull/618) |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-111.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-111-T02: [PR #618](https://github.com/voidbrain/nerv/pull/618). [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587); F-111-T01 in [PR #611](https://github.com/voidbrain/nerv/pull/611); F-111-T02 in [PR #618](https://github.com/voidbrain/nerv/pull/618) |
+| Opened | 2026-11-20 |
+| Closed | 2026-11-21 |
+| Verification | 2026-11-21 Unit/integration: PR #611 merged with green CI (F-111-T01); F-111-T02 verified via `node --test test/read-tool-shapes.test.ts test/misato.test.ts test/prompt-samples.test.ts test/mcp.test.ts` (38/38 passed) and `npm run check:fast`. |
+| Reviewed | 2026-11-21 |
+
+</details>
+
+---
 
 ## Other changes
 

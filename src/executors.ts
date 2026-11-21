@@ -557,11 +557,23 @@ export function validateToolResult(toolName: string, result: unknown): unknown {
   return result;
 }
 
+/** Formats a declared ResultShape as a compact signature for the planner's tool docs (F-111-T02). */
+export function formatResultShape(shape: ResultShape): string {
+  if (shape.kind === 'array') return 'array';
+  const entries = Object.entries(shape.required);
+  if (entries.length === 0) return 'object';
+  return `{${entries.map(([k, v]) => `${JSON.stringify(k)}: ${v}`).join(', ')}}`;
+}
+
 /** What Misato is told about each built-in tool, each assigned to one subject (F-113-T01). */
-export const toolDocs: ToolDoc[] = rawToolDocs.map((doc) => ({
-  ...doc,
-  subject: BUILTIN_TOOL_SUBJECTS[doc.name],
-}));
+export const toolDocs: ToolDoc[] = rawToolDocs.map((doc) => {
+  const shape = doc.effect === 'read' ? READ_TOOL_RESULT_SHAPES[doc.name] : undefined;
+  return {
+    ...doc,
+    ...(shape ? { returns: formatResultShape(shape) } : {}),
+    subject: BUILTIN_TOOL_SUBJECTS[doc.name],
+  };
+});
 /** Versioned descriptors for NERV's own tools, on the same shape used for registered MCP tools (F-021). */
 export const builtinToolDescriptors: ToolDescriptor[] = builtinTools.map((tool) => {
   const doc = toolDocs.find((candidate) => candidate.name === tool.name);
