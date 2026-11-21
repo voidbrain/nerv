@@ -935,3 +935,33 @@ test('B-091: journalTransaction retries transient SQLITE_IOERR (disk I/O error) 
     db.close();
   }
 });
+
+test('B-091: journalTransaction retains a bounded retry window for slow Windows file-handle release', () => {
+  const db = new DatabaseSync(':memory:');
+  try {
+    db.exec('CREATE TABLE t(v INTEGER)');
+    let attempts = 0;
+    const sleeps: number[] = [];
+    const origExec = db.exec.bind(db);
+    db.exec = ((sql: string) => {
+      if (sql === 'BEGIN IMMEDIATE' && attempts < 7) {
+        attempts += 1;
+        throw Object.assign(new Error('disk I/O error'), { errcode: 10 });
+      }
+      return origExec(sql);
+    }) as typeof db.exec;
+    const result = lifecycle.journalTransaction(
+      db,
+      () => {
+        db.prepare('INSERT INTO t VALUES (1)').run();
+        return 'ok';
+      },
+      { sleep: (ms) => sleeps.push(ms) },
+    );
+    assert.equal(result, 'ok');
+    assert.equal(attempts, 7);
+    assert.ok(sleeps.length >= 7);
+  } finally {
+    db.close();
+  }
+});
