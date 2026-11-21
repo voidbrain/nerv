@@ -555,3 +555,7 @@ Reconciled `docs/agents/pull-requests.md` from `voidbrain/project-harness#224` i
 ## 2026-11-21 — main `ed872cc`
 
 PRs #598–#614 merged green. Automated steps closed; #610 is harness maintenance recorded above. Pending Gauntlet cases remain under F-078-T08, B-086-T05 and F-115-T02. Reconciliation: [PR #615](https://github.com/voidbrain/nerv/pull/615).
+
+## 2026-11-21 — main `404f8ff`
+
+PRs #615–#620 merged green. #615 was reconciliation-only; B-105, F-111 and F-056 are current. #617 records F-005/B-091 recovery; #620 merged the fixes, with Tabgha verification pending. Reconciliation: [PR #622](https://github.com/voidbrain/nerv/pull/622).
