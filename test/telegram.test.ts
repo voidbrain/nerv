@@ -879,6 +879,17 @@ test('F-056-T02: Telegram /cards sends pending cards with inline buttons and rea
     await until(() => tg.sent().some((m) => m.text.includes('Telegram cards sortie')));
     assert.equal(modelCalls, 0);
     assert.equal((await runtime.sorties()).length, 1);
+
+    // F-056-T03: Telegram /spear sends confirmation buttons; tapping Confirm Spear stops the sortie.
+    tg.text(OWNER, `/spear S-${sortie.slice(0, 4).toUpperCase()}`);
+    await until(() =>
+      tg
+        .sent()
+        .some((m) => m.reply_markup?.inline_keyboard?.[0]?.some((b) => b.callback_data === `spear:confirm:${sortie}`)),
+    );
+    tg.tap(OWNER, `spear:confirm:${sortie}`);
+    await until(() => tg.sent().some((m) => m.text.includes(`Stopped S-${sortie.slice(0, 4).toUpperCase()}`)));
+    assert.equal((await runtime.sorties()).find((s) => s.id === sortie)?.status, 'revoked');
   } finally {
     await channel?.stop();
     await runtime?.close();

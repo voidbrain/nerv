@@ -349,13 +349,17 @@ export class TelegramChannel {
     this.routeState = { ...this.routeState, api: { state, at: new Date().toISOString() } };
   }
   private async pendingRows(rows: Button[][], baseId?: string): Promise<Button[][]> {
-    const ids = rowIds(rows);
+    const isApprovalRow = (row: Button[]) =>
+      row.some((b) => /^(?:[ar]|k:[A-Z0-9-]{1,16}:[ar]):[a-f0-9-]{36}$/.test(b.callback_data));
+    const approvalRows = rows.filter(isApprovalRow);
+    if (!approvalRows.length) return rows;
+    const ids = rowIds(approvalRows);
     const pending = baseId
       ? await this.remote?.pendingApprovalIds?.(baseId, ids)
       : await this.store.pendingApprovalIds(ids);
     if (!pending) throw new Error('Approval status unavailable; card delivery deferred.');
     const keep = new Set(pending);
-    return rows.filter((row) => row.some((b) => keep.has(b.callback_data.split(':').at(-1)!)));
+    return rows.filter((row) => !isApprovalRow(row) || row.some((b) => keep.has(b.callback_data.split(':').at(-1)!)));
   }
   private markupQueue: Promise<void> = Promise.resolve();
   private markup(
@@ -646,6 +650,25 @@ export class TelegramChannel {
         await this.sendLocal(`🛰 ${far[1]} · ${outcome}`);
         return;
       }
+      const spearMatch = /^spear:(confirm|cancel):([a-f0-9-]{36})$/.exec(q.data ?? '');
+      if (spearMatch) {
+        const [, action, sortieId] = spearMatch;
+        if (action === 'cancel') {
+          await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: 'Cancelled.' });
+          if (q.message) await this.markup(q.message.message_id, []).catch(() => {});
+          await this.sendLocal('Spear cancelled.');
+          return;
+        }
+        if (!this.store.spear) {
+          await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: 'Spear unavailable.' });
+          return;
+        }
+        await this.store.spear(sortieId!, 'telegram:/spear');
+        await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: 'Stopped.' });
+        if (q.message) await this.markup(q.message.message_id, []).catch(() => {});
+        await this.sendLocal(`🔱 Stopped S-${sortieId!.slice(0, 4).toUpperCase()}.`);
+        return;
+      }
       const match = /^([ar]):([a-f0-9-]{36})$/.exec(q.data ?? '');
       if (!match) {
         await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: 'Unknown button.' });
@@ -714,6 +737,35 @@ export class TelegramChannel {
         const c = card(a);
         await this.sendLocal(c.text, c.buttons);
       }
+      return;
+    }
+    const spearCmd = readCommand(text);
+    if (spearCmd?.name === 'spear') {
+      const lang = requestLanguage(text);
+      const list = this.store.sorties ? await this.store.sorties(20) : [];
+      const active = list.filter((s) => s.status === 'open' || s.status === 'waiting');
+      const wanted = spearCmd.target?.trim().replace(/^s-/i, '').toLowerCase();
+      const target = wanted
+        ? active.find((s) => s.id.toLowerCase() === wanted || s.id.toLowerCase().startsWith(wanted))
+        : active[0];
+      if (!target) {
+        await this.sendLocal(
+          lang === 'it' ? 'Nessuna sortita attiva o in attesa da fermare.' : 'No active or waiting sortie to stop.',
+        );
+        return;
+      }
+      const ref = `S-${target.id.slice(0, 4).toUpperCase()}`;
+      const prompt =
+        lang === 'it' ? `🔱 Fermare la sortita ${ref} (${target.title})?` : `🔱 Stop sortie ${ref} (${target.title})?`;
+      await this.sendLocal(prompt, [
+        [
+          {
+            text: lang === 'it' ? '🔱 Conferma Spear' : '🔱 Confirm Spear',
+            callback_data: `spear:confirm:${target.id}`,
+          },
+          { text: lang === 'it' ? 'Annulla' : 'Cancel', callback_data: `spear:cancel:${target.id}` },
+        ],
+      ]);
       return;
     }
     if (!this.store.chat) {

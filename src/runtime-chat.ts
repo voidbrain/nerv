@@ -8,7 +8,7 @@ import { requestLanguage, type Step, type Turn } from './misato.ts';
 import { DEFAULT_OPERATOR_NAME, type OperatorDirectory, type OperatorResolution } from './operator-directory.ts';
 import type { ProcessClient } from './process-client.ts';
 import type { RequestQueue } from './request-queue.ts';
-import type { ChatReply } from './runtime-api.ts';
+import type { ChatReply, LogVerbosity } from './runtime-api.ts';
 import { askedWhy, explainRecord } from './why.ts';
 
 export type ChatNoteKind =
@@ -58,9 +58,15 @@ export class RuntimeChat {
   private readonly host: RuntimeChatHost;
   /** F-083-T06: a saved recipe walked through step by step, per conversation. */
   private readonly cooking = new CookingSessions();
+  /** F-056-T03: per-conversation trace verbosity set via /log. */
+  private readonly logLevels = new Map<string, LogVerbosity>();
 
   constructor(host: RuntimeChatHost) {
     this.host = host;
+  }
+
+  logLevel(conversation?: string): LogVerbosity {
+    return this.logLevels.get(conversation ?? 'cli') ?? 'conversation';
   }
 
   chat(
@@ -182,13 +188,50 @@ export class RuntimeChat {
             ? 'Nessun pilota specialistico configurato.'
             : 'No specialist pilots configured.';
       } else if (command.name === 'spear') {
-        reply = it
-          ? 'Usa il pulsante Spear sulla sortita attiva o specifica /spear S-XXXX dalla dashboard.'
-          : 'Use the Spear control on the active sortie or confirm via /spear S-XXXX in the dashboard.';
+        const list = ((await this.host.nervous.call('sorties.list', { limit: 20 }).catch(() => [])) ?? []) as {
+          id: string;
+          title: string;
+          status: string;
+        }[];
+        const active = list.filter((s) => s.status === 'open' || s.status === 'waiting');
+        const wanted = command.target?.trim().replace(/^s-/i, '').toLowerCase();
+        const target = wanted
+          ? active.find((s) => s.id.toLowerCase() === wanted || s.id.toLowerCase().startsWith(wanted))
+          : active[0];
+        if (!target) {
+          reply = it ? 'Nessuna sortita attiva o in attesa da fermare.' : 'No active or waiting sortie to stop.';
+        } else {
+          const ref = `S-${target.id.slice(0, 4).toUpperCase()}`;
+          reply = it ? `Conferma Spear per ${ref} (${target.title}).` : `Confirm Spear for ${ref} (${target.title}).`;
+          return {
+            command: true,
+            sortieId: '',
+            reply,
+            confirmSpear: { sortieId: target.id, ref, goal: target.title },
+            steps: [],
+            waiting: [],
+          };
+        }
       } else if (command.name === 'log') {
         const level = command.target?.toLowerCase();
         if (level === 'conversation' || level === 'steps' || level === 'all') {
+          const key = conversation ?? 'cli';
+          this.logLevels.set(key, level);
+          await this.host.nervous
+            .call('sorties.open', {
+              source: 'owner',
+              title: `Log verbosity set to ${level} (${key})`,
+            })
+            .then((id) =>
+              this.host.nervous.call('sorties.finish', {
+                sortieId: id,
+                status: 'done',
+                reply: `Log verbosity set to ${level}.`,
+              }),
+            )
+            .catch(() => {});
           reply = it ? `Dettaglio log impostato su: ${level}.` : `Log verbosity set to: ${level}.`;
+          return { command: true, sortieId: '', reply, logLevel: level, steps: [], waiting: [] };
         } else {
           reply = it ? 'Usa /log conversation|steps|all.' : 'Usage: /log conversation|steps|all.';
         }
