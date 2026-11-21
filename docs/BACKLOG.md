@@ -722,7 +722,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-056-t01"></a>F-056-T01 — Shared command catalog and deterministic router | 0.5 h | 0 h | Completed | [PR #608](https://github.com/voidbrain/nerv/pull/608) Shared command catalog and deterministic router |
-| — | <a id="f-056-t02"></a>F-056-T02 — Read-only commands | 0.5 h | 0 h | Completed | — |
+| — | <a id="f-056-t02"></a>F-056-T02 — Read-only commands | 0.5 h | 0 h | Completed | [PR #619](https://github.com/voidbrain/nerv/pull/619) Read-only commands |
 
 </details>
 
@@ -734,7 +734,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Depends on | [F-042](archive/backlog-2026.md#f-042) — Record-reading interface for agency query commands |
-| PR / evidence | Steps: F-056-T01: [PR #608](https://github.com/voidbrain/nerv/pull/608) Shared command catalog and deterministic router. [PR #608](https://github.com/voidbrain/nerv/pull/608) (F-056-T01); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
+| PR / evidence | Steps: F-056-T01: [PR #608](https://github.com/voidbrain/nerv/pull/608) Shared command catalog and deterministic router · F-056-T02: [PR #619](https://github.com/voidbrain/nerv/pull/619) Read-only commands. [PR #619](https://github.com/voidbrain/nerv/pull/619) (F-056-T02); [PR #608](https://github.com/voidbrain/nerv/pull/608) (F-056-T01); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
 | Opened | 2026-11-05 |
 | Verification | 2026-11-06 Human: owner reports Telegram /status works. Source review: deterministic router/menu and full command-set automated checks remain pending. |
 | Reviewed | 2026-11-21 |

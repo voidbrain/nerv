@@ -5,6 +5,12 @@
   "title": "Read-only commands",
   "goal": "Read-only commands",
   "status": "closed",
+  "prs": [
+    {
+      "pr": 619,
+      "note": "Read-only commands"
+    }
+  ],
   "acceptance": [
     "/cards, /reminders, /why, /brief, /pilots, /bases in Telegram and dashboard chat"
   ],
