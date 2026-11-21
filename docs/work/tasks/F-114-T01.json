@@ -4,7 +4,7 @@
   "parent": "F-114",
   "title": "Pack manifest and registry, on and off in config",
   "goal": "A pack declares its tools, tables, chat phrases, Telegram captions and dashboard panels; config.json turns it on or off",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "A pack switched off offers no tools to Misato, routes no chat phrases and shows no panel; its data stays",
     "Core services (reminders, todos, timers, photos) are offered to packs through an interface",
@@ -38,9 +38,14 @@
     "estimate": "2 h",
     "basis": "Estimated 2026-11-20: manifest type, registry and config switch over the existing executor registry. Not a measurement.",
     "reviewed": "2026-11-20",
-    "agentHours": 2,
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 621,
+      "note": "Pack manifest and registry, on and off in config"
+    }
+  ]
 }

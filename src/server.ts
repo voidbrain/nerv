@@ -27,6 +27,8 @@ import type { DocumentStore } from './documents.ts';
 import type { BatteryRegistry } from './batteries.ts';
 import type { FleetStore } from './fleet.ts';
 import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.ts';
+import { readConfig } from './config.ts';
+import { builtinPackRegistry } from './packs.ts';
 
 type PhotoStoreHost = StoreApi & {
   photos?: PhotoStore;
@@ -274,6 +276,7 @@ export function makeServer(
           '/api/lists/show',
           '/api/batteries',
           '/api/fleet',
+          '/api/packs',
         ].includes(path) ||
           /^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path) ||
           /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path) ||
@@ -322,6 +325,13 @@ export function makeServer(
         }
         if (!feed.connect(res, () => root || (sessions.get(bearer) ?? 0) > Date.now()))
           reply(503, { error: 'Dashboard stream capacity reached.' });
+      } else if (req.method === 'GET' && path === '/api/packs') {
+        const home = (store as { home?: string }).home;
+        const packsConfig = home ? readConfig(home).packs : undefined;
+        reply(200, {
+          packs: builtinPackRegistry.status(packsConfig),
+          panels: builtinPackRegistry.enabledPanels(packsConfig),
+        });
       } else if (req.method === 'GET' && path === '/api/dashboard/history') {
         if ([...url.searchParams.keys()].some((k) => k !== 'since')) throw new Error('Unknown dashboard query.');
         reply(200, await store.dashboardHistory(url.searchParams.get('since') ?? ''));
