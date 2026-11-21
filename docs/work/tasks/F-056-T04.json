@@ -5,6 +5,12 @@
   "title": "Telegram menu registration and dashboard slash menu",
   "goal": "Telegram menu registration and dashboard slash menu",
   "status": "closed",
+  "prs": [
+    {
+      "pr": 625,
+      "note": "Telegram menu registration and dashboard slash menu"
+    }
+  ],
   "acceptance": [
     "Typing \"/\" shows the list in both; generated from the catalog"
   ],
