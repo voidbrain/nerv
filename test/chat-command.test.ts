@@ -79,3 +79,92 @@ test('authenticated status/help/unknown commands answer before dispatch and plan
     await runtime.close();
   }
 });
+
+test('F-056-T02: read-only commands (/cards, /reminders, /why, /brief, /pilots, /bases) return live local records without model calls or new sorties', async () => {
+  const { mkdtempSync, rmSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { Store } = await import('../src/store.ts');
+  const home = mkdtempSync(join(tmpdir(), 'nerv-f056-t02-'));
+  writeFileSync(
+    join(home, 'config.json'),
+    JSON.stringify({
+      base: { id: 'NERV-01', name: 'Tokyo-3' },
+      brief: { at: '07:30' },
+      timeZone: 'Europe/Rome',
+      pilots: [{ id: 'pilot-1', name: 'Rei', domain: 'ops', keywords: ['ops'], stage: 'production', model: 'qwen' }],
+    }),
+  );
+  const dbPath = join(home, 'nerv.sqlite');
+  let runtime: Runtime | undefined;
+  let server: ReturnType<typeof makeServer> | undefined;
+  try {
+    const seed = new Store(dbPath);
+    try {
+      seed.add('Check battery storage', '2030-01-01T09:00:00.000Z');
+      seed.addBrief('Daily brief: 1 pending reminder.');
+      const sortie = seed.ledger.openSortie('misato', 'Test sortie for /why', 'trusted');
+      const proposed = await seed.ledger.propose(sortie, {
+        tool: 'memory.remember',
+        args: { text: 'Owner prefers tea' },
+        stage: 'production',
+      });
+      assert.ok(proposed.approvalId);
+
+      runtime = new Runtime(dbPath, undefined, home);
+      let modelCalls = 0;
+      runtime.setDispatch(async () => {
+        modelCalls++;
+        return undefined;
+      });
+      (runtime as unknown as { bases: () => Promise<unknown[]> }).bases = async () => [
+        { baseId: 'NERV-01', name: 'Tokyo-3', online: true, self: true },
+        { baseId: 'NERV-02', name: 'Tabgha', online: false },
+      ];
+      const token = 'd'.repeat(32);
+      server = makeServer(runtime, token);
+      await runtime.ready();
+      await new Promise<void>((done) => server!.listen(0, '127.0.0.1', done));
+      const url = `http://127.0.0.1:${(server.address() as { port: number }).port}/api/chat`;
+      const send = async (message: string) =>
+        (await (
+          await fetch(url, {
+            method: 'POST',
+            headers: { authorization: 'Bearer ' + token, 'content-type': 'application/json' },
+            body: JSON.stringify({ message, conversation: 'dashboard' }),
+          })
+        ).json()) as { command: boolean; reply: string; sortieId: string };
+
+      const cardsReply = await send('/cards');
+      assert.equal(cardsReply.command, true);
+      assert.equal(cardsReply.sortieId, '');
+      assert.match(cardsReply.reply, /memory\.remember/);
+
+      const remindersReply = await send('/reminders');
+      assert.match(remindersReply.reply, /Check battery storage/);
+
+      const whyReply = await send(`/why S-${sortie.slice(0, 4).toUpperCase()}`);
+      assert.match(whyReply.reply, /Test sortie for \/why/);
+
+      const briefReply = await send('/brief');
+      assert.match(briefReply.reply, /07:30/);
+      assert.match(briefReply.reply, /Daily brief: 1 pending reminder\./);
+
+      const pilotsReply = await send('/pilots');
+      assert.match(pilotsReply.reply, /pilot-1 · Rei/);
+
+      const basesReply = await send('/bases');
+      assert.match(basesReply.reply, /NERV-01 · Tokyo-3 \(online, self\)/);
+      assert.match(basesReply.reply, /NERV-02 · Tabgha \(offline\)/);
+
+      assert.equal(modelCalls, 0);
+      assert.equal((await runtime.sorties()).length, 1);
+    } finally {
+      seed.close();
+    }
+  } finally {
+    if (server?.listening) await new Promise<void>((done) => server!.close(() => done()));
+    await runtime?.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});

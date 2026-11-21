@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 104.75 h agent + 11 h owner across 142 open steps of 44 features and 23 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
+**Remaining effort:** 104.25 h agent + 11 h owner across 141 open steps of 44 features and 23 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -692,6 +692,57 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-056"></a>[✨ F-056](#top)
+
+**Slash commands in Telegram and the dashboard chat, and how much Aoba tells you**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-056-T03 — /spear and /log (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-05: can commands be used from Telegram and the chat with "/"? At that report only `/start` had a dedicated path; other text went to Misato with a model call. Owner confirmed 2026-11-06 that `/status` gets a working reply from Aoba; at that time source still routed it through store.chat; the status/help slice below now provides deterministic acceptance. The owner also proposed `/log` to set how much is reported (all, conversation, …). |
+| **Reproduce** | Send `/status` to Aoba and compare the returned facts with the records; check that the command router answers without a model and without a new sortie. |
+| **Check** | The same commands in Telegram (registered, so typing "/" shows the list) and the dashboard chat, answered before Misato and without a model: `/help`, `/status` (this base's health, the other bases, cards waiting, the next reminder), `/cards` (with their buttons), `/reminders`, `/why S-…`, `/brief`, `/pilots`, `/bases`, `/spear [S-…]` (with a confirmation button), `/log conversation\|steps\|all` (conversation: replies and cards, the default; steps: also one line per action that ran; all: every trace line, advice, votes with shadow seats, other bases' results); read-only commands open no sortie, `/spear` and `/log` changes are recorded; an unknown command answers with `/help`. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-056-t03"></a>F-056-T03 — /spear and /log | 0.5 h | 0 h | 0.5 h | Planned | — | [F-056-T04](#f-056-t04) | — |
+| 🟢 Small | <a id="f-056-t04"></a>F-056-T04 — Telegram menu registration and dashboard slash menu | 0.25 h | 0 h | 0.25 h | Planned | [F-056-T03](#f-056-t03) | [F-056-T05](#f-056-t05) | — |
+| 🟢 Small | <a id="f-056-t05"></a>F-056-T05 — Group and connected-account assessment | 0.25 h | 0 h | 0.25 h | Planned | [F-056-T04](#f-056-t04) | — | — |
+| 🟢 Small | **Total** | 2 h | 0 h (0 of 5 steps recorded) | 1 h | 2 of 5 completed | | | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-056-t01"></a>F-056-T01 — Shared command catalog and deterministic router | 0.5 h | 0 h | Completed | [PR #608](https://github.com/voidbrain/nerv/pull/608) Shared command catalog and deterministic router |
+| — | <a id="f-056-t02"></a>F-056-T02 — Read-only commands | 0.5 h | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-056.md)
+
+| Field | Value |
+|---|---|
+| Depends on | [F-042](archive/backlog-2026.md#f-042) — Record-reading interface for agency query commands |
+| PR / evidence | Steps: F-056-T01: [PR #608](https://github.com/voidbrain/nerv/pull/608) Shared command catalog and deterministic router. [PR #608](https://github.com/voidbrain/nerv/pull/608) (F-056-T01); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
+| Opened | 2026-11-05 |
+| Verification | 2026-11-06 Human: owner reports Telegram /status works. Source review: deterministic router/menu and full command-set automated checks remain pending. |
+| Reviewed | 2026-11-21 |
+
+</details>
+
+---
+
 ### <a id="f-082"></a>[✨ F-082](#top)
 
 **Lists: add items by chat or Telegram, recall them as a checklist card**
@@ -741,57 +792,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-056"></a>[✨ F-056](#top)
-
-**Slash commands in Telegram and the dashboard chat, and how much Aoba tells you**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-056-T02 — Read-only commands (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-05: can commands be used from Telegram and the chat with "/"? At that report only `/start` had a dedicated path; other text went to Misato with a model call. Owner confirmed 2026-11-06 that `/status` gets a working reply from Aoba; at that time source still routed it through store.chat; the status/help slice below now provides deterministic acceptance. The owner also proposed `/log` to set how much is reported (all, conversation, …). |
-| **Reproduce** | Send `/status` to Aoba and compare the returned facts with the records; check that the command router answers without a model and without a new sortie. |
-| **Check** | The same commands in Telegram (registered, so typing "/" shows the list) and the dashboard chat, answered before Misato and without a model: `/help`, `/status` (this base's health, the other bases, cards waiting, the next reminder), `/cards` (with their buttons), `/reminders`, `/why S-…`, `/brief`, `/pilots`, `/bases`, `/spear [S-…]` (with a confirmation button), `/log conversation\|steps\|all` (conversation: replies and cards, the default; steps: also one line per action that ran; all: every trace line, advice, votes with shadow seats, other bases' results); read-only commands open no sortie, `/spear` and `/log` changes are recorded; an unknown command answers with `/help`. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-056-t02"></a>F-056-T02 — Read-only commands | 0.5 h | 0 h | 0.5 h | Planned | — | [F-056-T03](#f-056-t03) | — |
-| 🟢 Small | <a id="f-056-t03"></a>F-056-T03 — /spear and /log | 0.5 h | 0 h | 0.5 h | Planned | [F-056-T02](#f-056-t02) | [F-056-T04](#f-056-t04) | — |
-| 🟢 Small | <a id="f-056-t04"></a>F-056-T04 — Telegram menu registration and dashboard slash menu | 0.25 h | 0 h | 0.25 h | Planned | [F-056-T03](#f-056-t03) | [F-056-T05](#f-056-t05) | — |
-| 🟢 Small | <a id="f-056-t05"></a>F-056-T05 — Group and connected-account assessment | 0.25 h | 0 h | 0.25 h | Planned | [F-056-T04](#f-056-t04) | — | — |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 5 steps recorded) | 1.5 h | 1 of 5 completed | | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-056-t01"></a>F-056-T01 — Shared command catalog and deterministic router | 0.5 h | 0 h | Completed | [PR #608](https://github.com/voidbrain/nerv/pull/608) Shared command catalog and deterministic router |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-056.md)
-
-| Field | Value |
-|---|---|
-| Depends on | [F-042](archive/backlog-2026.md#f-042) — Record-reading interface for agency query commands |
-| PR / evidence | Steps: F-056-T01: [PR #608](https://github.com/voidbrain/nerv/pull/608) Shared command catalog and deterministic router. [PR #608](https://github.com/voidbrain/nerv/pull/608) (F-056-T01); [PR #196](https://github.com/voidbrain/nerv/pull/196) remaining-effort reassessment;  [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links;  [PR #167](https://github.com/voidbrain/nerv/pull/167) archive adoption/source review and CI reconciliation;  [PR #166](https://github.com/voidbrain/nerv/pull/166) map/tabs and Midori routing/status;  [PR #159](https://github.com/voidbrain/nerv/pull/159) unused-contract removal and owner-evidence reconciliation; Owner question 2026-11-05 |
-| Opened | 2026-11-05 |
-| Verification | 2026-11-06 Human: owner reports Telegram /status works. Source review: deterministic router/menu and full command-set automated checks remain pending. |
-| Reviewed | 2026-11-21 |
-
-</details>
-
----
-
 ### <a id="f-083"></a>[✨ F-083](#top)
 
 **Saved recipes: keep them by category, recall them, compute only from saved values**
