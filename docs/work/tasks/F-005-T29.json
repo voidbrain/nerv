@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-005",
   "id": "F-005-T29",
-  "status": "planned",
+  "status": "ready",
   "title": "T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix",
   "goal": "Upgrades, prerequisites, update policy and platform lifecycle on the device matrix.",
   "capabilities": [
@@ -18,7 +18,8 @@
   "dependsOn": [
     "F-005-T35",
     "B-087-T01",
-    "F-005-T38"
+    "F-005-T38",
+    "B-091-T01"
   ],
   "resources": [
     "src/**",
@@ -40,13 +41,13 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "1.5 h",
-    "basis": "Re-estimated 2026-11-20 from 0.5 h to 1.5 h (work-items calibrate since 2026-11-15: median 1.0 over 53 steps, but real-device runs took 1.5–3 h): upgrades across the enrolled devices, like F-005-T27 (2 h) and F-005-T28 (1.5 h).",
-    "reviewed": "2026-11-20",
+    "estimate": "2.5 h",
+    "basis": "Re-estimated 2026-11-21: 1.5 h for the device runs plus 1 h remaining after Tabgha reproduced B-091 and required safe rollback; the final update waits on B-091-T01.",
+    "reviewed": "2026-11-21",
     "baselineDays": 1,
     "ownerHours": 0,
-    "agentHours": 1.5,
-    "estimateAgentHours": 1.5,
+    "agentHours": 2.5,
+    "estimateAgentHours": 2.5,
     "baselineAgentHours": 0.5
   }
 }
