@@ -1,8 +1,7 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import type { StoreApi } from './runtime.ts';
-import { formatBatteryStateLines, parseBatteryStatusPhrase, type BatteryRegistry } from './batteries.ts';
 import type { DocumentStore } from './documents.ts';
-import type { FleetStore } from './fleet.ts';
+import { builtinPackRegistry } from './packs.ts';
 import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.ts';
 import { formatTelegramChecklist } from './lists.ts';
 import { ONLINE_MS } from './kaji-link.ts';
@@ -723,10 +722,9 @@ export class TelegramChannel {
       }
       return;
     }
-    const batteryStatusLang = parseBatteryStatusPhrase(text);
-    if (batteryStatusLang && this.store.batteryCards) {
-      const cards = await this.store.batteryCards();
-      await this.sendLocal(formatBatteryStateLines(cards, batteryStatusLang));
+    const packTextReply = await builtinPackRegistry.handleTelegramText(text, this.store);
+    if (packTextReply !== undefined) {
+      await this.sendLocal(packTextReply);
       return;
     }
     if (readCommand(text)?.name === 'cards') {
@@ -897,8 +895,6 @@ export class TelegramChannel {
     }
     const s = this.store as StoreApi & {
       documents?: DocumentStore;
-      fleet?: FleetStore;
-      batteries?: BatteryRegistry;
       photos?: PhotoStore;
     };
     if (!s.photos) {
@@ -974,7 +970,7 @@ export function parsePhotoCaption(raw: string): ParsedPhotoCaption | null {
 }
 
 function resolveTelegramPhotoTarget(
-  s: { documents?: DocumentStore; fleet?: FleetStore; batteries?: BatteryRegistry },
+  s: { documents?: DocumentStore },
   parsed: ParsedPhotoCaption,
 ): { id: string; label: string } | undefined {
   if (parsed.ownerKind === 'recipe' && s.documents) {
@@ -983,37 +979,5 @@ function resolveTelegramPhotoTarget(
     const doc = exact ?? (matches.length === 1 ? matches[0]! : undefined);
     return doc ? { id: doc.id, label: doc.title } : undefined;
   }
-  if (parsed.ownerKind === 'crash' && s.fleet) {
-    const exact = s.fleet.getCrash(parsed.query);
-    if (exact) return { id: exact.id, label: `${exact.position} crash` };
-    const byDrone = s.fleet.listCrashes({ droneName: parsed.query });
-    return byDrone[0] ? { id: byDrone[0].id, label: `${parsed.query} ${byDrone[0].position} crash` } : undefined;
-  }
-  if (parsed.ownerKind === 'part' && s.fleet) {
-    const exact = s.fleet.getPart(parsed.query);
-    if (exact) return { id: exact.id, label: `${exact.position} (${exact.componentModel})` };
-    const space = parsed.query.indexOf(' ');
-    if (space > 0) {
-      const drone = parsed.query.slice(0, space).trim();
-      const pos = parsed.query
-        .slice(space + 1)
-        .trim()
-        .toLowerCase();
-      const parts = s.fleet.listParts(drone).filter((p) => p.position.toLowerCase() === pos);
-      if (parts.length === 1) return { id: parts[0]!.id, label: `${drone} ${parts[0]!.position}` };
-    }
-    return undefined;
-  }
-  if (parsed.ownerKind === 'battery' && s.batteries) {
-    const exact = s.batteries.get(parsed.query);
-    if (exact) return { id: exact.id, label: exact.label };
-    const numMatch = /^(\d+)(?:\s+(.+))?$/.exec(parsed.query);
-    if (numMatch) {
-      const hits = s.batteries.findByNumberAndSeries(Number(numMatch[1]), numMatch[2]);
-      if (hits.length === 1) return { id: hits[0]!.id, label: hits[0]!.label };
-    }
-    const byLabel = s.batteries.list().filter((b) => b.label.toLowerCase() === parsed.query.toLowerCase());
-    return byLabel.length === 1 ? { id: byLabel[0]!.id, label: byLabel[0]!.label } : undefined;
-  }
-  return undefined;
+  return builtinPackRegistry.resolveTelegramPhoto(s, parsed.ownerKind, parsed.query);
 }

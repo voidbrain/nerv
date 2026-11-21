@@ -4,7 +4,7 @@
   "parent": "F-114",
   "title": "FPV pack: batteries, fleet, builds and blackbox behind the manifest",
   "goal": "All FPV tools, tables, phrases, captions and panels come from one pack",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "No FPV import left in store.ts, runtime-chat.ts, telegram.ts or server.ts outside the pack registration",
     "Existing FPV tests pass unchanged; a test shows FPV off hides its tools and keeps its data"
@@ -43,7 +43,7 @@
     "estimate": "2 h",
     "basis": "Estimated 2026-11-20: move wiring out of four core files into the pack. Not a measurement.",
     "reviewed": "2026-11-20",
-    "agentHours": 2,
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
   },
