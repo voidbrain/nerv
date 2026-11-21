@@ -13,7 +13,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 45 | 25 |
+| **Open** | 45 | 24 |
 | **Require Human 🧑** | 8 | 6 |
 
 ### Require Human 🧑
@@ -31,7 +31,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 118 h agent + 11 h owner across 155 open steps of 45 features and 25 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
+**Remaining effort:** 116.5 h agent + 11 h owner across 154 open steps of 45 features and 24 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -41,51 +41,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 - **Status:** 🔴 Open · 🟠 Investigate · 🟡 Implemented · 🟢 Verified · 🟣 Blocked · 🔵 Closed
 - **Steps:** `effort` = remaining agent time (🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more); `estimate` = latest whole-step estimate; `actual` = effort spent so far; `h` = agent hours (owner time apart); step status is not parent acceptance.
 
-### <a id="b-087"></a>[🐞 B-087](#top)
-
-**Windows: a fenced start applied from an SSH session is refused by the startup fence**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [B-082-T01](#b-082-t01), [F-005-T29](#f-005-t29) | 🤖 | — | — |
-
-💻 **→** Next: B-087-T01 — Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24): a fenced install applied over SSH registered the task (after B-082), but `serve`, started by Task Scheduler in the desktop session, stopped with "Lifecycle startup is not authorized by the live selected operation" and the receipt stayed `uncertain`. The same install applied from Tabgha's desktop completed. The fence checks the applying handler's process identity (`processIdentity`, PowerShell `GetProcessById` start time and main module); the SSH session is elevated and in another logon session, so the desktop `serve` most likely cannot read it the same way. Not yet confirmed which part differs. Also seen: a task registered from the elevated SSH session cannot be deleted from the desktop ("Access is denied"). |
-| **Reproduce** | Over SSH on Tabgha: `nodes lifecycle-inspect --action install`, then `lifecycle-apply`; `serve` logs the refusal in `service-error.log`. |
-| **Check** | The differing identity part is named from a probe run in both sessions; a committed test fails first if the cause is in code; a fenced start applied over SSH completes on Tabgha, or the record states why it cannot and `lifecycle-apply` says so before changing anything. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-087-t01"></a>B-087-T01 — Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [B-082-T01](#b-082-t01), [F-005-T29](#f-005-t29) | [PR #612](https://github.com/voidbrain/nerv/pull/612) implementation |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-087.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-087-T01: [PR #612](https://github.com/voidbrain/nerv/pull/612) implementation. [PR #612](https://github.com/voidbrain/nerv/pull/612); F-005-T24 run on Tabgha, 2026-11-18; Test: `test/windows-service-lifecycle.test.ts` refuses an SSH-applied install before Task Scheduler or definition changes (committed failing first); read-only two-session probe 2026-11-21 |
-| Opened | 2026-11-18 |
-| Verification | 2026-11-21 local: Windows lifecycle targeted suite 4/4; full suite 1,059 passed / 2 skipped; headless integration 5 passed / 1 Windows-only skipped; `check:fast` and production build pass. Live probe confirmed both process-identity parts are inaccessible from the desktop session. CI pending. |
-| Reviewed | 2026-11-21 |
-
-</details>
-
----
 ### <a id="f-005"></a>[✨ F-005](#top)
 
 **Discover, install and operate enrolled remote workers**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.5 h | [B-087-T01](#b-087-t01) | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
 
@@ -100,7 +62,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 1.25 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | — | — | 🤖 | — |
-| 🟡 Medium | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 1.5 h | 0 h | 1.5 h | Planned | [B-087-T01](#b-087-t01) | [F-005-T36](#f-005-t36) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 1.5 h | 0 h | 1.5 h | Planned | — | [F-005-T36](#f-005-t36) | 🤖 | — |
 | 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-005-T29](#f-005-t29) | [F-005-T30](#f-005-t30) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned | [F-005-T36](#f-005-t36) | — | ⏳ 🤖 | — |
 | 🟡 Medium | **Total** | 25.25 h (30 of 38 steps) | 19.75 h (23 of 38 steps recorded) | 2.5 h | 34 of 38 completed | | | | |
@@ -445,7 +407,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h | [B-087-T01](#b-087-t01) | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task (Implemented; verification pending).
 
@@ -457,10 +419,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-082-t01"></a>B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [B-087-T01](#b-087-t01) | — | [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded |
-| 🟢 Small | **Total** | 1.5 h | 0.5 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-082-t01"></a>B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded |
+| 🟢 Small | **Total** | 1.5 h | 0.5 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -3304,6 +3266,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: Unit: dashboard suite 38 pass. Owner live check pending. |
 | Reviewed | 2026-11-19 |
+
+</details>
+
+---
+### <a id="b-087"></a>[🐞 B-087](#top)
+
+**Windows: a fenced start applied from an SSH session is refused by the startup fence**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24): a fenced install applied over SSH registered the task (after B-082), but `serve`, started by Task Scheduler in the desktop session, stopped with "Lifecycle startup is not authorized by the live selected operation" and the receipt stayed `uncertain`. The same install applied from Tabgha's desktop completed. The fence checks the applying handler's process identity (`processIdentity`, PowerShell `GetProcessById` start time and main module); the SSH session is elevated and in another logon session, so the desktop `serve` most likely cannot read it the same way. Not yet confirmed which part differs. Also seen: a task registered from the elevated SSH session cannot be deleted from the desktop ("Access is denied"). |
+| **Reproduce** | Over SSH on Tabgha: `nodes lifecycle-inspect --action install`, then `lifecycle-apply`; `serve` logs the refusal in `service-error.log`. |
+| **Check** | The differing identity part is named from a probe run in both sessions; a committed test fails first if the cause is in code; a fenced start applied over SSH completes on Tabgha, or the record states why it cannot and `lifecycle-apply` says so before changing anything. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 0 h | 1 of 1 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-087-t01"></a>B-087-T01 — Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front | 1.5 h | 0 h | Completed | [PR #612](https://github.com/voidbrain/nerv/pull/612) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-087.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-087-T01: [PR #612](https://github.com/voidbrain/nerv/pull/612) implementation. [PR #612](https://github.com/voidbrain/nerv/pull/612); F-005-T24 run on Tabgha, 2026-11-18; Test: `test/windows-service-lifecycle.test.ts` refuses an SSH-applied install before Task Scheduler or definition changes (committed failing first); read-only two-session probe 2026-11-21 |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-21: PR #612 plan, validate, Windows, native-macOS, full-suite and all CodeQL analyses passed. Local: Windows lifecycle targeted suite 4/4; full suite 1,059 passed / 2 skipped; headless integration 5 passed / 1 Windows-only skipped; `check:fast` and production build pass. Live probe confirmed both process-identity parts are inaccessible from the desktop session. |
+| Reviewed | 2026-11-21 |
 
 </details>
 
