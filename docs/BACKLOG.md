@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 102.75 h agent + 11 h owner across 142 open steps of 44 features and 23 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
+**Remaining effort:** 104.75 h agent + 11 h owner across 142 open steps of 44 features and 23 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -44,13 +44,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 - **Status:** 🔴 Open · 🟠 Investigate · 🟡 Implemented · 🟢 Verified · 🟣 Blocked · 🔵 Closed
 - **Steps:** `effort` = remaining agent time (🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more); `estimate` = latest whole-step estimate; `actual` = effort spent so far; `h` = agent hours (owner time apart); step status is not parent acceptance.
 
+### <a id="b-091"></a>[🐞 B-091](#top)
+
+**Windows: a fenced stop ends uncertain after a SQLite "disk I/O error" while recording it**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | [F-005-T29](#f-005-t29) | 🤖 | — | — |
+
+💻 **→** Next: B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete (Ready).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24), from the desktop session: the fenced stop removed the task and ended NERV-02, then printed "disk I/O error" and left the receipt `uncertain` with `stop:started`. The disk was fine (115 GB free) and the lifecycle journal had been written at 18:43. Likely cause, not confirmed: the stopping `serve` still held the lifecycle journal (`~/.nerv-lifecycle/journal.sqlite`) open when the handler wrote the receipt. A later stop on the same machine completed. |
+| **Reproduce** | On Windows, a fenced stop of a running NERV service from the desktop session; intermittent (once in two stops). |
+| **Check** | The failing write is named (journal and statement); a committed test fails first if the cause is in code (for example a retry on SQLITE_IOERR or BUSY while the stopped process releases the file); a fenced stop on Tabgha completes its receipt. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 2 h | 0 h | 2 h | Ready | — | [F-005-T29](#f-005-t29) | [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-091.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18 |
+| Opened | 2026-11-18 |
+| Verification | Failed on Tabgha 2026-11-21 after PR #557; recovery start completed at the previous revision. |
+| Reviewed | 2026-11-21 |
+
+</details>
+
+---
 ### <a id="f-005"></a>[✨ F-005](#top)
 
 **Discover, install and operate enrolled remote workers**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 3.5 h | [B-091-T01](#b-091-t01) | — | 🤖 | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
 
@@ -65,10 +103,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 1.25 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | — | — | 🤖 | — |
-| 🟡 Medium | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 1.5 h | 0 h | 1.5 h | Planned | — | [F-005-T36](#f-005-t36) | 🤖 | — |
+| 🟡 Medium | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 2.5 h | 0 h | 2.5 h | Ready | [B-091-T01](#b-091-t01) | [F-005-T36](#f-005-t36) | ⏳ 🤖 | [PR #617](https://github.com/voidbrain/nerv/pull/617) Tabgha update attempt and safe recovery evidence |
 | 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-005-T29](#f-005-t29) | [F-005-T30](#f-005-t30) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned | [F-005-T36](#f-005-t36) | — | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 25.25 h (30 of 38 steps) | 19.75 h (23 of 38 steps recorded) | 2.5 h | 34 of 38 completed | | | | |
+| 🟡 Medium | **Total** | 26.25 h (30 of 38 steps) | 19.75 h (23 of 38 steps recorded) | 3.5 h | 34 of 38 completed | | | | |
 
 <details><summary>Done steps (34)</summary>
 
@@ -119,7 +157,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Queue order | 1 — Owner-selected next NERV work, 2026-11-10 |
-| PR / evidence | Steps: F-005-T11: [PR #526](https://github.com/voidbrain/nerv/pull/526) matrix · F-005-T22: [PR #517](https://github.com/voidbrain/nerv/pull/517) this change · F-005-T26: [PR #525](https://github.com/voidbrain/nerv/pull/525) evidence · F-005-T27: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change · F-005-T28: [PR #530](https://github.com/voidbrain/nerv/pull/530) this change · F-005-T31: [PR #523](https://github.com/voidbrain/nerv/pull/523) this change · F-005-T37: [PR #526](https://github.com/voidbrain/nerv/pull/526) matrix. [PR #339](https://github.com/voidbrain/nerv/pull/339) F-005-T21 (T08d) optional start-at-login and on-demand engine lifecycle, `src/engine-lifecycle.ts`, test/engine-lifecycle.test.ts (head 2ceb2ab, merged 23af8cf; CI43342617908 passed all five jobs); [PR #337](https://github.com/voidbrain/nerv/pull/337) F-005-T23 (T09b) Windows and F-005-T25 (T10b) Linux update and recovery, test/windows-service-lifecycle.test.ts and test/linux-service-lifecycle.test.ts (head e226321, merged 8da425a; CI43340798309 passed all five jobs); these PRs cited in the full audit of 2026-11-13, PR #374; older entries in the [evidence archive](archive/evidence-2026.md#f-005-moved-2026-11-18) |
+| PR / evidence | Steps: F-005-T11: [PR #526](https://github.com/voidbrain/nerv/pull/526) matrix · F-005-T22: [PR #517](https://github.com/voidbrain/nerv/pull/517) this change · F-005-T26: [PR #525](https://github.com/voidbrain/nerv/pull/525) evidence · F-005-T27: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change · F-005-T28: [PR #530](https://github.com/voidbrain/nerv/pull/530) this change · F-005-T29: [PR #617](https://github.com/voidbrain/nerv/pull/617) Tabgha update attempt and safe recovery evidence · F-005-T31: [PR #523](https://github.com/voidbrain/nerv/pull/523) this change · F-005-T37: [PR #526](https://github.com/voidbrain/nerv/pull/526) matrix. [PR #339](https://github.com/voidbrain/nerv/pull/339) F-005-T21 (T08d) optional start-at-login and on-demand engine lifecycle, `src/engine-lifecycle.ts`, test/engine-lifecycle.test.ts (head 2ceb2ab, merged 23af8cf; CI43342617908 passed all five jobs); [PR #337](https://github.com/voidbrain/nerv/pull/337) F-005-T23 (T09b) Windows and F-005-T25 (T10b) Linux update and recovery, test/windows-service-lifecycle.test.ts and test/linux-service-lifecycle.test.ts (head e226321, merged 8da425a; CI43340798309 passed all five jobs); these PRs cited in the full audit of 2026-11-13, PR #374; older entries in the [evidence archive](archive/evidence-2026.md#f-005-moved-2026-11-18) |
 | Opened | 2026-11-01 |
 | Verification | Recent 2026-11-12/13 update & lifecycle checks on `main`; 2026-11-08–2026-11-10 Mac/Windows acceptance details in [2026 evidence archive](archive/evidence-2026.md#f-005) |
 | Reviewed | 2026-11-18 |
@@ -1590,44 +1628,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: failing evidence above; B-066-T02 stays implemented until B-066-T03. |
 | Reviewed | 2026-11-19 |
-
-</details>
-
----
-### <a id="b-091"></a>[🐞 B-091](#top)
-
-**Windows: a fenced stop ends uncertain after a SQLite "disk I/O error" while recording it**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24), from the desktop session: the fenced stop removed the task and ended NERV-02, then printed "disk I/O error" and left the receipt `uncertain` with `stop:started`. The disk was fine (115 GB free) and the lifecycle journal had been written at 18:43. Likely cause, not confirmed: the stopping `serve` still held the lifecycle journal (`~/.nerv-lifecycle/journal.sqlite`) open when the handler wrote the receipt. A later stop on the same machine completed. |
-| **Reproduce** | On Windows, a fenced stop of a running NERV service from the desktop session; intermittent (once in two stops). |
-| **Check** | The failing write is named (journal and statement); a committed test fails first if the cause is in code (for example a retry on SQLITE_IOERR or BUSY while the stopped process releases the file); a fenced stop on Tabgha completes its receipt. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 1 h | 0 h | 1 h | Implemented; verification pending | [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-091.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18 |
-| Opened | 2026-11-18 |
-| Verification | Pending. |
-| Reviewed | 2026-11-18 |
 
 </details>
 
