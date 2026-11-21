@@ -40,6 +40,7 @@ import {
   type Turn,
 } from './misato.ts';
 import { toolDocs } from './executors.ts';
+import { builtinPackRegistry } from './packs.ts';
 import { digestAsk, factLimit, parseDigest, type Exchange } from './instrumentality.ts';
 import { measureMisatoPrompt } from './prompt-samples.ts';
 // Execution boundary: model routes, the Casper seat and Misato's planning step. It plans and reviews; it never executes a tool.
@@ -197,7 +198,9 @@ process.on('message', (value: unknown) => {
         });
         const tools = filterToolsByIntent(
           [
-            ...toolDocs.filter((t) => !proactive?.readOnly || t.effect === 'read'),
+            ...builtinPackRegistry
+              .filterToolDocs(toolDocs, readConfig(home).packs)
+              .filter((t) => !proactive?.readOnly || t.effect === 'read'),
             ...((params.external as ToolDoc[] | undefined) ?? []),
             ...(remote.length ? [remoteToolDoc(remote)] : []),
           ],

@@ -97,7 +97,7 @@ export class Runtime implements StoreApi {
   readonly requestQueue = new RequestQueue();
   private readonly itemLocks = new ItemLockManager();
   private readonly database: string;
-  private readonly home: string | undefined;
+  readonly home: string | undefined;
   constructor(database: string, brainEntry = new URL('./brain-process.ts', import.meta.url), home?: string) {
     this.database = database;
     this.home = home;
