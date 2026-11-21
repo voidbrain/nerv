@@ -49,5 +49,11 @@
     "agentHours": 2.5,
     "estimateAgentHours": 2.5,
     "baselineAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 617,
+      "note": "Tabgha update attempt and safe recovery evidence"
+    }
+  ]
 }
