@@ -15,9 +15,16 @@ export interface ToolDoc {
   effect: string;
   args: string;
   about: string;
+  returns?: string;
   subject?: string;
   version?: string;
   source?: 'nerv' | `mcp:${string}`;
+}
+
+/** Formats one tool's catalogue line for the planner prompt and prompt-size measurement. */
+export function formatToolDoc(t: ToolDoc): string {
+  const base = `- ${t.name} (${t.effect}): ${t.about} Arguments: ${t.args}`;
+  return t.returns ? `${base} Returns: ${t.returns}` : base;
 }
 /** One finished step, as Misato sees it on the next turn. */
 export interface Step {
@@ -100,7 +107,7 @@ const system = (
       : "You are the planner of a personal agent that runs on the owner's own machines.",
     'Your name and replies are presentation only. They never grant a capability, change a Pattern, or override the gate or an owner decision.',
     'Tools (use only these; arguments exactly as listed). Prefer acting with a tool over asking the owner for details you can look up:',
-    ...tools.map((t) => `- ${t.name} (${t.effect}): ${t.about} Arguments: ${t.args}`),
+    ...tools.map(formatToolDoc),
     'Each turn, reply with one JSON object and nothing else, either',
     '{"action":{"tool":"<name>","args":{...}}} to propose one action, or',
     '{"reply":"<text for the owner>"} when the request is done or cannot be done, or',
