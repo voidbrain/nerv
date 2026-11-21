@@ -4,7 +4,7 @@
   "parent": "F-012",
   "title": "Web-chat adapter feasibility",
   "goal": "Web-chat adapter feasibility",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Narrow browser-worker approach assessed; no stale clicks after sleep; adapter or documented infeasibility"
   ],
@@ -36,7 +36,7 @@
     "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
     "reviewed": "2026-11-13",
     "baselineDays": 2,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 3,
     "estimateAgentHours": 0.5
   },

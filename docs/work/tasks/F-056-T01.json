@@ -4,7 +4,7 @@
   "parent": "F-056",
   "title": "Shared command catalog and deterministic router",
   "goal": "Shared command catalog and deterministic router",
-  "status": "implemented",
+  "status": "closed",
   "prs": [
     {
       "pr": 608,
@@ -42,7 +42,7 @@
     "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio. Re-estimated 2026-11-15 from 0.75 h to 0.5 h: `node tools/work-items.mjs calibrate` since 2026-11-14 shows F-007-T04, F-050-T02 and F-054-T03 (bounded product steps of the same shape) at 0.08-0.17x their baselines (stated actuals, n=3); security, distributed and isolation steps not revised.",
     "reviewed": "2026-11-15",
     "baselineDays": 1,
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 0.5
   }

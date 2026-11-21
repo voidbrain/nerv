@@ -5,6 +5,7 @@
   "title": "Edge cases and real-host acceptance",
   "goal": "Edge cases and real-host acceptance",
   "status": "planned",
+  "ownerLink": "docs/acceptance/f012-real-resume.md",
   "acceptance": [
     "Longer limits, logout, closed tab, sleeping worker, changed task and already-resumed job handled without duplicates; one real resume observed"
   ],

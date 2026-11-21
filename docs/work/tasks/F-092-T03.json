@@ -4,7 +4,7 @@
  "parent": "F-092",
  "title": "Replay as a Blue action with preconditions",
  "goal": "Replay runs only after confirmation and stops on mismatch",
- "status": "implemented",
+  "status": "closed",
  "prs": [
   {
    "pr": 607,
@@ -40,7 +40,7 @@
   "estimate": "1.5 h",
   "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
   "reviewed": "2026-11-14",
-  "agentHours": 1.5,
+    "agentHours": 0,
   "baselineAgentHours": 1.5,
   "estimateAgentHours": 1.5
  }

@@ -551,3 +551,7 @@ PR #559 merged with green CI: B-101-T01 waits to be seen on NERV-01's dashboard 
 ## 2026-11-20 — PR #610 (harness PR conventions)
 
 Reconciled `docs/agents/pull-requests.md` from `voidbrain/project-harness#224` in [PR #610](https://github.com/voidbrain/nerv/pull/610) (PR title backlog ID and agent signature rules); fresh-context review passed with no findings.
+
+## 2026-11-21 — main `ed872cc`
+
+PRs #598–#614 merged green. Automated steps closed; #610 is harness maintenance recorded above. Pending Gauntlet cases remain under F-078-T08, B-086-T05 and F-115-T02. Reconciliation: [PR #615](https://github.com/voidbrain/nerv/pull/615).
