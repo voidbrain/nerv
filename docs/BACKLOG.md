@@ -59,10 +59,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-087-t01"></a>B-087-T01 — Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [B-082-T01](#b-082-t01), [F-005-T29](#f-005-t29) |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-087-t01"></a>B-087-T01 — Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [B-082-T01](#b-082-t01), [F-005-T29](#f-005-t29) | [PR #612](https://github.com/voidbrain/nerv/pull/612) implementation |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -71,9 +71,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | F-005-T24 run on Tabgha, 2026-11-18; Test: `test/windows-service-lifecycle.test.ts` refuses an SSH-applied install before Task Scheduler or definition changes (committed failing first); read-only two-session probe 2026-11-21 |
+| PR / evidence | Steps: B-087-T01: [PR #612](https://github.com/voidbrain/nerv/pull/612) implementation. [PR #612](https://github.com/voidbrain/nerv/pull/612); F-005-T24 run on Tabgha, 2026-11-18; Test: `test/windows-service-lifecycle.test.ts` refuses an SSH-applied install before Task Scheduler or definition changes (committed failing first); read-only two-session probe 2026-11-21 |
 | Opened | 2026-11-18 |
-| Verification | 2026-11-21 local: Windows lifecycle targeted suite 4/4 passes; CI pending. Live probe confirmed both process-identity parts are inaccessible from the desktop session. |
+| Verification | 2026-11-21 local: Windows lifecycle targeted suite 4/4; full suite 1,059 passed / 2 skipped; headless integration 5 passed / 1 Windows-only skipped; `check:fast` and production build pass. Live probe confirmed both process-identity parts are inaccessible from the desktop session. CI pending. |
 | Reviewed | 2026-11-21 |
 
 </details>
