@@ -36,5 +36,10 @@
     "actualAgentHours": 0.25,
     "actualSource": "stated"
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 623,
+      "note": "system verification and closure"
+    }
+  ]
 }
