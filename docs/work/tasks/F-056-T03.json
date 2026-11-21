@@ -5,6 +5,12 @@
   "title": "/spear and /log",
   "goal": "/spear and /log",
   "status": "closed",
+  "prs": [
+    {
+      "pr": 624,
+      "note": "/spear and /log"
+    }
+  ],
   "acceptance": [
     "/spear with a confirmation button; /log conversation|steps|all recorded as a change"
   ],
