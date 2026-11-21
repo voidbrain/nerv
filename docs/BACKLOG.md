@@ -1144,7 +1144,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟡 Medium | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 1.5 h | 0 h | 1.5 h | Planned | — | [F-078-T07](#f-078-t07) | 🤖 | — |
 | 🟢 Small | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned | [F-078-T09](#f-078-t09) | [F-078-T08](#f-078-t08) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned | [F-078-T07](#f-078-t07) | — | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned | [F-078-T07](#f-078-t07) | — | ⏳ 🤖 | [PR #630](https://github.com/voidbrain/nerv/pull/630) campaign evidence |
 | 🟡 Medium | **Total** | 4.75 h | 0.75 h (2 of 9 steps recorded) | 2.5 h | 6 of 9 completed | | | | |
 
 <details><summary>Done steps (6)</summary>
@@ -1167,7 +1167,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-078-T03: [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed · F-078-T05: [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence. [PR #475](https://github.com/voidbrain/nerv/pull/475); [PR #477](https://github.com/voidbrain/nerv/pull/477) (merged; CI green); Gauntlet 0.9.0 pin and harness 8.15.0 reconciliation prepared for PR #427; [PR #403](https://github.com/voidbrain/nerv/pull/403) T03 close; [PR #402](https://github.com/voidbrain/nerv/pull/402) T03; [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
+| PR / evidence | Steps: F-078-T03: [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed · F-078-T05: [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence · F-078-T08: [PR #630](https://github.com/voidbrain/nerv/pull/630) campaign evidence. [PR #630](https://github.com/voidbrain/nerv/pull/630) T08 campaign; [PR #475](https://github.com/voidbrain/nerv/pull/475); [PR #477](https://github.com/voidbrain/nerv/pull/477) (merged; CI green); Gauntlet 0.9.0 pin and harness 8.15.0 reconciliation prepared for PR #427; [PR #403](https://github.com/voidbrain/nerv/pull/403) T03 close; [PR #402](https://github.com/voidbrain/nerv/pull/402) T03; [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
 | Depends on | — |
 | Opened | 2026-11-13 |
 | Verification | 2026-11-16: T04/T06 report per-role model outcomes and aggregate metadata; PRs #475/#477 plan, validate, Windows and native-macos passed, full-suite skipped. 35 cases remain pending: 28 under F-078-T08 and seven system-flow cases under F-079. 2026-11-14: T03 recorded 144/144 graded outcomes across the three approved models and three packs; `node tools/gauntlet.mjs pending` exits 0; PR #402 CI run 43595307489 passed plan, validate, Windows, native-macos and full-suite on rerun after one transient Windows temp-directory cleanup failure. |
@@ -1988,7 +1988,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
-| — | <a id="f-115-t02"></a>F-115-T02 — Rerun the system flow cases at the F-115 source | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-115-t02"></a>F-115-T02 — Rerun the system flow cases at the F-115 source | 0.25 h | 0.25 h (stated) | Completed | [PR #630](https://github.com/voidbrain/nerv/pull/630) evidence |
 
 </details>
 
@@ -1999,7 +1999,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-115-T01: [PR #595](https://github.com/voidbrain/nerv/pull/595) implementation. [PR #595](https://github.com/voidbrain/nerv/pull/595); `test/cli-help.test.ts` |
+| PR / evidence | Steps: F-115-T01: [PR #595](https://github.com/voidbrain/nerv/pull/595) implementation · F-115-T02: [PR #630](https://github.com/voidbrain/nerv/pull/630) evidence. [PR #595](https://github.com/voidbrain/nerv/pull/595); `test/cli-help.test.ts` |
 | Opened | 2026-11-20 |
 | Verification | Pending: CI |
 | Reviewed | 2026-11-20 |
@@ -2182,7 +2182,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #630](https://github.com/voidbrain/nerv/pull/630) opened the record |
 | Opened | 2026-11-22 |
 | Verification | Pending: feasibility note and owner decision |
 | Reviewed | 2026-11-22 |
