@@ -38,5 +38,11 @@
   "agentHours": 0,
   "baselineAgentHours": 1,
   "estimateAgentHours": 1
- }
+ },
+ "prs": [
+  {
+   "pr": 632,
+   "note": "Push branch and open PR behind Orange approval (F-084-T03)"
+  }
+ ]
 }

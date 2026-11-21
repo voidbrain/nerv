@@ -1064,7 +1064,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|
 | — | <a id="f-084-t01"></a>F-084-T01 — Decision: the coding-job contract | 0.5 h | 0.25 h (measured) | Completed | — |
 | — | <a id="f-084-t02"></a>F-084-T02 — Run the change in a fresh worktree | 1.5 h | 0 h | Completed | [PR #494](https://github.com/voidbrain/nerv/pull/494) implementation |
-| — | <a id="f-084-t03"></a>F-084-T03 — Push and open the PR behind approval | 1 h | 0 h | Completed | — |
+| — | <a id="f-084-t03"></a>F-084-T03 — Push and open the PR behind approval | 1 h | 0 h | Completed | [PR #632](https://github.com/voidbrain/nerv/pull/632) Push branch and open PR behind Orange approval (F-084-T03) |
 
 </details>
 
@@ -1075,7 +1075,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-084-T02: [PR #494](https://github.com/voidbrain/nerv/pull/494) implementation. [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #494](https://github.com/voidbrain/nerv/pull/494) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-084-T02: [PR #494](https://github.com/voidbrain/nerv/pull/494) implementation · F-084-T03: [PR #632](https://github.com/voidbrain/nerv/pull/632) Push branch and open PR behind Orange approval (F-084-T03). [PR #632](https://github.com/voidbrain/nerv/pull/632); [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #494](https://github.com/voidbrain/nerv/pull/494) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-084-T02 verified: [PR #494](https://github.com/voidbrain/nerv/pull/494) merged on green CI. `F-084-T01` decision written in [coding-job-contract.md](decisions/coding-job-contract.md); verified with `npm run check:fast`. 2026-11-22: F-084-T03 verified (`coding.push_pr` Orange gate + `pushBranchAndOpenPr`); `node --test test/coding-job.test.ts` (5/5 passed) and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
