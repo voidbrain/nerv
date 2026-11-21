@@ -497,6 +497,66 @@ const rawToolDocs: ToolDoc[] = [
     args: '{"recording": DesktopRecordingFile, "approved": boolean}',
   },
 ];
+export type ResultShapeField = 'string' | 'number' | 'boolean' | 'array' | 'object' | 'object|null' | 'string|null';
+export type ResultShape = { kind: 'array' } | { kind: 'object'; required: Record<string, ResultShapeField> };
+
+export const READ_TOOL_RESULT_SHAPES: Record<string, ResultShape> = {
+  'reminders.list': { kind: 'array' },
+  'memory.recall': { kind: 'array' },
+  'docs.list': { kind: 'object', required: { documents: 'array', categories: 'array' } },
+  'docs.show': {
+    kind: 'object',
+    required: { id: 'string', title: 'string', category: 'string', body: 'string', surface: 'object' },
+  },
+  'docs.compute': {
+    kind: 'object',
+    required: { ok: 'boolean', status: 'string', results: 'array', working: 'array', answer: 'string' },
+  },
+  'sorties.explain': { kind: 'object', required: {} },
+  'approvals.list': { kind: 'object', required: { approvals: 'array', questions: 'array' } },
+  'agency.status': { kind: 'object', required: { health: 'object' } },
+  'lists.show': { kind: 'object', required: {} },
+  'gmail.search': { kind: 'object', required: { tainted: 'boolean', query: 'string', messages: 'array' } },
+  'gmail.read': { kind: 'object', required: { tainted: 'boolean', id: 'string', subject: 'string', body: 'string' } },
+  'batteries.list': { kind: 'array' },
+  'batteries.due': { kind: 'array' },
+  'pantry.check': { kind: 'object', required: {} },
+  'fpv.blackbox_report': { kind: 'object', required: { sampleCount: 'number', axes: 'array' } },
+  'fpv.wiring_answer': { kind: 'object', required: { known: 'boolean', connections: 'array', citations: 'array' } },
+};
+
+function matchesFieldType(val: unknown, expected: ResultShapeField): boolean {
+  if (expected === 'array') return Array.isArray(val);
+  if (expected === 'object') return !!val && typeof val === 'object' && !Array.isArray(val);
+  if (expected === 'object|null') return val === null || (typeof val === 'object' && !Array.isArray(val));
+  if (expected === 'string|null') return val === null || typeof val === 'string';
+  return typeof val === expected;
+}
+
+/** Validates a built-in read tool result against its declared shape at the tool boundary (F-111-T01). */
+export function validateToolResult(toolName: string, result: unknown): unknown {
+  const toolDef = builtinTools.find((t) => t.name === toolName);
+  if (toolDef?.effect !== 'read') return result;
+  const shape = READ_TOOL_RESULT_SHAPES[toolName];
+  if (!shape) throw new Error(`Read tool "${toolName}" is missing a declared result shape.`);
+  if (shape.kind === 'array') {
+    if (!Array.isArray(result)) {
+      throw new Error(`Malformed result from ${toolName}: field "<root>" expected array.`);
+    }
+    return result;
+  }
+  if (!result || typeof result !== 'object' || Array.isArray(result)) {
+    throw new Error(`Malformed result from ${toolName}: field "<root>" expected object.`);
+  }
+  const rec = result as Record<string, unknown>;
+  for (const [field, expected] of Object.entries(shape.required)) {
+    if (!matchesFieldType(rec[field], expected)) {
+      throw new Error(`Malformed result from ${toolName}: field "${field}" expected ${expected}.`);
+    }
+  }
+  return result;
+}
+
 /** What Misato is told about each built-in tool, each assigned to one subject (F-113-T01). */
 export const toolDocs: ToolDoc[] = rawToolDocs.map((doc) => ({
   ...doc,
@@ -519,6 +579,9 @@ export const builtinToolDescriptors: ToolDescriptor[] = builtinTools.map((tool) 
     effect: tool.effect,
     description: (doc ?? dynamic)!.about,
     inputSchema: (doc ?? dynamic)!.args,
+    ...(tool.effect === 'read' && READ_TOOL_RESULT_SHAPES[tool.name]
+      ? { resultShape: READ_TOOL_RESULT_SHAPES[tool.name] }
+      : {}),
   };
   return { ...value, source: 'nerv', version: descriptorVersion(value) };
 });
@@ -541,6 +604,19 @@ export function hasExecutor(tool: string): boolean {
   return builtinTools.some((t) => t.name === tool);
 }
 export function execute(
+  backend: ReminderBackend,
+  tool: string,
+  args: Record<string, unknown>,
+  context: { sortieId?: string; tainted?: boolean; agency?: AgencySnapshot } = {},
+): unknown {
+  const out = executeRaw(backend, tool, args, context);
+  if (out instanceof Promise) {
+    return out.then((resolved) => validateToolResult(tool, resolved));
+  }
+  return validateToolResult(tool, out);
+}
+
+function executeRaw(
   backend: ReminderBackend,
   tool: string,
   args: Record<string, unknown>,

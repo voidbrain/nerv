@@ -4,7 +4,7 @@
   "parent": "F-111",
   "title": "Declare result shapes for read tools and check them at the tool boundary",
   "goal": "A malformed tool result never reaches the planner",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Each built-in read tool has a declared result shape next to its descriptor",
     "A result that does not match is refused with an error naming the tool and field",

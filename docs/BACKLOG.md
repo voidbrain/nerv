@@ -2364,7 +2364,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-111-T01 — Declare result shapes for read tools and check them at the tool boundary (Ready).
+💻 **→** Next: F-111-T01 — Declare result shapes for read tools and check them at the tool boundary (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2376,7 +2376,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-111-t01"></a>F-111-T01 — Declare result shapes for read tools and check them at the tool boundary | 2 h | 0 h | 2 h | Ready | — | [F-111-T02](#f-111-t02) |
+| 🟡 Medium | <a id="f-111-t01"></a>F-111-T01 — Declare result shapes for read tools and check them at the tool boundary | 2 h | 0 h | 2 h | Implemented; verification pending | — | [F-111-T02](#f-111-t02) |
 | 🟢 Small | <a id="f-111-t02"></a>F-111-T02 — Show result shapes in the planner's tool docs and measure the prompt change | 1 h | 0 h | 1 h | Planned | [F-111-T01](#f-111-t01) | — |
 | 🟡 Medium | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 3 h | 0 of 2 completed | | |
 
@@ -2387,7 +2387,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
+| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587); F-111-T01 in [PR #611](https://github.com/voidbrain/nerv/pull/611) |
 | Opened | 2026-11-20 |
 | Verification | Pending |
 | Reviewed | 2026-11-20 |
