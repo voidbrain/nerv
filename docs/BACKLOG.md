@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 11 | 10 | 37 | 20 |
+| **This week** | 12 | 10 | 37 | 20 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 42 | 22 |
+| **Open** | 43 | 22 |
 | **Require Human 🧑** | 12 | 6 |
 
 ### Require Human 🧑
@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 100.25 h agent + 11 h owner across 136 open steps of 42 features and 22 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
+**Remaining effort:** 101.5 h agent + 11.25 h owner across 137 open steps of 43 features and 22 other records. 79 h of actual effort recorded on 121 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1171,7 +1171,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Depends on | — |
 | Opened | 2026-11-13 |
 | Verification | 2026-11-16: T04/T06 report per-role model outcomes and aggregate metadata; PRs #475/#477 plan, validate, Windows and native-macos passed, full-suite skipped. 35 cases remain pending: 28 under F-078-T08 and seven system-flow cases under F-079. 2026-11-14: T03 recorded 144/144 graded outcomes across the three approved models and three packs; `node tools/gauntlet.mjs pending` exits 0; PR #402 CI run 43595307489 passed plan, validate, Windows, native-macos and full-suite on rerun after one transient Windows temp-directory cleanup failure. |
-| Reviewed | 2026-11-18 |
+| Reviewed | 2026-11-22 |
 
 </details>
 
@@ -1967,7 +1967,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-115-T01 — Grouped, alphabetical CLI help (Implemented; verification pending).
 
@@ -1982,8 +1982,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
 | 🟢 Small | <a id="f-115-t01"></a>F-115-T01 — Grouped, alphabetical CLI help | 0.75 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | [PR #595](https://github.com/voidbrain/nerv/pull/595) implementation |
-| 🟢 Small | <a id="f-115-t02"></a>F-115-T02 — Rerun the system flow cases at the F-115 source | 0.25 h | 0 h | 0.25 h | Planned | — |
-| 🟢 Small | **Total** | 1 h | 0.75 h (1 of 2 steps recorded) | 0.25 h | 0 of 2 completed | |
+| 🟢 Small | **Total** | 1 h | 1 h | 0 h | 1 of 2 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-115-t02"></a>F-115-T02 — Rerun the system flow cases at the F-115 source | 0.25 h | 0.25 h (stated) | Completed | — |
+
+</details>
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2140,6 +2147,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: F-110-T02 by CI run 44489977085 (PR #539). |
 | Reviewed | 2026-11-19 |
+
+</details>
+
+---
+### <a id="f-116"></a>[✨ F-116](#top)
+
+**Split a model too big for one base across bases**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-116-T01 — Feasibility note: splitting a model across bases (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner idea 2026-11-22, prompted by an open-source phone chat app that splits one model's layers across several phones with llama.cpp's RPC backend. NERV places whole models on whole bases; a model larger than the free memory of any one base (Mac, mini PC) cannot run at all. |
+| **Reproduce** | Pick a model whose weights exceed the free memory of every enrolled base: no base can load it. |
+| **Check** | A feasibility note names the target model, the runtime (llama.cpp RPC; Ollama exposes none), how it joins NERV's enrolment and model routing, the security boundary (the RPC server has no authentication) and the expected tokens per second over the home network; the owner decides from it whether to build it (F-116-T02). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-116-t01"></a>F-116-T01 — Feasibility note: splitting a model across bases | 1.5 h | 0 h | 1.5 h | Planned | — | [F-116-T02](#f-116-t02) | 🤖 |
+| 🟢 Small | <a id="f-116-t02"></a>F-116-T02 — Owner decision: build model splitting or close | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-116-T01](#f-116-t01) | — | ⏳ 🤔 |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 1.5 h agent + 0.25 h owner | 0 of 2 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-116.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-22 |
+| Verification | Pending: feasibility note and owner decision |
+| Reviewed | 2026-11-22 |
 
 </details>
 

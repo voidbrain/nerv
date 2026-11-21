@@ -4,7 +4,7 @@
   "parent": "F-115",
   "title": "Rerun the system flow cases at the F-115 source",
   "goal": "nerv-system-flows/ledger, nerv-system-flows/conversation, nerv-system-flows/channels, nerv-system-flows/bases have a covering run at the F-115 source (src/cli.ts changed)",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "npm run gauntlet:all -- --execute records passing runs for nerv-system-flows/ledger, nerv-system-flows/conversation, nerv-system-flows/channels, nerv-system-flows/bases",
     "node tools/gauntlet.mjs pending lists none of them"
@@ -30,8 +30,10 @@
     "estimate": "0.25 h",
     "basis": "Estimated 2026-11-20 from B-095-T02. Not a measurement.",
     "reviewed": "2026-11-20",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }
