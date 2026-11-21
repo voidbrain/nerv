@@ -38,5 +38,11 @@
     "agentHours": 0,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
-  }
+  },
+  "prs": [
+    {
+      "pr": 633,
+      "note": "Hand off to Bambu Connect with owner checklist behind Orange approval (F-087-T03)"
+    }
+  ]
 }

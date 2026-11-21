@@ -1714,7 +1714,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|
 | — | <a id="f-087-t01"></a>F-087-T01 — Decision: slicer, Bambu Connect hand-off and base | 0.5 h | 0.25 h (measured) | Completed | — |
 | — | <a id="f-087-t02"></a>F-087-T02 — Slice with a material profile | 1 h | 0 h | Completed | [PR #491](https://github.com/voidbrain/nerv/pull/491) implementation |
-| — | <a id="f-087-t03"></a>F-087-T03 — Hand off to Bambu Connect with the owner checklist | 1 h | 0 h | Completed | — |
+| — | <a id="f-087-t03"></a>F-087-T03 — Hand off to Bambu Connect with the owner checklist | 1 h | 0 h | Completed | [PR #633](https://github.com/voidbrain/nerv/pull/633) Hand off to Bambu Connect with owner checklist behind Orange approval (F-087-T03) |
 
 </details>
 
@@ -1725,7 +1725,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-087-T02: [PR #491](https://github.com/voidbrain/nerv/pull/491) implementation. [PR #491](https://github.com/voidbrain/nerv/pull/491) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-087-T02: [PR #491](https://github.com/voidbrain/nerv/pull/491) implementation · F-087-T03: [PR #633](https://github.com/voidbrain/nerv/pull/633) Hand off to Bambu Connect with owner checklist behind Orange approval (F-087-T03). [PR #633](https://github.com/voidbrain/nerv/pull/633); [PR #491](https://github.com/voidbrain/nerv/pull/491) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-087-T02 verified: [PR #491](https://github.com/voidbrain/nerv/pull/491) merged on green CI. `F-087-T01` decision written in [bambu-print-handoff.md](decisions/bambu-print-handoff.md); verified with `npm run check:fast`. 2026-11-22: F-087-T03 verified (`bambu.handoff` Orange gate + `handOffToBambuConnect` + owner checklist); `node --test test/slicer.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
