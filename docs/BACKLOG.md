@@ -3318,16 +3318,16 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| — | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 0 h | 2 of 2 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 0 h | 2 of 2 completed | |
 
 <details><summary>Done steps (2)</summary>
 
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-111-t01"></a>F-111-T01 — Declare result shapes for read tools and check them at the tool boundary | 2 h | 0 h | Completed |
-| — | <a id="f-111-t02"></a>F-111-T02 — Show result shapes in the planner's tool docs and measure the prompt change | 1 h | 0 h | Completed |
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-111-t01"></a>F-111-T01 — Declare result shapes for read tools and check them at the tool boundary | 2 h | 0 h | Completed | — |
+| — | <a id="f-111-t02"></a>F-111-T02 — Show result shapes in the planner's tool docs and measure the prompt change | 1 h | 0 h | Completed | [PR #618](https://github.com/voidbrain/nerv/pull/618) |
 
 </details>
 
@@ -3338,7 +3338,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587); F-111-T01 in [PR #611](https://github.com/voidbrain/nerv/pull/611); F-111-T02 in current PR |
+| PR / evidence | Steps: F-111-T02: [PR #618](https://github.com/voidbrain/nerv/pull/618). [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587); F-111-T01 in [PR #611](https://github.com/voidbrain/nerv/pull/611); F-111-T02 in [PR #618](https://github.com/voidbrain/nerv/pull/618) |
 | Opened | 2026-11-20 |
 | Closed | 2026-11-21 |
 | Verification | 2026-11-21 Unit/integration: PR #611 merged with green CI (F-111-T01); F-111-T02 verified via `node --test test/read-tool-shapes.test.ts test/misato.test.ts test/prompt-samples.test.ts test/mcp.test.ts` (38/38 passed) and `npm run check:fast`. |
