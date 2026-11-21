@@ -41,8 +41,7 @@ import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts
 import { builtinTools, type AgencySnapshot } from './executors.ts';
 import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circuits.ts';
-import { BATTERY_SCHEMA, BatteryRegistry } from './batteries.ts';
-import { buildBatteryDashboardCards } from './battery-health.ts';
+import { createFpvStoreSlice, type FpvStoreSlice, type RegisterBatteryInput } from './packs.ts';
 import {
   advanceCoordinatorFence,
   assertActiveCoordinator,
@@ -58,11 +57,9 @@ import {
 } from './coordinator-lease.ts';
 import { PromptSampleStore } from './prompt-samples.ts';
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
-import { FPV_BUILDS_SCHEMA, FpvBuildStore } from './fpv-builds.ts';
 import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
 import { PHOTOS_SCHEMA, PhotoStore } from './photos.ts';
 import { createCookingStoreSlice, type CookingStoreSlice } from './packs.ts';
-import { FLEET_SCHEMA, FleetStore } from './fleet.ts';
 import { REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
 import { RESUME_INTENT_SCHEMA, ResumeIntentStore } from './resume-intent.ts';
@@ -75,7 +72,6 @@ import { StorePush } from './store-push.ts';
 import { StoreKajiOutbox } from './store-kaji-outbox.ts';
 import { StoreInbox } from './store-inbox.ts';
 import { StoreSorties } from './store-sorties.ts';
-import { BatteryStorageReminders } from './battery-storage-reminders.ts';
 export { REMINDER_KINDS, normalizeReminderKind, type ReminderKind } from './reminder-time.ts';
 export type { PushSubscriptionRecord } from './push.ts';
 export type Reminder = {
@@ -141,11 +137,9 @@ export class Store {
   readonly watch: Watch;
   readonly memory: Memory;
   readonly circuits: IncidentCircuitStore;
-  readonly batteries: BatteryRegistry;
-  readonly fleet: FleetStore;
+  private readonly fpv: FpvStoreSlice;
   readonly resumeIntents: ResumeIntentStore;
   readonly lists: ListStore;
-  readonly fpvBuilds: FpvBuildStore;
   readonly documents: DocumentStore;
   readonly photos: PhotoStore;
   private readonly cooking: CookingStoreSlice;
@@ -242,17 +236,11 @@ export class Store {
     );
     this.db.exec(RESUME_INTENT_SCHEMA);
     this.db.exec(LISTS_SCHEMA);
-    this.db.exec(FPV_BUILDS_SCHEMA);
     this.ledger = new Ledger(this.db, { policy: scrolls.policy, tools: builtinTools });
     this.memory = new Memory(this.db);
     this.circuits = new IncidentCircuitStore(this.db, this.ledger);
-    this.db.exec(BATTERY_SCHEMA);
-    this.batteries = new BatteryRegistry(this.db);
-    this.db.exec(FLEET_SCHEMA);
-    this.fleet = new FleetStore(this.db);
     this.resumeIntents = new ResumeIntentStore(this.db);
     this.lists = new ListStore(this.db);
-    this.fpvBuilds = new FpvBuildStore(this.db);
     this.db.exec(DOCUMENTS_SCHEMA);
     this.documents = new DocumentStore(this.db);
     this.db.exec(PHOTOS_SCHEMA);
@@ -260,6 +248,7 @@ export class Store {
       this.db,
       options.home ? join(options.home, 'photos') : path !== ':memory:' ? join(dirname(path), 'photos') : undefined,
     );
+    this.fpv = createFpvStoreSlice(this.db, this.remindersController, this.photos);
     this.cooking = createCookingStoreSlice(this.db);
     this.watch = new Watch(this.db, this.ledger);
     this.policySource = scrolls.source;
@@ -378,9 +367,17 @@ export class Store {
   cancel(id: string): boolean {
     return this.remindersController.cancel(id);
   }
-  private _batteryStorageReminders?: BatteryStorageReminders;
-  get batteryStorageReminders(): BatteryStorageReminders {
-    return (this._batteryStorageReminders ??= new BatteryStorageReminders(this.db, this.remindersController));
+  get batteries() {
+    return this.fpv.batteries;
+  }
+  get fleet() {
+    return this.fpv.fleet;
+  }
+  get fpvBuilds() {
+    return this.fpv.fpvBuilds;
+  }
+  get batteryStorageReminders() {
+    return this.fpv.batteryStorageReminders;
   }
   get pantry() {
     return this.cooking.pantry;
@@ -401,8 +398,7 @@ export class Store {
     this.assertActiveCoordinator(now.getTime());
     const count = this.remindersController.tick(now);
     const lang = this.remindersController.reminderDefaults().language;
-    this.batteries.deliverDueResistancePrompts(now, lang);
-    this.batteryStorageReminders.syncAll(this.batteries.list(), now);
+    this.fpv.tick(now, lang);
     return count;
   }
   private _pushController?: StorePush;
@@ -642,18 +638,10 @@ export class Store {
     return { integrityCheck: 'not-run', instrumentality: this.instrumentality.latest() };
   }
   batteryCards() {
-    return buildBatteryDashboardCards(this.batteries).map((card) => {
-      const photos = this.photos.list('battery', card.id).map((p) => ({
-        id: p.id,
-        url: p.url,
-        ...(p.caption ? { caption: p.caption } : {}),
-      }));
-      return photos.length ? { ...card, photos } : card;
-    });
+    return this.fpv.batteryCards();
   }
-  registerBattery(input: import('./batteries.ts').RegisterBatteryInput) {
-    const battery = this.batteries.register(input);
-    return { battery, items: this.batteryCards() };
+  registerBattery(input: RegisterBatteryInput) {
+    return this.fpv.registerBattery(input);
   }
   doctor() {
     return {

@@ -218,6 +218,16 @@ describe('F-114-T01: pack manifest, registry, CoreServices interface, and config
     assert.match(res.reply ?? '', /alpha.*beta/i);
   });
 
+  it('F-114-T02: keeps all FPV imports out of store.ts, runtime-chat.ts, telegram.ts and server.ts', async () => {
+    const { readFileSync } = await import('node:fs');
+    const fpvModuleRe =
+      /from\s+['"]\.\/(?:batteries|battery-health|battery-storage-reminders|fleet|fpv-builds)\.ts['"]/;
+    for (const file of ['src/store.ts', 'src/runtime-chat.ts', 'src/telegram.ts', 'src/server.ts']) {
+      const content = readFileSync(file, 'utf8');
+      assert.equal(fpvModuleRe.test(content), false, `${file} must not import FPV modules directly`);
+    }
+  });
+
   it('F-114-T03: keeps cooking-session and pantry imports out of store.ts, runtime-chat.ts, telegram.ts and server.ts', async () => {
     const { readFileSync } = await import('node:fs');
     const cookingModuleRe = /from\s+['"]\.\/(?:cooking-session|pantry)\.ts['"]/;

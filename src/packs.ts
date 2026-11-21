@@ -54,6 +54,13 @@ export interface PackManifest {
     conversation: string,
     ctx: PackChatContext,
   ) => Promise<string | undefined>;
+  readonly handleTelegramText?: (text: string, store: unknown) => Promise<string | undefined>;
+  readonly resolveTelegramPhoto?: (
+    store: unknown,
+    ownerKind: string,
+    query: string,
+  ) => { id: string; label: string } | undefined;
+  readonly resolvePhotoOwner?: (store: unknown, ownerKind: string, id: string) => string | undefined;
 }
 
 export type PacksConfig = Record<string, boolean>;
@@ -197,6 +204,40 @@ export class PackRegistry {
     return undefined;
   }
 
+  async handleTelegramText(text: string, store: unknown, config?: PacksConfig): Promise<string | undefined> {
+    for (const pack of this.enabledPacks(config)) {
+      if (pack.handleTelegramText) {
+        const reply = await pack.handleTelegramText(text, store);
+        if (reply !== undefined) return reply;
+      }
+    }
+    return undefined;
+  }
+
+  resolveTelegramPhoto(
+    store: unknown,
+    ownerKind: string,
+    query: string,
+    config?: PacksConfig,
+  ): { id: string; label: string } | undefined {
+    for (const pack of this.enabledPacks(config)) {
+      if (pack.telegramCaptions.includes(ownerKind) && pack.resolveTelegramPhoto) {
+        return pack.resolveTelegramPhoto(store, ownerKind, query);
+      }
+    }
+    return undefined;
+  }
+
+  resolvePhotoOwner(store: unknown, ownerKind: string, id: string, config?: PacksConfig): string | undefined {
+    for (const pack of this.enabledPacks(config)) {
+      if (pack.resolvePhotoOwner) {
+        const found = pack.resolvePhotoOwner(store, ownerKind, id);
+        if (found) return found;
+      }
+    }
+    return undefined;
+  }
+
   status(config?: PacksConfig): PackStatusEntry[] {
     return this.list().map((m) => ({
       id: m.id,
@@ -209,30 +250,19 @@ export class PackRegistry {
   }
 }
 
+import {
+  createFpvStoreSlice,
+  fpvFleetSnapshot,
+  fpvPackManifest,
+  type FpvStoreSlice,
+  type RegisterBatteryInput,
+} from './fpv-pack.ts';
+
+export { createFpvStoreSlice, fpvFleetSnapshot, type FpvStoreSlice, type RegisterBatteryInput };
+
 export const builtinPackRegistry = new PackRegistry();
 
-builtinPackRegistry.register({
-  id: 'fpv',
-  name: 'FPV',
-  tools: [
-    'batteries.list',
-    'batteries.chat',
-    'batteries.due',
-    'batteries.resistance',
-    'fleet.chat',
-    'fpv.blackbox_report',
-    'fpv.import_build',
-    'fpv.add_doc',
-    'fpv.wiring_answer',
-  ],
-  tables: ['batteries', 'battery_logs', 'drones', 'drone_parts', 'spares', 'crashes', 'fpv_builds'],
-  chatPhrases: [{ id: 'battery-status', pattern: /^\s*(?:stato batterie|battery status)\s*$/i }],
-  telegramCaptions: ['crash', 'part', 'battery'],
-  dashboardPanels: [
-    { id: 'batteries', title: 'Batteries', route: '/batteries' },
-    { id: 'fleet', title: 'Fleet', route: '/fleet' },
-  ],
-});
+builtinPackRegistry.register(fpvPackManifest);
 
 import { cookingPackManifest, createCookingStoreSlice, type CookingStoreSlice } from './cooking-pack.ts';
 
