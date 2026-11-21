@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 11 | 10 | 37 | 19 |
+| **This week** | 11 | 10 | 37 | 20 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 43 | 23 |
+| **Open** | 43 | 22 |
 | **Require Human 🧑** | 12 | 6 |
 
 ### Require Human 🧑
@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 103.25 h agent + 11 h owner across 140 open steps of 43 features and 23 other records. 80.5 h of actual effort recorded on 124 steps. Generated from the task files.
+**Remaining effort:** 103 h agent + 11 h owner across 139 open steps of 43 features and 22 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -433,55 +433,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-21: B-082-T02 CI run 44815656209 and required fresh-context review passed. Local: targeted regression 2/2, full tests 1,041 pass / 2 platform skips, build, `check:fast`, headless 5 pass / 1 Windows skip. Pending: the live desktop-session install on Tabgha after B-087-T01. |
 | Reviewed | 2026-11-21 |
-
-</details>
-
----
-### <a id="b-086"></a>[🐞 B-086](#top)
-
-**Linux: an install stops at start because a written unit already counts as registered**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-086-T05 — Rerun the two expensive system cases at this source (Ready).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 on Calvary: the fenced install wrote `~/.config/systemd/user/nerv.service`, then the start step stopped with "Selected service ownership changed." (receipt `uncertain`, `definition:completed,start:started`). systemd loads a unit as soon as its file exists (`LoadState=loaded`, `UnitFileState=disabled`), and the adapter counted any loaded matching unit as registered, while the start step requires it absent before `enable --now`. The same rule would make a stop wait forever for "absent" after `disable`. The test fake answered `not-found` until `enable`, unlike systemd. |
-| **Reproduce** | On Linux: `nodes lifecycle-inspect --action install`, then `lifecycle-apply`. |
-| **Check** | Test committed failing first (the systemctl fake loads a unit once its file exists, like systemd): Linux install, stop and update tests pass with registration meaning `UnitFileState=enabled`; the NERV-03 install on Calvary completes. A matching unit that is disabled but still active reads as NERV's, so a fenced stop disables and stops it; a foreign unit still reads foreign (B-086-T02, B-086-T04). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-086-t05"></a>B-086-T05 — Rerun the two expensive system cases at this source | 0.25 h | 0 h | 0.25 h | Ready | — |
-| 🟢 Small | **Total** | 2.25 h | 1.75 h (4 of 5 steps recorded) | 0.25 h | 4 of 5 completed | |
-
-<details><summary>Done steps (4)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="b-086-t01"></a>B-086-T01 — Linux: an install stops at start because a written unit already counts as registered | 0.75 h | 0.5 h (stated) | Completed | [PR #518](https://github.com/voidbrain/nerv/pull/518) fix |
-| — | <a id="b-086-t02"></a>B-086-T02 — A matching unit that is disabled but still active stays NERV's, so a stop can recover it | 0.5 h | 0.5 h (stated) | Completed | [PR #536](https://github.com/voidbrain/nerv/pull/536) the fix; CI green |
-| — | <a id="b-086-t03"></a>B-086-T03 — Rerun the two expensive system cases at this source | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="b-086-t04"></a>B-086-T04 — Tests for the PR #536 review: activating and reloading units, and a running disabled unit that is not NERV’s | 0.5 h | 0.5 h (stated) | Completed | [PR #542](https://github.com/voidbrain/nerv/pull/542) the tests |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-086.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-086-T01: [PR #518](https://github.com/voidbrain/nerv/pull/518) fix · B-086-T02: [PR #536](https://github.com/voidbrain/nerv/pull/536) the fix; CI green · B-086-T04: [PR #542](https://github.com/voidbrain/nerv/pull/542) the tests. [PR #542](https://github.com/voidbrain/nerv/pull/542) B-086-T04 (tests); [PR #536](https://github.com/voidbrain/nerv/pull/536) B-086-T02 (`test/linux-service-lifecycle.test.ts`); Test: `test/linux-service-lifecycle.test.ts` fake now loads a written unit (committed failing first: F-005-T10 and F-005-T25 failed) |
-| Opened | 2026-11-18 |
-| Verification | 2026-11-19: CI run 44483736523 (PR #536); live on Calvary 2026-11-18 (install) and 2026-11-19 (stop, update). |
-| Reviewed | 2026-11-19 |
 
 </details>
 
