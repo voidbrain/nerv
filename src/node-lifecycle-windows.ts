@@ -55,7 +55,11 @@ export function windowsServiceHost(home: string): ServiceHost {
 }
 
 /** Windows Task Scheduler lifecycle adapter (`windows-service`) under the shared fencing journal. */
-export function windowsServiceAdapter(context: ServiceContext, run: typeof command = command): ServiceHost {
+export function windowsServiceAdapter(
+  context: ServiceContext,
+  run: typeof command = command,
+  environment: Record<string, string | undefined> = process.env,
+): ServiceHost {
   const expectedTask = expectedDefinition(context, 'windows-service');
   const expectedVbs = windowsLauncher(context.home, context.source, context.node);
   const mac = macServiceAdapter(context, run);
@@ -124,6 +128,12 @@ export function windowsServiceAdapter(context: ServiceContext, run: typeof comma
         throw Error('Use the canonical reviewed NERV checkout.');
       }
       const prerequisites = await checkServicePrerequisites(context, run, { session: true });
+      if (environment.SSH_CONNECTION) {
+        prerequisites.ok = false;
+        prerequisites.issues.push(
+          'Windows lifecycle actions that start the service must run from the interactive Windows desktop session: that session cannot verify the SSH handler process identity (StartTime and MainModule are inaccessible across sessions/elevation).',
+        );
+      }
       const taskPath = definition(context, 'windows-service');
       const vbsPath = windowsLauncherPath(context);
       const defKind: ServiceObservation['definition'] = !present(taskPath)
