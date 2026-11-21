@@ -61,7 +61,6 @@ test('authenticated status/help/unknown commands answer before dispatch and plan
       '/pilots',
       '/bases',
       '/spear',
-      '/log steps',
       '/unknown',
       'Ask Tabgha his /status',
     ]) {
@@ -74,6 +73,10 @@ test('authenticated status/help/unknown commands answer before dispatch and plan
     assert.match(helpText('en'), /\/cards/);
     assert.equal(dispatched, 0);
     assert.deepEqual(await runtime.sorties(), []);
+    // F-056-T03: /log records its verbosity change in the ledger.
+    const logReply = await send('/log steps');
+    assert.equal(logReply.command, true);
+    assert.equal((await runtime.sorties()).length, 1);
   } finally {
     await new Promise<void>((done) => server.close(() => done()));
     await runtime.close();
@@ -159,6 +162,27 @@ test('F-056-T02: read-only commands (/cards, /reminders, /why, /brief, /pilots, 
 
       assert.equal(modelCalls, 0);
       assert.equal((await runtime.sorties()).length, 1);
+
+      // F-056-T03: /spear returns confirmation details without stopping the sortie; /log records the change.
+      const spearReply = (await send(`/spear S-${sortie.slice(0, 4).toUpperCase()}`)) as {
+        command: boolean;
+        reply: string;
+        confirmSpear?: { sortieId: string; ref: string; goal: string };
+      };
+      assert.equal(spearReply.command, true);
+      assert.equal(spearReply.confirmSpear?.sortieId, sortie);
+      assert.equal((await runtime.sorties()).find((s) => s.id === sortie)?.status, 'open');
+
+      const logBad = (await send('/log invalid')) as { logLevel?: string; reply: string };
+      assert.equal(logBad.logLevel, undefined);
+      assert.match(logBad.reply, /Usage: \/log/);
+
+      const logSteps = (await send('/log steps')) as { logLevel?: string; reply: string };
+      assert.equal(logSteps.logLevel, 'steps');
+      assert.match(logSteps.reply, /steps/);
+      assert.ok(
+        (await runtime.sorties()).some((s) => s.title.includes('Log verbosity set to steps') && s.status === 'done'),
+      );
     } finally {
       seed.close();
     }

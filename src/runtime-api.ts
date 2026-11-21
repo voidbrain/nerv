@@ -56,6 +56,8 @@ export function remoteOutcomeText(
   return `${base} answered for ${tool}: ${JSON.stringify(result).slice(0, 400)}`;
 }
 
+export type LogVerbosity = 'conversation' | 'steps' | 'all';
+
 export interface ChatReply {
   proactive?: true;
   command?: boolean;
@@ -66,6 +68,8 @@ export interface ChatReply {
   error?: string;
   steps: Step[];
   waiting: { approvalId: string; tool: string; reason: string }[];
+  confirmSpear?: { sortieId: string; ref: string; goal: string };
+  logLevel?: LogVerbosity;
   /** Set when the main base handled the request (F-036 dispatch): its sortie, cards and memory are there. */
   base?: { id: string; name: string };
   /** Dispatch only: the main base turned the request away before running anything (B-021). */
