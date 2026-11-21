@@ -61,7 +61,7 @@ import { LISTS_SCHEMA, ListStore } from './lists.ts';
 import { FPV_BUILDS_SCHEMA, FpvBuildStore } from './fpv-builds.ts';
 import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
 import { PHOTOS_SCHEMA, PhotoStore } from './photos.ts';
-import { PANTRY_SCHEMA, PantryStore } from './pantry.ts';
+import { createCookingStoreSlice, type CookingStoreSlice } from './packs.ts';
 import { FLEET_SCHEMA, FleetStore } from './fleet.ts';
 import { REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
@@ -148,7 +148,7 @@ export class Store {
   readonly fpvBuilds: FpvBuildStore;
   readonly documents: DocumentStore;
   readonly photos: PhotoStore;
-  readonly pantry: PantryStore;
+  private readonly cooking: CookingStoreSlice;
   readonly policySource: string;
   pushFetch: typeof fetch = fetch;
   /** The data home, when known: the schedule tool writes config.json there. */
@@ -260,8 +260,7 @@ export class Store {
       this.db,
       options.home ? join(options.home, 'photos') : path !== ':memory:' ? join(dirname(path), 'photos') : undefined,
     );
-    this.db.exec(PANTRY_SCHEMA);
-    this.pantry = new PantryStore(this.db);
+    this.cooking = createCookingStoreSlice(this.db);
     this.watch = new Watch(this.db, this.ledger);
     this.policySource = scrolls.source;
     this.db.exec(
@@ -382,6 +381,9 @@ export class Store {
   private _batteryStorageReminders?: BatteryStorageReminders;
   get batteryStorageReminders(): BatteryStorageReminders {
     return (this._batteryStorageReminders ??= new BatteryStorageReminders(this.db, this.remindersController));
+  }
+  get pantry() {
+    return this.cooking.pantry;
   }
   showList(name: string) {
     return this.lists.show(name);

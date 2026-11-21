@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 99.25 h agent + 11 h owner across 135 open steps of 42 features and 22 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
+**Remaining effort:** 97.75 h agent + 11 h owner across 134 open steps of 42 features and 22 other records. 78.75 h of actual effort recorded on 120 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2238,7 +2238,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 4 h | — | [F-101-T04](#f-101-t04) | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 2.5 h | — | [F-101-T04](#f-101-t04) | 🤖 | — | — |
 
 💻 **→** Next: F-114-T02 — FPV pack: batteries, fleet, builds and blackbox behind the manifest (Planned).
 
@@ -2253,16 +2253,16 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟡 Medium | <a id="f-114-t02"></a>F-114-T02 — FPV pack: batteries, fleet, builds and blackbox behind the manifest | 2 h | 0 h | 2 h | Planned | — | [F-101-T04](#f-101-t04), [F-114-T05](#f-114-t05) | — |
-| 🟡 Medium | <a id="f-114-t03"></a>F-114-T03 — Cooking pack: recipes, cooking sessions and pantry behind the manifest | 1.5 h | 0 h | 1.5 h | Planned | — | [F-114-T05](#f-114-t05) | — |
 | 🟢 Small | <a id="f-114-t06"></a>F-114-T06 — Rerun the two expensive system cases at the F-114-T01 source | 0.25 h | 0 h | 0.25 h | Planned | — | — | — |
-| 🟢 Small | <a id="f-114-t05"></a>F-114-T05 — Live check: turn FPV off and on | 0.25 h | 0 h | 0.25 h | Planned | [F-114-T02](#f-114-t02), [F-114-T03](#f-114-t03) | — | — |
-| 🟡 Medium | **Total** | 7 h | 0 h (0 of 6 steps recorded) | 4 h | 2 of 6 completed | | | |
+| 🟢 Small | <a id="f-114-t05"></a>F-114-T05 — Live check: turn FPV off and on | 0.25 h | 0 h | 0.25 h | Planned | [F-114-T02](#f-114-t02) | — | — |
+| 🟡 Medium | **Total** | 7 h | 0 h (0 of 6 steps recorded) | 2.5 h | 3 of 6 completed | | | |
 
-<details><summary>Done steps (2)</summary>
+<details><summary>Done steps (3)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-114-t01"></a>F-114-T01 — Pack manifest and registry, on and off in config | 2 h | 0 h | Completed | [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config |
+| — | <a id="f-114-t03"></a>F-114-T03 — Cooking pack: recipes, cooking sessions and pantry behind the manifest | 1.5 h | 0 h | Completed | — |
 | — | <a id="f-114-t04"></a>F-114-T04 — Chat routing when two packs claim the same message | 1 h | 0 h | Completed | [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message |
 
 </details>
