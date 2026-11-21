@@ -265,7 +265,7 @@ export function journalTransaction<T>(
   work: () => T,
   options?: { delaysMs?: number[]; sleep?: (ms: number) => void },
 ): T {
-  const delays = options?.delaysMs ?? [50, 150, 350, 750, 1500];
+  const delays = options?.delaysMs ?? [50, 150, 350, 750, 1500, 2500, 4000, 6000];
   const sleep = options?.sleep ?? ((ms: number) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms));
   let attempt = 0;
   for (;;) {
