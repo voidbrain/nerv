@@ -1,5 +1,9 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-21 — main `014e315`
+
+PRs #621–#628 merged on green CI. #622 reconciled B-091; #623 closed B-086; #621, #627 and #628 advanced F-114; #624–#626 advanced F-056. The owning records are current.
+
 ## 2026-11-20 — main `5c6e5a0`
 
 PRs #586–#597 reconciled: 11 of 12 own CI runs green; #587 failed Windows/full-suite, while later combined #595 and #597 passed all five jobs. #591 belongs to B-082, #596 to F-110 and #597 to F-008. Full audit opened B-106 for the lint-tooling advisory.
