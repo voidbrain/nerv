@@ -60,7 +60,7 @@ import { PromptSampleStore } from './prompt-samples.ts';
 import { LISTS_SCHEMA, ListStore } from './lists.ts';
 import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
 import { PHOTOS_SCHEMA, PhotoStore } from './photos.ts';
-import { PANTRY_SCHEMA, PantryStore } from './pantry.ts';
+import { createCookingStoreSlice, type CookingStoreSlice } from './packs.ts';
 import { REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
 import { RESUME_INTENT_SCHEMA, ResumeIntentStore } from './resume-intent.ts';
@@ -143,7 +143,7 @@ export class Store {
   readonly lists: ListStore;
   readonly documents: DocumentStore;
   readonly photos: PhotoStore;
-  readonly pantry: PantryStore;
+  private readonly cooking: CookingStoreSlice;
   readonly policySource: string;
   pushFetch: typeof fetch = fetch;
   bambuLauncher?: BambuConnectLauncher;
@@ -251,8 +251,7 @@ export class Store {
       options.home ? join(options.home, 'photos') : path !== ':memory:' ? join(dirname(path), 'photos') : undefined,
     );
     this.fpv = createFpvStoreSlice(this.db, this.remindersController, this.photos);
-    this.db.exec(PANTRY_SCHEMA);
-    this.pantry = new PantryStore(this.db);
+    this.cooking = createCookingStoreSlice(this.db);
     this.watch = new Watch(this.db, this.ledger);
     this.policySource = scrolls.source;
     this.db.exec(
@@ -381,6 +380,9 @@ export class Store {
   }
   get batteryStorageReminders() {
     return this.fpv.batteryStorageReminders;
+  }
+  get pantry() {
+    return this.cooking.pantry;
   }
   showList(name: string) {
     return this.lists.show(name);
