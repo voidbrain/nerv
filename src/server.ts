@@ -24,18 +24,14 @@ import type { ModelChange } from './model-setup.ts';
 import { MODEL_TIMEOUT_MS } from './model.ts';
 import { MAX_STEPS } from './misato.ts';
 import type { DocumentStore } from './documents.ts';
-import type { BatteryRegistry } from './batteries.ts';
-import type { FleetStore } from './fleet.ts';
 import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.ts';
 import { readConfig } from './config.ts';
 import { COMMAND_CATALOG } from './chat-command.ts';
-import { builtinPackRegistry } from './packs.ts';
+import { builtinPackRegistry, fpvFleetSnapshot } from './packs.ts';
 
 type PhotoStoreHost = StoreApi & {
   photos?: PhotoStore;
   documents?: DocumentStore;
-  fleet?: FleetStore;
-  batteries?: BatteryRegistry;
 };
 
 const PHOTO_ROUTE_KINDS: Readonly<Record<string, PhotoOwnerKind>> = {
@@ -47,9 +43,7 @@ const PHOTO_ROUTE_KINDS: Readonly<Record<string, PhotoOwnerKind>> = {
 
 function resolvePhotoOwner(s: PhotoStoreHost, kind: PhotoOwnerKind, id: string): string | undefined {
   if (kind === 'recipe') return s.documents?.get(id)?.id;
-  if (kind === 'crash') return s.fleet?.getCrash(id)?.id;
-  if (kind === 'part') return s.fleet?.getPart(id)?.id;
-  return s.batteries?.get(id)?.id;
+  return builtinPackRegistry.resolvePhotoOwner(s, kind, id);
 }
 async function body(req: IncomingMessage, limit = 8192): Promise<Record<string, unknown>> {
   let text = '';
@@ -1007,24 +1001,7 @@ export function makeServer(
         });
         res.end(found.bytes);
       } else if (req.method === 'GET' && path === '/api/fleet') {
-        const s = store as PhotoStoreHost;
-        if (!s.fleet) {
-          reply(200, { drones: [], parts: [], spares: [], crashes: [] });
-          return;
-        }
-        const drones = s.fleet.listDrones();
-        const parts = drones.flatMap((d) =>
-          s.fleet!.listParts(d.id).map((p) => ({
-            ...p,
-            photos: s.photos?.list('part', p.id) ?? [],
-          })),
-        );
-        const spares = s.fleet.listSpares();
-        const crashes = s.fleet.listCrashes().map((c) => ({
-          ...c,
-          photos: s.photos?.list('crash', c.id) ?? [],
-        }));
-        reply(200, { drones, parts, spares, crashes });
+        reply(200, fpvFleetSnapshot(store));
       } else if (/^\/api\/(recipes|crashes|parts|batteries)\/([^/]+)\/photos$/.test(path)) {
         const m = /^\/api\/(recipes|crashes|parts|batteries)\/([^/]+)\/photos$/.exec(path)!;
         const ownerKind = PHOTO_ROUTE_KINDS[m[1]!]!;

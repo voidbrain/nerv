@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 100.5 h agent + 11.25 h owner across 136 open steps of 43 features and 22 other records. 79 h of actual effort recorded on 121 steps. Generated from the task files.
+**Remaining effort:** 98.5 h agent + 11.25 h owner across 135 open steps of 43 features and 22 other records. 79 h of actual effort recorded on 121 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2278,56 +2278,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-114"></a>[✨ F-114](#top)
-
-**Domain packs: turn FPV and Cooking on and off**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 4 h | — | [F-101-T04](#f-101-t04) | 🤖 | — | — |
-
-💻 **→** Next: F-114-T02 — FPV pack: batteries, fleet, builds and blackbox behind the manifest (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-20: FPV and cooking are personal to the owner, not NERV core, and should be packs that can be switched on and off, with NERV as the hub. Today their stores, tools and chat phrases are wired straight into `store.ts`, `runtime-chat.ts`, `telegram.ts`, `server.ts` and `executors.ts`. |
-| **Reproduce** | `grep -c -iE "batter\|fleet\|recipe\|cooking" src/store.ts src/runtime-chat.ts` on main 2026-11-20: 18 each. |
-| **Check** | A pack manifest declares tools with effect classes, tables, chat phrases, Telegram captions and dashboard panels; `config.json` turns a pack on or off; a pack switched off offers no tools to Misato and shows no panel, and its data stays; reminders, todos, timers and photos stay in the core and packs use them; a phrase two packs claim is never silently routed to one; join tests across the registry, the planner tool list and the dashboard API; a live off-and-on check on the main base. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-114-t02"></a>F-114-T02 — FPV pack: batteries, fleet, builds and blackbox behind the manifest | 2 h | 0 h | 2 h | Planned | — | [F-101-T04](#f-101-t04), [F-114-T05](#f-114-t05) | — |
-| 🟡 Medium | <a id="f-114-t03"></a>F-114-T03 — Cooking pack: recipes, cooking sessions and pantry behind the manifest | 1.5 h | 0 h | 1.5 h | Planned | — | [F-114-T05](#f-114-t05) | — |
-| 🟢 Small | <a id="f-114-t06"></a>F-114-T06 — Rerun the two expensive system cases at the F-114-T01 source | 0.25 h | 0 h | 0.25 h | Planned | — | — | — |
-| 🟢 Small | <a id="f-114-t05"></a>F-114-T05 — Live check: turn FPV off and on | 0.25 h | 0 h | 0.25 h | Planned | [F-114-T02](#f-114-t02), [F-114-T03](#f-114-t03) | — | — |
-| 🟡 Medium | **Total** | 7 h | 0 h (0 of 6 steps recorded) | 4 h | 2 of 6 completed | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-114-t01"></a>F-114-T01 — Pack manifest and registry, on and off in config | 2 h | 0 h | Completed | [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config |
-| — | <a id="f-114-t04"></a>F-114-T04 — Chat routing when two packs claim the same message | 1 h | 0 h | Completed | [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-114.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-114-T01: [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config · F-114-T04: [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message. [FPV packs decision](decisions/fpv-packs.md); opened in [PR #593](https://github.com/voidbrain/nerv/pull/593); F-114-T01 in [PR #621](https://github.com/voidbrain/nerv/pull/621); F-114-T04 in [PR #627](https://github.com/voidbrain/nerv/pull/627) |
-| Opened | 2026-11-20 |
-| Verification | Pending |
-| Reviewed | 2026-11-20 |
-
-</details>
-
----
 ### <a id="f-099"></a>[✨ F-099](#top)
 
 **FPV build knowledge: components and wiring from cited sources**
@@ -2372,6 +2322,56 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-099-T03 verified: [PR #485](https://github.com/voidbrain/nerv/pull/485) merged on green CI. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-114"></a>[✨ F-114](#top)
+
+**Domain packs: turn FPV and Cooking on and off**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 2 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-114-T03 — Cooking pack: recipes, cooking sessions and pantry behind the manifest (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-20: FPV and cooking are personal to the owner, not NERV core, and should be packs that can be switched on and off, with NERV as the hub. Today their stores, tools and chat phrases are wired straight into `store.ts`, `runtime-chat.ts`, `telegram.ts`, `server.ts` and `executors.ts`. |
+| **Reproduce** | `grep -c -iE "batter\|fleet\|recipe\|cooking" src/store.ts src/runtime-chat.ts` on main 2026-11-20: 18 each. |
+| **Check** | A pack manifest declares tools with effect classes, tables, chat phrases, Telegram captions and dashboard panels; `config.json` turns a pack on or off; a pack switched off offers no tools to Misato and shows no panel, and its data stays; reminders, todos, timers and photos stay in the core and packs use them; a phrase two packs claim is never silently routed to one; join tests across the registry, the planner tool list and the dashboard API; a live off-and-on check on the main base. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-114-t03"></a>F-114-T03 — Cooking pack: recipes, cooking sessions and pantry behind the manifest | 1.5 h | 0 h | 1.5 h | Planned | — | [F-114-T05](#f-114-t05) | — |
+| 🟢 Small | <a id="f-114-t06"></a>F-114-T06 — Rerun the two expensive system cases at the F-114-T01 source | 0.25 h | 0 h | 0.25 h | Planned | — | — | — |
+| 🟢 Small | <a id="f-114-t05"></a>F-114-T05 — Live check: turn FPV off and on | 0.25 h | 0 h | 0.25 h | Planned | [F-114-T03](#f-114-t03) | — | — |
+| 🟡 Medium | **Total** | 7 h | 0 h (0 of 6 steps recorded) | 2 h | 3 of 6 completed | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-114-t01"></a>F-114-T01 — Pack manifest and registry, on and off in config | 2 h | 0 h | Completed | [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config |
+| — | <a id="f-114-t02"></a>F-114-T02 — FPV pack: batteries, fleet, builds and blackbox behind the manifest | 2 h | 0 h | Completed | [PR #628](https://github.com/voidbrain/nerv/pull/628) FPV pack behind the manifest |
+| — | <a id="f-114-t04"></a>F-114-T04 — Chat routing when two packs claim the same message | 1 h | 0 h | Completed | [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-114.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-114-T01: [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config · F-114-T02: [PR #628](https://github.com/voidbrain/nerv/pull/628) FPV pack behind the manifest · F-114-T04: [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message. [FPV packs decision](decisions/fpv-packs.md); opened in [PR #593](https://github.com/voidbrain/nerv/pull/593); F-114-T01 in [PR #621](https://github.com/voidbrain/nerv/pull/621); F-114-T02 in [PR #628](https://github.com/voidbrain/nerv/pull/628); F-114-T04 in [PR #627](https://github.com/voidbrain/nerv/pull/627) |
+| Opened | 2026-11-20 |
+| Verification | Pending |
+| Reviewed | 2026-11-20 |
 
 </details>
 
@@ -2937,7 +2937,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h agent + 0.25 h owner | [F-098-T04](#f-098-t04), [F-114-T02](#f-114-t02) | — | ⏳ | — | 🤔 |
+| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h agent + 0.25 h owner | [F-098-T04](#f-098-t04) | — | ⏳ | — | 🤔 |
 
 🧑 **→** Next: [🤔](decisions/fpv-packs.md) F-101-T03 — Owner names the FPV core repository and its visibility (Planned).
 
@@ -2952,7 +2952,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-101-t03"></a>F-101-T03 — Owner names the FPV core repository and its visibility | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | — | [F-101-T04](#f-101-t04) | [🤔](decisions/fpv-packs.md) | — |
-| 🟡 Medium | <a id="f-101-t04"></a>F-101-T04 — Create the FPV core repository and move the core into it | 2 h | 0 h | 2 h | Planned | [F-101-T03](#f-101-t03), [F-098-T04](#f-098-t04), [F-114-T02](#f-114-t02) | [F-101-T05](#f-101-t05) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-101-t04"></a>F-101-T04 — Create the FPV core repository and move the core into it | 2 h | 0 h | 2 h | Planned | [F-101-T03](#f-101-t03), [F-098-T04](#f-098-t04) | [F-101-T05](#f-101-t05) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-101-t05"></a>F-101-T05 — NERV FPV pack uses the FPV core package | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T04](#f-101-t04) | [F-101-T06](#f-101-t06) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-101-t06"></a>F-101-T06 — Dashboard uses the FPV core's web components | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T05](#f-101-t05) | — | ⏳ 🤖 | — |
 | 🔴 Large | **Total** | 5.75 h | 0 h (0 of 6 steps recorded) | 5 h agent + 0.25 h owner | 2 of 6 completed | | | | |
