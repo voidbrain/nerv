@@ -5,6 +5,12 @@
   "title": "Group and connected-account assessment",
   "goal": "Group and connected-account assessment",
   "status": "closed",
+  "prs": [
+    {
+      "pr": 626,
+      "note": "Group and connected-account assessment"
+    }
+  ],
   "acceptance": [
     "Written assessment of a multi-bot group and connected-business-bot options; private-chat authorization not widened"
   ],
