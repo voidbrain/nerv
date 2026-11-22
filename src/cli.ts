@@ -702,6 +702,7 @@ try {
             registry: runtime.kaji,
             health: () => runtime.baseHealth(),
             onHealth: (id, h) => runtime.notePeerHealth(id, h),
+            onReachable: (id, peers) => runtime.notePeerReachable(id, peers),
             channel: () => runtime.channelState(),
             onChannel: (id, c) => runtime.notePeerChannel(id, c),
             onBackup: async (from, date, copy) => {

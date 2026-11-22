@@ -915,11 +915,17 @@ function drawMap(now) {
     ctx.globalAlpha = 1;
   });
   // Kaji line: dashed great circles. Routes to the main base are green and moving while both ends are up (owner,
-  // 2026-11-18); the heartbeat mesh between peers is a thin, still, neutral dotted line: this base does not observe it.
+  // 2026-11-18); the heartbeat mesh between peers is coloured from both peers' own reports (--ok, --warn, or --muted).
   LINKS.forEach(([a, b, kind]) => {
     const A = BASES.find(x => x.id === a), B = BASES.find(x => x.id === b); const up = A.status !== "offline" && B.status !== "offline" && (A.status === "online" || B.status === "online");
     const pts = map.linkPaths[a + "|" + b]; const mesh = kind === "mesh";
-    if (mesh) { ctx.setLineDash([1.5, 4]); ctx.lineDashOffset = 0; ctx.strokeStyle = cssVar("--muted"); ctx.globalAlpha = up ? 0.45 : 0.2; ctx.lineWidth = 0.8; }
+    if (mesh) {
+      const ms = state.meshStates && state.meshStates[a + "|" + b];
+      ctx.setLineDash([1.5, 4]); ctx.lineDashOffset = 0;
+      ctx.strokeStyle = ms === "ok" ? cssVar("--ok") : ms === "warn" ? cssVar("--warn") : cssVar("--muted");
+      ctx.globalAlpha = ms === "ok" ? 0.7 : ms === "warn" ? 0.85 : up ? 0.45 : 0.2;
+      ctx.lineWidth = 0.8;
+    }
     else { ctx.setLineDash([4, 4]); ctx.lineDashOffset = up ? -(now / 60) % 8 : 0; ctx.strokeStyle = up ? cssVar("--ok") : "#555"; ctx.globalAlpha = up ? 0.85 : 0.4; ctx.lineWidth = 1.1; }
     ctx.beginPath(); pts.forEach((p, k) => { if (k && Math.abs(p[0] - pts[k - 1][0]) > W / 2) ctx.moveTo(p[0], p[1]); else if (k) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); }); ctx.stroke();
     ctx.setLineDash([]); ctx.globalAlpha = 1;

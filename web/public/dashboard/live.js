@@ -537,8 +537,8 @@
     state.kajiBases = list;
     const enrolled = list.filter(b => b.status !== "revoked");
     observeTelegram(enrolled);
-    const key = list.map(b => b.baseId + ":" + b.status + ":" + b.online + ":" + (b.health ? b.health.state : "")).join("|") + "|" + health; if (key === basesKey) return; basesKey = key;
-    if (!enrolled.length) { BASES.splice(1); BASES[0].status = health; LINKS.length = 0; CAGES.forEach(c => { c.base = BASES[0].id; }); document.getElementById("cages").innerHTML = ""; initMap(); return; }
+    const key = list.map(b => b.baseId + ":" + b.status + ":" + b.online + ":" + (b.health ? b.health.state : "") + ":" + (Array.isArray(b.reachable) ? b.reachable.slice().sort().join(",") : "")).join("|") + "|" + health; if (key === basesKey) return; basesKey = key;
+    if (!enrolled.length) { BASES.splice(1); BASES[0].status = health; LINKS.length = 0; state.meshStates = {}; CAGES.forEach(c => { c.base = BASES[0].id; }); document.getElementById("cages").innerHTML = ""; initMap(); return; }
     pulseHeartbeats(enrolled);
     const self = enrolled.find(b => b.self) || enrolled[0]; const others = enrolled.filter(b => b !== self);
     // Each other base gets a spot from its ID (owner, 2026-11-05: a column looked dull): scattered, but the same on every reload.
@@ -548,7 +548,7 @@
     BASES.splice(0, BASES.length, toBase(self, 0), ...others.map((b, i) => toBase(b, i)));
     // This base's pulse and its EVA cage follow its real health; peers show what they last reported in their heartbeat.
     BASES[0].status = health;
-    LINKS.length = 0; const up = enrolled;
+    LINKS.length = 0; state.meshStates = {}; const up = enrolled;
     const mainBase = up.find(b => b.main);
     if (mainBase) {
       const mainId = mainBase.baseId.toLowerCase();
@@ -556,7 +556,18 @@
       // bases, so peers are also joined by a quieter mesh line; no message is routed along it.
       up.forEach(b => { const id = b.baseId.toLowerCase(); if (id !== mainId) LINKS.push([id, mainId, "route"]); });
       const peers = up.filter(b => b !== mainBase);
-      for (let i = 0; i < peers.length; i++) for (let j = i + 1; j < peers.length; j++) LINKS.push([peers[i].baseId.toLowerCase(), peers[j].baseId.toLowerCase(), "mesh"]);
+      for (let i = 0; i < peers.length; i++) for (let j = i + 1; j < peers.length; j++) {
+        const pa = peers[i], pb = peers[j];
+        const ia = pa.baseId.toLowerCase(), ib = pb.baseId.toLowerCase();
+        LINKS.push([ia, ib, "mesh"]);
+        const ms = !Array.isArray(pa.reachable) || !Array.isArray(pb.reachable)
+          ? "unreported"
+          : pa.reachable.includes(pb.baseId) && pb.reachable.includes(pa.baseId)
+            ? "ok"
+            : "warn";
+        state.meshStates[ia + "|" + ib] = ms;
+        state.meshStates[ib + "|" + ia] = ms;
+      }
     } else {
       for (let i = 0; i < up.length; i++) for (let j = i + 1; j < up.length; j++) LINKS.push([up[i].baseId.toLowerCase(), up[j].baseId.toLowerCase(), "route"]);
     }

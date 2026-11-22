@@ -809,6 +809,9 @@ export class Runtime implements StoreApi {
   notePeerHealth(baseId: string, health: HeardHealth) {
     this.basesController.notePeerHealth(baseId, health);
   }
+  notePeerReachable(baseId: string, peers: string[], at?: string) {
+    this.basesController.notePeerReachable(baseId, peers, at);
+  }
   /** This base's health as it reports it to its peers: degraded with the reasons doctor and status give. */
   async baseHealth(): Promise<BaseHealth> {
     return this.basesController.baseHealth();

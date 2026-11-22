@@ -236,6 +236,8 @@ export class KajiLink {
     onPendingApprovals?: (ids: string[]) => Promise<string[]>;
     onDecide?: (approvalId: string, decision: 'approve' | 'reject') => Promise<string>;
     onSortie?: (from: string, sortieId: string) => Promise<{ sortie: unknown; events: unknown[] } | null>;
+    /** F-107-T02: reachable peers reported first-hand by a base in its heartbeat (enrolled base IDs). */
+    onReachable?: (baseId: string, peers: string[]) => void;
     /** F-062-T06: stores an encrypted backup copy from an enrolled base, if this base accepts copies from it. */
     onBackup?: (from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>;
     /** F-016-T04: applies an incremental coordinator replication batch on a standby base. */
@@ -257,6 +259,7 @@ export class KajiLink {
     this.onChannel = options.onChannel;
     this.health = options.health;
     this.onHealth = options.onHealth;
+    this.onReachable = options.onReachable;
     this.onRelay = options.onRelay;
     this.onBackup = options.onBackup;
     this.onReplicate = options.onReplicate;
@@ -354,6 +357,23 @@ export class KajiLink {
     ((from: string, sortieId: string) => Promise<{ sortie: unknown; events: unknown[] } | null>) | undefined;
   private readonly health: (() => Promise<BaseHealth>) | undefined;
   private readonly onHealth: ((baseId: string, health: HeardHealth) => void) | undefined;
+  private readonly onReachable: ((baseId: string, peers: string[]) => void) | undefined;
+  /** F-107-T02: enrolled peer base IDs this base currently reaches. */
+  private ownReachable(bases: readonly BaseEntry[]): string[] {
+    return bases
+      .filter((b) => b.status === 'enrolled' && b.baseId !== this.baseId && this.reachable.get(b.baseId) === true)
+      .map((b) => b.baseId)
+      .sort();
+  }
+  /** F-107-T02: validates a base's first-hand reachable-peers list against enrolled bases. */
+  private heardReachable(from: string, value: unknown, bases: readonly BaseEntry[]) {
+    if (!Array.isArray(value) || value.length > 64) return;
+    const enrolled = new Set(
+      bases.filter((b) => b.status === 'enrolled' && b.baseId !== from).map((b) => b.baseId),
+    );
+    const clean = [...new Set(value.filter((id): id is string => typeof id === 'string' && enrolled.has(id)))].sort();
+    this.onReachable?.(from, clean);
+  }
   /** This base's health for a heartbeat; a check that fails is itself a degraded reason. Omitted when no check is wired. */
   private async own(): Promise<BaseHealth | undefined> {
     if (!this.health) return undefined;
@@ -510,6 +530,7 @@ export class KajiLink {
           pilots?: unknown;
           channel?: unknown;
           operator?: unknown;
+          reachable?: unknown;
         };
         const now = new Date().toISOString();
         await this.port.seen({ ...sanitizeSeen(hb.seen, bases), [from]: now, [this.baseId]: now });
@@ -518,14 +539,18 @@ export class KajiLink {
         this.heardPilots(from, hb.pilots);
         this.heardChannel(from, hb.channel);
         this.heardOperator(from, hb.operator, bases);
+        this.heardReachable(from, hb.reachable, bases);
         const health = await this.own();
         const offers = this.offers?.();
         const pilots = this.pilotOffers?.();
         const channel = this.ownChannel();
         const operator = this.ownOperator?.();
+        const reachable = this.ownReachable(bases);
+        this.onReachable?.(this.baseId, reachable);
         reply(200, {
           head: head(await this.port.records()),
           seen: await this.port.lastSeen(),
+          reachable,
           ...(health ? { health } : {}),
           ...(offers ? { offers } : {}),
           ...(pilots ? { pilots } : {}),
@@ -1073,8 +1098,11 @@ export class KajiLink {
         const pilots = this.pilotOffers?.();
         const channel = this.ownChannel();
         const operator = this.ownOperator?.();
+        const ownReach = this.ownReachable(bases);
+        this.onReachable?.(this.baseId, ownReach);
         const r = (await this.call(peer, 'POST', '/kaji/heartbeat', {
           seen: await this.port.lastSeen(),
+          reachable: ownReach,
           ...(health ? { health } : {}),
           ...(offers ? { offers } : {}),
           ...(pilots ? { pilots } : {}),
@@ -1088,6 +1116,7 @@ export class KajiLink {
           pilots?: unknown;
           channel?: unknown;
           operator?: unknown;
+          reachable?: unknown;
         };
         await this.port.seen({ ...sanitizeSeen(r.seen, bases), [peer.baseId]: new Date().toISOString() });
         this.mark(peer.baseId, true);
@@ -1096,6 +1125,7 @@ export class KajiLink {
         this.heardPilots(peer.baseId, r.pilots);
         this.heardChannel(peer.baseId, r.channel);
         this.heardOperator(peer.baseId, r.operator, bases);
+        this.heardReachable(peer.baseId, r.reachable, bases);
         const mine = head(await this.port.records());
         if (r.head.count > mine.count || r.head.serial > mine.serial) {
           const got = (await this.call(peer, 'GET', '/kaji/registry')) as { records: SignedRecord[] };
@@ -1106,6 +1136,7 @@ export class KajiLink {
         this.mark(peer.baseId, false, e instanceof Error ? e.message : 'error');
       }
     }
+    this.onReachable?.(this.baseId, this.ownReachable(bases));
   }
 }
 /**
