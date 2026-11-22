@@ -4,7 +4,7 @@
   "parent": "F-114",
   "title": "Rerun the two expensive system cases at the F-114-T01 source",
   "goal": "nerv-system-flows/stress and nerv-system-flows/browser have a covering run at the F-114-T01 source",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "npm run gauntlet:all -- --execute --allow-expensive records passing runs for nerv-system-flows/stress and nerv-system-flows/browser",
     "node tools/gauntlet.mjs pending lists neither"
@@ -32,7 +32,7 @@
     "estimate": "0.25 h",
     "basis": "Added 2026-11-21: F-114-T01 touched planner/chat/server files covered by nerv-system-flows/stress and nerv-system-flows/browser.",
     "reviewed": "2026-11-21",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
   }
