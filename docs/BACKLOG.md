@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 90 h agent + 11.5 h owner across 124 open steps of 40 features and 23 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 90.25 h agent + 11.5 h owner across 125 open steps of 40 features and 23 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -3133,7 +3133,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h agent + 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
 
 🧑 **→** Confirm on the live dashboard after rebuilding `dist/web` and restarting `nerv`.
 
@@ -3148,7 +3148,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="b-106-t02"></a>B-106-T02 — Owner confirms Sephirot answer edge and arrowheads on live dashboard | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](work/records/B-106.md) |
-| 🟢 Small | **Total** | 0.5 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | |
+| 🟢 Small | <a id="b-106-t03"></a>B-106-T03 — Rerun pending gauntlet cases at this source | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
+| 🟢 Small | **Total** | 0.75 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.25 h agent + 0.25 h owner | 1 of 3 completed | |
 
 <details><summary>Done steps (1)</summary>
 
