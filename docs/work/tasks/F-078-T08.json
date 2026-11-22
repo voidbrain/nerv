@@ -4,7 +4,7 @@
  "parent": "F-078",
  "title": "Adopt the new Gauntlet packs (gauntlet F-012) when released",
  "goal": "Adopt the new Gauntlet packs (gauntlet F-012) when released",
- "status": "planned",
+ "status": "closed",
  "acceptance": [
   "Pending cases this task covers: refusal-permission/*, tool-use/unknown-tool-regression, tool-use/arguments-regression, tool-use/choose-tool-holdout, tool-use/unknown-tool-holdout, tool-use/arguments-holdout",
   "Pin bumped to the release; its new cases appear as pending",
@@ -38,9 +38,9 @@
  "effort": {
   "size": "small",
   "estimate": "0.5 h agent",
-  "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; campaign wall time on the host is extra and bounded by the T02 budget. Owner authorized the campaign 2026-11-15; not a measurement.",
-  "reviewed": "2026-11-15",
-  "agentHours": 0.5,
+  "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; campaign wall time on the host is extra and bounded by the T02 budget. Owner authorized the campaign 2026-11-15 and longer timeout 2026-11-22. Closed 2026-11-22: ran refusal-permission (0/4) and tool-use (0/6) with gemma4:12b under 180s caseMs (zero timeouts, 0 pending for F-078-T08), recorded in ledger.json and docs/evaluations/2026-11-22-f078-t08-timeout-rerun.md.",
+  "reviewed": "2026-11-22",
+  "agentHours": 0,
   "baselineAgentHours": 0.5,
   "estimateAgentHours": 0.5
  },
