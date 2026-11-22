@@ -13,7 +13,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 37 | 14 |
+| **Open** | 36 | 14 |
 | **Require Human 🧑** | 12 | 7 |
 
 ### Require Human 🧑
@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 77.75 h agent + 11 h owner across 108 open steps of 37 features and 14 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 77.25 h agent + 11 h owner across 107 open steps of 36 features and 14 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -937,60 +937,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-093-T02 not closed: the adapter logic passed on green CI, but `nerv desktop-click` runs the adapter with a stub driver ("No live desktop accessibility driver bound in CLI"), so the owner check F-093-T04 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/497) merged on green CI. `F-093-T01`: `npm run check:fast` passed. |
 | Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-078"></a>[✨ F-078](#top)
-
-**Model evaluation: the four candidate models by role and base, Mac and mini PC**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released (Planned).
-
-| | |
-|---|---|
-| **Issue** | The four candidate profiles in docs/agents/model-profiles.json (gemma4:12b, qwen2.5-coder:14b, devstral-small-2:24b, qwen3-coder:30b) are all unmeasured candidates. The Gauntlet ledger holds 55 runs, none with a model; the only real-model evidence is the gemma4:12b smoke of 2026-11-09 (7/10, three invalid structured outputs) and the B-021/B-049 Misato runs. Nothing measures the mini PC (Tabgha, NERV-02). The inventory of 2026-11-13 found `qwen2.5-coder:14b` on Neo Tokyo-3, not on Tabgha: Tabgha (Intel N97, 12 GB, no usable GPU) has only `qwen2.5:1.5b`, and none of the four candidates fits it. |
-| **Reproduce** | [Inventory steps](acceptance/f078-model-inventory.md); `node -e "console.log(require('./evals/gauntlet/ledger.json').runs.filter(r=>r.model).length)"`; docs/agents/model-profiles.json; [evaluation guide](evaluations/README.md). |
-| **Check** | Each approved model × role × base cell has a recorded run with model and base identity; each profile is qualified or not per role with evidence; the 2026-11-09 smoke failures are explained; F-006-T12 receives the comparison; new Gauntlet packs are adopted when released. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | [PR #630](https://github.com/voidbrain/nerv/pull/630) campaign evidence; [PR #634](https://github.com/voidbrain/nerv/pull/634) overnight rerun evidence |
-| 🟢 Small | **Total** | 4.75 h | 0.75 h (2 of 9 steps recorded) | 0.5 h | 8 of 9 completed | | |
-
-<details><summary>Done steps (8)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-078-t01"></a>F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | Completed | — |
-| — | <a id="f-078-t02"></a>F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | Completed | — |
-| — | <a id="f-078-t03"></a>F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0.5 h (stated) | Completed | [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed |
-| — | <a id="f-078-t04"></a>F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | Completed | — |
-| — | <a id="f-078-t05"></a>F-078-T05 — Prepare Tabgha for the campaign: download qwen2.5:3b | 0.25 h | 0.25 h (stated) | Completed | [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence |
-| — | <a id="f-078-t06"></a>F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | Completed | — |
-| — | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | Completed | — |
-| — | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 1.5 h | 0 h | Completed | [PR #643](https://github.com/voidbrain/nerv/pull/643) Tabgha remote and local fallback campaign (F-078-T09) |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-078.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-078-T03: [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed · F-078-T05: [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence · F-078-T08: [PR #630](https://github.com/voidbrain/nerv/pull/630) campaign evidence; [PR #634](https://github.com/voidbrain/nerv/pull/634) overnight rerun evidence · F-078-T09: [PR #643](https://github.com/voidbrain/nerv/pull/643) Tabgha remote and local fallback campaign (F-078-T09). [PR #646](https://github.com/voidbrain/nerv/pull/646) T07 comparison; [PR #643](https://github.com/voidbrain/nerv/pull/643) T09 Tabgha campaign; [PR #634](https://github.com/voidbrain/nerv/pull/634) T08 rerun; [PR #630](https://github.com/voidbrain/nerv/pull/630) T08 campaign; [PR #475](https://github.com/voidbrain/nerv/pull/475); [PR #477](https://github.com/voidbrain/nerv/pull/477) (merged; CI green); Gauntlet 0.9.0 pin and harness 8.15.0 reconciliation prepared for PR #427; [PR #403](https://github.com/voidbrain/nerv/pull/403) T03 close; [PR #402](https://github.com/voidbrain/nerv/pull/402) T03; [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
-| Depends on | — |
-| Opened | 2026-11-13 |
-| Verification | 2026-11-22: F-078-T09 Tabgha campaign (local `qwen2.5:1.5b` / `qwen2.5:3b`, remote `gemma4:26b` / `qwen2.5-coder:14b` to Neo Tokyo-3, asleep probe, memory stats) recorded in [2026-11-22-f078-t09-tabgha-campaign.md](evaluations/2026-11-22-f078-t09-tabgha-campaign.md); verified with `npm run check:fast`. 2026-11-16: T04/T06 report per-role model outcomes and aggregate metadata; PRs #475/#477 plan, validate, Windows and native-macos passed, full-suite skipped. 35 cases remain pending: 28 under F-078-T08 and seven system-flow cases under F-079. 2026-11-14: T03 recorded 144/144 graded outcomes across the three approved models and three packs; `node tools/gauntlet.mjs pending` exits 0; PR #402 CI run 43595307489 passed plan, validate, Windows, native-macos and full-suite on rerun after one transient Windows temp-directory cleanup failure. |
-| Reviewed | 2026-11-22 |
 
 </details>
 
@@ -3193,6 +3139,60 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-078"></a>[✨ F-078](#top)
+
+**Model evaluation: the four candidate models by role and base, Mac and mini PC**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟡 Medium | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | The four candidate profiles in docs/agents/model-profiles.json (gemma4:12b, qwen2.5-coder:14b, devstral-small-2:24b, qwen3-coder:30b) are all unmeasured candidates. The Gauntlet ledger holds 55 runs, none with a model; the only real-model evidence is the gemma4:12b smoke of 2026-11-09 (7/10, three invalid structured outputs) and the B-021/B-049 Misato runs. Nothing measures the mini PC (Tabgha, NERV-02). The inventory of 2026-11-13 found `qwen2.5-coder:14b` on Neo Tokyo-3, not on Tabgha: Tabgha (Intel N97, 12 GB, no usable GPU) has only `qwen2.5:1.5b`, and none of the four candidates fits it. |
+| **Reproduce** | [Inventory steps](acceptance/f078-model-inventory.md); `node -e "console.log(require('./evals/gauntlet/ledger.json').runs.filter(r=>r.model).length)"`; docs/agents/model-profiles.json; [evaluation guide](evaluations/README.md). |
+| **Check** | Each approved model × role × base cell has a recorded run with model and base identity; each profile is qualified or not per role with evidence; the 2026-11-09 smoke failures are explained; F-006-T12 receives the comparison; new Gauntlet packs are adopted when released. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| — | **Total** | 4.75 h | 0.75 h (2 of 9 steps recorded) | 0 h | 9 of 9 completed | | |
+
+<details><summary>Done steps (9)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-078-t01"></a>F-078-T01 — Inventory the models and hardware on Neo Tokyo-3 and Tabgha | 0.25 h | 0 h | Completed | — |
+| — | <a id="f-078-t02"></a>F-078-T02 — Agree the evaluation matrix and its budget | 0.25 h | 0 h | Completed | — |
+| — | <a id="f-078-t03"></a>F-078-T03 — Smoke campaign on Neo Tokyo-3 | 0.5 h | 0.5 h (stated) | Completed | [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed |
+| — | <a id="f-078-t04"></a>F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | Completed | — |
+| — | <a id="f-078-t05"></a>F-078-T05 — Prepare Tabgha for the campaign: download qwen2.5:3b | 0.25 h | 0.25 h (stated) | Completed | [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence |
+| — | <a id="f-078-t06"></a>F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | Completed | — |
+| — | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | Completed | — |
+| — | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | Completed | [PR #630](https://github.com/voidbrain/nerv/pull/630) campaign evidence; [PR #634](https://github.com/voidbrain/nerv/pull/634) overnight rerun evidence |
+| — | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 1.5 h | 0 h | Completed | [PR #643](https://github.com/voidbrain/nerv/pull/643) Tabgha remote and local fallback campaign (F-078-T09) |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-078.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-078-T03: [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed · F-078-T05: [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence · F-078-T08: [PR #630](https://github.com/voidbrain/nerv/pull/630) campaign evidence; [PR #634](https://github.com/voidbrain/nerv/pull/634) overnight rerun evidence · F-078-T09: [PR #643](https://github.com/voidbrain/nerv/pull/643) Tabgha remote and local fallback campaign (F-078-T09). [PR #655](https://github.com/voidbrain/nerv/pull/655) T08 timeout rerun & closure; [PR #646](https://github.com/voidbrain/nerv/pull/646) T07 comparison; [PR #643](https://github.com/voidbrain/nerv/pull/643) T09 Tabgha campaign; [PR #634](https://github.com/voidbrain/nerv/pull/634) T08 rerun; [PR #630](https://github.com/voidbrain/nerv/pull/630) T08 campaign; [PR #475](https://github.com/voidbrain/nerv/pull/475); [PR #477](https://github.com/voidbrain/nerv/pull/477) (merged; CI green); Gauntlet 0.9.0 pin and harness 8.15.0 reconciliation prepared for PR #427; [PR #403](https://github.com/voidbrain/nerv/pull/403) T03 close; [PR #402](https://github.com/voidbrain/nerv/pull/402) T03; [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
+| Depends on | — |
+| Opened | 2026-11-13 |
+| Verification | 2026-11-22: F-078-T09 Tabgha campaign (local `qwen2.5:1.5b` / `qwen2.5:3b`, remote `gemma4:26b` / `qwen2.5-coder:14b` to Neo Tokyo-3, asleep probe, memory stats) recorded in [2026-11-22-f078-t09-tabgha-campaign.md](evaluations/2026-11-22-f078-t09-tabgha-campaign.md); verified with `npm run check:fast`. 2026-11-16: T04/T06 report per-role model outcomes and aggregate metadata; PRs #475/#477 plan, validate, Windows and native-macos passed, full-suite skipped. 35 cases remain pending: 28 under F-078-T08 and seven system-flow cases under F-079. 2026-11-14: T03 recorded 144/144 graded outcomes across the three approved models and three packs; `node tools/gauntlet.mjs pending` exits 0; PR #402 CI run 43595307489 passed plan, validate, Windows, native-macos and full-suite on rerun after one transient Windows temp-directory cleanup failure. |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
 ### <a id="f-084"></a>[✨ F-084](#top)
 
 **Coding job on a local repository: change, test, open a PR**
