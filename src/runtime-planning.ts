@@ -21,6 +21,8 @@ import {
   type Turn,
 } from './misato.ts';
 import { MODEL_TIMEOUT_MS } from './model.ts';
+import { EvaSandboxUnavailableError } from './eva-runner.ts';
+import { runScriptPlanInEva03 } from './script-plan.ts';
 import type { OperatorResolution } from './operator-directory.ts';
 import { canRunRemotePilot, chooseAdvisers, rankPilots, type Chosen, type Pilot, type PilotOffer } from './pilots.ts';
 import { defaultPolicy } from './policy.ts';
@@ -393,6 +395,122 @@ export class RuntimePlanning {
         return { sortieId, reply: question.text, question, steps, waiting };
       }
       if ('reply' in out.plan) return finish('done', out.plan.reply, undefined, stepDurationMs);
+      if ('script' in out.plan) {
+        try {
+          const pendingGateReplies = new Map<string, ActReply>();
+          const waitingApprovals: Array<{ approvalId: string; tool: string; reason?: string }> = [];
+          const loadAllowedReadTools = async () => {
+            const packs = this.host.home ? readConfig(this.host.home).packs : undefined;
+            const ext = await this.host.externalTools();
+            return [...builtinPackRegistry.filterToolDocs(toolDocs, packs), ...ext.docs]
+              .filter((t) => ext.byName.get(t.name)?.eva !== '03')
+              .map((t) => ({
+                name: t.name,
+                effect: t.effect,
+                fingerprint: `${t.name}:${t.effect}:${t.version ?? '1'}`,
+              }));
+          };
+          const scriptRes = await runScriptPlanInEva03({
+            jobId: `${sortieId}-script-${steps.length}`,
+            source: out.plan.script,
+            tools: loadAllowedReadTools,
+            gate: async (t, a) => {
+              const g = await this.host
+                .gate(sortieId, {
+                  request: message,
+                  tool: t,
+                  args: a,
+                  ...(context.length ? { earlier: context.slice(-3) } : {}),
+                })
+                .catch(() => ({ outcome: 'reject' as const, reason: 'Gate error' }));
+              if (g.outcome === 'grant') {
+                const gid = g.actionId ?? `${sortieId}-${pendingGateReplies.size + 1}`;
+                pendingGateReplies.set(gid, g);
+                return { outcome: 'grant', grantId: gid };
+              }
+              if (g.outcome === 'approval') {
+                if ('approvalId' in g && g.approvalId) {
+                  waitingApprovals.push({ approvalId: g.approvalId, tool: t, reason: g.reason });
+                }
+                return { outcome: 'approval', reason: g.reason ?? 'Approval required' };
+              }
+              return { outcome: 'reject', reason: g.reason };
+            },
+            execute: async (t, a, grantId) => {
+              const g = grantId ? pendingGateReplies.get(grantId) : undefined;
+              if (grantId) pendingGateReplies.delete(grantId);
+              const ext = await this.host.externalTools();
+              const granted = ext.byName.get(t);
+              if (granted && g && 'external' in g && g.external) {
+                const extT0 = performance.now();
+                const outExt = (await this.host
+                  .toolsProcess()
+                  .call(
+                    'tools.call',
+                    { server: granted.server, tool: granted.tool, args: a, fingerprint: granted.fingerprint },
+                    120_000,
+                  )
+                  .catch((e) => ({ error: e instanceof Error ? e.message : 'The tools process did not answer.' }))) as {
+                  text?: string;
+                  error?: string;
+                };
+                await this.host.nervous.call('actions.finished', {
+                  sortieId,
+                  actionId: g.actionId,
+                  tool: t,
+                  durationMs: Math.max(0, Math.round(performance.now() - extT0)),
+                  ...(outExt.error
+                    ? { error: outExt.error.slice(0, 1000) }
+                    : { text: (outExt.text ?? '').slice(0, 8000) }),
+                });
+                if (outExt.error) throw new Error(outExt.error);
+                return outExt.text ?? '';
+              }
+              return g && 'result' in g ? g.result : undefined;
+            },
+          });
+          for (const rec of scriptRes.receipts) {
+            await this.host.record(sortieId, steps, {
+              tool: rec.tool,
+              args: { digest: rec.argsDigest },
+              outcome: rec.outcome === 'grant' ? 'grant' : rec.outcome === 'approval' ? 'approval' : 'invalid',
+              ...(rec.reason ? { error: rec.reason } : {}),
+            });
+          }
+          await this.host.record(
+            sortieId,
+            steps,
+            {
+              tool: 'script.plan',
+              args: { calls: scriptRes.calls },
+              outcome: scriptRes.status === 'completed' ? 'grant' : 'invalid',
+              ...(scriptRes.status === 'completed'
+                ? { result: scriptRes.result, tainted: true }
+                : { error: scriptRes.reason ?? 'Script plan terminated' }),
+            },
+            undefined,
+            stepDurationMs,
+          );
+          if (waitingApprovals.length) {
+            for (const w of waitingApprovals) {
+              waiting.push({ approvalId: w.approvalId, tool: w.tool, reason: w.reason ?? 'Approval required' });
+            }
+            const msg = waitingReply(lang(), waitingApprovals[0]!.tool, {});
+            await this.host.nervous.call('sorties.finish', { sortieId, reply: msg });
+            await this.host.note(sortieId, 'misato.waiting', { approvalIds: waiting.map((w) => w.approvalId) });
+            return { sortieId, reply: msg, steps, waiting };
+          }
+        } catch (err) {
+          const msg =
+            err instanceof EvaSandboxUnavailableError
+              ? 'EVA-03 isolation unavailable; use individual read tool calls.'
+              : err instanceof Error
+                ? err.message
+                : String(err);
+          await this.host.record(sortieId, steps, { tool: 'script.plan', args: {}, outcome: 'invalid', error: msg });
+        }
+        continue;
+      }
       const { tool } = out.plan.action;
       const shouldReconcile =
         tool === 'reminders.add' || (tool === 'reminders.update' && typeof out.plan.action.args.due === 'string');

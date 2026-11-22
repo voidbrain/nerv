@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 82.75 h agent + 11 h owner across 110 open steps of 38 features and 14 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 78.75 h agent + 11 h owner across 109 open steps of 38 features and 14 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1921,9 +1921,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-112-T03 — Read-only script executor inside EVA with a gate decision per call (Planned).
+💻 **→** Next: F-112-T04 — Gauntlet case comparing planner steps and tokens with and without scripts (Planned).
 
 | | |
 |---|---|
@@ -1933,18 +1933,18 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-112-t03"></a>F-112-T03 — Read-only script executor inside EVA with a gate decision per call | 4 h | 0 h | 4 h | Planned | — | [F-112-T04](#f-112-t04) | 🤖 | — |
-| 🟢 Small | <a id="f-112-t04"></a>F-112-T04 — Gauntlet case comparing planner steps and tokens with and without scripts | 1 h | 0 h | 1 h | Planned | [F-112-T03](#f-112-t03) | — | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 6.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 5 h | 2 of 4 completed | | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-112-t04"></a>F-112-T04 — Gauntlet case comparing planner steps and tokens with and without scripts | 1 h | 0 h | 1 h | Planned | 🤖 | — |
+| 🟢 Small | **Total** | 6.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 1 h | 3 of 4 completed | | |
 
-<details><summary>Done steps (2)</summary>
+<details><summary>Done steps (3)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-112-t01"></a>F-112-T01 — Design note: script subset, EVA placement, per-call gate and limits | 1.5 h | 0 h | Completed | [PR #614](https://github.com/voidbrain/nerv/pull/614) design note |
 | — | <a id="f-112-t02"></a>F-112-T02 — Owner decides whether to adopt script plans and their scope | — | 0 h | Completed | — |
+| — | <a id="f-112-t03"></a>F-112-T03 — Read-only script executor inside EVA with a gate decision per call | 4 h | 0 h | Completed | — |
 
 </details>
 

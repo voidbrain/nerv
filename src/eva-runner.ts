@@ -1,4 +1,5 @@
 import { execFile, spawn } from 'node:child_process';
+import { StringDecoder } from 'node:string_decoder';
 import { chmodSync, copyFileSync, existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative } from 'node:path';
@@ -55,6 +56,9 @@ export interface Eva03JobSpec {
   readonly onLedgerEvent?: (event: Eva03LedgerEvent) => void;
   /** Lists processes for B-099's tracking; tests point it at a missing binary to see tracking fail. */
   readonly psPath?: string;
+  /** F-112-T03: optional line-delimited stdin/stdout bridge for gated EVA-03 script plans. */
+  readonly onBridgeLine?: (line: string, send: (replyLine: string) => void) => void;
+  readonly maxBridgeLineBytes?: number;
 }
 
 /** F-049-T07: what a job of any EVA class asks of its instance, beyond the EVA-03 fields. */
@@ -571,7 +575,7 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
         cwd: workspaceDir,
         env: buildEva03CleanEnv(workspaceDir, spec.command, proxyEnv),
         detached: true,
-        stdio: ['ignore', 'pipe', 'pipe'],
+        stdio: [spec.onBridgeLine ? 'pipe' : 'ignore', 'pipe', 'pipe'],
       });
       if (child.pid) tracker = new DescendantTracker(child.pid, spec.psPath ?? '/bin/ps');
 
@@ -582,6 +586,13 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
       let timedOut = false;
       let cancelled = false;
       let settled = false;
+      let bridgeBuf = '';
+      const bridgeDecoder = spec.onBridgeLine ? new StringDecoder('utf8') : undefined;
+      const maxBridgeBytes = spec.maxBridgeLineBytes ?? 48 * 1024;
+      const sendToChild = (replyLine: string) => {
+        if (!child.stdin || child.stdin.destroyed || !child.stdin.writable) return;
+        child.stdin.write(`${replyLine}\n`);
+      };
 
       const appendChunk = (target: Buffer[], chunk: Buffer) => {
         if (totalBytes >= maxOutputBytes) {
@@ -599,7 +610,29 @@ export async function runEvaJob(spec: EvaJobSpec): Promise<Eva03JobResult> {
         }
       };
 
-      child.stdout?.on('data', (chunk: Buffer) => appendChunk(stdoutChunks, chunk));
+      child.stdout?.on('data', (chunk: Buffer) => {
+        appendChunk(stdoutChunks, chunk);
+        if (spec.onBridgeLine && bridgeDecoder) {
+          bridgeBuf += bridgeDecoder.write(chunk);
+          for (;;) {
+            const nl = bridgeBuf.indexOf('\n');
+            if (nl < 0) {
+              if (Buffer.byteLength(bridgeBuf, 'utf8') > maxBridgeBytes) {
+                bridgeBuf = '';
+                if (child.pid) terminateProcessGroup(child.pid);
+                spec.onBridgeLine(
+                  JSON.stringify({ kind: 'error', reason: 'Bridge frame exceeds budget' }),
+                  sendToChild,
+                );
+              }
+              break;
+            }
+            const line = bridgeBuf.slice(0, nl).trim();
+            bridgeBuf = bridgeBuf.slice(nl + 1);
+            if (line) spec.onBridgeLine(line, sendToChild);
+          }
+        }
+      });
       child.stderr?.on('data', (chunk: Buffer) => appendChunk(stderrChunks, chunk));
 
       const timer = setTimeout(() => {

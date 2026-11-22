@@ -1,6 +1,5 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { parsePlan } from '../src/misato.ts';
 
 describe('F-112-T03: read-only script plans inside EVA-03', () => {
@@ -61,6 +60,28 @@ describe('F-112-T03: read-only script plans inside EVA-03', () => {
     );
     // Source over 16 KiB hard ceiling rejected
     assert.throws(() => parseScriptPlan('const a = "' + 'x'.repeat(17_000) + '"; return a;', tools), /source/i);
+    // Aliasing before push rejected
+    assert.throws(
+      () =>
+        parseScriptPlan(
+          'const a = []; const b = a; a.push(tools.call("reminders.list", {})); tools.call("reminders.list", { q: b[0] }); return b;',
+          tools,
+        ),
+      /result-derived/i,
+    );
+    // Tainted control-flow gating tools.call rejected
+    assert.throws(
+      () =>
+        parseScriptPlan(
+          'const r = tools.call("reminders.list", {}); if (r[0]) { tools.call("reminders.list", {}); } return r;',
+          tools,
+        ),
+      /control flow/i,
+    );
+    // Prototype property keys & non-object args rejected
+    assert.throws(() => parseScriptPlan('const o = { "__proto__": 1 }; return o;', tools), /forbidden/i);
+    assert.throws(() => parseScriptPlan('const x = {}; return x["constructor"];', tools), /forbidden/i);
+    assert.throws(() => parseScriptPlan('return tools.call("reminders.list", "bad");', tools), /object literal/i);
   });
 
   it('executes inside EVA-03 with a MAGI gate decision per call, fails closed on denial/fingerprint change/missing sandbox', async () => {
@@ -121,7 +142,8 @@ describe('F-112-T03: read-only script plans inside EVA-03', () => {
       source,
       tools,
       bwrapPath: useFixture,
-      gate: async (_tool, args) => (args.filter === 'tomorrow' ? { outcome: 'reject', reason: 'policy' } : { outcome: 'grant' }),
+      gate: async (_tool, args) =>
+        args.filter === 'tomorrow' ? { outcome: 'reject', reason: 'policy' } : { outcome: 'grant' },
       execute: async (_tool, args) => {
         exec2.push(String(args.filter));
         return [];
@@ -159,10 +181,101 @@ describe('F-112-T03: read-only script plans inside EVA-03', () => {
     });
     assert.equal(overCalls.status, 'terminated');
     assert.match(overCalls.reason ?? '', /budget|call/i);
+
+    // 6) Loop iteration budget stops over-iteration
+    const overIter = await runScriptPlanInEva03({
+      jobId: 'script-max-iter',
+      source: 'const a = [1, 2, 3, 4]; for (const x of a) { const y = x; } return a;',
+      tools,
+      limits: { maxIterations: 2 },
+      bwrapPath: useFixture,
+      gate: async () => ({ outcome: 'grant' }),
+      execute: async () => [],
+    });
+    assert.equal(overIter.status, 'terminated');
+    assert.match(overIter.reason ?? '', /iteration/i);
+
+    // 7) Bridge frame budget & aggregate output budget
+    const overFrame = await runScriptPlanInEva03({
+      jobId: 'script-max-frame',
+      source: 'return tools.call("reminders.list", {});',
+      tools,
+      limits: { maxFrameBytes: 128 },
+      bwrapPath: useFixture,
+      gate: async () => ({ outcome: 'grant' }),
+      execute: async () => ({ big: 'z'.repeat(500) }),
+    });
+    assert.equal(overFrame.status, 'terminated');
+    assert.match(overFrame.reason ?? '', /frame budget/i);
+
+    // 8) Wall-time timeout marks late execute resolution as completed_late
+    const lateReceipts: Array<{ outcome: string }> = [];
+    const timedOut = await runScriptPlanInEva03({
+      jobId: 'script-timeout-late',
+      source: 'return tools.call("reminders.list", {});',
+      tools,
+      limits: { timeoutMs: 120 },
+      bwrapPath: useFixture,
+      gate: async () => ({ outcome: 'grant', grantId: 'g-late' }),
+      execute: async () => {
+        await new Promise((r) => setTimeout(r, 200));
+        return { ok: true };
+      },
+      onReceipt: (r) => lateReceipts.push(r),
+    });
+    assert.equal(timedOut.status, 'terminated');
+    assert.match(timedOut.reason ?? '', /wall-time/i);
+    assert.equal(lateReceipts[0]?.outcome, 'completed_late');
   });
 
-  it('join: planner script plan executes through Runtime gate and executor and records per-call sortie events', () => {
-    const src = readFileSync('src/runtime-planning.ts', 'utf8');
-    assert.match(src, /runScriptPlanInEva03/);
+  it('join: RuntimePlanning executes { script } through host gate and records per-call + script.plan steps', async () => {
+    const { RuntimePlanning } = await import('../src/runtime-planning.ts');
+    const gated: string[] = [];
+    const recorded: unknown[] = [];
+    const modelTurns = [
+      {
+        plan: {
+          script:
+            'const a = tools.call("reminders.list", { q: "a" }); const b = tools.call("reminders.list", { q: "b" }); return [a, b];',
+        },
+      },
+      { plan: { reply: 'Done reading both.' } },
+    ];
+    let turnIdx = 0;
+    const host = {
+      home: undefined,
+      reminderPage: async () => ({ items: [] }),
+      baseNames: async () => [],
+      pilots: () => [],
+      externalTools: async () => ({ docs: [], byName: new Map() }),
+      getRemoteConsultant: () => undefined,
+      proposePilot: async () => ({}),
+      remoteOffers: async () => [],
+      remotePilots: async () => [],
+      revokedBases: async () => [],
+      resolveOperator: async () => undefined,
+      spear: async () => ({}),
+      chatOnce: async () => ({ sortieId: 'S-TEST', steps: [], waiting: [] }),
+      modelCall: async () => modelTurns[turnIdx++] ?? { plan: { reply: 'fallback' } },
+      gate: async (_sid: string, req: { tool: string }) => {
+        gated.push(req.tool);
+        return { outcome: 'grant' as const, actionId: `act-${gated.length}`, result: [{ title: 'ok' }] };
+      },
+      record: async (_sid: string, steps: unknown[], step: unknown) => {
+        steps.push(step);
+        recorded.push(step);
+      },
+      note: async () => {},
+      nervous: { call: async (m: string) => (m === 'memory.recall' ? [] : {}) },
+      toolsProcess: () => ({ call: async () => ({}) }),
+    };
+    const planning = new RuntimePlanning(host as unknown as ConstructorParameters<typeof RuntimePlanning>[0]);
+    const out = await planning.loop('S-TEST', 'check reminders', [], [], { consult: false });
+    assert.equal(out.reply, 'Done reading both.');
+    assert.deepEqual(gated, ['reminders.list', 'reminders.list']);
+    assert.equal(
+      recorded.some((s) => (s as { tool?: string }).tool === 'script.plan'),
+      true,
+    );
   });
 });
