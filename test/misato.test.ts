@@ -942,7 +942,6 @@ test('F-106-T03: core tools stay always offered; domain toolsets load only when 
   }
 });
 
-
 test('F-098-T04: Italian crash and spares phrases unlock the fleet domain (fleet.chat)', () => {
   assert.equal(detectToolDomains({ request: 'ho crashato Smoke, motore sinistro inferiore rotto' }).has('fleet'), true);
   assert.equal(detectToolDomains({ request: 'quanti motori di scorta mi restano?' }).has('fleet'), true);
