@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { join } from 'node:path';
 import { parsePlan } from '../src/misato.ts';
 
 describe('F-112-T03: read-only script plans inside EVA-03', () => {
@@ -113,7 +114,8 @@ describe('F-112-T03: read-only script plans inside EVA-03', () => {
     const gatedCalls: Array<{ tool: string; args: Record<string, unknown> }> = [];
     const executedCalls: Array<{ tool: string; args: Record<string, unknown> }> = [];
     const receipts: unknown[] = [];
-    const useFixture = process.platform === 'linux' ? 'test/fixtures/eva/unconfined-bwrap' : undefined;
+    const useFixture =
+      process.platform === 'linux' ? join(import.meta.dirname, 'fixtures', 'eva', 'unconfined-bwrap') : undefined;
     const res = await runScriptPlanInEva03({
       jobId: 'script-ok-1',
       source,
