@@ -146,6 +146,11 @@ export const HELP_GROUPS: HelpGroup[] = [
         ],
       },
       { name: 'coding-job', args: 'REPO JOB ALLOWLIST', about: 'Run a coding job on an allowed repository' },
+      {
+        name: 'harness-job',
+        args: 'REPO JOB TEMPLATE TAG ALLOWLIST',
+        about: 'Apply a pinned harness template tag as a coding job',
+      },
       { name: 'headless-resume', args: 'TARGETS.json', about: 'Resume headless sessions' },
       { name: 'quarantine', args: 'fetch|report URL', about: 'Fetch untrusted content into quarantine' },
       { name: 'browser-click', args: 'CONTROL', about: 'Click a named browser control' },
