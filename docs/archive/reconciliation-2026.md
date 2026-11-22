@@ -2,7 +2,7 @@
 
 ## 2026-11-22 — main `ba5f9bc`
 
-PRs #646–#652 merged on green CI (#646–#648 docs-only; #649–#652 full CI). They advanced F-078-T07 (#646), owner decisions F-101-T03/F-112-T02/F-078-T08 (#647), closed B-073..B-104/F-027 (#648), F-107-T02 (#649), F-108 UI (#650), F-112-T03 (#651), and F-112-T04 (#652); F-112 closed.
+PRs #646–#652 merged on green CI (#646–#648 docs-only; #649–#652 full CI). They advanced F-078, F-101, F-107, F-108, closed B-073–B-104/F-027, and completed F-112 (closed). Reconciled by PR #653.
 
 ## 2026-11-22 — main `c1ad6b7`
 
