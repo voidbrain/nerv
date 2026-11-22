@@ -1,5 +1,9 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-22 — main `c8c6b6c`
+
+PR #631 merged on green CI and closed F-006-T14. PRs #621–#630 and #632–#634 remain reconciled by the preceding entry; records are current.
+
 ## 2026-11-22 — main `18cf52a`
 
 PRs #621–#630 and #632–#634 merged on green CI. #622 reconciled B-091; #623 closed B-086; #621/#627–#629 advanced F-114; #624–#626 advanced F-056; #630/#634 advanced F-078/F-116; #632 advanced F-084; #633 advanced F-087. Records are current.
