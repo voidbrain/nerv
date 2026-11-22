@@ -862,7 +862,7 @@
         ? "<div class='row' style='gap:6px'>" + ctrl.hdr + right + "</div>"
         : "<div class='row'><span class='b'>" + esc(name) + "</span>" + right + "</div>";
       const inner = top + "<div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + ctrl.body;
-      return ctrl.attrs ? "<form class='card pilot-model-form' " + ctrl.attrs + ">" + inner + "</form>" : "<div class='card'>" + inner + "</div>";
+      return ctrl.attrs ? "<div class='card'><form class='pilot-model-form' " + ctrl.attrs + ">" + inner + "</form></div>" : "<div class='card'>" + inner + "</div>";
     };
     const stageOf = p => p.retired ? "retired" : p.stage; const counts = {}; roster.forEach(p => { counts[stageOf(p)] = (counts[stageOf(p)] || 0) + 1; });
     const tab = currentTab("pilots", "prototype"); const shown = roster.filter(p => stageOf(p) === tab);
