@@ -612,7 +612,8 @@ test('an answer without an action: Misato passed, a green route straight to Debr
   );
   assert.match(
     js,
-    /if \(e\[2\] === "answer"\) return stepState\(s, "plan"\) === "done" && stepState\(s, "debrief"\) === "done"/,
+    /if \(e\[2\] === "answer"\) return stepState\(s, "plan"\) === "done" && activeOrDone\(stepState\(s, "debrief"\)\)/,
+    'B-106: answer edge activates with debrief',
   );
 });
 test("the apartment's count sits in the header like every other panel's sub-line, not a red badge (owner, 2026-11-05)", async () => {
@@ -1460,7 +1461,11 @@ test('B-106: answer edge activates with debrief and Sephirot markers are filled 
   const { readFileSync } = await import('node:fs');
   const html = readFileSync('web/public/dashboard/index.html', 'utf8');
   const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
-  assert.doesNotMatch(html, /\.sephirot svg\.edges path\s*\{[^}]*fill:\s*none/, 'CSS must not strip fill from marker arrowheads');
+  assert.doesNotMatch(
+    html,
+    /\.sephirot svg\.edges path\s*\{[^}]*fill:\s*none/,
+    'CSS must not strip fill from marker arrowheads',
+  );
   assert.match(src, /id='edge-arrow-passed'/, 'explicit passed marker arrowhead for cross-browser rendering');
 
   const fn = (name: string) => {
@@ -1484,7 +1489,11 @@ test('B-106: answer edge activates with debrief and Sephirot markers are filled 
     actions: [],
   };
   assert.equal(api.edgeShown(debriefActive, answer), true);
-  assert.equal(api.passedEdge(debriefActive, answer), 'passed', 'plan -> debrief line passes as soon as debrief activates');
+  assert.equal(
+    api.passedEdge(debriefActive, answer),
+    'passed',
+    'plan -> debrief line passes as soon as debrief activates',
+  );
 });
 test('the flow header names the sortie by its code only; every EVA class header stacks its name and status (F-108, F-049-T09)', async () => {
   const { readFileSync } = await import('node:fs');

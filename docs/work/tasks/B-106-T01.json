@@ -2,54 +2,40 @@
   "version": 1,
   "id": "B-106-T01",
   "parent": "B-106",
-  "title": "Update lint tooling past the minimatch advisory",
-  "goal": "Development dependencies contain no version affected by GHSA-g3hv-75wg-m249",
+  "title": "Fix Sephirot answer-edge activation and marker arrowhead fills",
+  "goal": "plan -> debrief passes as soon as debrief activates and all Sephirot edge arrowheads render filled",
   "status": "closed",
   "acceptance": [
-    "npm audit reports zero vulnerabilities",
-    "The typescript-eslint update is patch/minor only and does not weaken lint rules",
-    "Lint, typecheck and the full test suite pass"
+    "Failing test committed first in test/dashboard.test.ts",
+    "passedEdge marks answer/relay/declined passed when debrief is on, wait, or done",
+    ".sephirot svg.edges > path does not strip marker fill and drawEdges emits explicit per-state arrowheads"
   ],
   "dependsOn": [],
   "resources": [
-    "package.json",
-    "package-lock.json",
+    "web/public/dashboard/**",
+    "test/dashboard.test.ts",
     "docs/work/records/B-106.md",
-    "docs/work/tasks/B-106-T01.json",
     "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",
-    "security-review"
+    "regression-design"
   ],
-  "privacy": "Public package metadata and neutral repository tests only; no credentials or private data.",
+  "privacy": "Neutral fixtures only; no personal data.",
   "validation": [
-    "npm audit",
-    "npm run lint",
-    "npm run typecheck",
-    "npm test",
+    "node --test test/dashboard.test.ts",
     "npm run check:fast"
   ],
   "escalation": [
-    "A major dependency update or lint-policy change requires separate scope"
+    "A material scope or effort increase goes to the owner"
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h",
-    "basis": "Estimated 2026-11-20: one non-major development dependency update and the full local verification set. Not a measurement.",
-    "reviewed": "2026-11-20",
+    "estimate": "0.5 h",
+    "basis": "Fixed 2026-11-22 from owner report on S-F11B.",
+    "reviewed": "2026-11-22",
     "agentHours": 0,
-    "baselineAgentHours": 0.25,
-    "estimateAgentHours": 0.25
-  },
-  "prs": [
-    {
-      "pr": 598,
-      "note": "audit evidence and implementation"
-    },
-    {
-      "pr": 600,
-      "note": "verification and closure"
-    }
-  ]
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
 }

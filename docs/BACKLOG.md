@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 12 | 10 | 37 | 20 |
+| **This week** | 12 | 10 | 38 | 20 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 43 | 22 |
-| **Require Human 🧑** | 14 | 6 |
+| **Open** | 43 | 23 |
+| **Require Human 🧑** | 14 | 7 |
 
 ### Require Human 🧑
 
@@ -26,7 +26,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-004](#f-004) | [F-101](#f-101) | [B-056](#b-056) |  |
 | [F-012](#f-012) |  | [B-095](#b-095) |  |
 | [F-086](#f-086) |  | [B-096](#b-096) |  |
-| [F-087](#f-087) |  |  |  |
+| [F-087](#f-087) |  | [B-106](#b-106) |  |
 | [F-092](#f-092) |  |  |  |
 | [F-108](#f-108) |  |  |  |
 | [F-060](#f-060) |  |  |  |
@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 90 h agent + 11.25 h owner across 123 open steps of 40 features and 22 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 90 h agent + 11.5 h owner across 124 open steps of 40 features and 23 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -3123,6 +3123,52 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: Unit: dashboard suite 38 pass. Owner live check pending. |
 | Reviewed | 2026-11-19 |
+
+</details>
+
+---
+### <a id="b-106"></a>[🐞 B-106](#top)
+
+**Sephirot flow: answer edge lags behind Debrief activation and marker arrowheads lack fill**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
+
+🧑 **→** Confirm on the live dashboard after rebuilding `dist/web` and restarting `nerv`.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-22 on S-F11B: after Misato (`plan`), `DEBRIEF` activates before the `plan → debrief` (`answer`) line lights up, and arrowheads on `answer` and `sync → apt` (`MISATO'S APT`) do not render filled (`fill: none` on `.sephirot svg.edges path` matched `<marker><path>` and `context-stroke` failed to fill). |
+| **Reproduce** | Open the live dashboard EVA full view on an answer-only sortie (`S-F11B`) and inspect the `plan → debrief` and `sync → apt` edges. |
+| **Check** | Test committed failing first: `.sephirot svg.edges > path` leaves `<marker>` arrowheads filled, `drawEdges` emits explicit per-state markers (`#edge-arrow`, `#edge-arrow-passed`, `#edge-arrow-owner`, `#edge-arrow-skip`), and `passedEdge` marks `answer` / `relay` / `declined` passed as soon as `debrief` is `on`, `wait`, or `done`. The owner confirms on the live dashboard. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-106-t02"></a>B-106-T02 — Owner confirms Sephirot answer edge and arrowheads on live dashboard | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](work/records/B-106.md) |
+| 🟢 Small | **Total** | 0.5 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="b-106-t01"></a>B-106-T01 — Fix Sephirot answer-edge activation and marker arrowhead fills | 0.5 h | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-106.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Pending PR on `fix/b-106-sephirot-arrows`. Test: `B-106: answer edge activates with debrief and Sephirot markers are filled cleanly without context-stroke` in `test/dashboard.test.ts`. |
+| Opened | 2026-11-22 |
+| Verification | 2026-11-22: `node --test test/dashboard.test.ts` and `npm run check:fast` passed. |
+| Reviewed | 2026-11-22 |
 
 </details>
 
