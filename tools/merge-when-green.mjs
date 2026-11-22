@@ -12,6 +12,7 @@
 // repository's "Automatically delete head branches" setting.
 // Every check counts, not only the required ones: a failing optional check (code scanning, say) still stops it.
 import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
 
 const args = process.argv.slice(2);
 const at = args.indexOf('--every'),
@@ -21,7 +22,44 @@ if (!prs.length) {
   console.error('usage: node tools/merge-when-green.mjs <PR number>... [--every seconds]');
   process.exit(64);
 }
-const gh = (...a) => execFileSync('gh', a, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+const parseRepo = (raw) => {
+  const m = String(raw || '')
+    .trim()
+    .match(/github\.com[:/]([^/]+)\/([^/\s]+?)(?:\.git)?$/);
+  return m ? `${m[1]}/${m[2]}` : null;
+};
+const resolveRepo = () => {
+  const envRepo = String(process.env.GH_REPO || '').trim();
+  if (/^[^/\s]+\/[^/\s]+$/.test(envRepo)) return envRepo;
+  try {
+    const url = execFileSync('git', ['remote', 'get-url', 'origin'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const parsed = parseRepo(url);
+    if (parsed) return parsed;
+  } catch {
+    /* not a git checkout or no origin remote */
+  }
+  try {
+    const nwo = execFileSync('gh', ['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }).trim();
+    if (/^[^/\s]+\/[^/\s]+$/.test(nwo)) return nwo;
+  } catch {
+    /* ignore */
+  }
+  return null;
+};
+const repoSlug = resolveRepo();
+const [repoOwner, repoName] = repoSlug ? repoSlug.split('/') : ['{owner}', '{repo}'];
+// Run gh outside any local checkout so `gh pr merge` never fast-forwards a local branch
+const ghCwd = tmpdir();
+const gh = (...a) => {
+  const args = repoSlug && a[0] === 'pr' ? [...a, '--repo', repoSlug] : a;
+  return execFileSync('gh', args, { cwd: ghCwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+};
 
 /** One check's outcome: 'pass', 'fail' or 'wait', from a check run (status, conclusion) or a commit status (state). */
 const outcome = (c) => {
@@ -41,7 +79,18 @@ const queueQuery =
 /** Whether the PR's base branch has a merge queue and whether the PR is in it; throws when GitHub does not answer. */
 const queueOf = (pr) => {
   const q = JSON.parse(
-    gh('api', 'graphql', '-f', `query=${queueQuery}`, '-F', 'owner={owner}', '-F', 'repo={repo}', '-F', `n=${pr}`),
+    gh(
+      'api',
+      'graphql',
+      '-f',
+      `query=${queueQuery}`,
+      '-F',
+      `owner=${repoOwner}`,
+      '-F',
+      `repo=${repoName}`,
+      '-F',
+      `n=${pr}`,
+    ),
   )?.data?.repository?.pullRequest;
   if (typeof q?.isMergeQueueEnabled !== 'boolean') throw Error('no merge queue answer');
   return q;
