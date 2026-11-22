@@ -13,7 +13,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 14 |
+| **Open** | 40 | 14 |
 | **Require Human 🧑** | 12 | 7 |
 
 ### Require Human 🧑
