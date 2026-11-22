@@ -742,3 +742,79 @@ test('F-045-T01: Kaji heartbeat exchanges offered pilots between enrolled bases'
     rmSync(dirB, { recursive: true, force: true });
   }
 });
+
+test('F-107-T02: heartbeats report validated reachable peers across two KajiLinks', async () => {
+  const { Runtime } = await import('../src/runtime.ts');
+  const dirA = mkdtempSync(join(tmpdir(), 'kaji-reach-a-'));
+  const dirB = mkdtempSync(join(tmpdir(), 'kaji-reach-b-'));
+  const a = keys();
+  const b = keys();
+  const portA = await freePort();
+  const portB = await freePort();
+  const storeA = new Store(join(dirA, 'a.sqlite'));
+  const storeB = new Store(join(dirB, 'b.sqlite'));
+  const regA = new Registry(storeA.db, root.publicKey);
+  const regB = new Registry(storeB.db, root.publicKey);
+  const r1 = rec({
+    kind: 'enrol',
+    baseId: 'NERV-01',
+    name: 'Tokyo-3',
+    publicKey: a.publicKey,
+    address: `127.0.0.1:${portA}`,
+  });
+  const r2 = rec({
+    kind: 'enrol',
+    baseId: 'NERV-02',
+    name: 'Tabgha',
+    publicKey: b.publicKey,
+    address: `127.0.0.1:${portB}`,
+  });
+  for (const r of [r1, r2]) {
+    regA.add(r);
+    regB.add(r);
+  }
+
+  writeFileSync(
+    join(dirA, 'config.json'),
+    JSON.stringify({ base: { id: 'NERV-01', name: 'Tokyo-3' }, kaji: { root: root.publicKey } }),
+  );
+  const rtA = new Runtime(join(dirA, 'rt.sqlite'), undefined, dirA);
+  await rtA.ready();
+  await rtA.kaji.add([r1, r2]);
+  rtA.setBaseKey(a.publicKey);
+  const linkA = new KajiLink({
+    baseId: 'NERV-01',
+    key: a.privateKey,
+    publicKey: a.publicKey,
+    registry: rtA.kaji,
+    onReachable: (id, peers) => rtA.notePeerReachable(id, peers),
+  });
+  const heardOnB = new Map<string, string[]>();
+  const linkB = new KajiLink({
+    baseId: 'NERV-02',
+    key: b.privateKey,
+    publicKey: b.publicKey,
+    registry: port(regB),
+    onReachable: (id, peers) => heardOnB.set(id, peers),
+  });
+  try {
+    await linkA.start(60_000);
+    await linkB.start(60_000);
+    await until(() => heardOnB.has('NERV-01'));
+    // Second round carries each side's updated ownReachable list.
+    await linkA.heartbeat();
+    await linkB.heartbeat();
+    assert.deepEqual(heardOnB.get('NERV-01'), ['NERV-02']);
+    const bases = (await rtA.bases()) as Array<{ baseId: string; reachable?: string[] | null }>;
+    assert.deepEqual(bases.find((x) => x.baseId === 'NERV-01')?.reachable, ['NERV-02']);
+    assert.deepEqual(bases.find((x) => x.baseId === 'NERV-02')?.reachable, ['NERV-01']);
+  } finally {
+    await linkA.stop();
+    await linkB.stop();
+    await rtA.close();
+    storeA.close();
+    storeB.close();
+    rmSync(dirA, { recursive: true, force: true });
+    rmSync(dirB, { recursive: true, force: true });
+  }
+});

@@ -1508,6 +1508,171 @@ test('the flow header names the sortie by its code only; every EVA class header 
   assert.doesNotMatch(rule, /flex-wrap:\s*wrap/, 'no width-dependent wrapping');
 });
 
+test('F-107-T02: mesh lines colour --ok when both peers report each other, --warn when one does not, --muted when unreported', async () => {
+  const { readFileSync } = await import('node:fs');
+  const liveSrc = readFileSync('web/public/dashboard/live.js', 'utf8');
+  const applyStart = liveSrc.indexOf('  function applyBases(');
+  const applyEnd = liveSrc.indexOf('\n  }\n  const sinceText', applyStart);
+  const applyBody = liveSrc.slice(applyStart, applyEnd + 4);
+
+  const dashSrc = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const drawStart = dashSrc.indexOf('function drawMap(');
+  const drawBody = dashSrc.slice(drawStart, dashSrc.indexOf('\n}\n', drawStart) + 2);
+
+  const BASES: Array<{ id: string; name: string; status: string; lon: number; lat: number }> = [];
+  const LINKS: unknown[][] = [];
+  const CAGES: Array<{ base: string }> = [];
+  const state: { kajiBases?: unknown; meshStates?: Record<string, string>; packets: unknown[] } = { packets: [] };
+  const map = {
+    ready: true,
+    w: 200,
+    h: 120,
+    dpr: 1,
+    contours: [],
+    linkPaths: {
+      'nerv-02|nerv-01': [
+        [0, 0],
+        [10, 10],
+      ],
+      'nerv-03|nerv-01': [
+        [0, 0],
+        [10, 10],
+      ],
+      'nerv-02|nerv-03': [
+        [0, 0],
+        [10, 10],
+      ],
+    },
+    proj: () => [10, 10],
+  };
+
+  const applyBases = new Function(
+    'state',
+    'BASES',
+    'LINKS',
+    'CAGES',
+    'document',
+    'initMap',
+    'observeTelegram',
+    'pulseHeartbeats',
+    `let basesKey = '';\n${applyBody}\nreturn applyBases;`,
+  )(
+    state,
+    BASES,
+    LINKS,
+    CAGES,
+    { getElementById: () => ({ innerHTML: '' }) },
+    () => {},
+    () => {},
+    () => {},
+  ) as (list: unknown[], health: string) => void;
+
+  const strokes: string[] = [];
+  const ctx = {
+    fillStyle: '',
+    strokeStyle: '',
+    globalAlpha: 1,
+    lineWidth: 1,
+    font: '',
+    textAlign: '',
+    fillRect() {},
+    strokeRect() {},
+    createRadialGradient: () => ({ addColorStop() {} }),
+    setLineDash() {},
+    setTransform() {},
+    lineDashOffset: 0,
+    beginPath() {},
+    moveTo() {},
+    lineTo() {},
+    stroke() {
+      strokes.push(String(this.strokeStyle));
+    },
+    arc() {},
+    fill() {},
+    fillText() {},
+    measureText: () => ({ width: 40 }),
+  };
+
+  const drawMap = new Function(
+    'ctx',
+    'W',
+    'H',
+    'map',
+    'BASES',
+    'LINKS',
+    'state',
+    'cssVar',
+    'statusColor',
+    'document',
+    `function esc(s){return String(s);}function drawTelegram(){}\n${drawBody}\nreturn drawMap;`,
+  )(
+    ctx,
+    200,
+    120,
+    map,
+    BASES,
+    LINKS,
+    state,
+    (v: string) => v,
+    () => 'status-col',
+    { getElementById: () => ({ innerHTML: '', getContext: () => ctx }) },
+  ) as (now: number) => void;
+
+  const baseEntry = (baseId: string, main: boolean, reachable: string[] | null) => ({
+    baseId,
+    name: baseId,
+    address: '10.0.0.1:4318',
+    status: 'enrolled',
+    online: true,
+    self: main,
+    main,
+    health: { state: 'online', reasons: [] },
+    reachable,
+  });
+
+  // 1) Both peers report each other -> --ok
+  applyBases(
+    [
+      baseEntry('NERV-01', true, ['NERV-02', 'NERV-03']),
+      baseEntry('NERV-02', false, ['NERV-01', 'NERV-03']),
+      baseEntry('NERV-03', false, ['NERV-01', 'NERV-02']),
+    ],
+    'online',
+  );
+  assert.equal(state.meshStates?.['nerv-02|nerv-03'], 'ok');
+  strokes.length = 0;
+  drawMap(1000);
+  assert.equal(strokes.filter((s) => ['--ok', '--warn', '--muted'].includes(s)).at(-1), '--ok');
+
+  // 2) One peer omits the other -> --warn
+  applyBases(
+    [
+      baseEntry('NERV-01', true, ['NERV-02', 'NERV-03']),
+      baseEntry('NERV-02', false, ['NERV-01', 'NERV-03']),
+      baseEntry('NERV-03', false, ['NERV-01']),
+    ],
+    'online',
+  );
+  assert.equal(state.meshStates?.['nerv-02|nerv-03'], 'warn');
+  strokes.length = 0;
+  drawMap(1000);
+  assert.equal(strokes.filter((s) => ['--ok', '--warn', '--muted'].includes(s)).at(-1), '--warn');
+
+  // 3) Unreported -> --muted
+  applyBases(
+    [
+      baseEntry('NERV-01', true, ['NERV-02', 'NERV-03']),
+      baseEntry('NERV-02', false, ['NERV-01', 'NERV-03']),
+      baseEntry('NERV-03', false, null),
+    ],
+    'online',
+  );
+  assert.equal(state.meshStates?.['nerv-02|nerv-03'], 'unreported');
+  strokes.length = 0;
+  drawMap(1000);
+  assert.equal(strokes.filter((s) => ['--ok', '--warn', '--muted'].includes(s)).at(-1), '--muted');
+});
+
 test('F-049-T09: GET /api/eva/instances requires auth and returns live instances per machine', async () => {
   const store = new Store(':memory:');
   const { EvaJobs } = await import('../src/eva-jobs.ts');

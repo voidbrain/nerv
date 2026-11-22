@@ -13,7 +13,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 42 | 14 |
+| **Open** | 41 | 14 |
 | **Require Human 🧑** | 12 | 7 |
 
 ### Require Human 🧑
@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 84.25 h agent + 11 h owner across 111 open steps of 39 features and 14 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 82.75 h agent + 11 h owner across 110 open steps of 38 features and 14 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1817,52 +1817,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-107"></a>[✨ F-107](#top)
-
-**Kaji map: routes and the heartbeat mesh, readable base names and status colours**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-107-T02 — Heartbeats report reachable peers; the map colours each mesh line from both ends (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-18, after NERV-03 joined: with a main base the map drew only peer-to-main lines, so it showed routing but not that every pair of bases exchanges heartbeats (Tabgha and Calvary talk directly); base names were all capitals; the names in the list under the map did not follow their base's status; peer-to-main lines used the accent colour rather than a "communicating" green. |
-| **Reproduce** | Dashboard with three enrolled bases and a main base: map and list under it. |
-| **Check** | Routes to the main base are green while both ends are up; peers are joined by a thin neutral dotted heartbeat-mesh line that carries no pulses; base names keep their case; list names take their status colour; legend and design notes say so (F-107-T01). The mesh line is coloured from both peers' own reports once heartbeats carry them (F-107-T02). |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-107-t02"></a>F-107-T02 — Heartbeats report reachable peers; the map colours each mesh line from both ends | 1.5 h | 0 h | 1.5 h | Planned | — |
-| 🟡 Medium | **Total** | 2.5 h | 0.75 h (1 of 2 steps recorded) | 1.5 h | 1 of 2 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-107-t01"></a>F-107-T01 — Map: green routes, heartbeat mesh lines, names in their case and status colour | 1 h | 0.75 h (stated) | Completed | [PR #521](https://github.com/voidbrain/nerv/pull/521) map; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the owner live check |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-107.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-107-T01: [PR #521](https://github.com/voidbrain/nerv/pull/521) map; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the owner live check. `test/dashboard.test.ts` (B-065 bases test extended) |
-| Opened | 2026-11-18 |
-| Verification | 2026-11-18: CI green (PR #521) and the owner's live dashboard check. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
 ### <a id="f-109"></a>[✨ F-109](#top)
 
 **Pilots as persona cards with editable names and one Apply**
@@ -3432,6 +3386,52 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-107"></a>[✨ F-107](#top)
+
+**Kaji map: routes and the heartbeat mesh, readable base names and status colours**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P3 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-18, after NERV-03 joined: with a main base the map drew only peer-to-main lines, so it showed routing but not that every pair of bases exchanges heartbeats (Tabgha and Calvary talk directly); base names were all capitals; the names in the list under the map did not follow their base's status; peer-to-main lines used the accent colour rather than a "communicating" green. |
+| **Reproduce** | Dashboard with three enrolled bases and a main base: map and list under it. |
+| **Check** | Routes to the main base are green while both ends are up; peers are joined by a thin neutral dotted heartbeat-mesh line that carries no pulses; base names keep their case; list names take their status colour; legend and design notes say so (F-107-T01). The mesh line is coloured from both peers' own reports once heartbeats carry them (F-107-T02). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 2.5 h | 0.75 h (1 of 2 steps recorded) | 0 h | 2 of 2 completed | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-107-t01"></a>F-107-T01 — Map: green routes, heartbeat mesh lines, names in their case and status colour | 1 h | 0.75 h (stated) | Completed | [PR #521](https://github.com/voidbrain/nerv/pull/521) map; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the owner live check |
+| — | <a id="f-107-t02"></a>F-107-T02 — Heartbeats report reachable peers; the map colours each mesh line from both ends | 1.5 h | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-107.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-107-T01: [PR #521](https://github.com/voidbrain/nerv/pull/521) map; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the owner live check. [PR #649](https://github.com/voidbrain/nerv/pull/649) (F-107-T02); `test/dashboard.test.ts` (B-065 bases test extended) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-22: `test/kaji-link.test.ts` (`F-107-T02`) and `test/dashboard.test.ts` (`F-107-T02`) + `npm run check:fast` passed. Earlier: 2026-11-18: CI green (PR #521) and the owner's live dashboard check. |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
 ### <a id="f-111"></a>[✨ F-111](#top)
 
 **Typed results for tool calls**

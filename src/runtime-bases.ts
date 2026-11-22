@@ -43,6 +43,7 @@ export class RuntimeBases {
   private selfPrivateKey?: KeyObject;
   private readonly heard = new Map<string, HeardHealth>();
   private readonly channelsHeard = new Map<string, HeardChannel>();
+  private readonly reachableHeard = new Map<string, { peers: string[]; at: string }>();
   private ownChannel: () => ChannelState = () => ({ mode: 'unknown', checkedAt: new Date().toISOString() });
   private remoteSortieLoader?: RemoteSortieLoader;
 
@@ -126,6 +127,10 @@ export class RuntimeBases {
     this.heard.set(baseId, health);
   }
 
+  notePeerReachable(baseId: string, peers: string[], at = new Date().toISOString()): void {
+    this.reachableHeard.set(baseId, { peers: [...peers], at });
+  }
+
   /** This base's health as it reports it to its peers: degraded with the reasons doctor and status give. */
   async baseHealth(): Promise<BaseHealth> {
     const h = await this.host.health();
@@ -169,10 +174,22 @@ export class RuntimeBases {
         now - Date.parse(channel.receivedAt) < ONLINE_MS &&
         channelIsFresh(channel, now, ONLINE_MS);
       const op = directory.get(b.baseId);
+      const heardReach = this.reachableHeard.get(b.baseId);
+      const reachable =
+        b.status !== 'enrolled'
+          ? null
+          : self
+            ? heardReach && now - Date.parse(heardReach.at) < ONLINE_MS
+              ? heardReach.peers
+              : null
+            : online && heardReach && now - Date.parse(heardReach.at) < ONLINE_MS
+              ? heardReach.peers
+              : null;
       return {
         ...b,
         channel,
         channelFresh,
+        reachable,
         operator: op ? { name: op.operatorName, aliases: op.aliases, defaulted: op.defaulted, stale: op.stale } : null,
         lastSeen: seen[b.baseId] ?? null,
         online,
