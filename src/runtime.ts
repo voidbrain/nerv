@@ -14,7 +14,7 @@ import { ItemLockManager, itemKeysForTool } from './item-locks.ts';
 import type { Reminder, ReminderInput, InboxEntry, InboxPage } from './store.ts';
 import type { RouteHealth } from './route-health.ts';
 import type { ModelChange, ModelSetup } from './model-setup.ts';
-import { readConfig, setHealthThresholds as persistHealthThresholds } from './config.ts';
+import { readConfig, setHealthThresholds as persistHealthThresholds, setSchedule } from './config.ts';
 import type { ActionDetail, Approval, Decision, SortieSummary } from './ledger.ts';
 import type { SortieEvent } from './events.ts';
 import type { WorkerLink } from './worker-link.ts';
@@ -895,6 +895,24 @@ export class Runtime implements StoreApi {
     if (this.home) return persistHealthThresholds(this.home, thresholds);
     this.memoryHealthThresholds = validateHealthThresholds(thresholds);
     return this.memoryHealthThresholds;
+  }
+  private memoryBriefAt?: string;
+  scheduleSettings(): { brief: string; timeZone: string } {
+    const cfg = this.home ? readConfig(this.home) : undefined;
+    return {
+      brief: cfg ? (cfg.brief?.at ?? 'off') : (this.memoryBriefAt ?? '08:00'),
+      timeZone: cfg?.timeZone ?? 'Europe/Rome',
+    };
+  }
+  setBriefSchedule(brief: unknown): { brief: string; timeZone: string } {
+    if (typeof brief !== 'string' || (brief !== 'off' && !/^([01]\d|2[0-3]):[0-5]\d$/.test(brief))) {
+      throw new Error('brief must be HH:MM or off.');
+    }
+    const cfg = this.home ? readConfig(this.home) : undefined;
+    const timeZone = cfg?.timeZone ?? 'Europe/Rome';
+    if (this.home) setSchedule(this.home, { brief });
+    else this.memoryBriefAt = brief;
+    return { brief, timeZone };
   }
   async bases() {
     return this.basesController.bases();
