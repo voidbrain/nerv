@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 88.75 h agent + 11.5 h owner across 125 open steps of 40 features and 23 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 88.25 h agent + 11.5 h owner across 124 open steps of 40 features and 23 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -994,9 +994,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-078-T07 — Comparison report and profile status (Planned).
+💻 **→** Next: F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released (Planned).
 
 | | |
 |---|---|
@@ -1006,13 +1006,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned | — | [F-078-T08](#f-078-t08) | 🤖 | — |
-| 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned | [F-078-T07](#f-078-t07) | — | ⏳ 🤖 | [PR #630](https://github.com/voidbrain/nerv/pull/630) campaign evidence; [PR #634](https://github.com/voidbrain/nerv/pull/634) overnight rerun evidence |
-| 🟢 Small | **Total** | 4.75 h | 0.75 h (2 of 9 steps recorded) | 1 h | 7 of 9 completed | | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | [PR #630](https://github.com/voidbrain/nerv/pull/630) campaign evidence; [PR #634](https://github.com/voidbrain/nerv/pull/634) overnight rerun evidence |
+| 🟢 Small | **Total** | 4.75 h | 0.75 h (2 of 9 steps recorded) | 0.5 h | 8 of 9 completed | | |
 
-<details><summary>Done steps (7)</summary>
+<details><summary>Done steps (8)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -1022,6 +1021,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-078-t04"></a>F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | Completed | — |
 | — | <a id="f-078-t05"></a>F-078-T05 — Prepare Tabgha for the campaign: download qwen2.5:3b | 0.25 h | 0.25 h (stated) | Completed | [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence |
 | — | <a id="f-078-t06"></a>F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | Completed | — |
+| — | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | Completed | — |
 | — | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 1.5 h | 0 h | Completed | [PR #643](https://github.com/voidbrain/nerv/pull/643) Tabgha remote and local fallback campaign (F-078-T09) |
 
 </details>

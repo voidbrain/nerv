@@ -3,51 +3,74 @@
   "profiles": [
     {
       "id": "gemma-local",
-      "model": "Gemma 4 12B / gemma4:12b / Q4_K_M; Ollama configuration proposed in Gauntlet; not qualified for coding or autonomous task execution",
-      "status": "candidate",
+      "model": "Gemma 4 12B / gemma4:12b / Q4_K_M; Ollama on Neo Tokyo-3; qualified for Casper only, not qualified for Misato or autonomous coding",
+      "status": "qualified",
+      "roleStatus": {
+        "casper": "qualified",
+        "misato": "not-qualified",
+        "coding": "not-qualified"
+      },
       "capabilities": [
         "bounded-edit",
         "structured-tools"
       ],
       "evidence": [
-        "Inspected local inventory 2026-11-09: approximately 8 GB weights; configuration proposal only. Prior small role corpora do not establish coding capability.",
-        "Gauntlet profile: node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json; no new model campaign executed."
+        "F-078-T03 (2026-11-14, Neo Tokyo-3): neutral-smoke 7/10, neutral-smoke-schema 10/10, general-assistant-expanded 28/28; schema mode fixed all three 2026-11-09 JSON failures.",
+        "F-078-T04 (2026-11-16, Neo Tokyo-3): Casper 5/5 (9,501 ms avg) — qualified for Casper; Misato 3/5 (10,974 ms avg, failed exact-reminder and correct-rejected-time) — not qualified for Misato.",
+        "F-078-T08 (2026-11-22, Neo Tokyo-3 quiet rerun, 30 s cap): multi-step-agent 4/4, long-context 3/4, structured-output-robustness 1/6, bilingual-it-en 0/4; 9 refusal-permission/tool-use cases pending."
       ]
     },
     {
       "id": "qwen25-coder-local",
-      "model": "qwen2.5-coder:14b / Q4_K_M; approximately 9 GB weights, local inventory candidate",
+      "model": "qwen2.5-coder:14b / Q4_K_M; Ollama on Neo Tokyo-3; not qualified for Casper, Misato, or autonomous coding",
       "status": "candidate",
+      "roleStatus": {
+        "casper": "not-qualified",
+        "misato": "not-qualified",
+        "coding": "not-qualified"
+      },
       "capabilities": [
         "bounded-edit",
         "structured-tools"
       ],
       "evidence": [
-        "Configuration proposal in docs/evaluations/gauntlet.md; no measured capability pass or production permission."
+        "F-078-T03 (2026-11-14, Neo Tokyo-3): neutral-smoke 4/10, neutral-smoke-schema 10/10, general-assistant-expanded 28/28.",
+        "F-078-T04 (2026-11-16, Neo Tokyo-3): Casper 4/5 (4,871 ms avg, failed unclear-request); Misato 3/5 (8,229 ms avg, invalid structured output on exact-reminder, failed correct-rejected-time).",
+        "F-078-T09 (2026-11-22, Tabgha remote -> Neo Tokyo-3): Casper 4/5 (5,186 ms avg), Misato 2/5 (10,348 ms avg, invalid exact-reminder and italian-missing-title)."
       ]
     },
     {
       "id": "devstral-small2-local",
-      "model": "devstral-small-2:24b-instruct-2512-q4_K_M; approximately 15 GB proposed weights; download not performed",
+      "model": "devstral-small-2:24b / Q4_K_M; Ollama on Neo Tokyo-3; not qualified for Casper, Misato, or autonomous coding",
       "status": "candidate",
+      "roleStatus": {
+        "casper": "not-qualified",
+        "misato": "not-qualified",
+        "coding": "not-qualified"
+      },
       "capabilities": [
         "bounded-edit",
         "structured-tools"
       ],
       "evidence": [
-        "Configuration proposal in docs/evaluations/gauntlet.md; no measured capability pass or production permission."
+        "F-078-T06 (2026-11-16, Neo Tokyo-3): neutral-smoke 4/10, neutral-smoke-schema 10/10; Casper 4/5 (6,031 ms avg, failed unclear-request); Misato 1/5 (28,391 ms avg, 4/5 timed out at 30,000 ms caseMs cap)."
       ]
     },
     {
       "id": "qwen3-coder-local",
-      "model": "qwen3-coder:30b / Q4_K_M; approximately 19 GB proposed weights; download not performed",
+      "model": "qwen3-coder:30b / Q4_K_M; Ollama on Neo Tokyo-3; not qualified for Casper, Misato, or autonomous coding",
       "status": "candidate",
+      "roleStatus": {
+        "casper": "not-qualified",
+        "misato": "not-qualified",
+        "coding": "not-qualified"
+      },
       "capabilities": [
         "bounded-edit",
         "structured-tools"
       ],
       "evidence": [
-        "Configuration proposal in docs/evaluations/gauntlet.md; no measured capability pass or production permission."
+        "F-078-T06 (2026-11-16, Neo Tokyo-3): neutral-smoke 10/10, neutral-smoke-schema 10/10; Casper 4/5 (2,988 ms avg, failed unclear-request); Misato 2/5 (2,254 ms avg, failed exact-reminder, correct-rejected-time, topic-change-during-question)."
       ]
     }
   ]
