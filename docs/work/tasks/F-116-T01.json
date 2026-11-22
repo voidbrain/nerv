@@ -4,7 +4,7 @@
   "parent": "F-116",
   "title": "Feasibility note: splitting a model across bases",
   "goal": "A design note says whether and how NERV could run one model across two bases with llama.cpp RPC",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "docs/design/model-splitting.md names the target model, runtime, routing and enrolment join, security boundary and an expected throughput range with its source",
     "It states when splitting is not worth it (the model fits one base)",
@@ -32,7 +32,7 @@
     "estimate": "1.5 h",
     "basis": "Estimated 2026-11-22: reading llama.cpp RPC docs and NERV's routing, one note. Not a measurement.",
     "reviewed": "2026-11-22",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   }
