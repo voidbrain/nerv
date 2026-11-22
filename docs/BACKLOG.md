@@ -1016,7 +1016,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-091-t01"></a>F-091-T01 — Harness job template | 0.5 h | 0 h | Completed | [PR #635](https://github.com/voidbrain/nerv/pull/635) Pinned-tag harness job template (F-091-T01) |
-| — | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | Completed | — |
+| — | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | Completed | [PR #639](https://github.com/voidbrain/nerv/pull/639) Harness scratch-repository check recorded in docs/acceptance/f091-harness-scratch-check.md (F-091-T02) |
 
 </details>
 
@@ -1027,7 +1027,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-091-T01: [PR #635](https://github.com/voidbrain/nerv/pull/635) Pinned-tag harness job template (F-091-T01). [PR #635](https://github.com/voidbrain/nerv/pull/635); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-091-T01: [PR #635](https://github.com/voidbrain/nerv/pull/635) Pinned-tag harness job template (F-091-T01) · F-091-T02: [PR #639](https://github.com/voidbrain/nerv/pull/639) Harness scratch-repository check recorded in docs/acceptance/f091-harness-scratch-check.md (F-091-T02). [PR #639](https://github.com/voidbrain/nerv/pull/639) (`f091-harness-scratch-check.md`); [PR #635](https://github.com/voidbrain/nerv/pull/635); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-22: F-091-T01 verified (`runHarnessJobInWorktree`, `assertPinnedTemplateTag`, `buildHarnessPushProposal` behind `coding.push_pr` Orange gate); `node --test test/coding-job.test.ts` (7/7 passed) and `npm run check:fast`. 2026-11-22: F-091-T02 scratch-repository check recorded in [f091-harness-scratch-check.md](acceptance/f091-harness-scratch-check.md). |
 | Reviewed | 2026-11-18 |

@@ -36,5 +36,11 @@
     "agentHours": 0,
     "estimateAgentHours": 0.25,
     "baselineAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 639,
+      "note": "Harness scratch-repository check recorded in docs/acceptance/f091-harness-scratch-check.md (F-091-T02)"
+    }
+  ]
 }
