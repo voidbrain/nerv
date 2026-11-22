@@ -669,6 +669,23 @@ export function makeServer(
         const thresholds = await store.setHealthThresholds(b);
         const metrics = store.healthMetrics ? await store.healthMetrics() : undefined;
         reply(200, { ok: true, thresholds, warnings: metrics?.warnings ?? [] });
+      } else if (req.method === 'GET' && path === '/api/settings/schedule') {
+        reply(
+          200,
+          store.scheduleSettings ? await store.scheduleSettings() : { brief: '08:00', timeZone: 'Europe/Rome' },
+        );
+      } else if (req.method === 'PUT' && path === '/api/settings/schedule') {
+        if (!store.setBriefSchedule) {
+          reply(503, { error: 'Schedule settings unavailable.' });
+          return;
+        }
+        const b = await body(req);
+        try {
+          const schedule = await store.setBriefSchedule(b.brief);
+          reply(200, { ok: true, ...schedule });
+        } catch (e) {
+          reply(400, { error: (e as Error).message });
+        }
       } else if (req.method === 'POST' && path === '/api/pilots') {
         if (!store.addPilot) {
           reply(503, { error: 'Pilot setup unavailable.' });

@@ -276,6 +276,8 @@ export interface StoreApi {
   /** F-103-T03: process health samples, per-peer link load, thresholds, and deduplicated warnings. */
   healthMetrics?(): HealthMetricsSnapshot | Promise<HealthMetricsSnapshot>;
   setHealthThresholds?(thresholds: unknown): HealthThresholds | Promise<HealthThresholds>;
+  scheduleSettings?(): { brief: string; timeZone: string } | Promise<{ brief: string; timeZone: string }>;
+  setBriefSchedule?(brief: unknown): { brief: string; timeZone: string } | Promise<{ brief: string; timeZone: string }>;
   genericPilot?(): Pilot | Promise<Pilot>;
   changePilotModel?(id: string, model: string): Promise<Pilot[]>;
   addPilot?(entry: Pilot): Promise<Pilot[]>;

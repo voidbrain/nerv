@@ -76,9 +76,10 @@
     if (polling || !token) return; polling = true;
     const historySince = state.lastVisit;
     try {
-      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy, evaData, healthMetrics] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null), api("eva/instances").catch(() => null), api("health/metrics").catch(() => null)]);
+      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy, evaData, healthMetrics, scheduleSettings] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null), api("eva/instances").catch(() => null), api("health/metrics").catch(() => null), api("settings/schedule").catch(() => null)]);
       state.evaMachines = evaData && Array.isArray(evaData.machines) ? evaData.machines : null;
       state.healthMetrics = healthMetrics || null;
+      state.scheduleSettings = scheduleSettings || null;
       state.update = update || doctor.update || null;
       state.updatePolicy = updatePolicy || null;
       await loadUsage();
@@ -819,9 +820,9 @@
       if (typeof d === "string") return { model: d };
       return d && typeof d === "object" ? d : {};
     };
-    const modelControl = (id, current, fallback, name = "Generic pilot", extraFields = "", extraChanged = false, extraValid = true) => {
-      if (!modelsData) return "<div class='tiny muted'>Reading local models…</div>";
-      if (modelsData.error) return "<div class='tiny danger'>" + esc(modelsData.error) + "</div>";
+    const modelControl = (id, current, fallback, name = "Generic pilot", extraHeader = "", extraChanged = false, extraValid = true) => {
+      if (!modelsData) return { body: "<div class='tiny muted'>Reading local models…</div>", hdr: extraHeader, attrs: "" };
+      if (modelsData.error) return { body: "<div class='tiny danger'>" + esc(modelsData.error) + "</div>", hdr: extraHeader, attrs: "" };
       const d = draftFor(id);
       const selected = d.model !== undefined ? d.model : current || "off";
       const option = (value, label, disabled) => "<option value='" + esc(value) + "'" + (selected === value ? " selected" : "") + (disabled ? " disabled" : "") + ">" + esc(label) + "</option>";
@@ -833,10 +834,12 @@
       const canApply = !busy && extraValid && (modelChanged || extraChanged) && !unavailable && (!modelChanged || fallback || local.length > 0);
       const curName = d.savedName !== undefined ? d.savedName : name;
       const curSecond = d.savedSecond !== undefined ? d.savedSecond : "";
-      return "<form class='pilot-model-form' data-pilot='" + esc(id) + "' data-current='" + esc(current || "off") + "' data-current-name='" + esc(curName) + "' data-current-second='" + esc(curSecond) + "'>" +
-        extraFields +
-        "<div class='pilot-field'><label class='small' for='pilot-model-" + esc(id) + "'>Model</label><select id='pilot-model-" + esc(id) + "' aria-label='Model for " + esc(name) + "'" + (disabled ? " disabled" : "") + ">" + options + "</select></div>" +
-        "<div class='pilot-actions'><button class='btn sm' type='submit'" + (!canApply ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button></div></form>";
+      return {
+        hdr: extraHeader,
+        attrs: "data-pilot='" + esc(id) + "' data-current='" + esc(current || "off") + "' data-current-name='" + esc(curName) + "' data-current-second='" + esc(curSecond) + "'",
+        body: "<div class='pilot-field'><label class='small' for='pilot-model-" + esc(id) + "'>Model</label><select id='pilot-model-" + esc(id) + "' aria-label='Model for " + esc(name) + "'" + (disabled ? " disabled" : "") + ">" + options + "</select></div>" +
+          "<div class='pilot-actions'><button class='btn sm' type='submit'" + (!canApply ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button></div>"
+      };
     };
     const specialistControl = p => {
       const d = draftFor(p.id);
@@ -846,20 +849,29 @@
       const secondVal = d.secondName !== undefined ? d.secondName : savedSecond;
       const busy = pilotBusy.has(p.id);
       const dis = busy ? " disabled" : "";
-      const fields = "<div class='pilot-field'><label class='small' for='pilot-name-" + esc(p.id) + "'>Call name</label><input id='pilot-name-" + esc(p.id) + "' class='pilot-name-input' type='text' maxlength='40' aria-label='Call name for " + esc(savedName) + "' value='" + esc(nameVal) + "'" + dis + "/></div>" +
-        "<div class='pilot-field'><label class='small' for='pilot-second-" + esc(p.id) + "'>Second name</label><input id='pilot-second-" + esc(p.id) + "' class='pilot-second-input' type='text' maxlength='40' placeholder='Optional' aria-label='Second name for " + esc(savedName) + "' value='" + esc(secondVal) + "'" + dis + "/></div>";
+      const hdr = "<div class='pilot-hdr-inputs'><input id='pilot-name-" + esc(p.id) + "' class='pilot-name-input' type='text' maxlength='40' aria-label='Call name for " + esc(savedName) + "' value='" + esc(nameVal) + "'" + dis + "/>" +
+        "<input id='pilot-second-" + esc(p.id) + "' class='pilot-second-input' type='text' maxlength='40' placeholder='Second name' aria-label='Second name for " + esc(savedName) + "' value='" + esc(secondVal) + "'" + dis + "/></div>";
       const changed = nameVal.trim() !== savedName || secondVal.trim() !== savedSecond;
       const valid = nameVal.trim().length > 0 && nameVal.trim().length <= 40 && secondVal.trim().length <= 40;
       if (d.savedName === undefined) d.savedName = savedName;
       if (d.savedSecond === undefined) d.savedSecond = savedSecond;
-      return modelControl(p.id, p.model, false, savedName, fields, changed, valid);
+      return modelControl(p.id, p.model, false, savedName, hdr, changed, valid);
     };
-    const card = (name, second, sub, right, line, control = "") => "<div class='card'><div class='row'><span class='b'>" + esc(name) + (second ? " <span class='tiny muted'>(" + esc(second) + ")</span>" : "") + "</span>" + right + "</div><div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + control + "</div>";
+    const card = (name, sub, right, line, ctrl) => {
+      const top = ctrl.hdr
+        ? "<div class='row' style='gap:6px'>" + ctrl.hdr + right + "</div>"
+        : "<div class='row'><span class='b'>" + esc(name) + "</span>" + right + "</div>";
+      const inner = top + "<div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + ctrl.body;
+      return ctrl.attrs ? "<form class='card pilot-model-form' " + ctrl.attrs + ">" + inner + "</form>" : "<div class='card'>" + inner + "</div>";
+    };
     const stageOf = p => p.retired ? "retired" : p.stage; const counts = {}; roster.forEach(p => { counts[stageOf(p)] = (counts[stageOf(p)] || 0) + 1; });
     const tab = currentTab("pilots", "prototype"); const shown = roster.filter(p => stageOf(p) === tab);
-    box.innerHTML = card("Generic pilot", "", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", "", modelControl("generic", generic, true)) +
+    const gridHtml = shown.length
+      ? "<div class='pilot-grid'>" + shown.map(p => card(p.name, p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "), specialistControl(p))).join("") + "</div>"
+      : "";
+    box.innerHTML = card("Generic pilot", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", "", modelControl("generic", generic, true)) +
       stageTabs("pilots", [["prototype","Proto"],["test","Test"],["production","Prod"],["retired","Retired"]], counts) +
-      shown.map(p => card(p.name, p.secondName || "", p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "), specialistControl(p))).join("") +
+      gridHtml +
       (roster.length ? (shown.length ? "" : "<div class='muted small'>No pilot at this stage.</div>") : "<div class='muted small'>No specialists yet. Add one: nerv pilots add ID --name … --domain … --keywords … --model …, or approve a proposal from the Marduk Institute.</div>");
   };
   const syncPilotForm = form => {
@@ -961,18 +973,18 @@
     }
   };
   document.addEventListener("click", e => {
-    const t = e.target && e.target.closest && e.target.closest("#btn-apply-update");
+    const t = e.target && e.target.closest && e.target.closest("#btn-apply-update, #btn-update-now");
     if (!t) return;
     e.preventDefault();
     void window.liveApplyUpdate();
   });
   const DEFAULT_SCHEDULE = { mode:"apply", checkHour:20, applyHour:3, quietFrom:8, quietUntil:23 };
-  const DEFAULT_HEALTH_THRESHOLDS = { rssMb:512, eventLoopDelayMs:100, linkLatencyMs:500, inFlight:10, reconnects:5 };
   function settingsModel() {
     if (state.settingsDraft) return state.settingsDraft;
     const up = (state.updatePolicy && state.updatePolicy.policy) || { enabled:false };
     const s = Object.assign({}, DEFAULT_SCHEDULE, up.schedule || {});
-    const th = Object.assign({}, DEFAULT_HEALTH_THRESHOLDS, (state.healthMetrics && state.healthMetrics.thresholds) || {});
+    const ss = state.scheduleSettings || { brief:"08:00", timeZone:"Europe/Rome" };
+    const briefEnabled = ss.brief !== "off";
     return {
       enabled:!!up.enabled,
       mode:s.mode,
@@ -980,11 +992,9 @@
       applyHour:s.applyHour,
       quietFrom:s.quietFrom,
       quietUntil:s.quietUntil,
-      rssMb:th.rssMb,
-      eventLoopDelayMs:th.eventLoopDelayMs,
-      linkLatencyMs:th.linkLatencyMs,
-      inFlight:th.inFlight,
-      reconnects:th.reconnects
+      briefEnabled,
+      briefAt:briefEnabled ? ss.brief : "08:00",
+      timeZone:ss.timeZone || "Europe/Rome"
     };
   }
   window.renderSettings = function () {
@@ -992,22 +1002,21 @@
     const m = settingsModel();
     const busy = !!state.settingsBusy;
     const msg = state.settingsMsg;
+    const updBusy = !!state.manualUpdateBusy;
     box.innerHTML = "<form id='settings-form' class='list'>" +
       "<div class='row small' style='flex-wrap:wrap;gap:6px;align-items:center'>" +
       "<label style='display:inline-flex;align-items:center;gap:4px'><input type='checkbox' id='set-auto-enabled'" + (m.enabled ? " checked" : "") + (busy ? " disabled" : "") + "> Automatic updates</label>" +
       "<select id='set-update-mode' aria-label='Update mode'" + (busy ? " disabled" : "") + "><option value='apply'" + (m.mode === "apply" ? " selected" : "") + ">Apply after notice</option><option value='notify'" + (m.mode === "notify" ? " selected" : "") + ">Notify only</option></select>" +
-      "<span>· check</span><input id='set-check-hour' aria-label='Check hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.checkHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'>" +
-      "<span>apply</span><input id='set-apply-hour' aria-label='Apply hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.applyHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'>" +
-      "<span>quiet</span><input id='set-quiet-from' aria-label='No-apply from (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietFrom) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>–</span><input id='set-quiet-until' aria-label='No-apply until (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietUntil) + "'" + (busy ? " disabled" : "") + " style='width:48px'>" +
+      "<span>Check at</span><input id='set-check-hour' aria-label='Check hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.checkHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>:00</span>" +
+      "<span>Apply at</span><input id='set-apply-hour' aria-label='Apply hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.applyHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>:00</span>" +
+      "<span>Quiet hours</span><input id='set-quiet-from' aria-label='No-apply from (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietFrom) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>:00 –</span><input id='set-quiet-until' aria-label='No-apply until (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietUntil) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>:00</span>" +
+      "<button class='btn sm' id='btn-update-now' type='button'" + (updBusy ? " disabled" : "") + ">" + (updBusy ? "Updating…" : "Update now") + "</button>" +
       "</div>" +
       "<div class='row small' style='flex-wrap:wrap;gap:6px;align-items:center'>" +
-      "<span>Health warnings · RSS MB</span><input id='set-rss-mb' aria-label='RSS threshold (MB)' type='number' min='16' max='65536' step='1' value='" + esc(m.rssMb) + "'" + (busy ? " disabled" : "") + " style='width:60px'>" +
-      "<span>loop ms</span><input id='set-loop-ms' aria-label='Event loop delay threshold (ms)' type='number' min='1' max='60000' step='1' value='" + esc(m.eventLoopDelayMs) + "'" + (busy ? " disabled" : "") + " style='width:60px'>" +
-      "<span>link ms</span><input id='set-link-ms' aria-label='Link latency threshold (ms)' type='number' min='1' max='60000' step='1' value='" + esc(m.linkLatencyMs) + "'" + (busy ? " disabled" : "") + " style='width:60px'>" +
-      "<span>in-flight</span><input id='set-in-flight' aria-label='In-flight threshold' type='number' min='1' max='1000' step='1' value='" + esc(m.inFlight) + "'" + (busy ? " disabled" : "") + " style='width:52px'>" +
-      "<span>reconnects</span><input id='set-reconnects' aria-label='Reconnects threshold' type='number' min='1' max='1000' step='1' value='" + esc(m.reconnects) + "'" + (busy ? " disabled" : "") + " style='width:52px'>" +
+      "<label style='display:inline-flex;align-items:center;gap:4px'><input type='checkbox' id='set-brief-enabled'" + (m.briefEnabled ? " checked" : "") + (busy ? " disabled" : "") + "> Daily brief at</label>" +
+      "<input id='set-brief-at' aria-label='Daily brief time (HH:MM)' type='time' value='" + esc(m.briefAt) + "'" + (busy || !m.briefEnabled ? " disabled" : "") + ">" +
+      "<span class='tiny muted'>Time zone " + esc(m.timeZone) + " · Sync Ratio 80% · Telegram 90 s</span>" +
       "</div>" +
-      "<div class='tiny muted'>Brief 08:00 · Time zone Europe/Rome · Sync Ratio 80% · Telegram 90 s</div>" +
       "<div class='row' style='margin-top:4px'><button class='btn sm primary' id='btn-save-settings' type='submit'" + (busy ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button>" +
       "<span id='settings-status' role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : (state.settingsDraft ? "Unsaved changes" : "")) + "</span></div>" +
       "</form>";
@@ -1016,6 +1025,8 @@
     const enabled = !!document.getElementById("set-auto-enabled").checked;
     const mode = document.getElementById("set-update-mode").value;
     const num = id => Number(document.getElementById(id).value);
+    const briefEnabled = !!document.getElementById("set-brief-enabled").checked;
+    const briefAt = document.getElementById("set-brief-at").value || "08:00";
     return {
       enabled,
       mode,
@@ -1023,18 +1034,20 @@
       applyHour:num("set-apply-hour"),
       quietFrom:num("set-quiet-from"),
       quietUntil:num("set-quiet-until"),
-      rssMb:num("set-rss-mb"),
-      eventLoopDelayMs:num("set-loop-ms"),
-      linkLatencyMs:num("set-link-ms"),
-      inFlight:num("set-in-flight"),
-      reconnects:num("set-reconnects")
+      briefEnabled,
+      briefAt,
+      timeZone:(state.scheduleSettings && state.scheduleSettings.timeZone) || "Europe/Rome"
     };
   }
   document.addEventListener("input", e => {
     if (e.target && e.target.closest && e.target.closest("#settings-form")) { state.settingsDraft = readSettingsDraft(); state.settingsMsg = null; }
   });
   document.addEventListener("change", e => {
-    if (e.target && e.target.closest && e.target.closest("#settings-form")) { state.settingsDraft = readSettingsDraft(); state.settingsMsg = null; }
+    if (e.target && e.target.closest && e.target.closest("#settings-form")) {
+      state.settingsDraft = readSettingsDraft();
+      state.settingsMsg = null;
+      if (e.target.id === "set-brief-enabled") renderSettings();
+    }
   });
   document.addEventListener("submit", async e => {
     const form = e.target && e.target.closest && e.target.closest("#settings-form");
@@ -1057,18 +1070,12 @@
           schedule: { mode:draft.mode, checkHour:draft.checkHour, applyHour:draft.applyHour, quietFrom:draft.quietFrom, quietUntil:draft.quietUntil }
         })
       });
-      const th = await api("health/thresholds", {
+      const ss = await api("settings/schedule", {
         method:"PUT",
-        body:JSON.stringify({
-          rssMb: draft.rssMb,
-          eventLoopDelayMs: draft.eventLoopDelayMs,
-          linkLatencyMs: draft.linkLatencyMs,
-          inFlight: draft.inFlight,
-          reconnects: draft.reconnects
-        })
+        body:JSON.stringify({ brief: draft.briefEnabled ? draft.briefAt : "off" })
       });
       state.updatePolicy = Object.assign({}, state.updatePolicy, { policy: r.policy });
-      state.healthMetrics = Object.assign({}, state.healthMetrics || {}, { thresholds: th.thresholds, warnings: th.warnings });
+      state.scheduleSettings = { brief: ss.brief, timeZone: ss.timeZone };
       state.settingsDraft = null;
       state.settingsMsg = { kind:"ok", text:"Settings saved." };
       renderHealth();
