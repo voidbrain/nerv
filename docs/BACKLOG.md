@@ -2200,7 +2200,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-112-T01: [PR #614](https://github.com/voidbrain/nerv/pull/614) design note. [PR #614](https://github.com/voidbrain/nerv/pull/614) (F-112-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
+| PR / evidence | Steps: F-112-T01: [PR #614](https://github.com/voidbrain/nerv/pull/614) design note. [PR #647](https://github.com/voidbrain/nerv/pull/647) (F-112-T02 approval); [PR #614](https://github.com/voidbrain/nerv/pull/614) (F-112-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
 | Opened | 2026-11-20 |
 | Verification | 2026-11-21: `check:fast`, work and backlog checks pass (existing advisory warnings only); fresh-context design review found no remaining blockers. |
 | Reviewed | 2026-11-21 |
@@ -2436,7 +2436,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-101-T01: [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation. [PR #484](https://github.com/voidbrain/nerv/pull/484) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| PR / evidence | Steps: F-101-T01: [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation. [PR #647](https://github.com/voidbrain/nerv/pull/647) (F-101-T03 decision); [PR #484](https://github.com/voidbrain/nerv/pull/484) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-101-T01 verified: [PR #484](https://github.com/voidbrain/nerv/pull/484) merged on green CI. |
 | Reviewed | 2026-11-20 |
