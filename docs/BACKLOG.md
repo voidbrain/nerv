@@ -2760,16 +2760,16 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-116-t02"></a>F-116-T02 — Owner decision: build model splitting or close | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🤔](design/model-splitting.md) |
-| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-116-t02"></a>F-116-T02 — Owner decision: build model splitting or close | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🤔](design/model-splitting.md) | — |
+| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | |
 
 <details><summary>Done steps (1)</summary>
 
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-116-t01"></a>F-116-T01 — Feasibility note: splitting a model across bases | 1.5 h | 0 h | Completed |
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-116-t01"></a>F-116-T01 — Feasibility note: splitting a model across bases | 1.5 h | 0 h | Completed | [PR #636](https://github.com/voidbrain/nerv/pull/636) Model splitting feasibility note (F-116-T01) |
 
 </details>
 
@@ -2780,7 +2780,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #630](https://github.com/voidbrain/nerv/pull/630) opened the record |
+| PR / evidence | Steps: F-116-T01: [PR #636](https://github.com/voidbrain/nerv/pull/636) Model splitting feasibility note (F-116-T01). [PR #636](https://github.com/voidbrain/nerv/pull/636) (`model-splitting.md`); [PR #630](https://github.com/voidbrain/nerv/pull/630) opened the record |
 | Opened | 2026-11-22 |
 | Verification | 2026-11-22: F-116-T01 feasibility note written in [model-splitting.md](design/model-splitting.md); verified with `npm run check:fast`. Pending: owner decision (F-116-T02). |
 | Reviewed | 2026-11-22 |
