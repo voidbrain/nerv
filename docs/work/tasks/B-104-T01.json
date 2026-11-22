@@ -4,7 +4,7 @@
   "parent": "B-104",
   "title": "Wait for the Instrumentality attempts instead of a fixed 400 ms",
   "goal": "The daily-run test no longer depends on runner speed",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The test waits until both attempts happened, then a settle time, and still expects exactly 2"
   ],
@@ -32,7 +32,7 @@
     "size": "small",
     "estimate": "0.25 h",
     "basis": "Estimated 2026-11-20 from the Windows CI log. Not a measurement.",
-    "reviewed": "2026-11-20",
+    "reviewed": "2026-11-22",
     "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25,

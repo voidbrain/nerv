@@ -4,7 +4,7 @@
   "id": "B-075-T02",
   "title": "Give the F-003 checkpoint test the same Windows bound",
   "goal": "The F-003 checkpoint test no longer times out on slow Windows runners",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The cause and failed runs are in the record",
     "The Windows job passes without reruns"
@@ -33,8 +33,8 @@
     "size": "small",
     "estimate": "0.5 h",
     "basis": "Estimated 2026-11-19: same cause and bound as B-075-T01. Not a measurement.",
-    "reviewed": "2026-11-19",
-    "agentHours": 0.25,
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5,
     "actualAgentHours": 0.25,

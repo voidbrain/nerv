@@ -4,7 +4,7 @@
   "parent": "B-103",
   "title": "Fixture chat ID that no timestamp can contain",
   "goal": "The channel-state privacy test no longer depends on the clock",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The fixture chat ID cannot occur in an ISO timestamp, and the privacy assertion matches it"
   ],
@@ -32,7 +32,7 @@
     "size": "small",
     "estimate": "0.25 h",
     "basis": "Estimated 2026-11-20 from the CI log. Not a measurement.",
-    "reviewed": "2026-11-20",
+    "reviewed": "2026-11-22",
     "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25,
