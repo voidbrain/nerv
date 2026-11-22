@@ -1883,3 +1883,25 @@ test('F-051-T06: Sephirot EVA cage shows recorded pilot and instance, none when 
   assert.equal(unavailable.text, 'instance data unavailable');
   assert.notEqual(noData.text, unavailable.text);
 });
+
+test('Settings shows clear hour labels and editable Brief time without internal health thresholds; pilot cards sit 3-up without select overflow', () => {
+  const html = readFileSync('web/public/dashboard/index.html', 'utf8');
+  const live = readFileSync('web/public/dashboard/live.js', 'utf8');
+  const settingsBlock = live.slice(
+    live.indexOf('window.renderSettings ='),
+    live.indexOf('function readSettingsDraft()', live.indexOf('window.renderSettings =')),
+  );
+  assert.match(settingsBlock, /Check at/);
+  assert.match(settingsBlock, /Apply at/);
+  assert.match(settingsBlock, /Quiet hours/);
+  assert.match(settingsBlock, /:00/);
+  assert.doesNotMatch(settingsBlock, /set-rss-mb|set-loop-ms|set-link-ms|set-in-flight|set-reconnects/);
+  assert.match(settingsBlock, /id='set-brief-enabled'/);
+  assert.match(settingsBlock, /id='set-brief-at'/);
+  assert.match(live, /api\("settings\/schedule"/);
+
+  assert.match(html, /\.pilot-grid\s*\{[^}]*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(html, /\.pilot-field\s+select[^}]*max-width:\s*100%/);
+  assert.match(live, /class='pilot-grid'/);
+  assert.doesNotMatch(live, /for='pilot-name-.*Call name/);
+});
