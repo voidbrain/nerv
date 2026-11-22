@@ -8,7 +8,7 @@
   "id": "B-097-T01",
   "title": "Owner approves fixing merge-when-green in the template",
   "goal": "Approve or decline the template change",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Reply \"approve B-097\" (expected: the agent changes the template's merge-when-green, releases it and reconciles here) or \"keep the workaround\""
   ],
@@ -27,10 +27,10 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-19. Not a measurement.",
-    "reviewed": "2026-11-19",
+    "basis": "Estimated 2026-11-19. Not a measurement. Owner approved in chat 2026-11-22.",
+    "reviewed": "2026-11-22",
     "agentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision"
   }
 }

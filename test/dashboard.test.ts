@@ -743,7 +743,13 @@ test('Midori uses base status colours (--info blue when responding, --warn, --mu
         get: (_t, k) => {
           if (k === 'createRadialGradient') {
             return (...a: unknown[]) => {
-              calls.push({ m: 'createRadialGradient', a, stroke: style.stroke, fill: style.fill, dashOffset: style.dashOffset });
+              calls.push({
+                m: 'createRadialGradient',
+                a,
+                stroke: style.stroke,
+                fill: style.fill,
+                dashOffset: style.dashOffset,
+              });
               return { addColorStop: () => {} };
             };
           }
@@ -1263,9 +1269,9 @@ test('F-051: MAGI detail marks shadow/peer seats, Sephirot debrief shows directi
   assert.match(live, /data-inspect-remote-base=/);
   assert.match(live, /"bases\/" \+ encodeURIComponent\(baseId\) \+ "\/sorties\/" \+ encodeURIComponent\(sortieId\)/);
   assert.match(live, /const mainBase = up\.find\(b => b\.main\)/, 'routes to the main base when one exists');
-  // F-107 (owner, 2026-11-18): Midori uses the bases' status colours; its message dots are --info.
-  assert.match(js, /status === "responding" \? "--ok" : status === "failed" \? "--warn" : "--muted"/);
-  assert.match(js, /ctx\.fillStyle = cssVar\("--info"\); ctx\.beginPath\(\); const progress/);
+  // F-107 / B-095 (owner, 2026-11-22): Midori uses --info blue when connected/responding, --warn when failed, --muted when offline/unknown.
+  assert.match(js, /status === "responding" \? "--info" : status === "failed" \? "--warn" : "--muted"/);
+  assert.match(js, /ctx\.fillStyle = col; ctx\.beginPath\(\); const progress/);
 });
 
 test('B-065: revoked bases are excluded from BASES on the map and listed apart from live bases in renderBases', () => {

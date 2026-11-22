@@ -13,15 +13,15 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 14 |
-| **Require Human 🧑** | 12 | 7 |
+| **Open** | 35 | 13 |
+| **Require Human 🧑** | 12 | 6 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | [B-097](#b-097) |
+| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
 | [F-011](#f-011) |  | [B-068](#b-068) |  |
 | [F-004](#f-004) |  | [B-056](#b-056) |  |
 | [F-012](#f-012) |  | [B-095](#b-095) |  |
@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 77 h agent + 11 h owner across 106 open steps of 35 features and 14 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 76 h agent + 10.75 h owner across 104 open steps of 35 features and 13 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1534,45 +1534,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-097"></a>[🐞 B-097](#top)
-
-**Merging a PR from the primary checkout pulls it past the running service**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h agent + 0.25 h owner | — | — | ⏳ | — | 🤔 |
-
-🧑 **→** Approve the template change to `merge-when-green`, or keep the workaround.
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-19 preparing F-005-T29: `tools/merge-when-green.mjs` runs `gh pr merge` in the current directory; run from the primary checkout (on `main`), `gh` fast-forwards it (`pull --tags origin main` in the reflog after every merge since at least 2026-11-18 19:28). The primary checkout then holds a newer revision than the running service, against AGENTS ("never `git pull` it; it moves only through the `nodes lifecycle-*` update flow"), and the lifecycle plans read its runtime as unknown. |
-| **Reproduce** | `cd ~/Projects/NERV/NERV && node tools/merge-when-green.mjs <PR>`; after the merge, `git reflog -1` shows `pull --tags origin main: Fast-forward`. |
-| **Check** | Test committed failing first: `merge-when-green` runs `gh` with `--repo` from a directory outside any checkout, so no local branch moves; the template carries the fix and this project reconciles it. Until then the agent runs it only outside any checkout, with `GH_REPO` set. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="b-097-t01"></a>B-097-T01 — Owner approves fixing merge-when-green in the template | — | 0 h | 0 h agent + 0.25 h owner | Ready | — | [B-097-T02](#b-097-t02) | [🤔](work/records/B-097.md) |
-| 🟢 Small | <a id="b-097-t02"></a>B-097-T02 — merge-when-green runs gh outside any checkout, in the template and here | 1 h | 0 h | 1 h | Planned | [B-097-T01](#b-097-t01) | — | ⏳ 🤖 |
-| 🟢 Small | **Total** | 1 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 1 h agent + 0.25 h owner | 0 of 2 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-097.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Opened in [PR #537](https://github.com/voidbrain/nerv/pull/537) |
-| Opened | 2026-11-19 |
-| Verification | Pending. |
-| Reviewed | 2026-11-19 |
-
-</details>
-
----
 ### <a id="f-115"></a>[✨ F-115](#top)
 
 **Grouped, alphabetical CLI help**
@@ -2663,6 +2624,52 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-092-T01: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change. [PR #527](https://github.com/voidbrain/nerv/pull/527). Test: `test/node-lifecycle-execution.test.ts` "B-092: building a host needs only the data home…" (committed failing first). |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-22: PR #527 merged with green CI; closed. |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
+### <a id="b-097"></a>[🐞 B-097](#top)
+
+**Merging a PR from the primary checkout pulls it past the running service**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-19 preparing F-005-T29: `tools/merge-when-green.mjs` runs `gh pr merge` in the current directory; run from the primary checkout (on `main`), `gh` fast-forwards it (`pull --tags origin main` in the reflog after every merge since at least 2026-11-18 19:28). The primary checkout then holds a newer revision than the running service, against AGENTS ("never `git pull` it; it moves only through the `nodes lifecycle-*` update flow"), and the lifecycle plans read its runtime as unknown. |
+| **Reproduce** | `cd ~/Projects/NERV/NERV && node tools/merge-when-green.mjs <PR>`; after the merge, `git reflog -1` shows `pull --tags origin main: Fast-forward`. |
+| **Check** | Test committed failing first: `merge-when-green` runs `gh` with `--repo` from a directory outside any checkout, so no local branch moves; the template carries the fix and this project reconciles it. Until then the agent runs it only outside any checkout, with `GH_REPO` set. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| — | **Total** | 1 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0 h | 2 of 2 completed | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="b-097-t01"></a>B-097-T01 — Owner approves fixing merge-when-green in the template | — | 0 h | Completed |
+| — | <a id="b-097-t02"></a>B-097-T02 — merge-when-green runs gh outside any checkout, in the template and here | 1 h | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-097.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #537](https://github.com/voidbrain/nerv/pull/537) |
+| Opened | 2026-11-19 |
+| Verification | 2026-11-22: `project-harness` `test:tools` (274/274) and `NERV` [PR #657](https://github.com/voidbrain/nerv/pull/657) CI passed. |
 | Reviewed | 2026-11-22 |
 
 </details>

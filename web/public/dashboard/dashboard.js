@@ -665,7 +665,7 @@ const EDGES = [
 function edgeShown(s, e) {
   if (e[2] === "relay") return !!(s && s.forwarded);
   if (e[2] === "answer") return !!(s && !s.actions.length && !s.forwarded);
-  if (e[2] === "declined") return !!(s && !s.forwarded && s.status !== "active" && s.status !== "waiting" && s.status !== "queued" && s.done && s.done.apt && s.actions.length && !s.actions.some(a => a.status === "done" || a.status === "failed"));
+  if (e[2] === "declined") return !!(s && !s.forwarded && s.done && s.done.apt && s.actions.length && !s.actions.some(a => a.status === "done" || a.status === "failed") && (stepState(s, "debrief") === "on" || stepState(s, "debrief") === "done"));
   return true;
 }
 function nodeEl(id) { return id === "magi" ? document.getElementById("magi-big") : document.querySelector(".snode[data-n='" + id + "']"); }
@@ -1126,28 +1126,38 @@ function telegramApiState(base, now = Date.now()) {
 function drawTelegram(ctx, now, W, H) {
   const routes = telegramRoutes(telegramBases); const x = W - 36, y = H * 0.65;
   const origins = new Set(routes.map(b => b.channel.mode === "via-main" ? b.channel.destination : b.baseId));
-  // Midori is the channel, not a base (owner, 2026-11-18, B-095): node and links keep --info blue; only its status dot
-  // and label take the bases' status colours (green while the Bot API responds, as the header's "Midori live").
-  const color = status => cssVar(status === "responding" ? "--ok" : status === "failed" ? "--warn" : "--muted");
+  // Midori behaves like a base on the map (B-095): --info blue when connected/responding, --warn when failed, --muted when offline/unknown;
+  // expanding blue waves on contours when connected, no extra satellite dot, and moving route lines.
+  const color = status => cssVar(status === "responding" ? "--info" : status === "failed" ? "--warn" : "--muted");
   const channelById = id => telegramBases.find(b => b.baseId === id);
-  ctx.lineWidth = 1; ctx.globalAlpha = 0.7;
+  const states = [...origins].map(id => telegramApiState(channelById(id)));
+  const status = states.includes("responding") ? "responding" : states.includes("failed") ? "failed" : "unknown";
+  const col = color(status);
+  if (status === "responding" && map.contours) {
+    const ph = (now % 2600) / 2600; const r = 4 + ph * 30;
+    const g = ctx.createRadialGradient(x, y, Math.max(0, r - 7), x, y, r + 7);
+    g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(0.5, col); g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.globalAlpha = 1 - ph;
+    map.contours.forEach(c => ctx.stroke(c.p));
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, 14); glow.addColorStop(0, col); glow.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.globalAlpha = 0.35; ctx.strokeStyle = glow; ctx.lineWidth = 1; map.contours.forEach(c => ctx.stroke(c.p));
+    ctx.globalAlpha = 1;
+  }
+  ctx.lineWidth = 1.1; ctx.globalAlpha = status === "responding" ? 0.85 : 0.4;
+  ctx.setLineDash([4, 4]); ctx.lineDashOffset = status === "responding" ? Math.sin(now / 650) * 8 : 0;
   origins.forEach(id => { const base = BASES.find(b => b.id === String(id).toLowerCase()); if (!base) return;
-    const [bx,by] = map.proj([base.lon,base.lat]); ctx.strokeStyle = cssVar("--info"); ctx.setLineDash([2,3]); ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(x,y); ctx.stroke(); ctx.setLineDash([]);
+    const [bx,by] = map.proj([base.lon,base.lat]); ctx.strokeStyle = col; ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(x,y); ctx.stroke();
   });
-  ctx.globalAlpha = 1;
+  ctx.setLineDash([]); ctx.lineDashOffset = 0; ctx.globalAlpha = 1;
   for (let i = telegramPulses.length - 1; i >= 0; i--) {
     const pulse = telegramPulses[i]; const t = (now - pulse.t0) / 1500;
     if (t > 1) { telegramPulses.splice(i,1); continue; }
     const base = BASES.find(b => b.id === String(pulse.baseId).toLowerCase()); if (!base || !origins.has(pulse.baseId)) continue;
-    const [bx,by] = map.proj([base.lon,base.lat]); ctx.fillStyle = cssVar("--info"); ctx.beginPath(); const progress = pulse.direction === "inbound" ? 1-t : t; ctx.arc(bx+(x-bx)*progress,by+(y-by)*progress,3,0,Math.PI*2); ctx.fill();
+    const [bx,by] = map.proj([base.lon,base.lat]); ctx.fillStyle = col; ctx.beginPath(); const progress = pulse.direction === "inbound" ? 1-t : t; ctx.arc(bx+(x-bx)*progress,by+(y-by)*progress,3,0,Math.PI*2); ctx.fill();
   }
-  const states = [...origins].map(id => telegramApiState(channelById(id)));
-  const status = states.includes("responding") ? "responding" : states.includes("failed") ? "failed" : "unknown";
-
-  ctx.strokeStyle = cssVar("--info"); ctx.fillStyle = cssVar("--panel"); ctx.lineWidth = 2;
+  ctx.strokeStyle = col; ctx.fillStyle = cssVar("--panel"); ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = color(status); ctx.beginPath(); ctx.arc(x+8,y-3,2,0,Math.PI*2); ctx.fill();
-  ctx.font = "11px " + (cssVar("--font") || "monospace"); ctx.textAlign = "center"; ctx.fillStyle = color(status); ctx.fillText("Midori",x,y-12); ctx.textAlign = "start";
+  ctx.font = "11px " + (cssVar("--font") || "monospace"); ctx.textAlign = "center"; ctx.fillStyle = col; ctx.fillText("Midori",x,y-12); ctx.textAlign = "start";
 }
 
 /* ================= EVA heartbeats ================= */
