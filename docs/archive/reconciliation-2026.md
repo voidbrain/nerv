@@ -1,5 +1,9 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-22 — main `ba5f9bc`
+
+PRs #646–#652 merged on green CI (#646–#648 docs-only; #649–#652 full CI). They advanced F-078-T07 (#646), owner decisions F-101-T03/F-112-T02/F-078-T08 (#647), closed B-073..B-104/F-027 (#648), F-107-T02 (#649), F-108 UI (#650), F-112-T03 (#651), and F-112-T04 (#652); F-112 closed.
+
 ## 2026-11-22 — main `c1ad6b7`
 
 PRs #636, #637, #635, #639–#644 and #638 merged on green CI. They advanced F-116, F-084, F-091, F-083, F-114, F-078, B-106 and F-006; their owning records and task evidence are current. Reconciled by PR #645.
