@@ -698,18 +698,32 @@ function drawEdges(s) {
     else if (B.b <= A.t + 2) { const my = (B.b + A.t) / 2; d = "M" + A.x + "," + A.t + " V" + my + " H" + B.x + " V" + B.b; }
     else if (B.l >= A.r) { const mx = (A.r + B.l) / 2; d = "M" + A.r + "," + A.y + " H" + mx + " V" + B.y + " H" + B.l; }
     else { const mx = (B.r + A.l) / 2; d = "M" + A.l + "," + A.y + " H" + mx + " V" + B.y + " H" + B.r; }
-    const cls = (e[2] === "loop" ? "loop " : "") + (passedEdge(s, e) || "");
-    return "<path d='" + d + "' class='" + cls + "' marker-end='url(#edge-arrow)'/>";
+    const stateCls = passedEdge(s, e) || "";
+    const cls = (e[2] === "loop" ? "loop " : "") + stateCls;
+    const markerId = stateCls.includes("owner")
+      ? "edge-arrow-owner"
+      : stateCls.includes("passed")
+        ? "edge-arrow-passed"
+        : stateCls.includes("skip")
+          ? "edge-arrow-skip"
+          : "edge-arrow";
+    return "<path d='" + d + "' class='" + cls + "' marker-end='url(#" + markerId + ")'/>";
   }).join("");
-  svg.innerHTML = "<defs><marker id='edge-arrow' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='context-stroke'/></marker></defs>" + paths;
+  svg.innerHTML = "<defs>" +
+    "<marker id='edge-arrow' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='var(--accent)' fill-opacity='0.45'/></marker>" +
+    "<marker id='edge-arrow-passed' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='var(--ok)'/></marker>" +
+    "<marker id='edge-arrow-owner' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='var(--warn)'/></marker>" +
+    "<marker id='edge-arrow-skip' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='var(--accent)' fill-opacity='0.22'/></marker>" +
+    "</defs>" + paths;
 }
 /** The route already taken: green when the step passed on its own, yellow when it went through the owner's decision
     (Misato's apartment), faded into a skipped step. Step activity is shown on nodes; route history never claims an ongoing communication. */
 function passedEdge(s, e) {
   if (!s || (e[2] === "loop" && !(e[0] === "consult" && e[1] === "plan"))) return "";
-  if (e[2] === "answer") return stepState(s, "plan") === "done" && stepState(s, "debrief") === "done" ? "passed" : "";
-  if (e[2] === "relay") return stepState(s, "debrief") === "done" ? "passed" : "";
-  if (e[2] === "declined") return stepState(s, "apt") === "done" && stepState(s, "debrief") === "done" ? "passed owner" : "";
+  const activeOrDone = st => st === "done" || st === "on" || st === "wait";
+  if (e[2] === "answer") return stepState(s, "plan") === "done" && activeOrDone(stepState(s, "debrief")) ? "passed" : "";
+  if (e[2] === "relay") return activeOrDone(stepState(s, "debrief")) ? "passed" : "";
+  if (e[2] === "declined") return stepState(s, "apt") === "done" && activeOrDone(stepState(s, "debrief")) ? "passed owner" : "";
   const from = stepState(s, e[0]), to = stepState(s, e[1]);
   if (from === "skip" || to === "skip") return "skip";
   if (from !== "done" || !(to === "done" || to === "on" || to === "wait")) return "";

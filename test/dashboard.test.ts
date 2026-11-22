@@ -612,7 +612,8 @@ test('an answer without an action: Misato passed, a green route straight to Debr
   );
   assert.match(
     js,
-    /if \(e\[2\] === "answer"\) return stepState\(s, "plan"\) === "done" && stepState\(s, "debrief"\) === "done"/,
+    /if \(e\[2\] === "answer"\) return stepState\(s, "plan"\) === "done" && activeOrDone\(stepState\(s, "debrief"\)\)/,
+    'B-106: answer edge activates with debrief',
   );
 });
 test("the apartment's count sits in the header like every other panel's sub-line, not a red badge (owner, 2026-11-05)", async () => {
@@ -1454,6 +1455,44 @@ test('a sortie whose action the owner declined draws its route from Misato apart
     api.EDGES.some((e) => e[0] === 'magi' && e[1] === 'apt'),
     false,
     'no redundant direct magi -> apt edge',
+  );
+});
+test('B-106: answer edge activates with debrief and Sephirot markers are filled cleanly without context-stroke', async () => {
+  const { readFileSync } = await import('node:fs');
+  const html = readFileSync('web/public/dashboard/index.html', 'utf8');
+  const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  assert.doesNotMatch(
+    html,
+    /\.sephirot svg\.edges path\s*\{[^}]*fill:\s*none/,
+    'CSS must not strip fill from marker arrowheads',
+  );
+  assert.match(src, /id='edge-arrow-passed'/, 'explicit passed marker arrowhead for cross-browser rendering');
+
+  const fn = (name: string) => {
+    const i = src.indexOf('function ' + name + '(');
+    return src.slice(i, src.indexOf('\n}\n', i) + 2);
+  };
+  const edgesSrc = src.slice(src.indexOf('const EDGES = ['), src.indexOf('];', src.indexOf('const EDGES = [')) + 2);
+  const api = new Function(
+    `${edgesSrc}\n${fn('stepState')}\n${fn('passedEdge')}\n${fn('edgeShown')}\nreturn { EDGES, passedEdge, edgeShown };`,
+  )() as {
+    EDGES: [string, string, string?][];
+    passedEdge: (s: unknown, e: unknown) => string;
+    edgeShown: (s: unknown, e: unknown) => boolean;
+  };
+  const answer = api.EDGES.find((e) => e[2] === 'answer');
+  assert.ok(answer, 'answer edge exists');
+  const debriefActive = {
+    status: 'active',
+    phase: 'debrief',
+    done: { detect: true, intake: true, route: true, plan: true },
+    actions: [],
+  };
+  assert.equal(api.edgeShown(debriefActive, answer), true);
+  assert.equal(
+    api.passedEdge(debriefActive, answer),
+    'passed',
+    'plan -> debrief line passes as soon as debrief activates',
   );
 });
 test('the flow header names the sortie by its code only; every EVA class header stacks its name and status (F-108, F-049-T09)', async () => {
