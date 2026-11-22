@@ -138,6 +138,17 @@
         "pwa-lifecycle"
       ],
       "minimumTests": 2
+    },
+    {
+      "id": "script-plans",
+      "files": [
+        "test/script-plan.test.ts"
+      ],
+      "families": [
+        "script-plan-comparison",
+        "eva03-per-call-gate"
+      ],
+      "minimumTests": 2
     }
   ],
   "notCovered": [

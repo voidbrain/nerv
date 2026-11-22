@@ -1600,6 +1600,20 @@
     {
       "pack": "nerv-system-flows",
       "packVersion": "1.2.0",
+      "case": "script-plans",
+      "caseHash": "8c200ec992cf4a5a53f19a2eea6806b1f155f12a62292407c2f90301ee7894a9",
+      "profileHash": null,
+      "status": "passed",
+      "reportHash": "f809cff9902abaaa4275e9e77d6f10a5cbe405fa42e83e300d13f63e72298d1f",
+      "finished": "2026-11-22T18:46:13.128Z",
+      "modelDigest": null,
+      "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
+      "scenarioHash": null,
+      "sourceKey": "81d89977eca65e060ca68707c84841c240fb39062525095cb36085276ced1089"
+    },
+    {
+      "pack": "nerv-system-flows",
+      "packVersion": "1.2.0",
       "case": "stress",
       "caseHash": "8e6c22defd674bee13db7278a72090e4358dd06d110c77e73c56b93179ec6f45",
       "profileHash": null,

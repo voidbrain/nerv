@@ -88,6 +88,7 @@ Mapped cases are implemented coverage, not model qualification. Evidence retains
 | [nerv-system-flows@1.2.0 / bases](../evals/gauntlet/system-v1.json) | distributed-coordination | signed-bases, remote-idempotency, seat-delay, shadow-after-decision, lease-fencing, outbound-reconnect, approval-locks, signed-cancellation, legacy-quarantine, hostile-frames, connection-admission, proactive-dispatch-revalidation, quiet-remote-followups | system / regression | true / false | registered:bases / posix-process-groups | Unmeasured |
 | [nerv-system-flows@1.2.0 / stress](../evals/gauntlet/system-v1.json) | ci-operations | bounded-queues, brain-stall, crash, parallel-writes, latency | system / regression | true / true | registered:stress / posix-process-groups | Unmeasured |
 | [nerv-system-flows@1.2.0 / browser](../evals/gauntlet/system-v1.json) | ui-visual | dashboard-operator, waiting-state, approval, topic-change, accessibility | system / regression | true / true | registered:browser / posix-process-groups, built-browser-assets | Unmeasured |
+| [nerv-system-flows@1.2.0 / script-plans](../evals/gauntlet/system-v1.json) | security-permissions | script-plan-comparison, eva03-per-call-gate | system / regression | true / false | registered:script-plans / posix-process-groups | Unmeasured |
 
 ## Area coverage
 
@@ -106,7 +107,7 @@ Mapped cases are implemented coverage, not model qualification. Evidence retains
 - conversation-memory: 1 mapped cases
 - distributed-coordination: 2 mapped cases
 - ui-visual: 1 mapped cases
-- security-permissions: 6 mapped cases
+- security-permissions: 7 mapped cases
 - documents-data: 4 mapped cases
 - language-translation: 4 mapped cases
 - audio-video: 0 mapped cases
