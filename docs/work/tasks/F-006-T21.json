@@ -8,7 +8,7 @@
   "acceptance": [
     "A page under docs/acceptance gives tested commands for P2 (mini PC, PowerShell), P3 (mini PC worker with Mac remote inference) and P4 (Mac unavailable, then back), each with an expected result",
     "Every command is dry-run (plan, zero model calls) before the page is published",
-    "Pending cases this task covers (listed for check:gauntlet-runs): multi-step-agent/*, nerv-system-flows/ledger, nerv-system-flows/conversation, nerv-system-flows/channels, nerv-system-flows/bases"
+    "Pending cases this task covers (listed for check:gauntlet-runs): multi-step-agent/*, nerv-system-flows/*"
   ],
   "dependsOn": [
     "B-077-T01"
