@@ -730,24 +730,37 @@ test('the bases map draws: drawMap runs to the end and draws every base and its 
   assert.equal(calls[ring + 1]!.m, 'stroke', 'this base ring is outline-only');
   assert.ok(Number(calls[ring]!.a[2]) > 11, 'ring is larger than the square');
 });
-test('Midori keeps its blue node and links; only its status dot and label take the status colour (B-095)', async () => {
+test('Midori uses base status colours (--info blue when responding, --warn, --muted), expanding blue waves when connected, no extra dot, and moving route lines (B-095)', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
   const helper = src.slice(src.indexOf('const telegramObserved'), src.indexOf('/* ================= LOOP + EVENTS'));
-  const draw = (apiState: 'responding' | 'failed') => {
-    const calls: { m: string; a: unknown[]; stroke: string; fill: string }[] = [];
-    const style = { stroke: '', fill: '' };
+  const draw = (apiState: 'responding' | 'failed' | 'unknown', now = 0) => {
+    const calls: { m: string; a: unknown[]; stroke: string; fill: string; dashOffset: number }[] = [];
+    const style = { stroke: '', fill: '', dashOffset: 0 };
     const ctx = new Proxy(
       {},
       {
-        get:
-          (_t, k) =>
-          (...a: unknown[]) => {
-            calls.push({ m: String(k), a, stroke: style.stroke, fill: style.fill });
-          },
+        get: (_t, k) => {
+          if (k === 'createRadialGradient') {
+            return (...a: unknown[]) => {
+              calls.push({
+                m: 'createRadialGradient',
+                a,
+                stroke: style.stroke,
+                fill: style.fill,
+                dashOffset: style.dashOffset,
+              });
+              return { addColorStop: () => {} };
+            };
+          }
+          return (...a: unknown[]) => {
+            calls.push({ m: String(k), a, stroke: style.stroke, fill: style.fill, dashOffset: style.dashOffset });
+          };
+        },
         set: (_t, k, v) => {
-          if (k === 'strokeStyle') style.stroke = String(v);
+          if (k === 'strokeStyle') style.stroke = typeof v === 'string' ? v : '[gradient]';
           if (k === 'fillStyle') style.fill = String(v);
+          if (k === 'lineDashOffset') style.dashOffset = Number(v);
           return true;
         },
       },
@@ -758,7 +771,10 @@ test('Midori keeps its blue node and links; only its status dot and label take t
         status: 'enrolled',
         online: true,
         channelFresh: true,
-        channel: { mode: 'local', api: { state: apiState, at: new Date().toISOString() } },
+        channel: {
+          mode: 'local',
+          api: apiState === 'unknown' ? undefined : { state: apiState, at: new Date().toISOString() },
+        },
       },
     ];
     const run = new Function(
@@ -767,30 +783,36 @@ test('Midori keeps its blue node and links; only its status dot and label take t
       'cssVar',
       'bases',
       `${helper}\ntelegramBases = bases;\nreturn drawTelegram;`,
-    )([{ id: 'nerv-01', lon: 10, lat: 10 }], { proj: (p: number[]) => p }, (v: string) => v, bases) as (
-      ctx: unknown,
-      now: number,
-      W: number,
-      H: number,
-    ) => void;
-    run(ctx, 0, 236, 100);
+    )(
+      [{ id: 'nerv-01', lon: 10, lat: 10 }],
+      { proj: (p: number[]) => p, contours: [{ p: {} }] },
+      (v: string) => v,
+      bases,
+    ) as (ctx: unknown, now: number, W: number, H: number) => void;
+    run(ctx, now, 236, 100);
     return calls;
   };
   for (const [apiState, token] of [
-    ['responding', '--ok'],
+    ['responding', '--info'],
     ['failed', '--warn'],
+    ['unknown', '--muted'],
   ] as const) {
-    const calls = draw(apiState);
+    const calls = draw(apiState, 500);
     const node = calls.find((c) => c.m === 'stroke' && calls[calls.indexOf(c) - 2]?.a[0] === 200);
-    assert.equal(node?.stroke, '--info', `${apiState}: the Midori node keeps its blue`);
+    assert.equal(node?.stroke, token, `${apiState}: Midori node takes ${token}`);
     const link = calls.find((c) => c.m === 'lineTo');
-    assert.ok(link, 'the dotted link to the base is drawn');
-    assert.equal(calls[calls.indexOf(link!) + 1]!.stroke, '--info', `${apiState}: the dotted link stays blue`);
+    assert.ok(link, 'the link to the base is drawn');
+    assert.equal(calls[calls.indexOf(link!) + 1]!.stroke, token, `${apiState}: route link takes ${token}`);
     const label = calls.find((c) => c.m === 'fillText' && c.a[0] === 'Midori');
-    assert.equal(label?.fill, token, `${apiState}: the label takes the status colour`);
-    const dot = calls.find((c) => c.m === 'fill' && c.fill === token);
-    assert.ok(dot, `${apiState}: a status dot in ${token} sits by the node`);
+    assert.equal(label?.fill, token, `${apiState}: the label takes ${token}`);
+    const extraDot = calls.find((c) => c.m === 'arc' && c.a[0] === 208 && c.a[2] === 2);
+    assert.equal(extraDot, undefined, `${apiState}: no extra little status circle beside Midori`);
+    const waves = calls.filter((c) => c.m === 'createRadialGradient');
+    assert.equal(waves.length > 0, apiState === 'responding', `${apiState}: waves drawn iff connected`);
   }
+  const offsetA = draw('responding', 200).find((c) => c.m === 'lineTo')?.dashOffset;
+  const offsetB = draw('responding', 900).find((c) => c.m === 'lineTo')?.dashOffset;
+  assert.notEqual(offsetA, offsetB, 'responding route lines animate with now');
 });
 test('the Sephirot are numbered 1 to 11 with Hebrew and Latin names, the crew top right; the MAGI seats name their role, Casper idle when nothing runs (owner, 2026-11-05)', async () => {
   const { readFileSync } = await import('node:fs');
@@ -1247,9 +1269,9 @@ test('F-051: MAGI detail marks shadow/peer seats, Sephirot debrief shows directi
   assert.match(live, /data-inspect-remote-base=/);
   assert.match(live, /"bases\/" \+ encodeURIComponent\(baseId\) \+ "\/sorties\/" \+ encodeURIComponent\(sortieId\)/);
   assert.match(live, /const mainBase = up\.find\(b => b\.main\)/, 'routes to the main base when one exists');
-  // F-107 (owner, 2026-11-18): Midori uses the bases' status colours; its message dots are --info.
-  assert.match(js, /status === "responding" \? "--ok" : status === "failed" \? "--warn" : "--muted"/);
-  assert.match(js, /ctx\.fillStyle = cssVar\("--info"\); ctx\.beginPath\(\); const progress/);
+  // F-107 / B-095 (owner, 2026-11-22): Midori uses --info blue when connected/responding, --warn when failed, --muted when offline/unknown.
+  assert.match(js, /status === "responding" \? "--info" : status === "failed" \? "--warn" : "--muted"/);
+  assert.match(js, /ctx\.fillStyle = col; ctx\.beginPath\(\); const progress/);
 });
 
 test('B-065: revoked bases are excluded from BASES on the map and listed apart from live bases in renderBases', () => {
@@ -1494,6 +1516,28 @@ test('B-106: answer edge activates with debrief and Sephirot markers are filled 
     'passed',
     'plan -> debrief line passes as soon as debrief activates',
   );
+
+  const declined = api.EDGES.find((e) => e[2] === 'declined');
+  assert.ok(declined, 'apt -> debrief declined edge exists');
+  const aptWaiting = {
+    status: 'waiting',
+    phase: 'apt',
+    done: { detect: true, intake: true, route: true, plan: true, magi: true, sync: true },
+    actions: [{ status: 'waiting' }],
+  };
+  assert.equal(api.edgeShown(aptWaiting, declined), false, 'apt -> debrief is hidden before debrief is active');
+  const debriefAfterDecline = {
+    status: 'active',
+    phase: 'debrief',
+    done: { detect: true, intake: true, route: true, plan: true, magi: true, sync: true, apt: true },
+    actions: [{ status: 'rejected' }],
+  };
+  assert.equal(
+    api.edgeShown(debriefAfterDecline, declined),
+    true,
+    'apt -> debrief is visible as soon as debrief activates',
+  );
+  assert.equal(api.passedEdge(debriefAfterDecline, declined), 'passed owner');
 });
 test('the flow header names the sortie by its code only; every EVA class header stacks its name and status (F-108, F-049-T09)', async () => {
   const { readFileSync } = await import('node:fs');

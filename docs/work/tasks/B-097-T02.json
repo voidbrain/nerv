@@ -8,7 +8,7 @@
   "id": "B-097-T02",
   "title": "merge-when-green runs gh outside any checkout, in the template and here",
   "goal": "Merging never moves a local branch",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Test committed failing first: gh is called with --repo and a cwd outside the checkout",
     "Template released; this project reconciles it"
@@ -33,9 +33,9 @@
   "effort": {
     "size": "small",
     "estimate": "1 h",
-    "basis": "Estimated 2026-11-19. Not a measurement.",
-    "reviewed": "2026-11-19",
-    "agentHours": 1,
+    "basis": "Estimated 2026-11-19. Not a measurement. Closed 2026-11-22: fixed in project-harness PR #225 (v10.2.0) and reconciled into NERV tools/merge-when-green.mjs in PR #657.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   }
