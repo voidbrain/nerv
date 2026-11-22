@@ -1,5 +1,9 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-22 — main `0194d44`
+
+PR #656 refreshed all 8 `nerv-system-flows/*` and 4 `multi-step-agent/*` entries in `evals/gauntlet/ledger.json` against `0194d44` (0 pending Gauntlet cases remaining).
+
 ## 2026-11-22 — main `ba5f9bc`
 
 PRs #646–#652 merged on green CI (#646–#648 docs-only; #649–#652 full CI). They advanced F-078, F-101, F-107, F-108, closed B-073–B-104/F-027, and completed F-112 (closed). Reconciled by PR #653.
