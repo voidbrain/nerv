@@ -36,5 +36,10 @@
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 641,
+      "note": "FPV pack off-and-on toggle check recorded in docs/acceptance/f114-t05-fpv-toggle.md (F-114-T05)"
+    }
+  ]
 }
