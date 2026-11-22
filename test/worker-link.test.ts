@@ -131,6 +131,9 @@ async function fixture(heartbeatMs = 500, workerHeartbeatMs = heartbeatMs) {
   const sockets: WebSocket[] = [];
   return {
     main,
+    get link() {
+      return link;
+    },
     get rb() {
       return rb;
     },
@@ -1193,3 +1196,15 @@ test(
     }
   },
 );
+
+
+test('F-006-T11: worker link reports connected(coordinator) true for its outbound client session', async () => {
+  const f = await fixture();
+  try {
+    await f.start();
+    assert.equal(f.main.connected('NERV-02'), true);
+    assert.equal(f.link.connected('NERV-01'), true);
+  } finally {
+    await f.close();
+  }
+});
