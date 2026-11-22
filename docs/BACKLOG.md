@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 76 h agent + 10.75 h owner across 104 open steps of 35 features and 13 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 75.75 h agent + 10.75 h owner across 102 open steps of 35 features and 13 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -175,7 +175,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases (Ready).
+💻 **→** Next: F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC (Planned).
 
 | | |
 |---|---|
@@ -187,13 +187,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-006-t21"></a>F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases | 1.5 h | 0 h | 0 h | Ready | — | [F-006-T11](#f-006-t11) | 🤖 | [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending |
-| 🟡 Medium | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 1.5 h | 0 h | 1.5 h | Planned | [F-006-T21](#f-006-t21) | [F-006-T15](#f-006-t15) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 1.5 h | 0 h | 1.5 h | Planned | — | [F-006-T15](#f-006-t15) | 🤖 | — |
 | 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-006-T11](#f-006-t11) | [F-006-T12](#f-006-t12) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned | [F-006-T15](#f-006-t15) | — | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 10.25 h (18 of 21 steps) | 5.75 h (12 of 21 steps recorded) | 2 h | 17 of 21 completed | | | | |
+| 🟡 Medium | **Total** | 10.25 h (18 of 21 steps) | 5.75 h (12 of 21 steps recorded) | 2 h | 18 of 21 completed | | | | |
 
-<details><summary>Done steps (17)</summary>
+<details><summary>Done steps (18)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -214,6 +213,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | Completed | — |
 | — | <a id="f-006-t19"></a>F-006-T19 — Revise the placement campaign for 3 runs per case | 0.5 h | 0 h | Completed | [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation |
 | — | <a id="f-006-t20"></a>F-006-T20 — Revise the Mac operating-conditions plan for 3 runs and gemma4:12b | 0.5 h | 0 h | Completed | [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation |
+| — | <a id="f-006-t21"></a>F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases | 1.5 h | 0 h | Completed | [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending |
 
 </details>
 
@@ -2361,7 +2361,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h agent + 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
 
 🧑 **→** Confirm on the live dashboard after rebuilding `dist/web` and restarting `nerv`.
 
@@ -2376,14 +2376,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who |
 |---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="b-106-t02"></a>B-106-T02 — Owner confirms Sephirot answer edge and arrowheads on live dashboard | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](work/records/B-106.md) |
-| 🟢 Small | <a id="b-106-t03"></a>B-106-T03 — Rerun pending gauntlet cases at this source | 0.25 h | 0 h | 0.25 h | Planned | 🤖 |
-| 🟢 Small | **Total** | 0.75 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.25 h agent + 0.25 h owner | 1 of 3 completed | |
+| 🟢 Small | **Total** | 0.75 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.25 h owner | 2 of 3 completed | |
 
-<details><summary>Done steps (1)</summary>
+<details><summary>Done steps (2)</summary>
 
 | Effort | Step | Estimate | Actual | Status |
 |---|---|---|---|---|
 | — | <a id="b-106-t01"></a>B-106-T01 — Fix Sephirot answer-edge activation and marker arrowhead fills | 0.5 h | 0 h | Completed |
+| — | <a id="b-106-t03"></a>B-106-T03 — Rerun pending gauntlet cases at this source | 0.25 h | 0 h | Completed |
 
 </details>
 
