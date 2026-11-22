@@ -14,16 +14,16 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 43 | 22 |
-| **Require Human 🧑** | 13 | 6 |
+| **Require Human 🧑** | 14 | 6 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-112](#f-112) | [B-057](#b-057) | [B-097](#b-097) |
-| [F-011](#f-011) | [F-101](#f-101) | [B-068](#b-068) |  |
-| [F-004](#f-004) |  | [B-056](#b-056) |  |
+| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | [B-097](#b-097) |
+| [F-011](#f-011) | [F-112](#f-112) | [B-068](#b-068) |  |
+| [F-004](#f-004) | [F-101](#f-101) | [B-056](#b-056) |  |
 | [F-012](#f-012) |  | [B-095](#b-095) |  |
 | [F-086](#f-086) |  | [B-096](#b-096) |  |
 | [F-087](#f-087) |  |  |  |
@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 93.25 h agent + 11.25 h owner across 131 open steps of 43 features and 22 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 91.75 h agent + 11.25 h owner across 130 open steps of 43 features and 22 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2152,45 +2152,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-116"></a>[✨ F-116](#top)
-
-**Split a model too big for one base across bases**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-116-T01 — Feasibility note: splitting a model across bases (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner idea 2026-11-22, prompted by an open-source phone chat app that splits one model's layers across several phones with llama.cpp's RPC backend. NERV places whole models on whole bases; a model larger than the free memory of any one base (Mac, mini PC) cannot run at all. |
-| **Reproduce** | Pick a model whose weights exceed the free memory of every enrolled base: no base can load it. |
-| **Check** | A feasibility note names the target model, the runtime (llama.cpp RPC; Ollama exposes none), how it joins NERV's enrolment and model routing, the security boundary (the RPC server has no authentication) and the expected tokens per second over the home network; the owner decides from it whether to build it (F-116-T02). |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-116-t01"></a>F-116-T01 — Feasibility note: splitting a model across bases | 1.5 h | 0 h | 1.5 h | Planned | — | [F-116-T02](#f-116-t02) | 🤖 |
-| 🟢 Small | <a id="f-116-t02"></a>F-116-T02 — Owner decision: build model splitting or close | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-116-T01](#f-116-t01) | — | ⏳ 🤔 |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 1.5 h agent + 0.25 h owner | 0 of 2 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-116.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #630](https://github.com/voidbrain/nerv/pull/630) opened the record |
-| Opened | 2026-11-22 |
-| Verification | Pending: feasibility note and owner decision |
-| Reviewed | 2026-11-22 |
-
-</details>
-
----
 ### <a id="f-113"></a>[✨ F-113](#top)
 
 **Compact tool index with details on request**
@@ -2781,6 +2742,52 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-116"></a>[✨ F-116](#top)
+
+**Split a model too big for one base across bases**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h owner | — | — | — | — | 🤔 |
+
+🧑 **→** Next: [🤔](design/model-splitting.md) F-116-T02 — Owner decision: build model splitting or close (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner idea 2026-11-22, prompted by an open-source phone chat app that splits one model's layers across several phones with llama.cpp's RPC backend. NERV places whole models on whole bases; a model larger than the free memory of any one base (Mac, mini PC) cannot run at all. |
+| **Reproduce** | Pick a model whose weights exceed the free memory of every enrolled base: no base can load it. |
+| **Check** | A feasibility note names the target model, the runtime (llama.cpp RPC; Ollama exposes none), how it joins NERV's enrolment and model routing, the security boundary (the RPC server has no authentication) and the expected tokens per second over the home network; the owner decides from it whether to build it (F-116-T02). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-116-t02"></a>F-116-T02 — Owner decision: build model splitting or close | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🤔](design/model-splitting.md) | — |
+| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-116-t01"></a>F-116-T01 — Feasibility note: splitting a model across bases | 1.5 h | 0 h | Completed | [PR #636](https://github.com/voidbrain/nerv/pull/636) Model splitting feasibility note (F-116-T01) |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-116.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-116-T01: [PR #636](https://github.com/voidbrain/nerv/pull/636) Model splitting feasibility note (F-116-T01). [PR #636](https://github.com/voidbrain/nerv/pull/636) (`model-splitting.md`); [PR #630](https://github.com/voidbrain/nerv/pull/630) opened the record |
+| Opened | 2026-11-22 |
+| Verification | 2026-11-22: F-116-T01 feasibility note written in [model-splitting.md](design/model-splitting.md); verified with `npm run check:fast`. Pending: owner decision (F-116-T02). |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
 ### <a id="f-112"></a>[✨ F-112](#top)
 
 **Script plans over read-only tools**
