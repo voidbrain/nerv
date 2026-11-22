@@ -3165,7 +3165,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Pending PR on `fix/b-106-sephirot-arrows`. Test: `B-106: answer edge activates with debrief and Sephirot markers are filled cleanly without context-stroke` in `test/dashboard.test.ts`. |
+| PR / evidence | PR #644 (`fix/b-106-sephirot-arrows`). Test: `B-106: answer edge activates with debrief and Sephirot markers are filled cleanly without context-stroke` in `test/dashboard.test.ts`. |
 | Opened | 2026-11-22 |
 | Verification | 2026-11-22: `node --test test/dashboard.test.ts` and `npm run check:fast` passed. |
 | Reviewed | 2026-11-22 |
