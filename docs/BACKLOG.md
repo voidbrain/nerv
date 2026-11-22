@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 94.5 h agent + 11.25 h owner across 131 open steps of 43 features and 22 other records. 79 h of actual effort recorded on 121 steps. Generated from the task files.
+**Remaining effort:** 94.75 h agent + 11.25 h owner across 132 open steps of 43 features and 22 other records. 79 h of actual effort recorded on 121 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1042,7 +1042,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-091-T02 — Live check on a scratch repository (Planned).
 
@@ -1057,7 +1057,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
 | 🟢 Small | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned | — |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
+| 🟢 Small | <a id="f-091-t03"></a>F-091-T03 — Rerun the system flow cases at the F-091-T01 source | 0.25 h | 0 h | 0.25 h | Planned | — |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 0.5 h | 1 of 3 completed | |
 
 <details><summary>Done steps (1)</summary>
 
