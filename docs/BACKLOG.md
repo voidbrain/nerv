@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 92.75 h agent + 11.25 h owner across 129 open steps of 42 features and 22 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 92.5 h agent + 11.25 h owner across 128 open steps of 42 features and 22 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -994,9 +994,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-091-T02 — Live check on a scratch repository (Planned).
+💻 **→** Next: F-091-T03 — Rerun the gauntlet cases at the F-091-T01 source (Planned).
 
 | | |
 |---|---|
@@ -1008,15 +1008,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned | — |
 | 🟢 Small | <a id="f-091-t03"></a>F-091-T03 — Rerun the gauntlet cases at the F-091-T01 source | 0.25 h | 0 h | 0.25 h | Planned | — |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 0.5 h | 1 of 3 completed | |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 0.25 h | 2 of 3 completed | |
 
-<details><summary>Done steps (1)</summary>
+<details><summary>Done steps (2)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-091-t01"></a>F-091-T01 — Harness job template | 0.5 h | 0 h | Completed | [PR #635](https://github.com/voidbrain/nerv/pull/635) Pinned-tag harness job template (F-091-T01) |
+| — | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | Completed | [PR #639](https://github.com/voidbrain/nerv/pull/639) Harness scratch-repository check recorded in docs/acceptance/f091-harness-scratch-check.md (F-091-T02) |
 
 </details>
 
@@ -1027,9 +1027,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-091-T01: [PR #635](https://github.com/voidbrain/nerv/pull/635) Pinned-tag harness job template (F-091-T01). [PR #635](https://github.com/voidbrain/nerv/pull/635); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-091-T01: [PR #635](https://github.com/voidbrain/nerv/pull/635) Pinned-tag harness job template (F-091-T01) · F-091-T02: [PR #639](https://github.com/voidbrain/nerv/pull/639) Harness scratch-repository check recorded in docs/acceptance/f091-harness-scratch-check.md (F-091-T02). [PR #639](https://github.com/voidbrain/nerv/pull/639) (`f091-harness-scratch-check.md`); [PR #635](https://github.com/voidbrain/nerv/pull/635); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | 2026-11-22: F-091-T01 verified (`runHarnessJobInWorktree`, `assertPinnedTemplateTag`, `buildHarnessPushProposal` behind `coding.push_pr` Orange gate); `node --test test/coding-job.test.ts` (7/7 passed) and `npm run check:fast`. |
+| Verification | 2026-11-22: F-091-T01 verified (`runHarnessJobInWorktree`, `assertPinnedTemplateTag`, `buildHarnessPushProposal` behind `coding.push_pr` Orange gate); `node --test test/coding-job.test.ts` (7/7 passed) and `npm run check:fast`. 2026-11-22: F-091-T02 scratch-repository check recorded in [f091-harness-scratch-check.md](acceptance/f091-harness-scratch-check.md). |
 | Reviewed | 2026-11-18 |
 
 </details>
