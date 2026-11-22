@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "B-106-T03",
+  "parent": "B-106",
+  "title": "Rerun pending gauntlet cases at this source",
+  "goal": "multi-step-agent/* and nerv-system-flows/browser have a covering run at the B-106 source",
+  "status": "planned",
+  "acceptance": [
+    "npm run gauntlet:all -- --execute --allow-expensive records passing runs for multi-step-agent/* and nerv-system-flows/browser",
+    "node tools/gauntlet.mjs pending lists none"
+  ],
+  "dependsOn": [
+    "B-106-T01"
+  ],
+  "resources": [
+    "evals/gauntlet/ledger.json",
+    "docs/work/records/B-106.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "npm run check:gauntlet-runs"
+  ],
+  "escalation": [
+    "An expensive run waits for the owner's go-ahead"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Added 2026-11-22: B-106-T01 touched web/public/dashboard/** covered by nerv-system-flows/browser and multi-step-agent/*.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}
