@@ -43,9 +43,9 @@ test('changed tests join mapped dependencies; missing or empty selections fail r
       assert.ok(files.every(existsSync));
     }
 });
-test('CI has one PR trigger, manual/periodic selection and a full marker gated on every required outcome', () => {
+test('CI has PR and push-to-main triggers, manual/periodic selection and a full marker gated on every required outcome', () => {
   assert.match(workflow, /on:\n {2}pull_request:/);
-  assert.doesNotMatch(workflow, /^ {2}push:/m);
+  assert.match(workflow, /^ {2}push:\n {4}branches: \[main\]/m);
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /schedule:/);
   assert.match(workflow, /cancel-in-progress: true/);
