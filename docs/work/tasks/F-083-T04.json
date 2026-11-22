@@ -38,5 +38,11 @@
     "agentHours": 0,
     "estimateAgentHours": 0.25,
     "baselineAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 640,
+      "note": "Saved-recipe live check recorded in docs/acceptance/f083-t04-saved-recipe.md (F-083-T04)"
+    }
+  ]
 }
