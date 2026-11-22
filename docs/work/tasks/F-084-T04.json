@@ -36,5 +36,11 @@
     "agentHours": 0,
     "estimateAgentHours": 0.25,
     "baselineAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 637,
+      "note": "Scratch-repository check recorded in docs/acceptance/f084-scratch-repo-check.md (F-084-T04)"
+    }
+  ]
 }
