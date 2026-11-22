@@ -4,7 +4,7 @@
   "parent": "F-091",
   "title": "Rerun the gauntlet cases at the F-091-T01 source",
   "goal": "multi-step-agent/* and nerv-system-flows/* have a covering run at the F-091-T01 source (src/coding-job.ts changed)",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "npm run gauntlet:all -- --execute records passing runs for multi-step-agent/* and nerv-system-flows/*",
     "node tools/gauntlet.mjs pending lists none of them"
@@ -32,8 +32,14 @@
     "estimate": "0.25 h",
     "basis": "Added 2026-11-22: F-091-T01 touched src/coding-job.ts covered by nerv-system-flows/conversation, nerv-system-flows/channels, and nerv-system-flows/bases.",
     "reviewed": "2026-11-22",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 642,
+      "note": "Gauntlet multi-step-agent/* and nerv-system-flows/* reruns (F-091-T03)"
+    }
+  ]
 }
