@@ -1,5 +1,9 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-22 — main `ca35645`
+
+[PR #660](https://github.com/voidbrain/nerv/pull/660) reconciles PRs #657–#659, archives 23 Closed records into `docs/archive/backlog-2026.md`, updates recaps, and moves older evidence from `F-008`, `F-016`, `F-021`, and `F-049` into `docs/archive/evidence-2026.md`.
+
 ## 2026-11-22 — main `0194d44`
 
 PR #656 refreshed all 8 `nerv-system-flows/*` and 4 `multi-step-agent/*` entries in `evals/gauntlet/ledger.json` against `0194d44` (0 pending Gauntlet cases remaining).
