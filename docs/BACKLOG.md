@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 92.5 h agent + 11.25 h owner across 128 open steps of 42 features and 22 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 92.25 h agent + 11.25 h owner across 127 open steps of 42 features and 22 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -699,9 +699,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-083-T04 — Live check with a real saved recipe (Planned).
+💻 **→** Next: F-083-T07 — Timers in a cooking session (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -713,20 +713,20 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-083-t04"></a>F-083-T04 — Live check with a real saved recipe | 0.25 h | 0 h | 0.25 h | Planned | — | — | 🤖 | — |
 | 🟢 Small | <a id="f-083-t07"></a>F-083-T07 — Timers in a cooking session | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-083-T08](#f-083-t08), [F-083-T09](#f-083-t09) | 🤖 | [PR #576](https://github.com/voidbrain/nerv/pull/576) implementation |
 | 🟢 Small | <a id="f-083-t10"></a>F-083-T10 — Recipe photos | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | — | 🤖 | [PR #586](https://github.com/voidbrain/nerv/pull/586) implementation |
 | 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned | [F-083-T07](#f-083-t07) | — | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-083-t09"></a>F-083-T09 — Owner check: a recipe cooked hands-free | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-083-T07](#f-083-t07) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 5.25 h | 0.75 h (2 of 10 steps recorded) | 1.75 h agent + 0.25 h owner | 5 of 10 completed | | | | |
+| 🟡 Medium | **Total** | 5.25 h | 0.75 h (2 of 10 steps recorded) | 1.5 h agent + 0.25 h owner | 6 of 10 completed | | | | |
 
-<details><summary>Done steps (5)</summary>
+<details><summary>Done steps (6)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-083-t01"></a>F-083-T01 — Saved documents with categories | 1 h | 0.5 h (measured) | Completed | — |
 | — | <a id="f-083-t02"></a>F-083-T02 — Compute from saved values only | 1 h | 0.25 h (stated) | Completed | — |
 | — | <a id="f-083-t03"></a>F-083-T03 — Recipe card | 0.5 h | 0 h | Completed | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
+| — | <a id="f-083-t04"></a>F-083-T04 — Live check with a real saved recipe | 0.25 h | 0 h | Completed | — |
 | — | <a id="f-083-t05"></a>F-083-T05 — Purchases and shelf life | 0.5 h | 0 h | Completed | [PR #481](https://github.com/voidbrain/nerv/pull/481) implementation |
 | 🟢 Small | <a id="f-083-t06"></a>F-083-T06 — Cooking session: ingredients and steps | 0.5 h | 0 h | Verified | [PR #561](https://github.com/voidbrain/nerv/pull/561) cooking session; CI pending |
 
@@ -741,7 +741,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Steps: F-083-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep · F-083-T05: [PR #481](https://github.com/voidbrain/nerv/pull/481) implementation · F-083-T06: [PR #561](https://github.com/voidbrain/nerv/pull/561) cooking session; CI pending · F-083-T07: [PR #576](https://github.com/voidbrain/nerv/pull/576) implementation · F-083-T10: [PR #586](https://github.com/voidbrain/nerv/pull/586) implementation. [PR #586](https://github.com/voidbrain/nerv/pull/586) (F-083-T10); [PR #576](https://github.com/voidbrain/nerv/pull/576) (F-083-T07); [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #481](https://github.com/voidbrain/nerv/pull/481); [PR #489](https://github.com/voidbrain/nerv/pull/489) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | 2026-11-20: `node --test test/photos.test.ts test/documents.test.ts test/cooking-session.test.ts test/telegram.test.ts` (26/26 passed), `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-083-T05 verified: [PR #481](https://github.com/voidbrain/nerv/pull/481) merged on green CI (test/pantry.test.ts). `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history). `F-083-T02` added `computeFromSavedDocument` / `DocumentStore.compute` in `src/documents.ts` and read-only tool `docs.compute` in `src/executors.ts` (cites saved values & arithmetic, asks instead of guessing on missing ratio/setting/unit mismatch); verified with `node --test test/documents.test.ts` and `npm run check:fast`. |
+| Verification | 2026-11-22: F-083-T04 saved-recipe live check recorded in [f083-t04-saved-recipe.md](acceptance/f083-t04-saved-recipe.md). 2026-11-20: `node --test test/photos.test.ts test/documents.test.ts test/cooking-session.test.ts test/telegram.test.ts` (26/26 passed), `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-083-T05 verified: [PR #481](https://github.com/voidbrain/nerv/pull/481) merged on green CI (test/pantry.test.ts). `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history). `F-083-T02` added `computeFromSavedDocument` / `DocumentStore.compute` in `src/documents.ts` and read-only tool `docs.compute` in `src/executors.ts` (cites saved values & arithmetic, asks instead of guessing on missing ratio/setting/unit mismatch); verified with `node --test test/documents.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
 
 </details>
