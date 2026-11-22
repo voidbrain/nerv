@@ -6,6 +6,8 @@ The [review register](../reviews/README.md#acceptance-evidence) links every repo
 
 **Owner procedures to run now:** none. [F-005-T13 Mac service update](f005-t13-mac-update-procedure.md) ran on 2026-11-12.
 
+[F-006 placement P2–P4](f006-placement-p2-p4.md): pasteable PowerShell plans and explicitly confirmed probes for mini-PC local inference, mini-PC execution with Mac remote inference, and unavailable/recovered Mac behavior.
+
 [First lifecycle update of the Mac service, 12 November 2026](node-update-2026-11-12.md): 2a3448d → f8b8116 through inspect/apply, all steps and after-checks passed; agent-run with owner approval, so hand usability of the procedure is not shown.
 
 [B-008 reproduction on Tabgha, 12 November 2026](b008-tabgha-2026-11-12.md): real dashboard in headless Edge on Tabgha at 8c58ee5, relays of 47.5 s and 209.6 s to Neo Tokyo-3; banner stayed live, no failed or slow read. Not reproduced; agent-run over SSH with owner approval.

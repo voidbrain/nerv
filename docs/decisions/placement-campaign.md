@@ -43,6 +43,8 @@ Every placement candidate runs the same deterministic case packs with `repeat: 3
 
 ## 4. Owner execution workflow (after F-006-T17 approval)
 
+The pasteable P2–P4 workflow is [F-006 placement P2–P4](../acceptance/f006-placement-p2-p4.md). Its authenticated `placement plan` command performs selection with zero model calls; `placement run` requires explicit execution confirmation and probes inference only, never a tool effect.
+
 Keep all machine profiles and raw report artifacts in `$HOME/.nerv-private/` outside git.
 
 ### Step A — Generate private machine profiles on Mac and mini PC

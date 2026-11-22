@@ -28,6 +28,7 @@ import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.
 import { readConfig } from './config.ts';
 import { COMMAND_CATALOG } from './chat-command.ts';
 import { builtinPackRegistry, fpvFleetSnapshot } from './packs.ts';
+import { placementProbe } from './placement-campaign.ts';
 
 type PhotoStoreHost = StoreApi & {
   photos?: PhotoStore;
@@ -323,6 +324,39 @@ export function makeServer(
           reply(503, { error: 'Dashboard stream capacity reached.' });
       } else if (req.method === 'GET' && path === '/api/commands') {
         reply(200, { commands: COMMAND_CATALOG });
+      } else if (req.method === 'POST' && path === '/api/placement/plan') {
+        if (options.native || !root) {
+          reply(403, { error: 'Placement commands require the local admin token.' });
+          return;
+        }
+        if (!store.selectExecution) throw new Error('Placement planning is unavailable.');
+        const probe = placementProbe(await body(req));
+        reply(200, {
+          placement: probe.placement,
+          selection: await store.selectExecution(probe.orchestration),
+          budget: { timeoutMs: probe.timeoutMs, maxOutputTokens: probe.ask.maxTokens },
+        });
+      } else if (req.method === 'POST' && path === '/api/placement/run') {
+        if (options.native || !root) {
+          reply(403, { error: 'Placement commands require the local admin token.' });
+          return;
+        }
+        if (!store.runOrchestratedJob) throw new Error('Placement execution is unavailable.');
+        const value = await body(req);
+        if (value.confirmExecute !== true) throw new Error('Placement execution needs confirmExecute: true.');
+        const { confirmExecute: _confirmExecute, ...input } = value;
+        const probe = placementProbe(input);
+        const result = await store.runOrchestratedJob({
+          orchestration: probe.orchestration,
+          ask: probe.ask,
+          timeoutMs: probe.timeoutMs,
+        });
+        reply(200, {
+          placement: probe.placement,
+          selection: result.selection,
+          inference: result.inference,
+          provenance: result.provenance,
+        });
       } else if (req.method === 'GET' && path === '/api/packs') {
         const home = (store as { home?: string }).home;
         const packsConfig = home ? readConfig(home).packs : undefined;

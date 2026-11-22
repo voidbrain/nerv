@@ -157,6 +157,18 @@ export interface OwnerAction {
 export type ActReply = ActResult & { casperError?: string };
 
 export interface StoreApi {
+  selectExecution?(
+    req: import('./model.ts').OrchestrationRequest,
+  ): Promise<import('./model.ts').OrchestrationSelection>;
+  runOrchestratedJob?(input: {
+    orchestration: import('./model.ts').OrchestrationRequest;
+    ask: { prompt: string; maxTokens?: number; temperature?: number };
+    timeoutMs?: number;
+  }): Promise<{
+    selection: import('./model.ts').OrchestrationSelection;
+    inference: import('./model.ts').WorkerInferReply;
+    provenance: import('./model.ts').OrchestratedProvenance;
+  }>;
   dashboardRevision?(): string | Promise<string>;
   modelUsage?(
     before?: number,
