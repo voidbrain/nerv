@@ -4,7 +4,7 @@
   "parent": "F-076",
   "title": "Push-to-main CI trigger from the template",
   "goal": "Every merge to main runs CI, through a harness template release",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "The harness template releases a push: branches: [main] trigger in ci.yml (template record and tag)",
     "NERV reconciles that release and a merge to main shows its CI run"
@@ -31,9 +31,9 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
-    "agentHours": 0.25,
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Closed 2026-11-22: project-harness v10.2.0 released push: branches: [main] in ci.yml (F-086); reconciled into NERV .github/workflows/ci.yml.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
   }
