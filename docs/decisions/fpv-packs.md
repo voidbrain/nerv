@@ -26,6 +26,10 @@
 
 The core repository is the reusable master; NERV is derived. The core never depends on NERV, and NERV's FPV work never waits on the core's release. Once created (F-101-T04) the core repository's own backlog owns its web components, Claude skill and MCP server; NERV's records own only NERV's side (F-101-T05, F-101-T06, F-114).
 
+## Repository (F-101-T03)
+
+**Decided by the owner on 2026-11-22:** repository name **`fpv-buddy`**, visibility **`public`**.
+
 ## Reconsider when
 
 Pilots need builds, wiring or blackbox; a pilot needs shared or synced data rather than a file of their own; MCP write grants (F-021) make an external FPV pack usable from NERV; or two hosts start to diverge on the web components.

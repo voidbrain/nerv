@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 43 | 23 |
-| **Require Human 🧑** | 14 | 7 |
+| **Require Human 🧑** | 12 | 7 |
 
 ### Require Human 🧑
 
@@ -22,8 +22,8 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | [B-097](#b-097) |
-| [F-011](#f-011) | [F-112](#f-112) | [B-068](#b-068) |  |
-| [F-004](#f-004) | [F-101](#f-101) | [B-056](#b-056) |  |
+| [F-011](#f-011) |  | [B-068](#b-068) |  |
+| [F-004](#f-004) |  | [B-056](#b-056) |  |
 | [F-012](#f-012) |  | [B-095](#b-095) |  |
 | [F-086](#f-086) |  | [B-096](#b-096) |  |
 | [F-087](#f-087) |  | [B-106](#b-106) |  |
@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 88.25 h agent + 11.5 h owner across 124 open steps of 40 features and 23 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 88.25 h agent + 11 h owner across 122 open steps of 40 features and 23 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2160,6 +2160,54 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-112"></a>[✨ F-112](#top)
+
+**Script plans over read-only tools**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-112-T03 — Read-only script executor inside EVA with a gate decision per call (Planned).
+
+| | |
+|---|---|
+| **Issue** | A request that needs several reads (for example the reminders of each of the next seven days) takes one planner step per tool call, repeating context each time. Code-mode frameworks let the model write one short script over the calls instead. |
+| **Reproduce** | Ask Misato for something that needs the same read tool several times and count the planner steps in the sortie record. |
+| **Check** | A design note says which script subset is allowed, where it runs (an EVA instance), how every call inside it still passes the MAGI gate, and its limits; the owner decides whether to adopt it. If adopted: read-only tools only, one gate decision per call, time/call/output budgets, fail-closed outside EVA; a Gauntlet case compares planner steps and tokens with and without scripts. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-112-t03"></a>F-112-T03 — Read-only script executor inside EVA with a gate decision per call | 4 h | 0 h | 4 h | Planned | — | [F-112-T04](#f-112-t04) | 🤖 | — |
+| 🟢 Small | <a id="f-112-t04"></a>F-112-T04 — Gauntlet case comparing planner steps and tokens with and without scripts | 1 h | 0 h | 1 h | Planned | [F-112-T03](#f-112-t03) | — | ⏳ 🤖 | — |
+| 🔴 Large | **Total** | 6.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 5 h | 2 of 4 completed | | | | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-112-t01"></a>F-112-T01 — Design note: script subset, EVA placement, per-call gate and limits | 1.5 h | 0 h | Completed | [PR #614](https://github.com/voidbrain/nerv/pull/614) design note |
+| — | <a id="f-112-t02"></a>F-112-T02 — Owner decides whether to adopt script plans and their scope | — | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-112.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-112-T01: [PR #614](https://github.com/voidbrain/nerv/pull/614) design note. [PR #647](https://github.com/voidbrain/nerv/pull/647) (F-112-T02 approval); [PR #614](https://github.com/voidbrain/nerv/pull/614) (F-112-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
+| Opened | 2026-11-20 |
+| Verification | 2026-11-21: `check:fast`, work and backlog checks pass (existing advisory warnings only); fresh-context design review found no remaining blockers. |
+| Reviewed | 2026-11-21 |
+
+</details>
+
+---
 ### <a id="f-113"></a>[✨ F-113](#top)
 
 **Compact tool index with details on request**
@@ -2341,6 +2389,56 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-114-T01: [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config · F-114-T02: [PR #628](https://github.com/voidbrain/nerv/pull/628) FPV pack behind the manifest · F-114-T03: [PR #629](https://github.com/voidbrain/nerv/pull/629) Cooking pack behind the manifest · F-114-T04: [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message · F-114-T05: [PR #641](https://github.com/voidbrain/nerv/pull/641) FPV pack off-and-on toggle check recorded in docs/acceptance/f114-t05-fpv-toggle.md (F-114-T05) · F-114-T06: [PR #642](https://github.com/voidbrain/nerv/pull/642) Gauntlet nerv-system-flows/stress and nerv-system-flows/browser reruns (F-114-T06). [FPV packs decision](decisions/fpv-packs.md); opened in [PR #593](https://github.com/voidbrain/nerv/pull/593); F-114-T01 in [PR #621](https://github.com/voidbrain/nerv/pull/621); F-114-T02 in [PR #628](https://github.com/voidbrain/nerv/pull/628); F-114-T03 in [PR #629](https://github.com/voidbrain/nerv/pull/629); F-114-T04 in [PR #627](https://github.com/voidbrain/nerv/pull/627); F-114-T05 in [PR #641](https://github.com/voidbrain/nerv/pull/641); F-114-T06 in [PR #642](https://github.com/voidbrain/nerv/pull/642) |
 | Opened | 2026-11-20 |
 | Verification | 2026-11-22: F-114-T05 FPV pack off-and-on toggle check recorded in [f114-t05-fpv-toggle.md](acceptance/f114-t05-fpv-toggle.md). 2026-11-22: F-114-T06 expensive system-flow reruns (`nerv-system-flows/stress` and `nerv-system-flows/browser`) passed; `node tools/gauntlet.mjs pending` and `npm run check:gauntlet-runs` exited 0. |
+| Reviewed | 2026-11-20 |
+
+</details>
+
+---
+### <a id="f-101"></a>[✨ F-101](#top)
+
+**Share the FPV battery manager outside NERV**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h | [F-098-T04](#f-098-t04) | — | ⏳ | — | — |
+
+💻 **→** Next: F-101-T04 — Create the FPV core repository and move the core into it (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: friends and FPV pilots should be able to use the battery manager ("look at this FPV battery management tool"), including people who use Claude on the phone, and through Agensi among other channels. Today it would exist only inside NERV. |
+| **Reproduce** | Try to give a pilot without NERV a way to log charge state and resistance. |
+| **Check** | A recommendation compares a Claude skill, a standalone package or repository owning the battery core, and an MCP server: who it reaches, where each pilot's data lives, and the maintenance cost; the core lives once and the shapes wrap it; the owner decides. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-101-t04"></a>F-101-T04 — Create the FPV core repository and move the core into it | 2 h | 0 h | 2 h | Planned | [F-098-T04](#f-098-t04) | [F-101-T05](#f-101-t05) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-101-t05"></a>F-101-T05 — NERV FPV pack uses the FPV core package | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T04](#f-101-t04) | [F-101-T06](#f-101-t06) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-101-t06"></a>F-101-T06 — Dashboard uses the FPV core's web components | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T05](#f-101-t05) | — | ⏳ 🤖 | — |
+| 🔴 Large | **Total** | 5.75 h | 0 h (0 of 6 steps recorded) | 5 h | 3 of 6 completed | | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-101-t01"></a>F-101-T01 — Compare ways to share the battery manager | 0.75 h | 0 h | Completed | [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation |
+| — | <a id="f-101-t02"></a>F-101-T02 — Owner decides how to share | 0 h | 0 h | Completed | — |
+| — | <a id="f-101-t03"></a>F-101-T03 — Owner names the FPV core repository and its visibility | 0 h | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-101.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-101-T01: [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation. [PR #647](https://github.com/voidbrain/nerv/pull/647) (F-101-T03 decision); [PR #484](https://github.com/voidbrain/nerv/pull/484) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-101-T01 verified: [PR #484](https://github.com/voidbrain/nerv/pull/484) merged on green CI. |
 | Reviewed | 2026-11-20 |
 
 </details>
@@ -2796,54 +2894,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-112"></a>[✨ F-112](#top)
-
-**Script plans over read-only tools**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h agent + 0.25 h owner | — | — | ⏳ | — | 🤔 |
-
-🧑 **→** Next: [🤔](reviews/2026-11-20-agentica.md) F-112-T02 — Owner decides whether to adopt script plans and their scope (Planned).
-
-| | |
-|---|---|
-| **Issue** | A request that needs several reads (for example the reminders of each of the next seven days) takes one planner step per tool call, repeating context each time. Code-mode frameworks let the model write one short script over the calls instead. |
-| **Reproduce** | Ask Misato for something that needs the same read tool several times and count the planner steps in the sortie record. |
-| **Check** | A design note says which script subset is allowed, where it runs (an EVA instance), how every call inside it still passes the MAGI gate, and its limits; the owner decides whether to adopt it. If adopted: read-only tools only, one gate decision per call, time/call/output budgets, fail-closed outside EVA; a Gauntlet case compares planner steps and tokens with and without scripts. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-112-t02"></a>F-112-T02 — Owner decides whether to adopt script plans and their scope | — | 0 h | 0 h agent + 0.25 h owner | Planned | — | [F-112-T03](#f-112-t03) | [🤔](reviews/2026-11-20-agentica.md) | — |
-| 🟡 Medium | <a id="f-112-t03"></a>F-112-T03 — Read-only script executor inside EVA with a gate decision per call | 4 h | 0 h | 4 h | Planned | [F-112-T02](#f-112-t02) | [F-112-T04](#f-112-t04) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-112-t04"></a>F-112-T04 — Gauntlet case comparing planner steps and tokens with and without scripts | 1 h | 0 h | 1 h | Planned | [F-112-T03](#f-112-t03) | — | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 6.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 5 h agent + 0.25 h owner | 1 of 4 completed | | | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-112-t01"></a>F-112-T01 — Design note: script subset, EVA placement, per-call gate and limits | 1.5 h | 0 h | Completed | [PR #614](https://github.com/voidbrain/nerv/pull/614) design note |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-112.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-112-T01: [PR #614](https://github.com/voidbrain/nerv/pull/614) design note. [PR #614](https://github.com/voidbrain/nerv/pull/614) (F-112-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
-| Opened | 2026-11-20 |
-| Verification | 2026-11-21: `check:fast`, work and backlog checks pass (existing advisory warnings only); fresh-context design review found no remaining blockers. |
-| Reviewed | 2026-11-21 |
-
-</details>
-
----
 ### <a id="f-007"></a>[✨ F-007](#top)
 
 **Voice and evaluated skill improvement**
@@ -2943,56 +2993,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-100-T03 verified: [PR #486](https://github.com/voidbrain/nerv/pull/486) merged on green CI. `F-100-T01`: `npm run check:fast` passed. |
 | Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-101"></a>[✨ F-101](#top)
-
-**Share the FPV battery manager outside NERV**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h agent + 0.25 h owner | [F-098-T04](#f-098-t04) | — | ⏳ | — | 🤔 |
-
-🧑 **→** Next: [🤔](decisions/fpv-packs.md) F-101-T03 — Owner names the FPV core repository and its visibility (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-14: friends and FPV pilots should be able to use the battery manager ("look at this FPV battery management tool"), including people who use Claude on the phone, and through Agensi among other channels. Today it would exist only inside NERV. |
-| **Reproduce** | Try to give a pilot without NERV a way to log charge state and resistance. |
-| **Check** | A recommendation compares a Claude skill, a standalone package or repository owning the battery core, and an MCP server: who it reaches, where each pilot's data lives, and the maintenance cost; the core lives once and the shapes wrap it; the owner decides. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-101-t03"></a>F-101-T03 — Owner names the FPV core repository and its visibility | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | — | [F-101-T04](#f-101-t04) | [🤔](decisions/fpv-packs.md) | — |
-| 🟡 Medium | <a id="f-101-t04"></a>F-101-T04 — Create the FPV core repository and move the core into it | 2 h | 0 h | 2 h | Planned | [F-101-T03](#f-101-t03), [F-098-T04](#f-098-t04) | [F-101-T05](#f-101-t05) | ⏳ 🤖 | — |
-| 🟡 Medium | <a id="f-101-t05"></a>F-101-T05 — NERV FPV pack uses the FPV core package | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T04](#f-101-t04) | [F-101-T06](#f-101-t06) | ⏳ 🤖 | — |
-| 🟡 Medium | <a id="f-101-t06"></a>F-101-T06 — Dashboard uses the FPV core's web components | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T05](#f-101-t05) | — | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 5.75 h | 0 h (0 of 6 steps recorded) | 5 h agent + 0.25 h owner | 2 of 6 completed | | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-101-t01"></a>F-101-T01 — Compare ways to share the battery manager | 0.75 h | 0 h | Completed | [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation |
-| — | <a id="f-101-t02"></a>F-101-T02 — Owner decides how to share | 0 h | 0 h | Completed | — |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-101.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-101-T01: [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation. [PR #484](https://github.com/voidbrain/nerv/pull/484) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-101-T01 verified: [PR #484](https://github.com/voidbrain/nerv/pull/484) merged on green CI. |
-| Reviewed | 2026-11-20 |
 
 </details>
 

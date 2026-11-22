@@ -4,7 +4,7 @@
   "parent": "F-101",
   "title": "Owner names the FPV core repository and its visibility",
   "goal": "The owner picks the repository name and whether it is public or private",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Name and visibility recorded in F-101"
   ],
@@ -29,12 +29,12 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-20: one choice. Not a measurement.",
-    "reviewed": "2026-11-20",
+    "basis": "Closed 2026-11-22: owner chose repository name fpv-buddy (public).",
+    "reviewed": "2026-11-22",
     "agentHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision"
   },
   "prs": [],
