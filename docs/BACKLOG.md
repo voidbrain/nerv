@@ -3131,7 +3131,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-076-T03: [PR #382](https://github.com/voidbrain/nerv/pull/382) implementation. [PR #386](https://github.com/voidbrain/nerv/pull/386) [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #382](https://github.com/voidbrain/nerv/pull/382) [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
+| PR / evidence | Steps: F-076-T03: [PR #382](https://github.com/voidbrain/nerv/pull/382) implementation. [PR #657](https://github.com/voidbrain/nerv/pull/657) (v10.2.0 reconcile & F-076-T05 closure); [PR #386](https://github.com/voidbrain/nerv/pull/386) [PR #383](https://github.com/voidbrain/nerv/pull/383) [PR #382](https://github.com/voidbrain/nerv/pull/382) [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #374](https://github.com/voidbrain/nerv/pull/374) [full audit 2026-11-13](audits/2026-11-13-full.md) |
 | Opened | 2026-11-13 |
 | Verification | 2026-11-22: `node tools/check-harness.mjs --strict` (`v10.2.0`), `npm run check:fast` pass; Review: fresh-context review of `.github/workflows/ci.yml`, `.harness.json`, and `tools/merge-when-green.mjs` passed (LGTM). 2026-11-18: F-076-T03 verified: [PR #382](https://github.com/voidbrain/nerv/pull/382) merged on green CI. |
 | Reviewed | 2026-11-22 |
