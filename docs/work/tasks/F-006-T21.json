@@ -4,7 +4,7 @@
   "id": "F-006-T21",
   "title": "Owner page for placement P2–P4 on the mini PC and across both bases",
   "goal": "The owner can run P2–P4 by pasting commands, as P1 on the Mac",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "A page under docs/acceptance gives tested commands for P2 (mini PC, PowerShell), P3 (mini PC worker with Mac remote inference) and P4 (Mac unavailable, then back), each with an expected result",
     "Every command is dry-run (plan, zero model calls) before the page is published",
