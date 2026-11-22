@@ -23,7 +23,7 @@
   "validation": [
     "npm run check:work"
   ],
-  "ownerLink": "docs/work/records/B-097.md",
+  "ownerLink": "docs/archive/backlog-2026.md",
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
