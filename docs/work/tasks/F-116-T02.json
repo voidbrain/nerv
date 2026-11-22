@@ -5,6 +5,7 @@
   "title": "Owner decision: build model splitting or close",
   "goal": "The owner decides from the F-116-T01 note whether to plan the build steps",
   "status": "planned",
+  "ownerLink": "docs/design/model-splitting.md",
   "acceptance": [
     "The decision and its date are in the record; a go adds sized build steps, a no closes F-116"
   ],
