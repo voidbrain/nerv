@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 75.75 h agent + 10.75 h owner across 102 open steps of 35 features and 13 other records. 72.75 h of actual effort recorded on 105 steps. Generated from the task files.
+**Remaining effort:** 74.25 h agent + 10.75 h owner across 101 open steps of 35 features and 13 other records. 72.75 h of actual effort recorded on 105 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -173,9 +173,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC (Planned).
+💻 **→** Next: F-006-T15 — Record the evidence of F-006-T11 and close it (Planned).
 
 | | |
 |---|---|
@@ -187,12 +187,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 1.5 h | 0 h | 1.5 h | Planned | — | [F-006-T15](#f-006-t15) | 🤖 | — |
-| 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-006-T11](#f-006-t11) | [F-006-T12](#f-006-t12) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0 h | 0.25 h | Planned | — | [F-006-T12](#f-006-t12) | 🤖 | — |
 | 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned | [F-006-T15](#f-006-t15) | — | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 10.25 h (18 of 21 steps) | 5.75 h (12 of 21 steps recorded) | 2 h | 18 of 21 completed | | | | |
+| 🟢 Small | **Total** | 10.25 h (18 of 21 steps) | 5.75 h (12 of 21 steps recorded) | 0.5 h | 19 of 21 completed | | | | |
 
-<details><summary>Done steps (18)</summary>
+<details><summary>Done steps (19)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -206,6 +205,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0.75 h (stated) | Completed | — |
 | — | <a id="f-006-t09"></a>F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.75 h | 0.75 h (stated) | Completed | — |
 | — | <a id="f-006-t10"></a>F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 1.5 h | 0 h | Completed | — |
 | — | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | Completed | [PR #528](https://github.com/voidbrain/nerv/pull/528) results |
 | — | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0.25 h (stated) | Completed | [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure |
 | — | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0.25 h (stated) | Completed | — |
@@ -1822,7 +1822,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🔴 Large | 5 h | [F-098-T04](#f-098-t04) | — | ⏳ | — | — |
 
-💻 **→** Next: F-101-T04 — Create the FPV core repository and move the core into it (Planned).
+💻 **→** Next: F-101-T04 — Create/wire the FPVBuddy core repository and move the core into it (Planned).
 
 | | |
 |---|---|
@@ -1834,7 +1834,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-101-t04"></a>F-101-T04 — Create the FPV core repository and move the core into it | 2 h | 0 h | 2 h | Planned | [F-098-T04](#f-098-t04) | [F-101-T05](#f-101-t05) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-101-t04"></a>F-101-T04 — Create/wire the FPVBuddy core repository and move the core into it | 2 h | 0 h | 2 h | Planned | [F-098-T04](#f-098-t04) | [F-101-T05](#f-101-t05) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-101-t05"></a>F-101-T05 — NERV FPV pack uses the FPV core package | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T04](#f-101-t04) | [F-101-T06](#f-101-t06) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-101-t06"></a>F-101-T06 — Dashboard uses the FPV core's web components | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T05](#f-101-t05) | — | ⏳ 🤖 | — |
 | 🔴 Large | **Total** | 5.75 h | 0 h (0 of 6 steps recorded) | 5 h | 3 of 6 completed | | | | |
