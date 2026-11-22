@@ -6,7 +6,7 @@
  "goal": "Adopt the new Gauntlet packs (gauntlet F-012) when released",
  "status": "planned",
  "acceptance": [
-  "Pending cases this task covers: bilingual-it-en/*, long-context/*, multi-step-agent/*, refusal-permission/*, structured-output-robustness/*, tool-use/*, general-assistant-expanded/prompt-injection-r2, general-assistant-expanded/prompt-injection-h1, general-assistant-expanded/prompt-injection-h2, general-assistant-expanded/combined-r1, general-assistant-expanded/combined-r2, general-assistant-expanded/combined-h1, general-assistant-expanded/combined-h2, nerv-system-flows/* (stale after source changes; the overnight run covers them)",
+  "Pending cases this task covers: refusal-permission/*, tool-use/unknown-tool-regression, tool-use/arguments-regression, tool-use/choose-tool-holdout, tool-use/unknown-tool-holdout, tool-use/arguments-holdout",
   "Pin bumped to the release; its new cases appear as pending",
   "The approved matrix runs the new packs; pending exits 0"
  ],
@@ -48,6 +48,10 @@
   {
    "pr": 630,
    "note": "campaign evidence"
+  },
+  {
+   "pr": 634,
+   "note": "overnight rerun evidence"
   }
  ]
 }
