@@ -5,6 +5,7 @@ import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
 import { toChecklistSurface, type ListStore } from './lists.ts';
 import { replayDesktopRecording, type DesktopRecordingFile, type DesktopReplayDriver } from './desktop-recording.ts';
+import { pushBranchAndOpenPr, type CodingJobPrOpener } from './coding-job.ts';
 import { handOffToBambuConnect, type BambuConnectLauncher } from './slicer.ts';
 import type { GmailClient } from './gmail.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
@@ -66,6 +67,7 @@ export interface ReminderBackend {
   lists?: ListStore;
   gmail?: GmailClient;
   desktopReplayDriver?: DesktopReplayDriver;
+  codingPrOpener?: CodingJobPrOpener;
   bambuLauncher?: BambuConnectLauncher;
   fpvBuilds?: FpvBuildStore;
   documents?: DocumentStore;
@@ -140,6 +142,8 @@ export const builtinTools: Tool[] = [
   { name: 'fpv.import_build', effect: 'write-local' },
   { name: 'fpv.add_doc', effect: 'write-local' },
   { name: 'fpv.wiring_answer', effect: 'read' },
+  // F-084-T03: pushing a coding-job branch and opening a PR is Orange behind owner approval.
+  { name: 'coding.push_pr', effect: 'write-external' },
   // F-087-T03: opening Bambu Connect on the owner's desktop is an Orange action.
   { name: 'bambu.handoff', effect: 'write-external' },
 ];
@@ -203,6 +207,7 @@ export const BUILTIN_TOOL_SUBJECTS: Readonly<Record<string, ToolSubject>> = {
   'settings.schedule': 'agency',
   'kaji.run': 'agency',
   'desktop.replay': 'agency',
+  'coding.push_pr': 'agency',
   'bambu.handoff': 'agency',
 };
 
@@ -500,6 +505,12 @@ const rawToolDocs: ToolDoc[] = [
     about:
       'Replays a bounded local desktop recording as a Blue action after verifying display, app, and window preconditions and stopping on owner input.',
     args: '{"recording": DesktopRecordingFile, "approved": boolean}',
+  },
+  {
+    name: 'coding.push_pr',
+    effect: 'write-external',
+    about: 'Pushes a coding-job branch and opens a pull request behind Orange owner approval with diff summary.',
+    args: '{"worktreePath": string, "branch": string, "baseBranch": string, "title": string, "body"?: string, "diffSummary": string, "remote"?: string}',
   },
   {
     name: 'bambu.handoff',
@@ -1166,6 +1177,21 @@ function executeRaw(
         recording: args.recording as DesktopRecordingFile,
         approved: args.approved === true,
       });
+    }
+    case 'coding.push_pr': {
+      only(args, ['worktreePath', 'branch', 'baseBranch', 'title', 'body', 'diffSummary', 'remote']);
+      text(args, 'diffSummary');
+      return pushBranchAndOpenPr(
+        {
+          worktreePath: text(args, 'worktreePath'),
+          branch: text(args, 'branch'),
+          baseBranch: text(args, 'baseBranch'),
+          title: text(args, 'title'),
+          ...(args.body !== undefined ? { body: text(args, 'body') } : {}),
+          ...(args.remote !== undefined ? { remote: text(args, 'remote') } : {}),
+        },
+        backend.codingPrOpener,
+      );
     }
     case 'bambu.handoff': {
       only(args, [
