@@ -32,10 +32,10 @@ Status per milestone, derived from the records (Delivered: all closed; Awaiting 
 | 2b — Governed extensions | In progress | 11 | 0 | 3 | F-021, F-086, F-087 |
 | 3 — Multi-node foundation | In progress | 5 | 0 | 4 | F-005, F-088, F-102, F-103 |
 | 4 — Angular PWA, GenUI and live dashboard | In progress | 6 | 1 | 3 | F-004, F-109, F-110 |
-| 5 — Distributed agents/models | In progress | 4 | 0 | 15 | F-006, F-012, F-049, F-060, F-078, F-084, F-089, F-090, F-091, F-092, F-093, F-094, F-106, F-113, F-116 |
+| 5 — Distributed agents/models | In progress | 6 | 0 | 13 | F-006, F-012, F-049, F-060, F-078, F-089, F-090, F-092, F-093, F-094, F-106, F-113, F-116 |
 | 5b — Coordinator relocation (later) | Planned | 0 | 0 | 1 | F-016 |
 | 6 — Voice and evaluated improvement | Planned | 0 | 0 | 1 | F-007 |
-| Independent tracks | In progress | 2 | 0 | 6 | F-008, F-098, F-099, F-100, F-101, F-114 |
+| Independent tracks | In progress | 3 | 0 | 5 | F-008, F-098, F-099, F-100, F-101 |
 <!-- roadmap-status:end -->
 
 ## NERV naming and governance (2026-11-04)
