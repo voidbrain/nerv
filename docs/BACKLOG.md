@@ -1057,7 +1057,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
 | 🟢 Small | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned | — |
-| 🟢 Small | <a id="f-091-t03"></a>F-091-T03 — Rerun the system flow cases at the F-091-T01 source | 0.25 h | 0 h | 0.25 h | Planned | — |
+| 🟢 Small | <a id="f-091-t03"></a>F-091-T03 — Rerun the gauntlet cases at the F-091-T01 source | 0.25 h | 0 h | 0.25 h | Planned | — |
 | 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 0.5 h | 1 of 3 completed | |
 
 <details><summary>Done steps (1)</summary>
