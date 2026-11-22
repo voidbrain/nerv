@@ -48,5 +48,10 @@
     "actualAgentHours": 1.5,
     "actualSource": "stated"
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 638,
+      "note": "placement probes and owner page; CI pending"
+    }
+  ]
 }
