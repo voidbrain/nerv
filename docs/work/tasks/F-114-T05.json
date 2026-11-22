@@ -4,7 +4,7 @@
   "parent": "F-114",
   "title": "Live check: turn FPV off and on",
   "goal": "On the main base, FPV off removes its tools and panel; on again brings them back with the data intact",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Owner-visible result recorded with the commands used"
   ],
@@ -32,9 +32,14 @@
     "estimate": "0.25 h",
     "basis": "Estimated 2026-11-20: one config change each way and a chat check. Not a measurement.",
     "reviewed": "2026-11-20",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 641,
+      "note": "FPV pack off-and-on toggle check recorded in docs/acceptance/f114-t05-fpv-toggle.md (F-114-T05)"
+    }
+  ]
 }
