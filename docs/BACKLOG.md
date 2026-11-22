@@ -13,7 +13,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 43 | 23 |
+| **Open** | 42 | 14 |
 | **Require Human 🧑** | 12 | 7 |
 
 ### Require Human 🧑
@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 88.25 h agent + 11 h owner across 122 open steps of 40 features and 23 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 84.25 h agent + 11 h owner across 111 open steps of 39 features and 14 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -229,53 +229,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-006-T04 and F-006-T05 closed (were Verified). 2026-11-18: F-006-T19 verified: [PR #466](https://github.com/voidbrain/nerv/pull/466) merged on green CI; F-006-T20 verified: [PR #468](https://github.com/voidbrain/nerv/pull/468) merged on green CI. |
 | Reviewed | 2026-11-22 |
-
-</details>
-
----
-
-### <a id="f-027"></a>[✨ F-027](#top)
-
-**Naoko desk provenance and Ireul taint with an egress allowlist**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-027-T02 — Enforce Scrolls egress at the execution boundary (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Email, web and third-party content can carry injected instructions. Durable provenance/taint is implemented; enforced egress remains missing. |
-| **Reproduce** | Feed a sortie an email body that asks to send data elsewhere; run the same request from the owner directly. |
-| **Check** | Every intake item records source and trust; taint propagates into the LCL and memory; a tainted context asking for an external effect is Pattern Blue; network egress only to Scrolls-allowed destinations; untrusted code runs in the EVA-03 quarantine class. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-027-t02"></a>F-027-T02 — Enforce Scrolls egress at the execution boundary | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | [PR #584](https://github.com/voidbrain/nerv/pull/584) implementation |
-| 🟢 Small | **Total** | 0.75 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0.75 h | 1 of 2 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-027-t01"></a>F-027-T01 — Carry durable context provenance into the gate and memory | — | 0 days | Completed | — |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-027.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-027-T02: [PR #584](https://github.com/voidbrain/nerv/pull/584) implementation. [PR #584](https://github.com/voidbrain/nerv/pull/584) (T02 implementation); [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Acceptance: [PR #238](https://github.com/voidbrain/nerv/pull/238); [PR #237](https://github.com/voidbrain/nerv/pull/237); Review: independent fresh-context report in [provenance boundary](reviews/2026-11-09-provenance-boundary.md), finding fixed and rechecked; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
-| Opened | 2026-11-04 |
-| Verification | 2026-11-20: `node --test test/egress-proxy.test.ts test/eva-classes-runner.test.ts test/eva-gate.test.ts test/eva-runner.test.ts test/ledger.test.ts test/gate.test.ts` (58/58 passed, including live macOS Seatbelt `eva-01` join test + unconfined fixture proof), `npm run check:fast`, `npm run check:conventions`, and `npm run check:evals` passed. 2026-11-09 Unit/integration and Browser/accessibility: PR237 exact head be60c19 / CI42614209749 passed plan, validate (coverage, browser/axe, headless), Windows, native-macos and full-suite. |
-| Reviewed | 2026-11-20 |
 
 </details>
 
@@ -1493,158 +1446,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-092"></a>[🐞 B-092](#top)
-
-**Every NERV command refused to create a missing base key (regression from B-084)**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-092-T01 — Host construction needs only the data home; planning names missing files (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 re-enrolling NERV-03 after its revocation (F-005-T27): with the old key moved aside, `nerv base pubkey` answered "NERV data home … is not fully initialized (missing base-key, base.pub) … Create them first: nerv base pubkey". B-084 (PR #523) put the file check in `requireServiceHome`, which every host constructor calls, and the startup guard builds a host for every command when `~/.nerv-lifecycle` exists, so no command could create the key. Worked around on Calvary by calling `baseKey()` directly. |
-| **Reproduce** | On a host with `~/.nerv-lifecycle`: move `~/.nerv/base-key` aside, run `nerv base pubkey`. |
-| **Check** | Test committed failing first: `requireServiceHome` (host construction) needs only the data home; `requireServiceFiles`, called by `planService`, names missing files; B-084's test moves to `requireServiceFiles` with its requirement unchanged. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-092-t01"></a>B-092-T01 — Host construction needs only the data home; planning names missing files | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #527](https://github.com/voidbrain/nerv/pull/527) this change |
-| 🟢 Small | **Total** | 0.75 h | 0.5 h | 0.25 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-092.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-092-T01: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change. Test: `test/node-lifecycle-execution.test.ts` "B-092: building a host needs only the data home…" (committed failing first) |
-| Opened | 2026-11-18 |
-| Verification | Pending: CI. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="b-101"></a>[🐞 B-101](#top)
-
-**The dashboard says a model is down when the base is degraded for another reason, and never shows the reason**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-101-T01 — The dashboard names why the base is degraded, and calls a model down only when one is (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Reported by the owner 2026-11-19 on NERV-01: the health card read "DEGRADED · Dummy Plug: reminders and rule-based actions keep running; requests that need a model fail with the reason below until it is back" while every route was reachable. The reason was the 03:02 Instrumentality run, which failed because the local route was down at night (it came back at 09:24); a failed latest run stays a degraded reason until a later one succeeds. The banner text is fixed in `web/public/dashboard/live.js`, the reasons it points to are never listed, and the bases map marks the base standby for any reason. |
-| **Reproduce** | A failed Instrumentality run with all model routes reachable: the dashboard shows the model-failure banner with no reason, and the base as standby. |
-| **Check** | Test committed failing first: the banner lists each reason; its model-failure sentence and the standby state appear only for a down model route or brain (B-101-T01). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-101-t01"></a>B-101-T01 — The dashboard names why the base is degraded, and calls a model down only when one is | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [PR #559](https://github.com/voidbrain/nerv/pull/559) the fix; CI pending |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-101.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-101-T01: [PR #559](https://github.com/voidbrain/nerv/pull/559) the fix; CI pending. Owner report, NERV-01 dashboard, 2026-11-19; [PR #559](https://github.com/voidbrain/nerv/pull/559) B-101-T01 (`test/degraded-banner.test.mjs`) |
-| Opened | 2026-11-19 |
-| Verification | Pending. |
-| Reviewed | 2026-11-19 |
-
-</details>
-
----
-### <a id="b-102"></a>[🐞 B-102](#top)
-
-**Backlog IDs appear in text the owner sees: "(F-045)" on the dashboard's Skills tab, and in denial reasons and errors**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-102-T01 — No backlog ID in a string the owner or a model sees (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Reported by the owner 2026-11-20: the dashboard's Skills tab read "…grows through its own stages (F-045)." A scan of every string and template literal found ten more: EVA-03 and proactive-code denial reasons and a granted-tool reason ("(F-049)"), MCP write-grant errors ("F-021 slice 2"), a Misato prompt line a model could repeat ("(B-024)"), a restore warning ("under F-062"), the Windows launcher header ("(F-037)") and a load-forwarding error ("requires F-048 acceptance"). Backlog IDs belong to the repository, not to what the owner reads. |
-| **Reproduce** | Open the dashboard's Skills tab, or be denied an EVA-03 tool: the text names a backlog ID. |
-| **Check** | Test committed failing first: no string or template literal in `src/` or the dashboard script names a backlog ID (B-102-T01). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-102-t01"></a>B-102-T01 — No backlog ID in a string the owner or a model sees | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | [PR #573](https://github.com/voidbrain/nerv/pull/573) the fix |
-| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-102.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-102-T01: [PR #573](https://github.com/voidbrain/nerv/pull/573) the fix. Owner report, dashboard Skills tab, 2026-11-20; `test/user-text-ids.test.ts` |
-| Opened | 2026-11-20 |
-| Verification | Pending. |
-| Reviewed | 2026-11-20 |
-
-</details>
-
----
-### <a id="b-100"></a>[🐞 B-100](#top)
-
-**`nerv eva run-tools-03` never starts when the checkout is under `$HOME`**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-19 in F-049-T13: the EVA-03 profile denies reading `$HOME`, and the checkout lives under it (on the owner's Macs and on CI's macOS runner). Node cannot resolve the tools process's entry: `EPERM, lstat '/Users/<user>'` while it walks the path, then `Cannot read package config …/package.json`. The tools process is also given the NERV home, which the profile denies on purpose. The F-049-T04 test passed because it checked only that the instance was discarded, not the exit code. EVA execution is not enabled, so no live job is affected. |
-| **Reproduce** | `nerv eva run-tools-03` from a checkout under `$HOME`: exit 1, stderr `EPERM … lstat '/Users/<user>'`. |
-| **Check** | Test committed failing first: from a checkout under `$HOME`, the tools process in EVA-03 exits 0 and lists tools; NERV state, keys and the rest of `$HOME` stay denied and the gate tests still pass (B-100-T01). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-100-t01"></a>B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [PR #568](https://github.com/voidbrain/nerv/pull/568) the fix; CI pending |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-100.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-100-T01: [PR #568](https://github.com/voidbrain/nerv/pull/568) the fix; CI pending. Found in F-049-T13 ([PR #553](https://github.com/voidbrain/nerv/pull/553)); [PR #568](https://github.com/voidbrain/nerv/pull/568) B-100-T01 (`test/eva-runner.test.ts`) |
-| Opened | 2026-11-19 |
-| Verification | Pending. |
-| Reviewed | 2026-11-19 |
-
-</details>
-
----
 ### <a id="f-086"></a>[✨ F-086](#top)
 
 **Gmail: search and read, then draft and send behind approval**
@@ -2483,122 +2284,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="b-073"></a>[🐞 B-073](#top)
-
-**Windows CI: the service lifecycle test times out a lifecycle command**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-073-T01 — Find the slow lifecycle command on Windows and fix it or its bound (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 on PR #507 (no lifecycle change): the `windows` job failed `test/windows-service-lifecycle.test.ts:104` ("windowsServiceAdapter executes install, status, start, stop and uninstall under the fencing journal") with "Lifecycle command timed out; effects remain uncertain." from `src/node-lifecycle-execution.ts`. First seen; the same day B-072 showed another Windows timing failure. |
-| **Reproduce** | Run `npm test` on the Windows runner; the failure is intermittent. |
-| **Check** | The slow command and its bound are named from the CI log or a local trace; a committed test fails first if the cause is in code, or the bound is set from measured Windows timings; the Windows job passes without reruns. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-073-t01"></a>B-073-T01 — Find the slow lifecycle command on Windows and fix it or its bound | 1 h | 0.75 h so far (stated) | 0.25 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 1 h | 0.75 h | 0.25 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-073.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #508](https://github.com/voidbrain/nerv/pull/508); Test: `test/node-lifecycle-execution.test.ts` "the handler identity of the running process is queried once…" (committed failing first); `test/windows-service-lifecycle.test.ts` "B-073: the Windows adapter asks the process identity through its own runner with a 60 s bound" (committed failing first, 922c075c). CI run 44213770369 (windows job failed) |
-| Opened | 2026-11-18 |
-| Verification | Pending. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-
-### <a id="b-074"></a>[🐞 B-074](#top)
-
-**Windows CI: the real-CLI root-binding export/import test sees no exit status**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-074-T01 — Find why the root-binding CLI child ends without a status on Windows and fix it or its bound (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 on PR #508 (no change to root migration): the `windows` job failed `test/root-migration.test.ts:599` ("real CLI export/import propagates migrated root binding to a new profile without private root material") at line 623 with `null !== 0`: the CLI child ended without an exit status (killed, most likely by a timeout). First seen; B-072 and B-073 were Windows timing failures too. |
-| **Reproduce** | Run `npm test` on the Windows runner; intermittent. |
-| **Check** | The cause is named from the CI log or a local trace; a committed test fails first if it is in code, or the bound comes from measured Windows timings; the Windows job passes without reruns. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-074-t01"></a>B-074-T01 — Find why the root-binding CLI child ends without a status on Windows and fix it or its bound | 1 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #508](https://github.com/voidbrain/nerv/pull/508) bound |
-| 🟢 Small | **Total** | 1 h | 0.25 h | 0.25 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-074.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-074-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #508](https://github.com/voidbrain/nerv/pull/508) bound. Failed: windows job 134648345069 of run 44259214063 (PR #508, first attempt). |
-| Opened | 2026-11-18 |
-| Verification | Pending. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="b-075"></a>[🐞 B-075](#top)
-
-**Windows CI: Telegram checkpoint and quiet-hours tests time out**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-075-T01 — Read the failed Telegram tests on Windows and name the cause (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 in the history of the `windows` job: on 2026-11-16 (PR branch `feat/f-089-t02-browser-click`, no Telegram change) two tests failed in one run: "F-003: failed Bot delivery keeps its checkpoint across restart, retries once accepted, and is not replayed" and "F-026: Telegram defers proactive cards and resumed replies during quiet hours…". Not seen since in 20 clean Windows runs; recorded so it is not lost. |
-| **Reproduce** | Run `npm test` on a slow Windows runner; F-003 timed out in five runs on 2026-11-18 and 2026-11-19. |
-| **Check** | The failure messages are read from the CI log and the cause named; a committed test fails first if it is in code; otherwise the record closes with the investigation and the remaining uncertainty stated. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-075-t01"></a>B-075-T01 — Read the failed Telegram tests on Windows and name the cause | 1 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | — | [B-075-T02](#b-075-t02) | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound |
-| 🟢 Small | <a id="b-075-t02"></a>B-075-T02 — Give the F-003 checkpoint test the same Windows bound | 0.5 h | 0.25 h so far (stated) | 0.25 h | Implemented; verification pending | [B-075-T01](#b-075-t01) | — | [PR #571](https://github.com/voidbrain/nerv/pull/571) bound |
-| 🟢 Small | **Total** | 1.5 h | 0.75 h | 0.5 h | 0 of 2 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-075.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-075-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound · B-075-T02: [PR #571](https://github.com/voidbrain/nerv/pull/571) bound. Failed: windows job 133087302320 of run 43802969338 (2026-11-16). |
-| Opened | 2026-11-18 |
-| Verification | Pending. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
 ### <a id="b-076"></a>[🐞 B-076](#top)
 
 **CI 2026-11-18: scattered one-off failures in unrelated tests on Windows and Linux**
@@ -2641,82 +2326,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |
-
-</details>
-
----
-### <a id="b-103"></a>[🐞 B-103](#top)
-
-**A channel-state privacy test fails whenever a timestamp contains "123"**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-103-T01 — Fixture chat ID that no timestamp can contain (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-20 in CI run 44647978230 (PR #575, a docs and tooling reconcile): "failed relay and failed own-bot sends report failure without private error data…" (`test/channel-state.test.ts`) asserts the channel state never contains the fixture's private values, one of them the chat ID 123. The state carries ISO timestamps, and this one was `00:44:43.123Z`, so the check failed with no private data present. It fails whenever a timestamp in the state contains "123". |
-| **Reproduce** | Run the test when a delivery timestamp's seconds or milliseconds produce "123" (for example `…:43.123Z`). |
-| **Check** | The fixture chat ID is one no ISO timestamp can contain (987654321) and the privacy assertion matches it; the test passes. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-103-t01"></a>B-103-T01 — Fixture chat ID that no timestamp can contain | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix |
-| 🟢 Small | **Total** | 0.25 h | 0.25 h | 0 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-103.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-103-T01: [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix. CI run 44647978230 (PR #575); [PR #578](https://github.com/voidbrain/nerv/pull/578) |
-| Opened | 2026-11-20 |
-| Verification | Pending. |
-| Reviewed | 2026-11-20 |
-
-</details>
-
----
-### <a id="b-104"></a>[🐞 B-104](#top)
-
-**The Instrumentality daily-run test waits a fixed 400 ms and fails on a slow Windows runner**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-104-T01 — Wait for the Instrumentality attempts instead of a fixed 400 ms (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-20 on Windows in CI run 44650057242 (PR #578, a test-only change): "Instrumentality runs once a local day at its time, and a failed digest is not retried in a loop" (`test/instrumentality.test.ts`) found 0 digest attempts where it expects 2, after a fixed 400 ms wait. The idle-mode test below it had the same fixed wait and was changed to wait until the run happens. |
-| **Reproduce** | Run the test on a loaded Windows runner: the scheduler has not run within 400 ms. |
-| **Check** | The test waits until both attempts happened (up to 10 s), then 400 ms more in which a looping retry would show, and still expects exactly 2. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-104-t01"></a>B-104-T01 — Wait for the Instrumentality attempts instead of a fixed 400 ms | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix |
-| 🟢 Small | **Total** | 0.25 h | 0.25 h | 0 h | 0 of 1 completed | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-104.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-104-T01: [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix. CI run 44650057242 (Windows); [PR #578](https://github.com/voidbrain/nerv/pull/578) |
-| Opened | 2026-11-20 |
-| Verification | Pending. |
-| Reviewed | 2026-11-20 |
 
 </details>
 
@@ -3174,6 +2783,143 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-073"></a>[🐞 B-073](#top)
+
+**Windows CI: the service lifecycle test times out a lifecycle command**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P3 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on PR #507 (no lifecycle change): the `windows` job failed `test/windows-service-lifecycle.test.ts:104` ("windowsServiceAdapter executes install, status, start, stop and uninstall under the fencing journal") with "Lifecycle command timed out; effects remain uncertain." from `src/node-lifecycle-execution.ts`. First seen; the same day B-072 showed another Windows timing failure. |
+| **Reproduce** | Run `npm test` on the Windows runner; the failure is intermittent. |
+| **Check** | The slow command and its bound are named from the CI log or a local trace; a committed test fails first if the cause is in code, or the bound is set from measured Windows timings; the Windows job passes without reruns. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| — | **Total** | 1 h | 0.75 h | 0 h | 1 of 1 completed |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="b-073-t01"></a>B-073-T01 — Find the slow lifecycle command on Windows and fix it or its bound | 1 h | 0.75 h (stated) | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-073.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #508](https://github.com/voidbrain/nerv/pull/508); Test: `test/node-lifecycle-execution.test.ts` "the handler identity of the running process is queried once…" (committed failing first); `test/windows-service-lifecycle.test.ts` "B-073: the Windows adapter asks the process identity through its own runner with a 60 s bound" (committed failing first, 922c075c). CI run 44213770369 (windows job failed) |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-22: PR #508 merged with green CI (including windows); closed in [PR #648](https://github.com/voidbrain/nerv/pull/648). |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
+
+### <a id="b-074"></a>[🐞 B-074](#top)
+
+**Windows CI: the real-CLI root-binding export/import test sees no exit status**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P3 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on PR #508 (no change to root migration): the `windows` job failed `test/root-migration.test.ts:599` ("real CLI export/import propagates migrated root binding to a new profile without private root material") at line 623 with `null !== 0`: the CLI child ended without an exit status (killed, most likely by a timeout). First seen; B-072 and B-073 were Windows timing failures too. |
+| **Reproduce** | Run `npm test` on the Windows runner; intermittent. |
+| **Check** | The cause is named from the CI log or a local trace; a committed test fails first if it is in code, or the bound comes from measured Windows timings; the Windows job passes without reruns. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 1 h | 0.25 h | 0 h | 1 of 1 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-074-t01"></a>B-074-T01 — Find why the root-binding CLI child ends without a status on Windows and fix it or its bound | 1 h | 0.25 h (stated) | Completed | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #508](https://github.com/voidbrain/nerv/pull/508) bound |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-074.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-074-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #508](https://github.com/voidbrain/nerv/pull/508) bound. [PR #508](https://github.com/voidbrain/nerv/pull/508) (`test/root-migration.test.ts`). No test: test timeout bound adjusted from measured Windows timings. |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-22: PR #508 merged with green CI (including windows); closed. |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
+### <a id="b-075"></a>[🐞 B-075](#top)
+
+**Windows CI: Telegram checkpoint and quiet-hours tests time out**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P3 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 in the history of the `windows` job: on 2026-11-16 (PR branch `feat/f-089-t02-browser-click`, no Telegram change) two tests failed in one run: "F-003: failed Bot delivery keeps its checkpoint across restart, retries once accepted, and is not replayed" and "F-026: Telegram defers proactive cards and resumed replies during quiet hours…". Not seen since in 20 clean Windows runs; recorded so it is not lost. |
+| **Reproduce** | Run `npm test` on a slow Windows runner; F-003 timed out in five runs on 2026-11-18 and 2026-11-19. |
+| **Check** | The failure messages are read from the CI log and the cause named; a committed test fails first if it is in code; otherwise the record closes with the investigation and the remaining uncertainty stated. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 1.5 h | 0.75 h | 0 h | 2 of 2 completed | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-075-t01"></a>B-075-T01 — Read the failed Telegram tests on Windows and name the cause | 1 h | 0.5 h (stated) | Completed | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound |
+| — | <a id="b-075-t02"></a>B-075-T02 — Give the F-003 checkpoint test the same Windows bound | 0.5 h | 0.25 h (stated) | Completed | [PR #571](https://github.com/voidbrain/nerv/pull/571) bound |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-075.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-075-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #513](https://github.com/voidbrain/nerv/pull/513) bound · B-075-T02: [PR #571](https://github.com/voidbrain/nerv/pull/571) bound. [PR #513](https://github.com/voidbrain/nerv/pull/513) (B-075-T01), [PR #571](https://github.com/voidbrain/nerv/pull/571) (B-075-T02). No test: test timeout bounds adjusted from measured Windows timings. |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-22: PR #513 and PR #571 merged with green CI (including windows); closed. |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
 ### <a id="b-087"></a>[🐞 B-087](#top)
 
 **Windows: a fenced start applied from an SSH session is refused by the startup fence**
@@ -3215,6 +2961,276 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-21: PR #612 plan, validate, Windows, native-macOS, full-suite and all CodeQL analyses passed. Local: Windows lifecycle targeted suite 4/4; full suite 1,059 passed / 2 skipped; headless integration 5 passed / 1 Windows-only skipped; `check:fast` and production build pass. Live probe confirmed both process-identity parts are inaccessible from the desktop session. |
 | Reviewed | 2026-11-21 |
+
+</details>
+
+---
+### <a id="b-092"></a>[🐞 B-092](#top)
+
+**Every NERV command refused to create a missing base key (regression from B-084)**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 re-enrolling NERV-03 after its revocation (F-005-T27): with the old key moved aside, `nerv base pubkey` answered "NERV data home … is not fully initialized (missing base-key, base.pub) … Create them first: nerv base pubkey". B-084 (PR #523) put the file check in `requireServiceHome`, which every host constructor calls, and the startup guard builds a host for every command when `~/.nerv-lifecycle` exists, so no command could create the key. Worked around on Calvary by calling `baseKey()` directly. |
+| **Reproduce** | On a host with `~/.nerv-lifecycle`: move `~/.nerv/base-key` aside, run `nerv base pubkey`. |
+| **Check** | Test committed failing first: `requireServiceHome` (host construction) needs only the data home; `requireServiceFiles`, called by `planService`, names missing files; B-084's test moves to `requireServiceFiles` with its requirement unchanged. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 0.75 h | 0.5 h | 0 h | 1 of 1 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-092-t01"></a>B-092-T01 — Host construction needs only the data home; planning names missing files | 0.75 h | 0.5 h (stated) | Completed | [PR #527](https://github.com/voidbrain/nerv/pull/527) this change |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-092.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-092-T01: [PR #527](https://github.com/voidbrain/nerv/pull/527) this change. [PR #527](https://github.com/voidbrain/nerv/pull/527). Test: `test/node-lifecycle-execution.test.ts` "B-092: building a host needs only the data home…" (committed failing first). |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-22: PR #527 merged with green CI; closed. |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
+### <a id="b-100"></a>[🐞 B-100](#top)
+
+**`nerv eva run-tools-03` never starts when the checkout is under `$HOME`**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-19 in F-049-T13: the EVA-03 profile denies reading `$HOME`, and the checkout lives under it (on the owner's Macs and on CI's macOS runner). Node cannot resolve the tools process's entry: `EPERM, lstat '/Users/<user>'` while it walks the path, then `Cannot read package config …/package.json`. The tools process is also given the NERV home, which the profile denies on purpose. The F-049-T04 test passed because it checked only that the instance was discarded, not the exit code. EVA execution is not enabled, so no live job is affected. |
+| **Reproduce** | `nerv eva run-tools-03` from a checkout under `$HOME`: exit 1, stderr `EPERM … lstat '/Users/<user>'`. |
+| **Check** | Test committed failing first: from a checkout under `$HOME`, the tools process in EVA-03 exits 0 and lists tools; NERV state, keys and the rest of `$HOME` stay denied and the gate tests still pass (B-100-T01). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 0 h | 1 of 1 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-100-t01"></a>B-100-T01 — Decide what the tools process may read in EVA-03, and make eva run-tools-03 start | 1.5 h | 0 h | Completed | [PR #568](https://github.com/voidbrain/nerv/pull/568) the fix; CI pending |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-100.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-100-T01: [PR #568](https://github.com/voidbrain/nerv/pull/568) the fix; CI pending. Found in F-049-T13 ([PR #553](https://github.com/voidbrain/nerv/pull/553)); [PR #568](https://github.com/voidbrain/nerv/pull/568) B-100-T01. Test: `test/eva-runner.test.ts`. |
+| Opened | 2026-11-19 |
+| Verification | 2026-11-22: PR #568 merged with green CI; closed. |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
+### <a id="b-101"></a>[🐞 B-101](#top)
+
+**The dashboard says a model is down when the base is degraded for another reason, and never shows the reason**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Reported by the owner 2026-11-19 on NERV-01: the health card read "DEGRADED · Dummy Plug: reminders and rule-based actions keep running; requests that need a model fail with the reason below until it is back" while every route was reachable. The reason was the 03:02 Instrumentality run, which failed because the local route was down at night (it came back at 09:24); a failed latest run stays a degraded reason until a later one succeeds. The banner text is fixed in `web/public/dashboard/live.js`, the reasons it points to are never listed, and the bases map marks the base standby for any reason. |
+| **Reproduce** | A failed Instrumentality run with all model routes reachable: the dashboard shows the model-failure banner with no reason, and the base as standby. |
+| **Check** | Test committed failing first: the banner lists each reason; its model-failure sentence and the standby state appear only for a down model route or brain (B-101-T01). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0 h | 1 of 1 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-101-t01"></a>B-101-T01 — The dashboard names why the base is degraded, and calls a model down only when one is | 0.5 h | 0 h | Completed | [PR #559](https://github.com/voidbrain/nerv/pull/559) the fix; CI pending |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-101.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-101-T01: [PR #559](https://github.com/voidbrain/nerv/pull/559) the fix; CI pending. Owner report, NERV-01 dashboard, 2026-11-19; [PR #559](https://github.com/voidbrain/nerv/pull/559) B-101-T01. Test: `test/degraded-banner.test.mjs`. |
+| Opened | 2026-11-19 |
+| Verification | 2026-11-22: PR #559 merged with green CI; closed. |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
+### <a id="b-102"></a>[🐞 B-102](#top)
+
+**Backlog IDs appear in text the owner sees: "(F-045)" on the dashboard's Skills tab, and in denial reasons and errors**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P2 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Reported by the owner 2026-11-20: the dashboard's Skills tab read "…grows through its own stages (F-045)." A scan of every string and template literal found ten more: EVA-03 and proactive-code denial reasons and a granted-tool reason ("(F-049)"), MCP write-grant errors ("F-021 slice 2"), a Misato prompt line a model could repeat ("(B-024)"), a restore warning ("under F-062"), the Windows launcher header ("(F-037)") and a load-forwarding error ("requires F-048 acceptance"). Backlog IDs belong to the repository, not to what the owner reads. |
+| **Reproduce** | Open the dashboard's Skills tab, or be denied an EVA-03 tool: the text names a backlog ID. |
+| **Check** | Test committed failing first: no string or template literal in `src/` or the dashboard script names a backlog ID (B-102-T01). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 0.5 h | 0.5 h | 0 h | 1 of 1 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-102-t01"></a>B-102-T01 — No backlog ID in a string the owner or a model sees | 0.5 h | 0.5 h (stated) | Completed | [PR #573](https://github.com/voidbrain/nerv/pull/573) the fix |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-102.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-102-T01: [PR #573](https://github.com/voidbrain/nerv/pull/573) the fix. Owner report, dashboard Skills tab, 2026-11-20; [PR #573](https://github.com/voidbrain/nerv/pull/573). Test: `test/user-text-ids.test.ts`. |
+| Opened | 2026-11-20 |
+| Verification | 2026-11-22: PR #573 merged with green CI; closed. |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
+### <a id="b-103"></a>[🐞 B-103](#top)
+
+**A channel-state privacy test fails whenever a timestamp contains "123"**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P3 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-20 in CI run 44647978230 (PR #575, a docs and tooling reconcile): "failed relay and failed own-bot sends report failure without private error data…" (`test/channel-state.test.ts`) asserts the channel state never contains the fixture's private values, one of them the chat ID 123. The state carries ISO timestamps, and this one was `00:44:43.123Z`, so the check failed with no private data present. It fails whenever a timestamp in the state contains "123". |
+| **Reproduce** | Run the test when a delivery timestamp's seconds or milliseconds produce "123" (for example `…:43.123Z`). |
+| **Check** | The fixture chat ID is one no ISO timestamp can contain (987654321) and the privacy assertion matches it; the test passes. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 0.25 h | 0.25 h | 0 h | 1 of 1 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-103-t01"></a>B-103-T01 — Fixture chat ID that no timestamp can contain | 0.25 h | 0.25 h (stated) | Completed | [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-103.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-103-T01: [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix. CI run 44647978230 (PR #575); [PR #578](https://github.com/voidbrain/nerv/pull/578). Test: `test/channel-state.test.ts`. |
+| Opened | 2026-11-20 |
+| Verification | 2026-11-22: PR #578 merged with green CI; closed. |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
+### <a id="b-104"></a>[🐞 B-104](#top)
+
+**The Instrumentality daily-run test waits a fixed 400 ms and fails on a slow Windows runner**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P3 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-20 on Windows in CI run 44650057242 (PR #578, a test-only change): "Instrumentality runs once a local day at its time, and a failed digest is not retried in a loop" (`test/instrumentality.test.ts`) found 0 digest attempts where it expects 2, after a fixed 400 ms wait. The idle-mode test below it had the same fixed wait and was changed to wait until the run happens. |
+| **Reproduce** | Run the test on a loaded Windows runner: the scheduler has not run within 400 ms. |
+| **Check** | The test waits until both attempts happened (up to 10 s), then 400 ms more in which a looping retry would show, and still expects exactly 2. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 0.25 h | 0.25 h | 0 h | 1 of 1 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-104-t01"></a>B-104-T01 — Wait for the Instrumentality attempts instead of a fixed 400 ms | 0.25 h | 0.25 h (stated) | Completed | [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-104.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-104-T01: [PR #578](https://github.com/voidbrain/nerv/pull/578) the fix. CI run 44650057242 (Windows); [PR #578](https://github.com/voidbrain/nerv/pull/578). No test: polling helper replaced fixed 400 ms sleep for slow Windows runners. |
+| Opened | 2026-11-20 |
+| Verification | 2026-11-22: PR #578 merged with green CI (including windows); closed. |
+| Reviewed | 2026-11-22 |
 
 </details>
 
@@ -3265,6 +3281,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-027"></a>[✨ F-027](#top)
+
+**Naoko desk provenance and Ireul taint with an egress allowlist**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔵 Closed | ◻️ P1 | 🟢 Small | 0 days | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Email, web and third-party content can carry injected instructions. Durable provenance/taint is implemented; enforced egress remains missing. |
+| **Reproduce** | Feed a sortie an email body that asks to send data elsewhere; run the same request from the owner directly. |
+| **Check** | Every intake item records source and trust; taint propagates into the LCL and memory; a tainted context asking for an external effect is Pattern Blue; network egress only to Scrolls-allowed destinations; untrusted code runs in the EVA-03 quarantine class. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 0.75 h (1 of 2 steps) | 0 h (0 of 2 steps recorded) | 0 days | 2 of 2 completed | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-027-t01"></a>F-027-T01 — Carry durable context provenance into the gate and memory | — | 0 days | Completed | — |
+| — | <a id="f-027-t02"></a>F-027-T02 — Enforce Scrolls egress at the execution boundary | 0.75 h | 0 h | Completed | [PR #584](https://github.com/voidbrain/nerv/pull/584) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-027.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-027-T02: [PR #584](https://github.com/voidbrain/nerv/pull/584) implementation. [PR #584](https://github.com/voidbrain/nerv/pull/584) (T02 implementation); [PR #242](https://github.com/voidbrain/nerv/pull/242) retains/supersedes PR241 and adopts diagnostics;  Reference/operator documentation: [PR #241](https://github.com/voidbrain/nerv/pull/241); Acceptance: [PR #238](https://github.com/voidbrain/nerv/pull/238); [PR #237](https://github.com/voidbrain/nerv/pull/237); Review: independent fresh-context report in [provenance boundary](reviews/2026-11-09-provenance-boundary.md), finding fixed and rechecked; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #7](https://github.com/voidbrain/nerv/pull/7) (NERV M2a plan) |
+| Opened | 2026-11-04 |
+| Verification | 2026-11-22: PR #584 (F-027-T02) merged with green CI; closed. Earlier: 2026-11-20: 58/58 targeted tests + `check:fast` passed. |
+| Reviewed | 2026-11-22 |
+
+</details>
+
+---
+
 ### <a id="f-051"></a>[✨ F-051](#top)
 
 **Dashboard: a sortie shows where it runs and who contributed**

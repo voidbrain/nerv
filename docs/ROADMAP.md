@@ -28,7 +28,7 @@ Status per milestone, derived from the records (Delivered: all closed; Awaiting 
 | 1a — Headless and bilingual workspace | Delivered | 6 | 0 | 0 | — |
 | 1a.1 — Isolated runtime foundation | Delivered | 2 | 0 | 0 | — |
 | 1b — Native macOS companion | Awaiting verification | 1 | 1 | 0 | — |
-| 2a — Useful, gated assistant | In progress | 15 | 1 | 2 | F-082, F-083 |
+| 2a — Useful, gated assistant | In progress | 16 | 0 | 2 | F-082, F-083 |
 | 2b — Governed extensions | In progress | 11 | 0 | 3 | F-021, F-086, F-087 |
 | 3 — Multi-node foundation | In progress | 4 | 0 | 5 | F-005, F-088, F-102, F-103, F-107 |
 | 4 — Angular PWA, GenUI and live dashboard | In progress | 6 | 1 | 3 | F-004, F-109, F-110 |
