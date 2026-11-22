@@ -6,7 +6,7 @@
  "goal": "Adopt the new Gauntlet packs (gauntlet F-012) when released",
  "status": "planned",
  "acceptance": [
-  "Pending cases this task covers: bilingual-it-en/*, long-context/*, multi-step-agent/*, refusal-permission/*, structured-output-robustness/*, tool-use/*",
+  "Pending cases this task covers: refusal-permission/*, tool-use/unknown-tool-regression, tool-use/arguments-regression, tool-use/choose-tool-holdout, tool-use/unknown-tool-holdout, tool-use/arguments-holdout",
   "Pin bumped to the release; its new cases appear as pending",
   "The approved matrix runs the new packs; pending exits 0"
  ],
@@ -43,5 +43,15 @@
   "agentHours": 0.5,
   "baselineAgentHours": 0.5,
   "estimateAgentHours": 0.5
- }
+ },
+ "prs": [
+  {
+   "pr": 630,
+   "note": "campaign evidence"
+  },
+  {
+   "pr": 634,
+   "note": "overnight rerun evidence"
+  }
+ ]
 }

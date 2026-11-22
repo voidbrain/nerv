@@ -43,6 +43,72 @@ export interface CodingJobResult {
   };
 }
 
+export interface CodingJobPushRequest {
+  worktreePath: string;
+  branch: string;
+  baseBranch: string;
+  title: string;
+  body?: string;
+  remote?: string;
+}
+
+export type CodingJobPrOpener = (opts: {
+  worktreePath: string;
+  branch: string;
+  baseBranch: string;
+  remote: string;
+  title: string;
+  body: string;
+}) => string;
+
+export interface CodingJobPushResult {
+  branch: string;
+  remote: string;
+  prUrl: string;
+}
+
+function defaultPrOpener(opts: {
+  worktreePath: string;
+  branch: string;
+  baseBranch: string;
+  title: string;
+  body: string;
+}): string {
+  return execFileSync(
+    'gh',
+    ['pr', 'create', '--head', opts.branch, '--base', opts.baseBranch, '--title', opts.title, '--body', opts.body],
+    { cwd: opts.worktreePath, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8' },
+  ).trim();
+}
+
+/**
+ * Pushes a coding-job branch to the configured remote and opens a pull request, returning the PR URL (F-084-T03).
+ * Must only be invoked behind an approved Orange (`write-external`) action gate.
+ */
+export function pushBranchAndOpenPr(
+  request: CodingJobPushRequest,
+  opener: CodingJobPrOpener = defaultPrOpener,
+): CodingJobPushResult {
+  const worktreePath = resolve(request.worktreePath);
+  const remote = request.remote?.trim() || 'origin';
+  const branch = request.branch.trim();
+  const baseBranch = request.baseBranch.trim();
+  const title = request.title.trim();
+  const body = request.body?.trim() ?? '';
+  if (!branch || !baseBranch || !title) {
+    throw new Error('branch, baseBranch, and title are required to push and open a PR.');
+  }
+  execFileSync('git', ['-C', worktreePath, 'push', '-u', remote, branch], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    encoding: 'utf8',
+  });
+  const prUrl = opener({ worktreePath, branch, baseBranch, remote, title, body }).trim();
+  if (!prUrl) {
+    throw new Error('PR opener did not return a pull request URL.');
+  }
+  return { branch, remote, prUrl };
+}
+
 function summarizeWorktreeDiff(worktreePath: string): string {
   const diffStat = execFileSync('git', ['-C', worktreePath, 'diff', '--stat'], {
     stdio: ['ignore', 'pipe', 'ignore'],

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-116-T02",
+  "parent": "F-116",
+  "title": "Owner decision: build model splitting or close",
+  "goal": "The owner decides from the F-116-T01 note whether to plan the build steps",
+  "status": "planned",
+  "acceptance": [
+    "The decision and its date are in the record; a go adds sized build steps, a no closes F-116"
+  ],
+  "dependsOn": [
+    "F-116-T01"
+  ],
+  "resources": [
+    "docs/work/records/F-116.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "No personal data.",
+  "validation": [
+    "npm run check:backlog"
+  ],
+  "escalation": [
+    "This step is the owner's decision"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-22: reading one note. Not a measurement.",
+    "reviewed": "2026-11-22",
+    "ownerKind": "decision",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0
+  }
+}
