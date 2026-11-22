@@ -1955,7 +1955,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-112-T01: [PR #614](https://github.com/voidbrain/nerv/pull/614) design note. [PR #651](https://github.com/voidbrain/nerv/pull/651) (F-112-T03); [PR #647](https://github.com/voidbrain/nerv/pull/647) (F-112-T02 approval); [PR #614](https://github.com/voidbrain/nerv/pull/614) (F-112-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
+| PR / evidence | Steps: F-112-T01: [PR #614](https://github.com/voidbrain/nerv/pull/614) design note. [PR #652](https://github.com/voidbrain/nerv/pull/652) (F-112-T04); [PR #651](https://github.com/voidbrain/nerv/pull/651) (F-112-T03); [PR #647](https://github.com/voidbrain/nerv/pull/647) (F-112-T02 approval); [PR #614](https://github.com/voidbrain/nerv/pull/614) (F-112-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
 | Opened | 2026-11-20 |
 | Verification | 2026-11-21: `check:fast`, work and backlog checks pass (existing advisory warnings only); fresh-context design review found no remaining blockers. |
 | Reviewed | 2026-11-21 |
