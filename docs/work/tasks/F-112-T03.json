@@ -4,7 +4,7 @@
   "parent": "F-112",
   "title": "Read-only script executor inside EVA with a gate decision per call",
   "goal": "One script replaces several read steps without widening authority",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Only read-effect tools are callable from a script; anything else is refused",
     "Each call inside a script gets its own gate decision and sortie entry",
@@ -38,9 +38,9 @@
   "effort": {
     "size": "medium",
     "estimate": "4 h",
-    "basis": "Estimated 2026-11-20 from the Agentica review. Not a measurement.",
-    "reviewed": "2026-11-20",
-    "agentHours": 4,
+    "basis": "Closed 2026-11-22: src/script-plan.ts, EVA-03 onBridgeLine stdio bridge, Misato { script } plan, and RuntimePlanning per-call MAGI gating implemented and verified.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
     "baselineAgentHours": 4,
     "estimateAgentHours": 4
   }

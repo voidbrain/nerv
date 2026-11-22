@@ -39,6 +39,7 @@ export interface Step {
 }
 export type Plan =
   | { action: { tool: string; args: Record<string, unknown> } }
+  | { script: string }
   | { reply: string }
   | { ask: string }
   | { newRequest: true };
@@ -569,6 +570,13 @@ export function parsePlan(text: string): Plan | undefined {
     return { ask: v.ask.trim().slice(0, MAX_REPLY_CHARS) };
   if (keys.length === 1 && typeof v.reply === 'string' && v.reply.trim())
     return { reply: v.reply.trim().slice(0, MAX_REPLY_CHARS) };
+  if (
+    keys.length === 1 &&
+    typeof v.script === 'string' &&
+    v.script.trim() &&
+    Buffer.byteLength(v.script, 'utf8') <= 16_384
+  )
+    return { script: v.script };
   const a = v.action as Record<string, unknown> | undefined;
   if (
     keys.length === 1 &&
