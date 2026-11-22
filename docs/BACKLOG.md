@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 78.75 h agent + 11 h owner across 109 open steps of 38 features and 14 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 77.75 h agent + 11 h owner across 108 open steps of 37 features and 14 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1921,9 +1921,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 0 h | — | — | — | — | — |
 
-💻 **→** Next: F-112-T04 — Gauntlet case comparing planner steps and tokens with and without scripts (Planned).
+💻 **→** Next: all steps closed; verify and close the record.
 
 | | |
 |---|---|
@@ -1935,16 +1935,16 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-112-t04"></a>F-112-T04 — Gauntlet case comparing planner steps and tokens with and without scripts | 1 h | 0 h | 1 h | Planned | 🤖 | — |
-| 🟢 Small | **Total** | 6.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 1 h | 3 of 4 completed | | |
+| — | **Total** | 6.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 0 h | 4 of 4 completed | | |
 
-<details><summary>Done steps (3)</summary>
+<details><summary>Done steps (4)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-112-t01"></a>F-112-T01 — Design note: script subset, EVA placement, per-call gate and limits | 1.5 h | 0 h | Completed | [PR #614](https://github.com/voidbrain/nerv/pull/614) design note |
 | — | <a id="f-112-t02"></a>F-112-T02 — Owner decides whether to adopt script plans and their scope | — | 0 h | Completed | — |
 | — | <a id="f-112-t03"></a>F-112-T03 — Read-only script executor inside EVA with a gate decision per call | 4 h | 0 h | Completed | — |
+| — | <a id="f-112-t04"></a>F-112-T04 — Gauntlet case comparing planner steps and tokens with and without scripts | 1 h | 0 h | Completed | — |
 
 </details>
 
@@ -1955,7 +1955,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-112-T01: [PR #614](https://github.com/voidbrain/nerv/pull/614) design note. [PR #651](https://github.com/voidbrain/nerv/pull/651) (F-112-T03); [PR #647](https://github.com/voidbrain/nerv/pull/647) (F-112-T02 approval); [PR #614](https://github.com/voidbrain/nerv/pull/614) (F-112-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
+| PR / evidence | Steps: F-112-T01: [PR #614](https://github.com/voidbrain/nerv/pull/614) design note. [PR #652](https://github.com/voidbrain/nerv/pull/652) (F-112-T04); [PR #651](https://github.com/voidbrain/nerv/pull/651) (F-112-T03); [PR #647](https://github.com/voidbrain/nerv/pull/647) (F-112-T02 approval); [PR #614](https://github.com/voidbrain/nerv/pull/614) (F-112-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587) |
 | Opened | 2026-11-20 |
 | Verification | 2026-11-21: `check:fast`, work and backlog checks pass (existing advisory warnings only); fresh-context design review found no remaining blockers. |
 | Reviewed | 2026-11-21 |

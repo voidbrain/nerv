@@ -234,14 +234,66 @@ describe('F-112-T03: read-only script plans inside EVA-03', () => {
     },
   );
 
+  function createNeutralPlanningHost(
+    modelTurns: ReadonlyArray<{ readonly plan: Record<string, unknown> }>,
+    onGateResult?: (req: { tool: string; args: Record<string, unknown> }) => unknown,
+  ) {
+    const gated: string[] = [];
+    const recorded: unknown[] = [];
+    const turnMetrics: Array<{ turn: number; promptTokens: number; toolSchemaTokens: number; outputTokens: number }> =
+      [];
+    let turnIdx = 0;
+    const host = {
+      home: undefined,
+      reminderPage: async () => ({ items: [] }),
+      baseNames: async () => [],
+      pilots: () => [],
+      externalTools: async () => ({ docs: [], byName: new Map() }),
+      getRemoteConsultant: () => undefined,
+      proposePilot: async () => ({}),
+      remoteOffers: async () => [],
+      remotePilots: async () => [],
+      revokedBases: async () => [],
+      resolveOperator: async () => undefined,
+      spear: async () => ({}),
+      chatOnce: async () => ({ sortieId: 'S-TEST', steps: [], waiting: [] }),
+      modelCall: async (_method: string, input: unknown) => {
+        const { misatoAsk } = await import('../src/misato.ts');
+        const { toolDocs } = await import('../src/executors.ts');
+        const { estimateTokens, measureMisatoPrompt } = await import('../src/prompt-samples.ts');
+        const turn = modelTurns[turnIdx++] ?? { plan: { reply: 'fallback' } };
+        const ask = misatoAsk({ ...(input as Parameters<typeof misatoAsk>[0]), tools: toolDocs }, 'local');
+        const pm = measureMisatoPrompt(ask, toolDocs);
+        turnMetrics.push({
+          turn: turnIdx,
+          promptTokens: pm.promptTokens,
+          toolSchemaTokens: pm.toolSchemaTokens,
+          outputTokens: estimateTokens(JSON.stringify(turn.plan)),
+        });
+        return turn;
+      },
+      gate: async (_sid: string, req: { tool: string; args: Record<string, unknown> }) => {
+        gated.push(req.tool);
+        const result = onGateResult ? onGateResult(req) : [{ title: 'ok' }];
+        return { outcome: 'grant' as const, actionId: `act-${gated.length}`, result };
+      },
+      record: async (_sid: string, steps: unknown[], step: unknown) => {
+        steps.push(step);
+        recorded.push(step);
+      },
+      note: async () => {},
+      nervous: { call: async (m: string) => (m === 'memory.recall' ? [] : {}) },
+      toolsProcess: () => ({ call: async () => ({}) }),
+    };
+    return { host, gated, recorded, turnMetrics };
+  }
+
   it(
     'join: RuntimePlanning executes { script } through host gate and records per-call + script.plan steps',
     { skip: process.platform !== 'darwin' && process.platform !== 'linux' },
     async () => {
       const { RuntimePlanning } = await import('../src/runtime-planning.ts');
-      const gated: string[] = [];
-      const recorded: unknown[] = [];
-      const modelTurns = [
+      const { host, gated, recorded } = createNeutralPlanningHost([
         {
           plan: {
             script:
@@ -249,35 +301,7 @@ describe('F-112-T03: read-only script plans inside EVA-03', () => {
           },
         },
         { plan: { reply: 'Done reading both.' } },
-      ];
-      let turnIdx = 0;
-      const host = {
-        home: undefined,
-        reminderPage: async () => ({ items: [] }),
-        baseNames: async () => [],
-        pilots: () => [],
-        externalTools: async () => ({ docs: [], byName: new Map() }),
-        getRemoteConsultant: () => undefined,
-        proposePilot: async () => ({}),
-        remoteOffers: async () => [],
-        remotePilots: async () => [],
-        revokedBases: async () => [],
-        resolveOperator: async () => undefined,
-        spear: async () => ({}),
-        chatOnce: async () => ({ sortieId: 'S-TEST', steps: [], waiting: [] }),
-        modelCall: async () => modelTurns[turnIdx++] ?? { plan: { reply: 'fallback' } },
-        gate: async (_sid: string, req: { tool: string }) => {
-          gated.push(req.tool);
-          return { outcome: 'grant' as const, actionId: `act-${gated.length}`, result: [{ title: 'ok' }] };
-        },
-        record: async (_sid: string, steps: unknown[], step: unknown) => {
-          steps.push(step);
-          recorded.push(step);
-        },
-        note: async () => {},
-        nervous: { call: async (m: string) => (m === 'memory.recall' ? [] : {}) },
-        toolsProcess: () => ({ call: async () => ({}) }),
-      };
+      ]);
       const planning = new RuntimePlanning(host as unknown as ConstructorParameters<typeof RuntimePlanning>[0]);
       const out = await planning.loop('S-TEST', 'check reminders', [], [], { consult: false });
       assert.equal(out.reply, 'Done reading both.');
@@ -286,6 +310,72 @@ describe('F-112-T03: read-only script plans inside EVA-03', () => {
         recorded.some((s) => (s as { tool?: string }).tool === 'script.plan'),
         true,
       );
+    },
+  );
+
+  it(
+    'F-112-T04: compares planner steps and tokens with and without scripts on a neutral 4-read request',
+    { skip: process.platform !== 'darwin' && process.platform !== 'linux' },
+    async (t) => {
+      const { RuntimePlanning } = await import('../src/runtime-planning.ts');
+      const request = 'List my reminders for day-1, day-2, day-3, and day-4.';
+      const filters = ['day-1', 'day-2', 'day-3', 'day-4'];
+
+      // Baseline without script mode: 4 sequential tool turns + 1 reply turn
+      const withoutTurns = [
+        ...filters.map((filter) => ({ plan: { action: { tool: 'reminders.list', args: { filter } } } })),
+        { plan: { reply: 'Checked reminders for day-1 through day-4.' } },
+      ];
+      const withoutRun = createNeutralPlanningHost(withoutTurns, (req) => [
+        { title: `Reminder for ${String(req.args.filter)}`, due: String(req.args.filter) },
+      ]);
+      const withoutPlanning = new RuntimePlanning(
+        withoutRun.host as unknown as ConstructorParameters<typeof RuntimePlanning>[0],
+      );
+      const withoutOut = await withoutPlanning.loop('S-CMP-NO', request, [], [], { consult: false });
+
+      // Script mode: 1 { script } turn for all 4 reads + 1 reply turn
+      const withTurns = [
+        {
+          plan: {
+            script: [
+              'const d1 = tools.call("reminders.list", { filter: "day-1" });',
+              'const d2 = tools.call("reminders.list", { filter: "day-2" });',
+              'const d3 = tools.call("reminders.list", { filter: "day-3" });',
+              'const d4 = tools.call("reminders.list", { filter: "day-4" });',
+              'return { d1: d1, d2: d2, d3: d3, d4: d4 };',
+            ].join(' '),
+          },
+        },
+        { plan: { reply: 'Checked reminders for day-1 through day-4.' } },
+      ];
+      const withRun = createNeutralPlanningHost(withTurns, (req) => [
+        { title: `Reminder for ${String(req.args.filter)}`, due: String(req.args.filter) },
+      ]);
+      const withPlanning = new RuntimePlanning(
+        withRun.host as unknown as ConstructorParameters<typeof RuntimePlanning>[0],
+      );
+      const withOut = await withPlanning.loop('S-CMP-YES', request, [], [], { consult: false });
+
+      const sum = (rows: typeof withoutRun.turnMetrics) => ({
+        plannerSteps: rows.length,
+        promptTokens: rows.reduce((s, r) => s + r.promptTokens, 0),
+        toolSchemaTokens: rows.reduce((s, r) => s + r.toolSchemaTokens, 0),
+        outputTokens: rows.reduce((s, r) => s + r.outputTokens, 0),
+        totalTokens: rows.reduce((s, r) => s + r.promptTokens + r.outputTokens, 0),
+      });
+      const baseline = sum(withoutRun.turnMetrics);
+      const scripted = sum(withRun.turnMetrics);
+
+      t.diagnostic(`F-112-T04 comparison: baseline=${JSON.stringify(baseline)} scripted=${JSON.stringify(scripted)}`);
+
+      assert.equal(withoutOut.reply, withOut.reply);
+      assert.equal(withoutRun.gated.length, 4);
+      assert.equal(withRun.gated.length, 4);
+      assert.equal(baseline.plannerSteps, 5);
+      assert.equal(scripted.plannerSteps, 2);
+      assert.ok(scripted.promptTokens < baseline.promptTokens);
+      assert.ok(scripted.totalTokens < baseline.totalTokens);
     },
   );
 });

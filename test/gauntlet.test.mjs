@@ -928,11 +928,11 @@ test('the root command runs only uncovered cases, records them and reports nothi
       }),
     );
     const schema1Pending = await main(['pending']);
-    assert.equal(schema1Pending.pendingLines.length, 83);
+    assert.equal(schema1Pending.pendingLines.length, 76 + system.cases.length);
     assert.equal(
       schema1Pending.pendingLines.filter((l) => l.startsWith('nerv-system-flows/') && l.endsWith('(source-changed)'))
         .length,
-      7,
+      system.cases.length,
     );
     // Schema 2 entries with the current system sourceKey cover NERV's system cases; every common case is new.
     writeFileSync(
@@ -980,7 +980,7 @@ test('the root command runs only uncovered cases, records them and reports nothi
         ['neutral-smoke', 10, 0, 10],
         ['structured-output-robustness', 6, 0, 6],
         ['tool-use', 6, 0, 6],
-        ['nerv-system-flows', 0, 7, 0],
+        ['nerv-system-flows', 0, system.cases.length, 0],
       ],
     );
     await assert.rejects(main(['all', '--execute']), /out-dir/);
@@ -1059,7 +1059,7 @@ test('the root command runs only uncovered cases, records them and reports nothi
     }
     const written = JSON.parse(readFileSync(ledger, 'utf8'));
     const recorded = written.entries;
-    assert.equal(recorded.length, win32 ? 79 : 83);
+    assert.equal(recorded.length, win32 ? 80 : 84);
     const scriptedEntries = recorded.filter((entry) => entry.pack === 'multi-step-agent');
     assert.equal(scriptedEntries.length, win32 ? 0 : 4);
     assert.ok(scriptedEntries.every((entry) => entry.status === 'passed' && entry.modelDigest === null));
@@ -1107,7 +1107,7 @@ test('pending and ledger keep the harness contract: lines and exit 1 when pendin
     });
   const listed = cli(['pending']);
   assert.equal(listed.status, 1);
-  assert.equal(listed.stdout.trim().split('\n').length, 83);
+  assert.equal(listed.stdout.trim().split('\n').length, 84);
   assert.match(listed.stdout, /^nerv-system-flows\/policy \(new\)$/m);
   assert.equal(cli(['pending', '--max-age-days=x']).status, 2);
   writeFileSync(join(dir, 'bad.json'), '{"schemaVersion":1,"entries":[{"x":1}]}');
@@ -1221,7 +1221,7 @@ test('F-074-T10: identity-bound ledger coverage detects source, model, runtime a
     assert.equal(runtimeChanged.pendingLines.length, 72);
     assert.ok(runtimeChanged.pendingLines.every((l) => l.endsWith('(runtime-changed)')));
     const scenarioChanged = await main(['pending', '--profile=' + profilePath, '--scenario-hash=' + '7'.repeat(64)]);
-    assert.equal(scenarioChanged.pendingLines.length, 79);
+    assert.equal(scenarioChanged.pendingLines.length, 80);
     assert.ok(scenarioChanged.pendingLines.every((l) => l.endsWith('(scenario-changed)')));
     // Recording a system report via `ledger` binds NERV's systemSourceKey automatically.
     const reportPath = join(dir, 'sys-report.json');
@@ -1531,11 +1531,11 @@ test('B-079: the root command reruns system cases whose source changed, as pendi
       }),
     );
     const pending = (await main(['pending'])).pendingLines.filter((l) => l.startsWith('nerv-system-flows/'));
-    assert.equal(pending.length, 7);
+    assert.equal(pending.length, 8);
     const plan = (await main(['all'])).plan.find((p) => p.pack === 'nerv-system-flows');
     assert.deepEqual(
       plan.run.map((r) => r.reason),
-      Array(7).fill('source-changed'),
+      Array(8).fill('source-changed'),
       'a result recorded at another source is not reused',
     );
     assert.equal(plan.reuse.length, 0);

@@ -106,6 +106,19 @@
         "system"
       ],
       "allowModels": false
+    },
+    "script-plans": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=script-plans",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
     }
   }
 }

@@ -226,6 +226,30 @@
         "test/pwa.browser.mjs",
         "test/fixtures/browser.mjs"
       ]
+    },
+    {
+      "id": "script-plans",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "script-plan-comparison",
+        "eva03-per-call-gate"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "script-plans",
+      "area": "security-permissions",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/script-plan.ts",
+        "src/runtime-planning.ts",
+        "src/prompt-samples.ts",
+        "test/script-plan.test.ts"
+      ]
     }
   ]
 }
