@@ -1,4 +1,5 @@
 import type { CodingJobPrOpener } from './coding-job.ts';
+import type { BambuConnectLauncher } from './slicer.ts';
 import { Watch, type WatchWork } from './watch.ts';
 import {
   DEFAULT_HEALTH_THRESHOLDS,
@@ -147,6 +148,7 @@ export class Store {
   readonly policySource: string;
   pushFetch: typeof fetch = fetch;
   codingPrOpener?: CodingJobPrOpener;
+  bambuLauncher?: BambuConnectLauncher;
   /** The data home, when known: the schedule tool writes config.json there. */
   readonly home?: string;
   constructor(

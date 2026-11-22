@@ -6,6 +6,7 @@ import type { Memory } from './memory.ts';
 import { toChecklistSurface, type ListStore } from './lists.ts';
 import { replayDesktopRecording, type DesktopRecordingFile, type DesktopReplayDriver } from './desktop-recording.ts';
 import { pushBranchAndOpenPr, type CodingJobPrOpener } from './coding-job.ts';
+import { handOffToBambuConnect, type BambuConnectLauncher } from './slicer.ts';
 import type { GmailClient } from './gmail.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
 import type { FpvBuildStore, BuildComponentInput, BuildWiringInput, PinoutEntry } from './fpv-builds.ts';
@@ -67,6 +68,7 @@ export interface ReminderBackend {
   gmail?: GmailClient;
   desktopReplayDriver?: DesktopReplayDriver;
   codingPrOpener?: CodingJobPrOpener;
+  bambuLauncher?: BambuConnectLauncher;
   fpvBuilds?: FpvBuildStore;
   documents?: DocumentStore;
   photos?: PhotoStore;
@@ -142,6 +144,8 @@ export const builtinTools: Tool[] = [
   { name: 'fpv.wiring_answer', effect: 'read' },
   // F-084-T03: pushing a coding-job branch and opening a PR is Orange behind owner approval.
   { name: 'coding.push_pr', effect: 'write-external' },
+  // F-087-T03: opening Bambu Connect on the owner's desktop is an Orange action.
+  { name: 'bambu.handoff', effect: 'write-external' },
 ];
 const text = (args: Record<string, unknown>, key: string) => {
   const v = args[key];
@@ -204,6 +208,7 @@ export const BUILTIN_TOOL_SUBJECTS: Readonly<Record<string, ToolSubject>> = {
   'kaji.run': 'agency',
   'desktop.replay': 'agency',
   'coding.push_pr': 'agency',
+  'bambu.handoff': 'agency',
 };
 
 /** What Misato is told about each built-in tool. */
@@ -506,6 +511,13 @@ const rawToolDocs: ToolDoc[] = [
     effect: 'write-external',
     about: 'Pushes a coding-job branch and opens a pull request behind Orange owner approval with diff summary.',
     args: '{"worktreePath": string, "branch": string, "baseBranch": string, "title": string, "body"?: string, "diffSummary": string, "remote"?: string}',
+  },
+  {
+    name: 'bambu.handoff',
+    effect: 'write-external',
+    about:
+      'Opens a sliced .gcode.3mf file in Bambu Connect via import link behind Orange approval and returns the owner checklist.',
+    args: '{"gcode3mfPath": string, "profileName": string, "printTimeText"?: string, "filamentGrams"?: number, "printerName"?: string, "plateType"?: string, "nozzleSize"?: string, "amsMapping"?: string}',
   },
 ];
 export type ResultShapeField = 'string' | 'number' | 'boolean' | 'array' | 'object' | 'object|null' | 'string|null';
@@ -1179,6 +1191,31 @@ function executeRaw(
           ...(args.remote !== undefined ? { remote: text(args, 'remote') } : {}),
         },
         backend.codingPrOpener,
+      );
+    }
+    case 'bambu.handoff': {
+      only(args, [
+        'gcode3mfPath',
+        'profileName',
+        'printTimeText',
+        'filamentGrams',
+        'printerName',
+        'plateType',
+        'nozzleSize',
+        'amsMapping',
+      ]);
+      return handOffToBambuConnect(
+        {
+          gcode3mfPath: text(args, 'gcode3mfPath'),
+          profileName: text(args, 'profileName'),
+          ...(args.printTimeText !== undefined ? { printTimeText: text(args, 'printTimeText') } : {}),
+          ...(typeof args.filamentGrams === 'number' ? { filamentGrams: args.filamentGrams } : {}),
+          ...(args.printerName !== undefined ? { printerName: text(args, 'printerName') } : {}),
+          ...(args.plateType !== undefined ? { plateType: text(args, 'plateType') } : {}),
+          ...(args.nozzleSize !== undefined ? { nozzleSize: text(args, 'nozzleSize') } : {}),
+          ...(args.amsMapping !== undefined ? { amsMapping: text(args, 'amsMapping') } : {}),
+        },
+        backend.bambuLauncher,
       );
     }
     case 'fpv.import_build': {
