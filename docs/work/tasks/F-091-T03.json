@@ -35,5 +35,11 @@
     "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 642,
+      "note": "Gauntlet multi-step-agent/* and nerv-system-flows/* reruns (F-091-T03)"
+    }
+  ]
 }

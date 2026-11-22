@@ -1369,7 +1369,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|
 | — | <a id="f-091-t01"></a>F-091-T01 — Harness job template | 0.5 h | 0 h | Completed | [PR #635](https://github.com/voidbrain/nerv/pull/635) Pinned-tag harness job template (F-091-T01) |
 | — | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | Completed | [PR #639](https://github.com/voidbrain/nerv/pull/639) Harness scratch-repository check recorded in docs/acceptance/f091-harness-scratch-check.md (F-091-T02) |
-| — | <a id="f-091-t03"></a>F-091-T03 — Rerun the gauntlet cases at the F-091-T01 source | 0.25 h | 0 h | Completed | — |
+| — | <a id="f-091-t03"></a>F-091-T03 — Rerun the gauntlet cases at the F-091-T01 source | 0.25 h | 0 h | Completed | [PR #642](https://github.com/voidbrain/nerv/pull/642) Gauntlet multi-step-agent/&#42; and nerv-system-flows/&#42; reruns (F-091-T03) |
 
 </details>
 
@@ -1380,7 +1380,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-091-T01: [PR #635](https://github.com/voidbrain/nerv/pull/635) Pinned-tag harness job template (F-091-T01) · F-091-T02: [PR #639](https://github.com/voidbrain/nerv/pull/639) Harness scratch-repository check recorded in docs/acceptance/f091-harness-scratch-check.md (F-091-T02). [PR #639](https://github.com/voidbrain/nerv/pull/639) (`f091-harness-scratch-check.md`); [PR #635](https://github.com/voidbrain/nerv/pull/635); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-091-T01: [PR #635](https://github.com/voidbrain/nerv/pull/635) Pinned-tag harness job template (F-091-T01) · F-091-T02: [PR #639](https://github.com/voidbrain/nerv/pull/639) Harness scratch-repository check recorded in docs/acceptance/f091-harness-scratch-check.md (F-091-T02) · F-091-T03: [PR #642](https://github.com/voidbrain/nerv/pull/642) Gauntlet multi-step-agent/&#42; and nerv-system-flows/&#42; reruns (F-091-T03). [PR #642](https://github.com/voidbrain/nerv/pull/642) (F-091-T03); [PR #639](https://github.com/voidbrain/nerv/pull/639) (`f091-harness-scratch-check.md`); [PR #635](https://github.com/voidbrain/nerv/pull/635); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-22: F-091-T01 verified (`runHarnessJobInWorktree`, `assertPinnedTemplateTag`, `buildHarnessPushProposal` behind `coding.push_pr` Orange gate); `node --test test/coding-job.test.ts` (7/7 passed) and `npm run check:fast`. 2026-11-22: F-091-T02 scratch-repository check recorded in [f091-harness-scratch-check.md](acceptance/f091-harness-scratch-check.md). 2026-11-22: F-091-T03 gauntlet reruns (`multi-step-agent/*` + `nerv-system-flows/*`) passed; `node tools/gauntlet.mjs pending` and `npm run check:gauntlet-runs` exited 0. |
 | Reviewed | 2026-11-18 |
@@ -2327,7 +2327,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-114-t03"></a>F-114-T03 — Cooking pack: recipes, cooking sessions and pantry behind the manifest | 1.5 h | 0 h | Completed | [PR #629](https://github.com/voidbrain/nerv/pull/629) Cooking pack behind the manifest |
 | — | <a id="f-114-t04"></a>F-114-T04 — Chat routing when two packs claim the same message | 1 h | 0 h | Completed | [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message |
 | — | <a id="f-114-t05"></a>F-114-T05 — Live check: turn FPV off and on | 0.25 h | 0 h | Completed | [PR #641](https://github.com/voidbrain/nerv/pull/641) FPV pack off-and-on toggle check recorded in docs/acceptance/f114-t05-fpv-toggle.md (F-114-T05) |
-| — | <a id="f-114-t06"></a>F-114-T06 — Rerun the two expensive system cases at the F-114-T01 source | 0.25 h | 0 h | Completed | — |
+| — | <a id="f-114-t06"></a>F-114-T06 — Rerun the two expensive system cases at the F-114-T01 source | 0.25 h | 0 h | Completed | [PR #642](https://github.com/voidbrain/nerv/pull/642) Gauntlet nerv-system-flows/stress and nerv-system-flows/browser reruns (F-114-T06) |
 
 </details>
 
@@ -2338,7 +2338,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-114-T01: [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config · F-114-T02: [PR #628](https://github.com/voidbrain/nerv/pull/628) FPV pack behind the manifest · F-114-T03: [PR #629](https://github.com/voidbrain/nerv/pull/629) Cooking pack behind the manifest · F-114-T04: [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message · F-114-T05: [PR #641](https://github.com/voidbrain/nerv/pull/641) FPV pack off-and-on toggle check recorded in docs/acceptance/f114-t05-fpv-toggle.md (F-114-T05). [FPV packs decision](decisions/fpv-packs.md); opened in [PR #593](https://github.com/voidbrain/nerv/pull/593); F-114-T01 in [PR #621](https://github.com/voidbrain/nerv/pull/621); F-114-T02 in [PR #628](https://github.com/voidbrain/nerv/pull/628); F-114-T03 in [PR #629](https://github.com/voidbrain/nerv/pull/629); F-114-T04 in [PR #627](https://github.com/voidbrain/nerv/pull/627); F-114-T05 in [PR #641](https://github.com/voidbrain/nerv/pull/641) |
+| PR / evidence | Steps: F-114-T01: [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config · F-114-T02: [PR #628](https://github.com/voidbrain/nerv/pull/628) FPV pack behind the manifest · F-114-T03: [PR #629](https://github.com/voidbrain/nerv/pull/629) Cooking pack behind the manifest · F-114-T04: [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message · F-114-T05: [PR #641](https://github.com/voidbrain/nerv/pull/641) FPV pack off-and-on toggle check recorded in docs/acceptance/f114-t05-fpv-toggle.md (F-114-T05) · F-114-T06: [PR #642](https://github.com/voidbrain/nerv/pull/642) Gauntlet nerv-system-flows/stress and nerv-system-flows/browser reruns (F-114-T06). [FPV packs decision](decisions/fpv-packs.md); opened in [PR #593](https://github.com/voidbrain/nerv/pull/593); F-114-T01 in [PR #621](https://github.com/voidbrain/nerv/pull/621); F-114-T02 in [PR #628](https://github.com/voidbrain/nerv/pull/628); F-114-T03 in [PR #629](https://github.com/voidbrain/nerv/pull/629); F-114-T04 in [PR #627](https://github.com/voidbrain/nerv/pull/627); F-114-T05 in [PR #641](https://github.com/voidbrain/nerv/pull/641); F-114-T06 in [PR #642](https://github.com/voidbrain/nerv/pull/642) |
 | Opened | 2026-11-20 |
 | Verification | 2026-11-22: F-114-T05 FPV pack off-and-on toggle check recorded in [f114-t05-fpv-toggle.md](acceptance/f114-t05-fpv-toggle.md). 2026-11-22: F-114-T06 expensive system-flow reruns (`nerv-system-flows/stress` and `nerv-system-flows/browser`) passed; `node tools/gauntlet.mjs pending` and `npm run check:gauntlet-runs` exited 0. |
 | Reviewed | 2026-11-20 |
