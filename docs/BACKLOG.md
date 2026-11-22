@@ -3424,7 +3424,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-107-T01: [PR #521](https://github.com/voidbrain/nerv/pull/521) map; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the owner live check. `test/dashboard.test.ts` (B-065 bases test extended) |
+| PR / evidence | Steps: F-107-T01: [PR #521](https://github.com/voidbrain/nerv/pull/521) map; [PR #530](https://github.com/voidbrain/nerv/pull/530) closed on the owner live check. [PR #649](https://github.com/voidbrain/nerv/pull/649) (F-107-T02); `test/dashboard.test.ts` (B-065 bases test extended) |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-22: `test/kaji-link.test.ts` (`F-107-T02`) and `test/dashboard.test.ts` (`F-107-T02`) + `npm run check:fast` passed. Earlier: 2026-11-18: CI green (PR #521) and the owner's live dashboard check. |
 | Reviewed | 2026-11-22 |
