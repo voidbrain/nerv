@@ -1,6 +1,6 @@
 # Script plans over read-only tools
 
-Status: proposed for owner decision (F-112-T01). This note defines a bounded design; it does not authorize implementation, model execution, scheduling, or any external effect.
+Status: approved by owner on 2026-11-22 (F-112-T02). This note defines the bounded read-only script-plan design authorized for implementation in `F-112-T03` (EVA-03 isolation, MAGI per-call gates, budgets, and fail-closed recovery).
 
 ## Problem and invariant
 

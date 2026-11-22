@@ -4,7 +4,7 @@
   "parent": "F-112",
   "title": "Owner decides whether to adopt script plans and their scope",
   "goal": "Script plans are adopted, narrowed or dropped",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "The decision is written in the design note"
   ],
@@ -31,10 +31,10 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-20. Not a measurement.",
-    "reviewed": "2026-11-20",
+    "basis": "Closed 2026-11-22: owner approved adopting script plans under the F-112-T01 design note.",
+    "reviewed": "2026-11-22",
     "agentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision"
   }
 }
