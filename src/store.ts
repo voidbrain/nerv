@@ -1,3 +1,4 @@
+import type { CodingJobPrOpener } from './coding-job.ts';
 import { Watch, type WatchWork } from './watch.ts';
 import {
   DEFAULT_HEALTH_THRESHOLDS,
@@ -145,6 +146,7 @@ export class Store {
   private readonly cooking: CookingStoreSlice;
   readonly policySource: string;
   pushFetch: typeof fetch = fetch;
+  codingPrOpener?: CodingJobPrOpener;
   /** The data home, when known: the schedule tool writes config.json there. */
   readonly home?: string;
   constructor(

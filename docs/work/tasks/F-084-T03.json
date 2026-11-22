@@ -4,7 +4,7 @@
  "parent": "F-084",
  "title": "Push and open the PR behind approval",
  "goal": "The branch is pushed and the PR opened only after the owner approves",
- "status": "planned",
+ "status": "closed",
  "acceptance": [
   "Orange approval card with the diff summary; expiry does not push",
   "The PR link is sent back; a refused push leaves nothing on the remote"
@@ -35,8 +35,14 @@
   "estimate": "1 h",
   "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
   "reviewed": "2026-11-14",
-  "agentHours": 1,
+  "agentHours": 0,
   "baselineAgentHours": 1,
   "estimateAgentHours": 1
- }
+ },
+ "prs": [
+  {
+   "pr": 632,
+   "note": "Push branch and open PR behind Orange approval (F-084-T03)"
+  }
+ ]
 }

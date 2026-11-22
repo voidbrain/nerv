@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 97 h agent + 11.25 h owner across 134 open steps of 43 features and 22 other records. 79 h of actual effort recorded on 121 steps. Generated from the task files.
+**Remaining effort:** 96 h agent + 11.25 h owner across 133 open steps of 43 features and 22 other records. 79 h of actual effort recorded on 121 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -938,54 +938,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-084"></a>[✨ F-084](#top)
-
-**Coding job on a local repository: change, test, open a PR**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.25 h | — | [F-091-T01](#f-091-t01) | 🤖 | — | — |
-
-💻 **→** Next: F-084-T03 — Push and open the PR behind approval (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "open this project folder, refactor this function, open a PR on GitHub". F-006 places models and workers; no record owns the coding job itself (repository, worktree, coding agent, tests, PR). |
-| **Reproduce** | Ask for a named change in a repository on a base; today nothing runs. |
-| **Check** | A job names a repository the owner allowed and a change; it runs in a fresh worktree from the default branch inside a sandbox (F-049) with a coding agent; the owner sees the diff, the test result and the cost before anything leaves the machine; pushing and opening the PR is an Orange action on an approval card; the PR link comes back to the channel; the primary checkout is never edited; the instruction load is measured in tokens and a model route that cannot hold it is refused; long work is split into steps, each in a fresh session with a persisted handoff, so a full context never silently drops a rule. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-084-t03"></a>F-084-T03 — Push and open the PR behind approval | 1 h | 0 h | 1 h | Planned | — | [F-084-T04](#f-084-t04), [F-091-T01](#f-091-t01) | — |
-| 🟢 Small | <a id="f-084-t04"></a>F-084-T04 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned | [F-084-T03](#f-084-t03) | — | — |
-| 🟡 Medium | **Total** | 3.25 h | 0.25 h (1 of 4 steps recorded) | 1.25 h | 2 of 4 completed | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-084-t01"></a>F-084-T01 — Decision: the coding-job contract | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-084-t02"></a>F-084-T02 — Run the change in a fresh worktree | 1.5 h | 0 h | Completed | [PR #494](https://github.com/voidbrain/nerv/pull/494) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-084.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-084-T02: [PR #494](https://github.com/voidbrain/nerv/pull/494) implementation. [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #494](https://github.com/voidbrain/nerv/pull/494) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-084-T02 verified: [PR #494](https://github.com/voidbrain/nerv/pull/494) merged on green CI. `F-084-T01` decision written in [coding-job-contract.md](decisions/coding-job-contract.md); verified with `npm run check:fast`. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
 ### <a id="f-089"></a>[✨ F-089](#top)
 
 **Browser control: act on a named control in an open page**
@@ -1083,13 +1035,61 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-084"></a>[✨ F-084](#top)
+
+**Coding job on a local repository: change, test, open a PR**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-084-T04 — Live check on a scratch repository (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "open this project folder, refactor this function, open a PR on GitHub". F-006 places models and workers; no record owns the coding job itself (repository, worktree, coding agent, tests, PR). |
+| **Reproduce** | Ask for a named change in a repository on a base; today nothing runs. |
+| **Check** | A job names a repository the owner allowed and a change; it runs in a fresh worktree from the default branch inside a sandbox (F-049) with a coding agent; the owner sees the diff, the test result and the cost before anything leaves the machine; pushing and opening the PR is an Orange action on an approval card; the PR link comes back to the channel; the primary checkout is never edited; the instruction load is measured in tokens and a model route that cannot hold it is refused; long work is split into steps, each in a fresh session with a persisted handoff, so a full context never silently drops a rule. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-084-t04"></a>F-084-T04 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned | — |
+| 🟢 Small | **Total** | 3.25 h | 0.25 h (1 of 4 steps recorded) | 0.25 h | 3 of 4 completed | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-084-t01"></a>F-084-T01 — Decision: the coding-job contract | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-084-t02"></a>F-084-T02 — Run the change in a fresh worktree | 1.5 h | 0 h | Completed | [PR #494](https://github.com/voidbrain/nerv/pull/494) implementation |
+| — | <a id="f-084-t03"></a>F-084-T03 — Push and open the PR behind approval | 1 h | 0 h | Completed | [PR #632](https://github.com/voidbrain/nerv/pull/632) Push branch and open PR behind Orange approval (F-084-T03) |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-084.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-084-T02: [PR #494](https://github.com/voidbrain/nerv/pull/494) implementation · F-084-T03: [PR #632](https://github.com/voidbrain/nerv/pull/632) Push branch and open PR behind Orange approval (F-084-T03). [PR #632](https://github.com/voidbrain/nerv/pull/632); [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #494](https://github.com/voidbrain/nerv/pull/494) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-084-T02 verified: [PR #494](https://github.com/voidbrain/nerv/pull/494) merged on green CI. `F-084-T01` decision written in [coding-job-contract.md](decisions/coding-job-contract.md); verified with `npm run check:fast`. 2026-11-22: F-084-T03 verified (`coding.push_pr` Orange gate + `pushBranchAndOpenPr`); `node --test test/coding-job.test.ts` (5/5 passed) and `npm run check:fast`. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-091"></a>[✨ F-091](#top)
 
 **Apply the project harness to a repository as a coding job**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | [F-084-T03](#f-084-t03) | — | ⏳ | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-091-T01 — Harness job template (Planned).
 
@@ -1103,7 +1103,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-091-t01"></a>F-091-T01 — Harness job template | 0.5 h | 0 h | 0.5 h | Planned | [F-084-T03](#f-084-t03) | [F-091-T02](#f-091-t02) |
+| 🟢 Small | <a id="f-091-t01"></a>F-091-T01 — Harness job template | 0.5 h | 0 h | 0.5 h | Planned | — | [F-091-T02](#f-091-t02) |
 | 🟢 Small | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned | [F-091-T01](#f-091-t01) | — |
 | 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h | 0 of 2 completed | | |
 
