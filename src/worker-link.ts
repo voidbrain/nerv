@@ -657,7 +657,7 @@ export class WorkerLink {
     }
   }
   connected(base: string): boolean {
-    return this.peers.get(base)?.ready ?? false;
+    return (this.peers.get(base)?.ready ?? false) || (this.client?.remote === base && this.client.ready);
   }
   async infer(
     targetBaseId: string,

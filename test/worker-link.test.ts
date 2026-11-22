@@ -1197,7 +1197,6 @@ test(
   },
 );
 
-
 test('F-006-T11: worker link reports connected(coordinator) true for its outbound client session', async () => {
   const f = await fixture();
   try {

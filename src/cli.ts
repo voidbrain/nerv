@@ -771,7 +771,12 @@ try {
             onPendingApprovals: (ids) => runtime.pendingApprovalIds(ids),
             // Dispatch, on the main base: a request asked on another base, with its own conversation per base and channel.
             // Slice 3b, on the base asked: only actions this base offers, once per id, through this base's own gate.
-            offers: () => live().kaji?.offers ?? [],
+            offers: () => {
+              const base = live().kaji?.offers ?? [];
+              return live().models.remote?.serve?.enabled && !base.includes('model.infer')
+                ? [...base, 'model.infer']
+                : base;
+            },
             onOffers: (id, tools) => runtime.notePeerOffers(id, tools),
             pilots: () => runtime.offeredPilots(),
             onPilots: (id, pilots) => runtime.notePeerPilots(id, pilots),

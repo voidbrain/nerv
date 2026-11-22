@@ -9,9 +9,10 @@ Paste one block at a time and stop at the first unexpected result. Keep the JSON
 ```powershell
 Set-Location $HOME\Projects\NERV\NERV
 New-Item -ItemType Directory -Force "$HOME\.nerv-private\placement" | Out-Null
-'{"placement":"P2","prompt":"Reply with exactly READY.","maxOutputTokens":32}' | Set-Content -Encoding utf8 "$HOME\.nerv-private\placement\p2.json"
-'{"placement":"P3","endpoint":"mac","prompt":"Reply with exactly READY.","maxOutputTokens":32}' | Set-Content -Encoding utf8 "$HOME\.nerv-private\placement\p3.json"
-'{"placement":"P4","endpoint":"mac","prompt":"Reply with exactly READY.","waitBudgetMs":5000,"timeoutMs":20000,"maxOutputTokens":32}' | Set-Content -Encoding utf8 "$HOME\.nerv-private\placement\p4.json"
+$utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+[System.IO.File]::WriteAllText("$HOME\.nerv-private\placement\p2.json", '{"placement":"P2","prompt":"Reply with exactly READY.","maxOutputTokens":512}', $utf8NoBom)
+[System.IO.File]::WriteAllText("$HOME\.nerv-private\placement\p3.json", '{"placement":"P3","endpoint":"mac","prompt":"Reply with exactly READY.","maxOutputTokens":512}', $utf8NoBom)
+[System.IO.File]::WriteAllText("$HOME\.nerv-private\placement\p4.json", '{"placement":"P4","endpoint":"mac","prompt":"Reply with exactly READY.","waitBudgetMs":5000,"timeoutMs":20000,"maxOutputTokens":512}', $utf8NoBom)
 ```
 
 Expected: no output or error. These files contain no address, credential or private request.
