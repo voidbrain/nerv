@@ -161,4 +161,31 @@ describe('F-049-T06: per-machine EVA limits', () => {
       assert.equal(one.workspaceDiscarded && two.workspaceDiscarded, true);
     },
   );
+
+  it('lists running and waiting instances with class, pilot, job and state, and clears them when finished', async () => {
+    const pool = new EvaPool({ instances: 1, memoryMb: 100_000, modelSlots: 1 });
+    const held = gate();
+    const first = pool.run(
+      { jobId: 'job-1', evaClass: 'eva-01', pilot: 'mail-brief', sortieId: 'S-1234' },
+      () => held.done,
+    );
+    const second = pool.run({ jobId: 'job-2', evaClass: 'eva-02', pilot: 'repo-tidy' }, async () => 'done');
+    await tick();
+    assert.deepEqual(
+      pool.instances().map(({ jobId, evaClass, pilot, state, sortieId }) => ({
+        jobId,
+        evaClass,
+        pilot,
+        state,
+        ...(sortieId !== undefined ? { sortieId } : {}),
+      })),
+      [
+        { jobId: 'job-1', evaClass: 'eva-01', pilot: 'mail-brief', state: 'running', sortieId: 'S-1234' },
+        { jobId: 'job-2', evaClass: 'eva-02', pilot: 'repo-tidy', state: 'waiting' },
+      ],
+    );
+    held.open();
+    await Promise.all([first, second]);
+    assert.deepEqual(pool.instances(), []);
+  });
 });

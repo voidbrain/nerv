@@ -205,6 +205,19 @@ test('windowsServiceAdapter executes install, status, start, stop and uninstall 
       return { status: 1, out: '', err: `unexpected ${program}` };
     };
 
+    const sshHost = windowsServiceAdapter(context, run, {
+      SSH_CONNECTION: '192.0.2.10 50000 192.0.2.20 22',
+    });
+    const sshPlan = await planService(sshHost, 'install');
+    assert.ok(
+      sshPlan.blockers.some(
+        (blocker) => blocker.includes('interactive Windows desktop session') && blocker.includes('process identity'),
+      ),
+    );
+    await assert.rejects(applyService(sshHost, sshPlan, sshPlan.digest), /blocked/);
+    assert.equal(registered, false, 'an SSH-applied start is refused before Task Scheduler changes');
+    assert.equal(existsSync(join(context.home, 'nerv-task.xml')), false);
+
     const host = windowsServiceAdapter(context, run);
     assert.equal(host.kind, 'windows-service');
 
@@ -247,6 +260,24 @@ test('windowsServiceAdapter executes install, status, start, stop and uninstall 
     assert.equal(startReceipt.state, 'completed');
     assert.equal(startReceipt.fence, 3);
     assert.equal((await host.inspect()).registration, 'owned');
+
+    // B-091 recurrence: an update may cross a revision that changed only the generated launcher's comment.
+    // The candidate must accept the still-equivalent launcher, while command drift remains unauthorized.
+    const launcherPath = join(context.home, 'nerv-service.vbs');
+    const currentLauncher = readFileSync(launcherPath, 'utf8');
+    writeFileSync(launcherPath, currentLauncher.replace(/^'[^\r\n]*/, "' historical launcher comment"));
+    assert.equal(
+      await host.authorizedStart!({ ...startPlan, action: 'update', nextRevision: SHA_A }),
+      true,
+      'comment-only launcher drift remains authorized during a fenced update',
+    );
+    writeFileSync(launcherPath, readFileSync(launcherPath, 'utf8').replace('src\\cli.ts', 'src\\foreign.ts'));
+    assert.equal(
+      await host.authorizedStart!({ ...startPlan, action: 'update', nextRevision: SHA_A }),
+      false,
+      'launcher command drift is still refused',
+    );
+    writeFileSync(launcherPath, currentLauncher);
 
     // 5. Stop + Uninstall
     const stopPlan2 = await planService(host, 'stop');

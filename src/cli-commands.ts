@@ -1,5 +1,6 @@
 import { runResumeEngineTick, type CreateResumeIntentInput, type ResumeIntentStatus } from './resume-intent.ts';
 import { ClaudeCodeResumeAdapter } from './claude-resume-adapter.ts';
+import { createWebChatResumeDeps } from './web-chat-resume-adapter.ts';
 import { decideHitlThroughPersona, explainClassificationThroughPersona, formatMisatoPendingHitl } from './persona.ts';
 import { EVA_CLASS_SPECS, admitEvaJob, type EvaAdmissionRequest } from './eva-classes.ts';
 import { runToolsProcessInEva03 } from './eva-runner.ts';
@@ -224,6 +225,34 @@ export async function tryRunCliCommand(
         console.log(JSON.stringify(store.batteries.recordResistance(args[1], args.slice(2).join(' ')), null, 2));
       } else if (sub === 'chat' && args[1]) {
         console.log(JSON.stringify(store.batteries.applyChatPhrase(args.slice(1).join(' ')), null, 2));
+      } else if (sub === 'add' && args[1]) {
+        const packNumber = Number(args[1]);
+        const series = ctx.flag('--series');
+        const brand = ctx.flag('--brand') ?? 'Generic';
+        const cellFlag = ctx.flag('--cells');
+        const typeFlag = ctx.flag('--type');
+        const cells = cellFlag ? Number(cellFlag) : Number(/(\d+)s/i.exec(typeFlag ?? '')?.[1] ?? 6);
+        const batteryType = typeFlag ?? `LiPo ${cells}S`;
+        const capacityMah = Number(ctx.flag('--mah') ?? 1300);
+        const purchaseDate = ctx.flag('--date') ?? new Date().toISOString().slice(0, 10);
+        const resFlag = ctx.flag('--resistance');
+        const initialResistanceMohm = resFlag
+          ? resFlag
+              .split(',')
+              .map((v) => Number(v.trim()))
+              .filter(Number.isFinite)
+          : undefined;
+        const created = store.batteries.register({
+          packNumber,
+          ...(series ? { series, seriesColor: series } : {}),
+          brand,
+          batteryType,
+          cellCount: cells,
+          capacityMah,
+          purchaseDate,
+          ...(initialResistanceMohm ? { initialResistanceMohm } : { allowPendingResistance: true }),
+        });
+        console.log(JSON.stringify(created, null, 2));
       } else if (sub === 'import' && args[1]) {
         const payload = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as OneMoreBatteryExport;
         console.log(JSON.stringify(store.batteries.importOneMoreBattery(payload), null, 2));
@@ -267,12 +296,25 @@ export async function tryRunCliCommand(
         const owner = ctx.flag('--owner') ?? 'cli';
         const deps = args.includes('--claude-code')
           ? new ClaudeCodeResumeAdapter().toEngineDeps(owner)
-          : {
-              owner,
-              checkAvailability: () => ({ available: false, reason: 'Live adapter readiness probe required.' }),
-              verifyIdentity: () => null,
-              executeResume: () => ({ kind: 'failed' as const, reason: 'No live adapter bound in CLI tick.' }),
-            };
+          : args.includes('--web-chat')
+            ? createWebChatResumeDeps({
+                owner,
+                allowedOrigins: [],
+                driver: {
+                  getActiveTab: async () => {
+                    throw new Error('No live browser-worker driver bound in CLI tick.');
+                  },
+                  clickControl: async () => {
+                    throw new Error('No live browser-worker driver bound in CLI tick.');
+                  },
+                },
+              })
+            : {
+                owner,
+                checkAvailability: () => ({ available: false, reason: 'Live adapter readiness probe required.' }),
+                verifyIdentity: () => null,
+                executeResume: () => ({ kind: 'failed' as const, reason: 'No live adapter bound in CLI tick.' }),
+              };
         const res = await runResumeEngineTick(store.resumeIntents, deps);
         console.log(JSON.stringify(res, null, 2));
       } else {

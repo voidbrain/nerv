@@ -4,7 +4,13 @@
   "id": "F-082-T05",
   "title": "Show the checklist card in the dashboard chat",
   "goal": "When Misato shows or changes a list, the dashboard chat shows its checklist card",
-  "status": "planned",
+  "status": "closed",
+  "prs": [
+    {
+      "pr": 606,
+      "note": "Show checklist card in dashboard chat and sync toggles"
+    }
+  ],
   "acceptance": [
     "A chat reply that shows or changes a list carries the checklist surface and the dashboard chat renders it",
     "Ticking it there updates the store and Telegram (browser test, AXE passes)"
@@ -36,7 +42,7 @@
     "estimate": "1.5 h",
     "basis": "Estimated 2026-11-18 when the owner approved adding the live binding the owner check needs. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   }

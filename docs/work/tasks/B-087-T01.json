@@ -4,7 +4,7 @@
   "id": "B-087-T01",
   "title": "Name why the startup fence refuses an SSH-applied start on Windows, and fix it or refuse up front",
   "goal": "A fenced Windows start works over SSH, or says up front that it cannot",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "A probe in both sessions names the differing identity part",
     "A committed test fails first if the cause is in code; otherwise lifecycle-apply refuses before changing anything"
@@ -15,6 +15,7 @@
     "src/node-lifecycle-windows.ts",
     "test/**",
     "docs/work/records/B-087.md",
+    "docs/work/tasks/B-087-T01.json",
     "generated:backlog-views"
   ],
   "capabilities": [
@@ -34,9 +35,14 @@
     "estimate": "1.5 h",
     "basis": "Estimated 2026-11-18: a two-session probe, then a fix or an up-front refusal. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 612,
+      "note": "implementation"
+    }
+  ]
 }

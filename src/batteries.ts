@@ -104,7 +104,8 @@ export interface RegisterBatteryInput {
   cellCount: number;
   capacityMah: number;
   purchaseDate: string;
-  initialResistanceMohm: number[];
+  initialResistanceMohm?: number[];
+  allowPendingResistance?: boolean;
   initialState?: BatteryChargeState;
   recordedAt?: string;
 }
@@ -235,7 +236,10 @@ export class BatteryRegistry {
       throw new Error('Battery brand, batteryType, and purchaseDate are required.');
     }
 
-    const resistance = validateResistanceValues(input.initialResistanceMohm, input.cellCount);
+    const resistance =
+      input.allowPendingResistance && input.initialResistanceMohm === undefined
+        ? null
+        : validateResistanceValues(input.initialResistanceMohm ?? [], input.cellCount);
     const id = input.id?.trim() || `bat-${randomUUID()}`;
     const series = input.series?.trim() || undefined;
     const seriesColor = input.seriesColor?.trim() || undefined;
@@ -265,11 +269,13 @@ export class BatteryRegistry {
         createdAt,
       );
 
-    this.db
-      .prepare(
-        'INSERT INTO battery_resistance_records(id, battery_id, values_mohm_json, cycles_at_record, recorded_at) VALUES (?, ?, ?, 0, ?)',
-      )
-      .run(`res-${randomUUID()}`, id, JSON.stringify(resistance), createdAt);
+    if (resistance) {
+      this.db
+        .prepare(
+          'INSERT INTO battery_resistance_records(id, battery_id, values_mohm_json, cycles_at_record, recorded_at) VALUES (?, ?, ?, 0, ?)',
+        )
+        .run(`res-${randomUUID()}`, id, JSON.stringify(resistance), createdAt);
+    }
 
     return this.get(id)!;
   }
@@ -572,6 +578,31 @@ export class BatteryRegistry {
    * for one or more batteries. Refuses to guess when a pack number matches multiple series.
    */
   applyChatPhrase(text: string, recordedAt = new Date().toISOString()): BatteryChatResult {
+    const reg = parseBatteryRegisterPhrase(text);
+    if (reg) {
+      const created = this.register({
+        packNumber: reg.packNumber,
+        ...(reg.series ? { series: reg.series, seriesColor: reg.seriesColor ?? reg.series } : {}),
+        brand: reg.brand,
+        batteryType: reg.batteryType,
+        cellCount: reg.cellCount,
+        capacityMah: reg.capacityMah,
+        purchaseDate: recordedAt.slice(0, 10),
+        allowPendingResistance: true,
+        recordedAt,
+      });
+      const series = created.series ? ` (${created.series})` : '';
+      return {
+        status: 'registered',
+        language: reg.language,
+        registered: created,
+        message:
+          reg.language === 'it'
+            ? `Registrata batteria #${created.packNumber}${series} · ${created.batteryType} · ${created.capacityMah} mAh. Inserisci ${created.cellCount} valori di resistenza per cella in mΩ in ordine (es. 3.1, 3.2, ...).`
+            : `Registered battery #${created.packNumber}${series} · ${created.batteryType} · ${created.capacityMah} mAh. Please enter ${created.cellCount} per-cell resistance values in mΩ in order (e.g. 3.1, 3.2, ...).`,
+      };
+    }
+
     const parsed = parseBatteryChatCommand(text);
     if (!parsed) {
       return {
@@ -637,12 +668,83 @@ export interface ParsedBatteryChatCommand {
 }
 
 export interface BatteryChatResult {
-  status: 'updated' | 'ambiguous' | 'not_found' | 'unrecognized';
+  status: 'updated' | 'registered' | 'ambiguous' | 'not_found' | 'unrecognized';
   language: 'it' | 'en';
   state?: BatteryChargeState;
   updated?: BatteryRecord[];
+  registered?: BatteryRecord;
   matches?: BatteryRecord[];
   message: string;
+}
+
+interface ParsedBatteryRegisterPhrase {
+  packNumber: number;
+  series?: string;
+  seriesColor?: string;
+  batteryType: string;
+  cellCount: number;
+  capacityMah: number;
+  brand: string;
+  language: 'it' | 'en';
+}
+
+/** Parses Italian/English battery registration phrases such as "nuova batteria 9 blu LiPo 6S 1300 mAh" (F-008-T13). */
+function parseBatteryRegisterPhrase(text: string): ParsedBatteryRegisterPhrase | null {
+  const trimmed = text.trim();
+  const itMatch = /^(?:nuova|registra|aggiungi)\s+(?:la\s+)?batteria\s+(.+)$/i.exec(trimmed);
+  const enMatch = /^(?:new|register|add)\s+battery\s+(.+)$/i.exec(trimmed);
+  const body = (itMatch?.[1] ?? enMatch?.[1])?.trim();
+  if (!body) return null;
+  const language: 'it' | 'en' = itMatch ? 'it' : 'en';
+
+  const numMatch = /^#?(\d+)\b(.*)$/.exec(body);
+  if (!numMatch) return null;
+  const packNumber = Number(numMatch[1]);
+  if (!Number.isInteger(packNumber) || packNumber < 1) return null;
+
+  let rest = numMatch[2]!.trim();
+  const cellsMatch = /\b(\d{1,2})s\b/i.exec(rest);
+  if (!cellsMatch) return null;
+  const cellCount = Number(cellsMatch[1]);
+  if (!Number.isInteger(cellCount) || cellCount < 1 || cellCount > 12) return null;
+
+  const mahMatch = /\b(\d{2,5})\s*mah\b/i.exec(rest);
+  if (!mahMatch) return null;
+  const capacityMah = Number(mahMatch[1]);
+  if (!Number.isInteger(capacityMah) || capacityMah < 50) return null;
+
+  const chemMatch = /\b(lipo|lihv|li-?ion|life)\b/i.exec(rest);
+  const chem = chemMatch
+    ? chemMatch[1]!.toLowerCase() === 'lihv'
+      ? 'LiHV'
+      : chemMatch[1]!.toLowerCase() === 'life'
+        ? 'LiFe'
+        : chemMatch[1]!.toLowerCase().includes('ion')
+          ? 'Li-Ion'
+          : 'LiPo'
+    : 'LiPo';
+  const batteryType = `${chem} ${cellCount}S`;
+
+  rest = rest
+    .replace(cellsMatch[0], ' ')
+    .replace(mahMatch[0], ' ')
+    .replace(chemMatch?.[0] ?? '', ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const tokens = rest ? rest.split(' ').filter(Boolean) : [];
+  const series = tokens[0]?.toLowerCase();
+  const seriesColor = tokens[0] ? normalizeColorToken(tokens[0]) : undefined;
+  const brand = tokens.slice(1).join(' ').trim() || 'Generic';
+
+  return {
+    packNumber,
+    ...(series ? { series, seriesColor } : {}),
+    batteryType,
+    cellCount,
+    capacityMah,
+    brand,
+    language,
+  };
 }
 
 const COLOR_ALIASES: Record<string, string> = {
@@ -724,8 +826,46 @@ export function parseBatteryChatCommand(text: string): ParsedBatteryChatCommand 
   };
 }
 
+export type BatteryStateSummaryRow = Pick<
+  BatteryRecord,
+  'packNumber' | 'series' | 'seriesColor' | 'currentState' | 'cycles'
+>;
+
+/** Recognizes Italian/English phrases asking for the full battery status list without a model call (F-008-T14). */
+export function parseBatteryStatusPhrase(text: string): 'it' | 'en' | null {
+  const normalized = text
+    .trim()
+    .toLowerCase()
+    .replace(/^\/+/, '')
+    .replace(/[?!.]+$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (
+    normalized === 'stato batterie' ||
+    normalized === 'stato delle batterie' ||
+    normalized === 'lista batterie' ||
+    normalized === 'elenco batterie' ||
+    normalized === 'come sono le batterie'
+  ) {
+    return 'it';
+  }
+  if (
+    normalized === 'battery status' ||
+    normalized === 'batteries status' ||
+    normalized === 'status of batteries' ||
+    normalized === 'list batteries' ||
+    normalized === 'battery list'
+  ) {
+    return 'en';
+  }
+  return null;
+}
+
 /** Formats battery charge states and cycle counts for Telegram and dashboard summaries (F-008-T07). */
-export function formatBatteryStateLines(batteries: readonly BatteryRecord[], language: 'it' | 'en' = 'en'): string {
+export function formatBatteryStateLines(
+  batteries: readonly BatteryStateSummaryRow[],
+  language: 'it' | 'en' = 'en',
+): string {
   if (batteries.length === 0) {
     return language === 'it' ? 'Nessuna batteria registrata.' : 'No batteries registered.';
   }

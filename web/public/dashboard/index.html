@@ -184,12 +184,11 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .sephirot { position:relative; padding:10px 44px 12px 28px; }
 .sephirot svg.edges { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
 /* one stroke width for every state (colour and dash tell them apart), so a line never looks as if it moved */
-.sephirot svg.edges path { fill:none; stroke:color-mix(in srgb,var(--accent) 25%,transparent); stroke-width:1.8; }
-.sephirot svg.edges path.loop { stroke-dasharray:3 4; }
-.sephirot svg.edges path.passed { stroke:var(--ok); opacity:.9; }
-.sephirot svg.edges path.passed.owner { stroke:var(--warn); }
-.sephirot svg.edges path.skip { opacity:.22; }
-.sephirot svg.edges path { fill:none; stroke-linejoin:round; }
+.sephirot svg.edges > path { fill:none; stroke:color-mix(in srgb,var(--accent) 25%,transparent); stroke-width:1.8; stroke-linejoin:round; }
+.sephirot svg.edges > path.loop { stroke-dasharray:3 4; }
+.sephirot svg.edges > path.passed { stroke:var(--ok); opacity:.9; }
+.sephirot svg.edges > path.passed.owner { stroke:var(--warn); }
+.sephirot svg.edges > path.skip { opacity:.22; }
 .sgrid { position:relative; display:grid; grid-template-columns:1fr 1.25fr 1fr; grid-auto-rows:auto; gap:10px 18px; align-items:center; }
 .snode { position:relative; z-index:1; border:1px solid var(--border); background:var(--panel2); padding:3px 8px; text-align:center; transition:.15s; }
 .snode .sn { font-size:8px; color:var(--muted); letter-spacing:.12em; text-align:left; padding-right:26px; min-height:12px; }
@@ -260,13 +259,23 @@ mark { background:color-mix(in srgb,var(--accent) 35%,transparent); color:inheri
 [hidden] { display:none !important; }
 .sq { display:inline-block; width:7px; height:7px; margin-right:3px; vertical-align:middle; }
 
-/* EVA cages */
+/* EVA cages + live instances per class, per machine */
 .cages { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; }
 @media (max-width:720px) { .cages { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-.cage { border:1px solid var(--border); padding:4px; min-width:0; background:var(--panel2); }
-.cage .ch { display:flex; flex-direction:column; align-items:flex-start; font-size:10px; font-weight:900; letter-spacing:.08em; }
-.cage canvas { width:100%; height:30px; display:block; background:#000; border:1px solid var(--border); margin-top:3px; }
+.cage { border:1px solid var(--border); padding:4px; min-width:0; background:var(--panel2); display:flex; flex-direction:column; gap:3px; }
+.cage .ch, .eva-class-hdr { display:flex; flex-direction:column; align-items:flex-start; gap:1px; font-size:10px; font-weight:900; letter-spacing:.06em; }
+.cage canvas { width:100%; height:30px; display:block; background:#000; border:1px solid var(--border); margin-top:2px; }
 .cage .cd { font-size:9px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eva-machines-bar { display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+.eva-machine { border:1px solid var(--border); padding:5px 6px; background:var(--panel2); display:flex; flex-direction:column; gap:3px; }
+.eva-machine-hdr { display:flex; align-items:center; justify-content:space-between; gap:6px; flex-wrap:wrap; }
+.eva-inst { display:flex; align-items:center; justify-content:space-between; gap:4px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:3px; font-size:10px; }
+.eva-inst-meta { display:flex; flex-direction:column; min-width:0; }
+.eva-empty { font-size:10px; color:var(--muted); }
+.pilot-model-form { display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+.pilot-field { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.pilot-field input, .pilot-field select { flex:1; min-width:0; }
+.pilot-actions { display:flex; justify-content:flex-end; margin-top:2px; }
 
 /* log */
 details > summary { cursor:pointer; list-style:none; }
@@ -282,6 +291,11 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
 .msg.you { background:color-mix(in srgb,var(--accent) 7%,transparent); }
 .chat { display:flex; gap:6px; align-items:center; padding:8px; border-top:1px solid var(--border); }
 .chat input { flex:1; min-width:0; }
+.slash-menu { background:var(--panel2); border-top:1px solid var(--border); padding:4px 8px; display:flex; flex-direction:column; gap:2px; max-height:180px; overflow-y:auto; }
+.slash-menu[hidden] { display:none; }
+.slash-item { display:flex; justify-content:space-between; gap:8px; width:100%; text-align:left; background:transparent; border:1px solid transparent; color:var(--text); padding:4px 6px; font:inherit; font-size:11px; cursor:pointer; }
+.slash-item:hover, .slash-item:focus-visible { border-color:var(--accent); outline:none; }
+.slash-item .slash-desc { color:var(--muted); }
 .log { background:var(--panel2); border-top:1px solid var(--border); padding:8px; height:300px; overflow-y:auto; font-size:10px; line-height:1.5; }
 .log .ts { color:var(--muted); margin-right:6px; }
 .timeline-up { position:relative; padding-left:12px; }
@@ -426,6 +440,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
         <div class="hdr"><span data-l="log">Comms · Misato &amp; Maya trace</span>
           <span class="filters" role="group" aria-label="Filter messages"><button class="btn sm on" data-lf="all" style="color:inherit;border-color:currentColor">All</button><button class="btn sm" data-lf="sortie" style="color:inherit;border-color:currentColor">This sortie</button><button class="btn sm" data-lf="chat" style="color:inherit;border-color:currentColor">Chat only</button></span></div>
         <div class="log" id="log" role="log" aria-live="polite"></div>
+        <div id="slash-menu" class="slash-menu" role="listbox" aria-label="Slash commands" hidden></div>
         <form class="chat" id="chat-form">
           <img class="av" data-av="you" alt="" />
           <label class="sr" for="chat-in">Message Misato</label>
@@ -445,6 +460,11 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
       <section class="panel" id="p-health">
         <div class="hdr"><span data-l="health">Health</span><button class="btn sm" id="btn-doctor" style="color:inherit;border-color:currentColor">Run doctor</button></div>
         <div class="pad" id="health"></div>
+      </section>
+
+      <section class="panel" id="p-settings">
+        <div class="hdr"><span data-l="settings">Settings</span><span class="sub" id="settings-sub">this base</span></div>
+        <div class="pad" id="settings"></div>
       </section>
 
       <section class="panel" id="p-models">
@@ -484,9 +504,9 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
         </div>
       </section>
 
-      <section class="panel">
-        <div class="hdr"><span data-l="cages">EVA cages · heartbeat</span><span class="sub">executors</span></div>
-        <div class="pad cages" id="cages"></div>
+      <section class="panel" id="p-eva">
+        <div class="hdr"><span data-l="cages">EVA cages · heartbeat</span><span class="sub" id="cages-sub">by machine</span></div>
+        <div class="pad" id="cages"></div>
       </section>
 
 

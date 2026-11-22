@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-113-T01",
+  "parent": "F-113",
+  "title": "Measure the tool-doc share of the planner prompt and group tools by subject",
+  "goal": "Know whether a compact index is worth it",
+  "status": "implemented",
+  "acceptance": [
+    "Tool-doc share of the planner prompt recorded from promptMetrics for neutral sample requests",
+    "Each built-in tool assigned to one subject"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/executors.ts",
+    "docs/evaluations/**",
+    "docs/work/records/F-113.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-20 from the Agentica review. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": 592,
+      "note": "implementation"
+    }
+  ]
+}

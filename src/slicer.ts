@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { extname } from 'node:path';
+import { extname, resolve } from 'node:path';
 
 export interface SlicerProfile {
   name: string;
@@ -123,5 +123,109 @@ export function sliceModelWithProfile(
     profile,
     estimate: parseSlicerEstimate(stdout),
     command: [bin, ...args],
+  };
+}
+
+export interface BambuChecklistInput {
+  profileName: string;
+  printTimeText?: string;
+  filamentGrams?: number;
+  printerName?: string;
+  plateType?: string;
+  nozzleSize?: string;
+  amsMapping?: string;
+}
+
+export interface BambuHandoffRequest extends BambuChecklistInput {
+  gcode3mfPath: string;
+}
+
+export type BambuConnectLauncher = (importLink: string) => { opened: boolean; reason?: string };
+
+export interface BambuHandoffResult {
+  status: 'handed-off' | 'staged-waiting-login';
+  opened: boolean;
+  printStarted: false;
+  importLink: string;
+  checklist: string[];
+  reason?: string;
+  message: string;
+}
+
+export function buildBambuImportLink(gcode3mfPath: string): string {
+  const trimmed = gcode3mfPath.trim();
+  if (!trimmed.endsWith('.gcode.3mf')) {
+    throw new Error('Bambu Connect hand-off requires a .gcode.3mf file.');
+  }
+  if (!existsSync(trimmed)) {
+    throw new Error(`Sliced file does not exist: ${trimmed}`);
+  }
+  return `bambu-connect://import-file?path=${encodeURIComponent(resolve(trimmed))}`;
+}
+
+export function buildBambuOwnerChecklist(input: BambuChecklistInput): string[] {
+  const materialDetail = [
+    input.amsMapping ?? input.profileName,
+    input.filamentGrams !== undefined ? `${input.filamentGrams} g` : undefined,
+    input.printTimeText ? `est. ${input.printTimeText}` : undefined,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
+  return [
+    `Printer: ${input.printerName?.trim() || 'confirm target printer'}`,
+    `Build plate: ${input.plateType?.trim() || 'confirm clean, matching build plate'}`,
+    `Nozzle: ${input.nozzleSize?.trim() || 'confirm installed nozzle matches profile'}`,
+    `Filament & AMS mapping: ${materialDetail}`,
+    'Clear plate: verify the build plate is empty before starting',
+    'First layer: have someone nearby to watch the first layer',
+    'Press Print in Bambu Connect (NERV has not started the print)',
+  ];
+}
+
+function defaultBambuLauncher(importLink: string): { opened: boolean; reason?: string } {
+  if (process.platform === 'win32') {
+    execFileSync('powershell.exe', ['-NoProfile', '-Command', 'Start-Process', importLink], { stdio: 'ignore' });
+    return { opened: true };
+  }
+  if (process.platform === 'darwin') {
+    execFileSync('open', [importLink], { stdio: 'ignore' });
+    return { opened: true };
+  }
+  execFileSync('xdg-open', [importLink], { stdio: 'ignore' });
+  return { opened: true };
+}
+
+/**
+ * Hands off a sliced .gcode.3mf job to Bambu Connect via its import link with the owner pre-print checklist (F-087-T03).
+ * Never reports the print as started; when no desktop session is active, stages the link for login.
+ */
+export function handOffToBambuConnect(
+  request: BambuHandoffRequest,
+  launcher: BambuConnectLauncher = defaultBambuLauncher,
+): BambuHandoffResult {
+  const importLink = buildBambuImportLink(request.gcode3mfPath);
+  const checklist = buildBambuOwnerChecklist(request);
+  const launch = launcher(importLink);
+  if (!launch.opened) {
+    return {
+      status: 'staged-waiting-login',
+      opened: false,
+      printStarted: false,
+      importLink,
+      checklist,
+      ...(launch.reason ? { reason: launch.reason } : {}),
+      message:
+        'Sliced file is staged for Bambu Connect and waiting for an active desktop login. Print has not started.',
+    };
+  }
+  return {
+    status: 'handed-off',
+    opened: true,
+    printStarted: false,
+    importLink,
+    checklist,
+    message:
+      'Opened in Bambu Connect for owner review. Review the checklist and press Print in Bambu Connect; print has not started.',
   };
 }

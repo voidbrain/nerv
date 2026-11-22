@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-005",
   "id": "F-005-T29",
-  "status": "planned",
+  "status": "ready",
   "title": "T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix",
   "goal": "Upgrades, prerequisites, update policy and platform lifecycle on the device matrix.",
   "capabilities": [
@@ -18,7 +18,8 @@
   "dependsOn": [
     "F-005-T35",
     "B-087-T01",
-    "F-005-T38"
+    "F-005-T38",
+    "B-091-T01"
   ],
   "resources": [
     "src/**",
@@ -39,14 +40,20 @@
     "Anything that needs a human sense, account or device goes back to the owner as its own step"
   ],
   "effort": {
-    "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Moved to the agent 2026-11-18 (0.5 h owner → agent).",
-    "reviewed": "2026-11-18",
+    "size": "medium",
+    "estimate": "2.5 h",
+    "basis": "Re-estimated 2026-11-21: 1.5 h for the device runs plus 1 h remaining after Tabgha reproduced B-091 and required safe rollback; the final update waits on B-091-T01.",
+    "reviewed": "2026-11-21",
     "baselineDays": 1,
     "ownerHours": 0,
-    "agentHours": 0.5,
-    "estimateAgentHours": 0.5,
+    "agentHours": 2.5,
+    "estimateAgentHours": 2.5,
     "baselineAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 617,
+      "note": "Tabgha update attempt and safe recovery evidence"
+    }
+  ]
 }

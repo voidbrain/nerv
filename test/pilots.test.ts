@@ -1321,3 +1321,40 @@ test('F-045-T09: owner-approved tool acquisition/discard and Time Request PROTO 
     rmSync(home, { recursive: true, force: true });
   }
 });
+
+test('pilot interface stores, validates, updates and clears call name and second name (F-109-T02)', () => {
+  const created = addPilot([], {
+    id: 'scout',
+    name: '  Unit Zero  ',
+    secondName: '  Aria Vance  ',
+    domain: 'field scouting',
+    keywords: ['scout'],
+    model: 'qwen3:8b',
+    stage: 'prototype',
+  });
+  assert.equal(created[0]!.name, 'Unit Zero');
+  assert.equal(created[0]!.secondName, 'Aria Vance');
+
+  const offers = toPilotOffers(created);
+  assert.equal(offers[0]!.secondName, 'Aria Vance');
+  assert.equal(sanitizePilotOffers(offers)?.[0]?.secondName, 'Aria Vance');
+
+  const renamed = updatePilot(created, 'scout', { name: 'Unit One', secondName: 'Kai Lin' });
+  assert.equal(renamed[0]!.name, 'Unit One');
+  assert.equal(renamed[0]!.secondName, 'Kai Lin');
+
+  const cleared = updatePilot(renamed, 'scout', { secondName: '' });
+  assert.equal(cleared[0]!.name, 'Unit One');
+  assert.equal(cleared[0]!.secondName, undefined);
+
+  const clearedNull = updatePilot(renamed, 'scout', { secondName: null });
+  assert.equal(clearedNull[0]!.secondName, undefined);
+
+  assert.throws(() => updatePilot(renamed, 'scout', { secondName: '   ' }), /secondName up to 40 characters/);
+  assert.throws(() => updatePilot(renamed, 'scout', { secondName: 'x'.repeat(41) }), /secondName up to 40 characters/);
+  assert.throws(
+    () => updatePilot(renamed, 'scout', { secondName: 42 as unknown as string }),
+    /secondName up to 40 characters/,
+  );
+  assert.throws(() => updatePilot(renamed, 'scout', { id: 'other' } as unknown as { name: string }), /Invalid pilot/);
+});

@@ -53,11 +53,11 @@ const BASES = [
   { id:"nerv02", name:"NERV-02", role:"branch · vault · EVA cage", lat:35.160, lon:139.240, status:"standby", cpu:4, gpu:null, ram:18, rtt:null, models:"—" }
 ];
 const LINKS = [["tokyo3","nerv01"],["tokyo3","nerv02"],["nerv01","nerv02"]];
-const CAGES = [
-  { id:"EVA-00", label:"PROTOTYPE · shadow", base:"tokyo3", color:"#2a7fff" },
-  { id:"EVA-01", label:"TEST TYPE · bounded", base:"nerv01", color:"#9b5cff" },
-  { id:"EVA-02", label:"PRODUCTION · full grant", base:"tokyo3", color:"#ff3b30" },
-  { id:"EVA-03", label:"QUARANTINE · tainted", base:"nerv02", color:"#8a8a8a" }
+const EVA_CLASSES = [
+  { id:"eva-00", name:"EVA-00", label:"Shadow", css:"--eva00" },
+  { id:"eva-01", name:"EVA-01", label:"Bounded", css:"--eva01" },
+  { id:"eva-02", name:"EVA-02", label:"Full grant", css:"--eva02" },
+  { id:"eva-03", name:"EVA-03", label:"Quarantine", css:"--eva03" }
 ];
 const PILOTS = [
   { id:"mail-brief", stage:"production", runs:41, rejects:0, overrides:1 },
@@ -86,7 +86,7 @@ const STEP_IDS = ["detect","intake","route","consult","plan","magi","sync","apt"
 const LABELS = {
   eva:{ brandTitle:"TACTICAL COMMAND", brandTag:"SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY",
     needs:"Misato's apartment · needs you", sorties:"Sorties", next:"Coming up", flow:"Sephirot · sortie flow",
-    detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health",
+    detail:"Misato plan · current action", log:"Comms · Misato & Maya trace", away:"Debrief · while you were away", health:"Health", settings:"Settings",
     bases:"NERV bases · Kaji line", cages:"EVA cages · heartbeat", budget:"Battery · budget", melons:"Marduk Institute · Pilots", skills:"Kaji's watermelons · skills", skillStages:"seed → sprout → ripe", lilith:"Terminal Dogma · Lilith",
     spear:"SPEAR OF LONGINUS", dummy:"DUMMY PLUG ACTIVE", launch:"Launch",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Battery today",
@@ -94,7 +94,7 @@ const LABELS = {
     seats:{ melchior:"MELCHIOR", balthasar:"BALTHASAR", casper:"CASPER" }, short:{ melchior:"MEL", balthasar:"BAL", casper:"CAS" } },
   neutral:{ brandTitle:"OPERATIONS", brandTag:"owner rules enforced · append-only ledger · long-term memory",
     needs:"Needs your approval", sorties:"Jobs", next:"Coming up", flow:"Decision timeline",
-    detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health",
+    detail:"Plan · current action", log:"Messages · trace", away:"While you were away", health:"Health", settings:"Settings",
     bases:"Machines · mesh", cages:"Sandboxes · heartbeat", budget:"Budget", melons:"Pilots", skills:"Skills", skillStages:"create → try → use", lilith:"Memory",
     spear:"STOP EVERYTHING", dummy:"MODELS UNAVAILABLE", launch:"Run",
     qNeeds:"Needs you", qAway:"While you were away", qNext:"Coming up", qHealth:"Broken or stuck", qBudget:"Budget today",
@@ -275,12 +275,8 @@ async function runFrom(s) { // resume the loop at the current action after an ed
 async function execute(s, a, b) {
   if (s.status === "stood-down") return;
   setPhase(s, "plug", "Ritsuko signs the A.T. Field: " + a.tool + " · single use · 60 s · args hash bound"); await wait(380);
-  const cage = CAGES.find(c => c.id === b.executor) || CAGES.find(c => c.id === "EVA-02");
-  const base = BASES.find(x => x.id === cage.base);
-  if (base.id !== "tokyo3") sendPacket("tokyo3", base.id, "plug");
-  activeCage[cage.id] = Date.now() + 1600;
+  const base = BASES[0];
   setPhase(s, "eva", b.executor + " @ " + base.name + " executes " + a.tool + " · field checked at the executor"); await wait(700);
-  if (base.id !== "tokyo3") sendPacket(base.id, "tokyo3", "result");
   a.status = "done"; s.spent += a.cost; state.spentToday += a.cost;
   if (a.casper) { state.routeSpend.umbilical += 0.004; state.spentToday += 0.004; }
   if (!isLocal(TOOLS[a.tool].effect)) s.happened.push({ tool:a.tool, inverse:TOOLS[a.tool].inverse || null });
@@ -550,6 +546,39 @@ function startReplay(id) {
     renderFlow();
   }, REPLAY_MS);
 }
+function sephirotEvaLabel(s, a, b) {
+  if (a && a.evaInstance && a.evaInstance.jobId && a.evaInstance.evaClass) {
+    const inst = a.evaInstance;
+    return {
+      text: "pilot " + (inst.pilot || "unassigned") + " · " + inst.evaClass.toUpperCase() + " (" + inst.jobId + ")",
+      avatar: inst.evaClass.toLowerCase()
+    };
+  }
+  if (s && s.status === "active") {
+    if (Array.isArray(state.evaMachines)) {
+      for (const m of state.evaMachines) {
+        if (m.reported === false || !Array.isArray(m.instances)) continue;
+        const hit = m.instances.find(x => x.sortieId === s.id);
+        if (hit) {
+          return {
+            text: "pilot " + (hit.pilot || "unassigned") + " · " + hit.evaClass.toUpperCase() + " (" + hit.jobId + ")",
+            avatar: hit.evaClass.toLowerCase()
+          };
+        }
+      }
+      if (s.phase === "eva") {
+        const missingLocal = !state.evaMachines.length || state.evaMachines.some(m => m.self && m.reported === false);
+        return { text: missingLocal ? "instance data unavailable" : "pilot none · instance none", avatar: null };
+      }
+    } else if (s.phase === "eva") {
+      return { text: LIVE ? "instance data unavailable" : "pilot none · instance none", avatar: null };
+    }
+  }
+  if (a && (a.status === "done" || a.status === "failed")) {
+    return { text: "pilot none · instance none", avatar: null };
+  }
+  return { text: b ? b.executor + " · field enforced" : "sandbox · field enforced", avatar: null };
+}
 function renderFlow() {
   const real = state.sorties.find(x => x.id === state.selected);
   const s = real && state.replay && state.replay.id === real.id && state.replay.k < replayOrder(real).length ? replayFrame(real, state.replay.k) : real;
@@ -604,8 +633,9 @@ function renderFlow() {
   document.getElementById("sd-plan").textContent = s ? "action " + Math.min(s.current + 1, s.actions.length) + "/" + s.actions.length : "next action";
   document.getElementById("sd-route").textContent = s ? (s.status === "waiting-route" ? "no route · waits" : "S² local · $" + s.battery.toFixed(2) + " battery") : "route · battery";
   document.getElementById("sd-intake").textContent = s ? "provenance: " + s.trust : "intake · provenance";
-  document.getElementById("sd-eva").textContent = b ? b.executor + " · field enforced" : "sandbox · field enforced";
-  { const img = document.getElementById("av-eva-node"); const k = b ? b.executor.toLowerCase() : "eva-01"; if (img.dataset.av !== k) { img.dataset.av = k; fillAvatars(img.parentNode); } }
+  const evaInfo = sephirotEvaLabel(s, a, b);
+  document.getElementById("sd-eva").textContent = evaInfo.text;
+  { const img = document.getElementById("av-eva-node"); const k = evaInfo.avatar || (b ? b.executor.toLowerCase() : "eva-01"); if (img.dataset.av !== k) { img.dataset.av = k; fillAvatars(img.parentNode); } }
   drawEdges(s);
   renderDetail(s);
 }
@@ -620,7 +650,7 @@ function seatMetric(seat, s, a) {
 function renderMagiPending(s) { if (state.selected === s.id) renderFlow(); }
 const EDGES = [
   ["detect","intake"],["detect","route"],["intake","route"],["route","plan"],["consult","plan","loop"],["plan","magi"],
-  ["magi","sync"],["magi","apt"],["sync","apt"],["sync","plug"],["apt","plug"],["plug","eva"],["eva","debrief"],
+  ["magi","sync"],["sync","apt"],["sync","plug"],["apt","plug"],["plug","eva"],["eva","debrief"],
   ["magi","plan","loop"],["apt","plan","loop"],["eva","plan","loop"],
   // Misato answered without an action: straight to Debrief (drawn only for such a sortie).
   ["plan","debrief","answer"],
@@ -635,7 +665,7 @@ const EDGES = [
 function edgeShown(s, e) {
   if (e[2] === "relay") return !!(s && s.forwarded);
   if (e[2] === "answer") return !!(s && !s.actions.length && !s.forwarded);
-  if (e[2] === "declined") return !!(s && !s.forwarded && s.actions.length && !s.actions.some(a => a.status === "done" || a.status === "failed"));
+  if (e[2] === "declined") return !!(s && !s.forwarded && s.status !== "active" && s.status !== "waiting" && s.status !== "queued" && s.done && s.done.apt && s.actions.length && !s.actions.some(a => a.status === "done" || a.status === "failed"));
   return true;
 }
 function nodeEl(id) { return id === "magi" ? document.getElementById("magi-big") : document.querySelector(".snode[data-n='" + id + "']"); }
@@ -668,18 +698,32 @@ function drawEdges(s) {
     else if (B.b <= A.t + 2) { const my = (B.b + A.t) / 2; d = "M" + A.x + "," + A.t + " V" + my + " H" + B.x + " V" + B.b; }
     else if (B.l >= A.r) { const mx = (A.r + B.l) / 2; d = "M" + A.r + "," + A.y + " H" + mx + " V" + B.y + " H" + B.l; }
     else { const mx = (B.r + A.l) / 2; d = "M" + A.l + "," + A.y + " H" + mx + " V" + B.y + " H" + B.r; }
-    const cls = (e[2] === "loop" ? "loop " : "") + (passedEdge(s, e) || "");
-    return "<path d='" + d + "' class='" + cls + "' marker-end='url(#edge-arrow)'/>";
+    const stateCls = passedEdge(s, e) || "";
+    const cls = (e[2] === "loop" ? "loop " : "") + stateCls;
+    const markerId = stateCls.includes("owner")
+      ? "edge-arrow-owner"
+      : stateCls.includes("passed")
+        ? "edge-arrow-passed"
+        : stateCls.includes("skip")
+          ? "edge-arrow-skip"
+          : "edge-arrow";
+    return "<path d='" + d + "' class='" + cls + "' marker-end='url(#" + markerId + ")'/>";
   }).join("");
-  svg.innerHTML = "<defs><marker id='edge-arrow' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='context-stroke'/></marker></defs>" + paths;
+  svg.innerHTML = "<defs>" +
+    "<marker id='edge-arrow' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='var(--accent)' fill-opacity='0.45'/></marker>" +
+    "<marker id='edge-arrow-passed' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='var(--ok)'/></marker>" +
+    "<marker id='edge-arrow-owner' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='var(--warn)'/></marker>" +
+    "<marker id='edge-arrow-skip' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='var(--accent)' fill-opacity='0.22'/></marker>" +
+    "</defs>" + paths;
 }
 /** The route already taken: green when the step passed on its own, yellow when it went through the owner's decision
     (Misato's apartment), faded into a skipped step. Step activity is shown on nodes; route history never claims an ongoing communication. */
 function passedEdge(s, e) {
   if (!s || (e[2] === "loop" && !(e[0] === "consult" && e[1] === "plan"))) return "";
-  if (e[2] === "answer") return stepState(s, "plan") === "done" && stepState(s, "debrief") === "done" ? "passed" : "";
-  if (e[2] === "relay") return stepState(s, "debrief") === "done" ? "passed" : "";
-  if (e[2] === "declined") return stepState(s, "apt") === "done" && stepState(s, "debrief") === "done" ? "passed owner" : "";
+  const activeOrDone = st => st === "done" || st === "on" || st === "wait";
+  if (e[2] === "answer") return stepState(s, "plan") === "done" && activeOrDone(stepState(s, "debrief")) ? "passed" : "";
+  if (e[2] === "relay") return activeOrDone(stepState(s, "debrief")) ? "passed" : "";
+  if (e[2] === "declined") return stepState(s, "apt") === "done" && activeOrDone(stepState(s, "debrief")) ? "passed owner" : "";
   const from = stepState(s, e[0]), to = stepState(s, e[1]);
   if (from === "skip" || to === "skip") return "skip";
   if (from !== "done" || !(to === "done" || to === "on" || to === "wait")) return "";
@@ -780,16 +824,82 @@ function renderBases() {
     "<div class='tiny muted'>" + b.models + "</div>" +
     "<div style='margin-top:3px'><button class='btn sm' data-toggle='" + b.id + "'>" + (b.status === "online" ? "Simulate offline" : "Bring online") + "</button></div></div>").join("");
 }
+function evaMachinesForView() {
+  if (Array.isArray(state.evaMachines)) return state.evaMachines;
+  if (LIVE) {
+    const base = BASES[0] || { id:"local", name:"this machine", status:"online" };
+    return [{ machineId:base.id, machineName:base.name, self:true, online:base.status !== "offline", reported:true, instances:[] }];
+  }
+  const active = state.sorties.filter(s => s.status === "active" && s.phase === "eva").map(s => ({
+    jobId: s.id,
+    evaClass: pilotStage(s.pilot) === "prototype" ? "eva-00" : pilotStage(s.pilot) === "test" ? "eva-01" : "eva-02",
+    pilot: s.pilot || "unassigned",
+    state: "running",
+    sortieId: s.title
+  }));
+  return BASES.map((b, i) => ({
+    machineId: b.id,
+    machineName: b.name,
+    self: i === 0,
+    online: b.status !== "offline",
+    reported: true,
+    instances: i === 0 ? active : []
+  }));
+}
+function evaStateBadge(st) {
+  return st === "running" ? "b-ok" : st === "waiting" ? "b-warn" : st === "uncertain" ? "b-bad" : "b-muted";
+}
 function renderCages() {
   const box = document.getElementById("cages");
-  if (!box.children.length) box.innerHTML = CAGES.map(c => "<div class='cage" + (c.planned ? " planned" : "") + "'><div class='ch'><span style='color:var(--eva" + c.id.slice(4) + ")'>" + c.id + "</span><span class='tiny' id='cs-" + c.id + "'>IDLE</span></div><img class='eva-img' data-av='" + c.id.toLowerCase() + "' alt='" + c.id + "'/><canvas id='cv-" + c.id + "' height='30'></canvas><div class='cd' title='" + esc(c.label + " · @" + BASES.find(b => b.id === c.base).name) + "'>" + c.label + " · @" + BASES.find(b => b.id === c.base).name + "</div></div>").join("");
+  if (!box) return;
+  const machines = evaMachinesForView();
+  const total = machines.reduce((n, m) => n + (Array.isArray(m.instances) ? m.instances.length : 0), 0);
+  const sub = document.getElementById("cages-sub");
+  if (sub) sub.textContent = total + " active · " + machines.length + (machines.length === 1 ? " machine" : " machines");
+  const cagesHtml = "<div class='cages'>" + EVA_CLASSES.map(c => {
+    const items = [];
+    machines.forEach(m => {
+      if (m.reported === false || !Array.isArray(m.instances)) return;
+      m.instances.forEach(x => { if (x.evaClass === c.id) items.push({ inst: x, machine: m.machineName }); });
+    });
+    const instHtml = items.length
+      ? items.map(({ inst, machine }) => "<div class='eva-inst'><div class='eva-inst-meta'><span class='b'>" + esc(inst.pilot || "unassigned") + "</span><span class='tiny muted'>" + esc(inst.jobId) + (inst.sortieId ? " · " + esc(inst.sortieId) : "") + (machines.length > 1 ? " · @" + esc(machine) : "") + "</span></div><span class='badge " + evaStateBadge(inst.state) + "'>" + esc(inst.state.toUpperCase()) + "</span></div>").join("")
+      : "<div class='eva-empty'>Empty · no active instances</div>";
+    return "<div class='cage' data-eva-class='" + c.id + "'>" +
+      "<div class='ch eva-class-hdr'><span style='color:var(" + c.css + ")'>" + c.name + "</span><span class='tiny muted' id='cs-" + c.name + "'>" + (items.length ? items.length + " ACTIVE" : "IDLE") + "</span></div>" +
+      "<img class='eva-img' data-av='" + c.id + "' alt='" + c.name + "'/>" +
+      "<canvas id='cv-" + c.name + "' height='30'></canvas>" +
+      "<div class='cd' title='" + esc(c.label) + "'>" + esc(c.label) + " · " + (items.length ? items.length + " active" : "idle") + "</div>" +
+      instHtml +
+      "</div>";
+  }).join("") + "</div>";
+  const machinesHtml = machines.length
+    ? "<div class='eva-machines-bar'>" + machines.map(m => {
+        const insts = Array.isArray(m.instances) ? m.instances : [];
+        const statusText = m.self ? "this machine" : (m.online ? "online" : "offline");
+        const limitText = m.limits ? " · " + insts.length + "/" + m.limits.instances + " slots" : "";
+        const note = m.reported === false ? "<div class='eva-empty'>Not reported by this machine</div>" : "";
+        return "<div class='eva-machine' data-machine='" + esc(m.machineId) + "'><div class='eva-machine-hdr'><span class='b " + (m.online ? "ok" : "muted") + "'>" + esc(m.machineName) + "</span><span class='tiny muted'>" + esc(statusText + limitText) + "</span></div>" + note + "</div>";
+      }).join("") + "</div>"
+    : "<div class='eva-empty'>No machines reported.</div>";
+  box.innerHTML = cagesHtml + machinesHtml;
+  if (typeof fillAvatars === "function") fillAvatars(box);
+}
+function renderChatSurface(surface) {
+  if (!surface || surface.component !== "nerv-checklist-card" || !surface.props) return "";
+  const p = surface.props;
+  const items = Array.isArray(p.items) ? p.items : [];
+  const rows = items.map(it =>
+    "<li style='margin:2px 0'><label style='display:inline-flex;align-items:center;gap:6px;cursor:pointer'><input type='checkbox' data-checklist-toggle='" + esc(it.id) + "' data-list-id='" + esc(p.listId || "") + "'" + (it.done ? " checked" : "") + "><span>" + esc(it.text) + "</span></label></li>"
+  ).join("");
+  return "<div class='card checklist-card' data-list-id='" + esc(p.listId || "") + "' role='group' aria-label='" + esc(p.name || "Checklist") + "' style='margin-top:4px;padding:6px 8px'><div class='b small'>" + esc(p.name || "Checklist") + "</div>" + (rows ? "<ul style='list-style:none;margin:4px 0 0;padding:0'>" + rows + "</ul>" : "<div class='tiny muted'>No items.</div>") + "</div>";
 }
 function renderLog() {
   const el = document.getElementById("log"); if (!el) return;
   const f = state.logFilter || "all";
   const query = (state.search || "").trim().toLowerCase();
   const rows = state.log.filter(e => !query || (e.msg + " " + (e.s || "")).toLowerCase().includes(query)).filter(e => f === "all" || (f === "sortie" && (e.s === state.selected || e.who === "you" || e.chat)) || (f === "chat" && (e.who === "you" || e.chat))).slice(-150);
-  el.innerHTML = rows.map(e => "<div class='msg " + (e.who === "you" ? "you " : "") + e.cls + "'><img class='av' data-av='" + e.who + "' alt=''/><div><span class='ts'>" + new Date(e.t).toTimeString().slice(0, 8) + "</span><b class='who'>" + esc(speakerName(e.who)) + "</b>" + (e.s ? "<span class='muted'>" + e.s + " · </span>" : "") + highlight(e.msg, state.search) + "</div></div>").join("") || "<div class='muted'>" + (query ? "No loaded messages match your search." : f === "all" ? "No messages yet. Ask Misato something below: its steps, the MAGI's votes and its reply show here." : f === "sortie" ? "Nothing for this sortie yet. Pick another one in Sorties, or show all." : "No chat yet. Type below to talk to Misato.") + "</div>";
+  el.innerHTML = rows.map(e => "<div class='msg " + (e.who === "you" ? "you " : "") + e.cls + "'><img class='av' data-av='" + e.who + "' alt=''/><div><span class='ts'>" + new Date(e.t).toTimeString().slice(0, 8) + "</span><b class='who'>" + esc(speakerName(e.who)) + "</b>" + (e.s ? "<span class='muted'>" + e.s + " · </span>" : "") + highlight(e.msg, state.search) + (e.surface ? renderChatSurface(e.surface) : "") + "</div></div>").join("") || "<div class='muted'>" + (query ? "No loaded messages match your search." : f === "all" ? "No messages yet. Ask Misato something below: its steps, the MAGI's votes and its reply show here." : f === "sortie" ? "Nothing for this sortie yet. Pick another one in Sorties, or show all." : "No chat yet. Type below to talk to Misato.") + "</div>";
   fillAvatars(el); el.scrollTop = el.scrollHeight;
 }
 function applyLabels() { const p = L(); document.querySelectorAll("[data-l]").forEach(el => { const k = el.dataset.l; if (p[k]) el.textContent = p[k]; }); }
@@ -818,11 +928,14 @@ function renderChronicle() {
     ? days.map(d => "<div class='row small'><div><strong>" + esc(d.day) + "</strong>" + (d.version ? " <span class='tiny muted'>" + esc(d.version) + "</span>" : "") + "<div>" + esc(d.text) + "</div>" + (Array.isArray(d.sources) && d.sources.length ? "<div class='tiny muted'>" + d.sources.map(esc).join(" · ") + "</div>" : "") + "</div></div>").join("")
     : "<div class='tiny muted'>Entries appear here from recorded registry, pilot, and route milestones.</div>";
 }
-function renderAll() { renderSkills(); fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderBudget(); renderMelons(); renderBases(); renderChronicle(); renderCages(); renderLilith(); renderModels(); }
+function renderSettings() {
+  const box = document.getElementById("settings"); if (!box) return;
+  box.innerHTML = "<div class='tiny muted'>Simulation · live mode edits automatic update schedule (mode, check 20:00, apply 03:00, no-apply 08:00–23:00).</div>";
+}
+function renderAll() { renderSkills(); fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderSettings(); renderBudget(); renderMelons(); renderBases(); renderChronicle(); renderCages(); renderLilith(); renderModels(); }
 
 /* ================= MAP: zoomed regional topography (procedural hills and valleys) ================= */
 const map = { ready:false, w:540, h:250, proj:null, contours:[], base:null, linkPaths:{} };
-const activeCage = {};
 function sendPacket(from, to, kind) { state.packets.push({ from, to, kind, t0:performance.now(), dur:1400 }); }
 function noise(x, y) { // smooth deterministic pseudo-terrain
   return Math.sin(x * 0.021 + 1.3) * Math.cos(y * 0.027) + 0.6 * Math.sin(x * 0.051 + y * 0.034) + 0.35 * Math.cos(x * 0.093 - y * 0.071 + 2) + 0.2 * Math.sin(x * 0.17 + y * 0.13);
@@ -1039,20 +1152,31 @@ function drawTelegram(ctx, now, W, H) {
 
 /* ================= EVA heartbeats ================= */
 function drawHeartbeats(now) {
-  CAGES.forEach((c, i) => {
-    const cv = document.getElementById("cv-" + c.id); if (!cv) return;
-    const base = BASES.find(b => b.id === c.base); const off = base.status === "offline" || !!c.planned; const busy = (activeCage[c.id] || 0) > Date.now();
-    const st = document.getElementById("cs-" + c.id); st.textContent = c.planned ? "PLANNED" : off ? "OFFLINE" : busy ? "ACTIVE" : base.status === "standby" ? "STANDBY" : "IDLE"; st.className = "tiny " + (off ? "muted" : busy ? "ok" : base.status === "standby" ? "warn" : "muted");
+  const machines = evaMachinesForView();
+  const anyOnline = machines.some(m => m.online);
+  EVA_CLASSES.forEach((c, i) => {
+    const cv = document.getElementById("cv-" + c.name); if (!cv) return;
+    const items = [];
+    machines.forEach(m => { if (m.reported !== false && Array.isArray(m.instances)) m.instances.forEach(x => { if (x.evaClass === c.id) items.push(x); }); });
+    const busy = items.some(x => x.state === "running" || x.state === "waiting");
+    const off = !anyOnline;
+    const st = document.getElementById("cs-" + c.name);
+    if (st) {
+      st.textContent = off ? "OFFLINE" : busy ? items.length + " ACTIVE" : "IDLE";
+      st.className = "tiny " + (off ? "muted" : busy ? "ok" : "muted");
+    }
     const dpr = window.devicePixelRatio || 1; const w = cv.clientWidth || 120, h = 30;
     if (cv.width !== Math.floor(w * dpr)) { cv.width = Math.floor(w * dpr); cv.height = Math.floor(h * dpr); }
     const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = "#000"; ctx.fillRect(0, 0, w, h);
     ctx.strokeStyle = "rgba(255,102,0,.12)"; ctx.lineWidth = 1; for (let gx = 0; gx < w; gx += 10) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke(); }
-    ctx.strokeStyle = off ? "#555" : busy ? cssVar("--ok") : base.status === "standby" ? cssVar("--warn") : c.color; ctx.lineWidth = 1.3; ctx.beginPath();
-    const period = busy ? 34 : base.status === "standby" ? 110 : 70; const shift = off ? 0 : (now / (busy ? 9 : 16)) % period;
+    ctx.strokeStyle = off ? "#555" : busy ? cssVar("--ok") : cssVar(c.css); ctx.lineWidth = 1.3; ctx.beginPath();
+    const period = busy ? 34 : 70; const shift = off ? 0 : (now / (busy ? 9 : 16)) % period;
     for (let x = 0; x <= w; x++) {
       let y = h / 2;
-      if (!off) { const p = ((x + shift + i * 13) % period) / period; const amp = busy ? 12 : 8;
-        if (p > 0.40 && p < 0.44) y -= amp * 0.3; else if (p >= 0.46 && p < 0.49) y += amp * 0.35; else if (p >= 0.49 && p < 0.52) y -= amp; else if (p >= 0.52 && p < 0.55) y += amp * 0.6; else if (p > 0.62 && p < 0.7) y -= amp * 0.22 * Math.sin((p - 0.62) / 0.08 * Math.PI); }
+      if (!off) {
+        const p = ((x + shift + i * 13) % period) / period; const amp = busy ? 12 : 8;
+        if (p > 0.40 && p < 0.44) y -= amp * 0.3; else if (p >= 0.46 && p < 0.49) y += amp * 0.35; else if (p >= 0.49 && p < 0.52) y -= amp; else if (p >= 0.52 && p < 0.55) y += amp * 0.6; else if (p > 0.62 && p < 0.7) y -= amp * 0.22 * Math.sin((p - 0.62) / 0.08 * Math.PI);
+      }
       x ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
     }
     ctx.stroke();
@@ -1149,7 +1273,46 @@ function chat(text) {
     launch(key, text); say("On it: opened " + state.sorties[0].id + ". The MAGI decide each action's Pattern; anything that needs you comes to the apartment.");
   }, 250);
 }
-document.getElementById("chat-form").addEventListener("submit", e => { e.preventDefault(); const i = document.getElementById("chat-in"); const v = i.value.trim(); if (v) { chat(v); i.value = ""; } });
+const DEFAULT_COMMANDS = [
+  { name: "help", usage: "/help", summaryEn: "List available commands", summaryIt: "Elenca i comandi disponibili" },
+  { name: "status", usage: "/status [base]", summaryEn: "Show base health and Midori status", summaryIt: "Mostra stato della base e di Midori" },
+  { name: "cards", usage: "/cards", summaryEn: "List pending approval cards", summaryIt: "Mostra le schede in attesa di approvazione" },
+  { name: "reminders", usage: "/reminders", summaryEn: "List pending reminders", summaryIt: "Mostra i promemoria in attesa" },
+  { name: "why", usage: "/why S-XXXX", summaryEn: "Explain a sortie or action from the ledger", summaryIt: "Spiega una sortita o azione dal registro" },
+  { name: "brief", usage: "/brief", summaryEn: "Show brief schedule and latest summary", summaryIt: "Mostra orario del brief e stato recente" },
+  { name: "pilots", usage: "/pilots", summaryEn: "List configured specialist pilots", summaryIt: "Elenca i piloti specialistici configurati" },
+  { name: "bases", usage: "/bases", summaryEn: "List enrolled bases in the mesh", summaryIt: "Elenca le basi registrate nella rete" },
+  { name: "spear", usage: "/spear [S-XXXX]", summaryEn: "Stop an active or waiting sortie", summaryIt: "Ferma una sortita attiva o in attesa" },
+  { name: "log", usage: "/log conversation|steps|all", summaryEn: "Set trace verbosity for chat replies", summaryIt: "Imposta il dettaglio della traccia in chat" }
+];
+function renderSlashMenu() {
+  const input = document.getElementById("chat-in");
+  const menu = document.getElementById("slash-menu");
+  if (!input || !menu) return;
+  const raw = input.value;
+  if (!raw.startsWith("/")) { menu.hidden = true; menu.innerHTML = ""; return; }
+  const q = raw.slice(1).split(/\s+/)[0].toLowerCase();
+  const list = (Array.isArray(state.commands) && state.commands.length ? state.commands : DEFAULT_COMMANDS)
+    .filter(c => !q || c.name.startsWith(q));
+  if (!list.length) { menu.hidden = true; menu.innerHTML = ""; return; }
+  const it = state.lang === "it";
+  menu.innerHTML = list.map(c => "<button type='button' class='slash-item' role='option' data-cmd='" + esc(c.name) + "' data-has-args='" + (c.usage.includes(" ") ? "1" : "") + "'><span><b>" + esc(c.usage) + "</b></span><span class='slash-desc'>" + esc(it && c.summaryIt ? c.summaryIt : c.summaryEn) + "</span></button>").join("");
+  menu.hidden = false;
+}
+document.getElementById("chat-in").addEventListener("input", renderSlashMenu);
+document.getElementById("chat-in").addEventListener("keydown", e => {
+  if (e.key === "Escape") { const m = document.getElementById("slash-menu"); if (m) { m.hidden = true; m.innerHTML = ""; } }
+});
+document.getElementById("slash-menu").addEventListener("click", e => {
+  const btn = e.target.closest("[data-cmd]");
+  if (!btn) return;
+  const i = document.getElementById("chat-in");
+  i.value = "/" + btn.dataset.cmd + (btn.dataset.hasArgs ? " " : "");
+  const m = document.getElementById("slash-menu");
+  m.hidden = true; m.innerHTML = "";
+  i.focus();
+});
+document.getElementById("chat-form").addEventListener("submit", e => { e.preventDefault(); const m = document.getElementById("slash-menu"); if (m) { m.hidden = true; m.innerHTML = ""; } const i = document.getElementById("chat-in"); const v = i.value.trim(); if (v) { chat(v); i.value = ""; } });
 function guessPreset(t) { t = t.toLowerCase(); if (/mail|inbox|summar/.test(t)) return "brief"; if (/reply|tell|write to|email/.test(t)) return "reply"; if (/branch|repo/.test(t)) return "branches"; if (/charg|battery|fpv/.test(t)) return "charger"; if (/note|clip|page|web/.test(t)) return "note"; return null; }
 /* palette:start · F-047: Theme (eva | simple) × Mode (dark | light) × Accent. Every colour a text sits on reaches WCAG AA
    (test/dashboard.test.ts checks all 20); Eva · Dark · Orange is the original EVA Full, also the stylesheet's :root. */
@@ -1260,7 +1423,7 @@ function setTheme(theme, mode, accent) {
 }
 
 // Live: only this machine is a base; simulated cages and pilots would point at bases that do not exist.
-if (LIVE) { state = freshState(); state.upcoming = []; BASES.splice(1); LINKS.length = 0; CAGES.forEach(c => { c.base = "tokyo3"; c.planned = c.id !== "EVA-02"; if (c.id === "EVA-02") c.label = "PRODUCTION · in-process executor, not sandboxed yet"; else c.label = c.label.split(" · ")[0] + " · planned"; }); PILOTS.length = 0; PILOTS.push({ id:"owner", stage:"production" }, { id:"misato", stage:"production" }); } else seed();
+if (LIVE) { state = freshState(); state.upcoming = []; BASES.splice(1); LINKS.length = 0; PILOTS.length = 0; PILOTS.push({ id:"owner", stage:"production" }, { id:"misato", stage:"production" }); } else seed();
 // ?theme= (and ?mode=, ?accent=) in the address win; otherwise what this browser last chose; an older single theme name
 // is mapped to its nearest Theme · Mode · Accent.
 { const prefs = readPrefs(), q = new URLSearchParams(location.search); const t = q.get("theme") || prefs.theme; const old = migrateTheme(t);

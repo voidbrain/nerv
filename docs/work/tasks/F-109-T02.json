@@ -4,7 +4,7 @@
   "parent": "F-109",
   "title": "Store a pilot's call name and second name through a validated interface",
   "goal": "Names saved, validated and returned by the pilots API",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Regression test on the interface and on the API"
   ],
@@ -37,5 +37,11 @@
     "agentHours": 1,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
-  }
+  },
+  "prs": [
+    {
+      "pr": 590,
+      "note": "implementation"
+    }
+  ]
 }

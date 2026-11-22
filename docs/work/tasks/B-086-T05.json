@@ -4,7 +4,7 @@
   "parent": "B-086",
   "title": "Rerun the two expensive system cases at this source",
   "goal": "nerv-system-flows/stress and nerv-system-flows/browser have a covering run at the B-086-T04 source",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "npm run gauntlet:all -- --execute --allow-expensive records passing runs for nerv-system-flows/stress and nerv-system-flows/browser",
     "node tools/gauntlet.mjs pending lists neither"
@@ -28,11 +28,18 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h",
-    "basis": "Added 2026-11-19: the B-086-T04 test change made every system case source-changed; the expensive two wait for the owner.",
-    "reviewed": "2026-11-19",
-    "agentHours": 0.25,
+    "basis": "Added 2026-11-19: the B-086-T04 test change made every system case source-changed; closed 2026-11-21 after the owner-authorized system run.",
+    "reviewed": "2026-11-21",
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 623,
+      "note": "system verification and closure"
+    }
+  ]
 }

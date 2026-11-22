@@ -10,6 +10,7 @@ import { Runtime } from '../src/runtime.ts';
 import { TelegramApi, TelegramChannel, startChats, telegramBase, BUNDLE_WAIT_MS } from '../src/telegram.ts';
 import { Store } from '../src/store.ts';
 import type { StoreApi } from '../src/runtime.ts';
+import { formatBatteryStateLines } from '../src/batteries.ts';
 const OWNER = 1111,
   STRANGER = 2222;
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
@@ -767,6 +768,134 @@ test('F-082-T03: Telegram checklist toggles items by editing in place and answer
   } finally {
     await channel.stop();
     store.close();
+    await tg.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('F-008-T14: Telegram "stato batterie" and "battery status" return formatted CLI lines without a model call', async () => {
+  const token = '123456:' + 'x'.repeat(35);
+  const tg = await fakeTelegram(token);
+  const home = mkdtempSync(join(tmpdir(), 'nerv-tg-batteries-'));
+  const store = new Store(join(home, 'nerv.sqlite'));
+  let chatCalled = false;
+  store.batteries.register({
+    packNumber: 7,
+    series: 'blu',
+    seriesColor: 'blu',
+    brand: 'Tattu',
+    batteryType: 'LiPo 6S',
+    cellCount: 6,
+    capacityMah: 1300,
+    purchaseDate: '2026-10-01',
+    initialResistanceMohm: [2.1, 2.2, 2.1, 2.3, 2.2, 2.1],
+  });
+  store.batteries.recordState(store.batteries.list()[0]!.id, 'charged', '2026-11-20T10:00:00Z');
+  const expectedIt = formatBatteryStateLines(store.batteries.list(), 'it');
+  const expectedEn = formatBatteryStateLines(store.batteries.list(), 'en');
+  const apiStore = {
+    inboxPage: store.inboxPage.bind(store),
+    approvals: store.approvals.bind(store),
+    pendingApprovalIds: store.pendingApprovalIds.bind(store),
+    decide: store.decide.bind(store),
+    batteryCards: store.batteryCards.bind(store),
+    chat: async () => {
+      chatCalled = true;
+      return { sortieId: '', reply: 'should not be called', steps: [], waiting: [] };
+    },
+  } as unknown as StoreApi;
+  const channel = new TelegramChannel({
+    api: new TelegramApi(token, tg.base),
+    store: apiStore,
+    chatId: OWNER,
+    statePath: join(home, 'telegram-state.json'),
+    log: () => {},
+  });
+  try {
+    await channel.start(50);
+    tg.text(OWNER, 'stato batterie');
+    await until(() => tg.sent().some((m) => m.text === expectedIt));
+    tg.text(OWNER, 'battery status');
+    await until(() => tg.sent().some((m) => m.text === expectedEn));
+    assert.equal(chatCalled, false);
+  } finally {
+    await channel.stop();
+    store.close();
+    await tg.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('F-056-T02: Telegram /cards sends pending cards with inline buttons and read-only commands answer without model calls or sorties', async () => {
+  const token = 'tg-f056-t02-token';
+  const tg = await fakeTelegram(token);
+  const home = mkdtempSync(join(tmpdir(), 'nerv-tg-f056-t02-'));
+  let runtime: Runtime | undefined;
+  let channel: TelegramChannel | undefined;
+  try {
+    const dbPath = join(home, 'nerv.sqlite');
+    const seed = new Store(dbPath);
+    seed.add('Water plants', '2030-01-02T08:00:00.000Z');
+    seed.addBrief('Morning brief ready.');
+    const sortie = seed.ledger.openSortie('misato', 'Telegram cards sortie', 'trusted');
+    await seed.ledger.propose(sortie, {
+      tool: 'memory.remember',
+      args: { text: 'Owner likes espresso' },
+      stage: 'production',
+    });
+    seed.close();
+
+    runtime = new Runtime(dbPath, undefined, home);
+    let modelCalls = 0;
+    runtime.setDispatch(async () => {
+      modelCalls++;
+      return undefined;
+    });
+    (runtime as unknown as { bases: () => Promise<unknown[]> }).bases = async () => [
+      { baseId: 'NERV-01', name: 'Tokyo-3', online: true, self: true },
+    ];
+    await runtime.ready();
+    channel = new TelegramChannel({
+      api: new TelegramApi(token, tg.base),
+      store: runtime,
+      chatId: OWNER,
+      statePath: join(home, 'telegram-state.json'),
+      log: () => {},
+    });
+    await channel.start(50);
+    await until(() => tg.calls.some((c) => c.method === 'setMyCommands'));
+    const menuCall = tg.calls.find((c) => c.method === 'setMyCommands')!;
+    assert.ok(Array.isArray(menuCall.body.commands) && (menuCall.body.commands as unknown[]).length >= 10);
+    tg.text(OWNER, '/cards');
+    await until(() =>
+      tg.sent().some((m) => m.text.includes('memory.remember') && !!m.reply_markup?.inline_keyboard?.length),
+    );
+    tg.text(OWNER, '/reminders');
+    await until(() => tg.sent().some((m) => m.text.includes('Water plants')));
+    tg.text(OWNER, '/brief');
+    await until(() => tg.sent().some((m) => m.text.includes('Morning brief ready.')));
+    tg.text(OWNER, '/bases');
+    await until(() => tg.sent().some((m) => m.text.includes('NERV-01 · Tokyo-3')));
+    tg.text(OWNER, '/pilots');
+    await until(() => tg.sent().some((m) => m.text.includes('No specialist pilots configured.')));
+    tg.text(OWNER, `/why S-${sortie.slice(0, 4).toUpperCase()}`);
+    await until(() => tg.sent().some((m) => m.text.includes('Telegram cards sortie')));
+    assert.equal(modelCalls, 0);
+    assert.equal((await runtime.sorties()).length, 1);
+
+    // F-056-T03: Telegram /spear sends confirmation buttons; tapping Confirm Spear stops the sortie.
+    tg.text(OWNER, `/spear S-${sortie.slice(0, 4).toUpperCase()}`);
+    await until(() =>
+      tg
+        .sent()
+        .some((m) => m.reply_markup?.inline_keyboard?.[0]?.some((b) => b.callback_data === `spear:confirm:${sortie}`)),
+    );
+    tg.tap(OWNER, `spear:confirm:${sortie}`);
+    await until(() => tg.sent().some((m) => m.text.includes(`Stopped S-${sortie.slice(0, 4).toUpperCase()}`)));
+    assert.equal((await runtime.sorties()).find((s) => s.id === sortie)?.status, 'revoked');
+  } finally {
+    await channel?.stop();
+    await runtime?.close();
     await tg.close();
     rmSync(home, { recursive: true, force: true });
   }

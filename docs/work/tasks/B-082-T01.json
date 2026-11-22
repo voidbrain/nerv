@@ -8,7 +8,9 @@
   "acceptance": [
     "Test committed failing first: `windowsServiceUser` gives `COMPUTERNAME\\\\user` for a local account (also when USERDOMAIN is WORKGROUP) and `USERDOMAIN\\\\user` when USERDNSDOMAIN is set; on Tabgha an SSH install registers the task."
   ],
-  "dependsOn": [],
+  "dependsOn": [
+    "B-087-T01"
+  ],
   "resources": [
     "src/service.ts",
     "test/**",
@@ -31,7 +33,7 @@
     "size": "small",
     "estimate": "0.75 h",
     "basis": "Estimated 2026-11-18: one account rule and a test. Not a measurement.",
-    "reviewed": "2026-11-18",
+    "reviewed": "2026-11-20",
     "agentHours": 0.25,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75,
@@ -41,7 +43,11 @@
   "prs": [
     {
       "pr": 517,
-      "note": "this change"
+      "note": "implementation (merged on green CI 2026-11-18)"
+    },
+    {
+      "pr": 591,
+      "note": "review recorded"
     }
   ]
 }

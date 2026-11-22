@@ -26,13 +26,13 @@
     "A survivor after kill -1 is a finding, recorded, not retried away"
   ],
   "effort": {
-    "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Planned 2026-11-19. Not a measurement.",
-    "reviewed": "2026-11-19",
-    "agentHours": 0.5,
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Re-estimated 2026-11-20 from 0.5 h to 1.5 h (work-items calibrate since 2026-11-15: median 1.0 over 53 steps, but real-device runs took 1.5–3 h): a live check on NERV-01, like F-005-T22 (1.5 h against 0.5 h).",
+    "reviewed": "2026-11-20",
+    "agentHours": 1.5,
     "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5
+    "estimateAgentHours": 1.5
   },
   "prs": []
 }

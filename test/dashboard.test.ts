@@ -612,7 +612,8 @@ test('an answer without an action: Misato passed, a green route straight to Debr
   );
   assert.match(
     js,
-    /if \(e\[2\] === "answer"\) return stepState\(s, "plan"\) === "done" && stepState\(s, "debrief"\) === "done"/,
+    /if \(e\[2\] === "answer"\) return stepState\(s, "plan"\) === "done" && activeOrDone\(stepState\(s, "debrief"\)\)/,
+    'B-106: answer edge activates with debrief',
   );
 });
 test("the apartment's count sits in the header like every other panel's sub-line, not a red badge (owner, 2026-11-05)", async () => {
@@ -700,7 +701,7 @@ test('the bases map draws: drawMap runs to the end and draws every base and its 
     { id: 'nerv-02', name: 'Tabgha', status: 'offline', lon: 300, lat: 150 },
   ];
   const document = { getElementById: () => ({ getContext: () => ctx, clientWidth: 270 }) };
-  const helper = src.slice(src.indexOf('const telegramObserved'), src.indexOf('/* ================= EVA heartbeats'));
+  const helper = src.slice(src.indexOf('const telegramObserved'), src.indexOf('/* ================= LOOP + EVENTS'));
   const drawMap = new Function(
     'map',
     'BASES',
@@ -732,7 +733,7 @@ test('the bases map draws: drawMap runs to the end and draws every base and its 
 test('Midori keeps its blue node and links; only its status dot and label take the status colour (B-095)', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
-  const helper = src.slice(src.indexOf('const telegramObserved'), src.indexOf('/* ================= EVA heartbeats'));
+  const helper = src.slice(src.indexOf('const telegramObserved'), src.indexOf('/* ================= LOOP + EVENTS'));
   const draw = (apiState: 'responding' | 'failed') => {
     const calls: { m: string; a: unknown[]; stroke: string; fill: string }[] = [];
     const style = { stroke: '', fill: '' };
@@ -1443,8 +1444,58 @@ test('a sortie whose action the owner declined draws its route from Misato apart
   assert.equal(api.edgeShown(ran, declined), false, 'not drawn when the action ran through the plug');
   const plain = { status: 'done', phase: 'debrief', done, actions: [] };
   assert.equal(api.edgeShown(plain, declined), false, 'not drawn for an answer with no action');
+  const waiting = {
+    status: 'waiting',
+    phase: 'apt',
+    done: { ...done, apt: false, debrief: false },
+    actions: [{ status: 'waiting', ballot: { outcome: 'approval' } }],
+  };
+  assert.equal(api.edgeShown(waiting, declined), false, 'not drawn while still waiting at Misato apartment');
+  assert.equal(
+    api.EDGES.some((e) => e[0] === 'magi' && e[1] === 'apt'),
+    false,
+    'no redundant direct magi -> apt edge',
+  );
 });
-test('the flow header names the sortie by its code only; every EVA cage shows its status on its own line (F-108)', async () => {
+test('B-106: answer edge activates with debrief and Sephirot markers are filled cleanly without context-stroke', async () => {
+  const { readFileSync } = await import('node:fs');
+  const html = readFileSync('web/public/dashboard/index.html', 'utf8');
+  const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  assert.doesNotMatch(
+    html,
+    /\.sephirot svg\.edges path\s*\{[^}]*fill:\s*none/,
+    'CSS must not strip fill from marker arrowheads',
+  );
+  assert.match(src, /id='edge-arrow-passed'/, 'explicit passed marker arrowhead for cross-browser rendering');
+
+  const fn = (name: string) => {
+    const i = src.indexOf('function ' + name + '(');
+    return src.slice(i, src.indexOf('\n}\n', i) + 2);
+  };
+  const edgesSrc = src.slice(src.indexOf('const EDGES = ['), src.indexOf('];', src.indexOf('const EDGES = [')) + 2);
+  const api = new Function(
+    `${edgesSrc}\n${fn('stepState')}\n${fn('passedEdge')}\n${fn('edgeShown')}\nreturn { EDGES, passedEdge, edgeShown };`,
+  )() as {
+    EDGES: [string, string, string?][];
+    passedEdge: (s: unknown, e: unknown) => string;
+    edgeShown: (s: unknown, e: unknown) => boolean;
+  };
+  const answer = api.EDGES.find((e) => e[2] === 'answer');
+  assert.ok(answer, 'answer edge exists');
+  const debriefActive = {
+    status: 'active',
+    phase: 'debrief',
+    done: { detect: true, intake: true, route: true, plan: true },
+    actions: [],
+  };
+  assert.equal(api.edgeShown(debriefActive, answer), true);
+  assert.equal(
+    api.passedEdge(debriefActive, answer),
+    'passed',
+    'plan -> debrief line passes as soon as debrief activates',
+  );
+});
+test('the flow header names the sortie by its code only; every EVA class header stacks its name and status (F-108, F-049-T09)', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
   const line = src.split('\n').find((l) => l.includes('getElementById("flow-sub").textContent'))!;
@@ -1452,8 +1503,8 @@ test('the flow header names the sortie by its code only; every EVA cage shows it
   new Function('document', 's', line)({ getElementById: () => el }, { id: 'S-6E26', title: 'Remind me at 9' });
   assert.equal(el.textContent, 'S-6E26');
   const html = readFileSync('web/public/dashboard/index.html', 'utf8');
-  const rule = /\.cage \.ch \{([^}]*)\}/.exec(html)![1]!;
-  assert.match(rule, /flex-direction:\s*column/, 'name and status stack in every cage');
+  const rule = /\.eva-class-hdr \{([^}]*)\}/.exec(html)![1]!;
+  assert.match(rule, /flex-direction:\s*column/, 'name and status stack in every EVA class');
   assert.doesNotMatch(rule, /flex-wrap:\s*wrap/, 'no width-dependent wrapping');
 });
 
@@ -1479,9 +1530,18 @@ test('F-107-T02: mesh lines colour --ok when both peers report each other, --war
     dpr: 1,
     contours: [],
     linkPaths: {
-      'nerv-02|nerv-01': [[0, 0], [10, 10]],
-      'nerv-03|nerv-01': [[0, 0], [10, 10]],
-      'nerv-02|nerv-03': [[0, 0], [10, 10]],
+      'nerv-02|nerv-01': [
+        [0, 0],
+        [10, 10],
+      ],
+      'nerv-03|nerv-01': [
+        [0, 0],
+        [10, 10],
+      ],
+      'nerv-02|nerv-03': [
+        [0, 0],
+        [10, 10],
+      ],
     },
     proj: () => [10, 10],
   };
@@ -1611,4 +1671,215 @@ test('F-107-T02: mesh lines colour --ok when both peers report each other, --war
   strokes.length = 0;
   drawMap(1000);
   assert.equal(strokes.filter((s) => ['--ok', '--warn', '--muted'].includes(s)).at(-1), '--muted');
+});
+
+test('F-049-T09: GET /api/eva/instances requires auth and returns live instances per machine', async () => {
+  const store = new Store(':memory:');
+  const { EvaJobs } = await import('../src/eva-jobs.ts');
+  new EvaJobs(store.db).begin({ id: 'eva-job-1', sortieId: 'S-AAAA', key: 'notes', hash: 'h1' });
+  const srv = makeServer(store, 'e'.repeat(32));
+  await new Promise<void>((done) => srv.listen(0, '127.0.0.1', done));
+  try {
+    const port = (srv.address() as { port: number }).port;
+    const unauth = await fetch(`http://127.0.0.1:${port}/api/eva/instances`);
+    assert.equal(unauth.status, 401);
+    const res = await fetch(`http://127.0.0.1:${port}/api/eva/instances`, {
+      headers: { Authorization: 'Bearer ' + 'e'.repeat(32) },
+    });
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      machines: {
+        machineId: string;
+        reported: boolean;
+        instances: { jobId: string; evaClass: string; state: string }[];
+      }[];
+    };
+    assert.equal(body.machines.length, 1);
+    assert.equal(body.machines[0]!.reported, true);
+    assert.equal(body.machines[0]!.instances.length, 1);
+    assert.equal(body.machines[0]!.instances[0]!.jobId, 'eva-job-1');
+    assert.equal(body.machines[0]!.instances[0]!.evaClass, 'eva-03');
+    assert.equal(body.machines[0]!.instances[0]!.state, 'running');
+  } finally {
+    await new Promise<void>((done) => {
+      srv.close(() => done());
+      srv.closeAllConnections();
+    });
+    store.close();
+  }
+});
+
+test('F-049-T09: dashboard renders live EVA instances per class, per machine, and empty classes say so', () => {
+  const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const classesSrc = src.slice(
+    src.indexOf('const EVA_CLASSES = ['),
+    src.indexOf('];', src.indexOf('const EVA_CLASSES = [')) + 2,
+  );
+  const fnStart = src.indexOf('function evaMachinesForView()');
+  const fnEnd = src.indexOf('function renderLog()');
+  const block = src.slice(fnStart, fnEnd);
+  const cages = { innerHTML: '' };
+  const sub = { textContent: '' };
+  const state = {
+    evaMachines: [
+      {
+        machineId: 'tokyo3',
+        machineName: 'TOKYO-3',
+        self: true,
+        online: true,
+        reported: true,
+        limits: { instances: 4, memoryMb: 4096, modelSlots: 1 },
+        instances: [{ jobId: 'job-99', evaClass: 'eva-01', pilot: 'mail-brief', state: 'running', sortieId: 'S-99AA' }],
+      },
+      {
+        machineId: 'nerv01',
+        machineName: 'NERV-01',
+        self: false,
+        online: true,
+        reported: false,
+        instances: [],
+      },
+    ],
+    sorties: [],
+  };
+  const renderCages = new Function(
+    'LIVE',
+    'BASES',
+    'state',
+    'pilotStage',
+    'esc',
+    'document',
+    `${classesSrc}\n${block}\nreturn renderCages;`,
+  )(
+    true,
+    [{ id: 'tokyo3', name: 'TOKYO-3', status: 'online' }],
+    state,
+    () => 'test',
+    (v: unknown) =>
+      String(v ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;'),
+    { getElementById: (id: string) => (id === 'cages' ? cages : id === 'cages-sub' ? sub : null) },
+  ) as () => void;
+  renderCages();
+  assert.equal(sub.textContent, '1 active · 2 machines');
+  assert.match(cages.innerHTML, /TOKYO-3/);
+  assert.match(cages.innerHTML, /1\/4 slots/);
+  assert.match(cages.innerHTML, /mail-brief/);
+  assert.match(cages.innerHTML, /job-99 · S-99AA/);
+  assert.match(cages.innerHTML, /RUNNING/);
+  assert.match(cages.innerHTML, /Empty · no active instances/);
+  assert.match(cages.innerHTML, /NERV-01/);
+  assert.match(cages.innerHTML, /Not reported by this machine/);
+  assert.match(cages.innerHTML, /class=['"]cages['"]/);
+  assert.match(cages.innerHTML, /id=['"]cv-EVA-00['"]/);
+  assert.match(cages.innerHTML, /id=['"]cv-EVA-01['"]/);
+  assert.match(cages.innerHTML, /id=['"]cv-EVA-02['"]/);
+  assert.match(cages.innerHTML, /id=['"]cv-EVA-03['"]/);
+  assert.match(cages.innerHTML, /class=['"]eva-img['"]/);
+});
+
+test('F-110-T03: settings panel renders schedule controls, preserves drafts across polls, and health reflects saved hours', () => {
+  const html = readFileSync('web/public/dashboard/index.html', 'utf8');
+  assert.match(html, /id="p-settings"/);
+  assert.match(html, /id="settings"/);
+  const live = readFileSync('web/public/dashboard/live.js', 'utf8');
+  assert.match(live, /id='settings-form'/);
+  assert.match(live, /id='set-check-hour'/);
+  assert.match(live, /id='set-apply-hour'/);
+  assert.match(live, /id='set-quiet-from'/);
+  assert.match(live, /id='set-quiet-until'/);
+  assert.match(live, /id='set-update-mode'/);
+  assert.match(live, /id='btn-save-settings'/);
+  assert.match(live, /if \(state\.settingsDraft\) return state\.settingsDraft;/);
+  assert.match(live, /· checked " \+ pad2\(sch\.checkHour\) \+ ":00, "/);
+  const settingsBlock = live.slice(
+    live.indexOf('window.renderSettings ='),
+    live.indexOf('function readSettingsDraft()', live.indexOf('window.renderSettings =')),
+  );
+  assert.doesNotMatch(settingsBlock, /\b[FB]-\d{3}(?:-T\d{2})?\b/);
+});
+
+test('F-103-T03: live health view renders samples, link load, deduplicated warnings, and threshold settings', () => {
+  const live = readFileSync('web/public/dashboard/live.js', 'utf8');
+  assert.match(live, /id='health-sample-row'/);
+  assert.match(live, /data-link-peer=/);
+  assert.match(live, /data-health-warning=/);
+  assert.match(live, /id='set-rss-mb'/);
+  assert.match(live, /id='set-loop-ms'/);
+  assert.match(live, /id='set-link-ms'/);
+  assert.match(live, /id='set-in-flight'/);
+  assert.match(live, /id='set-reconnects'/);
+  assert.match(live, /api\("health\/thresholds"/);
+});
+
+test('F-051-T06: Sephirot EVA cage shows recorded pilot and instance, none when absent, distinct from unavailable', () => {
+  const store = new Store(':memory:');
+  try {
+    const s1 = store.ledger.openSortie('misato', 'With EVA instance', 'trusted');
+    const p1 = store.ledger.propose(s1, { tool: 'notes.read', args: { path: 'a', limit: 1 }, stage: 'test' });
+    store.ledger.finished(s1, p1.actionId, 'notes.read', { result: { ok: true } }, new Date(), 42, {
+      jobId: 'job-42',
+      evaClass: 'eva-01',
+      pilot: 'mail-brief',
+    });
+    const d1 = store.ledger.sortie(s1);
+    assert.deepEqual(d1?.detail[0]?.evaInstance, {
+      jobId: 'job-42',
+      evaClass: 'eva-01',
+      pilot: 'mail-brief',
+    });
+
+    const s2 = store.ledger.openSortie('misato', 'Without EVA instance', 'trusted');
+    const p2 = store.ledger.propose(s2, { tool: 'notes.read', args: { path: 'b', limit: 1 }, stage: 'test' });
+    store.ledger.finished(s2, p2.actionId, 'notes.read', { result: { ok: true } }, new Date(), 15);
+    const d2 = store.ledger.sortie(s2);
+    assert.equal(d2?.detail[0]?.evaInstance, undefined);
+  } finally {
+    store.close();
+  }
+
+  const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const fnStart = src.indexOf('function sephirotEvaLabel(s, a, b)');
+  const fnEnd = src.indexOf('function renderFlow(', fnStart);
+  const block = src.slice(fnStart, fnEnd);
+  const makeLabelFn = (live: boolean, evaMachines: unknown) =>
+    new Function('LIVE', 'state', `${block}\nreturn sephirotEvaLabel;`)(live, { evaMachines }) as (
+      s: unknown,
+      a: unknown,
+      b: unknown,
+    ) => { text: string; avatar: string | null };
+
+  const fn = makeLabelFn(true, []);
+  const withData = fn(
+    { id: 'S-1', status: 'done' },
+    {
+      status: 'done',
+      evaInstance: { jobId: 'job-42', evaClass: 'eva-01', pilot: 'mail-brief' },
+    },
+    { executor: 'EVA-01' },
+  );
+  assert.equal(withData.text, 'pilot mail-brief · EVA-01 (job-42)');
+  assert.equal(withData.avatar, 'eva-01');
+
+  const noData = fn({ id: 'S-2', status: 'done' }, { status: 'done' }, { executor: 'EVA-01' });
+  assert.equal(noData.text, 'pilot none · instance none');
+
+  const liveRunning = makeLabelFn(true, [
+    {
+      machineId: 'local',
+      reported: true,
+      instances: [{ jobId: 'job-77', evaClass: 'eva-02', pilot: 'fpv-charger', sortieId: 'S-3', state: 'running' }],
+    },
+  ])({ id: 'S-3', status: 'active', phase: 'eva' }, { status: 'proposed' }, { executor: 'EVA-02' });
+  assert.equal(liveRunning.text, 'pilot fpv-charger · EVA-02 (job-77)');
+
+  const unavailable = makeLabelFn(true, null)(
+    { id: 'S-4', status: 'active', phase: 'eva' },
+    { status: 'proposed' },
+    { executor: 'EVA-02' },
+  );
+  assert.equal(unavailable.text, 'instance data unavailable');
+  assert.notEqual(noData.text, unavailable.text);
 });

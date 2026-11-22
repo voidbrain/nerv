@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-112-T03",
+  "parent": "F-112",
+  "title": "Read-only script executor inside EVA with a gate decision per call",
+  "goal": "One script replaces several read steps without widening authority",
+  "status": "planned",
+  "acceptance": [
+    "Only read-effect tools are callable from a script; anything else is refused",
+    "Each call inside a script gets its own gate decision and sortie entry",
+    "Time, call-count and output budgets end a script; outside EVA it fails closed",
+    "Join tests across planner, script runner, gate and executor"
+  ],
+  "dependsOn": [
+    "F-112-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-112.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck"
+  ],
+  "escalation": [
+    "A fresh-context design review before merge",
+    "Needs EVA isolation that F-049 does not yet provide: stop and record it"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "4 h",
+    "basis": "Estimated 2026-11-20 from the Agentica review. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 4,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  }
+}

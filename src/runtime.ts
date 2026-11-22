@@ -1,4 +1,5 @@
 import type { WatchWork } from './watch.ts';
+import { EvaPool, defaultEvaLimits, type EvaInstancesSnapshot, type EvaMachineInstances } from './eva-pool.ts';
 import type { SeatPool } from './seat-pool.ts';
 import type { WorkerContext, WorkerLease } from './worker-jobs.ts';
 import type { InstrumentalityRun } from './instrumentality-runs.ts';
@@ -13,7 +14,7 @@ import { ItemLockManager, itemKeysForTool } from './item-locks.ts';
 import type { Reminder, ReminderInput, InboxEntry, InboxPage } from './store.ts';
 import type { RouteHealth } from './route-health.ts';
 import type { ModelChange, ModelSetup } from './model-setup.ts';
-import { readConfig } from './config.ts';
+import { readConfig, setHealthThresholds as persistHealthThresholds } from './config.ts';
 import type { ActionDetail, Approval, Decision, SortieSummary } from './ledger.ts';
 import type { SortieEvent } from './events.ts';
 import type { WorkerLink } from './worker-link.ts';
@@ -81,13 +82,22 @@ import { DatabaseSync } from 'node:sqlite';
 import type { OperatorResolution, PublicOperatorInfo, SignedOperatorEntry } from './operator-directory.ts';
 import type { PeerVerdict, RunItem, VerdictAsk, BaseHealth, HeardHealth, RegistryPort } from './kaji-link.ts';
 import { PromptSampleStore, type PromptMetrics } from './prompt-samples.ts';
+import {
+  DEFAULT_HEALTH_THRESHOLDS,
+  HealthSampleStore,
+  evaluateHealthWarnings,
+  validateHealthThresholds,
+  type HealthMetricsSnapshot,
+  type HealthThresholds,
+} from './health-samples.ts';
+import type { BaseLinkMetrics } from './link-load.ts';
 export class Runtime implements StoreApi {
   readonly nervous: ProcessClient;
   readonly brain: ProcessClient;
   readonly requestQueue = new RequestQueue();
   private readonly itemLocks = new ItemLockManager();
   private readonly database: string;
-  private readonly home: string | undefined;
+  readonly home: string | undefined;
   constructor(database: string, brainEntry = new URL('./brain-process.ts', import.meta.url), home?: string) {
     this.database = database;
     this.home = home;
@@ -220,6 +230,11 @@ export class Runtime implements StoreApi {
   }
   async batteryCards() {
     return (await this.nervous.call('batteries.cards', {})) as ReturnType<import('./store.ts').Store['batteryCards']>;
+  }
+  async registerBattery(input: import('./batteries.ts').RegisterBatteryInput) {
+    return (await this.nervous.call('batteries.register', input as unknown as Record<string, unknown>)) as ReturnType<
+      import('./store.ts').Store['registerBattery']
+    >;
   }
   async decide(
     id: string,
@@ -815,6 +830,71 @@ export class Runtime implements StoreApi {
   /** This base's health as it reports it to its peers: degraded with the reasons doctor and status give. */
   async baseHealth(): Promise<BaseHealth> {
     return this.basesController.baseHealth();
+  }
+  private _evaPool?: EvaPool;
+  get evaPool(): EvaPool {
+    return (this._evaPool ??= new EvaPool(
+      (this.home ? readConfig(this.home).eva?.limits : undefined) ?? defaultEvaLimits(),
+    ));
+  }
+  async evaInstances(): Promise<EvaInstancesSnapshot> {
+    const enrolled = (await this.bases().catch(() => [])).filter((b) => b.status !== 'revoked');
+    const selfBase = enrolled.find((b) => b.self);
+    const localMachine: EvaMachineInstances = {
+      machineId: selfBase?.baseId ?? 'local',
+      machineName: selfBase?.name ?? 'this machine',
+      self: true,
+      online: true,
+      reported: true,
+      limits: this.evaPool.limits,
+      instances: this.evaPool.instances(),
+    };
+    const peers: EvaMachineInstances[] = enrolled
+      .filter((b) => !b.self)
+      .map((b) => ({
+        machineId: b.baseId,
+        machineName: b.name,
+        self: false,
+        online: b.online,
+        reported: false,
+        instances: [],
+      }));
+    return { machines: [localMachine, ...peers] };
+  }
+  private linkMetricsProvider?: () => BaseLinkMetrics[];
+  private memoryHealthThresholds: HealthThresholds = { ...DEFAULT_HEALTH_THRESHOLDS };
+  setLinkMetricsProvider(provider: () => BaseLinkMetrics[]): void {
+    this.linkMetricsProvider = provider;
+  }
+  healthMetrics(): HealthMetricsSnapshot {
+    const recentSamples = (() => {
+      if (this.database === ':memory:') return [];
+      const db = new DatabaseSync(this.database);
+      try {
+        db.exec('PRAGMA busy_timeout = 5000');
+        return new HealthSampleStore(db).list(60);
+      } finally {
+        db.close();
+      }
+    })();
+    const latestSample = recentSamples[0] ?? null;
+    const links = this.linkMetricsProvider ? this.linkMetricsProvider() : [];
+    const thresholds = this.home
+      ? (readConfig(this.home).health?.thresholds ?? this.memoryHealthThresholds)
+      : this.memoryHealthThresholds;
+    const warnings = evaluateHealthWarnings(latestSample, links, thresholds);
+    return {
+      latestSample,
+      recentSamples,
+      links,
+      thresholds,
+      warnings,
+    };
+  }
+  setHealthThresholds(thresholds: unknown): HealthThresholds {
+    if (this.home) return persistHealthThresholds(this.home, thresholds);
+    this.memoryHealthThresholds = validateHealthThresholds(thresholds);
+    return this.memoryHealthThresholds;
   }
   async bases() {
     return this.basesController.bases();

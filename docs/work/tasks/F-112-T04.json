@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-112-T04",
+  "parent": "F-112",
+  "title": "Gauntlet case comparing planner steps and tokens with and without scripts",
+  "goal": "The saving is measured, not assumed",
+  "status": "planned",
+  "acceptance": [
+    "A neutral Gauntlet case needing several reads",
+    "Steps and tokens with and without scripts are recorded"
+  ],
+  "dependsOn": [
+    "F-112-T03"
+  ],
+  "resources": [
+    "evals/gauntlet/**",
+    "docs/evaluations/**",
+    "docs/work/records/F-112.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node tools/gauntlet.mjs pending"
+  ],
+  "escalation": [
+    "Running real models needs the owner's approval (BACKLOG-RULES, Evaluation dependencies)"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-20 from the Agentica review. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

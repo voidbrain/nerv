@@ -1,5 +1,6 @@
 import { readConfig, readScrolls } from './config.ts';
 import { toolDocs } from './executors.ts';
+import { builtinPackRegistry } from './packs.ts';
 import { argsHash } from './ledger.ts';
 import {
   MAX_REPLY_CHARS,
@@ -148,10 +149,15 @@ export class RuntimePlanning {
           ...(reply ? { reply } : {}),
           ...(durationMs !== undefined ? { durationMs } : {}),
         });
+      const surfaceStep = [...steps]
+        .reverse()
+        .find((s) => s.outcome === 'grant' && s.result && typeof s.result === 'object' && 'surface' in s.result);
+      const surface = surfaceStep ? (surfaceStep.result as { surface?: unknown }).surface : undefined;
       return {
         ...(proactive ? { proactive: true as const } : {}),
         sortieId,
         ...(reply ? { reply } : {}),
+        ...(surface !== undefined ? { surface } : {}),
         ...(error ? { error } : {}),
         steps,
         waiting,
@@ -447,12 +453,17 @@ export class RuntimePlanning {
             continue;
           }
         }
-      } else if (!toolDocs.some((t) => t.name === tool) && !ext.byName.has(tool)) {
+      } else if (
+        (!toolDocs.some((t) => t.name === tool) && !ext.byName.has(tool)) ||
+        !builtinPackRegistry.isToolEnabled(tool, this.host.home ? readConfig(this.host.home).packs : undefined)
+      ) {
+        const packs = this.host.home ? readConfig(this.host.home).packs : undefined;
+        const enabledDocs = builtinPackRegistry.filterToolDocs(toolDocs, packs);
         await this.host.record(sortieId, steps, {
           tool,
           args,
           outcome: 'invalid',
-          error: `Unknown tool "${tool}". Use exactly one of: ${[...toolDocs.map((t) => t.name), ...ext.byName.keys()].join(', ')}.`,
+          error: `Unknown tool "${tool}". Use exactly one of: ${[...enabledDocs.map((t) => t.name), ...ext.byName.keys()].join(', ')}.`,
         });
         continue;
       }

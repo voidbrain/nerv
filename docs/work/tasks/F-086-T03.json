@@ -4,7 +4,13 @@
  "parent": "F-086",
  "title": "Draft and send behind approval",
  "goal": "Drafts need approval; sending is Blue",
- "status": "planned",
+  "status": "closed",
+ "prs": [
+  {
+   "pr": 609,
+   "note": "Gmail draft and send behind approval"
+  }
+ ],
  "acceptance": [
   "Draft is Orange, send is Blue; expiry never sends; the sent message is read back"
  ],
@@ -34,7 +40,7 @@
   "estimate": "1 h",
   "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
   "reviewed": "2026-11-14",
-  "agentHours": 1,
+    "agentHours": 0,
   "baselineAgentHours": 1,
   "estimateAgentHours": 1
  }

@@ -4,7 +4,13 @@
   "parent": "F-103",
   "title": "Health view and warnings",
   "goal": "The dashboard shows the samples and link load with threshold warnings",
-  "status": "planned",
+  "status": "closed",
+  "prs": [
+    {
+      "pr": 605,
+      "note": "Dashboard health samples, link load, thresholds and deduplicated warnings"
+    }
+  ],
   "acceptance": [
     "Thresholds are settings; a crossed threshold gives one deduplicated warning"
   ],
@@ -36,7 +42,7 @@
     "estimate": "1.5 h",
     "basis": "Estimated 2026-11-15 at agent speed after the calibration of 2026-11-15. Not a measurement.",
     "reviewed": "2026-11-15",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   }

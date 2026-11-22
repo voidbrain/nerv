@@ -4,7 +4,7 @@
   "parent": "F-109",
   "title": "Persona card layout with one Apply for every change",
   "goal": "One card per pilot; one Apply saves names and model together",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Test on the card markup and the combined save",
     "Owner confirms on the live dashboard"
@@ -42,5 +42,11 @@
     "agentHours": 1.5,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 594,
+      "note": "implementation"
+    }
+  ]
 }

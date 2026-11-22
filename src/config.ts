@@ -18,10 +18,12 @@ import { randomBytes } from 'node:crypto';
 import { statSync } from 'node:fs';
 import { validateModels, type Models } from './model.ts';
 import { defaultPolicy, validatePolicy, type Policy } from './policy.ts';
+import { validateHealthThresholds, type HealthThresholds } from './health-samples.ts';
 import { validateAutoUpdatePolicy, type AutoUpdatePolicy } from './update-policy.ts';
 import { validateSeatPool, type SeatPoolEntry } from './seat-pool.ts';
 import { validateOperatorConfig, type OperatorConfig } from './operator-directory.ts';
 import { validateEvaLimits, type EvaLimits } from './eva-pool.ts';
+import { validatePacksConfig, type PacksConfig } from './packs.ts';
 import { validateJobUser, type EvaJobUser } from './eva-job-user.ts';
 import { validateBackup, type BackupConfig } from './offhost.ts';
 import { validatePersonas, type PersonaConfig } from './persona.ts';
@@ -41,12 +43,14 @@ export interface Config {
   tools?: ToolsConfig;
   watch?: WatchConfig;
   updatePolicy?: AutoUpdatePolicy;
+  health?: { thresholds: HealthThresholds };
   seats?: SeatPoolEntry[];
   operator?: OperatorConfig;
   /** F-049-T06: how many EVA instances, how much memory and how many model slots this machine gives EVA jobs. */
   eva?: { limits: EvaLimits; jobUser?: EvaJobUser };
   backup?: BackupConfig;
   personas?: PersonaConfig;
+  packs?: PacksConfig;
 }
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
 export interface Base {
@@ -114,6 +118,7 @@ export function readConfig(home: string): Config {
     config.nativePort = native;
   }
   if ('personas' in raw) config.personas = validatePersonas(raw.personas);
+  if ('packs' in raw) config.packs = validatePacksConfig(raw.packs);
   if ('telegram' in raw) {
     const t = raw.telegram as Record<string, unknown>;
     if (
@@ -206,6 +211,13 @@ export function readConfig(home: string): Config {
   if ('watch' in raw) config.watch = validateWatch((raw as Record<string, unknown>).watch);
   if ('updatePolicy' in raw)
     config.updatePolicy = validateAutoUpdatePolicy((raw as Record<string, unknown>).updatePolicy);
+  if ('health' in raw) {
+    const h = (raw as Record<string, unknown>).health;
+    if (!h || typeof h !== 'object' || Array.isArray(h) || Object.keys(h).some((k) => k !== 'thresholds')) {
+      throw new Error('Invalid health: {"thresholds": {...}}.');
+    }
+    config.health = { thresholds: validateHealthThresholds((h as Record<string, unknown>).thresholds) };
+  }
   if ('pilots' in raw) {
     const list = validatePilots((raw as Record<string, unknown>).pilots);
     if (list.length) config.pilots = list;
@@ -363,7 +375,21 @@ export function setUpdatePolicy(home: string, policy: unknown): AutoUpdatePolicy
   const current = existsSync(path)
     ? (JSON.parse(readFileSync(path, 'utf8')) as Record<string, unknown>)
     : { ...defaults };
+  mkdirSync(home, { recursive: true, mode: 0o700 });
   writeFileSync(path, JSON.stringify({ ...current, updatePolicy: valid }, null, 2) + '\n', { mode: 0o600 });
+  chmodSync(path, 0o600);
+  readConfig(home);
+  return valid;
+}
+/** Persists health threshold settings in config.json, keeping every other setting. */
+export function setHealthThresholds(home: string, thresholds: unknown): HealthThresholds {
+  const path = join(home, 'config.json');
+  const valid = validateHealthThresholds(thresholds);
+  const current = existsSync(path)
+    ? (JSON.parse(readFileSync(path, 'utf8')) as Record<string, unknown>)
+    : { ...defaults };
+  mkdirSync(home, { recursive: true, mode: 0o700 });
+  writeFileSync(path, JSON.stringify({ ...current, health: { thresholds: valid } }, null, 2) + '\n', { mode: 0o600 });
   chmodSync(path, 0o600);
   readConfig(home);
   return valid;

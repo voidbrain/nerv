@@ -1,4 +1,5 @@
 import { WorkerLink, type WorkerAdapter } from './worker-link.ts';
+import { LinkLoadTracker, type BaseLinkMetrics } from './link-load.ts';
 import { sanitizeChannel, type ChannelState, type HeardChannel } from './channel-state.ts';
 import { sanitizePilotOffers, type PilotOffer } from './pilots.ts';
 import { verifyOperatorEntry, type SignedOperatorEntry } from './operator-directory.ts';
@@ -162,6 +163,10 @@ export class KajiLink {
   readonly publicKey: string;
   readonly port: RegistryPort;
   readonly log: (line: string) => void;
+  readonly linkLoad = new LinkLoadTracker();
+  linkMetrics(): BaseLinkMetrics[] {
+    return this.linkLoad.snapshot();
+  }
   private readonly workers?: WorkerLink;
   get workerLink(): WorkerLink | undefined {
     return this.workers;
@@ -284,6 +289,7 @@ export class KajiLink {
         key: this.key,
         registry: this.port,
         adapter: options.worker,
+        linkLoad: this.linkLoad,
         offers: options.offers,
         onOffers: options.onOffers,
         log: this.log,
@@ -368,9 +374,7 @@ export class KajiLink {
   /** F-107-T02: validates a base's first-hand reachable-peers list against enrolled bases. */
   private heardReachable(from: string, value: unknown, bases: readonly BaseEntry[]) {
     if (!Array.isArray(value) || value.length > 64) return;
-    const enrolled = new Set(
-      bases.filter((b) => b.status === 'enrolled' && b.baseId !== from).map((b) => b.baseId),
-    );
+    const enrolled = new Set(bases.filter((b) => b.status === 'enrolled' && b.baseId !== from).map((b) => b.baseId));
     const clean = [...new Set(value.filter((id): id is string => typeof id === 'string' && enrolled.has(id)))].sort();
     this.onReachable?.(from, clean);
   }
@@ -484,8 +488,11 @@ export class KajiLink {
     end: (b: string) => void,
     setHeader: (k: string, v: string) => unknown,
   ): Promise<void> {
+    let fromBase: string | undefined;
+    let reqBytes = 0;
     const reply = (status: number, value: unknown) => {
       const body = JSON.stringify(value);
+      if (fromBase) this.linkLoad.recordInbound(fromBase, reqBytes, Buffer.byteLength(body));
       const h = signedHeaders(
         this.baseId,
         this.key,
@@ -510,6 +517,7 @@ export class KajiLink {
         body += chunk;
         if (body.length > limit) throw new Error('too large');
       }
+      reqBytes = Buffer.byteLength(body);
       const bases = await this.bases();
       const from = verifySigned(
         req.headers as Record<string, string>,
@@ -522,6 +530,7 @@ export class KajiLink {
         undefined,
         this.trust,
       );
+      fromBase = from;
       if (req.method === 'POST' && req.url === '/kaji/heartbeat') {
         const hb = JSON.parse(body) as {
           seen?: Record<string, string>;
@@ -769,43 +778,50 @@ export class KajiLink {
   ): Promise<unknown> {
     const body = value === undefined ? '' : JSON.stringify(value);
     const { host, port } = endpoint(peer.address);
-    const res = await send(
-      host,
-      port,
-      method,
-      path,
-      {
-        'content-type': 'application/json',
-        ...signedHeaders(
-          this.baseId,
-          this.key,
-          'req',
-          method,
-          path,
-          body,
-          undefined,
-          this.trust?.required ? this.trust.root : undefined,
-        ),
-      },
-      method === 'POST' ? body : undefined,
-      timeoutMs,
-    );
-    const text = res.text;
-    const headers = res.headers;
-    const from = verifySigned(
-      headers,
-      'res',
-      method,
-      path,
-      text,
-      await this.bases(),
-      this.nonces,
-      undefined,
-      this.trust,
-    );
-    if (from !== peer.baseId) throw new Error(`${peer.baseId} answered as ${from}`);
-    if (!res.ok) throw new Error(`${peer.baseId} refused (${res.status})`);
-    return JSON.parse(text);
+    const done = this.linkLoad.trackOutboundStart(peer.baseId, Buffer.byteLength(body));
+    let bytesIn = 0;
+    try {
+      const res = await send(
+        host,
+        port,
+        method,
+        path,
+        {
+          'content-type': 'application/json',
+          ...signedHeaders(
+            this.baseId,
+            this.key,
+            'req',
+            method,
+            path,
+            body,
+            undefined,
+            this.trust?.required ? this.trust.root : undefined,
+          ),
+        },
+        method === 'POST' ? body : undefined,
+        timeoutMs,
+      );
+      const text = res.text;
+      bytesIn = Buffer.byteLength(text);
+      const headers = res.headers;
+      const from = verifySigned(
+        headers,
+        'res',
+        method,
+        path,
+        text,
+        await this.bases(),
+        this.nonces,
+        undefined,
+        this.trust,
+      );
+      if (from !== peer.baseId) throw new Error(`${peer.baseId} answered as ${from}`);
+      if (!res.ok) throw new Error(`${peer.baseId} refused (${res.status})`);
+      return JSON.parse(text);
+    } finally {
+      done(bytesIn);
+    }
   }
   /**
    * F-062-T06: sends an encrypted backup copy to an enrolled peer. Rejects with code EREFUSED (and the HTTP status) when

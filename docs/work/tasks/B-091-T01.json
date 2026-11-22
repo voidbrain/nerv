@@ -33,17 +33,25 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h",
-    "basis": "Estimated 2026-11-18: find the write, a retry or ordering fix, one test. Not a measurement.",
-    "reviewed": "2026-11-18",
-    "agentHours": 1,
+    "estimate": "2 h",
+    "basis": "Re-estimated 2026-11-21: 1 h implemented in PR #557 plus 1 h to capture the live recurrence and startup-authorization failure with failing-first regressions and fix them.",
+    "reviewed": "2026-11-21",
+    "agentHours": 2,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 2
   },
   "prs": [
     {
       "pr": 557,
       "note": "implementation"
+    },
+    {
+      "pr": 617,
+      "note": "live recurrence and recovery evidence"
+    },
+    {
+      "pr": 620,
+      "note": "recurrence fix"
     }
   ]
 }

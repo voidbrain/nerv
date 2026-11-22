@@ -1,6 +1,6 @@
 import { channelIsFresh, type ChannelState } from './channel-state.ts';
-import { readCommand, statusText, type StatusBase } from './chat-command.ts';
-import { CookingSessions, readCookingCommand } from './cooking-session.ts';
+import { helpText, readCommand, statusText, type StatusBase } from './chat-command.ts';
+import { builtinPackRegistry, type PackRegistry } from './packs.ts';
 import { readConfig } from './config.ts';
 import type { SortieEvent } from './events.ts';
 import { ONLINE_MS, type BaseHealth, type RegistryPort } from './kaji-link.ts';
@@ -8,7 +8,7 @@ import { requestLanguage, type Step, type Turn } from './misato.ts';
 import { DEFAULT_OPERATOR_NAME, type OperatorDirectory, type OperatorResolution } from './operator-directory.ts';
 import type { ProcessClient } from './process-client.ts';
 import type { RequestQueue } from './request-queue.ts';
-import type { ChatReply } from './runtime-api.ts';
+import type { ChatReply, LogVerbosity } from './runtime-api.ts';
 import { askedWhy, explainRecord } from './why.ts';
 
 export type ChatNoteKind =
@@ -40,6 +40,7 @@ export interface RuntimeChatHost {
   updatePostpone?(text: string): { postponed: boolean; reply?: string } | undefined;
   /** Delivers a proactive notice line (e.g. an expired cooking timer) into the owner's inbox. */
   notice?(message: string): Promise<void>;
+  packRegistry?: PackRegistry;
   resolveOperator(query: string, opts: { excludeSelf?: boolean }): Promise<OperatorResolution>;
   loop(
     sortieId: string,
@@ -56,11 +57,15 @@ export interface RuntimeChatHost {
  */
 export class RuntimeChat {
   private readonly host: RuntimeChatHost;
-  /** F-083-T06: a saved recipe walked through step by step, per conversation. */
-  private readonly cooking = new CookingSessions();
+  /** F-056-T03: per-conversation trace verbosity set via /log. */
+  private readonly logLevels = new Map<string, LogVerbosity>();
 
   constructor(host: RuntimeChatHost) {
     this.host = host;
+  }
+
+  logLevel(conversation?: string): LogVerbosity {
+    return this.logLevels.get(conversation ?? 'cli') ?? 'conversation';
   }
 
   chat(
@@ -94,6 +99,7 @@ export class RuntimeChat {
     const command = readCommand(message);
     if (command) {
       const it = requestLanguage(message) === 'it';
+      const lang: 'en' | 'it' = it ? 'it' : 'en';
       let reply: string;
       if (command.name === 'status') {
         let bases: StatusBase[] = await this.host.bases();
@@ -113,36 +119,149 @@ export class RuntimeChat {
             },
           ];
         }
-        reply = statusText(bases, command.target, it ? 'it' : 'en');
-      } else
+        reply = statusText(bases, command.target, lang);
+      } else if (command.name === 'bases') {
+        const bases = await this.host.bases();
+        reply = bases.length
+          ? bases
+              .map((b) => `${b.baseId} · ${b.name} (${b.online ? 'online' : 'offline'}${b.self ? ', self' : ''})`)
+              .join('\n')
+          : it
+            ? 'Nessuna base registrata.'
+            : 'No enrolled bases.';
+      } else if (command.name === 'cards') {
+        const pending = (await this.host.nervous.call('approvals.pending', { limit: 10 })) as {
+          id: string;
+          card: { tool: string; pattern: string };
+        }[];
+        reply = pending.length
+          ? pending.map((a) => `${a.id.slice(0, 8)} · ${a.card.tool} (${a.card.pattern})`).join('\n')
+          : it
+            ? 'Nessuna scheda in attesa.'
+            : 'No pending approval cards.';
+      } else if (command.name === 'reminders') {
+        const list = (await this.host.nervous.call('reminders.pending')) as {
+          title: string;
+          due: string;
+          dueLocal?: string;
+        }[];
+        reply = list.length
+          ? list.map((r) => `${r.dueLocal ?? r.due} · ${r.title}`).join('\n')
+          : it
+            ? 'Nessun promemoria in attesa.'
+            : 'No pending reminders.';
+      } else if (command.name === 'why') {
+        const ref = command.target
+          ? (askedWhy('why ' + command.target) ??
+            (/^[0-9a-f]{4,36}$/i.test(command.target) ? command.target.toLowerCase() : undefined))
+          : undefined;
+        if (!ref) {
+          reply = it ? 'Specifica un riferimento, es. /why S-1A2B.' : 'Specify a reference, e.g. /why S-1A2B.';
+        } else {
+          const found = (await this.host.nervous.call('sorties.explain', { ref })) as Parameters<
+            typeof explainRecord
+          >[0];
+          reply = explainRecord(
+            found,
+            ref,
+            lang,
+            this.host.home ? readConfig(this.host.home).timeZone : Intl.DateTimeFormat().resolvedOptions().timeZone,
+          );
+        }
+      } else if (command.name === 'brief') {
+        const cfg = this.host.home ? readConfig(this.host.home) : undefined;
+        const at = cfg?.brief?.at ?? '08:00';
+        const tz = cfg?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const history = (await this.host.nervous
+          .call('dashboard.history', { since: new Date(0).toISOString() })
+          .catch(() => null)) as { brief?: { message: string; created: string } | null } | null;
+        const scheduleLine = it ? `Brief programmato alle ${at} (${tz}).` : `Brief scheduled at ${at} (${tz}).`;
+        reply = history?.brief?.message
+          ? `${scheduleLine}\n\n${history.brief.message}`
+          : `${scheduleLine} ${it ? 'Nessun brief recente.' : 'No recent brief.'}`;
+      } else if (command.name === 'pilots') {
+        const pilots = this.host.home ? (readConfig(this.host.home).pilots ?? []) : [];
+        reply = pilots.length
+          ? pilots.map((p) => `${p.id} · ${p.name} (${p.stage})`).join('\n')
+          : it
+            ? 'Nessun pilota specialistico configurato.'
+            : 'No specialist pilots configured.';
+      } else if (command.name === 'spear') {
+        const list = ((await this.host.nervous.call('sorties.list', { limit: 20 }).catch(() => [])) ?? []) as {
+          id: string;
+          title: string;
+          status: string;
+        }[];
+        const active = list.filter((s) => s.status === 'open' || s.status === 'waiting');
+        const wanted = command.target?.trim().replace(/^s-/i, '').toLowerCase();
+        const target = wanted
+          ? active.find((s) => s.id.toLowerCase() === wanted || s.id.toLowerCase().startsWith(wanted))
+          : active[0];
+        if (!target) {
+          reply = it ? 'Nessuna sortita attiva o in attesa da fermare.' : 'No active or waiting sortie to stop.';
+        } else {
+          const ref = `S-${target.id.slice(0, 4).toUpperCase()}`;
+          reply = it ? `Conferma Spear per ${ref} (${target.title}).` : `Confirm Spear for ${ref} (${target.title}).`;
+          return {
+            command: true,
+            sortieId: '',
+            reply,
+            confirmSpear: { sortieId: target.id, ref, goal: target.title },
+            steps: [],
+            waiting: [],
+          };
+        }
+      } else if (command.name === 'log') {
+        const level = command.target?.toLowerCase();
+        if (level === 'conversation' || level === 'steps' || level === 'all') {
+          const key = conversation ?? 'cli';
+          this.logLevels.set(key, level);
+          await this.host.nervous
+            .call('sorties.open', {
+              source: 'owner',
+              title: `Log verbosity set to ${level} (${key})`,
+            })
+            .then((id) =>
+              this.host.nervous.call('sorties.finish', {
+                sortieId: id,
+                status: 'done',
+                reply: `Log verbosity set to ${level}.`,
+              }),
+            )
+            .catch(() => {});
+          reply = it ? `Dettaglio log impostato su: ${level}.` : `Log verbosity set to: ${level}.`;
+          return { command: true, sortieId: '', reply, logLevel: level, steps: [], waiting: [] };
+        } else {
+          reply = it ? 'Usa /log conversation|steps|all.' : 'Usage: /log conversation|steps|all.';
+        }
+      } else {
         reply =
-          (command.name === 'unknown' ? (it ? 'Comando non supportato. ' : 'Unknown command. ') : '') +
-          (it ? 'Comandi disponibili: /status [base], /help.' : 'Available commands: /status [base], /help.');
+          (command.name === 'unknown' ? (it ? 'Comando non supportato.\n' : 'Unknown command.\n') : '') +
+          helpText(lang);
+      }
       return { command: true, sortieId: '', reply, steps: [], waiting: [] };
     }
     // F-083-T06 / F-083-T07: a cooking session answers from the saved recipe and manages session timers; with no session or no such recipe, it is chat.
-    const cooking = readCookingCommand(message);
-    if (cooking) {
-      const at = conversation ?? 'cli';
-      const onExpire = (line: string) => {
-        void this.host.notice?.(line).catch(() => {});
-      };
-      let reply: string | undefined;
-      if (cooking.kind === 'start') {
-        const doc = (await this.host.nervous.call('documents.find', { query: cooking.recipe }).catch(() => null)) as {
-          title: string;
-          body: string;
-        } | null;
-        if (doc) reply = this.cooking.start(at, doc.title, doc.body, cooking.it);
-      } else if (cooking.kind === 'timer-set') {
-        reply = this.cooking.setTimer(at, cooking.seconds, onExpire);
-      } else if (cooking.kind === 'timer-confirm') {
-        reply = this.cooking.confirmTimer(at, onExpire);
-      } else if (cooking.kind === 'timer-stop') {
-        reply = this.cooking.stopTimer(at);
-      } else reply = this.cooking.move(at, cooking.kind);
-      if (reply) return { command: true, sortieId: '', reply, steps: [], waiting: [] };
+    const packsConfig = this.host.home ? readConfig(this.host.home).packs : undefined;
+    const phraseMatch = (this.host.packRegistry ?? builtinPackRegistry).resolveChatPhrase(message, packsConfig);
+    if (phraseMatch && 'ambiguous' in phraseMatch) {
+      const it = requestLanguage(message) === 'it';
+      const names = phraseMatch.ambiguous.join(', ');
+      const reply = it
+        ? `Più pacchetti corrispondono a questo messaggio (${names}). Quale vuoi usare?`
+        : `Multiple packs match this message (${names}). Which one did you mean?`;
+      return { command: true, sortieId: '', reply, steps: [], waiting: [] };
     }
+    const packReply = await (this.host.packRegistry ?? builtinPackRegistry).handleChatMessage(
+      message,
+      conversation ?? 'cli',
+      {
+        findDocument: (query) => this.host.nervous.call('documents.find', { query }).catch(() => null),
+        notice: this.host.notice,
+      },
+      packsConfig,
+    );
+    if (packReply) return { command: true, sortieId: '', reply: packReply, steps: [], waiting: [] };
     const key = conversation ?? 'cli';
     const addressed =
       /^(?:tell|ask)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,31})(?:\s+on\s+(another\s+base|[A-Za-z0-9][A-Za-z0-9._-]{0,39}))?\b/i.exec(

@@ -1,4 +1,6 @@
 import type { HistoryPage } from './history.ts';
+import type { HealthMetricsSnapshot, HealthThresholds } from './health-samples.ts';
+import type { EvaInstancesSnapshot } from './eva-pool.ts';
 import { sanitizeVerdict, type PeerVerdict, type VerdictAsk } from './kaji-link.ts';
 import type { BaseEntry } from './kaji.ts';
 import type { ActionDetail, Approval, Decision, SortieSummary } from './ledger.ts';
@@ -54,15 +56,20 @@ export function remoteOutcomeText(
   return `${base} answered for ${tool}: ${JSON.stringify(result).slice(0, 400)}`;
 }
 
+export type LogVerbosity = 'conversation' | 'steps' | 'all';
+
 export interface ChatReply {
   proactive?: true;
   command?: boolean;
   sortieId: string;
   question?: { text: string; expires: string };
   reply?: string;
+  surface?: unknown;
   error?: string;
   steps: Step[];
   waiting: { approvalId: string; tool: string; reason: string }[];
+  confirmSpear?: { sortieId: string; ref: string; goal: string };
+  logLevel?: LogVerbosity;
   /** Set when the main base handled the request (F-036 dispatch): its sortie, cards and memory are there. */
   base?: { id: string; name: string };
   /** Dispatch only: the main base turned the request away before running anything (B-021). */
@@ -150,6 +157,18 @@ export interface OwnerAction {
 export type ActReply = ActResult & { casperError?: string };
 
 export interface StoreApi {
+  selectExecution?(
+    req: import('./model.ts').OrchestrationRequest,
+  ): Promise<import('./model.ts').OrchestrationSelection>;
+  runOrchestratedJob?(input: {
+    orchestration: import('./model.ts').OrchestrationRequest;
+    ask: { prompt: string; maxTokens?: number; temperature?: number };
+    timeoutMs?: number;
+  }): Promise<{
+    selection: import('./model.ts').OrchestrationSelection;
+    inference: import('./model.ts').WorkerInferReply;
+    provenance: import('./model.ts').OrchestratedProvenance;
+  }>;
   dashboardRevision?(): string | Promise<string>;
   modelUsage?(
     before?: number,
@@ -184,6 +203,11 @@ export interface StoreApi {
     | Promise<{ list: OwnerList; items: ListItem[]; item: ListItem } | null>;
   listsShow?(name: string): ListView | null | Promise<ListView | null>;
   batteryCards?(): BatteryDashboardCard[] | Promise<BatteryDashboardCard[]>;
+  registerBattery?(
+    input: import('./batteries.ts').RegisterBatteryInput,
+  ):
+    | { battery: import('./batteries.ts').BatteryRecord; items: BatteryDashboardCard[] }
+    | Promise<{ battery: import('./batteries.ts').BatteryRecord; items: BatteryDashboardCard[] }>;
   listsToggle?(
     itemId: string,
     done?: boolean,
@@ -247,6 +271,11 @@ export interface StoreApi {
   externalTools?(): Promise<ExternalTools>;
   /** F-045/F-051: the pilot roster for the dashboard (config.json pilots, read now). */
   pilotRoster?(): Pilot[] | Promise<Pilot[]>;
+  /** F-049-T09: live EVA instances per class, per machine, for the dashboard. */
+  evaInstances?(): EvaInstancesSnapshot | Promise<EvaInstancesSnapshot>;
+  /** F-103-T03: process health samples, per-peer link load, thresholds, and deduplicated warnings. */
+  healthMetrics?(): HealthMetricsSnapshot | Promise<HealthMetricsSnapshot>;
+  setHealthThresholds?(thresholds: unknown): HealthThresholds | Promise<HealthThresholds>;
   genericPilot?(): Pilot | Promise<Pilot>;
   changePilotModel?(id: string, model: string): Promise<Pilot[]>;
   addPilot?(entry: Pilot): Promise<Pilot[]>;

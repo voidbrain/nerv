@@ -49,7 +49,8 @@ test('failed relay and failed own-bot sends report failure without private error
   const channel = new TelegramChannel({
     api: new Bot('test-token'),
     store,
-    chatId: 123,
+    // B-103: a chat ID no ISO timestamp can contain; with 123, a send at hh:mm:ss.123 matched the privacy check below.
+    chatId: 987654321,
     statePath: join(home, 'state.json'),
     log: () => {},
     oneChannel: { destination: async () => 'NERV-01', quiet: async () => true, relay: async () => false },
@@ -62,7 +63,10 @@ test('failed relay and failed own-bot sends report failure without private error
     assert.equal(channel.channelState().mode, 'local-fallback');
     assert.equal(channel.channelState().lastDelivery?.result, 'failed');
     assert.equal(channel.channelState().api?.state, 'failed');
-    assert.doesNotMatch(JSON.stringify(channel.channelState()), /test-token|123|Neutral reminder|private provider/);
+    assert.doesNotMatch(
+      JSON.stringify(channel.channelState()),
+      /test-token|987654321|Neutral reminder|private provider/,
+    );
     fail = false;
     await channel.deliver();
     assert.equal(channel.channelState().lastDelivery?.result, 'accepted');

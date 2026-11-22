@@ -33,7 +33,7 @@
   function toSortie(s) {
     const d = detailCache[s.id]; const actions = d ? d.detail.map(a => {
       TOOLS[a.tool] = TOOLS[a.tool] || { effect:a.ballot.effect };
-      return { tool:a.tool, args:a.args, status:a.status, ballot:a.ballot, rejects:0, ...(a.durationMs != null ? { durationMs:a.durationMs } : {}) };
+      return { tool:a.tool, args:a.args, status:a.status, ballot:a.ballot, rejects:0, ...(a.durationMs != null ? { durationMs:a.durationMs } : {}), ...(a.evaInstance ? { evaInstance:a.evaInstance } : {}) };
     }) : s.patterns.map(p => ({ tool:"", args:{}, status:"proposed", ballot:{ pattern:p } }));
     const status = mapStatus(s);
     // One pass through the flow is one action: after the plan, only the latest action counts, so a step an earlier
@@ -76,7 +76,9 @@
     if (polling || !token) return; polling = true;
     const historySince = state.lastVisit;
     try {
-      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null)]);
+      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy, evaData, healthMetrics] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null), api("eva/instances").catch(() => null), api("health/metrics").catch(() => null)]);
+      state.evaMachines = evaData && Array.isArray(evaData.machines) ? evaData.machines : null;
+      state.healthMetrics = healthMetrics || null;
       state.update = update || doctor.update || null;
       state.updatePolicy = updatePolicy || null;
       await loadUsage();
@@ -92,9 +94,8 @@
       const selected = state.sorties.find(x => x.id === state.selected);
       const want = list.filter(s => (selected && s.id === selected.realId) || s.waiting || !detailCache[s.id] || s.status === "open").slice(0, 8);
       await Promise.all(want.map(async s => { detailCache[s.id] = await api("sorties/" + s.id); }));
-      // The one live "cage": the in-process executor beats when an action newly ran.
       const ran = Object.values(detailCache).flatMap(d => d.detail).filter(a => a.status === "done" || a.status === "failed").map(a => a.created).sort().pop();
-      if (ran && lastRan && ran > lastRan) activeCage["EVA-02"] = Date.now() + 4000; if (ran) lastRan = ran;
+      if (ran) lastRan = ran;
       // Comms: the first refresh loads the five most recent sorties' traces (so the panel is not empty at start); later
       // ones keep the selected sortie and every running or waiting one up to date.
       const traced = new Set([...(firstTrace ? latest20.slice(0, 5) : latest20.filter(s => s.status === "open")).map(s => s.id), ...(selected ? [selected.realId] : [])]);
@@ -140,7 +141,7 @@
       state.upcoming = state.reminders.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder", label:when(r) }));
       state.doctor = doctor; showBuild(doctor.build);
       if (!kajiBases.length && doctor.base) observeTelegram([{baseId:doctor.base.id,status:"enrolled",online:true,channel:doctor.channel,channelFresh:doctor.channelFresh}]);
-      if (doctor.base && BASES[0].name !== doctor.base.name) { BASES[0].name = doctor.base.name; BASES[0].role = doctor.base.id + " · this machine"; document.getElementById("cages").innerHTML = ""; }
+      if (doctor.base && BASES[0].name !== doctor.base.name) { BASES[0].name = doctor.base.name; BASES[0].role = doctor.base.id + " · this machine"; }
       // The newest sortie is selected at first; after the owner deselects one, nothing is selected again by itself.
       // Owner, 2026-11-05: by default the dashboard shows the real state. Nothing chosen: a running sortie is selected (F-019),
       // otherwise none; one it picked by itself is let go when it finishes. A sortie the owner clicked stays.
@@ -190,8 +191,33 @@
     catch (e) { if (e.status === 401) { token = ""; forgetSession(); signIn(SESSION_ENDED); } return; }
     button.blur(); renderBudget(); const nextButton = document.querySelector('[data-usage-page="' + direction + '"]:not(:disabled)') || document.querySelector('[data-usage-page]:not(:disabled)'); if (nextButton) nextButton.focus();
   });
+  document.addEventListener("change", async e => {
+    const chk = e.target && e.target.closest && e.target.closest("input[data-checklist-toggle]");
+    if (!chk) return;
+    const itemId = chk.dataset.checklistToggle;
+    const listId = chk.dataset.listId || "";
+    const done = !!chk.checked;
+    chk.disabled = true;
+    try {
+      const r = await api("lists/toggle", { method: "POST", body: JSON.stringify({ itemId, done }) });
+      if (r && r.surface) {
+        for (const entry of state.log) {
+          if (entry.surface && entry.surface.props && entry.surface.props.listId === listId) {
+            entry.surface = r.surface;
+          }
+        }
+        renderLog();
+      }
+    } catch (err) {
+      chk.checked = !done;
+      log("Could not update list item: " + err.message, "danger", null, "misato");
+    } finally {
+      chk.disabled = false;
+    }
+  });
   const seen = new Set();
   const phaseOf = new Map(), phaseStarted = new Map(), nodeTimings = new Map(), advisedBy = new Map(), forwardedTo = new Map(), originOf = new Map(), remoteSorties = new Map();
+  const sortieSurfaces = new Map();
   const addNodeTiming = (id, node, ms) => { if (typeof ms !== "number") return; const nt = nodeTimings.get(id) || {}; nt[node] = (nt[node] || 0) + ms; nodeTimings.set(id, nt); };
   const generic = () => { const r = modelsData && modelsData.models && modelsData.models.roles; return !!(r && r.consultant && r.consultant.model); };
   async function loadEvents(id) {
@@ -220,6 +246,9 @@
       if (e.kind === "misato.request" && /^kaji:/.test(p.conversation || "")) originOf.set(id, baseName(String(p.conversation).slice(5).split("-").slice(0, 2).join("-")));
       const noteTiming = (node, ms) => { if (typeof addNodeTiming === "function") addNodeTiming(id, node, ms); };
       if (e.kind === "misato.consult") { consulted.add(id); advisedBy.set(id, (p.pilot && p.pilot.name ? p.pilot.name : "Generic pilot") + (p.model ? " · " + p.model : "")); noteTiming("consult", p.durationMs); }
+      if (e.kind === "misato.step" && p.step && p.step.outcome === "grant" && p.step.result && p.step.result.surface && p.step.result.surface.component === "nerv-checklist-card") {
+        sortieSurfaces.set(id, p.step.result.surface);
+      }
       if (e.kind === "misato.step" || e.kind === "misato.reply" || e.kind === "misato.asked") noteTiming("plan", p.durationMs);
       if (e.kind === "ballot" && Array.isArray(p.verdicts)) {
         const magiMs = p.verdicts.filter(v => !v.shadow && typeof v.durationMs === "number").reduce((m, v) => Math.max(m, v.durationMs), 0);
@@ -230,7 +259,11 @@
       // F-051: the step a running sortie is on, from its latest event (not always MAGI).
       const step = { "misato.request":generic() ? "consult" : "plan", "misato.consult":"plan", "misato.resumed":"plan", "misato.asked":"apt", "misato.answered":"plan", "action.done":"plan", "action.failed":"plan", "approval.requested":"apt", "approval.approve":"plug", "misato.reply":"debrief" }[e.kind] || (e.kind === "ballot" ? (p.outcome === "grant" ? "plug" : p.outcome === "approval" ? "apt" : "plan") : null);
       if (step) { phaseOf.set(id, step); if (typeof phaseStarted !== "undefined") phaseStarted.set(id, t); }
-      if (line) { state.log.push({ t, msg:line[0], cls:line[1], s:s.id, who:line[2], chat:e.kind.startsWith("misato.") }); added++; }
+      if (line) {
+        const surface = e.kind === "misato.reply" ? sortieSurfaces.get(id) : undefined;
+        state.log.push({ t, msg:line[0], cls:line[1], s:s.id, who:line[2], chat:e.kind.startsWith("misato."), ...(surface ? { surface } : {}) });
+        added++;
+      }
     }
     state.log.sort((a, b) => a.t - b.t); if (state.log.length > 300) state.log.splice(0, state.log.length - 300);
     return added;
@@ -418,7 +451,15 @@
       // Dispatched (F-036): the main base answered; its sortie and cards are there, so only the reply is shown here.
       if (r.command) { followNew = null; log(r.reply || r.error || "No command result", r.error ? "danger" : "ok", null, "maya"); }
       else if (r.base) log((r.reply || ("Could not finish: " + (r.error || "no reply"))) + " · answered by " + r.base.name + (r.waiting && r.waiting.length ? "; decide its card on Aoba or on " + r.base.name + "'s dashboard" : ""), r.reply ? "ok" : "danger", null, "misato");
-      else state.selected = short(r.sortieId); }
+      else {
+        state.selected = short(r.sortieId);
+        if (r.surface && r.surface.component === "nerv-checklist-card") {
+          sortieSurfaces.set(r.sortieId, r.surface);
+          const sid = short(r.sortieId);
+          const hit = [...state.log].reverse().find(x => x.s === sid && x.who === "misato" && x.chat);
+          if (hit) { hit.surface = r.surface; renderLog(); }
+        }
+      } }
     catch (e) { log("Misato could not answer: " + e.message, "danger", null, "misato"); }
     finally { settled = true; if (queueTimer) clearTimeout(queueTimer); poll(); }
   };
@@ -487,11 +528,30 @@
     // F-102-T02: the automatic update switch (20:00 check, notice, 03:00 apply unless the owner says wait).
     const up = state.updatePolicy && state.updatePolicy.policy;
     const la = state.updatePolicy && state.updatePolicy.lastAttempt;
+    const sch = (up && up.schedule) || { mode:"apply", checkHour:20, applyHour:3 };
+    const pad2 = n => String(n).padStart(2, "0");
+    const policyLabel = "Automatic updates · checked " + pad2(sch.checkHour) + ":00, " +
+      (sch.mode === "notify" ? "notify only" : "applied " + pad2(sch.applyHour) + ":00 unless you say wait");
     const policyHtml = up
-      ? "<div class='row small' style='margin-top:6px'><label for='chk-auto-update' class='muted'>Automatic updates · checked 20:00, applied 03:00 unless you say wait</label><input type='checkbox' id='chk-auto-update'" + (up.enabled ? " checked" : "") + (state.updatePolicyBusy ? " disabled" : "") + "></div>" +
+      ? "<div class='row small' style='margin-top:6px'><label for='chk-auto-update' class='muted'>" + esc(policyLabel) + "</label><input type='checkbox' id='chk-auto-update'" + (up.enabled ? " checked" : "") + (state.updatePolicyBusy ? " disabled" : "") + "></div>" +
         (la ? "<div class='small " + (la.outcome === "completed" ? "ok" : la.outcome === "refused" ? "warn" : "muted") + "'>Last automatic attempt: " + esc(la.outcome) + (la.revision ? " · " + esc(la.revision.slice(0, 7)) : "") + ((la.reasons || []).length ? " · " + esc(la.reasons.join("; ")) : "") + "</div>" : "")
       : "";
+    const hm = state.healthMetrics;
+    const sampleHtml = hm && hm.latestSample
+      ? "<div class='row small' id='health-sample-row'><span>Service sample</span><span class='muted'>RSS " + (hm.latestSample.rssBytes / 1048576).toFixed(1) + " MB · Heap " + (hm.latestSample.heapUsedBytes / 1048576).toFixed(1) + " MB · Loop " + hm.latestSample.eventLoopDelayMs + " ms · Polls " + hm.latestSample.pollCount + "</span></div>"
+      : "<div class='row small muted' id='health-sample-row'><span>Service sample</span><span>No health samples yet.</span></div>";
+    const links = hm && Array.isArray(hm.links) ? hm.links : [];
+    const linksHtml = links.length
+      ? links.map(l => "<div class='row small' data-link-peer='" + esc(l.peerId) + "'><span>Link · " + esc(l.peerId) + "</span><span class='muted'>" + l.bytesSent + "B↑ / " + l.bytesReceived + "B↓ · " + (l.lastLatencyMs == null ? "—" : l.lastLatencyMs + " ms") + " · in-flight " + l.inFlight + " · reconnects " + l.reconnects + "</span></div>").join("")
+      : "<div class='row small muted' id='health-links-empty'><span>Link load</span><span>No peer link traffic recorded.</span></div>";
+    const warnings = hm && Array.isArray(hm.warnings) ? hm.warnings : [];
+    const warningsHtml = warnings.length
+      ? "<div id='health-warnings' style='margin-top:4px'>" + warnings.map(w => "<div class='small warn' data-health-warning='" + esc(w.key) + "'>▲ " + esc(w.message) + "</div>").join("") + "</div>"
+      : "";
     document.getElementById("health").innerHTML = degraded + rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span></div>").join("") +
+      sampleHtml +
+      linksHtml +
+      warningsHtml +
       updateActionHtml +
       policyHtml +
       updateResultHtml +
@@ -538,7 +598,7 @@
     const enrolled = list.filter(b => b.status !== "revoked");
     observeTelegram(enrolled);
     const key = list.map(b => b.baseId + ":" + b.status + ":" + b.online + ":" + (b.health ? b.health.state : "") + ":" + (Array.isArray(b.reachable) ? b.reachable.slice().sort().join(",") : "")).join("|") + "|" + health; if (key === basesKey) return; basesKey = key;
-    if (!enrolled.length) { BASES.splice(1); BASES[0].status = health; LINKS.length = 0; state.meshStates = {}; CAGES.forEach(c => { c.base = BASES[0].id; }); document.getElementById("cages").innerHTML = ""; initMap(); return; }
+    if (!enrolled.length) { BASES.splice(1); BASES[0].status = health; LINKS.length = 0; state.meshStates = {}; initMap(); return; }
     pulseHeartbeats(enrolled);
     const self = enrolled.find(b => b.self) || enrolled[0]; const others = enrolled.filter(b => b !== self);
     // Each other base gets a spot from its ID (owner, 2026-11-05: a column looked dull): scattered, but the same on every reload.
@@ -571,7 +631,6 @@
     } else {
       for (let i = 0; i < up.length; i++) for (let j = i + 1; j < up.length; j++) LINKS.push([up[i].baseId.toLowerCase(), up[j].baseId.toLowerCase(), "route"]);
     }
-    CAGES.forEach(c => { c.base = BASES[0].id; }); document.getElementById("cages").innerHTML = "";
     initMap();
   }
   const sinceText = t => { if (!t) return "never heard"; const s = Math.round((Date.now() - Date.parse(t)) / 1000); return s < 90 ? "seen " + s + " s ago" : s < 5400 ? "last seen " + Math.round(s / 60) + " min ago" : "last seen " + new Date(t).toLocaleString(); };
@@ -755,45 +814,111 @@
     // B-017: GET /api/models nests the roles under models (it said "off" with a consultant set).
     const roles = modelsData && modelsData.models && modelsData.models.roles; const generic = roles && roles.consultant && roles.consultant.model;
     const local = modelsData && modelsData.ollama ? modelsData.ollama.models.map(m => m.name) : [];
-    const selector = (id, current, fallback, name = "Generic pilot") => {
+    const draftFor = id => {
+      const d = pilotDrafts.get(id);
+      if (typeof d === "string") return { model: d };
+      return d && typeof d === "object" ? d : {};
+    };
+    const modelControl = (id, current, fallback, name = "Generic pilot", extraFields = "", extraChanged = false, extraValid = true) => {
       if (!modelsData) return "<div class='tiny muted'>Reading local models…</div>";
       if (modelsData.error) return "<div class='tiny danger'>" + esc(modelsData.error) + "</div>";
-      const selected = pilotDrafts.has(id) ? pilotDrafts.get(id) : current || "off";
+      const d = draftFor(id);
+      const selected = d.model !== undefined ? d.model : current || "off";
       const option = (value, label, disabled) => "<option value='" + esc(value) + "'" + (selected === value ? " selected" : "") + (disabled ? " disabled" : "") + ">" + esc(label) + "</option>";
       const options = (fallback ? option("off", "Off", false) : "") + local.map(n => option(n, n + " · local", false)).join("") +
         (current && !local.includes(current) ? option(current, current + " · unavailable locally", true) : "") + (selected !== "off" && selected !== current && !local.includes(selected) ? option(selected, selected + " · unavailable locally", true) : "");
       const busy = pilotBusy.has(id); const disabled = busy || (!fallback && !local.length);
-      const unchanged = selected === (current || "off"); const unavailable = selected !== "off" && !local.includes(selected);
-      return "<form class='pilot-model-form' data-pilot='" + esc(id) + "' data-current='" + esc(current || "off") + "'><label class='small' for='pilot-model-" + esc(id) + "'>Model</label><select id='pilot-model-" + esc(id) + "' aria-label='Model for " + esc(name) + "'" + (disabled ? " disabled" : "") + ">" + options + "</select><button class='btn sm' type='submit'" + (disabled || unchanged || unavailable ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button></form>";
+      const modelChanged = selected !== (current || "off");
+      const unavailable = modelChanged && selected !== "off" && !local.includes(selected);
+      const canApply = !busy && extraValid && (modelChanged || extraChanged) && !unavailable && (!modelChanged || fallback || local.length > 0);
+      const curName = d.savedName !== undefined ? d.savedName : name;
+      const curSecond = d.savedSecond !== undefined ? d.savedSecond : "";
+      return "<form class='pilot-model-form' data-pilot='" + esc(id) + "' data-current='" + esc(current || "off") + "' data-current-name='" + esc(curName) + "' data-current-second='" + esc(curSecond) + "'>" +
+        extraFields +
+        "<div class='pilot-field'><label class='small' for='pilot-model-" + esc(id) + "'>Model</label><select id='pilot-model-" + esc(id) + "' aria-label='Model for " + esc(name) + "'" + (disabled ? " disabled" : "") + ">" + options + "</select></div>" +
+        "<div class='pilot-actions'><button class='btn sm' type='submit'" + (!canApply ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button></div></form>";
     };
-    const card = (name, sub, right, line, control = "") => "<div class='card'><div class='row'><span class='b'>" + esc(name) + "</span>" + right + "</div><div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + control + "</div>";
+    const specialistControl = p => {
+      const d = draftFor(p.id);
+      const savedName = p.name || "";
+      const savedSecond = p.secondName || "";
+      const nameVal = d.name !== undefined ? d.name : savedName;
+      const secondVal = d.secondName !== undefined ? d.secondName : savedSecond;
+      const busy = pilotBusy.has(p.id);
+      const dis = busy ? " disabled" : "";
+      const fields = "<div class='pilot-field'><label class='small' for='pilot-name-" + esc(p.id) + "'>Call name</label><input id='pilot-name-" + esc(p.id) + "' class='pilot-name-input' type='text' maxlength='40' aria-label='Call name for " + esc(savedName) + "' value='" + esc(nameVal) + "'" + dis + "/></div>" +
+        "<div class='pilot-field'><label class='small' for='pilot-second-" + esc(p.id) + "'>Second name</label><input id='pilot-second-" + esc(p.id) + "' class='pilot-second-input' type='text' maxlength='40' placeholder='Optional' aria-label='Second name for " + esc(savedName) + "' value='" + esc(secondVal) + "'" + dis + "/></div>";
+      const changed = nameVal.trim() !== savedName || secondVal.trim() !== savedSecond;
+      const valid = nameVal.trim().length > 0 && nameVal.trim().length <= 40 && secondVal.trim().length <= 40;
+      if (d.savedName === undefined) d.savedName = savedName;
+      if (d.savedSecond === undefined) d.savedSecond = savedSecond;
+      return modelControl(p.id, p.model, false, savedName, fields, changed, valid);
+    };
+    const card = (name, second, sub, right, line, control = "") => "<div class='card'><div class='row'><span class='b'>" + esc(name) + (second ? " <span class='tiny muted'>(" + esc(second) + ")</span>" : "") + "</span>" + right + "</div><div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + control + "</div>";
     const stageOf = p => p.retired ? "retired" : p.stage; const counts = {}; roster.forEach(p => { counts[stageOf(p)] = (counts[stageOf(p)] || 0) + 1; });
     const tab = currentTab("pilots", "prototype"); const shown = roster.filter(p => stageOf(p) === tab);
-    box.innerHTML = card("Generic pilot", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", "", selector("generic", generic, true)) +
+    box.innerHTML = card("Generic pilot", "", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", "", modelControl("generic", generic, true)) +
       stageTabs("pilots", [["prototype","Proto"],["test","Test"],["production","Prod"],["retired","Retired"]], counts) +
-      shown.map(p => card(p.name, p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "), selector(p.id, p.model, false, p.name))).join("") +
+      shown.map(p => card(p.name, p.secondName || "", p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "), specialistControl(p))).join("") +
       (roster.length ? (shown.length ? "" : "<div class='muted small'>No pilot at this stage.</div>") : "<div class='muted small'>No specialists yet. Add one: nerv pilots add ID --name … --domain … --keywords … --model …, or approve a proposal from the Marduk Institute.</div>");
   };
+  const syncPilotForm = form => {
+    const id = form.dataset.pilot;
+    const nameEl = form.querySelector(".pilot-name-input");
+    const secondEl = form.querySelector(".pilot-second-input");
+    const selectEl = form.querySelector("select");
+    const prev = pilotDrafts.get(id);
+    const next = typeof prev === "string" ? { model: prev } : prev && typeof prev === "object" ? { ...prev } : {};
+    if (nameEl) next.name = nameEl.value;
+    if (secondEl) next.secondName = secondEl.value;
+    if (selectEl) next.model = selectEl.value;
+    const curName = form.dataset.currentName || "";
+    const curSecond = form.dataset.currentSecond || "";
+    const curModel = form.dataset.current || "off";
+    const nameChanged = nameEl ? nameEl.value.trim() !== curName : false;
+    const secondChanged = secondEl ? secondEl.value.trim() !== curSecond : false;
+    const modelChanged = selectEl ? selectEl.value !== curModel : false;
+    if (!nameChanged && !secondChanged && !modelChanged) pilotDrafts.delete(id);
+    else pilotDrafts.set(id, next);
+    const option = selectEl && selectEl.options[selectEl.selectedIndex];
+    const modelBad = modelChanged && (!selectEl.value || (option && option.disabled));
+    const nameValid = !nameEl || (nameEl.value.trim().length > 0 && nameEl.value.trim().length <= 40);
+    const secondValid = !secondEl || secondEl.value.trim().length <= 40;
+    form.querySelector("button").disabled = pilotBusy.has(id) || !(nameChanged || secondChanged || modelChanged) || modelBad || !nameValid || !secondValid;
+  };
+  document.addEventListener("input", e => {
+    const form = e.target.closest && e.target.closest(".pilot-model-form");
+    if (form) syncPilotForm(form);
+  });
   document.addEventListener("change", e => {
     const form = e.target.closest && e.target.closest(".pilot-model-form");
-    if (form) {
-      const id = form.dataset.pilot; const value = e.target.value;
-      if (value === form.dataset.current) pilotDrafts.delete(id); else pilotDrafts.set(id, value);
-      const option = e.target.options[e.target.selectedIndex];
-      form.querySelector("button").disabled = pilotBusy.has(id) || !value || value === form.dataset.current || !!(option && option.disabled);
-    }
+    if (form) syncPilotForm(form);
   });
   document.addEventListener("submit", async e => {
     const form = e.target; if (!form.matches(".pilot-model-form")) return; e.preventDefault();
     const id = form.dataset.pilot; if (pilotBusy.has(id)) return; const restoreFocus = form.contains(document.activeElement);
-    const value = form.querySelector("select").value; if (!value || value === form.dataset.current || form.querySelector("button").disabled) return;
-    pilotBusy.add(id); renderMelons(true);
+    const btn = form.querySelector("button"); if (!btn || btn.disabled) return;
+    const selectEl = form.querySelector("select");
+    const nameEl = form.querySelector(".pilot-name-input");
+    const secondEl = form.querySelector(".pilot-second-input");
+    const value = selectEl ? selectEl.value : "";
+    pilotBusy.add(id); window.renderMelons(true);
     try {
-      if (id === "generic") await api("models", { method:"PUT", body:JSON.stringify({ consultant:value === "off" ? null : { model:value } }) });
-      else { const result = await api("pilots/" + encodeURIComponent(id) + "/model", { method:"PATCH", body:JSON.stringify({ model:value }) }); state.pilots = result.pilots; }
-      pilotDrafts.delete(id); log("Pilot model applied: " + id + " · " + value, "ok", null, "maya");
-    } catch (error) { log("Pilot model: " + error.message, "danger", null, "maya"); }
-    finally { pilotBusy.delete(id); await loadModels(true); renderMelons(true); if (restoreFocus) { const next = [...document.querySelectorAll(".pilot-model-form")].find(f => f.dataset.pilot === id); if (next) next.querySelector("select").focus(); } }
+      if (id === "generic") {
+        await api("models", { method:"PUT", body:JSON.stringify({ consultant:value === "off" ? null : { model:value } }) });
+        log("Pilot model applied: " + id + " · " + value, "ok", null, "maya");
+      } else {
+        const patch = {};
+        if (nameEl && nameEl.value.trim() !== (form.dataset.currentName || "")) patch.name = nameEl.value.trim();
+        if (secondEl && secondEl.value.trim() !== (form.dataset.currentSecond || "")) patch.secondName = secondEl.value.trim();
+        if (selectEl && value !== (form.dataset.current || "off")) patch.model = value;
+        const result = await api("pilots/" + encodeURIComponent(id), { method:"PATCH", body:JSON.stringify(patch) });
+        state.pilots = result.pilots;
+        log("Pilot updated: " + id, "ok", null, "maya");
+      }
+      pilotDrafts.delete(id);
+    } catch (error) { log("Pilot update: " + error.message, "danger", null, "maya"); }
+    finally { pilotBusy.delete(id); await loadModels(true); window.renderMelons(true); if (restoreFocus) { const next = [...document.querySelectorAll(".pilot-model-form")].find(f => f.dataset.pilot === id); if (next) (next.querySelector("select") || next.querySelector("input"))?.focus(); } }
   });
   // While you were away: from real sorties and deliveries since your last visit, remembered in this browser only.
   const VISIT = "nerv.dashboard.lastVisit";
@@ -841,6 +966,119 @@
     e.preventDefault();
     void window.liveApplyUpdate();
   });
+  const DEFAULT_SCHEDULE = { mode:"apply", checkHour:20, applyHour:3, quietFrom:8, quietUntil:23 };
+  const DEFAULT_HEALTH_THRESHOLDS = { rssMb:512, eventLoopDelayMs:100, linkLatencyMs:500, inFlight:10, reconnects:5 };
+  function settingsModel() {
+    if (state.settingsDraft) return state.settingsDraft;
+    const up = (state.updatePolicy && state.updatePolicy.policy) || { enabled:false };
+    const s = Object.assign({}, DEFAULT_SCHEDULE, up.schedule || {});
+    const th = Object.assign({}, DEFAULT_HEALTH_THRESHOLDS, (state.healthMetrics && state.healthMetrics.thresholds) || {});
+    return {
+      enabled:!!up.enabled,
+      mode:s.mode,
+      checkHour:s.checkHour,
+      applyHour:s.applyHour,
+      quietFrom:s.quietFrom,
+      quietUntil:s.quietUntil,
+      rssMb:th.rssMb,
+      eventLoopDelayMs:th.eventLoopDelayMs,
+      linkLatencyMs:th.linkLatencyMs,
+      inFlight:th.inFlight,
+      reconnects:th.reconnects
+    };
+  }
+  window.renderSettings = function () {
+    const box = document.getElementById("settings"); if (!box) return;
+    const m = settingsModel();
+    const busy = !!state.settingsBusy;
+    const msg = state.settingsMsg;
+    box.innerHTML = "<form id='settings-form' class='list'>" +
+      "<div class='row small' style='flex-wrap:wrap;gap:6px;align-items:center'>" +
+      "<label style='display:inline-flex;align-items:center;gap:4px'><input type='checkbox' id='set-auto-enabled'" + (m.enabled ? " checked" : "") + (busy ? " disabled" : "") + "> Automatic updates</label>" +
+      "<select id='set-update-mode' aria-label='Update mode'" + (busy ? " disabled" : "") + "><option value='apply'" + (m.mode === "apply" ? " selected" : "") + ">Apply after notice</option><option value='notify'" + (m.mode === "notify" ? " selected" : "") + ">Notify only</option></select>" +
+      "<span>· check</span><input id='set-check-hour' aria-label='Check hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.checkHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'>" +
+      "<span>apply</span><input id='set-apply-hour' aria-label='Apply hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.applyHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'>" +
+      "<span>quiet</span><input id='set-quiet-from' aria-label='No-apply from (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietFrom) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>–</span><input id='set-quiet-until' aria-label='No-apply until (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietUntil) + "'" + (busy ? " disabled" : "") + " style='width:48px'>" +
+      "</div>" +
+      "<div class='row small' style='flex-wrap:wrap;gap:6px;align-items:center'>" +
+      "<span>Health warnings · RSS MB</span><input id='set-rss-mb' aria-label='RSS threshold (MB)' type='number' min='16' max='65536' step='1' value='" + esc(m.rssMb) + "'" + (busy ? " disabled" : "") + " style='width:60px'>" +
+      "<span>loop ms</span><input id='set-loop-ms' aria-label='Event loop delay threshold (ms)' type='number' min='1' max='60000' step='1' value='" + esc(m.eventLoopDelayMs) + "'" + (busy ? " disabled" : "") + " style='width:60px'>" +
+      "<span>link ms</span><input id='set-link-ms' aria-label='Link latency threshold (ms)' type='number' min='1' max='60000' step='1' value='" + esc(m.linkLatencyMs) + "'" + (busy ? " disabled" : "") + " style='width:60px'>" +
+      "<span>in-flight</span><input id='set-in-flight' aria-label='In-flight threshold' type='number' min='1' max='1000' step='1' value='" + esc(m.inFlight) + "'" + (busy ? " disabled" : "") + " style='width:52px'>" +
+      "<span>reconnects</span><input id='set-reconnects' aria-label='Reconnects threshold' type='number' min='1' max='1000' step='1' value='" + esc(m.reconnects) + "'" + (busy ? " disabled" : "") + " style='width:52px'>" +
+      "</div>" +
+      "<div class='tiny muted'>Brief 08:00 · Time zone Europe/Rome · Sync Ratio 80% · Telegram 90 s</div>" +
+      "<div class='row' style='margin-top:4px'><button class='btn sm primary' id='btn-save-settings' type='submit'" + (busy ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button>" +
+      "<span id='settings-status' role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : (state.settingsDraft ? "Unsaved changes" : "")) + "</span></div>" +
+      "</form>";
+  };
+  function readSettingsDraft() {
+    const enabled = !!document.getElementById("set-auto-enabled").checked;
+    const mode = document.getElementById("set-update-mode").value;
+    const num = id => Number(document.getElementById(id).value);
+    return {
+      enabled,
+      mode,
+      checkHour:num("set-check-hour"),
+      applyHour:num("set-apply-hour"),
+      quietFrom:num("set-quiet-from"),
+      quietUntil:num("set-quiet-until"),
+      rssMb:num("set-rss-mb"),
+      eventLoopDelayMs:num("set-loop-ms"),
+      linkLatencyMs:num("set-link-ms"),
+      inFlight:num("set-in-flight"),
+      reconnects:num("set-reconnects")
+    };
+  }
+  document.addEventListener("input", e => {
+    if (e.target && e.target.closest && e.target.closest("#settings-form")) { state.settingsDraft = readSettingsDraft(); state.settingsMsg = null; }
+  });
+  document.addEventListener("change", e => {
+    if (e.target && e.target.closest && e.target.closest("#settings-form")) { state.settingsDraft = readSettingsDraft(); state.settingsMsg = null; }
+  });
+  document.addEventListener("submit", async e => {
+    const form = e.target && e.target.closest && e.target.closest("#settings-form");
+    if (!form) return;
+    e.preventDefault();
+    if (state.settingsBusy) return;
+    const draft = readSettingsDraft();
+    state.settingsDraft = draft;
+    state.settingsBusy = true;
+    state.settingsMsg = null;
+    renderSettings();
+    try {
+      const current = (state.updatePolicy && state.updatePolicy.policy) || { channels: [], targets: [] };
+      const r = await api("update/policy", {
+        method:"POST",
+        body:JSON.stringify({
+          enabled: draft.enabled,
+          channels: current.channels || [],
+          targets: current.targets || [],
+          schedule: { mode:draft.mode, checkHour:draft.checkHour, applyHour:draft.applyHour, quietFrom:draft.quietFrom, quietUntil:draft.quietUntil }
+        })
+      });
+      const th = await api("health/thresholds", {
+        method:"PUT",
+        body:JSON.stringify({
+          rssMb: draft.rssMb,
+          eventLoopDelayMs: draft.eventLoopDelayMs,
+          linkLatencyMs: draft.linkLatencyMs,
+          inFlight: draft.inFlight,
+          reconnects: draft.reconnects
+        })
+      });
+      state.updatePolicy = Object.assign({}, state.updatePolicy, { policy: r.policy });
+      state.healthMetrics = Object.assign({}, state.healthMetrics || {}, { thresholds: th.thresholds, warnings: th.warnings });
+      state.settingsDraft = null;
+      state.settingsMsg = { kind:"ok", text:"Settings saved." };
+      renderHealth();
+    } catch (err) {
+      state.settingsMsg = { kind:"danger", text:err.message };
+    } finally {
+      state.settingsBusy = false;
+      renderSettings();
+    }
+  });
   // F-102-T02: the switch posts the policy; an empty selection means this base on main (the server fills it in).
   window.liveSetAutoUpdate = async function (enabled) {
     if (state.updatePolicyBusy) return;
@@ -856,6 +1094,7 @@
     } finally {
       state.updatePolicyBusy = false;
       renderHealth();
+      if (!state.settingsDraft && typeof renderSettings === "function") renderSettings();
     }
   };
   document.addEventListener("change", e => {
@@ -904,7 +1143,7 @@
   }
   window.addEventListener("pagehide", () => { streamPaused = true; clearTimeout(streamTimer); if (streamController) streamController.abort(); });
   window.addEventListener("pageshow", e => { if (e.persisted) { streamPaused = false; void watchChanges(); queueRefresh(); } });
-  let started = false; const begin = () => { void watchChanges(); if (started) { void poll(); return; } started = true; document.getElementById("chat-in").placeholder = LIVE_HINT; poll(); setInterval(poll, 3000); };
+  let started = false; const begin = () => { void watchChanges(); void api("commands").then(r => { if (r && Array.isArray(r.commands)) state.commands = r.commands; }).catch(() => {}); if (started) { void poll(); return; } started = true; document.getElementById("chat-in").placeholder = LIVE_HINT; poll(); setInterval(poll, 3000); };
   // F-039: the login code is swapped for a dashboard session (never the admin token), kept in this tab's sessionStorage so a
   // reload stays signed in; it ends after 12 h, when the service restarts, with `sessions revoke`, or when the tab closes.
   // A token pasted by hand is the admin token: it stays in memory only and is never stored.

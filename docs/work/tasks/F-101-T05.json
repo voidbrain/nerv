@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-101-T05",
+  "parent": "F-101",
+  "title": "NERV FPV pack uses the FPV core package",
+  "goal": "NERV's battery and fleet rules come from the core package; NERV keeps only the adapter",
+  "status": "planned",
+  "acceptance": [
+    "The FPV pack implements the core storage interface over SQLite; existing tables and data are unchanged",
+    "The moved rules and their tests are gone from NERV (no dead copies); a join test runs a chat phrase through the pack into the core and back"
+  ],
+  "dependsOn": [
+    "F-101-T04"
+  ],
+  "resources": [
+    "src/batteries.ts",
+    "src/battery-health.ts",
+    "src/fleet.ts",
+    "test/**",
+    "package.json",
+    "docs/work/records/F-101.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-20: swap internal calls for the package and delete the moved code. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

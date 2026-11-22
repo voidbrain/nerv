@@ -1,5 +1,35 @@
 # Backlog reconciliation log 2026
 
+## 2026-11-22 — main `c1ad6b7`
+
+PRs #636, #637, #635, #639–#644 and #638 merged on green CI. They advanced F-116, F-084, F-091, F-083, F-114, F-078, B-106 and F-006; their owning records and task evidence are current. Reconciled by PR #645.
+
+## 2026-11-22 — main `c8c6b6c`
+
+PR #631 merged on green CI and closed F-006-T14. PRs #621–#630 and #632–#634 remain reconciled by the preceding entry; records are current.
+
+## 2026-11-22 — main `18cf52a`
+
+PRs #621–#630 and #632–#634 merged on green CI. #622 reconciled B-091; #623 closed B-086; #621/#627–#629 advanced F-114; #624–#626 advanced F-056; #630/#634 advanced F-078/F-116; #632 advanced F-084; #633 advanced F-087. Records are current.
+
+## 2026-11-20 — main `5c6e5a0`
+
+PRs #586–#597 reconciled: 11 of 12 own CI runs green; #587 failed Windows/full-suite, while later combined #595 and #597 passed all five jobs. #591 belongs to B-082, #596 to F-110 and #597 to F-008. Full audit opened B-106 for the lint-tooling advisory.
+
+## 2026-11-20 — main `224e0e8`
+
+PRs #584 and #585 merged on green CI. F-079 closed (F-079-T02, run 44732108271); F-027-T02 waits on its confinement review. Five device-run steps re-estimated to 1.5 h; F-111–F-113 opened from the Agentica review.
+
+## 2026-11-20 — main `53b7671`
+
+PRs #579, #580, #581, #582 and #583 merged on green CI. #579 reconciled the backlog (docs-only); #580 implemented F-049-T09, #581 implemented F-049-T10, #582 fixed B-096, and #583 implemented F-110-T03.
+
+## 2026-11-20 — main `c2150218`
+
+PRs #573, #575, #577 and #578 merged on green CI. F-062 gets F-062-T07, the owner's real restore drill; F-005-T15 re-estimated to 1.25 h.
+
+B-102, B-103 and B-104 stay implemented until seen: B-102 on NERV-01's Skills tab after its next update, B-103 and B-104 on CI without reruns. F-062 had every step closed but no real drill, and off-host copies are not configured on NERV-01. Reconciled in [PR #579](https://github.com/voidbrain/nerv/pull/579).
+
 ## 2026-11-20 — main `45be5940`
 
 Harness v10.1.0 reconciled in [PR #575](https://github.com/voidbrain/nerv/pull/575): steps tables show Depends on and Unlocks; `check:work` warns on blockers named only in prose (two false positives on its first run, B-068 and F-012, left as they are).
@@ -529,3 +559,15 @@ PR #557 merged with green CI. B-091-T01 waits on its live check on Tabgha. F-049
 ## 2026-11-19 — main `37e0a248`
 
 PR #559 merged with green CI: B-101-T01 waits to be seen on NERV-01's dashboard (#558 and #561 are reconciled in #565). #560 (B-100-T01) closed unmerged. F-021-T05 implemented.
+
+## 2026-11-20 — PR #610 (harness PR conventions)
+
+Reconciled `docs/agents/pull-requests.md` from `voidbrain/project-harness#224` in [PR #610](https://github.com/voidbrain/nerv/pull/610) (PR title backlog ID and agent signature rules); fresh-context review passed with no findings.
+
+## 2026-11-21 — main `ed872cc`
+
+PRs #598–#614 merged green. Automated steps closed; #610 is harness maintenance recorded above. Pending Gauntlet cases remain under F-078-T08, B-086-T05 and F-115-T02. Reconciliation: [PR #615](https://github.com/voidbrain/nerv/pull/615).
+
+## 2026-11-21 — main `404f8ff`
+
+PRs #615–#620 merged green. #615 was reconciliation-only; B-105, F-111 and F-056 are current. #617 records F-005/B-091 recovery; #620 merged the fixes, with Tabgha verification pending. Reconciliation: [PR #622](https://github.com/voidbrain/nerv/pull/622).

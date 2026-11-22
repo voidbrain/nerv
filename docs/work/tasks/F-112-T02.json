@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-112-T02",
+  "parent": "F-112",
+  "title": "Owner decides whether to adopt script plans and their scope",
+  "goal": "Script plans are adopted, narrowed or dropped",
+  "status": "closed",
+  "acceptance": [
+    "The decision is written in the design note"
+  ],
+  "dependsOn": [
+    "F-112-T01"
+  ],
+  "resources": [
+    "docs/design/script-plans.md",
+    "docs/work/records/F-112.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "ownerLink": "docs/reviews/2026-11-20-agentica.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Closed 2026-11-22: owner approved adopting script plans under the F-112-T01 design note.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
+    "ownerHours": 0,
+    "ownerKind": "decision"
+  }
+}

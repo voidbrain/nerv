@@ -9,10 +9,16 @@ import { runResumeEngineTick } from './resume-intent.ts';
 import { createHeadlessResumeDeps, type HeadlessResumeTarget } from './headless-resume.ts';
 import { runCardCopyRule, type CopyRule } from './storage-copy.ts';
 import { sliceModelWithProfile, type SlicerProfile } from './slicer.ts';
-import { runCodingJobInWorktree, type AllowedCodingRepo } from './coding-job.ts';
+import {
+  buildHarnessPushProposal,
+  runCodingJobInWorktree,
+  runHarnessJobInWorktree,
+  type AllowedCodingRepo,
+} from './coding-job.ts';
 import { DesktopRecordingSession, type DesktopRecordingHeader } from './desktop-recording.ts';
 import { defaultAutoUpdatePolicy } from './update-policy.ts';
 import { startAutoUpdateScheduler } from './update-scheduler.ts';
+import { buildInfo, checkRevisionSkew, type BuildInfo } from './build.ts';
 import type { UpdateControl } from './server-update.ts';
 import { clickNamedControl, type BrowserAdapterDriver } from './browser-control.ts';
 import { clickDesktopControl, type DesktopAccessibilityDriver } from './desktop-control.ts';
@@ -20,6 +26,7 @@ import { clickDesktopControl, type DesktopAccessibilityDriver } from './desktop-
 import { SeatPool } from './seat-pool.ts';
 
 import { assertRootMigrationReady, rootMigrationCommand } from './root-migration.ts';
+import { formatCommandHelp, formatHelp } from './cli-help.ts';
 import { nodesCommand } from './nodes-cli.ts';
 import { backupCommand } from './backup-cli.ts';
 import { storeReceived } from './offhost.ts';
@@ -208,6 +215,28 @@ try {
     initialize(home);
     initializeNativeTLS(home);
     console.log('Native TLS configured. Restart NERV Agency, then run pair.');
+  } else if (command === 'placement') {
+    const sub = args[0];
+    const file = args[1];
+    if (!['plan', 'run'].includes(sub ?? '') || !file || (sub === 'run' && !args.includes('--execute')))
+      throw new Error('Usage: nerv placement plan PROBE.json | nerv placement run PROBE.json --execute');
+    let probe: unknown;
+    try {
+      probe = JSON.parse(readFileSync(resolve(file), 'utf8'));
+    } catch {
+      throw new Error('Placement probe must be a readable JSON file.');
+    }
+    const config = readConfig(home);
+    const response = await fetch(`http://127.0.0.1:${config.port}/api/placement/${sub}`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${readToken(home)}`, 'content-type': 'application/json' },
+      body: JSON.stringify(sub === 'run' ? { ...(probe as object), confirmExecute: true } : probe),
+    }).catch(() => {
+      throw new Error('NERV Agency is not running: start it with serve or service start.');
+    });
+    const value = (await response.json()) as { error?: string };
+    if (!response.ok) throw new Error(value.error ?? 'Placement request failed.');
+    console.log(JSON.stringify(value, null, 2));
   } else if (['pair', 'clients', 'revoke'].includes(command ?? '')) {
     const config = readConfig(home);
     const path =
@@ -234,11 +263,11 @@ try {
   } else if (command === 'service') service(args[0] ?? '', home);
   else if (await tryRunCliCommand(command, args, home, { readSecret, openPage, reloadIfRunning, flag })) {
     // Handled by cli-commands.ts
-  } else if (!command || command === 'help')
-    console.log(
-      'NERV Agency\nCommands: root-migration plan|apply|status | init [--base ID --name "Name"] [--no-model-setup] [--fresh] | base [ID "Name" | pubkey] | launch | key init [--out PATH] | kaji enrol|revoke|list|export|import | nodes discover|inspect|plan|apply|status|release | workers pending|history|held|result|cancel|cancel-outbox|release|retry-outbox|abandon-outbox | native-init | pair [label] | clients | revoke CLIENT_ID | doctor | bom | backup keygen|status|decrypt | credentials rotate admin|telegram|cloud | models [set misato| pilots [generic|add|set|pin|unpin|retire|restore] | tools [add|remove|grant|revoke] |casper MODEL | cloud on|off | key] | ask [--cloud] "text" | open [dashboard] | sessions revoke | chat "text" | telegram token | telegram link [CHAT_ID] | act "request" TOOL [JSON args] | reload | brief | chronicle [DAYS] | memory list|add|edit|forget|history|episodes | instrumentality | remind "title" "ISO timestamp with timezone" | list | cancel ID | tick | inbox | approvals | approve ID | reject ID | events SORTIE_ID | spear SORTIE_ID [reason] | serve | service install|start|stop|status|uninstall',
-    );
-  else {
+  } else if (!command || command === 'help') {
+    const detail = args[0] ? formatCommandHelp(args[0]) : undefined;
+    if (args[0] && !detail) throw new Error(`Unknown command: ${args[0]}. Run nerv help for the list.`);
+    console.log(detail ?? formatHelp(Math.min(process.stdout.columns || 100, 100)));
+  } else {
     const config = readConfig(home);
     const scrolls = readScrolls(home);
     if (command !== 'serve' && command !== 'launch') store = new Store(databasePath(home), scrolls, { home });
@@ -444,7 +473,20 @@ try {
       case 'spear':
         console.log(JSON.stringify(local().spear(args[0] ?? '', args[1] ?? 'cli'), null, 2));
         break;
-      case 'doctor':
+      case 'doctor': {
+        let runningBuild: BuildInfo = buildInfo();
+        try {
+          const res = await fetch(`http://127.0.0.1:${config.port}/api/doctor`, {
+            headers: { authorization: `Bearer ${readToken(home)}` },
+            signal: AbortSignal.timeout(500),
+          });
+          if (res.ok) {
+            const live = (await res.json()) as { build?: BuildInfo };
+            if (live.build) runningBuild = live.build;
+          }
+        } catch {
+          /* service not running locally: compare against local buildInfo */
+        }
         console.log(
           JSON.stringify(
             {
@@ -454,6 +496,8 @@ try {
               language: config.language,
               timeZone: config.timeZone,
               hostTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              build: runningBuild,
+              revisionSkew: checkRevisionSkew(runningBuild),
               ...local().doctor(),
               update: await checkUpdateAvailability({ offline: true }),
               delivery: 'Durable local inbox; phone notifications not configured.',
@@ -469,6 +513,7 @@ try {
           ),
         );
         break;
+      }
       case 'serve':
       case 'launch': {
         const webRoot = resolve(fileURLToPath(new URL('../dist/web/browser', import.meta.url)));
@@ -735,6 +780,7 @@ try {
             // Phase 2, on the base asked: this base's Casper votes on the main base's action.
             onVerdict: (_from, ask) => runtime.peerVerdict(ask),
           });
+          runtime.setLinkMetricsProvider(() => kaji?.linkMetrics() ?? []);
           if (kaji) {
             const link = kaji;
             runtime.setRemoteSortie(
@@ -858,6 +904,25 @@ try {
           }),
         );
         console.log(JSON.stringify(res, null, 2));
+        break;
+      }
+      case 'harness-job': {
+        if (!args[0] || !args[1] || !args[2] || !args[3] || !args[4]) {
+          throw new Error('Usage: nerv harness-job <repoId> <jobId> <templateRepo> <templateTag> <allowlist.json>');
+        }
+        const allowlist = JSON.parse(readFileSync(resolve(args[4]), 'utf8')) as AllowedCodingRepo[];
+        const res = await runHarnessJobInWorktree(
+          { repoId: args[0], jobId: args[1], templateRepo: args[2], templateTag: args[3] },
+          allowlist,
+          async () => ({
+            testPassed: false,
+            testSummary: 'No live coding-agent runner bound in CLI.',
+            tokens: 0,
+            costUsd: 0,
+          }),
+        );
+        const proposal = buildHarnessPushProposal(res, { baseBranch: 'main' });
+        console.log(JSON.stringify({ result: res, proposal }, null, 2));
         break;
       }
       case 'desktop-record': {

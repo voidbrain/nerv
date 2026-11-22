@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-115-T02",
+  "parent": "F-115",
+  "title": "Rerun the system flow cases at the F-115 source",
+  "goal": "nerv-system-flows/ledger, nerv-system-flows/conversation, nerv-system-flows/channels, nerv-system-flows/bases have a covering run at the F-115 source (src/cli.ts changed)",
+  "status": "closed",
+  "acceptance": [
+    "npm run gauntlet:all -- --execute records passing runs for nerv-system-flows/ledger, nerv-system-flows/conversation, nerv-system-flows/channels, nerv-system-flows/bases",
+    "node tools/gauntlet.mjs pending lists none of them"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "evals/gauntlet/ledger.json",
+    "docs/work/records/F-115.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures only; no real host names.",
+  "validation": [
+    "npm run check:gauntlet-runs"
+  ],
+  "escalation": [
+    "Running real models waits for the owner's go-ahead (BACKLOG-RULES, Evaluation dependencies)"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-20 from B-095-T02. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 0,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 630,
+      "note": "evidence"
+    }
+  ]
+}

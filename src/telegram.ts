@@ -1,9 +1,13 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import type { StoreApi } from './runtime.ts';
+import type { DocumentStore } from './documents.ts';
+import { builtinPackRegistry } from './packs.ts';
+import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.ts';
 import { formatTelegramChecklist } from './lists.ts';
 import { ONLINE_MS } from './kaji-link.ts';
 import type { ChannelState } from './channel-state.ts';
 import type { Approval } from './ledger.ts';
+import { readCommand, telegramCommands } from './chat-command.ts';
 import { requestLanguage } from './misato.ts';
 import { formatQueuedMessage, formatQueueFullMessage, QueueCancelledError, QueueFullError } from './request-queue.ts';
 /**
@@ -27,7 +31,14 @@ const MAX_TEXT = 4000;
 const STALE_SECONDS = 600;
 interface Update {
   update_id: number;
-  message?: { date: number; text?: string; chat: { id: number; type: string }; from?: { id: number } };
+  message?: {
+    date: number;
+    text?: string;
+    caption?: string;
+    photo?: { file_id: string; file_size?: number; width: number; height: number }[];
+    chat: { id: number; type: string };
+    from?: { id: number };
+  };
   callback_query?: {
     id: string;
     data?: string;
@@ -67,6 +78,27 @@ export class TelegramApi {
       { ...(offset !== undefined ? { offset } : {}), timeout, allowed_updates: ['message', 'callback_query'] },
       signal ?? AbortSignal.timeout((timeout + 10) * 1000),
     );
+  }
+  async downloadFile(fileId: string, maxBytes: number, signal?: AbortSignal): Promise<Buffer> {
+    const info = await this.call<{ file_path?: string }>('getFile', { file_id: fileId }, signal);
+    const filePath = info.file_path;
+    if (!filePath || filePath.startsWith('/') || filePath.includes('..')) {
+      throw new Error('Telegram getFile returned an invalid file path.');
+    }
+    const token = typeof this.token === 'function' ? this.token() : this.token;
+    const response = await fetch(`${this.base}/file/bot${token}/${filePath}`, {
+      method: 'GET',
+      signal: signal ?? AbortSignal.timeout(15000),
+      redirect: 'error',
+    });
+    if (!response.ok) throw new Error(`Telegram file download failed: HTTP ${response.status}`);
+    const lenHeader = response.headers.get('content-length');
+    if (lenHeader && Number(lenHeader) > maxBytes) {
+      throw new Error(`Photo exceeds ${maxBytes} byte limit.`);
+    }
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.length > maxBytes) throw new Error(`Photo exceeds ${maxBytes} byte limit (${bytes.length} bytes).`);
+    return bytes;
   }
   send(chatId: number, text: string, buttons?: Button[][]) {
     return this.call<{ message_id: number }>('sendMessage', {
@@ -316,13 +348,17 @@ export class TelegramChannel {
     this.routeState = { ...this.routeState, api: { state, at: new Date().toISOString() } };
   }
   private async pendingRows(rows: Button[][], baseId?: string): Promise<Button[][]> {
-    const ids = rowIds(rows);
+    const isApprovalRow = (row: Button[]) =>
+      row.some((b) => /^(?:[ar]|k:[A-Z0-9-]{1,16}:[ar]):[a-f0-9-]{36}$/.test(b.callback_data));
+    const approvalRows = rows.filter(isApprovalRow);
+    if (!approvalRows.length) return rows;
+    const ids = rowIds(approvalRows);
     const pending = baseId
       ? await this.remote?.pendingApprovalIds?.(baseId, ids)
       : await this.store.pendingApprovalIds(ids);
     if (!pending) throw new Error('Approval status unavailable; card delivery deferred.');
     const keep = new Set(pending);
-    return rows.filter((row) => row.some((b) => keep.has(b.callback_data.split(':').at(-1)!)));
+    return rows.filter((row) => !isApprovalRow(row) || row.some((b) => keep.has(b.callback_data.split(':').at(-1)!)));
   }
   private markupQueue: Promise<void> = Promise.resolve();
   private markup(
@@ -510,6 +546,9 @@ export class TelegramChannel {
         .catch((e) => this.log(`Telegram: ${e instanceof Error ? e.message : 'follow-up failed'}.`));
     });
     void this.poll();
+    void this.api.call('setMyCommands', { commands: telegramCommands() }).catch((e) => {
+      this.log(`Telegram setMyCommands: ${e instanceof Error ? e.message : 'failed'}.`);
+    });
     this.timer = setInterval(() => this.tick(), deliverEveryMs);
     await this.deliver();
   }
@@ -613,6 +652,25 @@ export class TelegramChannel {
         await this.sendLocal(`🛰 ${far[1]} · ${outcome}`);
         return;
       }
+      const spearMatch = /^spear:(confirm|cancel):([a-f0-9-]{36})$/.exec(q.data ?? '');
+      if (spearMatch) {
+        const [, action, sortieId] = spearMatch;
+        if (action === 'cancel') {
+          await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: 'Cancelled.' });
+          if (q.message) await this.markup(q.message.message_id, []).catch(() => {});
+          await this.sendLocal('Spear cancelled.');
+          return;
+        }
+        if (!this.store.spear) {
+          await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: 'Spear unavailable.' });
+          return;
+        }
+        await this.store.spear(sortieId!, 'telegram:/spear');
+        await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: 'Stopped.' });
+        if (q.message) await this.markup(q.message.message_id, []).catch(() => {});
+        await this.sendLocal(`🔱 Stopped S-${sortieId!.slice(0, 4).toUpperCase()}.`);
+        return;
+      }
       const match = /^([ar]):([a-f0-9-]{36})$/.exec(q.data ?? '');
       if (!match) {
         await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: 'Unknown button.' });
@@ -636,7 +694,7 @@ export class TelegramChannel {
       return;
     }
     const m = u.message;
-    if (!m?.text) return;
+    if (!m || (!m.text && !m.photo?.length)) return;
     if (m.chat.type !== 'private' || !this.owner(m.chat.id) || (m.from && !this.owner(m.from.id))) {
       this.log('Telegram: ignored a message from another chat.');
       return;
@@ -647,6 +705,11 @@ export class TelegramChannel {
       await this.sendLocal('I was offline when you sent that; send it again if it still matters.');
       return;
     }
+    if (!m.text && m.photo?.length) {
+      await this.handlePhoto(m.photo, m.caption ?? '');
+      return;
+    }
+    if (!m.text) return;
     const text = m.text.trim();
     if (text === '/start') {
       await this.sendLocal('Aoba here. Write what you need; actions that need you arrive with buttons.');
@@ -657,6 +720,53 @@ export class TelegramChannel {
       if (!name || !(await this.sendChecklist(name))) {
         await this.sendLocal(`List "${name}" not found.`);
       }
+      return;
+    }
+    const packTextReply = await builtinPackRegistry.handleTelegramText(text, this.store);
+    if (packTextReply !== undefined) {
+      await this.sendLocal(packTextReply);
+      return;
+    }
+    if (readCommand(text)?.name === 'cards') {
+      const lang = requestLanguage(text);
+      const pending = await this.store.approvals(10);
+      if (!pending.length) {
+        await this.sendLocal(lang === 'it' ? 'Nessuna scheda in attesa.' : 'No pending approval cards.');
+        return;
+      }
+      for (const a of pending) {
+        const c = card(a);
+        await this.sendLocal(c.text, c.buttons);
+      }
+      return;
+    }
+    const spearCmd = readCommand(text);
+    if (spearCmd?.name === 'spear') {
+      const lang = requestLanguage(text);
+      const list = this.store.sorties ? await this.store.sorties(20) : [];
+      const active = list.filter((s) => s.status === 'open' || s.status === 'waiting');
+      const wanted = spearCmd.target?.trim().replace(/^s-/i, '').toLowerCase();
+      const target = wanted
+        ? active.find((s) => s.id.toLowerCase() === wanted || s.id.toLowerCase().startsWith(wanted))
+        : active[0];
+      if (!target) {
+        await this.sendLocal(
+          lang === 'it' ? 'Nessuna sortita attiva o in attesa da fermare.' : 'No active or waiting sortie to stop.',
+        );
+        return;
+      }
+      const ref = `S-${target.id.slice(0, 4).toUpperCase()}`;
+      const prompt =
+        lang === 'it' ? `🔱 Fermare la sortita ${ref} (${target.title})?` : `🔱 Stop sortie ${ref} (${target.title})?`;
+      await this.sendLocal(prompt, [
+        [
+          {
+            text: lang === 'it' ? '🔱 Conferma Spear' : '🔱 Confirm Spear',
+            callback_data: `spear:confirm:${target.id}`,
+          },
+          { text: lang === 'it' ? 'Annulla' : 'Cancel', callback_data: `spear:cancel:${target.id}` },
+        ],
+      ]);
       return;
     }
     if (!this.store.chat) {
@@ -771,4 +881,103 @@ export class TelegramChannel {
       this.log(`Telegram delivery: ${e instanceof Error ? e.message : 'failed'}.`);
     }
   }
+
+  private async handlePhoto(
+    sizes: { file_id: string; file_size?: number; width: number; height: number }[],
+    rawCaption: string,
+  ) {
+    const parsed = parsePhotoCaption(rawCaption);
+    if (!parsed) {
+      await this.sendLocal(
+        'Caption a photo with "recipe: <name>" (optional "step N"), "crash: <drone|id>", "part: <drone> <position>", or "battery: <number|label>".',
+      );
+      return;
+    }
+    const s = this.store as StoreApi & {
+      documents?: DocumentStore;
+      photos?: PhotoStore;
+    };
+    if (!s.photos) {
+      await this.sendLocal('Photo storage is not available here.');
+      return;
+    }
+    const target = resolveTelegramPhotoTarget(s, parsed);
+    if (!target) {
+      await this.sendLocal(`No unique ${parsed.ownerKind} matching "${parsed.query}".`);
+      return;
+    }
+    const eligible = sizes
+      .filter((p) => p.file_size === undefined || p.file_size <= MAX_PHOTO_BYTES)
+      .sort((a, b) => b.width * b.height - a.width * a.height);
+    const chosen = eligible[0];
+    if (!chosen) {
+      await this.sendLocal(`Photo exceeds the ${MAX_PHOTO_BYTES} byte limit.`);
+      return;
+    }
+    try {
+      const bytes = await this.api.downloadFile(chosen.file_id, MAX_PHOTO_BYTES, this.stopping.signal);
+      const saved = s.photos.attach({
+        ownerKind: parsed.ownerKind,
+        ownerId: target.id,
+        stepIndex: parsed.stepIndex,
+        bytes,
+        caption: parsed.caption,
+      });
+      const where = saved.stepIndex !== null ? ` (step ${saved.stepIndex + 1})` : '';
+      await this.sendLocal(`Attached photo to "${target.label}"${where}: ${saved.url}`);
+    } catch (e) {
+      await this.sendLocal(`Photo could not be attached: ${e instanceof Error ? e.message : 'invalid photo'}`);
+    }
+  }
+}
+
+export interface ParsedPhotoCaption {
+  ownerKind: PhotoOwnerKind;
+  query: string;
+  stepIndex: number | null;
+  caption: string;
+}
+
+const CAPTION_KIND: Readonly<Record<string, PhotoOwnerKind>> = {
+  recipe: 'recipe',
+  ricetta: 'recipe',
+  crash: 'crash',
+  part: 'part',
+  parte: 'part',
+  battery: 'battery',
+  batteria: 'battery',
+};
+
+/** Parses a Telegram photo caption for a recipe, crash, part, or battery. */
+export function parsePhotoCaption(raw: string): ParsedPhotoCaption | null {
+  const trimmed = raw.trim();
+  const m = /^(recipe|ricetta|crash|part|parte|battery|batteria)\s*:\s*(.+)$/i.exec(trimmed);
+  if (!m) return null;
+  const ownerKind = CAPTION_KIND[m[1]!.toLowerCase()]!;
+  let rest = m[2]!.trim();
+  let stepIndex: number | null = null;
+  if (ownerKind === 'recipe') {
+    const stepMatch = /\s+(?:step|passaggio)\s+(\d+)\s*$/i.exec(rest);
+    if (stepMatch) {
+      const n = Number(stepMatch[1]);
+      if (!Number.isInteger(n) || n < 1) return null;
+      stepIndex = n - 1;
+      rest = rest.slice(0, stepMatch.index).trim();
+    }
+  }
+  if (!rest) return null;
+  return { ownerKind, query: rest, stepIndex, caption: trimmed };
+}
+
+function resolveTelegramPhotoTarget(
+  s: { documents?: DocumentStore },
+  parsed: ParsedPhotoCaption,
+): { id: string; label: string } | undefined {
+  if (parsed.ownerKind === 'recipe' && s.documents) {
+    const exact = s.documents.get(parsed.query);
+    const matches = exact ? [exact] : s.documents.recall(parsed.query);
+    const doc = exact ?? (matches.length === 1 ? matches[0]! : undefined);
+    return doc ? { id: doc.id, label: doc.title } : undefined;
+  }
+  return builtinPackRegistry.resolveTelegramPhoto(s, parsed.ownerKind, parsed.query);
 }

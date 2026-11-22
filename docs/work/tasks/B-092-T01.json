@@ -4,7 +4,7 @@
   "id": "B-092-T01",
   "title": "Host construction needs only the data home; planning names missing files",
   "goal": "Host construction needs only the data home; planning names missing files",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Test committed failing first; B-084 message kept at planning"
   ],
@@ -31,8 +31,8 @@
     "size": "small",
     "estimate": "0.75 h",
     "basis": "Estimated 2026-11-18. Not a measurement.",
-    "reviewed": "2026-11-18",
-    "agentHours": 0.25,
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.75,
     "actualAgentHours": 0.5,

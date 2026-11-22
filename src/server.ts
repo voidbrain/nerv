@@ -11,7 +11,7 @@ import { QueueCancelledError, QueueFullError } from './request-queue.ts';
 import type { Pilot, PilotPatch } from './pilots.ts';
 import { attachRpcSocket } from './socket.ts';
 import { toChecklistSurface } from './lists.ts';
-import { buildInfo } from './build.ts';
+import { buildInfo, checkRevisionSkew } from './build.ts';
 import type { UpdateAvailability } from './update-availability.ts';
 import type { ManualUpdateResult } from './manual-update.ts';
 import type { AutoUpdatePolicy, AutoUpdateSchemaCheck } from './update-policy.ts';
@@ -23,6 +23,29 @@ import { confirmPushToTalkDraft, preparePushToTalkDraft, prepareSpokenReply, typ
 import type { ModelChange } from './model-setup.ts';
 import { MODEL_TIMEOUT_MS } from './model.ts';
 import { MAX_STEPS } from './misato.ts';
+import type { DocumentStore } from './documents.ts';
+import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.ts';
+import { readConfig } from './config.ts';
+import { COMMAND_CATALOG } from './chat-command.ts';
+import { builtinPackRegistry, fpvFleetSnapshot } from './packs.ts';
+import { placementProbe } from './placement-campaign.ts';
+
+type PhotoStoreHost = StoreApi & {
+  photos?: PhotoStore;
+  documents?: DocumentStore;
+};
+
+const PHOTO_ROUTE_KINDS: Readonly<Record<string, PhotoOwnerKind>> = {
+  recipes: 'recipe',
+  crashes: 'crash',
+  parts: 'part',
+  batteries: 'battery',
+};
+
+function resolvePhotoOwner(s: PhotoStoreHost, kind: PhotoOwnerKind, id: string): string | undefined {
+  if (kind === 'recipe') return s.documents?.get(id)?.id;
+  return builtinPackRegistry.resolvePhotoOwner(s, kind, id);
+}
 async function body(req: IncomingMessage, limit = 8192): Promise<Record<string, unknown>> {
   let text = '';
   for await (const chunk of req) {
@@ -231,6 +254,7 @@ export function makeServer(
         ([
           '/api/status',
           '/api/doctor',
+          '/api/health/metrics',
           '/api/update',
           '/api/update/policy',
           '/api/push/key',
@@ -247,9 +271,13 @@ export function makeServer(
           '/api/queue',
           '/api/lists/show',
           '/api/batteries',
+          '/api/fleet',
+          '/api/packs',
+          '/api/commands',
         ].includes(path) ||
           /^\/api\/sorties\/[a-f0-9-]+(\/events)?$/.test(path) ||
-          /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path))
+          /^\/api\/bases\/[A-Za-z0-9-]{2,16}\/sorties\/[a-f0-9-]+$/.test(path) ||
+          /^\/api\/photos\/[a-f0-9-]+$/.test(path))
       )
     ) {
       reply(403, { error: 'Read-only client.' });
@@ -294,6 +322,48 @@ export function makeServer(
         }
         if (!feed.connect(res, () => root || (sessions.get(bearer) ?? 0) > Date.now()))
           reply(503, { error: 'Dashboard stream capacity reached.' });
+      } else if (req.method === 'GET' && path === '/api/commands') {
+        reply(200, { commands: COMMAND_CATALOG });
+      } else if (req.method === 'POST' && path === '/api/placement/plan') {
+        if (options.native || !root) {
+          reply(403, { error: 'Placement commands require the local admin token.' });
+          return;
+        }
+        if (!store.selectExecution) throw new Error('Placement planning is unavailable.');
+        const probe = placementProbe(await body(req));
+        reply(200, {
+          placement: probe.placement,
+          selection: await store.selectExecution(probe.orchestration),
+          budget: { timeoutMs: probe.timeoutMs, maxOutputTokens: probe.ask.maxTokens },
+        });
+      } else if (req.method === 'POST' && path === '/api/placement/run') {
+        if (options.native || !root) {
+          reply(403, { error: 'Placement commands require the local admin token.' });
+          return;
+        }
+        if (!store.runOrchestratedJob) throw new Error('Placement execution is unavailable.');
+        const value = await body(req);
+        if (value.confirmExecute !== true) throw new Error('Placement execution needs confirmExecute: true.');
+        const { confirmExecute: _confirmExecute, ...input } = value;
+        const probe = placementProbe(input);
+        const result = await store.runOrchestratedJob({
+          orchestration: probe.orchestration,
+          ask: probe.ask,
+          timeoutMs: probe.timeoutMs,
+        });
+        reply(200, {
+          placement: probe.placement,
+          selection: result.selection,
+          inference: result.inference,
+          provenance: result.provenance,
+        });
+      } else if (req.method === 'GET' && path === '/api/packs') {
+        const home = (store as { home?: string }).home;
+        const packsConfig = home ? readConfig(home).packs : undefined;
+        reply(200, {
+          packs: builtinPackRegistry.status(packsConfig),
+          panels: builtinPackRegistry.enabledPanels(packsConfig),
+        });
       } else if (req.method === 'GET' && path === '/api/dashboard/history') {
         if ([...url.searchParams.keys()].some((k) => k !== 'since')) throw new Error('Unknown dashboard query.');
         reply(200, await store.dashboardHistory(url.searchParams.get('since') ?? ''));
@@ -381,6 +451,34 @@ export function makeServer(
       } else if (req.method === 'GET' && path === '/api/batteries') {
         if (url.search) throw new Error('Unknown batteries query.');
         reply(200, { items: store.batteryCards ? await store.batteryCards() : [] });
+      } else if (req.method === 'POST' && path === '/api/batteries') {
+        if (!store.registerBattery) {
+          reply(503, { error: 'Battery registration unavailable.' });
+          return;
+        }
+        const b = await body(req);
+        const allowPendingResistance =
+          b.initialResistanceMohm === undefined ||
+          (Array.isArray(b.initialResistanceMohm) && b.initialResistanceMohm.length === 0);
+        const created = await store.registerBattery({
+          packNumber: Number(b.packNumber),
+          ...(typeof b.series === 'string' && b.series.trim()
+            ? { series: b.series.trim(), seriesColor: b.series.trim() }
+            : {}),
+          brand: typeof b.brand === 'string' && b.brand.trim() ? b.brand.trim() : 'Generic',
+          batteryType: typeof b.batteryType === 'string' ? b.batteryType.trim() : '',
+          cellCount: Number(b.cellCount),
+          capacityMah: Number(b.capacityMah),
+          purchaseDate:
+            typeof b.purchaseDate === 'string' && b.purchaseDate.trim()
+              ? b.purchaseDate.trim()
+              : new Date().toISOString().slice(0, 10),
+          ...(Array.isArray(b.initialResistanceMohm) && b.initialResistanceMohm.length > 0
+            ? { initialResistanceMohm: b.initialResistanceMohm.map(Number) }
+            : {}),
+          ...(allowPendingResistance ? { allowPendingResistance: true } : {}),
+        });
+        reply(201, created);
       } else if (req.method === 'GET' && path === '/api/lists/show') {
         if (!store.listsShow) {
           reply(404, { error: 'Lists unavailable.' });
@@ -553,6 +651,24 @@ export function makeServer(
           pilots: store.pilotRoster ? await store.pilotRoster() : [],
           ...(store.genericPilot ? { generic: await store.genericPilot() } : {}),
         });
+      } else if (req.method === 'GET' && path === '/api/eva/instances') {
+        reply(200, store.evaInstances ? await store.evaInstances() : { machines: [] });
+      } else if (req.method === 'GET' && path === '/api/health/metrics') {
+        reply(
+          200,
+          store.healthMetrics
+            ? await store.healthMetrics()
+            : { latestSample: null, recentSamples: [], links: [], thresholds: null, warnings: [] },
+        );
+      } else if (req.method === 'PUT' && path === '/api/health/thresholds') {
+        if (!store.setHealthThresholds) {
+          reply(503, { error: 'Health threshold settings unavailable.' });
+          return;
+        }
+        const b = await body(req);
+        const thresholds = await store.setHealthThresholds(b);
+        const metrics = store.healthMetrics ? await store.healthMetrics() : undefined;
+        reply(200, { ok: true, thresholds, warnings: metrics?.warnings ?? [] });
       } else if (req.method === 'POST' && path === '/api/pilots') {
         if (!store.addPilot) {
           reply(503, { error: 'Pilot setup unavailable.' });
@@ -895,6 +1011,7 @@ export function makeServer(
           name: 'NERV Agency',
           mode: 'local-core',
           build,
+          revisionSkew: checkRevisionSkew(build),
           ...(options.base ? { base: options.base } : {}),
           ...(await store.doctor()),
           update: await statusUpdate(),
@@ -903,7 +1020,67 @@ export function makeServer(
           timeZone: options.timeZone ?? 'Europe/Rome',
           ...(options.native ? { runtimeId: options.native.auth.runtimeId, home: options.native.auth.home } : {}),
         });
-      else if (await handleUpdateRoute(req, path, url, reply)) {
+      else if (req.method === 'GET' && /^\/api\/photos\/([a-f0-9-]+)$/.test(path)) {
+        const photoId = /^\/api\/photos\/([a-f0-9-]+)$/.exec(path)![1]!;
+        const photos = (store as StoreApi & { photos?: PhotoStore }).photos;
+        const found = photos?.get(photoId);
+        if (!found) {
+          reply(404, { error: 'Photo not found.' });
+          return;
+        }
+        res.writeHead(200, {
+          'content-type': found.photo.mimeType,
+          'cache-control': 'private, no-store',
+          'x-content-type-options': 'nosniff',
+        });
+        res.end(found.bytes);
+      } else if (req.method === 'GET' && path === '/api/fleet') {
+        reply(200, fpvFleetSnapshot(store));
+      } else if (/^\/api\/(recipes|crashes|parts|batteries)\/([^/]+)\/photos$/.test(path)) {
+        const m = /^\/api\/(recipes|crashes|parts|batteries)\/([^/]+)\/photos$/.exec(path)!;
+        const ownerKind = PHOTO_ROUTE_KINDS[m[1]!]!;
+        const rawId = decodeURIComponent(m[2]!);
+        const s = store as PhotoStoreHost;
+        const ownerId = resolvePhotoOwner(s, ownerKind, rawId);
+        if (!ownerId) {
+          reply(404, { error: 'Target record not found.' });
+          return;
+        }
+        if (req.method === 'GET') {
+          reply(200, s.photos?.list(ownerKind, ownerId) ?? []);
+          return;
+        }
+        if (req.method !== 'POST') {
+          reply(405, { error: 'Method not allowed.' });
+          return;
+        }
+        if (!s.photos) {
+          reply(400, { error: 'Photo storage is not available.' });
+          return;
+        }
+        const b = await body(req, Math.ceil((MAX_PHOTO_BYTES * 4) / 3) + 16_384);
+        if (
+          typeof b.dataBase64 !== 'string' ||
+          Object.keys(b).some((k) => !['dataBase64', 'mimeType', 'stepIndex', 'caption'].includes(k)) ||
+          (b.mimeType !== undefined && typeof b.mimeType !== 'string') ||
+          (b.stepIndex !== undefined &&
+            b.stepIndex !== null &&
+            (!Number.isInteger(b.stepIndex) || (b.stepIndex as number) < 0)) ||
+          (b.caption !== undefined && typeof b.caption !== 'string')
+        ) {
+          throw new Error('Expected dataBase64 and optional mimeType, stepIndex, caption.');
+        }
+        const bytes = Buffer.from(b.dataBase64, 'base64');
+        const saved = s.photos.attach({
+          ownerKind,
+          ownerId,
+          stepIndex: ownerKind === 'recipe' ? ((b.stepIndex as number | null | undefined) ?? null) : null,
+          bytes,
+          ...(b.mimeType !== undefined ? { mimeType: b.mimeType as string } : {}),
+          ...(b.caption !== undefined ? { caption: b.caption as string } : {}),
+        });
+        reply(201, saved);
+      } else if (await handleUpdateRoute(req, path, url, reply)) {
         // Handled by server-update.ts
       } else reply(404, { error: 'Unknown operation.' });
     } catch (e) {

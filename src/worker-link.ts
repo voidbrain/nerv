@@ -6,6 +6,7 @@ import { WebSocket, WebSocketServer } from 'ws';
 import { KAJI_CLOCK_SKEW_MS, signedHeaders, verifySigned, Nonces, type RootTrust } from './kaji-auth.ts';
 import type { BaseEntry } from './kaji.ts';
 import type { RegistryPort } from './kaji-link.ts';
+import { LinkLoadTracker } from './link-load.ts';
 import { validateParams, MAX_FRAME_BYTES, MAX_RPC_CONNECTIONS, MAX_RPC_INFLIGHT } from './rpc.ts';
 import { WORKER_LEASE_MS, WORKER_RESULT_BYTES, type WorkerItem, type WorkerContext } from './worker-jobs.ts';
 import {
@@ -46,6 +47,7 @@ interface Settings {
   reconnectMs?: number;
   offers?: () => string[];
   onOffers?: (id: string, offers: string[]) => void;
+  linkLoad?: LinkLoadTracker;
 }
 interface Pending {
   resolve: (value: unknown) => void;
@@ -98,6 +100,7 @@ class Peer {
     ws.on('message', (data, binary) => {
       const bytes = Buffer.isBuffer(data) ? data : Array.isArray(data) ? Buffer.concat(data) : Buffer.from(data);
       if (this.ended) return;
+      this.link.linkLoad.recordBytes(this.remote, 0, bytes.length);
       this.lastFrameAt = performance.now();
       if (binary || this.queued >= MAX_QUEUED_FRAMES || bytes.length > MAX_FRAME_BYTES) {
         this.end();
@@ -336,6 +339,7 @@ class Peer {
       throw Error('Worker transport saturated.');
     }
     this.sent++;
+    this.link.linkLoad.recordBytes(this.remote, Buffer.byteLength(encoded), 0);
     this.ws.send(encoded, (e) => {
       if (e) this.end();
     });
@@ -362,7 +366,16 @@ class Peer {
     // The outstanding heartbeat (one at most, see startHeartbeat) does not take a work slot.
     if (!heartbeat && this.pending.size - (this.pending.has(this.pingId) ? 1 : 0) >= MAX_RPC_INFLIGHT)
       return Promise.reject(Error('Worker pending request bound reached.'));
-    return new Promise((resolve, reject) => {
+    const finishInFlight = this.link.linkLoad.incInFlight(this.remote);
+    return new Promise((rawResolve, rawReject) => {
+      const resolve = (v: unknown) => {
+        finishInFlight();
+        rawResolve(v);
+      };
+      const reject = (e: unknown) => {
+        finishInFlight();
+        rawReject(e);
+      };
       // B-046: a timeout that fires late because this process's event loop was stalled is not evidence the peer is
       // gone: the peer did not get its full budget, and expired timers run before sockets are read. Such a late verdict
       // is deferred once by a fresh budget from the moment the loop resumed; a peer that really is gone still times out
@@ -494,7 +507,9 @@ export class WorkerLink {
   readonly settings: Settings;
   readonly heartbeatMs: number;
   readonly requestMs: number;
+  readonly linkLoad: LinkLoadTracker;
   private reconnectMs: number;
+  private hasConnectedOnce = new Set<string>();
   private server = new WebSocketServer({ noServer: true, maxPayload: MAX_FRAME_BYTES, perMessageDeflate: false });
   private peers = new Map<string, Peer>();
   private client?: Peer;
@@ -517,6 +532,7 @@ export class WorkerLink {
     this.heartbeatMs = settings.heartbeatMs ?? 30000;
     this.requestMs = settings.requestMs ?? 10000;
     this.reconnectMs = settings.reconnectMs ?? 1000;
+    this.linkLoad = settings.linkLoad ?? new LinkLoadTracker();
     this.unwatchRegistry = settings.registry.onChange?.(() => this.refreshAuthority(true).then(() => undefined));
   }
   currentAuthority() {
@@ -810,6 +826,8 @@ export class WorkerLink {
         socket.once('error', reject);
         socket.once('open', () => {
           this.connectingSocket = undefined;
+          if (this.hasConnectedOnce.has(owner)) this.linkLoad.recordReconnect(owner);
+          else this.hasConnectedOnce.add(owner);
           peer = new Peer(this, socket, owner, 'worker', target.publicKey, session);
           peer.epoch = state.epoch;
           this.client = peer;
