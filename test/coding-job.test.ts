@@ -4,7 +4,12 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'no
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, it } from 'node:test';
-import { runCodingJobInWorktree, type AllowedCodingRepo } from '../src/coding-job.ts';
+import {
+  buildHarnessPushProposal,
+  runCodingJobInWorktree,
+  runHarnessJobInWorktree,
+  type AllowedCodingRepo,
+} from '../src/coding-job.ts';
 import { Store } from '../src/store.ts';
 
 const dirs: string[] = [];
@@ -238,6 +243,79 @@ describe('F-084-T03 push and open the PR behind approval', () => {
       execFileSync('git', ['ls-remote', '--heads', remotePath, job.branch], { encoding: 'utf8' }),
       new RegExp(`refs/heads/${job.branch}`),
     );
+    store.close();
+  });
+});
+
+describe('F-091-T01 harness job template', () => {
+  it('refuses untagged or branch template references before creating a worktree', async () => {
+    const repoPath = makeRepo();
+    const allowlist: AllowedCodingRepo[] = [{ id: 'sample', localPath: repoPath, defaultBranch: 'main' }];
+    for (const badTag of ['', 'main', 'HEAD', 'latest']) {
+      await assert.rejects(
+        () =>
+          runHarnessJobInWorktree(
+            { repoId: 'sample', jobId: 'h0', templateRepo: 'https://example.invalid/harness', templateTag: badTag },
+            allowlist,
+            async () => ({ testPassed: true, testSummary: 'ok', tokens: 0, costUsd: 0 }),
+          ),
+        /pinned release tag/,
+      );
+    }
+  });
+
+  it('applies a pinned template tag following APPLY.md, runs checks, and opens a PR behind Orange approval', async () => {
+    const { root, repoPath, remotePath } = makeRepoWithBareRemote();
+    const allowlist: AllowedCodingRepo[] = [{ id: 'sample', localPath: repoPath, defaultBranch: 'main' }];
+
+    const job = await runHarnessJobInWorktree(
+      {
+        repoId: 'sample',
+        jobId: 'h1',
+        templateRepo: 'https://example.invalid/project-harness',
+        templateTag: 'v10.1.0',
+      },
+      allowlist,
+      async (worktreePath, prompt, context) => {
+        assert.equal(context.templateTag, 'v10.1.0');
+        assert.equal(context.applyProcedurePath, 'APPLY.md');
+        assert.match(prompt, /v10\.1\.0/);
+        assert.match(prompt, /APPLY\.md/);
+        writeFileSync(join(worktreePath, '.harness.json'), '{"version":"10.1.0"}\n', 'utf8');
+        execFileSync('git', ['-C', worktreePath, 'add', '.'], { stdio: 'pipe' });
+        execFileSync('git', ['-C', worktreePath, 'commit', '-m', 'apply harness v10.1.0'], { stdio: 'pipe' });
+        return { testPassed: true, testSummary: 'check:fast passed', tokens: 500, costUsd: 0.02 };
+      },
+    );
+
+    assert.equal(job.status, 'completed');
+    assert.equal(job.templateTag, 'v10.1.0');
+    assert.equal(job.applyProcedurePath, 'APPLY.md');
+    assert.equal(job.testResult.passed, true);
+
+    const store = new Store(join(root, 'nerv.db'));
+    store.codingPrOpener = ({ branch, title }) => {
+      assert.equal(branch, job.branch);
+      assert.match(title, /v10\.1\.0/);
+      return 'https://example.invalid/org/repo/pull/101';
+    };
+
+    const sortie = store.ledger.openSortie('owner', 'Apply harness v10.1.0', 'trusted');
+    const proposal = store.runAction(sortie, buildHarnessPushProposal(job, { baseBranch: 'main' }));
+    assert.equal(proposal.outcome, 'approval');
+    assert.equal(proposal.pattern, 'orange');
+    assert.equal(
+      execFileSync('git', ['ls-remote', '--heads', remotePath, job.branch], { encoding: 'utf8' }).trim(),
+      '',
+    );
+
+    const decided = store.decide(proposal.approvalId!, 'approve', 'owner');
+    assert.equal(decided.decision, 'approve');
+    assert.deepEqual(decided.result, {
+      branch: job.branch,
+      remote: 'origin',
+      prUrl: 'https://example.invalid/org/repo/pull/101',
+    });
     store.close();
   });
 });

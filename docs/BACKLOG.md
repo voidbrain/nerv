@@ -35,7 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 91.75 h agent + 11.25 h owner across 130 open steps of 43 features and 22 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
+**Remaining effort:** 88.5 h agent + 11.25 h owner across 123 open steps of 40 features and 22 other records. 79.25 h of actual effort recorded on 122 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -699,9 +699,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-083-T04 — Live check with a real saved recipe (Planned).
+💻 **→** Next: F-083-T07 — Timers in a cooking session (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -713,20 +713,20 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-083-t04"></a>F-083-T04 — Live check with a real saved recipe | 0.25 h | 0 h | 0.25 h | Planned | — | — | 🤖 | — |
 | 🟢 Small | <a id="f-083-t07"></a>F-083-T07 — Timers in a cooking session | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-083-T08](#f-083-t08), [F-083-T09](#f-083-t09) | 🤖 | [PR #576](https://github.com/voidbrain/nerv/pull/576) implementation |
 | 🟢 Small | <a id="f-083-t10"></a>F-083-T10 — Recipe photos | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | — | 🤖 | [PR #586](https://github.com/voidbrain/nerv/pull/586) implementation |
 | 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned | [F-083-T07](#f-083-t07) | — | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-083-t09"></a>F-083-T09 — Owner check: a recipe cooked hands-free | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-083-T07](#f-083-t07) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 5.25 h | 0.75 h (2 of 10 steps recorded) | 1.75 h agent + 0.25 h owner | 5 of 10 completed | | | | |
+| 🟡 Medium | **Total** | 5.25 h | 0.75 h (2 of 10 steps recorded) | 1.5 h agent + 0.25 h owner | 6 of 10 completed | | | | |
 
-<details><summary>Done steps (5)</summary>
+<details><summary>Done steps (6)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-083-t01"></a>F-083-T01 — Saved documents with categories | 1 h | 0.5 h (measured) | Completed | — |
 | — | <a id="f-083-t02"></a>F-083-T02 — Compute from saved values only | 1 h | 0.25 h (stated) | Completed | — |
 | — | <a id="f-083-t03"></a>F-083-T03 — Recipe card | 0.5 h | 0 h | Completed | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
+| — | <a id="f-083-t04"></a>F-083-T04 — Live check with a real saved recipe | 0.25 h | 0 h | Completed | [PR #640](https://github.com/voidbrain/nerv/pull/640) Saved-recipe live check recorded in docs/acceptance/f083-t04-saved-recipe.md (F-083-T04) |
 | — | <a id="f-083-t05"></a>F-083-T05 — Purchases and shelf life | 0.5 h | 0 h | Completed | [PR #481](https://github.com/voidbrain/nerv/pull/481) implementation |
 | 🟢 Small | <a id="f-083-t06"></a>F-083-T06 — Cooking session: ingredients and steps | 0.5 h | 0 h | Verified | [PR #561](https://github.com/voidbrain/nerv/pull/561) cooking session; CI pending |
 
@@ -739,9 +739,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-083-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep · F-083-T05: [PR #481](https://github.com/voidbrain/nerv/pull/481) implementation · F-083-T06: [PR #561](https://github.com/voidbrain/nerv/pull/561) cooking session; CI pending · F-083-T07: [PR #576](https://github.com/voidbrain/nerv/pull/576) implementation · F-083-T10: [PR #586](https://github.com/voidbrain/nerv/pull/586) implementation. [PR #586](https://github.com/voidbrain/nerv/pull/586) (F-083-T10); [PR #576](https://github.com/voidbrain/nerv/pull/576) (F-083-T07); [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #481](https://github.com/voidbrain/nerv/pull/481); [PR #489](https://github.com/voidbrain/nerv/pull/489) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-083-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep · F-083-T04: [PR #640](https://github.com/voidbrain/nerv/pull/640) Saved-recipe live check recorded in docs/acceptance/f083-t04-saved-recipe.md (F-083-T04) · F-083-T05: [PR #481](https://github.com/voidbrain/nerv/pull/481) implementation · F-083-T06: [PR #561](https://github.com/voidbrain/nerv/pull/561) cooking session; CI pending · F-083-T07: [PR #576](https://github.com/voidbrain/nerv/pull/576) implementation · F-083-T10: [PR #586](https://github.com/voidbrain/nerv/pull/586) implementation. [PR #640](https://github.com/voidbrain/nerv/pull/640) (`f083-t04-saved-recipe.md`); [PR #586](https://github.com/voidbrain/nerv/pull/586) (F-083-T10); [PR #576](https://github.com/voidbrain/nerv/pull/576) (F-083-T07); [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #481](https://github.com/voidbrain/nerv/pull/481); [PR #489](https://github.com/voidbrain/nerv/pull/489) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | 2026-11-20: `node --test test/photos.test.ts test/documents.test.ts test/cooking-session.test.ts test/telegram.test.ts` (26/26 passed), `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-083-T05 verified: [PR #481](https://github.com/voidbrain/nerv/pull/481) merged on green CI (test/pantry.test.ts). `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history). `F-083-T02` added `computeFromSavedDocument` / `DocumentStore.compute` in `src/documents.ts` and read-only tool `docs.compute` in `src/executors.ts` (cites saved values & arithmetic, asks instead of guessing on missing ratio/setting/unit mismatch); verified with `node --test test/documents.test.ts` and `npm run check:fast`. |
+| Verification | 2026-11-22: F-083-T04 saved-recipe live check recorded in [f083-t04-saved-recipe.md](acceptance/f083-t04-saved-recipe.md). 2026-11-20: `node --test test/photos.test.ts test/documents.test.ts test/cooking-session.test.ts test/telegram.test.ts` (26/26 passed), `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-083-T05 verified: [PR #481](https://github.com/voidbrain/nerv/pull/481) merged on green CI (test/pantry.test.ts). `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history). `F-083-T02` added `computeFromSavedDocument` / `DocumentStore.compute` in `src/documents.ts` and read-only tool `docs.compute` in `src/executors.ts` (cites saved values & arithmetic, asks instead of guessing on missing ratio/setting/unit mismatch); verified with `node --test test/documents.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
 
 </details>
@@ -988,102 +988,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-084"></a>[✨ F-084](#top)
-
-**Coding job on a local repository: change, test, open a PR**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-084-T04 — Live check on a scratch repository (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "open this project folder, refactor this function, open a PR on GitHub". F-006 places models and workers; no record owns the coding job itself (repository, worktree, coding agent, tests, PR). |
-| **Reproduce** | Ask for a named change in a repository on a base; today nothing runs. |
-| **Check** | A job names a repository the owner allowed and a change; it runs in a fresh worktree from the default branch inside a sandbox (F-049) with a coding agent; the owner sees the diff, the test result and the cost before anything leaves the machine; pushing and opening the PR is an Orange action on an approval card; the PR link comes back to the channel; the primary checkout is never edited; the instruction load is measured in tokens and a model route that cannot hold it is refused; long work is split into steps, each in a fresh session with a persisted handoff, so a full context never silently drops a rule. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-084-t04"></a>F-084-T04 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned | — |
-| 🟢 Small | **Total** | 3.25 h | 0.25 h (1 of 4 steps recorded) | 0.25 h | 3 of 4 completed | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-084-t01"></a>F-084-T01 — Decision: the coding-job contract | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-084-t02"></a>F-084-T02 — Run the change in a fresh worktree | 1.5 h | 0 h | Completed | [PR #494](https://github.com/voidbrain/nerv/pull/494) implementation |
-| — | <a id="f-084-t03"></a>F-084-T03 — Push and open the PR behind approval | 1 h | 0 h | Completed | [PR #632](https://github.com/voidbrain/nerv/pull/632) Push branch and open PR behind Orange approval (F-084-T03) |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-084.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-084-T02: [PR #494](https://github.com/voidbrain/nerv/pull/494) implementation · F-084-T03: [PR #632](https://github.com/voidbrain/nerv/pull/632) Push branch and open PR behind Orange approval (F-084-T03). [PR #632](https://github.com/voidbrain/nerv/pull/632); [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #494](https://github.com/voidbrain/nerv/pull/494) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-084-T02 verified: [PR #494](https://github.com/voidbrain/nerv/pull/494) merged on green CI. `F-084-T01` decision written in [coding-job-contract.md](decisions/coding-job-contract.md); verified with `npm run check:fast`. 2026-11-22: F-084-T03 verified (`coding.push_pr` Orange gate + `pushBranchAndOpenPr`); `node --test test/coding-job.test.ts` (5/5 passed) and `npm run check:fast`. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-091"></a>[✨ F-091](#top)
-
-**Apply the project harness to a repository as a coding job**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-091-T01 — Harness job template (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "apply the harness to this project". It is a coding job (F-084) that uses the apply-harness skill from a pinned template release. |
-| **Reproduce** | Ask NERV to apply the harness to a scratch repository. |
-| **Check** | The job uses a pinned template tag, follows its APPLY procedure in a fresh worktree, runs the project's checks and opens a PR behind approval like any coding job; it never applies an untagged or cached template as a release. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-091-t01"></a>F-091-T01 — Harness job template | 0.5 h | 0 h | 0.5 h | Planned | — | [F-091-T02](#f-091-t02) |
-| 🟢 Small | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | 0.25 h | Planned | [F-091-T01](#f-091-t01) | — |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h | 0 of 2 completed | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-091.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | Pending. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
 ### <a id="f-078"></a>[✨ F-078](#top)
 
 **Model evaluation: the four candidate models by role and base, Mac and mini PC**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-078-T09 — Tabgha campaign: remote endpoint and small local fallback (Planned).
+💻 **→** Next: F-078-T07 — Comparison report and profile status (Planned).
 
 | | |
 |---|---|
@@ -1095,12 +1008,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 1.5 h | 0 h | 1.5 h | Planned | — | [F-078-T07](#f-078-t07) | 🤖 | — |
-| 🟢 Small | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned | [F-078-T09](#f-078-t09) | [F-078-T08](#f-078-t08) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-078-t07"></a>F-078-T07 — Comparison report and profile status | 0.5 h | 0 h | 0.5 h | Planned | — | [F-078-T08](#f-078-t08) | 🤖 | — |
 | 🟢 Small | <a id="f-078-t08"></a>F-078-T08 — Adopt the new Gauntlet packs (gauntlet F-012) when released | 0.5 h | 0 h | 0.5 h | Planned | [F-078-T07](#f-078-t07) | — | ⏳ 🤖 | [PR #630](https://github.com/voidbrain/nerv/pull/630) campaign evidence; [PR #634](https://github.com/voidbrain/nerv/pull/634) overnight rerun evidence |
-| 🟡 Medium | **Total** | 4.75 h | 0.75 h (2 of 9 steps recorded) | 2.5 h | 6 of 9 completed | | | | |
+| 🟢 Small | **Total** | 4.75 h | 0.75 h (2 of 9 steps recorded) | 1 h | 7 of 9 completed | | | | |
 
-<details><summary>Done steps (6)</summary>
+<details><summary>Done steps (7)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -1110,6 +1022,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-078-t04"></a>F-078-T04 — Role campaign on Neo Tokyo-3 | 0.5 h | 0 h | Completed | — |
 | — | <a id="f-078-t05"></a>F-078-T05 — Prepare Tabgha for the campaign: download qwen2.5:3b | 0.25 h | 0.25 h (stated) | Completed | [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence |
 | — | <a id="f-078-t06"></a>F-078-T06 — Campaign for the larger candidates | 0.5 h | 0 h | Completed | — |
+| — | <a id="f-078-t09"></a>F-078-T09 — Tabgha campaign: remote endpoint and small local fallback | 1.5 h | 0 h | Completed | [PR #643](https://github.com/voidbrain/nerv/pull/643) Tabgha remote and local fallback campaign (F-078-T09) |
 
 </details>
 
@@ -1120,10 +1033,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-078-T03: [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed · F-078-T05: [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence · F-078-T08: [PR #630](https://github.com/voidbrain/nerv/pull/630) campaign evidence; [PR #634](https://github.com/voidbrain/nerv/pull/634) overnight rerun evidence. [PR #634](https://github.com/voidbrain/nerv/pull/634) T08 rerun; [PR #630](https://github.com/voidbrain/nerv/pull/630) T08 campaign; [PR #475](https://github.com/voidbrain/nerv/pull/475); [PR #477](https://github.com/voidbrain/nerv/pull/477) (merged; CI green); Gauntlet 0.9.0 pin and harness 8.15.0 reconciliation prepared for PR #427; [PR #403](https://github.com/voidbrain/nerv/pull/403) T03 close; [PR #402](https://github.com/voidbrain/nerv/pull/402) T03; [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
+| PR / evidence | Steps: F-078-T03: [PR #402](https://github.com/voidbrain/nerv/pull/402) Recorded the approved 144-case Neo Tokyo-3 smoke campaign; [PR #403](https://github.com/voidbrain/nerv/pull/403) Closed T03 after required CI passed · F-078-T05: [PR #515](https://github.com/voidbrain/nerv/pull/515) evidence · F-078-T08: [PR #630](https://github.com/voidbrain/nerv/pull/630) campaign evidence; [PR #634](https://github.com/voidbrain/nerv/pull/634) overnight rerun evidence · F-078-T09: [PR #643](https://github.com/voidbrain/nerv/pull/643) Tabgha remote and local fallback campaign (F-078-T09). [PR #643](https://github.com/voidbrain/nerv/pull/643) T09 Tabgha campaign; [PR #634](https://github.com/voidbrain/nerv/pull/634) T08 rerun; [PR #630](https://github.com/voidbrain/nerv/pull/630) T08 campaign; [PR #475](https://github.com/voidbrain/nerv/pull/475); [PR #477](https://github.com/voidbrain/nerv/pull/477) (merged; CI green); Gauntlet 0.9.0 pin and harness 8.15.0 reconciliation prepared for PR #427; [PR #403](https://github.com/voidbrain/nerv/pull/403) T03 close; [PR #402](https://github.com/voidbrain/nerv/pull/402) T03; [PR #379](https://github.com/voidbrain/nerv/pull/379) [PR #377](https://github.com/voidbrain/nerv/pull/377) [PR #375](https://github.com/voidbrain/nerv/pull/375) plan; owner request 2026-11-13; [Gemma smoke 2026-11-09](evaluations/2026-11-09-gemma-common-smoke.md); docs/agents/model-profiles.json |
 | Depends on | — |
 | Opened | 2026-11-13 |
-| Verification | 2026-11-16: T04/T06 report per-role model outcomes and aggregate metadata; PRs #475/#477 plan, validate, Windows and native-macos passed, full-suite skipped. 35 cases remain pending: 28 under F-078-T08 and seven system-flow cases under F-079. 2026-11-14: T03 recorded 144/144 graded outcomes across the three approved models and three packs; `node tools/gauntlet.mjs pending` exits 0; PR #402 CI run 43595307489 passed plan, validate, Windows, native-macos and full-suite on rerun after one transient Windows temp-directory cleanup failure. |
+| Verification | 2026-11-22: F-078-T09 Tabgha campaign (local `qwen2.5:1.5b` / `qwen2.5:3b`, remote `gemma4:26b` / `qwen2.5-coder:14b` to Neo Tokyo-3, asleep probe, memory stats) recorded in [2026-11-22-f078-t09-tabgha-campaign.md](evaluations/2026-11-22-f078-t09-tabgha-campaign.md); verified with `npm run check:fast`. 2026-11-16: T04/T06 report per-role model outcomes and aggregate metadata; PRs #475/#477 plan, validate, Windows and native-macos passed, full-suite skipped. 35 cases remain pending: 28 under F-078-T08 and seven system-flow cases under F-079. 2026-11-14: T03 recorded 144/144 graded outcomes across the three approved models and three packs; `node tools/gauntlet.mjs pending` exits 0; PR #402 CI run 43595307489 passed plan, validate, Windows, native-macos and full-suite on rerun after one transient Windows temp-directory cleanup failure. |
 | Reviewed | 2026-11-22 |
 
 </details>
@@ -1380,6 +1293,101 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-084"></a>[✨ F-084](#top)
+
+**Coding job on a local repository: change, test, open a PR**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "open this project folder, refactor this function, open a PR on GitHub". F-006 places models and workers; no record owns the coding job itself (repository, worktree, coding agent, tests, PR). |
+| **Reproduce** | Ask for a named change in a repository on a base; today nothing runs. |
+| **Check** | A job names a repository the owner allowed and a change; it runs in a fresh worktree from the default branch inside a sandbox (F-049) with a coding agent; the owner sees the diff, the test result and the cost before anything leaves the machine; pushing and opening the PR is an Orange action on an approval card; the PR link comes back to the channel; the primary checkout is never edited; the instruction load is measured in tokens and a model route that cannot hold it is refused; long work is split into steps, each in a fresh session with a persisted handoff, so a full context never silently drops a rule. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 3.25 h | 0.25 h (1 of 4 steps recorded) | 0 h | 4 of 4 completed | |
+
+<details><summary>Done steps (4)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-084-t01"></a>F-084-T01 — Decision: the coding-job contract | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-084-t02"></a>F-084-T02 — Run the change in a fresh worktree | 1.5 h | 0 h | Completed | [PR #494](https://github.com/voidbrain/nerv/pull/494) implementation |
+| — | <a id="f-084-t03"></a>F-084-T03 — Push and open the PR behind approval | 1 h | 0 h | Completed | [PR #632](https://github.com/voidbrain/nerv/pull/632) Push branch and open PR behind Orange approval (F-084-T03) |
+| — | <a id="f-084-t04"></a>F-084-T04 — Live check on a scratch repository | 0.25 h | 0 h | Completed | [PR #637](https://github.com/voidbrain/nerv/pull/637) Scratch-repository check recorded in docs/acceptance/f084-scratch-repo-check.md (F-084-T04) |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-084.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-084-T02: [PR #494](https://github.com/voidbrain/nerv/pull/494) implementation · F-084-T03: [PR #632](https://github.com/voidbrain/nerv/pull/632) Push branch and open PR behind Orange approval (F-084-T03) · F-084-T04: [PR #637](https://github.com/voidbrain/nerv/pull/637) Scratch-repository check recorded in docs/acceptance/f084-scratch-repo-check.md (F-084-T04). [PR #637](https://github.com/voidbrain/nerv/pull/637) (`f084-scratch-repo-check.md`); [PR #632](https://github.com/voidbrain/nerv/pull/632); [PR #462](https://github.com/voidbrain/nerv/pull/462); [PR #494](https://github.com/voidbrain/nerv/pull/494) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-084-T02 verified: [PR #494](https://github.com/voidbrain/nerv/pull/494) merged on green CI. `F-084-T01` decision written in [coding-job-contract.md](decisions/coding-job-contract.md); verified with `npm run check:fast`. 2026-11-22: F-084-T03 verified (`coding.push_pr` Orange gate + `pushBranchAndOpenPr`); `node --test test/coding-job.test.ts` (5/5 passed) and `npm run check:fast`. 2026-11-22: F-084-T04 scratch-repository check recorded in [f084-scratch-repo-check.md](acceptance/f084-scratch-repo-check.md). |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-091"></a>[✨ F-091](#top)
+
+**Apply the project harness to a repository as a coding job**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 0 h | — | — | — | — | — |
+
+💻 **→** Next: all steps closed; verify and close the record.
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "apply the harness to this project". It is a coding job (F-084) that uses the apply-harness skill from a pinned template release. |
+| **Reproduce** | Ask NERV to apply the harness to a scratch repository. |
+| **Check** | The job uses a pinned template tag, follows its APPLY procedure in a fresh worktree, runs the project's checks and opens a PR behind approval like any coding job; it never applies an untagged or cached template as a release. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| — | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 0 h | 3 of 3 completed | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-091-t01"></a>F-091-T01 — Harness job template | 0.5 h | 0 h | Completed | [PR #635](https://github.com/voidbrain/nerv/pull/635) Pinned-tag harness job template (F-091-T01) |
+| — | <a id="f-091-t02"></a>F-091-T02 — Live check on a scratch repository | 0.25 h | 0 h | Completed | [PR #639](https://github.com/voidbrain/nerv/pull/639) Harness scratch-repository check recorded in docs/acceptance/f091-harness-scratch-check.md (F-091-T02) |
+| — | <a id="f-091-t03"></a>F-091-T03 — Rerun the gauntlet cases at the F-091-T01 source | 0.25 h | 0 h | Completed | [PR #642](https://github.com/voidbrain/nerv/pull/642) Gauntlet multi-step-agent/&#42; and nerv-system-flows/&#42; reruns (F-091-T03) |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-091.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-091-T01: [PR #635](https://github.com/voidbrain/nerv/pull/635) Pinned-tag harness job template (F-091-T01) · F-091-T02: [PR #639](https://github.com/voidbrain/nerv/pull/639) Harness scratch-repository check recorded in docs/acceptance/f091-harness-scratch-check.md (F-091-T02) · F-091-T03: [PR #642](https://github.com/voidbrain/nerv/pull/642) Gauntlet multi-step-agent/&#42; and nerv-system-flows/&#42; reruns (F-091-T03). [PR #642](https://github.com/voidbrain/nerv/pull/642) (F-091-T03); [PR #639](https://github.com/voidbrain/nerv/pull/639) (`f091-harness-scratch-check.md`); [PR #635](https://github.com/voidbrain/nerv/pull/635); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-22: F-091-T01 verified (`runHarnessJobInWorktree`, `assertPinnedTemplateTag`, `buildHarnessPushProposal` behind `coding.push_pr` Orange gate); `node --test test/coding-job.test.ts` (7/7 passed) and `npm run check:fast`. 2026-11-22: F-091-T02 scratch-repository check recorded in [f091-harness-scratch-check.md](acceptance/f091-harness-scratch-check.md). 2026-11-22: F-091-T03 gauntlet reruns (`multi-step-agent/*` + `nerv-system-flows/*`) passed; `node tools/gauntlet.mjs pending` and `npm run check:gauntlet-runs` exited 0. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-008"></a>[✨ F-008](#top)
 
 **FPV batteries: registry, charge state, resistance checks and storage reminders**
@@ -2294,9 +2302,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 0 h | — | — | — | — | — |
 
-💻 **→** Next: F-114-T05 — Live check: turn FPV off and on (Planned).
+💻 **→** Next: all steps closed; verify and close the record.
 
 | | |
 |---|---|
@@ -2308,11 +2316,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-114-t05"></a>F-114-T05 — Live check: turn FPV off and on | 0.25 h | 0 h | 0.25 h | Planned | — |
-| 🟢 Small | <a id="f-114-t06"></a>F-114-T06 — Rerun the two expensive system cases at the F-114-T01 source | 0.25 h | 0 h | 0.25 h | Planned | — |
-| 🟢 Small | **Total** | 7 h | 0 h (0 of 6 steps recorded) | 0.5 h | 4 of 6 completed | |
+| — | **Total** | 7 h | 0 h (0 of 6 steps recorded) | 0 h | 6 of 6 completed | |
 
-<details><summary>Done steps (4)</summary>
+<details><summary>Done steps (6)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -2320,6 +2326,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-114-t02"></a>F-114-T02 — FPV pack: batteries, fleet, builds and blackbox behind the manifest | 2 h | 0 h | Completed | [PR #628](https://github.com/voidbrain/nerv/pull/628) FPV pack behind the manifest |
 | — | <a id="f-114-t03"></a>F-114-T03 — Cooking pack: recipes, cooking sessions and pantry behind the manifest | 1.5 h | 0 h | Completed | [PR #629](https://github.com/voidbrain/nerv/pull/629) Cooking pack behind the manifest |
 | — | <a id="f-114-t04"></a>F-114-T04 — Chat routing when two packs claim the same message | 1 h | 0 h | Completed | [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message |
+| — | <a id="f-114-t05"></a>F-114-T05 — Live check: turn FPV off and on | 0.25 h | 0 h | Completed | [PR #641](https://github.com/voidbrain/nerv/pull/641) FPV pack off-and-on toggle check recorded in docs/acceptance/f114-t05-fpv-toggle.md (F-114-T05) |
+| — | <a id="f-114-t06"></a>F-114-T06 — Rerun the two expensive system cases at the F-114-T01 source | 0.25 h | 0 h | Completed | [PR #642](https://github.com/voidbrain/nerv/pull/642) Gauntlet nerv-system-flows/stress and nerv-system-flows/browser reruns (F-114-T06) |
 
 </details>
 
@@ -2330,9 +2338,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-114-T01: [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config · F-114-T02: [PR #628](https://github.com/voidbrain/nerv/pull/628) FPV pack behind the manifest · F-114-T03: [PR #629](https://github.com/voidbrain/nerv/pull/629) Cooking pack behind the manifest · F-114-T04: [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message. [FPV packs decision](decisions/fpv-packs.md); opened in [PR #593](https://github.com/voidbrain/nerv/pull/593); F-114-T01 in [PR #621](https://github.com/voidbrain/nerv/pull/621); F-114-T02 in [PR #628](https://github.com/voidbrain/nerv/pull/628); F-114-T03 in [PR #629](https://github.com/voidbrain/nerv/pull/629); F-114-T04 in [PR #627](https://github.com/voidbrain/nerv/pull/627) |
+| PR / evidence | Steps: F-114-T01: [PR #621](https://github.com/voidbrain/nerv/pull/621) Pack manifest and registry, on and off in config · F-114-T02: [PR #628](https://github.com/voidbrain/nerv/pull/628) FPV pack behind the manifest · F-114-T03: [PR #629](https://github.com/voidbrain/nerv/pull/629) Cooking pack behind the manifest · F-114-T04: [PR #627](https://github.com/voidbrain/nerv/pull/627) Chat routing when two packs claim the same message · F-114-T05: [PR #641](https://github.com/voidbrain/nerv/pull/641) FPV pack off-and-on toggle check recorded in docs/acceptance/f114-t05-fpv-toggle.md (F-114-T05) · F-114-T06: [PR #642](https://github.com/voidbrain/nerv/pull/642) Gauntlet nerv-system-flows/stress and nerv-system-flows/browser reruns (F-114-T06). [FPV packs decision](decisions/fpv-packs.md); opened in [PR #593](https://github.com/voidbrain/nerv/pull/593); F-114-T01 in [PR #621](https://github.com/voidbrain/nerv/pull/621); F-114-T02 in [PR #628](https://github.com/voidbrain/nerv/pull/628); F-114-T03 in [PR #629](https://github.com/voidbrain/nerv/pull/629); F-114-T04 in [PR #627](https://github.com/voidbrain/nerv/pull/627); F-114-T05 in [PR #641](https://github.com/voidbrain/nerv/pull/641); F-114-T06 in [PR #642](https://github.com/voidbrain/nerv/pull/642) |
 | Opened | 2026-11-20 |
-| Verification | Pending |
+| Verification | 2026-11-22: F-114-T05 FPV pack off-and-on toggle check recorded in [f114-t05-fpv-toggle.md](acceptance/f114-t05-fpv-toggle.md). 2026-11-22: F-114-T06 expensive system-flow reruns (`nerv-system-flows/stress` and `nerv-system-flows/browser`) passed; `node tools/gauntlet.mjs pending` and `npm run check:gauntlet-runs` exited 0. |
 | Reviewed | 2026-11-20 |
 
 </details>

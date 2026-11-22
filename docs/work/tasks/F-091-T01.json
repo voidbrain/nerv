@@ -4,7 +4,7 @@
  "parent": "F-091",
  "title": "Harness job template",
  "goal": "A coding job that applies a pinned template release",
- "status": "planned",
+ "status": "closed",
  "acceptance": [
   "Pinned tag; APPLY followed; checks run; PR behind approval"
  ],
@@ -34,8 +34,14 @@
   "estimate": "0.5 h",
   "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
   "reviewed": "2026-11-14",
-  "agentHours": 0.5,
+  "agentHours": 0,
   "baselineAgentHours": 0.5,
   "estimateAgentHours": 0.5
- }
+ },
+ "prs": [
+  {
+   "pr": 635,
+   "note": "Pinned-tag harness job template (F-091-T01)"
+  }
+ ]
 }

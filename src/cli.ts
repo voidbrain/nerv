@@ -9,7 +9,12 @@ import { runResumeEngineTick } from './resume-intent.ts';
 import { createHeadlessResumeDeps, type HeadlessResumeTarget } from './headless-resume.ts';
 import { runCardCopyRule, type CopyRule } from './storage-copy.ts';
 import { sliceModelWithProfile, type SlicerProfile } from './slicer.ts';
-import { runCodingJobInWorktree, type AllowedCodingRepo } from './coding-job.ts';
+import {
+  buildHarnessPushProposal,
+  runCodingJobInWorktree,
+  runHarnessJobInWorktree,
+  type AllowedCodingRepo,
+} from './coding-job.ts';
 import { DesktopRecordingSession, type DesktopRecordingHeader } from './desktop-recording.ts';
 import { defaultAutoUpdatePolicy } from './update-policy.ts';
 import { startAutoUpdateScheduler } from './update-scheduler.ts';
@@ -898,6 +903,25 @@ try {
           }),
         );
         console.log(JSON.stringify(res, null, 2));
+        break;
+      }
+      case 'harness-job': {
+        if (!args[0] || !args[1] || !args[2] || !args[3] || !args[4]) {
+          throw new Error('Usage: nerv harness-job <repoId> <jobId> <templateRepo> <templateTag> <allowlist.json>');
+        }
+        const allowlist = JSON.parse(readFileSync(resolve(args[4]), 'utf8')) as AllowedCodingRepo[];
+        const res = await runHarnessJobInWorktree(
+          { repoId: args[0], jobId: args[1], templateRepo: args[2], templateTag: args[3] },
+          allowlist,
+          async () => ({
+            testPassed: false,
+            testSummary: 'No live coding-agent runner bound in CLI.',
+            tokens: 0,
+            costUsd: 0,
+          }),
+        );
+        const proposal = buildHarnessPushProposal(res, { baseBranch: 'main' });
+        console.log(JSON.stringify({ result: res, proposal }, null, 2));
         break;
       }
       case 'desktop-record': {

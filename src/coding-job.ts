@@ -208,3 +208,112 @@ export async function runCodingJobInWorktree(
     options.signal?.removeEventListener('abort', onAbort);
   }
 }
+
+const PINNED_TEMPLATE_TAG_RE = /^v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
+
+export interface HarnessJobRequest {
+  repoId: string;
+  jobId: string;
+  templateRepo: string;
+  templateTag: string;
+  prompt?: string;
+}
+
+export interface HarnessJobContext {
+  templateRepo: string;
+  templateTag: string;
+  applyProcedurePath: 'APPLY.md';
+}
+
+export type HarnessJobRunner = (
+  worktreePath: string,
+  prompt: string,
+  context: HarnessJobContext,
+  signal: AbortSignal,
+) => Promise<CodingJobAgentOutput>;
+
+export interface HarnessJobResult extends CodingJobResult {
+  templateRepo: string;
+  templateTag: string;
+  applyProcedurePath: 'APPLY.md';
+  prGateTool: 'coding.push_pr';
+}
+
+/** Validates that a harness job uses a pinned semantic-version release tag, never a branch or cached ref (F-091-T01). */
+export function assertPinnedTemplateTag(tag: string): string {
+  const trimmed = tag.trim();
+  if (!PINNED_TEMPLATE_TAG_RE.test(trimmed)) {
+    throw new Error(`Harness job requires a pinned release tag (e.g. v10.1.0); refused "${tag || '(empty)'}".`);
+  }
+  return trimmed;
+}
+
+/**
+ * Runs a harness application coding job in a fresh worktree from a pinned template tag,
+ * instructs the runner to follow `APPLY.md` and run project checks, and prepares the Orange PR gate (F-091-T01).
+ */
+export async function runHarnessJobInWorktree(
+  request: HarnessJobRequest,
+  allowlist: readonly AllowedCodingRepo[],
+  runner: HarnessJobRunner,
+  options: { signal?: AbortSignal; startRef?: string } = {},
+): Promise<HarnessJobResult> {
+  const templateTag = assertPinnedTemplateTag(request.templateTag);
+  const templateRepo = request.templateRepo.trim();
+  if (!templateRepo) {
+    throw new Error('Harness job requires a templateRepo URL or path.');
+  }
+  const applyProcedurePath = 'APPLY.md' as const;
+  const prompt =
+    request.prompt?.trim() ||
+    `Apply project-harness pinned release ${templateTag} from ${templateRepo} by following ${applyProcedurePath} and running the project's checks.`;
+  const context: HarnessJobContext = { templateRepo, templateTag, applyProcedurePath };
+
+  const result = await runCodingJobInWorktree(
+    { repoId: request.repoId, jobId: request.jobId, prompt },
+    allowlist,
+    (worktreePath, jobPrompt, signal) => runner(worktreePath, jobPrompt, context, signal),
+    options,
+  );
+  return {
+    ...result,
+    templateRepo,
+    templateTag,
+    applyProcedurePath,
+    prGateTool: 'coding.push_pr',
+  };
+}
+
+/** Builds the Orange-gated `coding.push_pr` action proposal for a completed harness job (F-091-T01). */
+export function buildHarnessPushProposal(
+  result: HarnessJobResult,
+  options: { baseBranch: string; title?: string; body?: string; remote?: string },
+): {
+  tool: 'coding.push_pr';
+  stage: 'production';
+  args: {
+    worktreePath: string;
+    branch: string;
+    baseBranch: string;
+    title: string;
+    body: string;
+    diffSummary: string;
+    remote?: string;
+  };
+} {
+  return {
+    tool: 'coding.push_pr',
+    stage: 'production',
+    args: {
+      worktreePath: result.worktreePath,
+      branch: result.branch,
+      baseBranch: options.baseBranch,
+      title: options.title?.trim() || `chore(harness): apply template ${result.templateTag}`,
+      body:
+        options.body?.trim() ||
+        `Applied ${result.templateRepo} @ ${result.templateTag} via ${result.applyProcedurePath}.\nChecks: ${result.testResult.summary}`,
+      diffSummary: result.diffSummary,
+      ...(options.remote ? { remote: options.remote } : {}),
+    },
+  };
+}
