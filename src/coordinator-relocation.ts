@@ -6,6 +6,7 @@ import { LEASE_TTL_MS, applyCoordinatorLease } from './coordinator-lease.ts';
 import {
   promoteStandbyDatabase,
   reassembleCoordinatorSnapshot,
+  type PromoteStandbySwapInput,
   type PromoteStandbySwapResult,
 } from './coordinator-snapshot.ts';
 import { KAJI_CLOCK_SKEW_MS } from './kaji-auth.ts';
@@ -43,6 +44,10 @@ export interface DrainReceipt {
   readonly finalSeq: number;
   readonly stateDigest: string | null;
   readonly leaseRevokedAt: number;
+  /** The base the owner-signed main record names: a receipt hands over to that base only. */
+  readonly newMainBaseId: string;
+  /** The epoch the owner signed for the new main: a receipt is never reused for a later relocation. */
+  readonly newEpoch: number;
 }
 
 export interface SignedDrainReceipt {
@@ -52,21 +57,30 @@ export interface SignedDrainReceipt {
 
 /**
  * Planned relocation, old coordinator side: stops coordinator authority (`draining`, then `fenced`
- * with the lease cleared) in one transaction and returns the drain receipt. Idempotent for the
- * same epoch so a lost reply can be fetched again; refuses any other epoch.
+ * with the lease cleared) in one transaction and returns the drain receipt, bound to the new main
+ * and epoch the owner signed. Idempotent for the same epoch so a lost reply can be fetched again;
+ * refuses any other epoch. The fencing state is read inside the write transaction.
  */
 export function drainCoordinator(
   db: DatabaseSync,
-  input: { readonly baseId: string; readonly coordinatorEpoch: number; readonly nowMs?: number },
+  input: {
+    readonly baseId: string;
+    readonly coordinatorEpoch: number;
+    readonly newMainBaseId: string;
+    readonly newEpoch: number;
+    readonly nowMs?: number;
+  },
 ): DrainReceipt {
-  const state = readCoordinatorFencingState(db);
-  if (!state) throw new Error('This base holds no coordinator state to drain.');
-  if (state.coordinatorEpoch !== input.coordinatorEpoch)
-    throw new Error(`Coordinator epoch ${state.coordinatorEpoch} does not match ${input.coordinatorEpoch}.`);
-  if (state.replicationMode === 'standby') throw new Error('A standby has no coordinator authority to drain.');
+  if (input.newEpoch <= input.coordinatorEpoch)
+    throw new Error(`The new epoch ${input.newEpoch} must be later than ${input.coordinatorEpoch}.`);
   const nowMs = input.nowMs ?? Date.now();
   db.exec('BEGIN IMMEDIATE');
   try {
+    const state = readCoordinatorFencingState(db);
+    if (!state) throw new Error('This base holds no coordinator state to drain.');
+    if (state.coordinatorEpoch !== input.coordinatorEpoch)
+      throw new Error(`Coordinator epoch ${state.coordinatorEpoch} does not match ${input.coordinatorEpoch}.`);
+    if (state.replicationMode === 'standby') throw new Error('A standby has no coordinator authority to drain.');
     if (state.replicationMode === 'active')
       db.prepare("UPDATE coordinator_state SET replication_mode = 'draining' WHERE id = 1").run();
     db.prepare("UPDATE coordinator_state SET replication_mode = 'fenced', lease_expires_at = 0 WHERE id = 1").run();
@@ -81,6 +95,8 @@ export function drainCoordinator(
       finalSeq: row.head_seq,
       stateDigest: row.state_digest,
       leaseRevokedAt: nowMs,
+      newMainBaseId: input.newMainBaseId,
+      newEpoch: input.newEpoch,
     };
   } catch (err) {
     db.exec('ROLLBACK');
@@ -129,7 +145,11 @@ export type RelocationLiveness =
       /** When this base first saw the owner-signed main record for the new epoch. */
       readonly epochSeenAtMs: number;
       readonly allUnrevokedAckedNewEpoch: boolean;
-      /** Owner confirmation that the old host is down (`--confirm-old-host-down`), or a root-signed revoke of it. */
+      /**
+       * Owner confirmation that the old host is down (`--confirm-old-host-down`), or a root-signed revoke of it.
+       * Always required: until coordinator lease renewal exists (F-016-T16) the old main runs with lease 0,
+       * which never expires, so the horizon wait alone does not bound it.
+       */
       readonly oldHostDownConfirmed: boolean;
       readonly nowMs?: number;
     };
@@ -164,10 +184,15 @@ export interface RelocationReadiness {
 
 /**
  * Decides whether this base may activate as coordinator for the epoch the owner signed.
- * Never automatic: the owner-signed main record must name this base at the next epoch.
+ * Never automatic: the owner-signed main record must name this base at a later epoch than its standby.
  * Context alone never grants leadership: the candidate must be a verified standby
- * (`replication_mode = 'standby'` with a state digest, at the previous epoch), or an
- * owner-approved cold restore whose signed snapshot binds to the previous epoch.
+ * (`replication_mode = 'standby'` with a state digest), or an owner-approved cold restore whose
+ * signed snapshot binds to the standby's epoch.
+ *
+ * The previous epoch is the epoch of the coordinator that actually last ran, never assumed to be
+ * `newEpoch - 1`: it is the standby's replicated epoch, and the signed drain receipt or snapshot must
+ * name the same epoch. So a relocation the owner re-targets (main B at E+1 signed, B never promoted,
+ * main C at E+2 signed) still takes over from epoch E.
  */
 export function checkRelocationReadiness(input: RelocationReadinessInput): RelocationReadiness {
   const refuse = (reason: RelocationRefusal, detail: string): never => {
@@ -177,8 +202,7 @@ export function checkRelocationReadiness(input: RelocationReadinessInput): Reloc
   if (registryMain.baseId !== input.selfBaseId)
     refuse('not_named_main', `The owner-signed main record names ${registryMain.baseId ?? 'no base'}, not this base.`);
   const newEpoch = registryMain.coordinatorEpoch;
-  const previousEpoch = newEpoch - 1;
-  if (previousEpoch < 1)
+  if (newEpoch < 2)
     refuse('epoch_not_next', `Relocation needs a main record at epoch 2 or later; this one is ${newEpoch}.`);
 
   const state = readCoordinatorFencingState(input.candidateDb);
@@ -190,10 +214,11 @@ export function checkRelocationReadiness(input: RelocationReadinessInput): Reloc
       'context_only',
       'No verified standby state: copied context, chat logs or an empty store never grant coordinator authority.',
     );
-  if (state!.coordinatorEpoch !== previousEpoch)
+  const previousEpoch = state!.coordinatorEpoch;
+  if (previousEpoch < 1 || previousEpoch >= newEpoch)
     refuse(
       'epoch_not_next',
-      `The standby holds epoch ${state!.coordinatorEpoch}; the owner-signed record needs epoch ${previousEpoch}.`,
+      `The standby holds epoch ${previousEpoch}; the owner-signed record at epoch ${newEpoch} must be later.`,
     );
   const headSeq = head!.head_seq;
 
@@ -228,21 +253,28 @@ export function checkRelocationReadiness(input: RelocationReadinessInput): Reloc
     if (
       !verifyDrainReceipt(live.drain, live.oldMainPublicKey) ||
       r.baseId !== input.previousMainBaseId ||
-      r.coordinatorEpoch !== previousEpoch
+      r.coordinatorEpoch !== previousEpoch ||
+      r.newMainBaseId !== input.selfBaseId ||
+      r.newEpoch !== newEpoch
     )
-      refuse('drain_receipt_invalid', 'The drain receipt is not signed by the previous main base for this epoch.');
+      refuse(
+        'drain_receipt_invalid',
+        'The drain receipt is not signed by the previous main base for the standby epoch, handing over to this base at this epoch.',
+      );
     if (headSeq !== r.finalSeq || state!.stateDigest !== r.stateDigest)
       refuse(
         'standby_behind',
         `The standby is at ${headSeq}; the drained coordinator ended at ${r.finalSeq}. Replicate the final batch first.`,
       );
   } else {
-    const hasAckHistory = live.lastAckMs !== undefined;
-    if (!hasAckHistory && !live.oldHostDownConfirmed)
+    // Interim (owner decision 2026-11-23): the old main holds lease 0 until F-016-T16 adds renewal and
+    // self-fencing, so no wait bounds it; an unplanned move always needs the old host confirmed down or revoked.
+    if (!live.oldHostDownConfirmed)
       refuse(
         'old_host_unconfirmed',
-        'No lease ack history: confirm the old host is down (--confirm-old-host-down) or revoke it first.',
+        'The wait alone does not stop the old main: confirm the old host is down (--confirm-old-host-down) or revoke it first.',
       );
+    const hasAckHistory = live.lastAckMs !== undefined;
     const horizon = relocationHorizonMs({
       allUnrevokedAckedNewEpoch: live.allUnrevokedAckedNewEpoch,
       hasStandbyAckHistory: hasAckHistory,
@@ -296,6 +328,8 @@ export interface RelocateCoordinatorInput extends Omit<RelocationReadinessInput,
   readonly quiesce?: () => void;
   readonly restart?: () => void;
   readonly nowMs?: number;
+  /** Test-only crash injection, passed to the promotion swap. */
+  readonly failAfterStep?: PromoteStandbySwapInput['failAfterStep'];
 }
 
 export interface RelocateCoordinatorResult extends RelocationReadiness {
@@ -306,9 +340,10 @@ export interface RelocateCoordinatorResult extends RelocationReadiness {
 
 /**
  * Owner-initiated relocation, new coordinator side (F-016-T07): checks readiness on the candidate store,
- * runs the promotion swap, and in its activation transaction quarantines uncertain outbox rows and
- * clears the inherited lease. A sole coordinator then arms its own lease; otherwise the lease waits
- * for a standby ack (`POST /kaji/lease/renew`).
+ * runs the promotion swap, and in its activation transaction quarantines uncertain outbox rows,
+ * clears the inherited lease and, for a sole coordinator, arms its own lease in the same commit, so a
+ * crash after activation never leaves an active base with lease 0. With other bases enrolled the lease
+ * waits for a standby ack (`POST /kaji/lease/renew`).
  */
 export function relocateCoordinator(input: RelocateCoordinatorInput): RelocateCoordinatorResult {
   const candidatePath = existsSync(input.standbyDbPath) ? input.standbyDbPath : input.mainDbPath;
@@ -323,29 +358,24 @@ export function relocateCoordinator(input: RelocateCoordinatorInput): RelocateCo
   }
   const nowMs = input.nowMs ?? Date.now();
   let quarantined = 0;
+  let leaseExpiresAt = 0;
   const promotion = promoteStandbyDatabase({
     mainDbPath: input.mainDbPath,
     standbyDbPath: input.standbyDbPath,
     newCoordinatorEpoch: readiness.newEpoch,
     ...(input.quiesce ? { quiesce: input.quiesce } : {}),
+    ...(input.failAfterStep ? { failAfterStep: input.failAfterStep } : {}),
     activate: (db) => {
       quarantined = quarantineUncertainOutbox(db, readiness.previousEpoch, new Date(nowMs).toISOString());
       db.prepare('UPDATE coordinator_state SET lease_issued_at = NULL, lease_expires_at = 0 WHERE id = 1').run();
+      if (input.soleCoordinator)
+        leaseExpiresAt = applyCoordinatorLease(db, {
+          coordinatorEpoch: readiness.newEpoch,
+          reqStartedWallMs: nowMs,
+          reqStartedMonoNs: process.hrtime.bigint(),
+        }).leaseExpiresAt;
     },
   });
-  let leaseExpiresAt = 0;
-  if (input.soleCoordinator) {
-    const db = new DatabaseSync(input.mainDbPath);
-    try {
-      leaseExpiresAt = applyCoordinatorLease(db, {
-        coordinatorEpoch: readiness.newEpoch,
-        reqStartedWallMs: nowMs,
-        reqStartedMonoNs: process.hrtime.bigint(),
-      }).leaseExpiresAt;
-    } finally {
-      db.close();
-    }
-  }
   if (input.restart) input.restart();
   return { ...readiness, promotion, quarantined, leaseExpiresAt };
 }

@@ -86,10 +86,7 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
 
       // A receipt drained before the final batch reached the standby is refused.
       setState(oldMain.db, 2, 'active', 8, 'digest-8');
-      const ahead = signDrainReceipt(
-        oldKey.privateKey,
-        drainCoordinator(oldMain.db, { ...drainTo, nowMs: 5 }),
-      );
+      const ahead = signDrainReceipt(oldKey.privateKey, drainCoordinator(oldMain.db, { ...drainTo, nowMs: 5 }));
       refusal(
         () =>
           Store.relocateCoordinator({

@@ -200,12 +200,22 @@ export async function runKajiCommand(
       throw new Error(
         'Sign the relocation first (kaji relocate BASE-ID) and import it here: draining now would leave no coordinator.',
       );
-    const receipt = drainCoordinator(store.db, { baseId: self.baseId, coordinatorEpoch: state.coordinatorEpoch });
+    const newMainBaseId = registry.main();
+    if (!newMainBaseId || newMainBaseId === self.baseId)
+      throw new Error(
+        'The newest main record names no other enrolled base: sign the relocation (kaji relocate BASE-ID).',
+      );
+    const receipt = drainCoordinator(store.db, {
+      baseId: self.baseId,
+      coordinatorEpoch: state.coordinatorEpoch,
+      newMainBaseId,
+      newEpoch: registry.mainEpoch(),
+    });
     const out = JSON.stringify(signDrainReceipt(baseKey(home).privateKey, receipt), null, 2) + '\n';
     if (args[1]) {
       writeFileSync(args[1], out);
       console.log(
-        `Drained epoch ${receipt.coordinatorEpoch} at seq ${receipt.finalSeq}; receipt written to ${args[1]}.`,
+        `Drained epoch ${receipt.coordinatorEpoch} at seq ${receipt.finalSeq} for ${newMainBaseId} at epoch ${receipt.newEpoch}; receipt written to ${args[1]}.`,
       );
     } else process.stdout.write(out);
   } else if (sub === 'lease-rearm') {
