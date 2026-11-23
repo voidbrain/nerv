@@ -419,7 +419,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776) |
+| PR / evidence | [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776) |
 | Opened | 2026-11-24 |
 | Verification | Pending |
 | Reviewed | 2026-11-24 |
@@ -1047,7 +1047,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-093-T02: [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation · F-093-T03: [PR #675](https://github.com/voidbrain/nerv/pull/675) implementation · F-093-T05: [PR #683](https://github.com/voidbrain/nerv/pull/683) implementation. [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) (F-093-T04 closed); [owner check](acceptance/f093-t04-desktop-click.md); [PR #683](https://github.com/voidbrain/nerv/pull/683) (F-093-T05); [PR #675](https://github.com/voidbrain/nerv/pull/675) (F-093-T03); [PR #497](https://github.com/voidbrain/nerv/pull/497) (merged; CI green); [Desktop control adapter decision](decisions/desktop-control-adapter.md) (`F-093-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-093-T02: [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation · F-093-T03: [PR #675](https://github.com/voidbrain/nerv/pull/675) implementation · F-093-T05: [PR #683](https://github.com/voidbrain/nerv/pull/683) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-093-T04 closed); [owner check](acceptance/f093-t04-desktop-click.md); [PR #683](https://github.com/voidbrain/nerv/pull/683) (F-093-T05); [PR #675](https://github.com/voidbrain/nerv/pull/675) (F-093-T03); [PR #497](https://github.com/voidbrain/nerv/pull/497) (merged; CI green); [Desktop control adapter decision](decisions/desktop-control-adapter.md) (`F-093-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | Human: 2026-11-23, owner live check on NERV-01 passed ([acceptance](acceptance/f093-t04-desktop-click.md)). Unit/integration: 2026-11-23, `test/desktop-macos-driver.test.ts` and `test/desktop-shared-adapter.test.ts` on green CI ([PR #683](https://github.com/voidbrain/nerv/pull/683), [PR #675](https://github.com/voidbrain/nerv/pull/675)). |
 | Reviewed | 2026-11-24 |
@@ -1441,7 +1441,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) (opened) |
+| PR / evidence | [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened) |
 | Opened | 2026-11-24 |
 | Verification | Pending |
 | Reviewed | 2026-11-24 |
@@ -1586,7 +1586,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-24 |

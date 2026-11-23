@@ -6435,7 +6435,7 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-**Next action / closure evidence:** 2026-11-24 ([PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM)): `B-106-T02` closed: the owner confirmed on the live dashboard that S-F11B looks correct (answer edge lights with Debrief, arrowheads filled). 2026-11-22 ([PR #659](https://github.com/voidbrain/nerv/pull/659)): `B-106-T03` closed (`gauntlet-protocol@0.9.1` pin + owner-authorized `gauntlet:all --execute --allow-expensive --allow-models` passed all 4 `multi-step-agent/*` and all 8 `nerv-system-flows/*` cases; `gauntlet:pending` 0 pending). 2026-11-22 ([PR #658](https://github.com/voidbrain/nerv/pull/658)): Fixed `edgeShown` for `declined` (`apt → debrief`): removed `s.status !== "active"` and gated on `stepState(s, "debrief") === "on" || stepState(s, "debrief") === "done"`, so the arrow is hidden before `debrief` is active and visible/lit as soon as `debrief` activates (`test/dashboard.test.ts` committed failing-first). Opened and implemented 2026-11-22 (`B-106-T01` and `B-106-T03` closed; `B-106-T02` awaits owner live confirmation).
+**Next action / closure evidence:** 2026-11-24 ([PR #692](https://github.com/voidbrain/nerv/pull/692)): `B-106-T02` closed: the owner confirmed on the live dashboard that S-F11B looks correct (answer edge lights with Debrief, arrowheads filled). 2026-11-22 ([PR #659](https://github.com/voidbrain/nerv/pull/659)): `B-106-T03` closed (`gauntlet-protocol@0.9.1` pin + owner-authorized `gauntlet:all --execute --allow-expensive --allow-models` passed all 4 `multi-step-agent/*` and all 8 `nerv-system-flows/*` cases; `gauntlet:pending` 0 pending). 2026-11-22 ([PR #658](https://github.com/voidbrain/nerv/pull/658)): Fixed `edgeShown` for `declined` (`apt → debrief`): removed `s.status !== "active"` and gated on `stepState(s, "debrief") === "on" || stepState(s, "debrief") === "done"`, so the arrow is hidden before `debrief` is active and visible/lit as soon as `debrief` activates (`test/dashboard.test.ts` committed failing-first). Opened and implemented 2026-11-22 (`B-106-T01` and `B-106-T03` closed; `B-106-T02` awaits owner live confirmation).
 
 **Resolution:** Closed 2026-11-24 as Verified: all three steps closed; the owner's live confirmation of S-F11B completes the Check.
 
@@ -6443,7 +6443,7 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) (closed); PR #644 (`fix/b-106-sephirot-arrows`). Test: `B-106: answer edge activates with debrief and Sephirot markers are filled cleanly without context-stroke` in `test/dashboard.test.ts`. |
+| PR / evidence | [PR #692](https://github.com/voidbrain/nerv/pull/692) (closed); PR #644 (`fix/b-106-sephirot-arrows`). Test: `B-106: answer edge activates with debrief and Sephirot markers are filled cleanly without context-stroke` in `test/dashboard.test.ts`. |
 | Opened | 2026-11-22 |
 | Closed | 2026-11-24 |
 | Verification | Human: 2026-11-24, owner confirmed S-F11B on the live dashboard. Unit: 2026-11-22: `node --test test/dashboard.test.ts` and `npm run check:fast` passed. |
