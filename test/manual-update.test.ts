@@ -331,3 +331,82 @@ test('B-108: POST /api/update/apply from the running service starts the outside 
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+// B-108 (live 2026-11-23): the install folder had never fetched the target, so the lifecycle did not admit it; and a
+// refusal found only after stopping left nothing running. The updater fetches first and refuses before stopping.
+const STOP_FIRST = 'Stop the selected service and descendants first.';
+const NOT_ADMITTED = 'This revision is not admitted.';
+
+test('B-108: the outside updater fetches the target into the install folder before planning', async () => {
+  const order: string[] = [];
+  const result = await executeManualUpdate(
+    {
+      resolveUpdate: async () => makeAvailability('update-available', B),
+      lifecycleHost: () => stubHost,
+      stopFirst: true,
+      fetchRevision: async (revision) => {
+        order.push('fetch ' + revision.slice(0, 1));
+      },
+      plan: async (_host, action) => {
+        order.push('plan ' + action);
+        const stopped = order.includes('apply stop');
+        return { ...makePlan(action === 'update' && !stopped ? [STOP_FIRST] : []), action };
+      },
+      applyPlan: async (_host, plan) => {
+        order.push('apply ' + plan.action);
+        return makeReceipt('completed');
+      },
+    },
+    { revision: B },
+  );
+  assert.equal(result.outcome, 'completed', JSON.stringify(result));
+  assert.equal(order[0], 'fetch b');
+  assert.deepEqual(order.slice(1), ['plan update', 'plan stop', 'apply stop', 'plan update', 'apply update']);
+});
+
+test('B-108: a refusal other than the running service is reported before anything is stopped', async () => {
+  const applied: string[] = [];
+  const result = await executeManualUpdate(
+    {
+      resolveUpdate: async () => makeAvailability('update-available', B),
+      lifecycleHost: () => stubHost,
+      stopFirst: true,
+      fetchRevision: async () => {},
+      plan: async (_host, action) => ({ ...makePlan([STOP_FIRST, NOT_ADMITTED]), action }),
+      applyPlan: async (_host, plan) => {
+        applied.push(plan.action);
+        return makeReceipt('completed');
+      },
+    },
+    { revision: B },
+  );
+  assert.equal(result.outcome, 'refused');
+  assert.deepEqual(result.reasons, [NOT_ADMITTED]);
+  assert.deepEqual(applied, [], 'the service was not stopped');
+});
+
+test('B-108: a refusal found after the stop starts the service again', async () => {
+  const applied: string[] = [];
+  let plans = 0;
+  const result = await executeManualUpdate(
+    {
+      resolveUpdate: async () => makeAvailability('update-available', B),
+      lifecycleHost: () => stubHost,
+      stopFirst: true,
+      fetchRevision: async () => {},
+      plan: async (_host, action) => {
+        plans++;
+        if (action === 'update') return { ...makePlan(plans === 1 ? [STOP_FIRST] : [NOT_ADMITTED]), action };
+        return { ...makePlan(), action };
+      },
+      applyPlan: async (_host, plan) => {
+        applied.push(plan.action);
+        return makeReceipt('completed');
+      },
+    },
+    { revision: B },
+  );
+  assert.equal(result.outcome, 'refused');
+  assert.deepEqual(applied, ['stop', 'start'], 'stopped, refused, started again');
+  assert.match(result.recovery.join(' '), /started again/);
+});
