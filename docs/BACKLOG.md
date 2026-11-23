@@ -1975,7 +1975,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #674](https://github.com/voidbrain/nerv/pull/674) |
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: `node --test test/blackbox.test.ts` 4/4; the owner's real CSV export decodes. |
 | Reviewed | 2026-11-23 |
