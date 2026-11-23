@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-23T09:27:22.095Z",
+  "reviewed": "2026-11-23T15:49:55.983Z",
   "policy": "7d15ab5f3e1a37d15075876ce3efd53d93600045088f48b41a3ef0dd6ab89e7d",
   "inputs": {
-    "AGENTS.md": "2bf68fbeeac1661fa987633e6d6702826ca436c5959f8daa599e08b4228935e5",
+    "AGENTS.md": "5e9df8d380abec1d861ad5803510024219ccfc13afc970438c63028b27f81873",
     "docs/BACKLOG-RULES.md": "91ea3b199cd49385549ac2869304e1cca2de94cad5bcb4f119502b594f00e621",
     "docs/agents/architecture-review.md": "5d967314854912b1a5f1446aeab309763b14f9856bceb3c82df5c6c25c166526",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
@@ -38,8 +38,8 @@
     "tools/work-usage.mjs": "09569f9b56bd6e403d4c235f980ba5fb03b2aff8fe56a28878cc298fe8a4b2af"
   },
   "measurements": {
-    "samples": 1,
-    "latestAt": "2026-11-23T09:27:22.028Z",
+    "samples": 20,
+    "latestAt": "2026-11-23T15:49:55.931Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -65,26 +65,26 @@
         }
       },
       "reconciliation": {
-        "samples": 1,
+        "samples": 20,
         "durationMs": {
-          "observed": 1,
+          "observed": 20,
           "missing": 0,
-          "median": 47
+          "median": 263898
         },
         "conflicts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 7,
+          "missing": 13,
+          "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 3,
+          "missing": 17,
+          "median": 0
         },
         "repeatedContextLoads": {
-          "observed": 0,
-          "missing": 1,
-          "median": null
+          "observed": 3,
+          "missing": 17,
+          "median": 1
         }
       }
     }
@@ -93,80 +93,8 @@
     {
       "kind": "rule",
       "disposition": "implemented",
-      "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Harness v8.11.0 reconcile: steps in the order work can happen, anchors, linked prerequisites, one Who cell."
-    },
-    {
-      "kind": "rule",
-      "disposition": "implemented",
       "target": "AGENTS.md",
-      "evidence": "Harness 8.14.1 reconciled from 8.11.0: rules by trigger (AGENTS slimmed, angular.md, BACKLOG-RULES index over docs/backlog/), all project lines kept; copied tools and guides from v8.14.1."
-    },
-    {
-      "kind": "rule",
-      "disposition": "implemented",
-      "target": "AGENTS.md",
-      "evidence": "Owner decision 2026-11-14: five project lines moved verbatim out of always-loaded AGENTS.md to the procedures that apply; harness 8.14.3; rule-load within every budget."
-    },
-    {
-      "kind": "tool",
-      "disposition": "implemented",
-      "target": "tools/work-usage.mjs",
-      "evidence": "Harness 8.15.0 paused-time accounting copied byte-identically; the adapted estimate rule retains every requirement and adds effective elapsed time."
-    },
-    {
-      "kind": "none",
-      "disposition": "no-change",
-      "target": "docs/agents/session-start.md",
-      "evidence": "Assessed the repeated-load candidate: reconcile:draft, work:next and code:map already provide bounded indexing/workflow help. One observed repeated load does not justify another skill or removing applicable rule reads."
-    },
-    {
-      "kind": "rule",
-      "disposition": "implemented",
-      "target": "docs/backlog/steps.md",
-      "evidence": "Harness 8.16.0 reconciled (copied work-items.mjs, check-backlog.mjs, steps.md): implemented steps name who their remaining work waits on; done steps in a collapsed table. F-005-T15 gets ownerKind procedure. Template PR #203 with fresh-context review."
-    },
-    {
-      "kind": "rule",
-      "disposition": "implemented",
-      "target": "docs/backlog/steps.md",
-      "evidence": "Harness 8.16.1 reconciled (B-028): the Agent cell counts an implemented step the agent still verifies. Template PR #205 with fresh-context review."
-    },
-    {
-      "kind": "rule",
-      "disposition": "implemented",
-      "target": ".harness.json",
-      "evidence": "Reconciled harness 8.17.0 (suggestedPauses in work-usage, empty backlog/roadmap check in check:freshness, feature-plans.md); set workUsage.pauseGapMinutes to 15."
-    },
-    {
-      "kind": "rule",
-      "disposition": "implemented",
-      "target": "tools/check-freshness.mjs",
-      "evidence": "Reconciled with project-harness v8.18.0: periodic review cadences (reviews.token.days=30, reviews.architecture.days=30), token review in rule-review.md, outside-landscape comparison in architecture-review.md"
-    },
-    {
-      "kind": "tool",
-      "disposition": "implemented",
-      "target": "tools/work-items.mjs",
-      "evidence": "Reconciled with project-harness v9.0.0: B-043–B-046, F-083-T03, F-084-T02; zeroed remaining effort on verified F-048-T01–T03"
-    },
-    {
-      "kind": "tool",
-      "disposition": "implemented",
-      "target": "tools/work-items.mjs",
-      "evidence": "B-071: harness 10.0.0 (template B-047, PR #217) reconciled; every open record Next line from tasks; owner pages for F-005-T15, F-007-T05, F-060-T01; check:work fails on an owner-turn step without ownerLink"
-    },
-    {
-      "kind": "tool",
-      "disposition": "implemented",
-      "target": "tools/work-items.mjs",
-      "evidence": "Harness v10.1.0 reconciled (template F-085, asked from NERV): steps table Depends on / Unlocks; check:work prose-blocker warning reviewed on its first run: B-068 → F-011 and F-012 → F-006 are false positives (reverse direction; undated history), no change; check:fast green"
-    },
-    {
-      "kind": "rule",
-      "disposition": "implemented",
-      "target": "docs/agents/skills.md",
-      "evidence": "Reconciled project-harness v10.3.0 (tools/check-freshness.mjs, docs/agents/skills.md, docs/agents/maintenance.md, .harness.json)."
+      "evidence": "F-117-T01 (PRs #669/#670): the live service moved to the install folder ~/.nerv-app on 2026-11-23; the project line now names it, keeps the dev checkout on main with worktrees from origin/main, and notes that a lifecycle install already starts the service. Project line only (<!-- project -->); no template change; no behaviour runner configured."
     }
   ]
 }

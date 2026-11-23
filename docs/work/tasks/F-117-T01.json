@@ -4,7 +4,7 @@
   "parent": "F-117",
   "title": "The service runs from its own install folder, apart from the project checkout",
   "goal": "NERV runs from a dedicated checkout (default ~/.nerv-app) that only the lifecycle update touches; ~/Projects/NERV/NERV becomes an ordinary development checkout",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Lifecycle install/update take the install folder as their source; the service definition points there",
     "A one-time migration clones the installed revision into the install folder, builds it, re-registers the service there and keeps ~/.nerv data unchanged, with a recorded rollback to the old path",
@@ -40,11 +40,13 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "0.25 h agent",
+    "estimate": "0 remaining",
     "basis": "Implemented 2026-11-23; the live NERV-01 move and the AGENTS.md project line remain, after the owner approves the move.",
     "reviewed": "2026-11-23",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 4,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 6,
+    "actualSource": "stated"
   }
 }
