@@ -1,6 +1,6 @@
 import type { IncomingMessage } from 'node:http';
 import { dataHome, readConfig, setUpdatePolicy } from './config.ts';
-import { executeManualUpdate, type ManualUpdateResult } from './manual-update.ts';
+import { executeManualUpdate, type ManualUpdateDeps, type ManualUpdateResult } from './manual-update.ts';
 import type { ServiceHost } from './node-lifecycle-execution.ts';
 import type { StoreApi } from './runtime.ts';
 import {
@@ -22,6 +22,8 @@ export interface ServerUpdateOptions {
   base?: { id: string; name: string };
   updateCheck?: (options: { channel: string; refresh: boolean }) => Promise<UpdateAvailability>;
   lifecycleHost?: () => ServiceHost;
+  /** B-108: starts the updater as its own OS job; the server runs inside the service it would update. */
+  startUpdater?: ManualUpdateDeps['startUpdater'];
   manualUpdate?: (input: { channel?: string; revision?: string }) => Promise<ManualUpdateResult>;
   updatePolicy?: AutoUpdatePolicy;
   saveUpdatePolicy?: (policy: AutoUpdatePolicy) => AutoUpdatePolicy | Promise<AutoUpdatePolicy>;
@@ -93,6 +95,8 @@ export function createUpdateHandlers(params: {
         {
           resolveUpdate,
           ...(options.lifecycleHost ? { lifecycleHost: options.lifecycleHost } : {}),
+          inService: true,
+          ...(options.startUpdater ? { startUpdater: options.startUpdater } : {}),
           ...(options.checkSchemaSafety ? { checkSchemaSafety: options.checkSchemaSafety } : {}),
           countActiveRuns: async () => (await store.sorties(50)).filter((s) => s.closed === null).length,
           countPendingApprovals: async () => (await store.approvals(20)).filter((a) => a.decision === null).length,
@@ -205,6 +209,8 @@ export function createUpdateHandlers(params: {
               {
                 resolveUpdate,
                 ...(options.lifecycleHost ? { lifecycleHost: options.lifecycleHost } : {}),
+                inService: true,
+                ...(options.startUpdater ? { startUpdater: options.startUpdater } : {}),
               },
               input,
             );

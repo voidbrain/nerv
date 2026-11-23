@@ -10,7 +10,8 @@ import {
 } from './node-lifecycle-execution.ts';
 import { parseUpdateChannel, type UpdateAvailability, type UpdateChannel } from './update-availability.ts';
 
-export type ManualUpdateOutcome = 'completed' | 'refused' | 'uncertain';
+/** `started`: the update was handed to the updater outside the service (B-108); its result arrives after the restart. */
+export type ManualUpdateOutcome = 'completed' | 'refused' | 'uncertain' | 'started';
 
 export interface ManualUpdateResult {
   outcome: ManualUpdateOutcome;
@@ -25,9 +26,18 @@ export interface ManualUpdateResult {
 export interface ManualUpdateDeps {
   resolveUpdate: (channel: UpdateChannel, refresh: boolean) => Promise<UpdateAvailability>;
   lifecycleHost?: () => ServiceHost;
-  plan?: (host: ServiceHost, action: 'update', nextRevision?: string) => Promise<ServicePlan>;
+  plan?: (host: ServiceHost, action: 'update' | 'stop', nextRevision?: string) => Promise<ServicePlan>;
   applyPlan?: (host: ServiceHost, plan: ServicePlan, confirm: string) => Promise<ServiceReceipt>;
   readReceipt?: (host: ServiceHost, digest: string) => ServiceReceipt | { state: 'absent' };
+  /**
+   * B-108: true when this runs inside the service it would update (dashboard Update now, scheduled apply). The
+   * lifecycle refuses to update a running service, so the update is handed to `startUpdater` instead.
+   */
+  inService?: boolean;
+  /** Starts the updater as its own OS job, outside the service's process tree, for this revision. */
+  startUpdater?: (input: { channel: UpdateChannel; revision: string }) => Promise<void>;
+  /** The outside updater: stop the running service through the lifecycle before planning the update. */
+  stopFirst?: boolean;
 }
 
 const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : String(error));
@@ -82,6 +92,35 @@ export async function executeManualUpdate(
     };
   }
 
+  if (deps.inService) {
+    if (!deps.startUpdater)
+      return {
+        outcome: 'refused',
+        channel,
+        revision: targetRevision,
+        reasons: ['No updater outside the service is available on this platform.'],
+        recovery: [`Run \`nerv nodes self-update --revision ${targetRevision}\` from a terminal.`],
+      };
+    try {
+      await deps.startUpdater({ channel, revision: targetRevision });
+    } catch (error) {
+      return {
+        outcome: 'refused',
+        channel,
+        revision: targetRevision,
+        reasons: [`The updater did not start: ${errorMessage(error)}`],
+        recovery: [`Run \`nerv nodes self-update --revision ${targetRevision}\` from a terminal.`],
+      };
+    }
+    return {
+      outcome: 'started',
+      channel,
+      revision: targetRevision,
+      reasons: [],
+      recovery: ['NERV stops, updates and starts again; the result appears once it is back.'],
+    };
+  }
+
   let host: ServiceHost;
   try {
     host = (deps.lifecycleHost ?? (() => macServiceHost(dataHome())))();
@@ -95,6 +134,11 @@ export async function executeManualUpdate(
         `Run the manual update from the supported local macOS user service host (\`nerv nodes lifecycle-inspect --action update --revision ${targetRevision}\`).`,
       ],
     };
+  }
+
+  if (deps.stopFirst) {
+    const stopped = await stopService(deps, host);
+    if (stopped) return { channel, revision: targetRevision, ...stopped };
   }
 
   let plan: ServicePlan;
@@ -183,4 +227,40 @@ export async function executeManualUpdate(
       ...(stored ? { receipt: stored } : {}),
     };
   }
+}
+
+/** B-108: the outside updater stops the running service through the lifecycle; a refusal or an unfinished stop ends here. */
+async function stopService(
+  deps: ManualUpdateDeps,
+  host: ServiceHost,
+): Promise<Pick<ManualUpdateResult, 'outcome' | 'reasons' | 'recovery' | 'planDigest' | 'receipt'> | undefined> {
+  const now = await host.inspect();
+  if (now.registration === 'absent' && now.runtime === 'stopped') return undefined;
+  let plan: ServicePlan;
+  try {
+    plan = await (deps.plan ?? planService)(host, 'stop');
+  } catch (error) {
+    return {
+      outcome: 'refused',
+      reasons: [errorMessage(error)],
+      recovery: ['Inspect with `nerv nodes lifecycle-inspect --action stop`.'],
+    };
+  }
+  if (plan.blockers.length)
+    return {
+      outcome: 'refused',
+      planDigest: plan.digest,
+      reasons: plan.blockers,
+      recovery: ['The service was not stopped. If it runs another revision than its checkout, restart it, then retry.'],
+    };
+  const receipt = await (deps.applyPlan ?? applyService)(host, plan, plan.digest);
+  if (receipt.state !== 'completed')
+    return {
+      outcome: 'uncertain',
+      planDigest: plan.digest,
+      receipt,
+      reasons: [`Stopping the service ended ${receipt.state}.`],
+      recovery: [`Inspect the stop with \`nerv nodes lifecycle-status --digest ${plan.digest}\`.`],
+    };
+  return undefined;
 }

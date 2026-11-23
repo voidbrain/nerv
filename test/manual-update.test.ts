@@ -297,3 +297,37 @@ test('B-108: the outside updater stops the running service through the lifecycle
   assert.equal(result.outcome, 'completed', JSON.stringify(result));
   assert.deepEqual(order, ['plan stop', 'apply stop', 'plan update', 'apply update']);
 });
+
+test('B-108: POST /api/update/apply from the running service starts the outside updater and answers started', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-b108-api-'));
+  const db = new DatabaseSync(join(dir, 'nerv.sqlite'));
+  db.close();
+  const store = new Store(join(dir, 'nerv.sqlite'));
+  const token = 't'.repeat(32);
+  const started: { channel: string; revision: string }[] = [];
+  const server = makeServer(store, token, {
+    updateCheck: async () => makeAvailability('update-available', B),
+    lifecycleHost: () => stubHost,
+    startUpdater: async (input) => {
+      started.push(input);
+    },
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const { port } = server.address() as { port: number };
+  try {
+    const r = await fetch(`http://127.0.0.1:${port}/api/update/apply`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ channel: 'main' }),
+    });
+    assert.equal(r.status, 200);
+    const body = (await r.json()) as { outcome: string; revision: string };
+    assert.equal(body.outcome, 'started');
+    assert.equal(body.revision, B);
+    assert.deepEqual(started, [{ channel: 'main', revision: B }]);
+  } finally {
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    store.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

@@ -10,7 +10,8 @@
   ],
   "dependsOn": [
     "F-102-T03",
-    "B-108-T01"
+    "B-108-T01",
+    "B-108-T02"
   ],
   "resources": [
     "docs/work/records/F-102.md"

@@ -13,7 +13,7 @@ import { attachRpcSocket } from './socket.ts';
 import { toChecklistSurface } from './lists.ts';
 import { buildInfo, checkRevisionSkew } from './build.ts';
 import type { UpdateAvailability } from './update-availability.ts';
-import type { ManualUpdateResult } from './manual-update.ts';
+import type { ManualUpdateDeps, ManualUpdateResult } from './manual-update.ts';
 import type { AutoUpdatePolicy, AutoUpdateSchemaCheck } from './update-policy.ts';
 import { createUpdateHandlers, type UpdateControl } from './server-update.ts';
 import type { ServiceHost } from './node-lifecycle-execution.ts';
@@ -77,6 +77,7 @@ export function makeServer(
     onStop?: () => void;
     updateCheck?: (options: { channel: string; refresh: boolean }) => Promise<UpdateAvailability>;
     lifecycleHost?: () => ServiceHost;
+    startUpdater?: ManualUpdateDeps['startUpdater'];
     manualUpdate?: (input: { channel?: string; revision?: string }) => Promise<ManualUpdateResult>;
     updatePolicy?: AutoUpdatePolicy;
     saveUpdatePolicy?: (policy: AutoUpdatePolicy) => AutoUpdatePolicy | Promise<AutoUpdatePolicy>;

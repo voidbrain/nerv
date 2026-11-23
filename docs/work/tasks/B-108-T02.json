@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "B-108-T02",
+  "parent": "B-108",
+  "title": "The restarted service reports the updater result in the inbox and on the dashboard",
+  "goal": "After an update started from inside the service, the restarted service reads the updater receipt and reports applied, refused or uncertain like the scheduled apply",
+  "status": "planned",
+  "acceptance": [
+    "The updater writes its result where the restarted service reads it once",
+    "The inbox (Telegram, dashboard) gets the same applied/refused/uncertain text as a scheduled apply",
+    "A result is reported exactly once"
+  ],
+  "dependsOn": [
+    "B-108-T01"
+  ],
+  "resources": [
+    "src/nodes-cli.ts",
+    "src/update-scheduler.ts",
+    "src/server-update.ts",
+    "test/update-scheduler.test.ts",
+    "docs/work/records/B-108.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "node --test test/update-scheduler.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-23",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}
