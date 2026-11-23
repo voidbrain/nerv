@@ -4,7 +4,7 @@
   "parent": "F-113",
   "title": "Measure the tool-doc share of the planner prompt and group tools by subject",
   "goal": "Know whether a compact index is worth it",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Tool-doc share of the planner prompt recorded from promptMetrics for neutral sample requests",
     "Each built-in tool assigned to one subject"
@@ -29,12 +29,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h",
+    "estimate": "0 remaining",
     "basis": "Estimated 2026-11-20 from the Agentica review. Not a measurement.",
     "reviewed": "2026-11-20",
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1,
+    "actualAgentHours": 1,
+    "actualSource": "stated"
   },
   "prs": [
     {
