@@ -38,5 +38,11 @@
     "ownerHours": 0,
     "actualAgentHours": 1.25,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 690,
+      "note": "implementation"
+    }
+  ]
 }
