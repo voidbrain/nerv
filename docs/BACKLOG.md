@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.75 h agent + 11 h owner across 98 open steps of 34 features and 17 other records. 94.75 h of actual effort recorded on 119 steps. Generated from the task files.
+**Remaining effort:** 72.75 h agent + 11 h owner across 99 open steps of 34 features and 17 other records. 94.75 h of actual effort recorded on 119 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1894,7 +1894,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | [F-101-T04](#f-101-t04) | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 2.25 h | — | [F-101-T04](#f-101-t04) | 🤖 | — | — |
 
 💻 **→** Next: F-098-T04 — Live check with a real crash (Planned).
 
@@ -1909,8 +1909,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0.25 h | 0 h | 0.25 h | Planned | — | [F-101-T04](#f-101-t04) | — |
-| 🟢 Small | <a id="f-098-t05"></a>F-098-T05 — Fleet import with spares cues | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | — | — | [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation |
-| 🟢 Small | **Total** | 2.5 h | 1.25 h (3 of 5 steps recorded) | 0.25 h | 3 of 5 completed | | | |
+| 🟢 Small | <a id="f-098-t05"></a>F-098-T05 — Fleet import with spares cues | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-098-T06](#f-098-t06) | [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation |
+| 🟡 Medium | <a id="f-098-t06"></a>F-098-T06 — Fleet by chat: add a drone, replace a part, set spare stock | 2 h | 0 h | 2 h | Planned | [F-098-T05](#f-098-t05) | — | — |
+| 🟡 Medium | **Total** | 4.5 h | 1.25 h (3 of 6 steps recorded) | 2.25 h | 3 of 6 completed | | | |
 
 <details><summary>Done steps (3)</summary>
 
