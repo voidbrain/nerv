@@ -587,3 +587,7 @@ PRs #615–#620 merged green. #615 was reconciliation-only; B-105, F-111 and F-0
 ## 2026-11-23 — main `57fac5a8`
 
 PRs #660–#663 merged green (#660 archive, #661 WorkerLink/model.infer, #662 F-006-T11/FPVBuddy, #663 Italian fleet intent). Reconciled harness v10.3.0 and closed F-006-T15 plus 7 verified tasks in [PR #664](https://github.com/voidbrain/nerv/pull/664).
+
+## 2026-11-23 — main `5438e2ae`
+
+PRs #664–#672 merged green (#664 reconciliation, #665–#667 dashboard fixes for B-107, #668 backlog closures, #669–#671 F-117-T01 install folder, #672 B-108 updater). Reconciled with F-093-T03 in its PR.
