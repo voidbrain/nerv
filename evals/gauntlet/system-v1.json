@@ -224,6 +224,7 @@
         "test/angular.browser.mjs",
         "test/evaluation.browser.mjs",
         "test/pwa.browser.mjs",
+        "test/browser-click.browser.mjs",
         "test/fixtures/browser.mjs"
       ]
     },
