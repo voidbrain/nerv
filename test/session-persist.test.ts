@@ -82,3 +82,58 @@ test('B-113: after Update started the dashboard waits for the new revision befor
   assert.match(fn![0], /runningRevision === revision/);
   assert.match(fn![0], /state\.manualUpdateBusy = false/);
 });
+
+// B-113 review findings: persistence is best-effort and fails closed; loaded entries are clamped; the temp file is
+// recreated private.
+test('B-113: a failed write never throws, and a revoke it cannot save deletes the file instead', async () => {
+  const { SessionBook } = await import('../src/session-book.ts');
+  const { mkdirSync, existsSync } = await import('node:fs');
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-b113r-'));
+  try {
+    const file = join(dir, 'sessions.json');
+    const token = () => 'c'.repeat(32);
+    const book = new SessionBook(token, file, 60_000, 4);
+    book.add('s1', Date.now() + 60_000, 4);
+    mkdirSync(file + '.tmp'); // every later write fails (EISDIR)
+    assert.doesNotThrow(() => book.add('s2', Date.now() + 60_000, 4));
+    assert.doesNotThrow(() => book.dropExpired());
+    assert.doesNotThrow(() => book.clear());
+    assert.equal(existsSync(file), false, 'the unsaved revoke removed the file');
+    assert.equal(new SessionBook(token, file, 60_000, 4).has('s1'), false, 'nothing comes back after a restart');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('B-113: loaded sessions are clamped to the lifetime and cap; a stale temp file never loosens permissions', async () => {
+  const { SessionBook } = await import('../src/session-book.ts');
+  const { writeFileSync } = await import('node:fs');
+  const { createHash } = await import('node:crypto');
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-b113r-'));
+  try {
+    const file = join(dir, 'sessions.json');
+    const tok = 'd'.repeat(32);
+    const h = (s: string) => createHash('sha256').update(s).digest('hex');
+    const far = Date.now() + 365 * 24 * 3600_000;
+    writeFileSync(
+      file,
+      JSON.stringify({
+        version: 1,
+        token: h(tok),
+        sessions: [
+          [h('a'), far],
+          [h('b'), far],
+          [h('c'), far],
+        ],
+      }),
+    );
+    writeFileSync(file + '.tmp', 'stale', { mode: 0o644 });
+    const book = new SessionBook(() => tok, file, 50, 2);
+    assert.equal(book.size, 2, 'trimmed to the cap');
+    if (process.platform !== 'win32') assert.equal(statSync(file).mode & 0o777, 0o600, 'recreated private');
+    await new Promise((r) => setTimeout(r, 120));
+    assert.equal(book.has('b') || book.has('c'), false, 'clamped to the lifetime, not a year');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
