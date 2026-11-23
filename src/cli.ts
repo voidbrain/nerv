@@ -24,6 +24,8 @@ import { clickNamedControl } from './browser-control.ts';
 import { createCdpBrowserDriver } from './browser-cdp-driver.ts';
 import { clickDesktopControl } from './desktop-control.ts';
 import { desktopDriverFor } from './desktop-macos-driver.ts';
+import { appWorkflowPlanHash, parseAppWorkflowPlan, runAppWorkflow } from './app-workflow.ts';
+import { createMacAppWorkflowDriver } from './app-workflow-macos.ts';
 
 import { SeatPool } from './seat-pool.ts';
 
@@ -967,6 +969,36 @@ try {
           controlName,
           allowedOrigins: browser.allowedOrigins,
           approved: args.includes('--approved'),
+        });
+        console.log(JSON.stringify(res, null, 2));
+        break;
+      }
+      case 'app-workflow': {
+        const file = args.find((a) => !a.startsWith('--'));
+        if (!file) throw new Error('Usage: nerv app-workflow <plan.json> [--approve=<plan-hash>] [--overwrite=<path>]');
+        const plan = parseAppWorkflowPlan(JSON.parse(readFileSync(resolve(file), 'utf8')));
+        const planHash = appWorkflowPlanHash(plan);
+        const approve = args.find((a) => a.startsWith('--approve='))?.slice('--approve='.length);
+        if (!approve) {
+          // The one approval card: every step and the hash the owner approves the run with.
+          console.log(JSON.stringify({ steps: plan.steps, planHash, approveWith: `--approve=${planHash}` }, null, 2));
+          break;
+        }
+        if (process.platform !== 'darwin') throw new Error('App workflows have a live driver on macOS only.');
+        const folders = readConfig(home).appWorkflow?.allowedFolders ?? [];
+        if (folders.length === 0) {
+          throw new Error(
+            'No folders allowed. Add "appWorkflow": {"allowedFolders": ["/absolute/folder"]} to config.json.',
+          );
+        }
+        const overwrite = args
+          .filter((a) => a.startsWith('--overwrite='))
+          .map((a) => resolve(a.slice('--overwrite='.length)));
+        const res = await runAppWorkflow(createMacAppWorkflowDriver(), {
+          plan,
+          approval: { approved: true, planHash: approve },
+          allowedFolders: folders,
+          confirmOverwrite: (path) => overwrite.includes(path),
         });
         console.log(JSON.stringify(res, null, 2));
         break;
