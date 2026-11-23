@@ -2,20 +2,21 @@
   "version": 1,
   "id": "F-117-T03",
   "parent": "F-117",
-  "title": "Docs and help for nerv update",
-  "goal": "INSTALL and the service guide name nerv update as the way to update a base",
+  "title": "nerv update repairs a stale build or an unloaded service",
+  "goal": "An up-to-date base whose dist/web is older than the checkout, or whose service is not loaded, is rebuilt and loaded",
   "status": "planned",
   "acceptance": [
-    "cli-help lists nerv update and --check",
-    "docs/INSTALL.md links the update guide; no backlog IDs in docs"
+    "A stale dist/web is rebuilt before the service starts",
+    "A defined but unloaded service is loaded and started instead of reported as already loaded",
+    "Stop waits until launchd has released the service before start"
   ],
   "dependsOn": [
-    "F-117-T01"
+    "F-117-T02"
   ],
   "resources": [
-    "docs/INSTALL.md",
-    "docs/guides/**",
-    "src/cli-help.ts",
+    "src/cli.ts",
+    "src/service.ts",
+    "test/service.test.ts",
     "docs/work/records/F-117.md",
     "generated:backlog-views"
   ],
@@ -25,6 +26,7 @@
   ],
   "privacy": "Neutral fixtures only; no personal data.",
   "validation": [
+    "node --test test/service.test.ts",
     "npm run check:fast"
   ],
   "escalation": [
@@ -32,11 +34,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h agent",
+    "estimate": "1 h agent",
     "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
     "reviewed": "2026-11-23",
-    "agentHours": 0.5,
-    "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
   }
 }

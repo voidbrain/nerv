@@ -2,22 +2,27 @@
   "version": 1,
   "id": "F-117-T01",
   "parent": "F-117",
-  "title": "nerv update [--check]: fetch, compare and run the lifecycle update",
-  "goal": "One command checks origin/main and, when behind, runs stop, lifecycle update and start, then probes the dashboard",
+  "title": "The service runs from its own install folder, apart from the project checkout",
+  "goal": "NERV runs from a dedicated checkout (default ~/.nerv-app) that only the lifecycle update touches; ~/Projects/NERV/NERV becomes an ordinary development checkout",
   "status": "planned",
   "acceptance": [
-    "--check prints up to date or behind by N commits without changing anything",
-    "A behind base completes stop → update → start through planService/applyService and reports the new revision",
-    "Any refusal prints the blockers and the recovery steps"
+    "Lifecycle install/update take the install folder as their source; the service definition points there",
+    "A one-time migration clones the installed revision into the install folder, builds it, re-registers the service there and keeps ~/.nerv data unchanged, with a recorded rollback to the old path",
+    "The AGENTS.md project line about the primary checkout names the install folder instead",
+    "Test across the join: rendered service definition, lifecycle plan and migration use the same install path"
   ],
-  "dependsOn": [
-    "B-108-T01"
-  ],
+  "dependsOn": [],
   "resources": [
+    "src/node-lifecycle-execution.ts",
+    "src/node-lifecycle-mac.ts",
+    "src/node-lifecycle-linux.ts",
+    "src/node-lifecycle-apply.ts",
+    "src/service.ts",
     "src/cli.ts",
-    "src/cli-help.ts",
-    "src/manual-update.ts",
-    "test/manual-update.test.ts",
+    "AGENTS.md",
+    "test/node-lifecycle.test.ts",
+    "test/node-lifecycle-execution.test.ts",
+    "test/upgrade-lifecycle.test.ts",
     "docs/work/records/F-117.md",
     "generated:backlog-views"
   ],
@@ -27,19 +32,19 @@
   ],
   "privacy": "Neutral fixtures only; no personal data.",
   "validation": [
-    "node --test test/manual-update.test.ts",
+    "node --test test/node-lifecycle.test.ts test/node-lifecycle-execution.test.ts test/upgrade-lifecycle.test.ts",
     "npm run check:fast"
   ],
   "escalation": [
     "A material scope or effort increase goes to the owner"
   ],
   "effort": {
-    "size": "small",
-    "estimate": "2 h agent",
-    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
+    "size": "medium",
+    "estimate": "4 h agent",
+    "basis": "Estimated 2026-11-23 at agent speed; migration of a live service. Not a measurement.",
     "reviewed": "2026-11-23",
-    "agentHours": 2,
-    "baselineAgentHours": 2,
-    "estimateAgentHours": 2
+    "agentHours": 4,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
   }
 }

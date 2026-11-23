@@ -9,7 +9,8 @@
     "Enable the automatic policy with the command or dashboard switch added in F-102-T02 (its exact command is written into this step when T02 lands), then wait for the scheduled check; expected: a Telegram notice with the revision and time, then the update report with the after-start health check"
   ],
   "dependsOn": [
-    "F-102-T03"
+    "F-102-T03",
+    "B-108-T01"
   ],
   "resources": [
     "docs/work/records/F-102.md"

@@ -2,21 +2,22 @@
   "version": 1,
   "id": "F-117-T02",
   "parent": "F-117",
-  "title": "nerv update repairs a stale build or an unloaded service",
-  "goal": "An up-to-date base whose dist/web is older than the checkout, or whose service is not loaded, is rebuilt and loaded",
+  "title": "nerv update [--check]: fetch, compare and run the lifecycle update",
+  "goal": "One command checks origin/main and, when behind, runs stop, lifecycle update and start, then probes the dashboard",
   "status": "planned",
   "acceptance": [
-    "A stale dist/web is rebuilt before the service starts",
-    "A defined but unloaded service is loaded and started instead of reported as already loaded",
-    "Stop waits until launchd has released the service before start"
+    "--check prints up to date or behind by N commits without changing anything",
+    "A behind base completes stop → update → start through planService/applyService and reports the new revision",
+    "Any refusal prints the blockers and the recovery steps"
   ],
   "dependsOn": [
-    "F-117-T01"
+    "B-108-T01"
   ],
   "resources": [
     "src/cli.ts",
-    "src/service.ts",
-    "test/service.test.ts",
+    "src/cli-help.ts",
+    "src/manual-update.ts",
+    "test/manual-update.test.ts",
     "docs/work/records/F-117.md",
     "generated:backlog-views"
   ],
@@ -26,7 +27,7 @@
   ],
   "privacy": "Neutral fixtures only; no personal data.",
   "validation": [
-    "node --test test/service.test.ts",
+    "node --test test/manual-update.test.ts",
     "npm run check:fast"
   ],
   "escalation": [
@@ -34,11 +35,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
+    "estimate": "2 h agent",
     "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
     "reviewed": "2026-11-23",
-    "agentHours": 1,
-    "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
   }
 }
