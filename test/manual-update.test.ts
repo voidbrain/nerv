@@ -414,3 +414,15 @@ test('B-108: a refusal found after the stop starts the service again', async () 
   assert.deepEqual(applied, ['stop', 'start'], 'stopped, refused, started again');
   assert.match(result.recovery.join(' '), /started again/);
 });
+
+// B-110 (owner 2026-11-23): Settings offered "Update now" while Health already said "up to date", and the click was
+// refused. One button, in Health next to "Update availability", and only when an update is available.
+test('B-110: Update now sits in Health beside the availability line and only when an update is available', () => {
+  const live = readFileSync(new URL('../web/public/dashboard/live.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(live, /btn-update-now/, 'no second Update now button in Settings');
+  const action = /const updateActionHtml = u && u\.status === "update-available"[\s\S]*?: "";/.exec(live);
+  assert.ok(action, 'the action is rendered only for update-available');
+  assert.match(action![0], /id='btn-apply-update'/);
+  assert.match(action![0], /Update now/);
+  assert.doesNotMatch(action![0], /Update ready/, 'the availability line already names the revision');
+});
