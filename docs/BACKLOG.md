@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 77.5 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 89.25 h of actual effort recorded on 114 steps. Generated from the task files.
+**Remaining effort:** 76.75 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 90.75 h of actual effort recorded on 115 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -289,9 +289,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.75 h agent + 1 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h agent + 1 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover (Planned).
+💻 **→** Next: F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -305,11 +305,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-016-t07"></a>F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.75 h | 0 h | 0.75 h | Planned | — | [F-016-T08](#f-016-t08) | 🤖 | — |
+| 🟢 Small | <a id="f-016-t07"></a>F-016-T07 — Step 4a — Owner-initiated relocation with restore; never a context-only takeover | 0.75 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-016-T08](#f-016-t08) | 🤖 | — |
 | 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned | [F-016-T07](#f-016-t07) | [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | [F-016-T08](#f-016-t08) | [F-016-T11](#f-016-t11) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-016-T09](#f-016-t09) | — | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 12.25 h (14 of 15 steps) | 9.75 h (9 of 15 steps recorded) | 1.75 h agent + 1 h owner | 11 of 15 completed | | | | |
+| 🟢 Small | **Total** | 12.25 h (14 of 15 steps) | 11.25 h (10 of 15 steps recorded) | 1 h agent + 1 h owner | 11 of 15 completed | | | | |
 
 <details><summary>Done steps (11)</summary>
 

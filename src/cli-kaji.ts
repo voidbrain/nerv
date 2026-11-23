@@ -19,6 +19,7 @@ import {
 } from './kaji.ts';
 
 import { builtinTools } from './executors.ts';
+import { drainCoordinator, signDrainReceipt } from './coordinator-relocation.ts';
 import { OFFER_NAME, toolName } from './mcp.ts';
 
 export async function runKajiCommand(
@@ -153,6 +154,60 @@ export async function runKajiCommand(
     console.log(
       `Main base: ${id}. While it is online, the other bases send their cards, reminders and briefs through its Aoba and keep their own bots quiet.`,
     );
+  } else if (sub === 'relocate') {
+    // F-016-T07: the owner moves the coordinator; never automatic. --revoke names a lost base to revoke first.
+    const id = (args[1] ?? '').toUpperCase();
+    const lost = ctx.flag('--revoke')?.toUpperCase();
+    const enrolled = registry.bases().filter((b) => b.status === 'enrolled');
+    if (!id) throw new Error('Usage: kaji relocate BASE-ID [--revoke LOST-BASE-ID]');
+    if (!enrolled.some((b) => b.baseId === id)) throw new Error('No enrolled base with that id (see kaji list).');
+    if (registry.main() === id) throw new Error(`${id} is already the main base.`);
+    const lostEntry = lost ? enrolled.find((b) => b.baseId === lost) : undefined;
+    if (lost && (!lostEntry || lost === id)) throw new Error('--revoke needs another enrolled base id.');
+    const root = await unlock();
+    const signed = new Registry(store.db, root.publicKey);
+    if (lostEntry)
+      signed.add(
+        signRecord(root.privateKey, {
+          kind: 'revoke',
+          serial: signed.nextSerial(),
+          baseId: lostEntry.baseId,
+          publicKey: lostEntry.publicKey,
+          issued: new Date().toISOString(),
+        }),
+      );
+    const epoch = signed.nextMainEpoch();
+    signed.add(
+      signRecord(root.privateKey, {
+        kind: 'main',
+        serial: signed.nextSerial(),
+        coordinatorEpoch: epoch,
+        baseId: id,
+        issued: new Date().toISOString(),
+      }),
+    );
+    console.log(
+      `Signed main ${id} at coordinator epoch ${epoch}${lostEntry ? ` and revoked ${lostEntry.baseId}` : ''}. ` +
+        'Export these records (kaji export) and import them on every surviving base before promotion; ' +
+        'on the old main, if reachable, run kaji drain and hand its receipt to the new main.',
+    );
+  } else if (sub === 'drain') {
+    // F-016-T07: planned relocation, old main side. Only after the owner signed a newer main record.
+    const state = store.coordinatorFencingState();
+    const self = registry.bases().find((b) => b.publicKey === me && b.status === 'enrolled');
+    if (!state || !self) throw new Error('This base holds no coordinator state to drain.');
+    if (registry.mainEpoch() <= state.coordinatorEpoch)
+      throw new Error(
+        'Sign the relocation first (kaji relocate BASE-ID) and import it here: draining now would leave no coordinator.',
+      );
+    const receipt = drainCoordinator(store.db, { baseId: self.baseId, coordinatorEpoch: state.coordinatorEpoch });
+    const out = JSON.stringify(signDrainReceipt(baseKey(home).privateKey, receipt), null, 2) + '\n';
+    if (args[1]) {
+      writeFileSync(args[1], out);
+      console.log(
+        `Drained epoch ${receipt.coordinatorEpoch} at seq ${receipt.finalSeq}; receipt written to ${args[1]}.`,
+      );
+    } else process.stdout.write(out);
   } else if (sub === 'lease-rearm') {
     const confirmSole = args.includes('--confirm-sole-coordinator');
     const ownPub = baseKey(home).publicKey;
@@ -237,7 +292,7 @@ export async function runKajiCommand(
     );
   } else
     throw new Error(
-      'Usage: kaji enrol | revoke | main [BASE-ID] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
+      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [--revoke LOST-ID] | drain [FILE] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
     );
   return;
 }

@@ -191,12 +191,13 @@ export const HELP_GROUPS: HelpGroup[] = [
     commands: [
       {
         name: 'kaji',
-        args: 'enrol|revoke|main|offer|seat|list|export|import',
+        args: 'enrol|revoke|main|relocate|drain|offer|seat|list|export|import',
         about: 'Enrolled bases',
         usage: [
           'kaji enrol BASE-ID "Name" PUBKEY|self ADDRESS | kaji revoke BASE-ID | kaji list',
           'kaji main [BASE-ID] | kaji offer [ACTION…|none] | kaji seat BASE-ID shadow|veto|off',
           'kaji export [FILE] | kaji import FILE --root FINGERPRINT',
+          'kaji relocate BASE-ID [--revoke LOST-ID] | kaji drain [FILE]',
         ],
       },
       {
