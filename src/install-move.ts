@@ -121,8 +121,8 @@ export async function moveInstall(deps: MoveDeps): Promise<MoveResult> {
     oldStopped = true;
     await run(oldHost, 'uninstall', 'old');
     oldRemoved = true;
+    // Lifecycle install writes the definition, starts the service and verifies it: no separate start.
     await run(newHost, 'install', 'new');
-    await run(newHost, 'start', 'new');
     if (!(await deps.probe())) throw Error('The service did not answer from the install folder.');
     say('probe: dashboard answers');
     return result('moved', revision);
@@ -136,9 +136,9 @@ export async function moveInstall(deps: MoveDeps): Promise<MoveResult> {
         const now = await newHost.inspect();
         if (now.registration !== 'absent' || now.runtime !== 'stopped') await run(newHost, 'stop', 'rollback new');
         if (now.definition === 'owned') await run(newHost, 'uninstall', 'rollback new');
+        // Install starts the old service again.
         await run(oldHost, 'install', 'rollback old');
-      }
-      await run(oldHost, 'start', 'rollback old');
+      } else await run(oldHost, 'start', 'rollback old');
       return result('rolled-back', revision, [reason, 'The service runs from the previous checkout again.']);
     } catch (rollbackError) {
       return result('uncertain', revision, [

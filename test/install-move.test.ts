@@ -169,3 +169,13 @@ test('F-117-T01: a failed old uninstall restarts the old service, which still ha
   );
   assert.equal(state['/dev/nerv']!.runtime, 'running');
 });
+
+test('F-117-T01: a blocked stop of the old service refuses before anything is cloned, built or started', async () => {
+  const { deps, calls, state } = fakes({ blockAt: 'old stop' });
+  const r = await moveInstall(deps);
+  assert.equal(r.outcome, 'refused', JSON.stringify(r));
+  assert.match(r.reasons.join(' '), /ownership is unknown/);
+  assert.ok(!calls.some((c) => c.startsWith('git clone') || c.startsWith('npm')), 'nothing prepared');
+  assert.ok(!calls.some((c) => /^(old|new) /.test(c)), 'no lifecycle step applied, no rollback start');
+  assert.equal(state['/dev/nerv']!.runtime, 'running');
+});
