@@ -454,7 +454,7 @@ const DOMAIN_INTENT_PATTERNS: Record<ToolDomain, RegExp> = {
   batteries:
     /\b(batter[iy]|batteri[ae]|lipo|li-ion|liion|celle|cell|voltag|tension|storage|scarica|ricarica|carica|mah|resistenz|resistance|pack|packs|1s|2s|3s|4s|6s)\b/i,
   fleet:
-    /\b(fleet|flotta|droni|drone|velivoli|aircraft|hangar|manutenzion|maintenance|crash|voli|flight|flights|parti|ricambi|spare|parts)\b/i,
+    /\b(fleet|flotta|droni|drone|velivoli|aircraft|hangar|manutenzion|maintenance|crash\w*|voli|flight|flights|part[ei]|ricambi|scort[ae]|spares?|motore|motori|braccio|arm|elica|eliche|rotto|rotta|broken|damaged|danneggiat\w*)\b/i,
 };
 
 const DOMAIN_PREFIXES: readonly ToolDomain[] = ['fpv', 'pantry', 'gmail', 'batteries', 'fleet'];
