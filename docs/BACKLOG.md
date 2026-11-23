@@ -1047,7 +1047,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-093-t03"></a>F-093-T03 — Shared adapter for F-012 and F-092 | 1 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-093-t03"></a>F-093-T03 — Shared adapter for F-012 and F-092 | 1 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | — | 🤖 | [PR #675](https://github.com/voidbrain/nerv/pull/675) implementation |
 | 🟡 Medium | <a id="f-093-t05"></a>F-093-T05 — Bind the macOS accessibility driver to the click adapter | 2 h | 0 h | 2 h | Planned | — | [F-093-T04](#f-093-t04) | 🤖 | — |
 | 🟢 Small | <a id="f-093-t04"></a>F-093-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-093-T05](#f-093-t05) | — | ⏳ 🧑‍🔧 | — |
 | 🟡 Medium | **Total** | 5 h (4 of 5 steps) | 2.5 h (3 of 5 steps recorded) | 2 h agent + 0.25 h owner | 2 of 5 completed | | | | |
@@ -1068,7 +1068,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-093-T02: [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation. [PR #497](https://github.com/voidbrain/nerv/pull/497) (merged; CI green); [Desktop control adapter decision](decisions/desktop-control-adapter.md) (`F-093-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-093-T02: [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation · F-093-T03: [PR #675](https://github.com/voidbrain/nerv/pull/675) implementation. [PR #675](https://github.com/voidbrain/nerv/pull/675) (F-093-T03); [PR #497](https://github.com/voidbrain/nerv/pull/497) (merged; CI green); [Desktop control adapter decision](decisions/desktop-control-adapter.md) (`F-093-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-093-T02 not closed: the adapter logic passed on green CI, but `nerv desktop-click` runs the adapter with a stub driver ("No live desktop accessibility driver bound in CLI"), so the owner check F-093-T04 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/497) merged on green CI. `F-093-T01`: `npm run check:fast` passed. |
 | Reviewed | 2026-11-18 |
