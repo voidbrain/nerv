@@ -583,3 +583,7 @@ PRs #598–#614 merged green. Automated steps closed; #610 is harness maintenanc
 ## 2026-11-21 — main `404f8ff`
 
 PRs #615–#620 merged green. #615 was reconciliation-only; B-105, F-111 and F-056 are current. #617 records F-005/B-091 recovery; #620 merged the fixes, with Tabgha verification pending. Reconciliation: [PR #622](https://github.com/voidbrain/nerv/pull/622).
+
+## 2026-11-23 — main `57fac5a8`
+
+PRs #660–#663 merged green (#660 archive, #661 WorkerLink/model.infer, #662 F-006-T11/FPVBuddy, #663 Italian fleet intent). Reconciled harness v10.3.0 and closed F-006-T15 plus 7 verified tasks.

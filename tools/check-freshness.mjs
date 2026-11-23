@@ -387,7 +387,9 @@ if (stamp.reviews !== undefined) {
             ? 'docs/agents/rule-review.md'
             : name === 'architecture'
               ? 'docs/agents/architecture-review.md'
-              : 'docs/agents/maintenance.md');
+              : name === 'skills'
+                ? 'docs/agents/skills.md'
+                : 'docs/agents/maintenance.md');
         const status = !latest ? 'missing' : `${latest.age} days old`;
         warn(
           `Review "${name}" (${latest?.path ?? 'none'}) is ${status} (limit ${cfg.days}, reviews.${name}.days in .harness.json): follow ${docHint} and write ${relDir}/${name}/<date>.md.`,

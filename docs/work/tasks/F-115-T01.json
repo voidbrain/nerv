@@ -4,7 +4,7 @@
   "parent": "F-115",
   "title": "Grouped, alphabetical CLI help",
   "goal": "`nerv help` is grouped by theme, sorted and aligned; `nerv help COMMAND` gives full usage",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A test fails when a dispatched command is missing from help or help lists one the CLI does not handle"
   ],
@@ -30,7 +30,7 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 h",
+    "estimate": "0 remaining",
     "basis": "Estimated 2026-11-20: one module, its wiring and a test. Not a measurement.",
     "reviewed": "2026-11-20",
     "agentHours": 0,

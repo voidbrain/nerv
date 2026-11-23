@@ -4,7 +4,7 @@
   "parent": "F-090",
   "title": "Headless resume adapter",
   "goal": "The F-012 engine resumes a named session once without the editor",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Identity rechecked; once only; needs-attention on change"
   ],
@@ -32,12 +32,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h",
+    "estimate": "0 remaining",
     "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
     "reviewed": "2026-11-18",
     "agentHours": 0,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1,
+    "actualAgentHours": 1,
+    "actualSource": "stated"
   },
   "prs": [
     {
