@@ -7,6 +7,7 @@ import { join, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
+import { addPilot } from '../src/pilots.ts';
 import { browser } from './fixtures/browser.mjs';
 const require = createRequire(import.meta.url);
 test(
@@ -46,10 +47,25 @@ test(
       }),
     );
     writeFileSync(join(home, 'scrolls.json'), JSON.stringify({ blue: ['reminders.add'] }));
+    // Neutral specialist pilots with long names and a long model name, so the pilot grid has cards to measure.
+    const fixturePilots = ['printer', 'writer', 'planner'].reduce(
+      (roster, id) =>
+        addPilot(roster, {
+          id,
+          name: 'Fixture ' + id + ' long call name',
+          domain: 'fixture domain for ' + id,
+          keywords: [id, 'fixture'],
+          model: 'fixture-model-with-a-very-long-name:30b-a3b-instruct-q4_K_M',
+          stage: 'prototype',
+          parent: 'generic',
+        }),
+      [],
+    );
     const runtime = new Runtime(join(home, 'db'), undefined, home);
     let server;
     try {
       await runtime.ready();
+      runtime.setPilots(() => fixturePilots);
       runtime.startResumer(100);
       let browserPolicy = { enabled: false, channels: [], targets: [] };
       server = makeServer(runtime, token, {
@@ -123,6 +139,31 @@ test(
         );
         releaseEva();
         await heldEva;
+        // Owner 2026-11-23: pilot cards sit 2 per row, call name and second name each on their own
+        // full-width line, and no select or input leaves its card (measured, not just asserted in CSS).
+        await until(`document.querySelectorAll('#melons .pilot-grid .pilot-second-input').length === 3`);
+        const pilotLayout = await evaluate(`(() => {
+          const box = document.querySelector('#melons'), out = { escaped: [], cols: null, stacked: [] };
+          const grid = box.querySelector('.pilot-grid');
+          if (grid) out.cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+          for (const card of box.querySelectorAll('.card')) {
+            const c = card.getBoundingClientRect();
+            for (const el of card.querySelectorAll('select, input')) {
+              const r = el.getBoundingClientRect();
+              if (r.left < c.left - 0.5 || r.right > c.right + 0.5) out.escaped.push(el.id || el.tagName);
+            }
+            const name = card.querySelector('.pilot-name-input'), second = card.querySelector('.pilot-second-input');
+            if (name && second) {
+              const a = name.getBoundingClientRect(), b = second.getBoundingClientRect();
+              out.stacked.push(b.top >= a.bottom && a.width > c.width * 0.8 && b.width > c.width * 0.8);
+            }
+          }
+          return out;
+        })()`);
+        assert.deepEqual(pilotLayout.escaped, [], 'every pilot select and input stays inside its card');
+        assert.equal(pilotLayout.cols, 2, 'pilot cards sit 2 per row');
+        assert.equal(pilotLayout.stacked.length, 3, 'the three fixture pilots render');
+        assert.ok(pilotLayout.stacked.every(Boolean), 'call name and second name each take a full-width line');
         // F-110-T03: Settings panel edits update schedule, saves via Apply, and passes axe.
         await until(`document.querySelector('#set-check-hour') && document.querySelector('#btn-save-settings')`);
         await evaluate(`{

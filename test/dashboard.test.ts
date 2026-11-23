@@ -1922,7 +1922,7 @@ test('F-051-T06: Sephirot EVA cage shows recorded pilot and instance, none when 
   assert.notEqual(noData.text, unavailable.text);
 });
 
-test('Settings shows clear hour labels and editable Brief time without internal health thresholds; pilot cards sit 3-up without select overflow', () => {
+test('Settings shows clear hour labels and editable Brief time without internal health thresholds; pilot cards sit 2-up with stacked names and no select overflow (owner 2026-11-23)', () => {
   const html = readFileSync('web/public/dashboard/index.html', 'utf8');
   const live = readFileSync('web/public/dashboard/live.js', 'utf8');
   const settingsBlock = live.slice(
@@ -1938,7 +1938,8 @@ test('Settings shows clear hour labels and editable Brief time without internal 
   assert.match(settingsBlock, /id='set-brief-at'/);
   assert.match(live, /api\("settings\/schedule"/);
 
-  assert.match(html, /\.pilot-grid\s*\{[^}]*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(html, /\.pilot-grid\s*\{[^}]*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(html, /\.pilot-hdr-inputs\s*\{[^}]*flex-direction:\s*column/);
   assert.match(html, /\.pilot-field\s+select[^}]*max-width:\s*100%/);
   assert.match(
     html,
