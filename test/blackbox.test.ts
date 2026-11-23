@@ -93,3 +93,29 @@ describe('F-100-T03: FPV blackbox vibration report', () => {
     }
   });
 });
+
+// B-109: Betaflight Blackbox Explorer's CSV export starts with a block of "key",value settings lines before the column
+// header; a real export (owner log, 2026-11-23) was rejected as "missing required columns".
+describe('B-109: Blackbox Explorer CSV export with a settings preamble', () => {
+  it('finds the column header after the preamble and reads every data row', () => {
+    const preamble = [
+      '"Product","Blackbox flight data recorder"',
+      '"firmware","4.5"',
+      '"looptime",312',
+      '"debug_mode",0',
+    ];
+    const header =
+      '"loopIteration","time","gyroADC[0]","gyroADC[1]","gyroADC[2]","gyroUnfilt[0]","gyroUnfilt[1]","gyroUnfilt[2]","rcCommand[3]","motor[0]","motor[1]","motor[2]","motor[3]","eRPM[0]","eRPM[1]","eRPM[2]","eRPM[3]"';
+    const rows: string[] = [];
+    for (let i = 0; i < 4000; i++) {
+      const t = 1000000 + i * 312;
+      const s = Math.round(40 * Math.sin((2 * Math.PI * 180 * t) / 1e6));
+      rows.push([i, t, s, -s, 1, s, -s, 1, 1400, 1500, 1510, 1490, 1505, 120, 121, 119, 120].join(','));
+    }
+    const csv = [...preamble, header, ...rows].join('\n');
+    const report = analyzeBlackboxVibration(csv);
+    assert.equal(report.sampleCount, 4000, 'every data row is read');
+    assert.equal(report.usedUnfilteredGyro, true);
+    assert.equal(report.hasERpmTelemetry, true);
+  });
+});

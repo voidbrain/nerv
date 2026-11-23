@@ -103,8 +103,19 @@ export function parseBlackboxCsv(csv: string): BlackboxSample[] {
     .split(/\r?\n/)
     .map((l) => l.trim())
     .filter((l) => l.length > 0 && !l.startsWith('#'));
+  // B-109: Blackbox Explorer exports start with "key",value settings lines; the column header is the first line that
+  // names the time and gyro columns, and the data follows it.
+  const cellsOf = (line: string) => line.split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
+  const start = lines.findIndex((l) => {
+    const c = cellsOf(l);
+    return (
+      c.some((h) => h === 'time' || h === 'time (us)' || h === 'timeUs') && c.some((h) => /^gyro(ADC)?\[0\]$/.test(h))
+    );
+  });
+  // No recognisable header: keep the first line, so the missing-columns error below names the problem.
+  if (start > 0) lines.splice(0, start);
   if (lines.length < 2) return [];
-  const headers = lines[0]!.split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
+  const headers = cellsOf(lines[0]!);
   const idx = (names: string[]) => names.map((n) => headers.indexOf(n)).find((i) => i >= 0) ?? -1;
 
   const iTime = idx(['time (us)', 'time', 'timeUs']);

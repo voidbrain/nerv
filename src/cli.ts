@@ -20,7 +20,8 @@ import { defaultAutoUpdatePolicy } from './update-policy.ts';
 import { startAutoUpdateScheduler } from './update-scheduler.ts';
 import { buildInfo, checkRevisionSkew, type BuildInfo } from './build.ts';
 import type { UpdateControl } from './server-update.ts';
-import { clickNamedControl, type BrowserAdapterDriver } from './browser-control.ts';
+import { clickNamedControl } from './browser-control.ts';
+import { createCdpBrowserDriver } from './browser-cdp-driver.ts';
 import { clickDesktopControl } from './desktop-control.ts';
 import { desktopDriverFor } from './desktop-macos-driver.ts';
 
@@ -970,22 +971,20 @@ try {
         break;
       }
       case 'browser-click': {
-        if (!args[0]) throw new Error('Usage: nerv browser-click <controlName>');
-        const noDriver: BrowserAdapterDriver = {
-          async getActiveTab() {
-            throw new Error('No live browser driver attached.');
-          },
-          async clickControl() {
-            throw new Error('No live browser driver attached.');
-          },
-        };
-        console.log(
-          JSON.stringify(
-            await clickNamedControl(noDriver, { controlName: args[0], allowedOrigins: [], approved: false }),
-            null,
-            2,
-          ),
-        );
+        const controlName = args.find((a) => !a.startsWith('--'));
+        if (!controlName) throw new Error('Usage: nerv browser-click <control-name> [--approved]');
+        const browser = readConfig(home).browser;
+        if (!browser || browser.allowedOrigins.length === 0) {
+          throw new Error(
+            'No browser origins allowed. Add "browser": {"allowedOrigins": ["https://..."], "debugPort": 9222} to config.json and start the dedicated browser profile with that remote debugging port.',
+          );
+        }
+        const res = await clickNamedControl(createCdpBrowserDriver({ port: browser.debugPort }), {
+          controlName,
+          allowedOrigins: browser.allowedOrigins,
+          approved: args.includes('--approved'),
+        });
+        console.log(JSON.stringify(res, null, 2));
         break;
       }
       case 'desktop-click': {
