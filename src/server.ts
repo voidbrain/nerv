@@ -113,7 +113,7 @@ export function makeServer(
   const sessionTtl = options.sessionTtlMs ?? SESSION_TTL_MS;
   const currentToken = () => (typeof token === 'function' ? token() : token);
   if (currentToken().length < 24) throw new Error('NERV_TOKEN must be at least 24 characters.');
-  const sessions = new SessionBook(currentToken, options.sessionFile);
+  const sessions = new SessionBook(currentToken, options.sessionFile, sessionTtl, MAX_SESSIONS);
   const listener: RequestListener = async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-store');

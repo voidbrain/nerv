@@ -79,7 +79,7 @@ test('B-113: after Update started the dashboard waits for the new revision befor
   assert.match(live, /outcome === "started"\) void awaitRestart\(/);
   const fn = /async function awaitRestart\(revision\) \{[\s\S]*?\n {2}\}/.exec(live);
   assert.ok(fn, 'awaitRestart exists');
-  assert.match(fn![0], /runningRevision === revision/);
+  assert.match(fn![0], /runningRevision === revision && !u\.restartRequired/);
   assert.match(fn![0], /state\.manualUpdateBusy = false/);
 });
 

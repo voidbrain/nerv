@@ -982,10 +982,12 @@
       await new Promise(r => setTimeout(r, 5000));
       try {
         const u = await api("update");
-        if (u && (u.runningRevision === revision || u.status === "up-to-date")) { state.update = u; break; }
+        // Only the new revision, actually running, ends the wait (B-113 review): "up to date" alone can be the old process.
+        if (u && u.runningRevision === revision && !u.restartRequired) { state.update = u; state.manualUpdateBusy = false; renderHealth(); poll(); return; }
       } catch { /* restarting: not answering yet */ }
     }
     state.manualUpdateBusy = false;
+    state.manualUpdate = { outcome:"uncertain", channel:"main", revision, reasons:["NERV did not answer on the new revision within 10 minutes."], recovery:["Check ~/.nerv/updater.log and the inbox for the updater's result."] };
     renderHealth();
     poll();
   }
