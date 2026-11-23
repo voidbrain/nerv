@@ -285,7 +285,11 @@ test('B-108: the outside updater stops the running service through the lifecycle
       stopFirst: true,
       plan: async (_host, action) => {
         order.push('plan ' + action);
-        return { ...makePlan(), action };
+        const running = !order.includes('apply stop');
+        return {
+          ...makePlan(action === 'update' && running ? ['Stop the selected service and descendants first.'] : []),
+          action,
+        };
       },
       applyPlan: async (_host, plan) => {
         order.push('apply ' + plan.action);
@@ -295,7 +299,7 @@ test('B-108: the outside updater stops the running service through the lifecycle
     { revision: B },
   );
   assert.equal(result.outcome, 'completed', JSON.stringify(result));
-  assert.deepEqual(order, ['plan stop', 'apply stop', 'plan update', 'apply update']);
+  assert.deepEqual(order, ['plan update', 'plan stop', 'apply stop', 'plan update', 'apply update']);
 });
 
 test('B-108: POST /api/update/apply from the running service starts the outside updater and answers started', async () => {
