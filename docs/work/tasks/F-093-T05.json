@@ -4,7 +4,7 @@
   "id": "F-093-T05",
   "title": "Bind the macOS accessibility driver to the click adapter",
   "goal": "`nerv desktop-click` presses a named control in a real app on the Mac",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A real driver (macOS Accessibility API through a small helper) replaces the stub; it checks the Accessibility permission and says how to grant it",
     "Fixture-tree tests unchanged; refusals of password fields, permission dialogs and payment buttons still hold"
@@ -36,8 +36,16 @@
     "estimate": "2 h",
     "basis": "Estimated 2026-11-18 when the owner approved adding the live binding the owner check needs. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 2,
+    "agentHours": 0,
     "baselineAgentHours": 2,
-    "estimateAgentHours": 2
-  }
+    "estimateAgentHours": 2,
+    "actualAgentHours": 1.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 683,
+      "note": "implementation"
+    }
+  ]
 }
