@@ -1279,7 +1279,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | Opened in [PR #668](https://github.com/voidbrain/nerv/pull/668). |
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: `nerv nodes lifecycle-inspect --action update` on NERV-01 with the service running listed "Stop the selected service and descendants first." |
 | Reviewed | 2026-11-23 |
@@ -1367,7 +1367,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | Opened in [PR #668](https://github.com/voidbrain/nerv/pull/668). |
 | Opened | 2026-11-23 |
 | Verification | — |
 | Reviewed | 2026-11-23 |
