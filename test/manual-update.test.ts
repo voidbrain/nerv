@@ -236,3 +236,64 @@ test('F-005-T17: dashboard live.js exposes manual update action with refusals an
   assert.match(live, /mu\.reasons/);
   assert.match(live, /mu\.recovery/);
 });
+
+// B-108: the lifecycle refuses to update a service that is running, and the dashboard's Update now and the
+// scheduled apply run inside that service. From inside, the update must be handed to an updater outside it.
+test('B-108: an update requested inside the running service starts the outside updater and plans nothing itself', async () => {
+  const started: { channel: string; revision: string }[] = [];
+  let planned = 0;
+  const result = await executeManualUpdate({
+    resolveUpdate: async () => makeAvailability('update-available', B),
+    lifecycleHost: () => stubHost,
+    inService: true,
+    startUpdater: async (input) => {
+      started.push(input);
+    },
+    plan: async () => {
+      planned++;
+      return makePlan(['Stop the selected service and descendants first.']);
+    },
+    applyPlan: async () => {
+      throw new Error('must not apply from inside the service');
+    },
+  });
+  assert.equal(result.outcome, 'started', JSON.stringify(result));
+  assert.equal(result.revision, B);
+  assert.deepEqual(started, [{ channel: 'main', revision: B }]);
+  assert.equal(planned, 0, 'no lifecycle plan from inside the service');
+});
+
+test('B-108: inside the service with no updater for this platform the update is refused, not attempted', async () => {
+  const result = await executeManualUpdate({
+    resolveUpdate: async () => makeAvailability('update-available', B),
+    lifecycleHost: () => stubHost,
+    inService: true,
+    applyPlan: async () => {
+      throw new Error('must not apply');
+    },
+  });
+  assert.equal(result.outcome, 'refused');
+  assert.match(result.reasons.join(' '), /updater/i);
+});
+
+test('B-108: the outside updater stops the running service through the lifecycle, then applies the update', async () => {
+  const order: string[] = [];
+  const result = await executeManualUpdate(
+    {
+      resolveUpdate: async () => makeAvailability('update-available', B),
+      lifecycleHost: () => stubHost,
+      stopFirst: true,
+      plan: async (_host, action) => {
+        order.push('plan ' + action);
+        return { ...makePlan(), action };
+      },
+      applyPlan: async (_host, plan) => {
+        order.push('apply ' + plan.action);
+        return makeReceipt('completed', { steps: plan.action === 'stop' ? ['stop:completed'] : ['start:completed'] });
+      },
+    },
+    { revision: B },
+  );
+  assert.equal(result.outcome, 'completed', JSON.stringify(result));
+  assert.deepEqual(order, ['plan stop', 'apply stop', 'plan update', 'apply update']);
+});
