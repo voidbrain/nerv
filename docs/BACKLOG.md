@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 77.5 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 89.25 h of actual effort recorded on 114 steps. Generated from the task files.
+**Remaining effort:** 75.5 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 91 h of actual effort recorded on 115 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -931,6 +931,54 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-090"></a>[✨ F-090](#top)
+
+**Resume interrupted coding work without the editor**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-090-T04 — Resume automatically when a session limit resets (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: continue a coding agent's interrupted work directly, without VS Code. F-012 covers resuming in the editor (F-012-T03); a headless resume through the coding agent's own command line is a separate adapter. |
+| **Reproduce** | Interrupt a coding-agent session at its limit, then ask NERV to continue it after the reset. |
+| **Check** | NERV identifies the exact session (repository, branch, session ID) and resumes it once through the agent's supported command line after the reset, using the F-012 resume engine; a changed branch, a missing session or an already-resumed job produces needs-attention, not a second run; output and cost come back to the channel. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-090-t04"></a>F-090-T04 — Resume automatically when a session limit resets | 2 h | 1.75 h so far (stated) | 0 h | Implemented; verification pending | — | [F-090-T03](#f-090-t03) | 🤖 | — |
+| 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-090-T04](#f-090-t04) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 3.5 h (3 of 4 steps) | 3 h (3 of 4 steps recorded) | 0.25 h owner | 2 of 4 completed | | | | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-090-t01"></a>F-090-T01 — Feasibility: headless resume | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-090-t02"></a>F-090-T02 — Headless resume adapter | 1 h | 1 h (stated) | Completed | [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-090.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-090-T02: [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation. [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-090-T02 not closed: the adapter logic passed on green CI, but headless resume runs only as `nerv headless-resume <targets.json>` by hand; nothing in `serve` notices a session limit, so the owner check F-090-T03 ("NERV resumes it") cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/493) merged on green CI. `F-090-T01` feasibility report written in [headless-resume.md](decisions/headless-resume.md) from live CLI probe; verified with `npm run check:fast`. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-089"></a>[✨ F-089](#top)
 
 **Browser control: act on a named control in an open page**
@@ -974,54 +1022,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation. [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-090"></a>[✨ F-090](#top)
-
-**Resume interrupted coding work without the editor**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-090-T04 — Resume automatically when a session limit resets (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: continue a coding agent's interrupted work directly, without VS Code. F-012 covers resuming in the editor (F-012-T03); a headless resume through the coding agent's own command line is a separate adapter. |
-| **Reproduce** | Interrupt a coding-agent session at its limit, then ask NERV to continue it after the reset. |
-| **Check** | NERV identifies the exact session (repository, branch, session ID) and resumes it once through the agent's supported command line after the reset, using the F-012 resume engine; a changed branch, a missing session or an already-resumed job produces needs-attention, not a second run; output and cost come back to the channel. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-090-t04"></a>F-090-T04 — Resume automatically when a session limit resets | 2 h | 0 h | 2 h | Planned | — | [F-090-T03](#f-090-t03) | 🤖 | — |
-| 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-090-T04](#f-090-t04) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 1.25 h (2 of 4 steps recorded) | 2 h agent + 0.25 h owner | 2 of 4 completed | | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-090-t01"></a>F-090-T01 — Feasibility: headless resume | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-090-t02"></a>F-090-T02 — Headless resume adapter | 1 h | 1 h (stated) | Completed | [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-090.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-090-T02: [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation. [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-090-T02 not closed: the adapter logic passed on green CI, but headless resume runs only as `nerv headless-resume <targets.json>` by hand; nothing in `serve` notices a session limit, so the owner check F-090-T03 ("NERV resumes it") cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/493) merged on green CI. `F-090-T01` feasibility report written in [headless-resume.md](decisions/headless-resume.md) from live CLI probe; verified with `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
 
 </details>

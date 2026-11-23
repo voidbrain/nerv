@@ -42,6 +42,12 @@ export const HELP_GROUPS: HelpGroup[] = [
         about: 'Work to pick up again later',
         usage: ['resume-intent list [status] | create <intent.json> | cancel <id> [reason] | tick'],
       },
+      {
+        name: 'session-limit',
+        args: 'list|record',
+        about: 'Resume a coding session after its limit resets',
+        usage: ['session-limit list | record SESSION REPO BRANCH "ISO reset time+zone" [--prompt TEXT]'],
+      },
     ],
   },
   {
