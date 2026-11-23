@@ -843,6 +843,85 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-108"></a>[🐞 B-108](#top)
+
+**Dashboard "Update now" and the scheduled apply cannot update the service they run in**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-117-T01](#f-117-t01) | 🤖 | — | — |
+
+💻 **→** Next: B-108-T01 — Update now runs from a detached helper outside the service (Planned).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-23 reading the code: `POST /api/update/apply` (dashboard **Update now**) and the policy's scheduled apply call `executeManualUpdate` → `planService(host, 'update', …)` from inside the running service. The lifecycle planner blocks `update` while the service is registered or running ("Stop the selected service and descendants first."), so the request is refused. Every completed update in the NERV-01 lifecycle journal (latest `477d6afc`, 2026-11-19) was run from the CLI as stop → update → start. |
+| **Reproduce** | With the service running on a newer `main`, press **Update now** in Settings; the reply lists the stop-first blocker. |
+| **Check** | Test committed failing first: a manual update requested from inside a registered, running service is not refused for that reason; the update runs from a detached helper outside the service, stops it, applies the plan and starts it again, with the existing rehearsal and rollback. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-108-t01"></a>B-108-T01 — Update now runs from a detached helper outside the service | 1.5 h | 0 h | 1.5 h | Planned | — | [F-117-T01](#f-117-t01) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-108.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #668](https://github.com/voidbrain/nerv/pull/668). |
+| Opened | 2026-11-23 |
+| Verification | 2026-11-23: `nerv nodes lifecycle-inspect --action update` on NERV-01 with the service running listed "Stop the selected service and descendants first." |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+### <a id="f-117"></a>[✨ F-117](#top)
+
+**One command to update a base: `nerv update`**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.25 h owner | [B-108-T01](#b-108-t01) | — | ⏳ | — | — |
+
+💻 **→** Next: F-117-T01 — nerv update &#91;--check&#93;: fetch, compare and run the lifecycle update (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-23: one command that checks `origin/main`, downloads it when newer, installs dependencies, builds, stops and starts the service, and says what it did. It goes through the reviewed lifecycle update (rehearsal, backup, rollback), never a bare `git pull`. |
+| **Reproduce** | On 2026-11-23 the checkout was pulled without a rebuild, so `dist/web` still served an older dashboard, and the service was left unloaded from launchd; the owner had to chain five commands by hand. |
+| **Check** | `nerv update --check` reports up to date or behind by N commits; `nerv update` on a behind base completes stop → update → start and probes the dashboard; on an up-to-date base whose `dist/web` is older than the checkout, or whose service is not loaded, it rebuilds and loads it. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-117-t01"></a>F-117-T01 — nerv update &#91;--check&#93;: fetch, compare and run the lifecycle update | 2 h | 0 h | 2 h | Planned | [B-108-T01](#b-108-t01) | [F-117-T02](#f-117-t02), [F-117-T03](#f-117-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-117-t02"></a>F-117-T02 — nerv update repairs a stale build or an unloaded service | 1 h | 0 h | 1 h | Planned | [F-117-T01](#f-117-t01) | [F-117-T04](#f-117-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-117-t03"></a>F-117-T03 — Docs and help for nerv update | 0.5 h | 0 h | 0.5 h | Planned | [F-117-T01](#f-117-t01) | — | ⏳ 🤖 |
+| 🟢 Small | <a id="f-117-t04"></a>F-117-T04 — Owner runs nerv update on NERV-01 | — | 0 h | 0.25 h owner | Planned | [F-117-T02](#f-117-t02) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3.5 h agent + 0.25 h owner | 0 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-117.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #668](https://github.com/voidbrain/nerv/pull/668). |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
 ### <a id="f-089"></a>[✨ F-089](#top)
 
 **Browser control: act on a named control in an open page**
@@ -1249,44 +1328,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-108"></a>[🐞 B-108](#top)
-
-**Dashboard "Update now" and the scheduled apply cannot update the service they run in**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-117-T01](#f-117-t01) | 🤖 | — | — |
-
-💻 **→** Next: B-108-T01 — Update now runs from a detached helper outside the service (Planned).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-23 reading the code: `POST /api/update/apply` (dashboard **Update now**) and the policy's scheduled apply call `executeManualUpdate` → `planService(host, 'update', …)` from inside the running service. The lifecycle planner blocks `update` while the service is registered or running ("Stop the selected service and descendants first."), so the request is refused. Every completed update in the NERV-01 lifecycle journal (latest `477d6afc`, 2026-11-19) was run from the CLI as stop → update → start. |
-| **Reproduce** | With the service running on a newer `main`, press **Update now** in Settings; the reply lists the stop-first blocker. |
-| **Check** | Test committed failing first: a manual update requested from inside a registered, running service is not refused for that reason; the update runs from a detached helper outside the service, stops it, applies the plan and starts it again, with the existing rehearsal and rollback. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-108-t01"></a>B-108-T01 — Update now runs from a detached helper outside the service | 1.5 h | 0 h | 1.5 h | Planned | — | [F-117-T01](#f-117-t01) |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-108.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Opened in [PR #668](https://github.com/voidbrain/nerv/pull/668). |
-| Opened | 2026-11-23 |
-| Verification | 2026-11-23: `nerv nodes lifecycle-inspect --action update` on NERV-01 with the service running listed "Stop the selected service and descendants first." |
-| Reviewed | 2026-11-23 |
-
-</details>
-
----
 ### <a id="b-066"></a>[🐞 B-066](#top)
 
 **Worker-link heartbeat verification awaits nervous SQLite IPC on every frame**
@@ -1330,47 +1371,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: failing evidence above; B-066-T02 stays implemented until B-066-T03. |
 | Reviewed | 2026-11-19 |
-
-</details>
-
----
-### <a id="f-117"></a>[✨ F-117](#top)
-
-**One command to update a base: `nerv update`**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.25 h owner | [B-108-T01](#b-108-t01) | — | ⏳ | — | — |
-
-💻 **→** Next: F-117-T01 — nerv update &#91;--check&#93;: fetch, compare and run the lifecycle update (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-23: one command that checks `origin/main`, downloads it when newer, installs dependencies, builds, stops and starts the service, and says what it did. It goes through the reviewed lifecycle update (rehearsal, backup, rollback), never a bare `git pull`. |
-| **Reproduce** | On 2026-11-23 the checkout was pulled without a rebuild, so `dist/web` still served an older dashboard, and the service was left unloaded from launchd; the owner had to chain five commands by hand. |
-| **Check** | `nerv update --check` reports up to date or behind by N commits; `nerv update` on a behind base completes stop → update → start and probes the dashboard; on an up-to-date base whose `dist/web` is older than the checkout, or whose service is not loaded, it rebuilds and loads it. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-117-t01"></a>F-117-T01 — nerv update &#91;--check&#93;: fetch, compare and run the lifecycle update | 2 h | 0 h | 2 h | Planned | [B-108-T01](#b-108-t01) | [F-117-T02](#f-117-t02), [F-117-T03](#f-117-t03) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-117-t02"></a>F-117-T02 — nerv update repairs a stale build or an unloaded service | 1 h | 0 h | 1 h | Planned | [F-117-T01](#f-117-t01) | [F-117-T04](#f-117-t04) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-117-t03"></a>F-117-T03 — Docs and help for nerv update | 0.5 h | 0 h | 0.5 h | Planned | [F-117-T01](#f-117-t01) | — | ⏳ 🤖 |
-| 🟢 Small | <a id="f-117-t04"></a>F-117-T04 — Owner runs nerv update on NERV-01 | — | 0 h | 0.25 h owner | Planned | [F-117-T02](#f-117-t02) | — | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3.5 h agent + 0.25 h owner | 0 of 4 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-117.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Opened in [PR #668](https://github.com/voidbrain/nerv/pull/668). |
-| Opened | 2026-11-23 |
-| Verification | — |
-| Reviewed | 2026-11-23 |
 
 </details>
 
