@@ -77,6 +77,7 @@ import {
 } from './node-lifecycle-execution.ts';
 import { ROOT_KEY_FILE, baseKey, createRootKey, fingerprint } from './kaji.ts';
 import { service } from './service.ts';
+import { serviceMove } from './install-move-cli.ts';
 import { initializeNativeTLS, loadNativeTLS, nativeAdmin, NativeAuth, type Invitation } from './native-auth.ts';
 import { Runtime, type ChatReply } from './runtime.ts';
 
@@ -260,7 +261,8 @@ try {
           Buffer.from(JSON.stringify(invitation)).toString('base64url'),
       );
     } else console.log(JSON.stringify(value, null, 2));
-  } else if (command === 'service') service(args[0] ?? '', home);
+  } else if (command === 'service' && args[0] === 'move') await serviceMove(args.slice(1), home);
+  else if (command === 'service') service(args[0] ?? '', home);
   else if (await tryRunCliCommand(command, args, home, { readSecret, openPage, reloadIfRunning, flag })) {
     // Handled by cli-commands.ts
   } else if (!command || command === 'help') {

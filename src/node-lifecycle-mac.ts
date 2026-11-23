@@ -14,7 +14,6 @@ import {
 } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { homedir } from 'node:os';
-import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { databasePath, readConfig, readToken } from './config.ts';
 import { canonical, ROOT_KEY_FILE } from './kaji.ts';
@@ -49,6 +48,7 @@ import {
   type ServiceHost,
   type ServiceObservation,
 } from './node-lifecycle-execution.ts';
+import { serviceSource } from './install-source.ts';
 
 export function macRegistrationMatches(output: string, c: ServiceContext): boolean {
   const field = (name: string) => output.match(new RegExp('^\\s*' + name + ' = (.+)$', 'm'))?.[1]?.trim();
@@ -68,13 +68,13 @@ export function macRegistrationMatches(output: string, c: ServiceContext): boole
   );
 }
 /** The only production adapter: current unprivileged GUI user, current checkout and existing default data home. */
-export function macServiceHost(home: string): ServiceHost {
+export function macServiceHost(home: string, source?: string): ServiceHost {
   if (process.platform !== 'darwin' || !process.getuid?.())
     throw Error('Durable local lifecycle currently requires an unprivileged macOS GUI user.');
   const context: ServiceContext = {
     userHome: homedir(),
     home: resolve(home),
-    source: realpathSync(fileURLToPath(new URL('..', import.meta.url))),
+    source: realpathSync(source ?? serviceSource({ userHome: homedir() })),
     node: realpathSync(process.execPath),
     uid: process.getuid(),
   };

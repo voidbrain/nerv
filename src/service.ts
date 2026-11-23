@@ -2,9 +2,9 @@ import { existsSync, lstatSync, mkdirSync, readlinkSync, realpathSync, unlinkSyn
 import { dirname, join, posix, resolve, win32 } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { homedir } from 'node:os';
-import { fileURLToPath } from 'node:url';
 import { NODE_FLAGS } from './process-client.ts';
 import { readConfig, readToken } from './config.ts';
+import { serviceSource } from './install-source.ts';
 const label = 'io.nerv.agent',
   unit = 'nerv.service';
 const unixServicePath = posix.join;
@@ -138,7 +138,8 @@ export function windowsTaskXml(home: string, root: string, user: string): string
 }
 export function service(action: string, home: string): void {
   const platform = process.platform;
-  const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
+  // F-117: the install folder once it holds NERV, otherwise this checkout.
+  const root = serviceSource({ userHome: homedir() });
   if (platform === 'win32') {
     windowsService(action, home, root);
     return;

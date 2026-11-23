@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 81.75 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 83.25 h of actual effort recorded on 113 steps. Generated from the task files.
+**Remaining effort:** 78 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 83.25 h of actual effort recorded on 113 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -743,9 +743,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 7.5 h agent + 0.25 h owner | [B-108-T01](#b-108-t01) | [B-108-T01](#b-108-t01) | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 3.75 h agent + 0.25 h owner | [B-108-T01](#b-108-t01) | [B-108-T01](#b-108-t01) | 🤖 | — | — |
 
-💻 **→** Next: F-117-T01 — The service runs from its own install folder, apart from the project checkout (Planned).
+💻 **→** Next: F-117-T01 — The service runs from its own install folder, apart from the project checkout (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -757,12 +757,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
 |---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-117-t01"></a>F-117-T01 — The service runs from its own install folder, apart from the project checkout | 4 h | 0 h | 4 h | Planned | — | [B-108-T01](#b-108-t01) | 🤖 |
+| 🟢 Small | <a id="f-117-t01"></a>F-117-T01 — The service runs from its own install folder, apart from the project checkout | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | — | [B-108-T01](#b-108-t01) | 🤖 |
 | 🟡 Medium | <a id="f-117-t02"></a>F-117-T02 — nerv update &#91;--check&#93;: fetch, compare and run the lifecycle update | 2 h | 0 h | 2 h | Planned | [B-108-T01](#b-108-t01) | [F-117-T03](#f-117-t03), [F-117-T04](#f-117-t04) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-117-t03"></a>F-117-T03 — nerv update repairs a stale build or an unloaded service | 1 h | 0 h | 1 h | Planned | [F-117-T02](#f-117-t02) | [F-117-T05](#f-117-t05) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-117-t04"></a>F-117-T04 — Docs and help for nerv update | 0.5 h | 0 h | 0.5 h | Planned | [F-117-T02](#f-117-t02) | — | ⏳ 🤖 |
 | 🟢 Small | <a id="f-117-t05"></a>F-117-T05 — Owner runs nerv update on NERV-01 | — | 0 h | 0.25 h owner | Planned | [F-117-T03](#f-117-t03) | — | ⏳ 🧑‍🔧 |
-| 🔴 Large | **Total** | 7.5 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 7.5 h agent + 0.25 h owner | 0 of 5 completed | | | |
+| 🟡 Medium | **Total** | 3.75 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 3.75 h agent + 0.25 h owner | 0 of 5 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
