@@ -42,7 +42,7 @@ test('B-108: starting the job replaces a finished earlier run on macOS, uses sys
     calls.map((c) => c.split(' ').slice(0, 2).join(' ')),
     ['launchctl bootout', 'launchctl bootstrap'],
   );
-  assert.ok(written[0]!.endsWith(`.nerv-lifecycle/updater/${UPDATER_LABEL}.plist`));
+  assert.ok(written[0]!.endsWith(join('.nerv-lifecycle', 'updater', `${UPDATER_LABEL}.plist`)), written[0]);
 
   calls.length = 0;
   await startUpdaterJob(context, { channel: 'main', revision: B }, run, 'linux');
