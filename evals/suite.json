@@ -127,7 +127,8 @@
       "files": [
         "test/angular.browser.mjs",
         "test/evaluation.browser.mjs",
-        "test/pwa.browser.mjs"
+        "test/pwa.browser.mjs",
+        "test/browser-click.browser.mjs"
       ],
       "families": [
         "dashboard-operator",

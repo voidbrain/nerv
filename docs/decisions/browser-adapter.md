@@ -16,3 +16,9 @@ Status: Accepted (decision for F-089)
   - Clicking a named control by accessible name on the active allowlisted tab is an **Orange** action gated behind an owner approval card.
   - Never enters credentials, never approves OS/browser permission or payment dialogs, and never switches to or acts on another tab.
 - **Host permission**: Local loopback CDP / Playwright process only (`127.0.0.1`), running under the owner's desktop session where the dedicated profile lives; no remote browser exposure.
+
+## Live binding (F-089-T04)
+
+- The live driver speaks the Chrome DevTools protocol directly (`src/browser-cdp-driver.ts`, no Playwright dependency) to the dedicated profile's debugging port on `127.0.0.1`. The owner starts that profile with `--remote-debugging-port=<port> --user-data-dir=<dedicated folder>` and sets `"browser": {"allowedOrigins": [...], "debugPort": <port>}` in `config.json`.
+- `nerv browser-click <control> --approved` acts on the most recently used page target, only when it is visible and its origin is allowed. Controls are found by accessible name in the page; password, payment-autocomplete fields and controls inside an open page dialog are refused; a click that opens a JavaScript dialog stops with a message and the dialog is left for the owner.
+- `test/browser-click.browser.mjs` runs it against a local fixture page in headless Chrome.
