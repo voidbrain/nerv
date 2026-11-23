@@ -21,7 +21,8 @@ import { startAutoUpdateScheduler } from './update-scheduler.ts';
 import { buildInfo, checkRevisionSkew, type BuildInfo } from './build.ts';
 import type { UpdateControl } from './server-update.ts';
 import { clickNamedControl, type BrowserAdapterDriver } from './browser-control.ts';
-import { clickDesktopControl, type DesktopAccessibilityDriver } from './desktop-control.ts';
+import { clickDesktopControl } from './desktop-control.ts';
+import { desktopDriverFor } from './desktop-macos-driver.ts';
 
 import { SeatPool } from './seat-pool.ts';
 
@@ -978,21 +979,15 @@ try {
         break;
       }
       case 'desktop-click': {
-        if (!args[0] || !args[1]) {
-          throw new Error('Usage: nerv desktop-click <app-name> <control-name>');
+        const positional = args.filter((a) => !a.startsWith('--'));
+        if (!positional[0] || !positional[1]) {
+          throw new Error('Usage: nerv desktop-click <app-name> <control-name> [--window=<title>] [--approved]');
         }
-        const driver: DesktopAccessibilityDriver = {
-          checkAccessibilityPermission: () => false,
-          getWindow: async () => {
-            throw new Error('No live desktop accessibility driver bound in CLI.');
-          },
-          pressControl: async () => {
-            throw new Error('No live desktop accessibility driver bound in CLI.');
-          },
-        };
-        const res = await clickDesktopControl(driver, {
-          appName: args[0],
-          controlName: args[1],
+        const windowTitle = args.find((a) => a.startsWith('--window='))?.slice('--window='.length);
+        const res = await clickDesktopControl(desktopDriverFor(process.platform), {
+          appName: positional[0],
+          ...(windowTitle ? { windowTitle } : {}),
+          controlName: positional[1],
           approved: args.includes('--approved'),
         });
         console.log(JSON.stringify(res, null, 2));
