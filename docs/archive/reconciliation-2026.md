@@ -595,3 +595,7 @@ PRs #664–#672 merged green (#664 reconciliation, #665–#667 dashboard fixes f
 ## 2026-11-23 — main `2c1c5785`
 
 PRs #673, #675 and #678 merged green (#673 B-108 updater fetch precheck, #675 F-093-T03 shared desktop adapter, #678 F-113-T02 subject index). Reconciled with F-093-T05 in its PR.
+
+## 2026-11-23 — main `9ab9139f`
+
+PRs #680 and #683 merged green (#680 B-110 Update now placement, #683 F-093-T05 macOS desktop driver). Reconciled with F-089-T04 in its PR.
