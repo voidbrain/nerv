@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 74 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 91.5 h of actual effort recorded on 116 steps. Generated from the task files.
+**Remaining effort:** 73.25 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 91.5 h of actual effort recorded on 116 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -753,7 +753,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.25 h | — | [F-102-T04](#f-102-t04), [F-117-T02](#f-117-t02) | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.5 h | — | [F-102-T04](#f-102-t04), [F-117-T02](#f-117-t02) | 🤖 | — | — |
 
 💻 **→** Next: B-108-T01 — Update now runs from a detached helper outside the service (Implemented; verification pending).
 
@@ -768,8 +768,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-108-t01"></a>B-108-T01 — Update now runs from a detached helper outside the service | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | — | [B-108-T02](#b-108-t02), [F-102-T04](#f-102-t04), [F-117-T02](#f-117-t02) |
-| 🟢 Small | <a id="b-108-t02"></a>B-108-T02 — The restarted service reports the updater result in the inbox and on the dashboard | 1 h | 0 h | 1 h | Planned | [B-108-T01](#b-108-t01) | [F-102-T04](#f-102-t04) |
-| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 2 steps recorded) | 1.25 h | 0 of 2 completed | | |
+| 🟢 Small | <a id="b-108-t02"></a>B-108-T02 — The restarted service reports the updater result in the inbox and on the dashboard | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [B-108-T01](#b-108-t01) | [F-102-T04](#f-102-t04) |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h | 0 of 2 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
