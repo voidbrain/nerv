@@ -1,3 +1,4 @@
+import { isAbsolute, relative } from 'node:path';
 import type { ServiceHost, ServicePlan, ServiceReceipt } from './node-lifecycle-execution.ts';
 
 /**
@@ -31,6 +32,11 @@ export interface MoveResult {
 }
 
 const SHA = /^[a-f0-9]{40}$/;
+/** True when `path` lies strictly inside `folder` (any platform separator). */
+const inside = (path: string, folder: string): boolean => {
+  const r = relative(folder, path);
+  return !!r && !r.startsWith('..') && !isAbsolute(r);
+};
 
 export async function moveInstall(deps: MoveDeps): Promise<MoveResult> {
   const steps: string[] = [];
@@ -49,7 +55,7 @@ export async function moveInstall(deps: MoveDeps): Promise<MoveResult> {
   const git = (args: string[], cwd = deps.from) => deps.exec('git', ['-C', cwd, ...args]);
 
   if (deps.from === deps.to) return result('refused', null, ['The service already runs from the install folder.']);
-  if (deps.to.startsWith(deps.from + '/') || deps.from.startsWith(deps.to + '/'))
+  if (inside(deps.to, deps.from) || inside(deps.from, deps.to))
     return result('refused', null, ['The install folder and the current checkout must not contain each other.']);
   if (deps.occupied(deps.to))
     return result('refused', null, [`${deps.to} already exists and is not empty; remove it or choose another --to.`]);

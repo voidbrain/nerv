@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { DEFAULT_INSTALL_DIR, installFolder, serviceSource } from '../src/install-source.ts';
 import { moveInstall, type MoveDeps } from '../src/install-move.ts';
 import { expectedDefinition, type ServiceHost } from '../src/node-lifecycle-execution.ts';
@@ -10,44 +10,48 @@ import { expectedDefinition, type ServiceHost } from '../src/node-lifecycle-exec
 const SHA = 'a'.repeat(40);
 
 test('F-117-T01: the install folder is ~/.nerv-app unless NERV_INSTALL names an absolute path', () => {
-  assert.equal(installFolder('/home/pilot', {}), join('/home/pilot', DEFAULT_INSTALL_DIR));
-  assert.equal(installFolder('/home/pilot', { NERV_INSTALL: '/opt/nerv-app' }), '/opt/nerv-app');
-  assert.throws(() => installFolder('/home/pilot', { NERV_INSTALL: 'relative/app' }), /absolute/);
+  const home = resolve('/home/pilot'),
+    chosen = resolve('/opt/nerv-app');
+  assert.equal(installFolder(home, {}), join(home, DEFAULT_INSTALL_DIR));
+  assert.equal(installFolder(home, { NERV_INSTALL: chosen }), chosen);
+  assert.throws(() => installFolder(home, { NERV_INSTALL: 'relative/app' }), /absolute/);
 });
 
 test('F-117-T01: lifecycle source is the install folder once it holds NERV, otherwise the running checkout', () => {
   const real = (p: string) => p;
-  const holds = (p: string) => p.startsWith('/home/pilot/.nerv-app/');
-  assert.equal(
-    serviceSource({ userHome: '/home/pilot', running: '/dev/nerv', env: {}, exists: holds, real }),
-    '/home/pilot/.nerv-app',
-  );
-  assert.equal(
-    serviceSource({ userHome: '/home/pilot', running: '/dev/nerv', env: {}, exists: () => false, real }),
-    '/dev/nerv',
-  );
+  const home = resolve('/home/pilot'),
+    app = join(home, DEFAULT_INSTALL_DIR),
+    running = resolve('/dev/nerv');
+  const holds = (p: string) => p.startsWith(app);
+  assert.equal(serviceSource({ userHome: home, running, env: {}, exists: holds, real }), app);
+  assert.equal(serviceSource({ userHome: home, running, env: {}, exists: () => false, real }), running);
 });
 
-test('F-117-T01: the resolved install folder is the source the rendered service definition runs', () => {
-  const user = mkdtempSync(join(tmpdir(), 'nerv-install-'));
-  try {
-    const app = join(user, 'app');
-    mkdirSync(join(app, 'src'), { recursive: true });
-    writeFileSync(join(app, 'src/cli.ts'), '');
-    writeFileSync(join(app, 'package.json'), '{}');
-    const source = serviceSource({ userHome: user, running: '/dev/nerv', env: { NERV_INSTALL: app } });
-    assert.equal(source, realpathSync(app));
-    const context = { userHome: user, home: join(user, '.nerv'), source, node: '/usr/bin/node', uid: 501 };
-    const plist = String(expectedDefinition(context, 'mac-service'));
-    assert.ok(plist.includes(join(source, 'src/cli.ts')), 'launchd runs the CLI from the install folder');
-    assert.ok(plist.includes(`<string>${source}</string>`), 'working directory is the install folder');
-    assert.ok(!plist.includes('/dev/nerv'), 'the development checkout is not referenced');
-    const unit = String(expectedDefinition(context, 'linux-service'));
-    assert.ok(unit.includes(join(source, 'src/cli.ts')), 'systemd runs the CLI from the install folder');
-  } finally {
-    rmSync(user, { recursive: true, force: true });
-  }
-});
+// launchd and systemd definitions exist only on macOS and Linux; Windows renders its own task (covered elsewhere).
+test(
+  'F-117-T01: the resolved install folder is the source the rendered service definition runs',
+  { skip: process.platform === 'win32' },
+  () => {
+    const user = mkdtempSync(join(tmpdir(), 'nerv-install-'));
+    try {
+      const app = join(user, 'app');
+      mkdirSync(join(app, 'src'), { recursive: true });
+      writeFileSync(join(app, 'src/cli.ts'), '');
+      writeFileSync(join(app, 'package.json'), '{}');
+      const source = serviceSource({ userHome: user, running: '/dev/nerv', env: { NERV_INSTALL: app } });
+      assert.equal(source, realpathSync(app));
+      const context = { userHome: user, home: join(user, '.nerv'), source, node: '/usr/bin/node', uid: 501 };
+      const plist = String(expectedDefinition(context, 'mac-service'));
+      assert.ok(plist.includes(join(source, 'src/cli.ts')), 'launchd runs the CLI from the install folder');
+      assert.ok(plist.includes(`<string>${source}</string>`), 'working directory is the install folder');
+      assert.ok(!plist.includes('/dev/nerv'), 'the development checkout is not referenced');
+      const unit = String(expectedDefinition(context, 'linux-service'));
+      assert.ok(unit.includes(join(source, 'src/cli.ts')), 'systemd runs the CLI from the install folder');
+    } finally {
+      rmSync(user, { recursive: true, force: true });
+    }
+  },
+);
 
 type Obs = { definition: string; registration: string; runtime: string };
 
