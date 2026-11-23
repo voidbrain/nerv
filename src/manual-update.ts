@@ -26,7 +26,7 @@ export interface ManualUpdateResult {
 export interface ManualUpdateDeps {
   resolveUpdate: (channel: UpdateChannel, refresh: boolean) => Promise<UpdateAvailability>;
   lifecycleHost?: () => ServiceHost;
-  plan?: (host: ServiceHost, action: 'update' | 'stop', nextRevision?: string) => Promise<ServicePlan>;
+  plan?: (host: ServiceHost, action: 'update' | 'stop' | 'start', nextRevision?: string) => Promise<ServicePlan>;
   applyPlan?: (host: ServiceHost, plan: ServicePlan, confirm: string) => Promise<ServiceReceipt>;
   readReceipt?: (host: ServiceHost, digest: string) => ServiceReceipt | { state: 'absent' };
   /**
@@ -38,7 +38,12 @@ export interface ManualUpdateDeps {
   startUpdater?: (input: { channel: UpdateChannel; revision: string }) => Promise<void>;
   /** The outside updater: stop the running service through the lifecycle before planning the update. */
   stopFirst?: boolean;
+  /** Bring the target revision into the managed checkout first: the lifecycle admits only a commit it can read. */
+  fetchRevision?: (revision: string) => Promise<void>;
 }
+
+/** The planner's blocker for a running service: the only one the outside updater resolves itself, by stopping it. */
+const STOP_FIRST = 'Stop the selected service and descendants first.';
 
 const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
@@ -136,9 +141,38 @@ export async function executeManualUpdate(
     };
   }
 
+  let stoppedHere = false;
   if (deps.stopFirst) {
-    const stopped = await stopService(deps, host);
-    if (stopped) return { channel, revision: targetRevision, ...stopped };
+    if (deps.fetchRevision) {
+      try {
+        await deps.fetchRevision(targetRevision);
+      } catch (error) {
+        return {
+          outcome: 'refused',
+          channel,
+          revision: targetRevision,
+          reasons: [`Fetching ${targetRevision.slice(0, 7)} into the install folder failed: ${errorMessage(error)}`],
+          recovery: ['Nothing was stopped. Check the network and the origin remote, then retry.'],
+        };
+      }
+    }
+    // Refuse before stopping anything when the update would be refused for any other reason than the running service.
+    const preview = await (deps.plan ?? planService)(host, 'update', targetRevision);
+    const other = preview.blockers.filter((b) => b !== STOP_FIRST);
+    if (other.length)
+      return {
+        outcome: 'refused',
+        channel,
+        revision: targetRevision,
+        planDigest: preview.digest,
+        reasons: other,
+        recovery: ['Nothing was stopped; NERV keeps running the current revision.'],
+      };
+    if (preview.blockers.length) {
+      const stopped = await stopService(deps, host);
+      if (stopped) return { channel, revision: targetRevision, ...stopped };
+      stoppedHere = true;
+    }
   }
 
   let plan: ServicePlan;
@@ -157,6 +191,21 @@ export async function executeManualUpdate(
   }
 
   if (plan.blockers.length > 0) {
+    if (stoppedHere) {
+      const restarted = await startService(deps, host);
+      return {
+        outcome: restarted ? 'refused' : 'uncertain',
+        channel,
+        revision: targetRevision,
+        planDigest: plan.digest,
+        reasons: plan.blockers,
+        recovery: [
+          restarted
+            ? 'The service was stopped for the update, then started again on the current revision.'
+            : 'The service was stopped for the update and did not start again: run `nerv nodes lifecycle-inspect --action start`.',
+        ],
+      };
+    }
     return {
       outcome: 'refused',
       channel,
@@ -263,4 +312,15 @@ async function stopService(
       recovery: [`Inspect the stop with \`nerv nodes lifecycle-status --digest ${plan.digest}\`.`],
     };
   return undefined;
+}
+
+/** B-108: put the service back after a refusal found only once it was stopped. True when it runs again. */
+async function startService(deps: ManualUpdateDeps, host: ServiceHost): Promise<boolean> {
+  try {
+    const plan = await (deps.plan ?? planService)(host, 'start');
+    if (plan.blockers.length) return false;
+    return (await (deps.applyPlan ?? applyService)(host, plan, plan.digest)).state === 'completed';
+  } catch {
+    return false;
+  }
 }
