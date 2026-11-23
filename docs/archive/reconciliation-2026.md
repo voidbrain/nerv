@@ -591,3 +591,7 @@ PRs #660–#663 merged green (#660 archive, #661 WorkerLink/model.infer, #662 F-
 ## 2026-11-23 — main `5438e2ae`
 
 PRs #664–#672 merged green (#664 reconciliation, #665–#667 dashboard fixes for B-107, #668 backlog closures, #669–#671 F-117-T01 install folder, #672 B-108 updater). Reconciled with F-093-T03 in its PR.
+
+## 2026-11-23 — main `2c1c5785`
+
+PRs #673, #675 and #678 merged green (#673 B-108 updater fetch precheck, #675 F-093-T03 shared desktop adapter, #678 F-113-T02 subject index). Reconciled with F-093-T05 in its PR.

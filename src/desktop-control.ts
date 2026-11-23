@@ -23,6 +23,8 @@ export interface DesktopWindowSnapshot {
 
 export interface DesktopAccessibilityDriver {
   checkAccessibilityPermission(): boolean;
+  /** How the owner grants the permission for this driver (which app, which settings pane). */
+  accessibilityGrantHint?(): string;
   getWindow(appName: string, windowTitle?: string): Promise<DesktopWindowSnapshot>;
   pressControl(appName: string, windowTitle: string, controlName: string): Promise<DesktopWindowSnapshot>;
 }
@@ -97,9 +99,9 @@ export async function clickDesktopControl(
   request: ClickDesktopControlRequest,
 ): Promise<ClickDesktopControlResult> {
   if (!driver.checkAccessibilityPermission()) {
-    throw new Error(
-      'Accessibility permission is not granted. Enable it in System Settings > Privacy & Security > Accessibility.',
-    );
+    const hint =
+      driver.accessibilityGrantHint?.() ?? 'Enable it in System Settings > Privacy & Security > Accessibility.';
+    throw new Error(`Accessibility permission is not granted. ${hint}`);
   }
   if (!request.approved) {
     throw new Error('Clicking a desktop control is an Orange action and requires explicit owner approval.');
