@@ -84,6 +84,8 @@ export function makeServer(
     checkSchemaSafety?: (revision?: string) => Promise<AutoUpdateSchemaCheck> | AutoUpdateSchemaCheck;
     readUpdatePolicy?: () => AutoUpdatePolicy;
     exposeUpdateControl?: (control: UpdateControl) => void;
+    /** Health sampling interval (F-103-T01 default 60 s); tests shorten it. */
+    healthSampleIntervalMs?: number;
   } = {},
 ) {
   if (options.native && !options.tls) throw new Error('Native pairing requires TLS.');
@@ -1110,8 +1112,10 @@ export function makeServer(
     : createServer(listener);
   const sockets = attachRpcSocket(server, store, token, options);
   const storeWithDb = store as StoreApi & { db?: import('node:sqlite').DatabaseSync };
-  const healthSampler = storeWithDb.db
-    ? startLocalHealthSampler(new HealthSampleStore(storeWithDb.db), () => statusPollCount)
+  // B-111: `serve` passes a Runtime, whose store lives in the nervous process; it opens its own connection for samples.
+  const sampleStore = storeWithDb.db ? new HealthSampleStore(storeWithDb.db) : store.healthSampleStore?.();
+  const healthSampler = sampleStore
+    ? startLocalHealthSampler(sampleStore, () => statusPollCount, options.healthSampleIntervalMs)
     : undefined;
   const close = server.close.bind(server);
   server.close = (callback) => {

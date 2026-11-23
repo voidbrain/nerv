@@ -152,7 +152,12 @@ export function startLocalHealthSampler(
 
   const timer = setInterval(
     () => {
-      sampleNow();
+      // A closed or busy database skips one sample; it must never take the service down.
+      try {
+        sampleNow();
+      } catch {
+        /* next interval tries again */
+      }
     },
     Math.max(100, intervalMs),
   );
