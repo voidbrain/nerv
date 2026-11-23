@@ -73,3 +73,12 @@ test('B-113: rotating the admin token or revoking ends stored sessions', async (
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('B-113: after Update started the dashboard waits for the new revision before offering the button again', () => {
+  const live = readFileSync(join('web', 'public', 'dashboard', 'live.js'), 'utf8');
+  assert.match(live, /outcome === "started"\) void awaitRestart\(/);
+  const fn = /async function awaitRestart\(revision\) \{[\s\S]*?\n {2}\}/.exec(live);
+  assert.ok(fn, 'awaitRestart exists');
+  assert.match(fn![0], /runningRevision === revision/);
+  assert.match(fn![0], /state\.manualUpdateBusy = false/);
+});

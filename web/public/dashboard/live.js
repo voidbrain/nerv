@@ -969,11 +969,26 @@
       state.manualUpdate = { outcome:"refused", channel, revision:null, reasons:[e.message], recovery:["Inspect /api/update and lifecycle status before retrying."] };
       log("Manual update error: " + e.message, "danger", null, "maya");
     } finally {
-      state.manualUpdateBusy = false;
+      // B-113: started means NERV stops, updates and restarts: keep the button busy until the new revision answers.
+      if (state.manualUpdate && state.manualUpdate.outcome === "started") void awaitRestart(state.manualUpdate.revision);
+      else state.manualUpdateBusy = false;
       renderHealth();
       poll();
     }
   };
+  async function awaitRestart(revision) {
+    const until = Date.now() + 10 * 60_000;
+    while (Date.now() < until) {
+      await new Promise(r => setTimeout(r, 5000));
+      try {
+        const u = await api("update");
+        if (u && (u.runningRevision === revision || u.status === "up-to-date")) { state.update = u; break; }
+      } catch { /* restarting: not answering yet */ }
+    }
+    state.manualUpdateBusy = false;
+    renderHealth();
+    poll();
+  }
   document.addEventListener("click", e => {
     const t = e.target && e.target.closest && e.target.closest("#btn-apply-update");
     if (!t) return;

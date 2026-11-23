@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 1 | 1 | 3 | 1 |
+| **This week** | 1 | 1 | 5 | 1 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 15 |
-| **Require Human 🧑** | 11 | 7 |
+| **Open** | 35 | 17 |
+| **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
 
@@ -24,17 +24,17 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
 | [F-011](#f-011) |  | [B-068](#b-068) |  |
 | [F-004](#f-004) |  | [B-107](#b-107) |  |
-| [F-012](#f-012) |  | [B-056](#b-056) |  |
-| [F-086](#f-086) |  | [B-096](#b-096) |  |
-| [F-087](#f-087) |  | [B-106](#b-106) |  |
-| [F-092](#f-092) |  | [B-110](#b-110) |  |
-| [F-060](#f-060) |  |  |  |
+| [F-012](#f-012) |  | [B-113](#b-113) |  |
+| [F-086](#f-086) |  | [B-056](#b-056) |  |
+| [F-087](#f-087) |  | [B-096](#b-096) |  |
+| [F-092](#f-092) |  | [B-106](#b-106) |  |
+| [F-060](#f-060) |  | [B-110](#b-110) |  |
 | [F-007](#f-007) |  |  |  |
 | [F-100](#f-100) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 72.25 h agent + 11 h owner across 95 open steps of 34 features and 15 other records. 92.75 h of actual effort recorded on 117 steps. Generated from the task files.
+**Remaining effort:** 73.75 h agent + 11 h owner across 97 open steps of 34 features and 17 other records. 92.75 h of actual effort recorded on 117 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1659,6 +1659,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-113"></a>[🐞 B-113](#top)
+
+**Updating from the dashboard signs it out, then offers a stale Update now that fails**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After this ships, press Update now with the next update: the dashboard stays signed in, shows Updating… until NERV answers on the new revision, then offers no button.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-23: Update now worked (journal operations 33 and 35 completed) but the dashboard showed "LIVE · NOT SIGNED IN", then offered Update now again, which failed. Dashboard sessions (F-039) lived only in the server's memory, so the restart an update makes ended every session, and the page kept its pre-update state. |
+| **Reproduce** | Press Update now with an update available and watch the dashboard through the restart. |
+| **Check** | Tests committed failing first (`test/session-persist.test.ts`): a session survives a server restart; the session file holds only SHA-256 hashes, mode 0600; a rotated admin token or a revoke ends stored sessions, also after a restart. After `started` the dashboard keeps the button busy until `/api/update` reports the new revision (10 min at most). Owner decision 2026-11-23: option (a), keep sessions across restarts. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-113-t01"></a>B-113-T01 — Dashboard sessions survive the restart an update makes; the button waits for the new revision | 0.5 h | 0 h | 0.5 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-113.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-23 |
+| Verification | 2026-11-23: session tests 14/14; dashboard and manual-update suites 61/61. |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
 ### <a id="f-115"></a>[✨ F-115](#top)
 
 **Grouped, alphabetical CLI help**
@@ -2077,6 +2115,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |
+
+</details>
+
+---
+### <a id="b-114"></a>[🐞 B-114](#top)
+
+**EVA-03 script-plan test fails under load**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-114-T01 — Find why the EVA-03 script-plan test fails under load (Planned).
+
+| | |
+|---|---|
+| **Issue** | 2026-11-23: "executes inside EVA-03 with a MAGI gate decision per call, fails closed on denial/fingerprint change/missing sandbox" (`test/script-plan.test.ts:88`) and "F-112-T03: read-only script plans inside EVA-03" failed in PR #674's validate run and in a local full `npm test` while five agents loaded the machine; alone it passes 3/3. |
+| **Reproduce** | Run `npm test` while the machine is busy (parallel gauntlet runs). |
+| **Check** | The cause is named with evidence, a regression reproduces the load case, and the fix keeps the test green under load. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-114-t01"></a>B-114-T01 — Find why the EVA-03 script-plan test fails under load | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-114.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in the B-113 PR. |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
 
 </details>
 
