@@ -40,5 +40,11 @@
     "estimateAgentHours": 2,
     "actualAgentHours": 1.75,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 676,
+      "note": "implementation"
+    }
+  ]
 }

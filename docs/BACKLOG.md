@@ -951,7 +951,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-090-t04"></a>F-090-T04 — Resume automatically when a session limit resets | 2 h | 1.75 h so far (stated) | 0 h | Implemented; verification pending | — | [F-090-T03](#f-090-t03) | 🤖 | — |
+| 🟢 Small | <a id="f-090-t04"></a>F-090-T04 — Resume automatically when a session limit resets | 2 h | 1.75 h so far (stated) | 0 h | Implemented; verification pending | — | [F-090-T03](#f-090-t03) | 🤖 | [PR #676](https://github.com/voidbrain/nerv/pull/676) implementation |
 | 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-090-T04](#f-090-t04) | — | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | **Total** | 3.5 h (3 of 4 steps) | 3 h (3 of 4 steps recorded) | 0.25 h owner | 2 of 4 completed | | | | |
 
@@ -971,7 +971,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-090-T02: [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation. [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-090-T02: [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation · F-090-T04: [PR #676](https://github.com/voidbrain/nerv/pull/676) implementation. [PR #676](https://github.com/voidbrain/nerv/pull/676) (F-090-T04, opened); [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-090-T02 not closed: the adapter logic passed on green CI, but headless resume runs only as `nerv headless-resume <targets.json>` by hand; nothing in `serve` notices a session limit, so the owner check F-090-T03 ("NERV resumes it") cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/493) merged on green CI. `F-090-T01` feasibility report written in [headless-resume.md](decisions/headless-resume.md) from live CLI probe; verified with `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
