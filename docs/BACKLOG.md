@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 1 | 1 | 3 | 1 |
+| **This week** | 1 | 1 | 4 | 1 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 15 |
-| **Require Human 🧑** | 11 | 7 |
+| **Open** | 35 | 16 |
+| **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
 
@@ -27,14 +27,14 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-012](#f-012) |  | [B-056](#b-056) |  |
 | [F-086](#f-086) |  | [B-096](#b-096) |  |
 | [F-087](#f-087) |  | [B-106](#b-106) |  |
-| [F-092](#f-092) |  | [B-112](#b-112) |  |
-| [F-060](#f-060) |  |  |  |
+| [F-092](#f-092) |  | [B-110](#b-110) |  |
+| [F-060](#f-060) |  | [B-112](#b-112) |  |
 | [F-007](#f-007) |  |  |  |
 | [F-100](#f-100) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 74.25 h agent + 11 h owner across 95 open steps of 34 features and 15 other records. 91.5 h of actual effort recorded on 116 steps. Generated from the task files.
+**Remaining effort:** 74.5 h agent + 11 h owner across 96 open steps of 34 features and 16 other records. 91.5 h of actual effort recorded on 116 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2446,6 +2446,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-22 |
 | Verification | 2026-11-22: `node --test test/dashboard.test.ts` and `npm run check:fast` passed. |
 | Reviewed | 2026-11-22 |
+
+</details>
+
+---
+### <a id="b-110"></a>[🐞 B-110](#top)
+
+**Dashboard offers Update now when already up to date, away from the update status**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** When the next update is available, open the dashboard: Health shows **Update now** beside "Update availability"; Settings has no update button; when up to date there is no button.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-23: Health said "up to date · 9ccab21 (main)" while Settings still offered **Update now**, whose click was refused ("Already running the latest revision"). Health also had its own "Update ready … Apply update" line, so the same action appeared twice. |
+| **Reproduce** | Open the dashboard on an up-to-date base and look at Settings. |
+| **Check** | Test committed failing first (`test/manual-update.test.ts`, B-110): no second button in Settings; the Health action renders only for `update-available`, labelled Update now, on the Update availability row. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-110-t01"></a>B-110-T01 — One Update now, in Health beside the availability line, only when an update is available | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-110.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #680](https://github.com/voidbrain/nerv/pull/680) |
+| Opened | 2026-11-23 |
+| Verification | 2026-11-23: `node --test test/manual-update.test.ts test/dashboard.test.ts` 58/58. |
+| Reviewed | 2026-11-23 |
 
 </details>
 
