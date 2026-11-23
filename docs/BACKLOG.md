@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.75 h agent + 11 h owner across 97 open steps of 34 features and 17 other records. 94.25 h of actual effort recorded on 118 steps. Generated from the task files.
+**Remaining effort:** 70.75 h agent + 11 h owner across 98 open steps of 34 features and 17 other records. 94.75 h of actual effort recorded on 119 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1909,7 +1909,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0.25 h | 0 h | 0.25 h | Planned | — | [F-101-T04](#f-101-t04) | — |
-| 🟢 Small | **Total** | 2 h | 0.75 h (2 of 4 steps recorded) | 0.25 h | 3 of 4 completed | | | |
+| 🟢 Small | <a id="f-098-t05"></a>F-098-T05 — Fleet import with spares cues | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | — | — | — |
+| 🟢 Small | **Total** | 2.5 h | 1.25 h (3 of 5 steps recorded) | 0.25 h | 3 of 5 completed | | | |
 
 <details><summary>Done steps (3)</summary>
 
@@ -1928,9 +1929,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation · F-098-T03: [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation. [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation · F-098-T03: [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation. F-098-T05 PR pending; [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
-| Verification | 2026-11-20: `node --test test/photos.test.ts test/fleet.test.ts test/batteries.test.ts test/battery-cards.test.ts test/telegram.test.ts`, `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-098-T02 verified: [PR #500](https://github.com/voidbrain/nerv/pull/500) merged on green CI. |
+| Verification | 2026-11-23: F-098-T05 `node --test test/fleet-import.test.ts test/fleet.test.ts test/cli-help.test.ts` and `npm run check:fast` passed locally; CI pending. 2026-11-20: `node --test test/photos.test.ts test/fleet.test.ts test/batteries.test.ts test/battery-cards.test.ts test/telegram.test.ts`, `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-098-T02 verified: [PR #500](https://github.com/voidbrain/nerv/pull/500) merged on green CI. |
 | Reviewed | 2026-11-20 |
 
 </details>

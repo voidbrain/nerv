@@ -186,9 +186,9 @@ export const HELP_GROUPS: HelpGroup[] = [
       },
       {
         name: 'fleet',
-        args: 'drones|parts|spares',
+        args: 'drones|parts|spares|import',
         about: 'Drones, parts and spares',
-        usage: ['fleet drones | fleet parts <drone> | fleet spares [category]'],
+        usage: ['fleet drones | fleet parts <drone> | fleet spares [category]', 'fleet import <fleet.json>'],
       },
       { name: 'card-copy', args: 'MOUNT LABEL RULES.json', about: 'Copy files from a memory card by rules' },
       { name: 'slice', args: 'IN OUT PROFILE ALLOWLIST', about: 'Slice a model for the 3D printer' },

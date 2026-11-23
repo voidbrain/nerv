@@ -55,7 +55,11 @@ describe('F-098-T05: fleet import file validation', () => {
     ['drones not an array', { version: 1, drones: {} }, /drones must be an array/],
     ['drone without name', { version: 1, drones: [{ parts: [] }] }, /drones\[0\]\.name must be a non-empty string/],
     ['drone frame not a string', { version: 1, drones: [{ name: 'A', frame: 5, parts: [] }] }, /drones\[0\]\.frame/],
-    ['drone unknown field', { version: 1, drones: [{ name: 'A', parts: [], colour: 'red' }] }, /drones\[0\]: unknown field "colour"/],
+    [
+      'drone unknown field',
+      { version: 1, drones: [{ name: 'A', parts: [], colour: 'red' }] },
+      /drones\[0\]: unknown field "colour"/,
+    ],
     ['parts missing', { version: 1, drones: [{ name: 'A' }] }, /drones\[0\]\.parts must be an array/],
     [
       'part without model',
@@ -74,7 +78,10 @@ describe('F-098-T05: fleet import file validation', () => {
     ],
     [
       'blank position',
-      { version: 1, drones: [{ name: 'A', parts: [{ category: 'motor', model: 'M', positions: ['front-left', ' '] }] }] },
+      {
+        version: 1,
+        drones: [{ name: 'A', parts: [{ category: 'motor', model: 'M', positions: ['front-left', ' '] }] }],
+      },
       /drones\[0\]\.parts\[0\]\.positions\[1\] must be a non-empty string/,
     ],
     [
@@ -95,7 +102,13 @@ describe('F-098-T05: fleet import file validation', () => {
     ],
     [
       'duplicate drone name',
-      { version: 1, drones: [{ name: 'A', parts: [] }, { name: 'a', parts: [] }] },
+      {
+        version: 1,
+        drones: [
+          { name: 'A', parts: [] },
+          { name: 'a', parts: [] },
+        ],
+      },
       /drones\[1\]\.name: duplicate drone "a"/,
     ],
   ];
@@ -231,7 +244,10 @@ describe('F-098-T05: nerv fleet import through the CLI', () => {
       }
 
       const badFile = join(home, 'bad.json');
-      writeFileSync(badFile, JSON.stringify({ version: 1, drones: [{ name: 'Gull', parts: [{ category: 'motor' }] }] }));
+      writeFileSync(
+        badFile,
+        JSON.stringify({ version: 1, drones: [{ name: 'Gull', parts: [{ category: 'motor' }] }] }),
+      );
       const bad = run('import', badFile);
       assert.notEqual(bad.status, 0);
       assert.match(bad.stderr, /drones\[0\]\.parts\[0\]\.model must be a non-empty string/);
