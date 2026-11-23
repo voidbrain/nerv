@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-117-T03",
+  "parent": "F-117",
+  "title": "nerv update repairs a stale build or an unloaded service",
+  "goal": "An up-to-date base whose dist/web is older than the checkout, or whose service is not loaded, is rebuilt and loaded",
+  "status": "planned",
+  "acceptance": [
+    "A stale dist/web is rebuilt before the service starts",
+    "A defined but unloaded service is loaded and started instead of reported as already loaded",
+    "Stop waits until launchd has released the service before start"
+  ],
+  "dependsOn": [
+    "F-117-T02"
+  ],
+  "resources": [
+    "src/cli.ts",
+    "src/service.ts",
+    "test/service.test.ts",
+    "docs/work/records/F-117.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "node --test test/service.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-23",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

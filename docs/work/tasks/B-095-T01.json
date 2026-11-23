@@ -4,7 +4,7 @@
   "id": "B-095-T01",
   "title": "Midori keeps its blue node; only its status dot and label change colour",
   "goal": "Midori keeps its blue node; only its status dot and label change colour",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Test committed failing first (test/dashboard.test.ts, B-095)",
     "Owner confirms on the live dashboard after the update: Midori's ring and dotted links stay blue; the small dot beside it and the label read green while live"
@@ -32,9 +32,9 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
+    "estimate": "0 remaining",
     "basis": "Estimated 2026-11-18. Not a measurement.",
-    "reviewed": "2026-11-18",
+    "reviewed": "2026-11-23",
     "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5,

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-117-T05",
+  "parent": "F-117",
+  "title": "Owner runs nerv update on NERV-01",
+  "goal": "The owner updates NERV-01 with one command and sees the new dashboard",
+  "status": "planned",
+  "acceptance": [
+    "After the migration the service runs from the install folder and the dashboard answers",
+    "On a behind NERV-01: nerv update ends with the new revision and the dashboard answering",
+    "nerv update --check then says up to date"
+  ],
+  "dependsOn": [
+    "F-117-T03"
+  ],
+  "resources": [
+    "docs/work/records/F-117.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "Owner: nerv update; nerv update --check"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-23",
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

@@ -11,6 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 1 | 1 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -6336,3 +6337,79 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 
 ---
 
+<a id="archive-week-2026-11-23"></a>
+## Closed 2026-11-23
+
+### B-095
+
+**On the map Midori looks like a base: it lost its own blue**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔹 P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-23.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-18 after F-107: Midori now takes the bases' status colours (green while live), so on the map it reads as one more base. It is the Telegram channel, not a base. |
+| **Reproduce** | Live dashboard with Midori live: its node and dots are green like the bases. |
+| **Check** | Test committed failing first: Midori's node keeps the `--info` blue; only its status dot and label take green, amber or grey. The owner confirms on the live dashboard. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** 2026-11-22 ([PR #658](https://github.com/voidbrain/nerv/pull/658)): Updated per owner feedback: `drawTelegram` uses `--info` blue when connected/responding, `--warn` when failed, `--muted` when offline/unknown, removes the extra status dot, draws expanding blue contour waves when connected, and animates route lines back-and-forth (`Math.sin(now / 650) * 8`); `test/dashboard.test.ts` updated failing-first and passes. 2026-11-18: B-095-T01 implemented: `drawTelegram` keeps the node ring and dotted links in `--info` and adds a small status dot beside the node; the dot and the *Midori* label take `--ok` / `--warn` / `--muted`; legend *○ Midori* in `--info`; design note updated. Test committed failing first (`test/dashboard.test.ts`, B-095). Next: the owner's live check after the update. Opened 2026-11-18 from the owner's F-107-T01 check. The owner suggested a phone mark near Midori or the old blue; the agent proposes the blue node with a status dot.
+
+**Resolution:** Closed 2026-11-23 as Verified: the agent opened the live NERV-01 dashboard (main `2e0c1996`) in headless Chrome at the owner's request; the map draws Midori as a small blue node with a blue label and a blue link, apart from the square bases.
+
+**Estimates:** Small, estimated 2026-11-18: 0.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Fix in [PR #531](https://github.com/voidbrain/nerv/pull/531) (`test/dashboard.test.ts`, B-095); opened in PR #530 |
+| Opened | 2026-11-18 |
+| Closed | 2026-11-23 |
+| Verification | 2026-11-18: Unit: B-095 test failed before the fix, passes after (dashboard suite 36 pass). Owner live check pending. |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+
+### F-108
+
+**Dashboard: flow header shows the sortie code; EVA cage status on its own line**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | 🔹 P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-23.
+
+| | |
+|---|---|
+| **Issue** | Owner requests 2026-11-18: the *Sephirot · sortie flow* header shows the sortie code only (for example S-6E26), not code and title; in the EVA cages, the status (IDLE and the others) sits on its own line under the EVA name so every cage has the same layout. |
+| **Reproduce** | Dashboard: select a sortie; look at the EVA cages panel. |
+| **Check** | Tests on the rendered header and cage markup; the owner confirms on the live dashboard. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** 2026-11-19: F-108-T01 implemented: The flow header shows the sortie code only; each EVA cage stacks its name and status (`.cage .ch` in a column). Test `test/dashboard.test.ts` (F-108). Next: the owner's live check after the update. Opened 2026-11-18 from the owner's dashboard review.
+
+**Resolution:** Closed 2026-11-23 as Verified: the agent opened the live NERV-01 dashboard (main `2e0c1996`) in headless Chrome at the owner's request; with S-15E3 selected the flow header reads only `S-15E3`, and the EVA cage node shows its pilot and instance on their own line.
+
+**Estimates:** Small, estimated 2026-11-18: 0.5 h agent. Not a measurement.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #650](https://github.com/voidbrain/nerv/pull/650) (Settings hours, editable Brief, Update now, 3-up Pilot cards); [PR #533](https://github.com/voidbrain/nerv/pull/533) (`test/dashboard.test.ts`); opened in PR #531 |
+| Opened | 2026-11-18 |
+| Closed | 2026-11-23 |
+| Verification | 2026-11-19: Unit: dashboard suite 38 pass. Owner live check pending. |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
