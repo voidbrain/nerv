@@ -152,7 +152,9 @@ async function fixture(heartbeatMs = 500, workerHeartbeatMs = heartbeatMs) {
     start: async () => {
       main.start();
       link.start();
-      await until(() => main.connected('NERV-02'));
+      // B-066: the worker marks its client session ready only when the coordinator's acknowledgement arrives, which can
+      // land after the coordinator already counts the worker; under CI load F-006-T11 asserted the worker side too early.
+      await until(() => main.connected('NERV-02') && link.connected('NERV-01'));
     },
     restartWorker: async () => {
       await link.stop();
@@ -161,7 +163,7 @@ async function fixture(heartbeatMs = 500, workerHeartbeatMs = heartbeatMs) {
       await rb.ready();
       link = worker();
       link.start();
-      await until(() => main.connected('NERV-02'));
+      await until(() => main.connected('NERV-02') && link.connected('NERV-01'));
     },
     raw: async (headers: Record<string, string>, path = '/kaji/worker') => {
       const socket = new WebSocket('ws://' + address + path, { headers });
