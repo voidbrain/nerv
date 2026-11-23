@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Store, OWNER_SOURCE } from '../src/store.ts';
@@ -1539,7 +1539,7 @@ test('B-106: answer edge activates with debrief and Sephirot markers are filled 
   );
   assert.equal(api.passedEdge(debriefAfterDecline, declined), 'passed owner');
 });
-test('the flow header names the sortie by its code only; EVA cage header keeps side-by-side layout (F-108, owner 2026-11-23)', async () => {
+test('the flow header names the sortie by its code only; every EVA class header stacks its name and status (F-108, F-049-T09)', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
   const line = src.split('\n').find((l) => l.includes('getElementById("flow-sub").textContent'))!;
@@ -1547,8 +1547,9 @@ test('the flow header names the sortie by its code only; EVA cage header keeps s
   new Function('document', 's', line)({ getElementById: () => el }, { id: 'S-6E26', title: 'Remind me at 9' });
   assert.equal(el.textContent, 'S-6E26');
   const html = readFileSync('web/public/dashboard/index.html', 'utf8');
-  const rule = /\.cage \.ch \{([^}]*)\}/.exec(html)![1]!;
-  assert.match(rule, /justify-content:\s*space-between/, 'restored side-by-side EVA cage header');
+  const rule = /\.eva-class-hdr \{([^}]*)\}/.exec(html)![1]!;
+  assert.match(rule, /flex-direction:\s*column/, 'name and status stack in every EVA class');
+  assert.doesNotMatch(rule, /flex-wrap:\s*wrap/, 'no width-dependent wrapping');
 });
 
 test('F-107-T02: mesh lines colour --ok when both peers report each other, --warn when one does not, --muted when unreported', async () => {
@@ -1937,16 +1938,17 @@ test('Settings shows clear hour labels and editable Brief time without internal 
   assert.match(settingsBlock, /id='set-brief-at'/);
   assert.match(live, /api\("settings\/schedule"/);
 
-  // Owner layout requirement 2026-11-23: stack pilot-name-input and pilot-second-input on full-width lines,
-  // constrain select width inside auto-fit cards, restore side-by-side .cage .ch, and bundle EVA unit PNGs.
-  assert.match(html, /\.pilot-grid\s*\{[^}]*repeat\(auto-fit,\s*minmax\(210px,\s*1fr\)\)/);
-  assert.match(html, /\.pilot-hdr-inputs\s*\{[^}]*flex-direction:\s*column/);
+  assert.match(html, /\.pilot-grid\s*\{[^}]*repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
   assert.match(html, /\.pilot-field\s+select[^}]*max-width:\s*100%/);
-  assert.match(html, /\.cage\s+\.ch\s*\{[^}]*justify-content:\s*space-between/);
+  assert.match(
+    html,
+    /\ninput,select \{[^}]*max-width:\s*100%/,
+    'every select is capped at its container width (owner 2026-11-23)',
+  );
+  assert.ok(
+    !existsSync('web/public/dashboard/assets/eva/eva-00.png'),
+    'PR #665 pixel-art EVA PNGs stay removed (owner 2026-11-23)',
+  );
   assert.match(live, /class='pilot-grid'/);
   assert.doesNotMatch(live, /for='pilot-name-.*Call name/);
-  for (const unit of ['eva-00.png', 'eva-01.png', 'eva-02.png', 'eva-03.png']) {
-    const png = readFileSync(join(process.cwd(), 'web/public/dashboard/assets/eva', unit));
-    assert.equal(png.subarray(0, 4).toString('hex'), '89504e47', `${unit} is a PNG`);
-  }
 });
