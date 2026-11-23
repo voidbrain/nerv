@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.5 h agent + 10.5 h owner across 98 open steps of 34 features and 18 other records. 94.25 h of actual effort recorded on 118 steps. Generated from the task files.
+**Remaining effort:** 68.75 h agent + 10.5 h owner across 98 open steps of 34 features and 18 other records. 95.25 h of actual effort recorded on 119 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -925,9 +925,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.25 h owner | [B-108-T01](#b-108-t01) | — | ⏳ | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h agent + 0.25 h owner | [B-108-T01](#b-108-t01) | — | 🤖 | — | — |
 
-💻 **→** Next: F-117-T02 — nerv update &#91;--check&#93;: fetch, compare and run the lifecycle update (Planned).
+💻 **→** Next: F-117-T02 — nerv update &#91;--check&#93;: fetch, compare and run the lifecycle update (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -939,11 +939,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
 |---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-117-t02"></a>F-117-T02 — nerv update &#91;--check&#93;: fetch, compare and run the lifecycle update | 2 h | 0 h | 2 h | Planned | [B-108-T01](#b-108-t01) | [F-117-T03](#f-117-t03), [F-117-T04](#f-117-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-117-t02"></a>F-117-T02 — nerv update &#91;--check&#93;: fetch, compare and run the lifecycle update | 0.25 h | 1 h so far (stated) | 0.25 h | Implemented; verification pending | [B-108-T01](#b-108-t01) | [F-117-T03](#f-117-t03), [F-117-T04](#f-117-t04) | 🤖 |
 | 🟢 Small | <a id="f-117-t03"></a>F-117-T03 — nerv update repairs a stale build or an unloaded service | 1 h | 0 h | 1 h | Planned | [F-117-T02](#f-117-t02) | [F-117-T05](#f-117-t05) | ⏳ 🤖 |
 | 🟢 Small | <a id="f-117-t04"></a>F-117-T04 — Docs and help for nerv update | 0.5 h | 0 h | 0.5 h | Planned | [F-117-T02](#f-117-t02) | — | ⏳ 🤖 |
 | 🟢 Small | <a id="f-117-t05"></a>F-117-T05 — Owner runs nerv update on NERV-01 | — | 0 h | 0.25 h owner | Planned | [F-117-T03](#f-117-t03) | — | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 3.75 h (4 of 5 steps) | 6 h (1 of 5 steps recorded) | 3.5 h agent + 0.25 h owner | 1 of 5 completed | | | |
+| 🟡 Medium | **Total** | 2 h (4 of 5 steps) | 7 h (2 of 5 steps recorded) | 1.75 h agent + 0.25 h owner | 1 of 5 completed | | | |
 
 <details><summary>Done steps (1)</summary>
 
