@@ -1084,18 +1084,18 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-094-t02"></a>F-094-T02 — Open app and file, save as, step by step | 1.5 h | 1.25 h so far (stated) | 0 h | Implemented; verification pending | — | [F-094-T03](#f-094-t03) | 🤖 |
-| 🟢 Small | <a id="f-094-t03"></a>F-094-T03 — Report and recovery | 0.5 h | 0 h | 0.5 h | Planned | [F-094-T02](#f-094-t02) | [F-094-T04](#f-094-t04) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-094-t04"></a>F-094-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-094-T03](#f-094-t03) | — | ⏳ 🧑‍🔧 |
-| 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 1.5 h (2 of 4 steps recorded) | 0.5 h agent + 0.25 h owner | 1 of 4 completed | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-094-t02"></a>F-094-T02 — Open app and file, save as, step by step | 1.5 h | 1.25 h so far (stated) | 0 h | Implemented; verification pending | — | [F-094-T03](#f-094-t03) | 🤖 | [PR #688](https://github.com/voidbrain/nerv/pull/688) implementation |
+| 🟢 Small | <a id="f-094-t03"></a>F-094-T03 — Report and recovery | 0.5 h | 0 h | 0.5 h | Planned | [F-094-T02](#f-094-t02) | [F-094-T04](#f-094-t04) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-094-t04"></a>F-094-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-094-T03](#f-094-t03) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 1.5 h (2 of 4 steps recorded) | 0.5 h agent + 0.25 h owner | 1 of 4 completed | | | | |
 
 <details><summary>Done steps (1)</summary>
 
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-094-t01"></a>F-094-T01 — Decision: scripted first, menus second | 0.5 h | 0.25 h (measured) | Completed |
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-094-t01"></a>F-094-T01 — Decision: scripted first, menus second | 0.5 h | 0.25 h (measured) | Completed | — |
 
 </details>
 
@@ -1106,7 +1106,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [App workflows scripted-first decision](decisions/app-workflows-scripted-first.md) (`F-094-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-094-T02: [PR #688](https://github.com/voidbrain/nerv/pull/688) implementation. [PR #688](https://github.com/voidbrain/nerv/pull/688) (F-094-T02); [App workflows scripted-first decision](decisions/app-workflows-scripted-first.md) (`F-094-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | `F-094-T01`: `npm run check:fast` passed. |
 | Reviewed | 2026-11-14 |
