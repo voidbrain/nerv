@@ -26,3 +26,9 @@ Status: Architecture decision (`2026-11-15`). Scope: `F-093` (macOS primary; Win
 - **System permission and elevation dialogs**: macOS TCC / SecurityAgent / sudo prompts, Windows UAC / SmartScreen / OS settings permission dialogs.
 - **Payment and irreversible purchase buttons**: Controls matching payment, checkout, buy, or transfer confirmation patterns.
 - **Prompt injection defense**: Screen and accessibility text is strictly untrusted observation data—never parsed or executed as an agent instruction.
+
+## 5. Live binding on macOS
+
+- `nerv desktop-click <app> <control> [--window=<title>] --approved` runs the click adapter with the macOS driver (`src/desktop-macos-driver.ts`). It calls a small JXA helper, `native/desktop-ax.js`, through `osascript`: `AXIsProcessTrusted` (no prompt) for the permission check, System Events for the window tree and `AXPress`.
+- Without the grant the command stops and says where to grant it: System Settings -> Privacy & Security -> Accessibility, for the app that runs `nerv` (the terminal for the CLI, `node` for the service). The first window read asks once for Automation consent to control System Events; the owner answers it.
+- Other platforms get a driver that refuses with the reason until Windows UI Automation is bound.
