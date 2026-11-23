@@ -1,7 +1,6 @@
 import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { homedir } from 'node:os';
-import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { databasePath, readConfig, readToken } from './config.ts';
 import { WINDOWS_TASK, windowsLauncher } from './service.ts';
@@ -25,6 +24,7 @@ import {
   type ServiceObservation,
 } from './node-lifecycle-execution.ts';
 import { macServiceAdapter } from './node-lifecycle-mac.ts';
+import { serviceSource } from './install-source.ts';
 
 export function windowsRegistrationMatches(output: string, c: ServiceContext): boolean {
   const launcher = windowsLauncherPath(c).replace(/\\/g, '/').toLowerCase();
@@ -42,14 +42,14 @@ function windowsLauncherMatches(actual: Buffer, expected: string): boolean {
 }
 
 /** Production Windows adapter: current unprivileged Windows user, current checkout and default `.nerv` data home. */
-export function windowsServiceHost(home: string): ServiceHost {
+export function windowsServiceHost(home: string, source?: string): ServiceHost {
   if (process.platform !== 'win32') {
     throw Error('Durable Windows local lifecycle requires Windows.');
   }
   const context: ServiceContext = {
     userHome: homedir(),
     home: resolve(home),
-    source: realpathSync(fileURLToPath(new URL('..', import.meta.url))),
+    source: realpathSync(source ?? serviceSource({ userHome: homedir() })),
     node: realpathSync(process.execPath),
     uid: 0,
   };

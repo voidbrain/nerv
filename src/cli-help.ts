@@ -227,7 +227,11 @@ export const HELP_GROUPS: HelpGroup[] = [
     commands: [
       { name: 'serve', about: 'Run NERV in the foreground' },
       { name: 'launch', about: 'Run NERV and open the dashboard' },
-      { name: 'service', args: 'install|start|stop|status|uninstall', about: 'The background service' },
+      {
+        name: 'service',
+        args: 'install|start|stop|status|uninstall|move [--to PATH] [--yes]',
+        about: 'The background service; move runs it from its own install folder',
+      },
       { name: 'reload', about: 'Make the running service re-read its configuration' },
       { name: 'doctor', about: 'Check this installation' },
       {

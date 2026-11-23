@@ -1,7 +1,6 @@
 import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { homedir } from 'node:os';
-import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { databasePath, readConfig, readToken } from './config.ts';
 import { renderService } from './service.ts';
@@ -22,6 +21,7 @@ import {
   type ServiceObservation,
 } from './node-lifecycle-execution.ts';
 import { macServiceAdapter } from './node-lifecycle-mac.ts';
+import { serviceSource } from './install-source.ts';
 
 function systemdField(output: string, key: string): string {
   const match = output.match(new RegExp(`^${key}=(.*)$`, 'm'));
@@ -47,13 +47,13 @@ function linuxRegistrationMatches(output: string, c: ServiceContext): boolean {
  * Production Linux user-service adapter (`systemd --user`, F-005-T10): requires an unprivileged user session,
  * default `~/.nerv` profile, canonical checkout, and never enables lingering or touches system-wide services.
  */
-export function linuxServiceHost(home: string): ServiceHost {
+export function linuxServiceHost(home: string, source?: string): ServiceHost {
   if (process.platform !== 'linux' || !process.getuid?.())
     throw Error('Durable Linux lifecycle currently requires an unprivileged user.');
   const context: ServiceContext = {
     userHome: homedir(),
     home: resolve(home),
-    source: realpathSync(fileURLToPath(new URL('..', import.meta.url))),
+    source: realpathSync(source ?? serviceSource({ userHome: homedir() })),
     node: realpathSync(process.execPath),
     uid: process.getuid(),
   };
