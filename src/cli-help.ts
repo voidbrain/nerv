@@ -125,8 +125,8 @@ export const HELP_GROUPS: HelpGroup[] = [
       { name: 'seats', args: '[check | key SEAT-ID]', about: 'MAGI seats and their keys' },
       {
         name: 'placement',
-        args: 'plan PROBE.json | run PROBE.json --execute',
-        about: 'Plan or run a bounded P2–P4 placement probe',
+        args: 'plan PROBE.json | run PROBE.json --execute | report EVIDENCE.json',
+        about: 'Plan or run a bounded P2–P4 placement probe, or report on placement evidence',
       },
       {
         name: 'engines',

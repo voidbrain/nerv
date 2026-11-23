@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T12",
-  "status": "planned",
+  "status": "implemented",
   "title": "T04c — Placement report and recommendation",
   "goal": "Placement report and recommendation.",
   "capabilities": [
@@ -31,7 +31,10 @@
     "docs/decisions/**",
     "docs/work/tasks/F-006-T01.json",
     "docs/work/records/F-006.md",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "src/placement-report.ts",
+    "test/placement-report.test.ts",
+    "docs/evaluations/**"
   ],
   "validation": [
     "Validate NERV pack/adapter across the Gauntlet evidence boundary with neutral fixtures",
@@ -44,11 +47,13 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Implemented 2026-11-23 in 0.75 h: pure placementReport, committed aggregate evidence and report; live equivalent runs left to the owner decision F-006-T22.",
+    "reviewed": "2026-11-23",
     "baselineDays": 0.5,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
   }
 }

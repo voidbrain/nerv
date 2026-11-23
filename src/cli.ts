@@ -28,6 +28,7 @@ import { SeatPool } from './seat-pool.ts';
 import { assertRootMigrationReady, rootMigrationCommand } from './root-migration.ts';
 import { formatCommandHelp, formatHelp } from './cli-help.ts';
 import { nodesCommand } from './nodes-cli.ts';
+import { placementEvidence, placementReport } from './placement-report.ts';
 import { backupCommand } from './backup-cli.ts';
 import { storeReceived } from './offhost.ts';
 
@@ -221,25 +222,30 @@ try {
   } else if (command === 'placement') {
     const sub = args[0];
     const file = args[1];
-    if (!['plan', 'run'].includes(sub ?? '') || !file || (sub === 'run' && !args.includes('--execute')))
-      throw new Error('Usage: nerv placement plan PROBE.json | nerv placement run PROBE.json --execute');
+    if (!['plan', 'run', 'report'].includes(sub ?? '') || !file || (sub === 'run' && !args.includes('--execute')))
+      throw new Error(
+        'Usage: nerv placement plan PROBE.json | nerv placement run PROBE.json --execute | nerv placement report EVIDENCE.json',
+      );
     let probe: unknown;
     try {
       probe = JSON.parse(readFileSync(resolve(file), 'utf8'));
     } catch {
-      throw new Error('Placement probe must be a readable JSON file.');
+      throw new Error(`Placement ${sub === 'report' ? 'evidence' : 'probe'} must be a readable JSON file.`);
     }
-    const config = readConfig(home);
-    const response = await fetch(`http://127.0.0.1:${config.port}/api/placement/${sub}`, {
-      method: 'POST',
-      headers: { authorization: `Bearer ${readToken(home)}`, 'content-type': 'application/json' },
-      body: JSON.stringify(sub === 'run' ? { ...(probe as object), confirmExecute: true } : probe),
-    }).catch(() => {
-      throw new Error('NERV Agency is not running: start it with serve or service start.');
-    });
-    const value = (await response.json()) as { error?: string };
-    if (!response.ok) throw new Error(value.error ?? 'Placement request failed.');
-    console.log(JSON.stringify(value, null, 2));
+    if (sub === 'report') console.log(JSON.stringify(placementReport(placementEvidence(probe)), null, 2));
+    else {
+      const config = readConfig(home);
+      const response = await fetch(`http://127.0.0.1:${config.port}/api/placement/${sub}`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${readToken(home)}`, 'content-type': 'application/json' },
+        body: JSON.stringify(sub === 'run' ? { ...(probe as object), confirmExecute: true } : probe),
+      }).catch(() => {
+        throw new Error('NERV Agency is not running: start it with serve or service start.');
+      });
+      const value = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(value.error ?? 'Placement request failed.');
+      console.log(JSON.stringify(value, null, 2));
+    }
   } else if (['pair', 'clients', 'revoke'].includes(command ?? '')) {
     const config = readConfig(home);
     const path =

@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 77.5 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 89.25 h of actual effort recorded on 114 steps. Generated from the task files.
+**Remaining effort:** 77.25 h agent + 11.25 h owner across 95 open steps of 34 features and 14 other records. 90 h of actual effort recorded on 115 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -172,9 +172,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-006-T12 — T04c — Placement report and recommendation (Planned).
+💻 **→** Next: F-006-T12 — T04c — Placement report and recommendation (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -184,10 +184,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟢 Small | **Total** | 10.25 h (18 of 21 steps) | 6 h (13 of 21 steps recorded) | 0.25 h | 20 of 21 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | [F-006-T22](#f-006-t22) | 🤖 | — |
+| 🟢 Small | <a id="f-006-t22"></a>F-006-T22 — Decide: accept the provisional Mac-only placement or run the equivalent placement campaign | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-006-T12](#f-006-t12) | — | ⏳ 🤔 | — |
+| 🟢 Small | **Total** | 10.25 h (19 of 22 steps) | 6.75 h (14 of 22 steps recorded) | 0.25 h owner | 20 of 22 completed | | | | |
 
 <details><summary>Done steps (20)</summary>
 
