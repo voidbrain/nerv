@@ -165,7 +165,11 @@ export const HELP_GROUPS: HelpGroup[] = [
       { name: 'headless-resume', args: 'TARGETS.json', about: 'Resume headless sessions' },
       { name: 'quarantine', args: 'fetch|report URL', about: 'Fetch untrusted content into quarantine' },
       { name: 'browser-click', args: 'CONTROL', about: 'Click a named browser control' },
-      { name: 'desktop-click', args: 'APP CONTROL', about: 'Click a named desktop control' },
+      {
+        name: 'desktop-click',
+        args: 'APP CONTROL [--window=TITLE] [--approved]',
+        about: 'Click a named desktop control (macOS)',
+      },
       { name: 'desktop-record', args: 'ID HEADER.json', about: 'Record desktop input for a workflow' },
     ],
   },
