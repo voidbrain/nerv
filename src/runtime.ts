@@ -1124,7 +1124,18 @@ export class Runtime implements StoreApi {
   async doctor() {
     return this.routesController.doctor();
   }
+  private healthDb?: DatabaseSync;
+  /** B-111: the serving process's own connection for its health samples (the store itself lives in the nervous process). */
+  healthSampleStore(): HealthSampleStore {
+    if (!this.healthDb) {
+      this.healthDb = new DatabaseSync(this.database);
+      this.healthDb.exec('PRAGMA busy_timeout = 5000');
+    }
+    return new HealthSampleStore(this.healthDb);
+  }
   async close() {
+    this.healthDb?.close();
+    this.healthDb = undefined;
     this.requestQueue.close();
     this.instrumentalityController.stopTimers();
     this.peersController.stopTimers();
