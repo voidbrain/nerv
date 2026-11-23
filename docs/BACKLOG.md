@@ -1842,7 +1842,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-113-T01: [PR #592](https://github.com/voidbrain/nerv/pull/592) implementation. [PR #592](https://github.com/voidbrain/nerv/pull/592) (F-113-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587); [F-113-T01 report](evaluations/2026-11-20-f113-t01-tool-doc-share.md) |
+| PR / evidence | Steps: F-113-T01: [PR #592](https://github.com/voidbrain/nerv/pull/592) implementation. [PR #678](https://github.com/voidbrain/nerv/pull/678) (F-113-T02); [PR #592](https://github.com/voidbrain/nerv/pull/592) (F-113-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587); [F-113-T01 report](evaluations/2026-11-20-f113-t01-tool-doc-share.md) |
 | Opened | 2026-11-20 |
 | Verification | F-113-T02: `node --test test/tool-index.test.ts`, `npm test`, `npm run check:fast` passed 2026-11-23. F-113-T01: `node --test test/prompt-samples.test.ts` and `npm run check:fast` passed. |
 | Reviewed | 2026-11-20 |
