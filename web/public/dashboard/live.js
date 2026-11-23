@@ -858,10 +858,9 @@
       return modelControl(p.id, p.model, false, savedName, hdr, changed, valid);
     };
     const card = (name, sub, right, line, ctrl) => {
-      const top = ctrl.hdr
-        ? "<div class='row' style='gap:6px'>" + ctrl.hdr + right + "</div>"
-        : "<div class='row'><span class='b'>" + esc(name) + "</span>" + right + "</div>";
-      const inner = top + "<div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + ctrl.body;
+      const inner = ctrl.hdr
+        ? "<div class='row tiny muted' style='gap:6px'><span>" + esc(sub) + "</span>" + right + "</div>" + ctrl.hdr + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + ctrl.body
+        : "<div class='row'><span class='b'>" + esc(name) + "</span>" + right + "</div>" + "<div class='row tiny muted'><span>" + esc(sub) + "</span></div>" + (line ? "<div class='tiny muted'>" + esc(line) + "</div>" : "") + ctrl.body;
       return ctrl.attrs ? "<div class='card'><form class='pilot-model-form' " + ctrl.attrs + ">" + inner + "</form></div>" : "<div class='card'>" + inner + "</div>";
     };
     const stageOf = p => p.retired ? "retired" : p.stage; const counts = {}; roster.forEach(p => { counts[stageOf(p)] = (counts[stageOf(p)] || 0) + 1; });

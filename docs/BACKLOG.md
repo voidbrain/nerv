@@ -1620,7 +1620,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-109-T01: [PR #574](https://github.com/voidbrain/nerv/pull/574) decision recorded · F-109-T02: [PR #590](https://github.com/voidbrain/nerv/pull/590) implementation · F-109-T03: [PR #594](https://github.com/voidbrain/nerv/pull/594) implementation. [PR #594](https://github.com/voidbrain/nerv/pull/594) (F-109-T03); [PR #590](https://github.com/voidbrain/nerv/pull/590) (F-109-T02); Opened in PR #531 |
+| PR / evidence | Steps: F-109-T01: [PR #574](https://github.com/voidbrain/nerv/pull/574) decision recorded · F-109-T02: [PR #590](https://github.com/voidbrain/nerv/pull/590) implementation · F-109-T03: [PR #594](https://github.com/voidbrain/nerv/pull/594) implementation. [PR #665](https://github.com/voidbrain/nerv/pull/665) (pilot card stacked inputs / select width & EVA cage PNGs/layout); [PR #594](https://github.com/voidbrain/nerv/pull/594) (F-109-T03); [PR #590](https://github.com/voidbrain/nerv/pull/590) (F-109-T02); Opened in PR #531 |
 | Opened | 2026-11-18 |
 | Verification | F-109-T03: `node --test test/dashboard.test.ts test/pilot-controls.test.mjs` and `npm run check:fast` passed; live dashboard check pending owner. |
 | Reviewed | 2026-11-20 |
