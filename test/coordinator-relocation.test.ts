@@ -12,7 +12,6 @@ import {
   RelocationRefusedError,
   checkRelocationReadiness,
   drainCoordinator,
-  relocateCoordinator,
   relocationHorizonMs,
   signDrainReceipt,
   type RelocationLiveness,
@@ -82,7 +81,7 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
         registryMain: { baseId: 'NERV-02', coordinatorEpoch: 3 },
         soleCoordinator: false,
       };
-      refusal(() => relocateCoordinator({ ...base, liveness: early }), 'horizon_not_passed');
+      refusal(() => Store.relocateCoordinator({ ...base, liveness: early }), 'horizon_not_passed');
 
       // A receipt drained before the final batch reached the standby is refused.
       setState(oldMain.db, 2, 'active', 8, 'digest-8');
@@ -92,7 +91,7 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
       );
       refusal(
         () =>
-          relocateCoordinator({
+          Store.relocateCoordinator({
             ...base,
             liveness: { kind: 'planned', drain: ahead, oldMainPublicKey: oldKey.publicKey },
           }),
@@ -115,14 +114,14 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
       const forged: SignedDrainReceipt = { ...drain, receipt: { ...drain.receipt, finalSeq: 9 } };
       refusal(
         () =>
-          relocateCoordinator({
+          Store.relocateCoordinator({
             ...base,
             liveness: { kind: 'planned', drain: forged, oldMainPublicKey: oldKey.publicKey },
           }),
         'drain_receipt_invalid',
       );
 
-      const result = relocateCoordinator({
+      const result = Store.relocateCoordinator({
         ...base,
         liveness: { kind: 'planned', drain, oldMainPublicKey: oldKey.publicKey },
       });
@@ -259,16 +258,19 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
         } as RelocationLiveness,
       };
       refusal(
-        () => relocateCoordinator({ ...base, coldRestore: { ...restore, ownerApproved: false } }),
+        () => Store.relocateCoordinator({ ...base, coldRestore: { ...restore, ownerApproved: false } }),
         'restore_not_approved',
       );
       refusal(
-        () => relocateCoordinator({ ...base, coldRestore: { ...restore, snapshotDigest: 'other' } }),
+        () => Store.relocateCoordinator({ ...base, coldRestore: { ...restore, snapshotDigest: 'other' } }),
         'restore_mismatch',
       );
-      refusal(() => relocateCoordinator({ ...base, coldRestore: { ...restore, minHeadSeq: 13 } }), 'restore_mismatch');
+      refusal(
+        () => Store.relocateCoordinator({ ...base, coldRestore: { ...restore, minHeadSeq: 13 } }),
+        'restore_mismatch',
+      );
 
-      const res = relocateCoordinator({ ...base, coldRestore: restore, nowMs: Date.now() });
+      const res = Store.relocateCoordinator({ ...base, coldRestore: restore, nowMs: Date.now() });
       assert.equal(res.source, 'cold-restore');
       assert.ok(res.leaseExpiresAt > Date.now(), 'a sole coordinator arms its own lease');
       const promoted = new Store(mainPath);
