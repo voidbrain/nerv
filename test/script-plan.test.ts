@@ -7,24 +7,50 @@ import { parsePlan } from '../src/misato.ts';
 
 const LINUX_FIXTURE = join(import.meta.dirname, 'fixtures', 'eva', 'unconfined-bwrap');
 
-/** A call still in flight when the wall-time budget expires is terminated and its late result receipted. */
+/**
+ * A call still in flight when the wall-time budget expires is terminated and its late result receipted.
+ * B-114: the budget is derived from this machine's measured EVA-03 start (run start to first gated call), so a
+ * loaded machine cannot spend it before the call arrives, and execute resolves only once the budget has fired.
+ */
 async function assertLateCompletion(paths: { sandboxExecPath?: string; bwrapPath?: string }) {
   const { runScriptPlanInEva03 } = await import('../src/script-plan.ts');
   const tools = [{ name: 'reminders.list', effect: 'read' as const, fingerprint: 'fp1' }];
+  const source = 'return tools.call("reminders.list", {});';
+  let startedAt = performance.now();
+  let startMs = -1;
+  const warm = await runScriptPlanInEva03({
+    jobId: 'script-timeout-measure',
+    source,
+    tools,
+    ...paths,
+    gate: async () => {
+      startMs = performance.now() - startedAt;
+      return { outcome: 'grant' };
+    },
+    execute: async () => ({ ok: true }),
+  });
+  assert.equal(warm.status, 'completed');
+  assert.ok(startMs >= 0);
+  const timeoutMs = Math.max(500, Math.ceil(4 * startMs));
   const lateReceipts: Array<{ outcome: string }> = [];
+  let executeStarted = false;
+  startedAt = performance.now();
   const timedOut = await runScriptPlanInEva03({
     jobId: 'script-timeout-late',
-    source: 'return tools.call("reminders.list", {});',
+    source,
     tools,
-    limits: { timeoutMs: 120 },
+    limits: { timeoutMs },
     ...paths,
     gate: async () => ({ outcome: 'grant', grantId: 'g-late' }),
-    execute: async () => {
-      await new Promise((r) => setTimeout(r, 200));
+    execute: async (_tool, _args, _grantId, signal) => {
+      executeStarted = true;
+      // Resolve only after the wall-time budget has terminated the job: the real condition, not a sleep.
+      if (!signal?.aborted) await new Promise((r) => signal?.addEventListener('abort', r, { once: true }));
       return { ok: true };
     },
     onReceipt: (r) => lateReceipts.push(r),
   });
+  assert.ok(executeStarted, `the call reached execute within the ${timeoutMs} ms budget`);
   assert.equal(timedOut.status, 'terminated');
   assert.match(timedOut.reason ?? '', /wall-time/i);
   assert.equal(lateReceipts[0]?.outcome, 'completed_late');

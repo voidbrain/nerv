@@ -9,9 +9,15 @@ const proposal = {
   args: { title: 'Private neutral fixture', due: '2099-01-01T00:00:00Z' },
   stage: 'prototype' as const,
 };
-/** The notice names the approval but carries none of the proposal's private details. */
-const assertNoPrivateDetails = (notice: InboxEntry) =>
-  assert.doesNotMatch(JSON.stringify(notice), /Private neutral fixture|2099|grantId|args/);
+/**
+ * The notice names the approval but carries none of the proposal's private details. B-116: the text check reads
+ * the message only, since random ids can contain 2099; the fixed field set keeps args and grantId out.
+ */
+const assertNoPrivateDetails = (notice: InboxEntry) => {
+  assert.doesNotMatch(notice.message, /Private neutral fixture|2099|grantId|args/);
+  assert.deepEqual(Object.keys(notice).sort(), ['approval', 'created', 'id', 'kind', 'message', 'sequence']);
+  assert.deepEqual(Object.keys(notice.approval ?? {}).sort(), ['expires', 'id', 'pending']);
+};
 const open = (store: Store) => store.ledger.openSortie('owner', 'Neutral approval', 'trusted');
 
 test('F-023: approval and generic durable inbox notice commit together and survive restart', () => {
