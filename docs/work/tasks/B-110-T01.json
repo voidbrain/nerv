@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-110-T01",
+  "parent": "B-110",
+  "title": "One Update now, in Health beside the availability line, only when an update is available",
+  "goal": "The dashboard offers Update now only when there is something to update, next to the update status",
+  "status": "implemented",
+  "acceptance": [
+    "Failing test first: no Update now in Settings; the Health action renders only for update-available",
+    "The button sits on the Update availability row and reuses the manual update handler",
+    "Owner sees it on the live dashboard when the next update is available"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/live.js",
+    "test/manual-update.test.ts",
+    "docs/work/records/B-110.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "node --test test/manual-update.test.ts test/dashboard.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h agent",
+    "basis": "Fixed 2026-11-23 from the owner report.",
+    "reviewed": "2026-11-23",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.25
+  }
+}
