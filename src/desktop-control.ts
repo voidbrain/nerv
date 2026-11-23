@@ -1,3 +1,10 @@
+import type {
+  DesktopInputEvent,
+  DesktopReplayDriver,
+  DisplayBounds,
+  FrontmostAppMetadata,
+} from './desktop-recording.ts';
+
 export interface DesktopControlNode {
   name: string;
   role: string;
@@ -18,6 +25,41 @@ export interface DesktopAccessibilityDriver {
   checkAccessibilityPermission(): boolean;
   getWindow(appName: string, windowTitle?: string): Promise<DesktopWindowSnapshot>;
   pressControl(appName: string, windowTitle: string, controlName: string): Promise<DesktopWindowSnapshot>;
+}
+
+/**
+ * The one desktop path (F-093-T03): a single accessibility driver that serves the click adapter,
+ * the editor resume (F-012, `createDesktopEditorResumeDeps`) and the replay preconditions
+ * (F-092, `desktopReplayDriver`), so no feature binds a second desktop path.
+ */
+export interface DesktopDriver extends DesktopAccessibilityDriver {
+  getDisplayBounds(): Promise<DisplayBounds>;
+  getFrontmostApp(): Promise<FrontmostAppMetadata>;
+}
+
+/** Low-level input the replay needs on top of the shared driver (event posting, owner-input watch). */
+export interface DesktopInputSource {
+  dispatchEvent(event: DesktopInputEvent): Promise<void>;
+  hasOwnerInput(): boolean | Promise<boolean>;
+}
+
+/**
+ * Builds the F-092 replay driver from the shared desktop driver: permission, display and frontmost-window
+ * preconditions and the readback all come from the same accessibility path the click adapter uses.
+ */
+export function desktopReplayDriver(driver: DesktopDriver, input: DesktopInputSource): DesktopReplayDriver {
+  return {
+    checkAccessibilityPermission: () => driver.checkAccessibilityPermission(),
+    getDisplayBounds: () => driver.getDisplayBounds(),
+    getFrontmostApp: () => driver.getFrontmostApp(),
+    dispatchEvent: (event) => input.dispatchEvent(event),
+    hasOwnerInput: () => input.hasOwnerInput(),
+    async readBackSummary() {
+      const front = await driver.getFrontmostApp();
+      const window = await driver.getWindow(front.appName, front.windowTitle);
+      return window.summaryText;
+    },
+  };
 }
 
 export interface ClickDesktopControlRequest {
