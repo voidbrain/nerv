@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T18",
+  "status": "planned",
+  "title": "`/kaji/epoch-push` so every peer acknowledges the new epoch",
+  "goal": "Reachable peers and workers persist maxSeenCoordinatorEpoch before the new main opens effects, and the acks are measured",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "nerv kaji relocate pushes the signed main record to reachable peers and workers over /kaji/epoch-push (HTTP) and open WebSockets; each persists maxSeenCoordinatorEpoch and rejects the old epoch (tests across both sides)",
+    "allUnrevokedAckedNewEpoch is computed from recorded acks, never supplied by the caller (test)"
+  ],
+  "dependsOn": [
+    "F-016-T07"
+  ],
+  "resources": [
+    "src/kaji-link.ts",
+    "src/cli-kaji.ts",
+    "src/coordinator-relocation.ts",
+    "src/store.ts",
+    "test/kaji-link.test.ts",
+    "test/coordinator-relocation.test.ts",
+    "docs/work/tasks/F-016-T18.json",
+    "docs/work/records/F-016.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Directed regressions in the named test files",
+    "npm run check:fast",
+    "final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h agent",
+    "basis": "Split from F-016-T07 on 2026-11-23 by owner decision (option a) after the PR #677 review; estimated from F-016-T06 and F-016-T07 (1.5 h each actual). Not a measurement.",
+    "reviewed": "2026-11-23",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

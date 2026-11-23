@@ -3,8 +3,8 @@
   "parent": "F-016",
   "id": "F-016-T07",
   "status": "implemented",
-  "title": "Step 4a — Owner-initiated relocation with restore; never a context-only takeover",
-  "goal": "Owner-initiated relocation with restore; never a context-only takeover.",
+  "title": "Step 4a — Relocation building blocks: readiness, drain receipt, promotion with quarantine; never a context-only takeover",
+  "goal": "The relocation primitives refuse every unsafe promotion; relocation is not usable end to end until F-016-T16 to F-016-T19.",
   "capabilities": [
     "bounded-edit",
     "structured-tools",
@@ -14,7 +14,12 @@
   ],
   "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
   "acceptance": [
-    "Owner-initiated relocation with restore; never a context-only takeover"
+    "checkRelocationReadiness promotes only when the owner-signed main record names this base at a later epoch than a verified standby (or an owner-approved cold restore bound to the standby epoch); empty stores, copied context and active copies are refused as context_only (tests)",
+    "The previous epoch is the epoch that actually last ran (the standby epoch, matched by the drain receipt or snapshot), so a re-targeted relocation (B at E+1 never promoted, C at E+2) still promotes (test)",
+    "drainCoordinator fences the old main inside one write transaction and returns a base-signed receipt that names the new main base and epoch; promotion refuses a receipt for another base or epoch (tests)",
+    "An unplanned move always needs the old host confirmed down or a root-signed revoke; the 65 s/300 s wait alone never suffices (interim until F-016-T16) (test)",
+    "Attempted-but-unreconciled outbox rows are quarantined, the inherited lease is cleared and a sole coordinator arms its lease inside the activation transaction, so a crash after it never leaves an active base with lease 0 (tests)",
+    "nerv kaji relocate signs the main record (and an optional revoke); nerv kaji drain signs the receipt. Not usable yet: no command runs the promotion (F-016-T17), coordinator lease renewal is not running (F-016-T16), no epoch push (F-016-T18), no Telegram hand-over (F-016-T19)"
   ],
   "dependsOn": [
     "F-016-T06"
@@ -26,10 +31,18 @@
     "src/cli-help.ts",
     "test/coordinator-relocation.test.ts",
     "docs/work/tasks/F-016-T07.json",
-    "docs/work/records/F-016.md"
+    "docs/work/records/F-016.md",
+    "docs/decisions/coordinator-relocation.md",
+    "docs/work/tasks/F-016-T16.json",
+    "docs/work/tasks/F-016-T17.json",
+    "docs/work/tasks/F-016-T18.json",
+    "docs/work/tasks/F-016-T19.json",
+    "generated:backlog-views"
   ],
   "validation": [
-    "Directed regressions or recorded evidence for this slice; final required CI"
+    "node --test test/coordinator-relocation.test.ts",
+    "npm run check:fast",
+    "final required CI"
   ],
   "escalation": [
     "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
@@ -38,19 +51,19 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
+    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio. 2026-11-23: review fixes on PR #677 (re-targeting, receipt binding, lease in the activation commit, drain re-read, unplanned confirmation) added about 1 h; actual stated.",
     "reviewed": "2026-11-14",
     "baselineDays": 1.5,
     "agentHours": 0,
     "baselineAgentHours": 2.25,
     "estimateAgentHours": 0.75,
-    "actualAgentHours": 1.5,
+    "actualAgentHours": 2.5,
     "actualSource": "stated"
   },
   "prs": [
     {
       "pr": 677,
-      "note": "implementation"
+      "note": "implementation and review fixes"
     }
   ]
 }
