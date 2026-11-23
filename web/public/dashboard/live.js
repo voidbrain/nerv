@@ -516,9 +516,11 @@
     }
     const degraded = degradedBanner(d.degraded);
     const mu = state.manualUpdate;
+    // B-110: one Update now, beside the availability line, only when there is something to update.
     const updateActionHtml = u && u.status === "update-available"
-      ? "<div class='row small' style='margin-top:6px'><span class='muted'>Update ready (" + esc(short(u.availableRevision)) + " · " + esc(u.channel || "main") + ")</span><button class='btn sm' id='btn-apply-update'" + (state.manualUpdateBusy ? " disabled" : "") + ">" + (state.manualUpdateBusy ? "Applying…" : "Apply update") + "</button></div>"
+      ? "<button class='btn sm' id='btn-apply-update' type='button'" + (state.manualUpdateBusy ? " disabled" : "") + ">" + (state.manualUpdateBusy ? "Updating…" : "Update now") + "</button>"
       : "";
+    if (updateActionHtml) { const row = rows.find(r => r[0] === "Update availability"); if (row) row[3] = updateActionHtml; }
     const updateResultHtml = mu
       ? "<div class='small " + (mu.outcome === "completed" || mu.outcome === "started" ? "ok" : mu.outcome === "refused" ? "warn" : "danger") + "' style='margin-top:6px'>" +
         "<div><strong>Manual update " + esc(mu.outcome) + "</strong>" + (mu.revision ? " · " + esc(mu.revision.slice(0, 7)) : "") + (mu.planDigest ? " · plan " + esc(mu.planDigest.slice(0, 7)) : "") + "</div>" +
@@ -549,11 +551,10 @@
     const warningsHtml = warnings.length
       ? "<div id='health-warnings' style='margin-top:4px'>" + warnings.map(w => "<div class='small warn' data-health-warning='" + esc(w.key) + "'>▲ " + esc(w.message) + "</div>").join("") + "</div>"
       : "";
-    document.getElementById("health").innerHTML = degraded + rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span></div>").join("") +
+    document.getElementById("health").innerHTML = degraded + rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='row' style='gap:6px'><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span>" + (c[3] || "") + "</span></div>").join("") +
       sampleHtml +
       linksHtml +
       warningsHtml +
-      updateActionHtml +
       policyHtml +
       updateResultHtml +
       "<div class='row small' style='margin-top:6px'><span class='muted'>Edited config.json? Apply it without a restart.</span><button class='btn sm' id='btn-reload'>Reload models</button></div>";
@@ -974,7 +975,7 @@
     }
   };
   document.addEventListener("click", e => {
-    const t = e.target && e.target.closest && e.target.closest("#btn-apply-update, #btn-update-now");
+    const t = e.target && e.target.closest && e.target.closest("#btn-apply-update");
     if (!t) return;
     e.preventDefault();
     void window.liveApplyUpdate();
@@ -1003,7 +1004,6 @@
     const m = settingsModel();
     const busy = !!state.settingsBusy;
     const msg = state.settingsMsg;
-    const updBusy = !!state.manualUpdateBusy;
     box.innerHTML = "<form id='settings-form' class='list'>" +
       "<div class='row small' style='flex-wrap:wrap;gap:6px;align-items:center'>" +
       "<label style='display:inline-flex;align-items:center;gap:4px'><input type='checkbox' id='set-auto-enabled'" + (m.enabled ? " checked" : "") + (busy ? " disabled" : "") + "> Automatic updates</label>" +
@@ -1011,7 +1011,6 @@
       "<span>Check at</span><input id='set-check-hour' aria-label='Check hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.checkHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>:00</span>" +
       "<span>Apply at</span><input id='set-apply-hour' aria-label='Apply hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.applyHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>:00</span>" +
       "<span>Quiet hours</span><input id='set-quiet-from' aria-label='No-apply from (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietFrom) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>:00 –</span><input id='set-quiet-until' aria-label='No-apply until (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietUntil) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>:00</span>" +
-      "<button class='btn sm' id='btn-update-now' type='button'" + (updBusy ? " disabled" : "") + ">" + (updBusy ? "Updating…" : "Update now") + "</button>" +
       "</div>" +
       "<div class='row small' style='flex-wrap:wrap;gap:6px;align-items:center'>" +
       "<label style='display:inline-flex;align-items:center;gap:4px'><input type='checkbox' id='set-brief-enabled'" + (m.briefEnabled ? " checked" : "") + (busy ? " disabled" : "") + "> Daily brief at</label>" +
