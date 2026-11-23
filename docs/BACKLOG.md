@@ -1689,7 +1689,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #687](https://github.com/voidbrain/nerv/pull/687) |
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: session tests 14/14; dashboard and manual-update suites 61/61. |
 | Reviewed | 2026-11-23 |
@@ -2149,7 +2149,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in the B-113 PR. |
+| PR / evidence | Opened in [PR #687](https://github.com/voidbrain/nerv/pull/687). |
 | Opened | 2026-11-23 |
 | Verification | — |
 | Reviewed | 2026-11-23 |
