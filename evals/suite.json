@@ -128,7 +128,8 @@
         "test/angular.browser.mjs",
         "test/evaluation.browser.mjs",
         "test/pwa.browser.mjs",
-        "test/browser-click.browser.mjs"
+        "test/browser-click.browser.mjs",
+        "test/diyfpv-read.browser.mjs"
       ],
       "families": [
         "dashboard-operator",

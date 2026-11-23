@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-099",
   "id": "F-099-T04",
-  "status": "planned",
+  "status": "implemented",
   "title": "Read a diyfpv.com build through the browser adapter",
   "goal": "NERV reads the parts and wiring of a diyfpv.com build link",
   "capabilities": [
@@ -32,9 +32,11 @@
     "reviewed": "2026-11-15",
     "basis": "Estimated 2026-11-15 at agent speed (harness 8.14.3: implementation steps 0.75 h, decision revisions 0.5 h). Not a measurement.",
     "estimate": "0.75 h",
-    "agentHours": 0.75,
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75,
-    "ownerHours": 0
+    "ownerHours": 0,
+    "actualAgentHours": 1.25,
+    "actualSource": "stated"
   }
 }

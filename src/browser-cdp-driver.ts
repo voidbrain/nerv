@@ -260,3 +260,109 @@ export function createCdpBrowserDriver(options: CdpBrowserDriverOptions): Browse
     },
   };
 }
+
+/** The structure of a page as read by `readPageTables`: its title, headings and tables, all page text (tainted). */
+export interface PageTables {
+  readonly url: string;
+  readonly title: string;
+  readonly headings: readonly string[];
+  readonly tables: readonly { readonly caption: string; readonly headers: string[]; readonly rows: string[][] }[];
+}
+
+const TABLES_EXPRESSION = `(() => {
+  const text = (el) => ((el && (el.innerText || el.textContent)) || '').replace(/\\s+/g, ' ').trim();
+  const tables = Array.from(document.querySelectorAll('table')).slice(0, 20).map((table) => {
+    const caption = text(table.querySelector('caption')) || text(table.previousElementSibling);
+    const headerRow = table.querySelector('thead tr') || table.querySelector('tr');
+    const headers = headerRow ? Array.from(headerRow.children).map(text) : [];
+    const rows = Array.from(table.querySelectorAll('tr'))
+      .filter((tr) => tr !== headerRow)
+      .slice(0, 200)
+      .map((tr) => Array.from(tr.children).map(text));
+    return { caption, headers, rows };
+  });
+  return {
+    url: location.href,
+    title: document.title,
+    ready: document.readyState === 'complete',
+    headings: Array.from(document.querySelectorAll('h1, h2, h3')).slice(0, 50).map(text),
+    tables,
+  };
+})()`;
+
+export interface CdpPageReaderOptions {
+  readonly port: number;
+  /** Opens a new tab on the URL and returns its target; closes it again. Replaceable in tests. */
+  readonly openTab?: (url: string) => Promise<CdpTarget>;
+  readonly closeTab?: (id: string) => Promise<void>;
+  readonly connect?: (webSocketUrl: string) => Promise<CdpSession>;
+  /** How long to wait for a client-rendered page to show its tables. */
+  readonly renderTimeoutMs?: number;
+  readonly pollMs?: number;
+  readonly timeoutMs?: number;
+}
+
+/**
+ * F-099-T04: read-only page read through the F-089 browser adapter. Opens the allowlisted URL in a new tab of
+ * the dedicated profile, waits for the client-rendered page, reads its headings and tables (no clicks, no
+ * typing), and closes the tab. Everything read is page text: data, never an instruction.
+ */
+export function createCdpPageReader(options: CdpPageReaderOptions) {
+  if (!Number.isInteger(options.port) || options.port < 1 || options.port > 65535) {
+    throw new Error('browser.debugPort must be a port number.');
+  }
+  const timeoutMs = options.timeoutMs ?? 5000;
+  const base = `http://127.0.0.1:${options.port}`;
+  const openTab =
+    options.openTab ??
+    (async (url: string) => {
+      const res = await fetch(`${base}/json/new?${encodeURI(url)}`, {
+        method: 'PUT',
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+      if (!res.ok) throw new Error(`Browser debugging port ${options.port} answered ${res.status}.`);
+      return (await res.json()) as CdpTarget;
+    });
+  const closeTab =
+    options.closeTab ??
+    (async (id: string) => {
+      await fetch(`${base}/json/close/${encodeURIComponent(id)}`, { signal: AbortSignal.timeout(timeoutMs) }).catch(
+        () => undefined,
+      );
+    });
+  const connect = options.connect ?? defaultConnect(timeoutMs);
+  const renderTimeoutMs = options.renderTimeoutMs ?? 15_000;
+  const pollMs = options.pollMs ?? 250;
+
+  return {
+    async readPageTables(url: string, allowedOrigins: readonly string[]): Promise<PageTables> {
+      let parsed: URL;
+      try {
+        parsed = new URL(url);
+      } catch {
+        throw new Error(`Invalid page URL: ${url}`);
+      }
+      if ((parsed.protocol !== 'http:' && parsed.protocol !== 'https:') || !allowedOrigins.includes(parsed.origin)) {
+        throw new Error(`Origin "${parsed.origin}" is not in browser.allowedOrigins.`);
+      }
+      const target = await openTab(parsed.href);
+      try {
+        if (!target.webSocketDebuggerUrl) throw new Error('The new tab has no debugging connection.');
+        const session = await connect(target.webSocketDebuggerUrl);
+        try {
+          const deadline = Date.now() + renderTimeoutMs;
+          for (;;) {
+            const page = await evaluate<PageTables & { ready: boolean }>(session, TABLES_EXPRESSION);
+            const { ready, ...tables } = page;
+            if ((ready && tables.tables.length > 0) || Date.now() >= deadline) return tables;
+            await new Promise((done) => setTimeout(done, pollMs));
+          }
+        } finally {
+          session.close();
+        }
+      } finally {
+        await closeTab(target.id);
+      }
+    },
+  };
+}

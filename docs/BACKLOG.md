@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.5 h agent + 11 h owner across 96 open steps of 34 features and 16 other records. 94.25 h of actual effort recorded on 118 steps. Generated from the task files.
+**Remaining effort:** 69.75 h agent + 11 h owner across 96 open steps of 34 features and 16 other records. 95.5 h of actual effort recorded on 119 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1942,9 +1942,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-099-T04 — Read a diyfpv.com build through the browser adapter (Planned).
+💻 **→** Next: F-099-T04 — Read a diyfpv.com build through the browser adapter (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1956,8 +1956,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-099-t04"></a>F-099-T04 — Read a diyfpv.com build through the browser adapter | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
-| 🟢 Small | **Total** | 2.25 h | 0.25 h (1 of 4 steps recorded) | 0.75 h | 3 of 4 completed | | |
+| 🟢 Small | <a id="f-099-t04"></a>F-099-T04 — Read a diyfpv.com build through the browser adapter | 0.75 h | 1.25 h so far (stated) | 0 h | Implemented; verification pending | 🤖 | — |
+| 🟢 Small | **Total** | 2.25 h | 1.5 h (2 of 4 steps recorded) | 0 h | 3 of 4 completed | | |
 
 <details><summary>Done steps (3)</summary>
 
