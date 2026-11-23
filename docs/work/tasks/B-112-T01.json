@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "B-112-T01",
+  "parent": "B-112",
+  "title": "Sephirot: routes light only when taken; answer route after planning; full map; loops when taken",
+  "goal": "The flow map shows the path the sortie really took, the whole map with no sortie, and the loops back to Misato when used",
+  "status": "implemented",
+  "acceptance": [
+    "Failing tests first: a shortcut (Detection → Gendo, Sync Ratio → Entry Plug) lights only when the step it bypasses did not run",
+    "The answer route appears only once Misato planned without an action",
+    "With no sortie selected every route is on the map, conditional ones dashed and dimmed",
+    "MAGI → Misato, Misato apartment → Misato and EVA Cage → Misato light when the sortie took them",
+    "Owner looks at a few live sorties (S-6AD9 among them)"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/dashboard.js",
+    "web/public/dashboard/index.html",
+    "test/dashboard.test.ts",
+    "docs/work/records/B-112.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "node --test test/dashboard.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h agent",
+    "basis": "Fixed 2026-11-23 from the owner review of S-6AD9; owner decisions 2a (full map) and 4c (loops lit when taken).",
+    "reviewed": "2026-11-23",
+    "agentHours": 0.25,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 0.25
+  }
+}
