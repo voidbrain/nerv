@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T11",
-  "status": "planned",
+  "status": "closed",
   "title": "T04b — Run the placement campaign on the enrolled Mac and mini PC",
   "goal": "Run the placement campaign on the enrolled Mac and mini PC.",
   "capabilities": [
@@ -46,7 +46,7 @@
     "reviewed": "2026-11-20",
     "baselineDays": 1,
     "ownerHours": 0,
-    "agentHours": 1.5,
+    "agentHours": 0,
     "estimateAgentHours": 1.5,
     "baselineAgentHours": 0.5
   }

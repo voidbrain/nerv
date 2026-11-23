@@ -28,7 +28,7 @@ The core repository is the reusable master; NERV is derived. The core never depe
 
 ## Repository (F-101-T03)
 
-**Decided by the owner on 2026-11-22:** repository name **`fpv-buddy`**, visibility **`public`**.
+**Decided by the owner on 2026-11-22 (clarified 2026-11-23):** canonical repository is **`voidbrain/FPVBuddy`** (`~/Projects/FPVBuddy/FPVBuddy`, visibility **`public`**); `fpv-buddy` and `one-more-battery` are legacy names only.
 
 ## Reconsider when
 

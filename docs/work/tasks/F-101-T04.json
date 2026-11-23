@@ -2,8 +2,8 @@
   "version": 1,
   "id": "F-101-T04",
   "parent": "F-101",
-  "title": "Create the FPV core repository and move the core into it",
-  "goal": "Batteries, fleet, spares and crash rules live once, in their own repository, behind a storage interface",
+  "title": "Create/wire the FPVBuddy core repository and move the core into it",
+  "goal": "Batteries, fleet, spares and crash rules live once, in voidbrain/FPVBuddy, behind a storage interface",
   "status": "planned",
   "acceptance": [
     "The repository has the core (batteries, fleet, spares, crashes, crash to battery-damage link) with no NERV imports, its own tests, formatter, linter and CI",
