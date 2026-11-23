@@ -55,7 +55,9 @@ test(
 
 type Obs = { definition: string; registration: string; runtime: string };
 
-function fakes(options: { failAt?: string; probe?: boolean; dirty?: boolean; occupied?: boolean } = {}) {
+function fakes(
+  options: { failAt?: string; probe?: boolean; dirty?: boolean; occupied?: boolean; blockAt?: string } = {},
+) {
   const calls: string[] = [];
   const state: Record<string, Obs> = {
     '/dev/nerv': { definition: 'owned', registration: 'matching', runtime: 'running' },
@@ -75,7 +77,12 @@ function fakes(options: { failAt?: string; probe?: boolean; dirty?: boolean; occ
     },
     occupied: () => !!options.occupied,
     host,
-    plan: async (h, action) => ({ action, digest: action + ':' + h.context.source, blockers: [] }) as never,
+    plan: async (h, action) => {
+      const key = `${h.context.source === '/dev/nerv' ? 'old' : 'new'} ${action}`;
+      calls.push('plan ' + key);
+      const blockers = options.blockAt === key ? ['Service or runtime ownership is unknown or belongs elsewhere.'] : [];
+      return { action, digest: action + ':' + h.context.source, blockers } as never;
+    },
     apply: async (h, plan) => {
       const action = (plan as unknown as { action: string }).action;
       const key = `${h.context.source === '/dev/nerv' ? 'old' : 'new'} ${action}`;
@@ -136,4 +143,14 @@ test('F-117-T01: a failed start or a silent dashboard puts the old service back 
     assert.equal(state['/dev/nerv']!.runtime, 'running');
     assert.equal(state['/home/pilot/.nerv-app']!.definition, 'absent', 'the new definition is removed');
   }
+});
+
+test('F-117-T01: a blocked stop of the old service refuses before anything is cloned, built or started', async () => {
+  const { deps, calls, state } = fakes({ blockAt: 'old stop' });
+  const r = await moveInstall(deps);
+  assert.equal(r.outcome, 'refused', JSON.stringify(r));
+  assert.match(r.reasons.join(' '), /ownership is unknown/);
+  assert.ok(!calls.some((c) => c.startsWith('git clone') || c.startsWith('npm')), 'nothing prepared');
+  assert.ok(!calls.some((c) => /^(old|new) /.test(c)), 'no lifecycle step applied, no rollback start');
+  assert.equal(state['/dev/nerv']!.runtime, 'running');
 });
