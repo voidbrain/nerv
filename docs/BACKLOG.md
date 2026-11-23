@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 77.5 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 89.25 h of actual effort recorded on 114 steps. Generated from the task files.
+**Remaining effort:** 75 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 90.75 h of actual effort recorded on 115 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1809,9 +1809,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-113-T02 — Compact subject index in the planner prompt and a read tool for one subject's docs (Planned).
+💻 **→** Next: F-113-T02 — Compact subject index in the planner prompt and a read tool for one subject's docs (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1823,9 +1823,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-113-t02"></a>F-113-T02 — Compact subject index in the planner prompt and a read tool for one subject's docs | 2.5 h | 0 h | 2.5 h | Planned | — | [F-113-T03](#f-113-t03) | — |
+| 🟢 Small | <a id="f-113-t02"></a>F-113-T02 — Compact subject index in the planner prompt and a read tool for one subject's docs | 2.5 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-113-T03](#f-113-t03) | — |
 | 🟢 Small | <a id="f-113-t03"></a>F-113-T03 — Gauntlet comparison of prompt size and task success with the compact index | 1 h | 0 h | 1 h | Planned | [F-113-T02](#f-113-t02) | — | — |
-| 🟡 Medium | **Total** | 4.5 h | 1 h (1 of 3 steps recorded) | 3.5 h | 1 of 3 completed | | | |
+| 🟢 Small | **Total** | 4.5 h | 2.5 h (2 of 3 steps recorded) | 1 h | 1 of 3 completed | | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1842,9 +1842,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-113-T01: [PR #592](https://github.com/voidbrain/nerv/pull/592) implementation. [PR #592](https://github.com/voidbrain/nerv/pull/592) (F-113-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587); [F-113-T01 report](evaluations/2026-11-20-f113-t01-tool-doc-share.md) |
+| PR / evidence | Steps: F-113-T01: [PR #592](https://github.com/voidbrain/nerv/pull/592) implementation. [PR #678](https://github.com/voidbrain/nerv/pull/678) (F-113-T02); [PR #592](https://github.com/voidbrain/nerv/pull/592) (F-113-T01); [Agentica review 2026-11-20](reviews/2026-11-20-agentica.md); opened in [PR #587](https://github.com/voidbrain/nerv/pull/587); [F-113-T01 report](evaluations/2026-11-20-f113-t01-tool-doc-share.md) |
 | Opened | 2026-11-20 |
-| Verification | F-113-T01: `node --test test/prompt-samples.test.ts` and `npm run check:fast` passed. |
+| Verification | F-113-T02: `node --test test/tool-index.test.ts`, `npm test`, `npm run check:fast` passed 2026-11-23. F-113-T01: `node --test test/prompt-samples.test.ts` and `npm run check:fast` passed. |
 | Reviewed | 2026-11-20 |
 
 </details>
