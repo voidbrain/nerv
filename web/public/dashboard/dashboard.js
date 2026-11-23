@@ -856,61 +856,33 @@ function renderCages() {
   const total = machines.reduce((n, m) => n + (Array.isArray(m.instances) ? m.instances.length : 0), 0);
   const sub = document.getElementById("cages-sub");
   if (sub) sub.textContent = total + " active · " + machines.length + (machines.length === 1 ? " machine" : " machines");
-  const classItems = c => {
+  const cagesHtml = "<div class='cages'>" + EVA_CLASSES.map(c => {
     const items = [];
     machines.forEach(m => {
       if (m.reported === false || !Array.isArray(m.instances)) return;
       m.instances.forEach(x => { if (x.evaClass === c.id) items.push({ inst: x, machine: m.machineName }); });
     });
-    return items;
-  };
-  const instHtmlFor = items => items.length
-    ? items.map(({ inst, machine }) => "<div class='eva-inst'><div class='eva-inst-meta'><span class='b'>" + esc(inst.pilot || "unassigned") + "</span><span class='tiny muted'>" + esc(inst.jobId) + (inst.sortieId ? " · " + esc(inst.sortieId) : "") + (machines.length > 1 ? " · @" + esc(machine) : "") + "</span></div><span class='badge " + evaStateBadge(inst.state) + "'>" + esc(inst.state.toUpperCase()) + "</span></div>").join("")
-    : "<div class='eva-empty'>Empty · no active instances</div>";
+    const instHtml = items.length
+      ? items.map(({ inst, machine }) => "<div class='eva-inst'><div class='eva-inst-meta'><span class='b'>" + esc(inst.pilot || "unassigned") + "</span><span class='tiny muted'>" + esc(inst.jobId) + (inst.sortieId ? " · " + esc(inst.sortieId) : "") + (machines.length > 1 ? " · @" + esc(machine) : "") + "</span></div><span class='badge " + evaStateBadge(inst.state) + "'>" + esc(inst.state.toUpperCase()) + "</span></div>").join("")
+      : "<div class='eva-empty'>Empty · no active instances</div>";
+    return "<div class='cage' data-eva-class='" + c.id + "'>" +
+      "<div class='ch eva-class-hdr'><span style='color:var(" + c.css + ")'>" + c.name + "</span><span class='tiny muted' id='cs-" + c.name + "'>" + (items.length ? items.length + " ACTIVE" : "IDLE") + "</span></div>" +
+      "<img class='eva-img' data-av='" + c.id + "' alt='" + c.name + "'/>" +
+      "<canvas id='cv-" + c.name + "' height='30'></canvas>" +
+      "<div class='cd' title='" + esc(c.label) + "'>" + esc(c.label) + " · " + (items.length ? items.length + " active" : "idle") + "</div>" +
+      instHtml +
+      "</div>";
+  }).join("") + "</div>";
   const machinesHtml = machines.length
-    ? machines.map(m => {
+    ? "<div class='eva-machines-bar'>" + machines.map(m => {
         const insts = Array.isArray(m.instances) ? m.instances : [];
         const statusText = m.self ? "this machine" : (m.online ? "online" : "offline");
         const limitText = m.limits ? " · " + insts.length + "/" + m.limits.instances + " slots" : "";
         const note = m.reported === false ? "<div class='eva-empty'>Not reported by this machine</div>" : "";
         return "<div class='eva-machine' data-machine='" + esc(m.machineId) + "'><div class='eva-machine-hdr'><span class='b " + (m.online ? "ok" : "muted") + "'>" + esc(m.machineName) + "</span><span class='tiny muted'>" + esc(statusText + limitText) + "</span></div>" + note + "</div>";
-      }).join("")
+      }).join("") + "</div>"
     : "<div class='eva-empty'>No machines reported.</div>";
-
-  // Preserve existing .cages DOM across 5s polls so <img> assets and heartbeat <canvas> never reset.
-  if (typeof box.querySelector === "function" && box.querySelector(".cages")) {
-    EVA_CLASSES.forEach(c => {
-      const card = box.querySelector(".cage[data-eva-class='" + c.id + "']");
-      if (!card) return;
-      const items = classItems(c);
-      const cs = card.querySelector("#cs-" + c.name);
-      if (cs) cs.textContent = items.length ? items.length + " ACTIVE" : "IDLE";
-      const cd = card.querySelector(".cd");
-      if (cd) {
-        const txt = c.label + " · " + (items.length ? items.length + " active" : "idle");
-        cd.textContent = txt;
-        cd.title = txt;
-      }
-      const list = card.querySelector(".eva-inst-list");
-      if (list) list.innerHTML = instHtmlFor(items);
-    });
-    const mbar = box.querySelector(".eva-machines-bar");
-    if (mbar) mbar.innerHTML = machinesHtml;
-    return;
-  }
-
-  const cagesHtml = "<div class='cages'>" + EVA_CLASSES.map(c => {
-    const items = classItems(c);
-    const cdTxt = c.label + " · " + (items.length ? items.length + " active" : "idle");
-    return "<div class='cage' data-eva-class='" + c.id + "'>" +
-      "<div class='ch'><span style='color:var(" + c.css + ")'>" + c.name + "</span><span class='tiny muted' id='cs-" + c.name + "'>" + (items.length ? items.length + " ACTIVE" : "IDLE") + "</span></div>" +
-      "<img class='eva-img' data-av='" + c.id + "' alt='" + c.name + "'/>" +
-      "<canvas id='cv-" + c.name + "' height='30'></canvas>" +
-      "<div class='cd' title='" + esc(cdTxt) + "'>" + esc(cdTxt) + "</div>" +
-      "<div class='eva-inst-list'>" + instHtmlFor(items) + "</div>" +
-      "</div>";
-  }).join("") + "</div>";
-  box.innerHTML = cagesHtml + "<div class='eva-machines-bar'>" + machinesHtml + "</div>";
+  box.innerHTML = cagesHtml + machinesHtml;
   if (typeof fillAvatars === "function") fillAvatars(box);
 }
 function renderChatSurface(surface) {
