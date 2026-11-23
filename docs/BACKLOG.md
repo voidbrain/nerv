@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 1 | 1 | 2 | 1 |
+| **This week** | 1 | 1 | 3 | 1 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 14 |
-| **Require Human 🧑** | 11 | 6 |
+| **Open** | 35 | 15 |
+| **Require Human 🧑** | 10 | 6 |
 
 ### Require Human 🧑
 
@@ -30,11 +30,10 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-092](#f-092) |  |  |  |
 | [F-060](#f-060) |  |  |  |
 | [F-007](#f-007) |  |  |  |
-| [F-100](#f-100) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 77.5 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 89.25 h of actual effort recorded on 114 steps. Generated from the task files.
+**Remaining effort:** 78 h agent + 10.5 h owner across 95 open steps of 34 features and 15 other records. 89.25 h of actual effort recorded on 114 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1946,6 +1945,92 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-109"></a>[🐞 B-109](#top)
+
+**Blackbox analysis rejects a real Blackbox Explorer CSV export**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | [F-100-T04](#f-100-t04) | 🤖 | — | — |
+
+💻 **→** Next: B-109-T01 — Read Blackbox Explorer CSV exports that start with a settings preamble (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-23 running F-100-T04 on the owner's real fleet log: Betaflight Blackbox Explorer's CSV export starts with about 150 `"key",value` settings lines before the column header, and `parseBlackboxCsv` took the first line as the header, so the analysis failed with "missing required time, gyroADC[0..2], or motor[0..3] columns". |
+| **Reproduce** | Export a log to CSV with Blackbox Explorer and analyse it. |
+| **Check** | Test committed failing first (`test/blackbox.test.ts`, B-109): a CSV with a settings preamble is read in full, using unfiltered gyro and eRPM; a CSV without a recognisable header still reports the missing columns. The real log then decodes (84,789 samples). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-109-t01"></a>B-109-T01 — Read Blackbox Explorer CSV exports that start with a settings preamble | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | — | [F-100-T04](#f-100-t04) |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-109.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-23 |
+| Verification | 2026-11-23: `node --test test/blackbox.test.ts` 4/4; the owner's real CSV export decodes. |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+### <a id="f-100"></a>[✨ F-100](#top)
+
+**FPV blackbox analysis for vibration**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | [B-109-T01](#b-109-t01) | — | 🤖 | — | — |
+
+💻 **→** Next: F-100-T04 — Analyse a real fleet log (Supernova) with GYRO data and eRPM (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: "Smoke vibrates and shakes; props changed, the problem stays; the frame seems fine: frame, motors or ESC? Analyse the blackbox." NERV cannot read Betaflight blackbox logs. |
+| **Reproduce** | Send a blackbox log of the shaking flight and ask what causes the vibration. |
+| **Check** | Feasibility first: decode the log locally and read the gyro spectrum per axis and motor; then a report that names candidate causes with the evidence for each (motor-specific peaks, frame resonance, prop or ESC signs) and says what the log cannot tell. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-100-t04"></a>F-100-T04 — Analyse a real fleet log (Supernova) with GYRO data and eRPM | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [B-109-T01](#b-109-t01) | — | 🤖 | — |
+| 🟢 Small | **Total** | 1.75 h | 0.25 h (1 of 4 steps recorded) | 0.25 h | 3 of 4 completed | | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-100-t01"></a>F-100-T01 — Feasibility: decoding blackbox logs and reading vibration | 0.75 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-100-t02"></a>F-100-T02 — Owner decides the analysis scope | 0 h | 0 h | Completed | — |
+| — | <a id="f-100-t03"></a>F-100-T03 — Vibration report from a blackbox log | 0.75 h | 0 h | Completed | [PR #486](https://github.com/voidbrain/nerv/pull/486) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-100.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-100-T03: [PR #486](https://github.com/voidbrain/nerv/pull/486) implementation. [PR #486](https://github.com/voidbrain/nerv/pull/486) (merged; CI green); [FPV blackbox feasibility](design/fpv-blackbox-feasibility.md) (`F-100-T01`); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-100-T03 verified: [PR #486](https://github.com/voidbrain/nerv/pull/486) merged on green CI. `F-100-T01`: `npm run check:fast` passed. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-101"></a>[✨ F-101](#top)
 
 **Share the FPV battery manager outside NERV**
@@ -2271,54 +2356,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-100"></a>[✨ F-100](#top)
-
-**FPV blackbox analysis for vibration**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h owner | — | — | — | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](work/records/F-100.md) F-100-T04 — Owner check: real Smoke log with GYRO&#95;SCALED and eRPM (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-14: "Smoke vibrates and shakes; props changed, the problem stays; the frame seems fine: frame, motors or ESC? Analyse the blackbox." NERV cannot read Betaflight blackbox logs. |
-| **Reproduce** | Send a blackbox log of the shaking flight and ask what causes the vibration. |
-| **Check** | Feasibility first: decode the log locally and read the gyro spectrum per axis and motor; then a report that names candidate causes with the evidence for each (motor-specific peaks, frame resonance, prop or ESC signs) and says what the log cannot tell. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-100-t04"></a>F-100-T04 — Owner check: real Smoke log with GYRO&#95;SCALED and eRPM | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [🧑‍🔧](work/records/F-100.md) | — |
-| 🟢 Small | **Total** | 1.5 h | 0.25 h (1 of 4 steps recorded) | 0.5 h owner | 3 of 4 completed | | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-100-t01"></a>F-100-T01 — Feasibility: decoding blackbox logs and reading vibration | 0.75 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-100-t02"></a>F-100-T02 — Owner decides the analysis scope | 0 h | 0 h | Completed | — |
-| — | <a id="f-100-t03"></a>F-100-T03 — Vibration report from a blackbox log | 0.75 h | 0 h | Completed | [PR #486](https://github.com/voidbrain/nerv/pull/486) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-100.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-100-T03: [PR #486](https://github.com/voidbrain/nerv/pull/486) implementation. [PR #486](https://github.com/voidbrain/nerv/pull/486) (merged; CI green); [FPV blackbox feasibility](design/fpv-blackbox-feasibility.md) (`F-100-T01`); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-100-T03 verified: [PR #486](https://github.com/voidbrain/nerv/pull/486) merged on green CI. `F-100-T01`: `npm run check:fast` passed. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
 ### <a id="b-056"></a>[🐞 B-056](#top)
 
 **A renewal the companion refuses on the Mac says it was not confirmed**
