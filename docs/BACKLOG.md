@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 1 | 1 | 4 | 1 |
+| **This week** | 3 | 1 | 5 | 1 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 16 |
+| **Open** | 37 | 17 |
 | **Require Human 🧑** | 11 | 7 |
 
 ### Require Human 🧑
@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.5 h agent + 11 h owner across 96 open steps of 34 features and 16 other records. 94.25 h of actual effort recorded on 118 steps. Generated from the task files.
+**Remaining effort:** 80.25 h agent + 11 h owner across 103 open steps of 36 features and 17 other records. 94.25 h of actual effort recorded on 118 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -596,6 +596,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-119"></a>[✨ F-119](#top)
+
+**Periodic skill discovery review**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-119-T01 — First skill discovery review (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-23: enable the periodic skill review (reviews.skills.days 30, harness v10.4.0); discovery stays periodic, validity on updates is template F-089. |
+| **Reproduce** | npm run check:freshness reports the skills review missing. |
+| **Check** | docs/reviews/skills/<date>.md exists and each candidate has an outcome. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-119-t01"></a>F-119-T01 — First skill discovery review | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-119.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
 ### <a id="f-082"></a>[✨ F-082](#top)
 
 **Lists: add items by chat or Telegram, recall them as a checklist card**
@@ -962,6 +1000,48 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | Opened in [PR #668](https://github.com/voidbrain/nerv/pull/668); F-117-T01 in [PR #669](https://github.com/voidbrain/nerv/pull/669) and the live-move fixes in [PR #670](https://github.com/voidbrain/nerv/pull/670); closed in [PR #671](https://github.com/voidbrain/nerv/pull/671). |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+### <a id="f-118"></a>[✨ F-118](#top)
+
+**Pair a phone once: device sign-in with a 90-day sliding limit**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 8.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-23 (decision 1): the installed phone app (workspace or dashboard) cannot sign in: the sign-in box takes only the admin token, a QR or link opens Safari, and the session lived in tab storage that iOS clears on relaunch. The owner chose pairing: once per device, revocable, lapsing after 90 days unused; plus a QR option. |
+| **Reproduce** | Install the dashboard to the iPhone Home Screen and open it: "NOT SIGNED IN". |
+| **Check** | A short code typed into the installed app pairs it; it stays signed in through restarts and updates; Settings and nerv devices revoke it; a QR pairs browsers in one step. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-118-t01"></a>F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code | 3 h | 0 h | 3 h | Planned | — | [F-118-T02](#f-118-t02), [F-118-T03](#f-118-t03), [F-118-T05](#f-118-t05) |
+| 🟡 Medium | <a id="f-118-t02"></a>F-118-T02 — Workspace and dashboard pair from their own sign-in box; the installed app signs itself in | 2 h | 0 h | 2 h | Planned | [F-118-T01](#f-118-t01) | [F-118-T04](#f-118-t04) |
+| 🟡 Medium | <a id="f-118-t03"></a>F-118-T03 — Paired devices in Settings with Revoke; nerv devices list and revoke | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
+| 🟢 Small | <a id="f-118-t04"></a>F-118-T04 — Phone procedure: Tailscale serve, pairing and push, then the owner check | 0.5 h | 0 h | 0.5 h | Planned | [F-118-T02](#f-118-t02) | — |
+| 🟡 Medium | <a id="f-118-t05"></a>F-118-T05 — Pairing as a QR code: nerv open --phone --qr and Settings → Pair a device | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
+| 🟣 Very large | **Total** | 8.5 h | 0 h (0 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-118.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
 | Opened | 2026-11-23 |
 | Verification | — |
 | Reviewed | 2026-11-23 |
@@ -2115,6 +2195,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |
+
+</details>
+
+---
+### <a id="b-116"></a>[🐞 B-116](#top)
+
+**F-023 notice test fails when a random ID contains a forbidden word**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-116-T01 — F-023 notice test: the forbidden-text regex can match a random ID (Planned).
+
+| | |
+|---|---|
+| **Issue** | PR #684 validate 2026-11-23: "F-023: approval and generic durable inbox notice commit together and survive restart" matched its forbidden-text regex (Private neutral fixture, 2099, grantId, args) against the whole serialized notice, whose random UUID can contain 2099. |
+| **Reproduce** | Rerun the test until a UUID contains 2099 (rare). |
+| **Check** | The assertion checks only the message text; a committed case with a UUID containing 2099 passes. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-116-t01"></a>B-116-T01 — F-023 notice test: the forbidden-text regex can match a random ID | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-116.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
 
 </details>
 

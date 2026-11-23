@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-23T15:49:55.983Z",
+  "reviewed": "2026-11-23T21:47:05.876Z",
   "policy": "7d15ab5f3e1a37d15075876ce3efd53d93600045088f48b41a3ef0dd6ab89e7d",
   "inputs": {
-    "AGENTS.md": "5e9df8d380abec1d861ad5803510024219ccfc13afc970438c63028b27f81873",
+    "AGENTS.md": "e50955592a28ff5022e17b998f28ede5a426b2fc8bea824fe543e3aa084cc8ce",
     "docs/BACKLOG-RULES.md": "91ea3b199cd49385549ac2869304e1cca2de94cad5bcb4f119502b594f00e621",
     "docs/agents/architecture-review.md": "5d967314854912b1a5f1446aeab309763b14f9856bceb3c82df5c6c25c166526",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
@@ -13,7 +13,7 @@
     "docs/agents/maintenance.md": "69f77d944551e4a442de20a0e46badf19a91e42f870bf8048f428c8a64f343a9",
     "docs/agents/mcp.md": "06efbb58a50f9236506ca0afa9a79bb1d42c12ca380a29ed0254bf0a537f860d",
     "docs/agents/parallel-work-plans.md": "d171d89ec5431668ff770e5fcb0098ad518da6289a0d12a56aafdae60930d567",
-    "docs/agents/parallel-work.md": "28608637b73e16f1e1664af8a16047849eea464a14cdaada4d54d7a4094d83ef",
+    "docs/agents/parallel-work.md": "e460a7ef54aa1ce270e9c8d87a8da85680182d2adec3cafbbf7ad0af5b75439c",
     "docs/agents/procedures.md": "d53486efdf0fdb64f4285941b8701e3bec5722671208e17e502b59bfeafc3b17",
     "docs/agents/prompt-caching.md": "3b8962bd4f2f713d5730e999e65338ebdd90347ee09dffbd9c8da98e2405a21e",
     "docs/agents/rule-review.md": "5eb7665d2bf91e3bf8d0778ee39dedd1cd151d2565adfa77e30c8dfeedd84460",
@@ -38,8 +38,8 @@
     "tools/work-usage.mjs": "09569f9b56bd6e403d4c235f980ba5fb03b2aff8fe56a28878cc298fe8a4b2af"
   },
   "measurements": {
-    "samples": 20,
-    "latestAt": "2026-11-23T15:49:55.931Z",
+    "samples": 21,
+    "latestAt": "2026-11-23T21:47:05.819Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -65,24 +65,24 @@
         }
       },
       "reconciliation": {
-        "samples": 20,
+        "samples": 21,
         "durationMs": {
-          "observed": 20,
+          "observed": 21,
           "missing": 0,
-          "median": 263898
+          "median": 286950
         },
         "conflicts": {
-          "observed": 7,
+          "observed": 8,
           "missing": 13,
           "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 3,
+          "observed": 4,
           "missing": 17,
           "median": 0
         },
         "repeatedContextLoads": {
-          "observed": 3,
+          "observed": 4,
           "missing": 17,
           "median": 1
         }
@@ -94,7 +94,7 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "AGENTS.md",
-      "evidence": "F-117-T01 (PRs #669/#670): the live service moved to the install folder ~/.nerv-app on 2026-11-23; the project line now names it, keeps the dev checkout on main with worktrees from origin/main, and notes that a lifecycle install already starts the service. Project line only (<!-- project -->); no template change; no behaviour runner configured."
+      "evidence": "Harness v10.4.0 reconciled from v10.3.0 (template F-088, owner decision for every project): agents land their PRs through the landing queue (AGENTS.md On its own; parallel-work.md Landing queue; claims.md link). Copied check-rules.mjs (v10.3.1 B-048). Enabled reviews.skills.days 30. All project lines kept; no behaviour runner configured."
     }
   ]
 }
