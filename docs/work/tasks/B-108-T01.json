@@ -4,7 +4,7 @@
   "parent": "B-108",
   "title": "Update now runs from a detached helper outside the service",
   "goal": "A manual or scheduled update requested from inside the running service stops, updates and restarts it through the lifecycle",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Failing test first: an update requested from inside a registered, running service is not refused with the stop-first blocker",
     "The helper outlives the service it stops and records a receipt the dashboard reads after restart",
@@ -16,9 +16,15 @@
   ],
   "resources": [
     "src/manual-update.ts",
-    "src/update-policy.ts",
+    "src/updater-job.ts",
     "src/server-update.ts",
+    "src/server.ts",
+    "src/cli.ts",
+    "src/nodes-cli.ts",
+    "src/update-scheduler.ts",
+    "web/public/dashboard/live.js",
     "test/manual-update.test.ts",
+    "test/updater-job.test.ts",
     "docs/work/records/B-108.md",
     "generated:backlog-views"
   ],
@@ -36,11 +42,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h agent",
-    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
+    "estimate": "0.25 h agent",
+    "basis": "Implemented 2026-11-23; live Update now on NERV-01 remains.",
     "reviewed": "2026-11-23",
-    "agentHours": 1.5,
+    "agentHours": 0.25,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 1.5
+    "estimateAgentHours": 0.25
   }
 }

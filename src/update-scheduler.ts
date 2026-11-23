@@ -187,6 +187,10 @@ export function resultText(
         ? `✅ Aggiornamento ${rev} applicato${parts.length ? `: ${parts.join(', ')}` : ''}.`
         : `✅ Update ${rev} applied${parts.length ? `: ${parts.join(', ')}` : ''}.`;
     }
+    case 'started':
+      return it
+        ? `🔄 Aggiornamento ${rev} avviato: NERV si ferma, si aggiorna e riparte; il risultato arriva quando è di nuovo attivo.`
+        : `🔄 Update ${rev} started: NERV stops, updates and starts again; the result follows once it is back.`;
     case 'refused': {
       const next = nextApplyAt ? when(nextApplyAt, timeZone, language) : undefined;
       return it

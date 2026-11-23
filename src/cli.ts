@@ -74,9 +74,11 @@ import {
   macServiceHost,
   windowsServiceHost,
   type ServiceHost,
+  command as runCommand,
 } from './node-lifecycle-execution.ts';
 import { ROOT_KEY_FILE, baseKey, createRootKey, fingerprint } from './kaji.ts';
 import { service } from './service.ts';
+import { startUpdaterJob } from './updater-job.ts';
 import { serviceMove } from './install-move-cli.ts';
 import { initializeNativeTLS, loadNativeTLS, nativeAdmin, NativeAuth, type Invitation } from './native-auth.ts';
 import { Runtime, type ChatReply } from './runtime.ts';
@@ -599,6 +601,13 @@ try {
             ...config,
             onStop: () => close(),
             lifecycleHost: localServiceHost,
+            // B-108: Update now and the scheduled apply hand the update to its own OS job outside this service.
+            startUpdater: async (input) => {
+              await startUpdaterJob(localServiceHost().context, input, async (program, args) => {
+                const r = await runCommand(program, args);
+                return { status: r.status, err: r.err };
+              });
+            },
             readUpdatePolicy: () => readConfig(home).updatePolicy ?? defaultAutoUpdatePolicy(),
             saveUpdatePolicy: (policy) => setUpdatePolicy(home, policy),
             exposeUpdateControl: (control) => {

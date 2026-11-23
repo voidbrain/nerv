@@ -520,7 +520,7 @@
       ? "<div class='row small' style='margin-top:6px'><span class='muted'>Update ready (" + esc(short(u.availableRevision)) + " · " + esc(u.channel || "main") + ")</span><button class='btn sm' id='btn-apply-update'" + (state.manualUpdateBusy ? " disabled" : "") + ">" + (state.manualUpdateBusy ? "Applying…" : "Apply update") + "</button></div>"
       : "";
     const updateResultHtml = mu
-      ? "<div class='small " + (mu.outcome === "completed" ? "ok" : mu.outcome === "refused" ? "warn" : "danger") + "' style='margin-top:6px'>" +
+      ? "<div class='small " + (mu.outcome === "completed" || mu.outcome === "started" ? "ok" : mu.outcome === "refused" ? "warn" : "danger") + "' style='margin-top:6px'>" +
         "<div><strong>Manual update " + esc(mu.outcome) + "</strong>" + (mu.revision ? " · " + esc(mu.revision.slice(0, 7)) : "") + (mu.planDigest ? " · plan " + esc(mu.planDigest.slice(0, 7)) : "") + "</div>" +
         ((mu.reasons || []).length ? "<ul style='margin:4px 0 0 16px;padding:0'>" + mu.reasons.map(r => "<li>" + esc(r) + "</li>").join("") + "</ul>" : "") +
         ((mu.recovery || []).length ? "<div class='muted' style='margin-top:4px'>Recovery:<ol style='margin:2px 0 0 16px;padding:0'>" + mu.recovery.map(s => "<li>" + esc(s) + "</li>").join("") + "</ol></div>" : "") +
@@ -535,7 +535,7 @@
       (sch.mode === "notify" ? "notify only" : "applied " + pad2(sch.applyHour) + ":00 unless you say wait");
     const policyHtml = up
       ? "<div class='row small' style='margin-top:6px'><label for='chk-auto-update' class='muted'>" + esc(policyLabel) + "</label><input type='checkbox' id='chk-auto-update'" + (up.enabled ? " checked" : "") + (state.updatePolicyBusy ? " disabled" : "") + "></div>" +
-        (la ? "<div class='small " + (la.outcome === "completed" ? "ok" : la.outcome === "refused" ? "warn" : "muted") + "'>Last automatic attempt: " + esc(la.outcome) + (la.revision ? " · " + esc(la.revision.slice(0, 7)) : "") + ((la.reasons || []).length ? " · " + esc(la.reasons.join("; ")) : "") + "</div>" : "")
+        (la ? "<div class='small " + (la.outcome === "completed" || la.outcome === "started" ? "ok" : la.outcome === "refused" ? "warn" : "muted") + "'>Last automatic attempt: " + esc(la.outcome) + (la.revision ? " · " + esc(la.revision.slice(0, 7)) : "") + ((la.reasons || []).length ? " · " + esc(la.reasons.join("; ")) : "") + "</div>" : "")
       : "";
     const hm = state.healthMetrics;
     const sampleHtml = hm && hm.latestSample

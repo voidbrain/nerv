@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 77.75 h agent + 11 h owner across 93 open steps of 34 features and 14 other records. 89.25 h of actual effort recorded on 114 steps. Generated from the task files.
+**Remaining effort:** 77.5 h agent + 11 h owner across 94 open steps of 34 features and 14 other records. 89.25 h of actual effort recorded on 114 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -753,9 +753,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-102-T04](#f-102-t04), [F-117-T02](#f-117-t02) | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.25 h | — | [F-102-T04](#f-102-t04), [F-117-T02](#f-117-t02) | 🤖 | — | — |
 
-💻 **→** Next: B-108-T01 — Update now runs from a detached helper outside the service (Planned).
+💻 **→** Next: B-108-T01 — Update now runs from a detached helper outside the service (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -767,8 +767,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-108-t01"></a>B-108-T01 — Update now runs from a detached helper outside the service | 1.5 h | 0 h | 1.5 h | Planned | — | [F-102-T04](#f-102-t04), [F-117-T02](#f-117-t02) |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | |
+| 🟢 Small | <a id="b-108-t01"></a>B-108-T01 — Update now runs from a detached helper outside the service | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | — | [B-108-T02](#b-108-t02), [F-102-T04](#f-102-t04), [F-117-T02](#f-117-t02) |
+| 🟢 Small | <a id="b-108-t02"></a>B-108-T02 — The restarted service reports the updater result in the inbox and on the dashboard | 1 h | 0 h | 1 h | Planned | [B-108-T01](#b-108-t01) | [F-102-T04](#f-102-t04) |
+| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 2 steps recorded) | 1.25 h | 0 of 2 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -777,7 +778,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #668](https://github.com/voidbrain/nerv/pull/668). |
+| PR / evidence | Opened in [PR #668](https://github.com/voidbrain/nerv/pull/668); B-108-T01 in [PR #672](https://github.com/voidbrain/nerv/pull/672). |
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: `nerv nodes lifecycle-inspect --action update` on NERV-01 with the service running listed "Stop the selected service and descendants first." |
 | Reviewed | 2026-11-23 |
@@ -791,7 +792,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [B-108-T01](#b-108-t01) | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | [B-108-T01](#b-108-t01), [B-108-T02](#b-108-t02) | — | 🤖 | — | — |
 
 💻 **→** Next: F-102-T03 — Apply at the announced time and report (Implemented; verification pending).
 
@@ -806,7 +807,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-102-t03"></a>F-102-T03 — Apply at the announced time and report | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | — | [F-102-T04](#f-102-t04) | 🤖 | [PR #577](https://github.com/voidbrain/nerv/pull/577) implementation |
-| 🟢 Small | <a id="f-102-t04"></a>F-102-T04 — Live check: one automatic update | 0.25 h | 0 h | 0.25 h | Planned | [F-102-T03](#f-102-t03), [B-108-T01](#b-108-t01) | — | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-102-t04"></a>F-102-T04 — Live check: one automatic update | 0.25 h | 0 h | 0.25 h | Planned | [F-102-T03](#f-102-t03), [B-108-T01](#b-108-t01), [B-108-T02](#b-108-t02) | — | ⏳ 🤖 | — |
 | 🟢 Small | **Total** | 1.75 h | 0 h (0 of 4 steps recorded) | 1 h | 2 of 4 completed | | | | |
 
 <details><summary>Done steps (2)</summary>
