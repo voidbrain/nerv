@@ -64,13 +64,14 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
         .run('reconciled', t);
       standby.close();
 
+      const drainTo = { baseId: 'NERV-01', coordinatorEpoch: 2, newMainBaseId: 'NERV-02', newEpoch: 3 };
       // Without a drain receipt or horizon, a reachable old main blocks promotion.
       const early: RelocationLiveness = {
         kind: 'unplanned',
         lastAckMs: 1_000,
         epochSeenAtMs: 1_000,
         allUnrevokedAckedNewEpoch: true,
-        oldHostDownConfirmed: false,
+        oldHostDownConfirmed: true,
         nowMs: 1_000 + RELOCATION_HORIZON_ACKED_MS - 1,
       };
       const base = {
@@ -87,7 +88,7 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
       setState(oldMain.db, 2, 'active', 8, 'digest-8');
       const ahead = signDrainReceipt(
         oldKey.privateKey,
-        drainCoordinator(oldMain.db, { baseId: 'NERV-01', coordinatorEpoch: 2, nowMs: 5 }),
+        drainCoordinator(oldMain.db, { ...drainTo, nowMs: 5 }),
       );
       refusal(
         () =>
@@ -100,13 +101,15 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
 
       // Planned: old main drains at seq 7; the old main is fenced and refuses effects.
       setState(oldMain.db, 2, 'active', 7, 'digest-7');
-      const receipt = drainCoordinator(oldMain.db, { baseId: 'NERV-01', coordinatorEpoch: 2, nowMs: 10 });
+      const receipt = drainCoordinator(oldMain.db, { ...drainTo, nowMs: 10 });
       assert.deepEqual(receipt, {
         baseId: 'NERV-01',
         coordinatorEpoch: 2,
         finalSeq: 7,
         stateDigest: 'digest-7',
         leaseRevokedAt: 10,
+        newMainBaseId: 'NERV-02',
+        newEpoch: 3,
       });
       assert.equal(readCoordinatorFencingState(oldMain.db)?.replicationMode, 'fenced');
       assert.throws(() => oldMain.assertActiveCoordinator(), /fenced mode/);
@@ -179,7 +182,9 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
 
     setState(empty.db, 2, 'standby', 7, 'digest-7');
     refusal(() => check(empty.db, { baseId: 'NERV-01', coordinatorEpoch: 3 }), 'not_named_main');
-    refusal(() => check(empty.db, { baseId: 'NERV-02', coordinatorEpoch: 4 }), 'epoch_not_next');
+    // A re-targeted relocation (epoch 4 signed while epoch 3 never activated) takes over epoch 2.
+    assert.equal(check(empty.db, { baseId: 'NERV-02', coordinatorEpoch: 4 }).previousEpoch, 2);
+    refusal(() => check(empty.db, { baseId: 'NERV-02', coordinatorEpoch: 2 }), 'epoch_not_next');
     assert.equal(check(empty.db).newEpoch, 3);
 
     // Unplanned without ack history needs the owner's confirmation and the conservative wait.
@@ -346,10 +351,150 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
       const signed = JSON.parse(readFileSync(receiptPath, 'utf8')) as SignedDrainReceipt;
       assert.equal(signed.receipt.baseId, 'NERV-01');
       assert.equal(signed.receipt.finalSeq, 4);
+      assert.equal(signed.receipt.newMainBaseId, 'NERV-02');
+      assert.equal(signed.receipt.newEpoch, 3);
       assert.equal(store.coordinatorFencingState()?.replicationMode, 'fenced');
       store.close();
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+  it('re-targets a pending relocation: relocate B then C, C promotes from the epoch that actually last ran (SHOULD-FIX 3)', () => {
+    const oldKey = generateKeyPairSync('ed25519');
+    const oldMain = new Store(':memory:');
+    setState(oldMain.db, 2, 'active', 7, 'digest-7');
+    const standby = new Store(':memory:');
+    setState(standby.db, 2, 'standby', 7, 'digest-7');
+    // The owner signed NERV-02 at epoch 3, which never promoted, then NERV-03 at epoch 4.
+    const drain = signDrainReceipt(
+      oldKey.privateKey,
+      drainCoordinator(oldMain.db, { baseId: 'NERV-01', coordinatorEpoch: 2, newMainBaseId: 'NERV-03', newEpoch: 4 }),
+    );
+    const ready = checkRelocationReadiness({
+      candidateDb: standby.db,
+      selfBaseId: 'NERV-03',
+      previousMainBaseId: 'NERV-01',
+      registryMain: { baseId: 'NERV-03', coordinatorEpoch: 4 },
+      liveness: { kind: 'planned', drain, oldMainPublicKey: oldKey.publicKey },
+    });
+    assert.deepEqual([ready.previousEpoch, ready.newEpoch], [2, 4]);
+    // A receipt whose epoch is not the standby's is refused, never assumed to be newEpoch - 1.
+    setState(standby.db, 3, 'standby', 7, 'digest-7');
+    refusal(
+      () =>
+        checkRelocationReadiness({
+          candidateDb: standby.db,
+          selfBaseId: 'NERV-03',
+          previousMainBaseId: 'NERV-01',
+          registryMain: { baseId: 'NERV-03', coordinatorEpoch: 4 },
+          liveness: { kind: 'planned', drain, oldMainPublicKey: oldKey.publicKey },
+        }),
+      'drain_receipt_invalid',
+    );
+  });
+
+  it('binds the signed drain receipt to the new main and epoch (SHOULD-FIX 4)', () => {
+    const oldKey = generateKeyPairSync('ed25519');
+    const oldMain = new Store(':memory:');
+    setState(oldMain.db, 2, 'active', 7, 'digest-7');
+    const standby = new Store(':memory:');
+    setState(standby.db, 2, 'standby', 7, 'digest-7');
+    // Drained for NERV-02 at epoch 3: NERV-03, later named main at epoch 4, cannot reuse it.
+    const drain = signDrainReceipt(
+      oldKey.privateKey,
+      drainCoordinator(oldMain.db, { baseId: 'NERV-01', coordinatorEpoch: 2, newMainBaseId: 'NERV-02', newEpoch: 3 }),
+    );
+    assert.equal(drain.receipt.newMainBaseId, 'NERV-02');
+    const check = (selfBaseId: string, coordinatorEpoch: number) =>
+      checkRelocationReadiness({
+        candidateDb: standby.db,
+        selfBaseId,
+        previousMainBaseId: 'NERV-01',
+        registryMain: { baseId: selfBaseId, coordinatorEpoch },
+        liveness: { kind: 'planned', drain, oldMainPublicKey: oldKey.publicKey },
+      });
+    refusal(() => check('NERV-03', 4), 'drain_receipt_invalid');
+    refusal(() => check('NERV-02', 4), 'drain_receipt_invalid');
+    const tampered: SignedDrainReceipt = { ...drain, receipt: { ...drain.receipt, newMainBaseId: 'NERV-03' } };
+    refusal(
+      () =>
+        checkRelocationReadiness({
+          candidateDb: standby.db,
+          selfBaseId: 'NERV-03',
+          previousMainBaseId: 'NERV-01',
+          registryMain: { baseId: 'NERV-03', coordinatorEpoch: 3 },
+          liveness: { kind: 'planned', drain: tampered, oldMainPublicKey: oldKey.publicKey },
+        }),
+      'drain_receipt_invalid',
+    );
+    assert.equal(check('NERV-02', 3).newEpoch, 3);
+  });
+
+  it('arms the sole-coordinator lease in the activation transaction, so a crash after it leaves no lease-0 base (SHOULD-FIX 5)', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-reloc-crash-'));
+    try {
+      const mainPath = join(dir, 'nerv.sqlite');
+      const standbyPath = join(dir, 'coordinator-standby.sqlite');
+      new Store(mainPath).close();
+      const standby = new Store(standbyPath);
+      setState(standby.db, 2, 'standby', 7, 'digest-7');
+      standby.close();
+      const nowMs = Date.now();
+      assert.throws(
+        () =>
+          Store.relocateCoordinator({
+            mainDbPath: mainPath,
+            standbyDbPath: standbyPath,
+            selfBaseId: 'NERV-02',
+            previousMainBaseId: 'NERV-01',
+            registryMain: { baseId: 'NERV-02', coordinatorEpoch: 3 },
+            soleCoordinator: true,
+            nowMs,
+            failAfterStep: 5,
+            liveness: {
+              kind: 'unplanned',
+              epochSeenAtMs: 0,
+              allUnrevokedAckedNewEpoch: false,
+              oldHostDownConfirmed: true,
+              nowMs: RELOCATION_HORIZON_CONSERVATIVE_MS,
+            },
+          }),
+        /Injected crash after step 5/,
+      );
+      const promoted = new DatabaseSync(mainPath);
+      try {
+        const st = readCoordinatorFencingState(promoted);
+        assert.equal(st?.replicationMode, 'active');
+        assert.equal(st?.coordinatorEpoch, 3);
+        assert.ok((st?.leaseExpiresAt ?? 0) > nowMs, 'the lease is armed in the same commit as the activation');
+      } finally {
+        promoted.close();
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('never promotes on an unplanned move from the wait alone: the old host must be confirmed down or revoked (BLOCKER 1 interim)', () => {
+    const standby = new Store(':memory:');
+    setState(standby.db, 2, 'standby', 7, 'digest-7');
+    const check = (oldHostDownConfirmed: boolean) =>
+      checkRelocationReadiness({
+        candidateDb: standby.db,
+        selfBaseId: 'NERV-02',
+        previousMainBaseId: 'NERV-01',
+        registryMain: { baseId: 'NERV-02', coordinatorEpoch: 3 },
+        liveness: {
+          kind: 'unplanned',
+          lastAckMs: 1_000,
+          epochSeenAtMs: 1_000,
+          allUnrevokedAckedNewEpoch: true,
+          oldHostDownConfirmed,
+          // Far past both horizons: the wait alone does not bound an old main whose lease never expires.
+          nowMs: 1_000 + 10 * RELOCATION_HORIZON_CONSERVATIVE_MS,
+        },
+      });
+    refusal(() => check(false), 'old_host_unconfirmed');
+    assert.equal(check(true).newEpoch, 3);
   });
 });
