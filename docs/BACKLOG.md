@@ -2480,7 +2480,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #682](https://github.com/voidbrain/nerv/pull/682) |
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: `node --test test/dashboard.test.ts` 51/51. |
 | Reviewed | 2026-11-23 |
