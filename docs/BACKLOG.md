@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 1 | 1 | 3 | 1 |
+| **This week** | 1 | 1 | 4 | 1 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 15 |
+| **Open** | 35 | 16 |
 | **Require Human 🧑** | 11 | 7 |
 
 ### Require Human 🧑
@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 72.25 h agent + 11 h owner across 95 open steps of 34 features and 15 other records. 92.75 h of actual effort recorded on 117 steps. Generated from the task files.
+**Remaining effort:** 72.5 h agent + 11 h owner across 96 open steps of 34 features and 16 other records. 92.75 h of actual effort recorded on 117 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -834,13 +834,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-111"></a>[🐞 B-111](#top)
+
+**The live service never records health samples: "No health samples yet" forever**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | [F-103-T04](#f-103-t04) | 🤖 | — | — |
+
+💻 **→** Next: B-111-T01 — Record health samples in serve, where the server is given a Runtime (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-23 ("why No health samples yet?"): `health_samples` on NERV-01 held 0 rows since F-103-T01 shipped (2026-11-16). `serve` hands `makeServer` a `Runtime`, whose store lives in the nervous process and which has no `db`, so `startLocalHealthSampler` never started. F-103-T01 was tested with a `Store` only; the join was never exercised. |
+| **Reproduce** | Run `nerv serve`; after minutes `/api/health/metrics` still has `latestSample: null`. |
+| **Check** | Test committed failing first (`test/health-sampler-runtime.test.ts`): a server given a real `Runtime`, as `serve` does, records samples that `/api/health/metrics` returns. A failing sample is skipped, never fatal. The live dashboard shows a Service sample after the update. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-111-t01"></a>B-111-T01 — Record health samples in serve, where the server is given a Runtime | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | — | [F-103-T04](#f-103-t04) |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-111.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #681](https://github.com/voidbrain/nerv/pull/681) |
+| Opened | 2026-11-23 |
+| Verification | 2026-11-23: `node --test test/health-sampler-runtime.test.ts` and the health suites 6/6; live `health_samples` count 0 before the fix. |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
 ### <a id="f-103"></a>[✨ F-103](#top)
 
 **Service health and link load between bases, measured**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h | [B-111-T01](#b-111-t01) | — | 🤖 | — | — |
 
 💻 **→** Next: F-103-T02 — Per-link load between bases (Implemented; verification pending).
 
@@ -852,11 +890,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-103-t02"></a>F-103-T02 — Per-link load between bases | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [PR #589](https://github.com/voidbrain/nerv/pull/589) implementation |
-| 🟢 Small | <a id="f-103-t04"></a>F-103-T04 — 24-hour baseline with both bases | 0.25 h | 0 h | 0.25 h | Planned | — |
-| 🟡 Medium | **Total** | 4.75 h | 0 h (0 of 4 steps recorded) | 1.75 h | 2 of 4 completed | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-103-t02"></a>F-103-T02 — Per-link load between bases | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | — | [PR #589](https://github.com/voidbrain/nerv/pull/589) implementation |
+| 🟢 Small | <a id="f-103-t04"></a>F-103-T04 — 24-hour baseline with both bases | 0.25 h | 0 h | 0.25 h | Planned | [B-111-T01](#b-111-t01) | — | — |
+| 🟡 Medium | **Total** | 4.75 h | 0 h (0 of 4 steps recorded) | 1.75 h | 2 of 4 completed | | | |
 
 <details><summary>Done steps (2)</summary>
 
