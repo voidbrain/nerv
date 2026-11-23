@@ -864,7 +864,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #681](https://github.com/voidbrain/nerv/pull/681) |
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: `node --test test/health-sampler-runtime.test.ts` and the health suites 6/6; live `health_samples` count 0 before the fix. |
 | Reviewed | 2026-11-23 |
