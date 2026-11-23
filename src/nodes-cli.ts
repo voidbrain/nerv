@@ -31,6 +31,7 @@ import {
   serviceReceipt,
   releaseObservedService,
   recoverServiceUpdate,
+  command as runCommand,
 } from './node-lifecycle-execution.ts';
 import { dataHome, readConfig, readToken } from './config.ts';
 import { rehearseUpgrade } from './upgrade-rehearsal.ts';
@@ -137,6 +138,19 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
             checkUpdateAvailability({ channel, offline: !refresh, runningRevision: null }),
           lifecycleHost: () => host,
           stopFirst: true,
+          // The lifecycle admits only a commit the install folder can read; never prompt for credentials.
+          fetchRevision: async (revision) => {
+            const r = await runCommand(
+              'git',
+              ['-C', host.context.source, 'fetch', '--no-tags', 'origin', revision],
+              undefined,
+              120000,
+              {
+                GIT_TERMINAL_PROMPT: '0',
+              },
+            );
+            if (r.status !== 0) throw Error((r.err || r.out).trim() || 'git fetch failed');
+          },
         },
         { revision: required('revision'), ...(values.has('channel') ? { channel: values.get('channel')! } : {}) },
       );
