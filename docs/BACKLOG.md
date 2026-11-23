@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 1 | 1 | 4 | 1 |
+| **This week** | 1 | 1 | 5 | 1 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 16 |
-| **Require Human 🧑** | 11 | 7 |
+| **Open** | 35 | 17 |
+| **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
 
@@ -28,13 +28,13 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-086](#f-086) |  | [B-096](#b-096) |  |
 | [F-087](#f-087) |  | [B-106](#b-106) |  |
 | [F-092](#f-092) |  | [B-110](#b-110) |  |
-| [F-060](#f-060) |  |  |  |
+| [F-060](#f-060) |  | [B-112](#b-112) |  |
 | [F-007](#f-007) |  |  |  |
 | [F-100](#f-100) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.5 h agent + 11 h owner across 96 open steps of 34 features and 16 other records. 94.25 h of actual effort recorded on 118 steps. Generated from the task files.
+**Remaining effort:** 70.75 h agent + 11 h owner across 97 open steps of 34 features and 17 other records. 94.25 h of actual effort recorded on 118 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2521,6 +2521,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #680](https://github.com/voidbrain/nerv/pull/680) |
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: `node --test test/manual-update.test.ts test/dashboard.test.ts` 58/58. |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+### <a id="b-112"></a>[🐞 B-112](#top)
+
+**Sephirot flow lights routes the sortie did not take and hides the map when no sortie is selected**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update, open a few sorties (S-6AD9, one answered without an action, one that asked you something) and deselect: check the routes below.
+
+| | |
+|---|---|
+| **Issue** | Owner review 2026-11-23 of S-6AD9: Detection → Naoko Desk, Naoko Desk → Gendo and Detection → Gendo all lit, because an edge lit whenever both its nodes ran (Sync Ratio → Entry Plug likewise lit beside Sync Ratio → Misato's Apt → Entry Plug). The Misato → Debrief answer route was drawn at the start of every sortie (no actions yet). Deselecting hid only the conditional routes, and the three loops back to Misato never lit. |
+| **Reproduce** | Select S-6AD9 (or any sortie through Naoko Desk); start a new sortie; deselect. |
+| **Check** | Tests committed failing first (`test/dashboard.test.ts`, B-112): a shortcut lights only when the step it bypasses did not run; the answer route appears once Misato planned with no action; with no sortie every route is drawn, conditional ones as `cond` (dashed, dimmed); MAGI → Misato lights after a rejection Misato planned past, Misato's Apt → Misato after your answer or an approval followed by another step, EVA Cage → Misato when a result led to a next step. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-112-t01"></a>B-112-T01 — Sephirot: routes light only when taken; answer route after planning; full map; loops when taken | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-112.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #682](https://github.com/voidbrain/nerv/pull/682) |
+| Opened | 2026-11-23 |
+| Verification | 2026-11-23: `node --test test/dashboard.test.ts` 51/51. |
 | Reviewed | 2026-11-23 |
 
 </details>
