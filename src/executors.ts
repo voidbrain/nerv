@@ -19,6 +19,8 @@ import { STAGES, applyPilotToolChange, mergePilots, nextStage, splitPilot, updat
 import { reconcileReminderArgs } from './reminder-time.ts';
 import { explainRecord, type WhyRecord } from './why.ts';
 import { OFFER_NAME, descriptorVersion, type ToolDescriptor } from './mcp.ts';
+import { builtinPackRegistry } from './packs.ts';
+import { TOOL_SUBJECT_SUMMARIES, subjectDocs } from './tool-index.ts';
 export interface AgencyBaseSnapshot {
   baseId: string;
   name: string;
@@ -104,6 +106,8 @@ export const builtinTools: Tool[] = [
   { name: 'sorties.explain', effect: 'read' },
   { name: 'approvals.list', effect: 'read' },
   { name: 'agency.status', effect: 'read' },
+  // F-113-T02: one subject's full tool docs for the planner; reads the static catalogue only.
+  { name: 'tools.read', effect: 'read' },
   // Only the brief and Instrumentality schedules: local, reversible by setting the previous values back.
   { name: 'settings.schedule', effect: 'write-local', inverse: 'settings.schedule' },
   // F-045: a new pilot, stage promotion, split/merge, or tool change only after the owner approves its card.
@@ -204,6 +208,7 @@ export const BUILTIN_TOOL_SUBJECTS: Readonly<Record<string, ToolSubject>> = {
   'sorties.explain': 'agency',
   'approvals.list': 'agency',
   'agency.status': 'agency',
+  'tools.read': 'agency',
   'settings.schedule': 'agency',
   'kaji.run': 'agency',
   'desktop.replay': 'agency',
@@ -408,6 +413,12 @@ const rawToolDocs: ToolDoc[] = [
     args: '{"base"?: base id or name}',
   },
   {
+    name: 'tools.read',
+    effect: 'read',
+    about: "Returns the full docs (arguments and results) of one subject's tools, so you can call them correctly.",
+    args: `{"subject": one of ${Object.keys(TOOL_SUBJECT_SUMMARIES).join(', ')}}`,
+  },
+  {
     name: 'settings.schedule',
     effect: 'write-local',
     about:
@@ -538,6 +549,7 @@ export const READ_TOOL_RESULT_SHAPES: Record<string, ResultShape> = {
   'sorties.explain': { kind: 'object', required: {} },
   'approvals.list': { kind: 'object', required: { approvals: 'array', questions: 'array' } },
   'agency.status': { kind: 'object', required: { health: 'object' } },
+  'tools.read': { kind: 'object', required: { subject: 'string', tools: 'array' } },
   'lists.show': { kind: 'object', required: {} },
   'gmail.search': { kind: 'object', required: { tainted: 'boolean', query: 'string', messages: 'array' } },
   'gmail.read': { kind: 'object', required: { tainted: 'boolean', id: 'string', subject: 'string', body: 'string' } },
@@ -731,6 +743,23 @@ function executeRaw(
         expires: q.expires,
       }));
       return { approvals, questions };
+    }
+    case 'tools.read': {
+      only(args, ['subject']);
+      const subject = text(args, 'subject').trim();
+      if (!(subject in TOOL_SUBJECT_SUMMARIES))
+        throw new Error(`subject must be one of: ${Object.keys(TOOL_SUBJECT_SUMMARIES).join(', ')}.`);
+      const packs = backend.home ? readConfig(backend.home).packs : undefined;
+      return {
+        subject,
+        tools: subjectDocs(builtinPackRegistry.filterToolDocs(toolDocs, packs), subject).map((d) => ({
+          name: d.name,
+          effect: d.effect,
+          about: d.about,
+          args: d.args,
+          ...(d.returns ? { returns: d.returns } : {}),
+        })),
+      };
     }
     case 'agency.status': {
       only(args, ['base']);

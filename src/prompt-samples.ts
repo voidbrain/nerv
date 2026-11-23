@@ -1,6 +1,7 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { formatToolDoc, type ToolDoc } from './misato.ts';
 import type { RouteName } from './model.ts';
+import { formatSubjectLine, type SubjectIndexEntry } from './tool-index.ts';
 
 export interface PromptMetrics {
   readonly route: RouteName;
@@ -55,9 +56,12 @@ export function estimateTokens(text: string): number {
 export function measureMisatoPrompt(
   ask: { readonly route?: RouteName; readonly prompt: string; readonly system?: string },
   tools: readonly ToolDoc[],
+  subjects: readonly SubjectIndexEntry[] = [],
 ): PromptMetrics {
   const systemText = ask.system ?? '';
-  const toolSchemaChars = tools.reduce((sum, t) => sum + formatToolDoc(t).length + 1, 0);
+  const toolSchemaChars =
+    tools.reduce((sum, t) => sum + formatToolDoc(t).length + 1, 0) +
+    subjects.reduce((sum, s) => sum + formatSubjectLine(s).length + 1, 0);
   const totalChars = systemText.length + ask.prompt.length;
   const promptTokens = Math.max(1, estimateTokens(systemText) + estimateTokens(ask.prompt));
   const toolSchemaTokens = Math.min(promptTokens, Math.ceil(toolSchemaChars / 4));

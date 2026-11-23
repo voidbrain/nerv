@@ -1,5 +1,6 @@
 import { readConfig, readScrolls } from './config.ts';
 import { toolDocs } from './executors.ts';
+import { TOOL_INDEX_READ, freeReadTurns } from './tool-index.ts';
 import { builtinPackRegistry } from './packs.ts';
 import { argsHash } from './ledger.ts';
 import {
@@ -172,7 +173,7 @@ export class RuntimePlanning {
       );
     const ranSteps = () =>
       steps
-        .filter((s) => s.outcome === 'grant' && !s.error && s.tool)
+        .filter((s) => s.outcome === 'grant' && !s.error && s.tool && s.tool !== TOOL_INDEX_READ)
         .map((s) => ({ tool: s.tool!, args: s.args ?? {} }));
     // F-025: a consultant's advice, once per request before the first step (not again on a resume); no vote, no action.
     // F-042: the consultant is not asked for questions about the agency itself; pilots, consultant, and Misato get enrolled base names as data (B-012).
@@ -312,7 +313,8 @@ export class RuntimePlanning {
       void this.host.proposePilot(unmatched).catch(() => {
         /* best effort */
       });
-    for (let turn = 0; turn < MAX_STEPS; turn++) {
+    // F-113-T02: reading a subject's tool docs costs no action step, up to MAX_FREE_SUBJECT_READS per request.
+    for (let turn = 0; turn < MAX_STEPS + freeReadTurns(steps); turn++) {
       if (proactive && !(await this.host.nervous.call('watch.plan', { sortieId }).catch(() => false))) break;
       const remote = proactive?.readOnly ? [] : await this.host.remoteOffers();
       const ext = proactive?.readOnly
@@ -608,6 +610,21 @@ export class RuntimePlanning {
           );
           continue;
         }
+      }
+      // F-113-T02: a subject read twice is not a finished job; its docs are already in the planner's instructions.
+      if (
+        tool === TOOL_INDEX_READ &&
+        steps.some(
+          (s) => s.tool === tool && s.outcome === 'grant' && !s.error && argsHash(s.args ?? {}) === argsHash(args),
+        )
+      ) {
+        await this.host.record(sortieId, steps, {
+          tool,
+          args,
+          outcome: 'invalid',
+          error: 'You already read this subject: its tools are listed in full in your instructions. Use them now.',
+        });
+        continue;
       }
       // The same action already ran in this sortie: running it again is never the owner's wish (a small model loops here).
       if (
