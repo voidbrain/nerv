@@ -40,6 +40,7 @@ import {
   type Turn,
 } from './misato.ts';
 import { toolDocs } from './executors.ts';
+import { compactToolCatalogue } from './tool-index.ts';
 import { builtinPackRegistry } from './packs.ts';
 import { digestAsk, factLimit, parseDigest, type Exchange } from './instrumentality.ts';
 import { measureMisatoPrompt } from './prompt-samples.ts';
@@ -196,7 +197,7 @@ process.on('message', (value: unknown) => {
           history: params.history as Step[],
           context: params.context as Turn[] | undefined,
         });
-        const tools = filterToolsByIntent(
+        const offered = filterToolsByIntent(
           [
             ...builtinPackRegistry
               .filterToolDocs(toolDocs, readConfig(home).packs)
@@ -206,12 +207,15 @@ process.on('message', (value: unknown) => {
           ],
           domains,
         );
+        // F-113-T02: subjects the planner has not read yet go in as one line each; tools.read returns their docs.
+        const { tools, index: subjects } = compactToolCatalogue(offered, params.history as Step[]);
         const ask = misatoAsk(
           {
             ...(params.clarification === true ? { clarification: true } : {}),
             request: params.request as string,
             history: params.history as Step[],
             tools,
+            ...(subjects.length ? { subjects } : {}),
             now: new Date().toISOString(),
             timeZone,
             ...(params.context ? { context: params.context as Turn[] } : {}),
@@ -224,7 +228,7 @@ process.on('message', (value: unknown) => {
           },
           route,
         );
-        const promptMetrics = measureMisatoPrompt(ask, tools);
+        const promptMetrics = measureMisatoPrompt(ask, tools, subjects);
         try {
           const on =
             proactive && proactive.model && models.local
