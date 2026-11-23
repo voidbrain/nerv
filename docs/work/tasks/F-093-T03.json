@@ -4,7 +4,7 @@
   "parent": "F-093",
   "title": "Shared adapter for F-012 and F-092",
   "goal": "The same adapter serves the editor resume (F-012-T03) and replay preconditions (F-092)",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "F-012-T03 and F-092-T03 can use it without a second desktop path"
   ],
@@ -34,8 +34,10 @@
     "estimate": "1 h",
     "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
   }
 }
