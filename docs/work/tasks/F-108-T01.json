@@ -4,7 +4,7 @@
   "parent": "F-108",
   "title": "Flow header shows only the sortie code; cage status on its own line",
   "goal": "Header shows the code; every cage shows its status on a second line",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Tests on header and cage markup",
     "Owner confirms on the live dashboard"
@@ -33,9 +33,9 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
+    "estimate": "0 remaining",
     "basis": "Estimated 2026-11-18. Not a measurement.",
-    "reviewed": "2026-11-18",
+    "reviewed": "2026-11-23",
     "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5,

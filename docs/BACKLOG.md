@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 0 | 0 | 1 | 0 |
+| **This week** | 1 | 1 | 2 | 1 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 35 | 14 |
-| **Require Human 🧑** | 12 | 7 |
+| **Require Human 🧑** | 11 | 6 |
 
 ### Require Human 🧑
 
@@ -25,17 +25,16 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-011](#f-011) |  | [B-068](#b-068) |  |
 | [F-004](#f-004) |  | [B-107](#b-107) |  |
 | [F-012](#f-012) |  | [B-056](#b-056) |  |
-| [F-086](#f-086) |  | [B-095](#b-095) |  |
-| [F-087](#f-087) |  | [B-096](#b-096) |  |
-| [F-092](#f-092) |  | [B-106](#b-106) |  |
-| [F-108](#f-108) |  |  |  |
+| [F-086](#f-086) |  | [B-096](#b-096) |  |
+| [F-087](#f-087) |  | [B-106](#b-106) |  |
+| [F-092](#f-092) |  |  |  |
 | [F-060](#f-060) |  |  |  |
 | [F-007](#f-007) |  |  |  |
 | [F-100](#f-100) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 72.75 h agent + 10.75 h owner across 94 open steps of 34 features and 14 other records. 79.25 h of actual effort recorded on 112 steps. Generated from the task files.
+**Remaining effort:** 77.75 h agent + 11 h owner across 93 open steps of 34 features and 14 other records. 83.25 h of actual effort recorded on 113 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -310,7 +309,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned | [F-016-T07](#f-016-t07) | [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | [F-016-T08](#f-016-t08) | [F-016-T11](#f-016-t11) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-016-T09](#f-016-t09) | — | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 12.25 h (14 of 15 steps) | 9 h (8 of 15 steps recorded) | 1.75 h agent + 1 h owner | 11 of 15 completed | | | | |
+| 🟡 Medium | **Total** | 12.25 h (14 of 15 steps) | 9.75 h (9 of 15 steps recorded) | 1.75 h agent + 1 h owner | 11 of 15 completed | | | | |
 
 <details><summary>Done steps (11)</summary>
 
@@ -320,7 +319,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-016-t02"></a>F-016-T02 — Step 1b — Independent review of the coordinator relocation decision | 0.25 h | 0 h | Completed | — |
 | — | <a id="f-016-t03"></a>F-016-T03 — Step 2a — Signed coordinator state snapshot export | 1.5 h | 1.5 h (stated) | Completed | [PR #546](https://github.com/voidbrain/nerv/pull/546) implementation; CI green |
 | — | <a id="f-016-t04"></a>F-016-T04 — Step 2b — Incremental log shipping to the standby | 0.75 h | 0.75 h (stated) | Completed | [PR #555](https://github.com/voidbrain/nerv/pull/555) implementation; CI green |
-| 🟢 Small | <a id="f-016-t05"></a>F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.75 h | 0 h | Verified | [PR #564](https://github.com/voidbrain/nerv/pull/564) implementation |
+| — | <a id="f-016-t05"></a>F-016-T05 — Step 3a — Leader epoch in signed registry records; every effect checks the fencing token | 0.75 h | 0.75 h (stated) | Completed | [PR #564](https://github.com/voidbrain/nerv/pull/564) implementation |
 | — | <a id="f-016-t06"></a>F-016-T06 — Step 3b — Lease renewal and expiry; an asleep old leader is refused on wake | 0.75 h | 0.75 h (stated) | Completed | [PR #567](https://github.com/voidbrain/nerv/pull/567) implementation |
 | — | <a id="f-016-t10"></a>F-016-T10 — Revise the relocation decision after review | 0.5 h | 0.5 h (stated) | Completed | [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review |
 | — | <a id="f-016-t12"></a>F-016-T12 — Revise the decision: local chat fallback on a non-main base | 0.5 h | 0 h | Completed | — |
@@ -670,7 +669,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-083-t10"></a>F-083-T10 — Recipe photos | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | — | 🤖 | [PR #586](https://github.com/voidbrain/nerv/pull/586) implementation |
 | 🟢 Small | <a id="f-083-t08"></a>F-083-T08 — Hands-free cooking by voice | 0.5 h | 0 h | 0.5 h | Planned | [F-083-T07](#f-083-t07) | — | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-083-t09"></a>F-083-T09 — Owner check: a recipe cooked hands-free | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-083-T07](#f-083-t07) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 5.25 h | 0.75 h (2 of 10 steps recorded) | 1.5 h agent + 0.25 h owner | 6 of 10 completed | | | | |
+| 🟡 Medium | **Total** | 5.25 h | 1.25 h (3 of 10 steps recorded) | 1.5 h agent + 0.25 h owner | 6 of 10 completed | | | | |
 
 <details><summary>Done steps (6)</summary>
 
@@ -681,7 +680,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-083-t03"></a>F-083-T03 — Recipe card | 0.5 h | 0 h | Completed | [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep |
 | — | <a id="f-083-t04"></a>F-083-T04 — Live check with a real saved recipe | 0.25 h | 0 h | Completed | [PR #640](https://github.com/voidbrain/nerv/pull/640) Saved-recipe live check recorded in docs/acceptance/f083-t04-saved-recipe.md (F-083-T04) |
 | — | <a id="f-083-t05"></a>F-083-T05 — Purchases and shelf life | 0.5 h | 0 h | Completed | [PR #481](https://github.com/voidbrain/nerv/pull/481) implementation |
-| 🟢 Small | <a id="f-083-t06"></a>F-083-T06 — Cooking session: ingredients and steps | 0.5 h | 0 h | Verified | [PR #561](https://github.com/voidbrain/nerv/pull/561) cooking session; CI pending |
+| — | <a id="f-083-t06"></a>F-083-T06 — Cooking session: ingredients and steps | 0.5 h | 0.5 h (stated) | Completed | [PR #561](https://github.com/voidbrain/nerv/pull/561) cooking session; CI pending |
 
 </details>
 
@@ -1058,13 +1057,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
 | 🟡 Medium | <a id="f-106-t03"></a>F-106-T03 — Domain tool schemas offered by intent | 2 h | 0 h | 2 h | Implemented; verification pending | [PR #569](https://github.com/voidbrain/nerv/pull/569) implementation |
-| 🟡 Medium | **Total** | 3.5 h | 0.25 h (1 of 3 steps recorded) | 2 h | 2 of 3 completed | |
+| 🟡 Medium | **Total** | 3.5 h | 1.25 h (2 of 3 steps recorded) | 2 h | 2 of 3 completed | |
 
 <details><summary>Done steps (2)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="f-106-t01"></a>F-106-T01 — Prompt size per Misato turn, measured | 1 h | 0 h | Verified | [PR #562](https://github.com/voidbrain/nerv/pull/562) implementation |
+| — | <a id="f-106-t01"></a>F-106-T01 — Prompt size per Misato turn, measured | 1 h | 1 h (stated) | Completed | [PR #562](https://github.com/voidbrain/nerv/pull/562) implementation |
 | — | <a id="f-106-t02"></a>F-106-T02 — Prompt prefix stable across turns | 0.5 h | 0.25 h (stated) | Completed | [PR #509](https://github.com/voidbrain/nerv/pull/509) stable prefix |
 
 </details>
@@ -1157,7 +1156,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-049-t10"></a>F-049-T10 — Linux host enforcement and join tests in CI | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | — | [F-049-T12](#f-049-t12), [F-049-T14](#f-049-t14) | 🤖 | [PR #581](https://github.com/voidbrain/nerv/pull/581) implementation |
 | 🟡 Medium | <a id="f-049-t12"></a>F-049-T12 — Run the first EVA job on the Linux host | 1.5 h | 0 h | 1.5 h | Planned | [F-049-T10](#f-049-t10) | — | ⏳ 🤖 | — |
 | 🟣 Very large | <a id="f-049-t14"></a>F-049-T14 — Actions run in EVA instances; the in-process executor goes | 16 h | 0 h | 16 h | Planned | [B-099-T02](#b-099-t02), [F-049-T10](#f-049-t10) | — | ⏳ 🤖 | — |
-| 🟣 Very large | **Total** | 30.75 h (13 of 14 steps) | 10 h (6 of 14 steps recorded) | 19.25 h | 9 of 14 completed | | | | |
+| 🟣 Very large | **Total** | 30.75 h (13 of 14 steps) | 13 h (7 of 14 steps recorded) | 19.25 h | 9 of 14 completed | | | | |
 
 <details><summary>Done steps (9)</summary>
 
@@ -1169,7 +1168,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-049-t04"></a>F-049-T04 — EVA-03 instance per job | 0.75 h | 0 h | Completed | [PR #474](https://github.com/voidbrain/nerv/pull/474) implementation |
 | — | <a id="f-049-t05"></a>F-049-T05 — Escape and timeout gate tests on the EVA-03 runner | 1.5 h | 2.5 h (stated) | Completed | [PR #549](https://github.com/voidbrain/nerv/pull/549) gate tests; CI green |
 | — | <a id="f-049-t06"></a>F-049-T06 — Concurrent instances within per-machine limits | 0.75 h | 1.5 h (stated) | Completed | [PR #551](https://github.com/voidbrain/nerv/pull/551) the pool; CI green |
-| 🟢 Small | <a id="f-049-t07"></a>F-049-T07 — EVA-00, EVA-01 and EVA-02 profiles on the runner | 3 h | 0 h | Verified | [PR #558](https://github.com/voidbrain/nerv/pull/558) class profiles; CI pending |
+| — | <a id="f-049-t07"></a>F-049-T07 — EVA-00, EVA-01 and EVA-02 profiles on the runner | 3 h | 3 h (stated) | Completed | [PR #558](https://github.com/voidbrain/nerv/pull/558) class profiles; CI pending |
 | — | <a id="f-049-t11"></a>F-049-T11 — Choose the macOS host enforcement mechanism | — | 0 h | Completed | — |
 | — | <a id="f-049-t13"></a>F-049-T13 — EVA-03 events in the ledger and the recovery join test | 4 h | 5 h (stated) | Completed | [PR #553](https://github.com/voidbrain/nerv/pull/553) receipts and recovery join; CI green |
 
@@ -1250,6 +1249,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-108"></a>[🐞 B-108](#top)
+
+**Dashboard "Update now" and the scheduled apply cannot update the service they run in**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-117-T01](#f-117-t01) | 🤖 | — | — |
+
+💻 **→** Next: B-108-T01 — Update now runs from a detached helper outside the service (Planned).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-23 reading the code: `POST /api/update/apply` (dashboard **Update now**) and the policy's scheduled apply call `executeManualUpdate` → `planService(host, 'update', …)` from inside the running service. The lifecycle planner blocks `update` while the service is registered or running ("Stop the selected service and descendants first."), so the request is refused. Every completed update in the NERV-01 lifecycle journal (latest `477d6afc`, 2026-11-19) was run from the CLI as stop → update → start. |
+| **Reproduce** | With the service running on a newer `main`, press **Update now** in Settings; the reply lists the stop-first blocker. |
+| **Check** | Test committed failing first: a manual update requested from inside a registered, running service is not refused for that reason; the update runs from a detached helper outside the service, stops it, applies the plan and starts it again, with the existing rehearsal and rollback. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-108-t01"></a>B-108-T01 — Update now runs from a detached helper outside the service | 1.5 h | 0 h | 1.5 h | Planned | — | [F-117-T01](#f-117-t01) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-108.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-23 |
+| Verification | 2026-11-23: `nerv nodes lifecycle-inspect --action update` on NERV-01 with the service running listed "Stop the selected service and descendants first." |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
 ### <a id="b-066"></a>[🐞 B-066](#top)
 
 **Worker-link heartbeat verification awaits nervous SQLite IPC on every frame**
@@ -1293,6 +1330,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: failing evidence above; B-066-T02 stays implemented until B-066-T03. |
 | Reviewed | 2026-11-19 |
+
+</details>
+
+---
+### <a id="f-117"></a>[✨ F-117](#top)
+
+**One command to update a base: `nerv update`**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.25 h owner | [B-108-T01](#b-108-t01) | — | ⏳ | — | — |
+
+💻 **→** Next: F-117-T01 — nerv update &#91;--check&#93;: fetch, compare and run the lifecycle update (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-23: one command that checks `origin/main`, downloads it when newer, installs dependencies, builds, stops and starts the service, and says what it did. It goes through the reviewed lifecycle update (rehearsal, backup, rollback), never a bare `git pull`. |
+| **Reproduce** | On 2026-11-23 the checkout was pulled without a rebuild, so `dist/web` still served an older dashboard, and the service was left unloaded from launchd; the owner had to chain five commands by hand. |
+| **Check** | `nerv update --check` reports up to date or behind by N commits; `nerv update` on a behind base completes stop → update → start and probes the dashboard; on an up-to-date base whose `dist/web` is older than the checkout, or whose service is not loaded, it rebuilds and loads it. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-117-t01"></a>F-117-T01 — nerv update &#91;--check&#93;: fetch, compare and run the lifecycle update | 2 h | 0 h | 2 h | Planned | [B-108-T01](#b-108-t01) | [F-117-T02](#f-117-t02), [F-117-T03](#f-117-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-117-t02"></a>F-117-T02 — nerv update repairs a stale build or an unloaded service | 1 h | 0 h | 1 h | Planned | [F-117-T01](#f-117-t01) | [F-117-T04](#f-117-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-117-t03"></a>F-117-T03 — Docs and help for nerv update | 0.5 h | 0 h | 0.5 h | Planned | [F-117-T01](#f-117-t01) | — | ⏳ 🤖 |
+| 🟢 Small | <a id="f-117-t04"></a>F-117-T04 — Owner runs nerv update on NERV-01 | — | 0 h | 0.25 h owner | Planned | [F-117-T02](#f-117-t02) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3.5 h agent + 0.25 h owner | 0 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-117.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
 
 </details>
 
@@ -2042,44 +2120,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-108"></a>[✨ F-108](#top)
-
-**Dashboard: flow header shows the sortie code; EVA cage status on its own line**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | 🧑‍🔧 | — |
-
-🧑 **→** Look at the live dashboard: NERV-01 runs `477d6afc` since 2026-11-19, which has this change.
-
-| | |
-|---|---|
-| **Issue** | Owner requests 2026-11-18: the *Sephirot · sortie flow* header shows the sortie code only (for example S-6E26), not code and title; in the EVA cages, the status (IDLE and the others) sits on its own line under the EVA name so every cage has the same layout. |
-| **Reproduce** | Dashboard: select a sortie; look at the EVA cages panel. |
-| **Check** | Tests on the rendered header and cage markup; the owner confirms on the live dashboard. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-108-t01"></a>F-108-T01 — Flow header shows only the sortie code; cage status on its own line | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.5 h | 0.5 h | 0 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-108.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #650](https://github.com/voidbrain/nerv/pull/650) (Settings hours, editable Brief, Update now, 3-up Pilot cards); [PR #533](https://github.com/voidbrain/nerv/pull/533) (`test/dashboard.test.ts`); opened in PR #531 |
-| Opened | 2026-11-18 |
-| Verification | 2026-11-19: Unit: dashboard suite 38 pass. Owner live check pending. |
-| Reviewed | 2026-11-19 |
-
-</details>
-
----
 ### <a id="f-060"></a>[✨ F-060](#top)
 
 **Spike: herdr-core as a coding-agent terminal runtime**
@@ -2312,52 +2352,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-12 |
 | Verification | 2026-11-13 CI: Swift tests passed on native-macos (CI43344562738). Live companion check pending. |
 | Reviewed | 2026-11-13 |
-
-</details>
-
----
-### <a id="b-095"></a>[🐞 B-095](#top)
-
-**On the map Midori looks like a base: it lost its own blue**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | 🧑‍🔧 | — |
-
-🧑 **→** Look at the live dashboard: NERV-01 runs `477d6afc` since 2026-11-19, which has this fix.
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-18 after F-107: Midori now takes the bases' status colours (green while live), so on the map it reads as one more base. It is the Telegram channel, not a base. |
-| **Reproduce** | Live dashboard with Midori live: its node and dots are green like the bases. |
-| **Check** | Test committed failing first: Midori's node keeps the `--info` blue; only its status dot and label take green, amber or grey. The owner confirms on the live dashboard. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-095-t01"></a>B-095-T01 — Midori keeps its blue node; only its status dot and label change colour | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 0.75 h | 0.75 h | 0 h | 1 of 2 completed |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="b-095-t02"></a>B-095-T02 — Rerun the two expensive system cases at this source | 0.25 h | 0.25 h (stated) | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-095.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Fix in [PR #531](https://github.com/voidbrain/nerv/pull/531) (`test/dashboard.test.ts`, B-095); opened in PR #530 |
-| Opened | 2026-11-18 |
-| Verification | 2026-11-18: Unit: B-095 test failed before the fix, passes after (dashboard suite 36 pass). Owner live check pending. |
-| Reviewed | 2026-11-19 |
 
 </details>
 
