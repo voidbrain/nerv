@@ -69,6 +69,24 @@ export async function moveInstall(deps: MoveDeps): Promise<MoveResult> {
   const origin = await git(['remote', 'get-url', 'origin']);
   if (origin.status !== 0 || !origin.out.trim()) return result('refused', revision, ['The checkout has no origin.']);
 
+  // The old service must be one the lifecycle can stop before anything is prepared: a service running another
+  // revision than this checkout (pulled without a restart) is not proven ours, and nothing should change then.
+  const oldHost = deps.host(deps.from);
+  const before = await oldHost.inspect();
+  if (before.definition !== 'owned')
+    return result('refused', revision, [
+      'The current service definition is not owned by this checkout; inspect it with nerv nodes lifecycle-inspect.',
+    ]);
+  const mustStop = before.registration !== 'absent' || before.runtime !== 'stopped';
+  if (mustStop) {
+    const stop = await deps.plan(oldHost, 'stop');
+    if (stop.blockers.length)
+      return result('refused', revision, [
+        ...stop.blockers,
+        'Nothing changed. If the service runs another revision than this checkout, restart it first (launchctl kickstart -k gui/$(id -u)/io.nerv.agent), then retry.',
+      ]);
+  }
+
   // 1. Prepare the install folder at exactly the running revision. Nothing about the service changes yet.
   const prepare: [string, string, string[], string?][] = [
     ['clone', 'git', ['clone', '--no-hardlinks', '--no-checkout', '--quiet', deps.from, deps.to]],
@@ -87,7 +105,6 @@ export async function moveInstall(deps: MoveDeps): Promise<MoveResult> {
   }
 
   // 2. Switch the service through the lifecycle, old definition out, new one in.
-  const oldHost = deps.host(deps.from);
   const newHost = deps.host(deps.to);
   const run = async (host: ServiceHost, action: 'stop' | 'uninstall' | 'install' | 'start', label: string) => {
     const plan = await deps.plan(host, action);
@@ -97,32 +114,31 @@ export async function moveInstall(deps: MoveDeps): Promise<MoveResult> {
     say(`${label}: ${action}`);
   };
 
-  const before = await oldHost.inspect();
-  if (before.definition !== 'owned')
-    return result('refused', revision, [
-      'The current service definition is not owned by this checkout; inspect it with nerv nodes lifecycle-inspect.',
-    ]);
-  let oldRemoved = false;
+  let oldStopped = !mustStop,
+    oldRemoved = false;
   try {
-    if (before.registration !== 'absent' || before.runtime !== 'stopped') await run(oldHost, 'stop', 'old');
+    if (mustStop) await run(oldHost, 'stop', 'old');
+    oldStopped = true;
     await run(oldHost, 'uninstall', 'old');
     oldRemoved = true;
+    // Lifecycle install writes the definition, starts the service and verifies it: no separate start.
     await run(newHost, 'install', 'new');
-    await run(newHost, 'start', 'new');
     if (!(await deps.probe())) throw Error('The service did not answer from the install folder.');
     say('probe: dashboard answers');
     return result('moved', revision);
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     say(`failed: ${reason}`);
+    // Nothing changed yet (the old service was never stopped): no rollback, nothing to start.
+    if (!oldStopped && mustStop) return result('refused', revision, [reason, 'The service was not changed.']);
     try {
       if (oldRemoved) {
         const now = await newHost.inspect();
         if (now.registration !== 'absent' || now.runtime !== 'stopped') await run(newHost, 'stop', 'rollback new');
         if (now.definition === 'owned') await run(newHost, 'uninstall', 'rollback new');
+        // Install starts the old service again.
         await run(oldHost, 'install', 'rollback old');
-      }
-      await run(oldHost, 'start', 'rollback old');
+      } else await run(oldHost, 'start', 'rollback old');
       return result('rolled-back', revision, [reason, 'The service runs from the previous checkout again.']);
     } catch (rollbackError) {
       return result('uncertain', revision, [

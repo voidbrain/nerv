@@ -55,7 +55,9 @@ test(
 
 type Obs = { definition: string; registration: string; runtime: string };
 
-function fakes(options: { failAt?: string; probe?: boolean; dirty?: boolean; occupied?: boolean } = {}) {
+function fakes(
+  options: { failAt?: string; probe?: boolean; dirty?: boolean; occupied?: boolean; blockAt?: string } = {},
+) {
   const calls: string[] = [];
   const state: Record<string, Obs> = {
     '/dev/nerv': { definition: 'owned', registration: 'matching', runtime: 'running' },
@@ -75,7 +77,20 @@ function fakes(options: { failAt?: string; probe?: boolean; dirty?: boolean; occ
     },
     occupied: () => !!options.occupied,
     host,
-    plan: async (h, action) => ({ action, digest: action + ':' + h.context.source, blockers: [] }) as never,
+    plan: async (h, action) => {
+      const key = `${h.context.source === '/dev/nerv' ? 'old' : 'new'} ${action}`;
+      calls.push('plan ' + key);
+      const st = state[h.context.source]!;
+      // Like planService: start and install need a stopped, unregistered service.
+      const running = st.registration !== 'absent' || st.runtime !== 'stopped';
+      const blockers =
+        options.blockAt === key
+          ? ['Service or runtime ownership is unknown or belongs elsewhere.']
+          : (action === 'start' || action === 'install') && running
+            ? ['Stop the selected service and descendants first.']
+            : [];
+      return { action, digest: action + ':' + h.context.source, blockers } as never;
+    },
     apply: async (h, plan) => {
       const action = (plan as unknown as { action: string }).action;
       const key = `${h.context.source === '/dev/nerv' ? 'old' : 'new'} ${action}`;
@@ -84,7 +99,8 @@ function fakes(options: { failAt?: string; probe?: boolean; dirty?: boolean; occ
       const s = state[h.context.source]!;
       if (action === 'stop') Object.assign(s, { registration: 'absent', runtime: 'stopped' });
       if (action === 'uninstall') s.definition = 'absent';
-      if (action === 'install') s.definition = 'owned';
+      // Like applyService: install writes the definition, starts the service and verifies it.
+      if (action === 'install') Object.assign(s, { definition: 'owned', registration: 'matching', runtime: 'running' });
       if (action === 'start') Object.assign(s, { registration: 'matching', runtime: 'running' });
       return { state: 'completed' } as never;
     },
@@ -99,7 +115,11 @@ test('F-117-T01: move prepares the install folder at the running revision, then 
   assert.equal(r.outcome, 'moved', r.reasons.join(' '));
   assert.equal(r.revision, SHA);
   const lifecycle = calls.filter((c) => /^(old|new) /.test(c));
-  assert.deepEqual(lifecycle, ['old stop', 'old uninstall', 'new install', 'new start']);
+  assert.deepEqual(
+    lifecycle,
+    ['old stop', 'old uninstall', 'new install'],
+    'install starts the service; no extra start',
+  );
   assert.ok(
     calls.some((c) => c.startsWith('git clone')),
     'clones',
@@ -125,15 +145,37 @@ test('F-117-T01: move refuses without touching the service when the folder is ta
   assert.equal((await moveInstall({ ...same.deps, to: '/dev/nerv/app' })).outcome, 'refused');
 });
 
-test('F-117-T01: a failed start or a silent dashboard puts the old service back and starts it', async () => {
-  for (const options of [{ failAt: 'new start' }, { probe: false }]) {
+test('F-117-T01: a failed new install or a silent dashboard puts the old service back; install starts it, no extra start', async () => {
+  for (const options of [{ failAt: 'new install' }, { probe: false }]) {
     const { deps, calls, state } = fakes(options);
     const r = await moveInstall(deps);
     assert.equal(r.outcome, 'rolled-back', JSON.stringify(r));
-    const tail = calls.filter((c) => /^(old|new) /.test(c)).slice(-3);
-    assert.deepEqual(tail.slice(-2), ['old install', 'old start']);
+    const applied = calls.filter((c) => /^(old|new) /.test(c));
+    assert.equal(applied.at(-1), 'old install', 'the old install is the last step; it starts the service');
+    assert.ok(!applied.includes('old start') && !applied.includes('new start'), 'no separate start: ' + applied);
     assert.equal(state['/dev/nerv']!.definition, 'owned');
     assert.equal(state['/dev/nerv']!.runtime, 'running');
     assert.equal(state['/home/pilot/.nerv-app']!.definition, 'absent', 'the new definition is removed');
   }
+});
+
+test('F-117-T01: a failed old uninstall restarts the old service, which still has its definition', async () => {
+  const { deps, calls, state } = fakes({ failAt: 'old uninstall' });
+  const r = await moveInstall(deps);
+  assert.equal(r.outcome, 'rolled-back', JSON.stringify(r));
+  assert.deepEqual(
+    calls.filter((c) => /^(old|new) /.test(c)),
+    ['old stop', 'old uninstall', 'old start'],
+  );
+  assert.equal(state['/dev/nerv']!.runtime, 'running');
+});
+
+test('F-117-T01: a blocked stop of the old service refuses before anything is cloned, built or started', async () => {
+  const { deps, calls, state } = fakes({ blockAt: 'old stop' });
+  const r = await moveInstall(deps);
+  assert.equal(r.outcome, 'refused', JSON.stringify(r));
+  assert.match(r.reasons.join(' '), /ownership is unknown/);
+  assert.ok(!calls.some((c) => c.startsWith('git clone') || c.startsWith('npm')), 'nothing prepared');
+  assert.ok(!calls.some((c) => /^(old|new) /.test(c)), 'no lifecycle step applied, no rollback start');
+  assert.equal(state['/dev/nerv']!.runtime, 'running');
 });
