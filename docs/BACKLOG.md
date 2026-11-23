@@ -1414,7 +1414,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-066-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #512](https://github.com/voidbrain/nerv/pull/512) fixture budget. [PR #464](https://github.com/voidbrain/nerv/pull/464) (merged; CI green); [PR #414](https://github.com/voidbrain/nerv/pull/414) (opened record & decision doc); prior context: [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02), [PR #293](https://github.com/voidbrain/nerv/pull/293) and [PR #361](https://github.com/voidbrain/nerv/pull/361) (B-046). |
+| PR / evidence | Steps: B-066-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #512](https://github.com/voidbrain/nerv/pull/512) fixture budget. [PR #684](https://github.com/voidbrain/nerv/pull/684) (F-006-T11 fixture race); [PR #464](https://github.com/voidbrain/nerv/pull/464) (merged; CI green); [PR #414](https://github.com/voidbrain/nerv/pull/414) (opened record & decision doc); prior context: [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02), [PR #293](https://github.com/voidbrain/nerv/pull/293) and [PR #361](https://github.com/voidbrain/nerv/pull/361) (B-046). |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: failing evidence above; B-066-T02 stays implemented until B-066-T03. |
 | Reviewed | 2026-11-19 |
