@@ -55,5 +55,11 @@
     "estimateAgentHours": 0.25,
     "actualAgentHours": 0.75,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 679,
+      "note": "placement report, recommendation and offline report command; CI pending"
+    }
+  ]
 }
