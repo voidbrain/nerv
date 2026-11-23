@@ -155,8 +155,6 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .rem .acts { display:flex; gap:4px; }
 .models-form { display:grid; grid-template-columns:auto 1fr; gap:4px 8px; align-items:center; }
 .models-form select { min-width:0; width:100%; }
-.pilot-model-form { display:flex; align-items:center; gap:8px; margin-top:8px; }
-.pilot-model-form select { min-width:0; flex:1; }
 .pilot-model-form button:disabled { opacity:.5; cursor:default; }
 .rem-edit { display:flex; flex-wrap:wrap; gap:4px; padding:4px 0; }
 .rem-edit input[type=text] { flex:1 1 100%; }
@@ -272,14 +270,13 @@ mark { background:color-mix(in srgb,var(--accent) 35%,transparent); color:inheri
 .eva-inst { display:flex; align-items:center; justify-content:space-between; gap:4px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:3px; font-size:10px; }
 .eva-inst-meta { display:flex; flex-direction:column; min-width:0; }
 .eva-empty { font-size:10px; color:var(--muted); }
-.pilot-model-form { display:flex; flex-direction:column; gap:4px; margin-top:6px; }
-.pilot-field { display:flex; align-items:center; justify-content:space-between; gap:6px; min-width:0; }
-.pilot-field input, .pilot-field select { flex:1 1 0; min-width:0; width:0; max-width:100%; }
-.pilot-hdr-inputs { display:flex; align-items:center; gap:4px; flex:1 1 0; min-width:0; }
-.pilot-hdr-inputs input { flex:1 1 0; min-width:0; width:0; padding:2px 5px; font-size:11px; }
-.pilot-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; }
+.pilot-model-form { display:flex; flex-direction:column; gap:4px; margin-top:6px; min-width:0; }
+.pilot-field { display:flex; flex-direction:column; align-items:stretch; gap:2px; min-width:0; }
+.pilot-field input, .pilot-field select { display:block; width:100%; min-width:0; max-width:100%; }
+.pilot-hdr-inputs { display:flex; flex-direction:column; gap:4px; width:100%; min-width:0; }
+.pilot-hdr-inputs input { display:block; width:100%; min-width:0; max-width:100%; padding:3px 6px; font-size:12px; }
+.pilot-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
 .pilot-grid .card { min-width:0; overflow:hidden; }
-@media (max-width:960px) { .pilot-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
 @media (max-width:600px) { .pilot-grid { grid-template-columns:1fr; } }
 .pilot-actions { display:flex; justify-content:flex-end; margin-top:2px; }
 

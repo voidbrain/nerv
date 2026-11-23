@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "B-107-T01",
+  "parent": "B-107",
+  "title": "Pilot cards 2 per row with stacked name inputs and a contained Model select",
+  "goal": "Every pilot select and input stays inside its card, names take their own full-width line, 2 cards per row",
+  "status": "implemented",
+  "acceptance": [
+    "Browser test in test/evaluation.browser.mjs fails on the previous layout and passes on the fix",
+    "Pilot grid is 2 columns (1 below 600 px); name and second name stack full width",
+    "Owner confirms on the live dashboard"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/**",
+    "test/dashboard.test.ts",
+    "test/evaluation.browser.mjs",
+    "docs/work/records/B-107.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "node --test test/evaluation.browser.mjs",
+    "node --test test/dashboard.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Fixed 2026-11-23 from owner report; owner live check remains.",
+    "reviewed": "2026-11-23",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 0.25
+  }
+}
