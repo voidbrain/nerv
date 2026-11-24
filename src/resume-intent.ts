@@ -379,6 +379,8 @@ export interface ResumeJobIdentity {
 
 export interface ResumeEngineDeps {
   readonly owner: string;
+  /** Intents this adapter handles; others are left untouched for their own adapter (F-090-T04). Default: all. */
+  readonly accepts?: (intent: ResumeIntent) => boolean;
   readonly leaseMs?: number;
   readonly now?: number;
   readonly checkAvailability: (intent: ResumeIntent) => Promise<ResumeAvailabilityCheck> | ResumeAvailabilityCheck;
@@ -408,6 +410,7 @@ export async function runResumeEngineTick(
   const processed: ResumeIntent[] = [];
 
   for (const intent of due) {
+    if (deps.accepts && !deps.accepts(intent)) continue;
     const leased = store.claimLease(intent.id, deps.owner, leaseMs, now);
     if (!leased) continue;
 

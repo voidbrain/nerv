@@ -18,7 +18,9 @@ The folder format is portable where Agent Skills is supported. Runtime dependenc
 
 ## Package and publish standalone skills
 
-Standalone skills under `skills/<name>/` (excluding `metadata.distribution: repo-only` skills such as `apply-harness`) are validated with `npm run check:skills` and packaged into `dist/skills/<name>-<version>.zip` with `npm run skills:package`. Each archive places `SKILL.md`, `LICENSE`, and the skill's own bundled files at the zip root without external repository links or `.harness.json` dependencies. Publishing and updating external marketplace listings (such as Agensi) is a manual upload of the generated zip.
+Standalone skills under `skills/<name>/` (excluding `metadata.distribution: repo-only` skills such as `apply-harness`) are packaged into `dist/skills/<name>-<version>.zip` with `npm run skills:package`. Each archive places `SKILL.md`, `LICENSE`, and the skill's own bundled files at the zip root without external repository links or `.harness.json` dependencies. Publishing and updating external marketplace listings (such as Agensi) is a manual upload of the generated zip.
+
+`npm run check:skills` checks every skill against the release it ships in: a standalone skill must be self-contained, carry its own `metadata.version` and name only npm scripts `package.json` defines; a repo-only skill must name only scripts, files and links that exist. Examples for the consumer belong under the skill's `templates/`, which is not checked. Before a release, `npm run skills:affected` (since the last tag, or `-- <tag>`) lists the skills that name a changed file, to re-read, and the standalone skills whose own files changed, to package and upload again (it warns when such a skill's `metadata.version` is unchanged since the tag); the release entry names both.
 
 ## Skill discovery review
 

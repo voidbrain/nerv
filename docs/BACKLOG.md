@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 1 | 1 | 8 | 2 |
+| **This week** | 3 | 1 | 9 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 19 |
+| **Open** | 37 | 20 |
 | **Require Human 🧑** | 11 | 7 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 77.5 h agent + 10.25 h owner across 98 open steps of 34 features and 19 other records. 94.25 h of actual effort recorded on 118 steps. Generated from the task files.
+**Remaining effort:** 85.25 h agent + 10.25 h owner across 105 open steps of 36 features and 20 other records. 96 h of actual effort recorded on 119 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -633,6 +633,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-119"></a>[✨ F-119](#top)
+
+**Periodic skill discovery review**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-119-T01 — First skill discovery review (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-23: enable the periodic skill review (reviews.skills.days 30, harness v10.4.0); discovery stays periodic, validity on updates is template F-089. |
+| **Reproduce** | npm run check:freshness reports the skills review missing. |
+| **Check** | docs/reviews/skills/<date>.md exists and each candidate has an outcome. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-119-t01"></a>F-119-T01 — First skill discovery review | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-119.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
 ### <a id="f-082"></a>[✨ F-082](#top)
 
 **Lists: add items by chat or Telegram, recall them as a checklist card**
@@ -1006,6 +1044,96 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-118"></a>[✨ F-118](#top)
+
+**Pair a phone once: device sign-in with a 90-day sliding limit**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 8.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-23 (decision 1): the installed phone app (workspace or dashboard) cannot sign in: the sign-in box takes only the admin token, a QR or link opens Safari, and the session lived in tab storage that iOS clears on relaunch. The owner chose pairing: once per device, revocable, lapsing after 90 days unused; plus a QR option. |
+| **Reproduce** | Install the dashboard to the iPhone Home Screen and open it: "NOT SIGNED IN". |
+| **Check** | A short code typed into the installed app pairs it; it stays signed in through restarts and updates; Settings and nerv devices revoke it; a QR pairs browsers in one step. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-118-t01"></a>F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code | 3 h | 0 h | 3 h | Planned | — | [F-118-T02](#f-118-t02), [F-118-T03](#f-118-t03), [F-118-T05](#f-118-t05) |
+| 🟡 Medium | <a id="f-118-t02"></a>F-118-T02 — Workspace and dashboard pair from their own sign-in box; the installed app signs itself in | 2 h | 0 h | 2 h | Planned | [F-118-T01](#f-118-t01) | [F-118-T04](#f-118-t04) |
+| 🟡 Medium | <a id="f-118-t03"></a>F-118-T03 — Paired devices in Settings with Revoke; nerv devices list and revoke | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
+| 🟢 Small | <a id="f-118-t04"></a>F-118-T04 — Phone procedure: Tailscale serve, pairing and push, then the owner check | 0.5 h | 0 h | 0.5 h | Planned | [F-118-T02](#f-118-t02) | — |
+| 🟡 Medium | <a id="f-118-t05"></a>F-118-T05 — Pairing as a QR code: nerv open --phone --qr and Settings → Pair a device | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
+| 🟣 Very large | **Total** | 8.5 h | 0 h (0 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-118.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+### <a id="f-090"></a>[✨ F-090](#top)
+
+**Resume interrupted coding work without the editor**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-090-T04 — Resume automatically when a session limit resets (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: continue a coding agent's interrupted work directly, without VS Code. F-012 covers resuming in the editor (F-012-T03); a headless resume through the coding agent's own command line is a separate adapter. |
+| **Reproduce** | Interrupt a coding-agent session at its limit, then ask NERV to continue it after the reset. |
+| **Check** | NERV identifies the exact session (repository, branch, session ID) and resumes it once through the agent's supported command line after the reset, using the F-012 resume engine; a changed branch, a missing session or an already-resumed job produces needs-attention, not a second run; output and cost come back to the channel. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-090-t04"></a>F-090-T04 — Resume automatically when a session limit resets | 2 h | 1.75 h so far (stated) | 0 h | Implemented; verification pending | — | [F-090-T03](#f-090-t03) | 🤖 | [PR #676](https://github.com/voidbrain/nerv/pull/676) implementation |
+| 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-090-T04](#f-090-t04) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 3.5 h (3 of 4 steps) | 3 h (3 of 4 steps recorded) | 0.25 h owner | 2 of 4 completed | | | | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-090-t01"></a>F-090-T01 — Feasibility: headless resume | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-090-t02"></a>F-090-T02 — Headless resume adapter | 1 h | 1 h (stated) | Completed | [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-090.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-090-T02: [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation · F-090-T04: [PR #676](https://github.com/voidbrain/nerv/pull/676) implementation. [PR #676](https://github.com/voidbrain/nerv/pull/676) (F-090-T04, opened); [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-090-T02 not closed: the adapter logic passed on green CI, but headless resume runs only as `nerv headless-resume <targets.json>` by hand; nothing in `serve` notices a session limit, so the owner check F-090-T03 ("NERV resumes it") cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/493) merged on green CI. `F-090-T01` feasibility report written in [headless-resume.md](decisions/headless-resume.md) from live CLI probe; verified with `npm run check:fast`. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-093"></a>[✨ F-093](#top)
 
 **Desktop control: click a named control in an app on screen**
@@ -1051,54 +1179,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | Human: 2026-11-23, owner live check on NERV-01 passed ([acceptance](acceptance/f093-t04-desktop-click.md)). Unit/integration: 2026-11-23, `test/desktop-macos-driver.test.ts` and `test/desktop-shared-adapter.test.ts` on green CI ([PR #683](https://github.com/voidbrain/nerv/pull/683), [PR #675](https://github.com/voidbrain/nerv/pull/675)). |
 | Reviewed | 2026-11-24 |
-
-</details>
-
----
-### <a id="f-090"></a>[✨ F-090](#top)
-
-**Resume interrupted coding work without the editor**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-090-T04 — Resume automatically when a session limit resets (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: continue a coding agent's interrupted work directly, without VS Code. F-012 covers resuming in the editor (F-012-T03); a headless resume through the coding agent's own command line is a separate adapter. |
-| **Reproduce** | Interrupt a coding-agent session at its limit, then ask NERV to continue it after the reset. |
-| **Check** | NERV identifies the exact session (repository, branch, session ID) and resumes it once through the agent's supported command line after the reset, using the F-012 resume engine; a changed branch, a missing session or an already-resumed job produces needs-attention, not a second run; output and cost come back to the channel. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-090-t04"></a>F-090-T04 — Resume automatically when a session limit resets | 2 h | 0 h | 2 h | Planned | — | [F-090-T03](#f-090-t03) | 🤖 | — |
-| 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-090-T04](#f-090-t04) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 1.25 h (2 of 4 steps recorded) | 2 h agent + 0.25 h owner | 2 of 4 completed | | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-090-t01"></a>F-090-T01 — Feasibility: headless resume | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-090-t02"></a>F-090-T02 — Headless resume adapter | 1 h | 1 h (stated) | Completed | [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-090.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-090-T02: [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation. [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-090-T02 not closed: the adapter logic passed on green CI, but headless resume runs only as `nerv headless-resume <targets.json>` by hand; nothing in `serve` notices a session limit, so the owner check F-090-T03 ("NERV resumes it") cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/493) merged on green CI. `F-090-T01` feasibility report written in [headless-resume.md](decisions/headless-resume.md) from live CLI probe; verified with `npm run check:fast`. |
-| Reviewed | 2026-11-18 |
 
 </details>
 
@@ -2277,6 +2357,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |
+
+</details>
+
+---
+### <a id="b-116"></a>[🐞 B-116](#top)
+
+**F-023 notice test fails when a random ID contains a forbidden word**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-116-T01 — F-023 notice test: the forbidden-text regex can match a random ID (Planned).
+
+| | |
+|---|---|
+| **Issue** | PR #684 validate 2026-11-23: "F-023: approval and generic durable inbox notice commit together and survive restart" matched its forbidden-text regex (Private neutral fixture, 2099, grantId, args) against the whole serialized notice, whose random UUID can contain 2099. |
+| **Reproduce** | Rerun the test until a UUID contains 2099 (rare). |
+| **Check** | The assertion checks only the message text; a committed case with a UUID containing 2099 passes. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-116-t01"></a>B-116-T01 — F-023 notice test: the forbidden-text regex can match a random ID | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-116.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
 
 </details>
 
