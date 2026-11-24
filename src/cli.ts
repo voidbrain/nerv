@@ -74,7 +74,11 @@ import {
 } from './chronicle.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
-import { coordinatorLeaseService } from './coordinator-serve.ts';
+import {
+  coordinatorChannelAuthority,
+  coordinatorLeaseService,
+  coordinatorTelegramContinuity,
+} from './coordinator-serve.ts';
 import { STANDBY_DB_FILE } from './coordinator-relocation.ts';
 import { assertNoPromotionInProgress } from './coordinator-promote.ts';
 import {
@@ -761,6 +765,14 @@ try {
             store: runtime,
             chatId: config.telegram.chatId,
             statePath: join(home, 'telegram-state.json'),
+            // F-016-T19: only the active coordinator polls and calls the Bot API; activation hydrates its state.
+            authority: coordinatorChannelAuthority({
+              home,
+              databasePath: databasePath(home),
+              baseId: config.base.id,
+              root: config.kaji?.root,
+            }),
+            continuity: coordinatorTelegramContinuity(databasePath(home)),
             // F-036 phase 2: quiet while another base is the main one and online; relayed cards are decided where they were made.
             oneChannel: {
               destination: async () => {

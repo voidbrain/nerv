@@ -10,6 +10,8 @@ import {
 } from './coordinator-lease.ts';
 import { STANDBY_DB_FILE } from './coordinator-relocation.ts';
 import { Registry, keyIdentity } from './kaji.ts';
+import { isActiveCoordinator, readCoordinatorFencingState } from './coordinator-authority.ts';
+import type { State, TelegramContinuity } from './telegram.ts';
 
 /**
  * F-016-T16: the coordinator lease as `serve` runs it. On the active main, a keeper renews the lease through
@@ -77,6 +79,130 @@ export function coordinatorLeaseService(input: {
     stop(): void {
       keeper?.stop();
       db.close();
+    },
+  };
+}
+
+/**
+ * F-016-T19: whether this base may run the coordinator's Telegram channel now. Where `nerv.sqlite` holds a
+ * coordinator state, only the active coordinator (mode, main base, epoch, lease) may; a base keeping a
+ * standby store may not; a legacy host with neither keeps today's behaviour. A promotion swap happens with
+ * the service stopped (`nerv kaji promote`), so the channel's connection never outlives the file it opened.
+ */
+export function coordinatorChannelAuthority(input: {
+  readonly home: string;
+  readonly databasePath: string;
+  readonly baseId: string;
+  readonly root: string | undefined;
+}): (() => boolean) & { close(): void } {
+  // One connection per channel; the registry is verified again only when the store changed (`data_version`,
+  // which moves on every commit by another connection). The lease is checked against the clock on every call.
+  // `close()` (the channel calls it when it stops) releases the connection for good: a closed check answers no,
+  // so a stopped channel never reopens the store (Windows cannot remove or swap a file that is still open).
+  let db: DatabaseSync | undefined;
+  let closed = false;
+  let cache: { version: number; mainBaseId: string | undefined; epoch: number } | undefined;
+  const check = () => {
+    if (closed) return false;
+    if (!db) {
+      db = new DatabaseSync(input.databasePath);
+      db.exec('PRAGMA busy_timeout = 1000');
+    }
+    if (!readCoordinatorFencingState(db)) return !existsSync(join(input.home, STANDBY_DB_FILE));
+    const version = (db.prepare('PRAGMA data_version').get() as { data_version: number }).data_version;
+    if (cache?.version !== version) {
+      const registry = new Registry(db, input.root);
+      cache = { version, mainBaseId: registry.main(), epoch: registry.mainEpoch() };
+    }
+    return isActiveCoordinator({
+      db,
+      baseId: input.baseId,
+      ...(cache.mainBaseId ? { mainBaseId: cache.mainBaseId } : {}),
+      maxSeenCoordinatorEpoch: cache.epoch,
+    }).ok;
+  };
+  return Object.assign(check, {
+    close: () => {
+      closed = true;
+      db?.close();
+      db = undefined;
+    },
+  });
+}
+
+/** F-016-T19: the Telegram state in `coordinator_state`, replicated to the standby and hydrated on activation. */
+export function coordinatorTelegramContinuity(databasePath: string): TelegramContinuity {
+  const withDb = <T>(fn: (db: DatabaseSync) => T): T | undefined => {
+    const db = new DatabaseSync(databasePath);
+    try {
+      db.exec('PRAGMA busy_timeout = 5000');
+      return readCoordinatorFencingState(db) ? fn(db) : undefined;
+    } finally {
+      db.close();
+    }
+  };
+  const parse = <T>(text: string | null): T | undefined => {
+    if (!text) return undefined;
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      return undefined;
+    }
+  };
+  return {
+    load: () =>
+      withDb((db) => {
+        const row = db
+          .prepare(
+            `SELECT telegram_offset, telegram_inbox_seq, telegram_inbox_id, telegram_cards_json, telegram_messages_json,
+                    telegram_brief_json FROM coordinator_state WHERE id = 1`,
+          )
+          .get() as
+          | {
+              telegram_offset: number | null;
+              telegram_inbox_seq: number | null;
+              telegram_inbox_id: string | null;
+              telegram_cards_json: string | null;
+              telegram_messages_json: string | null;
+              telegram_brief_json: string | null;
+            }
+          | undefined;
+        if (!row) return undefined;
+        const cards = parse<string[]>(row.telegram_cards_json);
+        const messages = parse<State['messages']>(row.telegram_messages_json);
+        const brief = parse<State['brief']>(row.telegram_brief_json);
+        return {
+          ...(row.telegram_offset !== null ? { offset: row.telegram_offset } : {}),
+          ...(row.telegram_inbox_seq !== null
+            ? {
+                inbox: {
+                  sequence: row.telegram_inbox_seq,
+                  ...(row.telegram_inbox_id !== null ? { id: row.telegram_inbox_id } : {}),
+                },
+              }
+            : {}),
+          ...(Array.isArray(cards) ? { cards } : {}),
+          ...(Array.isArray(messages) ? { messages } : {}),
+          ...(brief ? { brief } : {}),
+        };
+      }),
+    save: (state) => {
+      withDb((db) =>
+        db
+          .prepare(
+            `UPDATE coordinator_state SET telegram_offset = ?, telegram_inbox_seq = ?, telegram_inbox_id = ?,
+               telegram_cards_json = ?, telegram_messages_json = ?, telegram_brief_json = ?
+             WHERE id = 1 AND replication_mode = 'active'`,
+          )
+          .run(
+            state.offset ?? null,
+            state.inbox?.sequence ?? null,
+            state.inbox?.id ?? null,
+            JSON.stringify(state.cards),
+            state.messages ? JSON.stringify(state.messages) : null,
+            state.brief ? JSON.stringify(state.brief) : null,
+          ),
+      );
     },
   };
 }
