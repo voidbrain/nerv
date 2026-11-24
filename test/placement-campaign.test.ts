@@ -26,6 +26,7 @@ test('P4 has a bounded wait and malformed or expansive probes are refused', () =
   const p4 = placementProbe({ placement: 'P4', prompt: 'Return READY.' });
   assert.equal(p4.orchestration.waitBudgetMs, 5_000);
   assert.equal(p4.timeoutMs, 20_000);
+  assert.equal(p4.requestBudgetMs, 50_000);
   assert.throws(() => placementProbe({ placement: 'P4', prompt: '', endpoint: 'mac' }), /prompt/);
   assert.throws(() => placementProbe({ placement: 'P3', prompt: 'x', endpoint: 'https://host' }), /endpoint/);
   assert.throws(() => placementProbe({ placement: 'P2', prompt: 'x', extra: true }), /Unknown/);

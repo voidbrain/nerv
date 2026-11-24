@@ -16,6 +16,8 @@ export function placementProbe(value: unknown): {
   orchestration: OrchestrationRequest;
   ask: { prompt: string; maxTokens?: number; temperature: number };
   timeoutMs: number;
+  /** How long the HTTP request may stay open: a concurrency lease and the inference are each bounded by timeoutMs, plus the endpoint wait and a margin. */
+  requestBudgetMs: number;
 } {
   if (!value || typeof value !== 'object' || Array.isArray(value))
     throw new Error('Expected a placement probe object.');
@@ -61,5 +63,6 @@ export function placementProbe(value: unknown): {
     },
     ask: { prompt: v.prompt, maxTokens: maxOutputTokens, temperature: 0 },
     timeoutMs,
+    requestBudgetMs: 2 * timeoutMs + waitBudgetMs + 5_000,
   };
 }

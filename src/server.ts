@@ -414,6 +414,9 @@ export function makeServer(
         if (value.confirmExecute !== true) throw new Error('Placement execution needs confirmExecute: true.');
         const { confirmExecute: _confirmExecute, ...input } = value;
         const probe = placementProbe(input);
+        // The probe may outlast the server's 15 s idle timeout; hold the socket for its own budget.
+        req.setTimeout(probe.requestBudgetMs);
+        res.once('finish', () => req.socket.setTimeout(15000));
         const result = await store.runOrchestratedJob({
           orchestration: probe.orchestration,
           ask: probe.ask,
