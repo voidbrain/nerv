@@ -73,6 +73,7 @@ import {
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
 import { coordinatorLeaseService } from './coordinator-serve.ts';
+import { assertNoPromotionInProgress } from './coordinator-promote.ts';
 import {
   guardLocalService,
   linuxServiceHost,
@@ -531,6 +532,8 @@ try {
       }
       case 'serve':
       case 'launch': {
+        // F-016-T17: never while kaji promote swaps the coordinator stores.
+        assertNoPromotionInProgress(home);
         const webRoot = resolve(fileURLToPath(new URL('../dist/web/browser', import.meta.url)));
         if (!existsSync(join(webRoot, 'index.html'))) throw new Error('Frontend missing: run npm run build.');
         readToken(home);

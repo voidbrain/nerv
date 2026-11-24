@@ -20,6 +20,12 @@ import {
 
 import { builtinTools } from './executors.ts';
 import { drainCoordinator, signDrainReceipt } from './coordinator-relocation.ts';
+import {
+  installedPromotionService,
+  promoteCoordinator,
+  type PromotionClock,
+  type PromotionServiceControl,
+} from './coordinator-promote.ts';
 import { OFFER_NAME, toolName } from './mcp.ts';
 
 export async function runKajiCommand(
@@ -27,7 +33,12 @@ export async function runKajiCommand(
   home: string,
   store: Store,
   config: ReturnType<typeof readConfig>,
-  ctx: { readSecret: (prompt: string) => Promise<string>; flag: (name: string) => string | undefined },
+  ctx: {
+    readSecret: (prompt: string) => Promise<string>;
+    flag: (name: string) => string | undefined;
+    /** Tests inject the service control and clock of `kaji promote`. */
+    promotion?: { service?: PromotionServiceControl; clock?: PromotionClock };
+  },
 ): Promise<void> {
   const registry = new Registry(store.db, config.kaji?.root);
   const me = baseKey(home).publicKey;
@@ -218,6 +229,25 @@ export async function runKajiCommand(
         `Drained epoch ${receipt.coordinatorEpoch} at seq ${receipt.finalSeq} for ${newMainBaseId} at epoch ${receipt.newEpoch}; receipt written to ${args[1]}.`,
       );
     } else process.stdout.write(out);
+  } else if (sub === 'promote') {
+    // F-016-T17: the new main side. Every safety input is read from verified records on this base.
+    const receipt = ctx.flag('--drain-receipt');
+    const res = await promoteCoordinator({
+      home,
+      rootPublicKey: config.kaji?.root,
+      ownPublicKey: me,
+      ...(receipt ? { drainReceiptFile: receipt } : {}),
+      confirmOldHostDown: args.includes('--confirm-old-host-down'),
+      service: ctx.promotion?.service ?? installedPromotionService(home),
+      ...(ctx.promotion?.clock ? { clock: ctx.promotion.clock } : {}),
+      log: (line) => console.log(line),
+    });
+    console.log(
+      'resumed' in res
+        ? `Promotion at coordinator epoch ${res.newEpoch} finished; the service is running again.`
+        : `Promoted to coordinator epoch ${res.newEpoch} (from ${res.previousEpoch}, ${res.source}); ${res.quarantined} uncertain outbox row(s) parked for review. ` +
+            (res.leaseExpiresAt ? 'Sole coordinator: lease armed.' : 'Effects wait for the first standby-acked lease.'),
+    );
   } else if (sub === 'lease-rearm') {
     const confirmSole = args.includes('--confirm-sole-coordinator');
     const ownPub = baseKey(home).publicKey;
@@ -302,7 +332,7 @@ export async function runKajiCommand(
     );
   } else
     throw new Error(
-      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [--revoke LOST-ID] | drain [FILE] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
+      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [--revoke LOST-ID] | drain [FILE] | promote [--drain-receipt FILE | --confirm-old-host-down] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
     );
   return;
 }
