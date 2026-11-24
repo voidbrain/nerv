@@ -9,34 +9,34 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 5 | 3 | 23 | 6 |
+| **This week** | 7 | 3 | 23 | 6 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 37 | 30 |
-| **Require Human 🧑** | 11 | 12 |
+| **Open** | 39 | 30 |
+| **Require Human 🧑** | 9 | 12 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-089](#f-089) | [B-057](#b-057) | — |
-| [F-011](#f-011) | [F-116](#f-116) | [B-068](#b-068) |  |
-| [F-004](#f-004) |  | [B-107](#b-107) |  |
-| [F-012](#f-012) |  | [B-113](#b-113) |  |
-| [F-086](#f-086) |  | [B-122](#b-122) |  |
-| [F-087](#f-087) |  | [B-129](#b-129) |  |
-| [F-092](#f-092) |  | [B-128](#b-128) |  |
-| [F-060](#f-060) |  | [B-056](#b-056) |  |
-| [F-007](#f-007) |  | [B-096](#b-096) |  |
+| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
+| [F-011](#f-011) |  | [B-068](#b-068) |  |
+| [F-012](#f-012) |  | [B-107](#b-107) |  |
+| [F-086](#f-086) |  | [B-113](#b-113) |  |
+| [F-087](#f-087) |  | [B-122](#b-122) |  |
+| [F-092](#f-092) |  | [B-129](#b-129) |  |
+| [F-060](#f-060) |  | [B-128](#b-128) |  |
+| [F-007](#f-007) |  | [B-056](#b-056) |  |
+|  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
 |  |  | [B-112](#b-112) |  |
 |  |  | [B-130](#b-130) |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 86.75 h agent + 11.25 h owner across 123 open steps of 36 features and 30 other records. 164 h of actual effort recorded on 152 steps. Generated from the task files.
+**Remaining effort:** 96 h agent + 12 h owner across 129 open steps of 38 features and 30 other records. 165.5 h of actual effort recorded on 153 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -326,6 +326,59 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-02 |
 | Verification | Unit/integration and CI 2026-11-13: every built-in registration has a stable versioned descriptor; MCP fingerprints remain compatible; PR #381 CI 43496658350 passed validate, native-macos, windows, plan and full-suite. Remaining parent acceptance is pending. |
 | Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+### <a id="f-004"></a>[✨ F-004](#top)
+
+**Angular PWA and validated GenUI**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-004-T08 — Dashboard Settings → Notifications: enable push on the installed app (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Angular source exists with an installable PWA shell (F-004-T01, PR #286: manifest, icons, shell-only service worker, update prompt); no reminder CRUD UI beyond create/cancel, doctor view, generated UI or push configuration yet. |
+| **Reproduce** | Follow the [phone install and push procedure](acceptance/f004-t06-phone-push-procedure.md). |
+| **Check** | Real reminder CRUD and doctor UI; reject arbitrary component/code/action payloads; accessibility and phone install/push acceptance. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-004-t08"></a>F-004-T08 — Dashboard Settings → Notifications: enable push on the installed app | 1.75 h | 1.5 h so far (stated) | 0.25 h | Implemented; verification pending | — | [F-004-T06](#f-004-t06) | 🤖 | [PR #729](https://github.com/voidbrain/nerv/pull/729) |
+| 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | [F-004-T08](#f-004-t08) | [F-004-T07](#f-004-t07) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-004-T06](#f-004-t06) | — | ⏳ 🤖 | — |
+| 🟢 Small | **Total** | 14 h (7 of 8 steps) | 4.5 h (6 of 8 steps recorded) | 0.5 h agent + 0.5 h owner | 5 of 8 completed | | | | |
+
+<details><summary>Done steps (5)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-004-t01"></a>F-004-T01 — Installable PWA shell: manifest, service worker and update prompt | 1.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-004-t02"></a>F-004-T02 — Reminder CRUD in the workspace | 3 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-004-t03"></a>F-004-T03 — Doctor view | 1.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-004-t04"></a>F-004-T04 — Schema-validated registered component renderer (GenUI) | 3 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-004-t05"></a>F-004-T05 — Web push subscription and delivery | 3 h | 0.5 h (stated) | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-004.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-004-T08: [PR #729](https://github.com/voidbrain/nerv/pull/729). F-004-T08 [PR #729](https://github.com/voidbrain/nerv/pull/729) dashboard push (test/evaluation.browser.mjs); Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| Opened | 2026-11-01 |
+| Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Phone install/push acceptance pending (F-004-T06). |
+| Reviewed | 2026-11-12 |
 
 </details>
 
@@ -659,58 +712,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | 2026-11-08 Unit/integration: seven isolated release-path contracts pass (no actual signing/upload); signed-only, rejection, warning, timeout/failure and post-staple packaging paths checked. Real-device: temporary macOS release build, ad-hoc signature verification and bundle plist validation passed; that temporary build was not installed/launched. Later UI-only trial: verified/downloaded PR #213 CI app launch completed according to macOS process state; Human 2026-11-08: owner confirms icon appears and menu opens normally; no Accessibility permission granted to this session. PR #212 CI 42489231643 passed targeted native/auth/packaging checks, including actual macOS Swift tests/build/package; full-suite skipped. Actual Developer ID/notarization and native OS acceptance pending. |
 | Reviewed | 2026-11-10 |
-
-</details>
-
----
-
-### <a id="f-004"></a>[✨ F-004](#top)
-
-**Angular PWA and validated GenUI**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h agent + 0.5 h owner | — | — | ⏳ | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) F-004-T06 — Phone install and push acceptance (Ready).
-
-| | |
-|---|---|
-| **Issue** | Angular source exists with an installable PWA shell (F-004-T01, PR #286: manifest, icons, shell-only service worker, update prompt); no reminder CRUD UI beyond create/cancel, doctor view, generated UI or push configuration yet. |
-| **Reproduce** | Follow the [phone install and push procedure](acceptance/f004-t06-phone-push-procedure.md). |
-| **Check** | Real reminder CRUD and doctor UI; reject arbitrary component/code/action payloads; accessibility and phone install/push acceptance. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | — | [F-004-T07](#f-004-t07) | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) |
-| 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-004-T06](#f-004-t06) | — | ⏳ 🤖 |
-| 🟢 Small | **Total** | 12.25 h (6 of 7 steps) | 3 h (5 of 7 steps recorded) | 0.25 h agent + 0.5 h owner | 5 of 7 completed | | | |
-
-<details><summary>Done steps (5)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-004-t01"></a>F-004-T01 — Installable PWA shell: manifest, service worker and update prompt | 1.5 h | 0.5 h (stated) | Completed |
-| — | <a id="f-004-t02"></a>F-004-T02 — Reminder CRUD in the workspace | 3 h | 0.75 h (stated) | Completed |
-| — | <a id="f-004-t03"></a>F-004-T03 — Doctor view | 1.5 h | 0.5 h (stated) | Completed |
-| — | <a id="f-004-t04"></a>F-004-T04 — Schema-validated registered component renderer (GenUI) | 3 h | 0.75 h (stated) | Completed |
-| — | <a id="f-004-t05"></a>F-004-T05 — Web push subscription and delivery | 3 h | 0.5 h (stated) | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-004.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
-| Opened | 2026-11-01 |
-| Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Phone install/push acceptance pending (F-004-T06). |
-| Reviewed | 2026-11-12 |
 
 </details>
 
@@ -1374,6 +1375,56 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-089"></a>[✨ F-089](#top)
+
+**Browser control: act on a named control in an open page**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-089-T06 (owner chose A on 2026-11-24: a `browser.click` chat tool behind an approval card).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
+| **Reproduce** | Ask NERV to click a named button on an open tab. |
+| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
+| 🟡 Medium | <a id="f-089-t06"></a>F-089-T06 — A browser.click chat tool for Misato | 2.5 h | 0 h | 2.5 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 6.5 h (5 of 6 steps) | 3.25 h (3 of 6 steps recorded) | 2.5 h agent + 0.25 h owner | 3 of 6 completed | | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
+| — | <a id="f-089-t05"></a>F-089-T05 — Decision: a chat tool for browser clicks | 0 h | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-089.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-106"></a>[✨ F-106](#top)
 
 **Per-turn prompt size on the local route, then deferred domain tool loading**
@@ -1878,55 +1929,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-087-T02 verified: [PR #491](https://github.com/voidbrain/nerv/pull/491) merged on green CI. `F-087-T01` decision written in [bambu-print-handoff.md](decisions/bambu-print-handoff.md); verified with `npm run check:fast`. 2026-11-22: F-087-T03 verified (`bambu.handoff` Orange gate + `handOffToBambuConnect` + owner checklist); `node --test test/slicer.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-089"></a>[✨ F-089](#top)
-
-**Browser control: act on a named control in an open page**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h owner | — | — | 🤖 | — | 🤔 |
-
-🧑 **→** [Decide](decisions/browser-adapter.md#owner-decision-a-chat-tool-for-browser-clicks-f-089-t05) whether Misato gets a chat tool for browser clicks (F-089-T05).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
-| **Reproduce** | Ask NERV to click a named button on an open tab. |
-| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
-| 🟢 Small | <a id="f-089-t05"></a>F-089-T05 — Decision: a chat tool for browser clicks | — | 0 h | 0 h agent + 0.25 h owner | Planned | — | — | [🤔](decisions/browser-adapter.md#owner-decision-a-chat-tool-for-browser-clicks-f-089-t05) | — |
-| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 4 h (3 of 5 steps) | 3.25 h (3 of 5 steps recorded) | 0.5 h owner | 2 of 5 completed | | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-089.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
-| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -2511,6 +2513,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-123"></a>[✨ F-123](#top)
+
+**Connect NERV to Grover's hub over MCP**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 2.5 h agent + 0.5 h owner | — | [F-122-T02](#f-122-t02) | 🤖 | — | — |
+
+💻 **→** Next: F-123-T01 — Register a remote MCP server on the tailnet (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24 (coordinator gap review): Grover's hub exposes its tools at `/mcp` on the Pi behind Tailscale, and Grover F-005's last check expects NERV to list them. NERV has governed MCP tool registration (F-021) but no record for connecting to a remote MCP server on the tailnet. Grover F-005-T02 waits on this record (grover:F-005-T02). |
+| **Reproduce** | There is no documented, tested way to register `https://<pi>.<tailnet>.ts.net/mcp` as an MCP source in NERV. |
+| **Check** | The owner registers the hub's `/mcp` URL in NERV; NERV lists the Grover tools with their effect classes; read tools run as Green, actions go through the gate and approval as usual; an unreachable hub is reported, not hidden. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-123-t01"></a>F-123-T01 — Register a remote MCP server on the tailnet | 2.5 h | 0 h | 2.5 h | Planned | — | [F-122-T02](#f-122-t02), [F-123-T02](#f-123-t02) | 🤖 |
+| 🟢 Small | <a id="f-123-t02"></a>F-123-T02 — Owner check: NERV lists the Grover tools | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-123-T01](#f-123-t01) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 2 steps recorded) | 2.5 h agent + 0.5 h owner | 0 of 2 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-123.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730). |
+| Opened | 2026-11-24 |
+| Verification | — |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-099"></a>[✨ F-099](#top)
 
 **FPV build knowledge: components and wiring from cited sources**
@@ -2595,6 +2636,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-121-T01: [PR #715](https://github.com/voidbrain/nerv/pull/715) implementation · F-121-T02: [PR #718](https://github.com/voidbrain/nerv/pull/718) implementation · F-121-T04: [PR #722](https://github.com/voidbrain/nerv/pull/722) implementation. [PR #722](https://github.com/voidbrain/nerv/pull/722) (F-121-T04 part file over the Kaji line); [PR #718](https://github.com/voidbrain/nerv/pull/718) (F-121-T02 print a part by chat); [PR #715](https://github.com/voidbrain/nerv/pull/715) (F-121-T01 printed parts on drone models); opened in [PR #712](https://github.com/voidbrain/nerv/pull/712). |
 | Opened | 2026-11-24 |
 | Verification | 2026-11-24: F-121-T04 `node --test test/print-transfer.test.ts` (failing first: module missing) and the cross-process join test in `test/misato.test.ts` (failed with the coordinator step removed); affected suites (82 passed); full `npm test` 1393 (1391 passed, 2 skipped); `npm run build` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed. Coordinator review before review (asynchronous slicer, bounded lane, race-free cache): the slow-slicer test (another route answers while the slicer runs) failed first against the synchronous receiver; `test/print-transfer.test.ts` 11 passed; full `npm test` 1396 (1394 passed, 2 skipped); build passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed. CI pending. F-121-T02 `node --test test/fleet-print-job.test.ts` (failing first) and the affected suites (224 passed); full `npm test` 1365 (1363 passed, 2 skipped); `npm run build`, typecheck, lint, `npm run check:fast` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed; Review fixes (launcher guard, Blue hand-off; failing tests first): `node --test test/slicer.test.ts test/fleet-print-job.test.ts test/misato.test.ts` passed; full `npm test` 1366 (1364 passed, 2 skipped); build, typecheck, lint, `npm run check:fast` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed. CI pending. F-121-T01 `node --test test/fleet-prints.test.ts test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts test/misato.test.ts test/slicer.test.ts test/cli-help.test.ts` and related suites (126 passed), `npm run typecheck`, `npm run check:conventions`, `npm run check:fast` passed locally; full `npm test` 1310 tests (1308 passed, 2 skipped); `npm run build` passed; gauntlet `all` (gemma4-12b profile, owner-approved) passed with 0 cases still pending, ledger committed. Review fixes: `node --test` fleet-prints, fleet-chat, fleet, fleet-import, misato, slicer, cli-help, photos, telegram, batteries (142 passed), typecheck, lint, `npm run check:conventions` passed; build and gauntlet `all` (gemma4-12b, owner-approved) passed, 0 still pending, ledger committed; CI pending. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="f-122"></a>[✨ F-122](#top)
+
+**Deliver Grover alerts**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 4 h agent + 0.5 h owner | [F-123-T01](#f-123-t01) | — | 🤖 | — | — |
+
+💻 **→** Next: F-122-T01 — Design Grover alert delivery (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24 (coordinator gap review): Grover's hub raises and clears alerts (pH, EC, temperature or level out of the phase range, an agent offline, a driver fault) and lists them through an MCP tool, but nothing delivers them to the owner. Grover F-008-T03 waits on this record (grover:F-008-T03). |
+| **Reproduce** | With the hub reachable, `nerv chat "ci sono allarmi Grover?"` has no answer source, and a new Grover alert reaches no channel. |
+| **Check** | A new Grover alert reaches the owner once through NERV's channels (Telegram, phone push, inbox) with its value and range; a cleared alert is reported once; repeats inside the hub's hysteresis are not re-sent; delivery survives a NERV restart without duplicates. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-122-t01"></a>F-122-T01 — Design Grover alert delivery | 1 h | 0 h | 1 h | Planned | — | [F-122-T02](#f-122-t02) | 🤖 |
+| 🟡 Medium | <a id="f-122-t02"></a>F-122-T02 — Deliver Grover alerts through NERV's channels | 3 h | 0 h | 3 h | Planned | [F-122-T01](#f-122-t01), [F-123-T01](#f-123-t01) | [F-122-T03](#f-122-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-122-t03"></a>F-122-T03 — Owner check: a real Grover alert arrives | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-122-T02](#f-122-t02) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 4 h | 0 h (0 of 3 steps recorded) | 4 h agent + 0.5 h owner | 0 of 3 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-122.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730). |
+| Opened | 2026-11-24 |
+| Verification | — |
 | Reviewed | 2026-11-24 |
 
 </details>
