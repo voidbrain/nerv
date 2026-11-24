@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 99.25 h agent + 11 h owner across 137 open steps of 38 features and 27 other records. 147.5 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 99.25 h agent + 11 h owner across 137 open steps of 38 features and 27 other records. 148 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -415,8 +415,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-121-t01"></a>B-121-T01 — Refuse a move from a standby that acked a later epoch than its state | 0.5 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | [B-121-T02](#b-121-t02) | [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks |
-| 🟢 Small | <a id="b-121-t02"></a>B-121-T02 — Epoch-push replies report the newest epoch a base ran or acked | 2.75 h | 2.75 h so far (stated) | 0 h | Implemented; verification pending | [B-121-T01](#b-121-t01) | [B-124-T01](#b-124-t01) | [PR #721](https://github.com/voidbrain/nerv/pull/721) ranOrAckedEpoch in the epoch-push reply; record-free probe before the push; #721 review fixes |
-| 🟢 Small | **Total** | 3.25 h | 3.5 h | 0 h | 0 of 2 completed | | | |
+| 🟢 Small | <a id="b-121-t02"></a>B-121-T02 — Epoch-push replies report the newest epoch a base ran or acked | 3.25 h | 3.25 h so far (stated) | 0 h | Implemented; verification pending | [B-121-T01](#b-121-t01) | [B-124-T01](#b-124-t01) | [PR #721](https://github.com/voidbrain/nerv/pull/721) ranOrAckedEpoch in the epoch-push reply; record-free probe before the push; #721 review fixes |
+| 🟢 Small | **Total** | 3.75 h | 4 h | 0 h | 0 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -427,7 +427,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Steps: B-121-T01: [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks · B-121-T02: [PR #721](https://github.com/voidbrain/nerv/pull/721) ranOrAckedEpoch in the epoch-push reply; record-free probe before the push; #721 review fixes. [PR #717](https://github.com/voidbrain/nerv/pull/717) (Test: `test/coordinator-partition.test.ts`, mixed epochs) · B-121-T02: [PR #721](https://github.com/voidbrain/nerv/pull/721) (Test: `test/coordinator-partition.test.ts`, B-121-T02; `test/coordinator-relocation.test.ts`, epoch-push witness) |
 | Opened | 2026-11-24 |
-| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and the coordinator suites pass locally, B-121-T02 included; full `npm test` 1372 pass, 0 fail (2 skipped) after the #721 re-check fixes; gauntlet: the 10 pending cases ran and passed again (ledger committed in PR #721). On main: Pending. |
+| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and the coordinator suites pass locally, B-121-T02 included; full `npm test` (see the latest run below) after the #721 third-check fixes; gauntlet: the 10 pending cases ran and passed again (ledger committed in PR #721). On main: Pending. |
 | Reviewed | 2026-11-24 |
 
 </details>
