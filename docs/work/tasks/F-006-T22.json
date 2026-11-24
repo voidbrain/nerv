@@ -39,5 +39,11 @@
     "ownerKind": "decision",
     "baselineAgentHours": 0,
     "estimateAgentHours": 0
-  }
+  },
+  "prs": [
+    {
+      "pr": 697,
+      "note": "owner decision recorded; T23\u2013T26 planned"
+    }
+  ]
 }
