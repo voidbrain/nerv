@@ -9,6 +9,7 @@ import {
   checkRelocationReadiness,
   checkStandbyCandidate,
   relocateCoordinator,
+  verifyDrainReceipt,
   type RelocateCoordinatorInput,
   type RelocateCoordinatorResult,
   type RelocationLiveness,
@@ -287,9 +288,23 @@ function derive(
  * #717 review: the refusals this base's own stores decide (not named, not a verified standby, a standby behind
  * an epoch it acked) come before the epoch push, so a move that cannot happen never tells another base the new
  * epoch (which would fence the main that is running). A base already active at the new epoch skips them
- * (undefined); otherwise the result is the epoch of the state the standby holds.
+ * (undefined); otherwise the result is the epoch of the state the standby holds and, for a planned move, the
+ * main records its drain receipt lists as skipped. #721 third check: the receipt's signature is verified here,
+ * against the enrolment of the main at the standby's epoch, so a tampered receipt is refused before the probe and
+ * the push (readiness verifies it again).
  */
-function localPrecheck(input: PromoteCoordinatorInput, mainDbPath: string, standbyDbPath: string): number | undefined {
+function localPrecheck(
+  input: PromoteCoordinatorInput,
+  mainDbPath: string,
+  standbyDbPath: string,
+):
+  | {
+      readonly standbyEpoch: number;
+      readonly skippedMains: readonly { readonly baseId: string }[];
+      /** Planned: the drained main that signed the receipt (it is stopped, and its receipt is its answer). */
+      readonly drainedBy?: string;
+    }
+  | undefined {
   const db = new DatabaseSync(mainDbPath);
   try {
     const registry = new Registry(db, input.rootPublicKey);
@@ -305,8 +320,9 @@ function localPrecheck(input: PromoteCoordinatorInput, mainDbPath: string, stand
     )
       return undefined;
     const candidate = existsSync(standbyDbPath) ? new DatabaseSync(standbyDbPath) : db;
+    let standbyEpoch: number;
     try {
-      return checkStandbyCandidate({
+      standbyEpoch = checkStandbyCandidate({
         candidateDb: candidate,
         selfBaseId: self.baseId,
         registryMain: { baseId: registry.main(), coordinatorEpoch: newEpoch },
@@ -314,6 +330,32 @@ function localPrecheck(input: PromoteCoordinatorInput, mainDbPath: string, stand
     } finally {
       if (candidate !== db) candidate.close();
     }
+    if (!input.drainReceiptFile) return { standbyEpoch, skippedMains: [] };
+    const records = registry.records();
+    const previousMain = records
+      .filter((r) => r.body.kind === 'main' && (r.body.coordinatorEpoch ?? 0) === standbyEpoch)
+      .at(-1);
+    if (!previousMain)
+      refuse('previous_main_unknown', `No owner-signed main record names the epoch ${standbyEpoch} the standby holds.`);
+    const previousMainBaseId = previousMain.body.baseId;
+    const enrolment = records
+      .filter((r) => r.body.kind === 'enrol' && r.body.baseId === previousMainBaseId)
+      .sort((a, b) => b.body.serial - a.body.serial)[0];
+    if (!enrolment || registry.bases().some((b) => b.baseId === previousMainBaseId && b.status === 'revoked'))
+      refuse('drain_receipt_invalid', `${previousMainBaseId} is revoked: its receipt is not trusted.`);
+    let drain: SignedDrainReceipt;
+    try {
+      drain = JSON.parse(readFileSync(input.drainReceiptFile, 'utf8')) as SignedDrainReceipt;
+    } catch {
+      refuse('drain_receipt_invalid', 'The drain receipt cannot be read.');
+    }
+    if (!drain?.receipt || !verifyDrainReceipt(drain, publicKeyFrom(enrolment.body.publicKey!)))
+      refuse('drain_receipt_invalid', `The drain receipt is not signed by ${previousMainBaseId}.`);
+    const listed: unknown = drain.receipt.skippedMains;
+    const skippedMains = (Array.isArray(listed) ? (listed as { baseId?: unknown }[]) : []).flatMap((m) =>
+      typeof m?.baseId === 'string' ? [{ baseId: m.baseId }] : [],
+    );
+    return { standbyEpoch, skippedMains, drainedBy: previousMainBaseId };
   } finally {
     db.close();
   }
@@ -330,13 +372,13 @@ function localPrecheck(input: PromoteCoordinatorInput, mainDbPath: string, stand
 async function remotePrecheck(
   input: PromoteCoordinatorInput & { readonly pushEpoch: NonNullable<PromoteCoordinatorInput['pushEpoch']> },
   mainDbPath: string,
-  standbyEpoch: number,
+  local: NonNullable<ReturnType<typeof localPrecheck>>,
 ): Promise<void> {
+  const { standbyEpoch } = local;
   const db = new DatabaseSync(mainDbPath);
   let probe: Awaited<ReturnType<typeof probeCoordinatorEpochs>>;
   let newEpoch: number;
   let selfBaseId: string | undefined;
-  let revoked: Set<string>;
   let registryBetween: { baseId: string; coordinatorEpoch: number }[];
   try {
     db.exec('PRAGMA busy_timeout = 5000');
@@ -344,12 +386,6 @@ async function remotePrecheck(
     newEpoch = registry.mainEpoch();
     const own = keyIdentity(input.ownPublicKey);
     selfBaseId = registry.bases().find((b) => b.status === 'enrolled' && keyIdentity(b.publicKey) === own)?.baseId;
-    revoked = new Set(
-      registry
-        .bases()
-        .filter((b) => b.status === 'revoked')
-        .map((b) => b.baseId),
-    );
     registryBetween = registry
       .records()
       .filter(
@@ -380,30 +416,24 @@ async function remotePrecheck(
     );
   }
   if (input.drainReceiptFile) {
-    // #721 re-check: a planned move goes on past a base that does not answer, unless that base may have run an
-    // epoch after the standby's state: a main record the drain receipt lists as skipped, or one this base holds.
-    // Each must answer, with the field, at or below the standby's epoch (a revoked base cannot act).
-    let listed: unknown;
-    try {
-      listed = (JSON.parse(readFileSync(input.drainReceiptFile, 'utf8')) as SignedDrainReceipt).receipt?.skippedMains;
-    } catch {
-      listed = undefined; // readiness refuses an unreadable receipt
-    }
-    const skipped = [...(Array.isArray(listed) ? (listed as { baseId?: unknown }[]) : []), ...registryBetween]
-      .map((m) => m.baseId)
-      .filter((id): id is string => typeof id === 'string' && id !== selfBaseId && !revoked.has(id));
-    const must = [...new Set(skipped)].sort();
-    const silent = must.filter((id) => !probe.ranOrAcked.has(id) && !probe.unknown.includes(id));
+    // #721 re-check and third check: a planned move goes on past a base that does not answer, unless a main was
+    // signed between the standby's epoch and the new one (listed as skipped by the verified receipt, or held here),
+    // revoked or not: it may have run, and revoking it does not undo its epoch, which any base may have acked as
+    // its standby. Then, as unplanned, every unrevoked base must answer, with the field, at or below the standby's
+    // epoch.
+    const skipped = [...local.skippedMains, ...registryBetween].some((m) => m.baseId !== selfBaseId);
+    // The drained main signed the receipt and is stopped: its receipt answers for it.
+    const silent = skipped ? probe.unreachable.filter((id) => id !== local.drainedBy) : [];
     if (silent.length)
       refuse(
         'old_host_unconfirmed',
-        `${silent.join(', ')} did not answer: the owner named it main after the epoch ${standbyEpoch} state this standby holds, so it may have run. Reach it (or revoke it with the root key) and run kaji promote again. No base was told the new epoch.`,
+        `${silent.join(', ')} did not answer: a main was named after the epoch ${standbyEpoch} state this standby holds and may have run, and any unrevoked base may have acked it. Reach it and run kaji promote again. No base was told the new epoch.`,
       );
     // An older NERV says only the newest main record it holds, signed: one later than the standby's state (and
     // not the new one) may have run, and so may a listed base that cannot say.
     const unsure = probe.unknown.filter(
       (id) =>
-        must.includes(id) ||
+        skipped ||
         ((probe.unknownMaxSeen.get(id) ?? 0) > standbyEpoch && (probe.unknownMaxSeen.get(id) ?? 0) < newEpoch),
     );
     if (unsure.length)
@@ -453,9 +483,9 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
   if (!existsSync(mainDbPath) && existsSync(archivePath) && existsSync(standbyDbPath))
     renameSync(standbyDbPath, mainDbPath);
   if (!existsSync(mainDbPath)) throw new Error(`No store at ${mainDbPath}: nothing to promote.`);
-  const standbyEpoch = localPrecheck(input, mainDbPath, standbyDbPath);
-  if (input.pushEpoch && standbyEpoch !== undefined)
-    await remotePrecheck({ ...input, pushEpoch: input.pushEpoch }, mainDbPath, standbyEpoch);
+  const local = localPrecheck(input, mainDbPath, standbyDbPath);
+  if (input.pushEpoch && local !== undefined)
+    await remotePrecheck({ ...input, pushEpoch: input.pushEpoch }, mainDbPath, local);
   if (input.pushEpoch) {
     const db = new DatabaseSync(mainDbPath);
     try {
