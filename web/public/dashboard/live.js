@@ -155,13 +155,13 @@
       pollFailures = 0;
       setBanner("<b>LIVE · " + esc(liveBaseName(doctor)) + "</b> <span class='muted'>— " + esc(kajiSummary()) + " · " + latest20.length + " recent sorties · refreshed " + new Date().toTimeString().slice(0, 8) + "</span>", "live");
     } catch (e) {
-      if (e.status === 401) { token = ""; forgetSession(); signIn(SESSION_ENDED); return; }
+      if (e.status === 401) { token = ""; forgetSession(); signIn(ended()); return; }
       // Keep the last successful view through one failed poll; the regular interval retries reads only.
       if (++pollFailures < 2) return;
       let statusFailure = null;
       try { await api("status"); }
       catch (statusError) {
-        if (statusError.status === 401) { token = ""; forgetSession(); signIn(SESSION_ENDED); return; }
+        if (statusError.status === 401) { token = ""; forgetSession(); signIn(ended()); return; }
         statusFailure = statusError;
       }
       const clean = message => message.replace(/[.!\s]+$/, "");
@@ -189,7 +189,7 @@
     const button = e.target.closest("[data-usage-page]"); if (!button || usageBusy) return;
     const direction = button.dataset.usagePage;
     try { await moveUsage(direction); }
-    catch (e) { if (e.status === 401) { token = ""; forgetSession(); signIn(SESSION_ENDED); } return; }
+    catch (e) { if (e.status === 401) { token = ""; forgetSession(); signIn(ended()); } return; }
     button.blur(); renderBudget(); const nextButton = document.querySelector('[data-usage-page="' + direction + '"]:not(:disabled)') || document.querySelector('[data-usage-page]:not(:disabled)'); if (nextButton) nextButton.focus();
   });
   document.addEventListener("change", async e => {
@@ -774,7 +774,7 @@
       const data = await api("bases/" + encodeURIComponent(baseId) + "/sorties/" + encodeURIComponent(sortieId));
       remoteInspections.set(key, { data });
     } catch (err) {
-      if (err && err.status === 401) { token = ""; forgetSession(); signIn(SESSION_ENDED); return; }
+      if (err && err.status === 401) { token = ""; forgetSession(); signIn(ended()); return; }
       remoteInspections.set(key, { error: "Could not inspect on destination base: " + (err && err.message ? err.message : "unavailable") });
     }
     const after = state.sorties.find(x => x.id === state.selected);
@@ -1171,28 +1171,64 @@
   // F-039: the login code is swapped for a dashboard session (never the admin token), kept in this tab's sessionStorage so a
   // reload stays signed in; it ends after 12 h, when the service restarts, with `sessions revoke`, or when the tab closes.
   // A token pasted by hand is the admin token: it stays in memory only and is never stored.
-  const SESSION_KEY = "nerv.dashboard.session";
+  // F-118-T02: a typed pairing code (nerv open --phone) is swapped once for a device credential, only in the installed
+  // app (Home Screen): it is kept in the origin's localStorage so later launches sign in by themselves until it is
+  // revoked, lapses after 90 days unused or the admin token rotates. A browser tab refuses the code before any request
+  // (review of #707): it would hold a 90-day device it cannot sign out of.
+  const SESSION_KEY = "nerv.dashboard.session"; const DEVICE_KEY = "nerv.device";
   const SESSION_ENDED = "Your dashboard session ended (after 12 h, a service restart or sessions revoke).";
-  function keepSession(t) { try { sessionStorage.setItem(SESSION_KEY, t); } catch { /* storage blocked: memory only */ } }
-  function keptSession() { try { return sessionStorage.getItem(SESSION_KEY) || ""; } catch { return ""; } }
-  function forgetSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch { /* nothing kept */ } }
-  // Not signed in: a clear bar with a token field, never the simulation's invented data.
+  const DEVICE_ENDED = "This device's pairing ended (revoked, 90 days unused or a changed token).";
+  const INSTALLED = (() => { try { return navigator.standalone === true || matchMedia("(display-mode: standalone)").matches; } catch { return false; } })();
+  let paired = false;
+  const store = kind => { try { return kind === "device" ? localStorage : sessionStorage; } catch { return null; } };
+  function keepSession(t) { try { store("session").setItem(SESSION_KEY, t); } catch { /* storage blocked: memory only */ } }
+  function keptSession() { try { return store("session").getItem(SESSION_KEY) || ""; } catch { return ""; } }
+  function keptDevice() { try { return INSTALLED ? store("device").getItem(DEVICE_KEY) || "" : ""; } catch { return ""; } }
+  function forgetSession() { try { store("session").removeItem(SESSION_KEY); } catch { /* nothing kept */ } if (paired) try { store("device").removeItem(DEVICE_KEY); } catch { /* nothing kept */ } }
+  const ended = () => paired ? DEVICE_ENDED : SESSION_ENDED;
+  const PAIRING_CODE = /^[A-Za-z0-9]{4}[\s-]?[A-Za-z0-9]{4}$/;
+  const deviceName = () => { const ua = navigator.userAgent; const kind = /iPhone/.test(ua) ? "iPhone" : /iPad/.test(ua) ? "iPad" : /Android/.test(ua) ? "Android" : /Macintosh|Mac OS X/.test(ua) ? "Mac" : /Windows/.test(ua) ? "Windows" : /Linux/.test(ua) ? "Linux" : "Device"; return kind + " · dashboard app"; };
+  // Not signed in: a clear bar with a pairing-code or token field, never the simulation's invented data.
   const signIn = reason => {
     clearTimeout(streamTimer); if (streamController) streamController.abort();
-    setBanner("<b>LIVE · NOT SIGNED IN</b> <span class='muted'>— " + esc(reason) + " Run <code>nerv open dashboard</code>, or paste the access token (kept in this tab's memory only):</span> " +
-      "<form id='live-signin' style='display:inline-flex;gap:4px'><label class='sr-only' for='live-token'>Access token</label><input id='live-token' type='password' autocomplete='off' style='width:16em'/><button class='btn sm' type='submit'>Sign in</button></form>");
+    setBanner("<b>LIVE · NOT SIGNED IN</b> <span class='muted'>— " + esc(reason) + " Run <code>nerv open dashboard</code>" + (INSTALLED ? ", or type the pairing code from <code>nerv open --phone</code> (this app then stays signed in)" : "; on a phone, open the installed NERV app from the Home Screen and type the pairing code from <code>nerv open --phone</code> there") + "; or paste the access token (kept in memory only):</span> " +
+      "<form id='live-signin' style='display:inline-flex;gap:4px'><label class='sr-only' for='live-token'>Pairing code or access token</label><input id='live-token' type='password' autocomplete='off' placeholder='XXXX-XXXX' style='width:16em'/><button class='btn sm' type='submit'>Sign in</button></form>");
+  };
+  const pair = value => {
+    setBanner("<b>LIVE · SIGNING IN</b> <span class='muted'>— pairing this device…</span>");
+    fetch("/api/device/pair", { method:"POST", headers:{ "Content-Type":"application/json", "ngsw-bypass":"1" }, body:JSON.stringify({ code:value, name:deviceName() }) })
+      .then(r => r.json().catch(() => ({})).then(d => {
+        if (!r.ok || !d.token) throw new Error(d.error || "Pairing failed");
+        token = d.token; paired = true;
+        try { store("device").setItem(DEVICE_KEY, token); } catch { /* storage blocked: this launch only */ }
+        begin();
+      }))
+      .catch(e => signIn(e instanceof TypeError ? "The service was not reached." : e.message));
   };
   document.addEventListener("submit", e => {
     if (e.target.id !== "live-signin") return; e.preventDefault(); const input = document.getElementById("live-token"); const value = input.value.trim(); input.value = "";
-    if (!value) return; token = value; api("status").then(begin).catch(err => { token = ""; signIn("That token was refused (" + err.message + ")."); });
+    if (!value) return;
+    if (PAIRING_CODE.test(value)) { if (INSTALLED) pair(value); else signIn("A pairing code works only in the installed NERV app: open it from the Home Screen and type the code there, or use the access token here."); return; }
+    paired = false; token = value; api("status").then(begin).catch(err => { token = ""; signIn("That token was refused (" + err.message + ")."); });
   });
+  // An installed app that was paired: sign in with the kept credential. Only a refusal (401) forgets it; a 403 stops;
+  // while the service cannot be reached it is kept and tried again after 5 s, doubling up to 5 minutes.
+  const resumeDevice = (wait = 5000) => {
+    token = keptDevice(); paired = true; setBanner("<b>LIVE · SIGNING IN</b> <span class='muted'>— this device is paired; signing in…</span>");
+    api("status").then(begin).catch(e => {
+      if (e.status === 401) { token = ""; forgetSession(); paired = false; signIn(DEVICE_ENDED); return; }
+      if (e.status === 403) { token = ""; signIn("The service refused this device (" + e.message + ")."); return; }
+      setBanner("<b>LIVE · OFFLINE</b> <span class='muted'>— the service was not reached; trying again in " + Math.round(wait / 1000) + " s…</span>"); setTimeout(() => resumeDevice(Math.min(wait * 2, 300000)), wait);
+    });
+  };
   if (code) {
     setBanner("<b>LIVE · SIGNING IN</b> <span class='muted'>— exchanging the one-use login code…</span>");
     fetch("/api/session/exchange", { method:"POST", headers:{ "Content-Type":"application/json", "ngsw-bypass":"1" }, body:JSON.stringify({ code }) })
       .then(r => r.json().then(d => { if (!r.ok || !d.token) throw new Error(d.error || "Login failed"); token = d.token; keepSession(token); begin(); }))
       .catch(e => signIn(e.message + "."));
-  } else if (keptSession()) {
-    // A reload in the same tab: the dashboard session kept for this tab signs in again, until it ends.
+  } else if (keptDevice()) resumeDevice();
+  else if (keptSession()) {
+    // A reload in the same tab: the session kept for this tab signs in again, until it ends.
     token = keptSession(); setBanner("<b>LIVE · SIGNING IN</b> <span class='muted'>— resuming this tab's session…</span>");
     api("status").then(begin).catch(() => { token = ""; forgetSession(); signIn(SESSION_ENDED); });
   } else signIn("This page was opened without a login code.");

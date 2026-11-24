@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { DeviceBook, DEVICE_IDLE_MS, PairingCodes, PAIRING_CODE_TTL_MS } from '../src/device-book.ts';
+import { DeviceBook, DEVICE_IDLE_MS, MAX_DEVICES, PairingCodes, PAIRING_CODE_TTL_MS } from '../src/device-book.ts';
 import { initialize, readToken } from '../src/config.ts';
 import { makeServer } from '../src/server.ts';
 import { Store } from '../src/store.ts';
@@ -403,6 +403,33 @@ test('F-118-T01 review join: rotation ends pending pairing and login codes; only
         });
         assert.equal(plain.status, 415);
         assert.equal((await pair(url, good)).status, 200, 'the budget is intact');
+      },
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('F-118-T02 review join: a full device book refuses with 409 and leaves the code usable', async () => {
+  const dir = temp();
+  const admin = 'a'.repeat(32);
+  try {
+    await withServer(
+      dir,
+      () => admin,
+      async (url) => {
+        for (let i = 0; i < MAX_DEVICES; i++)
+          assert.equal((await pair(url, await mint(url, admin), 'Phone ' + i)).status, 200);
+        const code = await mint(url, admin);
+        assert.equal((await pair(url, code)).status, 409, 'full: refused before the code is spent');
+        const list = (await (
+          await fetch(url + '/api/devices', { headers: { authorization: 'Bearer ' + admin } })
+        ).json()) as { devices: { id: string }[] };
+        await fetch(url + '/api/devices/' + list.devices[0]!.id, {
+          method: 'DELETE',
+          headers: { authorization: 'Bearer ' + admin },
+        });
+        assert.equal((await pair(url, code)).status, 200, 'after a revoke the same code still pairs');
       },
     );
   } finally {
