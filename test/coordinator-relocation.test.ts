@@ -5,6 +5,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { after, describe, it } from 'node:test';
+import { createServer } from 'node:net';
+import { KajiLink } from '../src/kaji-link.ts';
+import { allUnrevokedAckedEpoch, pushCoordinatorEpoch, registryPort } from '../src/coordinator-epoch.ts';
 import { spawnSync } from 'node:child_process';
 import {
   CoordinatorAuthorityError,
@@ -34,6 +37,7 @@ import {
   signRecord,
   ROOT_KEY_FILE,
   type RegistryBody,
+  type SignedRecord,
 } from '../src/kaji.ts';
 import { pinKajiRoot, setBase } from '../src/config.ts';
 import {
@@ -387,7 +391,16 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
       );
       setState(store.db, 2, 'active', 4, 'digest-4');
       const config = { kaji: { root: key.publicKey } } as unknown as Parameters<typeof runKajiCommand>[3];
-      const ctx = { readSecret: async () => PASS, flag: (n: string) => (n === '--revoke' ? 'NERV-03' : undefined) };
+      const ctx = {
+        readSecret: async () => PASS,
+        flag: (n: string) => (n === '--revoke' ? 'NERV-03' : undefined),
+        // F-016-T18: relocate pushes the new records; these test bases are offline.
+        promotion: {
+          pushEpoch: async (): Promise<never> => {
+            throw new Error('offline');
+          },
+        },
+      };
       const noFlags = { ...ctx, flag: () => undefined };
       const receiptPath = join(dir, 'receipt.json');
 
@@ -812,6 +825,195 @@ describe('F-016-T17: nerv kaji promote stops the service, derives its inputs fro
   });
 });
 
+describe('F-016-T18: /kaji/epoch-push, so the new epoch acks are measured, not assumed', () => {
+  it('pushes the signed records over the Kaji line; peers persist the epoch and refuse the old main; acks are recorded', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-epoch-push-'));
+    const root = generateKeyPairSync('ed25519');
+    const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+    const free = async () =>
+      new Promise<number>((resolve) => {
+        const srv = createServer();
+        srv.listen(0, '127.0.0.1', () => {
+          const p = (srv.address() as { port: number }).port;
+          srv.close(() => resolve(p));
+        });
+      });
+    const ids = ['NERV-01', 'NERV-02', 'NERV-03'] as const;
+    const bases = await Promise.all(
+      ids.map(async (id) => {
+        const home = join(dir, id);
+        mkdirSync(home, { recursive: true });
+        setBase(home, { id, name: id });
+        pinKajiRoot(home, rootPub, true);
+        const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+        return { id, home, store, reg: new Registry(store.db, rootPub), port: await free(), key: baseKey(home) };
+      }),
+    );
+    let serial = 0;
+    const signed = (body: Record<string, unknown>) =>
+      signRecord(root.privateKey, {
+        ...body,
+        serial: ++serial,
+        issued: '2026-11-24T10:00:00.000Z',
+      } as unknown as RegistryBody);
+    const common = [
+      ...bases.map((b) =>
+        signed({ kind: 'enrol', baseId: b.id, name: b.id, publicKey: b.key.publicKey, address: `127.0.0.1:${b.port}` }),
+      ),
+      signed({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 }),
+    ];
+    for (const b of bases) for (const r of common) b.reg.add(r);
+    const [a, b, c] = bases as unknown as [(typeof bases)[0], (typeof bases)[0], (typeof bases)[0]];
+    b.reg.add(signed({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 }));
+    const links = [b, c].map(
+      (x) =>
+        new KajiLink({
+          baseId: x.id,
+          key: x.key.privateKey,
+          publicKey: x.key.publicKey,
+          registry: registryPort(x.reg),
+          minCoordinatorEpoch: () => x.reg.mainEpoch(),
+          holdsStandby: () => x.id === 'NERV-03',
+          onLeaseRenew: async () => ({ ok: false, reason: 'promoting', error: 'not a standby' }),
+        }),
+    );
+    const oldMain = new KajiLink({
+      baseId: 'NERV-01',
+      key: a.key.privateKey,
+      publicKey: a.key.publicKey,
+      registry: registryPort(a.reg),
+    });
+    for (const l of links) await l.start(60_000);
+    try {
+      const push = (id: string, records: SignedRecord[]) => links[0]!.pushEpoch(id, records);
+      // NERV-01 (the old main) is unreachable: its link never listens.
+      const first = await pushCoordinatorEpoch({
+        db: b.store.db,
+        rootPublicKey: rootPub,
+        ownPublicKey: b.key.publicKey,
+        push,
+      });
+      assert.deepEqual([first.acked, first.missing], [['NERV-03'], ['NERV-01']]);
+      assert.equal(c.reg.main(), 'NERV-02');
+      assert.equal(c.reg.mainEpoch(), 3, 'the peer persisted the new epoch');
+      // The signed reply says whether the base holds a standby store (re-review: only such a base may be named).
+      assert.equal((await links[0]!.pushEpoch('NERV-03', [])).standby, true);
+      assert.equal(
+        allUnrevokedAckedEpoch({ db: b.store.db, rootPublicKey: rootPub, ownPublicKey: b.key.publicKey, epoch: 3 }),
+        false,
+      );
+      // The peer now refuses the old main with signed newer-epoch evidence (#701 review fix 2: no longer a 403).
+      const refused = await oldMain.renewLease('NERV-03', { coordinatorEpoch: 2, leaseSeq: 1 });
+      assert.equal(refused.ok, false);
+      if (!refused.ok)
+        assert.deepEqual([refused.reason, refused.maxSeenCoordinatorEpoch], ['stale_coordinator_epoch', 3]);
+
+      // The owner revokes the lost old main: a revoked base needs no ack.
+      b.reg.add(signed({ kind: 'revoke', baseId: 'NERV-01', publicKey: a.key.publicKey }));
+      const second = await pushCoordinatorEpoch({
+        db: b.store.db,
+        rootPublicKey: rootPub,
+        ownPublicKey: b.key.publicKey,
+        push,
+      });
+      assert.deepEqual([second.acked, second.missing], [['NERV-03'], []]);
+      assert.equal(
+        allUnrevokedAckedEpoch({ db: b.store.db, rootPublicKey: rootPub, ownPublicKey: b.key.publicKey, epoch: 3 }),
+        true,
+      );
+      // An ack for an older epoch does not count for a newer one.
+      assert.equal(
+        allUnrevokedAckedEpoch({ db: b.store.db, rootPublicKey: rootPub, ownPublicKey: b.key.publicKey, epoch: 4 }),
+        false,
+      );
+    } finally {
+      for (const l of links) await l.stop();
+      for (const x of bases) x.store.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('kaji promote measures the acks itself: every unrevoked base acked and the lease was acked here, so no confirmation and the 65 s wait', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-acks-'));
+    try {
+      const home = join(dir, 'home');
+      mkdirSync(home, { recursive: true });
+      const root = generateKeyPairSync('ed25519');
+      const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      setBase(home, { id: 'NERV-02', name: 'Tabgha' });
+      pinKajiRoot(home, rootPub, true);
+      const oldPub = generateKeyPairSync('ed25519')
+        .publicKey.export({ type: 'spki', format: 'der' })
+        .toString('base64');
+      const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+      const reg = new Registry(store.db, rootPub);
+      let serial = 0;
+      const add = (body: Record<string, unknown>) =>
+        reg.add(
+          signRecord(root.privateKey, {
+            ...body,
+            serial: ++serial,
+            issued: '2026-11-24T10:00:00.000Z',
+          } as unknown as RegistryBody),
+        );
+      add({ kind: 'enrol', baseId: 'NERV-01', name: 'Tokyo', publicKey: oldPub, address: '127.0.0.1:1' });
+      add({
+        kind: 'enrol',
+        baseId: 'NERV-02',
+        name: 'Tabgha',
+        publicKey: baseKey(home).publicKey,
+        address: '127.0.0.1:2',
+      });
+      add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
+      add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
+      store.close();
+      const standby = new Store(join(home, STANDBY_DB_FILE));
+      setState(standby.db, 2, 'standby', 7, 'digest-7');
+      standby.db.exec(STANDBY_LEASE_SCHEMA);
+      standby.db.prepare("INSERT INTO standby_lease_state VALUES (1, 2, 9, ?, 'boot')").run(Date.now());
+      standby.close();
+      let wall = Date.now();
+      let mono = 0n;
+      const clock = {
+        wall: () => wall,
+        mono: () => mono,
+        sleep: async (ms: number) => {
+          wall += ms;
+          mono += BigInt(ms) * 1_000_000n;
+        },
+      };
+      const events: string[] = [];
+      const service = { stop: () => void events.push('stop'), start: () => void events.push('start') };
+      const base = {
+        home,
+        rootPublicKey: rootPub,
+        ownPublicKey: baseKey(home).publicKey,
+        confirmOldHostDown: false,
+        service,
+        clock,
+      };
+      // The old main does not answer: not measured as acked, so the owner must confirm.
+      await assert.rejects(
+        promoteCoordinator({
+          ...base,
+          pushEpoch: async () => {
+            throw new Error('unreachable');
+          },
+        }),
+        (err: unknown) => err instanceof RelocationRefusedError && err.reason === 'old_host_unconfirmed',
+      );
+      // It answers with the new epoch (and fences itself): measured, the fast horizon applies.
+      const start = wall;
+      const res = await promoteCoordinator({ ...base, pushEpoch: async () => ({ maxSeenCoordinatorEpoch: 3 }) });
+      assert.ok(!('resumed' in res));
+      assert.ok(wall - start >= RELOCATION_HORIZON_ACKED_MS && wall - start < RELOCATION_HORIZON_CONSERVATIVE_MS);
+      assert.deepEqual(events, ['stop', 'start']);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe('F-016-T17 review fixes (#702)', () => {
   it('fix 5: the installed service stops and starts idempotently, and starts on a resumed run', async () => {
     const calls: string[] = [];
@@ -906,6 +1108,90 @@ describe('F-016-T17 review fixes (#702)', () => {
         /did not stop/,
       );
       assert.doesNotThrow(() => assertNoPromotionInProgress(home));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('F-016-T18 review (#703): the promoted main names a base that acked the new epoch from a standby store', () => {
+  it('names an acked base that holds a standby store; never one without a store (re-review)', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-standby-'));
+    try {
+      const home = join(dir, 'home');
+      mkdirSync(home, { recursive: true });
+      const root = generateKeyPairSync('ed25519');
+      const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      setBase(home, { id: 'NERV-02', name: 'Tabgha' });
+      pinKajiRoot(home, rootPub, true);
+      const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+      const reg = new Registry(store.db, rootPub);
+      let serial = 0;
+      const add = (body: Record<string, unknown>) =>
+        reg.add(
+          signRecord(root.privateKey, {
+            ...body,
+            serial: ++serial,
+            issued: '2026-11-24T10:00:00.000Z',
+          } as unknown as RegistryBody),
+        );
+      const pub = () =>
+        generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      const oldPub = pub();
+      add({ kind: 'enrol', baseId: 'NERV-01', name: 'Tokyo', publicKey: oldPub, address: '127.0.0.1:1' });
+      add({
+        kind: 'enrol',
+        baseId: 'NERV-02',
+        name: 'Tabgha',
+        publicKey: baseKey(home).publicKey,
+        address: '127.0.0.1:2',
+      });
+      add({ kind: 'enrol', baseId: 'NERV-03', name: 'Relay', publicKey: pub(), address: '127.0.0.1:3' });
+      add({ kind: 'enrol', baseId: 'NERV-04', name: 'Harbor', publicKey: pub(), address: '127.0.0.1:4' });
+      add({ kind: 'enrol', baseId: 'NERV-00', name: 'Worker', publicKey: pub(), address: '127.0.0.1:5' });
+      add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
+      // Third review: an unplanned move needs a revoke of the old main (the owner's word is refused).
+      add({ kind: 'revoke', baseId: 'NERV-01', publicKey: oldPub });
+      add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
+      store.close();
+      const standby = new Store(join(home, STANDBY_DB_FILE));
+      setState(standby.db, 2, 'standby', 7, 'digest-7');
+      // The old main renewed through this base: a bare confirmation is accepted (F-016-T17 re-review).
+      standby.db.exec(STANDBY_LEASE_SCHEMA);
+      standby.db.prepare("INSERT INTO standby_lease_state VALUES (1, 2, 9, ?, 'boot')").run(Date.now());
+      standby.close();
+      let wall = Date.now();
+      let mono = 0n;
+      await promoteCoordinator({
+        home,
+        rootPublicKey: rootPub,
+        ownPublicKey: baseKey(home).publicKey,
+        service: { stop: () => {}, start: () => {} },
+        clock: {
+          wall: () => wall,
+          mono: () => mono,
+          sleep: async (ms: number) => {
+            wall += ms;
+            mono += BigInt(ms) * 1_000_000n;
+          },
+        },
+        pushEpoch: async (id) => {
+          // NERV-00 acks but is a worker without a standby store; it sorts first and must still not be named.
+          // NERV-00 and NERV-03 ack without a standby store (an unacked base now refuses the move: fourth review).
+          if (id === 'NERV-00' || id === 'NERV-03') return { maxSeenCoordinatorEpoch: 3, standby: false };
+          if (id !== 'NERV-04') throw new Error('unreachable');
+          return { maxSeenCoordinatorEpoch: 3, standby: true };
+        },
+      });
+      const db = new DatabaseSync(join(home, 'nerv.sqlite'));
+      try {
+        const row = db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as {
+          standby_base_id: string | null;
+        };
+        assert.equal(row.standby_base_id, 'NERV-04');
+      } finally {
+        db.close();
+      }
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -1205,6 +1491,77 @@ describe('F-016-T17 fourth review (#702)', () => {
       assert.equal(existsSync(join(h, 'nerv.sqlite')), false);
     } finally {
       rmSync(h, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('F-016-T18 fourth review (#703): the D scenario', () => {
+  it('with the old main revoked, an unreachable unrevoked base refuses the move; once it acks the push the move proceeds', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-d-push-'));
+    try {
+      const h = join(dir, 'home');
+      mkdirSync(h, { recursive: true });
+      const root = generateKeyPairSync('ed25519');
+      const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      setBase(h, { id: 'NERV-02', name: 'B' });
+      pinKajiRoot(h, rootPub, true);
+      const store = new Store(join(h, 'nerv.sqlite'), undefined, { home: h });
+      const reg = new Registry(store.db, rootPub);
+      let serial = 0;
+      const add = (body: Record<string, unknown>) =>
+        reg.add(
+          signRecord(root.privateKey, {
+            ...body,
+            serial: ++serial,
+            issued: '2026-11-24T10:00:00.000Z',
+          } as unknown as RegistryBody),
+        );
+      const pub = () =>
+        generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      const xPub = pub();
+      add({ kind: 'enrol', baseId: 'NERV-01', name: 'X', publicKey: xPub, address: '127.0.0.1:1' });
+      add({ kind: 'enrol', baseId: 'NERV-02', name: 'B', publicKey: baseKey(h).publicKey, address: '127.0.0.1:2' });
+      add({ kind: 'enrol', baseId: 'NERV-04', name: 'D', publicKey: pub(), address: '127.0.0.1:4' });
+      add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
+      add({ kind: 'revoke', baseId: 'NERV-01', publicKey: xPub });
+      add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
+      store.close();
+      const standby = new Store(join(h, STANDBY_DB_FILE));
+      setState(standby.db, 2, 'standby', 7, 'digest-7');
+      standby.close();
+      let wall = Date.now();
+      let mono = 0n;
+      const base = {
+        home: h,
+        rootPublicKey: rootPub,
+        ownPublicKey: baseKey(h).publicKey,
+        service: { stop: () => {}, start: () => {} },
+        clock: {
+          wall: () => wall,
+          mono: () => mono,
+          sleep: async (ms: number) => {
+            wall += ms;
+            mono += BigInt(ms) * 1_000_000n;
+          },
+        },
+      };
+      // {X, D} | {B}: D does not get the revoke, so it could keep acking X's lease.
+      await assert.rejects(
+        promoteCoordinator({
+          ...base,
+          pushEpoch: async () => {
+            throw new Error('partitioned');
+          },
+        }),
+        (err: unknown) =>
+          err instanceof RelocationRefusedError && err.reason === 'old_host_unconfirmed' && /NERV-04/.test(err.message),
+      );
+      // D acks the push carrying the revoke: it now refuses X, so B may promote.
+      const res = await promoteCoordinator({ ...base, pushEpoch: async () => ({ maxSeenCoordinatorEpoch: 3 }) });
+      assert.ok(!('resumed' in res));
+      assert.equal(res.newEpoch, 3);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
     }
   });
 });

@@ -14,7 +14,13 @@ import {
   type SignedDrainReceipt,
 } from './coordinator-relocation.ts';
 import { databasePath, readConfig } from './config.ts';
-import { Registry, canonical, keyIdentity, publicKeyFrom } from './kaji.ts';
+import { Registry, canonical, keyIdentity, publicKeyFrom, type SignedRecord } from './kaji.ts';
+import {
+  allUnrevokedAckedEpoch,
+  basesAckedEpoch,
+  pushCoordinatorEpoch,
+  standbyBasesAckedEpoch,
+} from './coordinator-epoch.ts';
 import { service } from './service.ts';
 
 /** While this file exists in the data home a promotion is unfinished and `serve` refuses to start. */
@@ -114,6 +120,14 @@ export interface PromoteCoordinatorInput {
   readonly service: PromotionServiceControl;
   readonly clock?: PromotionClock;
   readonly log?: (line: string) => void;
+  /**
+   * `KajiLink.pushEpoch`: before the readiness check the owner-signed records go to every enrolled, unrevoked
+   * base (F-016-T18); the acks are recorded here and decide `allUnrevokedAckedNewEpoch`.
+   */
+  readonly pushEpoch?: (
+    baseId: string,
+    records: SignedRecord[],
+  ) => Promise<{ maxSeenCoordinatorEpoch: number; standby?: boolean }>;
   /** Test-only crash injection, passed to the promotion swap. */
   readonly failAfterStep?: RelocateCoordinatorInput['failAfterStep'];
 }
@@ -204,6 +218,9 @@ function derive(
       .filter((b) => b.status === 'enrolled' && b.baseId !== self.baseId)
       .map((b) => b.baseId)
       .sort();
+    const acked = basesAckedEpoch(db, newEpoch);
+    const standbyStores = standbyBasesAckedEpoch(db, newEpoch);
+    const standbyBaseId = others.find((id) => standbyStores.has(id));
     let liveness: (nowMs: number, monoNowNs: bigint) => RelocationLiveness;
     if (input.drainReceiptFile) {
       if (!enrolment || previousRevoked)
@@ -218,19 +235,25 @@ function derive(
       // standby-store base since this one acked it). Unplanned, the old main is revoked with the root key, or
       // every unrevoked base, the old main included, acked the new epoch.
       const oldHostDownConfirmed = previousRevoked;
-      // Fourth review: a revoke stops the old main only where the base acking its lease holds that revoke. Every
-      // unrevoked base must hold the new epoch (and so the revoke) before an unplanned move; epoch pushes measure
-      // that (F-016-T18). Without a measurement, only a base with no other unrevoked base may promote.
-      if (others.length)
+      // Measured from the acks this base recorded for its own pushes (F-016-T18), never supplied by the caller.
+      const allUnrevokedAckedNewEpoch = allUnrevokedAckedEpoch({
+        db,
+        rootPublicKey: input.rootPublicKey,
+        ownPublicKey: input.ownPublicKey,
+        epoch: newEpoch,
+      });
+      // Fourth review: a revoke stops the old main only where the base acking its lease holds that revoke, so every
+      // unrevoked base must have acked the epoch push carrying it; an unreachable one keeps the move refused.
+      const missing = others.filter((id) => !acked.has(id));
+      if (missing.length)
         refuse(
           'old_host_unconfirmed',
-          `Not every unrevoked base is known to hold the new epoch and the revoke (${others.join(', ')}): one of them could still ack ${previousMainBaseId}'s lease. Import the records there (kaji export, kaji import) and push again.`,
+          `Not every unrevoked base acked the new epoch and the revoke (not acked: ${missing.join(', ')}): one of them could still ack ${previousMainBaseId}'s lease. Reach them (or import the records there) and run kaji promote again.`,
         );
       liveness = (nowMs, monoNowNs) => ({
         kind: 'unplanned',
         epochSeenAtMs,
-        // Measured by F-016-T18; until then never assumed.
-        allUnrevokedAckedNewEpoch: false,
+        allUnrevokedAckedNewEpoch,
         oldHostDownConfirmed,
         nowMs,
         monoSinceNs,
@@ -248,8 +271,10 @@ function derive(
         previousMainBaseId,
         registryMain: { baseId: registry.main(), coordinatorEpoch: newEpoch },
         soleCoordinator: others.length === 0,
-        // Re-review BLOCKER: only a base holding a standby store may ack the lease, and nothing here proves that
-        // of any base; the owner names one with `nerv kaji standby BASE-ID`, whose probe must be acked.
+        // Re-review BLOCKER: only a base holding a standby store may ack the lease. Named here only when a base
+        // acked the new epoch and said it holds one (a false claim only leaves the lease unarmed); otherwise the
+        // owner names one with `nerv kaji standby BASE-ID`, whose probe must be acked.
+        ...(standbyBaseId ? { standbyBaseId } : {}),
         ...(input.failAfterStep ? { failAfterStep: input.failAfterStep } : {}),
       },
     };
@@ -286,6 +311,25 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
   if (!existsSync(mainDbPath) && existsSync(archivePath) && existsSync(standbyDbPath))
     renameSync(standbyDbPath, mainDbPath);
   if (!existsSync(mainDbPath)) throw new Error(`No store at ${mainDbPath}: nothing to promote.`);
+  if (input.pushEpoch) {
+    const db = new DatabaseSync(mainDbPath);
+    try {
+      db.exec('PRAGMA busy_timeout = 5000');
+      const pushed = await pushCoordinatorEpoch({
+        db,
+        rootPublicKey: input.rootPublicKey,
+        ownPublicKey: input.ownPublicKey,
+        push: input.pushEpoch,
+        nowMs: clock.wall(),
+      });
+      input.log?.(
+        `Epoch ${pushed.epoch} acked by ${pushed.acked.join(', ') || 'no base'}` +
+          (pushed.missing.length ? `; not acked: ${pushed.missing.join(', ')}.` : '.'),
+      );
+    } finally {
+      db.close();
+    }
+  }
   const d = derive(input, mainDbPath, standbyDbPath, monoSinceNs);
   if (d.alreadyActive) {
     if (!existsSync(marker)) throw new Error(`This base is already the active coordinator at epoch ${d.newEpoch}.`);

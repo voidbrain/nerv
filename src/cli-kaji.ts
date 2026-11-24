@@ -4,7 +4,8 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 import { Store } from './store.ts';
 
-import { setKajiOffers, setKajiSeat, pinKajiRoot, readConfig } from './config.ts';
+import { databasePath, setKajiOffers, setKajiSeat, pinKajiRoot, readConfig } from './config.ts';
+import { DatabaseSync } from 'node:sqlite';
 
 import {
   ROOT_KEY_FILE,
@@ -20,6 +21,8 @@ import {
 
 import { builtinTools } from './executors.ts';
 import { RelocationRefusedError, drainCoordinator, signDrainReceipt } from './coordinator-relocation.ts';
+import { pushCoordinatorEpoch, registryPort } from './coordinator-epoch.ts';
+import { KajiLink } from './kaji-link.ts';
 import {
   installedPromotionService,
   promoteCoordinator,
@@ -27,7 +30,6 @@ import {
   type PromotionServiceControl,
 } from './coordinator-promote.ts';
 import { nextLeaseSeq, type LeaseRenewRequest, type LeaseRenewResult } from './coordinator-lease.ts';
-import { KajiLink } from './kaji-link.ts';
 import { OFFER_NAME, toolName } from './mcp.ts';
 
 /**
@@ -41,7 +43,14 @@ export async function runKajiPromoteCommand(
   config: ReturnType<typeof readConfig>,
   ctx: {
     flag: (name: string) => string | undefined;
-    promotion?: { service?: PromotionServiceControl; clock?: PromotionClock };
+    promotion?: {
+      service?: PromotionServiceControl;
+      clock?: PromotionClock;
+      pushEpoch?: (
+        baseId: string,
+        records: SignedRecord[],
+      ) => Promise<{ maxSeenCoordinatorEpoch: number; standby?: boolean }>;
+    };
   },
 ): Promise<void> {
   if (args.includes('--confirm-old-host-down'))
@@ -58,6 +67,27 @@ export async function runKajiPromoteCommand(
     service: ctx.promotion?.service ?? installedPromotionService(home),
     ...(ctx.promotion?.clock ? { clock: ctx.promotion.clock } : {}),
     log: (line) => console.log(line),
+    // F-016-T18: a client on the signed Kaji line that never listens; it reads the registry when it pushes
+    // (after any interrupted swap was finished, so the store exists).
+    pushEpoch:
+      ctx.promotion?.pushEpoch ??
+      (async (id, records) => {
+        const db = new DatabaseSync(databasePath(home));
+        try {
+          return await new KajiLink({
+            ...(config.kaji?.root
+              ? { trust: { root: config.kaji.root, required: config.kaji.rootBinding === true } }
+              : {}),
+            baseId: config.base.id,
+            key: baseKey(home).privateKey,
+            publicKey: baseKey(home).publicKey,
+            registry: registryPort(new Registry(db, config.kaji?.root)),
+            log: () => {},
+          }).pushEpoch(id, records);
+        } finally {
+          db.close();
+        }
+      }),
   });
   console.log(
     'resumed' in res
@@ -78,13 +108,27 @@ export async function runKajiCommand(
     readSecret: (prompt: string) => Promise<string>;
     flag: (name: string) => string | undefined;
     /** Tests inject the service control and clock of `kaji promote`. */
-    promotion?: { service?: PromotionServiceControl; clock?: PromotionClock };
+    promotion?: {
+      service?: PromotionServiceControl;
+      clock?: PromotionClock;
+      pushEpoch?: (baseId: string, records: SignedRecord[]) => Promise<{ maxSeenCoordinatorEpoch: number }>;
+    };
     /** Tests inject the lease renewal `kaji standby` probes with. */
     renewLease?: (baseId: string, req: LeaseRenewRequest) => Promise<LeaseRenewResult>;
   },
 ): Promise<void> {
   const registry = new Registry(store.db, config.kaji?.root);
   const me = baseKey(home).publicKey;
+  // F-016-T18: a client on the signed Kaji line (it never listens) for commands that push owner-signed records.
+  const kajiClient = () =>
+    new KajiLink({
+      ...(config.kaji?.root ? { trust: { root: config.kaji.root, required: config.kaji.rootBinding === true } } : {}),
+      baseId: config.base.id,
+      key: baseKey(home).privateKey,
+      publicKey: me,
+      registry: registryPort(new Registry(store.db, config.kaji?.root)),
+      log: () => {},
+    });
   const [sub] = args;
   const unlock = async () => {
     const path = ctx.flag('--key') ?? join(home, ROOT_KEY_FILE);
@@ -240,10 +284,17 @@ export async function runKajiCommand(
         issued: new Date().toISOString(),
       }),
     );
+    // F-016-T18: push the new records to every reachable base now; kaji promote pushes again and counts the acks.
+    const pushed = await pushCoordinatorEpoch({
+      db: store.db,
+      rootPublicKey: root.publicKey,
+      ownPublicKey: me,
+      push: ctx.promotion?.pushEpoch ?? ((base, records) => kajiClient().pushEpoch(base, records)),
+    });
     console.log(
       `Signed main ${id} at coordinator epoch ${epoch}${lostEntry ? ` and revoked ${lostEntry.baseId}` : ''}. ` +
-        'Export these records (kaji export) and import them on every surviving base before promotion; ' +
-        'on the old main, if reachable, run kaji drain and hand its receipt to the new main.',
+        `Pushed to ${pushed.acked.join(', ') || 'no base'}${pushed.missing.length ? `; unreachable: ${pushed.missing.join(', ')} (kaji export, then kaji import there)` : ''}. ` +
+        'On the old main, if reachable, run kaji drain and hand its receipt to the new main (kaji promote --drain-receipt FILE).',
     );
   } else if (sub === 'drain') {
     // F-016-T07: planned relocation, old main side. Only after the owner signed a newer main record.

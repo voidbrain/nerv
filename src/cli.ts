@@ -75,6 +75,7 @@ import {
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
 import { coordinatorLeaseService } from './coordinator-serve.ts';
+import { STANDBY_DB_FILE } from './coordinator-relocation.ts';
 import { assertNoPromotionInProgress } from './coordinator-promote.ts';
 import {
   guardLocalService,
@@ -807,6 +808,8 @@ try {
           stopLease = () => lease.stop();
           kaji = new KajiLink({
             onLeaseRenew: lease.onLeaseRenew,
+            minCoordinatorEpoch: lease.mainEpoch,
+            holdsStandby: () => existsSync(join(home, STANDBY_DB_FILE)),
             trust: { root: config.kaji.root, required: config.kaji.rootBinding === true },
             worker: runtime.worker,
             baseId: config.base.id,

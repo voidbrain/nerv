@@ -26,6 +26,8 @@ const MAX_BODY = 256 * 1024,
 /** F-062-T06: an encrypted backup copy (base64 in JSON) may be larger than any other Kaji message. */
 export const MAX_BACKUP_BODY = 64 * 1024 * 1024;
 const BACKUP_TIMEOUT_MS = 120_000;
+/** At most this many owner-signed records in one epoch push. */
+const MAX_EPOCH_PUSH_RECORDS = 1000;
 /** The newest coordinator epoch among owner-signed main records (legacy records count as 0). */
 export function maxMainEpoch(records: SignedRecord[]): number {
   return records.reduce((m, r) => (r.body.kind === 'main' ? Math.max(m, r.body.coordinatorEpoch ?? 0) : m), 0);
@@ -257,6 +259,8 @@ export class KajiLink {
     checkCoordinatorAuthority?: () => ActiveCoordinatorCheckResult;
     /** F-016-T05: minimum seen coordinatorEpoch enforced on incoming coordinator-authenticated RPCs. */
     minCoordinatorEpoch?: () => number;
+    /** F-016-T18 re-review: this base holds the coordinator standby store (said in epoch-push replies). */
+    holdsStandby?: () => boolean;
   }) {
     this.trust = options.trust;
     this.baseId = options.baseId;
@@ -275,6 +279,7 @@ export class KajiLink {
     this.onLeaseRenew = options.onLeaseRenew;
     this.checkCoordinatorAuthority = options.checkCoordinatorAuthority;
     this.minCoordinatorEpoch = options.minCoordinatorEpoch;
+    this.holdsStandby = options.holdsStandby;
     this.onDecide = options.onDecide;
     this.onPendingApprovals = options.onPendingApprovals;
     this.onSortie = options.onSortie;
@@ -334,6 +339,7 @@ export class KajiLink {
   private readonly onRelay: ((from: string, relay: Relay) => Promise<boolean>) | undefined;
   private readonly checkCoordinatorAuthority: (() => ActiveCoordinatorCheckResult) | undefined;
   private readonly minCoordinatorEpoch: (() => number) | undefined;
+  private readonly holdsStandby: (() => boolean) | undefined;
   private staleEpochReply(
     headers: IncomingMessage['headers'],
     reply: (status: number, value: unknown) => void,
@@ -719,6 +725,22 @@ export class KajiLink {
         reply(200, { outcome: await this.onDecide(d.approvalId, d.decision) });
         return;
       }
+      // F-016-T18: any enrolled base pushes owner-signed records (a new main, a revoke). Each is verified against the
+      // root before it is kept; the reply names the newest coordinator epoch this base now holds.
+      if (req.method === 'POST' && req.url === '/kaji/epoch-push') {
+        const parsed = JSON.parse(body) as { records?: unknown };
+        if (!Array.isArray(parsed.records) || parsed.records.length > MAX_EPOCH_PUSH_RECORDS) {
+          reply(400, { error: 'invalid epoch push' });
+          return;
+        }
+        await this.port.add(parsed.records as SignedRecord[]);
+        reply(200, {
+          baseId: this.baseId,
+          maxSeenCoordinatorEpoch: maxMainEpoch(await this.port.records()),
+          standby: this.holdsStandby?.() === true,
+        });
+        return;
+      }
       if (req.method === 'POST' && req.url === '/kaji/lease/renew') {
         if (!this.onLeaseRenew) {
           reply(403, { error: 'only the main base may renew its lease' });
@@ -1027,6 +1049,55 @@ export class KajiLink {
       if (parsed.reason === 'need_resync') return parsed;
     }
     throw new Error(`${peer.baseId} refused (${res.status}): ${res.text}`);
+  }
+  /** F-016-T18: pushes owner-signed records to a base; returns the coordinator epoch it holds afterwards. */
+  async pushEpoch(
+    baseId: string,
+    records: SignedRecord[],
+  ): Promise<{ maxSeenCoordinatorEpoch: number; standby: boolean }> {
+    const peer = (await this.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
+    if (!peer) throw new Error(`Base ${baseId} is not enrolled.`);
+    const body = JSON.stringify({ records });
+    const { host, port } = endpoint(peer.address);
+    const path = '/kaji/epoch-push';
+    const res = await send(
+      host,
+      port,
+      'POST',
+      path,
+      {
+        'content-type': 'application/json',
+        ...signedHeaders(
+          this.baseId,
+          this.key,
+          'req',
+          'POST',
+          path,
+          body,
+          undefined,
+          this.trust?.required ? this.trust.root : undefined,
+        ),
+      },
+      body,
+      5000,
+    );
+    const replyFrom = verifySigned(
+      res.headers,
+      'res',
+      'POST',
+      path,
+      res.text,
+      [peer],
+      this.nonces,
+      undefined,
+      this.trust,
+    );
+    if (replyFrom !== peer.baseId) throw new Error('Unexpected base answered the epoch push.');
+    if (res.status !== 200) throw new Error(`${peer.baseId} refused (${res.status}): ${res.text}`);
+    const reply = JSON.parse(res.text) as { baseId?: unknown; maxSeenCoordinatorEpoch?: unknown; standby?: unknown };
+    if (reply.baseId !== peer.baseId || !Number.isSafeInteger(reply.maxSeenCoordinatorEpoch))
+      throw new Error('Invalid epoch push reply.');
+    return { maxSeenCoordinatorEpoch: reply.maxSeenCoordinatorEpoch as number, standby: reply.standby === true };
   }
   /** F-016-T06: requests a standby-acked lease renewal for the active coordinator. */
   async renewLease(baseId: string, req: LeaseRenewRequest): Promise<LeaseRenewResult> {
