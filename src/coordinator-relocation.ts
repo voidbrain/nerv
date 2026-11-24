@@ -180,6 +180,25 @@ function standbyAckedEpoch(db: DatabaseSync): number {
   return row?.standby_coordinator_epoch ?? 0;
 }
 
+/**
+ * B-121-T02: the newest coordinator epoch this base ran or acked a lease at: the epoch of the coordinator state
+ * in `nerv.sqlite` and in the standby store next to it (a state at epoch E exists only because a coordinator ran
+ * E), and the newest lease ack in either. `/kaji/epoch-push` replies carry it, so a re-targeted move learns that a
+ * later coordinator ran than the state its standby holds, even when that coordinator renewed through another base.
+ */
+export function ranOrAckedCoordinatorEpoch(mainDb: DatabaseSync, standbyDbPath: string): number {
+  const of = (db: DatabaseSync) =>
+    Math.max(readCoordinatorFencingState(db)?.coordinatorEpoch ?? 0, standbyAckedEpoch(db));
+  if (!existsSync(standbyDbPath)) return of(mainDb);
+  const standby = new DatabaseSync(standbyDbPath);
+  try {
+    standby.exec('PRAGMA busy_timeout = 5000');
+    return Math.max(of(mainDb), of(standby));
+  } finally {
+    standby.close();
+  }
+}
+
 /** Owner-approved cold restore from a verified signed snapshot bound to the previous epoch. */
 export interface ColdRestoreBinding {
   readonly frames: readonly Buffer[];

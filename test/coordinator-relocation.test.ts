@@ -937,6 +937,74 @@ describe('F-016-T18: /kaji/epoch-push, so the new epoch acks are measured, not a
     }
   });
 
+  it('B-121-T02: the signed epoch-push reply carries the newest epoch the base ran or acked; an older peer leaves it out', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-epoch-witness-'));
+    const root = generateKeyPairSync('ed25519');
+    const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+    const free = async () =>
+      new Promise<number>((resolve) => {
+        const srv = createServer();
+        srv.listen(0, '127.0.0.1', () => {
+          const p = (srv.address() as { port: number }).port;
+          srv.close(() => resolve(p));
+        });
+      });
+    const ids = ['NERV-02', 'NERV-03', 'NERV-04'] as const;
+    const bases = await Promise.all(
+      ids.map(async (id) => {
+        const home = join(dir, id);
+        mkdirSync(home, { recursive: true });
+        setBase(home, { id, name: id });
+        pinKajiRoot(home, rootPub, true);
+        const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+        return { id, home, store, reg: new Registry(store.db, rootPub), port: await free(), key: baseKey(home) };
+      }),
+    );
+    let serial = 0;
+    const records = [
+      ...bases.map((b) => ({
+        kind: 'enrol',
+        baseId: b.id,
+        name: b.id,
+        publicKey: b.key.publicKey,
+        address: `127.0.0.1:${b.port}`,
+      })),
+      { kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 },
+    ].map((body) =>
+      signRecord(root.privateKey, {
+        ...body,
+        serial: ++serial,
+        issued: '2026-11-24T10:00:00.000Z',
+      } as unknown as RegistryBody),
+    );
+    for (const b of bases) for (const r of records) b.reg.add(r);
+    const [pusher, current, older] = bases as unknown as [(typeof bases)[0], (typeof bases)[0], (typeof bases)[0]];
+    const link = (x: (typeof bases)[0], ranOrAckedEpoch?: () => number) =>
+      new KajiLink({
+        baseId: x.id,
+        key: x.key.privateKey,
+        publicKey: x.key.publicKey,
+        registry: registryPort(x.reg),
+        holdsStandby: () => true,
+        ...(ranOrAckedEpoch ? { ranOrAckedEpoch } : {}),
+      });
+    const self = link(pusher);
+    // NERV-03 runs this version (it acked a lease at epoch 3); NERV-04 an older one, without the field.
+    const peers = [link(current, () => 3), link(older)];
+    for (const l of peers) await l.start(60_000);
+    try {
+      const now = await self.pushEpoch('NERV-03', []);
+      assert.deepEqual(now, { maxSeenCoordinatorEpoch: 3, standby: true, ranOrAckedEpoch: 3 });
+      const old = await self.pushEpoch('NERV-04', []);
+      assert.deepEqual(old, { maxSeenCoordinatorEpoch: 3, standby: true });
+      assert.equal('ranOrAckedEpoch' in old, false, 'unknown, never read as 0');
+    } finally {
+      for (const l of peers) await l.stop();
+      for (const x of bases) x.store.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('kaji promote measures the acks itself: every unrevoked base acked and the lease was acked here, so no confirmation and the 65 s wait', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-acks-'));
     try {
