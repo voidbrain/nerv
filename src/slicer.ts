@@ -220,7 +220,16 @@ export function buildBambuOwnerChecklist(input: BambuChecklistInput): string[] {
   ];
 }
 
+/** Set by the test runner (NODE_TEST_CONTEXT) and passed to NERV's child processes under it (NERV_TEST_RUNNER). */
+export function underTestRunner(): boolean {
+  return Boolean(process.env.NODE_TEST_CONTEXT || process.env.NERV_TEST_RUNNER);
+}
+
 function defaultBambuLauncher(importLink: string): { opened: boolean; reason?: string } {
+  // F-121-T02: a test never opens the real app on the developer's desktop.
+  if (underTestRunner()) {
+    throw new Error('A test must inject a bambuLauncher: the default launcher opens Bambu Connect on this desktop.');
+  }
   if (process.platform === 'win32') {
     execFileSync('powershell.exe', ['-NoProfile', '-Command', 'Start-Process', importLink], { stdio: 'ignore' });
     return { opened: true };

@@ -98,12 +98,24 @@ export class Runtime implements StoreApi {
   private readonly itemLocks = new ItemLockManager();
   private readonly database: string;
   readonly home: string | undefined;
-  constructor(database: string, brainEntry = new URL('./brain-process.ts', import.meta.url), home?: string) {
+  /**
+   * `test.bambuLaunchLog` (tests only, needs `home`): the nervous process records Bambu Connect hand-offs to that
+   * file instead of opening the app; it is honoured only under the test runner.
+   */
+  constructor(
+    database: string,
+    brainEntry = new URL('./brain-process.ts', import.meta.url),
+    home?: string,
+    test: { bambuLaunchLog?: string } = {},
+  ) {
     this.database = database;
     this.home = home;
+    if (test.bambuLaunchLog && !home) throw new Error('bambuLaunchLog needs a data home.');
     this.nervous = new ProcessClient(
       new URL('./nervous-process.ts', import.meta.url),
-      home ? [database, home] : [database],
+      home
+        ? [database, home, ...(test.bambuLaunchLog ? [`--bambu-launch-log=${test.bambuLaunchLog}`] : [])]
+        : [database],
       'nervous',
     );
     this.brain = new ProcessClient(brainEntry, home ? [home] : [], 'brain', 1500);
