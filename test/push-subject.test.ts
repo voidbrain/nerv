@@ -81,12 +81,12 @@ test('B-134: a failed dispatch is logged (host, status, reason only) and stored 
     store.pushFetch = (async () => new Response('{"reason":"BadJwtToken"}', { status: 403 })) as typeof fetch;
     const endpoint = 'https://web.push.apple.com/SECRET-TOKEN-123';
     store.savePushSubscription({ endpoint, ...sub() });
-    assert.deepEqual(store.pushStatus(), { devices: 1, last: null });
+    assert.deepEqual(store.pushHealth(), { devices: 1, last: null });
     store.add('Phone push test', '2030-01-01T10:00:00Z');
     store.tick(new Date('2030-01-01T10:01:00Z'));
     const end = Date.now() + 3000;
-    while (!store.pushStatus().last && Date.now() < end) await new Promise((d) => setTimeout(d, 20));
-    const last = store.pushStatus().last!;
+    while (!store.pushHealth().last && Date.now() < end) await new Promise((d) => setTimeout(d, 20));
+    const last = store.pushHealth().last!;
     assert.equal(last.ok, false);
     assert.equal(last.status, 403);
     assert.equal(last.reason, 'BadJwtToken');
@@ -111,9 +111,9 @@ test('B-134: a successful dispatch stores an ok result', async () => {
     store.add('ok', '2030-01-01T10:00:00Z');
     store.tick(new Date('2030-01-01T10:01:00Z'));
     const end = Date.now() + 3000;
-    while (!store.pushStatus().last && Date.now() < end) await new Promise((d) => setTimeout(d, 20));
-    assert.equal(store.pushStatus().last?.ok, true);
-    assert.equal(store.pushStatus().last?.status, 201);
+    while (!store.pushHealth().last && Date.now() < end) await new Promise((d) => setTimeout(d, 20));
+    assert.equal(store.pushHealth().last?.ok, true);
+    assert.equal(store.pushHealth().last?.status, 201);
   } finally {
     store.close();
   }

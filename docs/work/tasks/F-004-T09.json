@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-004-T09",
+  "parent": "F-004",
+  "title": "Delivery order: push first, Telegram as fallback",
+  "goal": "A reminder goes to the phone app first and reaches Telegram only when push fails, there is no device, or the reminder is not opened within about 10 minutes (owner decision 2026-11-25)",
+  "status": "planned",
+  "acceptance": [
+    "Reminders try Web Push first; Telegram is sent when the push fails, no device is subscribed, or the reminder is not opened on the phone within about 10 minutes",
+    "Replies, approvals and chat stay on Telegram until the app has two-way chat (F-124-T04)",
+    "A test across the join: reminder tick, push result, Telegram delivery, with a stubbed push service and a stubbed Telegram"
+  ],
+  "dependsOn": [
+    "F-004-T06",
+    "F-124-T01"
+  ],
+  "resources": [
+    "src/store-push.ts",
+    "src/reminders.ts",
+    "src/telegram.ts",
+    "test/push.test.ts",
+    "test/telegram.test.ts",
+    "docs/guides/channels-and-watches.md",
+    "docs/work/records/F-004.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, endpoints or personal data in Git.",
+  "validation": [
+    "Targeted push and telegram tests",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h agent",
+    "basis": "Estimated 2026-11-25: ordering rule on the existing deliveries plus the not-opened timer. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

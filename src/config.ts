@@ -30,6 +30,7 @@ import { validatePrintsConfig, type PrintsConfig } from './print-transfer.ts';
 import { validatePersonas, type PersonaConfig } from './persona.ts';
 import { validateBrowserConfig, type BrowserConfig } from './browser-control.ts';
 import { validateAppWorkflowConfig, type AppWorkflowConfig } from './app-workflow.ts';
+import { validateVapidSubject } from './push.ts';
 import { isLoopbackBase, pairingBase } from './pairing-address.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
 export interface Config {
@@ -42,6 +43,8 @@ export interface Config {
   brief?: { at: string };
   instrumentality?: { at: string } | { when: 'idle' };
   base: Base;
+  /** B-134: the VAPID subject Web Push sends (default: the project URL). */
+  push?: { subject: string };
   kaji?: { root: string; rootBinding?: true; offers?: string[]; seats?: Record<string, 'shadow' | 'veto' | 'off'> };
   pilots?: Pilot[];
   tools?: ToolsConfig;
@@ -172,6 +175,12 @@ export function readConfig(home: string): Config {
     )
       config.instrumentality = { at: b.at };
     else throw new Error('Invalid instrumentality: {"at": "HH:MM"} in your time zone, or {"when": "idle"}.');
+  }
+  if ('push' in raw) {
+    const p = raw.push as Record<string, unknown>;
+    if (!p || typeof p !== 'object' || Array.isArray(p) || Object.keys(p).some((k) => k !== 'subject'))
+      throw new Error('Invalid push: only subject, an https URL or mailto with a real domain.');
+    config.push = { subject: validateVapidSubject(p.subject) };
   }
   if ('kaji' in raw) {
     const k = raw.kaji as Record<string, unknown>;

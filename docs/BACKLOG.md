@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 7 | 3 | 23 | 6 |
+| **This week** | 8 | 3 | 24 | 6 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 30 |
-| **Require Human 🧑** | 9 | 12 |
+| **Open** | 40 | 31 |
+| **Require Human 🧑** | 9 | 13 |
 
 ### Require Human 🧑
 
@@ -27,8 +27,9 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-086](#f-086) |  | [B-113](#b-113) |  |
 | [F-087](#f-087) |  | [B-122](#b-122) |  |
 | [F-092](#f-092) |  | [B-129](#b-129) |  |
-| [F-060](#f-060) |  | [B-128](#b-128) |  |
-| [F-007](#f-007) |  | [B-056](#b-056) |  |
+| [F-060](#f-060) |  | [B-134](#b-134) |  |
+| [F-007](#f-007) |  | [B-128](#b-128) |  |
+|  |  | [B-056](#b-056) |  |
 |  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
 |  |  | [B-112](#b-112) |  |
@@ -36,7 +37,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 96 h agent + 12 h owner across 129 open steps of 38 features and 30 other records. 165.5 h of actual effort recorded on 153 steps. Generated from the task files.
+**Remaining effort:** 109.5 h agent + 12 h owner across 135 open steps of 39 features and 31 other records. 165.5 h of actual effort recorded on 153 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -331,13 +332,54 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-124"></a>[✨ F-124](#top)
+
+**Fuse Midori's Telegram and the phone app into one conversation**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟣 Very large | 11.5 h | — | [F-004-T09](#f-004-t09) | 🤖 | — | — |
+
+💻 **→** Next: F-124-T01 — Shared delivery state across Telegram and the phone app (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner decision 2026-11-25: Midori talks to the owner on two channels, Telegram and the phone app, with separate delivery state, so a reminder or approval can arrive twice and be answered in one place while still pending in the other. The two should be one conversation. |
+| **Reproduce** | Send a reminder to a phone with push and Telegram: both ring; open it on the phone and Telegram still holds it; answer an approval in Telegram and the app still offers it. |
+| **Check** | Delivery state is shared; an approval answered in either place is answered in both; a reminder opened on the phone is not re-sent on Telegram; later the app carries the chat itself. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-124-t01"></a>F-124-T01 — Shared delivery state across Telegram and the phone app | 2 h | 0 h | 2 h | Planned | — | [F-004-T09](#f-004-t09), [F-124-T02](#f-124-t02), [F-124-T03](#f-124-t03) |
+| 🟡 Medium | <a id="f-124-t02"></a>F-124-T02 — An approval answered in Telegram or the app clears the other | 2 h | 0 h | 2 h | Planned | [F-124-T01](#f-124-t01) | [F-124-T04](#f-124-t04) |
+| 🟡 Medium | <a id="f-124-t03"></a>F-124-T03 — A reminder opened on the phone is not re-sent on Telegram | 1.5 h | 0 h | 1.5 h | Planned | [F-124-T01](#f-124-t01) | [F-124-T04](#f-124-t04) |
+| 🔴 Large | <a id="f-124-t04"></a>F-124-T04 — Chat with Midori in the phone app | 6 h | 0 h | 6 h | Planned | [F-124-T02](#f-124-t02), [F-124-T03](#f-124-t03) | — |
+| 🟣 Very large | **Total** | 11.5 h | 0 h (0 of 4 steps recorded) | 11.5 h | 0 of 4 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-124.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in the PR that carries B-134-T01. |
+| Opened | 2026-11-25 |
+| Verification | — |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
 ### <a id="f-004"></a>[✨ F-004](#top)
 
 **Angular PWA and validated GenUI**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.5 h agent + 0.5 h owner | [F-124-T01](#f-124-t01) | — | 🤖 | — | — |
 
 💻 **→** Next: F-004-T08 — Dashboard Settings → Notifications: enable push on the installed app (Implemented; verification pending).
 
@@ -352,9 +394,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-004-t08"></a>F-004-T08 — Dashboard Settings → Notifications: enable push on the installed app | 1.75 h | 1.5 h so far (stated) | 0.25 h | Implemented; verification pending | — | [F-004-T06](#f-004-t06) | 🤖 | [PR #729](https://github.com/voidbrain/nerv/pull/729) |
-| 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | [F-004-T08](#f-004-t08) | [F-004-T07](#f-004-t07) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | [F-004-T08](#f-004-t08) | [F-004-T07](#f-004-t07), [F-004-T09](#f-004-t09) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-004-T06](#f-004-t06) | — | ⏳ 🤖 | — |
-| 🟢 Small | **Total** | 14 h (7 of 8 steps) | 4.5 h (6 of 8 steps recorded) | 0.5 h agent + 0.5 h owner | 5 of 8 completed | | | | |
+| 🟡 Medium | <a id="f-004-t09"></a>F-004-T09 — Delivery order: push first, Telegram as fallback | 2 h | 0 h | 2 h | Planned | [F-004-T06](#f-004-t06), [F-124-T01](#f-124-t01) | — | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 16 h (8 of 9 steps) | 4.5 h (6 of 9 steps recorded) | 2.5 h agent + 0.5 h owner | 5 of 9 completed | | | | |
 
 <details><summary>Done steps (5)</summary>
 
@@ -2230,6 +2273,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-24 |
 | Verification | 2026-11-24: committed first and failing on main: `test/doctor-run.test.mjs` (the helper did not exist) and `test/doctor-run.browser.mjs` (no `#doctor-result` next to the button); the browser test's sign-in wait then changed from the Health text, which the demo also renders, to the live banner, its assertions unchanged. With the fix both pass (5/5, 1/1 on the production build against `makeServer`). Before the PR: `npm test` 1,443 pass (2 skipped); the browser tests reading live.js, dashboard.js or web/src (`test/angular.browser.mjs`, `test/evaluation.browser.mjs`, `test/pwa.browser.mjs`, `test/updater-status.browser.mjs`, `test/doctor-run.browser.mjs`) 11/11 on the production build; `npm run gauntlet:all` (owner-approved, gemma4-12b profile) passed, none pending. A real Run doctor on the owner's base is not yet observed. |
 | Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-134"></a>[🐞 B-134](#top)
+
+**Every Web Push to Apple fails with 403 BadJwtToken, and the failure is invisible**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update reaches the service, follow [the phone push procedure](acceptance/f004-t06-phone-push-procedure.md) with the `nerv remind` command there: the iPhone shows the notification, and `nerv open dashboard` → Health reads "Phone push · 1 device · last ok (201) · <time>".
+
+| | |
+|---|---|
+| **Issue** | Verified live 2026-11-25: the VAPID JWT `sub` defaulted to `mailto:nerv@agency.local` (`src/push.ts`); Apple answered 403 `{"reason":"BadJwtToken"}` to every push. With `https://github.com/voidbrain/nerv` Apple returned 201 and the owner's iPhone showed the notification. `dispatchPushReminders` (`src/store-push.ts`) swallowed every error (`catch {}`), so nothing showed the failure. |
+| **Reproduce** | Subscribe the iPhone app, `nerv remind` a reminder due in a minute: no notification, no log line, no sign in Health. |
+| **Check** | The default subject is a real https URL; `push.subject` in config overrides it and is validated (https URL or mailto with a dotted domain, not .local or localhost); a failed send logs host, status and reason (no full endpoint, no keys) and is stored; 404/410 still delete the subscription; Health shows devices and the last result. A committed test fails first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-134-t01"></a>B-134-T01 — Default VAPID subject Apple accepts, push failures logged, Phone push line in Health | 1.5 h | 0 h | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 0 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-134.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in the PR that carries B-134-T01 (Tests: `test/push-subject.test.ts`, `test/push-health-row.test.mjs`) |
+| Opened | 2026-11-25 |
+| Verification | 2026-11-25: tests committed first and failing on main; with the fix they pass with `test/push.test.ts` unchanged. A real push to the owner's iPhone with the new subject was verified by hand on 2026-11-25; the shipped service is not yet observed. |
+| Reviewed | 2026-11-25 |
 
 </details>
 
