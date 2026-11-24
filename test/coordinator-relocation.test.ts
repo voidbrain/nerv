@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { describe, it } from 'node:test';
+import { spawnSync } from 'node:child_process';
 import {
   CoordinatorAuthorityError,
   assertActiveCoordinator,
@@ -1075,5 +1076,91 @@ describe('F-016-T16 fourth review: the refusal names the revoke, not a removed f
         !/confirm-old-host-down/.test(err.message),
     );
     standby.close();
+  });
+});
+
+describe('F-016-T17 fourth review (#702)', () => {
+  it('a revoke alone does not bound the old main while another unrevoked base may still ack its lease', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-d-'));
+    try {
+      // Set up through the same helper shape: old main X revoked, D enrolled and unreachable (no epoch push yet).
+      const h = join(dir, 'home');
+      mkdirSync(h, { recursive: true });
+      const root = generateKeyPairSync('ed25519');
+      const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      setBase(h, { id: 'NERV-02', name: 'Tabgha' });
+      pinKajiRoot(h, rootPub, true);
+      const store = new Store(join(h, 'nerv.sqlite'), undefined, { home: h });
+      const reg = new Registry(store.db, rootPub);
+      let serial = 0;
+      const add = (body: Record<string, unknown>) =>
+        reg.add(
+          signRecord(root.privateKey, {
+            ...body,
+            serial: ++serial,
+            issued: '2026-11-24T10:00:00.000Z',
+          } as unknown as RegistryBody),
+        );
+      const pub = () =>
+        generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      const oldPub = pub();
+      add({ kind: 'enrol', baseId: 'NERV-01', name: 'X', publicKey: oldPub, address: '127.0.0.1:1' });
+      add({ kind: 'enrol', baseId: 'NERV-02', name: 'B', publicKey: baseKey(h).publicKey, address: '127.0.0.1:2' });
+      add({ kind: 'enrol', baseId: 'NERV-04', name: 'D', publicKey: pub(), address: '127.0.0.1:4' });
+      add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
+      add({ kind: 'revoke', baseId: 'NERV-01', publicKey: oldPub });
+      add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
+      store.close();
+      const standby = new Store(join(h, STANDBY_DB_FILE));
+      setState(standby.db, 2, 'standby', 7, 'digest-7');
+      standby.close();
+      const events: string[] = [];
+      let wall = Date.now();
+      let mono = 0n;
+      await assert.rejects(
+        runKajiPromoteCommand(
+          ['promote'],
+          h,
+          { kaji: { root: rootPub, rootBinding: true }, base: { id: 'NERV-02' } } as unknown as Parameters<
+            typeof runKajiCommand
+          >[3],
+          {
+            flag: () => undefined,
+            promotion: {
+              service: { stop: () => void events.push('stop'), start: () => void events.push('start') },
+              clock: {
+                wall: () => wall,
+                mono: () => mono,
+                sleep: async (ms: number) => {
+                  wall += ms;
+                  mono += BigInt(ms) * 1_000_000n;
+                },
+              },
+            },
+          },
+        ),
+        (err: unknown) =>
+          err instanceof RelocationRefusedError && err.reason === 'old_host_unconfirmed' && /NERV-04/.test(err.message),
+      );
+      assert.deepEqual(events, []);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('a command that opens the store refuses while a promotion is unfinished, and creates no store', () => {
+    const h = mkdtempSync(join(tmpdir(), 'nerv-marker-cli-'));
+    try {
+      writeFileSync(join(h, PROMOTION_MARKER_FILE), '{}');
+      const run = spawnSync(process.execPath, ['src/cli.ts', 'remind', 'Neutral', '2031-01-01T09:00:00Z'], {
+        env: { ...process.env, NERV_HOME: h, NERV_OLLAMA: 'http://127.0.0.1:9' },
+        encoding: 'utf8',
+      });
+      assert.notEqual(run.status, 0);
+      assert.match(run.stderr, /promotion is in progress/);
+      assert.equal(existsSync(join(h, 'nerv.sqlite')), false);
+    } finally {
+      rmSync(h, { recursive: true, force: true });
+    }
   });
 });
