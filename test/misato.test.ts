@@ -117,8 +117,14 @@ test('fleet chat results are kept on the local model route even when Misato is c
   assert.match(ask.prompt, /There are 2 spare motors/);
 });
 /** A loopback model: Casper answers from one script, Misato from another; every request is recorded. */
+/** The handoff arguments of the last step in a planner prompt, copied as the planner does. */
+const handoffIn = (prompt: string) =>
+  (JSON.parse(prompt) as { steps: { result?: { handoff?: Record<string, unknown> } }[] }).steps.at(-1)!.result!
+    .handoff!;
+/** A scripted planner answer, or one built from the prompt it answers (to copy a step's result, as the model does). */
+type Scripted = string | ((prompt: string) => string);
 async function models(
-  misato: string[],
+  misato: Scripted[],
   casper: string | ((prompt: string) => string) = '{"vote":"approve","reason":"Matches.","confidence":0.9}',
 ) {
   const asked: { who: string; model: string; prompt: string }[] = [];
@@ -141,7 +147,12 @@ async function models(
                       ? typeof casper === 'function'
                         ? casper(r.messages.at(-1)!.content)
                         : casper
-                      : (misato.shift() ?? '{"reply":"done"}'),
+                      : (() => {
+                          const next = misato.shift();
+                          return typeof next === 'function'
+                            ? next(r.messages.at(-1)!.content)
+                            : (next ?? '{"reply":"done"}');
+                        })(),
                 },
                 finish_reason: 'stop',
               },
@@ -158,7 +169,7 @@ async function models(
   };
 }
 async function agent(
-  script: string[],
+  script: Scripted[],
   work: (
     r: Runtime,
     m: Awaited<ReturnType<typeof models>>,
@@ -1072,7 +1083,11 @@ test(
   { skip: process.platform === 'win32' ? 'a #! script on PATH cannot run on Windows' : false },
   async () => {
     const foot = 'solid foot\nendsolid foot\n';
-    const script = ['{"action":{"tool":"fleet.print","args":{"phrase":"stampa i piedini di Wisp"}}}'];
+    // The planner copies the result's handoff arguments (each slice has its own output file).
+    const script: Scripted[] = [
+      '{"action":{"tool":"fleet.print","args":{"phrase":"stampa i piedini di Wisp"}}}',
+      (prompt) => JSON.stringify({ action: { tool: 'bambu.handoff', args: handoffIn(prompt) } }),
+    ];
     // A fake bambu-studio first on PATH: the nervous process inherits PATH and runs it as the real slicer.
     const bin = mkdtempSync(join(tmpdir(), 'nerv-fake-slicer-'));
     writeFileSync(
@@ -1122,18 +1137,6 @@ test(
         { slicerProfiles: ['Test TPU 0.4'] },
       );
       store.close();
-      // The planner copies the result's handoff arguments; the sliced file's name is the part's SHA-256 and profile.
-      const digest = createHash('sha256').update(foot).digest('hex');
-      const handoff = {
-        gcode3mfPath: join(home, 'prints-out', `${digest.slice(0, 16)}-test-tpu-0-4.gcode.3mf`),
-        profileName: 'Test TPU 0.4',
-        printTimeText: '42m',
-        filamentGrams: 7.5,
-        amsMapping: 'External spool (TPU)',
-        sourceFile: 'kite-5/foot.stl',
-        repeats: 4,
-      };
-      script.push(JSON.stringify({ action: { tool: 'bambu.handoff', args: handoff } }));
     };
     try {
       await agent(
@@ -1249,18 +1252,12 @@ test('F-121-T04: "stampa i piedini di Wisp" with NERV-02 as the slicing base: th
         },
       }),
   });
-  const handoff = {
-    gcode3mfPath: join(tabgha, 'prints-out', `${digest.slice(0, 16)}-test-tpu-0-4.gcode.3mf`),
-    profileName: 'Test TPU 0.4',
-    printTimeText: '42m',
-    filamentGrams: 7.5,
-    amsMapping: 'External spool (TPU)',
-    sourceFile: 'kite-5/foot.stl',
-    repeats: 4,
-  };
-  const script = [
+  const script: Scripted[] = [
     '{"action":{"tool":"fleet.print","args":{"phrase":"stampa i piedini di Wisp"}}}',
-    JSON.stringify({ action: { tool: 'kaji.run', args: { base: 'NERV-02', tool: 'bambu.handoff', args: handoff } } }),
+    (prompt) =>
+      JSON.stringify({
+        action: { tool: 'kaji.run', args: { base: 'NERV-02', tool: 'bambu.handoff', args: handoffIn(prompt) } },
+      }),
   ];
   const setup = (home: string) => {
     const config = JSON.parse(readFileSync(join(home, 'config.json'), 'utf8')) as Record<string, unknown>;
@@ -1334,7 +1331,19 @@ test('F-121-T04: "stampa i piedini di Wisp" with NERV-02 as the slicing base: th
         };
         assert.match(result.reply, /^Sliced on NERV-02 motor foot/);
         assert.equal(result.handoffBase, 'NERV-02');
-        assert.deepEqual(result.handoff, handoff);
+        const { gcode3mfPath, ...rest } = result.handoff;
+        assert.ok(
+          String(gcode3mfPath).startsWith(join(tabgha, 'prints-out', `${digest.slice(0, 16)}-test-tpu-0-4-`)),
+          String(gcode3mfPath),
+        );
+        assert.deepEqual(rest, {
+          profileName: 'Test TPU 0.4',
+          printTimeText: '42m',
+          filamentGrams: 7.5,
+          amsMapping: 'External spool (TPU)',
+          sourceFile: 'kite-5/foot.stl',
+          repeats: 4,
+        });
         assert.deepEqual(
           sent.map((m) => m.content !== undefined),
           [false, true],
@@ -1345,7 +1354,7 @@ test('F-121-T04: "stampa i piedini di Wisp" with NERV-02 as the slicing base: th
         const cards = await runtime.approvals();
         assert.equal(cards.length, 1);
         assert.equal(cards[0]!.card.tool, 'kaji.run');
-        assert.deepEqual(cards[0]!.card.args, { base: 'NERV-02', tool: 'bambu.handoff', args: handoff });
+        assert.deepEqual(cards[0]!.card.args, { base: 'NERV-02', tool: 'bambu.handoff', args: result.handoff });
         // The ledger records the slice once, as it came back from NERV-02.
         const events = (await runtime.events(chat.sortieId)) as {
           kind: string;
@@ -1355,6 +1364,14 @@ test('F-121-T04: "stampa i piedini di Wisp" with NERV-02 as the slicing base: th
         assert.equal(done.length, 1);
         assert.match(done[0]!.payload.result!.text!, /Sliced on NERV-02/);
         assert.equal(existsSync(join(home, 'bambu-launches.log')), false, 'nothing opens before the owner approves');
+        // Review of #722: a direct action (POST /act, nerv act) sends the part too, and its sortie closes after.
+        const acted = await runtime.act({
+          request: 'stampa i piedini di Wisp',
+          tool: 'fleet.print',
+          args: { phrase: 'stampa i piedini di Wisp' },
+        });
+        assert.equal((acted as { result?: { sliced?: boolean } }).result?.sliced, true);
+        assert.equal((await runtime.sortie(acted.sortieId))?.status, 'done');
       },
       undefined,
       undefined,

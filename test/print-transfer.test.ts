@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash, generateKeyPairSync } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { request as httpRequest } from 'node:http';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -207,11 +208,15 @@ test('F-121-T04: the Mac sends the part over the Kaji line; Tabgha verifies, cac
       assert.ok(reply.reply.includes(text), `${text} in: ${reply.reply}`);
     }
     assert.equal(reply.handoffBase, 'NERV-02');
-    assert.equal(
-      reply.handoff!.gcode3mfPath,
-      join(b.tabgha, 'prints-out', `${sha(FOOT).slice(0, 16)}-test-tpu-0-4.gcode.3mf`),
-    );
+    // Review of #722: each slice has its own output file, so a later slice never replaces the file a pending
+    // hand-off card points at.
+    const first = String(reply.handoff!.gcode3mfPath);
+    assert.ok(first.startsWith(join(b.tabgha, 'prints-out', `${sha(FOOT).slice(0, 16)}-test-tpu-0-4-`)), first);
+    assert.ok(first.endsWith('.gcode.3mf'));
     assert.equal(reply.handoff!.repeats, 4);
+    const second = await b.print('stampa i piedini di Wisp');
+    assert.notEqual(second.handoff!.gcode3mfPath, first);
+    assert.equal(existsSync(first), true, 'the first slice is still there for its card');
   } finally {
     await b.done();
   }
@@ -463,5 +468,60 @@ test('F-121-T04: one slicer runs and one request waits; a third is told the base
     assert.deepEqual(readdirSync(join(home, 'prints-cache')), [`${sha(FOOT)}.stl`]);
   } finally {
     rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('F-121-T04: asking whether a part is cached never waits behind the slicer or gets busy', async () => {
+  const home = mkdtempSync(join(tmpdir(), 'nerv-print-probe-'));
+  try {
+    writeFileSync(join(home, 'slicer-profiles.json'), JSON.stringify(PROFILES));
+    const slow: SlicerExecAsyncFn = async (_bin, args) => {
+      await new Promise((r) => setTimeout(r, 600));
+      writeFileSync(args[args.indexOf('--export-3mf') + 1]!, 'PK-sliced');
+      return 'estimated printing time: 1m\n';
+    };
+    const request = {
+      version: 1,
+      part: { file: 'kite-5/foot.stl', sha256: sha(FOOT), bytes: FOOT.length },
+      profileName: 'Test TPU 0.4',
+      prints: 1,
+    };
+    const full = { version: 1, request, content: Buffer.from(FOOT).toString('base64') };
+    const busy = [1, 2].map(() => receivePartTransfer(home, ['NERV-01'], 'NERV-01', full, { exec: slow }));
+    const other = 'solid other\nendsolid other\n';
+    const asked = Date.now();
+    const probe = await receivePartTransfer(home, ['NERV-01'], 'NERV-01', {
+      version: 1,
+      request: { ...request, part: { file: 'kite-5/other.stl', sha256: sha(other), bytes: other.length } },
+    });
+    assert.deepEqual(probe, { status: 200, value: { need: 'content' } });
+    assert.ok(Date.now() - asked < 300, `answered in ${Date.now() - asked} ms`);
+    await Promise.all(busy);
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('F-121-T04: /kaji/print refuses an oversized or unaccepted sender before reading the body', async () => {
+  const b = await bases();
+  try {
+    await b.lb.start(60_000);
+    const address = (await b.lb.port.bases()).find((x) => x.baseId === 'NERV-02')!.address;
+    const [host, port] = address.split(':');
+    // Headers only: a handler that waited for the declared body would never answer.
+    const ask = (headers: Record<string, string>) =>
+      new Promise<number>((done, fail) => {
+        const req = httpRequest({ host, port: Number(port), method: 'POST', path: '/kaji/print', headers }, (res) => {
+          res.resume();
+          done(res.statusCode ?? 0);
+        });
+        req.on('error', fail);
+        req.setTimeout(3000, () => req.destroy(new Error('no answer before the body')));
+        req.flushHeaders();
+      });
+    assert.equal(await ask({ 'content-length': String(MAX_PART_TRANSFER_BODY + 1), 'x-kaji-base': 'NERV-01' }), 413);
+    assert.equal(await ask({ 'content-length': '1000', 'x-kaji-base': 'NERV-09' }), 403);
+  } finally {
+    await b.done();
   }
 });
