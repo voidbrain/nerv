@@ -70,6 +70,11 @@ export interface CoordinatorSnapshotManifest {
   coordinatorEpoch: number;
   coordinatorFence: number;
   headSeq: number;
+  /**
+   * F-016-T20: the main's `state_digest` at `headSeq` (the batch chain), so the first batch after the seed
+   * chains onto the standby. Absent from an older export: the standby then starts from `sha256`.
+   */
+  headDigest?: string;
   exportedAt: string;
   tableCounts: Record<string, number>;
   sha256: string;
@@ -96,9 +101,15 @@ export interface ExportCoordinatorSnapshotInput {
   coordinatorEpoch: number;
   coordinatorFence: number;
   headSeq: number;
+  /** F-016-T20: the chain digest at `headSeq` (see the manifest). */
+  headDigest?: string;
   privateKey: KeyObject;
   exportedAt?: string;
   maxBodyBytes?: number;
+  /** F-016-T20: read inside the caller's transaction. */
+  inTransaction?: boolean;
+  /** #725 review: with `inTransaction`, commit the caller's (read) transaction once the tables are read. */
+  commitAfterRead?: boolean;
 }
 
 export interface ExportedCoordinatorSnapshot {
@@ -168,7 +179,7 @@ export function exportCoordinatorSnapshot(input: ExportCoordinatorSnapshotInput)
   const tables: Record<string, Array<Record<string, unknown>>> = {};
   const tableCounts: Record<string, number> = {};
 
-  input.db.exec('BEGIN');
+  if (!input.inTransaction) input.db.exec('BEGIN');
   try {
     const present = existingTables(input.db);
     for (const table of REPLICATED_COORDINATOR_TABLES) {
@@ -185,8 +196,9 @@ export function exportCoordinatorSnapshot(input: ExportCoordinatorSnapshotInput)
       tables[table] = rows;
       tableCounts[table] = rows.length;
     }
-    input.db.exec('COMMIT');
+    if (!input.inTransaction || input.commitAfterRead) input.db.exec('COMMIT');
   } catch (err) {
+    if (input.inTransaction && !input.commitAfterRead) throw err;
     try {
       input.db.exec('ROLLBACK');
     } catch {
@@ -203,6 +215,7 @@ export function exportCoordinatorSnapshot(input: ExportCoordinatorSnapshotInput)
     coordinatorEpoch: input.coordinatorEpoch,
     coordinatorFence: input.coordinatorFence,
     headSeq: input.headSeq,
+    ...(input.headDigest ? { headDigest: input.headDigest } : {}),
     exportedAt,
     tableCounts,
     sha256,
@@ -422,7 +435,7 @@ export function importCoordinatorSnapshotToStandby(input: ImportStandbySnapshotI
         payload.manifest.coordinatorEpoch,
         payload.manifest.coordinatorFence,
         payload.manifest.headSeq,
-        payload.manifest.sha256,
+        payload.manifest.headDigest ?? payload.manifest.sha256,
         (coordRow?.lease_issued_at ?? null) as number | null,
         (coordRow?.lease_expires_at ?? null) as number | null,
         (coordRow?.standby_base_id ?? null) as string | null,
