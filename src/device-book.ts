@@ -163,6 +163,12 @@ export class DeviceBook {
       .map((d) => ({ ...d, expires: d.lastUse + this.idleMs }));
   }
 
+  /** The ID of a live device credential, so Settings can mark "this device"; undefined otherwise. */
+  idOf(credential: string): string | undefined {
+    if (!credential || !this.has(credential)) return undefined;
+    return this.current().get(sha256(credential))?.id;
+  }
+
   /** Revokes one device by its ID; false when there is none. */
   revoke(id: string): boolean {
     const book = this.current();
@@ -174,6 +180,44 @@ export class DeviceBook {
       }
     return false;
   }
+}
+
+/**
+ * F-118-T03: the device `nerv devices revoke NAME|ID` means: an exact ID, or a name compared without case. Several
+ * devices with that name are refused with their IDs (the same kind of phone and app gives the same name).
+ */
+export function matchDevice<D extends { id: string; name: string }>(
+  devices: readonly D[],
+  query: string,
+): { device: D } | { error: string } {
+  const wanted = query.trim();
+  const byId = devices.find((d) => d.id === wanted.toLowerCase());
+  if (byId) return { device: byId };
+  const named = devices.filter((d) => d.name.toLowerCase() === wanted.toLowerCase());
+  if (named.length === 1) return { device: named[0]! };
+  if (named.length > 1)
+    return {
+      error: `${named.length} devices are called ${named[0]!.name}: revoke one by its ID (${named.map((d) => d.id).join(', ')}).`,
+    };
+  return { error: `No paired device is called or has the ID ${wanted}: run nerv devices to see them.` };
+}
+
+/** F-118-T03: `nerv devices`: one line per device with its name, ID, pairing day, last use and when it lapses. */
+export function formatDevices(devices: readonly DeviceInfo[], now: number): string {
+  if (!devices.length) return 'No paired devices. Pair a phone with: nerv open --phone';
+  const day = (t: number) => new Date(t).toISOString().slice(0, 10);
+  const ago = (t: number) => {
+    const m = Math.max(0, Math.round((now - t) / 60_000));
+    return m < 60 ? `${m} min ago` : m < 48 * 60 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} days ago`;
+  };
+  return [
+    `${devices.length} paired device${devices.length === 1 ? '' : 's'} (each lapses after 90 days unused):`,
+    ...devices.map(
+      (d) =>
+        `  ${d.name} · ${d.id} · paired ${day(d.created)} · last used ${ago(d.lastUse)} · lapses ${day(d.expires)}`,
+    ),
+    'Revoke one with: nerv devices revoke NAME (or its ID)',
+  ].join('\n');
 }
 
 /** A pairing code is typed on a phone: 8 characters, shown XXXX-XXXX, without 0/O, 1/I. 32 symbols, 40 bits. */
