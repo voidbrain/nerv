@@ -4,7 +4,7 @@
   "parent": "F-098",
   "title": "Fleet by chat: add a drone, replace a part, set spare stock",
   "goal": "The owner adds drones and parts and sets stock from chat",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "fleet.chat understands Italian and English phrases such as \"nuovo drone Ghost, frame Apex 5, motori XING2 2207 1750KV\" (adds the drone, its parts by position and a spares record at 0 for each new model), \"sostituito motore anteriore sinistro di Smoke con …\" (marks the old part removed, installs the new one, adds its spares record if new), and \"ho 3 motori XING2 nuovi\" / \"2 usati\" (sets new/used counts)",
     "Uses the same src/fleet.ts functions as the fleet import (F-098-T05), gated like the other fleet writes (write-local)",
@@ -15,9 +15,12 @@
   ],
   "resources": [
     "src/fleet.ts",
+    "src/fleet-chat.ts",
     "src/executors.ts",
     "src/misato.ts",
-    "test/fleet.test.ts",
+    "src/fpv-pack.ts",
+    "test/fleet-chat.test.ts",
+    "test/misato.test.ts",
     "docs/work/tasks/F-098-T06.json",
     "docs/work/records/F-098.md",
     "generated:backlog-views"
@@ -28,7 +31,7 @@
   ],
   "privacy": "Owner fleet data stays local-only; tests use invented drones and generic parts.",
   "validation": [
-    "node --test test/fleet.test.ts",
+    "node --test test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts test/misato.test.ts",
     "npm run check:fast"
   ],
   "escalation": [
@@ -36,11 +39,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h",
-    "basis": "Owner approved 2026-11-23 with an estimate of 2 h agent: chat phrases for add drone, replace part and set stock over the F-098-T05 functions. Not a measurement.",
-    "reviewed": "2026-11-23",
-    "agentHours": 2,
+    "estimate": "0 remaining",
+    "basis": "Owner approved 2026-11-23 with an estimate of 2 h agent: chat phrases for add drone, replace part and set stock over the F-098-T05 functions. Actual includes a drone_parts table rebuild (slot unique only among non-removed parts) so a replaced part stays as a removed row. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
     "baselineAgentHours": 2,
-    "estimateAgentHours": 2
+    "estimateAgentHours": 2,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
   }
 }
