@@ -986,4 +986,61 @@ describe('F-016-T16 review fixes (#701)', () => {
     assert.equal(store.coordinatorFencingState()?.leaseExpiresAt, wall + 20_000);
     store.close();
   });
+
+  it('third review: kaji standby on a fenced main names the base without a probe, so the standby ack history does not move', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-standby-fenced-'));
+    try {
+      const home = join(dir, 'home');
+      mkdirSync(home, { recursive: true });
+      const root = generateKeyPairSync('ed25519');
+      const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      setBase(home, { id: 'NERV-01', name: 'Tokyo' });
+      pinKajiRoot(home, rootPub, true);
+      const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+      const reg = new Registry(store.db, rootPub);
+      let serial = 0;
+      const add = (body: Record<string, unknown>) =>
+        reg.add(
+          signRecord(root.privateKey, {
+            ...body,
+            serial: ++serial,
+            issued: '2026-11-24T10:00:00.000Z',
+          } as unknown as RegistryBody),
+        );
+      add({ kind: 'enrol', baseId: 'NERV-01', name: 'A', publicKey: baseKey(home).publicKey, address: '127.0.0.1:1' });
+      const other = generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      add({ kind: 'enrol', baseId: 'NERV-02', name: 'B', publicKey: other, address: '127.0.0.1:2' });
+      add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
+      store.db.exec(COORDINATOR_STATE_SCHEMA);
+      store.db
+        .prepare(
+          "INSERT INTO coordinator_state(id, coordinator_epoch, coordinator_fence, replication_mode, head_seq, lease_expires_at, state_digest) VALUES (1, 2, 1, 'fenced', 0, 0, 'd')",
+        )
+        .run();
+      const config = { kaji: { root: rootPub, rootBinding: true }, base: { id: 'NERV-01' } } as unknown as Parameters<
+        typeof runKajiCommand
+      >[3];
+      let probes = 0;
+      await runKajiCommand(['standby', 'NERV-02'], home, store, config, {
+        readSecret: async () => '',
+        flag: () => undefined,
+        renewLease: async () => {
+          probes++;
+          throw new Error('must not probe from a fenced main');
+        },
+      });
+      assert.equal(probes, 0);
+      assert.equal(
+        (
+          store.db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as {
+            standby_base_id: string;
+          }
+        ).standby_base_id,
+        'NERV-02',
+      );
+      store.close();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

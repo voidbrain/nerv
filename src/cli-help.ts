@@ -213,7 +213,7 @@ export const HELP_GROUPS: HelpGroup[] = [
           'kaji main [BASE-ID] | kaji offer [ACTION…|none] | kaji seat BASE-ID shadow|veto|off',
           'kaji export [FILE] | kaji import FILE --root FINGERPRINT',
           'kaji relocate BASE-ID [--revoke LOST-ID] | kaji drain [FILE] | kaji standby [BASE-ID]',
-          'kaji promote [--drain-receipt FILE | --confirm-old-host-down]',
+          'kaji promote [--drain-receipt FILE]',
         ],
       },
       {

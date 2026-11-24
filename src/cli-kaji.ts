@@ -4,7 +4,8 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 import { Store } from './store.ts';
 
-import { setKajiOffers, setKajiSeat, pinKajiRoot, readConfig } from './config.ts';
+import { databasePath, setKajiOffers, setKajiSeat, pinKajiRoot, readConfig } from './config.ts';
+import { DatabaseSync } from 'node:sqlite';
 
 import {
   ROOT_KEY_FILE,
@@ -19,7 +20,7 @@ import {
 } from './kaji.ts';
 
 import { builtinTools } from './executors.ts';
-import { drainCoordinator, signDrainReceipt } from './coordinator-relocation.ts';
+import { RelocationRefusedError, drainCoordinator, signDrainReceipt } from './coordinator-relocation.ts';
 import { pushCoordinatorEpoch, registryPort } from './coordinator-epoch.ts';
 import { KajiLink } from './kaji-link.ts';
 import {
@@ -30,6 +31,73 @@ import {
 } from './coordinator-promote.ts';
 import { nextLeaseSeq, type LeaseRenewRequest, type LeaseRenewResult } from './coordinator-lease.ts';
 import { OFFER_NAME, toolName } from './mcp.ts';
+
+/**
+ * `nerv kaji promote` (F-016-T17): the new main side. Every safety input is read from verified records on this
+ * base. The CLI runs it without opening a Store first (third review): opening one would create an empty
+ * nerv.sqlite in the middle of an interrupted swap.
+ */
+export async function runKajiPromoteCommand(
+  args: string[],
+  home: string,
+  config: ReturnType<typeof readConfig>,
+  ctx: {
+    flag: (name: string) => string | undefined;
+    promotion?: {
+      service?: PromotionServiceControl;
+      clock?: PromotionClock;
+      pushEpoch?: (
+        baseId: string,
+        records: SignedRecord[],
+      ) => Promise<{ maxSeenCoordinatorEpoch: number; standby?: boolean }>;
+    };
+  },
+): Promise<void> {
+  if (args.includes('--confirm-old-host-down'))
+    throw new RelocationRefusedError(
+      'old_host_unconfirmed',
+      "The owner's word does not bound the old main: revoke it with the root key (the Key of Nebuchadnezzar from its offline backup: kaji relocate BASE-ID --revoke OLD-ID, then kaji import here) and run kaji promote again.",
+    );
+  const receipt = ctx.flag('--drain-receipt');
+  const res = await promoteCoordinator({
+    home,
+    rootPublicKey: config.kaji?.root,
+    ownPublicKey: baseKey(home).publicKey,
+    ...(receipt ? { drainReceiptFile: receipt } : {}),
+    service: ctx.promotion?.service ?? installedPromotionService(home),
+    ...(ctx.promotion?.clock ? { clock: ctx.promotion.clock } : {}),
+    log: (line) => console.log(line),
+    // F-016-T18: a client on the signed Kaji line that never listens; it reads the registry when it pushes
+    // (after any interrupted swap was finished, so the store exists).
+    pushEpoch:
+      ctx.promotion?.pushEpoch ??
+      (async (id, records) => {
+        const db = new DatabaseSync(databasePath(home));
+        try {
+          return await new KajiLink({
+            ...(config.kaji?.root
+              ? { trust: { root: config.kaji.root, required: config.kaji.rootBinding === true } }
+              : {}),
+            baseId: config.base.id,
+            key: baseKey(home).privateKey,
+            publicKey: baseKey(home).publicKey,
+            registry: registryPort(new Registry(db, config.kaji?.root)),
+            log: () => {},
+          }).pushEpoch(id, records);
+        } finally {
+          db.close();
+        }
+      }),
+  });
+  console.log(
+    'resumed' in res
+      ? `Promotion at coordinator epoch ${res.newEpoch} finished; the service is running again.`
+      : `Promoted to coordinator epoch ${res.newEpoch} (from ${res.previousEpoch}, ${res.source}); ${res.quarantined} uncertain outbox row(s) parked for review. ` +
+          (res.leaseExpiresAt
+            ? 'Sole coordinator: lease armed.'
+            : 'Effects wait for the first standby-acked lease (name a standby: kaji standby BASE-ID).'),
+  );
+}
 
 export async function runKajiCommand(
   args: string[],
@@ -256,25 +324,7 @@ export async function runKajiCommand(
       );
     } else process.stdout.write(out);
   } else if (sub === 'promote') {
-    // F-016-T17: the new main side. Every safety input is read from verified records on this base.
-    const receipt = ctx.flag('--drain-receipt');
-    const res = await promoteCoordinator({
-      home,
-      rootPublicKey: config.kaji?.root,
-      ownPublicKey: me,
-      ...(receipt ? { drainReceiptFile: receipt } : {}),
-      confirmOldHostDown: args.includes('--confirm-old-host-down'),
-      service: ctx.promotion?.service ?? installedPromotionService(home),
-      ...(ctx.promotion?.clock ? { clock: ctx.promotion.clock } : {}),
-      log: (line) => console.log(line),
-      pushEpoch: ctx.promotion?.pushEpoch ?? ((id, records) => kajiClient().pushEpoch(id, records)),
-    });
-    console.log(
-      'resumed' in res
-        ? `Promotion at coordinator epoch ${res.newEpoch} finished; the service is running again.`
-        : `Promoted to coordinator epoch ${res.newEpoch} (from ${res.previousEpoch}, ${res.source}); ${res.quarantined} uncertain outbox row(s) parked for review. ` +
-            (res.leaseExpiresAt ? 'Sole coordinator: lease armed.' : 'Effects wait for the first standby-acked lease.'),
-    );
+    await runKajiPromoteCommand(args, home, config, ctx);
   } else if (sub === 'standby') {
     // F-016-T16 review: the owner names the base the active main renews its lease through.
     const id = (args[1] ?? '').toUpperCase();
@@ -294,7 +344,14 @@ export async function runKajiCommand(
       throw new Error('Name another enrolled base: a coordinator never acks its own lease.');
     if (!state || (state.replicationMode !== 'active' && state.replicationMode !== 'fenced'))
       throw new Error('This base holds no coordinator state to name a standby for.');
-    // F-016-T16 re-review: only a base that acks from a standby store may be named; one lease renewal proves it.
+    // F-016-T16 re-review: only a base that acks from a standby store may be named; on an active main one lease
+    // renewal proves it. A fenced main never probes (that would move the standby's ack history for a main that
+    // holds no lease); its keeper re-arms only through an ack, which only a standby store gives.
+    if (state.replicationMode === 'fenced') {
+      store.db.prepare('UPDATE coordinator_state SET standby_base_id = ? WHERE id = 1').run(id);
+      console.log(`Standby: ${id}. This main is fenced: it re-arms only when ${id} acks from its standby store.`);
+      return;
+    }
     const renew =
       ctx.renewLease ??
       ((base: string, req: LeaseRenewRequest) =>
@@ -413,7 +470,7 @@ export async function runKajiCommand(
     );
   } else
     throw new Error(
-      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [--revoke LOST-ID] | drain [FILE] | standby [BASE-ID] | promote [--drain-receipt FILE | --confirm-old-host-down] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
+      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [--revoke LOST-ID] | drain [FILE] | standby [BASE-ID] | promote [--drain-receipt FILE] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
     );
   return;
 }
