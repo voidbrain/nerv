@@ -64,7 +64,8 @@ CREATE TABLE IF NOT EXISTS drone_models(
 );
 CREATE TABLE IF NOT EXISTS printed_parts(
   id TEXT PRIMARY KEY,
-  file TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  file TEXT NOT NULL,
+  file_key TEXT NOT NULL UNIQUE,
   material TEXT NOT NULL DEFAULT 'TPU',
   slicer_profile TEXT NOT NULL,
   external_spool INTEGER NOT NULL DEFAULT 1 CHECK (external_spool IN (0, 1)),
@@ -214,12 +215,12 @@ const PRINT_FILE_EXTENSIONS: readonly string[] = ['.stl', '.3mf', '.obj', '.step
 const DEFAULT_PRINT_MATERIAL = 'TPU';
 
 /**
- * F-121-T01: a part file path as the fleet stores it: relative to the print library, `/` between folders,
- * no `..`, `.` or empty segments, and a slicer input extension. Links leaving the library are refused
+ * F-121-T01: a part file path as the fleet stores it: Unicode NFC, relative to the print library, `/`
+ * between folders, no `..`, `.` or empty segments, names Windows accepts, and a slicer input extension. Links leaving the library are refused
  * when the file is resolved (src/print-library.ts).
  */
 export function validatePrintPath(raw: string): string {
-  const path = raw.trim();
+  const path = raw.trim().normalize('NFC');
   if (!path) throw new Error('A part file path is required.');
   if (/[\u0000-\u001f]/.test(path)) throw new Error(`Part file "${path}" contains a control character.`);
   if (path.startsWith('/') || path.startsWith('\\') || path.startsWith('~') || /^[A-Za-z]:/.test(path)) {
@@ -231,11 +232,27 @@ export function validatePrintPath(raw: string): string {
   if (segments.some((segment) => segment === '' || segment === '.')) {
     throw new Error(`Part file "${path}" has an empty or "." segment.`);
   }
+  // Windows names (Tabgha, NERV-02, writes these files): no reserved characters or device names, and no
+  // segment ending in "." or a space, which Windows silently strips.
+  if (/[:<>"|?*]/.test(path))
+    throw new Error(`Part file "${path}" contains a character Windows refuses (: < > " | ? *).`);
+  const reserved = segments.find((segment) => /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(segment));
+  if (reserved) throw new Error(`Part file "${path}" uses the reserved Windows name "${reserved}".`);
+  const trailing = segments.find((segment) => /[. ]$/.test(segment));
+  if (trailing) throw new Error(`Part file "${path}": "${trailing}" must not end in "." or a space.`);
   const lower = path.toLowerCase();
   if (!PRINT_FILE_EXTENSIONS.some((ext) => lower.endsWith(ext))) {
     throw new Error(`Part file "${path}" must end in .stl, .3mf, .obj or .step.`);
   }
   return path;
+}
+
+/**
+ * F-121-T01: the identity of a library file. SQLite's NOCASE folds ASCII only, while APFS (and NTFS) treat
+ * NFC/NFD forms and Unicode case variants (É/é) as one file, so the key is NFC and Unicode lower case.
+ */
+function printFileKey(file: string): string {
+  return file.normalize('NFC').toLowerCase();
 }
 
 /** F-121-T01: the allowlisted (F-087) profile name, in the allowlist's spelling; unknown names are refused. */
@@ -978,8 +995,8 @@ ALTER TABLE drone_parts_next RENAME TO drone_parts;`);
     const variant = input.variant?.trim() || undefined;
     const aliases = input.aliases?.map((alias) => alias.trim()).filter(Boolean);
     return transaction(this.db, () => {
-      const file = input.file === undefined ? this.sharedFileByName(name) : validatePrintPath(input.file);
-      let row = this.db.prepare('SELECT * FROM printed_parts WHERE file = ?').get(file) as
+      const file = input.file === undefined ? this.sharedFileByName(name, model.id) : validatePrintPath(input.file);
+      let row = this.db.prepare('SELECT * FROM printed_parts WHERE file_key = ?').get(printFileKey(file)) as
         Record<string, unknown> | undefined;
       const created = !row;
       if (row) {
@@ -1016,12 +1033,13 @@ ALTER TABLE drone_parts_next RENAME TO drone_parts;`);
         }
         this.db
           .prepare(
-            `INSERT INTO printed_parts(id, file, material, slicer_profile, external_spool, objects_per_print, variant, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO printed_parts(id, file, file_key, material, slicer_profile, external_spool, objects_per_print, variant, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           )
           .run(
             `print-${randomUUID()}`,
             file,
+            printFileKey(file),
             material ?? DEFAULT_PRINT_MATERIAL,
             profile,
             input.externalSpool === false ? 0 : 1,
@@ -1029,7 +1047,10 @@ ALTER TABLE drone_parts_next RENAME TO drone_parts;`);
             variant ?? null,
             now,
           );
-        row = this.db.prepare('SELECT * FROM printed_parts WHERE file = ?').get(file) as Record<string, unknown>;
+        row = this.db.prepare('SELECT * FROM printed_parts WHERE file_key = ?').get(printFileKey(file)) as Record<
+          string,
+          unknown
+        >;
       }
       const partId = String(row.id);
       const link = this.db
@@ -1061,23 +1082,25 @@ ALTER TABLE drone_parts_next RENAME TO drone_parts;`);
     });
   }
 
-  /** The one library file a part name or alias already names on any model; none or several is an error. */
-  private sharedFileByName(name: string): string {
+  /**
+   * The library file a part name or alias names: on the target model first (so a name-only update of that
+   * model's part works even when another model has a part of the same name), then across all models.
+   * None or several files is an error.
+   */
+  private sharedFileByName(name: string, modelId: string): string {
     const wanted = name.toLowerCase();
     const rows = this.db
-      .prepare('SELECT l.name, l.aliases, p.file FROM drone_model_parts l JOIN printed_parts p ON p.id = l.part_id')
-      .all() as Array<{ name: string; aliases: string; file: string }>;
-    const files = [
-      ...new Set(
-        rows
-          .filter(
-            (row) =>
-              row.name.toLowerCase() === wanted ||
-              (JSON.parse(row.aliases) as string[]).some((alias) => alias.toLowerCase() === wanted),
-          )
-          .map((row) => row.file),
-      ),
-    ];
+      .prepare(
+        'SELECT l.model_id, l.name, l.aliases, p.file FROM drone_model_parts l JOIN printed_parts p ON p.id = l.part_id',
+      )
+      .all() as Array<{ model_id: string; name: string; aliases: string; file: string }>;
+    const matching = rows.filter(
+      (row) =>
+        row.name.toLowerCase() === wanted ||
+        (JSON.parse(row.aliases) as string[]).some((alias) => alias.toLowerCase() === wanted),
+    );
+    const own = [...new Set(matching.filter((row) => row.model_id === modelId).map((row) => row.file))];
+    const files = own.length ? own : [...new Set(matching.map((row) => row.file))];
     if (files.length === 1) return files[0]!;
     if (files.length === 0) throw new Error(`No printed part named "${name}" yet: give its file to add it.`);
     throw new Error(`"${name}" names several part files (${files.join(', ')}): give the file to share.`);

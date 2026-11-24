@@ -258,7 +258,11 @@ export function handleFleetEditChat(
   if (!edit) return { handled: false };
   if (edit.kind === 'ask') return ask(edit.question);
   if (edit.kind === 'add-model') return addModel(fleet, edit.name, now);
-  if (edit.kind === 'link-model') return linkModel(fleet, edit, now);
+  // "il drone Smoke è caduto" / "drone Smoke is down" have the same shape as a model link: claim the
+  // phrase only when it names a known model, so other handlers still see it.
+  if (edit.kind === 'link-model') {
+    return fleet.getDroneModel(edit.model) ? linkModel(fleet, edit, now) : { handled: false };
+  }
   if (edit.kind === 'printed-part') {
     const profiles = typeof options.slicerProfiles === 'function' ? options.slicerProfiles() : options.slicerProfiles;
     return addPrintedPart(fleet, edit, profiles ?? [], now);
@@ -383,12 +387,6 @@ function linkModel(fleet: FleetStore, edit: Extract<FleetEdit, { kind: 'link-mod
   if (!drone) {
     return ask(
       `I don't know a drone named "${edit.droneName}". Which drone did you mean? To add it, say "nuovo drone ${edit.droneName}, …".`,
-    );
-  }
-  if (!fleet.getDroneModel(edit.model)) {
-    const known = fleet.listDroneModels().map((model) => model.name);
-    return ask(
-      `I don't know a drone model named "${edit.model}"${known.length ? ` (known: ${known.join(', ')})` : ''}. Which model did you mean? To add it, say "nuovo modello di drone ${edit.model}".`,
     );
   }
   const { previous, model } = fleet.linkDroneModel(drone.name, edit.model, now);

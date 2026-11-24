@@ -43,12 +43,12 @@
   "effort": {
     "size": "medium",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 at agent speed (3 h agent). Actual includes the print library resolver, the home slicer-profiles.json allowlist reader and the fleet models/prints CLI listings. Not a measurement.",
+    "basis": "Estimated 2026-11-24 at agent speed (3 h agent). Actual includes the print library resolver, the home slicer-profiles.json allowlist reader and the fleet models/prints CLI listings. Not a measurement. Review round 2026-11-24 (Unicode path key, link phrase shadowing, name-only update scope, Windows path hazards) added 0.5 h.",
     "reviewed": "2026-11-24",
     "agentHours": 0,
     "baselineAgentHours": 3.0,
     "estimateAgentHours": 3.0,
-    "actualAgentHours": 2.5,
+    "actualAgentHours": 3.0,
     "actualSource": "stated"
   },
   "prs": [
