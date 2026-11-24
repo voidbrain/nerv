@@ -1044,6 +1044,9 @@ describe('F-016-T17 re-review fixes (#702)', () => {
     } finally {
       rmSync(f.dir, { recursive: true, force: true });
     }
+  });
+});
+
 describe('F-016-T16 fourth review: the refusal names the revoke, not a removed flag', () => {
   it('an unplanned move without ack history asks for a root-signed revoke', () => {
     const standby = new Store(':memory:');
