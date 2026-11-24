@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "B-116-T01",
+  "parent": "B-116",
+  "title": "F-023 notice test: the forbidden-text regex can match a random ID",
+  "goal": "The inbox notice test never fails on a random UUID",
+  "status": "planned",
+  "acceptance": [
+    "Failing case first: a notice whose random id contains 2099 fails the current regex",
+    "The assertion checks the message text, not the whole serialized record"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/approval-delivery.test.ts",
+    "docs/work/records/B-116.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "node --test test/approval-delivery.test.ts"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h agent",
+    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-23",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}
