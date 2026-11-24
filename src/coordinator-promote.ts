@@ -45,31 +45,52 @@ const systemClock: PromotionClock = {
   sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 };
 
-/** The installed service (launchd, systemd or the Windows task); a NERV run by hand must be stopped first. */
-export function installedPromotionService(home: string): PromotionServiceControl {
-  let stopped = false;
-  const answering = async () => {
-    try {
-      await fetch(`http://127.0.0.1:${readConfig(home).port}/api/status`, { signal: AbortSignal.timeout(500) });
-      return true;
-    } catch {
-      return false;
-    }
-  };
+/**
+ * The installed service (launchd, systemd or the Windows task); a NERV run by hand must be stopped first.
+ * Idempotent (F-016-T17 review): a stop that fails while nothing answers counts as stopped, a start that fails
+ * while NERV answers counts as started, and every run starts the service, a resumed one too.
+ */
+export function installedPromotionService(
+  home: string,
+  deps: {
+    readonly service: (action: 'stop' | 'start', home: string) => void;
+    readonly answering: () => Promise<boolean>;
+    readonly sleep: (ms: number) => Promise<void>;
+  } = {
+    service,
+    answering: async () => {
+      try {
+        await fetch(`http://127.0.0.1:${readConfig(home).port}/api/status`, { signal: AbortSignal.timeout(500) });
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    sleep: systemClock.sleep,
+  },
+): PromotionServiceControl {
+  const notInstalled = (err: unknown) => /not installed/.test((err as Error).message);
   return {
     async stop() {
+      let failure: unknown;
       try {
-        service('stop', home);
-        stopped = true;
+        deps.service('stop', home);
       } catch (err) {
-        if (!/not installed/.test((err as Error).message)) throw err;
+        if (!notInstalled(err)) failure = err;
       }
-      for (let i = 0; i < 60 && (await answering()); i++) await systemClock.sleep(250);
-      if (await answering())
+      for (let i = 0; i < 60 && (await deps.answering()); i++) await deps.sleep(250);
+      if (await deps.answering()) {
+        if (failure) throw failure;
         throw new Error('NERV Agency still answers on its port: stop it (Ctrl+C or service stop) and run again.');
+      }
     },
-    start() {
-      if (stopped) service('start', home);
+    async start() {
+      try {
+        deps.service('start', home);
+      } catch (err) {
+        if (notInstalled(err) || (await deps.answering())) return;
+        throw err;
+      }
     },
   };
 }
@@ -171,6 +192,14 @@ function derive(
       : undefined;
     const epochSeenAtMs = received ? Date.parse(received) : NaN;
 
+    const others = bases
+      .filter((b) => b.status === 'enrolled' && b.baseId !== self.baseId)
+      .map((b) => b.baseId)
+      .sort();
+    const standbyBaseId =
+      input.drainReceiptFile && others.includes(previousMainBaseId)
+        ? previousMainBaseId
+        : (others.find((id) => id !== previousMainBaseId) ?? others[0]);
     let liveness: (nowMs: number, monoNowNs: bigint) => RelocationLiveness;
     if (input.drainReceiptFile) {
       if (!enrolment || previousRevoked)
@@ -203,7 +232,10 @@ function derive(
         selfBaseId: self.baseId,
         previousMainBaseId,
         registryMain: { baseId: registry.main(), coordinatorEpoch: newEpoch },
-        soleCoordinator: !bases.some((b) => b.status === 'enrolled' && b.baseId !== self.baseId),
+        soleCoordinator: others.length === 0,
+        // Review BLOCKER: the new main names the base it renews through. A planned move hands it to the drained
+        // old main; otherwise another enrolled base, the old main last. `nerv kaji standby` changes it.
+        ...(standbyBaseId ? { standbyBaseId } : {}),
         ...(input.failAfterStep ? { failAfterStep: input.failAfterStep } : {}),
       },
     };
@@ -253,7 +285,13 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
       JSON.stringify({ baseId: d.relocation.selfBaseId, newEpoch: d.relocation.registryMain.coordinatorEpoch }) + '\n',
       { mode: 0o600 },
     );
-  await input.service.stop();
+  try {
+    await input.service.stop();
+  } catch (err) {
+    // Nothing was swapped: no promotion is in progress.
+    rmSync(marker, { force: true });
+    throw err;
+  }
   for (;;) {
     try {
       const nowMs = clock.wall();

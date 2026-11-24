@@ -807,7 +807,7 @@ describe('F-016-T17 review fixes (#702)', () => {
     await installedPromotionService('/nonexistent', deps({ startThrows: true })).start();
     // Still answering after a failed stop: refused.
     await assert.rejects(
-      installedPromotionService('/nonexistent', deps({ stopThrows: true })).stop(),
+      async () => installedPromotionService('/nonexistent', deps({ stopThrows: true })).stop(),
       /launchctl failed/,
     );
     // Not installed (a NERV run by hand): nothing to start.
