@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "10.3.0",
+  "version": "10.7.0",
   "stacks": [
     "core",
     "angular"
@@ -575,7 +575,7 @@
           "what": "Operator protocol bounds"
         }
       ],
-      "kept": "Both transports import shared constants; test/protocol.test.ts and test/worker-link.test.ts exercise overload."
+      "kept": "Both transports import shared constants; test/protocol.test.ts and test/worker-link-heartbeat.test.ts exercise overload."
     },
     {
       "value": "Bootstrap source protocol 1: fresh, model-free initialization",
@@ -1000,6 +1000,9 @@
       "days": 30
     },
     "architecture": {
+      "days": 30
+    },
+    "skills": {
       "days": 30
     }
   }
