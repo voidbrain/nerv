@@ -1108,7 +1108,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | **Issue** | Owner 2026-11-23 (decision 1): the installed phone app (workspace or dashboard) cannot sign in: the sign-in box takes only the admin token, a QR or link opens Safari, and the session lived in tab storage that iOS clears on relaunch. The owner chose pairing: once per device, revocable, lapsing after 90 days unused; plus a QR option. |
 | **Reproduce** | Install the dashboard to the iPhone Home Screen and open it: "NOT SIGNED IN". |
-| **Check** | A short code typed into the installed app pairs it; it stays signed in through restarts and updates; Settings and nerv devices revoke it; a QR pairs browsers in one step. |
+| **Check** | A short code typed into the installed app pairs it; it stays signed in through restarts and updates; Settings and nerv devices revoke it; a scanned QR opens the Safari dashboard showing the code, which the installed app then takes. |
 
 **Feature steps**
 
