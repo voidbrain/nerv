@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { generateKeyPairSync } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { describe, it } from 'node:test';
+import { after, describe, it } from 'node:test';
 import { spawnSync } from 'node:child_process';
 import {
   CoordinatorAuthorityError,
@@ -60,6 +60,24 @@ function setState(db: DatabaseSync, epoch: number, mode: string, headSeq: number
 }
 
 const ms = (n: number) => BigInt(n) * 1_000_000n;
+
+// Windows CI (run 45354728396): building a promotion home (SQLite stores, base keys, signed records) costs seconds
+// there, and this file built one per test. Each variant is built once and copied for every test that needs it.
+const templates = new Map<string, { dir: string; data: unknown }>();
+after(() => {
+  for (const t of templates.values()) rmSync(t.dir, { recursive: true, force: true });
+});
+function fromTemplate<T>(key: string, prefix: string, build: (dir: string) => T): { dir: string; data: T } {
+  let t = templates.get(key);
+  if (!t) {
+    const built = mkdtempSync(join(tmpdir(), 'nerv-template-'));
+    t = { dir: built, data: build(built) };
+    templates.set(key, t);
+  }
+  const dir = mkdtempSync(join(tmpdir(), prefix));
+  cpSync(t.dir, dir, { recursive: true });
+  return { dir, data: t.data as T };
+}
 
 function refusal(fn: () => unknown, reason: string) {
   assert.throws(fn, (err: unknown) => err instanceof RelocationRefusedError && err.reason === reason);
@@ -558,49 +576,59 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
 describe('F-016-T17: nerv kaji promote stops the service, derives its inputs from verified records and resumes', () => {
   /** A base (NERV-02) holding the owner's main record at epoch 3 and a verified standby of epoch 2 from NERV-01. */
   async function promotionHome(o: { revokeOld?: boolean } = {}) {
-    const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-'));
-    const home = join(dir, 'home');
-    mkdirSync(home, { recursive: true });
-    const root = generateKeyPairSync('ed25519');
-    const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
-    setBase(home, { id: 'NERV-02', name: 'Tabgha' });
-    pinKajiRoot(home, rootPub, true);
-    const oldKey = generateKeyPairSync('ed25519');
-    const oldPub = oldKey.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
-    const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
-    const reg = new Registry(store.db, rootPub);
-    let serial = 0;
-    const add = (body: Record<string, unknown>) =>
-      reg.add(
-        signRecord(root.privateKey, {
-          ...body,
-          serial: ++serial,
-          issued: '2026-11-24T10:00:00.000Z',
-        } as unknown as RegistryBody),
+    const { dir, data } = fromTemplate(`promotion:${o.revokeOld === true}`, 'nerv-promote-', (t) => {
+      const home = join(t, 'home');
+      mkdirSync(home, { recursive: true });
+      const root = generateKeyPairSync('ed25519');
+      const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      setBase(home, { id: 'NERV-02', name: 'Tabgha' });
+      pinKajiRoot(home, rootPub, true);
+      const oldKey = generateKeyPairSync('ed25519');
+      const oldPub = oldKey.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+      const reg = new Registry(store.db, rootPub);
+      let serial = 0;
+      const add = (body: Record<string, unknown>) =>
+        reg.add(
+          signRecord(root.privateKey, {
+            ...body,
+            serial: ++serial,
+            issued: '2026-11-24T10:00:00.000Z',
+          } as unknown as RegistryBody),
+        );
+      add({ kind: 'enrol', baseId: 'NERV-01', name: 'Tokyo', publicKey: oldPub, address: '127.0.0.1:4320' });
+      add({
+        kind: 'enrol',
+        baseId: 'NERV-02',
+        name: 'Tabgha',
+        publicKey: baseKey(home).publicKey,
+        address: '127.0.0.1:4321',
+      });
+      add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
+      if (o.revokeOld) add({ kind: 'revoke', baseId: 'NERV-01', publicKey: oldPub });
+      add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
+      store.close();
+      const standby = new Store(join(home, STANDBY_DB_FILE));
+      setState(standby.db, 2, 'standby', 7, 'digest-7');
+      standby.close();
+      const oldMain = new Store(':memory:');
+      setState(oldMain.db, 2, 'active', 7, 'digest-7');
+      const receipt = signDrainReceipt(
+        oldKey.privateKey,
+        drainCoordinator(oldMain.db, {
+          baseId: 'NERV-01',
+          coordinatorEpoch: 2,
+          newMainBaseId: 'NERV-02',
+          newEpoch: 3,
+        }),
       );
-    add({ kind: 'enrol', baseId: 'NERV-01', name: 'Tokyo', publicKey: oldPub, address: '127.0.0.1:4320' });
-    add({
-      kind: 'enrol',
-      baseId: 'NERV-02',
-      name: 'Tabgha',
-      publicKey: baseKey(home).publicKey,
-      address: '127.0.0.1:4321',
+      oldMain.close();
+      writeFileSync(join(t, 'receipt.json'), JSON.stringify(receipt));
+      return { oldKey, rootPub };
     });
-    add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
-    if (o.revokeOld) add({ kind: 'revoke', baseId: 'NERV-01', publicKey: oldPub });
-    add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
-    store.close();
-    const standby = new Store(join(home, STANDBY_DB_FILE));
-    setState(standby.db, 2, 'standby', 7, 'digest-7');
-    standby.close();
-    const oldMain = new Store(':memory:');
-    setState(oldMain.db, 2, 'active', 7, 'digest-7');
-    const receipt = signDrainReceipt(
-      oldKey.privateKey,
-      drainCoordinator(oldMain.db, { baseId: 'NERV-01', coordinatorEpoch: 2, newMainBaseId: 'NERV-02', newEpoch: 3 }),
-    );
+    const { oldKey, rootPub } = data;
+    const home = join(dir, 'home');
     const receiptFile = join(dir, 'receipt.json');
-    writeFileSync(receiptFile, JSON.stringify(receipt));
     const events: string[] = [];
     const state = () => {
       const db = new DatabaseSync(join(home, 'nerv.sqlite'));
@@ -886,38 +914,54 @@ describe('F-016-T17 review fixes (#702)', () => {
 
 describe('F-016-T17 re-review fixes (#702)', () => {
   async function home(o: { revokeOld?: boolean; ackHistory?: boolean } = {}) {
-    const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-rr-'));
+    const { dir, data } = fromTemplate(
+      `rr:${o.revokeOld === true}:${o.ackHistory === true}`,
+      'nerv-promote-rr-',
+      (t) => {
+        const h = join(t, 'home');
+        mkdirSync(h, { recursive: true });
+        const root = generateKeyPairSync('ed25519');
+        const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+        setBase(h, { id: 'NERV-02', name: 'Tabgha' });
+        pinKajiRoot(h, rootPub, true);
+        const store = new Store(join(h, 'nerv.sqlite'), undefined, { home: h });
+        const reg = new Registry(store.db, rootPub);
+        let serial = 0;
+        const add = (body: Record<string, unknown>) =>
+          reg.add(
+            signRecord(root.privateKey, {
+              ...body,
+              serial: ++serial,
+              issued: '2026-11-24T10:00:00.000Z',
+            } as unknown as RegistryBody),
+          );
+        const oldPub = generateKeyPairSync('ed25519')
+          .publicKey.export({ type: 'spki', format: 'der' })
+          .toString('base64');
+        add({ kind: 'enrol', baseId: 'NERV-01', name: 'Tokyo', publicKey: oldPub, address: '127.0.0.1:1' });
+        add({
+          kind: 'enrol',
+          baseId: 'NERV-02',
+          name: 'Tabgha',
+          publicKey: baseKey(h).publicKey,
+          address: '127.0.0.1:2',
+        });
+        add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
+        if (o.revokeOld) add({ kind: 'revoke', baseId: 'NERV-01', publicKey: oldPub });
+        add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
+        store.close();
+        const standby = new Store(join(h, STANDBY_DB_FILE));
+        setState(standby.db, 2, 'standby', 7, 'digest-7');
+        if (o.ackHistory) {
+          standby.db.exec(STANDBY_LEASE_SCHEMA);
+          standby.db.prepare("INSERT INTO standby_lease_state VALUES (1, 2, 9, ?, 'boot')").run(Date.now());
+        }
+        standby.close();
+        return { rootPub };
+      },
+    );
+    const { rootPub } = data;
     const h = join(dir, 'home');
-    mkdirSync(h, { recursive: true });
-    const root = generateKeyPairSync('ed25519');
-    const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
-    setBase(h, { id: 'NERV-02', name: 'Tabgha' });
-    pinKajiRoot(h, rootPub, true);
-    const store = new Store(join(h, 'nerv.sqlite'), undefined, { home: h });
-    const reg = new Registry(store.db, rootPub);
-    let serial = 0;
-    const add = (body: Record<string, unknown>) =>
-      reg.add(
-        signRecord(root.privateKey, {
-          ...body,
-          serial: ++serial,
-          issued: '2026-11-24T10:00:00.000Z',
-        } as unknown as RegistryBody),
-      );
-    const oldPub = generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
-    add({ kind: 'enrol', baseId: 'NERV-01', name: 'Tokyo', publicKey: oldPub, address: '127.0.0.1:1' });
-    add({ kind: 'enrol', baseId: 'NERV-02', name: 'Tabgha', publicKey: baseKey(h).publicKey, address: '127.0.0.1:2' });
-    add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
-    if (o.revokeOld) add({ kind: 'revoke', baseId: 'NERV-01', publicKey: oldPub });
-    add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
-    store.close();
-    const standby = new Store(join(h, STANDBY_DB_FILE));
-    setState(standby.db, 2, 'standby', 7, 'digest-7');
-    if (o.ackHistory) {
-      standby.db.exec(STANDBY_LEASE_SCHEMA);
-      standby.db.prepare("INSERT INTO standby_lease_state VALUES (1, 2, 9, ?, 'boot')").run(Date.now());
-    }
-    standby.close();
     let wall = Date.now();
     let mono = 0n;
     const events: string[] = [];
