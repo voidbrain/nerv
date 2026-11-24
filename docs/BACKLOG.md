@@ -824,6 +824,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-120"></a>[✨ F-120](#top)
+
+**Gauntlet coverage of NERV capabilities**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-120-T01 — Catch-up Gauntlet coverage review of closed features (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24: the Gauntlet exists to qualify models for NERV's general and specific capabilities, but no rule ties a finished NERV feature to a Gauntlet case. NERV's own pack (`evals/gauntlet/system-v1.json`) has 8 broad flows; pairing, relocation, update, fleet, placement and watches have no case. General domain packs (coding, embedded, logic, Italian quality, 3D printing, image generation) were requested from gauntlet-protocol the same day and are tracked in that repository. |
+| **Reproduce** | `jq '.cases[].id' evals/gauntlet/system-v1.json` lists 8 flows; `docs/test-capability-index.md` has no row for the features closed since F-074. |
+| **Check** | Every closed NERV feature with model-facing behaviour has a system-pack case or a recorded reason; the cases run and pass in an owner-approved campaign. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | 1.5 h | Planned | — | [F-120-T02](#f-120-t02) |
+| 🟢 Small | <a id="f-120-t03"></a>F-120-T03 — Adopt the Gauntlet domain packs when released | 0.5 h | 0 h | 0.5 h | Planned | — | — |
+| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | [F-120-T01](#f-120-t01) | — |
+| 🔴 Large | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 5 h | 0 of 3 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-120.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711). |
+| Opened | 2026-11-24 |
+| Verification | — |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-088"></a>[✨ F-088](#top)
 
 **Storage base: copy files from a known removable card when it is inserted**
@@ -1574,46 +1614,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened) |
 | Opened | 2026-11-24 |
 | Verification | Pending |
-| Reviewed | 2026-11-24 |
-
-</details>
-
----
-### <a id="f-120"></a>[✨ F-120](#top)
-
-**Gauntlet coverage of NERV capabilities**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-120-T01 — Catch-up Gauntlet coverage review of closed features (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner 2026-11-24: the Gauntlet exists to qualify models for NERV's general and specific capabilities, but no rule ties a finished NERV feature to a Gauntlet case. NERV's own pack (`evals/gauntlet/system-v1.json`) has 8 broad flows; pairing, relocation, update, fleet, placement and watches have no case. General domain packs (coding, embedded, logic, Italian quality, 3D printing, image generation) were requested from gauntlet-protocol the same day and are tracked in that repository. |
-| **Reproduce** | `jq '.cases[].id' evals/gauntlet/system-v1.json` lists 8 flows; `docs/test-capability-index.md` has no row for the features closed since F-074. |
-| **Check** | Every closed NERV feature with model-facing behaviour has a system-pack case or a recorded reason; the cases run and pass in an owner-approved campaign. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | 1.5 h | Planned | — | [F-120-T02](#f-120-t02) |
-| 🟢 Small | <a id="f-120-t03"></a>F-120-T03 — Adopt the Gauntlet domain packs when released | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | [F-120-T01](#f-120-t01) | — |
-| 🔴 Large | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 5 h | 0 of 3 completed | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-120.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Opened in this PR. |
-| Opened | 2026-11-24 |
-| Verification | — |
 | Reviewed | 2026-11-24 |
 
 </details>
