@@ -1074,3 +1074,78 @@ describe('F-016-T17 review fixes (#702)', () => {
     }
   });
 });
+
+describe('F-016-T18 review (#703): the promoted main names a base that acked the new epoch', () => {
+  it('prefers an acked base as its standby over an unreachable one', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-standby-'));
+    try {
+      const home = join(dir, 'home');
+      mkdirSync(home, { recursive: true });
+      const root = generateKeyPairSync('ed25519');
+      const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      setBase(home, { id: 'NERV-02', name: 'Tabgha' });
+      pinKajiRoot(home, rootPub, true);
+      const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+      const reg = new Registry(store.db, rootPub);
+      let serial = 0;
+      const add = (body: Record<string, unknown>) =>
+        reg.add(
+          signRecord(root.privateKey, {
+            ...body,
+            serial: ++serial,
+            issued: '2026-11-24T10:00:00.000Z',
+          } as unknown as RegistryBody),
+        );
+      const pub = () =>
+        generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      add({ kind: 'enrol', baseId: 'NERV-01', name: 'Tokyo', publicKey: pub(), address: '127.0.0.1:1' });
+      add({
+        kind: 'enrol',
+        baseId: 'NERV-02',
+        name: 'Tabgha',
+        publicKey: baseKey(home).publicKey,
+        address: '127.0.0.1:2',
+      });
+      add({ kind: 'enrol', baseId: 'NERV-03', name: 'Relay', publicKey: pub(), address: '127.0.0.1:3' });
+      add({ kind: 'enrol', baseId: 'NERV-04', name: 'Harbor', publicKey: pub(), address: '127.0.0.1:4' });
+      add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
+      add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
+      store.close();
+      const standby = new Store(join(home, STANDBY_DB_FILE));
+      setState(standby.db, 2, 'standby', 7, 'digest-7');
+      standby.close();
+      let wall = Date.now();
+      let mono = 0n;
+      await promoteCoordinator({
+        home,
+        rootPublicKey: rootPub,
+        ownPublicKey: baseKey(home).publicKey,
+        confirmOldHostDown: true,
+        service: { stop: () => {}, start: () => {} },
+        clock: {
+          wall: () => wall,
+          mono: () => mono,
+          sleep: async (ms: number) => {
+            wall += ms;
+            mono += BigInt(ms) * 1_000_000n;
+          },
+        },
+        pushEpoch: async (id) => {
+          if (id !== 'NERV-04') throw new Error('unreachable');
+          return { maxSeenCoordinatorEpoch: 3 };
+        },
+      });
+      const db = new DatabaseSync(join(home, 'nerv.sqlite'));
+      try {
+        const row = db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as {
+          standby_base_id: string | null;
+        };
+        assert.equal(row.standby_base_id, 'NERV-04');
+      } finally {
+        db.close();
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
