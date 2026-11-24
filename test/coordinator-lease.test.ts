@@ -25,7 +25,9 @@ import {
   RELOCATION_HORIZON_ACKED_MS,
   STANDBY_DB_FILE,
   checkRelocationReadiness,
+  relocateCoordinator,
 } from '../src/coordinator-relocation.ts';
+import { runKajiCommand } from '../src/cli-kaji.ts';
 import { Store } from '../src/store.ts';
 
 async function freePort(): Promise<number> {
@@ -526,5 +528,348 @@ describe('F-016-T16: serve wiring joins the keeper, the standby ack, the authori
       standbyHomeStore.close();
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe('F-016-T16 review fixes (#701)', () => {
+  function main(epoch: number, standby: string | null, leaseExpiresAt = 0, mode = 'active') {
+    const store = new Store(':memory:');
+    store.db.exec(COORDINATOR_STATE_SCHEMA);
+    store.db
+      .prepare(
+        'INSERT INTO coordinator_state(id, coordinator_epoch, coordinator_fence, replication_mode, head_seq, lease_expires_at, state_digest, standby_base_id) VALUES (1, ?, 1, ?, 10, ?, ?, ?)',
+      )
+      .run(epoch, mode, leaseExpiresAt, 'digest', standby);
+    return store;
+  }
+  function standbyAt(epoch: number) {
+    const store = new Store(':memory:');
+    store.db.exec(COORDINATOR_STATE_SCHEMA);
+    store.db
+      .prepare(
+        "INSERT INTO coordinator_state(id, coordinator_epoch, coordinator_fence, replication_mode, head_seq, lease_expires_at, state_digest) VALUES (1, ?, 1, 'standby', 10, 0, 'digest')",
+      )
+      .run(epoch);
+    return store;
+  }
+  const ackVia =
+    (standby: Store, maxSeen: () => number, nowMs: () => number) =>
+    async (_id: string, request: { coordinatorEpoch: number; leaseSeq: number }) =>
+      standby.handleStandbyLeaseRenew({
+        standbyBaseId: 'NERV-02',
+        request,
+        maxSeenCoordinatorEpoch: maxSeen(),
+        processBootId: 'boot',
+        nowMs: nowMs(),
+      });
+
+  it('BLOCKER: a main promoted with other bases enrolled names its standby, renews through it and holds authority', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-reloc-standby-'));
+    try {
+      const mainPath = join(dir, 'nerv.sqlite');
+      const standbyPath = join(dir, STANDBY_DB_FILE);
+      new Store(mainPath).close();
+      const s = new Store(standbyPath);
+      s.db.exec(COORDINATOR_STATE_SCHEMA);
+      s.db
+        .prepare(
+          "INSERT INTO coordinator_state(id, coordinator_epoch, coordinator_fence, replication_mode, head_seq, lease_expires_at, state_digest, standby_base_id) VALUES (1, 2, 1, 'standby', 7, 0, 'digest-7', 'NERV-02')",
+        )
+        .run();
+      s.close();
+      relocateCoordinator({
+        mainDbPath: mainPath,
+        standbyDbPath: standbyPath,
+        selfBaseId: 'NERV-02',
+        previousMainBaseId: 'NERV-01',
+        registryMain: { baseId: 'NERV-02', coordinatorEpoch: 3 },
+        soleCoordinator: false,
+        standbyBaseId: 'NERV-01',
+        liveness: {
+          kind: 'unplanned',
+          epochSeenAtMs: 0,
+          allUnrevokedAckedNewEpoch: false,
+          oldHostDownConfirmed: true,
+          nowMs: 10 * LEASE_TTL_MS,
+          monoSinceNs: 0n,
+          monoNowNs: BigInt(10 * LEASE_TTL_MS) * 1_000_000n,
+        },
+      });
+      const promoted = new Store(mainPath);
+      const peer = standbyAt(2);
+      try {
+        const row = promoted.db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as {
+          standby_base_id: string | null;
+        };
+        assert.equal(row.standby_base_id, 'NERV-01');
+        assert.throws(() => promoted.assertActiveCoordinator(), /no armed lease/);
+        // The named base acks at the new epoch: the keeper arms the lease and the base has authority.
+        const named: string[] = [];
+        const keeper = new CoordinatorLeaseKeeper({
+          db: promoted.db,
+          renew: async (id, req) => {
+            named.push(id);
+            return ackVia(peer, () => 3, Date.now)(id, req);
+          },
+          hasOtherEnrolledBases: () => true,
+        });
+        assert.equal(await keeper.renewOnce(), 'renewed');
+        assert.deepEqual(named, ['NERV-01']);
+        assert.equal(promoted.assertActiveCoordinator()?.coordinatorEpoch, 3);
+      } finally {
+        promoted.close();
+        peer.close();
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('BLOCKER: kaji standby names an enrolled base on the active main; serve acks from nerv.sqlite where no standby store exists', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-kaji-standby-'));
+    try {
+      const home = join(dir, 'home');
+      mkdirSync(home, { recursive: true });
+      const root = generateKeyPairSync('ed25519');
+      const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      setBase(home, { id: 'NERV-01', name: 'Tokyo' });
+      pinKajiRoot(home, rootPub, true);
+      const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+      const reg = new Registry(store.db, rootPub);
+      let serial = 0;
+      const add = (body: Record<string, unknown>) =>
+        reg.add(
+          signRecord(root.privateKey, {
+            ...body,
+            serial: ++serial,
+            issued: '2026-11-24T10:00:00.000Z',
+          } as unknown as RegistryBody),
+        );
+      add({ kind: 'enrol', baseId: 'NERV-01', name: 'A', publicKey: baseKey(home).publicKey, address: '127.0.0.1:1' });
+      const other = generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      add({ kind: 'enrol', baseId: 'NERV-02', name: 'B', publicKey: other, address: '127.0.0.1:2' });
+      add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
+      store.db.exec(COORDINATOR_STATE_SCHEMA);
+      store.db
+        .prepare(
+          "INSERT INTO coordinator_state(id, coordinator_epoch, coordinator_fence, replication_mode, head_seq, lease_expires_at, state_digest) VALUES (1, 2, 1, 'active', 0, 0, 'd')",
+        )
+        .run();
+      const config = { kaji: { root: rootPub, rootBinding: true }, base: { id: 'NERV-01' } } as unknown as Parameters<
+        typeof runKajiCommand
+      >[3];
+      const ctx = { readSecret: async () => '', flag: () => undefined };
+      await assert.rejects(runKajiCommand(['standby', 'NERV-09'], home, store, config, ctx), /enrolled/);
+      await assert.rejects(runKajiCommand(['standby', 'NERV-01'], home, store, config, ctx), /another/);
+      await runKajiCommand(['standby', 'NERV-02'], home, store, config, ctx);
+      const row = store.db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as {
+        standby_base_id: string;
+      };
+      assert.equal(row.standby_base_id, 'NERV-02');
+      store.close();
+
+      // A drained old main has no standby store: it acks from its own (fenced) nerv.sqlite.
+      const ackHome = join(dir, 'acker');
+      mkdirSync(ackHome, { recursive: true });
+      const acker = new Store(join(ackHome, 'nerv.sqlite'));
+      acker.db.exec(COORDINATOR_STATE_SCHEMA);
+      acker.db
+        .prepare(
+          "INSERT INTO coordinator_state(id, coordinator_epoch, coordinator_fence, replication_mode, head_seq, lease_expires_at, state_digest) VALUES (1, 2, 1, 'fenced', 7, 0, 'd')",
+        )
+        .run();
+      acker.close();
+      const svc = coordinatorLeaseService({
+        home: ackHome,
+        databasePath: join(ackHome, 'nerv.sqlite'),
+        baseId: 'NERV-01',
+        root: undefined,
+        ownPublicKey: other,
+      });
+      try {
+        // maxSeenCoordinatorEpoch is 0 without a root here, so it answers as a base that saw no newer epoch.
+        const r = await svc.onLeaseRenew('NERV-02', { coordinatorEpoch: 3, leaseSeq: 1 });
+        assert.equal(r.ok, false);
+        if (!r.ok) assert.equal(r.reason, 'stale_coordinator_epoch');
+      } finally {
+        svc.stop();
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('fix 1: a main fenced by a standby outage re-arms when a renewal succeeds at the same epoch it is still named for', async () => {
+    let wall = 1_700_000_000_000;
+    let mono = 1_000_000_000_000n;
+    const store = main(2, 'NERV-02');
+    const peer = standbyAt(2);
+    let down = false;
+    let registry = { baseId: 'NERV-01' as string | undefined, epoch: 2 };
+    const ack = ackVia(
+      peer,
+      () => 2,
+      () => wall,
+    );
+    const keeper = new CoordinatorLeaseKeeper({
+      db: store.db,
+      renew: (id, req) => (down ? Promise.reject(new Error('down')) : ack(id, req)),
+      hasOtherEnrolledBases: () => true,
+      selfBaseId: 'NERV-01',
+      registryMain: () => registry,
+      wallNow: () => wall,
+      monoNow: () => mono,
+    });
+    assert.equal(await keeper.renewOnce(), 'renewed');
+    down = true;
+    wall += 60_000;
+    mono += 60_000_000_000n;
+    assert.equal(await keeper.renewOnce(), 'fenced');
+    down = false;
+    wall += 15_000;
+    mono += 15_000_000_000n;
+    assert.equal(await keeper.renewOnce(), 'renewed');
+    assert.equal(store.coordinatorFencingState()?.replicationMode, 'active');
+    assert.doesNotThrow(() => store.assertActiveCoordinator(wall));
+    // Once a newer main record is held (or the base is no longer named), fenced stays fenced.
+    down = true;
+    wall += 60_000;
+    mono += 60_000_000_000n;
+    assert.equal(await keeper.renewOnce(), 'fenced');
+    down = false;
+    registry = { baseId: 'NERV-02', epoch: 3 };
+    assert.equal(await keeper.renewOnce(), 'inactive');
+    assert.equal(store.coordinatorFencingState()?.replicationMode, 'fenced');
+    // A drained main is never revived: drain needs a newer main record first.
+    const drained = main(2, 'NERV-02', 0, 'fenced');
+    const k2 = new CoordinatorLeaseKeeper({
+      db: drained.db,
+      renew: ack,
+      hasOtherEnrolledBases: () => true,
+      selfBaseId: 'NERV-01',
+      registryMain: () => ({ baseId: 'NERV-02', epoch: 3 }),
+      wallNow: () => wall,
+      monoNow: () => mono,
+    });
+    assert.equal(await k2.renewOnce(), 'inactive');
+    store.close();
+    peer.close();
+    drained.close();
+  });
+
+  it('fix 2: a standby that holds a newer main answers with signed newer-epoch evidence and the old main fences at once; a lagging one does not fence it', async () => {
+    const old = main(2, 'NERV-02', Date.now() + 40_000);
+    const bMain = makeBase('NERV-01', 'Tokyo', await freePort());
+    const bStandby = makeBase('NERV-02', 'Tabgha', await freePort());
+    let standbyView = { main: 'NERV-03', epoch: 3 };
+    const records = (): SignedRecord[] => [
+      {
+        body: { kind: 'main', serial: 9, baseId: standbyView.main, coordinatorEpoch: standbyView.epoch, issued: 'x' },
+        signature: '',
+      } as SignedRecord,
+    ];
+    const port = (): RegistryPort => ({
+      bases: async () => [bMain.entry, bStandby.entry],
+      records: async () => records(),
+      add: async () => 0,
+      seen: async () => {},
+      lastSeen: async () => ({}),
+      main: async () => standbyView.main,
+    });
+    const standbyLink = new KajiLink({
+      baseId: 'NERV-02',
+      key: bStandby.privateKey,
+      publicKey: bStandby.pubB64,
+      registry: port(),
+      onLeaseRenew: async () => {
+        throw new Error('never reached');
+      },
+    });
+    const mainLink = new KajiLink({
+      baseId: 'NERV-01',
+      key: bMain.privateKey,
+      publicKey: bMain.pubB64,
+      registry: port(),
+    });
+    await standbyLink.start(60_000);
+    await mainLink.start(60_000);
+    try {
+      const keeper = new CoordinatorLeaseKeeper({
+        db: old.db,
+        renew: (id, req) => mainLink.renewLease(id, req),
+        hasOtherEnrolledBases: () => true,
+      });
+      assert.equal(await keeper.renewOnce(), 'fenced');
+      // A peer that does not hold a newer epoch (it lags) is not evidence: the main waits for its lease instead.
+      const lagging = main(4, 'NERV-02', Date.now() + 40_000);
+      standbyView = { main: 'NERV-03', epoch: 3 };
+      const k2 = new CoordinatorLeaseKeeper({
+        db: lagging.db,
+        renew: (id, req) => mainLink.renewLease(id, req),
+        hasOtherEnrolledBases: () => true,
+      });
+      assert.equal(await k2.renewOnce(), 'waiting');
+      lagging.close();
+    } finally {
+      await mainLink.stop();
+      await standbyLink.stop();
+      old.close();
+    }
+  });
+
+  it('fix 3: the lease is bounded on the monotonic clock before any renewal is awaited, after a restart too, and never longer than the TTL', async () => {
+    const wall0 = 1_700_000_000_000;
+    // More than LEASE_TTL_MS left is impossible for an honest lease: refused (a backward wall jump).
+    const far = main(2, 'NERV-02', wall0 + LEASE_TTL_MS + 1);
+    assert.throws(() => far.assertActiveCoordinator(wall0), /stale_coordinator_lease|lease/);
+    far.close();
+
+    // A restarted keeper derives its monotonic deadline from the remaining lease at first sight.
+    let wall = wall0;
+    let mono = 5_000_000_000_000n;
+    const store = main(2, 'NERV-02', wall0 + 50_000);
+    let renewCalls = 0;
+    const keeper = new CoordinatorLeaseKeeper({
+      db: store.db,
+      renew: async () => {
+        renewCalls++;
+        throw new Error('unreachable');
+      },
+      hasOtherEnrolledBases: () => true,
+      wallNow: () => wall,
+      monoNow: () => mono,
+    });
+    assert.equal(await keeper.renewOnce(), 'waiting');
+    // The wall clock jumps back 100 s; 51 s pass on the monotonic clock: the lease is over.
+    wall -= 100_000;
+    mono += 51_000_000_000n;
+    const before = renewCalls;
+    assert.equal(await keeper.renewOnce(), 'fenced');
+    assert.equal(renewCalls, before, 'fenced before awaiting a renewal');
+    store.close();
+  });
+
+  it('fix 4: the lease sequence survives a restart even when the wall clock went back', async () => {
+    let wall = 1_700_000_000_000;
+    const store = main(2, 'NERV-02');
+    const peer = standbyAt(2);
+    const ack = ackVia(
+      peer,
+      () => 2,
+      () => wall,
+    );
+    const keeper = () =>
+      new CoordinatorLeaseKeeper({
+        db: store.db,
+        renew: ack,
+        hasOtherEnrolledBases: () => true,
+        wallNow: () => wall,
+        monoNow: () => BigInt(wall) * 1_000_000n,
+      });
+    assert.equal(await keeper().renewOnce(), 'renewed');
+    wall -= 3_600_000;
+    assert.equal(await keeper().renewOnce(), 'renewed');
+    store.close();
+    peer.close();
   });
 });
