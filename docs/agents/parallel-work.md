@@ -14,6 +14,16 @@ After adoption, `docs/work/records/ID.md` owns each active record; `docs/work/la
 
 Store one JSON file per task in the configured tasks directory. Fields: `version: 1`, `id`, `parent`, `title`, `goal`, `status` (`planned`, `ready`, `implemented`, `verified`, `closed`), string arrays `acceptance`, `dependsOn`, `resources`, `capabilities`, `validation`, `escalation`, and a `privacy` string. Optional `suggestedProfile` names an existing model profile. Validation strings describe reviewed checks; the tool does not execute them. A task becomes ready only after its scope, prerequisites and parent/human cues have been reviewed. Known source paths and `directory/**` scopes are resources; `contract:name` and `generated:name` identify shared boundaries/outputs. Unknown scope is a reason to serialize work, not assume independence.
 
+## Landing queue
+
+Parallel agents build in parallel; they land one at a time. Landing several PRs at once multiplies work: each merge puts every other open PR in conflict on the generated views, each update restarts its CI, and the runners and the shared machine fill up, so timing-sensitive tests fail that pass alone (observed 2026-11-23: up to 12 queued CI runs, about N×(N−1)/2 extra runs for N PRs, and failures that passed when rerun alone).
+
+- **Agents stop at ready.** An agent builds in its own worktree, runs the fast checks and the tests of what it changed, pushes, opens its PR with its evidence and marks it ready. It does not merge it, rerun CI on it or update it from `main` while it waits.
+- **One lander.** One session (or the project's landing script) takes ready PRs in order: updates the next one from `main`, regenerates the generated views (resolving their conflicts by regenerating from all accepted sources, never by keeping one side), runs the slow checks the project requires (full tests, evaluations), lets CI run, reruns a known flake once, and merges when every check passed. Then the next one.
+- **At most two PRs in CI.** The one being merged and the next one warming up. Order is the order PRs became ready, unless the owner reorders it.
+- **One heavy local run per machine.** Full test suites and evaluations that share one machine run one at a time (a lock file names the holder); fast checks may run in parallel.
+- **A real failure goes back.** A failure that is not a known flake takes the PR out of the queue and back to its owner with the failing output; the queue goes on with the next one. A flake that recurs gets its own bug record.
+
 ## Model suitability and delegation
 
 A model, pilot, host and execution permission are separate choices. Required capabilities and evaluation evidence are more useful than parameter-count minimums or permanent provider rankings. Every model follows the same task, privacy, test and review requirements. Never grant a local/cheap model broader permissions to compensate for weak tool use.

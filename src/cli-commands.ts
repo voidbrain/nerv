@@ -9,6 +9,7 @@ import { EvaJobs, runEva03Durably } from './eva-jobs.ts';
 
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
+import { parseFleetImport } from './fleet.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
 import {
   detectVoiceLanguage,
@@ -274,8 +275,44 @@ export async function tryRunCliCommand(
         console.log(JSON.stringify(store.fleet.listParts(args[1]), null, 2));
       } else if (sub === 'spares') {
         console.log(JSON.stringify(store.fleet.listSpares(args[1]), null, 2));
+      } else if (sub === 'import' && args[1]) {
+        let raw: unknown;
+        try {
+          raw = JSON.parse(readFileSync(resolve(args[1]), 'utf8'));
+        } catch (error) {
+          throw new Error(`${args[1]} is not readable JSON: ${(error as Error).message}`);
+        }
+        console.log(JSON.stringify(store.fleet.importFleet(parseFleetImport(raw)), null, 2));
       } else {
-        throw new Error('Usage: fleet drones | fleet parts <drone> | fleet spares [category]');
+        throw new Error(
+          'Usage: fleet drones | fleet parts <drone> | fleet spares [category] | fleet import <fleet.json>',
+        );
+      }
+    } finally {
+      store.close();
+    }
+  } else if (command === 'session-limit') {
+    // F-090-T04: record a coding session that stopped at its usage limit; `serve` resumes it once after the reset.
+    const sub = args[0] ?? 'list';
+    const store = new Store(databasePath(home), readScrolls(home), { home });
+    try {
+      if (sub === 'list') {
+        console.log(JSON.stringify(store.sessionLimits.list(), null, 2));
+      } else if (sub === 'record' && args[1] && args[2] && args[3] && args[4]) {
+        const resetAt = Date.parse(args[4]);
+        if (!/(Z|[+-]\d{2}:\d{2})$/.test(args[4]) || !Number.isFinite(resetAt))
+          throw new Error('The reset time is an ISO time with its zone, e.g. 2026-11-23T15:00:00+01:00.');
+        const prompt = ctx.flag('--prompt');
+        const recorded = store.sessionLimits.record({
+          sessionId: args[1],
+          repoPath: resolve(args[2]),
+          branch: args[3],
+          resetAt,
+          ...(prompt ? { prompt } : {}),
+        });
+        console.log(JSON.stringify(recorded, null, 2));
+      } else {
+        throw new Error('Usage: session-limit list | record SESSION REPO BRANCH "ISO reset time+zone" [--prompt TEXT]');
       }
     } finally {
       store.close();

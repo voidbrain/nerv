@@ -4,8 +4,8 @@
   "parent": "B-106",
   "title": "Owner confirms Sephirot answer edge and arrowheads on live dashboard",
   "goal": "Owner confirms S-F11B answer edge and sync -> apt arrowheads render cleanly",
-  "status": "planned",
-  "ownerLink": "docs/work/records/B-106.md",
+  "status": "closed",
+  "ownerLink": "docs/archive/backlog-2026.md",
   "acceptance": [
     "Owner confirms on the live dashboard after rebuilding dist/web"
   ],
@@ -29,10 +29,10 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Added 2026-11-22 for live dashboard confirmation.",
-    "reviewed": "2026-11-22",
+    "basis": "Added 2026-11-22 for live dashboard confirmation. Closed 2026-11-24: the owner confirmed S-F11B looks correct. No actual: owner time not recorded.",
+    "reviewed": "2026-11-24",
     "ownerKind": "procedure",
     "agentHours": 0,
-    "ownerHours": 0.25
+    "ownerHours": 0
   }
 }

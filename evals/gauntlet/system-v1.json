@@ -165,6 +165,12 @@
         "test/kaji-seats.test.ts",
         "test/worker-jobs.test.ts",
         "test/worker-link.test.ts",
+        "test/worker-link-heartbeat.test.ts",
+        "test/worker-link-admission.test.ts",
+        "test/worker-link-exit.test.ts",
+        "test/fixtures/worker-link.ts",
+        "test/fixtures/worker-link-timeout.probe.ts",
+        "test/fixtures/idle-brain.ts",
         "test/worker-outbox.test.ts",
         "test/protocol.test.ts"
       ]
@@ -225,6 +231,7 @@
         "test/evaluation.browser.mjs",
         "test/pwa.browser.mjs",
         "test/browser-click.browser.mjs",
+        "test/diyfpv-read.browser.mjs",
         "test/fixtures/browser.mjs"
       ]
     },

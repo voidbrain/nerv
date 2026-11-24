@@ -42,6 +42,12 @@ export const HELP_GROUPS: HelpGroup[] = [
         about: 'Work to pick up again later',
         usage: ['resume-intent list [status] | create <intent.json> | cancel <id> [reason] | tick'],
       },
+      {
+        name: 'session-limit',
+        args: 'list|record',
+        about: 'Resume a coding session after its limit resets',
+        usage: ['session-limit list | record SESSION REPO BRANCH "ISO reset time+zone" [--prompt TEXT]'],
+      },
     ],
   },
   {
@@ -125,8 +131,8 @@ export const HELP_GROUPS: HelpGroup[] = [
       { name: 'seats', args: '[check | key SEAT-ID]', about: 'MAGI seats and their keys' },
       {
         name: 'placement',
-        args: 'plan PROBE.json | run PROBE.json --execute',
-        about: 'Plan or run a bounded P2–P4 placement probe',
+        args: 'plan PROBE.json | run PROBE.json --execute | report EVIDENCE.json',
+        about: 'Plan or run a bounded P2–P4 placement probe, or report on placement evidence',
       },
       {
         name: 'engines',
@@ -168,6 +174,7 @@ export const HELP_GROUPS: HelpGroup[] = [
         args: 'APP CONTROL [--window=TITLE] [--approved]',
         about: 'Click a named desktop control (macOS)',
       },
+      { name: 'fpv-read-build', args: 'LINK', about: 'Read a diyfpv.com build into its local build note' },
       { name: 'desktop-record', args: 'ID HEADER.json', about: 'Record desktop input for a workflow' },
     ],
   },
@@ -186,9 +193,9 @@ export const HELP_GROUPS: HelpGroup[] = [
       },
       {
         name: 'fleet',
-        args: 'drones|parts|spares',
+        args: 'drones|parts|spares|import',
         about: 'Drones, parts and spares',
-        usage: ['fleet drones | fleet parts <drone> | fleet spares [category]'],
+        usage: ['fleet drones | fleet parts <drone> | fleet spares [category]', 'fleet import <fleet.json>'],
       },
       { name: 'card-copy', args: 'MOUNT LABEL RULES.json', about: 'Copy files from a memory card by rules' },
       { name: 'slice', args: 'IN OUT PROFILE ALLOWLIST', about: 'Slice a model for the 3D printer' },
@@ -199,12 +206,13 @@ export const HELP_GROUPS: HelpGroup[] = [
     commands: [
       {
         name: 'kaji',
-        args: 'enrol|revoke|main|offer|seat|list|export|import',
+        args: 'enrol|revoke|main|relocate|drain|offer|seat|list|export|import',
         about: 'Enrolled bases',
         usage: [
           'kaji enrol BASE-ID "Name" PUBKEY|self ADDRESS | kaji revoke BASE-ID | kaji list',
           'kaji main [BASE-ID] | kaji offer [ACTION…|none] | kaji seat BASE-ID shadow|veto|off',
           'kaji export [FILE] | kaji import FILE --root FINGERPRINT',
+          'kaji relocate BASE-ID [--revoke LOST-ID] | kaji drain [FILE]',
         ],
       },
       {

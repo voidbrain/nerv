@@ -124,6 +124,8 @@ node tools/gauntlet.mjs role-run \
 
 ## 5. Evidence and decision criteria for `F-006-T12`
 
+The [F-006-T12 placement report](../evaluations/2026-11-23-f006-t12-placement-report.md) applies these criteria (`src/placement-report.ts`).
+
 - Record neutral summary tables (pass rate, holdout pass rate, false-rejection count, missed-flaw count, shared-blind-spot count, p50/p95 latency, `transferMs`, and output tokens) in `docs/evaluations/` for `F-006-T12`.
 - Recommend `coder-reviewer` over `coder-alone` only if `compareCombinationRuns` shows higher or equal pass rate under the **same `totalBudget`** with `0` false rejections and `0` shared blind-spot failures.
 - Recommend mini PC worker + Mac remote inference (`P3`) over mini PC local inference (`P2`) only when accuracy/pass rate improves enough to justify `WorkerLink` transfer latency and Mac availability dependency.
