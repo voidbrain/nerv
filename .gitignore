@@ -21,3 +21,5 @@ artifacts/evaluations/
 
 # The complete test report the quiet reporter pairs with (tools/quiet-reporter.mjs).
 .test-report.txt
+# Per-file start and finish times of the last npm test (tools/test-timing-reporter.mjs). <!-- project -->
+.test-timings.txt
