@@ -2224,9 +2224,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #PR](https://github.com/voidbrain/nerv/pull/PR) (Test: `test/doctor-run.test.mjs`, `test/doctor-run.browser.mjs`) |
+| PR / evidence | this PR (Test: `test/doctor-run.test.mjs`, `test/doctor-run.browser.mjs`) |
 | Opened | 2026-11-24 |
-| Verification | 2026-11-24: committed first and failing on main: `test/doctor-run.test.mjs` (the helper did not exist) and `test/doctor-run.browser.mjs` (no `#doctor-result` next to the button); the browser test's sign-in wait then changed from the Health text, which the demo also renders, to the live banner, its assertions unchanged. With the fix both pass (5/5, 1/1 on the production build against `makeServer`). A real Run doctor on the owner's base is not yet observed. |
+| Verification | 2026-11-24: committed first and failing on main: `test/doctor-run.test.mjs` (the helper did not exist) and `test/doctor-run.browser.mjs` (no `#doctor-result` next to the button); the browser test's sign-in wait then changed from the Health text, which the demo also renders, to the live banner, its assertions unchanged. With the fix both pass (5/5, 1/1 on the production build against `makeServer`). Before the PR: `npm test` 1,443 pass (2 skipped); the browser tests reading live.js, dashboard.js or web/src (`test/angular.browser.mjs`, `test/evaluation.browser.mjs`, `test/pwa.browser.mjs`, `test/updater-status.browser.mjs`, `test/doctor-run.browser.mjs`) 11/11 on the production build; `npm run gauntlet:all` (owner-approved, gemma4-12b profile) passed, none pending. A real Run doctor on the owner's base is not yet observed. |
 | Reviewed | 2026-11-24 |
 
 </details>
@@ -3154,9 +3154,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #PR](https://github.com/voidbrain/nerv/pull/PR) (Test: `test/dashboard.test.ts` "B-130") |
+| PR / evidence | this PR (Test: `test/dashboard.test.ts` "B-130") |
 | Opened | 2026-11-24 |
-| Verification | 2026-11-24: `test/dashboard.test.ts` "B-130" committed first and failing on main (`skip` for the Apt); with the fix it passes with the B-044 and B-112 flow tests unchanged. Browser look on a real sortie not yet observed. |
+| Verification | 2026-11-24: `test/dashboard.test.ts` "B-130" committed first and failing on main (`skip` for the Apt); with the fix it passes with the B-044 and B-112 flow tests unchanged. Before the PR: `npm test` 1,443 pass (2 skipped); the browser tests reading live.js, dashboard.js or web/src (`test/angular.browser.mjs`, `test/evaluation.browser.mjs`, `test/pwa.browser.mjs`, `test/updater-status.browser.mjs`, `test/doctor-run.browser.mjs`) 11/11 on the production build; `npm run gauntlet:all` (owner-approved, gemma4-12b profile) passed, none pending. Browser look on a real sortie not yet observed. |
 | Reviewed | 2026-11-24 |
 
 </details>
