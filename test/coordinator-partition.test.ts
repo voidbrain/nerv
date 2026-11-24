@@ -615,6 +615,33 @@ describe('F-016-T08: partition, sleep and reconnect keep one authority and run n
     }
   });
 
+  it('#717 review: a service start that fails after the swap is recovered by running kaji promote again', async () => {
+    const m = (mesh = new Mesh([X, B], [B]));
+    m.partition = [[X], [B]];
+    await m.advance(60_000);
+    m.importRecords(B, [
+      m.sign({ kind: 'revoke', baseId: X, publicKey: m.base(X).publicKey }),
+      m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }),
+    ]);
+    await assert.rejects(
+      m.promote(B, {
+        service: {
+          stop: () => m.stop(B),
+          start: () => {
+            throw new Error('launchctl bootstrap failed');
+          },
+        },
+      }),
+      /launchctl bootstrap failed/,
+    );
+    assert.equal(existsSync(join(m.base(B).home, PROMOTION_MARKER_FILE)), false);
+    assert.equal(m.base(B).service, undefined);
+    const res = await m.promote(B);
+    assert.ok('resumed' in res && res.newEpoch === 3);
+    await m.advance(5_000);
+    assert.deepEqual(m.holders(), [B]);
+  });
+
   it('mixed epochs: a stale main is refused by peers holding the newer epoch, and a re-targeted move never takes over from state older than an epoch that ran', async () => {
     const m = (mesh = new Mesh([X, B, C, D], [B, C, D]));
     await m.advance(30_000);
@@ -639,16 +666,22 @@ describe('F-016-T08: partition, sleep and reconnect keep one authority and run n
     assert.deepEqual(m.holders(), [B]);
     assert.equal(m.state(X)?.replicationMode, 'fenced');
 
-    // The owner re-targets to C at epoch 4 while B runs epoch 3. C's push reaches B, which stops acting at once.
+    // The owner re-targets to C at epoch 4 while B runs epoch 3. C now holds the newer main record, so B's
+    // renewals through C get signed newer-epoch evidence and B fences.
     m.importRecords(C, [...toB, m.sign({ kind: 'main', baseId: C, coordinatorEpoch: 4 })]);
     // C's standby store holds epoch 2 state, but C itself acked B's lease at epoch 3: an epoch-3 coordinator ran
-    // after that state, so taking over from it would undo (and could repeat) what B did. C is refused.
+    // after that state, so taking over from it would undo (and could repeat) what B did. C is refused, and
+    // (#717 review) refused before its epoch push: no other base learns epoch 4 from a move that cannot happen.
     await assert.rejects(m.promote(C), refused('standby_behind', /epoch 3/));
     assert.ok(m.base(C).service, 'a refusal leaves the service running');
+    assert.equal(m.registryOf(B).epoch, 3);
+    assert.equal(m.registryOf(D).epoch, 3);
     await m.advance(30_000);
-    assert.deepEqual(m.timeline.at(-1)!.holders, []);
-    assert.equal(m.registryOf(B).epoch, 4);
-    assert.equal(m.registryOf(D).epoch, 4);
+    assert.equal(m.state(B)?.replicationMode, 'fenced');
+    // So B can be kept: it names D as its standby, D (still at epoch 3) acks, and B acts again, alone.
+    m.setStandby(B, D);
+    await m.advance(30_000);
+    assert.deepEqual(m.holders(), [B]);
     assert.equal(m.sends('approval', X), 1);
   });
 });
