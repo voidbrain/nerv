@@ -5,7 +5,7 @@ import { toolListing } from './tool-listing.ts';
 import { createServer, type IncomingMessage, type RequestListener } from 'node:http';
 import { createServer as createHttpsServer } from 'node:https';
 import type { NativeAuth } from './native-auth.ts';
-import { randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { realpath, stat, readFile } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import type { StoreApi } from './runtime.ts';
@@ -101,8 +101,15 @@ export function makeServer(
   const build = buildInfo();
   const loginCodes = new Map<string, number>();
   const codeTtl = options.loginCodeTtlMs ?? LOGIN_CODE_TTL_MS;
+  // Login codes are bound to the admin token that minted them: a rotated token ends the pending ones (review of #700).
+  let loginCodesFor = '';
   const dropExpired = () => {
     const now = Date.now();
+    const fp = createHash('sha256').update(currentToken()).digest('hex');
+    if (fp !== loginCodesFor) {
+      loginCodesFor = fp;
+      loginCodes.clear();
+    }
     for (const [c, expires] of loginCodes) if (expires <= now) loginCodes.delete(c);
     sessions.dropExpired(now);
   };
@@ -124,7 +131,7 @@ export function makeServer(
   // F-118: a phone pairs once with a short code and keeps a device credential (90 days unused, revocable, ended by a
   // rotated admin token). It may do what a dashboard session may (see DeviceBook, PairingCodes).
   const devices = new DeviceBook(currentToken, options.deviceFile, { now: options.clock });
-  const pairing = new PairingCodes({ now: options.clock });
+  const pairing = new PairingCodes({ now: options.clock, token: currentToken });
   const listener: RequestListener = async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-store');
@@ -226,6 +233,18 @@ export function makeServer(
         reply(404, { error: 'Not found.' });
         return;
       }
+    }
+    // Review of #700: the unauthenticated code exchanges take JSON only. A page on any origin can send a text/plain POST
+    // without a preflight and so spend the failure budget (behind tailscale serve every client is 127.0.0.1); JSON needs a
+    // preflight, which this server never answers.
+    if (
+      !options.native &&
+      req.method === 'POST' &&
+      (path === '/api/session/exchange' || path === '/api/device/pair') &&
+      (req.headers['content-type'] ?? '').split(';')[0]!.trim().toLowerCase() !== 'application/json'
+    ) {
+      reply(415, { error: 'Send JSON (Content-Type: application/json).' });
+      return;
     }
     // The browser half of `open`: a valid code is swapped once for the token; the web page keeps it in memory only.
     if (!options.native && req.method === 'POST' && path === '/api/session/exchange') {

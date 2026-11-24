@@ -1081,7 +1081,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689); F-118-T01 [PR #700](https://github.com/voidbrain/nerv/pull/700). |
 | Opened | 2026-11-23 |
-| Verification | 2026-11-24: F-118-T01 `test/device-pairing.test.ts` 10/10 (committed failing first); session, CLI help and dashboard suites 73/73 with it; `check:fast` green. |
+| Verification | 2026-11-24: F-118-T01 `test/device-pairing.test.ts` 13/13 (committed failing first, review fixes too); with session, session-persist, dashboard-accounting, decision-client, CLI help and dashboard suites 85/85; `check:fast` green. |
 | Reviewed | 2026-11-23 |
 
 </details>

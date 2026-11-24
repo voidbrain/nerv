@@ -173,7 +173,10 @@ export class DeviceBook {
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const PAIRING_CODE_TTL_MS = 5 * MINUTE;
 const MAX_PENDING_CODES = 3;
-/** Failed attempts: 5 a minute per client; 20 a minute in all locks pairing for a minute, doubling up to an hour. */
+/**
+ * Failed attempts: 5 a minute per client; 20 a minute in all locks pairing for a minute, doubling up to an hour, back to a
+ * minute after a quiet period as long as the last lockout.
+ */
 const CLIENT_FAILURES = 5;
 const GLOBAL_FAILURES = 20;
 const WINDOW_MS = MINUTE;
@@ -193,15 +196,31 @@ export class PairingCodes {
   private failures: number[] = [];
   private lockedUntil = 0;
   private level = 0;
+  private lastLockMs = 0;
+  private lastFailure = 0;
   private readonly ttlMs: number;
   private readonly now: () => number;
+  private readonly token: (() => string) | undefined;
+  private boundTo: string | undefined;
 
-  constructor(options: { ttlMs?: number; now?: () => number } = {}) {
+  /** With `token`, pending codes are bound to its fingerprint: a rotated admin token ends them (review of PR #700). */
+  constructor(options: { ttlMs?: number; now?: () => number; token?: () => string } = {}) {
     this.ttlMs = options.ttlMs ?? PAIRING_CODE_TTL_MS;
     this.now = options.now ?? Date.now;
+    this.token = options.token;
+    this.boundTo = options.token && sha256(options.token());
   }
 
   private prune(now: number): void {
+    if (this.token) {
+      const fp = sha256(this.token());
+      if (fp !== this.boundTo) {
+        this.boundTo = fp;
+        this.codes.clear();
+      }
+    }
+    // After a quiet period as long as the last lockout (no lockout, no failure), the next one starts from a minute again.
+    if (this.level && now - Math.max(this.lockedUntil, this.lastFailure) >= this.lastLockMs) this.level = 0;
     for (const [code, expires] of this.codes) if (expires <= now) this.codes.delete(code);
     for (const [client, times] of this.clients) {
       const recent = times.filter((t) => now - t < WINDOW_MS);
@@ -244,8 +263,10 @@ export class PairingCodes {
       this.clients.delete(this.clients.keys().next().value!);
     this.clients.set(client, [...mine, now]);
     this.failures.push(now);
+    this.lastFailure = now;
     if (this.failures.length >= GLOBAL_FAILURES) {
-      this.lockedUntil = now + Math.min(WINDOW_MS * 2 ** this.level, LOCKOUT_MAX_MS);
+      this.lastLockMs = Math.min(WINDOW_MS * 2 ** this.level, LOCKOUT_MAX_MS);
+      this.lockedUntil = now + this.lastLockMs;
       this.level++;
       this.failures = [];
     }
