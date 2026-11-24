@@ -23,11 +23,15 @@ test('F-118-T02: a typed pairing code is told apart from the admin token', () =>
     assert.equal(isPairingCode(other), false, other);
 });
 
-test('F-118-T02: installed means navigator.standalone (iOS) or a standalone or fullscreen display mode', () => {
+test('F-118-T02: installed means navigator.standalone (iOS) or the standalone display mode', () => {
   const media = (on: string[]) => (q: string) => ({ matches: on.some((m) => q.includes(m)) });
   assert.equal(isInstalled({ navigator: { standalone: true } }), true);
   assert.equal(isInstalled({ navigator: {}, matchMedia: media(['standalone']) }), true);
-  assert.equal(isInstalled({ navigator: {}, matchMedia: media(['fullscreen']) }), true);
+  assert.equal(
+    isInstalled({ navigator: {}, matchMedia: media(['fullscreen']) }),
+    false,
+    'a fullscreen (F11) tab is not installed (review of #707)',
+  );
   assert.equal(isInstalled({ navigator: {}, matchMedia: media(['browser']) }), false, 'a browser tab');
   assert.equal(isInstalled({ navigator: { standalone: 'yes' } }), false);
   assert.equal(

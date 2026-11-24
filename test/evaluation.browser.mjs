@@ -266,7 +266,7 @@ test('B-050: until still fails with timeout when throwing condition never holds'
 // credential is kept in localStorage and a reload signs in by itself; a revoke signs it out and forgets it. In a browser
 // tab nothing goes to localStorage: the dashboard keeps it like a session, the workspace in memory only.
 test(
-  'F-118-T02: the installed app pairs with a typed code and stays signed in; a browser tab keeps session behaviour',
+  'F-118-T02: the installed app pairs with a typed code and stays signed in; a browser tab refuses the code',
   { timeout: 120000 },
   async () => {
     const home = mkdtempSync(join(tmpdir(), 'nerv-pairing-browser-')),
@@ -337,35 +337,45 @@ test(
         await until(
           `document.querySelector('.connect')!==null&&document.querySelector('[role=alert]')?.textContent.includes('pairing ended')`,
         );
+        // A wrong code says so and pairs nothing.
+        await evaluate(typeCode('.connect input[name=signin]', '.connect form', 'AAAA-AAAA'));
+        await until(`document.querySelector('[role=alert]')?.textContent.includes('Pairing code invalid')`);
+        assert.equal((await devices()).length, 0);
         assert.equal(await evaluate(kept), '', 'the workspace forgets a refused credential');
         assert.deepEqual(errors, [], 'no browser runtime exceptions');
       });
-      // Browser tab: nothing reaches localStorage.
-      await browser(async ({ page, evaluate, until, errors }) => {
+      // Browser tab (review of #707): a pairing code is refused without calling the pairing endpoint, so a tab never
+      // holds a 90-day device; the code stays usable for the installed app.
+      await browser(async ({ page, evaluate, until, errors, network }) => {
+        const code = await mint();
+        await page('Network.enable');
         await page('Page.navigate', { url: origin + '/dashboard/' });
         await until(`${banner}.includes('NOT SIGNED IN')`);
-        await evaluate(typeCode('#live-token', '#live-signin', await mint()));
-        await until(signedIn);
-        assert.equal(await evaluate(kept), '', 'a tab keeps no device credential in localStorage');
-        assert.notEqual(
-          await evaluate(`sessionStorage.getItem('nerv.dashboard.session')`),
-          null,
-          'it keeps it like a session',
-        );
-        await page('Page.reload');
-        await until(signedIn);
+        await evaluate(typeCode('#live-token', '#live-signin', code));
+        await until(`${banner}.includes('NOT SIGNED IN')&&${banner}.includes('Home Screen')`);
         await page('Page.navigate', { url: origin + '/' });
         await until(`document.querySelector('.connect input[name=signin]')!==null`);
-        await evaluate(typeCode('.connect input[name=signin]', '.connect form', await mint()));
-        await until(`document.querySelector('.connect')===null`);
-        assert.equal(await evaluate(kept), '', 'the workspace tab keeps it in memory only');
-        await page('Page.reload');
-        await until(`document.querySelector('.connect input[name=signin]')!==null`);
-        // A wrong code says so and pairs nothing.
-        const before = (await devices()).length;
-        await evaluate(typeCode('.connect input[name=signin]', '.connect form', 'AAAA-AAAA'));
-        await until(`document.querySelector('[role=alert]')?.textContent.includes('Pairing code invalid')`);
-        assert.equal((await devices()).length, before);
+        await evaluate(typeCode('.connect input[name=signin]', '.connect form', code));
+        await until(`document.querySelector('[role=alert]')?.textContent.includes('Home Screen')`);
+        assert.equal(await evaluate(kept), '', 'a tab keeps no device credential');
+        assert.equal(
+          await evaluate(`sessionStorage.getItem('nerv.dashboard.session')`),
+          null,
+          'nor a session from a pairing code',
+        );
+        assert.equal((await devices()).length, 0, 'no device paired from a tab');
+        assert.ok(!network.some((r) => r.url.includes('/api/device/pair')), 'the pairing endpoint is never called');
+        assert.equal(
+          (
+            await fetch(origin + '/api/device/pair', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ code, name: 'Fixture phone' }),
+            })
+          ).status,
+          200,
+          'the refused code is still usable',
+        );
         assert.deepEqual(errors, [], 'no browser runtime exceptions');
       });
     } finally {
