@@ -29,7 +29,8 @@ export type RelocationRefusal =
   | 'old_host_unconfirmed'
   | 'horizon_not_passed'
   | 'restore_mismatch'
-  | 'restore_not_approved';
+  | 'restore_not_approved'
+  | 'previous_main_unknown';
 
 export class RelocationRefusedError extends Error {
   readonly reason: RelocationRefusal;
