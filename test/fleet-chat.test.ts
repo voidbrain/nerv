@@ -311,6 +311,107 @@ describe('F-098-T06: existing fleet databases keep their parts when replacements
   });
 });
 
+// The fleet tables as they were before F-098-T06 (one row per slot as a table constraint).
+const OLD_LAYOUT = `
+  CREATE TABLE drones(id TEXT PRIMARY KEY, name TEXT NOT NULL UNIQUE, frame TEXT, notes TEXT, created_at TEXT NOT NULL);
+  CREATE TABLE drone_parts(
+    id TEXT PRIMARY KEY,
+    drone_id TEXT NOT NULL REFERENCES drones(id) ON DELETE CASCADE,
+    category TEXT NOT NULL,
+    position TEXT NOT NULL,
+    component_model TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'installed',
+    installed_at TEXT NOT NULL,
+    UNIQUE(drone_id, category, position)
+  );
+  CREATE TABLE drone_crashes(
+    id TEXT PRIMARY KEY,
+    drone_id TEXT NOT NULL REFERENCES drones(id) ON DELETE CASCADE,
+    part_id TEXT REFERENCES drone_parts(id) ON DELETE SET NULL,
+    category TEXT NOT NULL, position TEXT NOT NULL, component_model TEXT, damage TEXT NOT NULL,
+    spare_used TEXT, crashed_at TEXT NOT NULL
+  );
+  INSERT INTO drones VALUES ('d1', 'Smoke', NULL, NULL, '2026-01-01T00:00:00.000Z');
+`;
+
+function withOldDb(rows: string, work: (db: DatabaseSync) => void): void {
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-fleet-migrate-'));
+  const db = new DatabaseSync(join(dir, 'fleet.sqlite'));
+  try {
+    db.exec(OLD_LAYOUT + rows);
+    work(db);
+  } finally {
+    db.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+function partsTableSql(db: DatabaseSync): string {
+  return (
+    db.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'drone_parts'").get() as {
+      sql: string;
+    }
+  ).sql;
+}
+
+describe('F-098-T06 review: the drone_parts rebuild is safe for crash links and old raw values', () => {
+  it('refuses to rebuild inside an open transaction, where foreign keys cannot be switched off', () => {
+    withOldDb(
+      `INSERT INTO drone_parts VALUES ('p1', 'd1', 'motor', 'front-left', 'Testmot 2207 1750KV', 'damaged', '2026-01-01T00:00:00.000Z');
+       INSERT INTO drone_crashes VALUES ('c1', 'd1', 'p1', 'motor', 'front-left', 'Testmot 2207 1750KV', 'rotto', NULL, '2026-01-02T00:00:00.000Z');`,
+      (db) => {
+        db.exec('BEGIN');
+        assert.throws(() => new FleetStore(db), /transaction/i);
+        db.exec('ROLLBACK');
+        assert.match(partsTableSql(db), /UNIQUE\(drone_id, category, position\)/);
+        const fleet = new FleetStore(db);
+        assert.equal(fleet.getCrash('c1')?.partId, 'p1');
+      },
+    );
+  });
+
+  it('rewrites stored categories and positions through the shared normalisers, keeping ids and crash links', () => {
+    withOldDb(
+      `INSERT INTO drone_parts VALUES ('p1', 'd1', 'motors', 'sinistra posteriore', 'Testmot 2207 1750KV', 'damaged', '2026-01-01T00:00:00.000Z');
+       INSERT INTO drone_parts VALUES ('p2', 'd1', 'Motore', 'front left', 'Testmot 2207 1750KV', 'installed', '2026-01-01T00:00:00.000Z');
+       INSERT INTO drone_crashes VALUES ('c1', 'd1', 'p1', 'motor', 'rear-left', 'Testmot 2207 1750KV', 'rotto', NULL, '2026-01-02T00:00:00.000Z');`,
+      (db) => {
+        const fleet = new FleetStore(db);
+        assert.deepEqual([fleet.getPart('p1')?.category, fleet.getPart('p1')?.position], ['motor', 'rear-left']);
+        assert.deepEqual([fleet.getPart('p2')?.category, fleet.getPart('p2')?.position], ['motor', 'front-left']);
+        assert.equal(fleet.getCrash('c1')?.partId, 'p1');
+        const replaced = fleet.replacePart({
+          droneName: 'Smoke',
+          category: 'motore',
+          position: 'posteriore sinistro',
+          componentModel: 'Testmot 2207 1950KV',
+        });
+        assert.equal(replaced.removed?.id, 'p1');
+        const crash = fleet.recordCrash({
+          droneName: 'Smoke',
+          category: 'motor',
+          position: 'front-left',
+          damage: 'rotto',
+        });
+        assert.equal(crash.partId, 'p2');
+      },
+    );
+  });
+
+  it('aborts the rebuild, naming the slot, when two current parts normalise into one slot', () => {
+    withOldDb(
+      `INSERT INTO drone_parts VALUES ('p1', 'd1', 'motor', 'front left', 'Testmot 2207 1750KV', 'installed', '2026-01-01T00:00:00.000Z');
+       INSERT INTO drone_parts VALUES ('p2', 'd1', 'motor', 'front-left', 'Testmot 2207 1950KV', 'installed', '2026-01-01T00:00:00.000Z');`,
+      (db) => {
+        assert.throws(() => new FleetStore(db), /Smoke.*motor.*front-left/);
+        assert.match(partsTableSql(db), /UNIQUE\(drone_id, category, position\)/);
+        assert.equal((db.prepare('SELECT count(*) AS n FROM drone_parts').get() as { n: number }).n, 2);
+        assert.equal((db.prepare('PRAGMA foreign_keys').get() as { foreign_keys: number }).foreign_keys, 1);
+      },
+    );
+  });
+});
+
 describe('F-098-T06: fleet.chat executor joins the edit phrases to the real store', () => {
   it('adds, replaces and sets stock through fleet.chat, then the crash phrases still work', () => {
     withStore((store) => {
