@@ -7,7 +7,7 @@ import { toChecklistSurface, type ListStore } from './lists.ts';
 import { replayDesktopRecording, type DesktopRecordingFile, type DesktopReplayDriver } from './desktop-recording.ts';
 import { pushBranchAndOpenPr, type CodingJobPrOpener } from './coding-job.ts';
 import { handOffToBambuConnect, readSlicerProfiles, type BambuConnectLauncher, type SlicerExecFn } from './slicer.ts';
-import { printPartByChat, sliceLibraryPart } from './print-job.ts';
+import { preparePrintPartFor, printPartByChat, sliceLibraryPart } from './print-job.ts';
 import type { GmailClient } from './gmail.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
 import type { FpvBuildStore, BuildComponentInput, BuildWiringInput, PinoutEntry } from './fpv-builds.ts';
@@ -492,7 +492,7 @@ const rawToolDocs: ToolDoc[] = [
     name: 'fleet.print',
     effect: 'write-local',
     about:
-      'Prints a drone\'s or drone model\'s printed part ("stampa i piedini di Smoke", "print the AOS feet"): resolves the part, file, count and profile, slices it and replies with file, count, profile, time and grams; asks back (needsAnswer) when the drone, model or part is ambiguous or unknown, and reports a missing file. When the result has handoff, propose bambu.handoff with exactly those arguments: opening Bambu Connect always waits for the owner\'s approval card.',
+      'Prints a drone\'s or drone model\'s printed part ("stampa i piedini di Smoke", "print the AOS feet"): resolves the part, file, count and profile, slices it (on the slicing base when one is set) and replies with file, count, profile, time and grams; asks back (needsAnswer) when the drone, model or part is ambiguous or unknown, and reports a missing file or an unreachable slicing base. When the result has handoff, propose bambu.handoff with exactly those arguments, or, when it also has handoffBase, kaji.run with that base, tool bambu.handoff and args those handoff arguments: opening Bambu Connect always waits for the owner\'s approval card.',
     args: '{"phrase": the owner\'s Italian or English print request}',
   },
   {
@@ -990,7 +990,12 @@ function executeRaw(
       only(args, ['phrase']);
       if (!backend.fleet) throw new Error('Fleet registry is not available here.');
       const home = backend.home;
-      // Until F-121-T04 sends the part to NERV-02, the base holding the library slices it with its own allowlist.
+      // F-121-T04: with `prints.slicer` naming another base, the coordinator sends the part there to slice.
+      const config = home ? readConfig(home) : undefined;
+      const slicer = config?.prints?.slicer;
+      if (slicer && slicer !== config.base.id) {
+        return preparePrintPartFor(backend.fleet, home, text(args, 'phrase'), slicer);
+      }
       return printPartByChat(backend.fleet, home, text(args, 'phrase'), (request, content) =>
         sliceLibraryPart(home!, request, content, backend.slicerExec),
       );

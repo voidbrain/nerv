@@ -4,7 +4,7 @@
   "parent": "B-117",
   "title": "Name and fix the load failures of the bases and browser gauntlet cases",
   "goal": "nerv-system-flows/bases and nerv-system-flows/browser pass under machine load as they do alone",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The failure of each case under load is reproduced and its cause named from the run output",
     "A regression that reproduces the load case fails before the fix and passes after it",
@@ -38,10 +38,10 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "3 h",
-    "basis": "Estimated 2026-11-24 from the owner's report: reproduce under load, name the cause, fix, rerun both cases. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 from the owner's report: reproduce under load, name the cause, fix, rerun both cases. Not a measurement. Closed 2026-11-24 in the reconciliation: PR #710 merged on green CI; both gauntlet cases passed under load and alone.",
     "reviewed": "2026-11-24",
-    "agentHours": 3,
+    "agentHours": 0,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3,
     "actualAgentHours": 0.5,

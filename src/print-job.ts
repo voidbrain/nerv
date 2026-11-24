@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   closeSync,
   constants,
@@ -19,19 +19,23 @@ import {
   readSlicerProfiles,
   resolveAllowedSlicerProfile,
   sliceModelWithProfile,
+  sliceModelWithProfileAsync,
   type SliceResult,
+  type SlicerExecAsyncFn,
   type SlicerExecFn,
+  type SlicerProfile,
 } from './slicer.ts';
 
 /**
  * F-121-T02: "stampa i piedini di Smoke" / "print the Kite feet". The phrase resolves a drone or a model, then
  * one of its printed parts (F-121-T01), the print count and the part's profile; the library file is resolved
  * again and read once at the point of use, and the slice request carries its identity (relative path and
- * SHA-256) with the content, so the base that slices (F-121-T04 sends it to NERV-02) checks the hash and its
- * own profile allowlist before the slicer runs. The Bambu Connect hand-off is `bambu.handoff`, always the owner's card.
+ * SHA-256) with the content, so the base that slices checks the hash and its own profile allowlist before the slicer
+ * runs. With `prints.slicer` naming another base (NERV-02), the coordinator sends it there over the Kaji line
+ * (F-121-T04, print-transfer.ts). The Bambu Connect hand-off is `bambu.handoff`, always the owner's card.
  */
 
-/** Largest part file read for slicing; the Kaji transfer (F-121-T04) caps at the same size. */
+/** Largest part file read for slicing; the Kaji transfer (F-121-T04) refuses a larger one on both sides. */
 export const MAX_PART_FILE_BYTES = 64 * 1024 * 1024;
 
 export interface PrintPartPhrase {
@@ -63,6 +67,11 @@ export interface PrintPartReply {
   estimate?: SliceResult['estimate'];
   /** The `bambu.handoff` arguments to propose next (Blue: the owner's approval card). */
   handoff?: Record<string, string | number>;
+  /** F-121-T04: the base that sliced it, and where `bambu.handoff` must run (through `kaji.run`). */
+  slicedOn?: string;
+  handoffBase?: string;
+  /** F-121-T04: set only between the fleet.print executor and the coordinator that sends the part. */
+  remote?: PendingRemotePrint;
 }
 
 const VERB = /^(?:per\s+favore\s+|please\s+)?(?:stampa(?:mi|re)?|print)\s+(.+?)[\s.!?]*$/iu;
@@ -260,7 +269,7 @@ const profileSlug = (name: string) =>
 /**
  * The slicing base's side: check the content against the request hash and this base's own profile allowlist,
  * keep the content in its cache under the hash (never the sender's path), and slice the cached copy.
- * F-121-T04 calls this on NERV-02 after the Kaji transfer; until then it runs on the base that has the library.
+ * It runs on the slicing base: NERV-02 after the Kaji transfer (F-121-T04), or the library's own base without `prints.slicer`.
  */
 export function sliceLibraryPart(
   home: string,
@@ -268,6 +277,27 @@ export function sliceLibraryPart(
   content: Buffer,
   exec?: SlicerExecFn,
 ): SliceResult {
+  const staged = stageLibraryPart(home, request, content);
+  return sliceModelWithProfile(staged.slice, staged.allowlist, exec);
+}
+
+/** F-121-T04: `sliceLibraryPart` with the slicer run asynchronously, as the slicing base serving other bases does. */
+export async function sliceLibraryPartAsync(
+  home: string,
+  request: PartSliceRequest,
+  content: Buffer,
+  exec?: SlicerExecAsyncFn,
+): Promise<SliceResult> {
+  const staged = stageLibraryPart(home, request, content);
+  return sliceModelWithProfileAsync(staged.slice, staged.allowlist, exec);
+}
+
+/** Check hash and allowlist, put the content in the cache under its hash, and clear a stale output. */
+function stageLibraryPart(
+  home: string,
+  request: PartSliceRequest,
+  content: Buffer,
+): { allowlist: SlicerProfile[]; slice: { inputPath: string; outputPath: string; profileName: string } } {
   const file = validatePrintPath(request.part.file);
   const digest = createHash('sha256').update(content).digest('hex');
   if (
@@ -285,17 +315,27 @@ export function sliceLibraryPart(
   mkdirSync(cache, { recursive: true, mode: 0o700 });
   mkdirSync(out, { recursive: true, mode: 0o700 });
   const input = join(cache, `${digest}${ext}`);
-  const cached = existsSync(input) ? createHash('sha256').update(readFileSync(input)).digest('hex') : undefined;
-  if (cached !== digest) {
-    const temp = `${input}.${process.pid}.tmp`;
-    writeFileSync(temp, content, { mode: 0o600 });
-    renameSync(temp, input);
+  if (cachedHash(input) !== digest) {
+    // A unique temporary name, then a rename: two writers of one hash write the same bytes, and a reader never sees
+    // a half-written file. On Windows a rename onto a file another process holds open can fail; the copy already
+    // there is then used when it has the right hash.
+    const temp = `${input}.${randomUUID()}.tmp`;
+    try {
+      writeFileSync(temp, content, { mode: 0o600 });
+      renameSync(temp, input);
+    } catch (error) {
+      if (existsSync(temp)) unlinkSync(temp);
+      if (cachedHash(input) !== digest) throw error;
+    }
   }
-  const output = join(out, `${digest.slice(0, 16)}-${profileSlug(profile.name)}.gcode.3mf`);
-  // A stale output would pass for a slice that never ran.
-  if (existsSync(output)) unlinkSync(output);
-  return sliceModelWithProfile({ inputPath: input, outputPath: output, profileName: profile.name }, allowlist, exec);
+  // One file per slice: a later slice never replaces the file an earlier hand-off card points at, and a file that
+  // already exists can never pass for a slice that did not run.
+  const output = join(out, `${digest.slice(0, 16)}-${profileSlug(profile.name)}-${randomUUID().slice(0, 8)}.gcode.3mf`);
+  return { allowlist, slice: { inputPath: input, outputPath: output, profileName: profile.name } };
 }
+
+const cachedHash = (path: string) =>
+  existsSync(path) ? createHash('sha256').update(readFileSync(path)).digest('hex') : undefined;
 
 /** "1h 24m 10s" → seconds; undefined when the slicer's time text has another shape. */
 function seconds(text: string): number | undefined {
@@ -315,24 +355,51 @@ function duration(total: number): string {
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
-/** Resolve a print phrase, read the part once, slice it (`slice`, normally the local base) and propose the hand-off. */
-export function printPartByChat(
-  fleet: FleetStore,
-  home: string | undefined,
-  phrase: string,
-  slice: PartSlicer,
-): PrintPartReply {
+/** A resolved, read and hashed print request, before any slicer runs. */
+export interface PreparedPrint {
+  /** "motor foot for Wisp (Kite 5.1): file …, 4 prints, profile … (TPU, external spool, …)". */
+  plan: string;
+  request: PartSliceRequest;
+  material: string;
+  externalSpool: boolean;
+}
+
+/** What a slicer reports back, wherever it ran. */
+export interface SlicedPlate {
+  outputPath: string;
+  profileName: string;
+  estimate: SliceResult['estimate'];
+}
+
+/** F-121-T04: a slice waiting to be sent to the slicing base; the coordinator sends it over the Kaji line. */
+export interface PendingRemotePrint {
+  base: string;
+  prepared: PreparedPrint;
+}
+
+export function isPendingRemotePrint(value: unknown): value is PrintPartReply & { remote: PendingRemotePrint } {
+  if (!value || typeof value !== 'object') return false;
+  const remote = (value as { remote?: unknown }).remote;
+  return Boolean(remote && typeof remote === 'object' && typeof (remote as PendingRemotePrint).base === 'string');
+}
+
+type Preparation = { reply: PrintPartReply } | { prepared: PreparedPrint; content: Buffer };
+
+/** Resolve a print phrase and read the part once: either a reply already (ask, missing file) or the prepared request. */
+export function preparePrintPart(fleet: FleetStore, home: string | undefined, phrase: string): Preparation {
   if (!phrase.trim() || phrase.trim().length > 500) throw new Error('Print phrase must contain 1–500 characters.');
   const parsed = parsePrintPartPhrase(phrase);
   if (!parsed) {
     return {
-      handled: false,
-      reply:
-        'Not a print request for a printed part. Say "stampa i piedini di <drone>" or "print the <part> for <model>".',
+      reply: {
+        handled: false,
+        reply:
+          'Not a print request for a printed part. Say "stampa i piedini di <drone>" or "print the <part> for <model>".',
+      },
     };
   }
   const resolved = resolvePart(fleet, parsed);
-  if (resolved.status === 'ask') return { handled: true, needsAnswer: true, reply: resolved.question };
+  if (resolved.status === 'ask') return { reply: { handled: true, needsAnswer: true, reply: resolved.question } };
   const { part } = resolved;
   const per = part.objectsPerPrint;
   const prints = parsed.count ? Math.ceil(parsed.count / per) : part.count;
@@ -344,23 +411,40 @@ export function printPartByChat(
     (per > 1 ? ` of ${per} objects (${pieces} pieces)` : '') +
     (parsed.count && parsed.count !== pieces ? `, ${parsed.count} asked` : '') +
     `, profile ${part.slicerProfile} (${part.material}, ${spool}, temperatures from the profile)`;
-  if (!home) return { handled: true, sliced: false, reply: `${plan}. Printing is not available here: no NERV home.` };
-
-  const read = readLibraryPart(home, part.file);
-  if (read.status !== 'ok') return { handled: true, sliced: false, reply: `${plan}. Not sliced: ${read.reason}` };
-  const request: PartSliceRequest = {
-    version: 1,
-    part: { file: part.file, sha256: read.sha256, bytes: read.content.length },
-    profileName: part.slicerProfile,
-    prints,
-  };
-  let result: SliceResult;
-  try {
-    result = slice(request, read.content);
-  } catch (error) {
-    return { handled: true, sliced: false, request, reply: `${plan}. Not sliced: ${(error as Error).message}` };
+  if (!home) {
+    return { reply: { handled: true, sliced: false, reply: `${plan}. Printing is not available here: no NERV home.` } };
   }
-  const { estimate } = result;
+  const read = readLibraryPart(home, part.file);
+  if (read.status !== 'ok')
+    return { reply: { handled: true, sliced: false, reply: `${plan}. Not sliced: ${read.reason}` } };
+  return {
+    prepared: {
+      plan,
+      request: {
+        version: 1,
+        part: { file: part.file, sha256: read.sha256, bytes: read.content.length },
+        profileName: part.slicerProfile,
+        prints,
+      },
+      material: part.material,
+      externalSpool: part.externalSpool,
+    },
+    content: read.content,
+  };
+}
+
+/** The reply for a prepared print once its slicer answered (`slicedOn`: the base that sliced, when not this one). */
+export function finishPrintPart(
+  prepared: PreparedPrint,
+  outcome: SlicedPlate | Error,
+  slicedOn?: string,
+): PrintPartReply {
+  const { plan, request } = prepared;
+  if (outcome instanceof Error) {
+    return { handled: true, sliced: false, request, reply: `${plan}. Not sliced: ${outcome.message}` };
+  }
+  const { estimate } = outcome;
+  const { prints } = request;
   const perPrint = [
     estimate.printTimeText,
     estimate.filamentGrams !== undefined ? `${estimate.filamentGrams} g` : undefined,
@@ -380,22 +464,68 @@ export function printPartByChat(
           .join(' and ')} for all ${prints}`
       : '';
   const handoff: Record<string, string | number> = {
-    gcode3mfPath: result.outputPath,
-    profileName: result.profile.name,
+    gcode3mfPath: outcome.outputPath,
+    profileName: outcome.profileName,
     printTimeText: estimate.printTimeText,
     ...(estimate.filamentGrams !== undefined ? { filamentGrams: estimate.filamentGrams } : {}),
-    amsMapping: `${part.externalSpool ? 'External spool' : 'AMS'} (${part.material})`,
-    sourceFile: part.file,
+    amsMapping: `${prepared.externalSpool ? 'External spool' : 'AMS'} (${prepared.material})`,
+    sourceFile: request.part.file,
     repeats: prints,
   };
+  const where = slicedOn ? ` on ${slicedOn}` : '';
+  const card = slicedOn
+    ? `Opening it in Bambu Connect on ${slicedOn} waits for your approval card (kaji.run on ${slicedOn} with tool bambu.handoff and the handoff arguments); NERV does not start the print.`
+    : 'Opening it in Bambu Connect waits for your approval card (bambu.handoff with the handoff arguments); NERV does not start the print.';
   return {
     handled: true,
     sliced: true,
     request,
     estimate,
     handoff,
-    reply:
-      `Sliced ${plan}: ${perPrint || 'no estimate'} per print${total}. ` +
-      'Opening it in Bambu Connect waits for your approval card (bambu.handoff with the handoff arguments); NERV does not start the print.',
+    ...(slicedOn ? { slicedOn, handoffBase: slicedOn } : {}),
+    reply: `Sliced${where} ${plan}: ${perPrint || 'no estimate'} per print${total}. ${card}`,
+  };
+}
+
+/** Resolve a print phrase, read the part once, slice it (`slice`, normally the local base) and propose the hand-off. */
+export function printPartByChat(
+  fleet: FleetStore,
+  home: string | undefined,
+  phrase: string,
+  slice: PartSlicer,
+): PrintPartReply {
+  const ready = preparePrintPart(fleet, home, phrase);
+  if ('reply' in ready) return ready.reply;
+  let result: SliceResult;
+  try {
+    result = slice(ready.prepared.request, ready.content);
+  } catch (error) {
+    return finishPrintPart(ready.prepared, error as Error);
+  }
+  return finishPrintPart(ready.prepared, {
+    outputPath: result.outputPath,
+    profileName: result.profile.name,
+    estimate: result.estimate,
+  });
+}
+
+/**
+ * F-121-T04: the part is sliced on another base (`prints.slicer`). The library file is read and hashed here; the
+ * coordinator reads it again, checks the hash and sends it over the Kaji line (`completeRemotePrint`).
+ */
+export function preparePrintPartFor(
+  fleet: FleetStore,
+  home: string | undefined,
+  phrase: string,
+  base: string,
+): PrintPartReply {
+  const ready = preparePrintPart(fleet, home, phrase);
+  if ('reply' in ready) return ready.reply;
+  return {
+    handled: true,
+    sliced: false,
+    request: ready.prepared.request,
+    remote: { base, prepared: ready.prepared },
+    reply: `${ready.prepared.plan}. Sending it to ${base} to slice.`,
   };
 }

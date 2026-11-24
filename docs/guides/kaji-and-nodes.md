@@ -21,6 +21,10 @@ Trust comes from your offline **Key of Nebuchadnezzar**; Tailscale carries signe
 Before enabling cross-base execution, review [worker protocol](../decisions/worker-protocol.md). Inspect or reconcile durable jobs with:
 `nerv workers pending | history | result ID | held | release ID --confirmed-stopped --reason "…" | retry-outbox ID --confirmed-not-run --reason "…" | abandon-outbox ID --reason "…" | cancel ID --reason "…" | cancel-outbox ID --reason "…"`.
 
+## Printing on another base
+
+The part library stays on the base that holds it; a print request sends the part to the slicing base over the Kaji line, only when that base does not already hold the same file. On the library base add `"prints": {"slicer": "NERV-02"}` to `config.json`; on the slicing base add `"prints": {"accept": ["NERV-01"]}`, its own `slicer-profiles.json`, and offer the hand-off with `nerv kaji offer <current offers…> bambu.handoff`. Details: [print hand-off decision](../decisions/bambu-print-handoff.md), section 3.
+
 ## Discover, inspect and bootstrap node candidates
 
 ```bash

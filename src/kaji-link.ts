@@ -25,6 +25,9 @@ const MAX_BODY = 256 * 1024,
   HEARTBEAT_MS = 30_000;
 /** F-062-T06: an encrypted backup copy (base64 in JSON) may be larger than any other Kaji message. */
 export const MAX_BACKUP_BODY = 64 * 1024 * 1024;
+/** F-121-T04: a part file for the slicing base (up to 64 MB, base64 in JSON) may be as large as a backup copy's. */
+export const MAX_PART_TRANSFER_BODY = Math.ceil((64 * 1024 * 1024) / 3) * 4 + 64 * 1024;
+const PART_TIMEOUT_MS = 300_000;
 const BACKUP_TIMEOUT_MS = 120_000;
 /** At most this many owner-signed records in one epoch push. */
 const MAX_EPOCH_PUSH_RECORDS = 1000;
@@ -258,6 +261,10 @@ export class KajiLink {
     onReachable?: (baseId: string, peers: string[]) => void;
     /** F-062-T06: stores an encrypted backup copy from an enrolled base, if this base accepts copies from it. */
     onBackup?: (from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>;
+    /** F-121-T04: slices a part file another base sends (`POST /kaji/print`); the answer is signed back as is. */
+    onPartTransfer?: (from: string, body: unknown) => Promise<{ status: number; value: unknown }>;
+    /** F-121-T04: refuses a part transfer before its body is read (claimed sender, declared size). */
+    admitPartTransfer?: (claimedFrom: string, declaredBytes: number) => { status: number; error: string } | undefined;
     /** F-016-T04: applies an incremental coordinator replication batch on a standby base. */
     onReplicate?: (from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>;
     /** F-016-T06: handles standby-acked coordinator lease renewal on a standby base. */
@@ -284,6 +291,8 @@ export class KajiLink {
     this.onReachable = options.onReachable;
     this.onRelay = options.onRelay;
     this.onBackup = options.onBackup;
+    this.onPartTransfer = options.onPartTransfer;
+    this.admitPartTransfer = options.admitPartTransfer;
     this.onReplicate = options.onReplicate;
     this.onLeaseRenew = options.onLeaseRenew;
     this.checkCoordinatorAuthority = options.checkCoordinatorAuthority;
@@ -376,6 +385,10 @@ export class KajiLink {
     return true;
   }
   private readonly onBackup: ((from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>) | undefined;
+  private readonly onPartTransfer:
+    ((from: string, body: unknown) => Promise<{ status: number; value: unknown }>) | undefined;
+  private readonly admitPartTransfer:
+    ((claimedFrom: string, declaredBytes: number) => { status: number; error: string } | undefined) | undefined;
   private readonly onReplicate:
     ((from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>) | undefined;
   private readonly onLeaseRenew: ((from: string, req: LeaseRenewRequest) => Promise<LeaseRenewResult>) | undefined;
@@ -529,11 +542,32 @@ export class KajiLink {
       end(body);
     };
     try {
+      // F-121-T04: a part transfer too large, from a base not accepted, or while the slicer lane is full is refused
+      // before its body is read.
+      if (req.method === 'POST' && req.url === '/kaji/print') {
+        const declared = Number(req.headers['content-length'] ?? 0);
+        if (!Number.isFinite(declared) || declared > MAX_PART_TRANSFER_BODY) {
+          reply(413, { error: 'part transfer too large' });
+          return;
+        }
+        const claimed = req.headers['x-kaji-base'];
+        const refusal = this.admitPartTransfer
+          ? this.admitPartTransfer(typeof claimed === 'string' ? claimed : '', declared)
+          : this.onPartTransfer
+            ? undefined
+            : { status: 403, error: 'this base does not slice parts' };
+        if (refusal) {
+          reply(refusal.status, { error: refusal.error });
+          return;
+        }
+      }
       let body = '';
       const limit =
         req.method === 'POST' && (req.url === '/kaji/backup' || req.url === '/kaji/replicate')
           ? MAX_BACKUP_BODY
-          : MAX_BODY;
+          : req.method === 'POST' && req.url === '/kaji/print'
+            ? MAX_PART_TRANSFER_BODY
+            : MAX_BODY;
       for await (const chunk of req) {
         body += chunk;
         if (body.length > limit) throw new Error('too large');
@@ -603,6 +637,14 @@ export class KajiLink {
         }
         const outcome = this.onBackup ? await this.onBackup(from, b.date, Buffer.from(b.copy, 'base64')) : 'refused';
         reply(outcome === 'stored' ? 200 : 403, outcome === 'stored' ? { stored: true } : { error: 'not accepted' });
+        return;
+      }
+      // F-121-T04: a part to slice here, from a base this base accepts (print-transfer.ts checks it all).
+      if (req.method === 'POST' && req.url === '/kaji/print') {
+        const answer = this.onPartTransfer
+          ? await this.onPartTransfer(from, JSON.parse(body))
+          : { status: 403, value: { error: 'this base does not slice parts' } };
+        reply(answer.status, answer.value);
         return;
       }
       if (req.method === 'POST' && req.url === '/kaji/relay') {
@@ -870,7 +912,8 @@ export class KajiLink {
         this.trust,
       );
       if (from !== peer.baseId) throw new Error(`${peer.baseId} answered as ${from}`);
-      if (!res.ok) throw new Error(`${peer.baseId} refused (${res.status})`);
+      if (!res.ok)
+        throw Object.assign(new Error(`${peer.baseId} refused (${res.status})`), { status: res.status, text });
       return JSON.parse(text);
     } finally {
       done(bytesIn);
@@ -899,6 +942,29 @@ export class KajiLink {
         code: status ? 'EREFUSED' : 'EUNREACHABLE',
         ...(status ? { status: Number(status) } : {}),
       });
+    }
+  }
+  /**
+   * F-121-T04: sends a part message to the slicing base and resolves with its signed answer. Rejects with code EREFUSED
+   * (the HTTP status and the base's own reason as the message) or EUNREACHABLE.
+   */
+  async sendPartTransfer(peerId: string, message: unknown): Promise<unknown> {
+    const peer = (await this.bases()).find((b) => b.baseId === peerId && b.status === 'enrolled');
+    if (!peer) throw Object.assign(new Error(`${peerId} is not an enrolled base`), { code: 'EREFUSED', status: 404 });
+    try {
+      return await this.call(peer, 'POST', '/kaji/print', message, PART_TIMEOUT_MS);
+    } catch (e) {
+      const refused = e as { status?: unknown; text?: unknown };
+      if (typeof refused.status !== 'number')
+        throw Object.assign(new Error('part not delivered'), { code: 'EUNREACHABLE' });
+      let reason = `refused (${refused.status})`;
+      try {
+        const error = (JSON.parse(String(refused.text)) as { error?: unknown }).error;
+        if (typeof error === 'string' && error) reason = error.slice(0, 500);
+      } catch {
+        /* the status is the reason */
+      }
+      throw Object.assign(new Error(reason), { code: 'EREFUSED', status: refused.status });
     }
   }
   /** Sends a relay to the main base (F-036 phase 2); false when there is none, it is this base, or it cannot be reached. */

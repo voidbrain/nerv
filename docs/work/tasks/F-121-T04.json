@@ -4,7 +4,7 @@
   "parent": "F-121",
   "title": "Send the part file with the print job",
   "goal": "A print request carries the part file from the Mac library to the slicing base, verified, cached and re-sent only when changed",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "The file travels over the Kaji line as a signed message with its SHA-256, size-capped like F-062-T06 backup copies; the receiver verifies signature and hash before writing",
     "Tabgha writes only inside its prints cache (%USERPROFILE%\\.nerv\\prints-cache); names are content hashes, never sender paths",
@@ -15,11 +15,19 @@
     "F-121-T02"
   ],
   "resources": [
+    "src/print-transfer.ts",
+    "src/print-job.ts",
     "src/kaji-link.ts",
-    "src/slicer.ts",
+    "src/runtime-approvals.ts",
+    "src/store-sorties.ts",
     "src/executors.ts",
-    "test/kaji-link.test.ts",
-    "test/slicer.test.ts",
+    "src/config.ts",
+    "src/cli.ts",
+    "test/print-transfer.test.ts",
+    "test/misato.test.ts",
+    "docs/decisions/bambu-print-handoff.md",
+    "docs/guides/kaji-and-nodes.md",
+    "docs/agents/areas/distributed.md",
     "docs/work/records/F-121.md",
     "generated:backlog-views"
   ],
@@ -29,6 +37,7 @@
   ],
   "privacy": "Neutral fixtures only; the owner's part files never enter Git.",
   "validation": [
+    "node --test test/print-transfer.test.ts test/misato.test.ts",
     "npm run check:fast",
     "npm test"
   ],
@@ -37,11 +46,19 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "3 h agent",
-    "basis": "Estimated 2026-11-24 at agent speed. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 at agent speed (3 h agent). Actual includes moving the send into the coordinator (the nervous process has no Kaji line and a 64 KB IPC frame) and the cross-process join test with a real Kaji line. Not a measurement.",
     "reviewed": "2026-11-24",
-    "agentHours": 3.0,
+    "agentHours": 0,
     "baselineAgentHours": 3.0,
-    "estimateAgentHours": 3.0
-  }
+    "estimateAgentHours": 3.0,
+    "actualAgentHours": 3.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 722,
+      "note": "implementation"
+    }
+  ]
 }

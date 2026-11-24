@@ -6,6 +6,7 @@ import type { InstrumentalityRuns } from './instrumentality-runs.ts';
 import { Registry } from './kaji.ts';
 import type { Decision, Ledger, Proposal } from './ledger.ts';
 import { suggestSpellingFix } from './memory.ts';
+import { finishPrintPart, isPendingRemotePrint } from './print-job.ts';
 import { transaction } from './sqlite-transaction.ts';
 import { OWNER_SOURCE, type ActResult, type Store } from './store.ts';
 import type { Watch } from './watch.ts';
@@ -345,7 +346,11 @@ export class StoreSorties {
       ...(p.approvalId ? { approvalId: p.approvalId } : {}),
     };
     if (p.grantId && hasExecutor(proposal.tool)) {
-      const outcome = this.run(sortieId, p.actionId, p.grantId, proposal.tool, proposal.args, agency);
+      const outcome = this.run(sortieId, p.actionId, p.grantId, proposal.tool, proposal.args, agency, true);
+      // F-121-T04: a part sent to the slicing base finishes in the coordinator (actions.finished), like an MCP call.
+      if (proposal.tool === 'fleet.print' && 'result' in outcome && isPendingRemotePrint(outcome.result)) {
+        return { ...base, ...outcome };
+      }
       this.settle(sortieId, 'error' in outcome ? 'failed' : 'done');
       return { ...base, ...outcome };
     }
@@ -366,6 +371,8 @@ export class StoreSorties {
     tool: string,
     args: Record<string, unknown>,
     agency?: AgencySnapshot,
+    /** Only the gate's own call (actions.act) leaves a remote slice for the coordinator to send. */
+    deferRemote = false,
   ): { result: unknown } | { error: string } {
     this.host.ledger.authorize(grantId, tool, args);
     let outcome: { result: unknown } | { error: string };
@@ -407,6 +414,14 @@ export class StoreSorties {
       );
     }
     if ('result' in outcome && tool === 'agency.status') this.host.ledger.intake(sortieId, 'tool:' + tool, 'trusted');
+    if (tool === 'fleet.print' && 'result' in outcome && isPendingRemotePrint(outcome.result)) {
+      if (deferRemote) return outcome;
+      // Approved on a card: no coordinator is waiting to send the part, so nothing is sent or half done.
+      const { base, prepared } = outcome.result.remote;
+      outcome = {
+        result: finishPrintPart(prepared, new Error(`approved after the request; ask again to send it to ${base}.`)),
+      };
+    }
     this.host.ledger.finished(sortieId, actionId, tool, outcome, new Date(), durationMs);
     return outcome;
   }
@@ -511,6 +526,8 @@ export class StoreSorties {
       new Date(),
       durationMs,
     );
+    // F-121-T04 (review of #722): a part sliced on another base finishes here, so its owner action closes here too.
+    if (tool === 'fleet.print') this.settle(sortieId, 'error' in outcome ? 'failed' : 'done');
     return true;
   }
 

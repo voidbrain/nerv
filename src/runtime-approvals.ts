@@ -18,6 +18,7 @@ import {
 } from './runtime-api.ts';
 import type { BaseHealth, PeerVerdict, VerdictAsk } from './kaji-link.ts';
 import type { SeatPool } from './seat-pool.ts';
+import { finishPrintPart, isPendingRemotePrint, type PendingRemotePrint, type PrintPartReply } from './print-job.ts';
 import type { ActResult } from './store.ts';
 import type { WatchWork } from './watch.ts';
 import type { WorkerLease } from './worker-jobs.ts';
@@ -85,6 +86,7 @@ export class RuntimeApprovals {
   private resumer?: NodeJS.Timeout;
   private poll?: Promise<string[]>;
   private nextPoll?: Promise<string[]>;
+  private remotePrint?: (pending: PendingRemotePrint) => Promise<PrintPartReply>;
 
   constructor(host: RuntimeApprovalsHost) {
     this.host = host;
@@ -108,6 +110,43 @@ export class RuntimeApprovals {
     return () => {
       this.extraSeatSpecs = this.extraSeatSpecs.filter((s) => s !== spec);
     };
+  }
+
+  /** F-121-T04: sends a part to the slicing base over the Kaji line (serve wires it once the line is up). */
+  useRemotePrint(send: ((pending: PendingRemotePrint) => Promise<PrintPartReply>) | undefined): void {
+    this.remotePrint = send;
+  }
+
+  /** F-121-T04: a fleet.print left for the coordinator is sent to its slicing base, then finished in the ledger. */
+  private async completeRemotePrint(sortieId: string, tool: string, result: ActResult): Promise<ActResult> {
+    if (tool !== 'fleet.print' || !isPendingRemotePrint(result.result)) return result;
+    const pending = result.result.remote;
+    const t0 = performance.now();
+    const final = await (
+      this.remotePrint
+        ? this.remotePrint(pending)
+        : Promise.resolve(
+            finishPrintPart(
+              pending.prepared,
+              new Error(`${pending.base} slices parts, and the Kaji line is not running here.`),
+            ),
+          )
+    ).catch((e: unknown) =>
+      finishPrintPart(
+        pending.prepared,
+        new Error(e instanceof Error ? e.message.slice(0, 300) : 'the slicing base did not answer'),
+      ),
+    );
+    await this.host.nervous
+      .call('actions.finished', {
+        sortieId,
+        actionId: result.actionId,
+        tool,
+        durationMs: Math.max(0, Math.round(performance.now() - t0)),
+        text: JSON.stringify(final).slice(0, 8000),
+      })
+      .catch(() => undefined);
+    return { ...result, result: final };
   }
 
   useRemoteConsultant(consultant: RemoteConsultant | undefined): void {
@@ -278,7 +317,7 @@ export class RuntimeApprovals {
           }))
         : undefined;
     const itemKeys = itemKeysForTool(action.tool, action.args);
-    const result = (await this.host.itemLocks.withLock(
+    const acted = (await this.host.itemLocks.withLock(
       itemKeys,
       () =>
         this.host.nervous.call('actions.act', {
@@ -293,6 +332,7 @@ export class RuntimeApprovals {
         }),
       { owner: sortieId },
     )) as ActResult;
+    const result = await this.completeRemotePrint(sortieId, action.tool, acted);
     // A late shadow vote (F-052) is kept with the action when it arrives; it never changes the outcome.
     const lateT0 = performance.now();
     for (const s of late)
