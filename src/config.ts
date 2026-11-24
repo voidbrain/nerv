@@ -26,6 +26,7 @@ import { validateEvaLimits, type EvaLimits } from './eva-pool.ts';
 import { validatePacksConfig, type PacksConfig } from './packs.ts';
 import { validateJobUser, type EvaJobUser } from './eva-job-user.ts';
 import { validateBackup, type BackupConfig } from './offhost.ts';
+import { validatePrintsConfig, type PrintsConfig } from './print-transfer.ts';
 import { validatePersonas, type PersonaConfig } from './persona.ts';
 import { validateBrowserConfig, type BrowserConfig } from './browser-control.ts';
 import { validateAppWorkflowConfig, type AppWorkflowConfig } from './app-workflow.ts';
@@ -51,6 +52,8 @@ export interface Config {
   /** F-049-T06: how many EVA instances, how much memory and how many model slots this machine gives EVA jobs. */
   eva?: { limits: EvaLimits; jobUser?: EvaJobUser };
   backup?: BackupConfig;
+  /** F-121-T04: the base that slices printed parts (`slicer`), or the bases this one slices for (`accept`). */
+  prints?: PrintsConfig;
   personas?: PersonaConfig;
   packs?: PacksConfig;
   /** F-089-T04: origins the browser adapter may act on and the dedicated profile's debugging port. */
@@ -212,6 +215,7 @@ export function readConfig(home: string): Config {
     config.brief = { at: b.at };
   }
   if ('backup' in raw) config.backup = validateBackup((raw as Record<string, unknown>).backup, home);
+  if ('prints' in raw) config.prints = validatePrintsConfig((raw as Record<string, unknown>).prints);
   if ('tools' in raw) {
     const t = validateTools((raw as Record<string, unknown>).tools);
     if (t.mcp.length || t.grants.length) config.tools = t;

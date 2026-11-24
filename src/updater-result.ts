@@ -2,6 +2,7 @@ import { existsSync, readFileSync, renameSync, rmSync, writeFileSync } from 'nod
 import { join } from 'node:path';
 import type { ManualUpdateResult } from './manual-update.ts';
 import { resultText } from './update-scheduler.ts';
+import { markUpdaterFinished } from './updater-status.ts';
 
 /**
  * B-108-T02: the updater runs outside the service, and a completed update starts the new service before the updater
@@ -14,6 +15,12 @@ export function writeUpdaterResult(home: string, result: ManualUpdateResult): vo
   const tmp = path + '.tmp';
   writeFileSync(tmp, JSON.stringify({ version: 1, at: new Date().toISOString(), result }) + '\n', { mode: 0o600 });
   renameSync(tmp, path);
+  // B-123: the dashboard's copy, which the inbox report never consumes. Display only: it never fails the report.
+  try {
+    markUpdaterFinished(home, result);
+  } catch {
+    /* display only */
+  }
 }
 
 /** Reports a pending updater result through `notify`; true when something was reported. Never throws on a bad file. */

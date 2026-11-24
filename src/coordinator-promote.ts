@@ -9,6 +9,7 @@ import {
   checkRelocationReadiness,
   checkStandbyCandidate,
   relocateCoordinator,
+  verifyDrainReceipt,
   type RelocateCoordinatorInput,
   type RelocateCoordinatorResult,
   type RelocationLiveness,
@@ -16,9 +17,11 @@ import {
 } from './coordinator-relocation.ts';
 import { databasePath, readConfig } from './config.ts';
 import { Registry, canonical, keyIdentity, publicKeyFrom, type SignedRecord } from './kaji.ts';
+import type { EpochPushReply } from './kaji-link.ts';
 import {
   allUnrevokedAckedEpoch,
   basesAckedEpoch,
+  probeCoordinatorEpochs,
   pushCoordinatorEpoch,
   standbyBasesAckedEpoch,
 } from './coordinator-epoch.ts';
@@ -125,10 +128,7 @@ export interface PromoteCoordinatorInput {
    * `KajiLink.pushEpoch`: before the readiness check the owner-signed records go to every enrolled, unrevoked
    * base (F-016-T18); the acks are recorded here and decide `allUnrevokedAckedNewEpoch`.
    */
-  readonly pushEpoch?: (
-    baseId: string,
-    records: SignedRecord[],
-  ) => Promise<{ maxSeenCoordinatorEpoch: number; standby?: boolean }>;
+  readonly pushEpoch?: (baseId: string, records: SignedRecord[]) => Promise<EpochPushReply>;
   /** Test-only crash injection, passed to the promotion swap. */
   readonly failAfterStep?: RelocateCoordinatorInput['failAfterStep'];
 }
@@ -287,9 +287,27 @@ function derive(
 /**
  * #717 review: the refusals this base's own stores decide (not named, not a verified standby, a standby behind
  * an epoch it acked) come before the epoch push, so a move that cannot happen never tells another base the new
- * epoch (which would fence the main that is running). A base already active at the new epoch skips them.
+ * epoch (which would fence the main that is running). A base already active at the new epoch skips them
+ * (undefined); otherwise the result is the epoch of the state the standby holds and, for a planned move, the
+ * main records its drain receipt lists as skipped. #721 third check: the receipt's signature is verified here,
+ * against the enrolment of the main at the standby's epoch, so a tampered receipt is refused before the probe and
+ * the push (readiness verifies it again).
  */
-function localPrecheck(input: PromoteCoordinatorInput, mainDbPath: string, standbyDbPath: string): void {
+function localPrecheck(
+  input: PromoteCoordinatorInput,
+  mainDbPath: string,
+  standbyDbPath: string,
+):
+  | {
+      readonly standbyEpoch: number;
+      readonly skippedMains: readonly { readonly baseId: string }[];
+      /**
+       * Planned: the drained main that signed the receipt. `kaji drain` leaves its service running (fenced), so it
+       * usually answers the probe; when it does not, its receipt (with the epochs it ran or acked) answers for it.
+       */
+      readonly drainedBy?: string;
+    }
+  | undefined {
   const db = new DatabaseSync(mainDbPath);
   try {
     const registry = new Registry(db, input.rootPublicKey);
@@ -303,20 +321,154 @@ function localPrecheck(input: PromoteCoordinatorInput, mainDbPath: string, stand
       current?.replicationMode === 'active' &&
       current.coordinatorEpoch === newEpoch
     )
-      return;
+      return undefined;
     const candidate = existsSync(standbyDbPath) ? new DatabaseSync(standbyDbPath) : db;
+    let standbyEpoch: number;
     try {
-      checkStandbyCandidate({
+      standbyEpoch = checkStandbyCandidate({
         candidateDb: candidate,
         selfBaseId: self.baseId,
         registryMain: { baseId: registry.main(), coordinatorEpoch: newEpoch },
-      });
+      }).previousEpoch;
     } finally {
       if (candidate !== db) candidate.close();
     }
+    if (!input.drainReceiptFile) return { standbyEpoch, skippedMains: [] };
+    const records = registry.records();
+    const previousMain = records
+      .filter((r) => r.body.kind === 'main' && (r.body.coordinatorEpoch ?? 0) === standbyEpoch)
+      .at(-1);
+    if (!previousMain)
+      refuse('previous_main_unknown', `No owner-signed main record names the epoch ${standbyEpoch} the standby holds.`);
+    const previousMainBaseId = previousMain.body.baseId;
+    const enrolment = records
+      .filter((r) => r.body.kind === 'enrol' && r.body.baseId === previousMainBaseId)
+      .sort((a, b) => b.body.serial - a.body.serial)[0];
+    if (!enrolment || registry.bases().some((b) => b.baseId === previousMainBaseId && b.status === 'revoked'))
+      refuse('drain_receipt_invalid', `${previousMainBaseId} is revoked: its receipt is not trusted.`);
+    let drain: SignedDrainReceipt;
+    try {
+      drain = JSON.parse(readFileSync(input.drainReceiptFile, 'utf8')) as SignedDrainReceipt;
+    } catch {
+      refuse('drain_receipt_invalid', 'The drain receipt cannot be read.');
+    }
+    if (!drain?.receipt || !verifyDrainReceipt(drain, publicKeyFrom(enrolment.body.publicKey!)))
+      refuse('drain_receipt_invalid', `The drain receipt is not signed by ${previousMainBaseId}.`);
+    // #721 fourth check: the receipt hands this epoch over to this base, from the standby's epoch (readiness checks
+    // it again); and the drained base never ran or acked a later epoch than that state.
+    const r = drain.receipt;
+    if (r.coordinatorEpoch !== standbyEpoch || r.newMainBaseId !== self.baseId || r.newEpoch !== newEpoch)
+      refuse(
+        'drain_receipt_invalid',
+        `The receipt hands epoch ${r.coordinatorEpoch} to ${r.newMainBaseId} at ${r.newEpoch}; this move takes epoch ${standbyEpoch} to ${self.baseId} at ${newEpoch}. No base was told the new epoch.`,
+      );
+    if (typeof r.ranOrAckedEpoch === 'number' && r.ranOrAckedEpoch > standbyEpoch)
+      refuse(
+        'standby_behind',
+        `${previousMainBaseId} ran or acked a coordinator lease at epoch ${r.ranOrAckedEpoch}, after the epoch ${standbyEpoch} state this standby holds: re-seed it from the epoch ${r.ranOrAckedEpoch} coordinator first. No base was told the new epoch.`,
+      );
+    const listed: unknown = drain.receipt.skippedMains;
+    const skippedMains = (Array.isArray(listed) ? (listed as { baseId?: unknown }[]) : []).flatMap((m) =>
+      typeof m?.baseId === 'string' ? [{ baseId: m.baseId }] : [],
+    );
+    return { standbyEpoch, skippedMains, drainedBy: previousMainBaseId };
   } finally {
     db.close();
   }
+}
+
+/**
+ * B-121-T02: the same question asked of every other unrevoked base, before the epoch push. A base that ran, or
+ * acked a lease at, a later epoch than the standby's state saw a coordinator run after that state (B-121: it may
+ * have renewed through a base other than this one), so the move is refused (`standby_behind`). An unplanned move
+ * also needs every such base to answer, and to answer with the field: an older NERV leaves it out, which says
+ * nothing about the epochs it ran (`peer_epoch_unknown`). A planned move goes on without them: its drain receipt
+ * binds the epoch that last ran. Nothing is committed on any base until this passes, so a refusal fences no main.
+ */
+async function remotePrecheck(
+  input: PromoteCoordinatorInput & { readonly pushEpoch: NonNullable<PromoteCoordinatorInput['pushEpoch']> },
+  mainDbPath: string,
+  local: NonNullable<ReturnType<typeof localPrecheck>>,
+): Promise<void> {
+  const { standbyEpoch } = local;
+  const db = new DatabaseSync(mainDbPath);
+  let probe: Awaited<ReturnType<typeof probeCoordinatorEpochs>>;
+  let newEpoch: number;
+  let selfBaseId: string | undefined;
+  let registryBetween: { baseId: string; coordinatorEpoch: number }[];
+  try {
+    db.exec('PRAGMA busy_timeout = 5000');
+    const registry = new Registry(db, input.rootPublicKey);
+    newEpoch = registry.mainEpoch();
+    const own = keyIdentity(input.ownPublicKey);
+    selfBaseId = registry.bases().find((b) => b.status === 'enrolled' && keyIdentity(b.publicKey) === own)?.baseId;
+    registryBetween = registry
+      .records()
+      .filter(
+        (r) =>
+          r.body.kind === 'main' &&
+          r.body.baseId !== undefined &&
+          (r.body.coordinatorEpoch ?? 0) > standbyEpoch &&
+          (r.body.coordinatorEpoch ?? 0) < newEpoch,
+      )
+      .map((r) => ({ baseId: r.body.baseId!, coordinatorEpoch: r.body.coordinatorEpoch ?? 0 }));
+    probe = await probeCoordinatorEpochs({
+      db,
+      rootPublicKey: input.rootPublicKey,
+      ownPublicKey: input.ownPublicKey,
+      push: input.pushEpoch,
+    });
+  } finally {
+    db.close();
+  }
+  const ahead = [...probe.ranOrAcked]
+    .filter(([, epoch]) => epoch > standbyEpoch)
+    .sort(([a], [b]) => a.localeCompare(b));
+  if (ahead.length) {
+    const newest = Math.max(...ahead.map(([, epoch]) => epoch));
+    refuse(
+      'standby_behind',
+      `${ahead.map(([id, epoch]) => `${id} (epoch ${epoch})`).join(', ')} ran or acked a coordinator lease after the epoch ${standbyEpoch} state this standby holds: re-seed it from the epoch ${newest} coordinator first. No base was told the new epoch.`,
+    );
+  }
+  if (input.drainReceiptFile) {
+    // #721 re-check and third check: a planned move goes on past a base that does not answer, unless a main was
+    // signed between the standby's epoch and the new one (listed as skipped by the verified receipt, or held here),
+    // revoked or not: it may have run, and revoking it does not undo its epoch, which any base may have acked as
+    // its standby. Then, as unplanned, every unrevoked base must answer, with the field, at or below the standby's
+    // epoch.
+    const skipped = [...local.skippedMains, ...registryBetween].some((m) => m.baseId !== selfBaseId);
+    // An unanswering drained main is exempt: its signed receipt says which epochs it ran or acked.
+    const silent = skipped ? probe.unreachable.filter((id) => id !== local.drainedBy) : [];
+    if (silent.length)
+      refuse(
+        'old_host_unconfirmed',
+        `${silent.join(', ')} did not answer: a main was named after the epoch ${standbyEpoch} state this standby holds and may have run, and any unrevoked base may have acked it. Reach it and run kaji promote again. No base was told the new epoch.`,
+      );
+    // An older NERV says only the newest main record it holds, signed: one later than the standby's state (and
+    // not the new one) may have run, and so may a listed base that cannot say.
+    const unsure = probe.unknown.filter(
+      (id) =>
+        skipped ||
+        ((probe.unknownMaxSeen.get(id) ?? 0) > standbyEpoch && (probe.unknownMaxSeen.get(id) ?? 0) < newEpoch),
+    );
+    if (unsure.length)
+      refuse(
+        'peer_epoch_unknown',
+        `${unsure.join(', ')} run(s) an older NERV that holds a main record after the epoch ${standbyEpoch} state this standby holds and does not report the epochs it ran: update it (or revoke it with the root key) and run kaji promote again. No base was told the new epoch.`,
+      );
+    return;
+  }
+  if (probe.unreachable.length)
+    refuse(
+      'old_host_unconfirmed',
+      `Not every unrevoked base answered (unreachable: ${probe.unreachable.join(', ')}): one of them may have run or acked a later epoch, or could still ack the old main's lease. Reach them (or import the records there) and run kaji promote again. No base was told the new epoch.`,
+    );
+  if (probe.unknown.length)
+    refuse(
+      'peer_epoch_unknown',
+      `${probe.unknown.join(', ')} run(s) an older NERV that does not report the epochs it ran or acked, so an unplanned move cannot rule out a later coordinator: update it (or revoke it with the root key) and run kaji promote again. No base was told the new epoch.`,
+    );
 }
 
 /**
@@ -347,7 +499,9 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
   if (!existsSync(mainDbPath) && existsSync(archivePath) && existsSync(standbyDbPath))
     renameSync(standbyDbPath, mainDbPath);
   if (!existsSync(mainDbPath)) throw new Error(`No store at ${mainDbPath}: nothing to promote.`);
-  localPrecheck(input, mainDbPath, standbyDbPath);
+  const local = localPrecheck(input, mainDbPath, standbyDbPath);
+  if (input.pushEpoch && local !== undefined)
+    await remotePrecheck({ ...input, pushEpoch: input.pushEpoch }, mainDbPath, local);
   if (input.pushEpoch) {
     const db = new DatabaseSync(mainDbPath);
     try {

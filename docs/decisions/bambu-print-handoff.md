@@ -16,7 +16,13 @@ Status: Accepted (decision for F-087)
 - **Import link**: Hand off the sliced `.gcode.3mf` via `bambu-connect://import-file?path=<urlEncodedLocalPath>`, accompanied by an owner pre-print checklist (printer, build plate, nozzle, filament/AMS slot mapping, clear plate, someone nearby for first layer).
 - **Why Developer Mode is not used**: Enabling firmware Developer Mode forces LAN-only mode and disconnects the printer from Bambu Cloud / Bambu Handy / Bambu Connect. Without Developer Mode, NERV prepares and hands off the sliced file cleanly while the owner presses Print in Bambu Connect. NERV **never** reports a print as started, because it cannot observe printer state.
 
-## 3. Opening Bambu Connect from the Tabgha Background Service
+## 3. Part Files from the Mac (F-121-T04)
+
+- The part library stays on the Mac (`~/.nerv/prints`). A print request there resolves and hashes the part; the coordinator sends the slice request to the slicing base over the Kaji line (`POST /kaji/print`, signed both ways) and sends the file itself (base64, up to 64 MB) only when that base does not hold a copy with the same SHA-256.
+- Tabgha verifies sender, size and hash before writing, writes only `%USERPROFILE%\.nerv\prints-cache\<sha256>.<ext>`, slices with its own allowlist into `prints-out`, and returns the time, grams and its own output path. The Mac's reply proposes `kaji.run` on Tabgha with `bambu.handoff`, so the owner card opens Bambu Connect where it is installed.
+- Configuration: on the Mac `"prints": {"slicer": "NERV-02"}`; on Tabgha `"prints": {"accept": ["NERV-01"]}` and `bambu.handoff` in its `kaji offer` list. Without `prints.slicer` the base holding the library slices locally.
+
+## 4. Opening Bambu Connect from the Tabgha Background Service
 
 - **Interactive session boundary**: The NERV Windows service runs in Session 0 (non-interactive, no desktop window). Launching a `bambu-connect://` URI directly from Session 0 cannot show a window on the owner's desktop.
 - **Session hand-off**: A lightweight per-user interactive helper (registered in the owner's Windows logon / scheduled task running in the active interactive session, polling or receiving the hand-off over a local user-ACL pipe/file) invokes `ShellExecute` / `Start-Process` for `bambu-connect://import-file?...` inside the owner's logged-in desktop session.

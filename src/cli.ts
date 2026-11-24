@@ -36,6 +36,7 @@ import { nodesCommand } from './nodes-cli.ts';
 import { placementEvidence, placementReport } from './placement-report.ts';
 import { backupCommand } from './backup-cli.ts';
 import { storeReceived } from './offhost.ts';
+import { admitPartTransfer, completeRemotePrint, receivePartTransfer } from './print-transfer.ts';
 
 import { checkUpdateAvailability } from './update-availability.ts';
 
@@ -79,7 +80,6 @@ import {
   coordinatorLeaseService,
   coordinatorTelegramContinuity,
 } from './coordinator-serve.ts';
-import { STANDBY_DB_FILE } from './coordinator-relocation.ts';
 import { assertNoPromotionInProgress } from './coordinator-promote.ts';
 import {
   guardLocalService,
@@ -637,6 +637,8 @@ try {
             sessionFile: join(home, 'sessions.json'),
             // F-118: paired devices (hashed, 90 days unused, bound to the admin token).
             deviceFile: join(home, 'devices.json'),
+            // B-123: the updater's status for the dashboard's Health row (kept in this data home).
+            updaterHome: home,
             // B-108: Update now and the scheduled apply hand the update to its own OS job outside this service.
             startUpdater: async (input) => {
               await startUpdaterJob(localServiceHost().context, input, async (program, args) => {
@@ -819,9 +821,7 @@ try {
           });
           stopLease = () => lease.stop();
           kaji = new KajiLink({
-            onLeaseRenew: lease.onLeaseRenew,
-            minCoordinatorEpoch: lease.mainEpoch,
-            holdsStandby: () => existsSync(join(home, STANDBY_DB_FILE)),
+            ...lease.kajiOptions(),
             trust: { root: config.kaji.root, required: config.kaji.rootBinding === true },
             worker: runtime.worker,
             baseId: config.base.id,
@@ -842,6 +842,9 @@ try {
                 return 'refused';
               }
             },
+            // F-121-T04: a part another base sends to slice here, when `prints.accept` names that base.
+            admitPartTransfer: (from, bytes) => admitPartTransfer(home, live().prints?.accept ?? [], from, bytes),
+            onPartTransfer: async (from, body) => receivePartTransfer(home, live().prints?.accept ?? [], from, body),
             ...createPeerHandlers({
               base: config.base,
               getAoba: () => aoba,
@@ -871,6 +874,10 @@ try {
           runtime.setLinkMetricsProvider(() => kaji?.linkMetrics() ?? []);
           if (kaji) {
             const link = kaji;
+            // F-121-T04: a print request sends the part to the slicing base (`prints.slicer`) over this line.
+            runtime.useRemotePrint((pending) =>
+              completeRemotePrint(home, pending, (base, message) => link.sendPartTransfer(base, message)),
+            );
             runtime.setRemoteSortie(
               (baseId, sortieId) =>
                 link.inspectSortie(baseId, sortieId) as Promise<{

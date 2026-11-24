@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "id": "B-123-T01",
+  "parent": "B-123",
+  "title": "Show the updater's status beside Update now",
+  "goal": "The Health row shows the outside updater's progress and result, with reasons and recovery, across restarts and reloads, until dismissed",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails first across the join: updater result -> GET /api/update/status -> Health row",
+    "The inbox report of the result still happens exactly once",
+    "In progress (with its step), completed, refused, failed and uncertain each show their words, reasons and recovery, escaped, with style-guide tokens only",
+    "The status survives a service restart and a page reload, and stays until dismissed or a new run supersedes it"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/updater-status.ts",
+    "src/updater-result.ts",
+    "src/server-update.ts",
+    "src/server.ts",
+    "src/cli.ts",
+    "src/nodes-cli.ts",
+    "web/public/dashboard/live.js",
+    "test/updater-status.test.ts",
+    "test/updater-status-render.test.mjs",
+    "test/updater-status.browser.mjs",
+    "docs/work/records/B-123.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design",
+    "browser-test"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "A committed regression fails before the fix (test/updater-status.test.ts, test/updater-status-render.test.mjs, test/updater-status.browser.mjs)",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-24: status file and route, Health row, unit, render and browser tests. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3,
+    "actualAgentHours": 2.5,
+    "actualSource": "stated"
+  }
+}

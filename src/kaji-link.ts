@@ -25,6 +25,9 @@ const MAX_BODY = 256 * 1024,
   HEARTBEAT_MS = 30_000;
 /** F-062-T06: an encrypted backup copy (base64 in JSON) may be larger than any other Kaji message. */
 export const MAX_BACKUP_BODY = 64 * 1024 * 1024;
+/** F-121-T04: a part file for the slicing base (up to 64 MB, base64 in JSON) may be as large as a backup copy's. */
+export const MAX_PART_TRANSFER_BODY = Math.ceil((64 * 1024 * 1024) / 3) * 4 + 64 * 1024;
+const PART_TIMEOUT_MS = 300_000;
 const BACKUP_TIMEOUT_MS = 120_000;
 /** At most this many owner-signed records in one epoch push. */
 const MAX_EPOCH_PUSH_RECORDS = 1000;
@@ -33,6 +36,13 @@ export function maxMainEpoch(records: SignedRecord[]): number {
   return records.reduce((m, r) => (r.body.kind === 'main' ? Math.max(m, r.body.coordinatorEpoch ?? 0) : m), 0);
 }
 /** What the link needs from the registry, implemented by the scheduler process (or directly in tests). */
+/** The signed `/kaji/epoch-push` reply (F-016-T18). `ranOrAckedEpoch` is absent from an older NERV (B-121-T02). */
+export interface EpochPushReply {
+  readonly maxSeenCoordinatorEpoch: number;
+  readonly standby?: boolean;
+  readonly ranOrAckedEpoch?: number;
+}
+
 export interface RegistryPort {
   bases(): Promise<BaseEntry[]>;
   records(): Promise<SignedRecord[]>;
@@ -251,6 +261,10 @@ export class KajiLink {
     onReachable?: (baseId: string, peers: string[]) => void;
     /** F-062-T06: stores an encrypted backup copy from an enrolled base, if this base accepts copies from it. */
     onBackup?: (from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>;
+    /** F-121-T04: slices a part file another base sends (`POST /kaji/print`); the answer is signed back as is. */
+    onPartTransfer?: (from: string, body: unknown) => Promise<{ status: number; value: unknown }>;
+    /** F-121-T04: refuses a part transfer before its body is read (claimed sender, declared size). */
+    admitPartTransfer?: (claimedFrom: string, declaredBytes: number) => { status: number; error: string } | undefined;
     /** F-016-T04: applies an incremental coordinator replication batch on a standby base. */
     onReplicate?: (from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>;
     /** F-016-T06: handles standby-acked coordinator lease renewal on a standby base. */
@@ -261,6 +275,8 @@ export class KajiLink {
     minCoordinatorEpoch?: () => number;
     /** F-016-T18 re-review: this base holds the coordinator standby store (said in epoch-push replies). */
     holdsStandby?: () => boolean;
+    /** B-121-T02: the newest coordinator epoch this base ran or acked a lease at (said in epoch-push replies). */
+    ranOrAckedEpoch?: () => number;
   }) {
     this.trust = options.trust;
     this.baseId = options.baseId;
@@ -275,11 +291,14 @@ export class KajiLink {
     this.onReachable = options.onReachable;
     this.onRelay = options.onRelay;
     this.onBackup = options.onBackup;
+    this.onPartTransfer = options.onPartTransfer;
+    this.admitPartTransfer = options.admitPartTransfer;
     this.onReplicate = options.onReplicate;
     this.onLeaseRenew = options.onLeaseRenew;
     this.checkCoordinatorAuthority = options.checkCoordinatorAuthority;
     this.minCoordinatorEpoch = options.minCoordinatorEpoch;
     this.holdsStandby = options.holdsStandby;
+    this.ranOrAckedEpoch = options.ranOrAckedEpoch;
     this.onDecide = options.onDecide;
     this.onPendingApprovals = options.onPendingApprovals;
     this.onSortie = options.onSortie;
@@ -340,6 +359,7 @@ export class KajiLink {
   private readonly checkCoordinatorAuthority: (() => ActiveCoordinatorCheckResult) | undefined;
   private readonly minCoordinatorEpoch: (() => number) | undefined;
   private readonly holdsStandby: (() => boolean) | undefined;
+  private readonly ranOrAckedEpoch: (() => number) | undefined;
   private staleEpochReply(
     headers: IncomingMessage['headers'],
     reply: (status: number, value: unknown) => void,
@@ -365,6 +385,10 @@ export class KajiLink {
     return true;
   }
   private readonly onBackup: ((from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>) | undefined;
+  private readonly onPartTransfer:
+    ((from: string, body: unknown) => Promise<{ status: number; value: unknown }>) | undefined;
+  private readonly admitPartTransfer:
+    ((claimedFrom: string, declaredBytes: number) => { status: number; error: string } | undefined) | undefined;
   private readonly onReplicate:
     ((from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>) | undefined;
   private readonly onLeaseRenew: ((from: string, req: LeaseRenewRequest) => Promise<LeaseRenewResult>) | undefined;
@@ -518,11 +542,32 @@ export class KajiLink {
       end(body);
     };
     try {
+      // F-121-T04: a part transfer too large, from a base not accepted, or while the slicer lane is full is refused
+      // before its body is read.
+      if (req.method === 'POST' && req.url === '/kaji/print') {
+        const declared = Number(req.headers['content-length'] ?? 0);
+        if (!Number.isFinite(declared) || declared > MAX_PART_TRANSFER_BODY) {
+          reply(413, { error: 'part transfer too large' });
+          return;
+        }
+        const claimed = req.headers['x-kaji-base'];
+        const refusal = this.admitPartTransfer
+          ? this.admitPartTransfer(typeof claimed === 'string' ? claimed : '', declared)
+          : this.onPartTransfer
+            ? undefined
+            : { status: 403, error: 'this base does not slice parts' };
+        if (refusal) {
+          reply(refusal.status, { error: refusal.error });
+          return;
+        }
+      }
       let body = '';
       const limit =
         req.method === 'POST' && (req.url === '/kaji/backup' || req.url === '/kaji/replicate')
           ? MAX_BACKUP_BODY
-          : MAX_BODY;
+          : req.method === 'POST' && req.url === '/kaji/print'
+            ? MAX_PART_TRANSFER_BODY
+            : MAX_BODY;
       for await (const chunk of req) {
         body += chunk;
         if (body.length > limit) throw new Error('too large');
@@ -592,6 +637,14 @@ export class KajiLink {
         }
         const outcome = this.onBackup ? await this.onBackup(from, b.date, Buffer.from(b.copy, 'base64')) : 'refused';
         reply(outcome === 'stored' ? 200 : 403, outcome === 'stored' ? { stored: true } : { error: 'not accepted' });
+        return;
+      }
+      // F-121-T04: a part to slice here, from a base this base accepts (print-transfer.ts checks it all).
+      if (req.method === 'POST' && req.url === '/kaji/print') {
+        const answer = this.onPartTransfer
+          ? await this.onPartTransfer(from, JSON.parse(body))
+          : { status: 403, value: { error: 'this base does not slice parts' } };
+        reply(answer.status, answer.value);
         return;
       }
       if (req.method === 'POST' && req.url === '/kaji/relay') {
@@ -726,7 +779,8 @@ export class KajiLink {
         return;
       }
       // F-016-T18: any enrolled base pushes owner-signed records (a new main, a revoke). Each is verified against the
-      // root before it is kept; the reply names the newest coordinator epoch this base now holds.
+      // root before it is kept; the reply names the newest coordinator epoch this base now holds and (B-121-T02) the
+      // newest it ran or acked a lease at. A push with no records commits nothing: `kaji promote` probes with one.
       if (req.method === 'POST' && req.url === '/kaji/epoch-push') {
         const parsed = JSON.parse(body) as { records?: unknown };
         if (!Array.isArray(parsed.records) || parsed.records.length > MAX_EPOCH_PUSH_RECORDS) {
@@ -738,6 +792,7 @@ export class KajiLink {
           baseId: this.baseId,
           maxSeenCoordinatorEpoch: maxMainEpoch(await this.port.records()),
           standby: this.holdsStandby?.() === true,
+          ...(this.ranOrAckedEpoch ? { ranOrAckedEpoch: this.ranOrAckedEpoch() } : {}),
         });
         return;
       }
@@ -857,7 +912,8 @@ export class KajiLink {
         this.trust,
       );
       if (from !== peer.baseId) throw new Error(`${peer.baseId} answered as ${from}`);
-      if (!res.ok) throw new Error(`${peer.baseId} refused (${res.status})`);
+      if (!res.ok)
+        throw Object.assign(new Error(`${peer.baseId} refused (${res.status})`), { status: res.status, text });
       return JSON.parse(text);
     } finally {
       done(bytesIn);
@@ -886,6 +942,29 @@ export class KajiLink {
         code: status ? 'EREFUSED' : 'EUNREACHABLE',
         ...(status ? { status: Number(status) } : {}),
       });
+    }
+  }
+  /**
+   * F-121-T04: sends a part message to the slicing base and resolves with its signed answer. Rejects with code EREFUSED
+   * (the HTTP status and the base's own reason as the message) or EUNREACHABLE.
+   */
+  async sendPartTransfer(peerId: string, message: unknown): Promise<unknown> {
+    const peer = (await this.bases()).find((b) => b.baseId === peerId && b.status === 'enrolled');
+    if (!peer) throw Object.assign(new Error(`${peerId} is not an enrolled base`), { code: 'EREFUSED', status: 404 });
+    try {
+      return await this.call(peer, 'POST', '/kaji/print', message, PART_TIMEOUT_MS);
+    } catch (e) {
+      const refused = e as { status?: unknown; text?: unknown };
+      if (typeof refused.status !== 'number')
+        throw Object.assign(new Error('part not delivered'), { code: 'EUNREACHABLE' });
+      let reason = `refused (${refused.status})`;
+      try {
+        const error = (JSON.parse(String(refused.text)) as { error?: unknown }).error;
+        if (typeof error === 'string' && error) reason = error.slice(0, 500);
+      } catch {
+        /* the status is the reason */
+      }
+      throw Object.assign(new Error(reason), { code: 'EREFUSED', status: refused.status });
     }
   }
   /** Sends a relay to the main base (F-036 phase 2); false when there is none, it is this base, or it cannot be reached. */
@@ -1050,11 +1129,11 @@ export class KajiLink {
     }
     throw new Error(`${peer.baseId} refused (${res.status}): ${res.text}`);
   }
-  /** F-016-T18: pushes owner-signed records to a base; returns the coordinator epoch it holds afterwards. */
-  async pushEpoch(
-    baseId: string,
-    records: SignedRecord[],
-  ): Promise<{ maxSeenCoordinatorEpoch: number; standby: boolean }> {
+  /**
+   * F-016-T18: pushes owner-signed records to a base; returns the coordinator epoch it holds afterwards and, when
+   * the base reports it (B-121-T02; an older NERV does not), the newest epoch it ran or acked a lease at.
+   */
+  async pushEpoch(baseId: string, records: SignedRecord[]): Promise<EpochPushReply> {
     const peer = (await this.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
     if (!peer) throw new Error(`Base ${baseId} is not enrolled.`);
     const body = JSON.stringify({ records });
@@ -1094,10 +1173,24 @@ export class KajiLink {
     );
     if (replyFrom !== peer.baseId) throw new Error('Unexpected base answered the epoch push.');
     if (res.status !== 200) throw new Error(`${peer.baseId} refused (${res.status}): ${res.text}`);
-    const reply = JSON.parse(res.text) as { baseId?: unknown; maxSeenCoordinatorEpoch?: unknown; standby?: unknown };
-    if (reply.baseId !== peer.baseId || !Number.isSafeInteger(reply.maxSeenCoordinatorEpoch))
+    const reply = JSON.parse(res.text) as {
+      baseId?: unknown;
+      maxSeenCoordinatorEpoch?: unknown;
+      standby?: unknown;
+      ranOrAckedEpoch?: unknown;
+    };
+    if (
+      reply.baseId !== peer.baseId ||
+      !Number.isSafeInteger(reply.maxSeenCoordinatorEpoch) ||
+      (reply.ranOrAckedEpoch !== undefined &&
+        (!Number.isSafeInteger(reply.ranOrAckedEpoch) || (reply.ranOrAckedEpoch as number) < 0))
+    )
       throw new Error('Invalid epoch push reply.');
-    return { maxSeenCoordinatorEpoch: reply.maxSeenCoordinatorEpoch as number, standby: reply.standby === true };
+    return {
+      maxSeenCoordinatorEpoch: reply.maxSeenCoordinatorEpoch as number,
+      standby: reply.standby === true,
+      ...(reply.ranOrAckedEpoch !== undefined ? { ranOrAckedEpoch: reply.ranOrAckedEpoch as number } : {}),
+    };
   }
   /** F-016-T06: requests a standby-acked lease renewal for the active coordinator. */
   async renewLease(baseId: string, req: LeaseRenewRequest): Promise<LeaseRenewResult> {
