@@ -276,9 +276,10 @@ export async function runKajiCommand(
       throw new Error('No enrolled base with that id (see kaji list).');
     // #734 review (B-124): once a coordinator has moved, or runs here, a stored main record stops it unchecked.
     const held = store.coordinatorFencingState();
-    if (registry.main() && registry.main() !== id && (registry.mainEpoch() >= 2 || (held?.coordinatorEpoch ?? 0) >= 2))
+    // #734 re-check: the running main named again, or a revoked newest main, is refused the same way.
+    if (registry.mainEpoch() >= 2 || (held?.coordinatorEpoch ?? 0) >= 2)
       throw new Error(
-        `${registry.main()} is main at coordinator epoch ${registry.mainEpoch()}: move it with kaji relocate ${id} FILE (then kaji promote --relocation FILE on ${id}). kaji main names the first main only.`,
+        `The main record is at coordinator epoch ${registry.mainEpoch()}${registry.main() ? ` (${registry.main()})` : ''}: move it with kaji relocate ${id} FILE (then kaji promote --relocation FILE on ${id}). kaji main names the first main only.`,
       );
     const root = await unlock();
     new Registry(store.db, root.publicKey).add(
