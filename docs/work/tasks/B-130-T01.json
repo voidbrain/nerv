@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "B-130-T01",
+  "parent": "B-130",
+  "title": "An unused Misato's Apt keeps its normal look in a finished sortie's flow",
+  "goal": "Misato's Apt is unlit, not skipped, when a finished sortie never needed approval (owner option c)",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails first: stepState for a finished granted sortie returns no state for the Apt",
+    "Forwarded skip and the consult rule are unchanged; Sync → Plug stays lit, the Apt routes unlit"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/dashboard.js",
+    "test/dashboard.test.ts",
+    "docs/guides/channels-and-watches.md",
+    "docs/work/records/B-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "A committed regression fails before the fix",
+    "Every test reading live.js, dashboard.js or web/src plus touched tests",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A change to the forwarded or consult skip goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h agent",
+    "basis": "Estimated 2026-11-24: one line and a test. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}

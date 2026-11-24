@@ -37,7 +37,8 @@ test(
           await fetch(origin + '/api/session/codes', { method: 'POST', headers: { authorization: 'Bearer ' + token } })
         ).json();
         await page('Page.navigate', { url: origin + '/dashboard/#code=' + login.code });
-        await until(`document.querySelector('#health')?.textContent.includes('Central Dogma')`, 30000);
+        // Signed in: the live banner counts the recent sorties (the demo's Health also names Central Dogma).
+        await until(`document.querySelector('.banner')?.textContent.includes('recent sorties')`, 30000);
         assert.equal(await evaluate(`document.querySelector('#doctor-result').hidden`), true, 'nothing before a run');
         const before = doctorCalls;
         await evaluate(`document.querySelector('#btn-doctor').click()`);

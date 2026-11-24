@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "B-129-T01",
+  "parent": "B-129",
+  "title": "Run doctor calls GET /api/doctor and shows the answer next to the button",
+  "goal": "The live dashboard's Run doctor reports what the service says, never a canned pass",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails first: render helper and a browser test on the production build against the real server",
+    "The answer (ok or problems, revision and skew, database checks, update status) stays next to the button until the next run, escaped, tokens only",
+    "Unreachable and 401 are said as such; Maya's line only points to Health; the demo says it checked nothing",
+    "The guide documents what Run doctor verifies"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/dashboard.js",
+    "web/public/dashboard/live.js",
+    "web/public/dashboard/index.html",
+    "test/doctor-run.test.mjs",
+    "test/doctor-run.browser.mjs",
+    "evals/suite.json",
+    "evals/gauntlet/system-v1.json",
+    "docs/guides/channels-and-watches.md",
+    "docs/work/records/B-129.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "A committed regression fails before the fix",
+    "Every test reading live.js, dashboard.js or web/src plus touched tests",
+    "node --test test/doctor-run.browser.mjs",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Never show a pass the service did not report"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-24: one render helper, the live call, a browser test. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

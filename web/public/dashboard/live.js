@@ -522,6 +522,63 @@
       "</div>";
   }
   // B-123: updater status (end)
+  // B-129: doctor run (start)
+  /** What GET /api/doctor reports as wrong, in words: processes, database integrity, revision skew, degraded reasons, fleet. */
+  function doctorProblems(d) {
+    const out = []; const p = d.processes;
+    if (p && !p.nervous) out.push("Scheduler (nervous) is not running.");
+    if (p && p.brainAlive === false) out.push("Brain process is not alive.");
+    if (d.models === "brain unavailable") out.push("Brain did not answer the model check.");
+    const qc = (d.database || {}).quick_check;
+    if (qc !== "ok") out.push("Database integrity: " + (qc == null ? "not checked" : String(qc)));
+    const skew = d.revisionSkew;
+    if (skew && skew.skewed) out.push(String(skew.message || "Running service differs from the checkout."));
+    (Array.isArray(d.degraded) ? d.degraded : []).forEach(r => out.push(String(r)));
+    if (d.fleet && d.fleet.error) out.push("Fleet: " + d.fleet.error);
+    return out;
+  }
+  function doctorUpdateText(u) {
+    if (!u || typeof u.status !== "string") return "not checked";
+    const short = rev => typeof rev === "string" && rev.length >= 7 ? rev.slice(0, 7) : "?";
+    const ch = " (" + (u.channel || "main") + ")";
+    if (u.status === "update-available") return "update available · " + short(u.availableRevision) + ch;
+    if (u.restartRequired) return "restart required · installed " + short(u.installedRevision);
+    if (u.status === "up-to-date") return "up to date · " + short(u.runningRevision) + ch;
+    if (u.status === "ahead") return "ahead · " + short(u.runningRevision) + ch;
+    if (u.status === "offline") return "offline · " + short(u.runningRevision);
+    return u.status;
+  }
+  /** The block next to Run doctor: running, the service's answer, or why there is none (unreachable, 401, other). */
+  function doctorRunHtml(run) {
+    if (run.running) return "<div id='doctor-run' class='small muted'>Running doctor…</div>";
+    const time = run.at ? new Date(run.at).toTimeString().slice(0, 8) : "";
+    const head = (cls, title) => "<div id='doctor-run' class='small " + cls + "'><div class='row'><strong>" + esc(title) + "</strong><span class='muted'>" + esc(time) + "</span></div>";
+    if (run.error) {
+      const e = run.error;
+      if (e.status === 401) return head("danger", "Doctor refused (401)") + "<div>The dashboard session ended. Run <code>nerv open dashboard</code> on the Mac to sign in again.</div></div>";
+      if (e.status) return head("danger", "Doctor failed (" + e.status + ")") + "<div>" + esc(e.message) + "</div></div>";
+      return head("danger", "Doctor could not reach the service") + "<div>" + esc(e.message) + "</div><div class='muted'>Is NERV running? Nothing was checked.</div></div>";
+    }
+    const d = run.result || {}; const problems = doctorProblems(d);
+    const b = d.build || {}; const skew = d.revisionSkew || {};
+    const skewText = skew.skewed ? "checkout is at " + (skew.checkoutShortCommit || "?") : skew.checkoutCommit ? "matches the checkout" : "checkout unknown";
+    const db = d.database || {}; const pending = (d.pending || {}).count;
+    const lines = [
+      "Revision " + (b.version || "?") + " · " + (b.shortCommit || "?") + " · " + skewText,
+      "Database: integrity " + (db.quick_check == null ? "not checked" : db.quick_check) + " · schema " + ((d.schema || {}).user_version ?? "?") + (pending != null ? " · " + pending + " pending reminder" + (pending === 1 ? "" : "s") : ""),
+      "Update: " + doctorUpdateText(d.update),
+    ];
+    return head(problems.length ? "danger" : "ok", problems.length ? "Doctor · " + problems.length + " problem" + (problems.length === 1 ? "" : "s") : "Doctor · all checks pass") +
+      (problems.length ? "<ul style='margin:4px 0 0 16px;padding:0'>" + problems.map(p => "<li>" + esc(p) + "</li>").join("") + "</ul>" : "") +
+      lines.map(l => "<div class='muted'>" + esc(l) + "</div>").join("") + "</div>";
+  }
+  /** Maya's line in Comms: only a pointer to the block in Health. */
+  function doctorChatLine(run) {
+    if (run.error) return "Doctor: " + (run.error.status === 401 ? "refused (401)" : run.error.status ? "failed (" + run.error.status + ")" : "service unreachable") + " · details in Health.";
+    const n = doctorProblems(run.result || {}).length;
+    return "Doctor: " + (n ? n + " problem" + (n === 1 ? "" : "s") : "all checks pass") + " · details in Health.";
+  }
+  // B-129: doctor run (end)
   window.renderHealth = function () {
     const d = state.doctor; if (!d) { document.getElementById("health").innerHTML = "<div class='muted small'>Waiting for doctor…</div>"; return; }
     const p = d.processes || {}; const m = d.models || {}; const roles = m.roles || {};
@@ -984,6 +1041,20 @@
   };
   // The panel redraws on every refresh: the brief stays open once the owner opened it.
   document.addEventListener("toggle", e => { if (e.target && e.target.id === "brief-box") state.briefOpen = e.target.open; }, true);
+  // B-129: Run doctor asks the service now and keeps its answer next to the button until the next run.
+  window.liveDoctor = async function () {
+    const box = document.getElementById("doctor-result"); const btn = document.getElementById("btn-doctor");
+    if (!box || (btn && btn.disabled)) return;
+    if (btn) btn.disabled = true;
+    box.hidden = false; box.innerHTML = doctorRunHtml({ running:true });
+    let run;
+    try { const result = await api("doctor"); run = { at:new Date().toISOString(), result }; state.doctor = result; }
+    catch (e) { run = { at:new Date().toISOString(), error:{ status:e.status, message:e.message } }; }
+    if (btn) btn.disabled = false;
+    box.innerHTML = doctorRunHtml(run);
+    log(doctorChatLine(run), run.error || doctorProblems(run.result).length ? "danger" : "ok", null, "maya");
+    if (run.result) renderHealth();
+  };
   window.liveReload = async function () {
     try { const r = await api("models/reload", { method:"POST" }); const roles = (r.models || {}).roles || {}; log("Models reloaded · Misato " + (roles.misato || "—") + " · Casper " + (roles.casper || "—"), "ok", null, "maya"); }
     catch (e) { log("Reload refused: " + e.message + " (the previous settings stay in use)", "danger", null, "maya"); }
