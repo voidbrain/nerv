@@ -16,7 +16,7 @@ import {
   type PartTransfer,
   type PartTransferSend,
 } from '../src/print-transfer.ts';
-import type { SlicerExecFn } from '../src/slicer.ts';
+import { execSlicerAsync, type SlicerExecAsyncFn } from '../src/slicer.ts';
 import { Store } from '../src/store.ts';
 
 // F-121-T04: the Mac (NERV-01) holds the part library, Tabgha (NERV-02) slices. Invented parts and profiles only.
@@ -68,7 +68,9 @@ interface Bases {
 }
 
 /** Two enrolled bases on loopback with their own data homes; Tabgha accepts part files from the Mac. */
-async function bases(options: { accept?: string[]; maxBytes?: number; profiles?: typeof PROFILES } = {}) {
+async function bases(
+  options: { accept?: string[]; maxBytes?: number; profiles?: typeof PROFILES; exec?: SlicerExecAsyncFn } = {},
+) {
   const dir = mkdtempSync(join(tmpdir(), 'nerv-print-transfer-')),
     mac = join(dir, 'mac'),
     tabgha = join(dir, 'tabgha');
@@ -106,7 +108,7 @@ async function bases(options: { accept?: string[]; maxBytes?: number; profiles?:
     { slicerProfiles: PROFILES.map((p) => p.name) },
   );
   const slicerCalls: string[][] = [];
-  const exec: SlicerExecFn = (bin, args) => {
+  const fake: SlicerExecAsyncFn = (bin, args) => {
     slicerCalls.push([bin, ...args]);
     writeFileSync(args[args.indexOf('--export-3mf') + 1]!, 'PK-sliced');
     return 'estimated printing time: 42m\ntotal filament used [g] = 7.5\n';
@@ -141,7 +143,7 @@ async function bases(options: { accept?: string[]; maxBytes?: number; profiles?:
     log: () => {},
     onPartTransfer: async (from, body) =>
       receivePartTransfer(tabgha, options.accept ?? ['NERV-01'], from, body, {
-        exec,
+        exec: options.exec ?? fake,
         ...(options.maxBytes ? { maxBytes: options.maxBytes } : {}),
       }),
   });
@@ -369,5 +371,64 @@ test('F-121-T04: receivePartTransfer refuses a malformed message', () => {
     assert.deepEqual(readdirSync(home), []);
   } finally {
     rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test('F-121-T04: a slow slicer does not block the slicing base: other Kaji routes answer meanwhile', async () => {
+  let running = 0;
+  let most = 0;
+  const slow: SlicerExecAsyncFn = async (_bin, args) => {
+    running += 1;
+    most = Math.max(most, running);
+    await new Promise((r) => setTimeout(r, 1500));
+    writeFileSync(args[args.indexOf('--export-3mf') + 1]!, 'PK-sliced');
+    running -= 1;
+    return 'estimated printing time: 42m\ntotal filament used [g] = 7.5\n';
+  };
+  const b = await bases({ exec: slow });
+  try {
+    await b.la.start(60_000);
+    await b.lb.start(60_000);
+    const started = Date.now();
+    const printing = b.print('stampa i piedini di Wisp');
+    // Wait until the slicer runs on Tabgha, then ask Tabgha something else over the same link.
+    for (const end = Date.now() + 5000; running === 0;) {
+      if (Date.now() > end) throw new Error('the slicer never started');
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    const asked = Date.now();
+    await assert.rejects(b.la.inspectSortie('NERV-02', '00000000-0000-4000-8000-000000000000'));
+    assert.ok(Date.now() - asked < 500, `another route answered in ${Date.now() - asked} ms while the slicer ran`);
+    const reply = await printing;
+    assert.equal(reply.sliced, true, reply.reply);
+    assert.ok(Date.now() - started >= 1400);
+    // Two requests for the same part at once: both slice, one at a time, into one cache file and no temp files.
+    const [one, two] = await Promise.all([b.print('stampa i piedini di Wisp'), b.print('print the Kite feet')]);
+    assert.equal(one.sliced, true, one.reply);
+    assert.equal(two.sliced, true, two.reply);
+    assert.equal(most, 1, 'the slicing base runs one slicer at a time');
+    assert.deepEqual(cacheFiles(b.tabgha), [`${sha(FOOT)}.stl`]);
+  } finally {
+    await b.done();
+  }
+});
+
+test('F-121-T04: the default slicer runner is asynchronous and kills a slicer that overruns its timeout', async () => {
+  let ticks = 0;
+  const timer = setInterval(() => (ticks += 1), 20);
+  try {
+    const started = Date.now();
+    await assert.rejects(
+      Promise.resolve(execSlicerAsync(process.execPath, ['-e', 'setTimeout(() => {}, 10000)'], 400)),
+      /timed out|killed|SIGKILL|ETIMEDOUT/i,
+    );
+    assert.ok(Date.now() - started < 5000, 'killed at its timeout');
+    assert.ok(ticks >= 5, `the event loop kept running (${ticks} ticks)`);
+    assert.equal(
+      await execSlicerAsync(process.execPath, ['-e', 'console.log("estimated printing time: 1m")'], 10_000),
+      'estimated printing time: 1m\n',
+    );
+  } finally {
+    clearInterval(timer);
   }
 });
