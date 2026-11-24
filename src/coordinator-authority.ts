@@ -3,6 +3,9 @@ import type { DatabaseSync } from 'node:sqlite';
 export type CoordinatorAuthorityReason =
   'coordinator_not_active' | 'stale_coordinator_epoch' | 'stale_coordinator_lease';
 
+/** `LEASE_TTL_MS` (coordinator-lease.ts, which imports this module). */
+const MAX_LEASE_AHEAD_MS = 60_000;
+
 export class CoordinatorAuthorityError extends Error {
   readonly reason: CoordinatorAuthorityReason;
 
@@ -103,6 +106,23 @@ export function isActiveCoordinator(input: ActiveCoordinatorCheckInput): ActiveC
     };
   }
   const nowMs = input.nowMs ?? Date.now();
+  // F-016-T16: an unarmed lease (0) is authority only for the first coordinator (epoch 0 or 1). A promoted
+  // coordinator (epoch 2 or later) acts only under an armed lease: standby-acked, or self-armed when sole.
+  if (!(state.leaseExpiresAt > 0) && state.coordinatorEpoch >= 2) {
+    return {
+      ok: false,
+      reason: 'stale_coordinator_lease',
+      detail: `Coordinator epoch ${state.coordinatorEpoch} holds no armed lease yet.`,
+    };
+  }
+  // F-016-T16 review: no honest lease ends more than its TTL ahead; more means the wall clock went back.
+  if (state.leaseExpiresAt - nowMs > MAX_LEASE_AHEAD_MS) {
+    return {
+      ok: false,
+      reason: 'stale_coordinator_lease',
+      detail: `Coordinator lease ends more than ${MAX_LEASE_AHEAD_MS} ms ahead: the wall clock moved back.`,
+    };
+  }
   if (state.leaseExpiresAt > 0 && nowMs >= state.leaseExpiresAt) {
     return {
       ok: false,
