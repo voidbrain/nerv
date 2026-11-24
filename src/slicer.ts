@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { extname, resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { extname, join, resolve } from 'node:path';
 
 export interface SlicerProfile {
   name: string;
@@ -50,6 +50,35 @@ export function resolveAllowedSlicerProfile(profileName: string, allowlist: read
     throw new Error(`Unknown slicer profile "${profileName}". Allowed profiles: ${known}.`);
   }
   return match;
+}
+
+/**
+ * F-121-T01: the base's slicer profile allowlist, `<NERV home>/slicer-profiles.json`, in the same shape
+ * `nerv slice` takes. A missing file is an empty allowlist, so every profile is refused.
+ */
+export function readSlicerProfiles(home: string): SlicerProfile[] {
+  const path = join(home, 'slicer-profiles.json');
+  if (!existsSync(path)) return [];
+  let raw: unknown;
+  try {
+    raw = JSON.parse(readFileSync(path, 'utf8'));
+  } catch (error) {
+    throw new Error(`${path} is not readable JSON: ${(error as Error).message}`);
+  }
+  const valid =
+    Array.isArray(raw) &&
+    raw.every(
+      (entry) =>
+        typeof entry === 'object' &&
+        entry !== null &&
+        ['name', 'machineProfile', 'materialProfile'].every(
+          (key) =>
+            typeof (entry as Record<string, unknown>)[key] === 'string' &&
+            (entry as Record<string, string>)[key]!.trim(),
+        ),
+    );
+  if (!valid) throw new Error(`${path} must be an array of { name, machineProfile, materialProfile } strings.`);
+  return raw as SlicerProfile[];
 }
 
 /**
