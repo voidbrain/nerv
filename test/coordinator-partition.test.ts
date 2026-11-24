@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { generateKeyPairSync, type KeyObject } from 'node:crypto';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -20,7 +20,12 @@ import {
   promoteCoordinator,
   type PromoteCoordinatorInput,
 } from '../src/coordinator-promote.ts';
-import { RelocationRefusedError, STANDBY_DB_FILE } from '../src/coordinator-relocation.ts';
+import {
+  RelocationRefusedError,
+  STANDBY_DB_FILE,
+  drainCoordinator,
+  signDrainReceipt,
+} from '../src/coordinator-relocation.ts';
 import { coordinatorChannelAuthority, coordinatorLeaseService } from '../src/coordinator-serve.ts';
 import { COORDINATOR_STATE_SCHEMA } from '../src/coordinator-snapshot.ts';
 import { Registry, signRecord, type RegistryBody, type SignedRecord } from '../src/kaji.ts';
@@ -181,6 +186,7 @@ class Mesh {
   readonly dir: string;
   readonly rootPub: string;
   private readonly rootKey: KeyObject;
+  private readonly keys: TemplateData['keys'];
   private serial: number;
   readonly bases = new Map<string, Base>();
   /** Groups that can reach each other; undefined: everyone reaches everyone. */
@@ -199,6 +205,7 @@ class Mesh {
     this.dir = dir;
     this.rootPub = data.rootPub;
     this.rootKey = data.rootKey;
+    this.keys = data.keys;
     this.serial = data.serial;
     this.startMs = Date.parse('2026-11-24T12:00:00.000Z');
     mock.timers.enable({ apis: ['Date'], now: this.startMs });
@@ -426,6 +433,35 @@ class Mesh {
   wake(id: string): void {
     this.base(id).awake = true;
     this.step();
+  }
+
+  /**
+   * `nerv kaji drain` on a base (src/cli-kaji.ts), its service stopped: drains its coordinator state for the newest
+   * main record in its registry and writes the signed receipt. The verified main records go with the request.
+   */
+  drain(id: string): string {
+    const b = this.base(id);
+    this.stop(id);
+    const db = new DatabaseSync(b.db);
+    try {
+      const reg = new Registry(db, this.rootPub);
+      const state = readCoordinatorFencingState(db)!;
+      const receipt = drainCoordinator(db, {
+        baseId: id,
+        coordinatorEpoch: state.coordinatorEpoch,
+        newMainBaseId: reg.main()!,
+        newEpoch: reg.mainEpoch(),
+        registryMains: reg
+          .records()
+          .filter((r) => r.body.kind === 'main')
+          .map((r) => ({ baseId: r.body.baseId, coordinatorEpoch: r.body.coordinatorEpoch ?? 0 })),
+      });
+      const file = join(this.dir, `receipt-${id}-${receipt.newMainBaseId}-${receipt.newEpoch}.json`);
+      writeFileSync(file, JSON.stringify(signDrainReceipt(this.keys[id]!.privateKey, receipt)));
+      return file;
+    } finally {
+      db.close();
+    }
   }
 
   /** `nerv kaji promote` on a base, its service control and clock wired into the mesh. */
@@ -760,6 +796,42 @@ describe('B-121-T02: a re-targeted move hears from every base which epochs ran, 
     m.olderPeers.delete(D);
     const res = await m.promote(B);
     assert.ok(!('resumed' in res) && res.newEpoch === 3);
+    await m.advance(30_000);
+    assert.deepEqual(m.holders(), [B]);
+  });
+});
+
+describe('B-121 review of #721: a planned re-target never hands over from state older than an epoch that ran', () => {
+  it('X drains to B (3), B runs through D, B and D sleep, the owner names C (4): X refuses a second receipt, so C cannot take over from epoch 2', async () => {
+    const m = (mesh = new Mesh([X, B, C, D], [B, C, D]));
+    await m.advance(30_000);
+    const toB = [m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 })];
+    m.importRecords(X, toB);
+    m.importRecords(B, toB);
+    const first = m.drain(X);
+    const b = await m.promote(B, { drainReceiptFile: first });
+    assert.ok(!('resumed' in b) && b.newEpoch === 3);
+    m.setStandby(B, D);
+    await m.advance(30_000);
+    assert.deepEqual(m.holders(), [B]);
+
+    // B and D are out of reach (asleep); the owner names C at epoch 4 and asks the drained X for a receipt.
+    m.sleep(B);
+    m.sleep(D);
+    const toC = [m.sign({ kind: 'main', baseId: C, coordinatorEpoch: 4 })];
+    m.importRecords(X, toC);
+    m.importRecords(C, [...toB, ...toC]);
+    // X's receipt would say epoch 2 ran last; B, signed at 3 since, may have run (it did): X refuses.
+    assert.throws(() => m.drain(X), /epoch 3/);
+    assert.equal(existsSync(join(m.base(C).home, PROMOTION_MARKER_FILE)), false);
+    assert.equal(m.state(C), undefined, 'C took over nothing');
+
+    // B and D wake: B acts again through D, alone, and C's unplanned attempt hears B ran epoch 3.
+    m.wake(B);
+    m.wake(D);
+    await m.advance(30_000);
+    assert.deepEqual(m.holders(), [B]);
+    await assert.rejects(m.promote(C), refused('standby_behind', /epoch 3/));
     await m.advance(30_000);
     assert.deepEqual(m.holders(), [B]);
   });

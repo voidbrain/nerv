@@ -465,6 +465,37 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
     );
   });
 
+  it('B-121 review of #721: a drain refuses when a main was signed between its epoch and the target, since it may have run', () => {
+    const oldMain = new Store(':memory:');
+    setState(oldMain.db, 2, 'fenced', 7, 'digest-7');
+    const mains = [
+      { baseId: 'NERV-01', coordinatorEpoch: 2 },
+      { baseId: 'NERV-02', coordinatorEpoch: 3 },
+      { baseId: 'NERV-03', coordinatorEpoch: 4 },
+    ];
+    assert.throws(
+      () =>
+        drainCoordinator(oldMain.db, {
+          baseId: 'NERV-01',
+          coordinatorEpoch: 2,
+          newMainBaseId: 'NERV-03',
+          newEpoch: 4,
+          registryMains: mains,
+        }),
+      /NERV-02 at epoch 3/,
+    );
+    // With no main signed in between, the same drain goes ahead (and is idempotent on a fenced base).
+    const receipt = drainCoordinator(oldMain.db, {
+      baseId: 'NERV-01',
+      coordinatorEpoch: 2,
+      newMainBaseId: 'NERV-03',
+      newEpoch: 4,
+      registryMains: [mains[0]!, mains[2]!],
+    });
+    assert.deepEqual([receipt.coordinatorEpoch, receipt.newEpoch], [2, 4]);
+    oldMain.close();
+  });
+
   it('binds the signed drain receipt to the new main and epoch (SHOULD-FIX 4)', () => {
     const oldKey = generateKeyPairSync('ed25519');
     const oldMain = new Store(':memory:');
@@ -688,6 +719,50 @@ describe('F-016-T17: nerv kaji promote stops the service, derives its inputs fro
       cleanup: () => rmSync(dir, { recursive: true, force: true }),
     };
   }
+
+  it('B-121-T02 planned: the probe runs before any push; a base reporting a later epoch refuses, an unanswered one does not', async () => {
+    const f = await promotionHome();
+    try {
+      const base = {
+        home: f.home,
+        rootPublicKey: f.rootPub,
+        ownPublicKey: f.ownPublicKey,
+        service: f.service,
+        clock: f.clock,
+        drainReceiptFile: f.receiptFile,
+      };
+      const pushes: number[] = [];
+      // NERV-01 answers that it ran (or acked) epoch 3, later than the epoch-2 state this standby holds.
+      await assert.rejects(
+        promoteCoordinator({
+          ...base,
+          pushEpoch: async (_id, records) => {
+            pushes.push(records.length);
+            return { maxSeenCoordinatorEpoch: 2, ranOrAckedEpoch: 3 };
+          },
+        }),
+        (err: unknown) =>
+          err instanceof RelocationRefusedError &&
+          err.reason === 'standby_behind' &&
+          /NERV-01 \(epoch 3\)/.test(err.message),
+      );
+      // Only the record-free probe went out: no base was told epoch 3, and the service was never stopped.
+      assert.deepEqual(pushes, [0]);
+      assert.deepEqual(f.events, []);
+      assert.doesNotThrow(() => assertNoPromotionInProgress(f.home));
+      // Unanswered at the probe (and at the push): a planned move goes on, bound by the receipt.
+      const res = await promoteCoordinator({
+        ...base,
+        pushEpoch: async () => {
+          throw new Error('unreachable');
+        },
+      });
+      assert.ok(!('resumed' in res) && res.newEpoch === 3);
+      assert.deepEqual(f.events, ['stop:standby-present', 'start:active']);
+    } finally {
+      f.cleanup();
+    }
+  });
 
   it('planned: stops the service before the swap, verifies the receipt against the registry key, restarts after', async () => {
     const f = await promotionHome();
