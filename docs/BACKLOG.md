@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 91 h agent + 10.25 h owner across 122 open steps of 36 features and 23 other records. 113 h of actual effort recorded on 132 steps. Generated from the task files.
+**Remaining effort:** 89 h agent + 10.25 h owner across 122 open steps of 36 features and 23 other records. 114.5 h of actual effort recorded on 133 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2138,7 +2138,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 2.25 h | — | [F-101-T04](#f-101-t04) | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | [F-101-T04](#f-101-t04) | 🤖 | — | — |
 
 💻 **→** Next: F-098-T04 — Live check with a real crash (Planned).
 
@@ -2154,8 +2154,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0.25 h | 0 h | 0.25 h | Planned | — | [F-101-T04](#f-101-t04) | — |
 | 🟢 Small | <a id="f-098-t05"></a>F-098-T05 — Fleet import with spares cues | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-098-T06](#f-098-t06) | [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation |
-| 🟡 Medium | <a id="f-098-t06"></a>F-098-T06 — Fleet by chat: add a drone, replace a part, set spare stock | 2 h | 0 h | 2 h | Planned | [F-098-T05](#f-098-t05) | — | — |
-| 🟡 Medium | **Total** | 4.5 h | 1.25 h (3 of 6 steps recorded) | 2.25 h | 3 of 6 completed | | | |
+| 🟢 Small | <a id="f-098-t06"></a>F-098-T06 — Fleet by chat: add a drone, replace a part, set spare stock | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | [F-098-T05](#f-098-t05) | — | [PR #705](https://github.com/voidbrain/nerv/pull/705) implementation |
+| 🟢 Small | **Total** | 4.5 h | 2.75 h (4 of 6 steps recorded) | 0.25 h | 3 of 6 completed | | | |
 
 <details><summary>Done steps (3)</summary>
 
@@ -2174,9 +2174,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation · F-098-T03: [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation · F-098-T05: [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation. [PR #691](https://github.com/voidbrain/nerv/pull/691) (F-098-T05 fleet import); [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation · F-098-T03: [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation · F-098-T05: [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation · F-098-T06: [PR #705](https://github.com/voidbrain/nerv/pull/705) implementation. [PR #705](https://github.com/voidbrain/nerv/pull/705) (F-098-T06 fleet by chat); [PR #691](https://github.com/voidbrain/nerv/pull/691) (F-098-T05 fleet import); [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
-| Verification | 2026-11-23: F-098-T05 `node --test test/fleet-import.test.ts test/fleet.test.ts test/cli-help.test.ts` and `npm run check:fast` passed locally; CI pending. 2026-11-20: `node --test test/photos.test.ts test/fleet.test.ts test/batteries.test.ts test/battery-cards.test.ts test/telegram.test.ts`, `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-098-T02 verified: [PR #500](https://github.com/voidbrain/nerv/pull/500) merged on green CI. |
+| Verification | 2026-11-24: containment `node --test test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts` (43 passed), `node --test test/misato.test.ts test/photos.test.ts test/telegram.test.ts test/credential-rotation.test.ts test/batteries.test.ts` passed, `npm run check:fast` passed. 2026-11-24: review fixes `node --test test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts` (42 passed), `node --test test/misato.test.ts test/photos.test.ts test/telegram.test.ts` (44 passed), `npm run check:fast` passed. 2026-11-24: F-098-T06 `node --test test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts` (39 passed) and `node --test test/misato.test.ts test/photos.test.ts test/telegram.test.ts` (44 passed) and `npm run check:fast` passed locally; CI pending. 2026-11-23: F-098-T05 `node --test test/fleet-import.test.ts test/fleet.test.ts test/cli-help.test.ts` and `npm run check:fast` passed locally; CI pending. 2026-11-20: `node --test test/photos.test.ts test/fleet.test.ts test/batteries.test.ts test/battery-cards.test.ts test/telegram.test.ts`, `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-098-T02 verified: [PR #500](https://github.com/voidbrain/nerv/pull/500) merged on green CI. |
 | Reviewed | 2026-11-20 |
 
 </details>

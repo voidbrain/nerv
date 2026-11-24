@@ -14,6 +14,7 @@ import { toRecipeSurface, type DocumentStore } from './documents.ts';
 import type { PhotoStore } from './photos.ts';
 import type { PantryStore } from './pantry.ts';
 import { handleFleetChat, type FleetStore } from './fleet.ts';
+import { handleFleetEditChat } from './fleet-chat.ts';
 import { readConfig, savePilots, setSchedule } from './config.ts';
 import { STAGES, applyPilotToolChange, mergePilots, nextStage, splitPilot, updatePilot, type Stage } from './pilots.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
@@ -477,7 +478,7 @@ const rawToolDocs: ToolDoc[] = [
     name: 'fleet.chat',
     effect: 'write-local',
     about:
-      'Records FPV drone crashes, answers last-crash and spare-count questions, or records a battery damage note from an Italian or English phrase. Uses local fleet and battery data only.',
+      'Records FPV drone crashes, answers last-crash and spare-count questions, adds a drone with its parts, replaces a part, sets new/used spare stock, or records a battery damage note from an Italian or English phrase; asks back (needsAnswer) when the drone, position or model is ambiguous. Uses local fleet and battery data only.',
     args: '{"phrase": Italian or English fleet or battery damage phrase}',
   },
   {
@@ -961,10 +962,13 @@ function executeRaw(
       only(args, ['phrase']);
       if (!backend.batteries) throw new Error('Battery registry is not available here.');
       return backend.batteries.applyChatPhrase(text(args, 'phrase'));
-    case 'fleet.chat':
+    case 'fleet.chat': {
       only(args, ['phrase']);
       if (!backend.fleet || !backend.batteries) throw new Error('Fleet and battery registries are not available here.');
-      return handleFleetChat(backend.fleet, backend.batteries, text(args, 'phrase'));
+      const phrase = text(args, 'phrase');
+      const edit = handleFleetEditChat(backend.fleet, phrase);
+      return edit.handled ? edit : handleFleetChat(backend.fleet, backend.batteries, phrase);
+    }
     case 'batteries.due':
       only(args, []);
       if (!backend.batteries) throw new Error('Battery registry is not available here.');
