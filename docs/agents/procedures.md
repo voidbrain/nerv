@@ -19,5 +19,6 @@ This index links authoritative procedures; it does not duplicate or replace them
 | Set up/change stack or use MCP | [MCP guidance](mcp.md) | Useful capabilities, actual connection state and authorized setup |
 | Coordinate repositories | [Solution profile](solution-profile.md) | One-way ownership/dependencies and source-revision-qualified evidence |
 | Add/use a shared skill | [Skill guidance](skills.md) | Reviewed source, permissions, limits and actual host discovery |
+| Search for, recommend or run a new skill | [Skill discovery](skills-discovery.md) | OWASP AST10 checklist record, unreviewed label when source cannot be inspected |
 
 Projects extend their AGENTS procedure table/area notes with project-specific commands and guides, linking this index rather than creating competing copies of its procedures. Architecture describes current/intended boundaries; decisions own rationale/alternatives; roadmap owns outcome sequencing; backlog/task sources own executable work/status; acceptance and audit reports own dated evidence. Validators check declared structure, not the truth of free text, architectural merit or model competence.
