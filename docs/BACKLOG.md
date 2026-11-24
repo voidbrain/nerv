@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 88.75 h agent + 10.5 h owner across 117 open steps of 36 features and 22 other records. 107.75 h of actual effort recorded on 127 steps. Generated from the task files.
+**Remaining effort:** 88 h agent + 10.5 h owner across 117 open steps of 36 features and 22 other records. 107.75 h of actual effort recorded on 127 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2415,9 +2415,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-114-T01 — Find why the EVA-03 script-plan test fails under load (Planned).
+💻 **→** Next: B-114-T01 — Find why the EVA-03 script-plan test fails under load (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2429,8 +2429,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-114-t01"></a>B-114-T01 — Find why the EVA-03 script-plan test fails under load | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| 🟢 Small | <a id="b-114-t01"></a>B-114-T01 — Find why the EVA-03 script-plan test fails under load | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2439,7 +2439,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #687](https://github.com/voidbrain/nerv/pull/687). |
+| PR / evidence | [PR #694](https://github.com/voidbrain/nerv/pull/694); Opened in [PR #687](https://github.com/voidbrain/nerv/pull/687). |
 | Opened | 2026-11-23 |
 | Verification | — |
 | Reviewed | 2026-11-23 |
@@ -2453,9 +2453,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-116-T01 — F-023 notice test: the forbidden-text regex can match a random ID (Planned).
+💻 **→** Next: B-116-T01 — F-023 notice test: the forbidden-text regex can match a random ID (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2467,7 +2467,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-116-t01"></a>B-116-T01 — F-023 notice test: the forbidden-text regex can match a random ID | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | <a id="b-116-t01"></a>B-116-T01 — F-023 notice test: the forbidden-text regex can match a random ID | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
 
 <details>
@@ -2477,7 +2477,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| PR / evidence | [PR #694](https://github.com/voidbrain/nerv/pull/694); Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
 | Opened | 2026-11-23 |
 | Verification | — |
 | Reviewed | 2026-11-23 |
