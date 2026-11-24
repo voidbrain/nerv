@@ -44,12 +44,18 @@
   "effort": {
     "size": "medium",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 from F-016-T16 to F-016-T19 (1–1.5 h each stated): seeding command, shipping loop, standby apply wiring and fixtures. Not a measurement; uncertain until the owner sets the scope. 2026-11-24: implemented; actual stated 3.5 h (capture triggers, seed endpoint and swap, shipper, drain flush, status, fixtures across two bases and the mesh).",
+    "basis": "Estimated 2026-11-24 from F-016-T16 to F-016-T19 (1–1.5 h each stated): seeding command, shipping loop, standby apply wiring and fixtures. Not a measurement; uncertain until the owner sets the scope. 2026-11-24: implemented in PR #725; actual stated 3.5 h (capture triggers, seed endpoint and swap, shipper, drain flush, status, fixtures across two bases and the mesh).",
     "reviewed": "2026-11-24",
     "agentHours": 0,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3,
     "actualAgentHours": 3.5,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 725,
+      "note": "Live standby seeding and replication while serve runs"
+    }
+  ]
 }
