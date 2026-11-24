@@ -6,6 +6,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
+import { generateKeyPairSync } from 'node:crypto';
+import { WorkerLink } from '../src/worker-link.ts';
+import type { BaseEntry } from '../src/kaji.ts';
+import type { RegistryPort } from '../src/kaji-link.ts';
 
 const probe = join(import.meta.dirname, 'fixtures', 'worker-link-timeout.probe.ts');
 // Generous for a slow Windows runner: the probe's own tests end within about 10 s; a leaked fixture never ends.
@@ -56,3 +60,44 @@ for (const name of ['times out while the fixture starts', 'times out with both l
     assert.match(run.output, /# cancelled 1\b/, run.output);
   });
 }
+
+// The fixture closes its links first; a stop that waits on a connection attempt stuck in the worker's store (here an
+// adapter that never answers `open`) would hold every later close and the file with it.
+// src/worker-link.ts gives a stop 5 s for what is in flight; the rest is margin for a loaded runner.
+const STOP_BOUND_MS = 9000;
+test('B-118: WorkerLink.stop() returns within its grace period while a connection attempt is stuck', async () => {
+  const key = generateKeyPairSync('ed25519');
+  const publicKey = key.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+  const base = (baseId: string, address: string) =>
+    ({ baseId, name: baseId, publicKey, address, status: 'enrolled' }) as unknown as BaseEntry;
+  let opened = false;
+  const link = new WorkerLink({
+    id: 'NERV-02',
+    key: key.privateKey,
+    registry: {
+      bases: async () => [base('NERV-01', '127.0.0.1:9'), base('NERV-02', '127.0.0.1:1')],
+      main: async () => 'NERV-01',
+    } as unknown as RegistryPort,
+    adapter: {
+      open: () => {
+        opened = true;
+        return new Promise(() => {});
+      },
+      close: async () => {},
+      cancel: async () => ({ status: 'unknown' }),
+      run: async () => ({}),
+    },
+    address: (s) => 'ws://' + s,
+    reconnectMs: 30,
+  });
+  link.start();
+  const end = Date.now() + 10_000;
+  while (!opened && Date.now() < end) await new Promise((done) => setTimeout(done, 10));
+  assert.ok(opened, 'the link started a connection attempt');
+  const started = Date.now();
+  const stopped = await Promise.race([
+    link.stop().then(() => true),
+    new Promise<false>((done) => setTimeout(() => done(false), STOP_BOUND_MS).unref()),
+  ]);
+  assert.ok(stopped, `stop() still waiting after ${Date.now() - started} ms`);
+});
