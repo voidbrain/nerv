@@ -443,6 +443,12 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
         /kaji relocate NERV-02 FILE/,
       );
       assert.equal(reg.mainEpoch(), 2);
+      // #734 re-check: naming the running main again would store it at a new epoch too, which fences it.
+      await assert.rejects(
+        runKajiCommand(['main', 'NERV-01'], home, store, config, noFlags),
+        /kaji relocate NERV-01 FILE/,
+      );
+      assert.equal(reg.mainEpoch(), 2);
       await runKajiCommand(['relocate', 'NERV-02', bundlePath], home, store, config, ctx);
       assert.deepEqual(pushes, [], 'relocate pushed nothing');
       assert.equal(reg.main(), 'NERV-01', 'relocate stored nothing in its own registry');
