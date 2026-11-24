@@ -32,6 +32,7 @@ import {
   drainCoordinator,
   relocationHorizonMs,
   signDrainReceipt,
+  verifyDrainReceipt,
   type RelocationLiveness,
   type SignedDrainReceipt,
 } from '../src/coordinator-relocation.ts';
@@ -451,28 +452,17 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
     const standby = new Store(':memory:');
     setState(standby.db, 2, 'standby', 7, 'digest-7');
     // The owner signed NERV-02 at epoch 3, which never promoted, then NERV-03 at epoch 4.
-    // B-121 (review of #721), requirement changed deliberately: a base that holds the epoch-3 record cannot know
-    // NERV-02 never ran, so it gives no receipt; that re-target goes through an unplanned kaji promote.
-    const to4 = { baseId: 'NERV-01', coordinatorEpoch: 2, newMainBaseId: 'NERV-03', newEpoch: 4 };
-    assert.throws(
-      () =>
-        drainCoordinator(oldMain.db, {
-          ...to4,
-          registryMains: [
-            { baseId: 'NERV-01', coordinatorEpoch: 2 },
-            { baseId: 'NERV-02', coordinatorEpoch: 3 },
-            { baseId: 'NERV-03', coordinatorEpoch: 4 },
-          ],
-        }),
-      /NERV-02 at epoch 3/,
-    );
-    // An old main that never received the epoch-3 record (so never drained to NERV-02, nor acked its push) does.
+    // The verified main records go with the drain (#721 review); the receipt lists the epoch-3 record it skips.
     const drain = signDrainReceipt(
       oldKey.privateKey,
       drainCoordinator(oldMain.db, {
-        ...to4,
+        baseId: 'NERV-01',
+        coordinatorEpoch: 2,
+        newMainBaseId: 'NERV-03',
+        newEpoch: 4,
         registryMains: [
           { baseId: 'NERV-01', coordinatorEpoch: 2 },
+          { baseId: 'NERV-02', coordinatorEpoch: 3 },
           { baseId: 'NERV-03', coordinatorEpoch: 4 },
         ],
       }),
@@ -500,34 +490,32 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
     );
   });
 
-  it('B-121 review of #721: a drain refuses when a main was signed between its epoch and the target, since it may have run', () => {
+  it('B-121 (#721 re-check): a drain past main records signed after its epoch lists them in the signed receipt', () => {
+    const oldKey = generateKeyPairSync('ed25519');
     const oldMain = new Store(':memory:');
     setState(oldMain.db, 2, 'fenced', 7, 'digest-7');
     const mains = [
       { baseId: 'NERV-01', coordinatorEpoch: 2 },
       { baseId: 'NERV-02', coordinatorEpoch: 3 },
-      { baseId: 'NERV-03', coordinatorEpoch: 4 },
+      { baseId: 'NERV-04', coordinatorEpoch: 4 },
+      { baseId: 'NERV-03', coordinatorEpoch: 5 },
     ];
-    assert.throws(
-      () =>
-        drainCoordinator(oldMain.db, {
-          baseId: 'NERV-01',
-          coordinatorEpoch: 2,
-          newMainBaseId: 'NERV-03',
-          newEpoch: 4,
-          registryMains: mains,
-        }),
-      /NERV-02 at epoch 3/,
-    );
-    // With no main signed in between, the same drain goes ahead (and is idempotent on a fenced base).
     const receipt = drainCoordinator(oldMain.db, {
       baseId: 'NERV-01',
       coordinatorEpoch: 2,
       newMainBaseId: 'NERV-03',
-      newEpoch: 4,
-      registryMains: [mains[0]!, mains[2]!],
+      newEpoch: 5,
+      registryMains: mains,
     });
-    assert.deepEqual([receipt.coordinatorEpoch, receipt.newEpoch], [2, 4]);
+    // Each may have run: the planned promote must hear from each that it did not run later than the standby.
+    assert.deepEqual(receipt.skippedMains, [
+      { baseId: 'NERV-02', coordinatorEpoch: 3 },
+      { baseId: 'NERV-04', coordinatorEpoch: 4 },
+    ]);
+    const signed = signDrainReceipt(oldKey.privateKey, receipt);
+    assert.equal(verifyDrainReceipt(signed, oldKey.publicKey), true);
+    const hidden: SignedDrainReceipt = { ...signed, receipt: { ...signed.receipt, skippedMains: [] } };
+    assert.equal(verifyDrainReceipt(hidden, oldKey.publicKey), false, 'the list is signed');
     oldMain.close();
   });
 

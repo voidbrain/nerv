@@ -801,8 +801,8 @@ describe('B-121-T02: a re-targeted move hears from every base which epochs ran, 
   });
 });
 
-describe('B-121 review of #721: a planned re-target never hands over from state older than an epoch that ran', () => {
-  it('X drains to B (3), B runs through D, B and D sleep, the owner names C (4): X refuses a second receipt, so C cannot take over from epoch 2', async () => {
+describe('B-121 (#721 review): a planned re-target never hands over from state older than an epoch that ran', () => {
+  it('X drains to B (3), B runs through D, the owner names C (4): the receipt from X lists B, which must answer; asleep or at epoch 3, C is refused', async () => {
     const m = (mesh = new Mesh([X, B, C, D], [B, C, D]));
     await m.advance(30_000);
     const toB = [m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 })];
@@ -815,24 +815,55 @@ describe('B-121 review of #721: a planned re-target never hands over from state 
     await m.advance(30_000);
     assert.deepEqual(m.holders(), [B]);
 
-    // B and D are out of reach (asleep); the owner names C at epoch 4 and asks the drained X for a receipt.
+    // B and D are out of reach (asleep); the owner names C at epoch 4 and the drained X gives a second receipt.
     m.sleep(B);
     m.sleep(D);
     const toC = [m.sign({ kind: 'main', baseId: C, coordinatorEpoch: 4 })];
     m.importRecords(X, toC);
     m.importRecords(C, [...toB, ...toC]);
-    // X's receipt would say epoch 2 ran last; B, signed at 3 since, may have run (it did): X refuses.
-    assert.throws(() => m.drain(X), /epoch 3/);
+    const second = m.drain(X);
+    // B, which the receipt lists as skipped, does not answer: it may have run epoch 3.
+    await assert.rejects(m.promote(C, { drainReceiptFile: second }), refused('old_host_unconfirmed', /NERV-02/));
     assert.equal(existsSync(join(m.base(C).home, PROMOTION_MARKER_FILE)), false);
-    assert.equal(m.state(C), undefined, 'C took over nothing');
 
-    // B and D wake: B acts again through D, alone, and C's unplanned attempt hears B ran epoch 3.
+    // B and D wake: B acts again through D, alone; asked again, B answers that it ran epoch 3.
     m.wake(B);
     m.wake(D);
     await m.advance(30_000);
     assert.deepEqual(m.holders(), [B]);
-    await assert.rejects(m.promote(C), refused('standby_behind', /epoch 3/));
+    await assert.rejects(m.promote(C, { drainReceiptFile: second }), refused('standby_behind', /epoch 3/));
+    assert.equal(m.registryOf(B).epoch, 3, 'no base was told epoch 4');
     await m.advance(30_000);
     assert.deepEqual(m.holders(), [B]);
+  });
+
+  it('a re-target whose first target never promoted stays planned: the receipt from X lists B, B answers epoch 2, C takes over', async () => {
+    const m = (mesh = new Mesh([X, B, C, D], [B, C, D]));
+    await m.advance(30_000);
+    const records = [
+      m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }),
+      m.sign({ kind: 'main', baseId: C, coordinatorEpoch: 4 }),
+    ];
+    m.importRecords(X, records);
+    m.importRecords(C, records);
+    const receipt = m.drain(X);
+    const res = await m.promote(C, { drainReceiptFile: receipt });
+    assert.ok(!('resumed' in res) && res.newEpoch === 4 && res.previousEpoch === 2);
+  });
+
+  it('an older peer whose signed reply shows a main record later than the standby keeps a planned move refused', async () => {
+    const m = (mesh = new Mesh([X, B, C, D], [B, C, D]));
+    await m.advance(30_000);
+    // B runs an older NERV and holds a main record at epoch 3 (it may have run it); X and C never received it.
+    m.olderPeers.add(B);
+    const toB = m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 });
+    const toC = m.sign({ kind: 'main', baseId: C, coordinatorEpoch: 4 });
+    m.importRecords(B, [toB]);
+    m.importRecords(X, [toC]);
+    m.importRecords(C, [toC]);
+    const receipt = m.drain(X);
+    await assert.rejects(m.promote(C, { drainReceiptFile: receipt }), refused('peer_epoch_unknown', /NERV-02/));
+    assert.equal(existsSync(join(m.base(C).home, PROMOTION_MARKER_FILE)), false);
+    assert.equal(m.registryOf(D).epoch, 2, 'no base was told epoch 4');
   });
 });
