@@ -437,6 +437,12 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
       );
       assert.equal(store.coordinatorFencingState()?.replicationMode, 'active');
 
+      // #734 review: kaji main on a base holding coordinator state at epoch 2 or later would store the re-target.
+      await assert.rejects(
+        runKajiCommand(['main', 'NERV-02'], home, store, config, noFlags),
+        /kaji relocate NERV-02 FILE/,
+      );
+      assert.equal(reg.mainEpoch(), 2);
       await runKajiCommand(['relocate', 'NERV-02', bundlePath], home, store, config, ctx);
       assert.deepEqual(pushes, [], 'relocate pushed nothing');
       assert.equal(reg.main(), 'NERV-01', 'relocate stored nothing in its own registry');

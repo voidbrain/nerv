@@ -1060,6 +1060,57 @@ describe('B-124: kaji relocate tells no base the new epoch before the target pas
     await assert.rejects(m.promote(B, { relocation: back }), refused('standby_behind', /NERV-04 \(epoch 4\)/));
     assert.equal(m.registryOf(D).epoch, 4, 'the refused way out told no base epoch 5');
   });
+
+  it("#734 review BLOCKER: a revoked main named after this base's state may have run: no reinstatement from the older state", async () => {
+    const m = (mesh = new Mesh([X, B, D], [B, D]));
+    m.replication = true;
+    await m.advance(30_000);
+    // X drains to B at 3; B runs epoch 3 through D.
+    const toB = await m.relocate(X, B);
+    await m.base(X).service!.shipper.flush();
+    const receipt = m.drain(X, toB);
+    const res = await m.promote(B, { drainReceiptFile: receipt, relocation: toB });
+    assert.ok('quarantined' in res && res.newEpoch === 3);
+    m.setStandby(B, D);
+    await m.advance(30_000);
+    assert.deepEqual(m.holders(), [B]);
+    // B and D are lost and revoked; the owner names X again. X's store holds epoch 2: B's epoch 3 would be undone.
+    m.sleep(B);
+    m.sleep(D);
+    m.importRecords(X, [m.sign({ kind: 'revoke', baseId: D, publicKey: m.base(D).publicKey })]);
+    const back = await m.relocate(X, X, { '--revoke': B });
+    await assert.rejects(m.promote(X, { relocation: back }), refused('standby_behind', /NERV-02.*cold restore/s));
+    assert.equal(m.state(X)?.coordinatorEpoch, 2, 'X kept its epoch-2 state');
+    assert.equal(m.state(X)?.replicationMode, 'fenced');
+    assert.equal(m.registryOf(X).epoch, 3, 'the refused way out stored nothing');
+  });
+
+  it("#734 review: a promote checks a relocation bundle while the service holds the store's write lock", async () => {
+    const { m } = await bRunsThroughD();
+    const toC = await m.relocate(D, C);
+    const lock = new DatabaseSync(m.base(C).db);
+    lock.exec('BEGIN IMMEDIATE');
+    try {
+      await assert.rejects(m.promote(C, { relocation: toC }), refused('standby_behind', /epoch 3/));
+    } finally {
+      lock.exec('ROLLBACK');
+      lock.close();
+    }
+  });
+
+  it('#734 review: a drain that fails stores none of the relocation records', async () => {
+    const { m } = await bRunsThroughD(true);
+    m.gossip = true;
+    const toD = await m.relocate(D, D);
+    // A change committed after the last batch: the drain refuses (not yet replicated).
+    m.queueRemote(B, OUTBOX_2);
+    assert.throws(() => m.drain(B, toD), /not yet replicated/);
+    await m.advance(10_000);
+    assert.deepEqual(
+      [B, C, D].map((id) => m.registryOf(id).epoch),
+      [3, 3, 3],
+    );
+  });
 });
 
 describe('B-121 (#721 review): a planned re-target never hands over from state older than an epoch that ran', () => {
