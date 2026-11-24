@@ -50,6 +50,22 @@ interface Button {
   text: string;
   callback_data: string;
 }
+/** F-016-T19: a Bot API whose every call is refused while this base holds no coordinator authority. */
+function guardedApi(api: TelegramApi, authority: () => boolean): TelegramApi {
+  const guarded = Object.create(api) as TelegramApi;
+  guarded.call = <T>(method: string, body: object, signal?: AbortSignal): Promise<T> => {
+    let ok = false;
+    try {
+      ok = authority();
+    } catch {
+      ok = false;
+    }
+    return ok
+      ? api.call<T>(method, body, signal)
+      : Promise.reject(new Error(`Telegram ${method} refused: this base is not the active coordinator.`));
+  };
+  return guarded;
+}
 export class TelegramApi {
   private readonly token: string | (() => string);
   readonly base: string;
@@ -172,7 +188,7 @@ interface CardMessage {
   rows: Button[][];
   baseId?: string;
 }
-interface State {
+export interface State {
   messages?: CardMessage[];
   offset?: number;
   inbox?: { sequence: number; id?: string };
@@ -263,6 +279,14 @@ export interface OneChannel {
   destination?(): Promise<string | undefined>;
   quiet(): Promise<boolean>;
   relay(text: string, cards: { id: string; label: string }[]): Promise<boolean>;
+}
+/**
+ * F-016-T19: the Telegram state that moves with the coordinator. `load` reads what was replicated into
+ * `coordinator_state`; `save` persists it there while this base is the active coordinator.
+ */
+export interface TelegramContinuity {
+  load(): Partial<State> | undefined;
+  save(state: State): void;
 }
 /** On the main base: a tap on a card relayed from another base is decided there. */
 export interface RemoteDecide {
@@ -506,10 +530,21 @@ export class TelegramChannel {
     log?: (line: string) => void;
     oneChannel?: OneChannel;
     remote?: RemoteDecide;
+    /**
+     * F-016-T19: whether this base holds coordinator authority now. Without it (standby, draining, fenced,
+     * lease expired) the channel never polls and makes no Bot API call, so no two bases answer the owner.
+     */
+    authority?: () => boolean;
+    continuity?: TelegramContinuity;
+    /** How often a base without authority checks whether it gained it (and an active poll whether it lost it). */
+    standbyCheckMs?: number;
   }) {
     this.one = options.oneChannel;
     this.remote = options.remote;
-    this.api = options.api;
+    this.authority = options.authority;
+    this.continuity = options.continuity;
+    this.standbyCheckMs = options.standbyCheckMs ?? 5000;
+    this.api = options.authority ? guardedApi(options.api, options.authority) : options.api;
     this.store = options.store;
     this.chatId = options.chatId;
     this.statePath = options.statePath;
@@ -523,10 +558,36 @@ export class TelegramChannel {
       }
     }
   }
+  private readonly authority: (() => boolean) | undefined;
+  private readonly continuity: TelegramContinuity | undefined;
+  private readonly standbyCheckMs: number;
+  private authorized(): boolean {
+    try {
+      return !this.authority || this.authority();
+    } catch {
+      return false;
+    }
+  }
+  /** On activation: the replicated state wins where it is ahead (offset, inbox), cards and messages merge. */
+  private hydrate() {
+    const r = this.continuity?.load();
+    if (!r) return;
+    const s = this.state;
+    this.state = {
+      ...s,
+      ...(r.offset !== undefined && (s.offset === undefined || r.offset > s.offset) ? { offset: r.offset } : {}),
+      ...(r.inbox && (!s.inbox || r.inbox.sequence > s.inbox.sequence) ? { inbox: r.inbox } : {}),
+      cards: [...new Set([...s.cards, ...(r.cards ?? [])])],
+      ...(r.messages ? { messages: [...(s.messages ?? []), ...r.messages] } : {}),
+      ...(r.brief && !s.brief ? { brief: r.brief } : {}),
+    };
+    this.save();
+  }
   private save() {
     const tmp = this.statePath + '.tmp';
     writeFileSync(tmp, JSON.stringify(this.state), { mode: 0o600 });
     renameSync(tmp, this.statePath);
+    if (this.continuity && this.authorized()) this.continuity.save(this.state);
   }
   async start(deliverEveryMs = 2000): Promise<void> {
     // First run: reminders already in the inbox are not replayed to the phone.
@@ -546,11 +607,12 @@ export class TelegramChannel {
         .catch((e) => this.log(`Telegram: ${e instanceof Error ? e.message : 'follow-up failed'}.`));
     });
     void this.poll();
-    void this.api.call('setMyCommands', { commands: telegramCommands() }).catch((e) => {
-      this.log(`Telegram setMyCommands: ${e instanceof Error ? e.message : 'failed'}.`);
-    });
+    if (this.authorized())
+      void this.api.call('setMyCommands', { commands: telegramCommands() }).catch((e) => {
+        this.log(`Telegram setMyCommands: ${e instanceof Error ? e.message : 'failed'}.`);
+      });
     this.timer = setInterval(() => this.tick(), deliverEveryMs);
-    await this.deliver();
+    if (this.authorized()) await this.deliver();
   }
   /** Waits for a delivery in progress, so a restart never sends the same reminder twice. */
   async stop() {
@@ -577,15 +639,38 @@ export class TelegramChannel {
     return id === this.chatId;
   }
   private async poll(): Promise<void> {
+    let held = !!this.authority;
     while (!this.stopping.signal.aborted) {
+      // F-016-T19: without coordinator authority, wait; on gaining it, take over the replicated state first.
+      if (!this.authorized()) {
+        held = true;
+        this.routeState = { ...this.routeState, polling: false };
+        await new Promise<void>((done) => {
+          const t = setTimeout(done, this.standbyCheckMs);
+          this.stopping.signal.addEventListener('abort', () => (clearTimeout(t), done()), { once: true });
+        });
+        continue;
+      }
+      if (held) {
+        held = false;
+        this.hydrate();
+      }
       // Outbound inbox deliveries use main, but either configured bot still accepts owner requests.
       await this.quiet();
+      // A long poll in flight ends as soon as authority is lost, so the next coordinator polls alone.
+      const lost = new AbortController();
+      const watch = this.authority
+        ? setInterval(() => {
+            if (!this.authorized()) lost.abort();
+          }, this.standbyCheckMs)
+        : undefined;
       try {
         const updates = await this.api.updates(
           this.state.offset,
           POLL_SECONDS,
-          AbortSignal.any([this.stopping.signal, AbortSignal.timeout((POLL_SECONDS + 10) * 1000)]),
+          AbortSignal.any([this.stopping.signal, lost.signal, AbortSignal.timeout((POLL_SECONDS + 10) * 1000)]),
         );
+        if (lost.signal.aborted) continue;
         this.apiResult('responding');
         for (const u of updates) {
           this.state.offset = u.update_id + 1;
@@ -594,9 +679,12 @@ export class TelegramChannel {
         }
       } catch (e) {
         if (this.stopping.signal.aborted) return;
+        if (lost.signal.aborted) continue;
         this.apiResult('failed');
         this.log(`Telegram: ${e instanceof Error ? e.message : 'poll failed'}; retrying in 5 s.`);
         await new Promise((done) => setTimeout(done, 5000));
+      } finally {
+        if (watch) clearInterval(watch);
       }
     }
   }
@@ -818,7 +906,7 @@ export class TelegramChannel {
   }
   /** The periodic tick: skipped while a pass runs, so a slow pass never queues ticks behind it. */
   private tick() {
-    if (!this.delivery) void this.deliver();
+    if (!this.delivery && this.authorized()) void this.deliver();
   }
   private followUp?: Promise<void>;
   private deliverPass(): Promise<void> {

@@ -924,12 +924,14 @@ test('F-016-T19: a base without coordinator authority never polls or calls the B
     standbyCheckMs: 20,
   });
   try {
-    store.add('Water plants', new Date(Date.now() - 1000).toISOString());
-    store.tick();
+    // A reminder already due: its delivery waits for authority too.
+    const now = Date.now();
+    store.add('Water plants', new Date(now + 60_000).toISOString(), new Date(now));
+    store.tick(new Date(now + 120_000));
     await aoba.start(30);
     tg.text(OWNER, '/start');
     await wait(300);
-    assert.deepEqual(tg.calls, [], 'a standby, draining or fenced base makes no Bot API call at all');
+    assert.equal(tg.calls.length, 0, 'a standby, draining or fenced base makes no Bot API call at all');
 
     // Activation: the replicated offset is hydrated before the first poll, then the base answers.
     authorized = true;
