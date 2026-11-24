@@ -15,7 +15,8 @@
   "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
   "acceptance": [
     "A command or serve loop seeds a base's standby store from a signed snapshot of the running main, and serve ships each committed batch over /kaji/replicate to the named standby (tests across both bases)",
-    "A fixture shows an effect the old main ran before a partition is known to the promoted main"
+    "A fixture shows an effect the old main ran before a partition is known to the promoted main",
+    "Owner agreed 2026-11-24 to add this step to the adopted plan, before F-016-T09"
   ],
   "dependsOn": [
     "F-016-T08"

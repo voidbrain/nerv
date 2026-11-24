@@ -14,14 +14,14 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 39 | 25 |
-| **Require Human 🧑** | 11 | 9 |
+| **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-089](#f-089) | [B-057](#b-057) | [B-121](#b-121) |
+| [F-062](#f-062) | [F-089](#f-089) | [B-057](#b-057) | — |
 | [F-011](#f-011) | [F-116](#f-116) | [B-068](#b-068) |  |
 | [F-004](#f-004) |  | [B-107](#b-107) |  |
 | [F-012](#f-012) |  | [B-113](#b-113) |  |
@@ -354,9 +354,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-016-t18"></a>F-016-T18 — &#96;/kaji/epoch-push&#96; so every peer acknowledges the new epoch | 2 h | 2 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | 🤖 | [PR #703](https://github.com/voidbrain/nerv/pull/703) /kaji/epoch-push, recorded acks, measured promotion horizon |
 | 🟢 Small | <a id="f-016-t19"></a>F-016-T19 — Telegram polling handed over on activation | 1 h | 1.25 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | 🤖 | [PR #704](https://github.com/voidbrain/nerv/pull/704) Telegram hand-over: authority gate, hydration, no 409 race |
 | 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 3 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07), [F-016-T16](#f-016-t16), [F-016-T17](#f-016-t17), [F-016-T18](#f-016-t18), [F-016-T19](#f-016-t19) | [F-016-T09](#f-016-t09), [F-016-T20](#f-016-t20) | 🤖 | [PR #717](https://github.com/voidbrain/nerv/pull/717) Partition, sleep and reconnect fixtures; B-120 and B-121 fixes |
-| 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | [F-016-T08](#f-016-t08) | [F-016-T11](#f-016-t11) | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | <a id="f-016-t20"></a>F-016-T20 — Seed the standby store and ship replication batches while serve runs | 3 h | 0 h | 3 h | Planned | [F-016-T08](#f-016-t08) | [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | [F-016-T08](#f-016-t08), [F-016-T20](#f-016-t20) | [F-016-T11](#f-016-t11) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-016-T09](#f-016-t09) | — | ⏳ 🤖 | — |
-| 🟡 Medium | <a id="f-016-t20"></a>F-016-T20 — Seed the standby store and ship replication batches while serve runs | 3 h | 0 h | 3 h | Planned | [F-016-T08](#f-016-t08) | — | ⏳ 🤖 | — |
 | 🟡 Medium | **Total** | 21.25 h (19 of 20 steps) | 24.75 h (15 of 20 steps recorded) | 3.25 h agent + 1 h owner | 11 of 20 completed | | | | |
 
 <details><summary>Done steps (11)</summary>
@@ -434,6 +434,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-21: B-082-T02 CI run 44815656209 and required fresh-context review passed. Local: targeted regression 2/2, full tests 1,041 pass / 2 platform skips, build, `check:fast`, headless 5 pass / 1 Windows skip. Pending: the live desktop-session install on Tabgha after B-087-T01. |
 | Reviewed | 2026-11-21 |
+
+</details>
+
+---
+### <a id="b-121"></a>[🐞 B-121](#top)
+
+**A re-targeted move can take over from a standby older than an epoch that ran**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: from tasks. Owner agreed the scope of B-121-T02 on 2026-11-24.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 by the F-016-T08 mixed-epoch fixture: B promoted to epoch 3 and renewed through C; the owner then re-targeted the move to C at epoch 4. C's standby store still held epoch-2 state (nothing re-seeds it), yet readiness took over from it (previous epoch 2, previous main X revoked), so C would undo what B did at epoch 3 and could repeat it. The decision allows taking over from the standby's epoch only when the first target never promoted. |
+| **Reproduce** | `test/coordinator-partition.test.ts`, "mixed epochs": X at 2; revoke X, main B at 3, B promotes and renews through C; main C at 4; `kaji promote` on C. |
+| **Check** | C is refused (`standby_behind`) while any unrevoked base, C itself included, ran or acked a lease at a later epoch than C's standby state. T01 covers C's own acks; T02 (planned, owner agrees scope) adds a field to the epoch-push reply so a base that ran or acked a later epoch reports it. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-121-t01"></a>B-121-T01 — Refuse a move from a standby that acked a later epoch than its state | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | — | [B-121-T02](#b-121-t02) | [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks |
+| 🟢 Small | <a id="b-121-t02"></a>B-121-T02 — Epoch-push replies report the newest epoch a base ran or acked | 1 h | 0 h | 1 h | Planned | [B-121-T01](#b-121-t01) | — | — |
+| 🟢 Small | **Total** | 1.5 h | 0.5 h (1 of 2 steps recorded) | 1 h | 0 of 2 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-121.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-121-T01: [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks. [PR #717](https://github.com/voidbrain/nerv/pull/717) (Test: `test/coordinator-partition.test.ts`, mixed epochs) |
+| Opened | 2026-11-24 |
+| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and the coordinator suites pass locally. B-121-T02: Pending. |
+| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -684,45 +723,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="b-121"></a>[🐞 B-121](#top)
-
-**A re-targeted move can take over from a standby older than an epoch that ran**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h | — | — | 🤖 | — | 🤔 |
-
-🧑 **→** Agree the scope of B-121-T02 (a new field in the `/kaji/epoch-push` reply), described in [the record's Check](work/records/B-121.md).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-24 by the F-016-T08 mixed-epoch fixture: B promoted to epoch 3 and renewed through C; the owner then re-targeted the move to C at epoch 4. C's standby store still held epoch-2 state (nothing re-seeds it), yet readiness took over from it (previous epoch 2, previous main X revoked), so C would undo what B did at epoch 3 and could repeat it. The decision allows taking over from the standby's epoch only when the first target never promoted. |
-| **Reproduce** | `test/coordinator-partition.test.ts`, "mixed epochs": X at 2; revoke X, main B at 3, B promotes and renews through C; main C at 4; `kaji promote` on C. |
-| **Check** | C is refused (`standby_behind`) while any unrevoked base, C itself included, ran or acked a lease at a later epoch than C's standby state. T01 covers C's own acks; T02 (planned, owner agrees scope) adds a field to the epoch-push reply so a base that ran or acked a later epoch reports it. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-121-t01"></a>B-121-T01 — Refuse a move from a standby that acked a later epoch than its state | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | — | [B-121-T02](#b-121-t02) | [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks |
-| 🟢 Small | <a id="b-121-t02"></a>B-121-T02 — Epoch-push replies report the newest epoch a base ran or acked | 1 h | 0 h | 1 h | Planned | [B-121-T01](#b-121-t01) | — | — |
-| 🟢 Small | **Total** | 1.5 h | 0.5 h (1 of 2 steps recorded) | 1 h | 0 of 2 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-121.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-121-T01: [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks. [PR #717](https://github.com/voidbrain/nerv/pull/717) (Test: `test/coordinator-partition.test.ts`, mixed epochs) |
-| Opened | 2026-11-24 |
-| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and the coordinator suites pass locally. B-121-T02: Pending. |
-| Reviewed | 2026-11-24 |
-
-</details>
-
----
 ### <a id="f-119"></a>[✨ F-119](#top)
 
 **Periodic skill discovery review**

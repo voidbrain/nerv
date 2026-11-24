@@ -7,7 +7,8 @@
   "status": "planned",
   "acceptance": [
     "A committed test fails first: B runs epoch 3 renewing through D, the owner re-targets to C at epoch 4, and C (which never acked B) is refused with standby_behind",
-    "/kaji/epoch-push replies carry the newest coordinator epoch the base held a lease at or acked; an older peer without the field is treated as unknown and documented"
+    "/kaji/epoch-push replies carry the newest coordinator epoch the base held a lease at or acked; an older peer without the field is treated as unknown and documented",
+    "Owner agreed the scope 2026-11-24 (new field in the /kaji/epoch-push reply)"
   ],
   "dependsOn": [
     "B-121-T01"
