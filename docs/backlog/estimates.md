@@ -1,6 +1,10 @@
 # Estimate calibration
 
-Read before you close a step or re-estimate open steps. Part of the [backlog rules](../BACKLOG-RULES.md).
+Read whenever you change a record (its effort is reassessed when scope, dependencies, implementation or verification change), and before you close a step or re-estimate open steps. Part of the [backlog rules](../BACKLOG-RULES.md).
+
+## Effort
+
+- Effort estimates remaining work, including investigation, implementation and verification: `🟢 Small` (up to one focused day), `🟡 Medium` (two to three days), `🔴 Large` (four or more days). Work estimated in agent hours is sized by its remaining agent hours, owner time apart (F-063): `🟢 Small` up to 1 h, `🟡 Medium` up to 4 h, `🔴 Large` up to 8 h, `🟣 Very large` more; the generated ledger sizes each open step and, when all its open steps are in hours, the record, so the size falls as the work is done. Colour always accompanies the word. Record a dated rationale, assumptions and uncertainty in details; an optional range such as 2–4 hours or 1–2 days can make that estimate more useful. Reassess effort when scope, dependencies, implementation or verification changes, and review related records. Keep pending acceptance in remaining effort. Status and verification evidence describe progress; completion percentages are removed from active records. Model tokens/cost are separate usage or budget measurements/estimates, not a measure of remaining project work.
 
 ## Estimate calibration
 
