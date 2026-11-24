@@ -15,7 +15,12 @@ import {
 } from './coordinator-relocation.ts';
 import { databasePath, readConfig } from './config.ts';
 import { Registry, canonical, keyIdentity, publicKeyFrom, type SignedRecord } from './kaji.ts';
-import { allUnrevokedAckedEpoch, pushCoordinatorEpoch, standbyBasesAckedEpoch } from './coordinator-epoch.ts';
+import {
+  allUnrevokedAckedEpoch,
+  basesAckedEpoch,
+  pushCoordinatorEpoch,
+  standbyBasesAckedEpoch,
+} from './coordinator-epoch.ts';
 import { service } from './service.ts';
 
 /** While this file exists in the data home a promotion is unfinished and `serve` refuses to start. */
@@ -213,6 +218,7 @@ function derive(
       .filter((b) => b.status === 'enrolled' && b.baseId !== self.baseId)
       .map((b) => b.baseId)
       .sort();
+    const acked = basesAckedEpoch(db, newEpoch);
     const standbyStores = standbyBasesAckedEpoch(db, newEpoch);
     const standbyBaseId = others.find((id) => standbyStores.has(id));
     let liveness: (nowMs: number, monoNowNs: bigint) => RelocationLiveness;
@@ -236,6 +242,14 @@ function derive(
         ownPublicKey: input.ownPublicKey,
         epoch: newEpoch,
       });
+      // Fourth review: a revoke stops the old main only where the base acking its lease holds that revoke, so every
+      // unrevoked base must have acked the epoch push carrying it; an unreachable one keeps the move refused.
+      const missing = others.filter((id) => !acked.has(id));
+      if (missing.length)
+        refuse(
+          'old_host_unconfirmed',
+          `Not every unrevoked base acked the new epoch and the revoke (not acked: ${missing.join(', ')}): one of them could still ack ${previousMainBaseId}'s lease. Reach them (or import the records there) and run kaji promote again.`,
+        );
       liveness = (nowMs, monoNowNs) => ({
         kind: 'unplanned',
         epochSeenAtMs,

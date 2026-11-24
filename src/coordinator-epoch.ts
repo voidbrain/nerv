@@ -102,6 +102,18 @@ export function allUnrevokedAckedEpoch(input: EpochScope & { readonly epoch: num
   );
 }
 
+/** The bases this base recorded as holding `epoch` or later. */
+export function basesAckedEpoch(db: DatabaseSync, epoch: number): Set<string> {
+  db.exec(EPOCH_ACKS_SCHEMA);
+  return new Set(
+    (
+      db.prepare('SELECT base_id FROM coordinator_epoch_acks WHERE coordinator_epoch >= ?').all(epoch) as {
+        base_id: string;
+      }[]
+    ).map((r) => r.base_id),
+  );
+}
+
 /** The bases that acked `epoch` or later and said they hold a standby store (the only ones that can ack a lease). */
 export function standbyBasesAckedEpoch(db: DatabaseSync, epoch: number): Set<string> {
   db.exec(EPOCH_ACKS_SCHEMA);
