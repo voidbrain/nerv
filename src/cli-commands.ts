@@ -10,6 +10,8 @@ import { EvaJobs, runEva03Durably } from './eva-jobs.ts';
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
 import { parseFleetImport } from './fleet.ts';
+import { printLibraryRoot, resolvePrintFile } from './print-library.ts';
+import { readSlicerProfiles } from './slicer.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
 import {
   detectVoiceLanguage,
@@ -282,10 +284,46 @@ export async function tryRunCliCommand(
         } catch (error) {
           throw new Error(`${args[1]} is not readable JSON: ${(error as Error).message}`);
         }
-        console.log(JSON.stringify(store.fleet.importFleet(parseFleetImport(raw)), null, 2));
+        const slicerProfiles = readSlicerProfiles(home).map((profile) => profile.name);
+        console.log(
+          JSON.stringify(
+            store.fleet.importFleet(parseFleetImport(raw, { slicerProfiles }), undefined, { slicerProfiles }),
+            null,
+            2,
+          ),
+        );
+      } else if (sub === 'models') {
+        console.log(
+          JSON.stringify(
+            store.fleet
+              .listDroneModels()
+              .map((model) => ({ ...model, parts: store.fleet.printedPartsForModel(model.name) })),
+            null,
+            2,
+          ),
+        );
+      } else if (sub === 'prints' && args[1]) {
+        // F-121-T01: a drone's inherited printed parts (or a model's), each with its library file checked.
+        const parts = store.fleet.getDroneByName(args[1])
+          ? store.fleet.printedPartsForDrone(args[1])
+          : store.fleet.getDroneModel(args[1])
+            ? store.fleet.printedPartsForModel(args[1])
+            : undefined;
+        if (!parts) throw new Error(`No drone or drone model named ${args[1]}.`);
+        const root = printLibraryRoot(home);
+        console.log(
+          JSON.stringify(
+            parts.map((part) => {
+              const file = resolvePrintFile(root, part.file);
+              return { ...part, fileStatus: file.status, ...(file.status === 'ok' ? {} : { fileNote: file.reason }) };
+            }),
+            null,
+            2,
+          ),
+        );
       } else {
         throw new Error(
-          'Usage: fleet drones | fleet parts <drone> | fleet spares [category] | fleet import <fleet.json>',
+          'Usage: fleet drones | fleet parts <drone> | fleet spares [category] | fleet import <fleet.json> | fleet models | fleet prints <drone|model>',
         );
       }
     } finally {

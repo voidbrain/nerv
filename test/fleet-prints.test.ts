@@ -15,7 +15,11 @@ import { Store } from '../src/store.ts';
 
 // Invented models, parts, paths and profiles only: the owner's real list stays in private fleet data.
 const PROFILES = ['Test TPU 0.4', 'Test PLA 0.4'];
-const PROFILE_FILE = PROFILES.map((name) => ({ name, machineProfile: `${name}.machine.json`, materialProfile: `${name}.filament.json` }));
+const PROFILE_FILE = PROFILES.map((name) => ({
+  name,
+  machineProfile: `${name}.machine.json`,
+  materialProfile: `${name}.filament.json`,
+}));
 
 function withStore(work: (store: Store, home: string) => void): void {
   const home = mkdtempSync(join(tmpdir(), 'nerv-fleet-prints-'));
@@ -29,7 +33,11 @@ function withStore(work: (store: Store, home: string) => void): void {
 }
 
 /** Two invented models sharing one enclosure file; Kite also has its own feet and a two-object band file. */
-const PRINT_FLEET = {
+const PRINT_FLEET: {
+  version: 1;
+  models: Array<{ name: string; parts: Array<Record<string, unknown>> }>;
+  drones: Array<{ name: string; model: string; parts: unknown[] }>;
+} = {
   version: 1,
   models: [
     {
@@ -121,7 +129,11 @@ describe('F-121-T01: printed parts on drone models', () => {
       fleet.addDroneModel({ name: 'Moth 2' });
       fleet.addDrone({ name: 'Kestrel' });
       fleet.addDrone({ name: 'Gnat' });
-      fleet.addPrintedPart('Kite 5', { name: 'motor foot', file: 'kite-5/foot.stl', count: 4, profile: 'Test TPU 0.4' }, PROFILES);
+      fleet.addPrintedPart(
+        'Kite 5',
+        { name: 'motor foot', file: 'kite-5/foot.stl', count: 4, profile: 'Test TPU 0.4' },
+        PROFILES,
+      );
       const kiteCase = fleet.addPrintedPart(
         'Kite 5',
         { name: 'sensor case', file: 'shared/sensor-case.stl', profile: 'Test TPU 0.4' },
@@ -158,7 +170,14 @@ describe('F-121-T01: printed parts on drone models', () => {
       store.fleet.addDroneModel({ name: 'Kite 5' });
       const { part } = store.fleet.addPrintedPart(
         'Kite 5',
-        { name: 'camera band', file: 'kite-5/camera-bands.3mf', count: 1, objectsPerPrint: 2, variant: 'left+right', profile: 'Test TPU 0.4' },
+        {
+          name: 'camera band',
+          file: 'kite-5/camera-bands.3mf',
+          count: 1,
+          objectsPerPrint: 2,
+          variant: 'left+right',
+          profile: 'Test TPU 0.4',
+        },
         PROFILES,
       );
       assert.equal(part.count, 1);
@@ -173,7 +192,8 @@ describe('F-121-T01: printed parts on drone models', () => {
       fleet.addDroneModel({ name: 'Kite 5' });
       fleet.addDroneModel({ name: 'Moth 2' });
       assert.throws(
-        () => fleet.addPrintedPart('Kite 5', { name: 'foot', file: 'kite-5/foot.stl', profile: 'Mystery PETG' }, PROFILES),
+        () =>
+          fleet.addPrintedPart('Kite 5', { name: 'foot', file: 'kite-5/foot.stl', profile: 'Mystery PETG' }, PROFILES),
         /Unknown slicer profile "Mystery PETG"\. Allowed profiles: Test TPU 0\.4, Test PLA 0\.4/,
       );
       assert.throws(
@@ -184,14 +204,21 @@ describe('F-121-T01: printed parts on drone models', () => {
         () => fleet.addPrintedPart('Kite 5', { name: 'foot', file: '../foot.stl', profile: 'Test TPU 0.4' }, PROFILES),
         /\.\./,
       );
-      assert.throws(() => fleet.addPrintedPart('Kite 5', { name: 'foot', file: 'kite-5/foot.stl' }, PROFILES), /profile/i);
+      assert.throws(
+        () => fleet.addPrintedPart('Kite 5', { name: 'foot', file: 'kite-5/foot.stl' }, PROFILES),
+        /profile/i,
+      );
       fleet.addPrintedPart('Kite 5', { name: 'case', file: 'shared/case.stl', profile: 'Test TPU 0.4' }, PROFILES);
       assert.throws(
-        () => fleet.addPrintedPart('Moth 2', { name: 'case', file: 'shared/case.stl', profile: 'Test PLA 0.4' }, PROFILES),
+        () =>
+          fleet.addPrintedPart('Moth 2', { name: 'case', file: 'shared/case.stl', profile: 'Test PLA 0.4' }, PROFILES),
         /shared\/case\.stl.*Test TPU 0\.4/,
       );
       assert.throws(() => fleet.addPrintedPart('Moth 2', { name: 'tail' }, PROFILES), /file/i);
-      assert.throws(() => fleet.addPrintedPart('Nope', { name: 'tail', file: 'x/tail.stl', profile: 'Test TPU 0.4' }, PROFILES), /model not found/i);
+      assert.throws(
+        () => fleet.addPrintedPart('Nope', { name: 'tail', file: 'x/tail.stl', profile: 'Test TPU 0.4' }, PROFILES),
+        /model not found/i,
+      );
       assert.equal(fleet.printedPartsForModel('Moth 2').length, 0);
     });
   });
@@ -214,7 +241,9 @@ INSERT INTO drones VALUES ('drone-1', 'Kestrel', 'Test frame', NULL, '2026-01-01
 INSERT INTO drone_parts VALUES ('part-1', 'drone-1', 'motor', 'front-left', 'Generic 2207', 'damaged', '2026-01-01T00:00:00.000Z');
 INSERT INTO drone_crashes VALUES ('crash-1', 'drone-1', 'part-1', 'motor', 'front-left', 'Generic 2207', 'rotto', NULL, '2026-01-02T00:00:00.000Z');`);
       const dump = (db: DatabaseSync) =>
-        JSON.stringify(['drones', 'drone_parts', 'spares', 'drone_crashes'].map((t) => db.prepare(`SELECT * FROM ${t}`).all()));
+        JSON.stringify(
+          ['drones', 'drone_parts', 'spares', 'drone_crashes'].map((t) => db.prepare(`SELECT * FROM ${t}`).all()),
+        );
       const before = dump(old);
       old.exec('PRAGMA foreign_keys = ON');
       const fleet = new FleetStore(old);
@@ -238,16 +267,23 @@ describe('F-121-T01: fleet import adds models, printed parts and drone links', (
   it('imports a shared part once, links drones and is idempotent', () => {
     withStore((store) => {
       const file = parseFleetImport(PRINT_FLEET, { slicerProfiles: PROFILES });
-      const first = store.fleet.importFleet(file);
+      const first = store.fleet.importFleet(file, undefined, { slicerProfiles: PROFILES });
       assert.deepEqual(first.models, { created: ['Kite 5', 'Moth 2'], present: [] });
       assert.deepEqual(first.printedParts, { created: 3, shared: 1, present: 0 });
       assert.deepEqual(first.droneModels, { linked: 3, present: 0 });
       assert.equal(store.fleet.printedPartsForDrone('Wren').length, 3);
       assert.equal(store.fleet.printedPartsForDrone('Gnat')[0]!.file, 'shared/sensor-case.stl');
-      assert.equal(store.fleet.printedPartsForModel('Kite 5').find((p) => p.name === 'motor foot')?.slicerProfile, 'Test TPU 0.4');
-      assert.deepEqual(store.fleet.printedPartsForModel('Kite 5').find((p) => p.name === 'motor foot')?.aliases, ['feet']);
+      assert.equal(
+        store.fleet.printedPartsForModel('Kite 5').find((p) => p.name === 'motor foot')?.slicerProfile,
+        'Test TPU 0.4',
+      );
+      assert.deepEqual(store.fleet.printedPartsForModel('Kite 5').find((p) => p.name === 'motor foot')?.aliases, [
+        'feet',
+      ]);
 
-      const again = store.fleet.importFleet(parseFleetImport(PRINT_FLEET, { slicerProfiles: PROFILES }));
+      const again = store.fleet.importFleet(parseFleetImport(PRINT_FLEET, { slicerProfiles: PROFILES }), undefined, {
+        slicerProfiles: PROFILES,
+      });
       assert.deepEqual(again.models, { created: [], present: ['Kite 5', 'Moth 2'] });
       assert.deepEqual(again.printedParts, { created: 0, shared: 0, present: 4 });
       assert.deepEqual(again.droneModels, { linked: 0, present: 3 });
@@ -257,8 +293,14 @@ describe('F-121-T01: fleet import adds models, printed parts and drone links', (
   it('refuses an unknown profile by field, an unknown model, and relinking a drone to another model', () => {
     const bad = structuredClone(PRINT_FLEET);
     bad.models[0]!.parts[0]!.profile = 'Mystery PETG';
-    assert.throws(() => parseFleetImport(bad, { slicerProfiles: PROFILES }), /models\[0\]\.parts\[0\]\.profile: Unknown slicer profile "Mystery PETG"/);
-    assert.throws(() => parseFleetImport(PRINT_FLEET), /models\[0\]\.parts\[0\]\.profile: Unknown slicer profile .*\(none\)/);
+    assert.throws(
+      () => parseFleetImport(bad, { slicerProfiles: PROFILES }),
+      /models\[0\]\.parts\[0\]\.profile: Unknown slicer profile "Mystery PETG"/,
+    );
+    assert.throws(
+      () => parseFleetImport(PRINT_FLEET),
+      /models\[0\]\.parts\[0\]\.profile: Unknown slicer profile .*\(none\)/,
+    );
     const badPath = structuredClone(PRINT_FLEET);
     badPath.models[0]!.parts[0]!.file = '/abs/foot.stl';
     assert.throws(() => parseFleetImport(badPath, { slicerProfiles: PROFILES }), /models\[0\]\.parts\[0\]\.file/);
@@ -271,11 +313,16 @@ describe('F-121-T01: fleet import adds models, printed parts and drone links', (
         /drones\[0\]\.model: drone model "Ghost 9"/,
       );
       assert.equal(store.fleet.getDroneByName('Kestrel'), undefined, 'the failed import changed nothing');
-      store.fleet.importFleet(parseFleetImport(PRINT_FLEET, { slicerProfiles: PROFILES }));
+      store.fleet.importFleet(parseFleetImport(PRINT_FLEET, { slicerProfiles: PROFILES }), undefined, {
+        slicerProfiles: PROFILES,
+      });
       const moved = structuredClone(PRINT_FLEET);
       moved.drones[0]!.model = 'Moth 2';
       assert.throws(
-        () => store.fleet.importFleet(parseFleetImport(moved, { slicerProfiles: PROFILES })),
+        () =>
+          store.fleet.importFleet(parseFleetImport(moved, { slicerProfiles: PROFILES }), undefined, {
+            slicerProfiles: PROFILES,
+          }),
         /Kestrel is already a Kite 5/,
       );
     });
@@ -352,22 +399,41 @@ describe('F-121-T01: printed parts by chat', () => {
     const part = {
       kind: 'printed-part',
       model: 'Kite 5',
-      part: { name: 'motor foot', file: 'kite-5/foot.stl', count: 4, profile: 'Test TPU 0.4', aliases: ['feet', 'piedini'] },
+      part: {
+        name: 'motor foot',
+        file: 'kite-5/foot.stl',
+        count: 4,
+        profile: 'Test TPU 0.4',
+        aliases: ['feet', 'piedini'],
+      },
     };
     assert.deepEqual(
-      parseFleetEditPhrase('parte stampata per Kite 5: motor foot, file kite-5/foot.stl, 4 pezzi, profilo Test TPU 0.4, alias feet/piedini'),
+      parseFleetEditPhrase(
+        'parte stampata per Kite 5: motor foot, file kite-5/foot.stl, 4 pezzi, profilo Test TPU 0.4, alias feet/piedini',
+      ),
       part,
     );
     assert.deepEqual(
-      parseFleetEditPhrase('printed part for Kite 5: motor foot, file kite-5/foot.stl, x4, profile Test TPU 0.4, aliases feet/piedini.'),
+      parseFleetEditPhrase(
+        'printed part for Kite 5: motor foot, file kite-5/foot.stl, x4, profile Test TPU 0.4, aliases feet/piedini.',
+      ),
       part,
     );
     assert.deepEqual(
-      parseFleetEditPhrase('parte stampata per Kite 5: camera band, file kite-5/bands.3mf, 2 oggetti, variante left+right, materiale TPU, bobina esterna'),
+      parseFleetEditPhrase(
+        'parte stampata per Kite 5: camera band, file kite-5/bands.3mf, 2 oggetti, variante left+right, materiale TPU, bobina esterna',
+      ),
       {
         kind: 'printed-part',
         model: 'Kite 5',
-        part: { name: 'camera band', file: 'kite-5/bands.3mf', objectsPerPrint: 2, variant: 'left+right', material: 'TPU', externalSpool: true },
+        part: {
+          name: 'camera band',
+          file: 'kite-5/bands.3mf',
+          objectsPerPrint: 2,
+          variant: 'left+right',
+          material: 'TPU',
+          externalSpool: true,
+        },
       },
     );
     assert.equal(parseFleetEditPhrase('parte stampata per Kite 5: foot, colore blu')?.kind, 'ask');
@@ -387,7 +453,9 @@ describe('F-121-T01: printed parts by chat', () => {
   it('asks instead of guessing: unknown model, unknown profile, bad path', () => {
     withStore((store) => {
       store.fleet.addDrone({ name: 'Kestrel' });
-      const linkUnknown = handleFleetEditChat(store.fleet, 'il drone Kestrel è un Kite 5', undefined, { slicerProfiles: PROFILES });
+      const linkUnknown = handleFleetEditChat(store.fleet, 'il drone Kestrel è un Kite 5', undefined, {
+        slicerProfiles: PROFILES,
+      });
       assert.equal(linkUnknown.needsAnswer, true);
       assert.match(linkUnknown.reply!, /nuovo modello di drone Kite 5/);
       handleFleetEditChat(store.fleet, 'nuovo modello di drone Kite 5');
@@ -424,10 +492,19 @@ describe('F-121-T01: printed parts by chat', () => {
         run('printed part for Kite 5: sensor case, file shared/sensor-case.stl, profile Test TPU 0.4').reply!,
         /Added printed part sensor case/,
       );
-      assert.match(run('printed part for Moth 2: sensor case').reply!, /Shared printed part sensor case .*shared\/sensor-case\.stl.* with Moth 2/);
-      assert.match(run('il drone Kestrel è un Kite 5').reply!, /Kestrel is now a Kite 5; it inherits 2 printed parts: motor foot x4, sensor case x1/);
+      assert.match(
+        run('printed part for Moth 2: sensor case').reply!,
+        /Shared printed part sensor case .*shared\/sensor-case\.stl.* with Moth 2/,
+      );
+      assert.match(
+        run('il drone Kestrel è un Kite 5').reply!,
+        /Kestrel is now a Kite 5; it inherits 2 printed parts: motor foot x4, sensor case x1/,
+      );
       assert.match(run('drone Gnat is a Moth 2').reply!, /Gnat is now a Moth 2/);
-      assert.equal(run('parte stampata per Kite 5: tail, file kite-5/tail.stl, profilo Mystery PETG').needsAnswer, true);
+      assert.equal(
+        run('parte stampata per Kite 5: tail, file kite-5/tail.stl, profilo Mystery PETG').needsAnswer,
+        true,
+      );
 
       assert.deepEqual(
         store.fleet.printedPartsForDrone('Gnat').map((p) => [p.name, p.file, p.slicerProfile]),

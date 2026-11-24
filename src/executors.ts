@@ -6,7 +6,7 @@ import type { Memory } from './memory.ts';
 import { toChecklistSurface, type ListStore } from './lists.ts';
 import { replayDesktopRecording, type DesktopRecordingFile, type DesktopReplayDriver } from './desktop-recording.ts';
 import { pushBranchAndOpenPr, type CodingJobPrOpener } from './coding-job.ts';
-import { handOffToBambuConnect, type BambuConnectLauncher } from './slicer.ts';
+import { handOffToBambuConnect, readSlicerProfiles, type BambuConnectLauncher } from './slicer.ts';
 import type { GmailClient } from './gmail.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
 import type { FpvBuildStore, BuildComponentInput, BuildWiringInput, PinoutEntry } from './fpv-builds.ts';
@@ -478,7 +478,7 @@ const rawToolDocs: ToolDoc[] = [
     name: 'fleet.chat',
     effect: 'write-local',
     about:
-      'Records FPV drone crashes, answers last-crash and spare-count questions, adds a drone with its parts, replaces a part, sets new/used spare stock, or records a battery damage note from an Italian or English phrase; asks back (needsAnswer) when the drone, position or model is ambiguous. Uses local fleet and battery data only.',
+      'Records FPV drone crashes, answers last-crash and spare-count questions, adds a drone with its parts, replaces a part, sets new/used spare stock, adds a drone model ("nuovo modello di drone X"), links a drone to it ("il drone Smoke è un X"), adds or shares a printed part ("parte stampata per X: piedini, file x/foot.stl, 4 pezzi, profilo P"), or records a battery damage note from an Italian or English phrase; asks back (needsAnswer) when the drone, position, model, file or profile is ambiguous or unknown. Uses local fleet and battery data only.',
     args: '{"phrase": Italian or English fleet or battery damage phrase}',
   },
   {
@@ -966,7 +966,10 @@ function executeRaw(
       only(args, ['phrase']);
       if (!backend.fleet || !backend.batteries) throw new Error('Fleet and battery registries are not available here.');
       const phrase = text(args, 'phrase');
-      const edit = handleFleetEditChat(backend.fleet, phrase);
+      const home = backend.home;
+      const edit = handleFleetEditChat(backend.fleet, phrase, undefined, {
+        slicerProfiles: () => (home ? readSlicerProfiles(home).map((profile) => profile.name) : []),
+      });
       return edit.handled ? edit : handleFleetChat(backend.fleet, backend.batteries, phrase);
     }
     case 'batteries.due':
