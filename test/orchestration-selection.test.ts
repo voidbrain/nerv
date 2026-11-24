@@ -637,6 +637,31 @@ test('F-006-T07: 3-node scheduler join (coordinator NERV-01, worker X NERV-02, e
     });
     assert.equal(Buffer.byteLength(maxBoundReply.text, 'utf8'), WORKER_MAX_INFER_REPLY_BYTES);
 
+    // 3b. F-006-T27 review: within the raw byte limits, an escape-heavy prompt and system (one quote in 20 characters)
+    // encode past the 64 KiB frame. That one request is refused; the session stays up and the next request works.
+    s2State.replyText = 'ok';
+    const quoted = (bytes: number) => ('"' + 'q'.repeat(19)).repeat(bytes / 20) + 'q'.repeat(bytes % 20);
+    const callsBeforeEscaped = s2State.calls;
+    await assert.rejects(
+      linkB.infer('NERV-03', {
+        endpoint: 'inferenceY',
+        model: 'qwen2.5:14b',
+        privacy: 'owner-bases',
+        prompt: quoted(WORKER_MAX_INFER_PROMPT_BYTES),
+        system: quoted(WORKER_MAX_INFER_SYSTEM_BYTES),
+      }),
+      /exceeds its bound/,
+    );
+    assert.equal(s2State.calls, callsBeforeEscaped);
+    assert.ok(linkA.connected('NERV-02') && linkA.connected('NERV-03'));
+    const afterEscaped = await linkB.infer('NERV-03', {
+      endpoint: 'inferenceY',
+      model: 'qwen2.5:14b',
+      privacy: 'owner-bases',
+      prompt: 'Same session after a refused oversize frame',
+    });
+    assert.equal(afterEscaped.text, 'ok');
+
     // 4. Oversize S² reply (> 16384 bytes) fails closed with ModelError (boundText marks truncated: true)
     const callsBeforeOversizeReply = s2State.calls;
     s2State.replyText = 'r'.repeat(WORKER_MAX_INFER_REPLY_BYTES + 1);
