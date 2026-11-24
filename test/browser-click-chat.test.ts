@@ -14,6 +14,8 @@ import { MISATO_SOURCE, Store, settledOutcome } from '../src/store.ts';
 // Invented page, origin and control names only. No test here starts or attaches to a real browser.
 const ORIGIN = 'https://app.example.test';
 
+const CASPER_SURE = { seat: 'casper', vote: 'approve' as const, reason: 'Matches.', confidence: 1 };
+
 interface FakePage {
   url: string;
   title: string;
@@ -47,29 +49,45 @@ function answer(p: FakePage, clicks: string[], expression: string): unknown {
   return 'clicked';
 }
 
-/** An in-process DevTools session over the page model (the real CDP driver code runs on top of it). */
-function fakeSessionDriver(p: FakePage, clicks: string[]) {
-  const target: CdpTarget = {
-    id: 'page-1',
-    type: 'page',
-    url: p.url,
-    title: p.title,
-    webSocketDebuggerUrl: 'ws://127.0.0.1:9333/devtools/page/page-1',
-  };
+/** The fake browser: tabs most recent first, as the DevTools target list orders them. */
+interface FakeBrowser {
+  tabs: { id: string; page: FakePage }[];
+}
+const browserWith = (p: FakePage): FakeBrowser => ({ tabs: [{ id: 'page-1', page: p }] });
+
+/** An in-process DevTools session over the fake browser (the real CDP driver code runs on top of it). */
+function fakeSessionDriver(b: FakeBrowser, clicks: string[]) {
+  const targets = (): CdpTarget[] =>
+    b.tabs.map((t) => ({
+      id: t.id,
+      type: 'page',
+      url: t.page.url,
+      title: t.page.title,
+      webSocketDebuggerUrl: `ws://127.0.0.1:9333/devtools/page/${t.id}`,
+    }));
   return (port: number) =>
     createCdpBrowserDriver({
       port,
       settleMs: 1,
-      listTargets: async () => [target],
-      connect: async (): Promise<CdpSession> => ({
-        async send(method, params = {}) {
-          if (method !== 'Runtime.evaluate') return {};
-          return { result: { value: answer(p, clicks, String(params.expression)) } };
-        },
-        onEvent() {},
-        close() {},
-      }),
+      listTargets: async () => targets(),
+      connect: async (url): Promise<CdpSession> => {
+        const tab = b.tabs.find((t) => url.endsWith(`/${t.id}`))!;
+        return {
+          async send(method, params = {}) {
+            if (method !== 'Runtime.evaluate') return {};
+            return { result: { value: answer(tab.page, clicks, String(params.expression)) } };
+          },
+          onEvent() {},
+          close() {},
+        };
+      },
     });
+}
+
+/** What the nervous process does with a proposal before the gate: browser.click is bound to the active tab. */
+async function propose(store: Store, sortie: string, args: Record<string, unknown>, casper?: typeof CASPER_SURE) {
+  const proposal = await store.prepareProposal({ tool: 'browser.click', stage: 'production', args });
+  return store.runAction(sortie, { ...proposal, ...(casper ? { casper } : {}) });
 }
 
 function withHome(browser: object | undefined, work: (home: string) => Promise<void>) {
@@ -77,8 +95,6 @@ function withHome(browser: object | undefined, work: (home: string) => Promise<v
   writeFileSync(join(home, 'config.json'), JSON.stringify(browser ? { browser } : {}));
   return work(home).finally(() => rmSync(home, { recursive: true, force: true }));
 }
-
-const CASPER_SURE = { seat: 'casper', vote: 'approve' as const, reason: 'Matches.', confidence: 1 };
 
 describe('F-089-T06: browser.click chat tool', () => {
   it('is registered as Orange (write-external, not owner-only) and documented for Misato', () => {
@@ -94,16 +110,18 @@ describe('F-089-T06: browser.click chat tool', () => {
     await withHome({ allowedOrigins: [ORIGIN], debugPort: 9333 }, async (home) => {
       const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
       const clicks: string[] = [];
-      store.browserDriver = fakeSessionDriver(page(), clicks);
+      store.browserDriver = fakeSessionDriver(browserWith(page()), clicks);
       try {
         const sortie = store.ledger.openSortie(MISATO_SOURCE, 'click the skip button', 'trusted');
-        const card = store.runAction(sortie, {
-          tool: 'browser.click',
-          stage: 'production',
-          args: { control: 'Skip' },
-          casper: CASPER_SURE,
-        });
+        const card = await propose(store, sortie, { control: 'Skip' }, CASPER_SURE);
         assert.equal(card.outcome, 'approval');
+        // The card names the tab, its origin and page; the grant's argument hash binds them.
+        assert.deepEqual(store.approvals()[0]!.card.args, {
+          control: 'Skip',
+          tabId: 'page-1',
+          origin: ORIGIN,
+          url: `${ORIGIN}/watch`,
+        });
         assert.equal(card.pattern, 'orange');
         assert.deepEqual(clicks, [], 'nothing is clicked before the owner approves');
         const decided = await settledOutcome(store.decide(card.approvalId!, 'approve', 'owner'));
@@ -119,29 +137,21 @@ describe('F-089-T06: browser.click chat tool', () => {
     });
   });
 
-  it('a page outside the allowlist, a credential field, a dialog control or a missing allowlist is refused without a click', async () => {
-    const cases: { browser?: object; url?: string; control: string; error: RegExp }[] = [
-      { url: 'https://other.example.test/x', control: 'Skip', error: /not in browser\.allowedOrigins/ },
-      { control: 'Card number', error: /credential or payment/ },
-      { control: 'Block', error: /inside an open dialog/ },
-      { browser: undefined, control: 'Skip', error: /No browser origins allowed/ },
-    ];
-    for (const c of cases) {
-      const browser = 'browser' in c ? c.browser : { allowedOrigins: [ORIGIN], debugPort: 9333 };
+  it('a page outside the allowlist or a missing allowlist is refused when proposed: no card, no click', async () => {
+    for (const [browser, url, error] of [
+      [{ allowedOrigins: [ORIGIN], debugPort: 9333 }, 'https://other.example.test/x', /not in browser\.allowedOrigins/],
+      [undefined, `${ORIGIN}/watch`, /No browser origins allowed/],
+    ] as const) {
       await withHome(browser, async (home) => {
         const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
         const clicks: string[] = [];
-        store.browserDriver = fakeSessionDriver(page(c.url), clicks);
+        store.browserDriver = fakeSessionDriver(browserWith(page(url)), clicks);
         try {
-          const sortie = store.ledger.openSortie(MISATO_SOURCE, 'click it', 'trusted');
-          const card = store.runAction(sortie, {
-            tool: 'browser.click',
-            stage: 'production',
-            args: { control: c.control },
-          });
-          assert.equal(card.outcome, 'approval');
-          const decided = await settledOutcome(store.decide(card.approvalId!, 'approve', 'owner'));
-          assert.match(String(decided.error), c.error);
+          await assert.rejects(
+            () => store.prepareProposal({ tool: 'browser.click', stage: 'production', args: { control: 'Skip' } }),
+            error,
+          );
+          assert.deepEqual(store.approvals(), []);
           assert.deepEqual(clicks, []);
         } finally {
           store.close();
@@ -150,21 +160,95 @@ describe('F-089-T06: browser.click chat tool', () => {
     }
   });
 
-  it('unknown or empty arguments are refused', async () => {
+  it('a credential field or a dialog control is refused after approval without a click', async () => {
+    for (const [control, error] of [
+      ['Card number', /credential or payment/],
+      ['Block', /inside an open dialog/],
+    ] as const) {
+      await withHome({ allowedOrigins: [ORIGIN], debugPort: 9333 }, async (home) => {
+        const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+        const clicks: string[] = [];
+        store.browserDriver = fakeSessionDriver(browserWith(page()), clicks);
+        try {
+          const sortie = store.ledger.openSortie(MISATO_SOURCE, 'click it', 'trusted');
+          const card = await propose(store, sortie, { control });
+          assert.equal(card.outcome, 'approval');
+          const decided = await settledOutcome(store.decide(card.approvalId!, 'approve', 'owner'));
+          assert.match(String(decided.error), error);
+          assert.deepEqual(clicks, []);
+        } finally {
+          store.close();
+        }
+      });
+    }
+  });
+
+  it('the click runs only on the tab and origin the card names: another tab, a closed tab or another origin is refused', async () => {
+    const switches: [string, (b: FakeBrowser) => void, RegExp][] = [
+      [
+        'the owner switched to another allowed tab',
+        (b) => b.tabs.unshift({ id: 'page-2', page: page(`${ORIGIN}/settings`) }),
+        /does not match expected tab/,
+      ],
+      ['the tab was closed', (b) => b.tabs.splice(0, 1, { id: 'page-3', page: page() }), /does not match expected tab/],
+      [
+        'the same tab moved to another allowed origin',
+        (b) => (b.tabs[0]!.page.url = 'https://second.example.test/x'),
+        /moved to another origin/,
+      ],
+    ];
+    for (const [what, change, error] of switches) {
+      await withHome({ allowedOrigins: [ORIGIN, 'https://second.example.test'], debugPort: 9333 }, async (home) => {
+        const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+        const clicks: string[] = [];
+        const browser = browserWith(page());
+        store.browserDriver = fakeSessionDriver(browser, clicks);
+        try {
+          const sortie = store.ledger.openSortie(MISATO_SOURCE, 'click the skip button', 'trusted');
+          const card = await propose(store, sortie, { control: 'Skip' });
+          change(browser);
+          const decided = await settledOutcome(store.decide(card.approvalId!, 'approve', 'owner'));
+          assert.match(String(decided.error), error, what);
+          assert.deepEqual(clicks, [], what);
+        } finally {
+          store.close();
+        }
+      });
+    }
+  });
+
+  it('a click not bound to a tab (proposed without the nervous process binding) is refused', async () => {
     await withHome({ allowedOrigins: [ORIGIN], debugPort: 9333 }, async (home) => {
       const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
       const clicks: string[] = [];
-      store.browserDriver = fakeSessionDriver(page(), clicks);
+      store.browserDriver = fakeSessionDriver(browserWith(page()), clicks);
+      try {
+        const sortie = store.ledger.openSortie(MISATO_SOURCE, 'click it', 'trusted');
+        const card = store.runAction(sortie, { tool: 'browser.click', stage: 'production', args: { control: 'Skip' } });
+        const decided = await settledOutcome(store.decide(card.approvalId!, 'approve', 'owner'));
+        assert.match(String(decided.error), /tabId must be a string/);
+        assert.deepEqual(clicks, []);
+      } finally {
+        store.close();
+      }
+    });
+  });
+
+  it('unknown or empty arguments are refused when proposed', async () => {
+    await withHome({ allowedOrigins: [ORIGIN], debugPort: 9333 }, async (home) => {
+      const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+      const clicks: string[] = [];
+      store.browserDriver = fakeSessionDriver(browserWith(page()), clicks);
       try {
         for (const [args, error] of [
           [{ control: 'Skip', tabId: 'page-2' }, /Arguments allowed: control/],
           [{ control: '   ' }, /control must be/],
           [{ control: 'x'.repeat(201) }, /control must be/],
         ] as const) {
-          const sortie = store.ledger.openSortie(MISATO_SOURCE, 'click it', 'trusted');
-          const card = store.runAction(sortie, { tool: 'browser.click', stage: 'production', args: { ...args } });
-          const decided = await settledOutcome(store.decide(card.approvalId!, 'approve', 'owner'));
-          assert.match(String(decided.error), error);
+          await assert.rejects(
+            () => store.prepareProposal({ tool: 'browser.click', stage: 'production', args: { ...args } }),
+            error,
+          );
         }
         assert.deepEqual(clicks, []);
       } finally {
@@ -177,8 +261,13 @@ describe('F-089-T06: browser.click chat tool', () => {
     await withHome({ allowedOrigins: [ORIGIN], debugPort: 9333 }, async (home) => {
       const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
       try {
+        await assert.rejects(
+          () => store.prepareProposal({ tool: 'browser.click', stage: 'production', args: { control: 'Skip' } }),
+          /A test must inject a browserDriver/,
+        );
         const sortie = store.ledger.openSortie(MISATO_SOURCE, 'click the skip button', 'trusted');
-        const card = store.runAction(sortie, { tool: 'browser.click', stage: 'production', args: { control: 'Skip' } });
+        const args = { control: 'Skip', tabId: 'page-1', origin: ORIGIN, url: `${ORIGIN}/watch` };
+        const card = store.runAction(sortie, { tool: 'browser.click', stage: 'production', args });
         const decided = await settledOutcome(store.decide(card.approvalId!, 'approve', 'owner'));
         assert.match(String(decided.error), /A test must inject a browserDriver/);
       } finally {
@@ -189,7 +278,7 @@ describe('F-089-T06: browser.click chat tool', () => {
 });
 
 /** A fake DevTools endpoint on 127.0.0.1: /json/list plus the page's WebSocket, answering from the page model. */
-async function fakeCdpEndpoint(p: FakePage, clicks: string[]) {
+async function fakeCdpEndpoint(p: FakePage, clicks: string[], delayAfterClickMs = 0) {
   const server: Server = createServer((req, res) => {
     if (req.url !== '/json/list') {
       res.statusCode = 404;
@@ -214,11 +303,14 @@ async function fakeCdpEndpoint(p: FakePage, clicks: string[]) {
   wss.on('connection', (socket) => {
     socket.on('message', (data) => {
       const msg = JSON.parse(String(data)) as { id: number; method: string; params?: { expression?: string } };
+      const clicked = clicks.length;
       const result =
         msg.method === 'Runtime.evaluate'
           ? { result: { value: answer(p, clicks, String(msg.params?.expression)) } }
           : {};
-      socket.send(JSON.stringify({ id: msg.id, result }));
+      // A slow page: the click and the read-back after it each take a while (each under the driver's 5 s per call).
+      const slow = delayAfterClickMs && (clicks.length > clicked || clicked > 0) ? delayAfterClickMs : 0;
+      setTimeout(() => socket.send(JSON.stringify({ id: msg.id, result })), slow);
     });
   });
   await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
@@ -266,48 +358,57 @@ async function fakeModels(misato: string[]) {
 }
 
 describe('F-089-T06 across the join: chat request → browser.click → approval card → CDP driver click', () => {
-  it('Misato proposes the click, the owner approves the card, the nervous process clicks through the DevTools protocol', async () => {
-    const clicks: string[] = [];
-    const cdp = await fakeCdpEndpoint(page(), clicks);
-    const models = await fakeModels([
-      '{"action":{"tool":"browser.click","args":{"control":"Skip"}}}',
-      '{"reply":"Clicked Skip."}',
-    ]);
-    const home = mkdtempSync(join(tmpdir(), 'nerv-browser-join-'));
-    writeFileSync(
-      join(home, 'config.json'),
-      JSON.stringify({
-        models: {
-          local: { baseUrl: models.url, model: 'gemma4:12b' },
-          roles: { misato: { route: 'local', model: 'qwen2.5-coder:14b' }, casper: { model: 'gemma4:12b' } },
-        },
-        browser: { allowedOrigins: [ORIGIN], debugPort: cdp.port },
-      }),
-    );
-    // Under the test runner only: the nervous process may attach the CDP driver to this test's fake endpoint.
-    const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home, { browserCdp: true });
-    try {
-      await runtime.ready();
-      const chat = await runtime.chat('click the skip button');
-      assert.deepEqual(
-        chat.steps.map((s) => [s.tool, s.outcome]),
-        [['browser.click', 'approval']],
+  for (const [slow, delay] of [
+    ['', 0],
+    [' on a page slower than the 5 s IPC default', 3000],
+  ] as const)
+    it(`Misato proposes the click, the owner approves the card, the nervous process clicks through the DevTools protocol${slow}`, async () => {
+      const clicks: string[] = [];
+      const cdp = await fakeCdpEndpoint(page(), clicks, delay);
+      const models = await fakeModels([
+        '{"action":{"tool":"browser.click","args":{"control":"Skip"}}}',
+        '{"reply":"Clicked Skip."}',
+      ]);
+      const home = mkdtempSync(join(tmpdir(), 'nerv-browser-join-'));
+      writeFileSync(
+        join(home, 'config.json'),
+        JSON.stringify({
+          models: {
+            local: { baseUrl: models.url, model: 'gemma4:12b' },
+            roles: { misato: { route: 'local', model: 'qwen2.5-coder:14b' }, casper: { model: 'gemma4:12b' } },
+          },
+          browser: { allowedOrigins: [ORIGIN], debugPort: cdp.port },
+        }),
       );
-      assert.deepEqual(clicks, [], 'nothing is clicked before the owner approves');
-      const cards = await runtime.approvals();
-      assert.equal(cards.length, 1);
-      assert.equal(cards[0]!.card.tool, 'browser.click');
-      assert.deepEqual(cards[0]!.card.args, { control: 'Skip' });
-      const decided = (await runtime.decide(cards[0]!.id, 'approve')) as { result?: ClickNamedControlResult };
-      assert.deepEqual(clicks, ['Skip']);
-      assert.equal(decided.result?.clicked, 'Skip');
-      assert.equal(decided.result?.tainted, true);
-      assert.equal(decided.result?.after.textSummary, 'Ad skipped.');
-    } finally {
-      await runtime.close();
-      await models.close();
-      await cdp.close();
-      rmSync(home, { recursive: true, force: true });
-    }
-  });
+      // Under the test runner only: the nervous process may attach the CDP driver to this test's fake endpoint.
+      const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home, { browserCdp: true });
+      try {
+        await runtime.ready();
+        const chat = await runtime.chat('click the skip button');
+        assert.deepEqual(
+          chat.steps.map((s) => [s.tool, s.outcome]),
+          [['browser.click', 'approval']],
+        );
+        assert.deepEqual(clicks, [], 'nothing is clicked before the owner approves');
+        const cards = await runtime.approvals();
+        assert.equal(cards.length, 1);
+        assert.equal(cards[0]!.card.tool, 'browser.click');
+        assert.deepEqual(cards[0]!.card.args, {
+          control: 'Skip',
+          tabId: 'page-1',
+          origin: ORIGIN,
+          url: `${ORIGIN}/watch`,
+        });
+        const decided = (await runtime.decide(cards[0]!.id, 'approve')) as { result?: ClickNamedControlResult };
+        assert.deepEqual(clicks, ['Skip']);
+        assert.equal(decided.result?.clicked, 'Skip');
+        assert.equal(decided.result?.tainted, true);
+        assert.equal(decided.result?.after.textSummary, 'Ad skipped.');
+      } finally {
+        await runtime.close();
+        await models.close();
+        await cdp.close();
+        rmSync(home, { recursive: true, force: true });
+      }
+    });
 });
