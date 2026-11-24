@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 91 h agent + 10.25 h owner across 122 open steps of 36 features and 23 other records. 111.5 h of actual effort recorded on 131 steps. Generated from the task files.
+**Remaining effort:** 91 h agent + 10.25 h owner across 122 open steps of 36 features and 23 other records. 113 h of actual effort recorded on 132 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1102,7 +1102,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟣 Very large | 8.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code (Planned).
+💻 **→** Next: F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1114,12 +1114,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-118-t01"></a>F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code | 3 h | 0 h | 3 h | Planned | — | [F-118-T02](#f-118-t02), [F-118-T03](#f-118-t03), [F-118-T05](#f-118-t05) |
+| 🟡 Medium | <a id="f-118-t01"></a>F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code | 3 h | 1.5 h so far (stated) | 3 h | Implemented; verification pending | — | [F-118-T02](#f-118-t02), [F-118-T03](#f-118-t03), [F-118-T05](#f-118-t05) |
 | 🟡 Medium | <a id="f-118-t02"></a>F-118-T02 — Workspace and dashboard pair from their own sign-in box; the installed app signs itself in | 2 h | 0 h | 2 h | Planned | [F-118-T01](#f-118-t01) | [F-118-T04](#f-118-t04) |
 | 🟡 Medium | <a id="f-118-t03"></a>F-118-T03 — Paired devices in Settings with Revoke; nerv devices list and revoke | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
 | 🟢 Small | <a id="f-118-t04"></a>F-118-T04 — Phone procedure: Tailscale serve, pairing and push, then the owner check | 0.5 h | 0 h | 0.5 h | Planned | [F-118-T02](#f-118-t02) | — |
 | 🟡 Medium | <a id="f-118-t05"></a>F-118-T05 — Pairing as a QR code: nerv open --phone --qr and Settings → Pair a device | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
-| 🟣 Very large | **Total** | 8.5 h | 0 h (0 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
+| 🟣 Very large | **Total** | 8.5 h | 1.5 h (1 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1128,9 +1128,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689); F-118-T01 [PR #700](https://github.com/voidbrain/nerv/pull/700). |
 | Opened | 2026-11-23 |
-| Verification | — |
+| Verification | 2026-11-24: F-118-T01 `test/device-pairing.test.ts` 13/13 (committed failing first, review fixes too); with session, session-persist, dashboard-accounting, decision-client, CLI help and dashboard suites 85/85; `check:fast` green. |
 | Reviewed | 2026-11-23 |
 
 </details>

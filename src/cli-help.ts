@@ -301,7 +301,7 @@ export const HELP_GROUPS: HelpGroup[] = [
       { name: 'clients', about: 'Paired companions' },
       { name: 'revoke', args: 'CLIENT_ID', about: 'Unpair a companion' },
       { name: 'sessions', args: 'revoke', about: 'Sign out every dashboard session' },
-      { name: 'open', args: '[dashboard]', about: 'Open the dashboard' },
+      { name: 'open', args: '[dashboard] [--phone]', about: 'Open the dashboard, or pair a phone' },
     ],
   },
 ];
