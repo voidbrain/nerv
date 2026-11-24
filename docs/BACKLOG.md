@@ -1629,7 +1629,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🟡 Implemented | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: CI on PR #PRNUM, then a real Update now on the base once B-122 is merged shows the outcome in Health.
+💻 **→** Next: CI on PR #720, then a real Update now on the base once B-122 is merged shows the outcome in Health.
 
 | | |
 |---|---|
@@ -1651,7 +1651,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) (status file, route, Health row; Test: `test/updater-status.test.ts`, `test/updater-status-render.test.mjs`, `test/updater-status.browser.mjs`) |
+| PR / evidence | [PR #720](https://github.com/voidbrain/nerv/pull/720) (status file, route, Health row; Test: `test/updater-status.test.ts`, `test/updater-status-render.test.mjs`, `test/updater-status.browser.mjs`) |
 | Opened | 2026-11-24 |
 | Verification | Unit/integration 2026-11-24: `npm test` 1,364 pass, `test:headless` pass, gauntlet system flows pass locally. Browser/accessibility 2026-11-24: `test/updater-status.browser.mjs` passes locally on the production build. Human (a real Update now on the base, after B-122): Pending. |
 | Reviewed | 2026-11-24 |
