@@ -1,6 +1,7 @@
 import { writeUpdaterResult } from './updater-result.ts';
 import type { ManualUpdateResult } from './manual-update.ts';
 import { executeManualUpdate } from './manual-update.ts';
+import { lifecycleGit, outsideUpdaterDeps } from './nerv-update.ts';
 import { writeFileSync, existsSync, openSync, fstatSync, readSync, closeSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
@@ -33,7 +34,6 @@ import {
   serviceReceipt,
   releaseObservedService,
   recoverServiceUpdate,
-  command as runCommand,
 } from './node-lifecycle-execution.ts';
 import { dataHome, readConfig, readToken } from './config.ts';
 import { rehearseUpgrade } from './upgrade-rehearsal.ts';
@@ -134,28 +134,11 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
     // B-108: the updater job the service starts for Update now / the scheduled apply. It runs outside the service,
     // stops it through the lifecycle, then applies the update, which starts and verifies the new revision.
     if (command === 'self-update') {
-      result = await executeManualUpdate(
-        {
-          resolveUpdate: (channel, refresh) =>
-            checkUpdateAvailability({ channel, offline: !refresh, runningRevision: null }),
-          lifecycleHost: () => host,
-          stopFirst: true,
-          // The lifecycle admits only a commit the install folder can read; never prompt for credentials.
-          fetchRevision: async (revision) => {
-            const r = await runCommand(
-              'git',
-              ['-C', host.context.source, 'fetch', '--no-tags', 'origin', revision],
-              undefined,
-              120000,
-              {
-                GIT_TERMINAL_PROMPT: '0',
-              },
-            );
-            if (r.status !== 0) throw Error((r.err || r.out).trim() || 'git fetch failed');
-          },
-        },
-        { revision: required('revision'), ...(values.has('channel') ? { channel: values.get('channel')! } : {}) },
-      );
+      // F-117-T02: the same dependencies as `nerv update`, which shares this path.
+      result = await executeManualUpdate(outsideUpdaterDeps({ host, git: lifecycleGit }), {
+        revision: required('revision'),
+        ...(values.has('channel') ? { channel: values.get('channel')! } : {}),
+      });
       // B-108-T02: leave the result for the restarted service to report in the inbox.
       writeUpdaterResult(dataHome(), result as ManualUpdateResult);
     } else if (command === 'lifecycle-inspect')

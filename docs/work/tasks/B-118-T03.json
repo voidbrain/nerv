@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "id": "B-118-T03",
+  "parent": "B-118",
+  "title": "Other Runtime test files always exit; failing tests named in a stopped run",
+  "goal": "No test file that starts Runtimes can hold the Windows test step past its limit, and a stopped run names each failed test",
+  "status": "implemented",
+  "acceptance": [
+    "test/watch-runtime.test.ts (run 45314998906: 'F-026: stopping a watch while it waits for approval…' cancelled at 30 s, file never finished) closes its Runtime in a hook that runs after a cancelled test, with a failing-first test as in B-118-T02",
+    "The other test files that start Runtimes get the same teardown, or a shared helper does it for all of them",
+    "The timing reporter records each failed test as it happens, so a stopped run names it (the spec report queues files behind the hung one)",
+    "Why worker-link-admission still fails on Windows is named from that record"
+  ],
+  "dependsOn": [
+    "B-118-T02"
+  ],
+  "resources": [
+    "test/watch-runtime.test.ts",
+    "test/fixtures/**",
+    "tools/test-timing-reporter.mjs",
+    "docs/work/records/B-118.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design",
+    "evidence-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/watch-runtime.test.ts",
+    "npm run check:fast",
+    "CI windows job durations"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-24 from B-118-T02 (same mechanism, one more file plus the reporter). Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2,
+    "actualAgentHours": 2.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 706,
+      "note": "shared teardown scope, exit guard preload, failed tests logged as they happen"
+    }
+  ]
+}
