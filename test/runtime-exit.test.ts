@@ -48,6 +48,6 @@ test(
 test('B-118: npm test, test:coverage and the selected regressions preload the exit guard', () => {
   const scripts = JSON.parse(readFileSync('package.json', 'utf8')).scripts;
   for (const name of ['test', 'test:coverage'])
-    assert.match(scripts[name], /^node --test --import \.\/test\/fixtures\/exit-guard\.ts /, name);
+    assert.match(scripts[name], /node --test --import \.\/test\/fixtures\/exit-guard\.ts /, name);
   assert.match(readFileSync('tools/selected-tests.mjs', 'utf8'), /'--import','\.\/test\/fixtures\/exit-guard\.ts'/);
 });

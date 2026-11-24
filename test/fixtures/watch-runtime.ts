@@ -1,6 +1,9 @@
 // Shared fixture of test/watch-runtime.test.ts: one Runtime with a scripted local model server. Kept here so the B-118
 // exit probe (test/fixtures/watch-runtime-timeout.probe.ts) builds exactly what the tests build.
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+// B-118: the server, the Runtime and the home directory are registered in a teardown scope as they are created
+// (test/fixtures/teardown.ts), so a test cancelled at its timeout before its own `finally` still has them closed and its
+// file exits (Windows run 45314998906 stopped at its limit with this file started and never finished).
+import { mkdtempSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -8,6 +11,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { Runtime } from '../../src/runtime.ts';
 import type { Config } from '../../src/config.ts';
 import type { WatchConfig, WatchTrigger } from '../../src/watch.ts';
+import { closeServer, removeDir, scope } from './teardown.ts';
 export const trigger: WatchTrigger = {
   id: 'fixture-check',
   request: 'Read fixture status',
@@ -23,6 +27,7 @@ export const quietNow = () => {
   return { from: format(m - 30), until: format(m + 30) };
 };
 export async function setup(script: string[], watch: WatchConfig = { triggers: [trigger] }) {
+  const own = scope('watch-runtime');
   const calls: { model: string; system: string; prompt: string }[] = [];
   let onPlan: (() => Promise<void>) | undefined;
   const server = createServer((req, res) => {
@@ -48,8 +53,9 @@ export async function setup(script: string[], watch: WatchConfig = { triggers: [
         });
       });
   });
+  own.add(server, closeServer);
   await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
-  const home = mkdtempSync(join(tmpdir(), 'nerv-watch-runtime-')),
+  const home = own.add(mkdtempSync(join(tmpdir(), 'nerv-watch-runtime-')), removeDir),
     database = join(home, 'nerv.sqlite');
   const config: Config = {
     port: 4317,
@@ -67,8 +73,12 @@ export async function setup(script: string[], watch: WatchConfig = { triggers: [
   };
   const save = () => writeFileSync(join(home, 'config.json'), JSON.stringify(config));
   save();
-  let runtime = new Runtime(database, undefined, home);
+  // Registered as created: a Runtime made after the test ended is closed at once and the fixture stops.
+  const start = () => own.add(new Runtime(database, undefined, home), (r) => r.close());
+  let runtime = start();
+  own.step('waiting for the Runtime to be ready');
   await runtime.ready();
+  own.step('fixture built; in the test');
   return {
     home,
     database,
@@ -81,10 +91,15 @@ export async function setup(script: string[], watch: WatchConfig = { triggers: [
     hold: (fn: () => Promise<void>) => {
       onPlan = fn;
     },
+    /** Names what the test waits for now, printed if the test is cancelled before it closes the fixture. */
+    step: (name: string) => own.step(name),
     restart: async () => {
+      own.step('restart(): closing the Runtime');
       await runtime.close();
-      runtime = new Runtime(database, undefined, home);
+      runtime = start();
+      own.step('restart(): waiting for the Runtime to be ready');
       await runtime.ready();
+      own.step('restarted; in the test');
     },
     read: <T>(sql: string) => {
       const db = new DatabaseSync(database, { readOnly: true });
@@ -97,14 +112,7 @@ export async function setup(script: string[], watch: WatchConfig = { triggers: [
         db.close();
       }
     },
-    close: async () => {
-      await runtime.close();
-      await new Promise<void>((done) => {
-        server.close(() => done());
-        server.closeAllConnections();
-      });
-      rmSync(home, { recursive: true, force: true });
-    },
+    close: () => own.close(),
   };
 }
 

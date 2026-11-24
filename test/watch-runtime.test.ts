@@ -324,14 +324,20 @@ test('F-026: stopping a watch while it waits for approval clears running capacit
     quietHours: quietNow(),
   });
   try {
+    // B-118: each step is named, so a run that cancels this test (Windows run 45314998906, 30 s) says where it waited.
+    t.step('first checkWatch()');
     const run = await t.runtime.checkWatch();
     assert.equal(run?.waiting.length, 1);
+    t.step('spear()');
     await t.runtime.spear(run!.sortieId, 'Owner stopped watch fixture');
+    t.step('second checkWatch()');
     assert.equal(await t.runtime.checkWatch(), null);
     assert.equal(t.read<{ state: string }[]>('SELECT state FROM watch_runs')[0]?.state, 'cancelled');
     delete t.config.watch!.quietHours;
     t.save();
+    t.step('watch.poll after quiet hours');
     await t.runtime.nervous.call('watch.poll');
+    t.step('approvals() and inboxPage()');
     assert.equal((await t.runtime.approvals()).length, 0);
     assert.equal((await t.runtime.inboxPage()).items.length, 0);
   } finally {
