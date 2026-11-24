@@ -65,6 +65,8 @@ After that frozen F-014 run, Windows CI exposed contention in the existing peer-
 
 [Mac operating-conditions report](2026-11-22-f006-t14-mac-operating-conditions.md): bounded aggregate evidence from the owner-run heavy, moderate and minimal Mac campaign; raw reports remain private and unavailable owner-impact metrics stay explicit.
 
+[Placement report](2026-11-23-f006-t12-placement-report.md): F-006 placement verdicts and the provisional Mac-only recommendation from committed aggregates ([evidence](2026-11-23-f006-t12-placement-evidence.json)); missing live comparisons stay listed.
+
 [Operator commands](gauntlet.md#operator-runs-common-gemma-smoke-and-nerv-system-acceptance) distinguish common Gemma, scripted NERV system and native role evaluation settings. [External project assessment](../reviews/2026-11-09-external-agent-projects.md) retains optional runner/attack/conversation references without adoption.
 Suite `nerv-golden-v5` adds F-026 watch admission/runtime, quiet-hour channel delivery and remote-dispatch revalidation to the ledger, conversation, channel and base groups. The matching NERV Gauntlet system pack is version1.2.0; earlier reports keep their original suite IDs and input hashes. Focused local groups passed50,42,20 and51 checks respectively on the candidate tree; these scripted results do not qualify a real model.
 

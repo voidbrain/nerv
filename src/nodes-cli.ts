@@ -1,3 +1,5 @@
+import { writeUpdaterResult } from './updater-result.ts';
+import type { ManualUpdateResult } from './manual-update.ts';
 import { executeManualUpdate } from './manual-update.ts';
 import { writeFileSync, existsSync, openSync, fstatSync, readSync, closeSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -131,7 +133,7 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
           : macServiceHost(home);
     // B-108: the updater job the service starts for Update now / the scheduled apply. It runs outside the service,
     // stops it through the lifecycle, then applies the update, which starts and verifies the new revision.
-    if (command === 'self-update')
+    if (command === 'self-update') {
       result = await executeManualUpdate(
         {
           resolveUpdate: (channel, refresh) =>
@@ -154,7 +156,9 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
         },
         { revision: required('revision'), ...(values.has('channel') ? { channel: values.get('channel')! } : {}) },
       );
-    else if (command === 'lifecycle-inspect')
+      // B-108-T02: leave the result for the restarted service to report in the inbox.
+      writeUpdaterResult(dataHome(), result as ManualUpdateResult);
+    } else if (command === 'lifecycle-inspect')
       result = await planService(
         host,
         required('action') as 'install' | 'start' | 'stop' | 'update' | 'uninstall',

@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-118-T02",
+  "parent": "F-118",
+  "title": "Workspace and dashboard pair from their own sign-in box; the installed app signs itself in",
+  "goal": "Typing the short code into an installed app pairs it, and later launches need no sign-in",
+  "status": "planned",
+  "acceptance": [
+    "The sign-in box accepts the short code and pairs; the device credential is kept in the app's persistent storage only when installed",
+    "Browser tabs keep session behaviour",
+    "Browser test of pair → reload → still signed in"
+  ],
+  "dependsOn": [
+    "F-118-T01"
+  ],
+  "resources": [
+    "web/public/dashboard/live.js",
+    "web/src/main.ts",
+    "test/evaluation.browser.mjs",
+    "docs/work/records/F-118.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h agent",
+    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-23",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}
