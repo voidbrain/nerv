@@ -5,6 +5,31 @@ const sha256 = (value: string) => createHash('sha256').update(value).digest('hex
 const DAY = 24 * 3600_000;
 
 /**
+ * Writes `value` to a private (0600) file through a temp file, best-effort: a failure is logged and never throws, so the
+ * request path and startup stay up. A leftover temp (or a symlink there) is removed first, so the new one is created
+ * private with 'wx' and never followed. When `revoking`, a failed write removes the file instead, so what was revoked
+ * can never come back after a restart. Shared by the session book and the device book (B-113, F-118).
+ */
+export function savePrivateJson(file: string, value: unknown, revoking: boolean, label: string): boolean {
+  const tmp = file + '.tmp';
+  try {
+    rmSync(tmp, { force: true });
+    writeFileSync(tmp, JSON.stringify(value) + '\n', { mode: 0o600, flag: 'wx' });
+    renameSync(tmp, file);
+    return true;
+  } catch (error) {
+    console.error(`${label} not saved: ${error instanceof Error ? error.message : String(error)}`);
+    if (revoking)
+      try {
+        unlinkSync(file);
+      } catch {
+        /* nothing left to remove */
+      }
+    return false;
+  }
+}
+
+/**
  * Dashboard sessions (F-039, B-113). An update restarts the service, and sessions held only in memory signed every open
  * dashboard out mid-update. With a file, the book keeps only the SHA-256 of each session and its expiry, bound to a
  * fingerprint of the admin token: a rotated token discards every stored session. Without a file it is memory only.
@@ -65,26 +90,12 @@ export class SessionBook {
   /** Best-effort write; true when written. A revoke that cannot be written removes the file instead. */
   private save(revoking = false): boolean {
     if (!this.file) return true;
-    const tmp = this.file + '.tmp';
-    try {
-      // A leftover temp (or a symlink there) is removed, so the new one is created private and never followed.
-      rmSync(tmp, { force: true });
-      writeFileSync(tmp, JSON.stringify({ version: 1, token: this.boundTo, sessions: [...this.entries] }) + '\n', {
-        mode: 0o600,
-        flag: 'wx',
-      });
-      renameSync(tmp, this.file);
-      return true;
-    } catch (error) {
-      console.error(`Dashboard sessions not saved: ${error instanceof Error ? error.message : String(error)}`);
-      if (revoking)
-        try {
-          unlinkSync(this.file);
-        } catch {
-          /* nothing left to remove */
-        }
-      return false;
-    }
+    return savePrivateJson(
+      this.file,
+      { version: 1, token: this.boundTo, sessions: [...this.entries] },
+      revoking,
+      'Dashboard sessions',
+    );
   }
 
   get size(): number {

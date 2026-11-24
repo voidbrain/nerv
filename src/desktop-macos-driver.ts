@@ -37,6 +37,36 @@ function helperError(result: HelperResult): string {
   return result.stderr.trim() || `desktop helper exited with status ${result.status}`;
 }
 
+/**
+ * Calls one command of a JXA helper (`osascript -l JavaScript <helper> <command> <json>`) and parses its JSON
+ * answer; arguments travel as JSON data, never as script text. Shared by the desktop and app-workflow helpers.
+ */
+export function macHelperCaller(
+  label: string,
+  helper: string,
+  options: Omit<MacDesktopDriverOptions, 'helperPath'> = {},
+): (command: string, args?: Record<string, unknown>) => unknown {
+  const runner: MacHelperRunner =
+    options.runner ??
+    ((args) => {
+      const r = spawnSync(options.osascript ?? 'osascript', ['-l', 'JavaScript', helper, ...args], {
+        encoding: 'utf8',
+        timeout: options.timeoutMs ?? 30_000,
+        maxBuffer: MAX_OUTPUT,
+      });
+      return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? (r.error ? r.error.message : '') };
+    });
+  return (command, args = {}) => {
+    const result = runner([command, JSON.stringify(args)]);
+    if (result.status !== 0) throw new Error(`${label} ${command} failed: ${helperError(result)}`);
+    try {
+      return JSON.parse(result.stdout);
+    } catch {
+      throw new Error(`${label} ${command} returned unreadable output.`);
+    }
+  };
+}
+
 function asWindow(value: unknown): DesktopWindowSnapshot {
   const v = value as Partial<DesktopWindowSnapshot>;
   if (typeof v?.appName !== 'string' || typeof v.windowTitle !== 'string' || !Array.isArray(v.controls)) {
@@ -59,27 +89,7 @@ function asWindow(value: unknown): DesktopWindowSnapshot {
  * without the prompt option, so NERV never asks for or changes the grant itself.
  */
 export function createMacDesktopDriver(options: MacDesktopDriverOptions = {}): DesktopDriver {
-  const helper = options.helperPath ?? MAC_DESKTOP_HELPER;
-  const runner: MacHelperRunner =
-    options.runner ??
-    ((args) => {
-      const r = spawnSync(options.osascript ?? 'osascript', ['-l', 'JavaScript', helper, ...args], {
-        encoding: 'utf8',
-        timeout: options.timeoutMs ?? 30_000,
-        maxBuffer: MAX_OUTPUT,
-      });
-      return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? (r.error ? r.error.message : '') };
-    });
-
-  const call = (command: string, args: Record<string, unknown> = {}): unknown => {
-    const result = runner([command, JSON.stringify(args)]);
-    if (result.status !== 0) throw new Error(`Desktop helper ${command} failed: ${helperError(result)}`);
-    try {
-      return JSON.parse(result.stdout);
-    } catch {
-      throw new Error(`Desktop helper ${command} returned unreadable output.`);
-    }
-  };
+  const call = macHelperCaller('Desktop helper', options.helperPath ?? MAC_DESKTOP_HELPER, options);
 
   return {
     checkAccessibilityPermission() {
