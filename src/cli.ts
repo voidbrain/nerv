@@ -638,6 +638,8 @@ try {
             sessionFile: join(home, 'sessions.json'),
             // F-118: paired devices (hashed, 90 days unused, bound to the admin token).
             deviceFile: join(home, 'devices.json'),
+            // B-123: the updater's status for the dashboard's Health row (kept in this data home).
+            updaterHome: home,
             // B-108: Update now and the scheduled apply hand the update to its own OS job outside this service.
             startUpdater: async (input) => {
               await startUpdaterJob(localServiceHost().context, input, async (program, args) => {
