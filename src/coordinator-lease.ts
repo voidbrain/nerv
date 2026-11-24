@@ -33,7 +33,8 @@ export type LeaseRenewResult =
     }
   | {
       readonly ok: false;
-      readonly reason: 'stale_coordinator_epoch' | 'stale_lease_seq' | 'promoting';
+      /** `not_standby`: this base holds no standby store, so it never acks a lease (F-016-T16 re-review). */
+      readonly reason: 'stale_coordinator_epoch' | 'stale_lease_seq' | 'promoting' | 'not_standby';
       readonly maxSeenCoordinatorEpoch?: number;
       readonly error: string;
     };
@@ -77,6 +78,17 @@ export function handleStandbyLeaseRenew(db: DatabaseSync, input: HandleStandbyLe
       reason: 'promoting',
       maxSeenCoordinatorEpoch,
       error: 'Standby has begun promoting and cannot renew an older lease.',
+    };
+  }
+
+  // Only a store that holds the replicated standby acks: its base is the one that would promote, so its refusal
+  // is what bounds the old main. A worker's or a drained main's store never acks.
+  if (fencing?.replicationMode !== 'standby') {
+    return {
+      ok: false,
+      reason: 'not_standby',
+      maxSeenCoordinatorEpoch,
+      error: 'This base holds no coordinator standby store.',
     };
   }
 
@@ -221,6 +233,17 @@ CREATE TABLE IF NOT EXISTS coordinator_lease_seq (
   seq INTEGER NOT NULL
 );`;
 
+/** The next lease sequence of this coordinator, persisted before it is sent so a restart never reuses one. */
+export function nextLeaseSeq(db: DatabaseSync): number {
+  db.exec(LEASE_SEQ_SCHEMA);
+  const row = db.prepare('SELECT seq FROM coordinator_lease_seq WHERE id = 1').get() as { seq: number } | undefined;
+  const seq = (row?.seq ?? 0) + 1;
+  db.prepare(
+    'INSERT INTO coordinator_lease_seq(id, seq) VALUES (1, ?) ON CONFLICT(id) DO UPDATE SET seq = excluded.seq',
+  ).run(seq);
+  return seq;
+}
+
 export interface CoordinatorLeaseKeeperOptions {
   /** The coordinator's own store (`nerv.sqlite`). */
   readonly db: DatabaseSync;
@@ -289,22 +312,21 @@ export class CoordinatorLeaseKeeper {
     return this.leaseExpiresMonoNs === undefined || this.mono() < this.leaseExpiresMonoNs;
   }
 
+  private passedDetail(db: DatabaseSync): string {
+    const standby = (
+      db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as
+        { standby_base_id: string | null } | undefined
+    )?.standby_base_id;
+    return `The coordinator lease passed without a renewal (standby ${standby ?? 'none named'}; last error: ${this.lastError || 'none'}).`;
+  }
+
   /** The registry still names this base at `epoch`: no newer main record was seen. */
   private namedAt(epoch: number): boolean {
     const main = this.options.registryMain?.();
     return !!main && !!this.options.selfBaseId && main.baseId === this.options.selfBaseId && main.epoch === epoch;
   }
 
-  private nextSeq(): number {
-    const { db } = this.options;
-    db.exec(LEASE_SEQ_SCHEMA);
-    const row = db.prepare('SELECT seq FROM coordinator_lease_seq WHERE id = 1').get() as { seq: number } | undefined;
-    const seq = (row?.seq ?? 0) + 1;
-    db.prepare(
-      'INSERT INTO coordinator_lease_seq(id, seq) VALUES (1, ?) ON CONFLICT(id) DO UPDATE SET seq = excluded.seq',
-    ).run(seq);
-    return seq;
-  }
+  private lastError = '';
 
   async renewOnce(): Promise<LeaseKeeperOutcome> {
     const { db } = this.options;
@@ -319,7 +341,7 @@ export class CoordinatorLeaseKeeper {
         const remaining = Math.min(Math.max(state.leaseExpiresAt - reqWall, 0), LEASE_EFFECTIVE_TTL_MS);
         this.leaseExpiresMonoNs = reqMono + BigInt(remaining) * 1_000_000n;
       }
-      if (!this.live(state.leaseExpiresAt)) return this.fence('The coordinator lease passed without a renewal.');
+      if (!this.live(state.leaseExpiresAt)) return this.fence(this.passedDetail(db));
     }
     const standby = (
       db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as
@@ -327,18 +349,24 @@ export class CoordinatorLeaseKeeper {
     )?.standby_base_id;
     if (standby) {
       let result: LeaseRenewResult | undefined;
+      const leaseSeq = nextLeaseSeq(db);
       try {
-        result = await this.options.renew(standby, {
-          coordinatorEpoch: state.coordinatorEpoch,
-          leaseSeq: this.nextSeq(),
-        });
-      } catch {
+        result = await this.options.renew(standby, { coordinatorEpoch: state.coordinatorEpoch, leaseSeq });
+        this.lastError = result.ok ? '' : `${result.reason}: ${result.error}`;
+      } catch (err) {
         result = undefined;
+        this.lastError = err instanceof Error ? err.message : 'renewal failed';
       }
       const now = readCoordinatorFencingState(db);
       if (!now || now.replicationMode !== state.replicationMode || now.coordinatorEpoch !== state.coordinatorEpoch)
         return 'inactive';
-      if (result?.ok && result.standbyBaseId === standby && result.coordinatorEpoch === state.coordinatorEpoch) {
+      // The ack must answer this request: a held-back ack for an earlier sequence never extends the lease.
+      if (
+        result?.ok &&
+        result.standbyBaseId === standby &&
+        result.coordinatorEpoch === state.coordinatorEpoch &&
+        result.ackSeq === leaseSeq
+      ) {
         if (!active) {
           if (!this.namedAt(state.coordinatorEpoch)) return 'inactive';
           db.prepare(
@@ -354,7 +382,8 @@ export class CoordinatorLeaseKeeper {
         (result.reason === 'promoting' ||
           (result.reason === 'stale_coordinator_epoch' &&
             (result.maxSeenCoordinatorEpoch ?? 0) > state.coordinatorEpoch));
-      if (newer && active) return this.fence(`Standby ${standby} holds a newer epoch or is promoting.`);
+      if (newer && active)
+        return this.fence(`Standby ${standby} holds a newer epoch or is promoting (${this.lastError}).`);
     } else if (active && !this.options.hasOtherEnrolledBases() && this.live(state.leaseExpiresAt)) {
       this.commit(state.coordinatorEpoch, reqWall, reqMono);
       return 'self-renewed';
@@ -362,8 +391,7 @@ export class CoordinatorLeaseKeeper {
     if (!active) return 'inactive';
     const after = readCoordinatorFencingState(db);
     if (!after || after.replicationMode !== 'active') return 'inactive';
-    if (after.leaseExpiresAt > 0 && !this.live(after.leaseExpiresAt))
-      return this.fence('The coordinator lease passed without a renewal.');
+    if (after.leaseExpiresAt > 0 && !this.live(after.leaseExpiresAt)) return this.fence(this.passedDetail(db));
     return 'waiting';
   }
 
