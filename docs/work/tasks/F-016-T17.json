@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T17",
+  "status": "planned",
+  "title": "`nerv kaji promote`: stop the service, verify and swap",
+  "goal": "The owner promotes a standby with one command whose safety inputs come from verified records, not from the caller",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "nerv kaji promote stops the running service (serve swap-quiesce guard) before the file swap and restarts it after (test)",
+    "Inside the function, main base, new epoch, previous main and the old main public key are derived from verified registry records; lastAckMs from standby_lease_state; the drain receipt from a file (tests)",
+    "--confirm-old-host-down or a root-signed revoke of the previous main is required for an unplanned promotion; a re-run after a crash resumes (tests)"
+  ],
+  "dependsOn": [
+    "F-016-T07"
+  ],
+  "resources": [
+    "src/cli-kaji.ts",
+    "src/cli-help.ts",
+    "src/coordinator-relocation.ts",
+    "src/store.ts",
+    "test/coordinator-relocation.test.ts",
+    "docs/work/tasks/F-016-T17.json",
+    "docs/work/records/F-016.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Directed regressions in the named test files",
+    "npm run check:fast",
+    "final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h agent",
+    "basis": "Split from F-016-T07 on 2026-11-23 by owner decision (option a) after the PR #677 review; estimated from F-016-T06 and F-016-T07 (1.5 h each actual). Not a measurement.",
+    "reviewed": "2026-11-23",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

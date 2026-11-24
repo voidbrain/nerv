@@ -174,6 +174,12 @@ export const HELP_GROUPS: HelpGroup[] = [
         args: 'APP CONTROL [--window=TITLE] [--approved]',
         about: 'Click a named desktop control (macOS)',
       },
+      {
+        name: 'app-workflow',
+        args: 'PLAN.json [--approve=HASH] [--overwrite=PATH]',
+        about: 'Show, then run, an open/save-as plan (macOS)',
+      },
+      { name: 'fpv-read-build', args: 'LINK', about: 'Read a diyfpv.com build into its local build note' },
       { name: 'desktop-record', args: 'ID HEADER.json', about: 'Record desktop input for a workflow' },
     ],
   },
@@ -192,9 +198,9 @@ export const HELP_GROUPS: HelpGroup[] = [
       },
       {
         name: 'fleet',
-        args: 'drones|parts|spares',
+        args: 'drones|parts|spares|import',
         about: 'Drones, parts and spares',
-        usage: ['fleet drones | fleet parts <drone> | fleet spares [category]'],
+        usage: ['fleet drones | fleet parts <drone> | fleet spares [category]', 'fleet import <fleet.json>'],
       },
       { name: 'card-copy', args: 'MOUNT LABEL RULES.json', about: 'Copy files from a memory card by rules' },
       { name: 'slice', args: 'IN OUT PROFILE ALLOWLIST', about: 'Slice a model for the 3D printer' },
@@ -205,12 +211,13 @@ export const HELP_GROUPS: HelpGroup[] = [
     commands: [
       {
         name: 'kaji',
-        args: 'enrol|revoke|main|offer|seat|list|export|import',
+        args: 'enrol|revoke|main|relocate|drain|offer|seat|list|export|import',
         about: 'Enrolled bases',
         usage: [
           'kaji enrol BASE-ID "Name" PUBKEY|self ADDRESS | kaji revoke BASE-ID | kaji list',
           'kaji main [BASE-ID] | kaji offer [ACTION…|none] | kaji seat BASE-ID shadow|veto|off',
           'kaji export [FILE] | kaji import FILE --root FINGERPRINT',
+          'kaji relocate BASE-ID [--revoke LOST-ID] | kaji drain [FILE]',
         ],
       },
       {
@@ -247,6 +254,15 @@ export const HELP_GROUPS: HelpGroup[] = [
         about: 'The background service; move runs it from its own install folder',
       },
       { name: 'reload', about: 'Make the running service re-read its configuration' },
+      {
+        name: 'update',
+        args: '[--check]',
+        about: 'Update the install folder to origin/main; --check only reports',
+        usage: [
+          'update --check (up to date, or behind origin/main by N commits; changes nothing)',
+          'update (fetch into the install folder, stop, lifecycle update: backup, rehearsal, build, start, verify)',
+        ],
+      },
       { name: 'doctor', about: 'Check this installation' },
       {
         name: 'update-policy',

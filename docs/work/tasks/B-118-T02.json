@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "id": "B-118-T02",
+  "parent": "B-118",
+  "title": "Worker-link test files always exit; find why they time out on Windows",
+  "goal": "No worker-link test file can hold the test process alive after its tests end or time out, and the Windows worker-link tests stop timing out",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails on main: a worker-link test cancelled at its timeout (mid-fixture and with links connected) leaves its file process running",
+    "Fixture teardown always runs (test hooks), each close is bounded, and WorkerLink.stop() and Runtime.close() end even mid-operation",
+    "The Windows cost of the worker-link tests is measured and reduced without weakening what they prove"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/fixtures/**",
+    "test/worker-link.test.ts",
+    "test/worker-link-heartbeat.test.ts",
+    "test/worker-link-admission.test.ts",
+    "test/worker-link-exit.test.ts",
+    "src/worker-link.ts",
+    "src/runtime.ts",
+    "src/process-client.ts",
+    "docs/work/records/B-118.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design",
+    "evidence-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/worker-link*.test.ts",
+    "npm run check:fast",
+    "CI windows job durations"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-24 when opened from run 45307748925: reproduce, fix teardown, measure Windows. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0.5,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2.5,
+    "actualAgentHours": 2,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 699,
+      "note": "teardown hooks, bounded stop/close, idle brain"
+    }
+  ]
+}

@@ -3,11 +3,20 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { Store } from '../src/store.ts';
+import { Store, type InboxEntry } from '../src/store.ts';
 const proposal = {
   tool: 'reminders.add',
   args: { title: 'Private neutral fixture', due: '2099-01-01T00:00:00Z' },
   stage: 'prototype' as const,
+};
+/**
+ * The notice names the approval but carries none of the proposal's private details. B-116: the text check reads
+ * the message only, since random ids can contain 2099; the fixed field set keeps args and grantId out.
+ */
+const assertNoPrivateDetails = (notice: InboxEntry) => {
+  assert.doesNotMatch(notice.message, /Private neutral fixture|2099|grantId|args/);
+  assert.deepEqual(Object.keys(notice).sort(), ['approval', 'created', 'id', 'kind', 'message', 'sequence']);
+  assert.deepEqual(Object.keys(notice.approval ?? {}).sort(), ['expires', 'id', 'pending']);
 };
 const open = (store: Store) => store.ledger.openSortie('owner', 'Neutral approval', 'trusted');
 
@@ -24,7 +33,7 @@ test('F-023: approval and generic durable inbox notice commit together and survi
     assert.equal(notice.kind, 'approval');
     assert.equal(notice.approval?.id, result.approvalId);
     assert.equal(notice.approval?.pending, true);
-    assert.doesNotMatch(JSON.stringify(notice), /Private neutral fixture|2099|grantId|args/);
+    assertNoPrivateDetails(notice);
     assert.equal(notice.approval?.expires, store.approvals()[0]!.expires);
     store.close();
     store = new Store(path);
@@ -39,6 +48,17 @@ test('F-023: approval and generic durable inbox notice commit together and survi
     store.close();
     rmSync(home, { recursive: true, force: true });
   }
+});
+
+test('B-116: a random id containing 2099 is not a private detail', () => {
+  assertNoPrivateDetails({
+    sequence: 1,
+    id: '5f2a2099-0c1d-4e2f-8a3b-2099c4d5e6f7',
+    message: 'MAGI approval needed for reminders.add.',
+    created: '2026-11-23T10:20:00.000Z',
+    kind: 'approval',
+    approval: { id: 'a2099b1c-2099-4d5e-9f60-718293a4b5c6', expires: '2026-11-23T11:20:00.000Z', pending: true },
+  });
 });
 
 test('F-023: an inbox failure rolls back the approval and its ledger events', () => {

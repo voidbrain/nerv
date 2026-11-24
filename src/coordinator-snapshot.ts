@@ -495,6 +495,8 @@ export interface PromoteStandbySwapInput {
   quiesce?: () => void;
   settlePendingApprovals?: (mainDb: DatabaseSync) => void;
   restart?: () => void;
+  /** Extra writes inside the step-5 activation transaction (F-016-T07: outbox quarantine, lease reset). */
+  activate?: (promotedDb: DatabaseSync) => void;
   /** Test-only crash injection after completing step N (1..5). */
   failAfterStep?: 1 | 2 | 3 | 4 | 5;
 }
@@ -701,6 +703,7 @@ export function promoteStandbyDatabase(input: PromoteStandbySwapInput): PromoteS
           .prepare('UPDATE grants SET revoked = COALESCE(revoked, ?) WHERE used IS NULL AND revoked IS NULL')
           .run(new Date().toISOString());
       }
+      if (input.activate) input.activate(promotedDb);
       promotedDb.exec('COMMIT');
     } catch (err) {
       try {
