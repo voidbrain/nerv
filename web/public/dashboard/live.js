@@ -1171,9 +1171,12 @@
       "<div role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : "A revoked device must pair again with a new code; each lapses after 90 days unused.") + "</div>";
   }
   // F-118-T05: Settings → Pair a device mints a 10-minute code (a dashboard session may; a paired device may not) and
-  // shows it with the QR of the dashboard link carrying it in the fragment, for this page's address.
+  // shows it with the QR of the dashboard link carrying it in the fragment. B-128: from a 127.0.0.1 page the server puts
+  // the phone's address (config phone.url or this Mac's tailnet name) in the link; without one it keeps this page's
+  // address and sends a hint how to set one.
   state.pairing = null;
-  const LOOPBACK = /^(127\.|localhost$|\[::1\]$)/.test(location.hostname);
+  const loopbackHost = h => /^(127\.|localhost$|\[::1\]$)/.test(h);
+  const linkHost = link => { try { return new URL(link).host; } catch { return ""; } };
   const qrSvg = rows => {
     if (!Array.isArray(rows) || !rows.every(r => typeof r === "string" && /^[01]+$/.test(r) && r.length === rows.length)) return "";
     const n = rows.length + 8; let d = "";
@@ -1188,7 +1191,8 @@
     return "<div id='settings-pair' class='list'>" + (p.qr ? qrSvg(p.qr) : "<div class='tiny muted'>No QR: " + esc(p.qrError || "none returned") + "</div>") +
       "<div class='small'>Pairing code <b class='pair-code'>" + esc(p.code) + "</b> <span class='tiny muted'>one use, valid until " + esc(at) + "</span></div>" +
       "<div class='tiny muted'>Scan it with the phone: Safari opens the dashboard and shows the code (it never pairs). There, Share → Add to Home Screen, open NERV from the Home Screen and type the code. A scanned link opens in Safari, never in the installed app.</div>" +
-      (LOOPBACK ? "<div class='tiny warn'>This page is on " + esc(location.host) + ", which a phone cannot open: open the dashboard at its Tailscale address (https://…ts.net) to pair from here, or run <code>nerv open --phone --qr</code>.</div>" : "") + "</div>";
+      (loopbackHost(linkHost(p.link).replace(/:\d+$/, "")) ? "<div class='tiny warn'>The QR opens " + esc(linkHost(p.link)) + ", which a phone cannot open. " + esc(p.phoneHint || "Open the dashboard at its Tailscale address (https://…ts.net) to pair from here.") + "</div>" :
+        loopbackHost(location.hostname) ? "<div class='tiny muted'>The QR opens " + esc(linkHost(p.link)) + ", this Mac's address for the phone.</div>" : "") + "</div>";
   }
   let pairingExpiry = null;
   async function pairDevice() {

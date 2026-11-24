@@ -30,6 +30,7 @@ import { validatePrintsConfig, type PrintsConfig } from './print-transfer.ts';
 import { validatePersonas, type PersonaConfig } from './persona.ts';
 import { validateBrowserConfig, type BrowserConfig } from './browser-control.ts';
 import { validateAppWorkflowConfig, type AppWorkflowConfig } from './app-workflow.ts';
+import { isLoopbackBase, pairingBase } from './pairing-address.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
 export interface Config {
   port: number;
@@ -60,6 +61,8 @@ export interface Config {
   browser?: BrowserConfig;
   /** F-094-T02: folders app workflows may open from and save to. */
   appWorkflow?: AppWorkflowConfig;
+  /** B-128: the address a phone opens for pairing QR codes, when this machine's tailnet name is not the one. */
+  phone?: { url: string };
 }
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
 export interface Base {
@@ -83,6 +86,19 @@ export function validateBase(value: unknown): Base {
   )
     throw new Error('Invalid base: {"id": "NERV-01" (capitals, digits, dashes), "name": up to 40 characters}.');
   return { id: b.id, name: b.name.trim() };
+}
+/** B-128: phone.url is an http(s) origin a phone can open (not loopback), kept as its origin. */
+export function validatePhone(value: unknown): { url: string } {
+  const p = value as Record<string, unknown>;
+  const url =
+    p && typeof p === 'object' && !Array.isArray(p) && Object.keys(p).every((k) => k === 'url')
+      ? pairingBase(p.url)
+      : undefined;
+  if (!url || isLoopbackBase(url))
+    throw new Error(
+      'Invalid phone: {"url": "https://NAME.TAILNET.ts.net"}, an address the phone opens (not 127.0.0.1).',
+    );
+  return { url };
 }
 export const defaults: Omit<Config, 'models' | 'base'> = { port: 4317, language: 'en', timeZone: 'Europe/Rome' };
 /** NERV_* settings; the pre-rename NODO_* names are still read as a fallback. */
@@ -130,6 +146,7 @@ export function readConfig(home: string): Config {
   if ('packs' in raw) config.packs = validatePacksConfig(raw.packs);
   if ('browser' in raw) config.browser = validateBrowserConfig(raw.browser);
   if ('appWorkflow' in raw) config.appWorkflow = validateAppWorkflowConfig(raw.appWorkflow);
+  if ('phone' in raw) config.phone = validatePhone(raw.phone);
   if ('telegram' in raw) {
     const t = raw.telegram as Record<string, unknown>;
     if (

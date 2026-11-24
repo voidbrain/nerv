@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T20",
-  "status": "planned",
+  "status": "implemented",
   "title": "Seed the standby store and ship replication batches while serve runs",
   "goal": "A running main keeps its named standby's coordinator-standby.sqlite current, so a move starts from the main's latest state",
   "capabilities": [
@@ -14,8 +14,8 @@
   ],
   "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
   "acceptance": [
-    "A command or serve loop seeds a base's standby store from a signed snapshot of the running main, and serve ships each committed batch over /kaji/replicate to the named standby (tests across both bases)",
-    "A fixture shows an effect the old main ran before a partition is known to the promoted main",
+    "A command or serve loop seeds a base's standby store from a signed snapshot of the running main, and serve ships each committed batch over /kaji/replicate to the named standby (tests across both bases): `nerv kaji standby BASE-ID` seeds a base without a standby store over `/kaji/standby/seed`; serve's shipper captures committed rows by trigger and sends one batch at a time, applied once and in order; an unreachable standby shows lag; a standby behind the kept log or without its store is seeded again; `kaji drain` ships the final batch before it fences (test/coordinator-shipping.test.ts, two bases over real KajiLinks)",
+    "A fixture shows an effect the old main ran before a partition is known to the promoted main: in test/coordinator-partition.test.ts the remote request X sent and its Telegram offset reach B before the partition; B promotes with nothing quarantined or sent again and resumes from the shipped offset",
     "Owner agreed 2026-11-24 to add this step to the adopted plan, before F-016-T09"
   ],
   "dependsOn": [
@@ -43,11 +43,19 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "3 h agent",
-    "basis": "Estimated 2026-11-24 from F-016-T16 to F-016-T19 (1–1.5 h each stated): seeding command, shipping loop, standby apply wiring and fixtures. Not a measurement; uncertain until the owner sets the scope.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 from F-016-T16 to F-016-T19 (1–1.5 h each stated): seeding command, shipping loop, standby apply wiring and fixtures. Not a measurement; uncertain until the owner sets the scope. 2026-11-24: implemented in PR #725; actual stated 3.5 h (capture triggers, seed endpoint and swap, shipper, drain flush, status, fixtures across two bases and the mesh). 2026-11-24: #725 design review fixes (2 blockers, 4 should-fixes, minors) added 2 h (stated).",
     "reviewed": "2026-11-24",
-    "agentHours": 3,
+    "agentHours": 0,
     "baselineAgentHours": 3,
-    "estimateAgentHours": 3
-  }
+    "estimateAgentHours": 3,
+    "actualAgentHours": 5.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 725,
+      "note": "Live standby seeding and replication while serve runs"
+    }
+  ]
 }
