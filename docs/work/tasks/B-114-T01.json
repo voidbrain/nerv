@@ -4,7 +4,7 @@
   "parent": "B-114",
   "title": "Find why the EVA-03 script-plan test fails under load",
   "goal": "test/script-plan.test.ts passes on a loaded runner as it does alone",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Cause named (timing budget, sandbox start, or gate wait) with evidence",
     "A committed regression that reproduces the load case, then the fix"
@@ -30,11 +30,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
-    "reviewed": "2026-11-23",
-    "agentHours": 1,
+    "estimate": "0.25 h agent",
+    "basis": "Implemented 2026-11-24 in PR #694; verification by green CI runs without the failure.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0.25,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 0.25
   }
 }
