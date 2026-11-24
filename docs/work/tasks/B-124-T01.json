@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "B-124-T01",
+  "parent": "B-124",
+  "title": "kaji relocate pushes a re-target only after the target's prechecks pass",
+  "goal": "A re-target signed while a coordinator runs never fences it before the target's promote has passed its local check and the B-121-T02 probe",
+  "status": "planned",
+  "acceptance": [
+    "A committed test fails first: B runs epoch 3 through D, the owner relocates to C at 4, C's promote is refused, and B is still acting",
+    "kaji relocate no longer fences the running main on its own; the decision doc and the relocation guide say how the records reach the target",
+    "The owner agrees the change to kaji relocate before work starts"
+  ],
+  "dependsOn": [
+    "B-121-T02"
+  ],
+  "resources": [
+    "src/cli-kaji.ts",
+    "src/coordinator-promote.ts",
+    "test/coordinator-partition.test.ts",
+    "docs/decisions/coordinator-relocation.md",
+    "docs/work/records/B-124.md",
+    "generated:backlog-views",
+    "contract:coordinator-authority"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "validation": [
+    "A committed regression fails before the fix",
+    "npm run check:fast",
+    "final required CI"
+  ],
+  "escalation": [
+    "Changes what kaji relocate does: the owner agrees before work starts",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h agent",
+    "basis": "Estimated 2026-11-24 from B-121-T02 (1.25 h stated): one command's push removed or gated, docs, a mesh test. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

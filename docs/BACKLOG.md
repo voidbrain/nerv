@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 5 | 1 | 16 | 2 |
+| **This week** | 5 | 1 | 18 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 27 |
+| **Open** | 39 | 29 |
 | **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 94.75 h agent + 11.25 h owner across 138 open steps of 38 features and 27 other records. 155.75 h of actual effort recorded on 153 steps. Generated from the task files.
+**Remaining effort:** 97.75 h agent + 11.25 h owner across 140 open steps of 38 features and 29 other records. 159.5 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -394,6 +394,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-121"></a>[🐞 B-121](#top)
+
+**A re-targeted move can take over from a standby older than an epoch that ran**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0 h | — | [B-124-T01](#b-124-t01) | 🤖 | — | — |
+
+💻 **→** Next: independent review of [PR #721](https://github.com/voidbrain/nerv/pull/721) (P1), then green CI and merge; verification follows on main.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 by the F-016-T08 mixed-epoch fixture: B promoted to epoch 3 and renewed through C; the owner then re-targeted the move to C at epoch 4. C's standby store still held epoch-2 state (nothing re-seeds it), yet readiness took over from it (previous epoch 2, previous main X revoked), so C would undo what B did at epoch 3 and could repeat it. The decision allows taking over from the standby's epoch only when the first target never promoted. |
+| **Reproduce** | `test/coordinator-partition.test.ts`, "mixed epochs": X at 2; revoke X, main B at 3, B promotes and renews through C; main C at 4; `kaji promote` on C. |
+| **Check** | C is refused (`standby_behind`) while any unrevoked base, C itself included, ran or acked a lease at a later epoch than C's standby state. T01 covers C's own acks; T02 (owner agreed the scope 2026-11-24) adds `ranOrAckedEpoch` to the signed `/kaji/epoch-push` reply and asks every other unrevoked base before any push, so a refused move leaves the running main acting. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-121-t01"></a>B-121-T01 — Refuse a move from a standby that acked a later epoch than its state | 0.5 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | [B-121-T02](#b-121-t02) | [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks |
+| 🟢 Small | <a id="b-121-t02"></a>B-121-T02 — Epoch-push replies report the newest epoch a base ran or acked | 3.75 h | 3.75 h so far (stated) | 0 h | Implemented; verification pending | [B-121-T01](#b-121-t01) | [B-124-T01](#b-124-t01) | [PR #721](https://github.com/voidbrain/nerv/pull/721) ranOrAckedEpoch in the epoch-push reply; record-free probe before the push; #721 review fixes |
+| 🟢 Small | **Total** | 4.25 h | 4.5 h | 0 h | 0 of 2 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-121.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-121-T01: [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks · B-121-T02: [PR #721](https://github.com/voidbrain/nerv/pull/721) ranOrAckedEpoch in the epoch-push reply; record-free probe before the push; #721 review fixes. [PR #717](https://github.com/voidbrain/nerv/pull/717) (Test: `test/coordinator-partition.test.ts`, mixed epochs) · B-121-T02: [PR #721](https://github.com/voidbrain/nerv/pull/721) (Test: `test/coordinator-partition.test.ts`, B-121-T02; `test/coordinator-relocation.test.ts`, epoch-push witness) |
+| Opened | 2026-11-24 |
+| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and the coordinator suites pass locally, B-121-T02 included; full `npm test` 1375 pass, 0 fail (2 skipped) after the #721 fourth-check fixes; gauntlet: the 10 pending cases ran and passed again (ledger committed in PR #721). On main: Pending. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="b-082"></a>[🐞 B-082](#top)
 
 **Windows: a service installed from an SSH session cannot register its logon task**
@@ -436,45 +475,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-21: B-082-T02 CI run 44815656209 and required fresh-context review passed. Local: targeted regression 2/2, full tests 1,041 pass / 2 platform skips, build, `check:fast`, headless 5 pass / 1 Windows skip. Pending: the live desktop-session install on Tabgha after B-087-T01. |
 | Reviewed | 2026-11-21 |
-
-</details>
-
----
-### <a id="b-121"></a>[🐞 B-121](#top)
-
-**A re-targeted move can take over from a standby older than an epoch that ran**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: from tasks. Owner agreed the scope of B-121-T02 on 2026-11-24.
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-24 by the F-016-T08 mixed-epoch fixture: B promoted to epoch 3 and renewed through C; the owner then re-targeted the move to C at epoch 4. C's standby store still held epoch-2 state (nothing re-seeds it), yet readiness took over from it (previous epoch 2, previous main X revoked), so C would undo what B did at epoch 3 and could repeat it. The decision allows taking over from the standby's epoch only when the first target never promoted. |
-| **Reproduce** | `test/coordinator-partition.test.ts`, "mixed epochs": X at 2; revoke X, main B at 3, B promotes and renews through C; main C at 4; `kaji promote` on C. |
-| **Check** | C is refused (`standby_behind`) while any unrevoked base, C itself included, ran or acked a lease at a later epoch than C's standby state. T01 covers C's own acks; T02 (planned, owner agrees scope) adds a field to the epoch-push reply so a base that ran or acked a later epoch reports it. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-121-t01"></a>B-121-T01 — Refuse a move from a standby that acked a later epoch than its state | 0.5 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | [B-121-T02](#b-121-t02) | [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks |
-| 🟢 Small | <a id="b-121-t02"></a>B-121-T02 — Epoch-push replies report the newest epoch a base ran or acked | 1 h | 0 h | 1 h | Planned | [B-121-T01](#b-121-t01) | — | — |
-| 🟢 Small | **Total** | 1.5 h | 0.75 h (1 of 2 steps recorded) | 1 h | 0 of 2 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-121.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-121-T01: [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks. [PR #717](https://github.com/voidbrain/nerv/pull/717) (Test: `test/coordinator-partition.test.ts`, mixed epochs) |
-| Opened | 2026-11-24 |
-| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and the coordinator suites pass locally. B-121-T02: Pending. |
-| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -1771,6 +1771,82 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #720](https://github.com/voidbrain/nerv/pull/720) (status file, route, Health row; Test: `test/updater-status.test.ts`, `test/updater-status-render.test.mjs`, `test/updater-status.browser.mjs`) |
 | Opened | 2026-11-24 |
 | Verification | Unit/integration 2026-11-24: `npm test` 1,364 pass, `test:headless` pass, gauntlet system flows pass locally. Browser/accessibility 2026-11-24: `test/updater-status.browser.mjs` passes locally on the production build. Human (a real Update now on the base, after B-122): Pending. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-124"></a>[🐞 B-124](#top)
+
+**A re-target `kaji relocate` signs fences the running main before the target's checks run**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | [B-121-T02](#b-121-t02) | — | ⏳ | — | — |
+
+💻 **→** Next: B-124-T01 (design and fix); the owner agrees the change to `kaji relocate` before work starts.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 in the review of [PR #721](https://github.com/voidbrain/nerv/pull/721) (B-121-T02). `kaji relocate` (src/cli-kaji.ts, `relocate`) pushes the main record it signs to every reachable base at once. When the owner re-targets while a coordinator runs (B at epoch 3, main C signed at 4), B's renewals then meet epoch 4 and B fences, before `kaji promote` on C has checked anything. If C's promote is then refused (`standby_behind`: B ran epoch 3 after C's standby state), no base acts. No way out exists today: nothing re-seeds C's standby from B, a new main record naming B (epoch 5) makes B's promote refuse `context_only` (B's store is no standby store), and `kaji lease-rearm` re-arms only at the epoch the store holds. Safety holds (no two coordinators); availability is lost until the owner restores by hand. |
+| **Reproduce** | Mesh as in `test/coordinator-partition.test.ts` (B-121-T02): B runs epoch 3 through D; the owner runs `kaji relocate` for C (epoch 4) on a base that reaches B or D; `kaji promote` on C is refused; nobody holds authority. |
+| **Check** | A re-target signed while a coordinator runs leaves that coordinator acting until the target's prechecks (local and the B-121-T02 probe) pass. Proposed fix: `kaji relocate` pushes nothing (only signs and stores the records, for `kaji export`/`import` to the target), and `kaji promote` on the target pushes them after its prechecks, as it already does; or relocate probes first and refuses a target whose standby is behind. A committed test fails first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-124-t01"></a>B-124-T01 — kaji relocate pushes a re-target only after the target's prechecks pass | 2 h | 0 h | 2 h | Planned | [B-121-T02](#b-121-t02) | — |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-124.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | None yet |
+| Opened | 2026-11-24 |
+| Verification | Pending |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-125"></a>[🐞 B-125](#top)
+
+**A signed Kaji reply is not bound to its request, so an old epoch-push reply can be replayed**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-125-T01 (design and fix); the owner agrees the change to the signed reply before work starts.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 in the review of [PR #721](https://github.com/voidbrain/nerv/pull/721) (B-121-T02). Replies on the Kaji line are signed over method, path, time, nonce and body digest, but the nonce is the reply's own, not the request's, so a reply is not bound to the request it answers. Each client refuses a reply nonce it has seen, so a replay must be one this client never received (withheld from it, or captured on the way to another base's request): an attacker on the path could answer a `/kaji/epoch-push` probe with a genuine reply that base signed up to 120 s earlier (the clock-skew window), hiding a newer `ranOrAckedEpoch` or `maxSeenCoordinatorEpoch`, and so let a re-targeted move pass the probe. The same holds for other signed replies (lease renewals included). |
+| **Reproduce** | Capture a signed epoch-push reply D sent to base A; within 120 s, after D acks a lease at a later epoch, answer base C's probe to D with it: C accepts it. |
+| **Check** | A committed test fails first: a reply signed for another request is refused. Proposed fix: the reply's signature covers the request's nonce (or its digest), and the client checks it, with a mixed-version rule for older peers stated in the decision. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-125-t01"></a>B-125-T01 — Bind every signed Kaji reply to the request it answers | 2 h | 0 h | 2 h | Planned |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-125.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | None yet (found in [PR #721](https://github.com/voidbrain/nerv/pull/721)) |
+| Opened | 2026-11-24 |
+| Verification | Pending |
 | Reviewed | 2026-11-24 |
 
 </details>

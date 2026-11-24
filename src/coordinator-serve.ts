@@ -8,7 +8,7 @@ import {
   type LeaseRenewRequest,
   type LeaseRenewResult,
 } from './coordinator-lease.ts';
-import { STANDBY_DB_FILE } from './coordinator-relocation.ts';
+import { STANDBY_DB_FILE, ranOrAckedCoordinatorEpoch } from './coordinator-relocation.ts';
 import { Registry, keyIdentity } from './kaji.ts';
 import { isActiveCoordinator, readCoordinatorFencingState } from './coordinator-authority.ts';
 import type { State, TelegramContinuity } from './telegram.ts';
@@ -36,6 +36,8 @@ export function coordinatorLeaseService(input: {
   return {
     /** F-016-T18: the newest coordinator epoch this base holds; older-epoch headers are refused. */
     mainEpoch: (): number => registry().mainEpoch(),
+    /** B-121-T02: the newest coordinator epoch this base ran or acked a lease at (said in epoch-push replies). */
+    ranOrAckedEpoch: (): number => ranOrAckedCoordinatorEpoch(db, join(input.home, STANDBY_DB_FILE)),
     /** Standby side of `POST /kaji/lease/renew`. */
     onLeaseRenew: async (_from: string, request: LeaseRenewRequest): Promise<LeaseRenewResult> => {
       // Only a base holding the standby store acks (F-016-T16 re-review): a worker or a drained old main never
@@ -55,6 +57,19 @@ export function coordinatorLeaseService(input: {
       } finally {
         standby.close();
       }
+    },
+    /**
+     * The Kaji line's coordinator handlers as `serve` wires them (#721 review: one place, tested end to end): lease
+     * acks, the newest epoch enforced on incoming headers, and what epoch-push replies say (a standby store held;
+     * B-121-T02, the newest epoch this base ran or acked).
+     */
+    kajiOptions() {
+      return {
+        onLeaseRenew: this.onLeaseRenew,
+        minCoordinatorEpoch: this.mainEpoch,
+        holdsStandby: () => existsSync(join(input.home, STANDBY_DB_FILE)),
+        ranOrAckedEpoch: this.ranOrAckedEpoch,
+      };
     },
     /** The keeper with the Kaji line's signed renewal; `serve` starts it. */
     keeper(

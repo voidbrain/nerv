@@ -30,7 +30,8 @@ export type RelocationRefusal =
   | 'horizon_not_passed'
   | 'restore_mismatch'
   | 'restore_not_approved'
-  | 'previous_main_unknown';
+  | 'previous_main_unknown'
+  | 'peer_epoch_unknown';
 
 export class RelocationRefusedError extends Error {
   readonly reason: RelocationRefusal;
@@ -52,6 +53,18 @@ export interface DrainReceipt {
   readonly newMainBaseId: string;
   /** The epoch the owner signed for the new main: a receipt is never reused for a later relocation. */
   readonly newEpoch: number;
+  /**
+   * B-121 (#721 re-check): every main record this base held that was signed between its epoch and the new one.
+   * Each named base may have run; the planned promote needs each to answer that it did not run later than the
+   * standby's state. Absent from a receipt an older NERV wrote.
+   */
+  readonly skippedMains?: readonly { readonly baseId: string; readonly coordinatorEpoch: number }[];
+  /**
+   * #721 fourth check: the newest coordinator epoch the drained base ran or acked a lease at (its stores, a standby
+   * store it keeps included), so a promote refuses when it is later than the standby's state. Absent from a receipt
+   * an older NERV wrote.
+   */
+  readonly ranOrAckedEpoch?: number;
 }
 
 export interface SignedDrainReceipt {
@@ -64,6 +77,10 @@ export interface SignedDrainReceipt {
  * with the lease cleared) in one transaction and returns the drain receipt, bound to the new main
  * and epoch the owner signed. Idempotent for the same epoch so a lost reply can be fetched again;
  * refuses any other epoch. The fencing state is read inside the write transaction.
+ *
+ * B-121 (#721 review and re-check): this base cannot know that a main signed between its epoch and the target
+ * never ran (it may have promoted with a receipt from here, or unplanned), so the receipt lists every such record
+ * it holds (`skippedMains`, signed with the rest); the planned promote asks each of those bases.
  */
 export function drainCoordinator(
   db: DatabaseSync,
@@ -72,11 +89,22 @@ export function drainCoordinator(
     readonly coordinatorEpoch: number;
     readonly newMainBaseId: string;
     readonly newEpoch: number;
+    /** Every verified owner-signed main record in this base's registry. */
+    readonly registryMains: readonly { readonly baseId: string | undefined; readonly coordinatorEpoch: number }[];
+    /** `ranOrAckedCoordinatorEpoch` of this base's stores, read before the drain. */
+    readonly ranOrAckedEpoch: number;
     readonly nowMs?: number;
   },
 ): DrainReceipt {
   if (input.newEpoch <= input.coordinatorEpoch)
     throw new Error(`The new epoch ${input.newEpoch} must be later than ${input.coordinatorEpoch}.`);
+  const skippedMains = input.registryMains
+    .filter(
+      (m): m is { baseId: string; coordinatorEpoch: number } =>
+        m.baseId !== undefined && m.coordinatorEpoch > input.coordinatorEpoch && m.coordinatorEpoch < input.newEpoch,
+    )
+    .map((m) => ({ baseId: m.baseId, coordinatorEpoch: m.coordinatorEpoch }))
+    .sort((a, b) => a.coordinatorEpoch - b.coordinatorEpoch);
   const nowMs = input.nowMs ?? Date.now();
   db.exec('BEGIN IMMEDIATE');
   try {
@@ -101,6 +129,8 @@ export function drainCoordinator(
       leaseRevokedAt: nowMs,
       newMainBaseId: input.newMainBaseId,
       newEpoch: input.newEpoch,
+      skippedMains,
+      ranOrAckedEpoch: input.ranOrAckedEpoch,
     };
   } catch (err) {
     db.exec('ROLLBACK');
@@ -178,6 +208,25 @@ function standbyAckedEpoch(db: DatabaseSync): number {
   const row = db.prepare('SELECT standby_coordinator_epoch FROM standby_lease_state WHERE id = 1').get() as
     { standby_coordinator_epoch: number } | undefined;
   return row?.standby_coordinator_epoch ?? 0;
+}
+
+/**
+ * B-121-T02: the newest coordinator epoch this base ran or acked a lease at: the epoch of the coordinator state
+ * in `nerv.sqlite` and in the standby store next to it (a state at epoch E exists only because a coordinator ran
+ * E), and the newest lease ack in either. `/kaji/epoch-push` replies carry it, so a re-targeted move learns that a
+ * later coordinator ran than the state its standby holds, even when that coordinator renewed through another base.
+ */
+export function ranOrAckedCoordinatorEpoch(mainDb: DatabaseSync, standbyDbPath: string): number {
+  const of = (db: DatabaseSync) =>
+    Math.max(readCoordinatorFencingState(db)?.coordinatorEpoch ?? 0, standbyAckedEpoch(db));
+  if (!existsSync(standbyDbPath)) return of(mainDb);
+  const standby = new DatabaseSync(standbyDbPath);
+  try {
+    standby.exec('PRAGMA busy_timeout = 5000');
+    return Math.max(of(mainDb), of(standby));
+  } finally {
+    standby.close();
+  }
 }
 
 /** Owner-approved cold restore from a verified signed snapshot bound to the previous epoch. */

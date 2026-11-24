@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "B-125-T01",
+  "parent": "B-125",
+  "title": "Bind every signed Kaji reply to the request it answers",
+  "goal": "A captured reply cannot answer a later request: the client refuses a reply not signed for its own request nonce",
+  "status": "planned",
+  "acceptance": [
+    "A committed test fails first: an epoch-push reply captured for one request is replayed to answer another and is refused",
+    "Reply signatures cover the request nonce; the decision states how an older peer is treated",
+    "The owner agrees the change to the signed reply before work starts"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/kaji-auth.ts",
+    "src/kaji-link.ts",
+    "test/coordinator-relocation.test.ts",
+    "docs/decisions/coordinator-relocation.md",
+    "docs/work/records/B-125.md",
+    "generated:backlog-views",
+    "contract:coordinator-authority"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design",
+    "distributed-contracts",
+    "security-review"
+  ],
+  "privacy": "Neutral fixtures only in git; real keys and device evidence remain private.",
+  "validation": [
+    "A committed regression fails before the fix",
+    "npm run check:fast",
+    "final required CI"
+  ],
+  "escalation": [
+    "Changes the signed Kaji reply: the owner agrees before work starts",
+    "Never weaken request signing or nonce replay checks to make progress"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h agent",
+    "basis": "Estimated 2026-11-24 from B-121-T02 (stated): signing helper, both call paths, a replay test, decision text. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}
