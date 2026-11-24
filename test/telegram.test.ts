@@ -963,3 +963,50 @@ test('F-016-T19: a base without coordinator authority never polls or calls the B
     rmSync(home, { recursive: true, force: true });
   }
 });
+
+test('F-016-T19 review (#704): hydrating twice never doubles the card messages', async () => {
+  const token = '123456:' + 'm'.repeat(35);
+  const tg = await fakeTelegram(token);
+  const home = mkdtempSync(join(tmpdir(), 'nerv-hydrate-'));
+  const store = new Store(join(home, 'nerv.sqlite'));
+  const statePath = join(home, 'telegram-state.json');
+  writeFileSync(statePath, JSON.stringify({ cards: [], messages: [{ messageId: 5, rows: [] }] }));
+  let authorized = false;
+  const aoba = new TelegramChannel({
+    api: new TelegramApi(token, tg.base),
+    store: store as unknown as StoreApi,
+    chatId: OWNER,
+    statePath,
+    log: () => {},
+    authority: () => authorized,
+    continuity: {
+      load: () => ({
+        messages: [
+          { messageId: 5, rows: [] },
+          { messageId: 6, rows: [] },
+        ],
+      }),
+      save: () => {},
+    },
+    standbyCheckMs: 20,
+  });
+  try {
+    await aoba.start(30);
+    for (let i = 0; i < 2; i++) {
+      authorized = true;
+      await until(() => tg.calls.filter((c) => c.method === 'getUpdates').length > i);
+      authorized = false;
+      await wait(100);
+    }
+    const saved = JSON.parse(readFileSync(statePath, 'utf8')) as { messages: { messageId: number }[] };
+    assert.deepEqual(
+      saved.messages.map((m) => m.messageId),
+      [5, 6],
+    );
+  } finally {
+    await aoba.stop();
+    store.close();
+    await tg.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
