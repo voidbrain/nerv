@@ -232,6 +232,7 @@
         "test/pwa.browser.mjs",
         "test/browser-click.browser.mjs",
         "test/diyfpv-read.browser.mjs",
+        "test/updater-status.browser.mjs",
         "test/fixtures/browser.mjs"
       ]
     },

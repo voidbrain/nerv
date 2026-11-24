@@ -36,6 +36,7 @@ import {
   compatibleServiceRevision,
   definition,
   exclusive,
+  FOREGROUND_ENTRY,
   fileHash,
   hash,
   object,
@@ -149,7 +150,7 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
         return m ? [{ pid: Number(m[1]), parent: Number(m[2]), comm: m[3]!, args: m[4]! }] : [];
       });
       const roots = rows.filter(
-        (r) => (r.comm === 'node' || r.comm.endsWith('/node')) && /src\/cli\.ts\s+(serve|launch)(\s|$)/.test(r.args),
+        (r) => (r.comm === 'node' || r.comm.endsWith('/node')) && FOREGROUND_ENTRY.test(r.args),
       );
       const ids = new Set(roots.map((r) => r.pid));
       if (managerPid) ids.add(managerPid);

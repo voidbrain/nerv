@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, it } from 'node:test';
@@ -105,7 +105,7 @@ describe('F-087-T02 slice with a material profile', () => {
 });
 
 describe('F-087-T03 hand off to Bambu Connect with the owner checklist', () => {
-  it('requires Orange approval, opens Bambu Connect import link, returns owner checklist, and never says print started', () => {
+  it("requires the owner's approval (Blue), opens Bambu Connect import link, returns owner checklist, and never says print started", () => {
     const dir = makeDir();
     const gcodePath = join(dir, 'bracket.gcode.3mf');
     writeFileSync(gcodePath, 'PK_MOCK_3MF', 'utf8');
@@ -133,7 +133,8 @@ describe('F-087-T03 hand off to Bambu Connect with the owner checklist', () => {
       },
     });
     assert.equal(proposal.outcome, 'approval');
-    assert.equal(proposal.pattern, 'orange');
+    // Owner decision 2026-11-24 (F-121): the hand-off is Blue, always the owner's card (was Orange in F-087-T03).
+    assert.equal(proposal.pattern, 'blue');
     assert.equal(launchedUrl, '');
 
     const decided = store.decide(proposal.approvalId!, 'approve', 'owner');
@@ -169,5 +170,30 @@ describe('F-087-T03 hand off to Bambu Connect with the owner checklist', () => {
     assert.equal(result.reason, 'no-active-desktop-session');
     assert.match(result.importLink, /^bambu-connect:\/\/import-file\?path=/);
     assert.match(result.message, /waiting for an active desktop login/i);
+  });
+});
+
+describe('F-121-T02: no test opens the real Bambu Connect', () => {
+  it('the default launcher refuses under the test runner, so a test must inject a bambuLauncher', () => {
+    const dir = makeDir();
+    const gcodePath = join(dir, 'bracket.gcode.3mf');
+    writeFileSync(gcodePath, 'PK_MOCK_3MF', 'utf8');
+    // Should the guard be missing, these fakes (first on PATH) record the call instead of opening an app.
+    const bin = makeDir();
+    const called = join(dir, 'opener-called');
+    for (const name of ['open', 'xdg-open']) {
+      writeFileSync(join(bin, name), `#!/bin/sh\necho "$@" > '${called}'\n`, { mode: 0o755 });
+    }
+    const path = process.env.PATH;
+    process.env.PATH = `${bin}:${path ?? ''}`;
+    try {
+      assert.throws(
+        () => handOffToBambuConnect({ gcode3mfPath: gcodePath, profileName: 'PLA-Basic' }),
+        /must inject a bambuLauncher/,
+      );
+    } finally {
+      process.env.PATH = path;
+    }
+    assert.equal(existsSync(called), false, 'no opener ran');
   });
 });

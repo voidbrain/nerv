@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 5 | 1 | 16 | 2 |
+| **This week** | 5 | 1 | 18 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 27 |
+| **Open** | 39 | 29 |
 | **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 99.25 h agent + 11 h owner across 137 open steps of 38 features and 27 other records. 148.5 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 100.75 h agent + 11.25 h owner across 140 open steps of 38 features and 29 other records. 156 h of actual effort recorded on 153 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1699,6 +1699,83 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-122"></a>[🐞 B-122](#top)
+
+**Update now is refused with "ownership is unknown" while NERV runs as a foreground `nerv launch`**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: merge PR #719 on green CI; then the owner check (B-122-T02).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 on NERV-01: the dashboard's Update now (B-108 updater job, B-110 button) was refused twice, at revision `fd0f2a0`, with "Service or runtime ownership is unknown or belongs elsewhere." and nothing stopped. The launchd service `io.nerv.agent` was not registered (stopped with `nerv service stop`); port 4317 was served by a foreground `nerv launch` from a terminal, through the global `nerv` link into the development checkout. The update refuses to stop a process the service manager did not start, which is right, but the reason did not say so, and process discovery did not even find that process (it matched only `…/src/cli.ts serve` or `launch`, not `…/bin/nerv launch`). |
+| **Reproduce** | On a base whose service was moved to the install folder: `nerv service stop`, then `nerv launch` in a terminal, then press Update now. Steps for the owner: [update from a foreground launch](acceptance/b122-update-from-foreground-2026-11-24.md). |
+| **Check** | A committed test fails first: after a service move, with the service not registered and a foreground `nerv launch` serving the base, the outside updater's refusal names the foreground process and what to do, not the generic ownership reason, and stops nothing; once it is stopped the same update plan has no blockers; a moved, registered service is observed owned. On NERV-01 the owner updates through the service and, after the fix is installed, sees the new reason (B-122-T02). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="b-122-t01"></a>B-122-T01 — Name a foreground NERV when an update is refused | 1.5 h | 1.5 h so far (stated) | 1.5 h | Implemented; verification pending | — | [B-122-T02](#b-122-t02) | 🤖 |
+| 🟢 Small | <a id="b-122-t02"></a>B-122-T02 — Owner updates NERV-01 and sees the foreground reason | — | 0 h | 0 h agent + 0.25 h owner | Planned | [B-122-T01](#b-122-t01) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 1.5 h (1 of 2 steps) | 1.5 h (1 of 2 steps recorded) | 1.5 h agent + 0.25 h owner | 0 of 2 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-122.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #719](https://github.com/voidbrain/nerv/pull/719) (Test: `test/update-foreground-runtime.test.ts`) |
+| Opened | 2026-11-24 |
+| Verification | Unit/integration 2026-11-24: `test/update-foreground-runtime.test.ts` (2 of 2) and the lifecycle suites pass locally; `npm test` 1358 pass, 0 fail; gauntlet `nerv-system-flows` (incl. stress, browser) passed. Owner check on NERV-01: Pending (B-122-T02). |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-123"></a>[🐞 B-123](#top)
+
+**After Update now the dashboard never shows the updater's result**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: CI on PR #720, then a real Update now on the base once B-122 is merged shows the outcome in Health.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-24: after pressing Update now in the dashboard's Health row, the page showed only "Manual update started · fd0f2a0" and nothing after. The outside updater (B-108) refused ("Service or runtime ownership is unknown or belongs elsewhere.", "Nothing was stopped…") and wrote that to `updater-result.json`, the inbox and `updater.log`, but the dashboard reads none of them, and it kept the button busy for 10 minutes before saying "uncertain". |
+| **Reproduce** | Press Update now on a base where the updater refuses (the B-122 case) or fails; the Health row stays on "Manual update started" and never shows the refusal, its reasons or recovery. |
+| **Check** | A committed test that fails first, across the join: the updater writes its result → `GET /api/update/status` returns it → the dashboard's Health row shows it beside the button (in progress with its step, completed, refused, failed or uncertain, with reasons and recovery) after a reload too, until dismissed or superseded; the inbox still reports it exactly once. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-123-t01"></a>B-123-T01 — Show the updater's status beside Update now | 3 h | 2.5 h so far (stated) | 3 h | Implemented; verification pending |
+| 🟡 Medium | **Total** | 3 h | 2.5 h | 3 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-123.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #720](https://github.com/voidbrain/nerv/pull/720) (status file, route, Health row; Test: `test/updater-status.test.ts`, `test/updater-status-render.test.mjs`, `test/updater-status.browser.mjs`) |
+| Opened | 2026-11-24 |
+| Verification | Unit/integration 2026-11-24: `npm test` 1,364 pass, `test:headless` pass, gauntlet system flows pass locally. Browser/accessibility 2026-11-24: `test/updater-status.browser.mjs` passes locally on the production build. Human (a real Update now on the base, after B-122): Pending. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="b-124"></a>[🐞 B-124](#top)
 
 **A re-target `kaji relocate` signs fences the running main before the target's checks run**
@@ -2512,6 +2589,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-121"></a>[✨ F-121](#top)
+
+**Printed parts per drone: "print Smoke's feet"**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-121-T01 — Printed parts on drone models (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-24: each drone model in the fleet (F-098) has its own 3D-printed parts. AOS 5: 4 motor feet, a rear tail with mounts for the two O4 antennas, a GPS enclosure, a buzzer enclosure and 2 camera cage bands (one per side). Pavo20 Pro: the same GPS and buzzer enclosures only. "Print Smoke's feet" or "print the AOS feet" should resolve the drone, its model, the part, its file, the count and the print settings (default TPU from the external spool, the profile's own temperatures) and go through the existing slice and Bambu Connect hand-off (F-087). |
+| **Reproduce** | `nerv chat "stampa i piedini di Smoke"`: NERV has no printed parts in the fleet and cannot name a file or profile. |
+| **Check** | Printed parts belong to a drone model with a count, file and print profile; a drone inherits its model's parts; a chat request names the part, file, count and profile and asks approval before the hand-off; the owner's part list and file paths stay in the private fleet data, never in Git. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-121-t01"></a>F-121-T01 — Printed parts on drone models | 3 h | 3 h so far (stated) | 0 h | Implemented; verification pending | — | [F-121-T02](#f-121-t02) | [PR #715](https://github.com/voidbrain/nerv/pull/715) implementation |
+| 🟢 Small | <a id="f-121-t02"></a>F-121-T02 — Print a part by chat | 3 h | 3.5 h so far (stated) | 0 h | Implemented; verification pending | [F-121-T01](#f-121-t01) | [F-121-T03](#f-121-t03), [F-121-T04](#f-121-t04) | [PR #718](https://github.com/voidbrain/nerv/pull/718) implementation |
+| 🟡 Medium | <a id="f-121-t04"></a>F-121-T04 — Send the part file with the print job | 3 h | 0 h | 3 h | Planned | [F-121-T02](#f-121-t02) | [F-121-T03](#f-121-t03) | — |
+| 🟢 Small | <a id="f-121-t03"></a>F-121-T03 — Owner: enter the parts and print one | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-121-T02](#f-121-t02), [F-121-T04](#f-121-t04) | — | — |
+| 🟡 Medium | **Total** | 9 h | 6.5 h (2 of 4 steps recorded) | 3 h agent + 0.5 h owner | 0 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-121.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-121-T01: [PR #715](https://github.com/voidbrain/nerv/pull/715) implementation · F-121-T02: [PR #718](https://github.com/voidbrain/nerv/pull/718) implementation. [PR #718](https://github.com/voidbrain/nerv/pull/718) (F-121-T02 print a part by chat); [PR #715](https://github.com/voidbrain/nerv/pull/715) (F-121-T01 printed parts on drone models); opened in [PR #712](https://github.com/voidbrain/nerv/pull/712). |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-24: F-121-T02 `node --test test/fleet-print-job.test.ts` (failing first) and the affected suites (224 passed); full `npm test` 1365 (1363 passed, 2 skipped); `npm run build`, typecheck, lint, `npm run check:fast` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed; Review fixes (launcher guard, Blue hand-off; failing tests first): `node --test test/slicer.test.ts test/fleet-print-job.test.ts test/misato.test.ts` passed; full `npm test` 1366 (1364 passed, 2 skipped); build, typecheck, lint, `npm run check:fast` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed. CI pending. F-121-T01 `node --test test/fleet-prints.test.ts test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts test/misato.test.ts test/slicer.test.ts test/cli-help.test.ts` and related suites (126 passed), `npm run typecheck`, `npm run check:conventions`, `npm run check:fast` passed locally; full `npm test` 1310 tests (1308 passed, 2 skipped); `npm run build` passed; gauntlet `all` (gemma4-12b profile, owner-approved) passed with 0 cases still pending, ledger committed. Review fixes: `node --test` fleet-prints, fleet-chat, fleet, fleet-import, misato, slicer, cli-help, photos, telegram, batteries (142 passed), typecheck, lint, `npm run check:conventions` passed; build and gauntlet `all` (gemma4-12b, owner-approved) passed, 0 still pending, ledger committed; CI pending. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-101"></a>[✨ F-101](#top)
 
 **Share the FPV battery manager outside NERV**
@@ -2558,47 +2676,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-101-T01 verified: [PR #484](https://github.com/voidbrain/nerv/pull/484) merged on green CI. |
 | Reviewed | 2026-11-20 |
-
-</details>
-
----
-### <a id="f-121"></a>[✨ F-121](#top)
-
-**Printed parts per drone: "print Smoke's feet"**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 6 h agent + 0.5 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-121-T01 — Printed parts on drone models (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-24: each drone model in the fleet (F-098) has its own 3D-printed parts. AOS 5: 4 motor feet, a rear tail with mounts for the two O4 antennas, a GPS enclosure, a buzzer enclosure and 2 camera cage bands (one per side). Pavo20 Pro: the same GPS and buzzer enclosures only. "Print Smoke's feet" or "print the AOS feet" should resolve the drone, its model, the part, its file, the count and the print settings (default TPU from the external spool, the profile's own temperatures) and go through the existing slice and Bambu Connect hand-off (F-087). |
-| **Reproduce** | `nerv chat "stampa i piedini di Smoke"`: NERV has no printed parts in the fleet and cannot name a file or profile. |
-| **Check** | Printed parts belong to a drone model with a count, file and print profile; a drone inherits its model's parts; a chat request names the part, file, count and profile and asks approval before the hand-off; the owner's part list and file paths stay in the private fleet data, never in Git. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-121-t01"></a>F-121-T01 — Printed parts on drone models | 3 h | 3 h so far (stated) | 0 h | Implemented; verification pending | — | [F-121-T02](#f-121-t02) | [PR #715](https://github.com/voidbrain/nerv/pull/715) implementation |
-| 🟡 Medium | <a id="f-121-t02"></a>F-121-T02 — Print a part by chat | 3 h | 0 h | 3 h | Planned | [F-121-T01](#f-121-t01) | [F-121-T03](#f-121-t03), [F-121-T04](#f-121-t04) | — |
-| 🟡 Medium | <a id="f-121-t04"></a>F-121-T04 — Send the part file with the print job | 3 h | 0 h | 3 h | Planned | [F-121-T02](#f-121-t02) | [F-121-T03](#f-121-t03) | — |
-| 🟢 Small | <a id="f-121-t03"></a>F-121-T03 — Owner: enter the parts and print one | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-121-T02](#f-121-t02), [F-121-T04](#f-121-t04) | — | — |
-| 🔴 Large | **Total** | 9 h | 3 h (1 of 4 steps recorded) | 6 h agent + 0.5 h owner | 0 of 4 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-121.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-121-T01: [PR #715](https://github.com/voidbrain/nerv/pull/715) implementation. [PR #715](https://github.com/voidbrain/nerv/pull/715) (F-121-T01 printed parts on drone models); opened in [PR #712](https://github.com/voidbrain/nerv/pull/712). |
-| Opened | 2026-11-24 |
-| Verification | 2026-11-24: F-121-T01 `node --test test/fleet-prints.test.ts test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts test/misato.test.ts test/slicer.test.ts test/cli-help.test.ts` and related suites (126 passed), `npm run typecheck`, `npm run check:conventions`, `npm run check:fast` passed locally; full `npm test` 1310 tests (1308 passed, 2 skipped); `npm run build` passed; gauntlet `all` (gemma4-12b profile, owner-approved) passed with 0 cases still pending, ledger committed. Review fixes: `node --test` fleet-prints, fleet-chat, fleet, fleet-import, misato, slicer, cli-help, photos, telegram, batteries (142 passed), typecheck, lint, `npm run check:conventions` passed; build and gauntlet `all` (gemma4-12b, owner-approved) passed, 0 still pending, ledger committed; CI pending. |
-| Reviewed | 2026-11-24 |
 
 </details>
 

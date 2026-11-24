@@ -1,4 +1,5 @@
 import { writeUpdaterResult } from './updater-result.ts';
+import { markUpdaterFailed, markUpdaterRunning, withUpdaterSteps } from './updater-status.ts';
 import type { ManualUpdateResult } from './manual-update.ts';
 import { executeManualUpdate } from './manual-update.ts';
 import { lifecycleGit, outsideUpdaterDeps } from './nerv-update.ts';
@@ -134,11 +135,22 @@ export async function nodesCommand(args: string[], runner: CommandRunner = runNo
     // B-108: the updater job the service starts for Update now / the scheduled apply. It runs outside the service,
     // stops it through the lifecycle, then applies the update, which starts and verifies the new revision.
     if (command === 'self-update') {
-      // F-117-T02: the same dependencies as `nerv update`, which shares this path.
-      result = await executeManualUpdate(outsideUpdaterDeps({ host, git: lifecycleGit }), {
-        revision: required('revision'),
-        ...(values.has('channel') ? { channel: values.get('channel')! } : {}),
-      });
+      // F-117-T02: the same dependencies as `nerv update`, which shares this path. B-123: its steps and an error are
+      // kept for the dashboard's Health row (display only; the update itself is unchanged).
+      const run = { channel: values.get('channel') ?? 'main', revision: required('revision') };
+      markUpdaterRunning(dataHome(), run);
+      try {
+        result = await executeManualUpdate(
+          withUpdaterSteps(dataHome(), outsideUpdaterDeps({ host, git: lifecycleGit })),
+          {
+            revision: run.revision,
+            ...(values.has('channel') ? { channel: values.get('channel')! } : {}),
+          },
+        );
+      } catch (error) {
+        markUpdaterFailed(dataHome(), run, error);
+        throw error;
+      }
       // B-108-T02: leave the result for the restarted service to report in the inbox.
       writeUpdaterResult(dataHome(), result as ManualUpdateResult);
     } else if (command === 'lifecycle-inspect')

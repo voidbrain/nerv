@@ -12,6 +12,7 @@ Status: Accepted (decision for F-087)
 
 ## 2. Bambu Connect Hand-Off & Developer Mode Choice
 
+- **Owner approval**: Opening Bambu Connect is always the owner's approval card (Blue, an `owner` tool in code), whatever Casper or the Scrolls say (owner decision 2026-11-24, F-121; it was Orange in F-087-T03). A test never opens the real app: the default launcher refuses under the test runner.
 - **Import link**: Hand off the sliced `.gcode.3mf` via `bambu-connect://import-file?path=<urlEncodedLocalPath>`, accompanied by an owner pre-print checklist (printer, build plate, nozzle, filament/AMS slot mapping, clear plate, someone nearby for first layer).
 - **Why Developer Mode is not used**: Enabling firmware Developer Mode forces LAN-only mode and disconnects the printer from Bambu Cloud / Bambu Handy / Bambu Connect. Without Developer Mode, NERV prepares and hands off the sliced file cleanly while the owner presses Print in Bambu Connect. NERV **never** reports a print as started, because it cannot observe printer state.
 

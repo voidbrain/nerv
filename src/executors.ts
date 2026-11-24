@@ -6,7 +6,8 @@ import type { Memory } from './memory.ts';
 import { toChecklistSurface, type ListStore } from './lists.ts';
 import { replayDesktopRecording, type DesktopRecordingFile, type DesktopReplayDriver } from './desktop-recording.ts';
 import { pushBranchAndOpenPr, type CodingJobPrOpener } from './coding-job.ts';
-import { handOffToBambuConnect, readSlicerProfiles, type BambuConnectLauncher } from './slicer.ts';
+import { handOffToBambuConnect, readSlicerProfiles, type BambuConnectLauncher, type SlicerExecFn } from './slicer.ts';
+import { printPartByChat, sliceLibraryPart } from './print-job.ts';
 import type { GmailClient } from './gmail.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
 import type { FpvBuildStore, BuildComponentInput, BuildWiringInput, PinoutEntry } from './fpv-builds.ts';
@@ -72,6 +73,8 @@ export interface ReminderBackend {
   desktopReplayDriver?: DesktopReplayDriver;
   codingPrOpener?: CodingJobPrOpener;
   bambuLauncher?: BambuConnectLauncher;
+  /** F-121-T02: the slicer process runner (tests pass a fake slicer). */
+  slicerExec?: SlicerExecFn;
   fpvBuilds?: FpvBuildStore;
   documents?: DocumentStore;
   photos?: PhotoStore;
@@ -133,6 +136,8 @@ export const builtinTools: Tool[] = [
   { name: 'batteries.list', effect: 'read' },
   { name: 'batteries.chat', effect: 'write-local' },
   { name: 'fleet.chat', effect: 'write-local' },
+  // F-121-T02: slices a printed part into the local prints-out folder; the Bambu Connect hand-off is the owner's card.
+  { name: 'fleet.print', effect: 'write-local' },
   { name: 'batteries.due', effect: 'read' },
   { name: 'batteries.resistance', effect: 'write-local' },
   // F-083-T05: pantry purchase logging, owner-confirmed shelf life, and expiry recall checks.
@@ -149,8 +154,9 @@ export const builtinTools: Tool[] = [
   { name: 'fpv.wiring_answer', effect: 'read' },
   // F-084-T03: pushing a coding-job branch and opening a PR is Orange behind owner approval.
   { name: 'coding.push_pr', effect: 'write-external' },
-  // F-087-T03: opening Bambu Connect on the owner's desktop is an Orange action.
-  { name: 'bambu.handoff', effect: 'write-external' },
+  // F-087-T03: opening Bambu Connect on the owner's desktop. Owner decision 2026-11-24 (F-121): always the owner's
+  // card (Blue), whatever Casper or the Scrolls say.
+  { name: 'bambu.handoff', effect: 'write-external', owner: true },
 ];
 const text = (args: Record<string, unknown>, key: string) => {
   const v = args[key];
@@ -197,6 +203,7 @@ export const BUILTIN_TOOL_SUBJECTS: Readonly<Record<string, ToolSubject>> = {
   'batteries.due': 'batteries',
   'batteries.resistance': 'batteries',
   'fleet.chat': 'fleet',
+  'fleet.print': 'fleet',
   'fpv.blackbox_report': 'fpv',
   'fpv.import_build': 'fpv',
   'fpv.add_doc': 'fpv',
@@ -482,6 +489,13 @@ const rawToolDocs: ToolDoc[] = [
     args: '{"phrase": Italian or English fleet or battery damage phrase}',
   },
   {
+    name: 'fleet.print',
+    effect: 'write-local',
+    about:
+      'Prints a drone\'s or drone model\'s printed part ("stampa i piedini di Smoke", "print the AOS feet"): resolves the part, file, count and profile, slices it and replies with file, count, profile, time and grams; asks back (needsAnswer) when the drone, model or part is ambiguous or unknown, and reports a missing file. When the result has handoff, propose bambu.handoff with exactly those arguments: opening Bambu Connect always waits for the owner\'s approval card.',
+    args: '{"phrase": the owner\'s Italian or English print request}',
+  },
+  {
     name: 'batteries.due',
     effect: 'read',
     about: 'Lists FPV batteries due for a per-cell resistance check (90 days or 30 cycles) and asks for cell readings.',
@@ -528,8 +542,8 @@ const rawToolDocs: ToolDoc[] = [
     name: 'bambu.handoff',
     effect: 'write-external',
     about:
-      'Opens a sliced .gcode.3mf file in Bambu Connect via import link behind Orange approval and returns the owner checklist.',
-    args: '{"gcode3mfPath": string, "profileName": string, "printTimeText"?: string, "filamentGrams"?: number, "printerName"?: string, "plateType"?: string, "nozzleSize"?: string, "amsMapping"?: string}',
+      "Opens a sliced .gcode.3mf file in Bambu Connect via import link; always waits for the owner's approval card, then returns the owner checklist.",
+    args: '{"gcode3mfPath": string, "profileName": string, "printTimeText"?: string, "filamentGrams"?: number, "printerName"?: string, "plateType"?: string, "nozzleSize"?: string, "amsMapping"?: string, "sourceFile"?: string, "repeats"?: integer}',
   },
 ];
 export type ResultShapeField = 'string' | 'number' | 'boolean' | 'array' | 'object' | 'object|null' | 'string|null';
@@ -972,6 +986,15 @@ function executeRaw(
       });
       return edit.handled ? edit : handleFleetChat(backend.fleet, backend.batteries, phrase);
     }
+    case 'fleet.print': {
+      only(args, ['phrase']);
+      if (!backend.fleet) throw new Error('Fleet registry is not available here.');
+      const home = backend.home;
+      // Until F-121-T04 sends the part to NERV-02, the base holding the library slices it with its own allowlist.
+      return printPartByChat(backend.fleet, home, text(args, 'phrase'), (request, content) =>
+        sliceLibraryPart(home!, request, content, backend.slicerExec),
+      );
+    }
     case 'batteries.due':
       only(args, []);
       if (!backend.batteries) throw new Error('Battery registry is not available here.');
@@ -1239,7 +1262,16 @@ function executeRaw(
         'plateType',
         'nozzleSize',
         'amsMapping',
+        'sourceFile',
+        'repeats',
       ]);
+      const repeats = args.repeats;
+      if (
+        repeats !== undefined &&
+        (!Number.isInteger(repeats) || (repeats as number) < 1 || (repeats as number) > 100)
+      ) {
+        throw new Error('repeats must be an integer from 1 to 100.');
+      }
       return handOffToBambuConnect(
         {
           gcode3mfPath: text(args, 'gcode3mfPath'),
@@ -1250,6 +1282,8 @@ function executeRaw(
           ...(args.plateType !== undefined ? { plateType: text(args, 'plateType') } : {}),
           ...(args.nozzleSize !== undefined ? { nozzleSize: text(args, 'nozzleSize') } : {}),
           ...(args.amsMapping !== undefined ? { amsMapping: text(args, 'amsMapping') } : {}),
+          ...(args.sourceFile !== undefined ? { sourceFile: text(args, 'sourceFile') } : {}),
+          ...(repeats !== undefined ? { repeats: repeats as number } : {}),
         },
         backend.bambuLauncher,
       );
