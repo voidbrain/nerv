@@ -52,6 +52,14 @@
     "reviewed": "2026-11-24",
     "agentHours": 2,
     "baselineAgentHours": 2,
-    "estimateAgentHours": 2
-  }
+    "estimateAgentHours": 2,
+    "actualAgentHours": 2.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 734,
+      "note": "relocate writes a bundle; promote/drain --relocation store and push after the checks; reinstatement way out"
+    }
+  ]
 }
