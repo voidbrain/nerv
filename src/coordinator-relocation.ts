@@ -12,6 +12,9 @@ import {
 import { KAJI_CLOCK_SKEW_MS } from './kaji-auth.ts';
 import { canonical } from './kaji.ts';
 
+/** The standby store a base keeps next to `nerv.sqlite` (decision §1). */
+export const STANDBY_DB_FILE = 'coordinator-standby.sqlite';
+
 /** Promotion horizon when every unrevoked peer and worker acknowledged the new epoch (decision §4). */
 export const RELOCATION_HORIZON_ACKED_MS = LEASE_TTL_MS + 5_000;
 /** Promotion horizon when any destination did not acknowledge the new epoch, or no ack history exists. */
@@ -140,19 +143,33 @@ export type RelocationLiveness =
     }
   | {
       readonly kind: 'unplanned';
-      /** Last standby ack of the old lease (`standby_lease_state.last_ack_wall_ms`), when one exists. */
-      readonly lastAckMs?: number;
       /** When this base first saw the owner-signed main record for the new epoch. */
       readonly epochSeenAtMs: number;
       readonly allUnrevokedAckedNewEpoch: boolean;
       /**
        * Owner confirmation that the old host is down (`--confirm-old-host-down`), or a root-signed revoke of it.
-       * Always required: until coordinator lease renewal exists (F-016-T16) the old main runs with lease 0,
-       * which never expires, so the horizon wait alone does not bound it.
+       * Required unless this standby acked the old main's lease for the epoch that last ran (so the old main
+       * renews through it and fences itself past the lease, F-016-T16) and every unrevoked base acked the new epoch.
        */
       readonly oldHostDownConfirmed: boolean;
       readonly nowMs?: number;
+      /**
+       * The monotonic instant the wait counts from: the last ack in this process, or this process's start
+       * when the ack was recorded by an earlier one. The wait must pass on this clock and on the wall clock.
+       */
+      readonly monoSinceNs: bigint;
+      readonly monoNowNs?: bigint;
     };
+
+/** Wall time of the last lease ack this standby gave for `epoch` (`standby_lease_state`), if any. */
+function standbyLastAckMs(db: DatabaseSync, epoch: number): number | undefined {
+  if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='standby_lease_state'").get())
+    return undefined;
+  const row = db
+    .prepare('SELECT standby_coordinator_epoch, last_ack_wall_ms FROM standby_lease_state WHERE id = 1')
+    .get() as { standby_coordinator_epoch: number; last_ack_wall_ms: number } | undefined;
+  return row && row.standby_coordinator_epoch === epoch ? row.last_ack_wall_ms : undefined;
+}
 
 /** Owner-approved cold restore from a verified signed snapshot bound to the previous epoch. */
 export interface ColdRestoreBinding {
@@ -267,24 +284,28 @@ export function checkRelocationReadiness(input: RelocationReadinessInput): Reloc
         `The standby is at ${headSeq}; the drained coordinator ended at ${r.finalSeq}. Replicate the final batch first.`,
       );
   } else {
-    // Interim (owner decision 2026-11-23): the old main holds lease 0 until F-016-T16 adds renewal and
-    // self-fencing, so no wait bounds it; an unplanned move always needs the old host confirmed down or revoked.
-    if (!live.oldHostDownConfirmed)
+    // F-016-T16: the old main's lease is bounded only when it was acked here for the epoch that last ran
+    // (it then renews through this base and fences itself past it). The ack is read from this base's own
+    // record, never from the caller. Without it, or with a base that did not ack the new epoch, the owner
+    // confirms the old host is down or revokes it.
+    const lastAckMs = standbyLastAckMs(input.candidateDb, previousEpoch);
+    const hasAckHistory = lastAckMs !== undefined;
+    if (!live.oldHostDownConfirmed && !(hasAckHistory && live.allUnrevokedAckedNewEpoch))
       refuse(
         'old_host_unconfirmed',
-        'The wait alone does not stop the old main: confirm the old host is down (--confirm-old-host-down) or revoke it first.',
+        'The wait alone does not bound the old main here: confirm the old host is down (--confirm-old-host-down) or revoke it first.',
       );
-    const hasAckHistory = live.lastAckMs !== undefined;
     const horizon = relocationHorizonMs({
       allUnrevokedAckedNewEpoch: live.allUnrevokedAckedNewEpoch,
       hasStandbyAckHistory: hasAckHistory,
     });
-    const since = Math.max(live.lastAckMs ?? 0, live.epochSeenAtMs);
+    const since = Math.max(lastAckMs ?? 0, live.epochSeenAtMs);
     const nowMs = live.nowMs ?? Date.now();
-    if (nowMs - since < horizon)
+    const monoElapsedMs = Number(((live.monoNowNs ?? process.hrtime.bigint()) - live.monoSinceNs) / 1_000_000n);
+    if (nowMs - since < horizon || monoElapsedMs < horizon)
       refuse(
         'horizon_not_passed',
-        `The old lease may still be live: wait until ${new Date(since + horizon).toISOString()}.`,
+        `The old lease may still be live: wait ${horizon / 1000} s on this base's clocks (wall clock until ${new Date(since + horizon).toISOString()}).`,
       );
   }
   return { previousEpoch, newEpoch, headSeq, source };
@@ -367,7 +388,10 @@ export function relocateCoordinator(input: RelocateCoordinatorInput): RelocateCo
     ...(input.failAfterStep ? { failAfterStep: input.failAfterStep } : {}),
     activate: (db) => {
       quarantined = quarantineUncertainOutbox(db, readiness.previousEpoch, new Date(nowMs).toISOString());
-      db.prepare('UPDATE coordinator_state SET lease_issued_at = NULL, lease_expires_at = 0 WHERE id = 1').run();
+      // The standby the old main renewed through is this base: the new main has none until one is seeded.
+      db.prepare(
+        'UPDATE coordinator_state SET lease_issued_at = NULL, lease_expires_at = 0, standby_base_id = NULL WHERE id = 1',
+      ).run();
       if (input.soleCoordinator)
         leaseExpiresAt = applyCoordinatorLease(db, {
           coordinatorEpoch: readiness.newEpoch,

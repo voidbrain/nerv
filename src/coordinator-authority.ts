@@ -103,6 +103,15 @@ export function isActiveCoordinator(input: ActiveCoordinatorCheckInput): ActiveC
     };
   }
   const nowMs = input.nowMs ?? Date.now();
+  // F-016-T16: an unarmed lease (0) is authority only for the first coordinator (epoch 0 or 1). A promoted
+  // coordinator (epoch 2 or later) acts only under an armed lease: standby-acked, or self-armed when sole.
+  if (!(state.leaseExpiresAt > 0) && state.coordinatorEpoch >= 2) {
+    return {
+      ok: false,
+      reason: 'stale_coordinator_lease',
+      detail: `Coordinator epoch ${state.coordinatorEpoch} holds no armed lease yet.`,
+    };
+  }
   if (state.leaseExpiresAt > 0 && nowMs >= state.leaseExpiresAt) {
     return {
       ok: false,

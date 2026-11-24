@@ -63,7 +63,7 @@ import { LISTS_SCHEMA, ListStore } from './lists.ts';
 import { DOCUMENTS_SCHEMA, DocumentStore } from './documents.ts';
 import { PHOTOS_SCHEMA, PhotoStore } from './photos.ts';
 import { createCookingStoreSlice, type CookingStoreSlice } from './packs.ts';
-import { REGISTRY_SCHEMA } from './kaji.ts';
+import { REGISTRY_SCHEMA, Registry } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
 import { RESUME_INTENT_SCHEMA, ResumeIntentStore } from './resume-intent.ts';
 import { SESSION_LIMIT_SCHEMA, SessionLimitResumes } from './session-limit-resume.ts';
@@ -688,7 +688,38 @@ export class Store {
     return readCoordinatorFencingState(this.db);
   }
   assertActiveCoordinator(nowMs = Date.now()) {
-    return assertActiveCoordinator({ db: this.db, nowMs });
+    return assertActiveCoordinator({ db: this.db, nowMs, ...this.coordinatorIdentity() });
+  }
+  private identityCache?: {
+    key: string;
+    value: { baseId?: string; mainBaseId?: string; maxSeenCoordinatorEpoch: number };
+  };
+  /**
+   * F-016-T16: this base, the main base and the newest coordinator epoch from the verified registry, for the
+   * authority check. Only where a coordinator state exists: a legacy single host keeps today's behaviour.
+   * Recomputed when the registry changes (records are verified on read).
+   */
+  private coordinatorIdentity(): { baseId?: string; mainBaseId?: string; maxSeenCoordinatorEpoch?: number } {
+    if (!this.home || !readCoordinatorFencingState(this.db)) return {};
+    const { n, s } = this.db.prepare('SELECT count(*) AS n, max(serial) AS s FROM registry').get() as {
+      n: number;
+      s: number | null;
+    };
+    const key = `${n}:${s ?? 0}`;
+    if (this.identityCache?.key !== key) {
+      const config = readConfig(this.home);
+      const registry = new Registry(this.db, config.kaji?.root);
+      const mainBaseId = registry.main();
+      this.identityCache = {
+        key,
+        value: {
+          baseId: config.base.id,
+          ...(mainBaseId ? { mainBaseId } : {}),
+          maxSeenCoordinatorEpoch: registry.mainEpoch(),
+        },
+      };
+    }
+    return this.identityCache.value;
   }
   advanceCoordinatorFence(expectedEpoch?: number, nowMs = Date.now()) {
     return advanceCoordinatorFence(this.db, expectedEpoch, nowMs);

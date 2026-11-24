@@ -4,6 +4,8 @@ import { readCoordinatorFencingState } from './coordinator-authority.ts';
 export const LEASE_TTL_MS = 60_000;
 const LEASE_SAFETY_MARGIN_MS = 5_000;
 export const LEASE_EFFECTIVE_TTL_MS = LEASE_TTL_MS - LEASE_SAFETY_MARGIN_MS;
+/** Target renewal interval of the active coordinator's lease (decision §2). */
+export const LEASE_RENEW_MS = 15_000;
 
 export const STANDBY_LEASE_SCHEMA = `
 CREATE TABLE IF NOT EXISTS standby_lease_state (
@@ -154,7 +156,7 @@ export function applyCoordinatorLease(db: DatabaseSync, input: ApplyCoordinatorL
   db.prepare(
     `UPDATE coordinator_state
      SET lease_issued_at = ?, lease_expires_at = ?
-     WHERE id = 1 AND coordinator_epoch = ?`,
+     WHERE id = 1 AND coordinator_epoch = ? AND replication_mode = 'active'`,
   ).run(leaseIssuedAt, leaseExpiresAt, input.coordinatorEpoch);
   return { leaseIssuedAt, leaseExpiresAt, leaseExpiresMonoNs };
 }
@@ -208,4 +210,126 @@ export function rearmSoleCoordinatorLease(
     reqStartedWallMs: nowMs,
     reqStartedMonoNs: nowMonoNs,
   });
+}
+
+export type LeaseKeeperOutcome = 'renewed' | 'self-renewed' | 'waiting' | 'fenced' | 'inactive';
+
+export interface CoordinatorLeaseKeeperOptions {
+  /** The coordinator's own store (`nerv.sqlite`). */
+  readonly db: DatabaseSync;
+  /** Signed `POST /kaji/lease/renew` to the named standby (`KajiLink.renewLease`). */
+  readonly renew: (standbyBaseId: string, request: LeaseRenewRequest) => Promise<LeaseRenewResult>;
+  /** Another enrolled, unrevoked base exists: a sole-coordinator self-renewal is then never allowed. */
+  readonly hasOtherEnrolledBases: () => boolean;
+  readonly wallNow?: () => number;
+  readonly monoNow?: () => bigint;
+  readonly onFenced?: (detail: string) => void;
+}
+
+/**
+ * The active coordinator's lease loop (F-016-T16, decision §2). Every `LEASE_RENEW_MS` it asks the standby
+ * named in `coordinator_state.standby_base_id` to ack the lease and commits `reqStarted + 55 s` on an ack.
+ * When the standby has seen a newer epoch or is promoting, it fences at once; when renewals fail, it fences
+ * once the lease is past on the wall clock or on the monotonic clock of the last ack (a backward wall jump
+ * never extends it). A sole coordinator (no other enrolled base) extends its own lease only while it is live:
+ * after a sleep past it, the owner re-arms (`nerv kaji lease-rearm --confirm-sole-coordinator`).
+ */
+export class CoordinatorLeaseKeeper {
+  private readonly options: CoordinatorLeaseKeeperOptions;
+  private seq = 0;
+  private timer: ReturnType<typeof setInterval> | undefined;
+  private running = false;
+  /** Monotonic deadline of the lease this process last committed. */
+  leaseExpiresMonoNs: bigint | undefined;
+
+  constructor(options: CoordinatorLeaseKeeperOptions) {
+    this.options = options;
+  }
+
+  private wall(): number {
+    return this.options.wallNow?.() ?? Date.now();
+  }
+  private mono(): bigint {
+    return this.options.monoNow?.() ?? process.hrtime.bigint();
+  }
+
+  private fence(detail: string): 'fenced' {
+    selfFenceCoordinator(this.options.db);
+    this.leaseExpiresMonoNs = undefined;
+    this.options.onFenced?.(detail);
+    return 'fenced';
+  }
+
+  private commit(epoch: number, wallMs: number, monoNs: bigint): void {
+    this.leaseExpiresMonoNs = applyCoordinatorLease(this.options.db, {
+      coordinatorEpoch: epoch,
+      reqStartedWallMs: wallMs,
+      reqStartedMonoNs: monoNs,
+    }).leaseExpiresMonoNs;
+  }
+
+  /** Lease live on both clocks; an unarmed lease (0) is not live. */
+  private live(leaseExpiresAt: number): boolean {
+    if (!(leaseExpiresAt > 0) || this.wall() >= leaseExpiresAt) return false;
+    return this.leaseExpiresMonoNs === undefined || this.mono() < this.leaseExpiresMonoNs;
+  }
+
+  async renewOnce(): Promise<LeaseKeeperOutcome> {
+    const { db } = this.options;
+    const state = readCoordinatorFencingState(db);
+    if (!state || state.replicationMode !== 'active') return 'inactive';
+    const standby = (
+      db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as
+        { standby_base_id: string | null } | undefined
+    )?.standby_base_id;
+    const reqWall = this.wall();
+    const reqMono = this.mono();
+    if (standby) {
+      this.seq = Math.max(this.seq + 1, reqWall);
+      let result: LeaseRenewResult | undefined;
+      try {
+        result = await this.options.renew(standby, { coordinatorEpoch: state.coordinatorEpoch, leaseSeq: this.seq });
+      } catch {
+        result = undefined;
+      }
+      const now = readCoordinatorFencingState(db);
+      if (!now || now.replicationMode !== 'active' || now.coordinatorEpoch !== state.coordinatorEpoch)
+        return 'inactive';
+      if (result?.ok && result.standbyBaseId === standby && result.coordinatorEpoch === state.coordinatorEpoch) {
+        this.commit(state.coordinatorEpoch, reqWall, reqMono);
+        return 'renewed';
+      }
+      if (result && !result.ok && (result.reason === 'stale_coordinator_epoch' || result.reason === 'promoting'))
+        return this.fence(`Standby ${standby} refused the lease (${result.reason}).`);
+    } else if (!this.options.hasOtherEnrolledBases() && this.live(state.leaseExpiresAt)) {
+      this.commit(state.coordinatorEpoch, reqWall, reqMono);
+      return 'self-renewed';
+    }
+    const after = readCoordinatorFencingState(db);
+    if (!after || after.replicationMode !== 'active') return 'inactive';
+    if (after.leaseExpiresAt > 0 && !this.live(after.leaseExpiresAt))
+      return this.fence('The coordinator lease passed without a renewal.');
+    return 'waiting';
+  }
+
+  start(intervalMs = LEASE_RENEW_MS): void {
+    if (this.timer) return;
+    const tick = () => {
+      if (this.running) return;
+      this.running = true;
+      void this.renewOnce()
+        .catch(() => undefined)
+        .finally(() => {
+          this.running = false;
+        });
+    };
+    tick();
+    this.timer = setInterval(tick, intervalMs);
+    this.timer.unref?.();
+  }
+
+  stop(): void {
+    if (this.timer) clearInterval(this.timer);
+    this.timer = undefined;
+  }
 }

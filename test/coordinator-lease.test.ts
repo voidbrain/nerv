@@ -6,7 +6,26 @@ import { CoordinatorAuthorityError, assertActiveCoordinator } from '../src/coord
 import { CoordinatorLeaseKeeper, LEASE_EFFECTIVE_TTL_MS, LEASE_TTL_MS } from '../src/coordinator-lease.ts';
 import { COORDINATOR_STATE_SCHEMA } from '../src/coordinator-snapshot.ts';
 import { KajiLink, type RegistryPort } from '../src/kaji-link.ts';
-import { fingerprint, type BaseEntry, type SignedRecord } from '../src/kaji.ts';
+import {
+  Registry,
+  baseKey,
+  fingerprint,
+  signRecord,
+  type BaseEntry,
+  type RegistryBody,
+  type SignedRecord,
+} from '../src/kaji.ts';
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
+import { pinKajiRoot, setBase } from '../src/config.ts';
+import { coordinatorLeaseService } from '../src/coordinator-serve.ts';
+import {
+  RELOCATION_HORIZON_ACKED_MS,
+  STANDBY_DB_FILE,
+  checkRelocationReadiness,
+} from '../src/coordinator-relocation.ts';
 import { Store } from '../src/store.ts';
 
 async function freePort(): Promise<number> {
@@ -373,5 +392,139 @@ describe('F-016-T16: the active main renews its lease and fences itself when ren
     const promoted = activeMain(3, null, 0);
     assert.throws(() => promoted.assertActiveCoordinator(wall), isLease);
     promoted.close();
+  });
+});
+
+describe('F-016-T16: serve wiring joins the keeper, the standby ack, the authority check and the relocation wait', () => {
+  it('renews through the standby base as serve runs it, lets the standby promote without confirmation, and fences the old main', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-lease-serve-'));
+    const root = generateKeyPairSync('ed25519');
+    const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+    const homes = { main: join(dir, 'main'), standby: join(dir, 'standby') };
+    const ports = { main: await freePort(), standby: await freePort() };
+    const stores: Store[] = [];
+    const regs: Registry[] = [];
+    for (const [id, home] of [
+      ['NERV-01', homes.main],
+      ['NERV-02', homes.standby],
+    ] as const) {
+      mkdirSync(home, { recursive: true });
+      setBase(home, { id, name: id });
+      pinKajiRoot(home, rootPub, true);
+      const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+      stores.push(store);
+      regs.push(new Registry(store.db, rootPub));
+    }
+    let serial = 0;
+    const signed = (body: Omit<RegistryBody, 'serial' | 'issued'>) =>
+      signRecord(root.privateKey, { ...body, serial: ++serial, issued: '2026-11-24T10:00:00.000Z' } as RegistryBody);
+    const records = [
+      signed({
+        kind: 'enrol',
+        baseId: 'NERV-01',
+        name: 'Tokyo',
+        publicKey: baseKey(homes.main).publicKey,
+        address: `127.0.0.1:${ports.main}`,
+      }),
+      signed({
+        kind: 'enrol',
+        baseId: 'NERV-02',
+        name: 'Tabgha',
+        publicKey: baseKey(homes.standby).publicKey,
+        address: `127.0.0.1:${ports.standby}`,
+      }),
+      signed({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 }),
+    ];
+    for (const reg of regs) for (const r of records) reg.add(r);
+    const [mainStore, standbyHomeStore] = stores as [Store, Store];
+    mainStore.db.exec(COORDINATOR_STATE_SCHEMA);
+    mainStore.db
+      .prepare(
+        "INSERT INTO coordinator_state(id, coordinator_epoch, coordinator_fence, replication_mode, head_seq, lease_expires_at, state_digest, standby_base_id) VALUES (1, 2, 1, 'active', 7, 0, 'digest-7', 'NERV-02')",
+      )
+      .run();
+    const standbyDb = new DatabaseSync(join(homes.standby, STANDBY_DB_FILE));
+    standbyDb.exec(COORDINATOR_STATE_SCHEMA);
+    standbyDb
+      .prepare(
+        "INSERT INTO coordinator_state(id, coordinator_epoch, coordinator_fence, replication_mode, head_seq, lease_expires_at, state_digest) VALUES (1, 2, 1, 'standby', 7, 0, 'digest-7')",
+      )
+      .run();
+
+    const service = (home: string, baseId: string) =>
+      coordinatorLeaseService({
+        home,
+        databasePath: join(home, 'nerv.sqlite'),
+        baseId,
+        root: rootPub,
+        ownPublicKey: baseKey(home).publicKey,
+      });
+    const mainLease = service(homes.main, 'NERV-01');
+    const standbyLease = service(homes.standby, 'NERV-02');
+    const port = (reg: Registry): RegistryPort => ({
+      bases: async () => reg.bases(),
+      records: async () => reg.records(),
+      add: async () => 0,
+      seen: async () => {},
+      lastSeen: async () => ({}),
+      main: async () => reg.main(),
+    });
+    const standbyLink = new KajiLink({
+      baseId: 'NERV-02',
+      key: baseKey(homes.standby).privateKey,
+      publicKey: baseKey(homes.standby).publicKey,
+      registry: port(regs[1]!),
+      onLeaseRenew: standbyLease.onLeaseRenew,
+    });
+    const mainLink = new KajiLink({
+      baseId: 'NERV-01',
+      key: baseKey(homes.main).privateKey,
+      publicKey: baseKey(homes.main).publicKey,
+      registry: port(regs[0]!),
+    });
+    await standbyLink.start(60_000);
+    await mainLink.start(60_000);
+    const keeper = mainLease.keeper((id, req) => mainLink.renewLease(id, req));
+    const later = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString();
+    try {
+      assert.throws(() => mainStore.add('Before the first ack', later(1)), /no armed lease/);
+      assert.equal(await keeper.renewOnce(), 'renewed');
+      assert.equal(mainStore.add('Acked', later(1)).title, 'Acked');
+
+      // The owner relocates to NERV-02 while NERV-01 is cut off: only the standby holds the new record.
+      regs[1]!.add(signed({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 }));
+      const ready = checkRelocationReadiness({
+        candidateDb: standbyDb,
+        selfBaseId: 'NERV-02',
+        previousMainBaseId: 'NERV-01',
+        registryMain: { baseId: 'NERV-02', coordinatorEpoch: 3 },
+        liveness: {
+          kind: 'unplanned',
+          epochSeenAtMs: Date.now(),
+          allUnrevokedAckedNewEpoch: true,
+          oldHostDownConfirmed: false,
+          nowMs: Date.now() + RELOCATION_HORIZON_ACKED_MS,
+          monoSinceNs: 0n,
+          monoNowNs: BigInt(RELOCATION_HORIZON_ACKED_MS) * 1_000_000n,
+        },
+      });
+      assert.deepEqual([ready.previousEpoch, ready.newEpoch], [2, 3]);
+
+      // The old main's next renewal is refused by the standby (403: it is no longer main there): it fences
+      // itself once the lease passes.
+      assert.equal(await keeper.renewOnce(), 'waiting');
+      mainStore.db.prepare('UPDATE coordinator_state SET lease_expires_at = ? WHERE id = 1').run(Date.now() - 1);
+      assert.equal(await keeper.renewOnce(), 'fenced');
+      assert.throws(() => mainStore.add('After the move', later(2)), /fenced mode/);
+    } finally {
+      await mainLink.stop();
+      await standbyLink.stop();
+      mainLease.stop();
+      standbyLease.stop();
+      standbyDb.close();
+      mainStore.close();
+      standbyHomeStore.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

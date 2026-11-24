@@ -72,6 +72,7 @@ import {
 } from './chronicle.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
+import { coordinatorLeaseService } from './coordinator-serve.ts';
 import {
   guardLocalService,
   linuxServiceHost,
@@ -550,6 +551,7 @@ try {
         const own = baseKey(home);
         runtime.setBaseKey(own.publicKey, own.privateKey);
         let kaji: KajiLink | undefined;
+        let stopLease: (() => void) | undefined;
         // Schedules are re-read every minute, so the owner can change them by chat or by hand without a restart.
         const live = () => {
           try {
@@ -689,6 +691,7 @@ try {
           clearInterval(updaterReport);
           void aoba?.stop();
           void kaji?.stop();
+          stopLease?.();
           void Promise.all(
             servers.map(
               (s) =>
@@ -776,7 +779,17 @@ try {
           if (n) console.log(`Closed ${n} sortie(s) a restart had interrupted.`);
         });
         if (config.kaji?.root) {
+          // F-016-T16: the coordinator lease (renewal and self-fencing here, acks on a standby base).
+          const lease = coordinatorLeaseService({
+            home,
+            databasePath: databasePath(home),
+            baseId: config.base.id,
+            root: config.kaji.root,
+            ownPublicKey: own.publicKey,
+          });
+          stopLease = () => lease.stop();
           kaji = new KajiLink({
+            onLeaseRenew: lease.onLeaseRenew,
             trust: { root: config.kaji.root, required: config.kaji.rootBinding === true },
             worker: runtime.worker,
             baseId: config.base.id,
@@ -863,6 +876,8 @@ try {
             )) as ChatReply | undefined;
           });
           void kaji.start();
+          const leaseLink = kaji;
+          lease.keeper((standbyBaseId, request) => leaseLink.renewLease(standbyBaseId, request)).start();
         }
         process.once('SIGINT', close);
         process.once('SIGTERM', close);
