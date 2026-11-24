@@ -84,8 +84,8 @@ export function coordinatorLeaseService(input: {
 /**
  * F-016-T19: whether this base may run the coordinator's Telegram channel now. Where `nerv.sqlite` holds a
  * coordinator state, only the active coordinator (mode, main base, epoch, lease) may; a base keeping a
- * standby store may not; a legacy host with neither keeps today's behaviour. Opens the store per check,
- * so a promotion swap is always read from the current file.
+ * standby store may not; a legacy host with neither keeps today's behaviour. A promotion swap happens with
+ * the service stopped (`nerv kaji promote`), so the channel's connection never outlives the file it opened.
  */
 export function coordinatorChannelAuthority(input: {
   readonly home: string;
@@ -93,22 +93,27 @@ export function coordinatorChannelAuthority(input: {
   readonly baseId: string;
   readonly root: string | undefined;
 }): () => boolean {
+  // One connection per channel; the registry is verified again only when the store changed (`data_version`,
+  // which moves on every commit by another connection). The lease is checked against the clock on every call.
+  let db: DatabaseSync | undefined;
+  let cache: { version: number; mainBaseId: string | undefined; epoch: number } | undefined;
   return () => {
-    const db = new DatabaseSync(input.databasePath);
-    try {
-      db.exec('PRAGMA busy_timeout = 5000');
-      if (!readCoordinatorFencingState(db)) return !existsSync(join(input.home, STANDBY_DB_FILE));
-      const registry = new Registry(db, input.root);
-      const mainBaseId = registry.main();
-      return isActiveCoordinator({
-        db,
-        baseId: input.baseId,
-        ...(mainBaseId ? { mainBaseId } : {}),
-        maxSeenCoordinatorEpoch: registry.mainEpoch(),
-      }).ok;
-    } finally {
-      db.close();
+    if (!db) {
+      db = new DatabaseSync(input.databasePath);
+      db.exec('PRAGMA busy_timeout = 1000');
     }
+    if (!readCoordinatorFencingState(db)) return !existsSync(join(input.home, STANDBY_DB_FILE));
+    const version = (db.prepare('PRAGMA data_version').get() as { data_version: number }).data_version;
+    if (cache?.version !== version) {
+      const registry = new Registry(db, input.root);
+      cache = { version, mainBaseId: registry.main(), epoch: registry.mainEpoch() };
+    }
+    return isActiveCoordinator({
+      db,
+      baseId: input.baseId,
+      ...(cache.mainBaseId ? { mainBaseId: cache.mainBaseId } : {}),
+      maxSeenCoordinatorEpoch: cache.epoch,
+    }).ok;
   };
 }
 

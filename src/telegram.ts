@@ -578,7 +578,15 @@ export class TelegramChannel {
       ...(r.offset !== undefined && (s.offset === undefined || r.offset > s.offset) ? { offset: r.offset } : {}),
       ...(r.inbox && (!s.inbox || r.inbox.sequence > s.inbox.sequence) ? { inbox: r.inbox } : {}),
       cards: [...new Set([...s.cards, ...(r.cards ?? [])])],
-      ...(r.messages ? { messages: [...(s.messages ?? []), ...r.messages] } : {}),
+      // One row per Telegram message: merged by messageId, so repeated hydrations never double them.
+      ...(r.messages
+        ? {
+            messages: [
+              ...(s.messages ?? []),
+              ...r.messages.filter((m) => !(s.messages ?? []).some((own) => own.messageId === m.messageId)),
+            ],
+          }
+        : {}),
       ...(r.brief && !s.brief ? { brief: r.brief } : {}),
     };
     this.save();
