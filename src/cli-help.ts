@@ -42,6 +42,12 @@ export const HELP_GROUPS: HelpGroup[] = [
         about: 'Work to pick up again later',
         usage: ['resume-intent list [status] | create <intent.json> | cancel <id> [reason] | tick'],
       },
+      {
+        name: 'session-limit',
+        args: 'list|record',
+        about: 'Resume a coding session after its limit resets',
+        usage: ['session-limit list | record SESSION REPO BRANCH "ISO reset time+zone" [--prompt TEXT]'],
+      },
     ],
   },
   {
@@ -158,7 +164,11 @@ export const HELP_GROUPS: HelpGroup[] = [
       },
       { name: 'headless-resume', args: 'TARGETS.json', about: 'Resume headless sessions' },
       { name: 'quarantine', args: 'fetch|report URL', about: 'Fetch untrusted content into quarantine' },
-      { name: 'browser-click', args: 'CONTROL', about: 'Click a named browser control' },
+      {
+        name: 'browser-click',
+        args: 'CONTROL [--approved]',
+        about: 'Click a named control on the allowed browser tab',
+      },
       {
         name: 'desktop-click',
         args: 'APP CONTROL [--window=TITLE] [--approved]',

@@ -20,7 +20,8 @@ import { defaultAutoUpdatePolicy } from './update-policy.ts';
 import { startAutoUpdateScheduler } from './update-scheduler.ts';
 import { buildInfo, checkRevisionSkew, type BuildInfo } from './build.ts';
 import type { UpdateControl } from './server-update.ts';
-import { clickNamedControl, type BrowserAdapterDriver } from './browser-control.ts';
+import { clickNamedControl } from './browser-control.ts';
+import { createCdpBrowserDriver } from './browser-cdp-driver.ts';
 import { clickDesktopControl } from './desktop-control.ts';
 import { desktopDriverFor } from './desktop-macos-driver.ts';
 
@@ -81,6 +82,7 @@ import {
 import { ROOT_KEY_FILE, baseKey, createRootKey, fingerprint } from './kaji.ts';
 import { service } from './service.ts';
 import { startUpdaterJob } from './updater-job.ts';
+import { reportUpdaterResult } from './updater-result.ts';
 import { serviceMove } from './install-move-cli.ts';
 import { initializeNativeTLS, loadNativeTLS, nativeAdmin, NativeAuth, type Invitation } from './native-auth.ts';
 import { Runtime, type ChatReply } from './runtime.ts';
@@ -663,10 +665,25 @@ try {
             })
           : undefined;
         runtime.setUpdatePostpone((text) => updates?.scheduler.postpone(text));
+        // B-108-T02: report the result the outside updater left (Update now, the scheduled apply, a terminal run): the
+        // update restarts this service before the updater finishes, so look every 30 s, report once.
+        const updaterReport = setInterval(() => {
+          const live = readConfig(home);
+          void reportUpdaterResult(
+            home,
+            (message) => runtime.notice(message),
+            live.language === 'it' ? 'it' : 'en',
+            live.timeZone,
+          ).catch((error) =>
+            console.error(`Updater result: ${error instanceof Error ? error.message : String(error)}`),
+          );
+        }, 30_000);
+        updaterReport.unref();
         close = () => {
           if (stopped) return;
           stopped = true;
           updates?.stop();
+          clearInterval(updaterReport);
           void aoba?.stop();
           void kaji?.stop();
           void Promise.all(
@@ -960,22 +977,20 @@ try {
         break;
       }
       case 'browser-click': {
-        if (!args[0]) throw new Error('Usage: nerv browser-click <controlName>');
-        const noDriver: BrowserAdapterDriver = {
-          async getActiveTab() {
-            throw new Error('No live browser driver attached.');
-          },
-          async clickControl() {
-            throw new Error('No live browser driver attached.');
-          },
-        };
-        console.log(
-          JSON.stringify(
-            await clickNamedControl(noDriver, { controlName: args[0], allowedOrigins: [], approved: false }),
-            null,
-            2,
-          ),
-        );
+        const controlName = args.find((a) => !a.startsWith('--'));
+        if (!controlName) throw new Error('Usage: nerv browser-click <control-name> [--approved]');
+        const browser = readConfig(home).browser;
+        if (!browser || browser.allowedOrigins.length === 0) {
+          throw new Error(
+            'No browser origins allowed. Add "browser": {"allowedOrigins": ["https://..."], "debugPort": 9222} to config.json and start the dedicated browser profile with that remote debugging port.',
+          );
+        }
+        const res = await clickNamedControl(createCdpBrowserDriver({ port: browser.debugPort }), {
+          controlName,
+          allowedOrigins: browser.allowedOrigins,
+          approved: args.includes('--approved'),
+        });
+        console.log(JSON.stringify(res, null, 2));
         break;
       }
       case 'desktop-click': {

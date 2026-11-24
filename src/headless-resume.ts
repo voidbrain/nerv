@@ -1,5 +1,6 @@
-import { execFileSync } from 'node:child_process';
+import { execFile, execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { promisify } from 'node:util';
 import type {
   ResumeAttemptOutcome,
   ResumeAvailabilityCheck,
@@ -21,7 +22,14 @@ export interface HeadlessResumeExecResult {
   costUsd?: number;
 }
 
-export type HeadlessExecFn = (bin: string, args: string[], cwd: string, timeoutMs: number) => HeadlessResumeExecResult;
+export type HeadlessExecFn = (
+  bin: string,
+  args: string[],
+  cwd: string,
+  timeoutMs: number,
+) => HeadlessResumeExecResult | Promise<HeadlessResumeExecResult>;
+
+const execFileAsync = promisify(execFile);
 
 export interface HeadlessResumeOptions {
   owner: string;
@@ -55,13 +63,14 @@ function defaultGetBranch(repoPath: string): string | null {
   }
 }
 
-function defaultExecHeadless(bin: string, args: string[], cwd: string, timeoutMs: number): HeadlessResumeExecResult {
-  const stdout = execFileSync(bin, args, {
-    cwd,
-    stdio: ['ignore', 'pipe', 'pipe'],
-    encoding: 'utf8',
-    timeout: timeoutMs,
-  });
+// Asynchronous, so a long resume never blocks the process that runs it (the scheduler during `serve`, F-090-T04).
+async function defaultExecHeadless(
+  bin: string,
+  args: string[],
+  cwd: string,
+  timeoutMs: number,
+): Promise<HeadlessResumeExecResult> {
+  const { stdout } = await execFileAsync(bin, args, { cwd, encoding: 'utf8', timeout: timeoutMs, maxBuffer: 4 << 20 });
   return { stdout };
 }
 
@@ -87,10 +96,10 @@ export function verifyHeadlessResumeIdentity(
 /**
  * Executes a supported headless coding-agent CLI resume once inside the recorded worktree (F-090-T02).
  */
-export function executeHeadlessResume(
+export async function executeHeadlessResume(
   target: HeadlessResumeTarget,
   options: Pick<HeadlessResumeOptions, 'execFn' | 'timeoutMs'> = {},
-): ResumeAttemptOutcome {
+): Promise<ResumeAttemptOutcome> {
   if (target.agent !== 'claude') {
     return {
       kind: 'failed',
@@ -101,7 +110,7 @@ export function executeHeadlessResume(
   const args = ['-p', '--resume', target.sessionId, target.prompt?.trim() || DEFAULT_PROMPT];
   const execFn = options.execFn ?? defaultExecHeadless;
   try {
-    const result = execFn('claude', args, target.repoPath, options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+    const result = await execFn('claude', args, target.repoPath, options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
     return {
       kind: 'resumed',
       detail: {
@@ -132,6 +141,7 @@ export function createHeadlessResumeDeps(
   return {
     owner: options.owner,
     now: options.now,
+    accepts: (intent) => targets.has(intent.id),
     checkAvailability: options.checkAvailability ?? (() => ({ available: true })),
     verifyIdentity: (intent) => {
       const target = targets.get(intent.id);

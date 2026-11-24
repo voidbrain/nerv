@@ -595,3 +595,15 @@ PRs #664–#672 merged green (#664 reconciliation, #665–#667 dashboard fixes f
 ## 2026-11-23 — main `2c1c5785`
 
 PRs #673, #675 and #678 merged green (#673 B-108 updater fetch precheck, #675 F-093-T03 shared desktop adapter, #678 F-113-T02 subject index). Reconciled with F-093-T05 in its PR.
+
+## 2026-11-23 — main `9ab9139f`
+
+PRs #680 and #683 merged green (#680 B-110 Update now placement, #683 F-093-T05 macOS desktop driver). Reconciled with F-089-T04 in its PR.
+
+## 2026-11-23 — harness v10.4.0 ([PR #689](https://github.com/voidbrain/nerv/pull/689))
+
+Reconciled harness v10.4.0 (template F-088, owner decision for every project): agents land their PRs through the landing queue, one at a time with at most two in CI (`AGENTS.md` "On its own", `docs/agents/parallel-work.md` "Landing queue", `docs/agents/claims.md`); copied `tools/check-rules.mjs` (v10.3.1, B-048 glob escaping). Enabled the periodic skill discovery review (`reviews.skills.days` 30, owner request); its first run becomes a record in this backlog. Nothing skipped.
+
+## 2026-11-24 — harness v10.7.0 ([PR #696](https://github.com/voidbrain/nerv/pull/696))
+
+Reconciled harness v10.7.0 from v10.4.0 (owner approved 2026-11-24). 10.5.0 (template F-090): `AGENTS.md` re-adapted to the lean template, with the safety block and every project line kept; the Documentation section moved to `docs/backlog/documentation.md` "Top-level documents" (NERV's `docs/guides/` example kept as a project line); copied `docs/agents/work-usage.md`. 10.6.0 (F-089): copied `docs/agents/skills.md`. 10.6.1 (B-049): copied `tools/friction.mjs` and `docs/agents/rule-review.md`, so friction samples now land in the primary checkout. 10.7.0 (F-091): copied `tools/work-items.mjs`, reconciled `docs/backlog/closure.md` and added `npm run work:close`. No new required settings. Nothing skipped.

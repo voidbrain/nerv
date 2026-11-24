@@ -10,6 +10,7 @@ import { readConfig, readScrolls } from './config.ts';
 import { Registry, type SignedRecord } from './kaji.ts';
 import { factKey } from './memory.ts';
 import { toolName } from './mcp.ts';
+import { runSessionLimitTick } from './session-limit-resume.ts';
 // argv: database path, then the data home whose scrolls.json sets the gate rules (defaults when absent).
 const store = new Store(
   process.argv[2]!,
@@ -26,6 +27,23 @@ const timer = setInterval(() => {
     console.error('Nervous scheduler tick failed.');
   }
 }, 250);
+// F-090-T04: coding sessions recorded at their usage limit are resumed once after the reset. The run is an asynchronous
+// child process, so the scheduler keeps ticking meanwhile; one pass at a time.
+let resuming = false;
+const resumeLimited = () => {
+  if (resuming) return;
+  resuming = true;
+  void runSessionLimitTick(store.sessionLimits, store.resumeIntents, {
+    owner: `serve:${process.pid}`,
+    notify: (message) => store.addBrief(message.length > 4000 ? `${message.slice(0, 3999)}…` : message).id,
+  })
+    .catch(() => console.error('Session-limit resume pass failed.'))
+    .finally(() => {
+      resuming = false;
+    });
+};
+const resumeTimer = setInterval(resumeLimited, 60_000);
+resumeLimited();
 const registry = () =>
   new Registry(
     store.db,
@@ -473,6 +491,7 @@ function stop() {
   if (stopped) return;
   stopped = true;
   clearInterval(timer);
+  clearInterval(resumeTimer);
   store.close();
   if (process.connected) process.disconnect();
 }

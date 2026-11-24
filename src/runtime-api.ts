@@ -1,3 +1,4 @@
+import type { HealthSampleStore } from './health-samples.ts';
 import type { HistoryPage } from './history.ts';
 import type { HealthMetricsSnapshot, HealthThresholds } from './health-samples.ts';
 import type { EvaInstancesSnapshot } from './eva-pool.ts';
@@ -275,6 +276,8 @@ export interface StoreApi {
   evaInstances?(): EvaInstancesSnapshot | Promise<EvaInstancesSnapshot>;
   /** F-103-T03: process health samples, per-peer link load, thresholds, and deduplicated warnings. */
   healthMetrics?(): HealthMetricsSnapshot | Promise<HealthMetricsSnapshot>;
+  /** B-111: where the serving process records its own health samples when it has no `db` of its own (a Runtime). */
+  healthSampleStore?(): HealthSampleStore;
   setHealthThresholds?(thresholds: unknown): HealthThresholds | Promise<HealthThresholds>;
   scheduleSettings?(): { brief: string; timeZone: string } | Promise<{ brief: string; timeZone: string }>;
   setBriefSchedule?(brief: unknown): { brief: string; timeZone: string } | Promise<{ brief: string; timeZone: string }>;

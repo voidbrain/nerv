@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "B-111-T01",
+  "parent": "B-111",
+  "title": "Record health samples in serve, where the server is given a Runtime",
+  "goal": "The live service records a local health sample every minute and the dashboard shows it",
+  "status": "implemented",
+  "acceptance": [
+    "Failing test first: a server given a real Runtime records samples that /api/health/metrics returns",
+    "A failed sample never stops the service",
+    "The live dashboard shows a Service sample after the update"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/runtime.ts",
+    "src/runtime-api.ts",
+    "src/server.ts",
+    "src/health-samples.ts",
+    "test/health-sampler-runtime.test.ts",
+    "docs/work/records/B-111.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "node --test test/health-sampler-runtime.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h agent",
+    "basis": "Fixed 2026-11-23 from the owner question on the live dashboard.",
+    "reviewed": "2026-11-23",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.25
+  }
+}

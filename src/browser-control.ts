@@ -2,6 +2,8 @@ export interface AccessibleControl {
   name: string;
   role: string;
   isCredentialOrPayment?: boolean;
+  /** Inside an open page dialog (`<dialog open>`, role dialog/alertdialog): NERV never answers dialogs. */
+  inDialog?: boolean;
 }
 
 export interface BrowserTabSnapshot {
@@ -84,6 +86,9 @@ export async function clickNamedControl(
   if (match.isCredentialOrPayment || SENSITIVE_CONTROL_PATTERN.test(match.name)) {
     throw new Error(`Refusing to interact with credential or payment control "${match.name}".`);
   }
+  if (match.inDialog) {
+    throw new Error(`Refusing to answer a dialog: "${match.name}" is inside an open dialog.`);
+  }
 
   const afterTab = await driver.clickControl(beforeTab.tabId, match.name);
   return {
@@ -94,4 +99,41 @@ export async function clickNamedControl(
     before: { url: beforeTab.url, title: beforeTab.title, textSummary: beforeTab.textSummary },
     after: { url: afterTab.url, title: afterTab.title, textSummary: afterTab.textSummary },
   };
+}
+
+/** config.json `browser`: the owner-set origin allowlist and the dedicated profile's local debugging port (F-089-T04). */
+export interface BrowserConfig {
+  allowedOrigins: string[];
+  debugPort: number;
+}
+
+const BROWSER_CONFIG_HELP =
+  'Invalid browser: {"allowedOrigins": ["https://example.com"], "debugPort": 9222} (http/https origins, at most 20; the port of the dedicated profile on 127.0.0.1).';
+
+export function validateBrowserConfig(value: unknown): BrowserConfig {
+  const b = value as Record<string, unknown>;
+  if (
+    !b ||
+    typeof b !== 'object' ||
+    Array.isArray(b) ||
+    Object.keys(b).some((k) => !['allowedOrigins', 'debugPort'].includes(k))
+  )
+    throw new Error(BROWSER_CONFIG_HELP);
+  const origins = b.allowedOrigins;
+  if (!Array.isArray(origins) || origins.length > 20) throw new Error(BROWSER_CONFIG_HELP);
+  for (const origin of origins) {
+    if (typeof origin !== 'string') throw new Error(BROWSER_CONFIG_HELP);
+    let parsed: URL;
+    try {
+      parsed = new URL(origin);
+    } catch {
+      throw new Error(BROWSER_CONFIG_HELP);
+    }
+    if ((parsed.protocol !== 'http:' && parsed.protocol !== 'https:') || parsed.origin !== origin)
+      throw new Error(BROWSER_CONFIG_HELP);
+  }
+  const port = b.debugPort;
+  if (typeof port !== 'number' || !Number.isInteger(port) || port < 1024 || port > 65535)
+    throw new Error(BROWSER_CONFIG_HELP);
+  return { allowedOrigins: [...(origins as string[])], debugPort: port };
 }

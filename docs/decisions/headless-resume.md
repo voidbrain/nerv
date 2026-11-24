@@ -36,3 +36,9 @@ Before spawning the headless resume process:
   - Claude Code's on-disk session state under the user's `~/.claude` project directory, keyed by `sessionId` and `cwd`.
 - **Does not survive**:
   - In-memory child-process pipes, transient stdout streams, and unpersisted environment variables; the adapter therefore captures `sessionId`, exit code, structured output, and cost summary to disk/SQLite on completion and reports them back to the originating channel.
+
+## 4. Live Binding in `serve`
+
+- The owner records a session that stopped at its usage limit: `nerv session-limit record SESSION REPO BRANCH "ISO reset time+zone" [--prompt TEXT]` (`nerv session-limit list` shows them). The target sits in SQLite next to a resume intent that allows one attempt and stays open for a day after the reset.
+- While `serve` runs, the scheduler process checks once a minute and, after the reset, runs `claude -p --resume <sessionId>` once in the worktree, after the branch and worktree recheck. The run is asynchronous, so the scheduler keeps working meanwhile.
+- Each outcome reaches the inbox once: the run's output, or **Needs attention** when the branch changed, the worktree is gone, the run failed (a limit still active included), the window closed, or a restart cut the run off. None of these runs it a second time.
