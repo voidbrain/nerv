@@ -866,4 +866,36 @@ describe('B-121 (#721 review): a planned re-target never hands over from state o
     assert.equal(existsSync(join(m.base(C).home, PROMOTION_MARKER_FILE)), false);
     assert.equal(m.registryOf(D).epoch, 2, 'no base was told epoch 4');
   });
+
+  it('#721 third check: B ran 3 through D, B is lost and revoked, D asleep; with a skipped main every unrevoked base must answer', async () => {
+    const m = (mesh = new Mesh([X, B, C, D], [B, C, D]));
+    await m.advance(30_000);
+    const toB = [m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 })];
+    m.importRecords(X, toB);
+    m.importRecords(B, toB);
+    const first = m.drain(X);
+    const b = await m.promote(B, { drainReceiptFile: first });
+    assert.ok(!('resumed' in b) && b.newEpoch === 3);
+    m.setStandby(B, D);
+    await m.advance(30_000);
+    assert.deepEqual(m.holders(), [B]);
+
+    // B is lost; the owner revokes it and names C at 4. Revoking B stops it, but does not undo epoch 3, which D
+    // (asleep) acked; X drains again, listing B at 3.
+    m.sleep(B);
+    m.sleep(D);
+    const toC = [
+      m.sign({ kind: 'revoke', baseId: B, publicKey: m.base(B).publicKey }),
+      m.sign({ kind: 'main', baseId: C, coordinatorEpoch: 4 }),
+    ];
+    m.importRecords(X, toC);
+    m.importRecords(C, [...toB, ...toC]);
+    const second = m.drain(X);
+    await assert.rejects(m.promote(C, { drainReceiptFile: second }), refused('old_host_unconfirmed', /NERV-04/));
+    assert.equal(existsSync(join(m.base(C).home, PROMOTION_MARKER_FILE)), false);
+    assert.equal(m.registryOf(D).epoch, 3, 'no base was told epoch 4');
+    // D wakes and answers that it acked epoch 3: C's epoch-2 state is behind.
+    m.wake(D);
+    await assert.rejects(m.promote(C, { drainReceiptFile: second }), refused('standby_behind', /epoch 3/));
+  });
 });

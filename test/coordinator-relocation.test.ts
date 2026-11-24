@@ -788,6 +788,24 @@ describe('F-016-T17: nerv kaji promote stops the service, derives its inputs fro
       assert.deepEqual(pushes, [0]);
       assert.deepEqual(f.events, []);
       assert.doesNotThrow(() => assertNoPromotionInProgress(f.home));
+      // #721 third check: a tampered receipt is refused before the probe and the push, so it fences nobody.
+      const signed = JSON.parse(readFileSync(f.receiptFile, 'utf8')) as SignedDrainReceipt;
+      const tampered = join(f.dir, 'tampered.json');
+      writeFileSync(tampered, JSON.stringify({ ...signed, receipt: { ...signed.receipt, finalSeq: 1 } }));
+      pushes.length = 0;
+      await assert.rejects(
+        promoteCoordinator({
+          ...base,
+          drainReceiptFile: tampered,
+          pushEpoch: async (_id, records) => {
+            pushes.push(records.length);
+            return { maxSeenCoordinatorEpoch: 2, ranOrAckedEpoch: 2 };
+          },
+        }),
+        (err: unknown) => err instanceof RelocationRefusedError && err.reason === 'drain_receipt_invalid',
+      );
+      assert.deepEqual(pushes, [], 'neither the probe nor the push went out');
+      assert.deepEqual(f.events, []);
       // Unanswered at the probe (and at the push): a planned move goes on, bound by the receipt.
       const res = await promoteCoordinator({
         ...base,
