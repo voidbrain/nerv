@@ -24,7 +24,7 @@ import {
   type SignedDrainReceipt,
 } from '../src/coordinator-relocation.ts';
 import { COORDINATOR_STATE_SCHEMA } from '../src/coordinator-snapshot.ts';
-import { runKajiCommand } from '../src/cli-kaji.ts';
+import { runKajiCommand, runKajiPromoteCommand } from '../src/cli-kaji.ts';
 import {
   Registry,
   baseKey,
@@ -40,6 +40,8 @@ import {
   assertNoPromotionInProgress,
   installedPromotionService,
   promoteCoordinator,
+  type PromotionClock,
+  type PromotionServiceControl,
 } from '../src/coordinator-promote.ts';
 import { Store } from '../src/store.ts';
 
@@ -648,7 +650,6 @@ describe('F-016-T17: nerv kaji promote stops the service, derives its inputs fro
         home: f.home,
         rootPublicKey: f.rootPub,
         ownPublicKey: f.ownPublicKey,
-        confirmOldHostDown: false,
         service: f.service,
         clock: f.clock,
       };
@@ -718,7 +719,6 @@ describe('F-016-T17: nerv kaji promote stops the service, derives its inputs fro
           home: f.home,
           rootPublicKey: f.rootPub,
           ownPublicKey: f.ownPublicKey,
-          confirmOldHostDown: false,
           service: f.service,
           clock: f.clock,
         }),
@@ -735,7 +735,6 @@ describe('F-016-T17: nerv kaji promote stops the service, derives its inputs fro
         home: g.home,
         rootPublicKey: g.rootPub,
         ownPublicKey: g.ownPublicKey,
-        confirmOldHostDown: false,
         service: g.service,
         clock: g.clock,
       };
@@ -868,7 +867,6 @@ describe('F-016-T17 review fixes (#702)', () => {
           home,
           rootPublicKey: rootPub,
           ownPublicKey: baseKey(home).publicKey,
-          confirmOldHostDown: false,
           service: {
             stop: () => {
               throw new Error('the service did not stop');
@@ -930,7 +928,6 @@ describe('F-016-T17 re-review fixes (#702)', () => {
         home: h,
         rootPublicKey: rootPub,
         ownPublicKey: baseKey(h).publicKey,
-        confirmOldHostDown: false,
         service: { stop: () => void events.push('stop'), start: () => void events.push('start') },
         clock: {
           wall: () => wall,
@@ -952,27 +949,62 @@ describe('F-016-T17 re-review fixes (#702)', () => {
     };
   }
 
-  it('re-review BLOCKER: a bare --confirm-old-host-down needs ack history here for the previous epoch, or a revoke', async () => {
-    const f = await home();
+  const config = (f: { base: { rootPublicKey: string } }) =>
+    ({ kaji: { root: f.base.rootPublicKey, rootBinding: true }, base: { id: 'NERV-02' } }) as unknown as Parameters<
+      typeof runKajiCommand
+    >[3];
+  const ctx = (f: { base: { service: PromotionServiceControl; clock: PromotionClock } }, flags: string[] = []) => ({
+    readSecret: async () => '',
+    flag: (n: string) => (flags.includes(n) ? '' : undefined),
+    promotion: { service: f.base.service, clock: f.base.clock },
+  });
+
+  it('third review: an unplanned promotion needs a revoke of the old main; the owner word never suffices, not with stale ack history either', async () => {
+    // B acked A's lease at epoch 2, then A moved its standby to D (kaji standby D) and kept renewing through D.
+    const f = await home({ ackHistory: true });
     try {
       await assert.rejects(
-        promoteCoordinator({ ...f.base, confirmOldHostDown: true }),
+        runKajiPromoteCommand(['promote', '--confirm-old-host-down'], f.h, config(f), ctx(f)),
         (err: unknown) =>
           err instanceof RelocationRefusedError &&
           err.reason === 'old_host_unconfirmed' &&
-          /ack history|revoke/.test(err.message),
+          /revoke/.test(err.message) &&
+          /root key/.test(err.message),
       );
       assert.deepEqual(f.events, []);
     } finally {
       rmSync(f.dir, { recursive: true, force: true });
     }
-    const g = await home({ ackHistory: true });
+    const g = await home({ revokeOld: true });
     try {
-      const res = await promoteCoordinator({ ...g.base, confirmOldHostDown: true });
-      assert.ok(!('resumed' in res));
+      await runKajiPromoteCommand(['promote'], g.h, config(g), ctx(g));
       assert.equal(g.state()?.coordinatorEpoch, 3);
     } finally {
       rmSync(g.dir, { recursive: true, force: true });
+    }
+  });
+
+  it('third review BLOCKER: through the CLI, a crash inside swap step 4 resumes, with no store opened or an empty one opened first', async () => {
+    for (const openStoreFirst of [false, true]) {
+      const f = await home({ revokeOld: true });
+      try {
+        await assert.rejects(promoteCoordinator({ ...f.base, failAfterStep: 3 }), /Injected crash after step 3/);
+        renameSync(join(f.h, 'nerv.sqlite'), join(f.h, 'nerv.sqlite.pre-standby'));
+        if (openStoreFirst) {
+          // What the CLI did before this fix: it opened (and so created) an empty, migrated nerv.sqlite first.
+          const store = new Store(join(f.h, 'nerv.sqlite'), undefined, { home: f.h });
+          store.close();
+          await runKajiCommand(['promote'], f.h, store, config(f), ctx(f));
+        } else {
+          // What the CLI does now for kaji promote: no Store is opened before the promotion.
+          await runKajiPromoteCommand(['promote'], f.h, config(f), ctx(f));
+        }
+        assert.equal(f.state()?.coordinatorEpoch, 3, `openStoreFirst=${openStoreFirst}`);
+        assert.equal(f.state()?.replicationMode, 'active');
+        assert.doesNotThrow(() => assertNoPromotionInProgress(f.h));
+      } finally {
+        rmSync(f.dir, { recursive: true, force: true });
+      }
     }
   });
 
