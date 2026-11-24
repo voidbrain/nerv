@@ -1021,12 +1021,15 @@ describe('F-016-T19: Telegram polling is handed over on activation', () => {
               res.end('{"ok":false,"description":"Conflict"}');
               return;
             }
+            // Like Telegram, a long poll is held (2 s here) and ends early when its client disconnects.
             polling++;
+            let gone = false;
+            res.once('close', () => (gone = true));
             const from = (body.offset as number | undefined) ?? 0;
-            for (let i = 0; i < 10 && !updates.some((u) => u.update_id >= from); i++)
+            for (let i = 0; i < 100 && !gone && !updates.some((u) => u.update_id >= from); i++)
               await new Promise((r) => setTimeout(r, 20));
             polling--;
-            res.end(JSON.stringify({ ok: true, result: updates.filter((u) => u.update_id >= from) }));
+            if (!gone) res.end(JSON.stringify({ ok: true, result: updates.filter((u) => u.update_id >= from) }));
             return;
           }
           res.end(JSON.stringify({ ok: true, result: { message_id: calls.length } }));
@@ -1080,7 +1083,11 @@ describe('F-016-T19: Telegram polling is handed over on activation', () => {
           root: undefined,
         }),
         continuity: coordinatorTelegramContinuity(join(home, 'nerv.sqlite')),
-        standbyCheckMs: 30,
+        // The old main notices it lost authority only at its next check (400 ms here, 5 s by default), so its
+        // last long poll can still be open when the new main activates: the new main waits a hand-over grace
+        // longer than that before its first poll (observed as a 409 under load before this was added).
+        standbyCheckMs: tag === 'a' ? 400 : 30,
+        handoverGraceMs: 1000,
       });
     const storeB0 = new Store(join(homeB, 'nerv.sqlite'));
     const a = channel(homeA, 'a', storeA);
@@ -1127,6 +1134,8 @@ describe('F-016-T19: Telegram polling is handed over on activation', () => {
       const storeB = new Store(join(homeB, 'nerv.sqlite'));
       b = channel(homeB, 'b', storeB);
       await b.start(50);
+      // The old main's last long poll is still open here (its next authority check is at 400 ms).
+      await new Promise((r) => setTimeout(r, 300));
       say('/start');
       await until(() => replies('b').length === 1);
       await new Promise((r) => setTimeout(r, 200));
