@@ -91,6 +91,7 @@ import {
   type HealthThresholds,
 } from './health-samples.ts';
 import type { BaseLinkMetrics } from './link-load.ts';
+import type { PendingRemotePrint, PrintPartReply } from './print-job.ts';
 export class Runtime implements StoreApi {
   readonly nervous: ProcessClient;
   readonly brain: ProcessClient;
@@ -342,6 +343,10 @@ export class Runtime implements StoreApi {
   }
   useExtraSeat(spec: ExtraSeatSpec): () => void {
     return this.approvalsController.useExtraSeat(spec);
+  }
+  /** F-121-T04: how this base sends a part to its slicing base (`prints.slicer`); serve wires the Kaji line. */
+  useRemotePrint(send: ((pending: PendingRemotePrint) => Promise<PrintPartReply>) | undefined): void {
+    this.approvalsController.useRemotePrint(send);
   }
   /** External/remote consultant without a vote (F-025-T03): receives only Scrolls-allowed data. */
   useRemoteConsultant(consultant: RemoteConsultant | undefined): void {
