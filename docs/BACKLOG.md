@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 4 | 1 | 12 | 2 |
+| **This week** | 5 | 1 | 12 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 38 | 23 |
+| **Open** | 39 | 23 |
 | **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 92.5 h agent + 10.25 h owner across 125 open steps of 37 features and 23 other records. 122.25 h of actual effort recorded on 139 steps. Generated from the task files.
+**Remaining effort:** 101.5 h agent + 10.75 h owner across 129 open steps of 38 features and 23 other records. 122.25 h of actual effort recorded on 139 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2402,6 +2402,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-101-T01 verified: [PR #484](https://github.com/voidbrain/nerv/pull/484) merged on green CI. |
 | Reviewed | 2026-11-20 |
+
+</details>
+
+---
+### <a id="f-121"></a>[✨ F-121](#top)
+
+**Printed parts per drone: "print Smoke's feet"**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟣 Very large | 9 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-121-T01 — Printed parts on drone models (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-24: each drone model in the fleet (F-098) has its own 3D-printed parts. AOS 5: 4 motor feet, a rear tail with mounts for the two O4 antennas, a GPS enclosure, a buzzer enclosure and 2 camera cage bands (one per side). Pavo20 Pro: the same GPS and buzzer enclosures only. "Print Smoke's feet" or "print the AOS feet" should resolve the drone, its model, the part, its file, the count and the print settings (default TPU from the external spool, the profile's own temperatures) and go through the existing slice and Bambu Connect hand-off (F-087). |
+| **Reproduce** | `nerv chat "stampa i piedini di Smoke"`: NERV has no printed parts in the fleet and cannot name a file or profile. |
+| **Check** | Printed parts belong to a drone model with a count, file and print profile; a drone inherits its model's parts; a chat request names the part, file, count and profile and asks approval before the hand-off; the owner's part list and file paths stay in the private fleet data, never in Git. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-121-t01"></a>F-121-T01 — Printed parts on drone models | 3 h | 0 h | 3 h | Planned | — | [F-121-T02](#f-121-t02) |
+| 🟡 Medium | <a id="f-121-t02"></a>F-121-T02 — Print a part by chat | 3 h | 0 h | 3 h | Planned | [F-121-T01](#f-121-t01) | [F-121-T03](#f-121-t03), [F-121-T04](#f-121-t04) |
+| 🟡 Medium | <a id="f-121-t04"></a>F-121-T04 — Send the part file with the print job | 3 h | 0 h | 3 h | Planned | [F-121-T02](#f-121-t02) | [F-121-T03](#f-121-t03) |
+| 🟢 Small | <a id="f-121-t03"></a>F-121-T03 — Owner: enter the parts and print one | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-121-T02](#f-121-t02), [F-121-T04](#f-121-t04) | — |
+| 🟣 Very large | **Total** | 9 h | 0 h (0 of 4 steps recorded) | 9 h agent + 0.5 h owner | 0 of 4 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-121.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #712](https://github.com/voidbrain/nerv/pull/712). |
+| Opened | 2026-11-24 |
+| Verification | — |
+| Reviewed | 2026-11-24 |
 
 </details>
 
