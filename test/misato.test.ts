@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { delimiter, join } from 'node:path';
 import {
   detectToolDomains,
   filterToolsByIntent,
@@ -1061,97 +1061,120 @@ test('F-121-T02: print phrases unlock the fleet domain (fleet.print)', () => {
   );
   assert.equal(ask.route, 'local', 'part names and library paths stay local');
 });
-test('F-121-T02: "stampa i piedini di Wisp" through chat: fleet.print slices with the slicer on PATH, then the hand-off waits for the owner even when Casper approves', async () => {
-  const foot = 'solid foot\nendsolid foot\n';
-  const script = ['{"action":{"tool":"fleet.print","args":{"phrase":"stampa i piedini di Wisp"}}}'];
-  // A fake bambu-studio first on PATH: the nervous process inherits PATH and runs it as the real slicer.
-  const bin = mkdtempSync(join(tmpdir(), 'nerv-fake-slicer-'));
-  writeFileSync(
-    join(bin, 'bambu-studio'),
-    [
-      `#!${process.execPath}`,
-      "const { writeFileSync } = require('node:fs');",
-      'const args = process.argv.slice(2);',
-      "writeFileSync(args[args.indexOf('--export-3mf') + 1], 'PK-sliced');",
-      "console.log('estimated printing time: 42m');",
-      "console.log('total filament used [g] = 7.5');",
-    ].join('\n'),
-    { mode: 0o755 },
-  );
-  const path = process.env.PATH;
-  process.env.PATH = `${bin}:${path ?? ''}`;
-  const setup = (home: string) => {
+// The fake slicer is a `#!node` script found on PATH; Windows cannot execute an extensionless script (and Node refuses
+// .cmd files without a shell), while the real Bambu Studio there is an .exe. Slicing itself is covered on every platform
+// by test/fleet-print-job.test.ts with an injected exec; this end-to-end chat test runs on macOS and Linux.
+test(
+  'F-121-T02: "stampa i piedini di Wisp" through chat: fleet.print slices with the slicer on PATH, then the hand-off waits for the owner even when Casper approves',
+  { skip: process.platform === 'win32' ? 'a #! script on PATH cannot run on Windows' : false },
+  async () => {
+    const foot = 'solid foot\nendsolid foot\n';
+    const script = ['{"action":{"tool":"fleet.print","args":{"phrase":"stampa i piedini di Wisp"}}}'];
+    // A fake bambu-studio first on PATH: the nervous process inherits PATH and runs it as the real slicer.
+    const bin = mkdtempSync(join(tmpdir(), 'nerv-fake-slicer-'));
     writeFileSync(
-      join(home, 'slicer-profiles.json'),
-      JSON.stringify([{ name: 'Test TPU 0.4', machineProfile: 'test-machine.json', materialProfile: 'test-tpu.json' }]),
+      join(bin, 'bambu-studio'),
+      [
+        `#!${process.execPath}`,
+        "const { writeFileSync } = require('node:fs');",
+        'const args = process.argv.slice(2);',
+        "writeFileSync(args[args.indexOf('--export-3mf') + 1], 'PK-sliced');",
+        "console.log('estimated printing time: 42m');",
+        "console.log('total filament used [g] = 7.5');",
+      ].join('\n'),
+      { mode: 0o755 },
     );
-    mkdirSync(join(home, 'prints', 'kite-5'), { recursive: true });
-    writeFileSync(join(home, 'prints', 'kite-5', 'foot.stl'), foot);
-    const store = new Store(join(home, 'nerv.sqlite'));
-    store.fleet.importFleet(
-      {
-        version: 1,
-        models: [
-          {
-            name: 'Kite 5.1',
-            parts: [
-              { name: 'motor foot', aliases: ['piedini'], file: 'kite-5/foot.stl', count: 4, profile: 'Test TPU 0.4' },
-            ],
-          },
-        ],
-        drones: [{ name: 'Wisp', model: 'Kite 5.1', parts: [] }],
-      },
-      undefined,
-      { slicerProfiles: ['Test TPU 0.4'] },
-    );
-    store.close();
-    // The planner copies the result's handoff arguments; the sliced file's name is the part's SHA-256 and profile.
-    const digest = createHash('sha256').update(foot).digest('hex');
-    const handoff = {
-      gcode3mfPath: join(home, 'prints-out', `${digest.slice(0, 16)}-test-tpu-0-4.gcode.3mf`),
-      profileName: 'Test TPU 0.4',
-      printTimeText: '42m',
-      filamentGrams: 7.5,
-      amsMapping: 'External spool (TPU)',
-      sourceFile: 'kite-5/foot.stl',
-      repeats: 4,
-    };
-    script.push(JSON.stringify({ action: { tool: 'bambu.handoff', args: handoff } }));
-  };
-  try {
-    await agent(
-      script,
-      async (runtime, _m, _base, _headers, home) => {
-        const chat = await runtime.chat('stampa i piedini di Wisp');
-        assert.deepEqual(
-          chat.steps.map((step) => [step.tool, step.outcome]),
-          [
-            ['fleet.print', 'grant'],
-            ['bambu.handoff', 'approval'],
+    const path = process.env.PATH;
+    process.env.PATH = `${bin}${delimiter}${path ?? ''}`;
+    const setup = (home: string) => {
+      writeFileSync(
+        join(home, 'slicer-profiles.json'),
+        JSON.stringify([
+          { name: 'Test TPU 0.4', machineProfile: 'test-machine.json', materialProfile: 'test-tpu.json' },
+        ]),
+      );
+      mkdirSync(join(home, 'prints', 'kite-5'), { recursive: true });
+      writeFileSync(join(home, 'prints', 'kite-5', 'foot.stl'), foot);
+      const store = new Store(join(home, 'nerv.sqlite'));
+      store.fleet.importFleet(
+        {
+          version: 1,
+          models: [
+            {
+              name: 'Kite 5.1',
+              parts: [
+                {
+                  name: 'motor foot',
+                  aliases: ['piedini'],
+                  file: 'kite-5/foot.stl',
+                  count: 4,
+                  profile: 'Test TPU 0.4',
+                },
+              ],
+            },
           ],
-        );
-        const sliced = chat.steps[0]!.result as { reply: string; handoff: Record<string, unknown> };
-        for (const text of ['kite-5/foot.stl', '4 prints', 'Test TPU 0.4', 'external spool', '42m', '7.5 g', '30 g']) {
-          assert.ok(sliced.reply.includes(text), `${text} in: ${sliced.reply}`);
-        }
-        assert.equal(chat.waiting.length, 1);
-        const cards = await runtime.approvals();
-        assert.equal(cards.length, 1);
-        assert.equal(cards[0]!.card.tool, 'bambu.handoff');
-        assert.deepEqual(cards[0]!.card.args, sliced.handoff, 'the card carries the slice result, unchanged');
-        const launches = join(home, 'bambu-launches.log');
-        assert.equal(existsSync(launches), false, 'nothing opens before the owner approves');
-        const decided = (await runtime.decide(cards[0]!.id, 'approve')) as { result?: { printStarted: boolean } };
-        assert.equal(decided.result?.printStarted, false);
-        assert.match(readFileSync(launches, 'utf8'), /^bambu-connect:\/\/import-file\?path=.*prints-out/);
-      },
-      undefined,
-      // Owner decision 2026-11-24: opening Bambu Connect always waits for the owner, even when Casper approves.
-      undefined,
-      setup,
-    );
-  } finally {
-    process.env.PATH = path;
-    rmSync(bin, { recursive: true, force: true });
-  }
-});
+          drones: [{ name: 'Wisp', model: 'Kite 5.1', parts: [] }],
+        },
+        undefined,
+        { slicerProfiles: ['Test TPU 0.4'] },
+      );
+      store.close();
+      // The planner copies the result's handoff arguments; the sliced file's name is the part's SHA-256 and profile.
+      const digest = createHash('sha256').update(foot).digest('hex');
+      const handoff = {
+        gcode3mfPath: join(home, 'prints-out', `${digest.slice(0, 16)}-test-tpu-0-4.gcode.3mf`),
+        profileName: 'Test TPU 0.4',
+        printTimeText: '42m',
+        filamentGrams: 7.5,
+        amsMapping: 'External spool (TPU)',
+        sourceFile: 'kite-5/foot.stl',
+        repeats: 4,
+      };
+      script.push(JSON.stringify({ action: { tool: 'bambu.handoff', args: handoff } }));
+    };
+    try {
+      await agent(
+        script,
+        async (runtime, _m, _base, _headers, home) => {
+          const chat = await runtime.chat('stampa i piedini di Wisp');
+          assert.deepEqual(
+            chat.steps.map((step) => [step.tool, step.outcome]),
+            [
+              ['fleet.print', 'grant'],
+              ['bambu.handoff', 'approval'],
+            ],
+          );
+          const sliced = chat.steps[0]!.result as { reply: string; handoff: Record<string, unknown> };
+          for (const text of [
+            'kite-5/foot.stl',
+            '4 prints',
+            'Test TPU 0.4',
+            'external spool',
+            '42m',
+            '7.5 g',
+            '30 g',
+          ]) {
+            assert.ok(sliced.reply.includes(text), `${text} in: ${sliced.reply}`);
+          }
+          assert.equal(chat.waiting.length, 1);
+          const cards = await runtime.approvals();
+          assert.equal(cards.length, 1);
+          assert.equal(cards[0]!.card.tool, 'bambu.handoff');
+          assert.deepEqual(cards[0]!.card.args, sliced.handoff, 'the card carries the slice result, unchanged');
+          const launches = join(home, 'bambu-launches.log');
+          assert.equal(existsSync(launches), false, 'nothing opens before the owner approves');
+          const decided = (await runtime.decide(cards[0]!.id, 'approve')) as { result?: { printStarted: boolean } };
+          assert.equal(decided.result?.printStarted, false);
+          assert.match(readFileSync(launches, 'utf8'), /^bambu-connect:\/\/import-file\?path=.*prints-out/);
+        },
+        undefined,
+        // Owner decision 2026-11-24: opening Bambu Connect always waits for the owner, even when Casper approves.
+        undefined,
+        setup,
+      );
+    } finally {
+      process.env.PATH = path;
+      rmSync(bin, { recursive: true, force: true });
+    }
+  },
+);
