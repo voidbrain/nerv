@@ -394,6 +394,90 @@ test('Scrolls can deny fleet chat before it mutates local records', async () => 
     setup,
   );
 });
+test('F-098-T06: fleet edits from chat go through the gated fleet.chat path into the real store', async () => {
+  const setup = (home: string) => {
+    const store = new Store(join(home, 'nerv.sqlite'));
+    store.fleet.addDrone({ name: 'TestQuad' });
+    store.fleet.setPart({
+      droneIdOrName: 'TestQuad',
+      category: 'motor',
+      position: 'front-left',
+      componentModel: 'Fictional 2207 1750KV',
+    });
+    store.close();
+  };
+  await agent(
+    [
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"nuovo drone Ghost, frame Fictional 5, motori Fictional 2207 1750KV"}}}',
+      '{"reply":"Ghost aggiunto."}',
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"replaced TestQuad\'s front-left motor with Fictional 2207 1950KV"}}}',
+      '{"reply":"Motor replaced."}',
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"I have 3 new Fictional 2207 1950KV motors"}}}',
+      '{"reply":"Stock set."}',
+    ],
+    async (runtime, m, _base, _headers, home) => {
+      for (const message of [
+        'nuovo drone Ghost, frame Fictional 5, motori Fictional 2207 1750KV',
+        "replaced TestQuad's front-left motor with Fictional 2207 1950KV",
+        'I have 3 new Fictional 2207 1950KV motors',
+      ]) {
+        const result = await runtime.chat(message);
+        assert.deepEqual(
+          result.steps.map((step) => [step.tool, step.outcome]),
+          [['fleet.chat', 'grant']],
+          message,
+        );
+      }
+      assert.ok(
+        m.asked.every((request) => request.who === 'misato'),
+        'Green writes never ask Casper',
+      );
+      const persisted = new Store(join(home, 'nerv.sqlite'));
+      try {
+        assert.equal(persisted.fleet.listParts('Ghost').length, 5);
+        assert.deepEqual(
+          persisted.fleet
+            .listParts('TestQuad')
+            .map((p) => [p.componentModel, p.status])
+            .sort(),
+          [
+            ['Fictional 2207 1750KV', 'removed'],
+            ['Fictional 2207 1950KV', 'installed'],
+          ],
+        );
+        assert.equal(persisted.fleet.getSpare('Fictional 2207 1950KV')?.newCount, 3);
+        assert.equal(persisted.fleet.getSpare('Fictional 5')?.newCount, 0);
+      } finally {
+        persisted.close();
+      }
+    },
+    undefined,
+    undefined,
+    setup,
+  );
+});
+test('F-098-T06: Scrolls can deny fleet edits from chat before they change the fleet', async () => {
+  await agent(
+    [
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"new drone Ghost, motors Fictional 2207 1750KV"}}}',
+      '{"reply":"Refused by the rules."}',
+    ],
+    async (runtime, _m, _base, _headers, home) => {
+      const result = await runtime.chat('new drone Ghost, motors Fictional 2207 1750KV');
+      assert.deepEqual(
+        result.steps.map((step) => [step.tool, step.outcome]),
+        [['fleet.chat', 'reject']],
+      );
+      const persisted = new Store(join(home, 'nerv.sqlite'));
+      try {
+        assert.equal(persisted.fleet.listDrones().length, 0);
+      } finally {
+        persisted.close();
+      }
+    },
+    { deny: ['fleet.chat'] },
+  );
+});
 test("an unreadable plan is shown back to Misato; a Blue action asks Casper, and its card ends the turn with the service's own waiting reply", async () => {
   await agent(
     [
@@ -945,4 +1029,15 @@ test('F-106-T03: core tools stay always offered; domain toolsets load only when 
 test('F-098-T04: Italian crash and spares phrases unlock the fleet domain (fleet.chat)', () => {
   assert.equal(detectToolDomains({ request: 'ho crashato Smoke, motore sinistro inferiore rotto' }).has('fleet'), true);
   assert.equal(detectToolDomains({ request: 'quanti motori di scorta mi restano?' }).has('fleet'), true);
+});
+test('F-098-T06: add-drone, replace-part and stock phrases unlock the fleet domain (fleet.chat)', () => {
+  for (const request of [
+    'nuovo drone Ghost, frame Apex 5, motori Testmot 2207 1750KV',
+    'sostituito motore anteriore sinistro di Smoke con Testmot 2207 1950KV',
+    "replaced Smoke's front-left motor with Testmot 2207 1950KV",
+    'ho 3 motori Testmot nuovi',
+    'I have 3 new Testmot motors',
+  ]) {
+    assert.equal(detectToolDomains({ request }).has('fleet'), true, request);
+  }
 });

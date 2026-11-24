@@ -3,6 +3,7 @@ import type { WorkerItem, WorkerContext, WorkerLease } from './worker-jobs.ts';
 import type { RunReason } from './instrumentality-runs.ts';
 import { parsePrices, type UsageObservation } from './model-usage.ts';
 import { MISATO_SOURCE, OWNER_SOURCE, Store } from './store.ts';
+import { CoordinatorAuthorityError } from './coordinator-authority.ts';
 import type { AgencySnapshot } from './executors.ts';
 import type { Verdict } from './policy.ts';
 import { dispatchRpc, MAX_FRAME_BYTES, READY } from './rpc.ts';
@@ -17,12 +18,20 @@ const store = new Store(
   process.argv[3] ? readScrolls(process.argv[3]) : undefined,
   process.argv[3] ? { home: process.argv[3] } : {},
 );
-store.tick();
-store.expire();
-const timer = setInterval(() => {
+// F-016-T16: a standby, fenced or lease-expired base runs no coordinator tick (the authority check refuses it),
+// quietly; worker-scoped expiry still runs.
+const schedule = () => {
   try {
     store.tick();
-    store.expire();
+  } catch (e) {
+    if (!(e instanceof CoordinatorAuthorityError)) throw e;
+  }
+  store.expire();
+};
+schedule();
+const timer = setInterval(() => {
+  try {
+    schedule();
   } catch {
     console.error('Nervous scheduler tick failed.');
   }
