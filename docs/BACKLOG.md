@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 5 | 1 | 15 | 2 |
+| **This week** | 5 | 1 | 16 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 26 |
+| **Open** | 39 | 27 |
 | **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 97.25 h agent + 11 h owner across 136 open steps of 38 features and 26 other records. 146.75 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 99.25 h agent + 11 h owner across 137 open steps of 38 features and 27 other records. 147.5 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -415,8 +415,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-121-t01"></a>B-121-T01 — Refuse a move from a standby that acked a later epoch than its state | 0.5 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | [B-121-T02](#b-121-t02) | [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks |
-| 🟢 Small | <a id="b-121-t02"></a>B-121-T02 — Epoch-push replies report the newest epoch a base ran or acked | 2 h | 2 h so far (stated) | 0 h | Implemented; verification pending | [B-121-T01](#b-121-t01) | [B-124-T01](#b-124-t01) | [PR #721](https://github.com/voidbrain/nerv/pull/721) ranOrAckedEpoch in the epoch-push reply; record-free probe before the push; #721 review fixes |
-| 🟢 Small | **Total** | 2.5 h | 2.75 h | 0 h | 0 of 2 completed | | | |
+| 🟢 Small | <a id="b-121-t02"></a>B-121-T02 — Epoch-push replies report the newest epoch a base ran or acked | 2.75 h | 2.75 h so far (stated) | 0 h | Implemented; verification pending | [B-121-T01](#b-121-t01) | [B-124-T01](#b-124-t01) | [PR #721](https://github.com/voidbrain/nerv/pull/721) ranOrAckedEpoch in the epoch-push reply; record-free probe before the push; #721 review fixes |
+| 🟢 Small | **Total** | 3.25 h | 3.5 h | 0 h | 0 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1730,6 +1730,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | None yet |
+| Opened | 2026-11-24 |
+| Verification | Pending |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-125"></a>[🐞 B-125](#top)
+
+**A signed Kaji reply is not bound to its request, so an old epoch-push reply can be replayed**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-125-T01 (design and fix); the owner agrees the change to the signed reply before work starts.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 in the review of [PR #721](https://github.com/voidbrain/nerv/pull/721) (B-121-T02). Replies on the Kaji line are signed over method, path, time, nonce and body digest, but the nonce is the reply's own, not the request's, so a reply is not bound to the request it answers. Each client refuses a reply nonce it has seen, so a replay must be one this client never received (withheld from it, or captured on the way to another base's request): an attacker on the path could answer a `/kaji/epoch-push` probe with a genuine reply that base signed up to 120 s earlier (the clock-skew window), hiding a newer `ranOrAckedEpoch` or `maxSeenCoordinatorEpoch`, and so let a re-targeted move pass the probe. The same holds for other signed replies (lease renewals included). |
+| **Reproduce** | Capture a signed epoch-push reply D sent to base A; within 120 s, after D acks a lease at a later epoch, answer base C's probe to D with it: C accepts it. |
+| **Check** | A committed test fails first: a reply signed for another request is refused. Proposed fix: the reply's signature covers the request's nonce (or its digest), and the client checks it, with a mixed-version rule for older peers stated in the decision. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-125-t01"></a>B-125-T01 — Bind every signed Kaji reply to the request it answers | 2 h | 0 h | 2 h | Planned |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-125.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | None yet (found in [PR #721](https://github.com/voidbrain/nerv/pull/721)) |
 | Opened | 2026-11-24 |
 | Verification | Pending |
 | Reviewed | 2026-11-24 |
