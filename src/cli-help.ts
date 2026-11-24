@@ -254,6 +254,15 @@ export const HELP_GROUPS: HelpGroup[] = [
         about: 'The background service; move runs it from its own install folder',
       },
       { name: 'reload', about: 'Make the running service re-read its configuration' },
+      {
+        name: 'update',
+        args: '[--check]',
+        about: 'Update the install folder to origin/main; --check only reports',
+        usage: [
+          'update --check (up to date, or behind origin/main by N commits; changes nothing)',
+          'update (fetch into the install folder, stop, lifecycle update: backup, rehearsal, build, start, verify)',
+        ],
+      },
       { name: 'doctor', about: 'Check this installation' },
       {
         name: 'update-policy',

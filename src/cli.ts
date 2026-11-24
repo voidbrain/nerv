@@ -87,6 +87,7 @@ import { service } from './service.ts';
 import { startUpdaterJob } from './updater-job.ts';
 import { reportUpdaterResult } from './updater-result.ts';
 import { serviceMove } from './install-move-cli.ts';
+import { updateCommand } from './update-cli.ts';
 import { initializeNativeTLS, loadNativeTLS, nativeAdmin, NativeAuth, type Invitation } from './native-auth.ts';
 import { Runtime, type ChatReply } from './runtime.ts';
 
@@ -276,6 +277,7 @@ try {
       );
     } else console.log(JSON.stringify(value, null, 2));
   } else if (command === 'service' && args[0] === 'move') await serviceMove(args.slice(1), home);
+  else if (command === 'update') await updateCommand(args, home);
   else if (command === 'service') service(args[0] ?? '', home);
   else if (await tryRunCliCommand(command, args, home, { readSecret, openPage, reloadIfRunning, flag })) {
     // Handled by cli-commands.ts
