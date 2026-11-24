@@ -43,12 +43,12 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Split from F-016-T07 on 2026-11-23 by owner decision (option a) after the PR #677 review; estimated from F-016-T06 and F-016-T07 (1.5 h each actual). Not a measurement. 2026-11-24: implemented in PR #703 (stacked on #702); actual stated 1.25 h. Push over the old main's worker WebSockets not done: acks gathered there would not reach the promoting base; outbound-only workers keep the conservative wait (decision section 2).",
+    "basis": "Split from F-016-T07 on 2026-11-23 by owner decision (option a) after the PR #677 review; estimated from F-016-T06 and F-016-T07 (1.5 h each actual). Not a measurement. 2026-11-24: implemented in PR #703 (stacked on #702); actual stated 1.25 h. Push over the old main's worker WebSockets not done: acks gathered there would not reach the promoting base; outbound-only workers keep the conservative wait (decision section 2). 2026-11-24: review fixes on the #701-#704 stack added time; actual restated. 2026-11-24: re-review fixes added time; actual restated. Fourth review fixes added time; actual restated.",
     "reviewed": "2026-11-23",
     "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2,
-    "actualAgentHours": 1.25,
+    "actualAgentHours": 2.0,
     "actualSource": "stated"
   },
   "prs": [
