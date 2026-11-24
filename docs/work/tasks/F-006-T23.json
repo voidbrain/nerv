@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T23",
-  "status": "implemented",
+  "status": "closed",
   "title": "Run P2 and P3 role-run and neutral-smoke under limits-repeat3",
   "goal": "P2 (mini PC local) and P3 (mini PC worker, Mac inference) have live repeat-3 results on the same cases and budgets as the Mac P1 baseline",
   "capabilities": [
@@ -42,7 +42,7 @@
   "effort": {
     "size": "medium",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 (F-006-T22): two packs on two placements at repeat 3, about 120 runs bounded by limits-repeat3; F-006-T11 live device steps took 1.5–3 h. Implemented 2026-11-24 in 1.5 h: P2 smoke 21/30 and roles 9/30 on NERV-02 (Gauntlet, limits-repeat3); P3 smoke 24/30 over WorkerLink; P3 roles blocked by B-119 and the probe's prompt limit (F-006-T27).",
+    "basis": "Estimated 2026-11-24 (F-006-T22): two packs on two placements at repeat 3, about 120 runs bounded by limits-repeat3; F-006-T11 live device steps took 1.5–3 h. Implemented 2026-11-24 in 1.5 h: P2 smoke 21/30 and roles 9/30 on NERV-02 (Gauntlet, limits-repeat3); P3 smoke 24/30 over WorkerLink; P3 roles blocked by B-119 and the probe's prompt limit (F-006-T27). Closed 2026-11-24 in the reconciliation: PR #698 merged on green CI; live runs recorded in the report.",
     "reviewed": "2026-11-24",
     "agentHours": 0,
     "ownerHours": 0,

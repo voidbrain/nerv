@@ -4,7 +4,7 @@
   "parent": "F-098",
   "title": "Fleet import with spares cues",
   "goal": "`nerv fleet import FILE.json` loads a whole fleet at once and every installed component model becomes a spares record",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Strict JSON shape { version: 1, drones: [ { name, frame?, notes?, parts: [ { category, model, positions? } ] } ] }; errors name the bad field",
     "A part with positions creates one part row per position; without positions, one row at \"main\"",
@@ -38,8 +38,8 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Owner decision 2026-11-23 added this step; estimated 0.5 h at agent speed for one parser, one store method and a CLI branch. Not a measurement.",
-    "reviewed": "2026-11-23",
+    "basis": "Owner decision 2026-11-23 added this step; estimated 0.5 h at agent speed for one parser, one store method and a CLI branch. Not a measurement. Closed 2026-11-24 in the reconciliation: PR #691 merged on green CI; the live check is F-098-T04.",
+    "reviewed": "2026-11-24",
     "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5,

@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T12",
-  "status": "implemented",
+  "status": "closed",
   "title": "T04c — Placement report and recommendation",
   "goal": "Placement report and recommendation.",
   "capabilities": [
@@ -46,9 +46,9 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Implemented 2026-11-23 in 0.75 h: pure placementReport, committed aggregate evidence and report; live equivalent runs left to the owner decision F-006-T22.",
-    "reviewed": "2026-11-23",
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Implemented 2026-11-23 in 0.75 h: pure placementReport, committed aggregate evidence and report; live equivalent runs left to the owner decision F-006-T22. Closed 2026-11-24 in the reconciliation: PR #679 merged on green CI; report superseded by F-006-T26.",
+    "reviewed": "2026-11-24",
     "baselineDays": 0.5,
     "agentHours": 0,
     "baselineAgentHours": 0.75,

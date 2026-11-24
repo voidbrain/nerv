@@ -4,7 +4,7 @@
   "parent": "F-118",
   "title": "Workspace and dashboard pair from their own sign-in box; the installed app signs itself in",
   "goal": "Typing the short code into an installed app pairs it, and later launches need no sign-in",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The sign-in box accepts the short code and pairs only in the installed app, which keeps the device credential in persistent storage",
     "Browser tabs keep session behaviour and refuse a pairing code before any request (review of #707)",
@@ -43,13 +43,18 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h agent",
-    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
-    "reviewed": "2026-11-23",
-    "agentHours": 2,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement. Closed 2026-11-24 in the reconciliation: PR #707 merged on green CI; its browser test passes alone and in CI and fails only under local load (B-127); the iPhone check is F-118-T04.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2,
     "actualAgentHours": 2.25,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 707
+    }
+  ]
 }

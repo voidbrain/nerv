@@ -4,7 +4,7 @@
   "parent": "F-117",
   "title": "nerv update [--check]: fetch, compare and run the lifecycle update",
   "goal": "One command checks origin/main and, when behind, runs stop, lifecycle update and start, then probes the dashboard",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "--check prints up to date or behind by N commits without changing anything",
     "A behind base completes stop → update → start through planService/applyService and reports the new revision",
@@ -37,13 +37,18 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h agent",
-    "basis": "Implemented 2026-11-24; the live run on NERV-01 is F-117-T05.",
+    "estimate": "0 remaining",
+    "basis": "Implemented 2026-11-24; the live run on NERV-01 is F-117-T05. Closed 2026-11-24 in the reconciliation: PR #693 merged on green CI; the live run is F-117-T05.",
     "reviewed": "2026-11-24",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 0.25,
     "actualAgentHours": 1,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 693
+    }
+  ]
 }

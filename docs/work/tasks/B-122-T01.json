@@ -4,7 +4,7 @@
   "parent": "B-122",
   "title": "Name a foreground NERV when an update is refused",
   "goal": "An update refused because NERV runs as a foreground nerv launch says so, names the process and the way forward",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test fails first: after a service move, with the service not registered and a foreground nerv launch (global link, other checkout) serving the base, the outside updater's refusal names the foreground process instead of the generic ownership reason, and nothing is stopped",
     "Process discovery finds a NERV runtime started through the global nerv command",
@@ -36,13 +36,18 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-24: live diagnosis, a failing join test, a matcher and message fix. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24: live diagnosis, a failing join test, a matcher and message fix. Not a measurement. Closed 2026-11-24 in the reconciliation: PR #719 merged on green CI; the live check is B-122-T02.",
     "reviewed": "2026-11-24",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5,
     "actualAgentHours": 1.5,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 719
+    }
+  ]
 }

@@ -4,7 +4,7 @@
   "parent": "F-118",
   "title": "Paired devices in Settings with Revoke; nerv devices list and revoke",
   "goal": "The owner sees every paired device and revokes any one of them",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Settings lists devices with name, created, last use and a Revoke button",
     "nerv devices list and nerv devices revoke NAME on the Mac"
@@ -34,13 +34,18 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h agent",
-    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
-    "reviewed": "2026-11-23",
-    "agentHours": 1.5,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement. Closed 2026-11-24 in the reconciliation: PR #713 merged on green CI after independent security review; the iPhone check is F-118-T04.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5,
     "actualAgentHours": 1.75,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 713
+    }
+  ]
 }

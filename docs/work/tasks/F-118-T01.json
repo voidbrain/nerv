@@ -4,7 +4,7 @@
   "parent": "F-118",
   "title": "Device credentials and pairing: hashed, 90-day sliding limit, short phone code",
   "goal": "A device pairs once with a short code and stays signed in until 90 days unused or revoked",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Starts after B-113 (PR #687) merges: it extends the session book (merged; the private-file writer is shared as savePrivateJson)",
     "Device credential stored hashed with name, created and last use; lapses after 90 days without use; ended by admin token rotation",
@@ -41,13 +41,18 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "3 h agent",
-    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
-    "reviewed": "2026-11-23",
-    "agentHours": 3,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement. Closed 2026-11-24 in the reconciliation: PR #700 merged on green CI after independent security review; the iPhone check is F-118-T04.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3,
     "actualAgentHours": 1.5,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 700
+    }
+  ]
 }

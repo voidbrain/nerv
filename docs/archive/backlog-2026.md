@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 1 | 2 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 3 | 6 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -6447,6 +6447,210 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | Opened | 2026-11-22 |
 | Closed | 2026-11-24 |
 | Verification | Human: 2026-11-24, owner confirmed S-F11B on the live dashboard. Unit: 2026-11-22: `node --test test/dashboard.test.ts` and `npm run check:fast` passed. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+
+### B-109
+
+**Blackbox analysis rejects a real Blackbox Explorer CSV export**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-24: PR #674 merged on green CI (run of 2026-11-23); the owner's real Blackbox Explorer CSV decodes.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-23 running F-100-T04 on the owner's real fleet log: Betaflight Blackbox Explorer's CSV export starts with about 150 `"key",value` settings lines before the column header, and `parseBlackboxCsv` took the first line as the header, so the analysis failed with "missing required time, gyroADC[0..2], or motor[0..3] columns". |
+| **Reproduce** | Export a log to CSV with Blackbox Explorer and analyse it. |
+| **Check** | Test committed failing first (`test/blackbox.test.ts`, B-109): a CSV with a settings preamble is read in full, using unfiltered gyro and eRPM; a CSV without a recognisable header still reports the missing columns. The real log then decodes (84,789 samples). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-24: PR #674 merged on green CI (run of 2026-11-23); the owner's real Blackbox Explorer CSV decodes. 2026-11-23: B-109-T01 implemented; the header is the first line naming the time and gyro columns. Verified on the owner's real log (F-100-T04).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #674](https://github.com/voidbrain/nerv/pull/674) |
+| Opened | 2026-11-23 |
+| Verification | Unit/integration 2026-11-23: Test: test/blackbox.test.ts 4/4; the owner's real CSV export decodes (F-100-T04). CI: PR #674 green. |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+
+### B-114
+
+**EVA-03 script-plan test fails under load**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-24: PR #694 merged on green CI; no EVA-03 script-plan failure in CI runs after it (reconciliation 2026-11-24).
+
+| | |
+|---|---|
+| **Issue** | 2026-11-23: "executes inside EVA-03 with a MAGI gate decision per call, fails closed on denial/fingerprint change/missing sandbox" (`test/script-plan.test.ts:88`) and "F-112-T03: read-only script plans inside EVA-03" failed in PR #674's validate run and in a local full `npm test` while five agents loaded the machine; alone it passes 3/3. |
+| **Reproduce** | Run `npm test` while the machine is busy (parallel gauntlet runs). |
+| **Check** | The cause is named with evidence, a regression reproduces the load case, and the fix keeps the test green under load. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-24: PR #694 merged on green CI; no EVA-03 script-plan failure in CI runs after it (reconciliation 2026-11-24). 2026-11-24 ([PR #694](https://github.com/voidbrain/nerv/pull/694)): cause: case 8 of the EVA-03 test gave the script a fixed 120 ms budget that also had to cover sandbox start (43–48 ms idle, 51–71 ms under 36 busy shells); 24 parallel runs failed 21/24, all at script-plan.test.ts:233 (late receipt undefined, not completed_late). Fix: a warm-up measures sandbox start and the budget is max(500 ms, 4× start); a regression wraps the real sandbox with a 0.3 s delayed start. After: 24/24 and 36/36 parallel runs pass. B-114-T01.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #694](https://github.com/voidbrain/nerv/pull/694); Opened in [PR #687](https://github.com/voidbrain/nerv/pull/687). |
+| Opened | 2026-11-23 |
+| Verification | Unit/integration 2026-11-24: Test: test/script-plan.test.ts (delayed-start regression) 24/24 and 36/36 parallel runs; CI: PR #694 green, no recurrence in the CI runs of 2026-11-24 after it. |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+
+### B-116
+
+**F-023 notice test fails when a random ID contains a forbidden word**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-24: PR #694 merged on green CI.
+
+| | |
+|---|---|
+| **Issue** | PR #684 validate 2026-11-23: "F-023: approval and generic durable inbox notice commit together and survive restart" matched its forbidden-text regex (Private neutral fixture, 2099, grantId, args) against the whole serialized notice, whose random UUID can contain 2099. |
+| **Reproduce** | Rerun the test until a UUID contains 2099 (rare). |
+| **Check** | The assertion checks only the message text; a committed case with a UUID containing 2099 passes. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-24: PR #694 merged on green CI. 2026-11-24 ([PR #694](https://github.com/voidbrain/nerv/pull/694)): the forbidden-text regex now checks only the notice's message; the notice and approval must carry an exact field set (keeps args/grantId out); a regression builds a notice with fixed ids containing 2099. B-116-T01.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #694](https://github.com/voidbrain/nerv/pull/694); Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| Opened | 2026-11-23 |
+| Verification | Unit/integration 2026-11-24: Test: test/approval-delivery.test.ts (fixed ids containing 2099); CI: PR #694 green. |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+
+### B-117
+
+**Gauntlet `nerv-system-flows/bases` and `browser` fail under machine load and pass alone**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-24: PR #710 merged on green CI; both gauntlet cases passed under load and alone.
+
+| | |
+|---|---|
+| **Issue** | Seen 2026-11-23 in several landers and agents: the gauntlet cases `nerv-system-flows/bases` and `nerv-system-flows/browser` failed while other runs loaded the machine, and passed when run alone. A case that fails on load gives no evidence about the change under test and costs a rerun. |
+| **Reproduce** | Run `npm run gauntlet:run` for `nerv-system-flows/bases` and `nerv-system-flows/browser` while another full `npm test` or gauntlet run loads the same machine; then run each case alone. |
+| **Check** | The failing step of each case is read from its run output and its cause named (a fixed deadline, a shared port or profile, ordering); a regression reproduces the load case and fails before the fix; with the fix both cases pass under the same load, or the case states the bound that absorbs it. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-24: PR #710 merged on green CI; both gauntlet cases passed under load and alone. 2026-11-24: B-117-T01 implemented in [PR #710](https://github.com/voidbrain/nerv/pull/710): inspected all 10 failed native evaluation reports from 2026-11-23..24 across the worktrees. (1) `nerv-system-flows/browser` (5 of 5 failed runs: `2026-11-23T17-37-23.353Z`, `18-53-10.762Z`, `19-49-18.017Z`, `2026-11-24T02-33-47.812Z`, `04-07-18.460Z`): every run failed at `test/angular.browser.mjs:894` (`ticking dashboard chat checklist updates store`, `false !== true`). Cause: clicking `<input type="checkbox" data-checklist-toggle>` flips `checked = true` synchronously in the DOM before the `change` handler in `web/public/dashboard/live.js:195` finishes `await api("lists/toggle", { method: "POST" })` (while in flight `chk.disabled = true`); `until('...?.checked===true')` resolved before `POST /api/lists/toggle` reached `store.lists` under load. Fix: wait for `input[data-checklist-toggle="${milkItemId}"]:not(:disabled)` with `checked === true`, and align `test/angular.browser.mjs` Chrome startup (45 s) and `until` (15 s) budgets with `test/fixtures/browser.mjs`. (2) `nerv-system-flows/bases` (5 failed runs: 3 in `F-006-T11` before B-066 waited for both sides of `f.start()`; `2026-11-23T19-03-54.108Z` at `B-046: a healthy session survives an event-loop stall longer than the heartbeat budget` with `coordinator kaji.main 156ms ...; coordinator kaji.seen 156ms` exceeding the 150 ms non-Windows heartbeat/grace budget while both directions ran heartbeats in one process; `2026-11-24T06-51-41.546Z` at `test/worker-outbox.test.ts:188` timing out at 15 s below `STARTUP_MS = 30_000` while spawning a real `brain-process.ts`). Fix: `test/worker-link-heartbeat.test.ts` uses `hb = 400` and `fixture(400, 60000)` for the busy-slot and event-loop-stall cases (above 50–270 ms nervous IPC latency, single-direction heartbeat in the shared-process fixture); `test/worker-outbox.test.ts` uses `idle-brain.ts`, teardown `scope('worker-outbox')`, and 60 s / 30 s budgets (`>= STARTUP_MS`); `test/kaji-seats.test.ts` holds both reserved ephemeral ports across `Runtime` startup via `reservePorts(2)`. Regression `test/gauntlet-load.test.ts` committed failing first (3/3 failed before fix, 3/3 passed after). Both `nerv-system-flows/bases` and `nerv-system-flows/browser` pass concurrently under load and alone.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #710](https://github.com/voidbrain/nerv/pull/710) (Test: `test/gauntlet-load.test.ts`); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened) |
+| Opened | 2026-11-24 |
+| Verification | Unit/integration 2026-11-24: `node --test test/gauntlet-load.test.ts test/worker-outbox.test.ts test/kaji-seats.test.ts test/worker-link-heartbeat.test.ts` (24/24 pass); `npm run gauntlet:run` for `nerv-system-flows/bases` and `nerv-system-flows/browser` passed concurrently under load and alone (`npm run check:gauntlet-runs` and `npm run check:fast` pass). |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+
+### F-100
+
+**FPV blackbox analysis for vibration**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-24: F-100-T04 done in PR #674 (merged on green CI): the real Supernova log decoded locally and reported with candidate causes and what the log cannot tell.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: "Smoke vibrates and shakes; props changed, the problem stays; the frame seems fine: frame, motors or ESC? Analyse the blackbox." NERV cannot read Betaflight blackbox logs. |
+| **Reproduce** | Send a blackbox log of the shaking flight and ask what causes the vibration. |
+| **Check** | Feasibility first: decode the log locally and read the gyro spectrum per axis and motor; then a report that names candidate causes with the evidence for each (motor-specific peaks, frame resonance, prop or ESC signs) and says what the log cannot tell. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-24: F-100-T04 done in PR #674 (merged on green CI): the real Supernova log decoded locally and reported with candidate causes and what the log cannot tell. 2026-11-23: F-100-T04 moved to the agent (owner: analyse Supernova, a fleet quad; Smoke shaking was an example). Real log 2026-10-10 (Betaflight 4.5.5, 84,789 samples at ~820 Hz, unfiltered gyro, bidirectional DShot eRPM, `debug_mode` 0) decoded after B-109: roll/pitch/yaw peaks 54.6/163.8/149.3 Hz at low throttle and 306.6/305/272.9 Hz at high throttle, all weak and none constant or throttle-tracking; no eRPM dropouts; M1 drive variation ~15% above M2, so the only candidate is a motor bearing (score 0.65) on M1; the log cannot name a loose screw or mount, and the eRPM-to-frequency mapping was not confirmed. A shaking flight with GYRO_SCALED and a throttle sweep would sharpen the report. F-100-T02 closed 2026-11-15: ([PR #454](https://github.com/voidbrain/nerv/pull/454)) decode with the WASM `blackbox-log` parser inside Node, locally; the owner records the real log with `debug_mode = GYRO_SCALED` and bidirectional DShot over a throttle sweep (F-100-T04, its page written by F-100-T03). F-100-T01 is feasibility; T02 the owner's decision; T03 is estimated after it.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #486](https://github.com/voidbrain/nerv/pull/486) (merged; CI green); [FPV blackbox feasibility](../design/fpv-blackbox-feasibility.md) (`F-100-T01`); Owner request 2026-11-14; [plan](../design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-100-T03 verified: [PR #486](https://github.com/voidbrain/nerv/pull/486) merged on green CI. `F-100-T01`: `npm run check:fast` passed. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### F-119
+
+**Periodic skill discovery review**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-24: PR #709 merged on green CI; docs/reviews/skills/2026-11-24.md written, each candidate has an outcome.
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-23: enable the periodic skill review (reviews.skills.days 30, harness v10.4.0); discovery stays periodic, validity on updates is template F-089. |
+| **Reproduce** | npm run check:freshness reports the skills review missing. |
+| **Check** | docs/reviews/skills/<date>.md exists and each candidate has an outcome. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-24: PR #709 merged on green CI; docs/reviews/skills/2026-11-24.md written, each candidate has an outcome. 2026-11-24: F-119-T01 implemented in [PR #709](https://github.com/voidbrain/nerv/pull/709): wrote [docs/reviews/skills/2026-11-24.md](../reviews/skills/2026-11-24.md) reviewing recent commits, the 22-sample friction log, recurring owner and agent operations, domain CLI commands, procedure budgets and existing agent definitions; each of the six candidates ends in one of the four outcomes, and `npm run check:freshness` no longer reports the skills review missing.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #709](https://github.com/voidbrain/nerv/pull/709) ([2026-11-24.md](../reviews/skills/2026-11-24.md)); opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| Opened | 2026-11-23 |
+| Verification | Documentation 2026-11-24: [2026-11-24.md](../reviews/skills/2026-11-24.md) written per docs/agents/skills.md; `npm run check:freshness` and `npm run check:fast` pass. |
 | Reviewed | 2026-11-24 |
 
 </details>

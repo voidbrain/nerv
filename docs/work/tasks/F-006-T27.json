@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T27",
-  "status": "implemented",
+  "status": "closed",
   "title": "Make the placement probe carry role-sized prompts",
   "goal": "The placement probe carries Casper's and Misato's own system messages unchanged, on P2 and across WorkerLink for P3",
   "capabilities": [
@@ -50,7 +50,7 @@
   "effort": {
     "size": "medium",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 (F-006-T26): probe field and limit change with tests (1 h), rerun and evidence update (1 h). Split 2026-11-24: the rerun needs both bases updated (owner, F-006-T28) and moved to F-006-T29. Implemented 2026-11-24 in 2 h (with the review fix): probe system field, byte limits, WorkerLink system bound 8 → 24 KiB, join test.",
+    "basis": "Estimated 2026-11-24 (F-006-T26): probe field and limit change with tests (1 h), rerun and evidence update (1 h). Split 2026-11-24: the rerun needs both bases updated (owner, F-006-T28) and moved to F-006-T29. Implemented 2026-11-24 in 2 h (with the review fix): probe system field, byte limits, WorkerLink system bound 8 → 24 KiB, join test. Closed 2026-11-24 in the reconciliation: PR #714 merged on green CI; the live role-sized run is F-006-T29 after F-006-T28.",
     "reviewed": "2026-11-24",
     "agentHours": 0,
     "ownerHours": 0,

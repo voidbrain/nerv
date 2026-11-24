@@ -4,7 +4,7 @@
   "parent": "F-113",
   "title": "Compact subject index in the planner prompt and a read tool for one subject's docs",
   "goal": "The planner loads tool details only when it needs them",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The planner prompt lists subjects with one line each",
     "A read tool returns one subject's full tool docs",
@@ -34,12 +34,17 @@
   "effort": {
     "size": "medium",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-20 from the Agentica review. Not a measurement.",
-    "reviewed": "2026-11-20",
+    "basis": "Estimated 2026-11-20 from the Agentica review. Not a measurement. Closed 2026-11-24 in the reconciliation: PR #678 merged on green CI; the Gauntlet comparison is F-113-T03.",
+    "reviewed": "2026-11-24",
     "agentHours": 0,
     "baselineAgentHours": 2.5,
     "estimateAgentHours": 2.5,
     "actualAgentHours": 1.5,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 678
+    }
+  ]
 }

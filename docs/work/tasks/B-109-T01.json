@@ -4,7 +4,7 @@
   "parent": "B-109",
   "title": "Read Blackbox Explorer CSV exports that start with a settings preamble",
   "goal": "A real Blackbox Explorer CSV export is parsed from its column header row",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Failing test first: a CSV with \"key\",value preamble lines before the header is read in full",
     "A CSV without a recognisable header still reports the missing columns"
@@ -30,11 +30,16 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h agent",
-    "basis": "Fixed 2026-11-23 from the owner's real log; owner confirmation not needed (agent reran the analysis on the real file).",
-    "reviewed": "2026-11-23",
-    "agentHours": 0.25,
+    "estimate": "0 remaining",
+    "basis": "Fixed 2026-11-23 from the owner's real log; owner confirmation not needed (agent reran the analysis on the real file). Closed 2026-11-24 in the reconciliation: PR #674 merged on green CI; the owner real CSV export decodes. No actual: the elapsed time was not recorded when the step was done and is not known to this reconciliation.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 674
+    }
+  ]
 }
