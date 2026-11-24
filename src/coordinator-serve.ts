@@ -9,7 +9,7 @@ import {
   type LeaseRenewResult,
 } from './coordinator-lease.ts';
 import { STANDBY_DB_FILE } from './coordinator-relocation.ts';
-import { Registry } from './kaji.ts';
+import { Registry, keyIdentity } from './kaji.ts';
 import { isActiveCoordinator, readCoordinatorFencingState } from './coordinator-authority.ts';
 import type { State, TelegramContinuity } from './telegram.ts';
 
@@ -36,9 +36,10 @@ export function coordinatorLeaseService(input: {
     mainEpoch: (): number => registry().mainEpoch(),
     /** Standby side of `POST /kaji/lease/renew`. */
     onLeaseRenew: async (_from: string, request: LeaseRenewRequest): Promise<LeaseRenewResult> => {
+      // A base without a standby store (a drained old main, a worker base the owner named) acks from its own
+      // store; the ack only promises that this base has not seen a newer epoch and is not promoting.
       const path = join(input.home, STANDBY_DB_FILE);
-      if (!existsSync(path)) throw new Error('This base holds no coordinator standby.');
-      const standby = new DatabaseSync(path);
+      const standby = new DatabaseSync(existsSync(path) ? path : input.databasePath);
       try {
         standby.exec('PRAGMA busy_timeout = 5000');
         return handleStandbyLeaseRenew(standby, {
@@ -58,10 +59,17 @@ export function coordinatorLeaseService(input: {
       keeper = new CoordinatorLeaseKeeper({
         db,
         renew,
-        hasOtherEnrolledBases: () =>
-          registry()
+        hasOtherEnrolledBases: () => {
+          const own = keyIdentity(input.ownPublicKey);
+          return registry()
             .bases()
-            .some((b) => b.status === 'enrolled' && b.publicKey !== input.ownPublicKey),
+            .some((b) => b.status === 'enrolled' && keyIdentity(b.publicKey) !== own);
+        },
+        selfBaseId: input.baseId,
+        registryMain: () => {
+          const r = registry();
+          return { baseId: r.main(), epoch: r.mainEpoch() };
+        },
         onFenced: (detail) => console.error(`Coordinator fenced: ${detail}`),
       });
       return keeper;
