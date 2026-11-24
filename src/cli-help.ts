@@ -211,13 +211,14 @@ export const HELP_GROUPS: HelpGroup[] = [
     commands: [
       {
         name: 'kaji',
-        args: 'enrol|revoke|main|relocate|drain|standby|offer|seat|list|export|import',
+        args: 'enrol|revoke|main|relocate|drain|standby|promote|offer|seat|list|export|import',
         about: 'Enrolled bases',
         usage: [
           'kaji enrol BASE-ID "Name" PUBKEY|self ADDRESS | kaji revoke BASE-ID | kaji list',
           'kaji main [BASE-ID] | kaji offer [ACTION…|none] | kaji seat BASE-ID shadow|veto|off',
           'kaji export [FILE] | kaji import FILE --root FINGERPRINT',
           'kaji relocate BASE-ID [--revoke LOST-ID] | kaji drain [FILE] | kaji standby [BASE-ID]',
+          'kaji promote [--drain-receipt FILE]',
         ],
       },
       {
@@ -301,6 +302,7 @@ export const HELP_GROUPS: HelpGroup[] = [
       { name: 'clients', about: 'Paired companions' },
       { name: 'revoke', args: 'CLIENT_ID', about: 'Unpair a companion' },
       { name: 'sessions', args: 'revoke', about: 'Sign out every dashboard session' },
+      { name: 'devices', args: '[list] | revoke NAME|ID', about: 'Paired phones: list or revoke' },
       { name: 'open', args: '[dashboard] [--phone]', about: 'Open the dashboard, or pair a phone' },
     ],
   },

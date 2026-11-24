@@ -635,21 +635,22 @@ export function makeServer(
         (path === '/api/session/codes' ||
           path === '/api/session/revoke' ||
           path === '/api/stop' ||
-          path === '/api/device/codes' ||
-          path === '/api/devices' ||
-          path.startsWith('/api/devices/'))
+          path === '/api/device/codes')
       )
         reply(403, {
           error:
-            'Only the CLI (with the admin token) can mint login or pairing codes, manage devices, revoke sessions or stop the service.',
+            'Only the CLI (with the admin token) can mint login or pairing codes, revoke sessions or stop the service.',
         });
       else if (!options.native && root && req.method === 'POST' && path === '/api/device/codes') {
         const minted = pairing.mint();
         if (!minted) reply(429, { error: 'Too many unused pairing codes; wait a few minutes.' });
         else reply(201, minted);
-      } else if (!options.native && root && req.method === 'GET' && path === '/api/devices') {
-        reply(200, { devices: devices.list() });
-      } else if (!options.native && root && req.method === 'DELETE' && path.startsWith('/api/devices/')) {
+      } else if (!options.native && req.method === 'GET' && path === '/api/devices') {
+        // F-118-T03: Settings lists the paired devices for the owner (admin token, dashboard session or a paired
+        // device) and marks the one asking; a device revoked here is refused (401) on its next request.
+        const self = root ? undefined : devices.idOf(bearer);
+        reply(200, { devices: devices.list().map((d) => ({ ...d, current: d.id === self })) });
+      } else if (!options.native && req.method === 'DELETE' && path.startsWith('/api/devices/')) {
         const revoked = devices.revoke(decodeURIComponent(path.slice('/api/devices/'.length)));
         reply(revoked ? 200 : 404, { revoked });
       } else if (!options.native && root && req.method === 'POST' && path === '/api/session/revoke') {

@@ -1103,6 +1103,44 @@
       renderSettings();
     }
   });
+  // F-118-T03: Settings lists the paired devices (name, paired, last use) and revokes one. A device paired from a browser
+  // tab before the fix of #707 shows as "<kind> · dashboard app" with an old last use. Revoking this device ends its
+  // pairing at once: the next request is refused (401) and the sign-in bar says the pairing ended.
+  state.devices = null; state.devicesMsg = null;
+  const deviceDay = t => new Date(t).toLocaleDateString();
+  const deviceAgo = t => { const m = Math.max(0, Math.round((Date.now() - t) / 60000)); return m < 60 ? m + " min ago" : m < 2880 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " days ago"; };
+  function renderDevices() {
+    const box = document.getElementById("settings-devices"); if (!box) return;
+    const list = state.devices, msg = state.devicesMsg;
+    box.innerHTML = "<div class='row small' style='justify-content:space-between;align-items:center'><b>Paired devices</b><button class='btn sm' type='button' id='btn-devices-refresh'>Refresh</button></div>" +
+      (list === null ? "<div class='tiny muted'>Loading…</div>" : !list.length ? "<div class='tiny muted'>No paired devices. Pair a phone with <code>nerv open --phone</code>.</div>" :
+        "<div class='list'>" + list.map(d => "<div class='row small' data-device='" + esc(d.id) + "' style='justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap'>" +
+          "<span><b>" + esc(d.name) + "</b>" + (d.current ? " <span class='ok'>· this device</span>" : "") +
+          "<br><span class='tiny muted'>paired " + esc(deviceDay(d.created)) + " · last used " + esc(deviceAgo(d.lastUse)) + " · lapses " + esc(deviceDay(d.expires)) + "</span></span>" +
+          "<button class='btn sm danger' type='button' data-revoke='" + esc(d.id) + "' aria-label='Revoke " + esc(d.name) + (d.current ? " (this device)" : "") + "'>Revoke</button></div>").join("") + "</div>") +
+      "<div role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : "A revoked device must pair again with a new code; each lapses after 90 days unused.") + "</div>";
+  }
+  async function loadDevices() {
+    try { state.devices = (await api("devices")).devices || []; }
+    catch (e) { if (e.status === 401) return; state.devices = state.devices || []; state.devicesMsg = { kind:"danger", text:e.message }; }
+    renderDevices();
+  }
+  document.addEventListener("click", async e => {
+    if (e.target && e.target.closest && e.target.closest("#btn-devices-refresh")) { state.devicesMsg = null; void loadDevices(); return; }
+    const b = e.target && e.target.closest && e.target.closest("#settings-devices button[data-revoke]"); if (!b) return;
+    const d = (state.devices || []).find(x => x.id === b.getAttribute("data-revoke")); if (!d) return;
+    if (!confirm("Revoke " + d.name + (d.current ? " (this device)" : "") + "? It must pair again with a new code from nerv open --phone.")) return;
+    b.disabled = true;
+    try {
+      await api("devices/" + encodeURIComponent(d.id), { method:"DELETE" });
+      if (d.current) { void poll(); return; }
+      state.devicesMsg = { kind:"ok", text:"Revoked " + d.name + "." };
+    } catch (err) {
+      if (err.status === 401) return;
+      state.devicesMsg = { kind:"danger", text:err.message };
+    }
+    await loadDevices();
+  });
   // F-102-T02: the switch posts the policy; an empty selection means this base on main (the server fills it in).
   window.liveSetAutoUpdate = async function (enabled) {
     if (state.updatePolicyBusy) return;
@@ -1167,7 +1205,7 @@
   }
   window.addEventListener("pagehide", () => { streamPaused = true; clearTimeout(streamTimer); if (streamController) streamController.abort(); });
   window.addEventListener("pageshow", e => { if (e.persisted) { streamPaused = false; void watchChanges(); queueRefresh(); } });
-  let started = false; const begin = () => { void watchChanges(); void api("commands").then(r => { if (r && Array.isArray(r.commands)) state.commands = r.commands; }).catch(() => {}); if (started) { void poll(); return; } started = true; document.getElementById("chat-in").placeholder = LIVE_HINT; poll(); setInterval(poll, 3000); };
+  let started = false; const begin = () => { void watchChanges(); void api("commands").then(r => { if (r && Array.isArray(r.commands)) state.commands = r.commands; }).catch(() => {}); void loadDevices(); if (started) { void poll(); return; } started = true; document.getElementById("chat-in").placeholder = LIVE_HINT; poll(); setInterval(poll, 3000); };
   // F-039: the login code is swapped for a dashboard session (never the admin token), kept in this tab's sessionStorage so a
   // reload stays signed in; it ends after 12 h, when the service restarts, with `sessions revoke`, or when the tab closes.
   // A token pasted by hand is the admin token: it stays in memory only and is never stored.

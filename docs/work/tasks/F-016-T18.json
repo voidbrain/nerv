@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T18",
-  "status": "planned",
+  "status": "implemented",
   "title": "`/kaji/epoch-push` so every peer acknowledges the new epoch",
   "goal": "Reachable peers and workers persist maxSeenCoordinatorEpoch before the new main opens effects, and the acks are measured",
   "capabilities": [
@@ -42,11 +42,19 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h agent",
-    "basis": "Split from F-016-T07 on 2026-11-23 by owner decision (option a) after the PR #677 review; estimated from F-016-T06 and F-016-T07 (1.5 h each actual). Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Split from F-016-T07 on 2026-11-23 by owner decision (option a) after the PR #677 review; estimated from F-016-T06 and F-016-T07 (1.5 h each actual). Not a measurement. 2026-11-24: implemented in PR #703 (stacked on #702); actual stated 1.25 h. Push over the old main's worker WebSockets not done: acks gathered there would not reach the promoting base; outbound-only workers keep the conservative wait (decision section 2). 2026-11-24: review fixes on the #701-#704 stack added time; actual restated. 2026-11-24: re-review fixes added time; actual restated. Fourth review fixes added time; actual restated.",
     "reviewed": "2026-11-23",
-    "agentHours": 2,
+    "agentHours": 0,
     "baselineAgentHours": 2,
-    "estimateAgentHours": 2
-  }
+    "estimateAgentHours": 2,
+    "actualAgentHours": 2.0,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 703,
+      "note": "/kaji/epoch-push, recorded acks, measured promotion horizon"
+    }
+  ]
 }

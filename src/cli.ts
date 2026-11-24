@@ -1,6 +1,6 @@
 #!/usr/bin/env -S node --use-system-ca
 import { tryRunCliCommand } from './cli-commands.ts';
-import { runKajiCommand } from './cli-kaji.ts';
+import { runKajiCommand, runKajiPromoteCommand } from './cli-kaji.ts';
 import { startSnapshots } from './snapshots.ts';
 
 import { createPeerHandlers } from './peer-handlers.ts';
@@ -74,7 +74,13 @@ import {
 } from './chronicle.ts';
 import { composeBrief, gatherBrief } from './brief.ts';
 import { KajiLink } from './kaji-link.ts';
-import { coordinatorLeaseService } from './coordinator-serve.ts';
+import {
+  coordinatorChannelAuthority,
+  coordinatorLeaseService,
+  coordinatorTelegramContinuity,
+} from './coordinator-serve.ts';
+import { STANDBY_DB_FILE } from './coordinator-relocation.ts';
+import { assertNoPromotionInProgress } from './coordinator-promote.ts';
 import {
   guardLocalService,
   linuxServiceHost,
@@ -193,6 +199,10 @@ let store: Store | undefined;
 let running = false;
 try {
   const home = dataHome();
+  // F-016-T17 fourth review: while a promotion is unfinished no command opens the store (it would create or write
+  // an empty nerv.sqlite mid-swap); only kaji promote resumes it, and help and service still answer.
+  if (!(command === 'kaji' && args[0] === 'promote') && !['help', 'service', undefined].includes(command))
+    assertNoPromotionInProgress(home);
   if (!['root-migration', 'nodes', 'help'].includes(command ?? 'help')) assertRootMigrationReady(home);
   if (
     !['nodes', 'help', 'backup'].includes(command ?? 'help') &&
@@ -286,6 +296,10 @@ try {
     const detail = args[0] ? formatCommandHelp(args[0]) : undefined;
     if (args[0] && !detail) throw new Error(`Unknown command: ${args[0]}. Run nerv help for the list.`);
     console.log(detail ?? formatHelp(Math.min(process.stdout.columns || 100, 100)));
+  } else if (command === 'kaji' && args[0] === 'promote') {
+    // F-016-T17 third review: kaji promote never opens a Store first (that would create an empty nerv.sqlite in
+    // the middle of an interrupted swap).
+    await runKajiPromoteCommand(args, home, readConfig(home), { flag });
   } else {
     const config = readConfig(home);
     const scrolls = readScrolls(home);
@@ -535,6 +549,8 @@ try {
       }
       case 'serve':
       case 'launch': {
+        // F-016-T17: never while kaji promote swaps the coordinator stores.
+        assertNoPromotionInProgress(home);
         const webRoot = resolve(fileURLToPath(new URL('../dist/web/browser', import.meta.url)));
         if (!existsSync(join(webRoot, 'index.html'))) throw new Error('Frontend missing: run npm run build.');
         readToken(home);
@@ -749,6 +765,14 @@ try {
             store: runtime,
             chatId: config.telegram.chatId,
             statePath: join(home, 'telegram-state.json'),
+            // F-016-T19: only the active coordinator polls and calls the Bot API; activation hydrates its state.
+            authority: coordinatorChannelAuthority({
+              home,
+              databasePath: databasePath(home),
+              baseId: config.base.id,
+              root: config.kaji?.root,
+            }),
+            continuity: coordinatorTelegramContinuity(databasePath(home)),
             // F-036 phase 2: quiet while another base is the main one and online; relayed cards are decided where they were made.
             oneChannel: {
               destination: async () => {
@@ -796,6 +820,8 @@ try {
           stopLease = () => lease.stop();
           kaji = new KajiLink({
             onLeaseRenew: lease.onLeaseRenew,
+            minCoordinatorEpoch: lease.mainEpoch,
+            holdsStandby: () => existsSync(join(home, STANDBY_DB_FILE)),
             trust: { root: config.kaji.root, required: config.kaji.rootBinding === true },
             worker: runtime.worker,
             baseId: config.base.id,
