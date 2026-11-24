@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 5 | 3 | 21 | 6 |
+| **This week** | 7 | 3 | 21 | 6 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 37 | 28 |
+| **Open** | 39 | 28 |
 | **Require Human 🧑** | 9 | 10 |
 
 ### Require Human 🧑
@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 85.75 h agent + 11 h owner across 122 open steps of 36 features and 28 other records. 168 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 92.25 h agent + 12 h owner across 127 open steps of 38 features and 28 other records. 168 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2473,6 +2473,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-123"></a>[✨ F-123](#top)
+
+**Connect NERV to Grover's hub over MCP**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 2.5 h agent + 0.5 h owner | — | [F-122-T02](#f-122-t02) | 🤖 | — | — |
+
+💻 **→** Next: F-123-T01 — Register a remote MCP server on the tailnet (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24 (coordinator gap review): Grover's hub exposes its tools at `/mcp` on the Pi behind Tailscale, and Grover F-005's last check expects NERV to list them. NERV has governed MCP tool registration (F-021) but no record for connecting to a remote MCP server on the tailnet. Grover F-005-T02 waits on this record (grover:F-005-T02). |
+| **Reproduce** | There is no documented, tested way to register `https://<pi>.<tailnet>.ts.net/mcp` as an MCP source in NERV. |
+| **Check** | The owner registers the hub's `/mcp` URL in NERV; NERV lists the Grover tools with their effect classes; read tools run as Green, actions go through the gate and approval as usual; an unreachable hub is reported, not hidden. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-123-t01"></a>F-123-T01 — Register a remote MCP server on the tailnet | 2.5 h | 0 h | 2.5 h | Planned | — | [F-122-T02](#f-122-t02), [F-123-T02](#f-123-t02) | 🤖 |
+| 🟢 Small | <a id="f-123-t02"></a>F-123-T02 — Owner check: NERV lists the Grover tools | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-123-T01](#f-123-t01) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 2 steps recorded) | 2.5 h agent + 0.5 h owner | 0 of 2 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-123.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730). |
+| Opened | 2026-11-24 |
+| Verification | — |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-099"></a>[✨ F-099](#top)
 
 **FPV build knowledge: components and wiring from cited sources**
@@ -2557,6 +2596,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-121-T01: [PR #715](https://github.com/voidbrain/nerv/pull/715) implementation · F-121-T02: [PR #718](https://github.com/voidbrain/nerv/pull/718) implementation · F-121-T04: [PR #722](https://github.com/voidbrain/nerv/pull/722) implementation. [PR #722](https://github.com/voidbrain/nerv/pull/722) (F-121-T04 part file over the Kaji line); [PR #718](https://github.com/voidbrain/nerv/pull/718) (F-121-T02 print a part by chat); [PR #715](https://github.com/voidbrain/nerv/pull/715) (F-121-T01 printed parts on drone models); opened in [PR #712](https://github.com/voidbrain/nerv/pull/712). |
 | Opened | 2026-11-24 |
 | Verification | 2026-11-24: F-121-T04 `node --test test/print-transfer.test.ts` (failing first: module missing) and the cross-process join test in `test/misato.test.ts` (failed with the coordinator step removed); affected suites (82 passed); full `npm test` 1393 (1391 passed, 2 skipped); `npm run build` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed. Coordinator review before review (asynchronous slicer, bounded lane, race-free cache): the slow-slicer test (another route answers while the slicer runs) failed first against the synchronous receiver; `test/print-transfer.test.ts` 11 passed; full `npm test` 1396 (1394 passed, 2 skipped); build passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed. CI pending. F-121-T02 `node --test test/fleet-print-job.test.ts` (failing first) and the affected suites (224 passed); full `npm test` 1365 (1363 passed, 2 skipped); `npm run build`, typecheck, lint, `npm run check:fast` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed; Review fixes (launcher guard, Blue hand-off; failing tests first): `node --test test/slicer.test.ts test/fleet-print-job.test.ts test/misato.test.ts` passed; full `npm test` 1366 (1364 passed, 2 skipped); build, typecheck, lint, `npm run check:fast` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed. CI pending. F-121-T01 `node --test test/fleet-prints.test.ts test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts test/misato.test.ts test/slicer.test.ts test/cli-help.test.ts` and related suites (126 passed), `npm run typecheck`, `npm run check:conventions`, `npm run check:fast` passed locally; full `npm test` 1310 tests (1308 passed, 2 skipped); `npm run build` passed; gauntlet `all` (gemma4-12b profile, owner-approved) passed with 0 cases still pending, ledger committed. Review fixes: `node --test` fleet-prints, fleet-chat, fleet, fleet-import, misato, slicer, cli-help, photos, telegram, batteries (142 passed), typecheck, lint, `npm run check:conventions` passed; build and gauntlet `all` (gemma4-12b, owner-approved) passed, 0 still pending, ledger committed; CI pending. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="f-122"></a>[✨ F-122](#top)
+
+**Deliver Grover alerts**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 4 h agent + 0.5 h owner | [F-123-T01](#f-123-t01) | — | 🤖 | — | — |
+
+💻 **→** Next: F-122-T01 — Design Grover alert delivery (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24 (coordinator gap review): Grover's hub raises and clears alerts (pH, EC, temperature or level out of the phase range, an agent offline, a driver fault) and lists them through an MCP tool, but nothing delivers them to the owner. Grover F-008-T03 waits on this record (grover:F-008-T03). |
+| **Reproduce** | With the hub reachable, `nerv chat "ci sono allarmi Grover?"` has no answer source, and a new Grover alert reaches no channel. |
+| **Check** | A new Grover alert reaches the owner once through NERV's channels (Telegram, phone push, inbox) with its value and range; a cleared alert is reported once; repeats inside the hub's hysteresis are not re-sent; delivery survives a NERV restart without duplicates. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-122-t01"></a>F-122-T01 — Design Grover alert delivery | 1 h | 0 h | 1 h | Planned | — | [F-122-T02](#f-122-t02) | 🤖 |
+| 🟡 Medium | <a id="f-122-t02"></a>F-122-T02 — Deliver Grover alerts through NERV's channels | 3 h | 0 h | 3 h | Planned | [F-122-T01](#f-122-t01), [F-123-T01](#f-123-t01) | [F-122-T03](#f-122-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-122-t03"></a>F-122-T03 — Owner check: a real Grover alert arrives | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-122-T02](#f-122-t02) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 4 h | 0 h (0 of 3 steps recorded) | 4 h agent + 0.5 h owner | 0 of 3 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-122.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730). |
+| Opened | 2026-11-24 |
+| Verification | — |
 | Reviewed | 2026-11-24 |
 
 </details>
