@@ -205,6 +205,8 @@ interface MockS2State {
   lastSystem?: string;
   replyModel?: string;
   replyText: string;
+  /** Input tokens the fake model reports for the UTF-8 bytes of its messages; 11 when unset. */
+  promptTokens?: (bytes: number) => number;
 }
 
 async function startMockS2(state: MockS2State) {
@@ -224,7 +226,13 @@ async function startMockS2(state: MockS2State) {
         JSON.stringify({
           model: state.replyModel ?? body.model,
           choices: [{ message: { content: state.replyText }, finish_reason: 'stop' }],
-          usage: { prompt_tokens: 11, completion_tokens: 5 },
+          usage: {
+            prompt_tokens:
+              state.promptTokens?.(
+                (body.messages ?? []).reduce((n, m) => n + Buffer.byteLength(m.content, 'utf8'), 0),
+              ) ?? 11,
+            completion_tokens: 5,
+          },
         }),
       );
     });
@@ -439,6 +447,44 @@ test('F-006-T07: 2-node scheduler join runs job on worker X using remote inferen
         privacy: 'owner-bases',
       });
       assert.equal(s2State.lastSystem, ask.system);
+
+      // B-131: the fake model now counts input tokens like a real tokenizer (about 4 bytes a token, plus a chat
+      // template), so Misato's ask costs about 4,500 input tokens, more than twice the probe's 2,048 output tokens.
+      // NERV-02 applies the total budget after NERV-01 replied; the probe's budget must cover its own input.
+      s2State.promptTokens = (bytes) => Math.ceil(bytes / 4) + 32;
+      s2State.replyText = 'Misato-sized probe ok';
+      const callsBefore = s2State.calls;
+      const probe = (maxOutputTokens: number) =>
+        fetch(`http://127.0.0.1:${(httpB.address() as { port: number }).port}/api/placement/run`, {
+          method: 'POST',
+          headers: { authorization: `Bearer ${tokenB}`, 'content-type': 'application/json' },
+          body: JSON.stringify({
+            placement: 'P3',
+            endpoint: 'mac',
+            system: ask.system,
+            prompt: ask.prompt,
+            timeoutMs: 20_000,
+            maxOutputTokens,
+            confirmExecute: true,
+          }),
+        });
+      const sized = await probe(2048);
+      const sizedValue = (await sized.json()) as { inference?: { text: string; usage: object }; error?: string };
+      assert.equal(sized.status, 200, sizedValue.error);
+      assert.equal(sizedValue.inference?.text, 'Misato-sized probe ok');
+      assert.ok(
+        (sizedValue.inference?.usage as { inputTokens: number }).inputTokens > 2 * 2048,
+        'the fixture input exceeds 2 x maxOutputTokens',
+      );
+      assert.equal(s2State.calls, callsBefore + 1);
+      // The total budget still bounds the run: a model reporting more input tokens than the probe's bytes can
+      // encode is refused on NERV-02.
+      s2State.promptTokens = (bytes) => 2 * bytes;
+      const over = await probe(2048);
+      const overValue = (await over.json()) as { error?: string };
+      assert.notEqual(over.status, 200);
+      assert.match(overValue.error ?? '', /Orchestrated token budget exhausted/);
+      s2State.promptTokens = undefined;
     } finally {
       httpB.closeAllConnections();
       await new Promise<void>((done) => httpB.close(() => done()));
