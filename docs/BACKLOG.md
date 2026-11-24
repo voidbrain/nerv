@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 3 | 1 | 12 | 2 |
+| **This week** | 4 | 1 | 12 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 37 | 23 |
+| **Open** | 38 | 23 |
 | **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 86.5 h agent + 10.5 h owner across 124 open steps of 36 features and 23 other records. 124.25 h of actual effort recorded on 140 steps. Generated from the task files.
+**Remaining effort:** 91.5 h agent + 10.5 h owner across 127 open steps of 37 features and 23 other records. 124.25 h of actual effort recorded on 140 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -822,6 +822,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-22: F-083-T04 saved-recipe live check recorded in [f083-t04-saved-recipe.md](acceptance/f083-t04-saved-recipe.md). 2026-11-20: `node --test test/photos.test.ts test/documents.test.ts test/cooking-session.test.ts test/telegram.test.ts` (26/26 passed), `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-083-T05 verified: [PR #481](https://github.com/voidbrain/nerv/pull/481) merged on green CI (test/pantry.test.ts). `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history). `F-083-T02` added `computeFromSavedDocument` / `DocumentStore.compute` in `src/documents.ts` and read-only tool `docs.compute` in `src/executors.ts` (cites saved values & arithmetic, asks instead of guessing on missing ratio/setting/unit mismatch); verified with `node --test test/documents.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-120"></a>[✨ F-120](#top)
+
+**Gauntlet coverage of NERV capabilities**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-120-T01 — Catch-up Gauntlet coverage review of closed features (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24: the Gauntlet exists to qualify models for NERV's general and specific capabilities, but no rule ties a finished NERV feature to a Gauntlet case. NERV's own pack (`evals/gauntlet/system-v1.json`) has 8 broad flows; pairing, relocation, update, fleet, placement and watches have no case. General domain packs (coding, embedded, logic, Italian quality, 3D printing, image generation) were requested from gauntlet-protocol the same day and are tracked in that repository. |
+| **Reproduce** | `jq '.cases[].id' evals/gauntlet/system-v1.json` lists 8 flows; `docs/test-capability-index.md` has no row for the features closed since F-074. |
+| **Check** | Every closed NERV feature with model-facing behaviour has a system-pack case or a recorded reason; the cases run and pass in an owner-approved campaign. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | 1.5 h | Planned | — | [F-120-T02](#f-120-t02) |
+| 🟢 Small | <a id="f-120-t03"></a>F-120-T03 — Adopt the Gauntlet domain packs when released | 0.5 h | 0 h | 0.5 h | Planned | — | — |
+| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | [F-120-T01](#f-120-t01) | — |
+| 🔴 Large | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 5 h | 0 of 3 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-120.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711). |
+| Opened | 2026-11-24 |
+| Verification | — |
+| Reviewed | 2026-11-24 |
 
 </details>
 
