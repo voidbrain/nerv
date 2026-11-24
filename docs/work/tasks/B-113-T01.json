@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "B-113-T01",
+  "parent": "B-113",
+  "title": "Dashboard sessions survive the restart an update makes; the button waits for the new revision",
+  "goal": "Updating from the dashboard keeps it signed in and never offers a stale Update now",
+  "status": "implemented",
+  "acceptance": [
+    "Failing tests first: a session survives a server restart; the file holds only hashes, mode 0600",
+    "Rotating the admin token or revoking ends stored sessions, also after a restart",
+    "After Update started the button stays busy until the new revision answers",
+    "Owner updates from the dashboard and stays signed in"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/session-book.ts",
+    "src/server.ts",
+    "src/cli.ts",
+    "web/public/dashboard/live.js",
+    "test/session-persist.test.ts",
+    "docs/work/records/B-113.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "node --test test/session-persist.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Implemented 2026-11-23 (owner decision a); independent security review before merge.",
+    "reviewed": "2026-11-23",
+    "agentHours": 0.5,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 0.5
+  }
+}
