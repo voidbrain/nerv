@@ -70,7 +70,9 @@ export interface Reply {
 }
 export const MAX_REPLY_BYTES = 16384;
 export const WORKER_MAX_INFER_PROMPT_BYTES = 32768;
-export const WORKER_MAX_INFER_SYSTEM_BYTES = 8192;
+/** Room for a role's own system message: Misato's is about 18 KB (F-006-T27). These bound raw content: unescaped, prompt +
+    system fit a 64 KiB frame, but heavy JSON escaping can exceed it, and WorkerLink then refuses that one request. */
+export const WORKER_MAX_INFER_SYSTEM_BYTES = 24576;
 export const WORKER_MAX_INFER_REPLY_BYTES = MAX_REPLY_BYTES;
 /** Coordinator wait for a brain model call; the route itself gives up 5 s earlier so the brain can answer. */
 export const MODEL_TIMEOUT_MS = 120000;

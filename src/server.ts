@@ -30,7 +30,7 @@ import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.
 import { readConfig } from './config.ts';
 import { COMMAND_CATALOG } from './chat-command.ts';
 import { builtinPackRegistry, fpvFleetSnapshot } from './packs.ts';
-import { placementProbe } from './placement-campaign.ts';
+import { PLACEMENT_PROBE_BODY_BYTES, placementProbe } from './placement-campaign.ts';
 
 type PhotoStoreHost = StoreApi & {
   photos?: PhotoStore;
@@ -49,12 +49,15 @@ function resolvePhotoOwner(s: PhotoStoreHost, kind: PhotoOwnerKind, id: string):
   return builtinPackRegistry.resolvePhotoOwner(s, kind, id);
 }
 async function body(req: IncomingMessage, limit = 8192): Promise<Record<string, unknown>> {
-  let text = '';
+  const chunks: Buffer[] = [];
+  let size = 0;
   for await (const chunk of req) {
-    text += chunk;
-    if (Buffer.byteLength(text) > limit) throw new Error('Request too large.');
+    const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk));
+    size += bytes.length;
+    if (size > limit) throw new Error('Request too large.');
+    chunks.push(bytes);
   }
-  const value: unknown = JSON.parse(text);
+  const value: unknown = JSON.parse(Buffer.concat(chunks).toString('utf8'));
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Expected JSON object.');
   return value as Record<string, unknown>;
 }
@@ -403,7 +406,7 @@ export function makeServer(
           return;
         }
         if (!store.selectExecution) throw new Error('Placement planning is unavailable.');
-        const probe = placementProbe(await body(req));
+        const probe = placementProbe(await body(req, PLACEMENT_PROBE_BODY_BYTES));
         reply(200, {
           placement: probe.placement,
           selection: await store.selectExecution(probe.orchestration),
@@ -415,7 +418,7 @@ export function makeServer(
           return;
         }
         if (!store.runOrchestratedJob) throw new Error('Placement execution is unavailable.');
-        const value = await body(req);
+        const value = await body(req, PLACEMENT_PROBE_BODY_BYTES);
         if (value.confirmExecute !== true) throw new Error('Placement execution needs confirmExecute: true.');
         const { confirmExecute: _confirmExecute, ...input } = value;
         const probe = placementProbe(input);

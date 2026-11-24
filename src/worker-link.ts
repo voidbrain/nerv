@@ -333,10 +333,10 @@ class Peer {
         this.link.settings.trust?.required ? this.link.settings.trust.root : undefined,
       ),
     });
-    if (
-      Buffer.byteLength(encoded) > MAX_FRAME_BYTES ||
-      this.ws.bufferedAmount + Buffer.byteLength(encoded) > MAX_FRAME_BYTES
-    ) {
+    // A message whose encoded frame is too large is refused on its own: the session and its other requests stay up.
+    // Within the raw content limits, JSON escaping (body, then body inside the envelope) can still exceed the frame.
+    if (Buffer.byteLength(encoded) > MAX_FRAME_BYTES) throw Error('Worker message exceeds its bound after encoding.');
+    if (this.ws.bufferedAmount + Buffer.byteLength(encoded) > MAX_FRAME_BYTES) {
       this.end();
       throw Error('Worker transport saturated.');
     }
