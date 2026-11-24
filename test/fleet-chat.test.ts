@@ -412,6 +412,40 @@ describe('F-098-T06 review: the drone_parts rebuild is safe for crash links and 
   });
 });
 
+describe('F-098-T06 review: a failed fleet migration is contained', () => {
+  it('the store still opens and serves non-fleet requests; fleet tools refuse and doctor reports the error', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-fleet-contained-'));
+    try {
+      const path = join(dir, 'nerv.sqlite');
+      const seed = new DatabaseSync(path);
+      seed.exec(
+        OLD_LAYOUT +
+          `INSERT INTO drone_parts VALUES ('p1', 'd1', 'motor', 'front left', 'Testmot 2207 1750KV', 'installed', '2026-01-01T00:00:00.000Z');
+           INSERT INTO drone_parts VALUES ('p2', 'd1', 'motor', 'front-left', 'Testmot 2207 1950KV', 'installed', '2026-01-01T00:00:00.000Z');`,
+      );
+      seed.close();
+      const store = new Store(path);
+      try {
+        const backend = store as unknown as Parameters<typeof execute>[0];
+        // Non-fleet work still runs.
+        assert.deepEqual(execute(backend, 'batteries.list', {}), []);
+        // Fleet tools refuse with the migration error and the slot to fix.
+        assert.throws(
+          () => execute(backend, 'fleet.chat', { phrase: 'ho 3 motori Testmot nuovi' }),
+          /Fleet is unavailable.*Smoke.*motor.*front-left.*removed/s,
+        );
+        assert.throws(() => store.fleet.listDrones(), /Fleet is unavailable/);
+        const doctor = store.doctor() as { fleet?: { error: string } };
+        assert.match(doctor.fleet?.error ?? '', /Smoke.*motor.*front-left/);
+      } finally {
+        store.close();
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe('F-098-T06: fleet.chat executor joins the edit phrases to the real store', () => {
   it('adds, replaces and sets stock through fleet.chat, then the crash phrases still work', () => {
     withStore((store) => {
