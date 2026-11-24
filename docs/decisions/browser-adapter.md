@@ -33,4 +33,4 @@ Today the Chrome DevTools driver is reachable only from the CLI (`nerv browser-c
 | **B. Keep it CLI-only** | No change: browser clicks stay with the owner's terminal and the F-012 resume. F-089 closes on the CLI owner check (F-089-T03). |
 | **C. Read-only chat tool first** | Misato can read the allowed page's control names and title (tainted), but not click; a click tool stays a later decision. About 1–2 h. |
 
-Reply in chat with `F-089-T05: A`, `B` or `C`. Expected: the agent records the decision on F-089 and, for A or C, adds the planned step with its estimate.
+**Decided 2026-11-24: A** (planned as F-089-T06). Reply in chat with `F-089-T05: A`, `B` or `C`. Expected: the agent records the decision on F-089 and, for A or C, adds the planned step with its estimate.
