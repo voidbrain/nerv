@@ -19,8 +19,11 @@ import {
   type EnrolledBaseCandidate,
   type Models,
 } from '../src/model.ts';
+import { toolDocs } from '../src/executors.ts';
 import { signRecord, type RegistryBody } from '../src/kaji.ts';
+import { misatoAsk } from '../src/misato.ts';
 import { Runtime } from '../src/runtime.ts';
+import { makeServer } from '../src/server.ts';
 import { WorkerLink, type WorkerAdapter } from '../src/worker-link.ts';
 
 const baseModels: Models = {
@@ -199,6 +202,7 @@ function genKeys() {
 interface MockS2State {
   calls: number;
   lastModel?: string;
+  lastSystem?: string;
   replyModel?: string;
   replyText: string;
 }
@@ -209,8 +213,12 @@ async function startMockS2(state: MockS2State) {
     req.on('data', (c) => chunks.push(c));
     req.on('end', () => {
       state.calls += 1;
-      const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as { model?: string };
+      const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as {
+        model?: string;
+        messages?: { role: string; content: string }[];
+      };
       state.lastModel = body.model;
+      state.lastSystem = body.messages?.find((m) => m.role === 'system')?.content;
       res.writeHead(200, { 'content-type': 'application/json' });
       res.end(
         JSON.stringify({
@@ -388,6 +396,53 @@ test('F-006-T07: 2-node scheduler join runs job on worker X using remote inferen
     const execResult = joined.execution as { outcome?: string; result?: { title?: string } };
     assert.equal(execResult.outcome, 'grant');
     assert.equal(execResult.result?.title, 'Remote Mac summary ok');
+
+    // F-006-T27: a P3 placement probe with Misato's own system message (about 17,600 characters) crosses the
+    // whole join: NERV-02's HTTP route -> probe -> NERV-02 runtime -> WorkerLink -> NERV-01 receiver -> its model.
+    const ask = misatoAsk(
+      {
+        request: 'Remind me to water the plants tomorrow at 9.',
+        history: [],
+        tools: toolDocs,
+        now: '2031-01-01T10:00:00Z',
+        timeZone: 'Europe/Rome',
+      },
+      'local',
+    );
+    assert.ok(ask.system && Buffer.byteLength(ask.system) > 16_000);
+    const tokenB = 'y'.repeat(32);
+    const httpB = makeServer(rb, tokenB);
+    await new Promise<void>((done) => httpB.listen(0, '127.0.0.1', done));
+    try {
+      const res = await fetch(`http://127.0.0.1:${(httpB.address() as { port: number }).port}/api/placement/run`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${tokenB}`, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          placement: 'P3',
+          endpoint: 'mac',
+          system: ask.system,
+          prompt: ask.prompt,
+          timeoutMs: 20_000,
+          confirmExecute: true,
+        }),
+      });
+      const value = (await res.json()) as { inference?: { text: string }; provenance?: object; error?: string };
+      assert.equal(res.status, 200, value.error);
+      assert.equal(value.inference?.text, 'Remote Mac summary ok');
+      assert.deepEqual(value.provenance, {
+        executionBaseId: 'NERV-02',
+        executionKind: 'local',
+        inferenceBaseId: 'NERV-01',
+        inferenceKind: 'remote',
+        inferenceModel: 'qwen2.5:14b',
+        endpoint: 'mac',
+        privacy: 'owner-bases',
+      });
+      assert.equal(s2State.lastSystem, ask.system);
+    } finally {
+      httpB.closeAllConnections();
+      await new Promise<void>((done) => httpB.close(() => done()));
+    }
   } finally {
     await linkB?.stop();
     await linkA?.stop();
