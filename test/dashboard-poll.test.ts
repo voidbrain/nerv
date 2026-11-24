@@ -13,7 +13,7 @@ function harness(api: (path: string) => Promise<unknown>) {
     'signIn',
     'forgetSession',
     `
- const SESSION_ENDED='Session ended';let token='test',polling=false,pollFailures=0,lastRan=null,firstTrace=true,followNew=null;
+ const SESSION_ENDED='Session ended',ended=()=>SESSION_ENDED;let token='test',polling=false,pollFailures=0,lastRan=null,firstTrace=true,followNew=null;
  const detailCache={},known=new Map(),older=[],matches=[],BASES=[{name:'TEST'}],activeCage={};let shown=[];
  const state={lastVisit:Date.now(),sorties:[],selected:null};
  const loadUsage=async()=>{};const toSortie=s=>s,toApproval=a=>a;const applyBases=()=>{},healthOf=()=>{},loadModels=()=>{},loadTools=()=>{},loadEvents=async()=>0,renderLog=()=>{},showBuild=()=>{},renderAll=()=>{},kajiSummary=()=>'',liveBaseName=()=> 'test',esc=s=>s.replaceAll('<','&lt;');
