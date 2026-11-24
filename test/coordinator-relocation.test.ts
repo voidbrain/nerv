@@ -365,7 +365,16 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
       );
       setState(store.db, 2, 'active', 4, 'digest-4');
       const config = { kaji: { root: key.publicKey } } as unknown as Parameters<typeof runKajiCommand>[3];
-      const ctx = { readSecret: async () => PASS, flag: (n: string) => (n === '--revoke' ? 'NERV-03' : undefined) };
+      const ctx = {
+        readSecret: async () => PASS,
+        flag: (n: string) => (n === '--revoke' ? 'NERV-03' : undefined),
+        // F-016-T18: relocate pushes the new records; these test bases are offline.
+        promotion: {
+          pushEpoch: async (): Promise<never> => {
+            throw new Error('offline');
+          },
+        },
+      };
       const noFlags = { ...ctx, flag: () => undefined };
       const receiptPath = join(dir, 'receipt.json');
 

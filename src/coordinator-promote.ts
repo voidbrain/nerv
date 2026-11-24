@@ -14,7 +14,8 @@ import {
   type SignedDrainReceipt,
 } from './coordinator-relocation.ts';
 import { databasePath, readConfig } from './config.ts';
-import { Registry, canonical, keyIdentity, publicKeyFrom } from './kaji.ts';
+import { Registry, canonical, keyIdentity, publicKeyFrom, type SignedRecord } from './kaji.ts';
+import { allUnrevokedAckedEpoch, pushCoordinatorEpoch } from './coordinator-epoch.ts';
 import { service } from './service.ts';
 
 /** While this file exists in the data home a promotion is unfinished and `serve` refuses to start. */
@@ -85,6 +86,11 @@ export interface PromoteCoordinatorInput {
   readonly service: PromotionServiceControl;
   readonly clock?: PromotionClock;
   readonly log?: (line: string) => void;
+  /**
+   * `KajiLink.pushEpoch`: before the readiness check the owner-signed records go to every enrolled, unrevoked
+   * base (F-016-T18); the acks are recorded here and decide `allUnrevokedAckedNewEpoch`.
+   */
+  readonly pushEpoch?: (baseId: string, records: SignedRecord[]) => Promise<{ maxSeenCoordinatorEpoch: number }>;
   /** Test-only crash injection, passed to the promotion swap. */
   readonly failAfterStep?: RelocateCoordinatorInput['failAfterStep'];
 }
@@ -182,11 +188,17 @@ function derive(
       if (!Number.isFinite(epochSeenAtMs))
         refuse('not_named_main', 'The owner-signed main record for this base has no receipt time.');
       const oldHostDownConfirmed = input.confirmOldHostDown || previousRevoked;
+      // Measured from the acks this base recorded for its own pushes (F-016-T18), never supplied by the caller.
+      const allUnrevokedAckedNewEpoch = allUnrevokedAckedEpoch({
+        db,
+        rootPublicKey: input.rootPublicKey,
+        ownPublicKey: input.ownPublicKey,
+        epoch: newEpoch,
+      });
       liveness = (nowMs, monoNowNs) => ({
         kind: 'unplanned',
         epochSeenAtMs,
-        // Measured by F-016-T18; until then never assumed.
-        allUnrevokedAckedNewEpoch: false,
+        allUnrevokedAckedNewEpoch,
         oldHostDownConfirmed,
         nowMs,
         monoSinceNs,
@@ -224,6 +236,25 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
   const mainDbPath = databasePath(input.home);
   const standbyDbPath = join(input.home, STANDBY_DB_FILE);
   const marker = join(input.home, PROMOTION_MARKER_FILE);
+  if (input.pushEpoch) {
+    const db = new DatabaseSync(mainDbPath);
+    try {
+      db.exec('PRAGMA busy_timeout = 5000');
+      const pushed = await pushCoordinatorEpoch({
+        db,
+        rootPublicKey: input.rootPublicKey,
+        ownPublicKey: input.ownPublicKey,
+        push: input.pushEpoch,
+        nowMs: clock.wall(),
+      });
+      input.log?.(
+        `Epoch ${pushed.epoch} acked by ${pushed.acked.join(', ') || 'no base'}` +
+          (pushed.missing.length ? `; not acked: ${pushed.missing.join(', ')}.` : '.'),
+      );
+    } finally {
+      db.close();
+    }
+  }
   const d = derive(input, mainDbPath, standbyDbPath, monoSinceNs);
   if (d.alreadyActive) {
     if (!existsSync(marker)) throw new Error(`This base is already the active coordinator at epoch ${d.newEpoch}.`);

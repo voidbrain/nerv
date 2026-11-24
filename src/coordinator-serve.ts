@@ -30,6 +30,8 @@ export function coordinatorLeaseService(input: {
   const processBootId = randomUUID();
   let keeper: CoordinatorLeaseKeeper | undefined;
   return {
+    /** F-016-T18: the newest coordinator epoch this base holds; older-epoch headers are refused. */
+    mainEpoch: (): number => registry().mainEpoch(),
     /** Standby side of `POST /kaji/lease/renew`. */
     onLeaseRenew: async (_from: string, request: LeaseRenewRequest): Promise<LeaseRenewResult> => {
       const path = join(input.home, STANDBY_DB_FILE);

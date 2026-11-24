@@ -793,6 +793,7 @@ try {
           stopLease = () => lease.stop();
           kaji = new KajiLink({
             onLeaseRenew: lease.onLeaseRenew,
+            minCoordinatorEpoch: lease.mainEpoch,
             trust: { root: config.kaji.root, required: config.kaji.rootBinding === true },
             worker: runtime.worker,
             baseId: config.base.id,
