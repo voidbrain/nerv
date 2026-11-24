@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-118-T05",
+  "parent": "F-118",
+  "title": "Pairing as a QR code: nerv open --phone --qr and Settings → Pair a device",
+  "goal": "Scanning a QR pairs a browser in one step; the code is generated locally",
+  "status": "planned",
+  "acceptance": [
+    "A vendored, pinned, dependency-free MIT QR encoder (named to the owner before adding)",
+    "nerv open --phone --qr prints a terminal QR plus the short code; Settings shows the same",
+    "The iOS limit (a scan opens Safari, not the installed app) is stated in the procedure"
+  ],
+  "dependsOn": [
+    "F-118-T01"
+  ],
+  "resources": [
+    "src/cli.ts",
+    "web/public/dashboard/live.js",
+    "web/public/dashboard/**",
+    "test/device-pairing.test.ts",
+    "docs/work/records/F-118.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-23",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

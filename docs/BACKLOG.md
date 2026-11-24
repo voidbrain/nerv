@@ -9,31 +9,31 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 1 | 1 | 6 | 1 |
+| **This week** | 3 | 1 | 11 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 18 |
-| **Require Human 🧑** | 10 | 8 |
+| **Open** | 37 | 22 |
+| **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
-| [F-011](#f-011) |  | [B-068](#b-068) |  |
+| [F-062](#f-062) | [F-089](#f-089) | [B-057](#b-057) | — |
+| [F-011](#f-011) | [F-116](#f-116) | [B-068](#b-068) |  |
 | [F-004](#f-004) |  | [B-107](#b-107) |  |
-| [F-012](#f-012) |  | [B-056](#b-056) |  |
-| [F-086](#f-086) |  | [B-096](#b-096) |  |
-| [F-087](#f-087) |  | [B-106](#b-106) |  |
+| [F-012](#f-012) |  | [B-113](#b-113) |  |
+| [F-086](#f-086) |  | [B-056](#b-056) |  |
+| [F-087](#f-087) |  | [B-096](#b-096) |  |
 | [F-092](#f-092) |  | [B-110](#b-110) |  |
 | [F-060](#f-060) |  | [B-112](#b-112) |  |
 | [F-007](#f-007) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 70.5 h agent + 10.5 h owner across 98 open steps of 34 features and 18 other records. 94.25 h of actual effort recorded on 118 steps. Generated from the task files.
+**Remaining effort:** 85.75 h agent + 10.5 h owner across 109 open steps of 36 features and 22 other records. 98 h of actual effort recorded on 121 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -171,9 +171,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-006-T12 — T04c — Placement report and recommendation (Planned).
+💻 **→** Next: F-006-T12 — T04c — Placement report and recommendation (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -183,10 +183,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟢 Small | **Total** | 10.25 h (18 of 21 steps) | 6 h (13 of 21 steps recorded) | 0.25 h | 20 of 21 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | [F-006-T22](#f-006-t22) | 🤖 | [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending |
+| 🟢 Small | <a id="f-006-t22"></a>F-006-T22 — Decide: accept the provisional Mac-only placement or run the equivalent placement campaign | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-006-T12](#f-006-t12) | — | ⏳ 🤔 | — |
+| 🟢 Small | **Total** | 10.25 h (19 of 22 steps) | 6.75 h (14 of 22 steps recorded) | 0.25 h owner | 20 of 22 completed | | | | |
 
 <details><summary>Done steps (20)</summary>
 
@@ -223,7 +224,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
-| PR / evidence | Steps: F-006-T13: [PR #528](https://github.com/voidbrain/nerv/pull/528) results · F-006-T14: [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure · F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation · F-006-T21: [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending. [PR #638](https://github.com/voidbrain/nerv/pull/638) F-006-T21 placement probes and owner page; [PR #631](https://github.com/voidbrain/nerv/pull/631) F-006-T14 report; [PR #466](https://github.com/voidbrain/nerv/pull/466); [PR #468](https://github.com/voidbrain/nerv/pull/468) (merged; CI green); older entries in the [evidence archive](archive/evidence-2026.md#f-006-moved-2026-11-18) |
+| PR / evidence | Steps: F-006-T12: [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending · F-006-T13: [PR #528](https://github.com/voidbrain/nerv/pull/528) results · F-006-T14: [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure · F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation · F-006-T21: [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending. [PR #679](https://github.com/voidbrain/nerv/pull/679) F-006-T12 placement report; [PR #638](https://github.com/voidbrain/nerv/pull/638) F-006-T21 placement probes and owner page; [PR #631](https://github.com/voidbrain/nerv/pull/631) F-006-T14 report; [PR #466](https://github.com/voidbrain/nerv/pull/466); [PR #468](https://github.com/voidbrain/nerv/pull/468) (merged; CI green); older entries in the [evidence archive](archive/evidence-2026.md#f-006-moved-2026-11-18) |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-006-T04 and F-006-T05 closed (were Verified). 2026-11-18: F-006-T19 verified: [PR #466](https://github.com/voidbrain/nerv/pull/466) merged on green CI; F-006-T20 verified: [PR #468](https://github.com/voidbrain/nerv/pull/468) merged on green CI. |
 | Reviewed | 2026-11-23 |
@@ -385,6 +386,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-21: B-082-T02 CI run 44815656209 and required fresh-context review passed. Local: targeted regression 2/2, full tests 1,041 pass / 2 platform skips, build, `check:fast`, headless 5 pass / 1 Windows skip. Pending: the live desktop-session install on Tabgha after B-087-T01. |
 | Reviewed | 2026-11-21 |
+
+</details>
+
+---
+### <a id="b-118"></a>[🐞 B-118](#top)
+
+**Windows CI: the test step runs into its 18-minute limit**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 4 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-118-T01 — Make the Windows test step fit its limit with margin (Planned).
+
+| | |
+|---|---|
+| **Issue** | The `windows` job's `npm test` step (limit `timeout-minutes: 18`, set by B-076) ran out twice on PR #679: run 45259024776, attempts 1 (20:31:12–20:49:13 UTC) and 2 (21:20:20–21:38:20 UTC), 2026-11-23. Passing attempts that day took about 9–10 minutes (attempt 3 of the same run 9 m 48 s), so the suite either slows sharply on some runners or a test hangs; either way a PR waits on reruns. |
+| **Reproduce** | Rerun the `windows` job of a full-suite PR several times; compare the step duration and the `windows-test-report` artifact (the last line before the stop names the test after which it hung). |
+| **Check** | The two stopped attempts are read from their test reports and the cause named (a hanging test, or a slow runner with the slowest files measured); a hang gets a failing-first test and a fix, slowness a split, parallelism or test change; the next five full Windows runs finish within 12 minutes (a third of margin under the limit) without reruns. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-118-t01"></a>B-118-T01 — Make the Windows test step fit its limit with margin | 4 h | 0 h | 4 h | Planned |
+| 🟡 Medium | **Total** | 4 h | 0 h (0 of 1 steps recorded) | 4 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-118.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776) |
+| Opened | 2026-11-24 |
+| Verification | Pending |
+| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -595,6 +634,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-119"></a>[✨ F-119](#top)
+
+**Periodic skill discovery review**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-119-T01 — First skill discovery review (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-23: enable the periodic skill review (reviews.skills.days 30, harness v10.4.0); discovery stays periodic, validity on updates is template F-089. |
+| **Reproduce** | npm run check:freshness reports the skills review missing. |
+| **Check** | docs/reviews/skills/<date>.md exists and each candidate has an outcome. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-119-t01"></a>F-119-T01 — First skill discovery review | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-119.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
 ### <a id="f-082"></a>[✨ F-082](#top)
 
 **Lists: add items by chat or Telegram, recall them as a checklist card**
@@ -968,99 +1045,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-089"></a>[✨ F-089](#top)
+### <a id="f-118"></a>[✨ F-118](#top)
 
-**Browser control: act on a named control in an open page**
+**Pair a phone once: device sign-in with a 90-day sliding limit**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 8.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-089-T04 — Bind a live browser driver to the click adapter (Implemented; verification pending).
+💻 **→** Next: F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code (Planned).
 
 | | |
 |---|---|
-| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
-| **Reproduce** | Ask NERV to click a named button on an open tab. |
-| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
+| **Issue** | Owner 2026-11-23 (decision 1): the installed phone app (workspace or dashboard) cannot sign in: the sign-in box takes only the admin token, a QR or link opens Safari, and the session lived in tab storage that iOS clears on relaunch. The owner chose pairing: once per device, revocable, lapsing after 90 days unused; plus a QR option. |
+| **Reproduce** | Install the dashboard to the iPhone Home Screen and open it: "NOT SIGNED IN". |
+| **Check** | A short code typed into the installed app pairs it; it stays signed in through restarts and updates; Settings and nerv devices revoke it; a QR pairs browsers in one step. |
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
-| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 4 h (3 of 4 steps) | 3.25 h (3 of 4 steps recorded) | 0.25 h owner | 2 of 4 completed | | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
-
-</details>
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-118-t01"></a>F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code | 3 h | 0 h | 3 h | Planned | — | [F-118-T02](#f-118-t02), [F-118-T03](#f-118-t03), [F-118-T05](#f-118-t05) |
+| 🟡 Medium | <a id="f-118-t02"></a>F-118-T02 — Workspace and dashboard pair from their own sign-in box; the installed app signs itself in | 2 h | 0 h | 2 h | Planned | [F-118-T01](#f-118-t01) | [F-118-T04](#f-118-t04) |
+| 🟡 Medium | <a id="f-118-t03"></a>F-118-T03 — Paired devices in Settings with Revoke; nerv devices list and revoke | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
+| 🟢 Small | <a id="f-118-t04"></a>F-118-T04 — Phone procedure: Tailscale serve, pairing and push, then the owner check | 0.5 h | 0 h | 0.5 h | Planned | [F-118-T02](#f-118-t02) | — |
+| 🟡 Medium | <a id="f-118-t05"></a>F-118-T05 — Pairing as a QR code: nerv open --phone --qr and Settings → Pair a device | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
+| 🟣 Very large | **Total** | 8.5 h | 0 h (0 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-[Full notes & evidence](work/records/F-089.md)
+[Full notes & evidence](work/records/F-118.md)
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-093"></a>[✨ F-093](#top)
-
-**Desktop control: click a named control in an app on screen**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-093-T03 — Shared adapter for F-012 and F-092 (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "that app is on screen, click the button". NERV has no desktop control. Clicking by screen position breaks when a window moves; the operating system's accessibility interface finds a control by its name and role. |
-| **Reproduce** | Ask NERV to click a named button in a visible app window. |
-| **Check** | NERV finds the control by app, window and accessible name through the accessibility interface (macOS first; Windows UI Automation for Tabgha in T01's scope decision), falling back to a screenshot only with owner approval; one click as an Orange action; it reads the window back and reports the change; it refuses password fields, system permission dialogs and payment buttons; screen content never becomes an instruction; the accessibility permission is granted by the owner, never requested silently. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-093-t03"></a>F-093-T03 — Shared adapter for F-012 and F-092 | 1 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | — | 🤖 | [PR #675](https://github.com/voidbrain/nerv/pull/675) implementation |
-| 🟢 Small | <a id="f-093-t05"></a>F-093-T05 — Bind the macOS accessibility driver to the click adapter | 2 h | 1.25 h so far (stated) | 0 h | Implemented; verification pending | — | [F-093-T04](#f-093-t04) | 🤖 | [PR #683](https://github.com/voidbrain/nerv/pull/683) implementation |
-| 🟢 Small | <a id="f-093-t04"></a>F-093-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-093-T05](#f-093-t05) | — | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 5 h (4 of 5 steps) | 3.75 h (4 of 5 steps recorded) | 0.25 h owner | 2 of 5 completed | | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-093-t01"></a>F-093-T01 — Decision: desktop adapter and permissions | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-093-t02"></a>F-093-T02 — Find and click a control by name | 1.5 h | 1.5 h (stated) | Completed | [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-093.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-093-T02: [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation · F-093-T03: [PR #675](https://github.com/voidbrain/nerv/pull/675) implementation · F-093-T05: [PR #683](https://github.com/voidbrain/nerv/pull/683) implementation. [PR #683](https://github.com/voidbrain/nerv/pull/683) (F-093-T05); [PR #675](https://github.com/voidbrain/nerv/pull/675) (F-093-T03); [PR #497](https://github.com/voidbrain/nerv/pull/497) (merged; CI green); [Desktop control adapter decision](decisions/desktop-control-adapter.md) (`F-093-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-093-T02 not closed: the adapter logic passed on green CI, but `nerv desktop-click` runs the adapter with a stub driver ("No live desktop accessibility driver bound in CLI"), so the owner check F-093-T04 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/497) merged on green CI. `F-093-T01`: `npm run check:fast` passed. |
-| Reviewed | 2026-11-18 |
+| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
 
 </details>
 
@@ -1071,9 +1093,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-090-T04 — Resume automatically when a session limit resets (Planned).
+💻 **→** Next: F-090-T04 — Resume automatically when a session limit resets (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1085,9 +1107,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-090-t04"></a>F-090-T04 — Resume automatically when a session limit resets | 2 h | 0 h | 2 h | Planned | — | [F-090-T03](#f-090-t03) | 🤖 | — |
+| 🟢 Small | <a id="f-090-t04"></a>F-090-T04 — Resume automatically when a session limit resets | 2 h | 1.75 h so far (stated) | 0 h | Implemented; verification pending | — | [F-090-T03](#f-090-t03) | 🤖 | [PR #676](https://github.com/voidbrain/nerv/pull/676) implementation |
 | 🟢 Small | <a id="f-090-t03"></a>F-090-T03 — Owner check on a real interrupted session | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-090-T04](#f-090-t04) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 1.25 h (2 of 4 steps recorded) | 2 h agent + 0.25 h owner | 2 of 4 completed | | | | |
+| 🟢 Small | **Total** | 3.5 h (3 of 4 steps) | 3 h (3 of 4 steps recorded) | 0.25 h owner | 2 of 4 completed | | | | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -1105,10 +1127,59 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-090-T02: [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation. [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-090-T02: [PR #493](https://github.com/voidbrain/nerv/pull/493) implementation · F-090-T04: [PR #676](https://github.com/voidbrain/nerv/pull/676) implementation. [PR #676](https://github.com/voidbrain/nerv/pull/676) (F-090-T04, opened); [PR #493](https://github.com/voidbrain/nerv/pull/493) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-090-T02 not closed: the adapter logic passed on green CI, but headless resume runs only as `nerv headless-resume <targets.json>` by hand; nothing in `serve` notices a session limit, so the owner check F-090-T03 ("NERV resumes it") cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/493) merged on green CI. `F-090-T01` feasibility report written in [headless-resume.md](decisions/headless-resume.md) from live CLI probe; verified with `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-093"></a>[✨ F-093](#top)
+
+**Desktop control: click a named control in an app on screen**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-093-T03 — Shared adapter for F-012 and F-092 (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "that app is on screen, click the button". NERV has no desktop control. Clicking by screen position breaks when a window moves; the operating system's accessibility interface finds a control by its name and role. |
+| **Reproduce** | Ask NERV to click a named button in a visible app window. |
+| **Check** | NERV finds the control by app, window and accessible name through the accessibility interface (macOS first; Windows UI Automation for Tabgha in T01's scope decision), falling back to a screenshot only with owner approval; one click as an Orange action; it reads the window back and reports the change; it refuses password fields, system permission dialogs and payment buttons; screen content never becomes an instruction; the accessibility permission is granted by the owner, never requested silently. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-093-t03"></a>F-093-T03 — Shared adapter for F-012 and F-092 | 1 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | 🤖 | [PR #675](https://github.com/voidbrain/nerv/pull/675) implementation |
+| 🟢 Small | **Total** | 5 h (4 of 5 steps) | 3.75 h (4 of 5 steps recorded) | 0 h | 4 of 5 completed | | |
+
+<details><summary>Done steps (4)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-093-t01"></a>F-093-T01 — Decision: desktop adapter and permissions | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-093-t02"></a>F-093-T02 — Find and click a control by name | 1.5 h | 1.5 h (stated) | Completed | [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation |
+| — | <a id="f-093-t04"></a>F-093-T04 — Owner check on the Mac | — | 0 h | Completed | — |
+| — | <a id="f-093-t05"></a>F-093-T05 — Bind the macOS accessibility driver to the click adapter | 2 h | 1.25 h (stated) | Completed | [PR #683](https://github.com/voidbrain/nerv/pull/683) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-093.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-093-T02: [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation · F-093-T03: [PR #675](https://github.com/voidbrain/nerv/pull/675) implementation · F-093-T05: [PR #683](https://github.com/voidbrain/nerv/pull/683) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-093-T04 closed); [owner check](acceptance/f093-t04-desktop-click.md); [PR #683](https://github.com/voidbrain/nerv/pull/683) (F-093-T05); [PR #675](https://github.com/voidbrain/nerv/pull/675) (F-093-T03); [PR #497](https://github.com/voidbrain/nerv/pull/497) (merged; CI green); [Desktop control adapter decision](decisions/desktop-control-adapter.md) (`F-093-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | Human: 2026-11-23, owner live check on NERV-01 passed ([acceptance](acceptance/f093-t04-desktop-click.md)). Unit/integration: 2026-11-23, `test/desktop-macos-driver.test.ts` and `test/desktop-shared-adapter.test.ts` on green CI ([PR #683](https://github.com/voidbrain/nerv/pull/683), [PR #675](https://github.com/voidbrain/nerv/pull/675)). |
+| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -1421,6 +1492,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-117"></a>[🐞 B-117](#top)
+
+**Gauntlet `nerv-system-flows/bases` and `browser` fail under machine load and pass alone**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-117-T01 — Name and fix the load failures of the bases and browser gauntlet cases (Planned).
+
+| | |
+|---|---|
+| **Issue** | Seen 2026-11-23 in several landers and agents: the gauntlet cases `nerv-system-flows/bases` and `nerv-system-flows/browser` failed while other runs loaded the machine, and passed when run alone. A case that fails on load gives no evidence about the change under test and costs a rerun. |
+| **Reproduce** | Run `npm run gauntlet:run` for `nerv-system-flows/bases` and `nerv-system-flows/browser` while another full `npm test` or gauntlet run loads the same machine; then run each case alone. |
+| **Check** | The failing step of each case is read from its run output and its cause named (a fixed deadline, a shared port or profile, ordering); a regression reproduces the load case and fails before the fix; with the fix both cases pass under the same load, or the case states the bound that absorbs it. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-117-t01"></a>B-117-T01 — Name and fix the load failures of the bases and browser gauntlet cases | 3 h | 0 h | 3 h | Planned |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 1 steps recorded) | 3 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-117.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened) |
+| Opened | 2026-11-24 |
+| Verification | Pending |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-086"></a>[✨ F-086](#top)
 
 **Gmail: search and read, then draft and send behind approval**
@@ -1513,6 +1622,55 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-087-T02 verified: [PR #491](https://github.com/voidbrain/nerv/pull/491) merged on green CI. `F-087-T01` decision written in [bambu-print-handoff.md](decisions/bambu-print-handoff.md); verified with `npm run check:fast`. 2026-11-22: F-087-T03 verified (`bambu.handoff` Orange gate + `handOffToBambuConnect` + owner checklist); `node --test test/slicer.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-089"></a>[✨ F-089](#top)
+
+**Browser control: act on a named control in an open page**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h owner | — | — | 🤖 | — | 🤔 |
+
+🧑 **→** [Decide](decisions/browser-adapter.md#owner-decision-a-chat-tool-for-browser-clicks-f-089-t05) whether Misato gets a chat tool for browser clicks (F-089-T05).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
+| **Reproduce** | Ask NERV to click a named button on an open tab. |
+| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
+| 🟢 Small | <a id="f-089-t05"></a>F-089-T05 — Decision: a chat tool for browser clicks | — | 0 h | 0 h agent + 0.25 h owner | Planned | — | — | [🤔](decisions/browser-adapter.md#owner-decision-a-chat-tool-for-browser-clicks-f-089-t05) | — |
+| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 4 h (3 of 5 steps) | 3.25 h (3 of 5 steps recorded) | 0.5 h owner | 2 of 5 completed | | | | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-089.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
+| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -1691,6 +1849,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #667](https://github.com/voidbrain/nerv/pull/667) (`fix/pilot-cards-2up`). |
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: browser test measured at 1440 px; harness widths 1920, 1200, 1000, 800 and 390 px kept the select inside each card. |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+### <a id="b-113"></a>[🐞 B-113](#top)
+
+**Updating from the dashboard signs it out, then offers a stale Update now that fails**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.5 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After this ships, press Update now with the next update: the dashboard stays signed in, shows Updating… until NERV answers on the new revision, then offers no button.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-23: Update now worked (journal operations 33 and 35 completed) but the dashboard showed "LIVE · NOT SIGNED IN", then offered Update now again, which failed. Dashboard sessions (F-039) lived only in the server's memory, so the restart an update makes ended every session, and the page kept its pre-update state. |
+| **Reproduce** | Press Update now with an update available and watch the dashboard through the restart. |
+| **Check** | Tests committed failing first (`test/session-persist.test.ts`): a session survives a server restart; the session file holds only SHA-256 hashes, mode 0600; a rotated admin token or a revoke ends stored sessions, also after a restart. After `started` the dashboard keeps the button busy until `/api/update` reports the new revision (10 min at most). Owner decision 2026-11-23: option (a), keep sessions across restarts. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-113-t01"></a>B-113-T01 — Dashboard sessions survive the restart an update makes; the button waits for the new revision | 0.5 h | 0 h | 0.5 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-113.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #687](https://github.com/voidbrain/nerv/pull/687) |
+| Opened | 2026-11-23 |
+| Verification | 2026-11-23: session tests 14/14; dashboard and manual-update suites 61/61. |
 | Reviewed | 2026-11-23 |
 
 </details>
@@ -1941,9 +2137,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-099-T04 — Read a diyfpv.com build through the browser adapter (Planned).
+💻 **→** Next: F-099-T04 — Read a diyfpv.com build through the browser adapter (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1955,8 +2151,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-099-t04"></a>F-099-T04 — Read a diyfpv.com build through the browser adapter | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
-| 🟢 Small | **Total** | 2.25 h | 0.25 h (1 of 4 steps recorded) | 0.75 h | 3 of 4 completed | | |
+| 🟢 Small | <a id="f-099-t04"></a>F-099-T04 — Read a diyfpv.com build through the browser adapter | 0.75 h | 1.25 h so far (stated) | 0 h | Implemented; verification pending | 🤖 | [PR #690](https://github.com/voidbrain/nerv/pull/690) implementation |
+| 🟢 Small | **Total** | 2.25 h | 1.5 h (2 of 4 steps recorded) | 0 h | 3 of 4 completed | | |
 
 <details><summary>Done steps (3)</summary>
 
@@ -1975,7 +2171,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-099-T03: [PR #485](https://github.com/voidbrain/nerv/pull/485) implementation. [PR #485](https://github.com/voidbrain/nerv/pull/485) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| PR / evidence | Steps: F-099-T03: [PR #485](https://github.com/voidbrain/nerv/pull/485) implementation · F-099-T04: [PR #690](https://github.com/voidbrain/nerv/pull/690) implementation. [PR #690](https://github.com/voidbrain/nerv/pull/690) (F-099-T04); [PR #485](https://github.com/voidbrain/nerv/pull/485) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-099-T03 verified: [PR #485](https://github.com/voidbrain/nerv/pull/485) merged on green CI. |
 | Reviewed | 2026-11-18 |
@@ -2179,7 +2375,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-076-t01"></a>B-076-T01 — Name the cause of each scattered CI failure of 2026-11-18 | 1.25 h | 1 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound |
-| 🟢 Small | **Total** | 1.5 h | 1.25 h | 0.25 h | 1 of 2 completed | |
+| 🟢 Small | <a id="b-076-t03"></a>B-076-T03 — Rerun pending gauntlet cases at the B-118 source | 0.25 h | 0 h | 0 h | Planned | [PR #695](https://github.com/voidbrain/nerv/pull/695) |
+| 🟢 Small | **Total** | 1.75 h | 1.25 h (2 of 3 steps recorded) | 0.25 h | 1 of 3 completed | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -2196,10 +2393,86 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound. [PR #540](https://github.com/voidbrain/nerv/pull/540) B-076-T01; [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2 |
+| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound · B-076-T03: [PR #695](https://github.com/voidbrain/nerv/pull/695). [PR #540](https://github.com/voidbrain/nerv/pull/540) B-076-T01; [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2 |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-19 |
+
+</details>
+
+---
+### <a id="b-114"></a>[🐞 B-114](#top)
+
+**EVA-03 script-plan test fails under load**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-114-T01 — Find why the EVA-03 script-plan test fails under load (Planned).
+
+| | |
+|---|---|
+| **Issue** | 2026-11-23: "executes inside EVA-03 with a MAGI gate decision per call, fails closed on denial/fingerprint change/missing sandbox" (`test/script-plan.test.ts:88`) and "F-112-T03: read-only script plans inside EVA-03" failed in PR #674's validate run and in a local full `npm test` while five agents loaded the machine; alone it passes 3/3. |
+| **Reproduce** | Run `npm test` while the machine is busy (parallel gauntlet runs). |
+| **Check** | The cause is named with evidence, a regression reproduces the load case, and the fix keeps the test green under load. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-114-t01"></a>B-114-T01 — Find why the EVA-03 script-plan test fails under load | 1 h | 0 h | 1 h | Planned |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-114.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #687](https://github.com/voidbrain/nerv/pull/687). |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+### <a id="b-116"></a>[🐞 B-116](#top)
+
+**F-023 notice test fails when a random ID contains a forbidden word**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-116-T01 — F-023 notice test: the forbidden-text regex can match a random ID (Planned).
+
+| | |
+|---|---|
+| **Issue** | PR #684 validate 2026-11-23: "F-023: approval and generic durable inbox notice commit together and survive restart" matched its forbidden-text regex (Private neutral fixture, 2099, grantId, args) against the whole serialized notice, whose random UUID can contain 2099. |
+| **Reproduce** | Rerun the test until a UUID contains 2099 (rare). |
+| **Check** | The assertion checks only the message text; a committed case with a UUID containing 2099 passes. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-116-t01"></a>B-116-T01 — F-023 notice test: the forbidden-text regex can match a random ID | 0.25 h | 0 h | 0.25 h | Planned |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-116.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| Opened | 2026-11-23 |
+| Verification | — |
+| Reviewed | 2026-11-23 |
 
 </details>
 
@@ -2474,53 +2747,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: Unit: dashboard suite 38 pass. Owner live check pending. |
 | Reviewed | 2026-11-19 |
-
-</details>
-
----
-### <a id="b-106"></a>[🐞 B-106](#top)
-
-**Sephirot flow: answer edge lags behind Debrief activation and marker arrowheads lack fill**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
-
-🧑 **→** Confirm on the live dashboard after rebuilding `dist/web` and restarting `nerv`.
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-22 on S-F11B: after Misato (`plan`), `DEBRIEF` activates before the `plan → debrief` (`answer`) line lights up, and arrowheads on `answer` and `sync → apt` (`MISATO'S APT`) do not render filled (`fill: none` on `.sephirot svg.edges path` matched `<marker><path>` and `context-stroke` failed to fill). |
-| **Reproduce** | Open the live dashboard EVA full view on an answer-only sortie (`S-F11B`) and inspect the `plan → debrief` and `sync → apt` edges. |
-| **Check** | Test committed failing first: `.sephirot svg.edges > path` leaves `<marker>` arrowheads filled, `drawEdges` emits explicit per-state markers (`#edge-arrow`, `#edge-arrow-passed`, `#edge-arrow-owner`, `#edge-arrow-skip`), and `passedEdge` marks `answer` / `relay` / `declined` passed as soon as `debrief` is `on`, `wait`, or `done`. The owner confirms on the live dashboard. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="b-106-t02"></a>B-106-T02 — Owner confirms Sephirot answer edge and arrowheads on live dashboard | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](work/records/B-106.md) |
-| 🟢 Small | **Total** | 0.75 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.25 h owner | 2 of 3 completed | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="b-106-t01"></a>B-106-T01 — Fix Sephirot answer-edge activation and marker arrowhead fills | 0.5 h | 0 h | Completed |
-| — | <a id="b-106-t03"></a>B-106-T03 — Rerun pending gauntlet cases at this source | 0.25 h | 0 h | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-106.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | PR #644 (`fix/b-106-sephirot-arrows`). Test: `B-106: answer edge activates with debrief and Sephirot markers are filled cleanly without context-stroke` in `test/dashboard.test.ts`. |
-| Opened | 2026-11-22 |
-| Verification | 2026-11-22: `node --test test/dashboard.test.ts` and `npm run check:fast` passed. |
-| Reviewed | 2026-11-22 |
 
 </details>
 

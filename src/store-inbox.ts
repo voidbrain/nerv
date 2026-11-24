@@ -53,7 +53,7 @@ export class StoreInbox {
     const brief =
       this.host.db
         .prepare(
-          "SELECT message,created FROM deliveries WHERE kind='brief' AND id NOT IN (SELECT delivery_id FROM watch_notices WHERE delivery_id IS NOT NULL) ORDER BY rowid DESC LIMIT 1",
+          "SELECT message,created FROM deliveries WHERE kind='brief' AND id NOT IN (SELECT delivery_id FROM watch_notices WHERE delivery_id IS NOT NULL) AND id NOT IN (SELECT notice_id FROM session_limit_targets WHERE notice_id IS NOT NULL) ORDER BY rowid DESC LIMIT 1",
         )
         .get() ?? null;
     const pending = (
@@ -112,7 +112,7 @@ export class StoreInbox {
       (
         this.host.db
           .prepare(
-            "SELECT created FROM deliveries WHERE kind='brief' AND id NOT IN (SELECT delivery_id FROM watch_notices WHERE delivery_id IS NOT NULL) ORDER BY rowid DESC LIMIT 1",
+            "SELECT created FROM deliveries WHERE kind='brief' AND id NOT IN (SELECT delivery_id FROM watch_notices WHERE delivery_id IS NOT NULL) AND id NOT IN (SELECT notice_id FROM session_limit_targets WHERE notice_id IS NOT NULL) ORDER BY rowid DESC LIMIT 1",
           )
           .get() as { created: string } | undefined
       )?.created ?? null

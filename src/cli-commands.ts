@@ -280,6 +280,32 @@ export async function tryRunCliCommand(
     } finally {
       store.close();
     }
+  } else if (command === 'session-limit') {
+    // F-090-T04: record a coding session that stopped at its usage limit; `serve` resumes it once after the reset.
+    const sub = args[0] ?? 'list';
+    const store = new Store(databasePath(home), readScrolls(home), { home });
+    try {
+      if (sub === 'list') {
+        console.log(JSON.stringify(store.sessionLimits.list(), null, 2));
+      } else if (sub === 'record' && args[1] && args[2] && args[3] && args[4]) {
+        const resetAt = Date.parse(args[4]);
+        if (!/(Z|[+-]\d{2}:\d{2})$/.test(args[4]) || !Number.isFinite(resetAt))
+          throw new Error('The reset time is an ISO time with its zone, e.g. 2026-11-23T15:00:00+01:00.');
+        const prompt = ctx.flag('--prompt');
+        const recorded = store.sessionLimits.record({
+          sessionId: args[1],
+          repoPath: resolve(args[2]),
+          branch: args[3],
+          resetAt,
+          ...(prompt ? { prompt } : {}),
+        });
+        console.log(JSON.stringify(recorded, null, 2));
+      } else {
+        throw new Error('Usage: session-limit list | record SESSION REPO BRANCH "ISO reset time+zone" [--prompt TEXT]');
+      }
+    } finally {
+      store.close();
+    }
   } else if (command === 'resume-intent') {
     const sub = args[0] ?? 'list';
     const store = new Store(databasePath(home), readScrolls(home), { home });
