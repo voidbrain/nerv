@@ -374,9 +374,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h | [B-121-T02](#b-121-t02), [F-016-T20](#f-016-t20) | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) | ⏳ | — | — |
+| 🟡 Implemented | 🔺 P1 | 🟡 Medium | 2 h | [B-121-T02](#b-121-t02), [F-016-T20](#f-016-t20) | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) | 🤖 | — | — |
 
-💻 **→** Next: B-124-T01 after F-016-T20. Owner 2026-11-24: P1, and the change to `kaji relocate` (push nothing until the target's prechecks pass) is agreed; F-016-T09 waits for it ([PR #724](https://github.com/voidbrain/nerv/pull/724)).
+💻 **→** Next: independent review of [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) (P1), then green CI and merge; verification follows on main. Owner 2026-11-24: P1, and the change to `kaji relocate` (push nothing until the target's prechecks pass) is agreed; F-016-T09 waits for it ([PR #724](https://github.com/voidbrain/nerv/pull/724)).
 
 | | |
 |---|---|
@@ -388,7 +388,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-124-t01"></a>B-124-T01 — kaji relocate pushes a re-target only after the target's prechecks pass | 2 h | 0 h | 2 h | Planned | [B-121-T02](#b-121-t02), [F-016-T20](#f-016-t20) | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) |
+| 🟡 Medium | <a id="b-124-t01"></a>B-124-T01 — kaji relocate pushes a re-target only after the target's prechecks pass | 2 h | 0 h | 2 h | Implemented; verification pending | [B-121-T02](#b-121-t02), [F-016-T20](#f-016-t20) | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) |
 | 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | | |
 
 <details>
@@ -398,9 +398,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | None yet |
+| PR / evidence | [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) (Test: `test/coordinator-partition.test.ts`, B-124; `test/coordinator-relocation.test.ts`, kaji relocate bundle) |
 | Opened | 2026-11-24 |
-| Verification | Pending |
+| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` 20 pass; full `npm test` 1441 pass, 0 fail (2 skipped). GAUNTLETLINE On main: Pending. |
 | Reviewed | 2026-11-24 |
 
 </details>
