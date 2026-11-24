@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID, type KeyObject } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -9,7 +9,20 @@ import {
   type LeaseRenewResult,
 } from './coordinator-lease.ts';
 import { STANDBY_DB_FILE, ranOrAckedCoordinatorEpoch } from './coordinator-relocation.ts';
-import { Registry, keyIdentity } from './kaji.ts';
+import {
+  applyReplicationBatch,
+  type ApplyReplicationBatchResult,
+  type ReplicationBatch,
+} from './coordinator-replication.ts';
+import {
+  ReplicationShipper,
+  StandbySeedReceiver,
+  seedStandbyStore,
+  type ReplicationShipperOptions,
+  type SeedReply,
+  type ShippingLink,
+} from './coordinator-shipping.ts';
+import { Registry, baseKey, keyIdentity, publicKeyFrom } from './kaji.ts';
 import { isActiveCoordinator, readCoordinatorFencingState } from './coordinator-authority.ts';
 import type { State, TelegramContinuity } from './telegram.ts';
 
@@ -27,12 +40,32 @@ export function coordinatorLeaseService(input: {
   readonly ownPublicKey: string;
   /** The monotonic clock the keeper reads (tests inject one; a host asleep stops it, F-016-T08). */
   readonly monoNow?: () => bigint;
+  /** F-016-T20: the base key that signs a seed snapshot; read from the data home when not given. */
+  readonly privateKey?: KeyObject;
 }) {
   const db = new DatabaseSync(input.databasePath);
   db.exec('PRAGMA busy_timeout = 5000');
   const registry = () => new Registry(db, input.root);
   const processBootId = randomUUID();
   let keeper: CoordinatorLeaseKeeper | undefined;
+  let shipper: ReplicationShipper | undefined;
+  const standbyPath = join(input.home, STANDBY_DB_FILE);
+  // F-016-T20: a seed is applied as the snapshot of the base the registry names main, at its epoch or later.
+  const seeds = new StandbySeedReceiver((from, frames): SeedReply => {
+    const reg = registry();
+    const main = reg.bases().find((b) => b.baseId === from && b.status === 'enrolled');
+    if (!input.root || !main || reg.main() !== from)
+      return { ok: false, reason: 'not_main', error: 'Only the active main seeds this base.' };
+    return seedStandbyStore({
+      home: input.home,
+      frames,
+      publicKey: publicKeyFrom(main.publicKey),
+      expectedRoot: input.root,
+      expectedMainBaseId: from,
+      minCoordinatorEpoch: reg.mainEpoch(),
+      localMode: readCoordinatorFencingState(db)?.replicationMode,
+    });
+  });
   return {
     /** F-016-T18: the newest coordinator epoch this base holds; older-epoch headers are refused. */
     mainEpoch: (): number => registry().mainEpoch(),
@@ -59,6 +92,26 @@ export function coordinatorLeaseService(input: {
       }
     },
     /**
+     * F-016-T20: standby side of `POST /kaji/replicate`. KajiLink has checked the sender is the main, the epoch
+     * header and the lease; the batch is applied to the standby store only in order, once, from the newest epoch.
+     */
+    onReplicate: async (from: string, batch: ReplicationBatch): Promise<ApplyReplicationBatchResult> => {
+      if (!input.root || !existsSync(standbyPath)) return { ok: false, reason: 'not_standby', expectedSeq: 0 };
+      const standby = new DatabaseSync(standbyPath);
+      try {
+        standby.exec('PRAGMA busy_timeout = 5000');
+        return applyReplicationBatch(standby, batch, {
+          expectedRoot: input.root,
+          expectedMainBaseId: from,
+          minCoordinatorEpoch: registry().mainEpoch(),
+        });
+      } finally {
+        standby.close();
+      }
+    },
+    /** F-016-T20: standby side of `POST /kaji/standby/seed` (one frame of a signed snapshot). */
+    onSeed: async (from: string, frame: string): Promise<SeedReply> => seeds.receive(from, frame),
+    /**
      * The Kaji line's coordinator handlers as `serve` wires them (#721 review: one place, tested end to end): lease
      * acks, the newest epoch enforced on incoming headers, and what epoch-push replies say (a standby store held;
      * B-121-T02, the newest epoch this base ran or acked).
@@ -66,6 +119,8 @@ export function coordinatorLeaseService(input: {
     kajiOptions() {
       return {
         onLeaseRenew: this.onLeaseRenew,
+        onReplicate: this.onReplicate,
+        onSeed: this.onSeed,
         minCoordinatorEpoch: this.mainEpoch,
         holdsStandby: () => existsSync(join(input.home, STANDBY_DB_FILE)),
         ranOrAckedEpoch: this.ranOrAckedEpoch,
@@ -94,8 +149,24 @@ export function coordinatorLeaseService(input: {
       });
       return keeper;
     },
+    /** F-016-T20: the replication shipper on this base (it ships only while this base is the active main). */
+    shipper(
+      link: ShippingLink,
+      options: Pick<ReplicationShipperOptions, 'keepBatches' | 'maxBatchesPerTick' | 'log'> = {},
+    ): ReplicationShipper {
+      shipper = new ReplicationShipper({
+        db,
+        baseId: input.baseId,
+        root: input.root ?? '',
+        privateKey: () => input.privateKey ?? baseKey(input.home).privateKey,
+        link,
+        ...options,
+      });
+      return shipper;
+    },
     stop(): void {
       keeper?.stop();
+      shipper?.stop();
       db.close();
     },
   };

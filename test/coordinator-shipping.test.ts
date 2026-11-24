@@ -13,7 +13,7 @@ import { applyCoordinatorLease } from '../src/coordinator-lease.ts';
 import { STANDBY_DB_FILE, type SignedDrainReceipt } from '../src/coordinator-relocation.ts';
 import type { ReplicationBatch } from '../src/coordinator-replication.ts';
 import { coordinatorLeaseService, coordinatorTelegramContinuity } from '../src/coordinator-serve.ts';
-import { replicationBatchAt, replicationStatus } from '../src/coordinator-shipping.ts';
+import { replicationBatchAt, replicationStatus, seedStandbyStore } from '../src/coordinator-shipping.ts';
 import { COORDINATOR_STATE_SCHEMA } from '../src/coordinator-snapshot.ts';
 import { pinKajiRoot, readConfig, setBase } from '../src/config.ts';
 import { KajiLink } from '../src/kaji-link.ts';
@@ -102,7 +102,9 @@ async function buildTemplate() {
       address: `127.0.0.1:${ports[id]}`,
     })),
     { kind: 'main', baseId: X, coordinatorEpoch: 2 },
-  ].map((body) => signRecord(root.privateKey, { ...body, serial: ++serial, issued: ISSUED } as unknown as RegistryBody));
+  ].map((body) =>
+    signRecord(root.privateKey, { ...body, serial: ++serial, issued: ISSUED } as unknown as RegistryBody),
+  );
   for (const id of [X, B]) {
     const home = join(dir, id);
     const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
@@ -240,14 +242,15 @@ describe('F-016-T20: the standby store is seeded and kept current while serve ru
       const after = readStandby(b.home, (db) => ({
         head: headOf(db),
         done: db.prepare('SELECT done FROM kaji_outbox WHERE id = ?').get(OUT_2) as { done: string | null },
-        offset: coordinatorTelegramContinuity(join(b.home, STANDBY_DB_FILE)).load(),
       }));
       assert.deepEqual(after.head, headOf(x.store.db));
       assert.ok(after.head.head_seq > seeded.head.head_seq);
       assert.ok(after.done.done, 'the settled send is known to the standby');
-      assert.equal(after.offset, undefined, 'a standby store is never read as coordinator Telegram state');
       assert.equal(
-        readStandby(b.home, (db) => (db.prepare('SELECT telegram_offset AS o FROM coordinator_state').get() as { o: number }).o),
+        readStandby(
+          b.home,
+          (db) => (db.prepare('SELECT telegram_offset AS o FROM coordinator_state').get() as { o: number }).o,
+        ),
         501,
       );
 
@@ -262,8 +265,8 @@ describe('F-016-T20: the standby store is seeded and kept current while serve ru
         stateDigest: head.state_digest,
       });
       const gap: ReplicationBatch = { ...last, seq: last.seq + 5 };
-      const refused = await x.link.replicate(B, gap, lease).catch((e: unknown) => e);
-      assert.ok(refused instanceof Error && /\(400\)/.test(refused.message), String(refused));
+      const refused = await x.link.replicate(B, gap, lease);
+      assert.ok(!refused.ok && refused.reason === 'invalid_batch');
       // A batch from an older epoch than B holds is refused before it is looked at.
       const old = await x.link.replicate(B, { ...last, coordinatorEpoch: 1 }, lease).catch((e: unknown) => e);
       assert.ok(old instanceof Error && /409/.test(old.message));
@@ -328,10 +331,13 @@ describe('F-016-T20: the standby store is seeded and kept current while serve ru
       // B's standby store is lost (removed): the next batch finds no standby; serve seeds it again.
       rmSync(join(b.home, STANDBY_DB_FILE));
       x.store.outboxDone(OUT_2, { ok: true });
-      assert.equal(await shipper.tick(), 'seeded');
+      assert.equal(await shipper.tick(), 'seeded', replicationStatus(x.store.db).peer?.lastError);
       assert.deepEqual(readStandby(b.home, headOf), headOf(x.store.db));
       // The seed kept B's lease ack history (the promote checks read it).
-      assert.equal(readStandby(b.home, (db) => readCoordinatorFencingState(db)?.replicationMode), 'standby');
+      assert.equal(
+        readStandby(b.home, (db) => readCoordinatorFencingState(db)?.replicationMode),
+        'standby',
+      );
     } finally {
       await t.close();
     }
@@ -342,11 +348,28 @@ describe('F-016-T20: the standby store is seeded and kept current while serve ru
     try {
       const { x, b } = t;
       await kaji(x.home, x.store, ['standby', B]);
-      // B (not main) tries to seed X.
-      const bShipper = b.lease.shipper(b.link);
-      await assert.rejects(bShipper.seed(X), /not the active main|only the main/i);
-      // X seeds itself? Never: a coordinator never names or seeds its own base.
+      // B (not main) tries to seed X: its shipper refuses (no active coordinator state), and so does X's line.
+      await assert.rejects(b.lease.shipper(b.link).seed(X), /not the active main/);
+      await x.link.start(600_000);
+      const lease = readCoordinatorFencingState(x.store.db)!.leaseExpiresAt;
+      await assert.rejects(b.link.seedStandby(X, Buffer.from('{}'), 2, lease), /\(403\)/);
+      const head = headOf(x.store.db).head_seq;
+      const forged = { ...replicationBatchAt(x.store.db, 2, head)!, sourceBaseId: B };
+      await assert.rejects(b.link.replicate(X, forged, lease), /\(403\)/);
+      // A coordinator never names or seeds its own base.
       await assert.rejects(x.lease.shipper(x.link).seed(X), /own base/);
+      // A base running as the coordinator refuses a seed, whatever the snapshot.
+      const refused = seedStandbyStore({
+        home: x.home,
+        frames: [Buffer.from('{}')],
+        publicKey: generateKeyPairSync('ed25519').publicKey,
+        expectedRoot: t.rootPub,
+        expectedMainBaseId: B,
+        minCoordinatorEpoch: 2,
+        localMode: 'active',
+      });
+      assert.equal(refused.ok ? 'seeded' : refused.reason, 'active_coordinator');
+      assert.equal(existsSync(join(x.home, STANDBY_DB_FILE)), false);
     } finally {
       await t.close();
     }

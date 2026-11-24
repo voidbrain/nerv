@@ -344,7 +344,7 @@ export function checkRelocationReadiness(input: RelocationReadinessInput): Reloc
       refuse('restore_mismatch', 'The snapshot digest is not the one the owner approved.');
     if (manifest.headSeq < restore.minHeadSeq)
       refuse('restore_mismatch', `The snapshot head ${manifest.headSeq} is older than ${restore.minHeadSeq}.`);
-    if (stateDigest !== manifest.sha256 || headSeq !== manifest.headSeq)
+    if (stateDigest !== (manifest.headDigest ?? manifest.sha256) || headSeq !== manifest.headSeq)
       refuse('restore_mismatch', 'The standby store does not hold the approved snapshot.');
     source = 'cold-restore';
   }

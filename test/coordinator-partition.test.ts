@@ -55,7 +55,8 @@ import { Store } from '../src/store.ts';
  * Limits (#717 review): the mock bot hands each update out once, so the Telegram check proves only that no
  * two bases poll in the same step; the real getUpdates offset hand-over (an update fetched but not yet
  * confirmed by the old main) is not modelled, nor is replication of what the old main did after the standby
- * was seeded (F-016-T20 adds that: the shipper runs each step over the simulated line). The simulated decide checks main and epoch like KajiLink's staleEpochReply, in a
+ * was seeded unless a scenario turns replication on (F-016-T20: serve's shipper then runs each step over the
+ * simulated line). The simulated decide checks main and epoch like KajiLink's staleEpochReply, in a
  * simplified form; the routing rules are copied here, not shared with KajiLink.
  */
 
@@ -211,6 +212,11 @@ class Mesh {
   private nextUpdate = 1;
   /** F-016-T20: the holder saves its Telegram offset as the channel does. */
   telegramContinuity = false;
+  /**
+   * F-016-T20: serve's shipper runs each step. Off, the scenarios model a standby store that was not kept
+   * current (it holds the template state: the attempt of the uncertain send, not its result).
+   */
+  replication = false;
   private readonly telegram: number[] = [];
 
   constructor(ids: readonly string[], standbys: readonly string[]) {
@@ -260,13 +266,13 @@ class Mesh {
       root: this.rootPub,
       ownPublicKey: b.publicKey,
       monoNow: () => b.mono,
+      privateKey: this.keys[id]!.privateKey,
     });
     const keeper = lease.keeper((standby, request) => this.renew(id, standby, request));
     const authority = coordinatorChannelAuthority({ home: b.home, databasePath: b.db, baseId: id, root: this.rootPub });
     const shipper = lease.shipper({
       replicate: (to, batch, leaseExpiresAt) => this.replicate(id, to, batch, leaseExpiresAt),
-      seedStandby: (to, frame, coordinatorEpoch, leaseExpiresAt) =>
-        this.seedStandby(id, to, frame, coordinatorEpoch, leaseExpiresAt),
+      seedStandby: (to, frame, coordinatorEpoch) => this.seedStandby(id, to, frame, coordinatorEpoch),
     });
     b.service = { lease, keeper, authority, shipper, store: new Store(b.db, undefined, { home: b.home }) };
   }
@@ -370,11 +376,12 @@ class Mesh {
   }
 
   /** The coordinator routes KajiLink checks before its handler: only from the main base, never an older epoch, a live lease. */
-  private coordinatorRoute(from: string, to: string, coordinatorEpoch: number, leaseExpiresAt: number): Base {
+  private coordinatorRoute(from: string, to: string, coordinatorEpoch: number, leaseExpiresAt?: number): Base {
     const target = this.answering(from, to);
     const reg = this.withRegistry(target, (r) => ({ main: r.main(), epoch: r.mainEpoch() }));
     if (reg.main !== from) throw new Error(`${to} refused (403): only the main base replicates here`);
-    if (coordinatorEpoch < reg.epoch || Date.now() > leaseExpiresAt)
+    if (coordinatorEpoch < reg.epoch) throw new Error(`${to} refused (409): stale_coordinator_epoch`);
+    if (leaseExpiresAt !== undefined && Date.now() > leaseExpiresAt)
       throw new Error(`${to} refused (409): stale_coordinator_lease`);
     return target;
   }
@@ -385,9 +392,9 @@ class Mesh {
     return target.service!.lease.onReplicate(from, batch);
   }
 
-  /** `POST /kaji/standby/seed` as KajiLink routes it (F-016-T20). */
-  async seedStandby(from: string, to: string, frame: Buffer, coordinatorEpoch: number, leaseExpiresAt: number) {
-    const target = this.coordinatorRoute(from, to, coordinatorEpoch, leaseExpiresAt);
+  /** `POST /kaji/standby/seed` as KajiLink routes it (F-016-T20): state, not authority, so no lease check. */
+  async seedStandby(from: string, to: string, frame: Buffer, coordinatorEpoch: number) {
+    const target = this.coordinatorRoute(from, to, coordinatorEpoch);
     return target.service!.lease.onSeed(from, frame.toString('utf8'));
   }
 
@@ -468,7 +475,8 @@ class Mesh {
         for (const b of this.bases.values()) if (b.awake && b.service) await b.service.keeper.renewOnce();
       this.step();
       // F-016-T20: serve ships each committed batch to the named standby.
-      for (const b of this.bases.values()) if (b.awake && b.service) await b.service.shipper.tick();
+      if (this.replication)
+        for (const b of this.bases.values()) if (b.awake && b.service) await b.service.shipper.tick();
     }
   }
 
@@ -476,8 +484,9 @@ class Mesh {
   telegramOffset(id: string, file = 'nerv.sqlite'): number | null {
     const db = new DatabaseSync(join(this.base(id).home, file));
     try {
-      return (db.prepare('SELECT telegram_offset AS o FROM coordinator_state WHERE id = 1').get() as { o: number | null })
-        .o;
+      return (
+        db.prepare('SELECT telegram_offset AS o FROM coordinator_state WHERE id = 1').get() as { o: number | null }
+      ).o;
     } finally {
       db.close();
     }
@@ -1025,6 +1034,7 @@ describe('B-121 (#721 review): a planned re-target never hands over from state o
 describe('F-016-T20: live replication carries what the old main did across a partition', () => {
   it('a remote request the old main sent before the partition, and its Telegram offset, are known to the promoted main', async () => {
     const m = (mesh = new Mesh([X, B], [B]));
+    m.replication = true;
     m.telegramContinuity = true;
     // `kaji standby B` on X: B's store is seeded from a signed snapshot of X (it held only the older template).
     await m.base(X).service!.shipper.seed(B);

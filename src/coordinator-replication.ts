@@ -69,7 +69,13 @@ export interface ApplyReplicationBatchOptions {
 
 export type ApplyReplicationBatchResult =
   | { ok: true; duplicate?: boolean; headSeq: number; stateDigest: string }
-  | { ok: false; reason: 'need_resync' | 'invalid_batch' | 'not_standby'; expectedSeq: number };
+  | {
+      ok: false;
+      reason: 'need_resync' | 'invalid_batch' | 'not_standby';
+      expectedSeq: number;
+      /** F-016-T20: the epoch the standby holds, so the main tells a gap from an epoch change. */
+      coordinatorEpoch?: number;
+    };
 
 const ALLOWED_REPLICATION_TABLES = new Set<string>(
   REPLICATED_COORDINATOR_TABLES.filter((t) => t !== 'registry' && t !== 'registry_roots' && t !== 'coordinator_state'),
@@ -104,81 +110,109 @@ function validateMutations(changes: readonly ReplicationMutation[]): boolean {
   return true;
 }
 
+/** Modes that append: the active main, and a draining one flushing its final batch (F-016-T20). */
+const APPENDING_MODES = new Set(['active', 'draining']);
+
+/**
+ * Appends one batch inside the caller's write transaction (F-016-T20: the capture and the seed hold one).
+ * Advances `coordinator_state.head_seq` and `state_digest`.
+ */
+export function appendReplicationBatchInTransaction(
+  db: DatabaseSync,
+  input: AppendReplicationBatchInput,
+): ReplicationBatch {
+  if (!validateMutations(input.changes)) {
+    throw new Error('Replication batch contains non-replicated or invalid table mutation.');
+  }
+  const createdAt = input.createdAt ?? new Date().toISOString();
+  const state = db
+    .prepare(
+      'SELECT coordinator_epoch, coordinator_fence, replication_mode, head_seq, state_digest FROM coordinator_state WHERE id = 1',
+    )
+    .get() as
+    | {
+        coordinator_epoch: number;
+        coordinator_fence: number;
+        replication_mode: string;
+        head_seq: number;
+        state_digest: string | null;
+      }
+    | undefined;
+  if (!state || !APPENDING_MODES.has(state.replication_mode)) {
+    throw new Error('Cannot append replication batch when coordinator is not active.');
+  }
+
+  const seq = Number(state.head_seq) + 1;
+  const prevDigest = state.state_digest ?? '';
+  const batchDigest = computeBatchDigest(state.coordinator_epoch, seq, prevDigest, input.changes, input.telegram);
+
+  db.prepare(
+    'INSERT INTO coordinator_replication_log(coordinator_epoch, seq, prev_digest, batch_digest, changes_json, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+  ).run(
+    state.coordinator_epoch,
+    seq,
+    prevDigest,
+    batchDigest,
+    // F-016-T20: the whole batch, so the shipper sends it again unchanged (the same id after a lost reply).
+    JSON.stringify({
+      root: input.root,
+      sourceBaseId: input.sourceBaseId,
+      coordinatorFence: state.coordinator_fence,
+      changes: input.changes,
+      ...(input.telegram ? { telegram: input.telegram } : {}),
+    }),
+    createdAt,
+  );
+
+  db.prepare(
+    `UPDATE coordinator_state SET
+       head_seq = ?,
+       state_digest = ?,
+       telegram_offset = COALESCE(?, telegram_offset),
+       telegram_inbox_seq = COALESCE(?, telegram_inbox_seq),
+       telegram_inbox_id = COALESCE(?, telegram_inbox_id),
+       telegram_cards_json = COALESCE(?, telegram_cards_json),
+       telegram_messages_json = COALESCE(?, telegram_messages_json),
+       telegram_brief_json = COALESCE(?, telegram_brief_json)
+     WHERE id = 1`,
+  ).run(
+    seq,
+    batchDigest,
+    input.telegram?.offset ?? null,
+    input.telegram?.inboxSeq ?? null,
+    input.telegram?.inboxId ?? null,
+    input.telegram?.cardsJson ?? null,
+    input.telegram?.messagesJson ?? null,
+    input.telegram?.briefJson ?? null,
+  );
+
+  return {
+    version: 1,
+    root: input.root,
+    sourceBaseId: input.sourceBaseId,
+    coordinatorEpoch: state.coordinator_epoch,
+    coordinatorFence: state.coordinator_fence,
+    seq,
+    prevDigest,
+    batchDigest,
+    createdAt,
+    changes: input.changes,
+    ...(input.telegram ? { telegram: input.telegram } : {}),
+  };
+}
+
 /**
  * Appends an ordered `(coordinatorEpoch, seq)` replication batch on the active coordinator
  * and advances `coordinator_state.head_seq` and `state_digest` (`F-016-T04`).
  */
 export function appendReplicationBatch(db: DatabaseSync, input: AppendReplicationBatchInput): ReplicationBatch {
-  if (!validateMutations(input.changes)) {
-    throw new Error('Replication batch contains non-replicated or invalid table mutation.');
-  }
   db.exec(COORDINATOR_STATE_SCHEMA);
   db.exec(COORDINATOR_REPLICATION_SCHEMA);
-  const createdAt = input.createdAt ?? new Date().toISOString();
-
   db.exec('BEGIN IMMEDIATE');
   try {
-    const state = db
-      .prepare(
-        'SELECT coordinator_epoch, coordinator_fence, replication_mode, head_seq, state_digest FROM coordinator_state WHERE id = 1',
-      )
-      .get() as
-      | {
-          coordinator_epoch: number;
-          coordinator_fence: number;
-          replication_mode: string;
-          head_seq: number;
-          state_digest: string | null;
-        }
-      | undefined;
-    if (!state || state.replication_mode !== 'active') {
-      throw new Error('Cannot append replication batch when coordinator is not active.');
-    }
-
-    const seq = Number(state.head_seq) + 1;
-    const prevDigest = state.state_digest ?? '';
-    const batchDigest = computeBatchDigest(state.coordinator_epoch, seq, prevDigest, input.changes, input.telegram);
-
-    db.prepare(
-      'INSERT INTO coordinator_replication_log(coordinator_epoch, seq, prev_digest, batch_digest, changes_json, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-    ).run(state.coordinator_epoch, seq, prevDigest, batchDigest, JSON.stringify(input.changes), createdAt);
-
-    db.prepare(
-      `UPDATE coordinator_state SET
-         head_seq = ?,
-         state_digest = ?,
-         telegram_offset = COALESCE(?, telegram_offset),
-         telegram_inbox_seq = COALESCE(?, telegram_inbox_seq),
-         telegram_inbox_id = COALESCE(?, telegram_inbox_id),
-         telegram_cards_json = COALESCE(?, telegram_cards_json),
-         telegram_messages_json = COALESCE(?, telegram_messages_json),
-         telegram_brief_json = COALESCE(?, telegram_brief_json)
-       WHERE id = 1`,
-    ).run(
-      seq,
-      batchDigest,
-      input.telegram?.offset ?? null,
-      input.telegram?.inboxSeq ?? null,
-      input.telegram?.inboxId ?? null,
-      input.telegram?.cardsJson ?? null,
-      input.telegram?.messagesJson ?? null,
-      input.telegram?.briefJson ?? null,
-    );
-
+    const batch = appendReplicationBatchInTransaction(db, input);
     db.exec('COMMIT');
-    return {
-      version: 1,
-      root: input.root,
-      sourceBaseId: input.sourceBaseId,
-      coordinatorEpoch: state.coordinator_epoch,
-      coordinatorFence: state.coordinator_fence,
-      seq,
-      prevDigest,
-      batchDigest,
-      createdAt,
-      changes: input.changes,
-      ...(input.telegram ? { telegram: input.telegram } : {}),
-    };
+    return batch;
   } catch (err) {
     try {
       db.exec('ROLLBACK');
@@ -238,18 +272,15 @@ export function applyReplicationBatch(
   }
 
   const expectedSeq = Number(state.head_seq) + 1;
-  if (batch.coordinatorEpoch !== state.coordinator_epoch) {
-    return { ok: false, reason: 'need_resync', expectedSeq };
-  }
+  const resync = { ok: false, reason: 'need_resync', expectedSeq, coordinatorEpoch: state.coordinator_epoch } as const;
+  if (batch.coordinatorEpoch !== state.coordinator_epoch) return resync;
   if (batch.seq <= state.head_seq) {
     if (batch.seq === state.head_seq && batch.batchDigest === state.state_digest) {
       return { ok: true, duplicate: true, headSeq: state.head_seq, stateDigest: state.state_digest };
     }
-    return { ok: false, reason: 'need_resync', expectedSeq };
+    return resync;
   }
-  if (batch.seq !== expectedSeq || batch.prevDigest !== (state.state_digest ?? '')) {
-    return { ok: false, reason: 'need_resync', expectedSeq };
-  }
+  if (batch.seq !== expectedSeq || batch.prevDigest !== (state.state_digest ?? '')) return resync;
 
   let touchedFacts = false;
   let touchedEpisodes = false;
