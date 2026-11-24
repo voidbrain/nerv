@@ -27,7 +27,12 @@ import {
   ranOrAckedCoordinatorEpoch,
   signDrainReceipt,
 } from '../src/coordinator-relocation.ts';
-import { coordinatorChannelAuthority, coordinatorLeaseService } from '../src/coordinator-serve.ts';
+import {
+  coordinatorChannelAuthority,
+  coordinatorLeaseService,
+  coordinatorTelegramContinuity,
+} from '../src/coordinator-serve.ts';
+import type { ReplicationBatch } from '../src/coordinator-replication.ts';
 import { COORDINATOR_STATE_SCHEMA } from '../src/coordinator-snapshot.ts';
 import { Registry, signRecord, type RegistryBody, type SignedRecord } from '../src/kaji.ts';
 import { Store } from '../src/store.ts';
@@ -50,7 +55,7 @@ import { Store } from '../src/store.ts';
  * Limits (#717 review): the mock bot hands each update out once, so the Telegram check proves only that no
  * two bases poll in the same step; the real getUpdates offset hand-over (an update fetched but not yet
  * confirmed by the old main) is not modelled, nor is replication of what the old main did after the standby
- * was seeded (F-016-T20). The simulated decide checks main and epoch like KajiLink's staleEpochReply, in a
+ * was seeded (F-016-T20 adds that: the shipper runs each step over the simulated line). The simulated decide checks main and epoch like KajiLink's staleEpochReply, in a
  * simplified form; the routing rules are copied here, not shared with KajiLink.
  */
 
@@ -63,6 +68,7 @@ const STEP_MS = 1000;
 const ISSUED = '2026-11-24T10:00:00.000Z';
 const OUTBOX_ID = '00000000-0000-4000-8000-0000000000a1';
 const APPROVAL_ID = '00000000-0000-4000-8000-0000000000b1';
+const OUTBOX_2 = '00000000-0000-4000-8000-0000000000a2';
 
 const b64 = (k: KeyObject) => k.export({ type: 'spki', format: 'der' }).toString('base64');
 
@@ -169,6 +175,8 @@ interface Service {
   readonly keeper: ReturnType<ReturnType<typeof coordinatorLeaseService>['keeper']>;
   readonly authority: ReturnType<typeof coordinatorChannelAuthority>;
   readonly store: Store;
+  /** F-016-T20: serve's replication shipper, over the simulated Kaji line. */
+  readonly shipper: ReturnType<ReturnType<typeof coordinatorLeaseService>['shipper']>;
 }
 
 interface Base {
@@ -201,6 +209,8 @@ class Mesh {
   readonly timeline: { at: number; holders: string[] }[] = [];
   private readonly startMs: number;
   private nextUpdate = 1;
+  /** F-016-T20: the holder saves its Telegram offset as the channel does. */
+  telegramContinuity = false;
   private readonly telegram: number[] = [];
 
   constructor(ids: readonly string[], standbys: readonly string[]) {
@@ -253,7 +263,12 @@ class Mesh {
     });
     const keeper = lease.keeper((standby, request) => this.renew(id, standby, request));
     const authority = coordinatorChannelAuthority({ home: b.home, databasePath: b.db, baseId: id, root: this.rootPub });
-    b.service = { lease, keeper, authority, store: new Store(b.db, undefined, { home: b.home }) };
+    const shipper = lease.shipper({
+      replicate: (to, batch, leaseExpiresAt) => this.replicate(id, to, batch, leaseExpiresAt),
+      seedStandby: (to, frame, coordinatorEpoch, leaseExpiresAt) =>
+        this.seedStandby(id, to, frame, coordinatorEpoch, leaseExpiresAt),
+    });
+    b.service = { lease, keeper, authority, shipper, store: new Store(b.db, undefined, { home: b.home }) };
   }
 
   stop(id: string): void {
@@ -262,6 +277,7 @@ class Mesh {
     if (!s) return;
     b.service = undefined;
     s.keeper.stop();
+    s.shipper.stop();
     s.lease.stop();
     s.authority.close();
     s.store.close();
@@ -353,6 +369,28 @@ class Mesh {
     return target.service!.lease.onLeaseRenew(from, request);
   }
 
+  /** The coordinator routes KajiLink checks before its handler: only from the main base, never an older epoch, a live lease. */
+  private coordinatorRoute(from: string, to: string, coordinatorEpoch: number, leaseExpiresAt: number): Base {
+    const target = this.answering(from, to);
+    const reg = this.withRegistry(target, (r) => ({ main: r.main(), epoch: r.mainEpoch() }));
+    if (reg.main !== from) throw new Error(`${to} refused (403): only the main base replicates here`);
+    if (coordinatorEpoch < reg.epoch || Date.now() > leaseExpiresAt)
+      throw new Error(`${to} refused (409): stale_coordinator_lease`);
+    return target;
+  }
+
+  /** `POST /kaji/replicate` as KajiLink routes it (F-016-T20). */
+  async replicate(from: string, to: string, batch: ReplicationBatch, leaseExpiresAt: number) {
+    const target = this.coordinatorRoute(from, to, batch.coordinatorEpoch, leaseExpiresAt);
+    return target.service!.lease.onReplicate(from, batch);
+  }
+
+  /** `POST /kaji/standby/seed` as KajiLink routes it (F-016-T20). */
+  async seedStandby(from: string, to: string, frame: Buffer, coordinatorEpoch: number, leaseExpiresAt: number) {
+    const target = this.coordinatorRoute(from, to, coordinatorEpoch, leaseExpiresAt);
+    return target.service!.lease.onSeed(from, frame.toString('utf8'));
+  }
+
   /** `POST /kaji/epoch-push` as KajiLink routes it. */
   async pushEpoch(from: string, to: string, records: SignedRecord[]) {
     this.pushes.push({ from, to, records: records.length });
@@ -408,7 +446,11 @@ class Mesh {
     const [holder] = holders;
     if (!holder) return;
     // Telegram: the bot hands each update out once (getUpdates confirms it); only the holder polls.
-    for (const u of this.telegram.splice(0)) this.record({ kind: 'telegram', id: String(u), by: holder });
+    const updates = this.telegram.splice(0);
+    for (const u of updates) this.record({ kind: 'telegram', id: String(u), by: holder });
+    // F-016-T20: the channel saves its getUpdates offset into coordinator_state (TelegramChannel.save).
+    if (this.telegramContinuity && updates.length)
+      coordinatorTelegramContinuity(this.base(holder).db).save({ offset: updates.at(-1)! + 1, cards: [] });
     // Outbox: the holder sends every unsettled, unquarantined row (Store.outbox), then settles it.
     const store = this.base(holder).service!.store;
     for (const row of store.outbox()) {
@@ -425,6 +467,39 @@ class Mesh {
       if (this.elapsed() % LEASE_RENEW_MS === 0)
         for (const b of this.bases.values()) if (b.awake && b.service) await b.service.keeper.renewOnce();
       this.step();
+      // F-016-T20: serve ships each committed batch to the named standby.
+      for (const b of this.bases.values()) if (b.awake && b.service) await b.service.shipper.tick();
+    }
+  }
+
+  /** The Telegram offset a base's coordinator_state holds (main or standby store). */
+  telegramOffset(id: string, file = 'nerv.sqlite'): number | null {
+    const db = new DatabaseSync(join(this.base(id).home, file));
+    try {
+      return (db.prepare('SELECT telegram_offset AS o FROM coordinator_state WHERE id = 1').get() as { o: number | null })
+        .o;
+    } finally {
+      db.close();
+    }
+  }
+
+  /** A new remote request queued on a base (sent by the holder's outbox at the next step). */
+  queueRemote(id: string, outboxId: string): void {
+    const db = new DatabaseSync(this.base(id).db);
+    try {
+      db.prepare('INSERT INTO kaji_outbox VALUES(?,?,?,?,?,?,?,?,?)').run(
+        outboxId,
+        '00000000-0000-4000-8000-0000000000c2',
+        D,
+        'neutral.tool',
+        '{}',
+        'Neutral request',
+        new Date().toISOString(),
+        null,
+        null,
+      );
+    } finally {
+      db.close();
     }
   }
 
@@ -944,5 +1019,41 @@ describe('B-121 (#721 review): a planned re-target never hands over from state o
     await assert.rejects(m.promote(C, { drainReceiptFile: second }), refused('standby_behind', /epoch 3/));
     assert.deepEqual(m.pushes, [], 'refused from the receipt, before any probe or push');
     assert.equal(existsSync(join(m.base(C).home, PROMOTION_MARKER_FILE)), false);
+  });
+});
+
+describe('F-016-T20: live replication carries what the old main did across a partition', () => {
+  it('a remote request the old main sent before the partition, and its Telegram offset, are known to the promoted main', async () => {
+    const m = (mesh = new Mesh([X, B], [B]));
+    m.telegramContinuity = true;
+    // `kaji standby B` on X: B's store is seeded from a signed snapshot of X (it held only the older template).
+    await m.base(X).service!.shipper.seed(B);
+    m.queueRemote(X, OUTBOX_2);
+    await m.advance(30_000);
+    assert.equal(m.sends('outbox', X), 2, 'X sent the queued request (and the one from before the fixture)');
+    const shippedOffset = m.telegramOffset(X);
+    assert.ok(shippedOffset && shippedOffset > 1);
+    assert.equal(m.telegramOffset(B, STANDBY_DB_FILE), shippedOffset, 'the standby is current before the partition');
+
+    m.partition = [[X], [B]];
+    await m.advance(90_000);
+    assert.equal(m.state(X)?.replicationMode, 'fenced');
+    // X polled Telegram until it fenced; those offsets never reached B (Telegram's own confirmation covers them).
+    assert.ok(m.telegramOffset(X)! > shippedOffset);
+
+    const records = [
+      m.sign({ kind: 'revoke', baseId: X, publicKey: m.base(X).publicKey }),
+      m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }),
+    ];
+    m.importRecords(B, records);
+    const res = await m.promote(B);
+    // Both sends are settled in B's state: nothing is parked as uncertain, and nothing is sent again.
+    assert.ok(!('resumed' in res) && res.newEpoch === 3 && res.quarantined === 0);
+    // The promoted main resumes Telegram from the offset X had shipped (the channel hydrates it on activation).
+    assert.equal(coordinatorTelegramContinuity(m.base(B).db).load()?.offset, shippedOffset);
+    await m.advance(30_000);
+    assert.deepEqual(m.holders(), [B]);
+    assert.equal(m.sends('outbox', B), 0);
+    assert.equal(m.base(B).service!.store.outbox().length, 0);
   });
 });
