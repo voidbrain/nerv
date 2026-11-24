@@ -19,7 +19,7 @@ import {
 } from './kaji.ts';
 
 import { builtinTools } from './executors.ts';
-import { drainCoordinator, signDrainReceipt } from './coordinator-relocation.ts';
+import { RelocationRefusedError, drainCoordinator, signDrainReceipt } from './coordinator-relocation.ts';
 import {
   installedPromotionService,
   promoteCoordinator,
@@ -29,6 +29,45 @@ import {
 import { nextLeaseSeq, type LeaseRenewRequest, type LeaseRenewResult } from './coordinator-lease.ts';
 import { KajiLink } from './kaji-link.ts';
 import { OFFER_NAME, toolName } from './mcp.ts';
+
+/**
+ * `nerv kaji promote` (F-016-T17): the new main side. Every safety input is read from verified records on this
+ * base. The CLI runs it without opening a Store first (third review): opening one would create an empty
+ * nerv.sqlite in the middle of an interrupted swap.
+ */
+export async function runKajiPromoteCommand(
+  args: string[],
+  home: string,
+  config: ReturnType<typeof readConfig>,
+  ctx: {
+    flag: (name: string) => string | undefined;
+    promotion?: { service?: PromotionServiceControl; clock?: PromotionClock };
+  },
+): Promise<void> {
+  if (args.includes('--confirm-old-host-down'))
+    throw new RelocationRefusedError(
+      'old_host_unconfirmed',
+      "The owner's word does not bound the old main: revoke it with the root key (the Key of Nebuchadnezzar from its offline backup: kaji relocate BASE-ID --revoke OLD-ID, then kaji import here) and run kaji promote again.",
+    );
+  const receipt = ctx.flag('--drain-receipt');
+  const res = await promoteCoordinator({
+    home,
+    rootPublicKey: config.kaji?.root,
+    ownPublicKey: baseKey(home).publicKey,
+    ...(receipt ? { drainReceiptFile: receipt } : {}),
+    service: ctx.promotion?.service ?? installedPromotionService(home),
+    ...(ctx.promotion?.clock ? { clock: ctx.promotion.clock } : {}),
+    log: (line) => console.log(line),
+  });
+  console.log(
+    'resumed' in res
+      ? `Promotion at coordinator epoch ${res.newEpoch} finished; the service is running again.`
+      : `Promoted to coordinator epoch ${res.newEpoch} (from ${res.previousEpoch}, ${res.source}); ${res.quarantined} uncertain outbox row(s) parked for review. ` +
+          (res.leaseExpiresAt
+            ? 'Sole coordinator: lease armed.'
+            : 'Effects wait for the first standby-acked lease (name a standby: kaji standby BASE-ID).'),
+  );
+}
 
 export async function runKajiCommand(
   args: string[],
@@ -234,24 +273,7 @@ export async function runKajiCommand(
       );
     } else process.stdout.write(out);
   } else if (sub === 'promote') {
-    // F-016-T17: the new main side. Every safety input is read from verified records on this base.
-    const receipt = ctx.flag('--drain-receipt');
-    const res = await promoteCoordinator({
-      home,
-      rootPublicKey: config.kaji?.root,
-      ownPublicKey: me,
-      ...(receipt ? { drainReceiptFile: receipt } : {}),
-      confirmOldHostDown: args.includes('--confirm-old-host-down'),
-      service: ctx.promotion?.service ?? installedPromotionService(home),
-      ...(ctx.promotion?.clock ? { clock: ctx.promotion.clock } : {}),
-      log: (line) => console.log(line),
-    });
-    console.log(
-      'resumed' in res
-        ? `Promotion at coordinator epoch ${res.newEpoch} finished; the service is running again.`
-        : `Promoted to coordinator epoch ${res.newEpoch} (from ${res.previousEpoch}, ${res.source}); ${res.quarantined} uncertain outbox row(s) parked for review. ` +
-            (res.leaseExpiresAt ? 'Sole coordinator: lease armed.' : 'Effects wait for the first standby-acked lease.'),
-    );
+    await runKajiPromoteCommand(args, home, config, ctx);
   } else if (sub === 'standby') {
     // F-016-T16 review: the owner names the base the active main renews its lease through.
     const id = (args[1] ?? '').toUpperCase();
@@ -397,7 +419,7 @@ export async function runKajiCommand(
     );
   } else
     throw new Error(
-      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [--revoke LOST-ID] | drain [FILE] | standby [BASE-ID] | promote [--drain-receipt FILE | --confirm-old-host-down] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
+      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [--revoke LOST-ID] | drain [FILE] | standby [BASE-ID] | promote [--drain-receipt FILE] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
     );
   return;
 }
