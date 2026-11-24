@@ -54,7 +54,7 @@ interface Button {
 function guardedApi(api: TelegramApi, authority: () => boolean): TelegramApi {
   const guarded = Object.create(api) as TelegramApi;
   guarded.call = <T>(method: string, body: object, signal?: AbortSignal): Promise<T> => {
-    let ok = false;
+    let ok: boolean;
     try {
       ok = authority();
     } catch {
