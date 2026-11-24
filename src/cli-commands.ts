@@ -9,6 +9,7 @@ import { EvaJobs, runEva03Durably } from './eva-jobs.ts';
 
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
+import { parseFleetImport } from './fleet.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
 import {
   detectVoiceLanguage,
@@ -274,8 +275,18 @@ export async function tryRunCliCommand(
         console.log(JSON.stringify(store.fleet.listParts(args[1]), null, 2));
       } else if (sub === 'spares') {
         console.log(JSON.stringify(store.fleet.listSpares(args[1]), null, 2));
+      } else if (sub === 'import' && args[1]) {
+        let raw: unknown;
+        try {
+          raw = JSON.parse(readFileSync(resolve(args[1]), 'utf8'));
+        } catch (error) {
+          throw new Error(`${args[1]} is not readable JSON: ${(error as Error).message}`);
+        }
+        console.log(JSON.stringify(store.fleet.importFleet(parseFleetImport(raw)), null, 2));
       } else {
-        throw new Error('Usage: fleet drones | fleet parts <drone> | fleet spares [category]');
+        throw new Error(
+          'Usage: fleet drones | fleet parts <drone> | fleet spares [category] | fleet import <fleet.json>',
+        );
       }
     } finally {
       store.close();
