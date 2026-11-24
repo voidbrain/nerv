@@ -50,5 +50,11 @@
     "estimateAgentHours": 1.5,
     "actualAgentHours": 1.5,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 698,
+      "note": "equivalent placement runs and updated report; CI pending"
+    }
+  ]
 }
