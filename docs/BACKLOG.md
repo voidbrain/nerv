@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 93 h agent + 11 h owner across 131 open steps of 38 features and 23 other records. 140 h of actual effort recorded on 146 steps. Generated from the task files.
+**Remaining effort:** 96 h agent + 11 h owner across 132 open steps of 38 features and 24 other records. 140 h of actual effort recorded on 146 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1616,6 +1616,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-117-T01: [PR #710](https://github.com/voidbrain/nerv/pull/710) name and fix bases and browser gauntlet load failures; failing-first test/gauntlet-load.test.ts. [PR #710](https://github.com/voidbrain/nerv/pull/710) (Test: `test/gauntlet-load.test.ts`); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened) |
 | Opened | 2026-11-24 |
 | Verification | Unit/integration 2026-11-24: `node --test test/gauntlet-load.test.ts test/worker-outbox.test.ts test/kaji-seats.test.ts test/worker-link-heartbeat.test.ts` (24/24 pass); `npm run gauntlet:run` for `nerv-system-flows/bases` and `nerv-system-flows/browser` passed concurrently under load and alone (`npm run check:gauntlet-runs` and `npm run check:fast` pass). |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-123"></a>[🐞 B-123](#top)
+
+**After Update now the dashboard never shows the updater's result**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-123-T01, a status route for the updater and the Health row that shows it.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-24: after pressing Update now in the dashboard's Health row, the page showed only "Manual update started · fd0f2a0" and nothing after. The outside updater (B-108) refused ("Service or runtime ownership is unknown or belongs elsewhere.", "Nothing was stopped…") and wrote that to `updater-result.json`, the inbox and `updater.log`, but the dashboard reads none of them, and it kept the button busy for 10 minutes before saying "uncertain". |
+| **Reproduce** | Press Update now on a base where the updater refuses (the B-122 case) or fails; the Health row stays on "Manual update started" and never shows the refusal, its reasons or recovery. |
+| **Check** | A committed test that fails first, across the join: the updater writes its result → `GET /api/update/status` returns it → the dashboard's Health row shows it beside the button (in progress with its step, completed, refused, failed or uncertain, with reasons and recovery) after a reload too, until dismissed or superseded; the inbox still reports it exactly once. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-123-t01"></a>B-123-T01 — Show the updater's status beside Update now | 3 h | 0 h | 3 h | Planned |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 1 steps recorded) | 3 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-123.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — |
+| Opened | 2026-11-24 |
+| Verification | Unit/integration: Pending. Browser/accessibility: Pending. Human (a real Update now on the base): Pending. |
 | Reviewed | 2026-11-24 |
 
 </details>
