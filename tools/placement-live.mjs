@@ -181,15 +181,16 @@ export function summarize(results) {
 /** One combination case: the coder checks its patch; in coder-reviewer the auditor's vote decides. */
 export async function combinationCase(c, mode, coder, reviewer, budget) {
   const t0 = Date.now();
-  const first = await coder(coderPrompt(c), budget);
+  const first = await coder({ prompt: coderPrompt(c) }, budget);
   const coderVote = parseVote(first.text);
   let tokens = first.outputTokens ?? 0,
     rounds = 1,
     final = coderVote,
     auditor = null;
   if (mode === 'coder-reviewer') {
-    if (!coderVote) return { submission: null, tokens, rounds, ms: Date.now() - t0, invalid: 'coder' };
-    const second = await reviewer(reviewerPrompt(c, coderVote), {
+    if (!coderVote)
+      return { submission: null, tokens, rounds, ms: Date.now() - t0, invalid: 'coder', coderText: String(first.text).slice(0, 300) };
+    const second = await reviewer({ prompt: reviewerPrompt(c, coderVote) }, {
       ...budget,
       timeoutMs: Math.max(1000, budget.timeoutMs - (Date.now() - t0)),
     });
@@ -199,7 +200,9 @@ export async function combinationCase(c, mode, coder, reviewer, budget) {
     final = parseVote(second.text);
   }
   const ms = Date.now() - t0;
-  if (!final) return { submission: null, tokens, rounds, ms, invalid: mode === 'coder-reviewer' ? 'reviewer' : 'coder' };
+  const texts = { coderText: String(first.text).slice(0, 300), auditorText: auditor ? String(auditor.text).slice(0, 300) : null };
+  if (!final)
+    return { submission: null, tokens, rounds, ms, invalid: mode === 'coder-reviewer' ? 'reviewer' : 'coder', ...texts };
   return {
     submission: { reviewerVote: final.vote, reviewerReason: final.reason, rounds, outputTokens: tokens, durationMs: ms },
     tokens,
@@ -207,6 +210,7 @@ export async function combinationCase(c, mode, coder, reviewer, budget) {
     ms,
     coderServerMs: first.serverMs ?? null,
     auditorServerMs: auditor?.serverMs ?? null,
+    ...texts,
   };
 }
 
@@ -240,7 +244,15 @@ export async function runCombination(mode, coder, reviewer, totalBudget, perCall
           continue;
         }
         if (!out.submission) {
-          results.push({ ...base, status: 'invalid', error: `${out.invalid} reply invalid`, ms: out.ms, tokens: out.tokens });
+          results.push({
+            ...base,
+            status: 'invalid',
+            error: `${out.invalid} reply invalid`,
+            ms: out.ms,
+            tokens: out.tokens,
+            coderText: out.coderText,
+            auditorText: out.auditorText ?? null,
+          });
           continue;
         }
         const graded = grader.gradeCase(c.id, out.submission);
@@ -259,6 +271,8 @@ export async function runCombination(mode, coder, reviewer, totalBudget, perCall
           tokens: out.tokens,
           coderServerMs: out.coderServerMs,
           auditorServerMs: out.auditorServerMs,
+          coderText: out.coderText,
+          auditorText: out.auditorText,
         });
       } catch (error) {
         const timedOut = /timed? ?out|abort/i.test(String(error?.message));
@@ -389,7 +403,14 @@ const COMBINATION_BUDGET = { outputTokens: 6144, suiteMs: 360000, caseMs: 30000,
 
 async function main(args) {
   const [command, ...rest] = args;
-  const opt = Object.fromEntries(rest.filter((a) => a.startsWith('--')).map((a) => a.slice(2).split('=')));
+  const opt = Object.fromEntries(
+    rest
+      .filter((a) => a.startsWith('--'))
+      .map((a) => {
+        const at = a.indexOf('=');
+        return at < 0 ? [a.slice(2), true] : [a.slice(2, at), a.slice(at + 1)];
+      }),
+  );
   if (command === 'probe') {
     // stdin {ask, maxTokens, timeoutMs} -> stdout one JSON reply (used by the ssh transport).
     const input = JSON.parse(readFileSync(0, 'utf8'));
