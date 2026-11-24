@@ -4,7 +4,7 @@
   "parent": "F-094",
   "title": "Open app and file, save as, step by step",
   "goal": "A planned sequence runs with readback after each step",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "One approval for the whole plan; readback each step; stops on a step outside the plan",
     "Save as never overwrites without asking"
@@ -36,8 +36,16 @@
     "estimate": "1.5 h",
     "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
     "reviewed": "2026-11-14",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 1.5
-  }
+    "estimateAgentHours": 1.5,
+    "actualAgentHours": 1.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 688,
+      "note": "implementation"
+    }
+  ]
 }
