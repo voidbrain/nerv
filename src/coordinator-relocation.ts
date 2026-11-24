@@ -172,6 +172,14 @@ function standbyLastAckMs(db: DatabaseSync, epoch: number): number | undefined {
   return row && row.standby_coordinator_epoch === epoch ? row.last_ack_wall_ms : undefined;
 }
 
+/** The newest epoch this standby acked a lease for (`standby_lease_state`), 0 when it never acked one. */
+function standbyAckedEpoch(db: DatabaseSync): number {
+  if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='standby_lease_state'").get()) return 0;
+  const row = db.prepare('SELECT standby_coordinator_epoch FROM standby_lease_state WHERE id = 1').get() as
+    { standby_coordinator_epoch: number } | undefined;
+  return row?.standby_coordinator_epoch ?? 0;
+}
+
 /** Owner-approved cold restore from a verified signed snapshot bound to the previous epoch. */
 export interface ColdRestoreBinding {
   readonly frames: readonly Buffer[];
@@ -239,6 +247,14 @@ export function checkRelocationReadiness(input: RelocationReadinessInput): Reloc
       `The standby holds epoch ${previousEpoch}; the owner-signed record at epoch ${newEpoch} must be later.`,
     );
   const headSeq = head!.head_seq;
+  // F-016-T08: this standby acked a lease at a later epoch than the state it holds, so a later coordinator ran
+  // (with effects) after that state: taking over from it would undo, and could repeat, what that coordinator did.
+  const ackedEpoch = standbyAckedEpoch(input.candidateDb);
+  if (ackedEpoch > previousEpoch)
+    refuse(
+      'standby_behind',
+      `This standby acked a coordinator lease at epoch ${ackedEpoch}, but its store holds epoch ${previousEpoch}: re-seed it from the epoch ${ackedEpoch} coordinator first.`,
+    );
 
   let source: RelocationReadiness['source'] = 'standby';
   if (input.coldRestore) {
