@@ -663,9 +663,12 @@ const EDGES = [
 /** Conditional routes: the relay only for a forwarded sortie, the answer only when Misato answered with no action, the
     declined route only when the sortie had actions and none of them ran (B-096). */
 function edgeShown(s, e) {
-  if (e[2] === "relay") return !!(s && s.forwarded);
-  if (e[2] === "answer") return !!(s && !s.actions.length && !s.forwarded);
-  if (e[2] === "declined") return !!(s && !s.forwarded && s.done && s.done.apt && s.actions.length && !s.actions.some(a => a.status === "done" || a.status === "failed") && (stepState(s, "debrief") === "on" || stepState(s, "debrief") === "done"));
+  // B-112 (2a): with no sortie selected the map shows every route; passedEdge marks the conditional ones.
+  if (!s) return true;
+  if (e[2] === "relay") return !!s.forwarded;
+  // B-112: only once Misato's planning ended with no action, not at the start of every sortie.
+  if (e[2] === "answer") return !s.actions.length && !s.forwarded && stepState(s, "plan") === "done";
+  if (e[2] === "declined") return !!(!s.forwarded && s.done && s.done.apt && s.actions.length && !s.actions.some(a => a.status === "done" || a.status === "failed") && (stepState(s, "debrief") === "done" || stepState(s, "debrief") === "on"));
   return true;
 }
 function nodeEl(id) { return id === "magi" ? document.getElementById("magi-big") : document.querySelector(".snode[data-n='" + id + "']"); }
@@ -719,15 +722,34 @@ function drawEdges(s) {
 /** The route already taken: green when the step passed on its own, yellow when it went through the owner's decision
     (Misato's apartment), faded into a skipped step. Step activity is shown on nodes; route history never claims an ongoing communication. */
 function passedEdge(s, e) {
-  if (!s || (e[2] === "loop" && !(e[0] === "consult" && e[1] === "plan"))) return "";
+  // B-112 (2a): the full map with no sortie: conditional routes are drawn as such.
+  if (!s) return e[2] && e[2] !== "loop" ? "cond" : "";
   const activeOrDone = st => st === "done" || st === "on" || st === "wait";
   if (e[2] === "answer") return stepState(s, "plan") === "done" && activeOrDone(stepState(s, "debrief")) ? "passed" : "";
   if (e[2] === "relay") return activeOrDone(stepState(s, "debrief")) ? "passed" : "";
   if (e[2] === "declined") return stepState(s, "apt") === "done" && activeOrDone(stepState(s, "debrief")) ? "passed owner" : "";
+  if (e[2] === "loop" && e[0] !== "consult") return loopTaken(s, e[0]) ? (e[0] === "apt" ? "passed owner" : "passed") : "";
   const from = stepState(s, e[0]), to = stepState(s, e[1]);
   if (from === "skip" || to === "skip") return "skip";
   if (from !== "done" || !(to === "done" || to === "on" || to === "wait")) return "";
+  // B-112: a shortcut lights only when the step it bypasses did not run (S-6AD9 lit both ways round Naoko Desk).
+  const bypassed = { "detect>route":"intake", "sync>plug":"apt" }[e[0] + ">" + e[1]];
+  if (bypassed && stepState(s, bypassed) === "done") return "";
   return e[0] === "apt" || e[1] === "apt" ? "passed owner" : "passed";
+}
+/** B-112 (4c): whether the sortie went back to Misato from this step: a rejection she planned past (MAGI), your answer
+    or decision (Misato's Apt), a result followed by a next step (EVA Cage). The advice route keeps the normal rule. */
+function loopTaken(s, from) {
+  const acts = s.actions || [];
+  const later = i => i >= 0 && i < acts.length - 1;
+  if (from === "eva") return acts.some((a, i) => later(i) && (a.status === "done" || a.status === "failed"));
+  if (from === "magi") return acts.some((a, i) => a.ballot && a.ballot.outcome === "reject" && (later(i) || stepState(s, "plan") === "done"));
+  if (from === "apt") {
+    if (!s.done || !s.done.apt) return false;
+    const asked = !acts.some(a => a.ballot && a.ballot.outcome !== "grant");
+    return asked || acts.some((a, i) => a.ballot && a.ballot.outcome === "approval" && later(i));
+  }
+  return false;
 }
 
 /* ================= RENDER: detail (plan + action) ================= */

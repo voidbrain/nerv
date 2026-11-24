@@ -51,7 +51,7 @@ const glob = (root, pattern) => {
     re = new RegExp(
       `^${pattern
         .slice(dir === '.' && !pattern.startsWith('./') ? 0 : dir.length + 1)
-        .replace(/[.]/g, '\\.')
+        .replace(/[\\^$.|?+()[\]{}]/g, '\\$&')
         .replace(/\*/g, '[^/]*')}$`,
     );
   return existsSync(join(root, dir))

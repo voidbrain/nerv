@@ -1,0 +1,62 @@
+{
+  "source": "F-006-T11 live probes (record F-006) and F-006-T14 Mac moderate-load aggregates; private raw reports stay on their bases",
+  "evidence": [
+    {
+      "option": "mac-only",
+      "source": "live",
+      "enrolledTargets": true,
+      "identity": {
+        "model": "gemma4:12b Q4_K_M, digest 6114515d…36ed0b",
+        "runtime": "Ollama 0.40.16, 8K context, temperature 0, seed 42, parallel 1",
+        "hardware": "NERV-01, Apple M3 Pro",
+        "memory": "36 GiB unified",
+        "concurrentLoad": "moderate-load@1.0.0: Safari, Firefox, VS Code"
+      },
+      "caseSet": "neutral-smoke + role-run both, repeat 3",
+      "budget": "limits-repeat3: 30 s/case, 15 min/suite, 61440 output tokens",
+      "outcome": { "passed": 48, "total": 60 },
+      "metrics": {
+        "latencyMedianMs": null,
+        "queueMs": null,
+        "networkMs": 0,
+        "outputTokens": 9948,
+        "resource": "process RSS peak 9.9 GB; whole-device GPU peak 100%; GPU allocation peak 11.5 GB"
+      },
+      "failures": { "unavailableMac": null, "disconnectedAuditor": null, "cancellation": null, "uncertainOutcome": null }
+    },
+    {
+      "option": "mini-only",
+      "source": "live",
+      "enrolledTargets": true,
+      "identity": {
+        "model": "qwen2.5:1.5b",
+        "runtime": null,
+        "hardware": "NERV-02, Intel N97 4-core, Windows 11",
+        "memory": "11.75 GiB RAM",
+        "concurrentLoad": "normal home baseline (owner procedure; not sampled)"
+      },
+      "caseSet": "placement probe READY, 1 run",
+      "budget": "probe: 512 output tokens, 120 s",
+      "outcome": { "passed": 1, "total": 1 },
+      "metrics": { "latencyMedianMs": 7763, "queueMs": null, "networkMs": 0, "outputTokens": null, "resource": null },
+      "failures": { "unavailableMac": null, "disconnectedAuditor": null, "cancellation": null, "uncertainOutcome": null }
+    },
+    {
+      "option": "mini-tools-mac-inference",
+      "source": "live",
+      "enrolledTargets": true,
+      "identity": {
+        "model": "gemma4:12b on NERV-01",
+        "runtime": "NERV-01 loopback Ollama via signed WorkerLink model.infer; execution local on NERV-02",
+        "hardware": "NERV-02 worker (Intel N97) + NERV-01 inference (Apple M3 Pro)",
+        "memory": "11.75 GiB RAM + 36 GiB unified",
+        "concurrentLoad": "mini baseline + Mac moderate (owner procedure; not sampled)"
+      },
+      "caseSet": "placement probe READY, 1 run",
+      "budget": "probe: 512 output tokens, 120 s",
+      "outcome": { "passed": 1, "total": 1 },
+      "metrics": { "latencyMedianMs": 2244, "queueMs": null, "networkMs": null, "outputTokens": 65, "resource": null },
+      "failures": { "unavailableMac": true, "disconnectedAuditor": null, "cancellation": null, "uncertainOutcome": null }
+    }
+  ]
+}

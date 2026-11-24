@@ -20,7 +20,9 @@ import { defaultAutoUpdatePolicy } from './update-policy.ts';
 import { startAutoUpdateScheduler } from './update-scheduler.ts';
 import { buildInfo, checkRevisionSkew, type BuildInfo } from './build.ts';
 import type { UpdateControl } from './server-update.ts';
-import { clickNamedControl, type BrowserAdapterDriver } from './browser-control.ts';
+import { clickNamedControl } from './browser-control.ts';
+import { createCdpBrowserDriver, createCdpPageReader } from './browser-cdp-driver.ts';
+import { assertDiyfpvBuildLink, DIYFPV_BUILDER_ORIGIN, parseDiyfpvBuild } from './diyfpv-build.ts';
 import { clickDesktopControl } from './desktop-control.ts';
 import { desktopDriverFor } from './desktop-macos-driver.ts';
 
@@ -29,6 +31,7 @@ import { SeatPool } from './seat-pool.ts';
 import { assertRootMigrationReady, rootMigrationCommand } from './root-migration.ts';
 import { formatCommandHelp, formatHelp } from './cli-help.ts';
 import { nodesCommand } from './nodes-cli.ts';
+import { placementEvidence, placementReport } from './placement-report.ts';
 import { backupCommand } from './backup-cli.ts';
 import { storeReceived } from './offhost.ts';
 
@@ -80,6 +83,7 @@ import {
 import { ROOT_KEY_FILE, baseKey, createRootKey, fingerprint } from './kaji.ts';
 import { service } from './service.ts';
 import { startUpdaterJob } from './updater-job.ts';
+import { reportUpdaterResult } from './updater-result.ts';
 import { serviceMove } from './install-move-cli.ts';
 import { initializeNativeTLS, loadNativeTLS, nativeAdmin, NativeAuth, type Invitation } from './native-auth.ts';
 import { Runtime, type ChatReply } from './runtime.ts';
@@ -222,25 +226,30 @@ try {
   } else if (command === 'placement') {
     const sub = args[0];
     const file = args[1];
-    if (!['plan', 'run'].includes(sub ?? '') || !file || (sub === 'run' && !args.includes('--execute')))
-      throw new Error('Usage: nerv placement plan PROBE.json | nerv placement run PROBE.json --execute');
+    if (!['plan', 'run', 'report'].includes(sub ?? '') || !file || (sub === 'run' && !args.includes('--execute')))
+      throw new Error(
+        'Usage: nerv placement plan PROBE.json | nerv placement run PROBE.json --execute | nerv placement report EVIDENCE.json',
+      );
     let probe: unknown;
     try {
       probe = JSON.parse(readFileSync(resolve(file), 'utf8'));
     } catch {
-      throw new Error('Placement probe must be a readable JSON file.');
+      throw new Error(`Placement ${sub === 'report' ? 'evidence' : 'probe'} must be a readable JSON file.`);
     }
-    const config = readConfig(home);
-    const response = await fetch(`http://127.0.0.1:${config.port}/api/placement/${sub}`, {
-      method: 'POST',
-      headers: { authorization: `Bearer ${readToken(home)}`, 'content-type': 'application/json' },
-      body: JSON.stringify(sub === 'run' ? { ...(probe as object), confirmExecute: true } : probe),
-    }).catch(() => {
-      throw new Error('NERV Agency is not running: start it with serve or service start.');
-    });
-    const value = (await response.json()) as { error?: string };
-    if (!response.ok) throw new Error(value.error ?? 'Placement request failed.');
-    console.log(JSON.stringify(value, null, 2));
+    if (sub === 'report') console.log(JSON.stringify(placementReport(placementEvidence(probe)), null, 2));
+    else {
+      const config = readConfig(home);
+      const response = await fetch(`http://127.0.0.1:${config.port}/api/placement/${sub}`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${readToken(home)}`, 'content-type': 'application/json' },
+        body: JSON.stringify(sub === 'run' ? { ...(probe as object), confirmExecute: true } : probe),
+      }).catch(() => {
+        throw new Error('NERV Agency is not running: start it with serve or service start.');
+      });
+      const value = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(value.error ?? 'Placement request failed.');
+      console.log(JSON.stringify(value, null, 2));
+    }
   } else if (['pair', 'clients', 'revoke'].includes(command ?? '')) {
     const config = readConfig(home);
     const path =
@@ -659,10 +668,25 @@ try {
             })
           : undefined;
         runtime.setUpdatePostpone((text) => updates?.scheduler.postpone(text));
+        // B-108-T02: report the result the outside updater left (Update now, the scheduled apply, a terminal run): the
+        // update restarts this service before the updater finishes, so look every 30 s, report once.
+        const updaterReport = setInterval(() => {
+          const live = readConfig(home);
+          void reportUpdaterResult(
+            home,
+            (message) => runtime.notice(message),
+            live.language === 'it' ? 'it' : 'en',
+            live.timeZone,
+          ).catch((error) =>
+            console.error(`Updater result: ${error instanceof Error ? error.message : String(error)}`),
+          );
+        }, 30_000);
+        updaterReport.unref();
         close = () => {
           if (stopped) return;
           stopped = true;
           updates?.stop();
+          clearInterval(updaterReport);
           void aoba?.stop();
           void kaji?.stop();
           void Promise.all(
@@ -955,23 +979,39 @@ try {
         console.log(JSON.stringify(session.stop(), null, 2));
         break;
       }
-      case 'browser-click': {
-        if (!args[0]) throw new Error('Usage: nerv browser-click <controlName>');
-        const noDriver: BrowserAdapterDriver = {
-          async getActiveTab() {
-            throw new Error('No live browser driver attached.');
-          },
-          async clickControl() {
-            throw new Error('No live browser driver attached.');
-          },
-        };
-        console.log(
-          JSON.stringify(
-            await clickNamedControl(noDriver, { controlName: args[0], allowedOrigins: [], approved: false }),
-            null,
-            2,
-          ),
+      case 'fpv-read-build': {
+        const link = args.find((a) => !a.startsWith('--'));
+        if (!link) throw new Error('Usage: nerv fpv-read-build <diyfpv.com build link>');
+        assertDiyfpvBuildLink(link);
+        const browser = config.browser;
+        if (!browser?.allowedOrigins.includes(DIYFPV_BUILDER_ORIGIN)) {
+          throw new Error(
+            `Add "${DIYFPV_BUILDER_ORIGIN}" to browser.allowedOrigins in config.json and start the dedicated browser profile on browser.debugPort.`,
+          );
+        }
+        const page = await createCdpPageReader({ port: browser.debugPort }).readPageTables(
+          link,
+          browser.allowedOrigins,
         );
+        const build = parseDiyfpvBuild(page, link);
+        console.log(JSON.stringify(local().fpvBuilds.importBuild(build), null, 2));
+        break;
+      }
+      case 'browser-click': {
+        const controlName = args.find((a) => !a.startsWith('--'));
+        if (!controlName) throw new Error('Usage: nerv browser-click <control-name> [--approved]');
+        const browser = readConfig(home).browser;
+        if (!browser || browser.allowedOrigins.length === 0) {
+          throw new Error(
+            'No browser origins allowed. Add "browser": {"allowedOrigins": ["https://..."], "debugPort": 9222} to config.json and start the dedicated browser profile with that remote debugging port.',
+          );
+        }
+        const res = await clickNamedControl(createCdpBrowserDriver({ port: browser.debugPort }), {
+          controlName,
+          allowedOrigins: browser.allowedOrigins,
+          approved: args.includes('--approved'),
+        });
+        console.log(JSON.stringify(res, null, 2));
         break;
       }
       case 'desktop-click': {

@@ -4,7 +4,7 @@
   "id": "F-089-T04",
   "title": "Bind a live browser driver to the click adapter",
   "goal": "`nerv browser-click` and the tool click a control in a real open tab",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A real driver (Chrome DevTools protocol on a local debugging port) replaces the stub; origins come from an owner-set allowlist; the click still needs approval",
     "Integration test against a local fixture page; credential fields and dialogs still refused"
@@ -35,8 +35,16 @@
     "estimate": "2 h",
     "basis": "Estimated 2026-11-18 when the owner approved adding the live binding the owner check needs. Not a measurement.",
     "reviewed": "2026-11-18",
-    "agentHours": 2,
+    "agentHours": 0,
     "baselineAgentHours": 2,
-    "estimateAgentHours": 2
-  }
+    "estimateAgentHours": 2,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 686,
+      "note": "implementation"
+    }
+  ]
 }
