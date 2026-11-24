@@ -1,10 +1,14 @@
-import type { OrchestrationRequest } from './model.ts';
+import { WORKER_MAX_INFER_PROMPT_BYTES, WORKER_MAX_INFER_SYSTEM_BYTES, type OrchestrationRequest } from './model.ts';
+
+/** The largest request body a valid probe can need: its prompt and system message, each JSON-escaped, plus fields. */
+export const PLACEMENT_PROBE_BODY_BYTES = 2 * (WORKER_MAX_INFER_PROMPT_BYTES + WORKER_MAX_INFER_SYSTEM_BYTES) + 4096;
 
 export type PlacementId = 'P2' | 'P3' | 'P4';
 
 export interface PlacementProbe {
   placement: PlacementId;
   prompt: string;
+  system?: string;
   endpoint?: string;
   waitBudgetMs?: number;
   timeoutMs?: number;
@@ -14,7 +18,7 @@ export interface PlacementProbe {
 export function placementProbe(value: unknown): {
   placement: PlacementId;
   orchestration: OrchestrationRequest;
-  ask: { prompt: string; maxTokens?: number; temperature: number };
+  ask: { prompt: string; system?: string; maxTokens?: number; temperature: number };
   timeoutMs: number;
   /** How long the HTTP request may stay open: a concurrency lease and the inference are each bounded by timeoutMs, plus the endpoint wait and a margin. */
   requestBudgetMs: number;
@@ -24,13 +28,26 @@ export function placementProbe(value: unknown): {
   const v = value as Record<string, unknown>;
   if (
     Object.keys(v).some(
-      (key) => !['placement', 'prompt', 'endpoint', 'waitBudgetMs', 'timeoutMs', 'maxOutputTokens'].includes(key),
+      (key) =>
+        !['placement', 'prompt', 'system', 'endpoint', 'waitBudgetMs', 'timeoutMs', 'maxOutputTokens'].includes(key),
     )
   )
     throw new Error('Unknown placement probe field.');
   if (!['P2', 'P3', 'P4'].includes(String(v.placement))) throw new Error('placement must be P2, P3 or P4.');
-  if (typeof v.prompt !== 'string' || !v.prompt.trim() || v.prompt.length > 8_192)
-    throw new Error('prompt must contain 1–8192 characters.');
+  // The limits are the remote inference contract's, in UTF-8 bytes, so a probe that passes here also fits WorkerLink.
+  if (
+    typeof v.prompt !== 'string' ||
+    !v.prompt.trim() ||
+    Buffer.byteLength(v.prompt, 'utf8') > WORKER_MAX_INFER_PROMPT_BYTES
+  )
+    throw new Error(`prompt must be non-empty text of at most ${WORKER_MAX_INFER_PROMPT_BYTES} bytes.`);
+  if (
+    v.system !== undefined &&
+    (typeof v.system !== 'string' ||
+      !v.system.trim() ||
+      Buffer.byteLength(v.system, 'utf8') > WORKER_MAX_INFER_SYSTEM_BYTES)
+  )
+    throw new Error(`system must be non-empty text of at most ${WORKER_MAX_INFER_SYSTEM_BYTES} bytes.`);
   const placement = v.placement as PlacementId;
   const integer = (
     name: 'waitBudgetMs' | 'timeoutMs' | 'maxOutputTokens',
@@ -61,7 +78,12 @@ export function placementProbe(value: unknown): {
       maxDelegations: 1,
       delegationDepth: 0,
     },
-    ask: { prompt: v.prompt, maxTokens: maxOutputTokens, temperature: 0 },
+    ask: {
+      prompt: v.prompt,
+      ...(v.system !== undefined ? { system: v.system as string } : {}),
+      maxTokens: maxOutputTokens,
+      temperature: 0,
+    },
     timeoutMs,
     requestBudgetMs: 2 * timeoutMs + waitBudgetMs + 5_000,
   };

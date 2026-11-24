@@ -71,3 +71,35 @@ node src/cli.ts placement run "$HOME\.nerv-private\placement\p4.json" --execute 
 Expected: remote inference provenance names NERV-01 and endpoint `mac`, local execution remains NERV-02, and the text is `READY` within the 20-second probe timeout.
 
 Return the four command summaries (P2, P3, P4 unavailable, P4 recovered). Keep the private JSON files on their originating base.
+
+## 6. Role-sized probes: put both bases on the same revision (F-006-T28)
+
+A probe may carry `system` (at most 24,576 bytes) beside `prompt` (at most 32,768 bytes), so Casper's and Misato's own system messages (Misato's is about 18 KB) travel unchanged. WorkerLink checks the system bound on the receiving base too: a base on a revision before PR #PR_T27 refuses a system message over 8 KiB with `Remote inference system prompt exceeds 8192 bytes.` (no fallback). The P3 role rerun therefore needs NERV-01 and NERV-02 both on a `main` revision that includes PR #PR_T27 (and PR #708, B-119).
+
+On Neo Tokyo-3 (`NERV-01`), in a local Terminal, on power. `nerv update` updates the install folder `~/.nerv-app` through the lifecycle (backup, rehearsal, build, start, verify); the development checkout only runs the command:
+
+```bash
+cd ~/Projects/NERV/NERV && git switch main && git pull --ff-only && npm ci
+node src/cli.ts update --check
+node src/cli.ts update
+node src/cli.ts update --check
+```
+
+Expected: behind by N commits; then the update summary ending with the outcome `completed`; then up to date.
+
+On Tabgha (`NERV-02`), in PowerShell. Its checkout predates `nerv update`, so it takes the documented manual update (as on 2026-11-12):
+
+```powershell
+Set-Location $HOME\Projects\NERV\NERV
+node src/cli.ts service stop
+Copy-Item $HOME\.nerv\nerv.sqlite "$HOME\.nerv-private\nerv-before-f006-t28.sqlite"
+git pull --ff-only
+npm ci --ignore-scripts
+npm run build
+node src/cli.ts service start
+node src/cli.ts doctor
+node src/cli.ts kaji list
+```
+
+Expected: the service stops and starts without error; `doctor` reports the new revision with no revision skew; `kaji list` shows NERV-01 and NERV-02 online. Reply `F-006-T28 done` with the two revisions; the agent then runs the P3 role rerun (F-006-T29) under the Mac's machine lock.
+

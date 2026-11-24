@@ -14,16 +14,34 @@ import { join, resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { isDeepStrictEqual } from 'node:util';
+import { WORKER_MAX_INFER_PROMPT_BYTES, WORKER_MAX_INFER_SYSTEM_BYTES } from '../src/model.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 
-/** The placement probe takes one prompt of at most 8192 characters and no system message. */
-export const PROBE_PROMPT_LIMIT = 8192;
+/** The placement probe's limits are the remote inference contract's, in UTF-8 bytes (F-006-T27). */
+export const PROBE_PROMPT_BYTES = WORKER_MAX_INFER_PROMPT_BYTES;
+export const PROBE_SYSTEM_BYTES = WORKER_MAX_INFER_SYSTEM_BYTES;
 
-/** Folds a system and user message into one prompt, as the placement probe needs; null when it does not fit. */
-export function foldAsk(ask) {
-  const prompt = ask.system ? `${ask.system}\n\n${ask.prompt}` : ask.prompt;
-  return prompt.length <= PROBE_PROMPT_LIMIT ? prompt : null;
+/** Why the placement probe cannot carry this ask, or null when it fits. */
+export function probeRefusal(ask) {
+  if (ask.system && Buffer.byteLength(ask.system, 'utf8') > PROBE_SYSTEM_BYTES)
+    return `system message exceeds the placement probe limit (${PROBE_SYSTEM_BYTES} bytes)`;
+  if (Buffer.byteLength(ask.prompt, 'utf8') > PROBE_PROMPT_BYTES)
+    return `prompt exceeds the placement probe limit (${PROBE_PROMPT_BYTES} bytes)`;
+  return null;
+}
+
+/** The `/api/placement/run` body for one ask: the system message travels as its own field, never folded in. */
+export function probeBody(placement, ask, { maxTokens, timeoutMs }) {
+  return {
+    placement,
+    ...(ask.system ? { system: ask.system } : {}),
+    prompt: ask.prompt,
+    ...(placement === 'P2' ? {} : { endpoint: 'mac' }),
+    timeoutMs: Math.max(1000, Math.min(120000, timeoutMs)),
+    maxOutputTokens: Math.max(1, Math.min(4096, maxTokens)),
+    confirmExecute: true,
+  };
 }
 
 /** Gauntlet's neutral-smoke acceptance (engine run): JSON.parse of the reply deep-equal to the expected value, else trimmed text equality. */
@@ -338,19 +356,12 @@ export function nervTransport(placement, home = process.env.NERV_HOME || join(ho
   const port = JSON.parse(readFileSync(join(home, 'config.json'), 'utf8')).port ?? 4317;
   const token = readFileSync(join(home, 'token'), 'utf8').trim();
   return async (ask, { maxTokens, timeoutMs, signal }) => {
-    const prompt = foldAsk(ask);
-    if (prompt === null) throw Error(`prompt exceeds the placement probe limit of ${PROBE_PROMPT_LIMIT} characters`);
+    const refusal = probeRefusal(ask);
+    if (refusal) throw Error(refusal);
     const res = await fetch(`http://127.0.0.1:${port}/api/placement/run`, {
       method: 'POST',
       headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
-      body: JSON.stringify({
-        placement,
-        prompt,
-        ...(placement === 'P2' ? {} : { endpoint: 'mac' }),
-        timeoutMs: Math.max(1000, Math.min(120000, timeoutMs)),
-        maxOutputTokens: Math.max(1, Math.min(4096, maxTokens)),
-        confirmExecute: true,
-      }),
+      body: JSON.stringify(probeBody(placement, ask, { maxTokens, timeoutMs })),
       signal: signal ?? AbortSignal.timeout(timeoutMs + 2000),
     });
     const value = await res.json();
@@ -433,7 +444,7 @@ async function main(args) {
     const infer = transport(opt.transport);
     let items = command === 'smoke' ? smokeCases() : await roleItems();
     if (opt.transport.startsWith('nerv'))
-      items = items.map((i) => (foldAsk(i.ask) === null ? { ...i, blocked: `prompt exceeds the placement probe limit (${PROBE_PROMPT_LIMIT} characters)` } : i));
+      items = items.map((i) => (probeRefusal(i.ask) ? { ...i, blocked: probeRefusal(i.ask) } : i));
     return runSuite(items, infer, LIMITS_REPEAT3);
   }
   if (command === 'combination') {
