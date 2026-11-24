@@ -347,3 +347,65 @@ test('F-118-T01 join: nerv open --phone prints a code the phone pairs with', asy
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+// Review of PR #700 (2026-11-24): codes end with a rotated admin token, the lockout level decays after a quiet
+// period, and only JSON (which a cross-origin page cannot send without a preflight) may spend the failure budget.
+test('F-118-T01 review: pending pairing codes end when the admin token rotates', () => {
+  let admin = 'a'.repeat(32);
+  const codes = new PairingCodes({ token: () => admin });
+  const code = codes.mint()!.code;
+  admin = 'b'.repeat(32);
+  assert.equal(codes.take(code, 'phone'), 'invalid', 'minted with the old token');
+  const fresh = codes.mint()!.code;
+  assert.equal(codes.take(fresh, 'phone'), 'ok', 'a code minted with the new token works');
+});
+
+test('F-118-T01 review: the lockout level resets after a quiet period', () => {
+  let now = 1_000_000_000_000;
+  const codes = new PairingCodes({ now: () => now });
+  for (let i = 0; i < 20; i++) codes.take('AAAA-AAAA', 'c' + i);
+  const first = codes.take('AAAA-AAAA', 'x') as { retryAfterMs: number };
+  assert.equal(first.retryAfterMs, 60_000);
+  // The lockout ends, then as long again with no failure: the next lockout starts from one minute again.
+  now += first.retryAfterMs + 60_000;
+  for (let i = 0; i < 20; i++) codes.take('AAAA-AAAA', 'd' + i);
+  assert.deepEqual(codes.take('AAAA-AAAA', 'y'), { retryAfterMs: 60_000 });
+});
+
+test('F-118-T01 review join: rotation ends pending pairing and login codes; only JSON is accepted', async () => {
+  const dir = temp();
+  let admin = 'a'.repeat(32);
+  try {
+    await withServer(
+      dir,
+      () => admin,
+      async (url) => {
+        const pairingCode = await mint(url, admin);
+        const login = ((await (await post(url + '/api/session/codes', admin)).json()) as { code: string }).code;
+        admin = 'b'.repeat(32);
+        assert.equal((await pair(url, pairingCode)).status, 401, 'pairing code minted with the old token');
+        const exchanged = await post(url + '/api/session/exchange', undefined, { code: login });
+        assert.equal(exchanged.status, 401, 'login code minted with the old token');
+        // A page on any origin can POST text/plain without a preflight; it is refused and spends no attempt.
+        const good = await mint(url, admin);
+        for (let i = 0; i < 6; i++) {
+          const r = await fetch(url + '/api/device/pair', {
+            method: 'POST',
+            headers: { 'content-type': 'text/plain' },
+            body: JSON.stringify({ code: 'AAAA-AAAA', name: 'Phone' }),
+          });
+          assert.equal(r.status, 415);
+        }
+        const plain = await fetch(url + '/api/session/exchange', {
+          method: 'POST',
+          headers: { 'content-type': 'text/plain' },
+          body: JSON.stringify({ code: 'x' }),
+        });
+        assert.equal(plain.status, 415);
+        assert.equal((await pair(url, good)).status, 200, 'the budget is intact');
+      },
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
