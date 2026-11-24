@@ -41,7 +41,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 (F-006-T27 split): rerun about 15 min plus evidence and report update, as F-006-T26 (0.75 h). Implemented 2026-11-24 in 0.75 h: Casper 15/15 on P3 (role-sized system message), Misato 0/15 blocked by the probe token budget (B-129); evidence and report updated through placementReport.",
+    "basis": "Estimated 2026-11-24 (F-006-T27 split): rerun about 15 min plus evidence and report update, as F-006-T26 (0.75 h). Implemented 2026-11-24 in 0.75 h: Casper 15/15 on P3 (role-sized system message), Misato 0/15 blocked by the probe token budget (B-131); evidence and report updated through placementReport.",
     "reviewed": "2026-11-24",
     "agentHours": 0,
     "ownerHours": 0,

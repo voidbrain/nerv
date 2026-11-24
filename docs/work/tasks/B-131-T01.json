@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "id": "B-129-T01",
-  "parent": "B-129",
+  "id": "B-131-T01",
+  "parent": "B-131",
   "title": "Size the placement probe token budget to cover its prompt",
   "goal": "A role-sized placement probe returns its result instead of exhausting a total budget sized from the output limit alone",
   "status": "planned",
@@ -14,7 +14,7 @@
     "src/placement-campaign.ts",
     "src/runtime-dispatch.ts",
     "test/placement-campaign.test.ts",
-    "docs/work/records/B-129.md",
+    "docs/work/records/B-131.md",
     "generated:backlog-views"
   ],
   "capabilities": [
@@ -24,7 +24,7 @@
   ],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
   "validation": [
-    "A committed regression fails before the fix (test/placement-campaign.test.ts, B-129 case)",
+    "A committed regression fails before the fix (test/placement-campaign.test.ts, B-131 case)",
     "npm run check:fast"
   ],
   "escalation": [

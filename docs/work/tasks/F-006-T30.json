@@ -14,13 +14,13 @@
   ],
   "id": "F-006-T30",
   "status": "planned",
-  "title": "Owner: put NERV-02 on the revision with the B-129 probe budget",
-  "goal": "NERV-02 runs a main revision that includes the B-129 fix, so a Misato-sized P3 probe is not refused by its own token budget",
+  "title": "Owner: put NERV-02 on the revision with the B-131 probe budget",
+  "goal": "NERV-02 runs a main revision that includes the B-131 fix, so a Misato-sized P3 probe is not refused by its own token budget",
   "acceptance": [
-    "NERV-02 updated through its documented update after B-129-T01 merges; doctor shows no revision skew and kaji list shows NERV-01 and NERV-02 enrolled"
+    "NERV-02 updated through its documented update after B-131-T01 merges; doctor shows no revision skew and kaji list shows NERV-01 and NERV-02 enrolled"
   ],
   "dependsOn": [
-    "B-129-T01"
+    "B-131-T01"
   ],
   "resources": [
     "docs/acceptance/f006-placement-p2-p4.md",

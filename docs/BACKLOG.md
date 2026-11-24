@@ -166,7 +166,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="b-129"></a>[🐞 B-129](#top)
+### <a id="b-131"></a>[🐞 B-131](#top)
 
 **Role-sized placement probes fail their own token budget: it counts the prompt but is sized from the output limit**
 
@@ -174,7 +174,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | [F-006-T30](#f-006-t30) | 🤖 | — | — |
 
-💻 **→** Next: B-129-T01, a failing test, then a probe budget that covers the prompt.
+💻 **→** Next: B-131-T01, a failing test, then a probe budget that covers the prompt.
 
 | | |
 |---|---|
@@ -186,19 +186,19 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-129-t01"></a>B-129-T01 — Size the placement probe token budget to cover its prompt | 1 h | 0 h | 1 h | Planned | — | [F-006-T30](#f-006-t30) |
+| 🟢 Small | <a id="b-131-t01"></a>B-131-T01 — Size the placement probe token budget to cover its prompt | 1 h | 0 h | 1 h | Planned | — | [F-006-T30](#f-006-t30) |
 | 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-[Full notes & evidence](work/records/B-129.md)
+[Full notes & evidence](work/records/B-131.md)
 
 | Field | Value |
 |---|---|
 | PR / evidence | [#732](https://github.com/voidbrain/nerv/pull/732) (opened; F-006-T29 evidence in the [F-006-T29 report](evaluations/2026-11-24-f006-t29-placement-report.md)) |
 | Opened | 2026-11-24 |
-| Verification | Unit/integration: Pending (B-129-T01). Live Misato P3 probe on NERV-02: Pending (F-006-T31). |
+| Verification | Unit/integration: Pending (B-131-T01). Live Misato P3 probe on NERV-02: Pending (F-006-T31). |
 | Reviewed | 2026-11-24 |
 
 </details>
@@ -210,7 +210,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h agent + 0.25 h owner | [B-129-T01](#b-129-t01) | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h agent + 0.25 h owner | [B-131-T01](#b-131-t01) | — | 🤖 | — | — |
 
 💻 **→** Next: F-006-T29 — Rerun the P3 role cases with role-sized probes and update the report (Implemented; verification pending).
 
@@ -225,7 +225,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-006-t29"></a>F-006-T29 — Rerun the P3 role cases with role-sized probes and update the report | 1 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | — | 🤖 | — |
-| 🟢 Small | <a id="f-006-t30"></a>F-006-T30 — Owner: put NERV-02 on the revision with the B-129 probe budget | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-129-T01](#b-129-t01) | [F-006-T31](#f-006-t31) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-006-t30"></a>F-006-T30 — Owner: put NERV-02 on the revision with the B-131 probe budget | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-131-T01](#b-131-t01) | [F-006-T31](#f-006-t31) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-006-t31"></a>F-006-T31 — Rerun the P3 Misato cases with the fixed probe budget and update the report | 1 h | 0 h | 1 h | Planned | [F-006-T30](#f-006-t30) | — | ⏳ 🤖 | — |
 | 🟢 Small | **Total** | 19.5 h (28 of 31 steps) | 13.25 h (20 of 31 steps recorded) | 1 h agent + 0.25 h owner | 28 of 31 completed | | | | |
 
@@ -274,7 +274,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
 | PR / evidence | Steps: F-006-T12: [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending · F-006-T13: [PR #528](https://github.com/voidbrain/nerv/pull/528) results · F-006-T14: [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure · F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation · F-006-T21: [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending · F-006-T22: [PR #697](https://github.com/voidbrain/nerv/pull/697) owner decision recorded; T23–T26 planned · F-006-T23: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T24: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T25: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T26: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T27: [PR #714](https://github.com/voidbrain/nerv/pull/714) probe system field, role-sized limits, frame refusal without ending the session; CI pending. [#732](https://github.com/voidbrain/nerv/pull/732) F-006-T28/T29 P3 role rerun and report; [PR #714](https://github.com/voidbrain/nerv/pull/714) F-006-T27 role-sized placement probes; [PR #698](https://github.com/voidbrain/nerv/pull/698) F-006-T23–T26 equivalent placement runs and updated report; [PR #697](https://github.com/voidbrain/nerv/pull/697) F-006-T22 owner decision; [PR #679](https://github.com/voidbrain/nerv/pull/679) F-006-T12 placement report; older entries in the [evidence archive](archive/evidence-2026.md#f-006-moved-2026-11-24) |
 | Opened | 2026-11-01 |
-| Verification | Unit/integration 2026-11-24: `test/placement-report.test.ts` binds the report to the committed evidence; `test/placement-campaign.test.ts` and `test/orchestration-selection.test.ts` (role-sized probe across bases) pass; CI green on PRs #679, #698, #714. Live 2026-11-24: P2/P3 smoke, combination and failure checks on NERV-01 + NERV-02 recorded in the report; P3 Casper cases with role-sized probes 2026-11-24 (F-006-T29): 15/15 in the [F-006-T29 report](evaluations/2026-11-24-f006-t29-placement-report.md); P3 Misato cases: Pending (B-129, F-006-T31). |
+| Verification | Unit/integration 2026-11-24: `test/placement-report.test.ts` binds the report to the committed evidence; `test/placement-campaign.test.ts` and `test/orchestration-selection.test.ts` (role-sized probe across bases) pass; CI green on PRs #679, #698, #714. Live 2026-11-24: P2/P3 smoke, combination and failure checks on NERV-01 + NERV-02 recorded in the report; P3 Casper cases with role-sized probes 2026-11-24 (F-006-T29): 15/15 in the [F-006-T29 report](evaluations/2026-11-24-f006-t29-placement-report.md); P3 Misato cases: Pending (B-131, F-006-T31). |
 | Reviewed | 2026-11-24 |
 
 </details>

@@ -18,7 +18,7 @@ This report updates the [F-006-T26 report](2026-11-24-f006-t26-placement-report.
 |---|---|---|---|---|
 | neutral-smoke, repeat 3 | 24/30 | 21/30 | 24/30 | (not rerun) |
 | Casper, repeat 3 | 15/15 | 6/15 | 4 passed, 11 cut at 15 s (B-119) | **15/15**, median 8.7 s, longest 20.9 s |
-| Misato, repeat 3 | 9/15 | 3/15 | not run (over the 8 KiB probe limit) | 0/15: refused by the probe token budget (B-129) |
+| Misato, repeat 3 | 9/15 | 3/15 | not run (over the 8 KiB probe limit) | 0/15: refused by the probe token budget (B-131) |
 | neutral-smoke + Casper, repeat 3 | 39/45, median 4.9 s | 27/45, median 1.0 s | not comparable | **39/45**, median 5.0 s, overhead 119 ms |
 
 The P1 and P2 subsets are recounted per case from the same private F-006-T14 and F-006-T23 reports that gave the F-006-T26 totals (48/60 and 30/60 reproduce exactly).
@@ -40,7 +40,7 @@ Passed. Probes longer than 15 s now return through `/api/placement/run`: a Caspe
 
 ## Limits of this evidence
 
-- **Misato is still not comparable.** `placementProbe` sets the probe's total token budget to 2 × `maxOutputTokens` (4,096 for the driver's 2,048), and the runtime counts input tokens against it after the Mac replies. Misato's system message alone is about 4,500 tokens, so 14 of 15 cases ended with `Orchestrated token budget exhausted (4781–5206 > 4096).` after generation, and the first with `Worker result unknown after timeout.` at 30 s. This is a NERV defect, not a model outcome, so these 15 errors are left out of the evidence instead of counted as failures (B-129). The Misato half reruns after the fix (F-006-T31).
+- **Misato is still not comparable.** `placementProbe` sets the probe's total token budget to 2 × `maxOutputTokens` (4,096 for the driver's 2,048), and the runtime counts input tokens against it after the Mac replies. Misato's system message alone is about 4,500 tokens, so 14 of 15 cases ended with `Orchestrated token budget exhausted (4781–5206 > 4096).` after generation, and the first with `Worker result unknown after timeout.` at 30 s. This is a NERV defect, not a model outcome, so these 15 errors are left out of the evidence instead of counted as failures (B-131). The Misato half reruns after the fix (F-006-T31).
 - **Smoke and Casper ran at different revisions** (NERV-02 `c9fc9994` and `d9d9aed4`); the smoke path sends no system message and did not change between them.
 - **Different paths per placement**, as in F-006-T26: P1/P2 used Gauntlet against loopback Ollama (P1 with thinking on); P3 used NERV-01's serve settings over WorkerLink.
 - **Unknown stays unknown:** queue time everywhere and several resource figures are `null` in the evidence.
