@@ -8,7 +8,8 @@
   "acceptance": [
     "A vendored, pinned, dependency-free MIT QR encoder (named to the owner before adding)",
     "nerv open --phone --qr prints a terminal QR plus the short code; Settings shows the same",
-    "The iOS limit (a scan opens Safari, not the installed app) is stated in the procedure"
+    "The iOS limit (a scan opens Safari, not the installed app) is stated in the procedure",
+    "Since the review of #707 (F-118-T02) a browser tab refuses a pairing code and only the installed app pairs; a scan opens Safari, so a QR cannot pair the installed app in one step. Before building, the owner decides what a scanned QR does (for example carry the code to type in the installed app, or sign the tab in with a session-length credential, not a 90-day device)"
   ],
   "dependsOn": [
     "F-118-T01"

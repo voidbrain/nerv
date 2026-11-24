@@ -259,10 +259,14 @@ class App {
       return;
     }
     this.error.set('');
-    const installed = isInstalled(window);
+    // Review of #707: only the installed app pairs; a tab would hold a 90-day device it cannot sign out of.
+    if (!isInstalled(window)) {
+      this.error.set(this.t().pairInstalledOnly);
+      return;
+    }
     const outcome = await pairDevice(
       typed,
-      deviceLabel(navigator.userAgent, installed ? 'workspace app' : 'workspace'),
+      deviceLabel(navigator.userAgent, 'workspace app'),
       (input, init) => fetch(input, init),
       SW_BYPASS,
     );
@@ -280,8 +284,8 @@ class App {
       return;
     }
     this.paired = true;
-    // Installed, the credential survives relaunches and updates; a browser tab keeps it in memory, like a session.
-    if (installed) keepDevice(this.storage(), outcome.token);
+    // The installed app keeps the credential, so it survives relaunches and updates.
+    keepDevice(this.storage(), outcome.token);
     await this.connect(outcome.token);
   }
   /** The pairing ended (revoked, 90 days unused or a rotated admin token): forget it and show the sign-in box. */

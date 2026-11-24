@@ -3,9 +3,10 @@
  * live.js (a classic script) keeps the same rules in a few lines of its own.
  *
  * - A typed `XXXX-XXXX` code (from `nerv open --phone`) is swapped once at `POST /api/device/pair` for a device credential.
- * - Installed (Home Screen, standalone display), the credential is kept in this app's `localStorage`, so later launches
+ * - Installed (Home Screen, standalone display), the credential is kept in the origin's `localStorage`, so later launches
  *   need no sign-in until it is revoked, lapses after 90 days unused, or the admin token rotates.
- * - In a browser tab nothing is stored: the tab keeps its session behaviour (memory only in the workspace).
+ * - In a browser tab a pairing code is refused before any request (review of #707): a tab would hold a 90-day device it
+ *   cannot sign out of. A tab signs in with `nerv open` (a 12-hour session) or the admin token, kept in memory only.
  * - A pasted admin token is never stored anywhere.
  */
 export const DEVICE_KEY = 'nerv.device';
@@ -23,10 +24,8 @@ export function isInstalled(win: {
   // iOS reports a Home Screen app as navigator.standalone; other browsers through the display-mode media query.
   if ((win.navigator as { standalone?: unknown } | undefined)?.standalone === true) return true;
   try {
-    return (
-      !!win.matchMedia?.('(display-mode: standalone)').matches ||
-      !!win.matchMedia?.('(display-mode: fullscreen)').matches
-    );
+    // The manifest asks for standalone; a fullscreen (F11) browser tab is not an installed app (review of #707).
+    return !!win.matchMedia?.('(display-mode: standalone)').matches;
   } catch {
     return false;
   }

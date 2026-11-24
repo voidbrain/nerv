@@ -352,11 +352,11 @@ test(
         await page('Page.navigate', { url: origin + '/dashboard/' });
         await until(`${banner}.includes('NOT SIGNED IN')`);
         await evaluate(typeCode('#live-token', '#live-signin', code));
-        await until(`${banner}.includes('NOT SIGNED IN')&&${banner}.includes('Home Screen')`);
+        await until(`${banner}.includes('NOT SIGNED IN')&&${banner}.includes('works only in the installed')`);
         await page('Page.navigate', { url: origin + '/' });
         await until(`document.querySelector('.connect input[name=signin]')!==null`);
         await evaluate(typeCode('.connect input[name=signin]', '.connect form', code));
-        await until(`document.querySelector('[role=alert]')?.textContent.includes('Home Screen')`);
+        await until(`document.querySelector('[role=alert]')?.textContent.includes('works only in the installed')`);
         assert.equal(await evaluate(kept), '', 'a tab keeps no device credential');
         assert.equal(
           await evaluate(`sessionStorage.getItem('nerv.dashboard.session')`),

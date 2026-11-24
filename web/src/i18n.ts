@@ -18,11 +18,13 @@ export const messages = {
     intro: 'NERV Agency tiene il filo tra i tuoi impegni, strumenti e dispositivi.',
     connectTitle: 'Connetti il tuo NERV Agency locale',
     connectHint:
-      'Per abbinare questo dispositivo esegui nerv open --phone sul computer e inserisci qui il codice: l’app installata resta collegata. Oppure esegui npm start -- open, o inserisci il token di accesso (resta soltanto nella memoria di questa scheda).',
+      'Per abbinare un telefono esegui nerv open --phone sul computer e inserisci il codice nell’app NERV installata (schermata Home): resta collegata. Nel browser esegui npm start -- open, o inserisci il token di accesso (resta soltanto nella memoria di questa scheda).',
     codeError: 'Codice di accesso non valido, già usato o scaduto: esegui di nuovo npm start -- open.',
     pairError: 'Codice di abbinamento non valido, già usato o scaduto: esegui di nuovo nerv open --phone.',
     pairLimit: 'Troppi tentativi di abbinamento: attendi un minuto e riprova.',
     pairFull: 'Troppi dispositivi abbinati: revocane uno prima.',
+    pairInstalledOnly:
+      'Il codice di abbinamento funziona solo nell’app NERV installata: aprila dalla schermata Home e inseriscilo lì, oppure usa qui il token di accesso.',
     deviceEnded:
       'L’abbinamento di questo dispositivo è terminato (revocato, 90 giorni senza uso o token cambiato): esegui nerv open --phone e inserisci il nuovo codice.',
     token: 'Codice di abbinamento o token di accesso',
@@ -147,11 +149,13 @@ export const messages = {
     intro: 'NERV Agency keeps the thread between your tasks, tools and machines.',
     connectTitle: 'Connect to your local NERV Agency',
     connectHint:
-      'To pair this device, run nerv open --phone on the computer and type the code here: the installed app stays signed in. Or run npm start -- open, or enter the access token (kept in this tab’s memory only).',
+      'To pair a phone, run nerv open --phone on the computer and type the code in the installed NERV app (Home Screen): it stays signed in. In a browser, run npm start -- open, or enter the access token (kept in this tab’s memory only).',
     codeError: 'Login code invalid, used or expired: run npm start -- open again.',
     pairError: 'Pairing code invalid, used or expired: run nerv open --phone again.',
     pairLimit: 'Too many pairing attempts: wait a minute and try again.',
     pairFull: 'Too many paired devices: revoke one first.',
+    pairInstalledOnly:
+      'A pairing code works only in the installed NERV app: open it from the Home Screen and type the code there, or use the access token here.',
     deviceEnded:
       'This device’s pairing ended (revoked, 90 days unused or a changed token): run nerv open --phone and type the new code.',
     token: 'Pairing code or access token',
