@@ -1386,11 +1386,12 @@ function executeRaw(
     }
     case 'browser.click': {
       // F-089-T06: the CLI's adapter, allowlist and refusals unchanged; approved only by the owner's card, and only on
-      // the tab and origin the card names (bound when proposed, see bindBrowserClick).
+      // the tab, origin and page the card names (bound when proposed, see bindBrowserClick).
       only(args, ['control', 'tabId', 'origin', 'url']);
       const control = clickControlName(args);
       const tabId = text(args, 'tabId');
       const origin = text(args, 'origin');
+      const url = text(args, 'url');
       const browser = browserConfig(backend);
       if (!browser.allowedOrigins.includes(origin))
         throw new Error(`Origin "${origin}" is not in browser.allowedOrigins.`);
@@ -1399,6 +1400,7 @@ function executeRaw(
         allowedOrigins: browser.allowedOrigins,
         expectedTabId: tabId,
         expectedOrigin: origin,
+        expectedUrl: url,
         approved: context.ownerApproved === true,
       });
     }

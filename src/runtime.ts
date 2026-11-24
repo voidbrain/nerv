@@ -5,7 +5,7 @@ import type { WorkerContext, WorkerLease } from './worker-jobs.ts';
 import type { InstrumentalityRun } from './instrumentality-runs.ts';
 import type { KeyObject } from 'node:crypto';
 import { type UsageRecord } from './model-usage.ts';
-import { type Method } from './rpc.ts';
+import { REFUSED_BEFORE_GATE, RpcFault, type Method } from './rpc.ts';
 import { gateCallTimeoutMs } from './executors.ts';
 import type { HistoryPage } from './history.ts';
 import type { ChannelState, HeardChannel } from './channel-state.ts';
@@ -335,7 +335,16 @@ export class Runtime implements StoreApi {
   /** Coordinator side of the gate: open the sortie, ask Casper only for Orange/Blue, then ballot and (on a grant) run in the scheduler process. */
   async act(action: OwnerAction, worker?: WorkerLease): Promise<ActReply> {
     const sortieId = (await this.nervous.call('sorties.open', { title: action.request.slice(0, 500) })) as string;
-    return this.gate(sortieId, action, true, worker);
+    try {
+      return await this.gate(sortieId, action, true, worker);
+    } catch (e) {
+      // F-089-T06: refused before its gate (a browser click it cannot bind): nothing ran, the sortie closes as failed.
+      if (e instanceof RpcFault && e.code === REFUSED_BEFORE_GATE)
+        await this.nervous
+          .call('sorties.finish', { sortieId, status: 'failed', reply: e.message.slice(0, 4000) })
+          .catch(() => undefined);
+      throw e;
+    }
   }
   /** Veto-only extra seats attached by action class (F-025-T01); new seats start in shadow unless `shadow: false`. */
   private readonly startedAt = new Date();

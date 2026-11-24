@@ -26,6 +26,8 @@ export interface ClickNamedControlRequest {
   expectedTabId?: string;
   /** F-089-T06: the origin the owner's card names; the active tab must still be on it. */
   expectedOrigin?: string;
+  /** F-089-T06: the page (origin and path, no query or fragment) the owner's card names; the tab must still be on it. */
+  expectedUrl?: string;
   approved: boolean;
 }
 
@@ -80,10 +82,16 @@ export async function clickNamedControl(
   if (request.expectedTabId && beforeTab.tabId !== request.expectedTabId) {
     throw new Error(`Active tab "${beforeTab.tabId}" does not match expected tab "${request.expectedTabId}".`);
   }
-  const origin = assertAllowedOrigin(beforeTab.url, request.allowedOrigins).origin;
+  const parsed = assertAllowedOrigin(beforeTab.url, request.allowedOrigins);
+  const origin = parsed.origin;
   if (request.expectedOrigin !== undefined && origin !== request.expectedOrigin) {
     throw new Error(
       `The tab moved to another origin ("${origin}", not "${request.expectedOrigin}"); nothing was clicked.`,
+    );
+  }
+  if (request.expectedUrl !== undefined && pageOf(parsed) !== request.expectedUrl) {
+    throw new Error(
+      `The tab moved to another page ("${pageOf(parsed)}", not "${request.expectedUrl}"); nothing was clicked.`,
     );
   }
 
@@ -109,6 +117,11 @@ export async function clickNamedControl(
   };
 }
 
+/** The page a card names: origin and path, without query or fragment (they may hold tokens), at most 300 characters. */
+function pageOf(url: URL): string {
+  return (url.origin + url.pathname).slice(0, 300);
+}
+
 /** A click bound to the tab it was proposed on: the owner's card shows these, and the grant's argument hash binds them. */
 export interface BoundClick {
   control: string;
@@ -130,7 +143,7 @@ export async function bindClickToActiveTab(
   const tab = await driver.getActiveTab();
   if (!tab.active) throw new Error('Refusing to act on a non-active browser tab.');
   const parsed = assertAllowedOrigin(tab.url, allowedOrigins);
-  return { control, tabId: tab.tabId, origin: parsed.origin, url: (parsed.origin + parsed.pathname).slice(0, 300) };
+  return { control, tabId: tab.tabId, origin: parsed.origin, url: pageOf(parsed) };
 }
 
 /** config.json `browser`: the owner-set origin allowlist and the dedicated profile's local debugging port (F-089-T04). */

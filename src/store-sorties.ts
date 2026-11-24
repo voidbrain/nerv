@@ -197,8 +197,11 @@ export class StoreSorties {
             // The job may have been released or cancelled while the executor ran: the action's own outcome stands.
             try {
               finish({ ...rest, ...o });
-            } catch {
-              /* the worker job no longer takes a result */
+            } catch (e) {
+              // A released or re-leased job no longer takes a result; any other failure is logged, never hidden.
+              const message = e instanceof Error ? e.message : String(e);
+              if (!/^Worker lease (was released|does not own this request)\./.test(message))
+                console.error(`Worker job ${lease.id}: its result was not recorded: ${message}`);
             }
             return o;
           }),
@@ -429,7 +432,12 @@ export class StoreSorties {
       let timer: NodeJS.Timeout | undefined;
       const late = new Promise<never>((_, fail) => {
         timer = setTimeout(
-          () => fail(new Error(`${tool} did not answer within ${Math.round(bound / 1000)} s; it may still finish.`)),
+          () =>
+            fail(
+              new Error(
+                `${tool} did not answer within ${Math.round(bound / 1000)} s: outcome unknown — it may still finish; check before retrying.`,
+              ),
+            ),
           bound,
         );
       });
