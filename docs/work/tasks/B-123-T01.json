@@ -4,7 +4,7 @@
   "parent": "B-123",
   "title": "Show the updater's status beside Update now",
   "goal": "The Health row shows the outside updater's progress and result, with reasons and recovery, across restarts and reloads, until dismissed",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A committed test fails first across the join: updater result -> GET /api/update/status -> Health row",
     "The inbox report of the result still happens exactly once",
@@ -47,6 +47,8 @@
     "reviewed": "2026-11-24",
     "agentHours": 3,
     "baselineAgentHours": 3,
-    "estimateAgentHours": 3
+    "estimateAgentHours": 3,
+    "actualAgentHours": 2.5,
+    "actualSource": "stated"
   }
 }

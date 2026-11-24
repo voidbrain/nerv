@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 96 h agent + 11 h owner across 132 open steps of 38 features and 24 other records. 140 h of actual effort recorded on 146 steps. Generated from the task files.
+**Remaining effort:** 96 h agent + 11 h owner across 132 open steps of 38 features and 24 other records. 142.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1627,9 +1627,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-123-T01, a status route for the updater and the Health row that shows it.
+💻 **→** Next: CI on PR #PRNUM, then a real Update now on the base once B-122 is merged shows the outcome in Health.
 
 | | |
 |---|---|
@@ -1641,8 +1641,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-123-t01"></a>B-123-T01 — Show the updater's status beside Update now | 3 h | 0 h | 3 h | Planned |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 1 steps recorded) | 3 h | 0 of 1 completed |
+| 🟡 Medium | <a id="b-123-t01"></a>B-123-T01 — Show the updater's status beside Update now | 3 h | 2.5 h so far (stated) | 3 h | Implemented; verification pending |
+| 🟡 Medium | **Total** | 3 h | 2.5 h | 3 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1651,9 +1651,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — |
+| PR / evidence | [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) (status file, route, Health row; Test: `test/updater-status.test.ts`, `test/updater-status-render.test.mjs`, `test/updater-status.browser.mjs`) |
 | Opened | 2026-11-24 |
-| Verification | Unit/integration: Pending. Browser/accessibility: Pending. Human (a real Update now on the base): Pending. |
+| Verification | Unit/integration 2026-11-24: `npm test` 1,364 pass, `test:headless` pass, gauntlet system flows pass locally. Browser/accessibility 2026-11-24: `test/updater-status.browser.mjs` passes locally on the production build. Human (a real Update now on the base, after B-122): Pending. |
 | Reviewed | 2026-11-24 |
 
 </details>
