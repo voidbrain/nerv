@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 5 | 1 | 12 | 2 |
+| **This week** | 5 | 1 | 13 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 23 |
+| **Open** | 39 | 24 |
 | **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
