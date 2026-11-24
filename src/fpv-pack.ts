@@ -18,7 +18,10 @@ export type { RegisterBatteryInput };
 
 export interface FpvStoreSlice {
   readonly batteries: BatteryRegistry;
+  /** Throws while the fleet failed to open (see `fleetError`); the rest of the slice keeps working. */
   readonly fleet: FleetStore;
+  /** F-098-T06: why the fleet store could not open or migrate, with how to fix it; undefined when it opened. */
+  readonly fleetError?: string;
   readonly fpvBuilds: FpvBuildStore;
   readonly batteryStorageReminders: BatteryStorageReminders;
   tick(now: Date, language: 'it' | 'en'): void;
@@ -33,8 +36,15 @@ export function createFpvStoreSlice(db: DatabaseSync, reminders: StoreReminders,
   db.exec(FPV_BUILDS_SCHEMA);
   db.exec(BATTERY_SCHEMA);
   const batteries = new BatteryRegistry(db);
-  db.exec(FLEET_SCHEMA);
-  const fleet = new FleetStore(db);
+  // F-098-T06: a fleet migration failure is contained: the service starts, fleet tools refuse with the reason.
+  let fleet: FleetStore | undefined;
+  let fleetError: string | undefined;
+  try {
+    db.exec(FLEET_SCHEMA);
+    fleet = new FleetStore(db);
+  } catch (error) {
+    fleetError = `${error instanceof Error ? error.message : String(error)} Fleet tools stay off until it is fixed: mark the extra part's status 'removed' in drone_parts, then restart NERV; everything else runs.`;
+  }
   const fpvBuilds = new FpvBuildStore(db);
   let storageReminders: BatteryStorageReminders | undefined;
 
@@ -50,7 +60,11 @@ export function createFpvStoreSlice(db: DatabaseSync, reminders: StoreReminders,
 
   return {
     batteries,
-    fleet,
+    get fleet(): FleetStore {
+      if (!fleet) throw new Error(`Fleet is unavailable: ${fleetError}`);
+      return fleet;
+    },
+    ...(fleetError ? { fleetError } : {}),
     fpvBuilds,
     get batteryStorageReminders() {
       return (storageReminders ??= new BatteryStorageReminders(db, reminders));

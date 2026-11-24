@@ -663,6 +663,7 @@ export class Store {
         .get(),
       policy: { source: this.policySource, ...this.ledger.policy },
       promptSizes: new PromptSampleStore(this.db).summarizeLastDay(),
+      ...(this.fpv.fleetError ? { fleet: { error: this.fpv.fleetError } } : {}),
     };
   }
   exportCoordinatorSnapshot(input: Omit<ExportCoordinatorSnapshotInput, 'db'>) {
