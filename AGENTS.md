@@ -8,22 +8,15 @@ The project is **NERV Agency**. The repository is `https://github.com/voidbrain/
 
 ### Style guide
 
-- Before any UI change (templates, styles, user-facing text) read [docs/STYLE-GUIDE.md](docs/STYLE-GUIDE.md). Follow its voice, tokens, type and spacing; use the `var(--…)` tokens, never a new literal colour.
-- A new token or shared component updates the style guide in the same change.
+- Before any UI change (templates, styles, user-facing text) read [docs/STYLE-GUIDE.md](docs/STYLE-GUIDE.md): its voice, tokens, type and spacing; `var(--…)` tokens, never a new literal colour. A new token or shared component updates it in the same change.
 
 ### Adding things
 
 - Add backend operations through validated interfaces and regression tests; add UI surfaces through registered Angular components. Update the owning backlog record and documentation.
 
-### Documentation
-
-- Keep top-level docs (`README.md`, `docs/README.md`, `docs/INSTALL.md`, `docs/STYLE-GUIDE.md`, and general guides) concise (~150–200 lines max) and clearly structured as entry points.
-- Move feature-specific, platform-specific, or deep technical details into dedicated topic files under `docs/<topic>/` (e.g. `docs/guides/`, `docs/design/`, `docs/architecture/`) and link to them.
-- Keep docs current and free of backlog IDs or "not yet shipped / planned" lists; document shipped behavior and point to `docs/ROADMAP.md` & [docs/BACKLOG.md](docs/BACKLOG.md) where needed.
-
 ### Checks before you finish
 
-Before you open, update or merge a PR, read [pull requests](docs/agents/pull-requests.md): PRs against `main`, when a green PR takes new work, conflicts, scoped verification and independent review.
+Before you open, update or merge a PR, read [pull requests](docs/agents/pull-requests.md).
 
 <!-- safety:start -->
 **What the agent does on its own, and what it asks first.** These rules load with this file in every session; the procedures below are read when they apply, never in place of these rules.
@@ -51,51 +44,42 @@ npm run check:fast        # single pre-push bundle: format, lint, typecheck, bac
 npm run code:map -- <path> # exports with line ranges: read those lines, not the whole file
 ```
 
-- Every project formats and lints its source, in CI too: `check:tooling` fails without both. A project with no source code records `tooling.exempt` with its reason in `.harness.json`.
-
-- A failing test is evidence until shown otherwise: check it against the intended behaviour. Change its expectation only when the requirement deliberately changed, and say which requirement; otherwise fix the code.
-- Do not leave dead code behind when replacing a feature: its state, helpers and tests go too.
+- Format and lint in CI too (`check:tooling`; a project with no source code records `tooling.exempt` with its reason).
+- A failing test is evidence until shown otherwise: change its expectation only when the requirement deliberately changed, and say which; otherwise fix the code.
 - A bug fix starts with a committed test that fails without the fix; the fix never edits that test to pass (BACKLOG-RULES, "A bug fix starts with a failing test").
+- Replacing a feature removes its state, helpers and tests too: no dead code.
 
 ### Changing a harness file
 
-Before editing a file listed in `.harness.json` (`copied`, `forked`, `adapted`, or `.harness.json` itself), decide whether the change holds for this project only or for every project. The edit is the trigger, whatever the request's words: an "allow X" that changes how work is done is a rule.
-- **This project only**: its content or a setting stays here. A project line inside a section that comes from the template ends with `<!-- project -->`, so a reconcile keeps it; a changed harness rule is an override (APPLY.md, "Project overrides").
+Before editing a file listed in `.harness.json` (`copied`, `forked`, `adapted`, or `.harness.json` itself), decide: this project only, or every project. The edit is the trigger, whatever the request's words: an "allow X" that changes how work is done is a rule.
+- **This project only**: content or a setting stays here; a project line in a template section ends with `<!-- project -->`; a changed harness rule is an override (APPLY.md, "Project overrides").
 - **Every project**: the template first, then reconcile here (APPLY.md, "Changing the harness from a project").
-- **Unsure**: ask the user before editing. Never decide silently.
-
-`npm run check:freshness` lists the harness files a branch changes, locally and on every PR.
+- **Unsure**: ask the user before editing. Never decide silently. (`check:freshness` lists the harness files a branch changes.)
 
 ### Procedures: read before the task
 
-All applicable rules must be known and followed from the start; shorter indexes never defer requirements. The [procedure discovery index](docs/agents/procedures.md) links authorities and expected evidence. Each procedure below is binding when its trigger applies: read it before starting that task. `npm run check:rules` fails when a never or ask-first rule lives only in a procedure.
+Each procedure is binding when its trigger applies: read it before the task; a short index never defers a requirement. All of them: [procedure index](docs/agents/procedures.md). `npm run check:rules` fails when a never or ask-first rule lives only in a procedure.
 
 | Before you | Read |
 |---|---|
-| start a session (`npm run check:freshness` lists what is due) | [session start](docs/agents/session-start.md) |
+| start a session | [session start](docs/agents/session-start.md) |
 | open, update or merge a PR | [pull requests](docs/agents/pull-requests.md) |
 | change Angular code (`web/`) | [Angular rules](docs/agents/angular.md) |
-| start, change the phase of or finish a job, when `workUsage.enabled` | [job usage](docs/agents/work-usage.md) |
-| import usage counters or allowance snapshots, or save a usage report | [usage sources](docs/agents/work-usage-sources.md) |
-| record an effectiveness observation | [effectiveness observations](docs/agents/work-usage-effectiveness.md) |
-| switch independent tasks or compact/handoff context | [Task context](docs/agents/task-context.md) |
-| work on claimed tasks, parallel branches or model assignments | [Parallel work](docs/agents/parallel-work.md) |
-| claim, renew or release a task | [shared claims](docs/agents/claims.md) |
-| reassess architecture, decisions or alternatives | [Architecture reassessment](docs/agents/architecture-review.md) |
-| change tests, coverage settings or the coverage page | [coverage guide](docs/agents/coverage-guide.md) |
-| change something another output is derived from (generated pages and data, recordings, translations, guides, a value used in two places) | [change impact](docs/agents/change-impact.md); `check:freshness` lists the rows a branch sets off: do each in the same PR, or record in the backlog why not |
+| update or close a backlog record | [backlog rules](docs/BACKLOG-RULES.md) (it names the one file a change needs) |
+| write or change documentation | [documentation](docs/backlog/documentation.md) |
+| change something an output is derived from (generated pages and data, recordings, translations, guides, a value used in two places) | [change impact](docs/agents/change-impact.md); do each row `check:freshness` lists, or record why not |
+| change tests or coverage | [coverage guide](docs/agents/coverage-guide.md) |
+| switch tasks or hand off context | [task context](docs/agents/task-context.md) |
+| work in parallel: claimed tasks, branches, model assignments | [parallel work](docs/agents/parallel-work.md) (claims inside) |
+| start, change the phase of or finish a job, when `workUsage.enabled` | [job usage](docs/agents/work-usage.md) (sources, effectiveness inside) |
+| reassess architecture or decisions | [architecture review](docs/agents/architecture-review.md) |
 | set up the project or change its stack or workflow (capability assessment) | [MCP guidance](docs/agents/mcp.md), "In short" |
-| add, configure or rely on an MCP connection | [MCP guidance](docs/agents/mcp.md) |
-| edit the project's MCP selections or run the MCP commands | [MCP selections and commands](docs/agents/mcp-commands.md) |
-| work across repositories of a solution | [solution profile](docs/agents/solution-profile.md) |
-| refresh or verify a solution dashboard, or adopt the profile in CI | [solution refresh](docs/agents/solution-refresh.md) |
-| add or use a shared skill | [skill guidance](docs/agents/skills.md) |
-| adopt or reconcile the harness or review maintenance evidence (`node tools/maintenance.mjs check` runs at session start and in CI) | [maintenance guidance](docs/agents/maintenance.md) |
-| change AGENTS.md, CLAUDE.md, BACKLOG-RULES or `docs/backlog/` (rerun the agent-behaviour checks when a runner is configured) | [rule review](docs/agents/rule-review.md), "Agent-behaviour checks" |
-| measure friction, consolidate rules or run the periodic token review | [rule review](docs/agents/rule-review.md) |
-| run an audit (`check:freshness` says when) | [audit procedure](docs/agents/audit.md) |
-| record audit findings or improvement proposals | [audit findings](docs/agents/audit-findings.md) |
-| update or close a backlog record | [backlog rules](docs/BACKLOG-RULES.md): its table names the one file the change needs |
+| add, configure or rely on an MCP connection, or edit MCP selections | [MCP guidance](docs/agents/mcp.md) (commands inside) |
+| work across repositories of a solution | [solution profile](docs/agents/solution-profile.md) (refresh inside) |
+| add or use a shared skill | [skills](docs/agents/skills.md) |
+| adopt or reconcile the harness, or review maintenance evidence | [maintenance](docs/agents/maintenance.md) |
+| change AGENTS.md, CLAUDE.md, BACKLOG-RULES or `docs/backlog/`; measure friction; consolidate rules | [rule review](docs/agents/rule-review.md) (agent-behaviour checks when a runner is set) |
+| run an audit, or record its findings or an improvement proposal | [audit](docs/agents/audit.md) ([findings](docs/agents/audit-findings.md)) |
 
 ### Testing the joins
 
@@ -115,11 +99,8 @@ Before changing an area, read its section in [docs/agents/areas.md](docs/agents/
 
 ## Work tracking
 
-- Keep single responsibility and dependency inversion across repository boundaries: reusable masters define contracts; derived projects supply their adapters/configuration. A master never depends on derived implementation, deployment or adoption for its release or acceptance. Each backlog owns only its repository’s work; reject foreign next actions and closure conditions (BACKLOG-RULES, Ownership rejection and dependency direction).
+**At the start of every session, before other work, run `npm run check:freshness`** and do what it lists, as [session start](docs/agents/session-start.md) says.
 
-**At the start of every session, before other work, run `npm run check:freshness`** and do what it lists, as [session start](docs/agents/session-start.md) says for each finding.
-
-- Keep a confirmed bug, a candidate fix awaiting review, an unimplemented feature and a completed check distinct. A merge is not verification, and a passing unit test is not a verified visual, pointer or device fix. A green CI run establishes the checks it named, not the absence of bugs. Archives (`docs/archive/`) and audits (`docs/audits/`) are dated evidence, not current status; current audit coverage is reported per area by check:audits; a scoped report never resets the full-audit baseline.
-- A change to a harness file follows "Changing a harness file" above: this project only, every project (the template first), or ask.
+- This backlog owns only this repository's work: reject foreign next actions and closure conditions; a master never waits on what derives from it (BACKLOG-RULES, "One repository, one backlog").
+- Keep a confirmed bug, a candidate fix, an unimplemented feature and a completed check distinct: a merge is not verification, a unit test is not a visual, pointer or device check, a green CI run proves only the checks it ran. Archives and audits are dated evidence, not current status.
 - A plan or promise given to the user (steps, a table to build, a later fix) becomes backlog records in the same change, and the reply names them. Nothing promised lives only in the conversation.
-
