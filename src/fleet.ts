@@ -231,25 +231,65 @@ export class FleetStore {
   /**
    * F-098-T06: databases created before part replacement had UNIQUE(drone_id, category, position) on the
    * table, which forbids keeping a removed part in its old slot. Rebuild the table once, keeping every
-   * row and id (crash links stay), with foreign keys off so dropping the old table nulls no crash link.
+   * row and id (crash links stay), and rewrite stored categories and positions through the shared
+   * normalisers so old raw values ("motors", "front left") meet the canonical slot. Foreign keys must be
+   * off while the old table is dropped, or ON DELETE SET NULL would clear crash links; SQLite ignores that
+   * pragma inside a transaction, so the rebuild refuses to run in one and checks the switch took.
    */
   private migrateSlotConstraint(): void {
     const row = this.db.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'drone_parts'").get() as
       { sql: string } | undefined;
     if (!row || !/UNIQUE\s*\(\s*drone_id\s*,\s*category\s*,\s*position\s*\)/i.test(row.sql)) return;
-    const foreignKeys = (this.db.prepare('PRAGMA foreign_keys').get() as { foreign_keys: number }).foreign_keys;
+    if (this.db.isTransaction) {
+      throw new Error('The drone_parts rebuild cannot run inside an open transaction (foreign keys stay on there).');
+    }
+    const foreignKeysOn = () =>
+      (this.db.prepare('PRAGMA foreign_keys').get() as { foreign_keys: number }).foreign_keys === 1;
+    const restore = foreignKeysOn();
     this.db.exec('PRAGMA foreign_keys = OFF');
     try {
+      if (foreignKeysOn())
+        throw new Error('Foreign keys could not be switched off; the drone_parts rebuild did not run.');
       transaction(this.db, () => {
         this.db.exec(`DROP TABLE IF EXISTS drone_parts_next;
 ${dronePartsTable('drone_parts_next')}
 INSERT INTO drone_parts_next(id, drone_id, category, position, component_model, status, installed_at)
-  SELECT id, drone_id, category, position, component_model, status, installed_at FROM drone_parts;
-DROP TABLE drone_parts;
+  SELECT id, drone_id, category, position, component_model, status, installed_at FROM drone_parts;`);
+        const rows = this.db.prepare('SELECT id, category, position FROM drone_parts_next').all() as Array<{
+          id: string;
+          category: string;
+          position: string;
+        }>;
+        const update = this.db.prepare('UPDATE drone_parts_next SET category = ?, position = ? WHERE id = ?');
+        for (const part of rows) {
+          update.run(normalizePartCategory(part.category), normalizePosition(part.position), part.id);
+        }
+        const clash = this.db
+          .prepare(
+            `SELECT d.name AS drone, p.category, p.position FROM drone_parts_next p JOIN drones d ON d.id = p.drone_id
+             WHERE p.status <> 'removed' GROUP BY p.drone_id, p.category, p.position HAVING count(*) > 1 LIMIT 1`,
+          )
+          .get() as { drone: string; category: string; position: string } | undefined;
+        if (clash) {
+          throw new Error(
+            `The drone_parts rebuild stopped: ${clash.drone} has two current ${clash.category} parts at ${clash.position} once positions are normalised. Mark one removed, then restart.`,
+          );
+        }
+        this.db.exec(`DROP TABLE drone_parts;
 ALTER TABLE drone_parts_next RENAME TO drone_parts;`);
+        // Scoped to the tables the swap touches, so an unrelated table's old violation cannot block it.
+        const broken = [
+          ...this.db.prepare('PRAGMA foreign_key_check(drone_parts)').all(),
+          ...(this.db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'drone_crashes'").get()
+            ? this.db.prepare('PRAGMA foreign_key_check(drone_crashes)').all()
+            : []),
+        ];
+        if (broken.length) {
+          throw new Error(`The drone_parts rebuild stopped: ${broken.length} foreign key violation(s) after the swap.`);
+        }
       });
     } finally {
-      if (foreignKeys) this.db.exec('PRAGMA foreign_keys = ON');
+      if (restore) this.db.exec('PRAGMA foreign_keys = ON');
     }
   }
 
