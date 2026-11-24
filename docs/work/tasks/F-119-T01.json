@@ -36,5 +36,11 @@
     "estimateAgentHours": 1,
     "actualAgentHours": 0.25,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 709,
+      "note": "first skill discovery review (docs/reviews/skills/2026-11-24.md)"
+    }
+  ]
 }
