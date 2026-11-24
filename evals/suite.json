@@ -133,7 +133,8 @@
         "test/pwa.browser.mjs",
         "test/browser-click.browser.mjs",
         "test/diyfpv-read.browser.mjs",
-        "test/updater-status.browser.mjs"
+        "test/updater-status.browser.mjs",
+        "test/doctor-run.browser.mjs"
       ],
       "families": [
         "dashboard-operator",
