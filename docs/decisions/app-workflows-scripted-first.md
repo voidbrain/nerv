@@ -24,3 +24,9 @@ Status: Architecture decision (`2026-11-15`). Scope: `F-094` (depends on `F-093`
 
 - Both input (`open`) and output (`save as`) paths must resolve inside owner-configured **allowed folders** (after realpath/symlink resolution).
 - Paths outside allowed folders, or inside system/credential directories, are rejected before any app is launched or scripted.
+
+## 4. What runs today
+
+- `runAppWorkflow` (`src/app-workflow.ts`) runs open-app, open-file and save-as steps after one approval of the whole plan (its hash), reads each step back and stops on a readback outside the plan (another app in front, an unplanned dialog, another document). Save as asks before replacing an existing file.
+- On macOS the scripting tier is `native/app-workflow.js`, fixed JXA templates called by `createMacAppWorkflowDriver`; the app name and paths arrive as JSON data.
+- `nerv app-workflow plan.json` prints the steps and the plan hash; `--approve=<hash>` runs it, `--overwrite=<path>` confirms replacing that file. Folders come from `"appWorkflow": {"allowedFolders": [...]}` in `config.json`.

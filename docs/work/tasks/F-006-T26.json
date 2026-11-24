@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T26",
+  "status": "implemented",
+  "title": "Update the placement report and recommendation with the new evidence",
+  "goal": "The placement evidence and report carry the T23–T25 results and the recommendation the code derives from them",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures and the gauntlet packs only; local models on the enrolled NERV-01 and NERV-02 over Tailscale; 0 paid cloud tokens; raw reports stay in ~/.nerv-private on their base; NERV-01's live service (~/.nerv-app, ~/.nerv) is never stopped, updated or edited.",
+  "acceptance": [
+    "Evidence JSON updated with the new aggregates; verdicts come from placementReport (nerv placement report EVIDENCE.json)",
+    "Report and recommendation updated; test/placement-report.test.ts still binds the report to the evidence",
+    "F-006 record carries the dated evidence"
+  ],
+  "dependsOn": [
+    "F-006-T23",
+    "F-006-T24",
+    "F-006-T25"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "docs/decisions/placement-campaign.md",
+    "docs/acceptance/f006-placement-p2-p4.md",
+    "docs/evaluations/2026-11-23-f006-t12-placement-evidence.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views",
+    "src/placement-report.ts",
+    "test/placement-report.test.ts",
+    "docs/evaluations/2026-11-23-f006-t12-placement-report.md",
+    "docs/evaluations/2026-11-24-f006-t26-placement-report.md",
+    "docs/evaluations/2026-11-24-f006-t26-placement-evidence.json"
+  ],
+  "validation": [
+    "Recorded evidence for this slice; scoped checks and required CI"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "A stop rule of the placement campaign aborts the run without fallback or retry",
+    "Anything that needs a credential, an unreachable host or the owner goes back to the owner; NERV-02 is left running"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 (F-006-T22): same shape as F-006-T12 (0.75 h actual). Implemented 2026-11-24 in 0.75 h: Evidence and report updated; placementReport compares each pair on a shared case set; Mac-only stays the provisional default.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 698,
+      "note": "equivalent placement runs and updated report; CI pending"
+    }
+  ]
+}

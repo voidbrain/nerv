@@ -27,6 +27,15 @@ function files() {
     slow: write('slow.test.mjs', "test('slow', () => new Promise((done) => setTimeout(done, 300)));"),
     // Its test passes, but a leaked timer keeps the file's process alive: the run never ends on its own.
     hung: write('hung.test.mjs', "test('leaks a timer', () => { setInterval(() => {}, 1000); });"),
+    // Fails one test (and a subtest) while the hung file, started first, still holds the run.
+    failing: write(
+      'zfail.test.mjs',
+      [
+        "test('passes', () => {});",
+        "test('fails its check', () => { throw new Error('fixture check failed\\nsecond line'); });",
+        "test('times out', { timeout: 50 }, () => new Promise(() => {}));",
+      ].join('\n'),
+    ),
   };
 }
 
@@ -93,6 +102,38 @@ describe('B-118 test timing reporter', () => {
     const printed = spawnSync(process.execPath, ['tools/test-timing-reporter.mjs', f.log], { encoding: 'utf8' });
     assert.match(printed.stdout, /the run did not finish/);
     assert.match(printed.stdout, /NOT FINISHED {2}.*hung\.test\.mjs/);
+  });
+
+  // B-118-T03: run 45314998906 stopped with worker-link-admission.test.ts failed, but the spec report queues each file's
+  // results behind the hung one, so the failing test was never named.
+  it('names each failed test and its error as it happens, while another file keeps the run alive', async () => {
+    const f = files();
+    const child = spawn(process.execPath, args(f.hung, f.failing), { env: env(f.log), stdio: 'ignore' });
+    try {
+      const end = Date.now() + 20000;
+      while (!(existsSync(f.log) && /^done .*zfail\.test\.mjs/m.test(readFileSync(f.log, 'utf8')))) {
+        assert.ok(Date.now() < end, 'the failing file is logged as finished');
+        await new Promise((done) => setTimeout(done, 50));
+      }
+      assert.equal(child.exitCode, null, 'the hung file keeps the run alive');
+    } finally {
+      child.kill('SIGKILL');
+    }
+    const { failed, unfinished } = summarize(readFileSync(f.log, 'utf8'));
+    assert.deepEqual(
+      unfinished.map((u) => u.file.split('/').pop()),
+      ['hung.test.mjs'],
+    );
+    assert.deepEqual(
+      failed.map((x) => [x.file.split('/').pop(), x.test, x.error]),
+      [
+        ['zfail.test.mjs', 'fails its check', 'fixture check failed'],
+        ['zfail.test.mjs', 'times out', 'test timed out after 50ms'],
+      ],
+    );
+    const printed = spawnSync(process.execPath, ['tools/test-timing-reporter.mjs', f.log], { encoding: 'utf8' });
+    assert.match(printed.stdout, /FAILED {2}.*zfail\.test\.mjs > fails its check: fixture check failed\n/);
+    assert.match(printed.stdout, /FAILED {2}.*zfail\.test\.mjs > times out: test timed out after 50ms\n/);
   });
 
   it('npm test and test:coverage use it, its log is ignored, and CI uploads the dot-named reports', () => {

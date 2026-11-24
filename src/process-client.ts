@@ -127,12 +127,18 @@ export class ProcessClient {
       if (!sent) this.waiting--;
     }
   }
+  /** SIGTERM, SIGKILL after 2 s; resolves on exit, or 2 s after SIGKILL at the latest (B-118: never waits forever). */
   async close(): Promise<void> {
     if (this.child.exitCode !== null || this.child.signalCode !== null) return;
     await new Promise<void>((resolve) => {
-      const timer = setTimeout(() => this.child.kill('SIGKILL'), 2000);
+      let last: NodeJS.Timeout | undefined;
+      const timer = setTimeout(() => {
+        this.child.kill('SIGKILL');
+        last = setTimeout(resolve, 2000);
+      }, 2000);
       this.child.once('exit', () => {
         clearTimeout(timer);
+        clearTimeout(last);
         resolve();
       });
       this.child.kill('SIGTERM');

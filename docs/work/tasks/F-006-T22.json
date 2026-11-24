@@ -4,31 +4,46 @@
   "id": "F-006-T22",
   "title": "Decide: accept the provisional Mac-only placement or run the equivalent placement campaign",
   "goal": "The owner either accepts the provisional F-006-T12 recommendation (Mac-only P1 default) or authorizes the live runs that would make it supported",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "The owner's decision is recorded in the F-006 record with its date",
     "If the runs are authorized, they become their own agent steps with estimates before any model call: P2/P3 role-run and neutral-smoke under limits-repeat3; combination-v1 coder-alone vs coder-reviewer for mac-only and mac-coder-mini-auditor under one totalBudget; bounded live disconnected-auditor, cancellation and uncertain-outcome checks",
     "If accepted as provisional, F-006 can close on its existing Check with the report's unknowns left recorded as unknown"
   ],
-  "dependsOn": ["F-006-T12"],
+  "dependsOn": [
+    "F-006-T12"
+  ],
   "resources": [
     "docs/evaluations/2026-11-23-f006-t12-placement-report.md",
     "docs/work/records/F-006.md",
     "generated:backlog-views"
   ],
-  "capabilities": ["architecture-review", "privacy-review"],
+  "capabilities": [
+    "architecture-review",
+    "privacy-review"
+  ],
   "privacy": "A decision only; no model call, device or service change.",
-  "validation": ["The decision and date are in the record"],
-  "escalation": ["A material scope or effort increase goes to the owner"],
+  "validation": [
+    "The decision and date are in the record"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-23 (F-006-T12): one owner decision on the report's three missing-evidence items; the runs themselves are not estimated until authorized.",
-    "reviewed": "2026-11-23",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-23 (F-006-T12): one owner decision on the report's three missing-evidence items. Owner decision 2026-11-23/24: authorized the live equivalent placement runs (not the provisional acceptance), including stopping NERV on NERV-02 for the disconnected-auditor check; NERV-01's live service is never stopped or edited. The runs became F-006-T23 to F-006-T26. No actual: owner time not measured.",
+    "reviewed": "2026-11-24",
     "agentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision",
     "baselineAgentHours": 0,
     "estimateAgentHours": 0
-  }
+  },
+  "prs": [
+    {
+      "pr": 697,
+      "note": "owner decision recorded; T23\u2013T26 planned"
+    }
+  ]
 }

@@ -12,6 +12,7 @@ import {
 } from '../src/placement-report.ts';
 
 const COMMITTED = join(import.meta.dirname, '..', 'docs', 'evaluations', '2026-11-23-f006-t12-placement-evidence.json');
+const T26 = join(import.meta.dirname, '..', 'docs', 'evaluations', '2026-11-24-f006-t26-placement-evidence.json');
 
 const NONE = { unavailableMac: null, disconnectedAuditor: null, cancellation: null, uncertainOutcome: null };
 
@@ -116,6 +117,25 @@ test('no better candidate keeps the Mac-only baseline and lists unknown metrics'
   assert.deepEqual(report.unknowns, ['mini-only: queueMs unknown', 'mini-only: resource unknown']);
 });
 
+test('an option with several case sets is compared on the case set it shares with the baseline', () => {
+  const report = placementReport([
+    evidence({ option: 'mac-only' }),
+    evidence({ option: 'mac-only', caseSet: 'combination x3', outcome: { passed: 6, total: 10 } }),
+    evidence({
+      option: 'mac-coder-mini-auditor',
+      caseSet: 'combination x3',
+      outcome: { passed: 4, total: 10 },
+      failures: { ...crossNodeChecks, disconnectedAuditor: true },
+    }),
+  ]);
+  const auditor = report.comparisons.find((c) => c.candidate === 'mac-coder-mini-auditor');
+  assert.equal(auditor?.verdict, 'keep-baseline');
+  assert.throws(
+    () => placementReport([evidence({ option: 'mac-only' }), evidence({ option: 'mac-only' })]),
+    /Duplicate evidence for mac-only on pack-1 x3/,
+  );
+});
+
 test('committed F-006-T12 evidence yields the recorded provisional Mac-only recommendation', () => {
   const report = placementReport(placementEvidence(JSON.parse(readFileSync(COMMITTED, 'utf8'))));
   assert.deepEqual(
@@ -141,6 +161,26 @@ test('committed F-006-T12 evidence yields the recorded provisional Mac-only reco
   });
   assert.ok(report.unknowns.includes('mini-only: runtime unknown'));
   assert.ok(report.unknowns.includes('mini-tools-mac-inference: networkMs unknown'));
+});
+
+test('committed F-006-T26 evidence yields the recorded verdicts of the equivalent runs', () => {
+  const report = placementReport(placementEvidence(JSON.parse(readFileSync(T26, 'utf8'))));
+  assert.deepEqual(
+    report.comparisons.map((c) => `${c.baseline}->${c.candidate}:${c.verdict}`),
+    [
+      'mac-only->mini-only:keep-baseline',
+      'mac-only->mac-coder-mini-auditor:insufficient-evidence',
+      'mac-only->mini-tools-mac-inference:keep-baseline',
+      'mini-only->mini-tools-mac-inference:prefer-candidate',
+    ],
+  );
+  assert.ok(report.comparisons[1].reasons.includes('mac-coder-mini-auditor: cancellation not exercised live'));
+  assert.deepEqual(report.comparisons[3].reasons, [
+    'mini-tools-mac-inference passes 24/30 vs 21/30 on the same cases and budget',
+  ]);
+  assert.equal(report.recommendation.option, 'mac-only');
+  assert.equal(report.recommendation.status, 'provisional');
+  assert.ok(!report.unknowns.some((u) => u.includes('runtime unknown')), 'the mini PC runtime is recorded');
 });
 
 test('evidence files with unknown fields, bad options or impossible outcomes are refused', () => {
