@@ -12,6 +12,10 @@ import { COORDINATOR_STATE_SCHEMA } from '../src/coordinator-snapshot.ts';
 import { KajiLink, type RegistryPort } from '../src/kaji-link.ts';
 import { Registry, fingerprint, signRecord, type BaseEntry, type SignedRecord } from '../src/kaji.ts';
 import { Store } from '../src/store.ts';
+import { pinKajiRoot, setBase } from '../src/config.ts';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 async function freePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -273,6 +277,67 @@ describe('F-016-T05: leader epoch in signed registry records and fencing checks 
     } finally {
       await link1.stop();
       await link2.stop();
+    }
+  });
+
+  it('F-016-T16: Store passes baseId, mainBaseId and maxSeenCoordinatorEpoch from the registry to the authority check', () => {
+    const home = mkdtempSync(join(tmpdir(), 'nerv-authority-'));
+    try {
+      const root = generateKeyPairSync('ed25519');
+      const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+      setBase(home, { id: 'NERV-01', name: 'Tokyo' });
+      pinKajiRoot(home, rootPub, true);
+      const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+      try {
+        const reg = new Registry(store.db, rootPub);
+        let serial = 0;
+        const add = (body: Omit<Parameters<typeof signRecord>[1], 'serial' | 'issued'>) =>
+          reg.add(signRecord(root.privateKey, { ...body, serial: ++serial, issued: '2026-11-24T10:00:00.000Z' }));
+        for (const [baseId, port] of [
+          ['NERV-01', 4320],
+          ['NERV-02', 4321],
+        ] as const)
+          add({
+            kind: 'enrol',
+            baseId,
+            name: baseId,
+            publicKey: generateKeyPairSync('ed25519')
+              .publicKey.export({ type: 'spki', format: 'der' })
+              .toString('base64'),
+            address: `127.0.0.1:${port}`,
+          });
+        add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
+        const nowMs = Date.now();
+        const day = (n: number) => new Date(nowMs + n * 86_400_000).toISOString();
+        // Legacy host, no coordinator_state: the registry does not change today's behaviour.
+        assert.equal(store.add('Legacy', day(1), new Date(nowMs)).title, 'Legacy');
+
+        store.db.exec(COORDINATOR_STATE_SCHEMA);
+        store.db
+          .prepare(
+            "INSERT INTO coordinator_state(id, coordinator_epoch, coordinator_fence, replication_mode, head_seq, lease_expires_at, state_digest) VALUES (1, 2, 1, 'active', 0, ?, 'd')",
+          )
+          .run(nowMs + 50_000);
+        assert.equal(store.add('Active', day(2), new Date(nowMs)).title, 'Active');
+
+        // The owner signed this base again at epoch 3: the store at epoch 2 trails maxSeenCoordinatorEpoch.
+        add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 3 });
+        assert.throws(
+          () => store.add('Stale epoch', day(3), new Date(nowMs)),
+          (err: unknown) => err instanceof CoordinatorAuthorityError && err.reason === 'stale_coordinator_epoch',
+        );
+        // The owner moved main to NERV-02: this base is no longer the main base, whatever its own row says.
+        store.db.prepare('UPDATE coordinator_state SET coordinator_epoch = 4 WHERE id = 1').run();
+        add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 4 });
+        assert.throws(
+          () => store.tick(new Date(nowMs)),
+          (err: unknown) => err instanceof CoordinatorAuthorityError && err.reason === 'coordinator_not_active',
+        );
+      } finally {
+        store.close();
+      }
+    } finally {
+      rmSync(home, { recursive: true, force: true });
     }
   });
 });
