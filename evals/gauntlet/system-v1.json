@@ -165,6 +165,9 @@
         "test/kaji-seats.test.ts",
         "test/worker-jobs.test.ts",
         "test/worker-link.test.ts",
+        "test/worker-link-heartbeat.test.ts",
+        "test/worker-link-admission.test.ts",
+        "test/fixtures/worker-link.ts",
         "test/worker-outbox.test.ts",
         "test/protocol.test.ts"
       ]
