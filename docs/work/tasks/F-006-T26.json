@@ -2,9 +2,9 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T26",
-  "status": "planned",
+  "status": "implemented",
   "title": "Update the placement report and recommendation with the new evidence",
-  "goal": "The placement evidence and report carry the T23\u2013T25 results and the recommendation the code derives from them",
+  "goal": "The placement evidence and report carry the T23–T25 results and the recommendation the code derives from them",
   "capabilities": [
     "bounded-edit",
     "structured-tools",
@@ -32,7 +32,9 @@
     "generated:backlog-views",
     "src/placement-report.ts",
     "test/placement-report.test.ts",
-    "docs/evaluations/2026-11-23-f006-t12-placement-report.md"
+    "docs/evaluations/2026-11-23-f006-t12-placement-report.md",
+    "docs/evaluations/2026-11-24-f006-t26-placement-report.md",
+    "docs/evaluations/2026-11-24-f006-t26-placement-evidence.json"
   ],
   "validation": [
     "Recorded evidence for this slice; scoped checks and required CI"
@@ -44,12 +46,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 h agent",
-    "basis": "Estimated 2026-11-24 (F-006-T22): same shape as F-006-T12 (0.75 h actual).",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 (F-006-T22): same shape as F-006-T12 (0.75 h actual). Implemented 2026-11-24 in 0.75 h: Evidence and report updated; placementReport compares each pair on a shared case set; Mac-only stays the provisional default.",
     "reviewed": "2026-11-24",
-    "agentHours": 0.75,
+    "agentHours": 0,
     "ownerHours": 0,
     "baselineAgentHours": 0.75,
-    "estimateAgentHours": 0.75
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
   }
 }

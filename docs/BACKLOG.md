@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 3 | 1 | 9 | 2 |
+| **This week** | 3 | 1 | 10 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 37 | 20 |
+| **Open** | 37 | 21 |
 | **Require Human 🧑** | 11 | 7 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 90.25 h agent + 10.25 h owner across 110 open steps of 36 features and 20 other records. 96.75 h of actual effort recorded on 120 steps. Generated from the task files.
+**Remaining effort:** 88 h agent + 10.25 h owner across 112 open steps of 36 features and 21 other records. 100.5 h of actual effort recorded on 124 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -165,13 +165,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="b-119"></a>[🐞 B-119](#top)
+
+**Placement probes longer than 15 s are cut off by the HTTP server**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | [F-006-T27](#f-006-t27) | 🤖 | — | — |
+
+💻 **→** Next: B-119-T01 — Let placement probes run to their own budget (Planned).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 in F-006-T23 on NERV-02: `POST /api/placement/run` accepts `timeoutMs` up to 120,000 ms, but the server's `requestTimeout`/`timeout` of 15,000 ms (`src/server.ts`) closes the socket at 15 s because this route, unlike `/api/chat` and the other model routes, never calls `req.setTimeout`. Eleven P3 Casper probes ended at 15.0 s with `fetch failed` (`other side closed`), so any cross-node probe longer than 15 s cannot complete. |
+| **Reproduce** | On a base with a P3 endpoint, run `nerv placement run` with a probe whose inference takes more than 15 s (for example a long prompt with `timeoutMs: 60000`); the client sees the connection closed at 15 s instead of a result or a timeout error. |
+| **Check** | A committed test that fails first: a placement run whose inference takes longer than 15 s but less than its `timeoutMs` returns its result; the route's socket timeout follows the probe's budget like the chat routes. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-119-t01"></a>B-119-T01 — Let placement probes run to their own budget | 1 h | 0 h | 1 h | Planned | — | [F-006-T27](#f-006-t27) |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-119.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | F-006-T23 evidence in the [F-006-T26 report](evaluations/2026-11-24-f006-t26-placement-report.md) |
+| Opened | 2026-11-24 |
+| Verification | Pending |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-006"></a>[✨ F-006](#top)
 
 **Orchestrate agents and models across nodes**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 5.25 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h | [B-119-T01](#b-119-t01) | — | 🤖 | — | — |
 
 💻 **→** Next: F-006-T12 — T04c — Placement report and recommendation (Implemented; verification pending).
 
@@ -186,11 +224,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | — | 🤖 | [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending |
-| 🟡 Medium | <a id="f-006-t23"></a>F-006-T23 — Run P2 and P3 role-run and neutral-smoke under limits-repeat3 | 1.5 h | 0 h | 1.5 h | Planned | — | [F-006-T26](#f-006-t26) | 🤖 | — |
-| 🟡 Medium | <a id="f-006-t24"></a>F-006-T24 — Run combination-v1 coder-alone vs coder-reviewer for mac-only and mac-coder-mini-auditor | 1.5 h | 0 h | 1.5 h | Planned | — | [F-006-T26](#f-006-t26) | 🤖 | — |
-| 🟡 Medium | <a id="f-006-t25"></a>F-006-T25 — Check a disconnected auditor, a cancellation and an uncertain outcome live | 1.5 h | 0 h | 1.5 h | Planned | — | [F-006-T26](#f-006-t26) | 🤖 | — |
-| 🟢 Small | <a id="f-006-t26"></a>F-006-T26 — Update the placement report and recommendation with the new evidence | 0.75 h | 0 h | 0.75 h | Planned | [F-006-T23](#f-006-t23), [F-006-T24](#f-006-t24), [F-006-T25](#f-006-t25) | — | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 15.5 h (23 of 26 steps) | 6.75 h (14 of 26 steps recorded) | 5.25 h | 21 of 26 completed | | | | |
+| 🟢 Small | <a id="f-006-t23"></a>F-006-T23 — Run P2 and P3 role-run and neutral-smoke under limits-repeat3 | 1.5 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-006-T26](#f-006-t26) | 🤖 | — |
+| 🟢 Small | <a id="f-006-t24"></a>F-006-T24 — Run combination-v1 coder-alone vs coder-reviewer for mac-only and mac-coder-mini-auditor | 1.5 h | 1 h so far (stated) | 0 h | Implemented; verification pending | — | [F-006-T26](#f-006-t26) | 🤖 | — |
+| 🟢 Small | <a id="f-006-t25"></a>F-006-T25 — Check a disconnected auditor, a cancellation and an uncertain outcome live | 1.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-006-T26](#f-006-t26) | 🤖 | — |
+| 🟢 Small | <a id="f-006-t26"></a>F-006-T26 — Update the placement report and recommendation with the new evidence | 0.75 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | [F-006-T23](#f-006-t23), [F-006-T24](#f-006-t24), [F-006-T25](#f-006-t25) | [F-006-T27](#f-006-t27) | 🤖 | — |
+| 🟡 Medium | <a id="f-006-t27"></a>F-006-T27 — Rerun the P3 role cases once the placement probe carries role-sized prompts | 2 h | 0 h | 2 h | Planned | [F-006-T26](#f-006-t26), [B-119-T01](#b-119-t01) | — | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 17.5 h (24 of 27 steps) | 10.5 h (18 of 27 steps recorded) | 2 h | 21 of 27 completed | | | | |
 
 <details><summary>Done steps (21)</summary>
 

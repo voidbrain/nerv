@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T25",
-  "status": "planned",
+  "status": "implemented",
   "title": "Check a disconnected auditor, a cancellation and an uncertain outcome live",
   "goal": "Bounded live checks show the cross-node placements keep privacy, leases and permission gates when the auditor disconnects, a run is cancelled or an outcome is uncertain",
   "capabilities": [
@@ -39,12 +39,14 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "1.5 h agent",
-    "basis": "Estimated 2026-11-24 (F-006-T22): three bounded probes on live bases with one NERV-02 stop and restart; owner allowed stopping NERV on NERV-02 only.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 (F-006-T22): three bounded probes on live bases with one NERV-02 stop and restart; owner allowed stopping NERV on NERV-02 only. Implemented 2026-11-24 in 0.5 h: Disconnected auditor (NERV-02 stopped 03:17, restarted 03:19, healthy), cancellation and uncertain outcome held on live bases; cancellation does not reach the Mac's generation.",
     "reviewed": "2026-11-24",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "ownerHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 1.5
+    "estimateAgentHours": 1.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
   }
 }
