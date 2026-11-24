@@ -15,7 +15,7 @@ import {
 } from './coordinator-relocation.ts';
 import { databasePath, readConfig } from './config.ts';
 import { Registry, canonical, keyIdentity, publicKeyFrom, type SignedRecord } from './kaji.ts';
-import { allUnrevokedAckedEpoch, pushCoordinatorEpoch } from './coordinator-epoch.ts';
+import { allUnrevokedAckedEpoch, basesAckedEpoch, pushCoordinatorEpoch } from './coordinator-epoch.ts';
 import { service } from './service.ts';
 
 /** While this file exists in the data home a promotion is unfinished and `serve` refuses to start. */
@@ -202,10 +202,14 @@ function derive(
       .filter((b) => b.status === 'enrolled' && b.baseId !== self.baseId)
       .map((b) => b.baseId)
       .sort();
-    const standbyBaseId =
-      input.drainReceiptFile && others.includes(previousMainBaseId)
+    // F-016-T18 review: a base that acked the new epoch first (it can ack the lease at once), the drained old
+    // main first among those for a planned move; then the F-016-T17 order.
+    const acked = basesAckedEpoch(db, newEpoch);
+    const order = (ids: string[]) =>
+      input.drainReceiptFile && ids.includes(previousMainBaseId)
         ? previousMainBaseId
-        : (others.find((id) => id !== previousMainBaseId) ?? others[0]);
+        : (ids.find((id) => id !== previousMainBaseId) ?? ids[0]);
+    const standbyBaseId = order(others.filter((id) => acked.has(id))) ?? order(others);
     let liveness: (nowMs: number, monoNowNs: bigint) => RelocationLiveness;
     if (input.drainReceiptFile) {
       if (!enrolment || previousRevoked)

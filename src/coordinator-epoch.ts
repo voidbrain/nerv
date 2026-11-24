@@ -96,3 +96,15 @@ export function allUnrevokedAckedEpoch(input: EpochScope & { readonly epoch: num
     (id) => ((ack.get(id) as { coordinator_epoch: number } | undefined)?.coordinator_epoch ?? 0) >= input.epoch,
   );
 }
+
+/** The bases this base recorded as holding `epoch` or later. */
+export function basesAckedEpoch(db: DatabaseSync, epoch: number): Set<string> {
+  db.exec(EPOCH_ACKS_SCHEMA);
+  return new Set(
+    (
+      db.prepare('SELECT base_id FROM coordinator_epoch_acks WHERE coordinator_epoch >= ?').all(epoch) as {
+        base_id: string;
+      }[]
+    ).map((r) => r.base_id),
+  );
+}
