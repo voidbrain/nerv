@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "id": "B-121-T01",
+  "parent": "B-121",
+  "title": "Refuse a move from a standby that acked a later epoch than its state",
+  "goal": "A standby whose own lease acks show a later coordinator ran never takes over from its older state",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails first: B runs epoch 3 renewing through C, the owner re-targets to C at epoch 4, C is refused with standby_behind (test/coordinator-partition.test.ts, mixed epochs)",
+    "checkRelocationReadiness refuses before the service stops when standby_lease_state holds a later epoch than the candidate store"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/coordinator-relocation.ts",
+    "test/coordinator-partition.test.ts",
+    "docs/decisions/coordinator-relocation.md",
+    "docs/work/records/B-121.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "distributed-contracts",
+    "architecture-review"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "validation": [
+    "A committed regression fails before the fix (test/coordinator-partition.test.ts, mixed epochs)",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Found and fixed 2026-11-24 inside F-016-T08 (PR #717); time counted in F-016-T08.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 717,
+      "note": "standby_behind refusal from the standby's own lease acks"
+    }
+  ]
+}

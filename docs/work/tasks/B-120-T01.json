@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "B-120-T01",
+  "parent": "B-120",
+  "title": "kaji promote removes its marker before it starts the service",
+  "goal": "The service kaji promote starts after a finished swap is never refused by its own promotion marker",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails first: a service start that refuses while the marker exists, as serve does, starts after kaji promote (test/coordinator-partition.test.ts)",
+    "kaji promote removes the marker before it starts the service, on a finished swap and on a resumed one"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/coordinator-promote.ts",
+    "test/coordinator-partition.test.ts",
+    "docs/work/records/B-120.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "validation": [
+    "A committed regression fails before the fix (test/coordinator-partition.test.ts, every scenario that promotes)",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Found and fixed 2026-11-24 inside F-016-T08 (PR #717): the order of two lines; the fixture was the failing test. Time counted in F-016-T08.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 717,
+      "note": "Marker removed before the service starts"
+    }
+  ]
+}
