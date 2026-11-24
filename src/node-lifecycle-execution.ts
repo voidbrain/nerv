@@ -289,6 +289,19 @@ export function held(db: DatabaseSync | undefined): boolean {
     !!db.prepare('SELECT 1 FROM resource').get()
   );
 }
+/**
+ * A NERV runtime in a process list: the CLI entry run with `serve` or `launch`, by path (`…/src/cli.ts`) or through the
+ * global `nerv` command, whose link shows as `…/bin/nerv` (B-122: a foreground `nerv launch` was not found).
+ */
+export const FOREGROUND_ENTRY = /(?:src\/cli\.ts|(?:^|[\s/])nerv)\s+(?:serve|launch)(?:\s|$)/;
+const OWNERSHIP_UNKNOWN = 'Service or runtime ownership is unknown or belongs elsewhere.';
+/**
+ * B-122: the service is not registered but NERV answers: a foreground `nerv launch` or `nerv serve`, often through the
+ * global `nerv` link from another checkout. The lifecycle never stops a process the service manager did not start, so
+ * the owner is told which process it is and what to do instead of the generic ownership refusal.
+ */
+export const foregroundRuntime = (pids: number[]): string =>
+  `NERV is running in the foreground (\`nerv launch\` or \`nerv serve\`, pid ${pids.join(', ')}), not as the installed service, and an update never stops a process the service manager did not start. Stop it (Ctrl-C in its terminal), then run \`nerv update\`: it updates the install folder and starts the service.`;
 export function blockers(action: Action, o: ServiceObservation, next?: string): string[] {
   const out: string[] = [];
   if (o.schema < UPGRADE_CONTRACT.minimumServiceSchema || o.schema > SERVICE_READER_SCHEMA)
@@ -298,8 +311,9 @@ export function blockers(action: Action, o: ServiceObservation, next?: string): 
   if (o.legacy) out.push('Legacy service ownership requires a separate review.');
   if (o.pending) out.push('Reconcile pending or uncertain work first.');
   if (!o.built && action !== 'uninstall') out.push('Build the selected source first.');
-  if (o.definition === 'foreign' || o.registration === 'foreign' || o.runtime === 'unknown')
-    out.push('Service or runtime ownership is unknown or belongs elsewhere.');
+  if (o.definition === 'foreign' || o.registration === 'foreign') out.push(OWNERSHIP_UNKNOWN);
+  else if (o.runtime === 'unknown')
+    out.push(o.registration === 'absent' && o.pids.length ? foregroundRuntime(o.pids) : OWNERSHIP_UNKNOWN);
   if (action === 'install' && (o.definition !== 'absent' || o.registration !== 'absent' || o.runtime !== 'stopped'))
     out.push('Install requires absent definition/registration and stopped runtime.');
   if (action !== 'install' && o.definition !== 'owned')

@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "B-122-T02",
+  "parent": "B-122",
+  "title": "Owner updates NERV-01 and sees the foreground reason",
+  "goal": "NERV-01 is updated through the service, and once the fix is installed a foreground launch is refused with its pid",
+  "status": "planned",
+  "acceptance": [
+    "With the foreground nerv launch stopped and the service started, Update now or nerv update completes on NERV-01",
+    "After the fix is installed, Update now during a foreground nerv launch is refused with the foreground reason and its pid"
+  ],
+  "dependsOn": [
+    "B-122-T01"
+  ],
+  "resources": [
+    "docs/acceptance/**",
+    "docs/work/records/B-122.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "Owner-observed check: git -C ~/.nerv-app rev-parse --short HEAD and the updater.log outcome"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-24: four copy-paste steps and one update. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "ownerHours": 0.25,
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/b122-update-from-foreground-2026-11-24.md"
+}

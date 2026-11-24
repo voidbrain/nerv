@@ -3,6 +3,8 @@ import type { WorkerItem, WorkerContext, WorkerLease } from './worker-jobs.ts';
 import type { RunReason } from './instrumentality-runs.ts';
 import { parsePrices, type UsageObservation } from './model-usage.ts';
 import { MISATO_SOURCE, OWNER_SOURCE, Store } from './store.ts';
+import { underTestRunner } from './slicer.ts';
+import { appendFileSync } from 'node:fs';
 import { CoordinatorAuthorityError } from './coordinator-authority.ts';
 import type { AgencySnapshot } from './executors.ts';
 import type { Verdict } from './policy.ts';
@@ -18,6 +20,14 @@ const store = new Store(
   process.argv[3] ? readScrolls(process.argv[3]) : undefined,
   process.argv[3] ? { home: process.argv[3] } : {},
 );
+// F-121-T02: under the test runner only, a test's Runtime records Bambu Connect hand-offs to a file.
+const bambuLaunchLog = process.argv.find((arg) => arg.startsWith('--bambu-launch-log='))?.slice(19);
+if (bambuLaunchLog && underTestRunner()) {
+  store.bambuLauncher = (importLink) => {
+    appendFileSync(bambuLaunchLog, `${importLink}\n`);
+    return { opened: true };
+  };
+}
 // F-016-T16: a standby, fenced or lease-expired base runs no coordinator tick (the authority check refuses it),
 // quietly; worker-scoped expiry still runs.
 const schedule = () => {

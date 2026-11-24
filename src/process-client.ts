@@ -41,7 +41,12 @@ export class ProcessClient {
     // Explicit small environment: no provider/API/root token passed to children. Same-user process isolation is NOT a sandbox.
     this.child = fork(entry, args, {
       stdio: ['ignore', 'ignore', 'inherit', 'ipc'],
-      env: { PATH: process.env.PATH ?? '', LANG: process.env.LANG ?? 'C.UTF-8' },
+      env: {
+        PATH: process.env.PATH ?? '',
+        LANG: process.env.LANG ?? 'C.UTF-8',
+        // F-121-T02: children of a test run know it, so they refuse to open desktop apps (src/slicer.ts).
+        ...(process.env.NODE_TEST_CONTEXT || process.env.NERV_TEST_RUNNER ? { NERV_TEST_RUNNER: '1' } : {}),
+      },
       execArgv: [...NODE_FLAGS],
     });
     this.child.on('message', (value: unknown) => {
