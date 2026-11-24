@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T07",
-  "status": "implemented",
+  "status": "closed",
   "title": "Step 4a — Relocation building blocks: readiness, drain receipt, promotion with quarantine; never a context-only takeover",
   "goal": "The relocation primitives refuse every unsafe promotion; relocation is not usable end to end until F-016-T16 to F-016-T19.",
   "capabilities": [
@@ -51,8 +51,8 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio. 2026-11-23: review fixes on PR #677 (re-targeting, receipt binding, lease in the activation commit, drain re-read, unplanned confirmation) added about 1 h; actual stated.",
-    "reviewed": "2026-11-14",
+    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio. 2026-11-23: review fixes on PR #677 (re-targeting, receipt binding, lease in the activation commit, drain re-read, unplanned confirmation) added about 1 h; actual stated. 2026-11-25: closed in the reconciliation: PR #677 merged on green CI (run 45316374919) after its design reviews; no coordinator test failed in a CI run since (reruns were worker-link, B-066). Live proof is the two-device acceptance, F-016-T09.",
+    "reviewed": "2026-11-25",
     "baselineDays": 1.5,
     "agentHours": 0,
     "baselineAgentHours": 2.25,

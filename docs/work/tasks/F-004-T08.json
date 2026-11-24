@@ -4,7 +4,7 @@
   "parent": "F-004",
   "title": "Dashboard Settings → Notifications: enable push on the installed app",
   "goal": "The installed dashboard app (the one paired by QR, F-118) asks for notification permission on a tap in Settings and registers its push subscription with the service, as the workspace toggle does (owner report 2026-11-24: no permission prompt on the iPhone)",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Settings → Notifications shows the state: On, Off, Blocked (with where to allow it), not supported, or that a Safari tab needs the Home Screen app",
     "Enable notifications asks for permission on the tap, subscribes with the service's VAPID key through the dashboard's own service worker (sw.js, scope /dashboard/) and stores the subscription with POST /api/push/subscribe; Turn off removes it there and unsubscribes",
@@ -41,10 +41,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h remaining (gauntlet run and merge)",
-    "basis": "Estimated 2026-11-24 at agent speed (1.5 h agent). Not a measurement.",
-    "reviewed": "2026-11-24",
-    "agentHours": 0.25,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 at agent speed (1.5 h agent). Not a measurement. 2026-11-25: closed in the reconciliation: PR #729 merged on green CI (run 45502275722, one attempt); node tools/gauntlet.mjs pending lists none at main 774a08f, so nerv-system-flows/browser and multi-step-agent/* are covered.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.75,
     "actualAgentHours": 1.5,
