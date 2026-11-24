@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 100.75 h agent + 11.25 h owner across 140 open steps of 38 features and 29 other records. 156 h of actual effort recorded on 153 steps. Generated from the task files.
+**Remaining effort:** 102.25 h agent + 11.25 h owner across 141 open steps of 38 features and 30 other records. 156 h of actual effort recorded on 153 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1845,6 +1845,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | None yet (found in [PR #721](https://github.com/voidbrain/nerv/pull/721)) |
+| Opened | 2026-11-24 |
+| Verification | Pending |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-128"></a>[🐞 B-128](#top)
+
+**Settings → Pair a device on a 127.0.0.1 dashboard puts a loopback address in the QR, which a phone cannot open**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-128-T01 (failing join test, then the fix).
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-24: Settings → Pair a device (F-118-T05, [PR #716](https://github.com/voidbrain/nerv/pull/716)) builds the QR link from the address the dashboard was opened at, so on the Mac (`nerv open dashboard`) it encodes `http://127.0.0.1:4317/dashboard/#pair=…`, which a phone cannot open; Settings only warns. `nerv open --phone --qr` already uses this machine's tailnet name. |
+| **Reproduce** | `nerv open dashboard` on the Mac, Settings → Pair a device: the QR opens `127.0.0.1` on the phone. |
+| **Check** | From a loopback page the server resolves the phone's address itself (config `phone.url`, else the tailnet name, as the CLI does, through one shared helper); only without either does the loopback link stay, with a hint how to set one. A committed join test fails first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-128-t01"></a>B-128-T01 — Settings pairing QR uses the phone's address, not 127.0.0.1 | 1.5 h | 0 h | 1.5 h | Ready |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-128.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | None yet |
 | Opened | 2026-11-24 |
 | Verification | Pending |
 | Reviewed | 2026-11-24 |
