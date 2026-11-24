@@ -39,6 +39,12 @@ import { Store } from '../src/store.ts';
  *
  * Every step of one simulated second checks the invariant: at most one base holds coordinator authority,
  * and no effect (Telegram update, outbox send, approval decision) runs twice.
+ *
+ * Limits (#717 review): the mock bot hands each update out once, so the Telegram check proves only that no
+ * two bases poll in the same step; the real getUpdates offset hand-over (an update fetched but not yet
+ * confirmed by the old main) is not modelled, nor is replication of what the old main did after the standby
+ * was seeded (F-016-T20). The simulated decide checks main and epoch like KajiLink's staleEpochReply, in a
+ * simplified form; the routing rules are copied here, not shared with KajiLink.
  */
 
 const X = 'NERV-01';
@@ -613,6 +619,17 @@ describe('F-016-T08: partition, sleep and reconnect keep one authority and run n
       mesh.close();
       mesh = undefined;
     }
+  });
+
+  it('#717 review: a main whose own registry names it at a later epoch than its state stops acting (epoch check)', async () => {
+    const m = (mesh = new Mesh([X, B], [B]));
+    await m.advance(20_000);
+    assert.deepEqual(m.holders(), [X]);
+    // The owner re-signs X as main at epoch 3 without a promotion: X's store still runs epoch 2, so only the
+    // epoch comparison (not the main-base check) can stop it.
+    m.importRecords(X, [m.sign({ kind: 'main', baseId: X, coordinatorEpoch: 3 })]);
+    await m.advance(1_000);
+    assert.deepEqual(m.holders(), []);
   });
 
   it('#717 review: a service start that fails after the swap is recovered by running kaji promote again', async () => {
