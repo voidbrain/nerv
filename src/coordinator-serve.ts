@@ -36,10 +36,12 @@ export function coordinatorLeaseService(input: {
     mainEpoch: (): number => registry().mainEpoch(),
     /** Standby side of `POST /kaji/lease/renew`. */
     onLeaseRenew: async (_from: string, request: LeaseRenewRequest): Promise<LeaseRenewResult> => {
-      // A base without a standby store (a drained old main, a worker base the owner named) acks from its own
-      // store; the ack only promises that this base has not seen a newer epoch and is not promoting.
+      // Only a base holding the standby store acks (F-016-T16 re-review): a worker or a drained old main never
+      // does, so a partitioned old main cannot keep its lease through a base that would not promote.
       const path = join(input.home, STANDBY_DB_FILE);
-      const standby = new DatabaseSync(existsSync(path) ? path : input.databasePath);
+      if (!existsSync(path))
+        return { ok: false, reason: 'not_standby', error: 'This base holds no coordinator standby store.' };
+      const standby = new DatabaseSync(path);
       try {
         standby.exec('PRAGMA busy_timeout = 5000');
         return handleStandbyLeaseRenew(standby, {

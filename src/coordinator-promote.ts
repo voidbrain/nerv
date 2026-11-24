@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { readCoordinatorFencingState } from './coordinator-authority.ts';
@@ -8,6 +8,7 @@ import {
   STANDBY_DB_FILE,
   checkRelocationReadiness,
   relocateCoordinator,
+  standbyLastAckMs,
   type RelocateCoordinatorInput,
   type RelocateCoordinatorResult,
   type RelocationLiveness,
@@ -15,7 +16,7 @@ import {
 } from './coordinator-relocation.ts';
 import { databasePath, readConfig } from './config.ts';
 import { Registry, canonical, keyIdentity, publicKeyFrom, type SignedRecord } from './kaji.ts';
-import { allUnrevokedAckedEpoch, basesAckedEpoch, pushCoordinatorEpoch } from './coordinator-epoch.ts';
+import { allUnrevokedAckedEpoch, pushCoordinatorEpoch, standbyBasesAckedEpoch } from './coordinator-epoch.ts';
 import { service } from './service.ts';
 
 /** While this file exists in the data home a promotion is unfinished and `serve` refuses to start. */
@@ -111,7 +112,10 @@ export interface PromoteCoordinatorInput {
    * `KajiLink.pushEpoch`: before the readiness check the owner-signed records go to every enrolled, unrevoked
    * base (F-016-T18); the acks are recorded here and decide `allUnrevokedAckedNewEpoch`.
    */
-  readonly pushEpoch?: (baseId: string, records: SignedRecord[]) => Promise<{ maxSeenCoordinatorEpoch: number }>;
+  readonly pushEpoch?: (
+    baseId: string,
+    records: SignedRecord[],
+  ) => Promise<{ maxSeenCoordinatorEpoch: number; standby?: boolean }>;
   /** Test-only crash injection, passed to the promotion swap. */
   readonly failAfterStep?: RelocateCoordinatorInput['failAfterStep'];
 }
@@ -164,11 +168,13 @@ function derive(
     const candidatePath = existsSync(standbyDbPath) ? standbyDbPath : mainDbPath;
     const candidate = candidatePath === mainDbPath ? db : new DatabaseSync(candidatePath);
     let previousEpoch: number;
+    let hasAckHistory: boolean;
     try {
       const state = readCoordinatorFencingState(candidate);
       if (!state || state.replicationMode !== 'standby')
         refuse('context_only', 'No verified standby store on this base: seed one before promoting.');
       previousEpoch = state.coordinatorEpoch;
+      hasAckHistory = standbyLastAckMs(candidate, previousEpoch) !== undefined;
     } finally {
       if (candidate !== db) candidate.close();
     }
@@ -202,14 +208,8 @@ function derive(
       .filter((b) => b.status === 'enrolled' && b.baseId !== self.baseId)
       .map((b) => b.baseId)
       .sort();
-    // F-016-T18 review: a base that acked the new epoch first (it can ack the lease at once), the drained old
-    // main first among those for a planned move; then the F-016-T17 order.
-    const acked = basesAckedEpoch(db, newEpoch);
-    const order = (ids: string[]) =>
-      input.drainReceiptFile && ids.includes(previousMainBaseId)
-        ? previousMainBaseId
-        : (ids.find((id) => id !== previousMainBaseId) ?? ids[0]);
-    const standbyBaseId = order(others.filter((id) => acked.has(id))) ?? order(others);
+    const standbyStores = standbyBasesAckedEpoch(db, newEpoch);
+    const standbyBaseId = others.find((id) => standbyStores.has(id));
     let liveness: (nowMs: number, monoNowNs: bigint) => RelocationLiveness;
     if (input.drainReceiptFile) {
       if (!enrolment || previousRevoked)
@@ -220,7 +220,14 @@ function derive(
     } else {
       if (!Number.isFinite(epochSeenAtMs))
         refuse('not_named_main', 'The owner-signed main record for this base has no receipt time.');
-      const oldHostDownConfirmed = input.confirmOldHostDown || previousRevoked;
+      // Re-review BLOCKER: the owner's word bounds the old main only where it renewed through this standby (so it
+      // fences when this base stops acking); otherwise it may hold a lease through another base: revoke it.
+      if (input.confirmOldHostDown && !hasAckHistory && !previousRevoked)
+        refuse(
+          'old_host_unconfirmed',
+          `This base holds no ack history for ${previousMainBaseId}'s lease at epoch ${previousEpoch}, so --confirm-old-host-down does not bound it: revoke it (kaji relocate BASE-ID --revoke ${previousMainBaseId}) and import the revoke here.`,
+        );
+      const oldHostDownConfirmed = previousRevoked || (input.confirmOldHostDown && hasAckHistory);
       // Measured from the acks this base recorded for its own pushes (F-016-T18), never supplied by the caller.
       const allUnrevokedAckedNewEpoch = allUnrevokedAckedEpoch({
         db,
@@ -249,8 +256,9 @@ function derive(
         previousMainBaseId,
         registryMain: { baseId: registry.main(), coordinatorEpoch: newEpoch },
         soleCoordinator: others.length === 0,
-        // Review BLOCKER: the new main names the base it renews through. A planned move hands it to the drained
-        // old main; otherwise another enrolled base, the old main last. `nerv kaji standby` changes it.
+        // Re-review BLOCKER: only a base holding a standby store may ack the lease. Named here only when a base
+        // acked the new epoch and said it holds one (a false claim only leaves the lease unarmed); otherwise the
+        // owner names one with `nerv kaji standby BASE-ID`, whose probe must be acked.
         ...(standbyBaseId ? { standbyBaseId } : {}),
         ...(input.failAfterStep ? { failAfterStep: input.failAfterStep } : {}),
       },
@@ -272,6 +280,12 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
   const mainDbPath = databasePath(input.home);
   const standbyDbPath = join(input.home, STANDBY_DB_FILE);
   const marker = join(input.home, PROMOTION_MARKER_FILE);
+  // Re-review fix 1: a crash between the two renames of swap step 4 leaves the archive and the standby store
+  // but no nerv.sqlite: finish that rename before anything opens the store (opening would create an empty one).
+  const archivePath = `${mainDbPath}.pre-standby`;
+  if (!existsSync(mainDbPath) && existsSync(archivePath) && existsSync(standbyDbPath))
+    renameSync(standbyDbPath, mainDbPath);
+  if (!existsSync(mainDbPath)) throw new Error(`No store at ${mainDbPath}: nothing to promote.`);
   if (input.pushEpoch) {
     const db = new DatabaseSync(mainDbPath);
     try {
@@ -314,7 +328,9 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
     precheck.close();
   }
 
-  if (!existsSync(marker))
+  // Re-review fix 2: a marker an earlier, crashed swap left is never removed by this run's refusals.
+  const createdMarker = !existsSync(marker);
+  if (createdMarker)
     writeFileSync(
       marker,
       JSON.stringify({ baseId: d.relocation.selfBaseId, newEpoch: d.relocation.registryMain.coordinatorEpoch }) + '\n',
@@ -323,8 +339,8 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
   try {
     await input.service.stop();
   } catch (err) {
-    // Nothing was swapped: no promotion is in progress.
-    rmSync(marker, { force: true });
+    // Nothing was swapped by this run.
+    if (createdMarker) rmSync(marker, { force: true });
     throw err;
   }
   for (;;) {
@@ -341,8 +357,10 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
         await clock.sleep(5_000);
         continue;
       }
-      rmSync(marker, { force: true });
-      await input.service.start();
+      if (createdMarker) {
+        rmSync(marker, { force: true });
+        await input.service.start();
+      }
       throw err;
     }
   }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { generateKeyPairSync } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -686,27 +686,36 @@ describe('F-016-T17: nerv kaji promote stops the service, derives its inputs fro
       assert.deepEqual(f.events, ['stop:standby-present', 'start:active']);
       assert.equal(f.state()?.coordinatorEpoch, 3);
       assert.doesNotThrow(() => assertNoPromotionInProgress(f.home));
-      // NERV-01 is still enrolled: no sole lease. Review BLOCKER: the drained old main is named the standby, so
-      // the keeper renews through it and the new main holds authority with a renewed lease.
+      // NERV-01 is still enrolled: no sole lease. Re-review BLOCKER: promote cannot prove any base holds a
+      // standby store, so it names none; the owner names one with kaji standby, whose probe must be acked from a
+      // standby store; then the keeper renews through it and the new main holds authority.
       assert.equal(f.state()?.leaseExpiresAt, 0);
       const db = new DatabaseSync(join(f.home, 'nerv.sqlite'));
       try {
-        const row = db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as {
-          standby_base_id: string | null;
-        };
-        assert.equal(row.standby_base_id, 'NERV-01');
+        const standbyOf = () =>
+          (
+            db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as {
+              standby_base_id: string | null;
+            }
+          ).standby_base_id;
+        assert.equal(standbyOf(), null);
         const acker = new Store(':memory:');
-        const keeper = new CoordinatorLeaseKeeper({
-          db,
-          renew: async (id, request) =>
-            acker.handleStandbyLeaseRenew({
-              standbyBaseId: id,
-              request,
-              maxSeenCoordinatorEpoch: 3,
-              processBootId: 'boot',
-            }),
-          hasOtherEnrolledBases: () => true,
+        setState(acker.db, 2, 'standby', 7, 'digest-7');
+        const renew = async (id: string, request: { coordinatorEpoch: number; leaseSeq: number }) =>
+          acker.handleStandbyLeaseRenew({ standbyBaseId: id, request, maxSeenCoordinatorEpoch: 3, processBootId: 'b' });
+        const store = new Store(join(f.home, 'nerv.sqlite'), undefined, { home: f.home });
+        const config = {
+          kaji: { root: f.rootPub, rootBinding: true },
+          base: { id: 'NERV-02' },
+        } as unknown as Parameters<typeof runKajiCommand>[3];
+        await runKajiCommand(['standby', 'NERV-01'], f.home, store, config, {
+          readSecret: async () => '',
+          flag: () => undefined,
+          renewLease: renew,
         });
+        store.close();
+        assert.equal(standbyOf(), 'NERV-01');
+        const keeper = new CoordinatorLeaseKeeper({ db, renew, hasOtherEnrolledBases: () => true });
         assert.equal(await keeper.renewOnce(), 'renewed');
         assert.equal(assertActiveCoordinator({ db })?.coordinatorEpoch, 3);
         acker.close();
@@ -840,6 +849,7 @@ describe('F-016-T18: /kaji/epoch-push, so the new epoch acks are measured, not a
           publicKey: x.key.publicKey,
           registry: registryPort(x.reg),
           minCoordinatorEpoch: () => x.reg.mainEpoch(),
+          holdsStandby: () => x.id === 'NERV-03',
           onLeaseRenew: async () => ({ ok: false, reason: 'promoting', error: 'not a standby' }),
         }),
     );
@@ -862,6 +872,8 @@ describe('F-016-T18: /kaji/epoch-push, so the new epoch acks are measured, not a
       assert.deepEqual([first.acked, first.missing], [['NERV-03'], ['NERV-01']]);
       assert.equal(c.reg.main(), 'NERV-02');
       assert.equal(c.reg.mainEpoch(), 3, 'the peer persisted the new epoch');
+      // The signed reply says whether the base holds a standby store (re-review: only such a base may be named).
+      assert.equal((await links[0]!.pushEpoch('NERV-03', [])).standby, true);
       assert.equal(
         allUnrevokedAckedEpoch({ db: b.store.db, rootPublicKey: rootPub, ownPublicKey: b.key.publicKey, epoch: 3 }),
         false,
@@ -1235,8 +1247,8 @@ describe('F-016-T17 review fixes (#702)', () => {
   });
 });
 
-describe('F-016-T18 review (#703): the promoted main names a base that acked the new epoch', () => {
-  it('prefers an acked base as its standby over an unreachable one', async () => {
+describe('F-016-T18 review (#703): the promoted main names a base that acked the new epoch from a standby store', () => {
+  it('names an acked base that holds a standby store; never an unreachable one or one without a store (re-review)', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-standby-'));
     try {
       const home = join(dir, 'home');
@@ -1268,11 +1280,15 @@ describe('F-016-T18 review (#703): the promoted main names a base that acked the
       });
       add({ kind: 'enrol', baseId: 'NERV-03', name: 'Relay', publicKey: pub(), address: '127.0.0.1:3' });
       add({ kind: 'enrol', baseId: 'NERV-04', name: 'Harbor', publicKey: pub(), address: '127.0.0.1:4' });
+      add({ kind: 'enrol', baseId: 'NERV-00', name: 'Worker', publicKey: pub(), address: '127.0.0.1:5' });
       add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
       add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
       store.close();
       const standby = new Store(join(home, STANDBY_DB_FILE));
       setState(standby.db, 2, 'standby', 7, 'digest-7');
+      // The old main renewed through this base: a bare confirmation is accepted (F-016-T17 re-review).
+      standby.db.exec(STANDBY_LEASE_SCHEMA);
+      standby.db.prepare("INSERT INTO standby_lease_state VALUES (1, 2, 9, ?, 'boot')").run(Date.now());
       standby.close();
       let wall = Date.now();
       let mono = 0n;
@@ -1291,8 +1307,10 @@ describe('F-016-T18 review (#703): the promoted main names a base that acked the
           },
         },
         pushEpoch: async (id) => {
+          // NERV-00 acks but is a worker without a standby store; it sorts first and must still not be named.
+          if (id === 'NERV-00') return { maxSeenCoordinatorEpoch: 3, standby: false };
           if (id !== 'NERV-04') throw new Error('unreachable');
-          return { maxSeenCoordinatorEpoch: 3 };
+          return { maxSeenCoordinatorEpoch: 3, standby: true };
         },
       });
       const db = new DatabaseSync(join(home, 'nerv.sqlite'));
@@ -1306,6 +1324,136 @@ describe('F-016-T18 review (#703): the promoted main names a base that acked the
       }
     } finally {
       rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('F-016-T17 re-review fixes (#702)', () => {
+  async function home(o: { revokeOld?: boolean; ackHistory?: boolean } = {}) {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-rr-'));
+    const h = join(dir, 'home');
+    mkdirSync(h, { recursive: true });
+    const root = generateKeyPairSync('ed25519');
+    const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+    setBase(h, { id: 'NERV-02', name: 'Tabgha' });
+    pinKajiRoot(h, rootPub, true);
+    const store = new Store(join(h, 'nerv.sqlite'), undefined, { home: h });
+    const reg = new Registry(store.db, rootPub);
+    let serial = 0;
+    const add = (body: Record<string, unknown>) =>
+      reg.add(
+        signRecord(root.privateKey, {
+          ...body,
+          serial: ++serial,
+          issued: '2026-11-24T10:00:00.000Z',
+        } as unknown as RegistryBody),
+      );
+    const oldPub = generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+    add({ kind: 'enrol', baseId: 'NERV-01', name: 'Tokyo', publicKey: oldPub, address: '127.0.0.1:1' });
+    add({ kind: 'enrol', baseId: 'NERV-02', name: 'Tabgha', publicKey: baseKey(h).publicKey, address: '127.0.0.1:2' });
+    add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
+    if (o.revokeOld) add({ kind: 'revoke', baseId: 'NERV-01', publicKey: oldPub });
+    add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
+    store.close();
+    const standby = new Store(join(h, STANDBY_DB_FILE));
+    setState(standby.db, 2, 'standby', 7, 'digest-7');
+    if (o.ackHistory) {
+      standby.db.exec(STANDBY_LEASE_SCHEMA);
+      standby.db.prepare("INSERT INTO standby_lease_state VALUES (1, 2, 9, ?, 'boot')").run(Date.now());
+    }
+    standby.close();
+    let wall = Date.now();
+    let mono = 0n;
+    const events: string[] = [];
+    return {
+      dir,
+      h,
+      events,
+      base: {
+        home: h,
+        rootPublicKey: rootPub,
+        ownPublicKey: baseKey(h).publicKey,
+        confirmOldHostDown: false,
+        service: { stop: () => void events.push('stop'), start: () => void events.push('start') },
+        clock: {
+          wall: () => wall,
+          mono: () => mono,
+          sleep: async (ms: number) => {
+            wall += ms;
+            mono += BigInt(ms) * 1_000_000n;
+          },
+        },
+      },
+      state: () => {
+        const db = new DatabaseSync(join(h, 'nerv.sqlite'));
+        try {
+          return readCoordinatorFencingState(db);
+        } finally {
+          db.close();
+        }
+      },
+    };
+  }
+
+  it('re-review BLOCKER: a bare --confirm-old-host-down needs ack history here for the previous epoch, or a revoke', async () => {
+    const f = await home();
+    try {
+      await assert.rejects(
+        promoteCoordinator({ ...f.base, confirmOldHostDown: true }),
+        (err: unknown) =>
+          err instanceof RelocationRefusedError &&
+          err.reason === 'old_host_unconfirmed' &&
+          /ack history|revoke/.test(err.message),
+      );
+      assert.deepEqual(f.events, []);
+    } finally {
+      rmSync(f.dir, { recursive: true, force: true });
+    }
+    const g = await home({ ackHistory: true });
+    try {
+      const res = await promoteCoordinator({ ...g.base, confirmOldHostDown: true });
+      assert.ok(!('resumed' in res));
+      assert.equal(g.state()?.coordinatorEpoch, 3);
+    } finally {
+      rmSync(g.dir, { recursive: true, force: true });
+    }
+  });
+
+  it('re-review fix 1: a crash between the two renames of step 4 is resumed, never answered with an empty store', async () => {
+    const f = await home({ revokeOld: true });
+    try {
+      await assert.rejects(promoteCoordinator({ ...f.base, failAfterStep: 3 }), /Injected crash after step 3/);
+      // The crash fell between "nerv.sqlite → archive" and "standby → nerv.sqlite".
+      renameSync(join(f.h, 'nerv.sqlite'), join(f.h, 'nerv.sqlite.pre-standby'));
+      const res = await promoteCoordinator(f.base);
+      assert.ok(!('resumed' in res));
+      assert.equal(f.state()?.coordinatorEpoch, 3);
+      assert.equal(f.state()?.replicationMode, 'active');
+      assert.doesNotThrow(() => assertNoPromotionInProgress(f.h));
+    } finally {
+      rmSync(f.dir, { recursive: true, force: true });
+    }
+  });
+
+  it('re-review fix 2: a run never removes the marker an earlier crashed swap left', async () => {
+    const f = await home({ revokeOld: true });
+    try {
+      await assert.rejects(promoteCoordinator({ ...f.base, failAfterStep: 4 }), /Injected crash after step 4/);
+      await assert.rejects(
+        promoteCoordinator({
+          ...f.base,
+          service: {
+            stop: () => {
+              throw new Error('the service did not stop');
+            },
+            start: () => {},
+          },
+        }),
+        /did not stop/,
+      );
+      assert.throws(() => assertNoPromotionInProgress(f.h), /promotion is in progress/);
+    } finally {
+      rmSync(f.dir, { recursive: true, force: true });
     }
   });
 });
