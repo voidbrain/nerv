@@ -28,7 +28,7 @@ import {
  * one of its printed parts (F-121-T01), the print count and the part's profile; the library file is resolved
  * again and read once at the point of use, and the slice request carries its identity (relative path and
  * SHA-256) with the content, so the base that slices (F-121-T04 sends it to NERV-02) checks the hash and its
- * own profile allowlist before the slicer runs. The Bambu Connect hand-off stays the Orange `bambu.handoff`.
+ * own profile allowlist before the slicer runs. The Bambu Connect hand-off is `bambu.handoff`, always the owner's card.
  */
 
 /** Largest part file read for slicing; the Kaji transfer (F-121-T04) caps at the same size. */
@@ -61,7 +61,7 @@ export interface PrintPartReply {
   sliced?: boolean;
   request?: PartSliceRequest;
   estimate?: SliceResult['estimate'];
-  /** The `bambu.handoff` arguments to propose next (Orange, owner approval). */
+  /** The `bambu.handoff` arguments to propose next (Blue: the owner's approval card). */
   handoff?: Record<string, string | number>;
 }
 
@@ -396,6 +396,6 @@ export function printPartByChat(
     handoff,
     reply:
       `Sliced ${plan}: ${perPrint || 'no estimate'} per print${total}. ` +
-      'Opening it in Bambu Connect needs your approval (bambu.handoff with the handoff arguments); NERV does not start the print.',
+      'Opening it in Bambu Connect waits for your approval card (bambu.handoff with the handoff arguments); NERV does not start the print.',
   };
 }

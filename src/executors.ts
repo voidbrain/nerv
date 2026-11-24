@@ -136,7 +136,7 @@ export const builtinTools: Tool[] = [
   { name: 'batteries.list', effect: 'read' },
   { name: 'batteries.chat', effect: 'write-local' },
   { name: 'fleet.chat', effect: 'write-local' },
-  // F-121-T02: slices a printed part into the local prints-out folder; the Bambu Connect hand-off stays Orange.
+  // F-121-T02: slices a printed part into the local prints-out folder; the Bambu Connect hand-off is the owner's card.
   { name: 'fleet.print', effect: 'write-local' },
   { name: 'batteries.due', effect: 'read' },
   { name: 'batteries.resistance', effect: 'write-local' },
@@ -154,8 +154,9 @@ export const builtinTools: Tool[] = [
   { name: 'fpv.wiring_answer', effect: 'read' },
   // F-084-T03: pushing a coding-job branch and opening a PR is Orange behind owner approval.
   { name: 'coding.push_pr', effect: 'write-external' },
-  // F-087-T03: opening Bambu Connect on the owner's desktop is an Orange action.
-  { name: 'bambu.handoff', effect: 'write-external' },
+  // F-087-T03: opening Bambu Connect on the owner's desktop. Owner decision 2026-11-24 (F-121): always the owner's
+  // card (Blue), whatever Casper or the Scrolls say.
+  { name: 'bambu.handoff', effect: 'write-external', owner: true },
 ];
 const text = (args: Record<string, unknown>, key: string) => {
   const v = args[key];
@@ -491,7 +492,7 @@ const rawToolDocs: ToolDoc[] = [
     name: 'fleet.print',
     effect: 'write-local',
     about:
-      'Prints a drone\'s or drone model\'s printed part ("stampa i piedini di Smoke", "print the AOS feet"): resolves the part, file, count and profile, slices it and replies with file, count, profile, time and grams; asks back (needsAnswer) when the drone, model or part is ambiguous or unknown, and reports a missing file. When the result has handoff, propose bambu.handoff with exactly those arguments: opening Bambu Connect needs the owner\'s approval.',
+      'Prints a drone\'s or drone model\'s printed part ("stampa i piedini di Smoke", "print the AOS feet"): resolves the part, file, count and profile, slices it and replies with file, count, profile, time and grams; asks back (needsAnswer) when the drone, model or part is ambiguous or unknown, and reports a missing file. When the result has handoff, propose bambu.handoff with exactly those arguments: opening Bambu Connect always waits for the owner\'s approval card.',
     args: '{"phrase": the owner\'s Italian or English print request}',
   },
   {
@@ -541,7 +542,7 @@ const rawToolDocs: ToolDoc[] = [
     name: 'bambu.handoff',
     effect: 'write-external',
     about:
-      'Opens a sliced .gcode.3mf file in Bambu Connect via import link behind Orange approval and returns the owner checklist.',
+      "Opens a sliced .gcode.3mf file in Bambu Connect via import link; always waits for the owner's approval card, then returns the owner checklist.",
     args: '{"gcode3mfPath": string, "profileName": string, "printTimeText"?: string, "filamentGrams"?: number, "printerName"?: string, "plateType"?: string, "nozzleSize"?: string, "amsMapping"?: string, "sourceFile"?: string, "repeats"?: integer}',
   },
 ];
