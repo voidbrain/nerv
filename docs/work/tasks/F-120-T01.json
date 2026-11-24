@@ -7,14 +7,16 @@
   "status": "planned",
   "acceptance": [
     "docs/reviews/gauntlet-coverage/2026-11-24.md (or the run date) lists each closed feature since F-074 with its class and reason",
-    "Each NERV-specific gap becomes a proposed case in F-120-T02 with expected outcome; general gaps are listed as requests for gauntlet-protocol, not as NERV work"
+    "Each NERV-specific gap becomes a proposed case in F-120-T02 with expected outcome; general gaps are listed as requests for gauntlet-protocol, not as NERV work",
+    "Starts from the \"Area coverage\" list in docs/test-capability-index.md: every area with 0 mapped cases (coding, code-review, math, logic-planning, cad-3d, backlog-management, estimation, research, audio-video, scheduling-time at 2026-11-24) ends with a decision: NERV system-pack case, gauntlet-protocol request, or a stated reason to skip"
   ],
   "dependsOn": [],
   "resources": [
     "docs/reviews/gauntlet-coverage/**",
     "docs/work/records/F-120.md",
     "docs/work/tasks/F-120-T02.json",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "docs/test-capability-index.md"
   ],
   "capabilities": [
     "bounded-edit",
