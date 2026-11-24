@@ -9,31 +9,31 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 3 | 1 | 7 | 1 |
+| **This week** | 3 | 1 | 9 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 37 | 19 |
-| **Require Human 🧑** | 10 | 8 |
+| **Open** | 37 | 20 |
+| **Require Human 🧑** | 11 | 7 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
-| [F-011](#f-011) |  | [B-068](#b-068) |  |
+| [F-062](#f-062) | [F-089](#f-089) | [B-057](#b-057) | — |
+| [F-011](#f-011) | [F-116](#f-116) | [B-068](#b-068) |  |
 | [F-004](#f-004) |  | [B-107](#b-107) |  |
 | [F-012](#f-012) |  | [B-056](#b-056) |  |
 | [F-086](#f-086) |  | [B-096](#b-096) |  |
-| [F-087](#f-087) |  | [B-106](#b-106) |  |
-| [F-092](#f-092) |  | [B-110](#b-110) |  |
-| [F-060](#f-060) |  | [B-112](#b-112) |  |
+| [F-087](#f-087) |  | [B-110](#b-110) |  |
+| [F-092](#f-092) |  | [B-112](#b-112) |  |
+| [F-060](#f-060) |  |  |  |
 | [F-007](#f-007) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 78.25 h agent + 10.5 h owner across 105 open steps of 36 features and 19 other records. 96 h of actual effort recorded on 119 steps. Generated from the task files.
+**Remaining effort:** 85.25 h agent + 10.25 h owner across 105 open steps of 36 features and 20 other records. 96 h of actual effort recorded on 119 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -385,6 +385,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-21: B-082-T02 CI run 44815656209 and required fresh-context review passed. Local: targeted regression 2/2, full tests 1,041 pass / 2 platform skips, build, `check:fast`, headless 5 pass / 1 Windows skip. Pending: the live desktop-session install on Tabgha after B-087-T01. |
 | Reviewed | 2026-11-21 |
+
+</details>
+
+---
+### <a id="b-118"></a>[🐞 B-118](#top)
+
+**Windows CI: the test step runs into its 18-minute limit**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 4 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-118-T01 — Make the Windows test step fit its limit with margin (Planned).
+
+| | |
+|---|---|
+| **Issue** | The `windows` job's `npm test` step (limit `timeout-minutes: 18`, set by B-076) ran out twice on PR #679: run 45259024776, attempts 1 (20:31:12–20:49:13 UTC) and 2 (21:20:20–21:38:20 UTC), 2026-11-23. Passing attempts that day took about 9–10 minutes (attempt 3 of the same run 9 m 48 s), so the suite either slows sharply on some runners or a test hangs; either way a PR waits on reruns. |
+| **Reproduce** | Rerun the `windows` job of a full-suite PR several times; compare the step duration and the `windows-test-report` artifact (the last line before the stop names the test after which it hung). |
+| **Check** | The two stopped attempts are read from their test reports and the cause named (a hanging test, or a slow runner with the slowest files measured); a hang gets a failing-first test and a fix, slowness a split, parallelism or test change; the next five full Windows runs finish within 12 minutes (a third of margin under the limit) without reruns. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-118-t01"></a>B-118-T01 — Make the Windows test step fit its limit with margin | 4 h | 0 h | 4 h | Planned |
+| 🟡 Medium | **Total** | 4 h | 0 h (0 of 1 steps recorded) | 4 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-118.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776) |
+| Opened | 2026-11-24 |
+| Verification | Pending |
+| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -1048,54 +1086,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-089"></a>[✨ F-089](#top)
-
-**Browser control: act on a named control in an open page**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-089-T04 — Bind a live browser driver to the click adapter (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
-| **Reproduce** | Ask NERV to click a named button on an open tab. |
-| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
-| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 4 h (3 of 4 steps) | 3.25 h (3 of 4 steps recorded) | 0.25 h owner | 2 of 4 completed | | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-089.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
 ### <a id="f-090"></a>[✨ F-090](#top)
 
 **Resume interrupted coding work without the editor**
@@ -1150,7 +1140,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-093-T03 — Shared adapter for F-012 and F-092 (Implemented; verification pending).
 
@@ -1162,19 +1152,19 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-093-t03"></a>F-093-T03 — Shared adapter for F-012 and F-092 | 1 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | — | 🤖 | [PR #675](https://github.com/voidbrain/nerv/pull/675) implementation |
-| 🟢 Small | <a id="f-093-t05"></a>F-093-T05 — Bind the macOS accessibility driver to the click adapter | 2 h | 1.25 h so far (stated) | 0 h | Implemented; verification pending | — | [F-093-T04](#f-093-t04) | 🤖 | [PR #683](https://github.com/voidbrain/nerv/pull/683) implementation |
-| 🟢 Small | <a id="f-093-t04"></a>F-093-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-093-T05](#f-093-t05) | — | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 5 h (4 of 5 steps) | 3.75 h (4 of 5 steps recorded) | 0.25 h owner | 2 of 5 completed | | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-093-t03"></a>F-093-T03 — Shared adapter for F-012 and F-092 | 1 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | 🤖 | [PR #675](https://github.com/voidbrain/nerv/pull/675) implementation |
+| 🟢 Small | **Total** | 5 h (4 of 5 steps) | 3.75 h (4 of 5 steps recorded) | 0 h | 4 of 5 completed | | |
 
-<details><summary>Done steps (2)</summary>
+<details><summary>Done steps (4)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-093-t01"></a>F-093-T01 — Decision: desktop adapter and permissions | 0.5 h | 0.25 h (measured) | Completed | — |
 | — | <a id="f-093-t02"></a>F-093-T02 — Find and click a control by name | 1.5 h | 1.5 h (stated) | Completed | [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation |
+| — | <a id="f-093-t04"></a>F-093-T04 — Owner check on the Mac | — | 0 h | Completed | — |
+| — | <a id="f-093-t05"></a>F-093-T05 — Bind the macOS accessibility driver to the click adapter | 2 h | 1.25 h (stated) | Completed | [PR #683](https://github.com/voidbrain/nerv/pull/683) implementation |
 
 </details>
 
@@ -1185,10 +1175,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-093-T02: [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation · F-093-T03: [PR #675](https://github.com/voidbrain/nerv/pull/675) implementation · F-093-T05: [PR #683](https://github.com/voidbrain/nerv/pull/683) implementation. [PR #683](https://github.com/voidbrain/nerv/pull/683) (F-093-T05); [PR #675](https://github.com/voidbrain/nerv/pull/675) (F-093-T03); [PR #497](https://github.com/voidbrain/nerv/pull/497) (merged; CI green); [Desktop control adapter decision](decisions/desktop-control-adapter.md) (`F-093-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-093-T02: [PR #497](https://github.com/voidbrain/nerv/pull/497) implementation · F-093-T03: [PR #675](https://github.com/voidbrain/nerv/pull/675) implementation · F-093-T05: [PR #683](https://github.com/voidbrain/nerv/pull/683) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-093-T04 closed); [owner check](acceptance/f093-t04-desktop-click.md); [PR #683](https://github.com/voidbrain/nerv/pull/683) (F-093-T05); [PR #675](https://github.com/voidbrain/nerv/pull/675) (F-093-T03); [PR #497](https://github.com/voidbrain/nerv/pull/497) (merged; CI green); [Desktop control adapter decision](decisions/desktop-control-adapter.md) (`F-093-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-093-T02 not closed: the adapter logic passed on green CI, but `nerv desktop-click` runs the adapter with a stub driver ("No live desktop accessibility driver bound in CLI"), so the owner check F-093-T04 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/497) merged on green CI. `F-093-T01`: `npm run check:fast` passed. |
-| Reviewed | 2026-11-18 |
+| Verification | Human: 2026-11-23, owner live check on NERV-01 passed ([acceptance](acceptance/f093-t04-desktop-click.md)). Unit/integration: 2026-11-23, `test/desktop-macos-driver.test.ts` and `test/desktop-shared-adapter.test.ts` on green CI ([PR #683](https://github.com/voidbrain/nerv/pull/683), [PR #675](https://github.com/voidbrain/nerv/pull/675)). |
+| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -1501,6 +1491,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-117"></a>[🐞 B-117](#top)
+
+**Gauntlet `nerv-system-flows/bases` and `browser` fail under machine load and pass alone**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-117-T01 — Name and fix the load failures of the bases and browser gauntlet cases (Planned).
+
+| | |
+|---|---|
+| **Issue** | Seen 2026-11-23 in several landers and agents: the gauntlet cases `nerv-system-flows/bases` and `nerv-system-flows/browser` failed while other runs loaded the machine, and passed when run alone. A case that fails on load gives no evidence about the change under test and costs a rerun. |
+| **Reproduce** | Run `npm run gauntlet:run` for `nerv-system-flows/bases` and `nerv-system-flows/browser` while another full `npm test` or gauntlet run loads the same machine; then run each case alone. |
+| **Check** | The failing step of each case is read from its run output and its cause named (a fixed deadline, a shared port or profile, ordering); a regression reproduces the load case and fails before the fix; with the fix both cases pass under the same load, or the case states the bound that absorbs it. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-117-t01"></a>B-117-T01 — Name and fix the load failures of the bases and browser gauntlet cases | 3 h | 0 h | 3 h | Planned |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 1 steps recorded) | 3 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-117.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened) |
+| Opened | 2026-11-24 |
+| Verification | Pending |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-086"></a>[✨ F-086](#top)
 
 **Gmail: search and read, then draft and send behind approval**
@@ -1593,6 +1621,55 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-087-T02 verified: [PR #491](https://github.com/voidbrain/nerv/pull/491) merged on green CI. `F-087-T01` decision written in [bambu-print-handoff.md](decisions/bambu-print-handoff.md); verified with `npm run check:fast`. 2026-11-22: F-087-T03 verified (`bambu.handoff` Orange gate + `handOffToBambuConnect` + owner checklist); `node --test test/slicer.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-089"></a>[✨ F-089](#top)
+
+**Browser control: act on a named control in an open page**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h owner | — | — | 🤖 | — | 🤔 |
+
+🧑 **→** [Decide](decisions/browser-adapter.md#owner-decision-a-chat-tool-for-browser-clicks-f-089-t05) whether Misato gets a chat tool for browser clicks (F-089-T05).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
+| **Reproduce** | Ask NERV to click a named button on an open tab. |
+| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
+| 🟢 Small | <a id="f-089-t05"></a>F-089-T05 — Decision: a chat tool for browser clicks | — | 0 h | 0 h agent + 0.25 h owner | Planned | — | — | [🤔](decisions/browser-adapter.md#owner-decision-a-chat-tool-for-browser-clicks-f-089-t05) | — |
+| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 4 h (3 of 5 steps) | 3.25 h (3 of 5 steps recorded) | 0.5 h owner | 2 of 5 completed | | | | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-089.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
+| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -2592,53 +2669,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: Unit: dashboard suite 38 pass. Owner live check pending. |
 | Reviewed | 2026-11-19 |
-
-</details>
-
----
-### <a id="b-106"></a>[🐞 B-106](#top)
-
-**Sephirot flow: answer edge lags behind Debrief activation and marker arrowheads lack fill**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
-
-🧑 **→** Confirm on the live dashboard after rebuilding `dist/web` and restarting `nerv`.
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-22 on S-F11B: after Misato (`plan`), `DEBRIEF` activates before the `plan → debrief` (`answer`) line lights up, and arrowheads on `answer` and `sync → apt` (`MISATO'S APT`) do not render filled (`fill: none` on `.sephirot svg.edges path` matched `<marker><path>` and `context-stroke` failed to fill). |
-| **Reproduce** | Open the live dashboard EVA full view on an answer-only sortie (`S-F11B`) and inspect the `plan → debrief` and `sync → apt` edges. |
-| **Check** | Test committed failing first: `.sephirot svg.edges > path` leaves `<marker>` arrowheads filled, `drawEdges` emits explicit per-state markers (`#edge-arrow`, `#edge-arrow-passed`, `#edge-arrow-owner`, `#edge-arrow-skip`), and `passedEdge` marks `answer` / `relay` / `declined` passed as soon as `debrief` is `on`, `wait`, or `done`. The owner confirms on the live dashboard. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who |
-|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="b-106-t02"></a>B-106-T02 — Owner confirms Sephirot answer edge and arrowheads on live dashboard | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](work/records/B-106.md) |
-| 🟢 Small | **Total** | 0.75 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.25 h owner | 2 of 3 completed | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="b-106-t01"></a>B-106-T01 — Fix Sephirot answer-edge activation and marker arrowhead fills | 0.5 h | 0 h | Completed |
-| — | <a id="b-106-t03"></a>B-106-T03 — Rerun pending gauntlet cases at this source | 0.25 h | 0 h | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-106.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | PR #644 (`fix/b-106-sephirot-arrows`). Test: `B-106: answer edge activates with debrief and Sephirot markers are filled cleanly without context-stroke` in `test/dashboard.test.ts`. |
-| Opened | 2026-11-22 |
-| Verification | 2026-11-22: `node --test test/dashboard.test.ts` and `npm run check:fast` passed. |
-| Reviewed | 2026-11-22 |
 
 </details>
 
