@@ -281,7 +281,8 @@ test('F-118-T01 join: wrong, expired and too many codes are refused; a device ha
         assert.equal((await pair(url, expired)).status, 401, 'expired');
         const good = await mint(url, token);
         assert.equal((await pair(url, good, '')).status, 400, 'a name is required');
-        for (let i = 0; i < 3; i++) await pair(url, 'AAAA-AAAA');
+        // The wrong code above is older than a minute now: four more plus the expired one make five.
+        for (let i = 0; i < 4; i++) await pair(url, 'AAAA-AAAA');
         const limited = await pair(url, good);
         assert.equal(limited.status, 429, 'rate limited');
         assert.ok(Number(limited.headers.get('retry-after')) > 0);

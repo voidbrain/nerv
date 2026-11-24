@@ -4,6 +4,8 @@
 
 `nerv open dashboard` opens **http://127.0.0.1:4317/dashboard/** using a short-lived dashboard session (12 h, tab close, service restart, or `nerv sessions revoke`). Demo data only loads when opened from disk or with `?demo`.
 
+`nerv open --phone` prints a one-use pairing code (`XXXX-XXXX`, 5 minutes) for a phone. `POST /api/device/pair` with `{code, name}` swaps it once for a device credential that the phone sends as its bearer: same powers as a dashboard session, stored only as a hash in `devices.json` (mode 0600), lapsing after 90 days without use, revocable per device (`GET`/`DELETE /api/devices`, admin token) and ended by rotating the admin token. Failed codes are limited to 5 a minute per client; 20 a minute in all lock pairing for a minute, doubling up to an hour.
+
 - **Sorties & search:** `/` filters loaded sorties; **Load older sorties** pages history in chunks of 50 (`GET /api/sorties`).
 - **Approvals:** `a` approves once and `r` rejects in two presses (`Esc` cancels). **Spear this sortie** stands down cards and revokes unused grants.
 - **Reminders & Memory:** edit/cancel pending reminders (`PATCH`/`DELETE /api/reminders/ID`), manage Lilith facts, and reload `config.json` from the Health panel.

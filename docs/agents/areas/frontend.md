@@ -4,6 +4,7 @@
 
 - Read [the style guide](../../STYLE-GUIDE.md). Angular renders registered components, never model-generated JavaScript.
 - The admin token lives in a mode-0600 file under `NERV_HOME` and never reaches the browser. `open` mints a single-use code (60 s, max 5 unused), the page strips `#code=` from URL/history and exchanges it for an in-memory **dashboard session** (12 h max, ended by restart or `sessions revoke`, barred from minting codes, revoking sessions, or calling `POST /api/stop`).
+- A **paired device** (F-118, `src/device-book.ts`) holds a device credential with the same restrictions as a dashboard session; the server keeps only its SHA-256, bound to the admin-token fingerprint, with a 90-day sliding idle limit. Pairing codes are admin-minted, single-use, 5 min, compared in constant time and rate-limited per client and globally.
 - Dashboard keeps the session in `sessionStorage`; Angular keeps it in component memory. Pasted admin tokens stay in memory only. No token or code appears in a command line or a URL after sign-in, and native TLS offers no codes or sessions.
 - English is the default UI language with Italian switching; CLI commands and raw diagnostics remain English.
 - The NERV dashboard lives in `web/public/dashboard/` (`dashboard.js` simulation, `live.js` live adapter active only with `#code=`). It must run under service CSP (no inline script, no CDN, no remote fonts).
