@@ -226,7 +226,15 @@ test('F-118-T01 join: pair, use, restart, list, revoke and rotation over HTTP', 
       ).json()) as {
         devices: Record<string, unknown>[];
       };
-      assert.deepEqual(Object.keys(list.devices[0]!).sort(), ['created', 'expires', 'id', 'lastUse', 'name']);
+      // F-118-T03 added `current` (Settings marks the device asking; never true for the admin token).
+      assert.deepEqual(Object.keys(list.devices[0]!).sort(), [
+        'created',
+        'current',
+        'expires',
+        'id',
+        'lastUse',
+        'name',
+      ]);
       const del = await fetch(url + '/api/devices/' + device.device.id, {
         method: 'DELETE',
         headers: { authorization: 'Bearer ' + admin },
@@ -293,13 +301,8 @@ test('F-118-T01 join: wrong, expired and too many codes are refused; a device ha
         assert.equal(await doctor(url, device), 200);
         for (const path of ['/api/device/codes', '/api/session/codes', '/api/session/revoke', '/api/stop'])
           assert.equal((await post(url + path, device)).status, 403, path);
-        const list = await fetch(url + '/api/devices', { headers: { authorization: 'Bearer ' + device } });
-        assert.equal(list.status, 403);
-        const del = await fetch(url + '/api/devices/x', {
-          method: 'DELETE',
-          headers: { authorization: 'Bearer ' + device },
-        });
-        assert.equal(del.status, 403);
+        // F-118-T03 (requirement changed: Settings lists and revokes devices) opened GET/DELETE /api/devices to
+        // sessions and devices; the F-118-T03 join test covers them.
         // A dashboard session cannot mint pairing codes either.
         const login = (await (await post(url + '/api/session/codes', token)).json()) as { code: string };
         const session = (
@@ -430,6 +433,148 @@ test('F-118-T02 review join: a full device book refuses with 409 and leaves the 
           headers: { authorization: 'Bearer ' + admin },
         });
         assert.equal((await pair(url, code)).status, 200, 'after a revoke the same code still pairs');
+      },
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// F-118-T03: the owner lists and revokes paired devices from Settings (a dashboard session or a paired device, so the
+// installed app too) and from `nerv devices` on the Mac. Minting pairing codes stays CLI only. A revoked device's next
+// request is refused (401), which the app shows as "pairing ended".
+const get = (url: string, bearer: string) => fetch(url, { headers: { authorization: 'Bearer ' + bearer } });
+const del = (url: string, bearer: string) =>
+  fetch(url, { method: 'DELETE', headers: { authorization: 'Bearer ' + bearer } });
+const sessionFor = async (url: string, admin: string) => {
+  const login = (await (await post(url + '/api/session/codes', admin)).json()) as { code: string };
+  return (
+    (await (await post(url + '/api/session/exchange', undefined, { code: login.code })).json()) as { token: string }
+  ).token;
+};
+type Listed = { id: string; name: string; created: number; lastUse: number; expires: number; current: boolean };
+
+test('F-118-T03 join: Settings (a session or a device) lists devices, marks this one and revokes; codes stay CLI only', async () => {
+  const dir = temp();
+  const admin = 'a'.repeat(32);
+  try {
+    await withServer(
+      dir,
+      () => admin,
+      async (url) => {
+        const phone = (await (await pair(url, await mint(url, admin), 'iPhone · dashboard app')).json()) as {
+          token: string;
+          device: { id: string };
+        };
+        const tab = (await (await pair(url, await mint(url, admin), 'Mac · dashboard app')).json()) as {
+          token: string;
+          device: { id: string };
+        };
+        // The installed app sees every device and which one it is.
+        const fromPhone = await get(url + '/api/devices', phone.token);
+        assert.equal(fromPhone.status, 200);
+        const listed = ((await fromPhone.json()) as { devices: Listed[] }).devices;
+        assert.deepEqual(
+          listed.map((d) => [d.name, d.current]),
+          [
+            ['iPhone · dashboard app', true],
+            ['Mac · dashboard app', false],
+          ],
+        );
+        assert.deepEqual(Object.keys(listed[0]!).sort(), ['created', 'current', 'expires', 'id', 'lastUse', 'name']);
+        // A dashboard session (nerv open dashboard) lists them too, none of them its own.
+        const session = await sessionFor(url, admin);
+        const fromSession = ((await (await get(url + '/api/devices', session)).json()) as { devices: Listed[] })
+          .devices;
+        assert.deepEqual(
+          fromSession.map((d) => d.current),
+          [false, false],
+        );
+        // Revoke from Settings: the stale tab device's next request is refused.
+        assert.equal(await doctor(url, tab.token), 200);
+        assert.equal((await del(url + '/api/devices/' + tab.device.id, session)).status, 200);
+        assert.equal(await doctor(url, tab.token), 401, 'the revoked device is refused');
+        assert.equal((await del(url + '/api/devices/' + tab.device.id, session)).status, 404, 'already gone');
+        // The phone revokes itself: its next request is refused too.
+        assert.equal((await del(url + '/api/devices/' + phone.device.id, phone.token)).status, 200);
+        assert.equal(await doctor(url, phone.token), 401);
+        assert.equal((await get(url + '/api/devices', session)).status, 200);
+        // Still CLI only: minting codes, revoking sessions, stopping.
+        for (const path of ['/api/device/codes', '/api/session/codes', '/api/session/revoke', '/api/stop'])
+          assert.equal((await post(url + path, session)).status, 403, path);
+      },
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+async function cli(dir: string, home: string, port: string, args: string[]) {
+  const child = spawn(process.execPath, ['src/cli.ts', ...args], {
+    cwd: process.cwd(),
+    // HOME too, so the lifecycle guard never looks at the real service.
+    env: { ...process.env, NERV_HOME: home, NERV_PORT: port, NERV_TOKEN: undefined, HOME: dir, USERPROFILE: dir },
+  });
+  let out = '';
+  let err = '';
+  child.stdout.on('data', (c: Buffer) => (out += c.toString()));
+  child.stderr.on('data', (c: Buffer) => (err += c.toString()));
+  const status = await new Promise<number | null>((done) => child.on('close', done));
+  return { status, out, err };
+}
+
+test('F-118-T03 join: nerv devices lists name and last use; nerv devices revoke NAME ends that device', async () => {
+  const dir = temp();
+  const home = join(dir, 'home');
+  try {
+    initialize(home);
+    await withServer(
+      dir,
+      () => readToken(home),
+      async (url) => {
+        const port = new URL(url).port;
+        const admin = readToken(home);
+        const empty = await cli(dir, home, port, ['devices']);
+        assert.equal(empty.status, 0, empty.err);
+        assert.match(empty.out, /No paired devices/);
+        const phone = (
+          (await (await pair(url, await mint(url, admin), 'iPhone · workspace app')).json()) as {
+            token: string;
+          }
+        ).token;
+        const macs: string[] = [];
+        for (let i = 0; i < 2; i++)
+          macs.push(
+            ((await (await pair(url, await mint(url, admin), 'Mac · dashboard app')).json()) as { token: string })
+              .token,
+          );
+        const ids = ((await (await get(url + '/api/devices', admin)).json()) as { devices: Listed[] }).devices.map(
+          (d) => d.id,
+        );
+        const list = await cli(dir, home, port, ['devices', 'list']);
+        assert.equal(list.status, 0, list.err);
+        assert.match(list.out, /3 paired devices/);
+        for (const id of ids) assert.ok(list.out.includes(id), id);
+        assert.match(list.out, /iPhone · workspace app/);
+        assert.match(list.out, /last used/);
+        // Two devices share a name: revoking by that name asks for the ID and revokes nothing.
+        const ambiguous = await cli(dir, home, port, ['devices', 'revoke', 'Mac · dashboard app']);
+        assert.notEqual(ambiguous.status, 0);
+        assert.match(ambiguous.err, /2 devices are called/);
+        assert.ok(ambiguous.err.includes(ids[1]!) && ambiguous.err.includes(ids[2]!), ambiguous.err);
+        for (const t of [phone, ...macs]) assert.equal(await doctor(url, t), 200);
+        // By name (any case), then by ID.
+        const byName = await cli(dir, home, port, ['devices', 'revoke', 'iphone · WORKSPACE app']);
+        assert.equal(byName.status, 0, byName.err);
+        assert.match(byName.out, /Revoked iPhone · workspace app/);
+        assert.equal(await doctor(url, phone), 401, 'the revoked phone is refused');
+        const byId = await cli(dir, home, port, ['devices', 'revoke', ids[2]!]);
+        assert.equal(byId.status, 0, byId.err);
+        assert.equal(await doctor(url, macs[1]!), 401);
+        assert.equal(await doctor(url, macs[0]!), 200, 'the other one is kept');
+        const unknown = await cli(dir, home, port, ['devices', 'revoke', 'Nothing']);
+        assert.notEqual(unknown.status, 0);
+        assert.match(unknown.err, /No paired device/);
       },
     );
   } finally {
