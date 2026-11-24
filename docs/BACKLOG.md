@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 3 | 1 | 12 | 2 |
+| **This week** | 5 | 1 | 12 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 37 | 23 |
+| **Open** | 39 | 23 |
 | **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 84 h agent + 10.25 h owner across 122 open steps of 36 features and 23 other records. 121 h of actual effort recorded on 137 steps. Generated from the task files.
+**Remaining effort:** 98 h agent + 10.75 h owner across 129 open steps of 38 features and 23 other records. 124.75 h of actual effort recorded on 141 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -173,7 +173,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | [F-006-T27](#f-006-t27) | 🤖 | — | — |
 
-💻 **→** Next: B-119-T01 — Let placement probes run to their own budget (Planned).
+💻 **→** Next: merge PR #708 (B-119-T01 implemented), then rerun the P3 role comparison (F-006-T27).
 
 | | |
 |---|---|
@@ -185,8 +185,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-119-t01"></a>B-119-T01 — Let placement probes run to their own budget | 1 h | 0 h | 1 h | Planned | — | [F-006-T27](#f-006-t27) |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | | |
+| 🟢 Small | <a id="b-119-t01"></a>B-119-T01 — Let placement probes run to their own budget | 1 h | 0.75 h so far (stated) | 1 h | Implemented; verification pending | — | [F-006-T27](#f-006-t27) |
+| 🟢 Small | **Total** | 1 h | 0.75 h | 1 h | 0 of 1 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -195,9 +195,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #698](https://github.com/voidbrain/nerv/pull/698) (opened); F-006-T23 evidence in the [F-006-T26 report](evaluations/2026-11-24-f006-t26-placement-report.md) |
+| PR / evidence | [PR #708](https://github.com/voidbrain/nerv/pull/708) (socket budget; Test: `test/placement-campaign.test.ts`); [PR #698](https://github.com/voidbrain/nerv/pull/698) (opened); F-006-T23 evidence in the [F-006-T26 report](evaluations/2026-11-24-f006-t26-placement-report.md) |
 | Opened | 2026-11-24 |
-| Verification | Pending |
+| Verification | Unit/integration 2026-11-24: `test/placement-campaign.test.ts` passes locally (4 of 4 tests). Live P3 probe over 15 s on NERV-02: Pending (F-006-T27). |
 | Reviewed | 2026-11-24 |
 
 </details>
@@ -689,9 +689,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-119-T01 — First skill discovery review (Planned).
+💻 **→** Next: merge PR on green CI and close.
 
 | | |
 |---|---|
@@ -701,10 +701,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-119-t01"></a>F-119-T01 — First skill discovery review | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-119-t01"></a>F-119-T01 — First skill discovery review | 1 h | 0.25 h so far (stated) | 1 h | Implemented; verification pending | [PR #709](https://github.com/voidbrain/nerv/pull/709) first skill discovery review (docs/reviews/skills/2026-11-24.md) |
+| 🟢 Small | **Total** | 1 h | 0.25 h | 1 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -713,10 +713,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| PR / evidence | Steps: F-119-T01: [PR #709](https://github.com/voidbrain/nerv/pull/709) first skill discovery review (docs/reviews/skills/2026-11-24.md). [PR #709](https://github.com/voidbrain/nerv/pull/709) ([2026-11-24.md](reviews/skills/2026-11-24.md)); opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
 | Opened | 2026-11-23 |
-| Verification | — |
-| Reviewed | 2026-11-23 |
+| Verification | Documentation 2026-11-24: [2026-11-24.md](reviews/skills/2026-11-24.md) written per docs/agents/skills.md; `npm run check:freshness` and `npm run check:fast` pass. |
+| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -820,6 +820,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-22: F-083-T04 saved-recipe live check recorded in [f083-t04-saved-recipe.md](acceptance/f083-t04-saved-recipe.md). 2026-11-20: `node --test test/photos.test.ts test/documents.test.ts test/cooking-session.test.ts test/telegram.test.ts` (26/26 passed), `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-083-T05 verified: [PR #481](https://github.com/voidbrain/nerv/pull/481) merged on green CI (test/pantry.test.ts). `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history). `F-083-T02` added `computeFromSavedDocument` / `DocumentStore.compute` in `src/documents.ts` and read-only tool `docs.compute` in `src/executors.ts` (cites saved values & arithmetic, asks instead of guessing on missing ratio/setting/unit mismatch); verified with `node --test test/documents.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-120"></a>[✨ F-120](#top)
+
+**Gauntlet coverage of NERV capabilities**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-120-T01 — Catch-up Gauntlet coverage review of closed features (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24: the Gauntlet exists to qualify models for NERV's general and specific capabilities, but no rule ties a finished NERV feature to a Gauntlet case. NERV's own pack (`evals/gauntlet/system-v1.json`) has 8 broad flows; pairing, relocation, update, fleet, placement and watches have no case. General domain packs (coding, embedded, logic, Italian quality, 3D printing, image generation) were requested from gauntlet-protocol the same day and are tracked in that repository. |
+| **Reproduce** | `jq '.cases[].id' evals/gauntlet/system-v1.json` lists 8 flows; `docs/test-capability-index.md` has no row for the features closed since F-074. |
+| **Check** | Every closed NERV feature with model-facing behaviour has a system-pack case or a recorded reason; the cases run and pass in an owner-approved campaign. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | 1.5 h | Planned | — | [F-120-T02](#f-120-t02) |
+| 🟢 Small | <a id="f-120-t03"></a>F-120-T03 — Adopt the Gauntlet domain packs when released | 0.5 h | 0 h | 0.5 h | Planned | — | — |
+| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | [F-120-T01](#f-120-t01) | — |
+| 🔴 Large | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 5 h | 0 of 3 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-120.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711). |
+| Opened | 2026-11-24 |
+| Verification | — |
+| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -1108,18 +1148,18 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | **Issue** | Owner 2026-11-23 (decision 1): the installed phone app (workspace or dashboard) cannot sign in: the sign-in box takes only the admin token, a QR or link opens Safari, and the session lived in tab storage that iOS clears on relaunch. The owner chose pairing: once per device, revocable, lapsing after 90 days unused; plus a QR option. |
 | **Reproduce** | Install the dashboard to the iPhone Home Screen and open it: "NOT SIGNED IN". |
-| **Check** | A short code typed into the installed app pairs it; it stays signed in through restarts and updates; Settings and nerv devices revoke it; a QR pairs browsers in one step. |
+| **Check** | A short code typed into the installed app pairs it; it stays signed in through restarts and updates; Settings and nerv devices revoke it; a scanned QR opens the Safari dashboard showing the code, which the installed app then takes. |
 
 **Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
 | 🟡 Medium | <a id="f-118-t01"></a>F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code | 3 h | 1.5 h so far (stated) | 3 h | Implemented; verification pending | — | [F-118-T02](#f-118-t02), [F-118-T03](#f-118-t03), [F-118-T05](#f-118-t05) |
-| 🟡 Medium | <a id="f-118-t02"></a>F-118-T02 — Workspace and dashboard pair from their own sign-in box; the installed app signs itself in | 2 h | 0 h | 2 h | Planned | [F-118-T01](#f-118-t01) | [F-118-T04](#f-118-t04) |
+| 🟡 Medium | <a id="f-118-t02"></a>F-118-T02 — Workspace and dashboard pair from their own sign-in box; the installed app signs itself in | 2 h | 2.25 h so far (stated) | 2 h | Implemented; verification pending | [F-118-T01](#f-118-t01) | [F-118-T04](#f-118-t04) |
 | 🟡 Medium | <a id="f-118-t03"></a>F-118-T03 — Paired devices in Settings with Revoke; nerv devices list and revoke | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
 | 🟢 Small | <a id="f-118-t04"></a>F-118-T04 — Phone procedure: Tailscale serve, pairing and push, then the owner check | 0.5 h | 0 h | 0.5 h | Planned | [F-118-T02](#f-118-t02) | — |
 | 🟡 Medium | <a id="f-118-t05"></a>F-118-T05 — Pairing as a QR code: nerv open --phone --qr and Settings → Pair a device | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
-| 🟣 Very large | **Total** | 8.5 h | 1.5 h (1 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
+| 🟣 Very large | **Total** | 8.5 h | 3.75 h (2 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1128,9 +1168,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689); F-118-T01 [PR #700](https://github.com/voidbrain/nerv/pull/700). |
+| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689); F-118-T01 [PR #700](https://github.com/voidbrain/nerv/pull/700); F-118-T02 [PR #707](https://github.com/voidbrain/nerv/pull/707). |
 | Opened | 2026-11-23 |
-| Verification | 2026-11-24: F-118-T01 `test/device-pairing.test.ts` 13/13 (committed failing first, review fixes too); with session, session-persist, dashboard-accounting, decision-client, CLI help and dashboard suites 85/85; `check:fast` green. |
+| Verification | 2026-11-24: F-118-T01 `test/device-pairing.test.ts` 13/13 (committed failing first, review fixes too); with session, session-persist, dashboard-accounting, decision-client, CLI help and dashboard suites 85/85; `check:fast` green. F-118-T02: `test/evaluation.browser.mjs` F-118-T02 (installed pair → reload → still signed in → revoke → pairing ended, both apps; browser tab keeps no device credential) failed first against main's client, passes; `test/device-pairing-client.test.ts` 5/5; after the review, the browser test (tab refuses the code without calling the endpoint, the code stays usable), `test/device-pairing.test.ts` full book keeps the code and the client tests 19/19. A real iPhone Home Screen launch is not yet observed (F-118-T04). |
 | Reviewed | 2026-11-23 |
 
 </details>
@@ -1547,9 +1587,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-117-T01 — Name and fix the load failures of the bases and browser gauntlet cases (Planned).
+💻 **→** Next: merge PR on green CI and close.
 
 | | |
 |---|---|
@@ -1559,10 +1599,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-117-t01"></a>B-117-T01 — Name and fix the load failures of the bases and browser gauntlet cases | 3 h | 0 h | 3 h | Planned |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 1 steps recorded) | 3 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-117-t01"></a>B-117-T01 — Name and fix the load failures of the bases and browser gauntlet cases | 3 h | 0.5 h so far (stated) | 3 h | Implemented; verification pending | [PR #710](https://github.com/voidbrain/nerv/pull/710) name and fix bases and browser gauntlet load failures; failing-first test/gauntlet-load.test.ts |
+| 🟡 Medium | **Total** | 3 h | 0.5 h | 3 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1571,9 +1611,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened) |
+| PR / evidence | Steps: B-117-T01: [PR #710](https://github.com/voidbrain/nerv/pull/710) name and fix bases and browser gauntlet load failures; failing-first test/gauntlet-load.test.ts. [PR #710](https://github.com/voidbrain/nerv/pull/710) (Test: `test/gauntlet-load.test.ts`); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened) |
 | Opened | 2026-11-24 |
-| Verification | Pending |
+| Verification | Unit/integration 2026-11-24: `node --test test/gauntlet-load.test.ts test/worker-outbox.test.ts test/kaji-seats.test.ts test/worker-link-heartbeat.test.ts` (24/24 pass); `npm run gauntlet:run` for `nerv-system-flows/bases` and `nerv-system-flows/browser` passed concurrently under load and alone (`npm run check:gauntlet-runs` and `npm run check:fast` pass). |
 | Reviewed | 2026-11-24 |
 
 </details>
@@ -2362,6 +2402,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-101-T01 verified: [PR #484](https://github.com/voidbrain/nerv/pull/484) merged on green CI. |
 | Reviewed | 2026-11-20 |
+
+</details>
+
+---
+### <a id="f-121"></a>[✨ F-121](#top)
+
+**Printed parts per drone: "print Smoke's feet"**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟣 Very large | 9 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-121-T01 — Printed parts on drone models (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-24: each drone model in the fleet (F-098) has its own 3D-printed parts. AOS 5: 4 motor feet, a rear tail with mounts for the two O4 antennas, a GPS enclosure, a buzzer enclosure and 2 camera cage bands (one per side). Pavo20 Pro: the same GPS and buzzer enclosures only. "Print Smoke's feet" or "print the AOS feet" should resolve the drone, its model, the part, its file, the count and the print settings (default TPU from the external spool, the profile's own temperatures) and go through the existing slice and Bambu Connect hand-off (F-087). |
+| **Reproduce** | `nerv chat "stampa i piedini di Smoke"`: NERV has no printed parts in the fleet and cannot name a file or profile. |
+| **Check** | Printed parts belong to a drone model with a count, file and print profile; a drone inherits its model's parts; a chat request names the part, file, count and profile and asks approval before the hand-off; the owner's part list and file paths stay in the private fleet data, never in Git. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-121-t01"></a>F-121-T01 — Printed parts on drone models | 3 h | 0 h | 3 h | Planned | — | [F-121-T02](#f-121-t02) |
+| 🟡 Medium | <a id="f-121-t02"></a>F-121-T02 — Print a part by chat | 3 h | 0 h | 3 h | Planned | [F-121-T01](#f-121-t01) | [F-121-T03](#f-121-t03), [F-121-T04](#f-121-t04) |
+| 🟡 Medium | <a id="f-121-t04"></a>F-121-T04 — Send the part file with the print job | 3 h | 0 h | 3 h | Planned | [F-121-T02](#f-121-t02) | [F-121-T03](#f-121-t03) |
+| 🟢 Small | <a id="f-121-t03"></a>F-121-T03 — Owner: enter the parts and print one | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-121-T02](#f-121-t02), [F-121-T04](#f-121-t04) | — |
+| 🟣 Very large | **Total** | 9 h | 0 h (0 of 4 steps recorded) | 9 h agent + 0.5 h owner | 0 of 4 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-121.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #712](https://github.com/voidbrain/nerv/pull/712). |
+| Opened | 2026-11-24 |
+| Verification | — |
+| Reviewed | 2026-11-24 |
 
 </details>
 

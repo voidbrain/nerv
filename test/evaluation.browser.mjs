@@ -8,6 +8,7 @@ import { createRequire } from 'node:module';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
 import { addPilot } from '../src/pilots.ts';
+import { Store } from '../src/store.ts';
 import { browser } from './fixtures/browser.mjs';
 const require = createRequire(import.meta.url);
 test(
@@ -259,3 +260,131 @@ test('B-050: until still fails with timeout when throwing condition never holds'
     );
   });
 });
+
+// F-118-T02: across the join, the real pairing endpoint (makeServer, DeviceBook, PairingCodes) and the production build's
+// sign-in boxes. Installed (navigator.standalone, as iOS reports a Home Screen app), a typed pairing code pairs, the
+// credential is kept in localStorage and a reload signs in by itself; a revoke signs it out and forgets it. In a browser
+// tab nothing goes to localStorage: the dashboard keeps it like a session, the workspace in memory only.
+test(
+  'F-118-T02: the installed app pairs with a typed code and stays signed in; a browser tab refuses the code',
+  { timeout: 120000 },
+  async () => {
+    const home = mkdtempSync(join(tmpdir(), 'nerv-pairing-browser-')),
+      token = 'f'.repeat(32);
+    const store = new Store(':memory:');
+    const server = makeServer(store, token, {
+      webRoot: resolve('dist/web/browser'),
+      deviceFile: join(home, 'devices.json'),
+      language: 'en',
+      timeZone: 'Europe/Rome',
+    });
+    await new Promise((done) => server.listen(0, '127.0.0.1', done));
+    const origin = `http://127.0.0.1:${server.address().port}`;
+    const admin = { authorization: 'Bearer ' + token };
+    const mint = async () =>
+      (await (await fetch(origin + '/api/device/codes', { method: 'POST', headers: admin })).json()).code;
+    const devices = async () => (await (await fetch(origin + '/api/devices', { headers: admin })).json()).devices;
+    const revokeAll = async () => {
+      for (const d of await devices())
+        await fetch(origin + '/api/devices/' + d.id, { method: 'DELETE', headers: admin });
+    };
+    const kept = `(()=>{try{return localStorage.getItem('nerv.device')||''}catch{return ''}})()`;
+    const banner = `document.querySelector('.banner').textContent`;
+    const signedIn = `${banner}.includes('LIVE ·')&&!${banner}.includes('NOT SIGNED IN')&&!${banner}.includes('SIGNING IN')`;
+    const typeCode = (selector, form, code) =>
+      `{const i=document.querySelector(${JSON.stringify(selector)});i.value=${JSON.stringify(code)};document.querySelector(${JSON.stringify(form)}).requestSubmit()}`;
+    try {
+      // Installed app.
+      await browser(async ({ page, evaluate, until, errors }) => {
+        await page('Page.addScriptToEvaluateOnNewDocument', {
+          source: `Object.defineProperty(Navigator.prototype,'standalone',{configurable:true,get:()=>true})`,
+        });
+        // Dashboard: type the code into the sign-in bar.
+        await page('Page.navigate', { url: origin + '/dashboard/' });
+        await until(`${banner}.includes('NOT SIGNED IN')&&${banner}.includes('nerv open --phone')`);
+        await evaluate(typeCode('#live-token', '#live-signin', (await mint()).toLowerCase()));
+        await until(signedIn);
+        const paired = await devices();
+        assert.equal(paired.length, 1, 'the typed code paired one device');
+        assert.match(paired[0].name, / · dashboard app$/, 'named after the kind of device and the installed app');
+        const credential = await evaluate(kept);
+        assert.match(credential, /^.{24,}$/, 'the device credential is kept in the installed app');
+        assert.equal(await evaluate(`sessionStorage.getItem('nerv.dashboard.session')`), null, 'not as a tab session');
+        await page('Page.reload');
+        await until(signedIn);
+        assert.equal(await evaluate(kept), credential, 'a relaunch signs in with the kept credential');
+        // Revoked: the next launch is refused, forgets the credential and says why.
+        await revokeAll();
+        await page('Page.reload');
+        await until(`${banner}.includes('NOT SIGNED IN')&&${banner}.includes('pairing ended')`);
+        assert.equal(await evaluate(kept), '', 'a refused credential is forgotten');
+
+        // Workspace: the same sign-in box takes the code.
+        await page('Page.navigate', { url: origin + '/' });
+        await until(`document.querySelector('.connect input[name=signin]')!==null`);
+        await evaluate(typeCode('.connect input[name=signin]', '.connect form', await mint()));
+        await until(
+          `document.querySelector('.connect')===null&&document.querySelector('nerv-surface-renderer')!==null`,
+        );
+        assert.match((await devices())[0].name, / · workspace app$/);
+        assert.notEqual(await evaluate(kept), '', 'kept in the installed workspace');
+        await page('Page.reload');
+        await until(
+          `document.querySelector('.connect')===null&&document.querySelector('nerv-surface-renderer')!==null`,
+        );
+        await revokeAll();
+        await page('Page.reload');
+        await until(
+          `document.querySelector('.connect')!==null&&document.querySelector('[role=alert]')?.textContent.includes('pairing ended')`,
+        );
+        // A wrong code says so and pairs nothing.
+        await evaluate(typeCode('.connect input[name=signin]', '.connect form', 'AAAA-AAAA'));
+        await until(`document.querySelector('[role=alert]')?.textContent.includes('Pairing code invalid')`);
+        assert.equal((await devices()).length, 0);
+        assert.equal(await evaluate(kept), '', 'the workspace forgets a refused credential');
+        assert.deepEqual(errors, [], 'no browser runtime exceptions');
+      });
+      // Browser tab (review of #707): a pairing code is refused without calling the pairing endpoint, so a tab never
+      // holds a 90-day device; the code stays usable for the installed app.
+      await browser(async ({ page, evaluate, until, errors, network }) => {
+        const code = await mint();
+        await page('Network.enable');
+        await page('Page.navigate', { url: origin + '/dashboard/' });
+        await until(`${banner}.includes('NOT SIGNED IN')`);
+        await evaluate(typeCode('#live-token', '#live-signin', code));
+        await until(`${banner}.includes('NOT SIGNED IN')&&${banner}.includes('works only in the installed')`);
+        await page('Page.navigate', { url: origin + '/' });
+        await until(`document.querySelector('.connect input[name=signin]')!==null`);
+        await evaluate(typeCode('.connect input[name=signin]', '.connect form', code));
+        await until(`document.querySelector('[role=alert]')?.textContent.includes('works only in the installed')`);
+        assert.equal(await evaluate(kept), '', 'a tab keeps no device credential');
+        assert.equal(
+          await evaluate(`sessionStorage.getItem('nerv.dashboard.session')`),
+          null,
+          'nor a session from a pairing code',
+        );
+        assert.equal((await devices()).length, 0, 'no device paired from a tab');
+        assert.ok(!network.some((r) => r.url.includes('/api/device/pair')), 'the pairing endpoint is never called');
+        assert.equal(
+          (
+            await fetch(origin + '/api/device/pair', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ code, name: 'Fixture phone' }),
+            })
+          ).status,
+          200,
+          'the refused code is still usable',
+        );
+        assert.deepEqual(errors, [], 'no browser runtime exceptions');
+      });
+    } finally {
+      await new Promise((done) => {
+        server.close(done);
+        server.closeAllConnections();
+      });
+      store.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);
