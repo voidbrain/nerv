@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 37 | 28 |
-| **Require Human 🧑** | 10 | 10 |
+| **Require Human 🧑** | 9 | 10 |
 
 ### Require Human 🧑
 
@@ -23,18 +23,18 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
 | [F-011](#f-011) |  | [B-068](#b-068) |  |
-| [F-004](#f-004) |  | [B-107](#b-107) |  |
-| [F-012](#f-012) |  | [B-113](#b-113) |  |
-| [F-086](#f-086) |  | [B-122](#b-122) |  |
-| [F-087](#f-087) |  | [B-128](#b-128) |  |
-| [F-092](#f-092) |  | [B-056](#b-056) |  |
-| [F-060](#f-060) |  | [B-096](#b-096) |  |
-| [F-007](#f-007) |  | [B-110](#b-110) |  |
+| [F-012](#f-012) |  | [B-107](#b-107) |  |
+| [F-086](#f-086) |  | [B-113](#b-113) |  |
+| [F-087](#f-087) |  | [B-122](#b-122) |  |
+| [F-092](#f-092) |  | [B-128](#b-128) |  |
+| [F-060](#f-060) |  | [B-056](#b-056) |  |
+| [F-007](#f-007) |  | [B-096](#b-096) |  |
+|  |  | [B-110](#b-110) |  |
 |  |  | [B-112](#b-112) |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 88 h agent + 11 h owner across 121 open steps of 36 features and 28 other records. 164 h of actual effort recorded on 152 steps. Generated from the task files.
+**Remaining effort:** 88.25 h agent + 11 h owner across 122 open steps of 36 features and 28 other records. 165.5 h of actual effort recorded on 153 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -324,6 +324,59 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-02 |
 | Verification | Unit/integration and CI 2026-11-13: every built-in registration has a stable versioned descriptor; MCP fingerprints remain compatible; PR #381 CI 43496658350 passed validate, native-macos, windows, plan and full-suite. Remaining parent acceptance is pending. |
 | Reviewed | 2026-11-13 |
+
+</details>
+
+---
+
+### <a id="f-004"></a>[✨ F-004](#top)
+
+**Angular PWA and validated GenUI**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-004-T08 — Dashboard Settings → Notifications: enable push on the installed app (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Angular source exists with an installable PWA shell (F-004-T01, PR #286: manifest, icons, shell-only service worker, update prompt); no reminder CRUD UI beyond create/cancel, doctor view, generated UI or push configuration yet. |
+| **Reproduce** | Follow the [phone install and push procedure](acceptance/f004-t06-phone-push-procedure.md). |
+| **Check** | Real reminder CRUD and doctor UI; reject arbitrary component/code/action payloads; accessibility and phone install/push acceptance. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-004-t08"></a>F-004-T08 — Dashboard Settings → Notifications: enable push on the installed app | 1.75 h | 1.5 h so far (stated) | 0.25 h | Implemented; verification pending | — | [F-004-T06](#f-004-t06) | 🤖 | [PR #729](https://github.com/voidbrain/nerv/pull/729) |
+| 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | [F-004-T08](#f-004-t08) | [F-004-T07](#f-004-t07) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-004-T06](#f-004-t06) | — | ⏳ 🤖 | — |
+| 🟢 Small | **Total** | 14 h (7 of 8 steps) | 4.5 h (6 of 8 steps recorded) | 0.5 h agent + 0.5 h owner | 5 of 8 completed | | | | |
+
+<details><summary>Done steps (5)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-004-t01"></a>F-004-T01 — Installable PWA shell: manifest, service worker and update prompt | 1.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-004-t02"></a>F-004-T02 — Reminder CRUD in the workspace | 3 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-004-t03"></a>F-004-T03 — Doctor view | 1.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-004-t04"></a>F-004-T04 — Schema-validated registered component renderer (GenUI) | 3 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-004-t05"></a>F-004-T05 — Web push subscription and delivery | 3 h | 0.5 h (stated) | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-004.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-004-T08: [PR #729](https://github.com/voidbrain/nerv/pull/729). F-004-T08 [PR #729](https://github.com/voidbrain/nerv/pull/729) dashboard push (test/evaluation.browser.mjs); Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| Opened | 2026-11-01 |
+| Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Phone install/push acceptance pending (F-004-T06). |
+| Reviewed | 2026-11-12 |
 
 </details>
 
@@ -657,58 +710,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | 2026-11-08 Unit/integration: seven isolated release-path contracts pass (no actual signing/upload); signed-only, rejection, warning, timeout/failure and post-staple packaging paths checked. Real-device: temporary macOS release build, ad-hoc signature verification and bundle plist validation passed; that temporary build was not installed/launched. Later UI-only trial: verified/downloaded PR #213 CI app launch completed according to macOS process state; Human 2026-11-08: owner confirms icon appears and menu opens normally; no Accessibility permission granted to this session. PR #212 CI 42489231643 passed targeted native/auth/packaging checks, including actual macOS Swift tests/build/package; full-suite skipped. Actual Developer ID/notarization and native OS acceptance pending. |
 | Reviewed | 2026-11-10 |
-
-</details>
-
----
-
-### <a id="f-004"></a>[✨ F-004](#top)
-
-**Angular PWA and validated GenUI**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h agent + 0.5 h owner | — | — | ⏳ | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) F-004-T06 — Phone install and push acceptance (Ready).
-
-| | |
-|---|---|
-| **Issue** | Angular source exists with an installable PWA shell (F-004-T01, PR #286: manifest, icons, shell-only service worker, update prompt); no reminder CRUD UI beyond create/cancel, doctor view, generated UI or push configuration yet. |
-| **Reproduce** | Follow the [phone install and push procedure](acceptance/f004-t06-phone-push-procedure.md). |
-| **Check** | Real reminder CRUD and doctor UI; reject arbitrary component/code/action payloads; accessibility and phone install/push acceptance. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | — | [F-004-T07](#f-004-t07) | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) |
-| 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-004-T06](#f-004-t06) | — | ⏳ 🤖 |
-| 🟢 Small | **Total** | 12.25 h (6 of 7 steps) | 3 h (5 of 7 steps recorded) | 0.25 h agent + 0.5 h owner | 5 of 7 completed | | | |
-
-<details><summary>Done steps (5)</summary>
-
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-004-t01"></a>F-004-T01 — Installable PWA shell: manifest, service worker and update prompt | 1.5 h | 0.5 h (stated) | Completed |
-| — | <a id="f-004-t02"></a>F-004-T02 — Reminder CRUD in the workspace | 3 h | 0.75 h (stated) | Completed |
-| — | <a id="f-004-t03"></a>F-004-T03 — Doctor view | 1.5 h | 0.5 h (stated) | Completed |
-| — | <a id="f-004-t04"></a>F-004-T04 — Schema-validated registered component renderer (GenUI) | 3 h | 0.75 h (stated) | Completed |
-| — | <a id="f-004-t05"></a>F-004-T05 — Web push subscription and delivery | 3 h | 0.5 h (stated) | Completed |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-004.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
-| Opened | 2026-11-01 |
-| Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Phone install/push acceptance pending (F-004-T06). |
-| Reviewed | 2026-11-12 |
 
 </details>
 
