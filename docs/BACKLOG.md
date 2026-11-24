@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 96.25 h agent + 11 h owner across 135 open steps of 38 features and 25 other records. 144.75 h of actual effort recorded on 149 steps. Generated from the task files.
+**Remaining effort:** 95.25 h agent + 11 h owner across 135 open steps of 38 features and 25 other records. 146 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -446,23 +446,23 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: from tasks. Owner agreed the scope of B-121-T02 on 2026-11-24.
+💻 **→** Next: independent review of the B-121-T02 PR, then green CI and merge; verification follows on main.
 
 | | |
 |---|---|
 | **Issue** | Found 2026-11-24 by the F-016-T08 mixed-epoch fixture: B promoted to epoch 3 and renewed through C; the owner then re-targeted the move to C at epoch 4. C's standby store still held epoch-2 state (nothing re-seeds it), yet readiness took over from it (previous epoch 2, previous main X revoked), so C would undo what B did at epoch 3 and could repeat it. The decision allows taking over from the standby's epoch only when the first target never promoted. |
 | **Reproduce** | `test/coordinator-partition.test.ts`, "mixed epochs": X at 2; revoke X, main B at 3, B promotes and renews through C; main C at 4; `kaji promote` on C. |
-| **Check** | C is refused (`standby_behind`) while any unrevoked base, C itself included, ran or acked a lease at a later epoch than C's standby state. T01 covers C's own acks; T02 (planned, owner agrees scope) adds a field to the epoch-push reply so a base that ran or acked a later epoch reports it. |
+| **Check** | C is refused (`standby_behind`) while any unrevoked base, C itself included, ran or acked a lease at a later epoch than C's standby state. T01 covers C's own acks; T02 (owner agreed the scope 2026-11-24) adds `ranOrAckedEpoch` to the signed `/kaji/epoch-push` reply and asks every other unrevoked base before any push, so a refused move leaves the running main acting. |
 
 **Steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-121-t01"></a>B-121-T01 — Refuse a move from a standby that acked a later epoch than its state | 0.5 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | [B-121-T02](#b-121-t02) | [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks |
-| 🟢 Small | <a id="b-121-t02"></a>B-121-T02 — Epoch-push replies report the newest epoch a base ran or acked | 1 h | 0 h | 1 h | Planned | [B-121-T01](#b-121-t01) | — | — |
-| 🟢 Small | **Total** | 1.5 h | 0.75 h (1 of 2 steps recorded) | 1 h | 0 of 2 completed | | | |
+| 🟢 Small | <a id="b-121-t02"></a>B-121-T02 — Epoch-push replies report the newest epoch a base ran or acked | 1.25 h | 1.25 h so far (stated) | 0 h | Implemented; verification pending | [B-121-T01](#b-121-t01) | — | — |
+| 🟢 Small | **Total** | 1.75 h | 2 h | 0 h | 0 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -473,7 +473,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Steps: B-121-T01: [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks. [PR #717](https://github.com/voidbrain/nerv/pull/717) (Test: `test/coordinator-partition.test.ts`, mixed epochs) |
 | Opened | 2026-11-24 |
-| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and the coordinator suites pass locally. B-121-T02: Pending. |
+| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and the coordinator suites pass locally, B-121-T02 included (coordinator-partition, -relocation, -lease, kaji and cli suites: 80/80). On main: Pending. |
 | Reviewed | 2026-11-24 |
 
 </details>

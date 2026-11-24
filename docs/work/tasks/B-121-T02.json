@@ -4,7 +4,7 @@
   "parent": "B-121",
   "title": "Epoch-push replies report the newest epoch a base ran or acked",
   "goal": "A re-targeted move is refused when any unrevoked base ran, or acked a lease for, a later epoch than the promoting standby's state, not only when the promoting standby did",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A committed test fails first: B runs epoch 3 renewing through D, the owner re-targets to C at epoch 4, and C (which never acked B) is refused with standby_behind",
     "/kaji/epoch-push replies carry the newest coordinator epoch the base held a lease at or acked; an older peer without the field is treated as unknown and documented",
@@ -44,11 +44,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Estimated 2026-11-24 from F-016-T18 (epoch push, 1 h stated): one reply field, one recorded column, one refusal and a mesh fixture. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 from F-016-T18 (epoch push, 1 h stated): one reply field, one recorded column, one refusal and a mesh fixture. Not a measurement. 2026-11-24: implemented in 1.25 h agent (stated): the record-free probe phase and the mixed-version rule were added to keep a refused re-target from fencing the running main.",
     "reviewed": "2026-11-24",
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1.25,
+    "actualAgentHours": 1.25,
+    "actualSource": "stated"
   }
 }
