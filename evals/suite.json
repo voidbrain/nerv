@@ -89,6 +89,7 @@
         "test/worker-link.test.ts",
         "test/worker-link-heartbeat.test.ts",
         "test/worker-link-admission.test.ts",
+        "test/worker-link-exit.test.ts",
         "test/worker-outbox.test.ts",
         "test/protocol.test.ts"
       ],
@@ -130,7 +131,8 @@
         "test/angular.browser.mjs",
         "test/evaluation.browser.mjs",
         "test/pwa.browser.mjs",
-        "test/browser-click.browser.mjs"
+        "test/browser-click.browser.mjs",
+        "test/diyfpv-read.browser.mjs"
       ],
       "families": [
         "dashboard-operator",

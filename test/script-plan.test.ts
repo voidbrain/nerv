@@ -1,7 +1,60 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parsePlan } from '../src/misato.ts';
+
+const LINUX_FIXTURE = join(import.meta.dirname, 'fixtures', 'eva', 'unconfined-bwrap');
+
+/**
+ * A call still in flight when the wall-time budget expires is terminated and its late result receipted.
+ * B-114: the budget is derived from this machine's measured EVA-03 start (run start to first gated call), so a
+ * loaded machine cannot spend it before the call arrives, and execute resolves only once the budget has fired.
+ */
+async function assertLateCompletion(paths: { sandboxExecPath?: string; bwrapPath?: string }) {
+  const { runScriptPlanInEva03 } = await import('../src/script-plan.ts');
+  const tools = [{ name: 'reminders.list', effect: 'read' as const, fingerprint: 'fp1' }];
+  const source = 'return tools.call("reminders.list", {});';
+  let startedAt = performance.now();
+  let startMs = -1;
+  const warm = await runScriptPlanInEva03({
+    jobId: 'script-timeout-measure',
+    source,
+    tools,
+    ...paths,
+    gate: async () => {
+      startMs = performance.now() - startedAt;
+      return { outcome: 'grant' };
+    },
+    execute: async () => ({ ok: true }),
+  });
+  assert.equal(warm.status, 'completed');
+  assert.ok(startMs >= 0);
+  const timeoutMs = Math.max(500, Math.ceil(4 * startMs));
+  const lateReceipts: Array<{ outcome: string }> = [];
+  let executeStarted = false;
+  startedAt = performance.now();
+  const timedOut = await runScriptPlanInEva03({
+    jobId: 'script-timeout-late',
+    source,
+    tools,
+    limits: { timeoutMs },
+    ...paths,
+    gate: async () => ({ outcome: 'grant', grantId: 'g-late' }),
+    execute: async (_tool, _args, _grantId, signal) => {
+      executeStarted = true;
+      // Resolve only after the wall-time budget has terminated the job: the real condition, not a sleep.
+      if (!signal?.aborted) await new Promise((r) => signal?.addEventListener('abort', r, { once: true }));
+      return { ok: true };
+    },
+    onReceipt: (r) => lateReceipts.push(r),
+  });
+  assert.ok(executeStarted, `the call reached execute within the ${timeoutMs} ms budget`);
+  assert.equal(timedOut.status, 'terminated');
+  assert.match(timedOut.reason ?? '', /wall-time/i);
+  assert.equal(lateReceipts[0]?.outcome, 'completed_late');
+}
 
 describe('F-112-T03: read-only script plans inside EVA-03', () => {
   it('parsePlan accepts a bounded { script } plan from Misato', () => {
@@ -117,8 +170,7 @@ describe('F-112-T03: read-only script plans inside EVA-03', () => {
       const gatedCalls: Array<{ tool: string; args: Record<string, unknown> }> = [];
       const executedCalls: Array<{ tool: string; args: Record<string, unknown> }> = [];
       const receipts: unknown[] = [];
-      const useFixture =
-        process.platform === 'linux' ? join(import.meta.dirname, 'fixtures', 'eva', 'unconfined-bwrap') : undefined;
+      const useFixture = process.platform === 'linux' ? LINUX_FIXTURE : undefined;
       const res = await runScriptPlanInEva03({
         jobId: 'script-ok-1',
         source,
@@ -214,23 +266,25 @@ describe('F-112-T03: read-only script plans inside EVA-03', () => {
       assert.match(overFrame.reason ?? '', /frame budget/i);
 
       // 8) Wall-time timeout marks late execute resolution as completed_late
-      const lateReceipts: Array<{ outcome: string }> = [];
-      const timedOut = await runScriptPlanInEva03({
-        jobId: 'script-timeout-late',
-        source: 'return tools.call("reminders.list", {});',
-        tools,
-        limits: { timeoutMs: 120 },
-        bwrapPath: useFixture,
-        gate: async () => ({ outcome: 'grant', grantId: 'g-late' }),
-        execute: async () => {
-          await new Promise((r) => setTimeout(r, 200));
-          return { ok: true };
-        },
-        onReceipt: (r) => lateReceipts.push(r),
-      });
-      assert.equal(timedOut.status, 'terminated');
-      assert.match(timedOut.reason ?? '', /wall-time/i);
-      assert.equal(lateReceipts[0]?.outcome, 'completed_late');
+      await assertLateCompletion({ bwrapPath: useFixture });
+    },
+  );
+
+  it(
+    'B-114: the late-completion check holds when EVA-03 starts slowly (machine under load)',
+    { skip: process.platform !== 'darwin' && process.platform !== 'linux' },
+    async () => {
+      // A loaded machine delays the sandbox start; a wrapper that sleeps before the real sandbox reproduces it.
+      const dir = mkdtempSync(join(tmpdir(), 'nerv-slow-eva-'));
+      try {
+        const real = process.platform === 'linux' ? LINUX_FIXTURE : '/usr/bin/sandbox-exec';
+        const slow = join(dir, 'slow-sandbox');
+        writeFileSync(slow, `#!/bin/sh\nsleep 0.3\nexec "${real}" "$@"\n`);
+        chmodSync(slow, 0o755);
+        await assertLateCompletion(process.platform === 'linux' ? { bwrapPath: slow } : { sandboxExecPath: slow });
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
     },
   );
 
