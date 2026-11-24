@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "B-114-T01",
+  "parent": "B-114",
+  "title": "Find why the EVA-03 script-plan test fails under load",
+  "goal": "test/script-plan.test.ts passes on a loaded runner as it does alone",
+  "status": "planned",
+  "acceptance": [
+    "Cause named (timing budget, sandbox start, or gate wait) with evidence",
+    "A committed regression that reproduces the load case, then the fix"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/script-plan.test.ts",
+    "src/eva-runner.ts",
+    "docs/work/records/B-114.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "node --test test/script-plan.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-23",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

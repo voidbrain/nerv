@@ -1,3 +1,4 @@
+import { SessionBook } from './session-book.ts';
 import { DashboardFeed } from './dashboard-feed.ts';
 import { toolListing } from './tool-listing.ts';
 import { createServer, type IncomingMessage, type RequestListener } from 'node:http';
@@ -84,6 +85,8 @@ export function makeServer(
     checkSchemaSafety?: (revision?: string) => Promise<AutoUpdateSchemaCheck> | AutoUpdateSchemaCheck;
     readUpdatePolicy?: () => AutoUpdatePolicy;
     exposeUpdateControl?: (control: UpdateControl) => void;
+    /** B-113: where dashboard sessions are kept (hashed) across restarts; memory only when absent. */
+    sessionFile?: string;
     /** Health sampling interval (F-103-T01 default 60 s); tests shorten it. */
     healthSampleIntervalMs?: number;
   } = {},
@@ -96,13 +99,12 @@ export function makeServer(
   const dropExpired = () => {
     const now = Date.now();
     for (const [c, expires] of loginCodes) if (expires <= now) loginCodes.delete(c);
-    for (const [t, expires] of sessions) if (expires <= now) sessions.delete(t);
+    sessions.dropExpired(now);
   };
-  // Dashboard sessions (F-039): what a login code is swapped for, instead of the admin token. Random, in this process's
-  // memory only (a restart ends them all), expiring, revocable; they may do what the admin can except mint login codes,
-  // so a session can never renew itself.
+  // Dashboard sessions (F-039): what a login code is swapped for, instead of the admin token. Random, expiring,
+  // revocable; they may do what the admin can except mint login codes, so a session can never renew itself. B-113: with
+  // `sessionFile` they survive a restart (an update), stored hashed and bound to the admin token (see SessionBook).
   const feed = store.dashboardRevision ? new DashboardFeed(() => store.dashboardRevision!()) : undefined;
-  const sessions = new Map<string, number>();
   let statusPollCount = 0;
   const { statusUpdate, handleUpdateRoute } = createUpdateHandlers({
     store,
@@ -113,6 +115,7 @@ export function makeServer(
   const sessionTtl = options.sessionTtlMs ?? SESSION_TTL_MS;
   const currentToken = () => (typeof token === 'function' ? token() : token);
   if (currentToken().length < 24) throw new Error('NERV_TOKEN must be at least 24 characters.');
+  const sessions = new SessionBook(currentToken, options.sessionFile, sessionTtl, MAX_SESSIONS);
   const listener: RequestListener = async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-store');
@@ -226,9 +229,8 @@ export function makeServer(
           return;
         }
         loginCodes.delete(code);
-        if (sessions.size >= MAX_SESSIONS) sessions.delete(sessions.keys().next().value!);
         const session = randomBytes(32).toString('hex');
-        sessions.set(session, Date.now() + sessionTtl);
+        sessions.add(session, Date.now() + sessionTtl, MAX_SESSIONS);
         reply(200, { token: session, expiresInMs: sessionTtl });
       } catch {
         reply(400, { error: 'Invalid request.' });
@@ -323,7 +325,7 @@ export function makeServer(
           reply(400, { error: 'Dashboard stream takes no query parameters.' });
           return;
         }
-        if (!feed.connect(res, () => root || (sessions.get(bearer) ?? 0) > Date.now()))
+        if (!feed.connect(res, () => root || sessions.has(bearer)))
           reply(503, { error: 'Dashboard stream capacity reached.' });
       } else if (req.method === 'GET' && path === '/api/commands') {
         reply(200, { commands: COMMAND_CATALOG });
@@ -562,9 +564,7 @@ export function makeServer(
           error: 'Only the CLI (with the admin token) can mint login codes, revoke sessions or stop the service.',
         });
       else if (!options.native && root && req.method === 'POST' && path === '/api/session/revoke') {
-        const n = sessions.size;
-        sessions.clear();
-        reply(200, { revoked: n });
+        reply(200, { revoked: sessions.clear() });
       } else if (!options.native && root && req.method === 'POST' && path === '/api/session/codes') {
         dropExpired();
         if (loginCodes.size >= MAX_LOGIN_CODES) {

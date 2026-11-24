@@ -42,6 +42,12 @@ export const HELP_GROUPS: HelpGroup[] = [
         about: 'Work to pick up again later',
         usage: ['resume-intent list [status] | create <intent.json> | cancel <id> [reason] | tick'],
       },
+      {
+        name: 'session-limit',
+        args: 'list|record',
+        about: 'Resume a coding session after its limit resets',
+        usage: ['session-limit list | record SESSION REPO BRANCH "ISO reset time+zone" [--prompt TEXT]'],
+      },
     ],
   },
   {
@@ -125,8 +131,8 @@ export const HELP_GROUPS: HelpGroup[] = [
       { name: 'seats', args: '[check | key SEAT-ID]', about: 'MAGI seats and their keys' },
       {
         name: 'placement',
-        args: 'plan PROBE.json | run PROBE.json --execute',
-        about: 'Plan or run a bounded P2–P4 placement probe',
+        args: 'plan PROBE.json | run PROBE.json --execute | report EVIDENCE.json',
+        about: 'Plan or run a bounded P2–P4 placement probe, or report on placement evidence',
       },
       {
         name: 'engines',
@@ -168,6 +174,7 @@ export const HELP_GROUPS: HelpGroup[] = [
         args: 'APP CONTROL [--window=TITLE] [--approved]',
         about: 'Click a named desktop control (macOS)',
       },
+      { name: 'fpv-read-build', args: 'LINK', about: 'Read a diyfpv.com build into its local build note' },
       { name: 'desktop-record', args: 'ID HEADER.json', about: 'Record desktop input for a workflow' },
     ],
   },

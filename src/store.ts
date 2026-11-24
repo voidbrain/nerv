@@ -66,6 +66,7 @@ import { createCookingStoreSlice, type CookingStoreSlice } from './packs.ts';
 import { REGISTRY_SCHEMA } from './kaji.ts';
 import { MILESTONE_SCHEMA } from './milestones.ts';
 import { RESUME_INTENT_SCHEMA, ResumeIntentStore } from './resume-intent.ts';
+import { SESSION_LIMIT_SCHEMA, SessionLimitResumes } from './session-limit-resume.ts';
 import { defaultPolicy, type Ballot, type Policy } from './policy.ts';
 import type { PushSubscriptionRecord } from './push.ts';
 import type { ReminderKind } from './reminder-time.ts';
@@ -142,6 +143,7 @@ export class Store {
   readonly circuits: IncidentCircuitStore;
   private readonly fpv: FpvStoreSlice;
   readonly resumeIntents: ResumeIntentStore;
+  readonly sessionLimits: SessionLimitResumes;
   readonly lists: ListStore;
   readonly documents: DocumentStore;
   readonly photos: PhotoStore;
@@ -240,11 +242,13 @@ export class Store {
        CREATE TABLE IF NOT EXISTS push_vapid(id TEXT PRIMARY KEY, public_key TEXT NOT NULL, private_key TEXT NOT NULL, created TEXT NOT NULL);`,
     );
     this.db.exec(RESUME_INTENT_SCHEMA);
+    this.db.exec(SESSION_LIMIT_SCHEMA);
     this.db.exec(LISTS_SCHEMA);
     this.ledger = new Ledger(this.db, { policy: scrolls.policy, tools: builtinTools });
     this.memory = new Memory(this.db);
     this.circuits = new IncidentCircuitStore(this.db, this.ledger);
     this.resumeIntents = new ResumeIntentStore(this.db);
+    this.sessionLimits = new SessionLimitResumes(this.db, this.resumeIntents);
     this.lists = new ListStore(this.db);
     this.db.exec(DOCUMENTS_SCHEMA);
     this.documents = new DocumentStore(this.db);

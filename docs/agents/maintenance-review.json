@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-23T15:49:55.983Z",
+  "reviewed": "2026-11-24T00:17:30.540Z",
   "policy": "7d15ab5f3e1a37d15075876ce3efd53d93600045088f48b41a3ef0dd6ab89e7d",
   "inputs": {
-    "AGENTS.md": "5e9df8d380abec1d861ad5803510024219ccfc13afc970438c63028b27f81873",
+    "AGENTS.md": "32c504a3efc3da400609520a8705cf27ada243d5aff8f8f2a2690d12ed88f50d",
     "docs/BACKLOG-RULES.md": "91ea3b199cd49385549ac2869304e1cca2de94cad5bcb4f119502b594f00e621",
     "docs/agents/architecture-review.md": "5d967314854912b1a5f1446aeab309763b14f9856bceb3c82df5c6c25c166526",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
@@ -13,16 +13,16 @@
     "docs/agents/maintenance.md": "69f77d944551e4a442de20a0e46badf19a91e42f870bf8048f428c8a64f343a9",
     "docs/agents/mcp.md": "06efbb58a50f9236506ca0afa9a79bb1d42c12ca380a29ed0254bf0a537f860d",
     "docs/agents/parallel-work-plans.md": "d171d89ec5431668ff770e5fcb0098ad518da6289a0d12a56aafdae60930d567",
-    "docs/agents/parallel-work.md": "28608637b73e16f1e1664af8a16047849eea464a14cdaada4d54d7a4094d83ef",
+    "docs/agents/parallel-work.md": "e460a7ef54aa1ce270e9c8d87a8da85680182d2adec3cafbbf7ad0af5b75439c",
     "docs/agents/procedures.md": "d53486efdf0fdb64f4285941b8701e3bec5722671208e17e502b59bfeafc3b17",
     "docs/agents/prompt-caching.md": "3b8962bd4f2f713d5730e999e65338ebdd90347ee09dffbd9c8da98e2405a21e",
-    "docs/agents/rule-review.md": "5eb7665d2bf91e3bf8d0778ee39dedd1cd151d2565adfa77e30c8dfeedd84460",
-    "docs/agents/skills.md": "1b02b48d8b3ec3dcdec7205697d35213a324edab98f93ad1f38983ed47842035",
+    "docs/agents/rule-review.md": "1a6cb030a1cd2b802312d02a974f76e4df04b47865aedb99fb7c5f78d5d15f10",
+    "docs/agents/skills.md": "6b00029e8c496f17097c52fdbeb91a237932e1406ac269e0031c46cd04fd3af1",
     "docs/agents/solution-profile.md": "685d55612f55d157bf124e23115f95bd16fe4d4f8834a4e0e152a191e3cd45f8",
     "docs/agents/task-context.md": "c689f02b9571ff747a4866d71690bb01afd7e6654dea640a1ce1c66e7c0fa204",
-    "docs/agents/work-usage.md": "40e6b0b17fcc08bedb0ddbf405e232e2bebbca80e36e585334ecb9a2628631a7",
-    "docs/backlog/closure.md": "21fcc14351588107943d9aab70991399e07af7026d48327619f215e62ecb3319",
-    "docs/backlog/documentation.md": "6328e3eccb3a222af1a9f4682dcef9e763464d0842cf94b28713bbc5f61e04b1",
+    "docs/agents/work-usage.md": "d4063b0cb1f484ae7957c34dbf4015ffbe37f71eca5ce5909575e46a4873c5ad",
+    "docs/backlog/closure.md": "621d7de170f1cf91b1fdbcbe5024f298a1c72f8fb754af8bae3a1c282d5a3ce1",
+    "docs/backlog/documentation.md": "64bea7a9405d89f07162205381899081daa2a8b7e2f0bc19b861364172892da1",
     "docs/backlog/estimates.md": "251a65fa17a7c5ab79732ad790c4f312baa3251e54f761d0f91a8964cde81574",
     "docs/backlog/evaluations.md": "7540bf69b6b5d40dc09dc9ce82138218525733c5f602945bdaa58d5c3a743f37",
     "docs/backlog/feature-plans.md": "f2377140ce4f2f38b449516498dd5ff6ba58ca04287aa92381a1029f7416f85b",
@@ -34,12 +34,12 @@
     "docs/backlog/steps.md": "98705e1e90b5a908a6a6cc666bf64fbdae82020a2a80cf8d11906ebb19108c8c",
     "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "c7b3afd5f6146f9d059ffd4a65cc6e744fdf02c32ec080a40f5d1dec881b2c4c",
+    "tools/work-items.mjs": "c494fc066c6addc602cb3b4e4761c69ff3f70f7d71074678b5f1a7126abb4dcd",
     "tools/work-usage.mjs": "09569f9b56bd6e403d4c235f980ba5fb03b2aff8fe56a28878cc298fe8a4b2af"
   },
   "measurements": {
-    "samples": 20,
-    "latestAt": "2026-11-23T15:49:55.931Z",
+    "samples": 22,
+    "latestAt": "2026-11-24T00:17:30.383Z",
     "operations": {
       "adoption": {
         "samples": 0,
@@ -65,24 +65,24 @@
         }
       },
       "reconciliation": {
-        "samples": 20,
+        "samples": 22,
         "durationMs": {
-          "observed": 20,
+          "observed": 22,
           "missing": 0,
           "median": 263898
         },
         "conflicts": {
-          "observed": 7,
+          "observed": 9,
           "missing": 13,
           "median": 0
         },
         "unnecessaryPrompts": {
-          "observed": 3,
+          "observed": 5,
           "missing": 17,
           "median": 0
         },
         "repeatedContextLoads": {
-          "observed": 3,
+          "observed": 5,
           "missing": 17,
           "median": 1
         }
@@ -94,7 +94,7 @@
       "kind": "rule",
       "disposition": "implemented",
       "target": "AGENTS.md",
-      "evidence": "F-117-T01 (PRs #669/#670): the live service moved to the install folder ~/.nerv-app on 2026-11-23; the project line now names it, keeps the dev checkout on main with worktrees from origin/main, and notes that a lifecycle install already starts the service. Project line only (<!-- project -->); no template change; no behaviour runner configured."
+      "evidence": "Harness v10.7.0 reconciled from v10.4.0 (owner approved 2026-11-24): AGENTS.md re-adapted to the lean template F-090 with the safety block byte-identical and every project line kept; Documentation section moved to docs/backlog/documentation.md Top-level documents (docs/guides/ line marked project); ownership text stays in docs/backlog/ownership.md; merged procedures rows keep the Angular row. Copied work-usage.md, skills.md, rule-review.md, friction.mjs, work-items.mjs; closure.md reconciled; work:close script added. check:rules passes; no behaviour runner configured."
     }
   ]
 }

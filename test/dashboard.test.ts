@@ -596,15 +596,28 @@ test('an answer without an action: Misato passed, a green route straight to Debr
   // Same requirement, read through edgeShown since B-096 moved the route filter there.
   assert.match(js, /const edges = EDGES\.filter\(e => edgeShown\(s, e\)\);/);
   const shownAt = js.indexOf('function edgeShown(');
-  const shown = new Function(js.slice(shownAt, js.indexOf('\n}\n', shownAt) + 2) + '\nreturn edgeShown;')() as (
-    s: unknown,
-    e: unknown,
-  ) => boolean;
+  const stepAt = js.indexOf('function stepState(');
+  const shown = new Function(
+    js.slice(stepAt, js.indexOf('\n}\n', stepAt) + 2) +
+      js.slice(shownAt, js.indexOf('\n}\n', shownAt) + 2) +
+      '\nreturn edgeShown;',
+  )() as (s: unknown, e: unknown) => boolean;
   const answer = ['plan', 'debrief', 'answer'];
-  assert.equal(shown({ actions: [] }, answer), true, 'drawn only for an answer-only sortie');
-  assert.equal(shown({ actions: [{ status: 'done' }] }, answer), false, 'not with an action');
-  assert.equal(shown({ actions: [], forwarded: 'Tabgha' }, answer), false, 'not for a forwarded sortie (F-051 relay)');
-  assert.equal(shown({ actions: [], forwarded: 'Tabgha' }, ['detect', 'debrief', 'relay']), true, 'the relay instead');
+  // B-112 (owner 2026-11-23): drawn once Misato's planning ended with no action, not from the start of every sortie.
+  const planned = { done: { plan: true } };
+  assert.equal(shown({ actions: [], ...planned }, answer), true, 'drawn only for an answer-only sortie');
+  assert.equal(shown({ actions: [], done: {} }, answer), false, 'not while Misato has not planned yet');
+  assert.equal(shown({ actions: [{ status: 'done' }], ...planned }, answer), false, 'not with an action');
+  assert.equal(
+    shown({ actions: [], forwarded: 'Tabgha', ...planned }, answer),
+    false,
+    'not for a forwarded sortie (F-051 relay)',
+  );
+  assert.equal(
+    shown({ actions: [], forwarded: 'Tabgha', done: {} }, ['detect', 'debrief', 'relay']),
+    true,
+    'the relay instead',
+  );
   assert.doesNotMatch(
     js,
     /function liveEdges\(/,
@@ -1130,10 +1143,9 @@ test('B-044: completed advice marks the Advise → Misato route passed without c
     const a = source.indexOf(`function ${name}(`);
     return source.slice(a, source.indexOf('\n}\n', a) + 2);
   };
-  const passed = new Function(take('stepState') + '\n' + take('passedEdge') + '\nreturn passedEdge;')() as (
-    sortie: object,
-    edge: string[],
-  ) => string;
+  const passed = new Function(
+    take('stepState') + '\n' + take('loopTaken') + '\n' + take('passedEdge') + '\nreturn passedEdge;',
+  )() as (sortie: object, edge: string[]) => string;
   const sortie = {
     status: 'active',
     phase: 'plan',
@@ -1432,7 +1444,7 @@ test('a sortie whose action the owner declined draws its route from Misato apart
   };
   const edgesSrc = src.slice(src.indexOf('const EDGES = ['), src.indexOf('];', src.indexOf('const EDGES = [')) + 2);
   const api = new Function(
-    `${edgesSrc}\n${fn('stepState')}\n${fn('passedEdge')}\n${fn('edgeShown')}\nreturn { EDGES, passedEdge, edgeShown };`,
+    `${edgesSrc}\n${fn('stepState')}\n${fn('loopTaken')}\n${fn('passedEdge')}\n${fn('edgeShown')}\nreturn { EDGES, passedEdge, edgeShown };`,
   )() as {
     EDGES: [string, string, string?][];
     passedEdge: (s: unknown, e: unknown) => string;
@@ -1496,7 +1508,7 @@ test('B-106: answer edge activates with debrief and Sephirot markers are filled 
   };
   const edgesSrc = src.slice(src.indexOf('const EDGES = ['), src.indexOf('];', src.indexOf('const EDGES = [')) + 2);
   const api = new Function(
-    `${edgesSrc}\n${fn('stepState')}\n${fn('passedEdge')}\n${fn('edgeShown')}\nreturn { EDGES, passedEdge, edgeShown };`,
+    `${edgesSrc}\n${fn('stepState')}\n${fn('loopTaken')}\n${fn('passedEdge')}\n${fn('edgeShown')}\nreturn { EDGES, passedEdge, edgeShown };`,
   )() as {
     EDGES: [string, string, string?][];
     passedEdge: (s: unknown, e: unknown) => string;
@@ -1952,4 +1964,97 @@ test('Settings shows clear hour labels and editable Brief time without internal 
   );
   assert.match(live, /class='pilot-grid'/);
   assert.doesNotMatch(live, /for='pilot-name-.*Call name/);
+});
+
+// B-112 (owner 2026-11-23, S-6AD9): a route lights only when the sortie took it; the answer route waits for Misato's
+// planning to end; with no sortie the map shows every route; the loops back to Misato light when they happened.
+function sephirot() {
+  const source = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const take = (name: string) => {
+    const start = source.indexOf(`function ${name}(`);
+    return start < 0 ? '' : source.slice(start, source.indexOf('\n}\n', start) + 2);
+  };
+  return new Function(
+    `${take('stepState')}\n${take('loopTaken')}\n${take('edgeShown')}\n${take('passedEdge')}\nreturn { stepState, edgeShown, passedEdge };`,
+  )() as {
+    edgeShown: (s: unknown, e: string[]) => boolean;
+    passedEdge: (s: unknown, e: string[]) => string;
+  };
+}
+const sortie = (over: Record<string, unknown> = {}) => ({
+  status: 'done',
+  phase: 'debrief',
+  current: 0,
+  forwarded: false,
+  consult: false,
+  actions: [] as unknown[],
+  done: {} as Record<string, boolean>,
+  ...over,
+});
+const act = (outcome: string, status = 'done') => ({ tool: 'reminders.add', status, ballot: { outcome } });
+
+test('B-112: a shortcut lights only when the step it bypasses did not run', () => {
+  const { passedEdge } = sephirot();
+  const viaIntake = sortie({
+    actions: [act('grant')],
+    done: { detect: true, intake: true, route: true, plan: true, magi: true, sync: true, plug: true, eva: true },
+  });
+  assert.equal(passedEdge(viaIntake, ['detect', 'intake']), 'passed');
+  assert.equal(passedEdge(viaIntake, ['intake', 'route']), 'passed');
+  assert.equal(passedEdge(viaIntake, ['detect', 'route']), '', 'S-6AD9: not also the direct line');
+  const direct = sortie({ actions: [act('grant')], done: { detect: true, route: true, plan: true } });
+  assert.equal(passedEdge(direct, ['detect', 'route']), 'passed', 'no intake: the direct line');
+  const viaApt = sortie({
+    actions: [act('approval')],
+    done: { detect: true, route: true, plan: true, magi: true, sync: true, apt: true, plug: true, eva: true },
+  });
+  assert.equal(passedEdge(viaApt, ['sync', 'apt']), 'passed owner');
+  assert.equal(passedEdge(viaApt, ['apt', 'plug']), 'passed owner');
+  assert.equal(
+    passedEdge(viaApt, ['sync', 'plug']),
+    '',
+    'approval went through Misato’s Apt, not straight to the plug',
+  );
+});
+
+test('B-112: the answer route appears only once Misato planned without an action', () => {
+  const { edgeShown } = sephirot();
+  const answer = ['plan', 'debrief', 'answer'];
+  assert.equal(edgeShown(sortie({ status: 'active', phase: 'route', done: { detect: true } }), answer), false, 'start');
+  assert.equal(
+    edgeShown(sortie({ status: 'active', phase: 'plan', done: { detect: true, route: true } }), answer),
+    false,
+  );
+  assert.equal(edgeShown(sortie({ done: { detect: true, route: true, plan: true } }), answer), true, 'answered');
+});
+
+test('B-112: with no sortie selected every route is on the map, the conditional ones as conditional', () => {
+  const { edgeShown, passedEdge } = sephirot();
+  for (const e of [
+    ['plan', 'debrief', 'answer'],
+    ['apt', 'debrief', 'declined'],
+    ['detect', 'debrief', 'relay'],
+    ['detect', 'intake'],
+  ])
+    assert.equal(edgeShown(null, e), true, e.join('→'));
+  assert.equal(passedEdge(null, ['plan', 'debrief', 'answer']), 'cond');
+  assert.equal(passedEdge(null, ['detect', 'intake']), '');
+});
+
+test('B-112: the loops back to Misato light when the sortie took them', () => {
+  const { passedEdge } = sephirot();
+  const all = { detect: true, route: true, plan: true, magi: true, sync: true, plug: true, eva: true };
+  const nextStep = sortie({ actions: [act('grant'), act('grant')], current: 1, done: all });
+  assert.equal(passedEdge(nextStep, ['eva', 'plan', 'loop']), 'passed', 'a result went back for the next step');
+  assert.equal(passedEdge(sortie({ actions: [act('grant')], done: all }), ['eva', 'plan', 'loop']), '', 'one step');
+  const rejected = sortie({ actions: [act('reject', 'rejected'), act('grant')], current: 1, done: all });
+  assert.equal(passedEdge(rejected, ['magi', 'plan', 'loop']), 'passed', 'MAGI rejected, Misato planned again');
+  const asked = sortie({ actions: [], done: { detect: true, route: true, plan: true, apt: true } });
+  assert.equal(passedEdge(asked, ['apt', 'plan', 'loop']), 'passed owner', 'your answer went back to Misato');
+  assert.equal(passedEdge(sortie({ actions: [act('grant')], done: all }), ['apt', 'plan', 'loop']), '');
+});
+
+test('B-112: conditional routes on the full map are drawn dashed and dimmed', () => {
+  const html = readFileSync('web/public/dashboard/index.html', 'utf8');
+  assert.match(html, /\.sephirot svg\.edges > path\.cond \{[^}]*stroke-dasharray[^}]*opacity/);
 });

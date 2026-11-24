@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "B-117-T01",
+  "parent": "B-117",
+  "title": "Name and fix the load failures of the bases and browser gauntlet cases",
+  "goal": "nerv-system-flows/bases and nerv-system-flows/browser pass under machine load as they do alone",
+  "status": "planned",
+  "acceptance": [
+    "The failure of each case under load is reproduced and its cause named from the run output",
+    "A regression that reproduces the load case fails before the fix and passes after it",
+    "Both cases pass under the same load after the fix, or the case states the bound that absorbs it"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "tools/gauntlet-adapter.mjs",
+    "test/**",
+    "docs/work/records/B-117.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design",
+    "concurrency-control"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run gauntlet:run (the two cases, under load and alone, owner-approved where it calls models)",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-24 from the owner's report: reproduce under load, name the cause, fix, rerun both cases. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  }
+}
