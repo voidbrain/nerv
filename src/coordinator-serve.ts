@@ -25,6 +25,8 @@ export function coordinatorLeaseService(input: {
   readonly baseId: string;
   readonly root: string | undefined;
   readonly ownPublicKey: string;
+  /** The monotonic clock the keeper reads (tests inject one; a host asleep stops it, F-016-T08). */
+  readonly monoNow?: () => bigint;
 }) {
   const db = new DatabaseSync(input.databasePath);
   db.exec('PRAGMA busy_timeout = 5000');
@@ -73,6 +75,7 @@ export function coordinatorLeaseService(input: {
           return { baseId: r.main(), epoch: r.mainEpoch() };
         },
         onFenced: (detail) => console.error(`Coordinator fenced: ${detail}`),
+        ...(input.monoNow ? { monoNow: input.monoNow } : {}),
       });
       return keeper;
     },

@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T08",
-  "status": "planned",
+  "status": "implemented",
   "title": "Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects",
   "goal": "Partition, sleep and reconnect fixtures proving one authority and no duplicate effects.",
   "capabilities": [
@@ -14,7 +14,7 @@
   ],
   "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
   "acceptance": [
-    "Partition, sleep and reconnect fixtures proving one authority and no duplicate effects"
+    "Partition, sleep and reconnect fixtures proving one authority and no duplicate effects (test/coordinator-partition.test.ts: partition, benign and relocated sleep, the moved-standby {X, D} | {B} partition, a crash after each swap step, mixed epochs; every simulated second asserts at most one authority and no effect twice)"
   ],
   "dependsOn": [
     "F-016-T07",
@@ -40,12 +40,20 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 h agent",
-    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
-    "reviewed": "2026-11-14",
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h (feature steps closed since 2026-11-13 took 0.75–1 h). 2026-11-24: implemented in PR #717; actual stated 3 h, four times the estimate: the fixtures needed a multi-base mesh (real homes, keeper, standby ack, authority gate, outbox and promote; simulated clocks and Kaji line), and they found two bugs (B-120, B-121) fixed in the same PR test-first, plus a gap filed as F-016-T20. 2026-11-24: #717 review fixes added 0.5 h (stated).",
+    "reviewed": "2026-11-24",
     "baselineDays": 1.5,
-    "agentHours": 0.75,
+    "agentHours": 0,
     "baselineAgentHours": 2.25,
-    "estimateAgentHours": 0.75
-  }
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 3.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 717,
+      "note": "Partition, sleep and reconnect fixtures; B-120 and B-121 fixes"
+    }
+  ]
 }

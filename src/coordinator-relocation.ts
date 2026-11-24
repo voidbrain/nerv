@@ -172,6 +172,14 @@ function standbyLastAckMs(db: DatabaseSync, epoch: number): number | undefined {
   return row && row.standby_coordinator_epoch === epoch ? row.last_ack_wall_ms : undefined;
 }
 
+/** The newest epoch this standby acked a lease for (`standby_lease_state`), 0 when it never acked one. */
+function standbyAckedEpoch(db: DatabaseSync): number {
+  if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='standby_lease_state'").get()) return 0;
+  const row = db.prepare('SELECT standby_coordinator_epoch FROM standby_lease_state WHERE id = 1').get() as
+    { standby_coordinator_epoch: number } | undefined;
+  return row?.standby_coordinator_epoch ?? 0;
+}
+
 /** Owner-approved cold restore from a verified signed snapshot bound to the previous epoch. */
 export interface ColdRestoreBinding {
   readonly frames: readonly Buffer[];
@@ -201,18 +209,18 @@ export interface RelocationReadiness {
 }
 
 /**
- * Decides whether this base may activate as coordinator for the epoch the owner signed.
- * Never automatic: the owner-signed main record must name this base at a later epoch than its standby.
- * Context alone never grants leadership: the candidate must be a verified standby
- * (`replication_mode = 'standby'` with a state digest), or an owner-approved cold restore whose
- * signed snapshot binds to the standby's epoch.
- *
- * The previous epoch is the epoch of the coordinator that actually last ran, never assumed to be
- * `newEpoch - 1`: it is the standby's replicated epoch, and the signed drain receipt or snapshot must
- * name the same epoch. So a relocation the owner re-targets (main B at E+1 signed, B never promoted,
- * main C at E+2 signed) still takes over from epoch E.
+ * The checks that need only this base's own stores (#717 review): the owner-signed record names this base at
+ * a later epoch, the candidate is a verified standby, and it acked no lease at a later epoch than its state.
+ * `kaji promote` runs them before it pushes the new epoch, so a move that cannot happen tells no other base.
  */
-export function checkRelocationReadiness(input: RelocationReadinessInput): RelocationReadiness {
+export function checkStandbyCandidate(
+  input: Pick<RelocationReadinessInput, 'candidateDb' | 'selfBaseId' | 'registryMain'>,
+): {
+  readonly previousEpoch: number;
+  readonly newEpoch: number;
+  readonly headSeq: number;
+  readonly stateDigest: string;
+} {
   const refuse = (reason: RelocationRefusal, detail: string): never => {
     throw new RelocationRefusedError(reason, detail);
   };
@@ -238,7 +246,34 @@ export function checkRelocationReadiness(input: RelocationReadinessInput): Reloc
       'epoch_not_next',
       `The standby holds epoch ${previousEpoch}; the owner-signed record at epoch ${newEpoch} must be later.`,
     );
-  const headSeq = head!.head_seq;
+  // F-016-T08: this standby acked a lease at a later epoch than the state it holds, so a later coordinator ran
+  // (with effects) after that state: taking over from it would undo, and could repeat, what that coordinator did.
+  const ackedEpoch = standbyAckedEpoch(input.candidateDb);
+  if (ackedEpoch > previousEpoch)
+    refuse(
+      'standby_behind',
+      `This standby acked a coordinator lease at epoch ${ackedEpoch}, but its store holds epoch ${previousEpoch}: re-seed it from the epoch ${ackedEpoch} coordinator first.`,
+    );
+  return { previousEpoch, newEpoch, headSeq: head!.head_seq, stateDigest: state!.stateDigest! };
+}
+
+/**
+ * Decides whether this base may activate as coordinator for the epoch the owner signed.
+ * Never automatic: the owner-signed main record must name this base at a later epoch than its standby.
+ * Context alone never grants leadership: the candidate must be a verified standby
+ * (`replication_mode = 'standby'` with a state digest), or an owner-approved cold restore whose
+ * signed snapshot binds to the standby's epoch.
+ *
+ * The previous epoch is the epoch of the coordinator that actually last ran, never assumed to be
+ * `newEpoch - 1`: it is the standby's replicated epoch, and the signed drain receipt or snapshot must
+ * name the same epoch. So a relocation the owner re-targets (main B at E+1 signed, B never promoted,
+ * main C at E+2 signed) still takes over from epoch E.
+ */
+export function checkRelocationReadiness(input: RelocationReadinessInput): RelocationReadiness {
+  const refuse = (reason: RelocationRefusal, detail: string): never => {
+    throw new RelocationRefusedError(reason, detail);
+  };
+  const { previousEpoch, newEpoch, headSeq, stateDigest } = checkStandbyCandidate(input);
 
   let source: RelocationReadiness['source'] = 'standby';
   if (input.coldRestore) {
@@ -260,7 +295,7 @@ export function checkRelocationReadiness(input: RelocationReadinessInput): Reloc
       refuse('restore_mismatch', 'The snapshot digest is not the one the owner approved.');
     if (manifest.headSeq < restore.minHeadSeq)
       refuse('restore_mismatch', `The snapshot head ${manifest.headSeq} is older than ${restore.minHeadSeq}.`);
-    if (state!.stateDigest !== manifest.sha256 || headSeq !== manifest.headSeq)
+    if (stateDigest !== manifest.sha256 || headSeq !== manifest.headSeq)
       refuse('restore_mismatch', 'The standby store does not hold the approved snapshot.');
     source = 'cold-restore';
   }
@@ -279,7 +314,7 @@ export function checkRelocationReadiness(input: RelocationReadinessInput): Reloc
         'drain_receipt_invalid',
         'The drain receipt is not signed by the previous main base for the standby epoch, handing over to this base at this epoch.',
       );
-    if (headSeq !== r.finalSeq || state!.stateDigest !== r.stateDigest)
+    if (headSeq !== r.finalSeq || stateDigest !== r.stateDigest)
       refuse(
         'standby_behind',
         `The standby is at ${headSeq}; the drained coordinator ended at ${r.finalSeq}. Replicate the final batch first.`,
