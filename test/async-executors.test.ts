@@ -85,13 +85,18 @@ describe('B-132: executors that answer later', () => {
       });
       const decided = await settle(store.decide(card.approvalId!, 'approve', 'owner'));
       assert.match(String(decided.error), /did not answer within/);
+      // A send may still go out: the owner is told the outcome is unknown, not that it failed.
+      assert.match(String(decided.error), /outcome unknown/);
+      assert.match(String(decided.error), /check before retrying/);
       assert.ok(kinds(store, sortie).includes('action.failed'));
       assert.equal(status(store, sortie), 'failed');
     });
   });
 
-  it('a worker-bound card finishes its worker job with the settled outcome; a job released meanwhile is no error', async () => {
-    for (const released of [false, true]) {
+  it('a worker-bound card finishes its worker job with the settled outcome; a job released meanwhile is no error, another failure is logged', async (t) => {
+    const logged = t.mock.method(console, 'error', () => {});
+    for (const mode of ['ok', 'released', 'broken'] as const) {
+      const released = mode !== 'ok';
       await withStore(async (store) => {
         let send: (v: unknown) => void = () => {};
         Object.assign(store, { gmail: fakeGmail(() => new Promise((done) => (send = done))) });
@@ -116,7 +121,11 @@ describe('B-132: executors that answer later', () => {
         });
         store.workerJobs.bindApproval(lease, card.approvalId!, card);
         const decided = settle(store.decide(card.approvalId!, 'approve', 'owner'));
-        if (released) store.db.prepare("UPDATE worker_jobs SET state='cancelled' WHERE id=?").run(lease.id);
+        if (mode === 'released') store.db.prepare("UPDATE worker_jobs SET state='cancelled' WHERE id=?").run(lease.id);
+        if (mode === 'broken')
+          store.workerJobs.finish = () => {
+            throw new Error('disk I/O error');
+          };
         send({ id: 'sent-1' });
         const out = await decided;
         assert.deepEqual(out.result, { id: 'sent-1' });
@@ -125,6 +134,13 @@ describe('B-132: executors that answer later', () => {
           state: string;
           result: string;
         };
+        const logs = logged.mock.calls.map((c) => c.arguments.map(String).join(' '));
+        assert.equal(
+          logs.some((l) => l.includes('disk I/O error')),
+          mode === 'broken',
+          'only a failure other than a released lease is logged',
+        );
+        assert.ok(!logs.some((l) => l.includes('Worker lease')), 'a released lease is not logged');
         if (!released) {
           assert.equal(job.state, 'completed');
           assert.deepEqual(JSON.parse(job.result), { outcome: 'grant', decision: 'approve', result: { id: 'sent-1' } });

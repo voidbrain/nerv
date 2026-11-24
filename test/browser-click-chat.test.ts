@@ -183,8 +183,8 @@ describe('F-089-T06: browser.click chat tool', () => {
     }
   });
 
-  it('the click runs only on the tab and origin the card names: another tab, a closed tab or another origin is refused', async () => {
-    const switches: [string, (b: FakeBrowser) => void, RegExp][] = [
+  it('the click runs only on the tab, origin and page the card names: another tab, a closed tab, another origin or another page is refused', async () => {
+    const switches: [string, (b: FakeBrowser) => void, RegExp | null][] = [
       [
         'the owner switched to another allowed tab',
         (b) => b.tabs.unshift({ id: 'page-2', page: page(`${ORIGIN}/settings`) }),
@@ -195,6 +195,16 @@ describe('F-089-T06: browser.click chat tool', () => {
         'the same tab moved to another allowed origin',
         (b) => (b.tabs[0]!.page.url = 'https://second.example.test/x'),
         /moved to another origin/,
+      ],
+      [
+        'the same tab moved to another page of the same origin',
+        (b) => (b.tabs[0]!.page.url = `${ORIGIN}/account/delete`),
+        /moved to another page/,
+      ],
+      [
+        'the same page with another query string is still the page the card names',
+        (b) => (b.tabs[0]!.page.url = `${ORIGIN}/watch?t=42#top`),
+        null,
       ],
     ];
     for (const [what, change, error] of switches) {
@@ -208,8 +218,13 @@ describe('F-089-T06: browser.click chat tool', () => {
           const card = await propose(store, sortie, { control: 'Skip' });
           change(browser);
           const decided = await settledOutcome(store.decide(card.approvalId!, 'approve', 'owner'));
-          assert.match(String(decided.error), error, what);
-          assert.deepEqual(clicks, [], what);
+          if (error) {
+            assert.match(String(decided.error), error, what);
+            assert.deepEqual(clicks, [], what);
+          } else {
+            assert.equal(decided.error, undefined, what);
+            assert.deepEqual(clicks, ['Skip'], what);
+          }
         } finally {
           store.close();
         }
@@ -411,4 +426,34 @@ describe('F-089-T06 across the join: chat request → browser.click → approval
         rmSync(home, { recursive: true, force: true });
       }
     });
+
+  it('an owner-direct click the nervous process refuses before the gate closes its sortie as failed', async () => {
+    const models = await fakeModels([]);
+    const home = mkdtempSync(join(tmpdir(), 'nerv-browser-refused-'));
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({
+        models: {
+          local: { baseUrl: models.url, model: 'gemma4:12b' },
+          roles: { misato: { route: 'local', model: 'qwen2.5-coder:14b' }, casper: { model: 'gemma4:12b' } },
+        },
+      }),
+    );
+    const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home, { browserCdp: true });
+    try {
+      await runtime.ready();
+      await assert.rejects(
+        () => runtime.act({ request: 'click the skip button', tool: 'browser.click', args: { control: 'Skip' } }),
+        /No browser origins allowed/,
+      );
+      const [sortie] = await runtime.sorties(1);
+      assert.equal(sortie!.title, 'click the skip button');
+      assert.equal(sortie!.status, 'failed');
+      assert.equal(sortie!.actions, 0, 'nothing reached the gate');
+    } finally {
+      await runtime.close();
+      await models.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  });
 });
