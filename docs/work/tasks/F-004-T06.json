@@ -9,7 +9,8 @@
     "Owner installs on a phone, receives a reminder push and completes it from the PWA; result recorded"
   ],
   "dependsOn": [
-    "F-004-T05"
+    "F-004-T05",
+    "F-004-T08"
   ],
   "resources": [
     "docs/**",

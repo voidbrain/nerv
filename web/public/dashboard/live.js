@@ -1226,6 +1226,60 @@
     }
     await loadDevices();
   });
+  // F-004-T08: Settings → Notifications. iOS asks for permission only after a tap inside the Home Screen app, and a
+  // Safari tab has no PushManager, so a tab says to open the installed app. Enable asks first (still inside the tap),
+  // then subscribes with the service's VAPID key through this page's own worker (sw.js, scope /dashboard/) and
+  // registers the subscription with POST /api/push/subscribe, as the workspace's push toggle (web/src/main.ts) does;
+  // Turn off removes it from the service, then unsubscribes here. A paired device may do both, like a dashboard session.
+  state.push = { busy:false, on:false, msg:null };
+  const pushSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  let pushReady = null;
+  const pushWorker = () => pushReady || (pushReady = navigator.serviceWorker.register("/dashboard/sw.js", { scope:"/dashboard/" }).then(() => navigator.serviceWorker.ready).catch(e => { pushReady = null; throw e; }));
+  const vapidKey = s => Uint8Array.from(atob((s + "=".repeat((4 - s.length % 4) % 4)).replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+  function pushView() {
+    if (!pushSupported()) return ["muted", !INSTALLED && "standalone" in navigator ? "Notifications need the Home Screen app: in Safari, Share → Add to Home Screen, open NERV from the Home Screen and enable them there." : "This browser cannot receive notifications.", ""];
+    if (Notification.permission === "denied") return ["warn", "Blocked: notifications for NERV are turned off on this device. Allow them in the phone's Settings → Notifications → NERV (or the browser's site settings), then reload.", ""];
+    if (state.push.on) return ["ok", "On: this device is subscribed; reminders that fall due are sent here.", "<button class='btn sm' type='button' id='btn-push-disable'>Turn off</button>"];
+    return ["muted", "Off. Press Enable notifications and allow them when asked.", "<button class='btn sm primary' type='button' id='btn-push-enable'>Enable notifications</button>"];
+  }
+  function renderPush() {
+    const box = document.getElementById("settings-push"); if (!box) return;
+    const p = state.push, [kind, text, button] = pushView();
+    box.innerHTML = "<div class='row small' style='justify-content:space-between;align-items:center'><b>Notifications</b>" + (p.busy ? "<button class='btn sm' type='button' disabled>Working…</button>" : button) + "</div>" +
+      "<div role='status' class='tiny " + kind + "'>" + esc(text) + "</div>" + (p.msg ? "<div role='alert' class='tiny " + p.msg.kind + "'>" + esc(p.msg.text) + "</div>" : "");
+  }
+  async function loadPush() {
+    if (pushSupported()) {
+      try { state.push.on = !!(await (await pushWorker()).pushManager.getSubscription()); }
+      catch (e) { state.push.msg = { kind:"danger", text:"Notifications unavailable: " + e.message }; }
+    }
+    renderPush();
+  }
+  async function pushChange(enable) {
+    const p = state.push; if (p.busy) return; p.busy = true; p.msg = null; renderPush();
+    try {
+      if (enable) {
+        // Asked first, while the tap is still the user's gesture: iOS shows the prompt only then.
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") { if (permission !== "denied") p.msg = { kind:"muted", text:"Not allowed: notifications stay off." }; return; }
+        const [reg, key] = await Promise.all([pushWorker(), api("push/key")]);
+        if (!key.publicKey) throw new Error("the service has no push key");
+        const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:vapidKey(key.publicKey) });
+        await api("push/subscribe", { method:"POST", body:JSON.stringify({ endpoint:sub.endpoint, keys:sub.toJSON().keys, userAgent:navigator.userAgent }) });
+        p.on = true;
+      } else {
+        const sub = await (await pushWorker()).pushManager.getSubscription();
+        if (sub) { await api("push/unsubscribe", { method:"POST", body:JSON.stringify({ endpoint:sub.endpoint }) }); await sub.unsubscribe(); }
+        p.on = false;
+      }
+    } catch (e) { if (e.status !== 401) p.msg = { kind:"danger", text:(enable ? "Notifications not enabled: " : "Notifications not turned off: ") + e.message }; }
+    finally { p.busy = false; renderPush(); }
+  }
+  document.addEventListener("click", e => {
+    if (!e.target || !e.target.closest) return;
+    if (e.target.closest("#btn-push-enable")) void pushChange(true);
+    else if (e.target.closest("#btn-push-disable")) void pushChange(false);
+  });
   // F-102-T02: the switch posts the policy; an empty selection means this base on main (the server fills it in).
   window.liveSetAutoUpdate = async function (enabled) {
     if (state.updatePolicyBusy) return;
@@ -1290,7 +1344,7 @@
   }
   window.addEventListener("pagehide", () => { streamPaused = true; clearTimeout(streamTimer); if (streamController) streamController.abort(); });
   window.addEventListener("pageshow", e => { if (e.persisted) { streamPaused = false; void watchChanges(); queueRefresh(); } });
-  let started = false; const begin = () => { void watchChanges(); void api("commands").then(r => { if (r && Array.isArray(r.commands)) state.commands = r.commands; }).catch(() => {}); void loadDevices(); if (started) { void poll(); return; } started = true; document.getElementById("chat-in").placeholder = LIVE_HINT; poll(); setInterval(poll, 3000); };
+  let started = false; const begin = () => { void watchChanges(); void api("commands").then(r => { if (r && Array.isArray(r.commands)) state.commands = r.commands; }).catch(() => {}); void loadDevices(); void loadPush(); if (started) { void poll(); return; } started = true; document.getElementById("chat-in").placeholder = LIVE_HINT; poll(); setInterval(poll, 3000); };
   // F-039: the login code is swapped for a dashboard session (never the admin token), kept in this tab's sessionStorage so a
   // reload stays signed in; it ends after 12 h, when the service restarts, with `sessions revoke`, or when the tab closes.
   // A token pasted by hand is the admin token: it stays in memory only and is never stored.

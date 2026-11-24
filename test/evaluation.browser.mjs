@@ -637,3 +637,99 @@ test(
     }
   },
 );
+
+// F-004-T08 (owner 2026-11-24): across the join, the production dashboard's Settings → Notifications and the real
+// server's push endpoints with a device credential (F-118). In a Safari tab (no PushManager) Settings says to open the
+// Home Screen app. In the installed app, Enable notifications asks for permission on the tap (stubbed: no prompt),
+// subscribes with the server's VAPID key (stubbed PushManager: no real push service) and the server stores the
+// subscription; Turn off removes it; a refused permission shows Blocked with where to allow it.
+test(
+  'F-004-T08: dashboard Settings enables notifications on the installed app and the server stores the subscription',
+  { timeout: 120000 },
+  async () => {
+    const home = mkdtempSync(join(tmpdir(), 'nerv-push-browser-')),
+      token = 'f'.repeat(32);
+    const store = new Store(':memory:');
+    const server = makeServer(store, token, {
+      webRoot: resolve('dist/web/browser'),
+      deviceFile: join(home, 'devices.json'),
+      language: 'en',
+      timeZone: 'Europe/Rome',
+    });
+    await new Promise((done) => server.listen(0, '127.0.0.1', done));
+    const origin = `http://127.0.0.1:${server.address().port}`;
+    const admin = { authorization: 'Bearer ' + token };
+    const mint = async () =>
+      (await (await fetch(origin + '/api/device/codes', { method: 'POST', headers: admin })).json()).code;
+    const banner = `document.querySelector('.banner').textContent`;
+    const signedIn = `${banner}.includes('LIVE ·')&&!${banner}.includes('NOT SIGNED IN')&&!${banner}.includes('SIGNING IN')`;
+    const push = `(document.querySelector('#settings-push')||{textContent:''}).textContent`;
+    const signInWith = (value) =>
+      `{const i=document.querySelector('#live-token');i.value=${JSON.stringify(value)};document.querySelector('#live-signin').requestSubmit()}`;
+    try {
+      await browser(async ({ page, evaluate, until, errors }) => {
+        // A Safari tab on the iPhone: no PushManager outside the Home Screen app.
+        const tab = await page('Page.addScriptToEvaluateOnNewDocument', {
+          source: `Object.defineProperty(Navigator.prototype,'standalone',{configurable:true,get:()=>false});delete window.PushManager`,
+        });
+        await page('Page.navigate', { url: origin + '/dashboard/' });
+        await until(`${banner}.includes('NOT SIGNED IN')`);
+        await evaluate(signInWith(token));
+        await until(`${signedIn}&&${push}.includes('Add to Home Screen')`);
+        assert.equal(await evaluate(`document.querySelector('#btn-push-enable')`), null, 'no Enable button in a tab');
+        await page('Page.removeScriptToEvaluateOnNewDocument', { identifier: tab.identifier });
+
+        // The installed app, paired with a device credential; permission and the push service are stubbed.
+        await page('Page.addScriptToEvaluateOnNewDocument', {
+          source: `Object.defineProperty(Navigator.prototype,'standalone',{configurable:true,get:()=>true});
+            window.__perm='default';window.__asked=0;let sub=null;
+            Object.defineProperty(Notification,'permission',{configurable:true,get:()=>window.__perm});
+            Notification.requestPermission=()=>{window.__asked++;window.__perm=window.__deny?'denied':'granted';return Promise.resolve(window.__perm)};
+            PushManager.prototype.getSubscription=function(){return Promise.resolve(sub)};
+            PushManager.prototype.subscribe=function(o){window.__keyBytes=o.applicationServerKey.byteLength;sub={endpoint:'https://push.invalid/fixture-device',toJSON(){return{endpoint:this.endpoint,keys:{p256dh:'BFixtureP256dhKey',auth:'fixtureAuth'}}},unsubscribe(){sub=null;return Promise.resolve(true)}};return Promise.resolve(sub)};`,
+        });
+        await page('Page.navigate', { url: origin + '/dashboard/' });
+        await until(`${banner}.includes('NOT SIGNED IN')`);
+        await evaluate(signInWith(await mint()));
+        await until(`${signedIn}&&document.querySelector('#btn-push-enable')!==null`);
+        assert.match(await evaluate(push), /Off/);
+        assert.equal(await evaluate(`window.__asked`), 0, 'no permission request before the tap');
+        await evaluate(`document.querySelector('#btn-push-enable').click()`);
+        await until(`${push}.includes('On')&&document.querySelector('#btn-push-disable')!==null`);
+        assert.equal(await evaluate(`window.__asked`), 1, 'asked once, on the tap');
+        assert.equal(await evaluate(`window.__keyBytes`), 65, "subscribed with the server's VAPID key");
+        const saved = await store.listPushSubscriptions();
+        assert.deepEqual(
+          saved.map((s) => [s.endpoint, s.p256dh, s.auth]),
+          [['https://push.invalid/fixture-device', 'BFixtureP256dhKey', 'fixtureAuth']],
+          'the server stored the subscription sent with the device credential',
+        );
+        assert.equal(
+          await evaluate(`navigator.serviceWorker.getRegistration('/dashboard/').then(r=>!!r&&r.scope)`),
+          origin + '/dashboard/',
+          'the dashboard registered its own service worker',
+        );
+
+        // Turn off: unsubscribed here and removed on the server.
+        await evaluate(`document.querySelector('#btn-push-disable').click()`);
+        await until(`${push}.includes('Off')&&document.querySelector('#btn-push-enable')!==null`);
+        assert.deepEqual(await store.listPushSubscriptions(), []);
+
+        // Refused permission: Blocked, with where to allow it, and no button that cannot work.
+        await evaluate(`window.__perm='default';window.__deny=true`);
+        await evaluate(`document.querySelector('#btn-push-enable').click()`);
+        await until(`${push}.includes('Blocked')`);
+        assert.equal(await evaluate(`document.querySelector('#btn-push-enable')`), null);
+        assert.deepEqual(await store.listPushSubscriptions(), []);
+        assert.deepEqual(errors, [], 'no browser runtime exceptions');
+      });
+    } finally {
+      await new Promise((done) => {
+        server.close(done);
+        server.closeAllConnections();
+      });
+      store.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);
