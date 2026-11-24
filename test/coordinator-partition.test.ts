@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { generateKeyPairSync, type KeyObject } from 'node:crypto';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -34,7 +34,16 @@ import {
 } from '../src/coordinator-serve.ts';
 import type { ReplicationBatch } from '../src/coordinator-replication.ts';
 import { COORDINATOR_STATE_SCHEMA } from '../src/coordinator-snapshot.ts';
-import { Registry, signRecord, type RegistryBody, type SignedRecord } from '../src/kaji.ts';
+import { runKajiCommand } from '../src/cli-kaji.ts';
+import {
+  ROOT_KEY_FILE,
+  Registry,
+  createRootKey,
+  signRecord,
+  unlockRootKey,
+  type RegistryBody,
+  type SignedRecord,
+} from '../src/kaji.ts';
 import { Store } from '../src/store.ts';
 
 /*
@@ -70,6 +79,7 @@ const ISSUED = '2026-11-24T10:00:00.000Z';
 const OUTBOX_ID = '00000000-0000-4000-8000-0000000000a1';
 const APPROVAL_ID = '00000000-0000-4000-8000-0000000000b1';
 const OUTBOX_2 = '00000000-0000-4000-8000-0000000000a2';
+const PASS = 'neutral mesh passphrase';
 
 const b64 = (k: KeyObject) => k.export({ type: 'spki', format: 'der' }).toString('base64');
 
@@ -104,6 +114,8 @@ function seedOutbox(db: DatabaseSync, done: boolean) {
 interface TemplateData {
   readonly rootPub: string;
   readonly rootKey: KeyObject;
+  /** B-124: the encrypted Key of Nebuchadnezzar file, for `kaji relocate` run as the CLI runs it. */
+  readonly keyFile: string;
   readonly keys: Record<string, { publicKey: string; privateKey: KeyObject }>;
   readonly serial: number;
 }
@@ -117,8 +129,9 @@ after(() => {
 
 /** Bases `ids`, all enrolled; X is main at epoch 2 with B as its standby; `standbys` keep a standby store. */
 function buildMesh(dir: string, ids: readonly string[], standbys: readonly string[]): TemplateData {
-  const root = generateKeyPairSync('ed25519');
-  const rootPub = b64(root.publicKey);
+  const keyFile = createRootKey(PASS);
+  const root = unlockRootKey(keyFile.file, PASS);
+  const rootPub = keyFile.publicKey;
   const keys: TemplateData['keys'] = {};
   for (const id of ids) {
     const k = generateKeyPairSync('ed25519');
@@ -155,7 +168,7 @@ function buildMesh(dir: string, ids: readonly string[], standbys: readonly strin
       standby.close();
     }
   }
-  return { rootPub, rootKey: root.privateKey, keys, serial };
+  return { rootPub, rootKey: root.privateKey, keyFile: keyFile.file, keys, serial };
 }
 
 function meshFromTemplate(ids: readonly string[], standbys: readonly string[]) {
@@ -196,6 +209,7 @@ class Mesh {
   readonly dir: string;
   readonly rootPub: string;
   private readonly rootKey: KeyObject;
+  private readonly keyFile: string;
   private readonly keys: TemplateData['keys'];
   private serial: number;
   readonly bases = new Map<string, Base>();
@@ -217,6 +231,12 @@ class Mesh {
    * current (it holds the template state: the attempt of the uncertain send, not its result).
    */
   replication = false;
+  /**
+   * B-124: KajiLink's heartbeat registry sync. Every 5 s each serving base pulls the records of every peer it reaches
+   * (a peer that holds newer ones hands them over), so a record stored in any live registry reaches every base.
+   */
+  gossip = false;
+  private relocations = 0;
   private readonly telegram: number[] = [];
 
   constructor(ids: readonly string[], standbys: readonly string[]) {
@@ -224,6 +244,7 @@ class Mesh {
     this.dir = dir;
     this.rootPub = data.rootPub;
     this.rootKey = data.rootKey;
+    this.keyFile = data.keyFile;
     this.keys = data.keys;
     this.serial = data.serial;
     this.startMs = Date.parse('2026-11-24T12:00:00.000Z');
@@ -302,6 +323,56 @@ class Mesh {
       serial: ++this.serial,
       issued: new Date().toISOString(),
     } as unknown as RegistryBody);
+  }
+
+  /** One round of the heartbeat registry sync between every pair of serving bases that reach each other. */
+  syncRegistries(): void {
+    for (const a of this.bases.values())
+      for (const b of this.bases.values()) {
+        if (a === b || !a.awake || !a.service) continue;
+        try {
+          this.answering(a.id, b.id);
+        } catch {
+          continue;
+        }
+        const theirs = this.withRegistry(b, (reg) => reg.records());
+        this.withRegistry(a, (reg) => {
+          for (const r of theirs)
+            try {
+              reg.add(r);
+            } catch {
+              // Not signed by the pinned root, or an older main record: dropped, as KajiLink drops it.
+            }
+        });
+      }
+  }
+
+  /**
+   * B-124: `nerv kaji relocate TARGET FILE` run with the real CLI on base `on` (the base holding the Key, its live
+   * store); a push it sends goes over the simulated Kaji line. Returns the records of the bundle it wrote.
+   */
+  async relocate(on: string, target: string, flags: Record<string, string> = {}): Promise<SignedRecord[]> {
+    const b = this.base(on);
+    writeFileSync(join(b.home, ROOT_KEY_FILE), this.keyFile);
+    const file = join(this.dir, `relocate-${target}-${++this.relocations}.json`);
+    const config = { base: { id: on }, kaji: { root: this.rootPub } } as unknown as Parameters<
+      typeof runKajiCommand
+    >[3];
+    const log = mock.method(console, 'log', () => {});
+    try {
+      await runKajiCommand(['relocate', target, file], b.home, b.service!.store, config, {
+        readSecret: async () => PASS,
+        flag: (name) => flags[name],
+        promotion: { pushEpoch: (to, records) => this.pushEpoch(on, to, records) },
+      });
+    } finally {
+      log.mock.restore();
+    }
+    const records = existsSync(file)
+      ? (JSON.parse(readFileSync(file, 'utf8')) as { records: SignedRecord[] }).records
+      : [];
+    this.serial = Math.max(this.serial, ...records.map((r) => r.body.serial));
+    return records;
   }
 
   /** `kaji import` on a base: merges owner-signed records into its registry. */
@@ -471,6 +542,7 @@ class Mesh {
     for (let t = 0; t < ms; t += STEP_MS) {
       mock.timers.tick(STEP_MS);
       for (const b of this.bases.values()) if (b.awake) b.mono += BigInt(STEP_MS) * 1_000_000n;
+      if (this.gossip && this.elapsed() % 5000 === 0) this.syncRegistries();
       if (this.elapsed() % LEASE_RENEW_MS === 0)
         for (const b of this.bases.values()) if (b.awake && b.service) await b.service.keeper.renewOnce();
       this.step();
@@ -528,22 +600,31 @@ class Mesh {
    * registry and writes the signed receipt; its service keeps running (fenced), as with the real command. The
    * verified main records and (#721 fourth check) the newest epoch this base ran or acked go with the request.
    */
-  drain(id: string): string {
+  drain(id: string, relocation?: readonly SignedRecord[]): string {
     const b = this.base(id);
     const db = new DatabaseSync(b.db);
     try {
       const reg = new Registry(db, this.rootPub);
       const state = readCoordinatorFencingState(db)!;
+      // B-124: `kaji drain --relocation FILE` reads the bundle's records as if held and stores them with the fence.
+      const records = [...reg.records(), ...(relocation ?? [])];
+      const mains = records.filter((r) => r.body.kind === 'main');
+      const newest = mains.reduce((a, r) => ((r.body.coordinatorEpoch ?? 0) > (a.body.coordinatorEpoch ?? 0) ? r : a));
       const receipt = drainCoordinator(db, {
         baseId: id,
         coordinatorEpoch: state.coordinatorEpoch,
-        newMainBaseId: reg.main()!,
-        newEpoch: reg.mainEpoch(),
-        registryMains: reg
-          .records()
-          .filter((r) => r.body.kind === 'main')
-          .map((r) => ({ baseId: r.body.baseId, coordinatorEpoch: r.body.coordinatorEpoch ?? 0 })),
+        newMainBaseId: newest.body.baseId!,
+        newEpoch: newest.body.coordinatorEpoch ?? 0,
+        registryMains: mains.map((r) => ({ baseId: r.body.baseId, coordinatorEpoch: r.body.coordinatorEpoch ?? 0 })),
         ranOrAckedEpoch: ranOrAckedCoordinatorEpoch(db, join(b.home, STANDBY_DB_FILE)),
+        ...(relocation
+          ? {
+              commit: (tx: DatabaseSync) => {
+                const signed = new Registry(tx, this.rootPub);
+                for (const r of relocation) signed.add(r);
+              },
+            }
+          : {}),
       });
       const file = join(this.dir, `receipt-${id}-${receipt.newMainBaseId}-${receipt.newEpoch}.json`);
       writeFileSync(file, JSON.stringify(signDrainReceipt(this.keys[id]!.privateKey, receipt)));
@@ -835,25 +916,29 @@ describe('F-016-T08: partition, sleep and reconnect keep one authority and run n
   });
 });
 
-describe('B-121-T02: a re-targeted move hears from every base which epochs ran, before it tells any of them the new one', () => {
-  /** X at 2 is revoked while asleep; B promotes to 3 and renews through D only, so C never acks epoch 3. */
-  async function bRunsThroughD() {
-    const m = (mesh = new Mesh([X, B, C, D], [B, C, D]));
-    await m.advance(30_000);
-    m.sleep(X);
-    const toB = [
-      m.sign({ kind: 'revoke', baseId: X, publicKey: m.base(X).publicKey }),
-      m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }),
-    ];
-    m.importRecords(B, toB);
-    const b = await m.promote(B);
-    assert.ok(!('resumed' in b) && b.newEpoch === 3);
-    m.setStandby(B, D);
-    await m.advance(30_000);
-    assert.deepEqual(m.holders(), [B]);
-    return { m, toB };
-  }
+/**
+ * X at 2 is revoked while asleep; B promotes to 3 and renews through D only, so C never acks epoch 3. With
+ * `replication`, serve's shipper keeps each main's standby current (B seeds D).
+ */
+async function bRunsThroughD(replication = false) {
+  const m = (mesh = new Mesh([X, B, C, D], [B, C, D]));
+  m.replication = replication;
+  await m.advance(30_000);
+  m.sleep(X);
+  const toB = [
+    m.sign({ kind: 'revoke', baseId: X, publicKey: m.base(X).publicKey }),
+    m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }),
+  ];
+  m.importRecords(B, toB);
+  const b = await m.promote(B);
+  assert.ok(!('resumed' in b) && b.newEpoch === 3);
+  m.setStandby(B, D);
+  await m.advance(30_000);
+  assert.deepEqual(m.holders(), [B]);
+  return { m, toB };
+}
 
+describe('B-121-T02: a re-targeted move hears from every base which epochs ran, before it tells any of them the new one', () => {
   it('B ran epoch 3 renewing through D; re-targeted to C at 4, C (which never acked B) is refused standby_behind and B keeps acting', async () => {
     const { m, toB } = await bRunsThroughD();
     // C's own stores show nothing later than epoch 2: the local check alone (B-121-T01) would let it promote.
@@ -887,6 +972,93 @@ describe('B-121-T02: a re-targeted move hears from every base which epochs ran, 
     assert.ok(!('resumed' in res) && res.newEpoch === 3);
     await m.advance(30_000);
     assert.deepEqual(m.holders(), [B]);
+  });
+});
+
+describe('B-124: kaji relocate tells no base the new epoch before the target passes its prechecks', () => {
+  const epochs = (m: Mesh) => [B, C, D].map((id) => m.registryOf(id).epoch);
+
+  it('B runs 3 through D; relocated to C at 4, C is refused and B keeps acting; then a planned move to D takes over', async () => {
+    const { m } = await bRunsThroughD(true);
+    m.gossip = true;
+    m.pushes.length = 0;
+    // The owner signs the re-target on D (it holds the Key): nothing is pushed and no registry holds epoch 4.
+    const toC = await m.relocate(D, C);
+    assert.deepEqual(
+      m.pushes.filter((p) => p.records > 0),
+      [],
+      'kaji relocate pushed the new epoch',
+    );
+    await m.advance(10_000);
+    assert.deepEqual(epochs(m), [3, 3, 3], 'no registry holds epoch 4, so the heartbeat sync carries none');
+    assert.deepEqual(m.holders(), [B]);
+    // C's promote reads the bundle's records as if held, asks every base, and is refused before telling any.
+    await assert.rejects(m.promote(C, { relocation: toC }), refused('standby_behind', /epoch 3/));
+    assert.deepEqual(epochs(m), [3, 3, 3], 'the refused move stored and pushed nothing');
+    await m.advance(60_000);
+    assert.deepEqual(m.holders(), [B]);
+    assert.equal(m.state(B)?.replicationMode, 'active');
+
+    // A planned move to D, whose standby B keeps current: the drain stores the records with the fence.
+    const toD = await m.relocate(D, D);
+    await m.base(B).service!.shipper.flush();
+    const receipt = m.drain(B, toD);
+    const res = await m.promote(D, { drainReceiptFile: receipt, relocation: toD });
+    assert.ok(!('resumed' in res) && res.newEpoch === 4 && res.previousEpoch === 3);
+    await m.advance(30_000);
+    assert.deepEqual(m.holders(), [D]);
+    assert.deepEqual(epochs(m), [4, 4, 4]);
+  });
+
+  it('an unplanned move from a relocation bundle (revoke + main) still promotes once every unrevoked base answers', async () => {
+    const m = (mesh = new Mesh([X, B, D], [B, D]));
+    m.gossip = true;
+    await m.advance(30_000);
+    m.sleep(X);
+    m.pushes.length = 0;
+    const toB = await m.relocate(D, B, { '--revoke': X });
+    assert.deepEqual(
+      m.pushes.filter((p) => p.records > 0),
+      [],
+    );
+    assert.equal(m.registryOf(B).epoch, 2);
+    const res = await m.promote(B, { relocation: toB });
+    assert.ok(!('resumed' in res) && res.newEpoch === 3);
+    await m.advance(30_000);
+    assert.deepEqual(m.holders(), [B]);
+  });
+
+  it('the way out: the epoch was pushed and C is refused; a new main record naming B reinstates it from its own store', async () => {
+    const { m, toB } = await bRunsThroughD();
+    m.gossip = true;
+    // As an older relocate did (or a hand import): every base holds C at 4 and B fences; C is refused.
+    const toC = [m.sign({ kind: 'main', baseId: C, coordinatorEpoch: 4 })];
+    for (const id of [B, C, D]) m.importRecords(id, [...toB, ...toC]);
+    await assert.rejects(m.promote(C), refused('standby_behind', /epoch 3/));
+    await m.advance(30_000);
+    assert.deepEqual(m.holders(), [], 'no coordinator');
+    // The owner names B again (epoch 5); kaji promote on B asks every base that nobody ran a later epoch than 3.
+    const back = await m.relocate(D, B);
+    const res = await m.promote(B, { relocation: back });
+    assert.ok('reinstated' in res && res.newEpoch === 5 && res.previousEpoch === 3);
+    await m.advance(30_000);
+    assert.deepEqual(m.holders(), [B]);
+    assert.equal(m.state(B)?.coordinatorEpoch, 5);
+    // C, no longer named, cannot promote from the old record.
+    await assert.rejects(m.promote(C), refused('not_named_main'));
+  });
+
+  it('the way out is refused while a base reports a later epoch than the old main ran', async () => {
+    const { m, toB } = await bRunsThroughD();
+    const toC = [m.sign({ kind: 'main', baseId: C, coordinatorEpoch: 4 })];
+    for (const id of [B, C, D]) m.importRecords(id, [...toB, ...toC]);
+    // D acked a lease at epoch 4 (as if C had run): B's state is behind it.
+    const ddb = new DatabaseSync(join(m.base(D).home, STANDBY_DB_FILE));
+    ddb.prepare('UPDATE standby_lease_state SET standby_coordinator_epoch = 4 WHERE id = 1').run();
+    ddb.close();
+    const back = await m.relocate(D, B);
+    await assert.rejects(m.promote(B, { relocation: back }), refused('standby_behind', /NERV-04 \(epoch 4\)/));
+    assert.equal(m.registryOf(D).epoch, 4, 'the refused way out told no base epoch 5');
   });
 });
 
