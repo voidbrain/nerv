@@ -45,18 +45,18 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 from F-016-T18 (epoch push, 1 h stated): one reply field, one recorded column, one refusal and a mesh fixture. Not a measurement. 2026-11-24: implemented in 1.25 h agent (stated): the record-free probe phase and the mixed-version rule were added to keep a refused re-target from fencing the running main.",
+    "basis": "Estimated 2026-11-24 from F-016-T18 (epoch push, 1 h stated): one reply field, one recorded column, one refusal and a mesh fixture. Not a measurement. 2026-11-24: implemented in 1.25 h agent (stated): the record-free probe phase and the mixed-version rule were added to keep a refused re-target from fencing the running main. 2026-11-24: #721 review fixes (drain refusal, planned-path and wiring tests, B-124) added 0.75 h (stated).",
     "reviewed": "2026-11-24",
     "agentHours": 0,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1.25,
-    "actualAgentHours": 1.25,
+    "estimateAgentHours": 2,
+    "actualAgentHours": 2,
     "actualSource": "stated"
   },
   "prs": [
     {
       "pr": 721,
-      "note": "ranOrAckedEpoch in the epoch-push reply; record-free probe before the push"
+      "note": "ranOrAckedEpoch in the epoch-push reply; record-free probe before the push; #721 review fixes"
     }
   ]
 }
