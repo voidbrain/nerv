@@ -271,7 +271,14 @@ export async function runKajiCommand(
       throw new Error('Name another enrolled base: a coordinator never acks its own lease.');
     if (!state || (state.replicationMode !== 'active' && state.replicationMode !== 'fenced'))
       throw new Error('This base holds no coordinator state to name a standby for.');
-    // F-016-T16 re-review: only a base that acks from a standby store may be named; one lease renewal proves it.
+    // F-016-T16 re-review: only a base that acks from a standby store may be named; on an active main one lease
+    // renewal proves it. A fenced main never probes (that would move the standby's ack history for a main that
+    // holds no lease); its keeper re-arms only through an ack, which only a standby store gives.
+    if (state.replicationMode === 'fenced') {
+      store.db.prepare('UPDATE coordinator_state SET standby_base_id = ? WHERE id = 1').run(id);
+      console.log(`Standby: ${id}. This main is fenced: it re-arms only when ${id} acks from its standby store.`);
+      return;
+    }
     const renew =
       ctx.renewLease ??
       ((base: string, req: LeaseRenewRequest) =>
