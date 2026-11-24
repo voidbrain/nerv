@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-121-T04",
+  "parent": "F-121",
+  "title": "Send the part file with the print job",
+  "goal": "A print request carries the part file from the Mac library to the slicing base, verified, cached and re-sent only when changed",
+  "status": "planned",
+  "acceptance": [
+    "The file travels over the Kaji line as a signed message with its SHA-256, size-capped like F-062-T06 backup copies; the receiver verifies signature and hash before writing",
+    "Tabgha writes only inside its prints cache (%USERPROFILE%\\.nerv\\prints-cache); names are content hashes, never sender paths",
+    "A file already cached with the same hash is not sent again; a changed file is",
+    "A test across the join: Mac base sends, Tabgha base receives, verifies and slices from the cache with a fake slicer; a tampered or oversized file is refused"
+  ],
+  "dependsOn": [
+    "F-121-T02"
+  ],
+  "resources": [
+    "src/kaji-link.ts",
+    "src/slicer.ts",
+    "src/executors.ts",
+    "test/kaji-link.test.ts",
+    "test/slicer.test.ts",
+    "docs/work/records/F-121.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; the owner's part files never enter Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h agent",
+    "basis": "Estimated 2026-11-24 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 3.0,
+    "baselineAgentHours": 3.0,
+    "estimateAgentHours": 3.0
+  }
+}

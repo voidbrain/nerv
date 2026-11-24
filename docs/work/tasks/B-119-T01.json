@@ -4,7 +4,7 @@
   "parent": "B-119",
   "title": "Let placement probes run to their own budget",
   "goal": "A placement run longer than 15 s but within its timeoutMs returns its result instead of a closed connection",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A committed test fails first: a placement run whose inference takes longer than 15 s and less than its timeoutMs returns its result",
     "/api/placement/run sets its socket timeout from the probe budget, as the chat routes do"
@@ -12,7 +12,8 @@
   "dependsOn": [],
   "resources": [
     "src/server.ts",
-    "test/**",
+    "src/placement-campaign.ts",
+    "test/placement-campaign.test.ts",
     "docs/work/records/B-119.md",
     "generated:backlog-views"
   ],
@@ -23,7 +24,7 @@
   ],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
   "validation": [
-    "The new regression test",
+    "A committed regression fails before the fix (test/placement-campaign.test.ts, B-119 case)",
     "npm run check:fast"
   ],
   "escalation": [
@@ -36,6 +37,8 @@
     "reviewed": "2026-11-24",
     "agentHours": 1,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
   }
 }
