@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-120-T03",
+  "parent": "F-120",
+  "title": "Adopt the Gauntlet domain packs when released",
+  "goal": "NERV pins the gauntlet-protocol release carrying the domain packs and runs them, so pilot qualification can use the results",
+  "status": "planned",
+  "acceptance": [
+    "Starts only after gauntlet-protocol tags a release with the domain packs (tracked in that repository)",
+    "Pin bumped; pending cases named in this record; owner-approved run recorded in the ledger"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "vendor/**",
+    "package.json",
+    "package-lock.json",
+    "evals/gauntlet/**",
+    "docs/work/records/F-120.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-24 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

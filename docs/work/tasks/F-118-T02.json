@@ -4,10 +4,10 @@
   "parent": "F-118",
   "title": "Workspace and dashboard pair from their own sign-in box; the installed app signs itself in",
   "goal": "Typing the short code into an installed app pairs it, and later launches need no sign-in",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
-    "The sign-in box accepts the short code and pairs; the device credential is kept in the app's persistent storage only when installed",
-    "Browser tabs keep session behaviour",
+    "The sign-in box accepts the short code and pairs only in the installed app, which keeps the device credential in persistent storage",
+    "Browser tabs keep session behaviour and refuse a pairing code before any request (review of #707)",
     "Browser test of pair → reload → still signed in"
   ],
   "dependsOn": [
@@ -18,7 +18,16 @@
     "web/src/main.ts",
     "test/evaluation.browser.mjs",
     "docs/work/records/F-118.md",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "web/src/device-pairing.ts",
+    "web/src/i18n.ts",
+    "test/device-pairing-client.test.ts",
+    "docs/agents/areas/frontend.md",
+    "docs/guides/channels-and-watches.md",
+    "src/server.ts",
+    "src/device-book.ts",
+    "test/device-pairing.test.ts",
+    "docs/work/tasks/F-118-T05.json"
   ],
   "capabilities": [
     "bounded-edit",
@@ -39,6 +48,8 @@
     "reviewed": "2026-11-23",
     "agentHours": 2,
     "baselineAgentHours": 2,
-    "estimateAgentHours": 2
+    "estimateAgentHours": 2,
+    "actualAgentHours": 2.25,
+    "actualSource": "stated"
   }
 }

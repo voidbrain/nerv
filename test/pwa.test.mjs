@@ -53,11 +53,14 @@ test('the service worker caches only the shell: never the API, never the dashboa
 test('every API call of the workspace and the dashboard bypasses the service worker', () => {
   const live = read('web/public/dashboard/live.js');
   const calls = [...live.matchAll(/fetch\("\/api\/[^\n]*/g)].map((m) => m[0]);
-  assert.equal(calls.length, 3, 'live.js API calls');
+  // F-118-T02 added POST /api/device/pair to the dashboard (4 calls) and, through pairDevice, to the workspace.
+  assert.equal(calls.length, 4, 'live.js API calls');
   for (const call of calls) assert.match(call, /"ngsw-bypass":"1"/, call);
   const main = read('web/src/main.ts');
   assert.match(main, /const SW_BYPASS = \{ 'ngsw-bypass': '1' \};/);
   const fetches = [...main.matchAll(/await fetch\('\/api\/[\s\S]*?\}\);/g)].map((m) => m[0]);
   assert.equal(fetches.length, 3, 'main.ts API calls');
   for (const call of fetches) assert.match(call, /\.\.\.SW_BYPASS/, call);
+  assert.match(main, /pairDevice\([\s\S]*?SW_BYPASS,?\s*\)/, 'workspace pairing bypasses the service worker');
+  assert.match(read('web/src/device-pairing.ts'), /headers: \{ 'Content-Type': 'application\/json', \.\.\.headers \}/);
 });

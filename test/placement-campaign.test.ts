@@ -26,6 +26,7 @@ test('P4 has a bounded wait and malformed or expansive probes are refused', () =
   const p4 = placementProbe({ placement: 'P4', prompt: 'Return READY.' });
   assert.equal(p4.orchestration.waitBudgetMs, 5_000);
   assert.equal(p4.timeoutMs, 20_000);
+  assert.equal(p4.requestBudgetMs, 50_000);
   assert.throws(() => placementProbe({ placement: 'P4', prompt: '', endpoint: 'mac' }), /prompt/);
   assert.throws(() => placementProbe({ placement: 'P3', prompt: 'x', endpoint: 'https://host' }), /endpoint/);
   assert.throws(() => placementProbe({ placement: 'P2', prompt: 'x', extra: true }), /Unknown/);
@@ -95,3 +96,69 @@ test('placement HTTP plans without inference and runs only with explicit confirm
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 });
+
+test(
+  'a placement run longer than the server idle timeout but within its timeoutMs returns its result (B-119)',
+  {
+    timeout: 60_000,
+  },
+  async () => {
+    // The run outlasts the server's 15 s default socket timeout but stays inside the probe's 30 s budget.
+    const inferenceMs = 15_500;
+    let budgetSeen: number | undefined;
+    const api = {
+      runOrchestratedJob: async (input: { timeoutMs: number }) => {
+        budgetSeen = input.timeoutMs;
+        await new Promise((resolve) => setTimeout(resolve, inferenceMs));
+        return {
+          selection: {
+            inference: { kind: 'remote', endpoint: 'mac', baseId: 'NERV-01', model: 'm' },
+            worker: { kind: 'local', baseId: 'NERV-02' },
+          },
+          inference: {
+            model: 'm',
+            text: 'READY',
+            stop: 'stop',
+            truncated: false,
+            usage: { inputTokens: 1, outputTokens: 1 },
+            durationMs: inferenceMs,
+          },
+          provenance: {
+            executionBaseId: 'NERV-02',
+            executionKind: 'local',
+            inferenceBaseId: 'NERV-01',
+            inferenceKind: 'remote',
+            inferenceModel: 'm',
+            endpoint: 'mac',
+            privacy: 'owner-bases',
+          },
+        };
+      },
+    };
+    const server = makeServer(api as never, 'x'.repeat(32));
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const address = server.address();
+    assert(address && typeof address === 'object');
+    try {
+      const res = await fetch(`http://127.0.0.1:${address.port}/api/placement/run`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${'x'.repeat(32)}`, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          placement: 'P3',
+          prompt: 'Return READY.',
+          endpoint: 'mac',
+          timeoutMs: 30_000,
+          confirmExecute: true,
+        }),
+        signal: AbortSignal.timeout(45_000),
+      });
+      assert.equal(res.status, 200);
+      const value = (await res.json()) as { inference: { text: string } };
+      assert.equal(value.inference.text, 'READY');
+      assert.equal(budgetSeen, 30_000);
+    } finally {
+      server.closeAllConnections();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  },
+);
