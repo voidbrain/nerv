@@ -214,6 +214,13 @@ export function rearmSoleCoordinatorLease(
 
 export type LeaseKeeperOutcome = 'renewed' | 'self-renewed' | 'waiting' | 'fenced' | 'inactive';
 
+/** Base-local: the last lease sequence this coordinator sent, so a restart never reuses one (F-016-T16 review). */
+const LEASE_SEQ_SCHEMA = `
+CREATE TABLE IF NOT EXISTS coordinator_lease_seq (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  seq INTEGER NOT NULL
+);`;
+
 export interface CoordinatorLeaseKeeperOptions {
   /** The coordinator's own store (`nerv.sqlite`). */
   readonly db: DatabaseSync;
@@ -221,6 +228,12 @@ export interface CoordinatorLeaseKeeperOptions {
   readonly renew: (standbyBaseId: string, request: LeaseRenewRequest) => Promise<LeaseRenewResult>;
   /** Another enrolled, unrevoked base exists: a sole-coordinator self-renewal is then never allowed. */
   readonly hasOtherEnrolledBases: () => boolean;
+  /**
+   * This base and the newest owner-signed main record it holds. With both, a main this keeper fenced re-arms
+   * when its standby acks again at the same epoch and the record still names it; without them it never re-arms.
+   */
+  readonly selfBaseId?: string;
+  readonly registryMain?: () => { readonly baseId: string | undefined; readonly epoch: number };
   readonly wallNow?: () => number;
   readonly monoNow?: () => bigint;
   readonly onFenced?: (detail: string) => void;
@@ -229,17 +242,19 @@ export interface CoordinatorLeaseKeeperOptions {
 /**
  * The active coordinator's lease loop (F-016-T16, decision §2). Every `LEASE_RENEW_MS` it asks the standby
  * named in `coordinator_state.standby_base_id` to ack the lease and commits `reqStarted + 55 s` on an ack.
- * When the standby has seen a newer epoch or is promoting, it fences at once; when renewals fail, it fences
- * once the lease is past on the wall clock or on the monotonic clock of the last ack (a backward wall jump
- * never extends it). A sole coordinator (no other enrolled base) extends its own lease only while it is live:
- * after a sleep past it, the owner re-arms (`nerv kaji lease-rearm --confirm-sole-coordinator`).
+ * - Before any renewal is awaited, a lease past on the wall clock or on the monotonic clock fences the base;
+ *   after a restart the monotonic deadline is derived from the remaining lease at first sight.
+ * - A standby that is promoting, or that holds a newer epoch (signed evidence), fences it at once.
+ * - A fenced main re-arms when its standby acks again at the same epoch and the registry still names it
+ *   (a drained main never: draining needs a newer main record first).
+ * - A sole coordinator (no other enrolled base) extends its own lease only while it is live; after a sleep
+ *   past it the owner re-arms (`nerv kaji lease-rearm --confirm-sole-coordinator`).
  */
 export class CoordinatorLeaseKeeper {
   private readonly options: CoordinatorLeaseKeeperOptions;
-  private seq = 0;
   private timer: ReturnType<typeof setInterval> | undefined;
   private running = false;
-  /** Monotonic deadline of the lease this process last committed. */
+  /** Monotonic deadline of the lease, from this process's last commit or its first sight of the lease. */
   leaseExpiresMonoNs: bigint | undefined;
 
   constructor(options: CoordinatorLeaseKeeperOptions) {
@@ -274,37 +289,77 @@ export class CoordinatorLeaseKeeper {
     return this.leaseExpiresMonoNs === undefined || this.mono() < this.leaseExpiresMonoNs;
   }
 
+  /** The registry still names this base at `epoch`: no newer main record was seen. */
+  private namedAt(epoch: number): boolean {
+    const main = this.options.registryMain?.();
+    return !!main && !!this.options.selfBaseId && main.baseId === this.options.selfBaseId && main.epoch === epoch;
+  }
+
+  private nextSeq(): number {
+    const { db } = this.options;
+    db.exec(LEASE_SEQ_SCHEMA);
+    const row = db.prepare('SELECT seq FROM coordinator_lease_seq WHERE id = 1').get() as { seq: number } | undefined;
+    const seq = (row?.seq ?? 0) + 1;
+    db.prepare(
+      'INSERT INTO coordinator_lease_seq(id, seq) VALUES (1, ?) ON CONFLICT(id) DO UPDATE SET seq = excluded.seq',
+    ).run(seq);
+    return seq;
+  }
+
   async renewOnce(): Promise<LeaseKeeperOutcome> {
     const { db } = this.options;
     const state = readCoordinatorFencingState(db);
-    if (!state || state.replicationMode !== 'active') return 'inactive';
+    if (!state) return 'inactive';
+    const active = state.replicationMode === 'active';
+    if (!active && !(state.replicationMode === 'fenced' && this.namedAt(state.coordinatorEpoch))) return 'inactive';
+    const reqWall = this.wall();
+    const reqMono = this.mono();
+    if (active && state.leaseExpiresAt > 0) {
+      if (this.leaseExpiresMonoNs === undefined) {
+        const remaining = Math.min(Math.max(state.leaseExpiresAt - reqWall, 0), LEASE_EFFECTIVE_TTL_MS);
+        this.leaseExpiresMonoNs = reqMono + BigInt(remaining) * 1_000_000n;
+      }
+      if (!this.live(state.leaseExpiresAt)) return this.fence('The coordinator lease passed without a renewal.');
+    }
     const standby = (
       db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as
         { standby_base_id: string | null } | undefined
     )?.standby_base_id;
-    const reqWall = this.wall();
-    const reqMono = this.mono();
     if (standby) {
-      this.seq = Math.max(this.seq + 1, reqWall);
       let result: LeaseRenewResult | undefined;
       try {
-        result = await this.options.renew(standby, { coordinatorEpoch: state.coordinatorEpoch, leaseSeq: this.seq });
+        result = await this.options.renew(standby, {
+          coordinatorEpoch: state.coordinatorEpoch,
+          leaseSeq: this.nextSeq(),
+        });
       } catch {
         result = undefined;
       }
       const now = readCoordinatorFencingState(db);
-      if (!now || now.replicationMode !== 'active' || now.coordinatorEpoch !== state.coordinatorEpoch)
+      if (!now || now.replicationMode !== state.replicationMode || now.coordinatorEpoch !== state.coordinatorEpoch)
         return 'inactive';
       if (result?.ok && result.standbyBaseId === standby && result.coordinatorEpoch === state.coordinatorEpoch) {
+        if (!active) {
+          if (!this.namedAt(state.coordinatorEpoch)) return 'inactive';
+          db.prepare(
+            "UPDATE coordinator_state SET replication_mode = 'active' WHERE id = 1 AND replication_mode = 'fenced' AND coordinator_epoch = ?",
+          ).run(state.coordinatorEpoch);
+        }
         this.commit(state.coordinatorEpoch, reqWall, reqMono);
         return 'renewed';
       }
-      if (result && !result.ok && (result.reason === 'stale_coordinator_epoch' || result.reason === 'promoting'))
-        return this.fence(`Standby ${standby} refused the lease (${result.reason}).`);
-    } else if (!this.options.hasOtherEnrolledBases() && this.live(state.leaseExpiresAt)) {
+      const newer =
+        !!result &&
+        !result.ok &&
+        (result.reason === 'promoting' ||
+          (result.reason === 'stale_coordinator_epoch' &&
+            (result.maxSeenCoordinatorEpoch ?? 0) > state.coordinatorEpoch));
+      if (newer && active) return this.fence(`Standby ${standby} holds a newer epoch or is promoting.`);
+    } else if (active && !this.options.hasOtherEnrolledBases() && this.live(state.leaseExpiresAt)) {
       this.commit(state.coordinatorEpoch, reqWall, reqMono);
       return 'self-renewed';
     }
+    if (!active) return 'inactive';
     const after = readCoordinatorFencingState(db);
     if (!after || after.replicationMode !== 'active') return 'inactive';
     if (after.leaseExpiresAt > 0 && !this.live(after.leaseExpiresAt))
