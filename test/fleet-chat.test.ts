@@ -138,10 +138,7 @@ describe('F-098-T06: fleet edits against a temp store', () => {
       );
       assert.ok(parts.some((p) => p.category === 'frame' && p.position === 'main' && p.componentModel === 'Apex 5'));
       assert.ok(parts.some((p) => p.category === 'fc' && p.position === 'main'));
-      assert.deepEqual(
-        [store.fleet.getSpare('Apex 5')?.newCount, store.fleet.getSpare('Apex 5')?.usedCount],
-        [0, 0],
-      );
+      assert.deepEqual([store.fleet.getSpare('Apex 5')?.newCount, store.fleet.getSpare('Apex 5')?.usedCount], [0, 0]);
       // An existing spares record keeps its counts.
       assert.equal(store.fleet.getSpare('Testmot 2207 1750KV')?.newCount, 1);
       assert.equal(store.fleet.getSpare('Testmot 2207 1750KV')?.usedCount, 1);
@@ -239,7 +236,12 @@ describe('F-098-T06: ambiguous phrases ask instead of guessing', () => {
     it(name, () => {
       withStore((store) => {
         seedSmoke(store);
-        store.fleet.upsertSpare({ componentModel: 'Testmot 2207 2450KV', category: 'motor', newCount: 0, usedCount: 0 });
+        store.fleet.upsertSpare({
+          componentModel: 'Testmot 2207 2450KV',
+          category: 'motor',
+          newCount: 0,
+          usedCount: 0,
+        });
         const before = JSON.stringify([
           store.fleet.listDrones(),
           store.fleet.listParts('Smoke'),

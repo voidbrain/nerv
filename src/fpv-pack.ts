@@ -136,7 +136,9 @@ export const fpvPackManifest: PackManifest = {
           .slice(space + 1)
           .trim()
           .toLowerCase();
-        const parts = s.fleet.listParts(drone).filter((p) => p.position.toLowerCase() === pos);
+        const parts = s.fleet
+          .listParts(drone)
+          .filter((p) => p.status !== 'removed' && p.position.toLowerCase() === pos);
         if (parts.length === 1) return { id: parts[0]!.id, label: `${drone} ${parts[0]!.position}` };
       }
       return undefined;
