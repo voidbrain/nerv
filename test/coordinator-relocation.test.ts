@@ -1076,7 +1076,10 @@ describe('F-016-T18: /kaji/epoch-push, so the new epoch acks are measured, not a
       );
       // It answers with the new epoch (and fences itself): measured, the fast horizon applies.
       const start = wall;
-      const res = await promoteCoordinator({ ...base, pushEpoch: async () => ({ maxSeenCoordinatorEpoch: 3 }) });
+      const res = await promoteCoordinator({
+        ...base,
+        pushEpoch: async () => ({ maxSeenCoordinatorEpoch: 3, ranOrAckedEpoch: 2 }),
+      });
       assert.ok(!('resumed' in res));
       assert.ok(wall - start >= RELOCATION_HORIZON_ACKED_MS && wall - start < RELOCATION_HORIZON_CONSERVATIVE_MS);
       assert.deepEqual(events, ['stop', 'start']);
@@ -1418,9 +1421,11 @@ describe('F-016-T18 review (#703): the promoted main names a base that acked the
         pushEpoch: async (id) => {
           // NERV-00 acks but is a worker without a standby store; it sorts first and must still not be named.
           // NERV-00 and NERV-03 ack without a standby store (an unacked base now refuses the move: fourth review).
-          if (id === 'NERV-00' || id === 'NERV-03') return { maxSeenCoordinatorEpoch: 3, standby: false };
+          // B-121-T02: each also reports the newest epoch it ran or acked (2, no later than this standby's state).
+          if (id === 'NERV-00' || id === 'NERV-03')
+            return { maxSeenCoordinatorEpoch: 3, standby: false, ranOrAckedEpoch: 2 };
           if (id !== 'NERV-04') throw new Error('unreachable');
-          return { maxSeenCoordinatorEpoch: 3, standby: true };
+          return { maxSeenCoordinatorEpoch: 3, standby: true, ranOrAckedEpoch: 2 };
         },
       });
       const db = new DatabaseSync(join(home, 'nerv.sqlite'));
@@ -1797,7 +1802,10 @@ describe('F-016-T18 fourth review (#703): the D scenario', () => {
           err instanceof RelocationRefusedError && err.reason === 'old_host_unconfirmed' && /NERV-04/.test(err.message),
       );
       // D acks the push carrying the revoke: it now refuses X, so B may promote.
-      const res = await promoteCoordinator({ ...base, pushEpoch: async () => ({ maxSeenCoordinatorEpoch: 3 }) });
+      const res = await promoteCoordinator({
+        ...base,
+        pushEpoch: async () => ({ maxSeenCoordinatorEpoch: 3, ranOrAckedEpoch: 2 }),
+      });
       assert.ok(!('resumed' in res));
       assert.equal(res.newEpoch, 3);
     } finally {

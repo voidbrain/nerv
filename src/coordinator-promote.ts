@@ -16,9 +16,11 @@ import {
 } from './coordinator-relocation.ts';
 import { databasePath, readConfig } from './config.ts';
 import { Registry, canonical, keyIdentity, publicKeyFrom, type SignedRecord } from './kaji.ts';
+import type { EpochPushReply } from './kaji-link.ts';
 import {
   allUnrevokedAckedEpoch,
   basesAckedEpoch,
+  probeCoordinatorEpochs,
   pushCoordinatorEpoch,
   standbyBasesAckedEpoch,
 } from './coordinator-epoch.ts';
@@ -125,10 +127,7 @@ export interface PromoteCoordinatorInput {
    * `KajiLink.pushEpoch`: before the readiness check the owner-signed records go to every enrolled, unrevoked
    * base (F-016-T18); the acks are recorded here and decide `allUnrevokedAckedNewEpoch`.
    */
-  readonly pushEpoch?: (
-    baseId: string,
-    records: SignedRecord[],
-  ) => Promise<{ maxSeenCoordinatorEpoch: number; standby?: boolean }>;
+  readonly pushEpoch?: (baseId: string, records: SignedRecord[]) => Promise<EpochPushReply>;
   /** Test-only crash injection, passed to the promotion swap. */
   readonly failAfterStep?: RelocateCoordinatorInput['failAfterStep'];
 }
@@ -287,9 +286,10 @@ function derive(
 /**
  * #717 review: the refusals this base's own stores decide (not named, not a verified standby, a standby behind
  * an epoch it acked) come before the epoch push, so a move that cannot happen never tells another base the new
- * epoch (which would fence the main that is running). A base already active at the new epoch skips them.
+ * epoch (which would fence the main that is running). A base already active at the new epoch skips them
+ * (undefined); otherwise the result is the epoch of the state the standby holds.
  */
-function localPrecheck(input: PromoteCoordinatorInput, mainDbPath: string, standbyDbPath: string): void {
+function localPrecheck(input: PromoteCoordinatorInput, mainDbPath: string, standbyDbPath: string): number | undefined {
   const db = new DatabaseSync(mainDbPath);
   try {
     const registry = new Registry(db, input.rootPublicKey);
@@ -303,20 +303,69 @@ function localPrecheck(input: PromoteCoordinatorInput, mainDbPath: string, stand
       current?.replicationMode === 'active' &&
       current.coordinatorEpoch === newEpoch
     )
-      return;
+      return undefined;
     const candidate = existsSync(standbyDbPath) ? new DatabaseSync(standbyDbPath) : db;
     try {
-      checkStandbyCandidate({
+      return checkStandbyCandidate({
         candidateDb: candidate,
         selfBaseId: self.baseId,
         registryMain: { baseId: registry.main(), coordinatorEpoch: newEpoch },
-      });
+      }).previousEpoch;
     } finally {
       if (candidate !== db) candidate.close();
     }
   } finally {
     db.close();
   }
+}
+
+/**
+ * B-121-T02: the same question asked of every other unrevoked base, before the epoch push. A base that ran, or
+ * acked a lease at, a later epoch than the standby's state saw a coordinator run after that state (B-121: it may
+ * have renewed through a base other than this one), so the move is refused (`standby_behind`). An unplanned move
+ * also needs every such base to answer, and to answer with the field: an older NERV leaves it out, which says
+ * nothing about the epochs it ran (`peer_epoch_unknown`). A planned move goes on without them: its drain receipt
+ * binds the epoch that last ran. Nothing is committed on any base until this passes, so a refusal fences no main.
+ */
+async function remotePrecheck(
+  input: PromoteCoordinatorInput & { readonly pushEpoch: NonNullable<PromoteCoordinatorInput['pushEpoch']> },
+  mainDbPath: string,
+  standbyEpoch: number,
+): Promise<void> {
+  const db = new DatabaseSync(mainDbPath);
+  let probe: Awaited<ReturnType<typeof probeCoordinatorEpochs>>;
+  try {
+    db.exec('PRAGMA busy_timeout = 5000');
+    probe = await probeCoordinatorEpochs({
+      db,
+      rootPublicKey: input.rootPublicKey,
+      ownPublicKey: input.ownPublicKey,
+      push: input.pushEpoch,
+    });
+  } finally {
+    db.close();
+  }
+  const ahead = [...probe.ranOrAcked]
+    .filter(([, epoch]) => epoch > standbyEpoch)
+    .sort(([a], [b]) => a.localeCompare(b));
+  if (ahead.length) {
+    const newest = Math.max(...ahead.map(([, epoch]) => epoch));
+    refuse(
+      'standby_behind',
+      `${ahead.map(([id, epoch]) => `${id} (epoch ${epoch})`).join(', ')} ran or acked a coordinator lease after the epoch ${standbyEpoch} state this standby holds: re-seed it from the epoch ${newest} coordinator first. No base was told the new epoch.`,
+    );
+  }
+  if (input.drainReceiptFile) return;
+  if (probe.unreachable.length)
+    refuse(
+      'old_host_unconfirmed',
+      `Not every unrevoked base answered (unreachable: ${probe.unreachable.join(', ')}): one of them may have run or acked a later epoch, or could still ack the old main's lease. Reach them (or import the records there) and run kaji promote again. No base was told the new epoch.`,
+    );
+  if (probe.unknown.length)
+    refuse(
+      'peer_epoch_unknown',
+      `${probe.unknown.join(', ')} run(s) an older NERV that does not report the epochs it ran or acked, so an unplanned move cannot rule out a later coordinator: update it (or revoke it with the root key) and run kaji promote again. No base was told the new epoch.`,
+    );
 }
 
 /**
@@ -347,7 +396,9 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
   if (!existsSync(mainDbPath) && existsSync(archivePath) && existsSync(standbyDbPath))
     renameSync(standbyDbPath, mainDbPath);
   if (!existsSync(mainDbPath)) throw new Error(`No store at ${mainDbPath}: nothing to promote.`);
-  localPrecheck(input, mainDbPath, standbyDbPath);
+  const standbyEpoch = localPrecheck(input, mainDbPath, standbyDbPath);
+  if (input.pushEpoch && standbyEpoch !== undefined)
+    await remotePrecheck({ ...input, pushEpoch: input.pushEpoch }, mainDbPath, standbyEpoch);
   if (input.pushEpoch) {
     const db = new DatabaseSync(mainDbPath);
     try {

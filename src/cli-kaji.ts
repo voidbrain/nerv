@@ -22,7 +22,7 @@ import {
 import { builtinTools } from './executors.ts';
 import { RelocationRefusedError, drainCoordinator, signDrainReceipt } from './coordinator-relocation.ts';
 import { pushCoordinatorEpoch, registryPort } from './coordinator-epoch.ts';
-import { KajiLink } from './kaji-link.ts';
+import { KajiLink, type EpochPushReply } from './kaji-link.ts';
 import {
   installedPromotionService,
   promoteCoordinator,
@@ -46,10 +46,7 @@ export async function runKajiPromoteCommand(
     promotion?: {
       service?: PromotionServiceControl;
       clock?: PromotionClock;
-      pushEpoch?: (
-        baseId: string,
-        records: SignedRecord[],
-      ) => Promise<{ maxSeenCoordinatorEpoch: number; standby?: boolean }>;
+      pushEpoch?: (baseId: string, records: SignedRecord[]) => Promise<EpochPushReply>;
     };
   },
 ): Promise<void> {

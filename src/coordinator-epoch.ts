@@ -1,5 +1,5 @@
 import type { DatabaseSync } from 'node:sqlite';
-import type { RegistryPort } from './kaji-link.ts';
+import type { EpochPushReply, RegistryPort } from './kaji-link.ts';
 import { Registry, keyIdentity, type SignedRecord } from './kaji.ts';
 
 /** Base-local: which base acknowledged which coordinator epoch, as measured by this base's own pushes (F-016-T18). */
@@ -57,10 +57,7 @@ function otherBases(scope: EpochScope): { registry: Registry; others: string[] }
  */
 export async function pushCoordinatorEpoch(
   input: EpochScope & {
-    readonly push: (
-      baseId: string,
-      records: SignedRecord[],
-    ) => Promise<{ maxSeenCoordinatorEpoch: number; standby?: boolean }>;
+    readonly push: (baseId: string, records: SignedRecord[]) => Promise<EpochPushReply>;
     readonly nowMs?: number;
   },
 ): Promise<{ epoch: number; acked: string[]; missing: string[] }> {
@@ -90,6 +87,34 @@ export async function pushCoordinatorEpoch(
     }),
   );
   return { epoch, acked: acked.sort(), missing: missing.sort() };
+}
+
+/**
+ * B-121-T02: asks every enrolled, unrevoked base other than this one, with an epoch push carrying no records (so
+ * no base learns a new epoch from it), for the newest coordinator epoch it ran or acked a lease at. `kaji promote`
+ * decides from the answers before its real push, so a refused move fences no running main.
+ */
+export async function probeCoordinatorEpochs(
+  input: EpochScope & { readonly push: (baseId: string, records: SignedRecord[]) => Promise<EpochPushReply> },
+): Promise<{ ranOrAcked: Map<string, number>; unknown: string[]; unreachable: string[] }> {
+  const { others } = otherBases(input);
+  const ranOrAcked = new Map<string, number>();
+  const unknown: string[] = [];
+  const unreachable: string[] = [];
+  await Promise.all(
+    others.map(async (baseId) => {
+      let reply: EpochPushReply;
+      try {
+        reply = await input.push(baseId, []);
+      } catch {
+        unreachable.push(baseId);
+        return;
+      }
+      if (reply.ranOrAckedEpoch === undefined) unknown.push(baseId);
+      else ranOrAcked.set(baseId, reply.ranOrAckedEpoch);
+    }),
+  );
+  return { ranOrAcked, unknown: unknown.sort(), unreachable: unreachable.sort() };
 }
 
 /** Every enrolled, unrevoked base other than this one acked `epoch` or later, from this base's recorded acks. */

@@ -822,6 +822,7 @@ try {
             onLeaseRenew: lease.onLeaseRenew,
             minCoordinatorEpoch: lease.mainEpoch,
             holdsStandby: () => existsSync(join(home, STANDBY_DB_FILE)),
+            ranOrAckedEpoch: lease.ranOrAckedEpoch,
             trust: { root: config.kaji.root, required: config.kaji.rootBinding === true },
             worker: runtime.worker,
             baseId: config.base.id,
