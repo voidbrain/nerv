@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 85 h agent + 10.5 h owner across 107 open steps of 36 features and 20 other records. 96.75 h of actual effort recorded on 120 steps. Generated from the task files.
+**Remaining effort:** 90.25 h agent + 10.25 h owner across 110 open steps of 36 features and 20 other records. 96.75 h of actual effort recorded on 120 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -171,7 +171,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 5.25 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-006-T12 — T04c — Placement report and recommendation (Implemented; verification pending).
 
@@ -185,11 +185,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | [F-006-T22](#f-006-t22) | 🤖 | [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending |
-| 🟢 Small | <a id="f-006-t22"></a>F-006-T22 — Decide: accept the provisional Mac-only placement or run the equivalent placement campaign | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-006-T12](#f-006-t12) | — | ⏳ 🤔 | — |
-| 🟢 Small | **Total** | 10.25 h (19 of 22 steps) | 6.75 h (14 of 22 steps recorded) | 0.25 h owner | 20 of 22 completed | | | | |
+| 🟢 Small | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | — | 🤖 | [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending |
+| 🟡 Medium | <a id="f-006-t23"></a>F-006-T23 — Run P2 and P3 role-run and neutral-smoke under limits-repeat3 | 1.5 h | 0 h | 1.5 h | Planned | — | [F-006-T26](#f-006-t26) | 🤖 | — |
+| 🟡 Medium | <a id="f-006-t24"></a>F-006-T24 — Run combination-v1 coder-alone vs coder-reviewer for mac-only and mac-coder-mini-auditor | 1.5 h | 0 h | 1.5 h | Planned | — | [F-006-T26](#f-006-t26) | 🤖 | — |
+| 🟡 Medium | <a id="f-006-t25"></a>F-006-T25 — Check a disconnected auditor, a cancellation and an uncertain outcome live | 1.5 h | 0 h | 1.5 h | Planned | — | [F-006-T26](#f-006-t26) | 🤖 | — |
+| 🟢 Small | <a id="f-006-t26"></a>F-006-T26 — Update the placement report and recommendation with the new evidence | 0.75 h | 0 h | 0.75 h | Planned | [F-006-T23](#f-006-t23), [F-006-T24](#f-006-t24), [F-006-T25](#f-006-t25) | — | ⏳ 🤖 | — |
+| 🔴 Large | **Total** | 15.5 h (23 of 26 steps) | 6.75 h (14 of 26 steps recorded) | 5.25 h | 21 of 26 completed | | | | |
 
-<details><summary>Done steps (20)</summary>
+<details><summary>Done steps (21)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -213,6 +216,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-006-t19"></a>F-006-T19 — Revise the placement campaign for 3 runs per case | 0.5 h | 0 h | Completed | [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation |
 | — | <a id="f-006-t20"></a>F-006-T20 — Revise the Mac operating-conditions plan for 3 runs and gemma4:12b | 0.5 h | 0 h | Completed | [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation |
 | — | <a id="f-006-t21"></a>F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases | 1.5 h | 0 h | Completed | [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending |
+| — | <a id="f-006-t22"></a>F-006-T22 — Decide: accept the provisional Mac-only placement or run the equivalent placement campaign | 0 h | 0 h | Completed | — |
 
 </details>
 
@@ -227,7 +231,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-006-T12: [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending · F-006-T13: [PR #528](https://github.com/voidbrain/nerv/pull/528) results · F-006-T14: [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure · F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation · F-006-T21: [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending. [PR #679](https://github.com/voidbrain/nerv/pull/679) F-006-T12 placement report; [PR #638](https://github.com/voidbrain/nerv/pull/638) F-006-T21 placement probes and owner page; [PR #631](https://github.com/voidbrain/nerv/pull/631) F-006-T14 report; [PR #466](https://github.com/voidbrain/nerv/pull/466); [PR #468](https://github.com/voidbrain/nerv/pull/468) (merged; CI green); older entries in the [evidence archive](archive/evidence-2026.md#f-006-moved-2026-11-18) |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-006-T04 and F-006-T05 closed (were Verified). 2026-11-18: F-006-T19 verified: [PR #466](https://github.com/voidbrain/nerv/pull/466) merged on green CI; F-006-T20 verified: [PR #468](https://github.com/voidbrain/nerv/pull/468) merged on green CI. |
-| Reviewed | 2026-11-23 |
+| Reviewed | 2026-11-24 |
 
 </details>
 

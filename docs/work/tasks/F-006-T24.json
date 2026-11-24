@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T24",
+  "status": "planned",
+  "title": "Run combination-v1 coder-alone vs coder-reviewer for mac-only and mac-coder-mini-auditor",
+  "goal": "Both placements have combination-v1 results for coder-alone and coder-reviewer under one totalBudget",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures and the gauntlet packs only; local models on the enrolled NERV-01 and NERV-02 over Tailscale; 0 paid cloud tokens; raw reports stay in ~/.nerv-private on their base; NERV-01's live service (~/.nerv-app, ~/.nerv) is never stopped, updated or edited.",
+  "acceptance": [
+    "combination-v1, 8 cases \u00d7 repeat 3 per mode, coder-alone and coder-reviewer under the same totalBudget (6144 output tokens, 360 s suite, 30 s case) with the protected grader",
+    "Run for mac-only and for mac-coder-mini-auditor (coder on NERV-01, auditor on NERV-02)",
+    "Pass rate, false rejections, missed flaws and shared blind spots recorded per mode and placement"
+  ],
+  "dependsOn": [
+    "F-006-T22"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "docs/decisions/placement-campaign.md",
+    "docs/acceptance/f006-placement-p2-p4.md",
+    "docs/evaluations/2026-11-23-f006-t12-placement-evidence.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Recorded evidence for this slice; scoped checks and required CI"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "A stop rule of the placement campaign aborts the run without fallback or retry",
+    "Anything that needs a credential, an unreachable host or the owner goes back to the owner; NERV-02 is left running"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-24 (F-006-T22): 96 bounded combination runs over two placements; cross-node auditor wiring may need a bounded harness adapter.",
+    "reviewed": "2026-11-24",
+    "agentHours": 1.5,
+    "ownerHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}
