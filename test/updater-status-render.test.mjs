@@ -36,12 +36,18 @@ test('B-123: in progress names the step and cannot be dismissed; each outcome ha
   assert.match(running, /Update in progress · fd0f2a0 · Stopping the service/);
   assert.doesNotMatch(running, /btn-dismiss-update-status/);
   assert.match(updaterStatusHtml({ ...base, state: 'running' }), /Update in progress · fd0f2a0 · started/);
-  assert.match(updaterStatusHtml({ ...base, state: 'completed' }), /class='small ok'[\s\S]*Update completed · now on fd0f2a0/);
+  assert.match(
+    updaterStatusHtml({ ...base, state: 'completed' }),
+    /class='small ok'[\s\S]*Update completed · now on fd0f2a0/,
+  );
   assert.match(
     updaterStatusHtml({ ...base, state: 'failed', reasons: ['boom'] }),
     /class='small danger'[\s\S]*Update failed · fd0f2a0/,
   );
-  assert.match(updaterStatusHtml({ ...base, state: 'uncertain' }), /class='small danger'[\s\S]*Update outcome uncertain/);
+  assert.match(
+    updaterStatusHtml({ ...base, state: 'uncertain' }),
+    /class='small danger'[\s\S]*Update outcome uncertain/,
+  );
   assert.equal(updaterStatusHtml(null), '');
 });
 

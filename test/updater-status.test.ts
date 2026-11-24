@@ -86,7 +86,9 @@ test('B-123: the updater result reaches GET /api/update/status and survives the 
 
 test('B-123: without an updater home the route answers null and reads nothing', async () => {
   await withServer(undefined, async (url, token) => {
-    const body = await (await fetch(`${url}/api/update/status`, { headers: { authorization: `Bearer ${token}` } })).json();
+    const body = await (
+      await fetch(`${url}/api/update/status`, { headers: { authorization: `Bearer ${token}` } })
+    ).json();
     assert.deepEqual(body, { updater: null });
   });
 });
