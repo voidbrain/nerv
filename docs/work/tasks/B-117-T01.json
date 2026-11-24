@@ -46,5 +46,11 @@
     "estimateAgentHours": 3,
     "actualAgentHours": 0.5,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 710,
+      "note": "name and fix bases and browser gauntlet load failures; failing-first test/gauntlet-load.test.ts"
+    }
+  ]
 }
