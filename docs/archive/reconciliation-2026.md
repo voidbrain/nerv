@@ -600,6 +600,9 @@ PRs #673, #675 and #678 merged green (#673 B-108 updater fetch precheck, #675 F-
 
 PRs #680 and #683 merged green (#680 B-110 Update now placement, #683 F-093-T05 macOS desktop driver). Reconciled with F-089-T04 in its PR.
 
+## 2026-11-23 — main `b07508c8`
+
+PRs #681 and #686 merged green (#681 B-111 health samples in serve, #686 F-089-T04 Chrome DevTools browser driver). Reconciled with F-094-T02 in its PR.
 ## 2026-11-23 — harness v10.4.0 ([PR #689](https://github.com/voidbrain/nerv/pull/689))
 
 Reconciled harness v10.4.0 (template F-088, owner decision for every project): agents land their PRs through the landing queue, one at a time with at most two in CI (`AGENTS.md` "On its own", `docs/agents/parallel-work.md` "Landing queue", `docs/agents/claims.md`); copied `tools/check-rules.mjs` (v10.3.1, B-048 glob escaping). Enabled the periodic skill discovery review (`reviews.skills.days` 30, owner request); its first run becomes a record in this backlog. Nothing skipped.

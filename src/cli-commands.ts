@@ -536,6 +536,22 @@ export async function tryRunCliCommand(
         console.log(`Aoba linked to ${pick.name} (chat ${pick.chatId}). Restart the service to start it.`);
       }
     }
+  } else if (command === 'open' && args.includes('--phone')) {
+    // F-118: open --phone mints a one-use pairing code (5 minutes) that the installed phone app swaps for a device credential.
+    const config = readConfig(home);
+    const response = await fetch(`http://127.0.0.1:${config.port}/api/device/codes`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${readToken(home)}` },
+    }).catch(() => {
+      throw new Error('NERV Agency is not running: start it with serve, launch or service start.');
+    });
+    const value = (await response.json()) as { code?: string; expiresInMs?: number; error?: string };
+    if (!response.ok || !value.code) throw new Error(value.error ?? 'Could not create a pairing code.');
+    console.log(
+      `Pairing code: ${value.code} (one use, valid ${Math.round((value.expiresInMs ?? 0) / 60_000)} minutes)\n` +
+        `Link: http://127.0.0.1:${config.port}/ on this computer, or its address on your network (Tailscale).\n` +
+        'On the phone, open NERV from the Home Screen and type the code.',
+    );
   } else if (command === 'open') {
     // open dashboard: the same sign-in, landing on the live dashboard instead of the workspace.
     await ctx.openPage(home, args.includes('dashboard') ? '/dashboard/' : '/', args.includes('--print'));

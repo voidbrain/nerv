@@ -174,6 +174,11 @@ export const HELP_GROUPS: HelpGroup[] = [
         args: 'APP CONTROL [--window=TITLE] [--approved]',
         about: 'Click a named desktop control (macOS)',
       },
+      {
+        name: 'app-workflow',
+        args: 'PLAN.json [--approve=HASH] [--overwrite=PATH]',
+        about: 'Show, then run, an open/save-as plan (macOS)',
+      },
       { name: 'fpv-read-build', args: 'LINK', about: 'Read a diyfpv.com build into its local build note' },
       { name: 'desktop-record', args: 'ID HEADER.json', about: 'Record desktop input for a workflow' },
     ],
@@ -249,6 +254,15 @@ export const HELP_GROUPS: HelpGroup[] = [
         about: 'The background service; move runs it from its own install folder',
       },
       { name: 'reload', about: 'Make the running service re-read its configuration' },
+      {
+        name: 'update',
+        args: '[--check]',
+        about: 'Update the install folder to origin/main; --check only reports',
+        usage: [
+          'update --check (up to date, or behind origin/main by N commits; changes nothing)',
+          'update (fetch into the install folder, stop, lifecycle update: backup, rehearsal, build, start, verify)',
+        ],
+      },
       { name: 'doctor', about: 'Check this installation' },
       {
         name: 'update-policy',
@@ -287,7 +301,7 @@ export const HELP_GROUPS: HelpGroup[] = [
       { name: 'clients', about: 'Paired companions' },
       { name: 'revoke', args: 'CLIENT_ID', about: 'Unpair a companion' },
       { name: 'sessions', args: 'revoke', about: 'Sign out every dashboard session' },
-      { name: 'open', args: '[dashboard]', about: 'Open the dashboard' },
+      { name: 'open', args: '[dashboard] [--phone]', about: 'Open the dashboard, or pair a phone' },
     ],
   },
 ];

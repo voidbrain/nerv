@@ -28,6 +28,7 @@ import { validateJobUser, type EvaJobUser } from './eva-job-user.ts';
 import { validateBackup, type BackupConfig } from './offhost.ts';
 import { validatePersonas, type PersonaConfig } from './persona.ts';
 import { validateBrowserConfig, type BrowserConfig } from './browser-control.ts';
+import { validateAppWorkflowConfig, type AppWorkflowConfig } from './app-workflow.ts';
 /** telegram.chatId: the one private chat (the owner's) the Aoba bot answers; set by `telegram link`. */
 export interface Config {
   port: number;
@@ -54,6 +55,8 @@ export interface Config {
   packs?: PacksConfig;
   /** F-089-T04: origins the browser adapter may act on and the dedicated profile's debugging port. */
   browser?: BrowserConfig;
+  /** F-094-T02: folders app workflows may open from and save to. */
+  appWorkflow?: AppWorkflowConfig;
 }
 /** This machine's identity in the NERV mesh: an id (NERV-01) and a name (Neo Tokyo-3), shown in the dashboard, doctor and brief. */
 export interface Base {
@@ -123,6 +126,7 @@ export function readConfig(home: string): Config {
   if ('personas' in raw) config.personas = validatePersonas(raw.personas);
   if ('packs' in raw) config.packs = validatePacksConfig(raw.packs);
   if ('browser' in raw) config.browser = validateBrowserConfig(raw.browser);
+  if ('appWorkflow' in raw) config.appWorkflow = validateAppWorkflowConfig(raw.appWorkflow);
   if ('telegram' in raw) {
     const t = raw.telegram as Record<string, unknown>;
     if (

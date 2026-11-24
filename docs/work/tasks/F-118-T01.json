@@ -4,9 +4,9 @@
   "parent": "F-118",
   "title": "Device credentials and pairing: hashed, 90-day sliding limit, short phone code",
   "goal": "A device pairs once with a short code and stays signed in until 90 days unused or revoked",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
-    "Starts after B-113 (PR #687) merges: it extends the session book",
+    "Starts after B-113 (PR #687) merges: it extends the session book (merged; the private-file writer is shared as savePrivateJson)",
     "Device credential stored hashed with name, created and last use; lapses after 90 days without use; ended by admin token rotation",
     "POST pairing endpoint swaps a one-use 8-character code (5 min, rate-limited) for a device credential; nerv open --phone mints it",
     "A device credential has dashboard-session powers only (no login codes, revoke or stop)",
@@ -14,10 +14,15 @@
   ],
   "dependsOn": [],
   "resources": [
+    "src/device-book.ts",
     "src/session-book.ts",
     "src/server.ts",
     "src/cli.ts",
+    "src/cli-commands.ts",
+    "src/cli-help.ts",
     "test/device-pairing.test.ts",
+    "docs/guides/channels-and-watches.md",
+    "docs/agents/areas/frontend.md",
     "docs/work/records/F-118.md",
     "generated:backlog-views"
   ],
@@ -27,6 +32,7 @@
   ],
   "privacy": "Neutral fixtures only; no personal data.",
   "validation": [
+    "A committed regression fails before the fix (test/device-pairing.test.ts)",
     "npm run check:fast",
     "npm test"
   ],
@@ -40,6 +46,8 @@
     "reviewed": "2026-11-23",
     "agentHours": 3,
     "baselineAgentHours": 3,
-    "estimateAgentHours": 3
+    "estimateAgentHours": 3,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
   }
 }
