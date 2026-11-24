@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 97.75 h agent + 11.25 h owner across 137 open steps of 38 features and 26 other records. 146.25 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 94.75 h agent + 11.25 h owner across 137 open steps of 38 features and 26 other records. 149.75 h of actual effort recorded on 151 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2475,6 +2475,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-121"></a>[✨ F-121](#top)
+
+**Printed parts per drone: "print Smoke's feet"**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-121-T01 — Printed parts on drone models (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-24: each drone model in the fleet (F-098) has its own 3D-printed parts. AOS 5: 4 motor feet, a rear tail with mounts for the two O4 antennas, a GPS enclosure, a buzzer enclosure and 2 camera cage bands (one per side). Pavo20 Pro: the same GPS and buzzer enclosures only. "Print Smoke's feet" or "print the AOS feet" should resolve the drone, its model, the part, its file, the count and the print settings (default TPU from the external spool, the profile's own temperatures) and go through the existing slice and Bambu Connect hand-off (F-087). |
+| **Reproduce** | `nerv chat "stampa i piedini di Smoke"`: NERV has no printed parts in the fleet and cannot name a file or profile. |
+| **Check** | Printed parts belong to a drone model with a count, file and print profile; a drone inherits its model's parts; a chat request names the part, file, count and profile and asks approval before the hand-off; the owner's part list and file paths stay in the private fleet data, never in Git. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-121-t01"></a>F-121-T01 — Printed parts on drone models | 3 h | 3 h so far (stated) | 0 h | Implemented; verification pending | — | [F-121-T02](#f-121-t02) | [PR #715](https://github.com/voidbrain/nerv/pull/715) implementation |
+| 🟢 Small | <a id="f-121-t02"></a>F-121-T02 — Print a part by chat | 3 h | 3.5 h so far (stated) | 0 h | Implemented; verification pending | [F-121-T01](#f-121-t01) | [F-121-T03](#f-121-t03), [F-121-T04](#f-121-t04) | [PR #718](https://github.com/voidbrain/nerv/pull/718) implementation |
+| 🟡 Medium | <a id="f-121-t04"></a>F-121-T04 — Send the part file with the print job | 3 h | 0 h | 3 h | Planned | [F-121-T02](#f-121-t02) | [F-121-T03](#f-121-t03) | — |
+| 🟢 Small | <a id="f-121-t03"></a>F-121-T03 — Owner: enter the parts and print one | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-121-T02](#f-121-t02), [F-121-T04](#f-121-t04) | — | — |
+| 🟡 Medium | **Total** | 9 h | 6.5 h (2 of 4 steps recorded) | 3 h agent + 0.5 h owner | 0 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-121.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-121-T01: [PR #715](https://github.com/voidbrain/nerv/pull/715) implementation · F-121-T02: [PR #718](https://github.com/voidbrain/nerv/pull/718) implementation. [PR #718](https://github.com/voidbrain/nerv/pull/718) (F-121-T02 print a part by chat); [PR #715](https://github.com/voidbrain/nerv/pull/715) (F-121-T01 printed parts on drone models); opened in [PR #712](https://github.com/voidbrain/nerv/pull/712). |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-24: F-121-T02 `node --test test/fleet-print-job.test.ts` (failing first) and the affected suites (224 passed); full `npm test` 1365 (1363 passed, 2 skipped); `npm run build`, typecheck, lint, `npm run check:fast` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed; Review fixes (launcher guard, Blue hand-off; failing tests first): `node --test test/slicer.test.ts test/fleet-print-job.test.ts test/misato.test.ts` passed; full `npm test` 1366 (1364 passed, 2 skipped); build, typecheck, lint, `npm run check:fast` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed. CI pending. F-121-T01 `node --test test/fleet-prints.test.ts test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts test/misato.test.ts test/slicer.test.ts test/cli-help.test.ts` and related suites (126 passed), `npm run typecheck`, `npm run check:conventions`, `npm run check:fast` passed locally; full `npm test` 1310 tests (1308 passed, 2 skipped); `npm run build` passed; gauntlet `all` (gemma4-12b profile, owner-approved) passed with 0 cases still pending, ledger committed. Review fixes: `node --test` fleet-prints, fleet-chat, fleet, fleet-import, misato, slicer, cli-help, photos, telegram, batteries (142 passed), typecheck, lint, `npm run check:conventions` passed; build and gauntlet `all` (gemma4-12b, owner-approved) passed, 0 still pending, ledger committed; CI pending. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-101"></a>[✨ F-101](#top)
 
 **Share the FPV battery manager outside NERV**
@@ -2521,47 +2562,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-101-T01 verified: [PR #484](https://github.com/voidbrain/nerv/pull/484) merged on green CI. |
 | Reviewed | 2026-11-20 |
-
-</details>
-
----
-### <a id="f-121"></a>[✨ F-121](#top)
-
-**Printed parts per drone: "print Smoke's feet"**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 6 h agent + 0.5 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-121-T01 — Printed parts on drone models (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-24: each drone model in the fleet (F-098) has its own 3D-printed parts. AOS 5: 4 motor feet, a rear tail with mounts for the two O4 antennas, a GPS enclosure, a buzzer enclosure and 2 camera cage bands (one per side). Pavo20 Pro: the same GPS and buzzer enclosures only. "Print Smoke's feet" or "print the AOS feet" should resolve the drone, its model, the part, its file, the count and the print settings (default TPU from the external spool, the profile's own temperatures) and go through the existing slice and Bambu Connect hand-off (F-087). |
-| **Reproduce** | `nerv chat "stampa i piedini di Smoke"`: NERV has no printed parts in the fleet and cannot name a file or profile. |
-| **Check** | Printed parts belong to a drone model with a count, file and print profile; a drone inherits its model's parts; a chat request names the part, file, count and profile and asks approval before the hand-off; the owner's part list and file paths stay in the private fleet data, never in Git. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-121-t01"></a>F-121-T01 — Printed parts on drone models | 3 h | 3 h so far (stated) | 0 h | Implemented; verification pending | — | [F-121-T02](#f-121-t02) | [PR #715](https://github.com/voidbrain/nerv/pull/715) implementation |
-| 🟡 Medium | <a id="f-121-t02"></a>F-121-T02 — Print a part by chat | 3 h | 0 h | 3 h | Planned | [F-121-T01](#f-121-t01) | [F-121-T03](#f-121-t03), [F-121-T04](#f-121-t04) | — |
-| 🟡 Medium | <a id="f-121-t04"></a>F-121-T04 — Send the part file with the print job | 3 h | 0 h | 3 h | Planned | [F-121-T02](#f-121-t02) | [F-121-T03](#f-121-t03) | — |
-| 🟢 Small | <a id="f-121-t03"></a>F-121-T03 — Owner: enter the parts and print one | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-121-T02](#f-121-t02), [F-121-T04](#f-121-t04) | — | — |
-| 🔴 Large | **Total** | 9 h | 3 h (1 of 4 steps recorded) | 6 h agent + 0.5 h owner | 0 of 4 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-121.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-121-T01: [PR #715](https://github.com/voidbrain/nerv/pull/715) implementation. [PR #715](https://github.com/voidbrain/nerv/pull/715) (F-121-T01 printed parts on drone models); opened in [PR #712](https://github.com/voidbrain/nerv/pull/712). |
-| Opened | 2026-11-24 |
-| Verification | 2026-11-24: F-121-T01 `node --test test/fleet-prints.test.ts test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts test/misato.test.ts test/slicer.test.ts test/cli-help.test.ts` and related suites (126 passed), `npm run typecheck`, `npm run check:conventions`, `npm run check:fast` passed locally; full `npm test` 1310 tests (1308 passed, 2 skipped); `npm run build` passed; gauntlet `all` (gemma4-12b profile, owner-approved) passed with 0 cases still pending, ledger committed. Review fixes: `node --test` fleet-prints, fleet-chat, fleet, fleet-import, misato, slicer, cli-help, photos, telegram, batteries (142 passed), typecheck, lint, `npm run check:conventions` passed; build and gauntlet `all` (gemma4-12b, owner-approved) passed, 0 still pending, ledger committed; CI pending. |
-| Reviewed | 2026-11-24 |
 
 </details>
 

@@ -1,5 +1,5 @@
 import type { CodingJobPrOpener } from './coding-job.ts';
-import type { BambuConnectLauncher } from './slicer.ts';
+import type { BambuConnectLauncher, SlicerExecFn } from './slicer.ts';
 import { Watch, type WatchWork } from './watch.ts';
 import {
   DEFAULT_HEALTH_THRESHOLDS,
@@ -152,6 +152,8 @@ export class Store {
   pushFetch: typeof fetch = fetch;
   codingPrOpener?: CodingJobPrOpener;
   bambuLauncher?: BambuConnectLauncher;
+  /** F-121-T02: the slicer process runner; tests set a fake slicer. */
+  slicerExec?: SlicerExecFn;
   /** The data home, when known: the schedule tool writes config.json there. */
   readonly home?: string;
   constructor(
