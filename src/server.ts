@@ -1,10 +1,11 @@
 import { SessionBook } from './session-book.ts';
+import { DEVICE_IDLE_MS, DeviceBook, deviceName, PairingCodes } from './device-book.ts';
 import { DashboardFeed } from './dashboard-feed.ts';
 import { toolListing } from './tool-listing.ts';
 import { createServer, type IncomingMessage, type RequestListener } from 'node:http';
 import { createServer as createHttpsServer } from 'node:https';
 import type { NativeAuth } from './native-auth.ts';
-import { randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { realpath, stat, readFile } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import type { StoreApi } from './runtime.ts';
@@ -87,6 +88,10 @@ export function makeServer(
     exposeUpdateControl?: (control: UpdateControl) => void;
     /** B-113: where dashboard sessions are kept (hashed) across restarts; memory only when absent. */
     sessionFile?: string;
+    /** F-118: where paired devices are kept (hashed); memory only when absent. */
+    deviceFile?: string;
+    /** F-118: the clock for paired devices and pairing codes; tests move it. */
+    clock?: () => number;
     /** Health sampling interval (F-103-T01 default 60 s); tests shorten it. */
     healthSampleIntervalMs?: number;
   } = {},
@@ -96,8 +101,15 @@ export function makeServer(
   const build = buildInfo();
   const loginCodes = new Map<string, number>();
   const codeTtl = options.loginCodeTtlMs ?? LOGIN_CODE_TTL_MS;
+  // Login codes are bound to the admin token that minted them: a rotated token ends the pending ones (review of #700).
+  let loginCodesFor = '';
   const dropExpired = () => {
     const now = Date.now();
+    const fp = createHash('sha256').update(currentToken()).digest('hex');
+    if (fp !== loginCodesFor) {
+      loginCodesFor = fp;
+      loginCodes.clear();
+    }
     for (const [c, expires] of loginCodes) if (expires <= now) loginCodes.delete(c);
     sessions.dropExpired(now);
   };
@@ -116,6 +128,10 @@ export function makeServer(
   const currentToken = () => (typeof token === 'function' ? token() : token);
   if (currentToken().length < 24) throw new Error('NERV_TOKEN must be at least 24 characters.');
   const sessions = new SessionBook(currentToken, options.sessionFile, sessionTtl, MAX_SESSIONS);
+  // F-118: a phone pairs once with a short code and keeps a device credential (90 days unused, revocable, ended by a
+  // rotated admin token). It may do what a dashboard session may (see DeviceBook, PairingCodes).
+  const devices = new DeviceBook(currentToken, options.deviceFile, { now: options.clock });
+  const pairing = new PairingCodes({ now: options.clock, token: currentToken });
   const listener: RequestListener = async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-store');
@@ -218,6 +234,18 @@ export function makeServer(
         return;
       }
     }
+    // Review of #700: the unauthenticated code exchanges take JSON only. A page on any origin can send a text/plain POST
+    // without a preflight and so spend the failure budget (behind tailscale serve every client is 127.0.0.1); JSON needs a
+    // preflight, which this server never answers.
+    if (
+      !options.native &&
+      req.method === 'POST' &&
+      (path === '/api/session/exchange' || path === '/api/device/pair') &&
+      (req.headers['content-type'] ?? '').split(';')[0]!.trim().toLowerCase() !== 'application/json'
+    ) {
+      reply(415, { error: 'Send JSON (Content-Type: application/json).' });
+      return;
+    }
     // The browser half of `open`: a valid code is swapped once for the token; the web page keeps it in memory only.
     if (!options.native && req.method === 'POST' && path === '/api/session/exchange') {
       try {
@@ -237,12 +265,47 @@ export function makeServer(
       }
       return;
     }
+    // F-118: the phone half of `open --phone`: a typed pairing code is swapped once for a device credential.
+    if (!options.native && req.method === 'POST' && path === '/api/device/pair') {
+      try {
+        const value = await body(req, 1024);
+        const { code, name } = value;
+        const clean = deviceName(name);
+        if (Object.keys(value).some((k) => k !== 'code' && k !== 'name') || typeof code !== 'string' || !clean) {
+          reply(400, { error: 'Send the pairing code and a device name (1 to 40 characters).' });
+          return;
+        }
+        const taken = pairing.take(code.slice(0, 32), req.socket.remoteAddress ?? '');
+        if (typeof taken === 'object') {
+          res.setHeader('Retry-After', String(Math.ceil(taken.retryAfterMs / 1000)));
+          reply(429, { error: 'Too many pairing attempts; wait and try again.' });
+          return;
+        }
+        if (taken === 'invalid') {
+          reply(401, { error: 'Pairing code invalid, used or expired: run open --phone again.' });
+          return;
+        }
+        const device = devices.pair(clean);
+        if (!device) {
+          reply(409, { error: 'Too many paired devices: revoke one first.' });
+          return;
+        }
+        reply(200, {
+          token: device.credential,
+          device: { id: device.id, name: device.name },
+          idleLimitMs: DEVICE_IDLE_MS,
+        });
+      } catch {
+        reply(400, { error: 'Invalid request.' });
+      }
+      return;
+    }
     const supplied = Buffer.from(req.headers.authorization ?? '');
     const expected = Buffer.from(`Bearer ${currentToken()}`);
     const root = supplied.length === expected.length && timingSafeEqual(supplied, expected);
     const bearer = req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.slice(7) : '';
     if (!options.native && !root && bearer) dropExpired();
-    const admin = root || (!options.native && sessions.has(bearer));
+    const admin = root || (!options.native && (sessions.has(bearer) || devices.use(bearer)));
     const client =
       !admin &&
       options.native?.auth.authenticate(
@@ -325,7 +388,7 @@ export function makeServer(
           reply(400, { error: 'Dashboard stream takes no query parameters.' });
           return;
         }
-        if (!feed.connect(res, () => root || sessions.has(bearer)))
+        if (!feed.connect(res, () => root || sessions.has(bearer) || devices.has(bearer)))
           reply(503, { error: 'Dashboard stream capacity reached.' });
       } else if (req.method === 'GET' && path === '/api/commands') {
         reply(200, { commands: COMMAND_CATALOG });
@@ -558,12 +621,27 @@ export function makeServer(
       } else if (
         !options.native &&
         !root &&
-        (path === '/api/session/codes' || path === '/api/session/revoke' || path === '/api/stop')
+        (path === '/api/session/codes' ||
+          path === '/api/session/revoke' ||
+          path === '/api/stop' ||
+          path === '/api/device/codes' ||
+          path === '/api/devices' ||
+          path.startsWith('/api/devices/'))
       )
         reply(403, {
-          error: 'Only the CLI (with the admin token) can mint login codes, revoke sessions or stop the service.',
+          error:
+            'Only the CLI (with the admin token) can mint login or pairing codes, manage devices, revoke sessions or stop the service.',
         });
-      else if (!options.native && root && req.method === 'POST' && path === '/api/session/revoke') {
+      else if (!options.native && root && req.method === 'POST' && path === '/api/device/codes') {
+        const minted = pairing.mint();
+        if (!minted) reply(429, { error: 'Too many unused pairing codes; wait a few minutes.' });
+        else reply(201, minted);
+      } else if (!options.native && root && req.method === 'GET' && path === '/api/devices') {
+        reply(200, { devices: devices.list() });
+      } else if (!options.native && root && req.method === 'DELETE' && path.startsWith('/api/devices/')) {
+        const revoked = devices.revoke(decodeURIComponent(path.slice('/api/devices/'.length)));
+        reply(revoked ? 200 : 404, { revoked });
+      } else if (!options.native && root && req.method === 'POST' && path === '/api/session/revoke') {
         reply(200, { revoked: sessions.clear() });
       } else if (!options.native && root && req.method === 'POST' && path === '/api/session/codes') {
         dropExpired();

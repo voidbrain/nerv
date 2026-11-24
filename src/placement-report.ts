@@ -63,6 +63,8 @@ const PAIRS: [PlacementOption, PlacementOption][] = [
 ];
 
 const OPTIONS: PlacementOption[] = ['mac-only', 'mini-only', ...MAC_DEPENDENT];
+/** An option may carry evidence for a few case sets (e.g. the role packs and the combination pack). */
+const MAX_CASE_SETS = 3;
 
 function record(value: unknown, at: string, keys: string[]): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${at} must be an object.`);
@@ -81,8 +83,8 @@ function nullable(v: Record<string, unknown>, at: string, keys: string[], type: 
 /** Validates `{ evidence: PlacementEvidence[] }` read from a file; unknown fields and shapes are refused. */
 export function placementEvidence(value: unknown): PlacementEvidence[] {
   const top = record(value, 'evidence file', ['source', 'evidence']);
-  if (!Array.isArray(top.evidence) || top.evidence.length > OPTIONS.length)
-    throw new Error(`evidence must be an array of at most ${OPTIONS.length} entries.`);
+  if (!Array.isArray(top.evidence) || top.evidence.length > OPTIONS.length * MAX_CASE_SETS)
+    throw new Error(`evidence must be an array of at most ${OPTIONS.length * MAX_CASE_SETS} entries.`);
   return top.evidence.map((entry, i) => {
     const at = `evidence[${i}]`;
     const e = record(entry, at, [
@@ -177,14 +179,24 @@ export function comparePlacement(
 
 /** Compares every placement against its baseline; the Mac-only baseline stays recommended unless a candidate wins. */
 export function placementReport(evidence: PlacementEvidence[]): PlacementReport {
-  const byOption = new Map<PlacementOption, PlacementEvidence>();
+  const byOption = new Map<PlacementOption, PlacementEvidence[]>();
   for (const e of evidence) {
-    if (byOption.has(e.option)) throw new Error(`Duplicate evidence for ${e.option}.`);
-    byOption.set(e.option, e);
+    const list = byOption.get(e.option) ?? [];
+    if (list.some((x) => x.caseSet === e.caseSet))
+      throw new Error(`Duplicate evidence for ${e.option} on ${e.caseSet}.`);
+    if (list.length >= MAX_CASE_SETS) throw new Error(`At most ${MAX_CASE_SETS} case sets for ${e.option}.`);
+    byOption.set(e.option, [...list, e]);
   }
-  const comparisons = PAIRS.map(([baseline, candidate]) =>
-    comparePlacement(byOption.get(baseline), byOption.get(candidate), { baseline, candidate }),
-  );
+  // Each pair is compared on the case set both options share; without one, on their first entries (which then differ).
+  const comparisons = PAIRS.map(([baseline, candidate]) => {
+    const b = byOption.get(baseline) ?? [];
+    const c = byOption.get(candidate) ?? [];
+    const shared = c.find((x) => b.some((y) => y.caseSet === x.caseSet));
+    return comparePlacement(shared ? b.find((y) => y.caseSet === shared.caseSet) : b[0], shared ?? c[0], {
+      baseline,
+      candidate,
+    });
+  });
   const winners = comparisons.filter((c) => c.verdict === 'prefer-candidate' && c.baseline === 'mac-only');
   const unknowns = [
     ...new Set(
@@ -202,7 +214,7 @@ export function placementReport(evidence: PlacementEvidence[]): PlacementReport 
       recommendation: { option: winners[0].candidate, status: 'supported', reasons: winners[0].reasons },
       unknowns,
     };
-  const mac = byOption.get('mac-only');
+  const mac = byOption.get('mac-only')?.[0];
   const supported =
     winners.length === 0 && comparisons.every((c) => c.verdict === 'keep-baseline' || c.verdict === 'rejected');
   return {

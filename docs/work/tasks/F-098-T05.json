@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "F-098-T05",
+  "parent": "F-098",
+  "title": "Fleet import with spares cues",
+  "goal": "`nerv fleet import FILE.json` loads a whole fleet at once and every installed component model becomes a spares record",
+  "status": "implemented",
+  "acceptance": [
+    "Strict JSON shape { version: 1, drones: [ { name, frame?, notes?, parts: [ { category, model, positions? } ] } ] }; errors name the bad field",
+    "A part with positions creates one part row per position; without positions, one row at \"main\"",
+    "Every distinct component model gets a spares record at 0 new and 0 used, category from the part",
+    "Idempotent: an existing drone keeps its row and parts, an existing spares record keeps its counts; the report lists created vs already present"
+  ],
+  "dependsOn": [
+    "F-098-T01"
+  ],
+  "resources": [
+    "src/fleet.ts",
+    "src/cli-commands.ts",
+    "src/cli-help.ts",
+    "test/fleet-import.test.ts",
+    "docs/work/tasks/F-098-T05.json",
+    "docs/work/records/F-098.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet data stays local-only; tests use invented drones and generic parts.",
+  "validation": [
+    "node --test test/fleet-import.test.ts test/fleet.test.ts test/cli-help.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Owner decision 2026-11-23 added this step; estimated 0.5 h at agent speed for one parser, one store method and a CLI branch. Not a measurement.",
+    "reviewed": "2026-11-23",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 691,
+      "note": "implementation"
+    }
+  ]
+}

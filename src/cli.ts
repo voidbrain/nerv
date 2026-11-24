@@ -25,6 +25,8 @@ import { createCdpBrowserDriver, createCdpPageReader } from './browser-cdp-drive
 import { assertDiyfpvBuildLink, DIYFPV_BUILDER_ORIGIN, parseDiyfpvBuild } from './diyfpv-build.ts';
 import { clickDesktopControl } from './desktop-control.ts';
 import { desktopDriverFor } from './desktop-macos-driver.ts';
+import { appWorkflowPlanHash, parseAppWorkflowPlan, runAppWorkflow } from './app-workflow.ts';
+import { createMacAppWorkflowDriver } from './app-workflow-macos.ts';
 
 import { SeatPool } from './seat-pool.ts';
 
@@ -86,6 +88,7 @@ import { service } from './service.ts';
 import { startUpdaterJob } from './updater-job.ts';
 import { reportUpdaterResult } from './updater-result.ts';
 import { serviceMove } from './install-move-cli.ts';
+import { updateCommand } from './update-cli.ts';
 import { initializeNativeTLS, loadNativeTLS, nativeAdmin, NativeAuth, type Invitation } from './native-auth.ts';
 import { Runtime, type ChatReply } from './runtime.ts';
 
@@ -275,6 +278,7 @@ try {
       );
     } else console.log(JSON.stringify(value, null, 2));
   } else if (command === 'service' && args[0] === 'move') await serviceMove(args.slice(1), home);
+  else if (command === 'update') await updateCommand(args, home);
   else if (command === 'service') service(args[0] ?? '', home);
   else if (await tryRunCliCommand(command, args, home, { readSecret, openPage, reloadIfRunning, flag })) {
     // Handled by cli-commands.ts
@@ -615,6 +619,8 @@ try {
             lifecycleHost: localServiceHost,
             // B-113: dashboard sessions survive the restart an update makes (hashed, bound to the admin token).
             sessionFile: join(home, 'sessions.json'),
+            // F-118: paired devices (hashed, 90 days unused, bound to the admin token).
+            deviceFile: join(home, 'devices.json'),
             // B-108: Update now and the scheduled apply hand the update to its own OS job outside this service.
             startUpdater: async (input) => {
               await startUpdaterJob(localServiceHost().context, input, async (program, args) => {
@@ -1025,6 +1031,36 @@ try {
           controlName,
           allowedOrigins: browser.allowedOrigins,
           approved: args.includes('--approved'),
+        });
+        console.log(JSON.stringify(res, null, 2));
+        break;
+      }
+      case 'app-workflow': {
+        const file = args.find((a) => !a.startsWith('--'));
+        if (!file) throw new Error('Usage: nerv app-workflow <plan.json> [--approve=<plan-hash>] [--overwrite=<path>]');
+        const plan = parseAppWorkflowPlan(JSON.parse(readFileSync(resolve(file), 'utf8')));
+        const planHash = appWorkflowPlanHash(plan);
+        const approve = args.find((a) => a.startsWith('--approve='))?.slice('--approve='.length);
+        if (!approve) {
+          // The one approval card: every step and the hash the owner approves the run with.
+          console.log(JSON.stringify({ steps: plan.steps, planHash, approveWith: `--approve=${planHash}` }, null, 2));
+          break;
+        }
+        if (process.platform !== 'darwin') throw new Error('App workflows have a live driver on macOS only.');
+        const folders = readConfig(home).appWorkflow?.allowedFolders ?? [];
+        if (folders.length === 0) {
+          throw new Error(
+            'No folders allowed. Add "appWorkflow": {"allowedFolders": ["/absolute/folder"]} to config.json.',
+          );
+        }
+        const overwrite = args
+          .filter((a) => a.startsWith('--overwrite='))
+          .map((a) => resolve(a.slice('--overwrite='.length)));
+        const res = await runAppWorkflow(createMacAppWorkflowDriver(), {
+          plan,
+          approval: { approved: true, planHash: approve },
+          allowedFolders: folders,
+          confirmOverwrite: (path) => overwrite.includes(path),
         });
         console.log(JSON.stringify(res, null, 2));
         break;

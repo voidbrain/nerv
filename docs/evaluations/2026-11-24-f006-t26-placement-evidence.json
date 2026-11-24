@@ -1,0 +1,166 @@
+{
+  "source": "F-006-T23–T25 live runs on NERV-01 (Mac) and NERV-02 (Tabgha), 2026-11-24, plus the F-006-T14 Mac moderate-load aggregates for mac-only; private raw reports stay in ~/.nerv-private/placement on their base",
+  "evidence": [
+    {
+      "option": "mac-only",
+      "source": "live",
+      "enrolledTargets": true,
+      "identity": {
+        "model": "gemma4:12b Q4_K_M, digest 6114515d…36ed0b",
+        "runtime": "Ollama 0.40.16, 8K context, temperature 0, seed 42, think on, parallel 1 (Gauntlet model-run and role-run)",
+        "hardware": "NERV-01, Apple M3 Pro",
+        "memory": "36 GiB unified",
+        "concurrentLoad": "moderate-load@1.0.0: Safari, Firefox, VS Code"
+      },
+      "caseSet": "neutral-smoke + role-run both, repeat 3",
+      "budget": "limits-repeat3: 30 s/case, 15 min/suite, 61440 output tokens",
+      "outcome": { "passed": 48, "total": 60 },
+      "metrics": {
+        "latencyMedianMs": 5524,
+        "queueMs": null,
+        "networkMs": 0,
+        "outputTokens": 9948,
+        "resource": "process RSS peak 9.9 GB; whole-device GPU peak 100%; GPU allocation peak 11.5 GB"
+      },
+      "failures": { "unavailableMac": null, "disconnectedAuditor": null, "cancellation": null, "uncertainOutcome": null }
+    },
+    {
+      "option": "mac-only",
+      "source": "live",
+      "enrolledTargets": true,
+      "identity": {
+        "model": "gemma4:12b Q4_K_M, digest 6114515d…36ed0b",
+        "runtime": "Ollama 0.40.16, 8K context, temperature 0, seed 42, think on, parallel 1 (Gauntlet model-run)",
+        "hardware": "NERV-01, Apple M3 Pro",
+        "memory": "36 GiB unified",
+        "concurrentLoad": "moderate-load@1.0.0: Safari, Firefox, VS Code"
+      },
+      "caseSet": "neutral-smoke, repeat 3",
+      "budget": "limits-repeat3: 30 s/case, 15 min/suite, 61440 output tokens",
+      "outcome": { "passed": 24, "total": 30 },
+      "metrics": {
+        "latencyMedianMs": 3842,
+        "queueMs": null,
+        "networkMs": 0,
+        "outputTokens": 3477,
+        "resource": "process RSS peak 9.9 GB; model allocation 1.0 GB sampled"
+      },
+      "failures": { "unavailableMac": null, "disconnectedAuditor": null, "cancellation": null, "uncertainOutcome": null }
+    },
+    {
+      "option": "mac-only",
+      "source": "live",
+      "enrolledTargets": true,
+      "identity": {
+        "model": "gemma4:12b Q4_K_M, digest 6114515d…36ed0b, coder and reviewer",
+        "runtime": "Ollama 0.40.16 /api/chat, 8K context, temperature 0, seed 42, think off (tools/placement-live.mjs)",
+        "hardware": "NERV-01, Apple M3 Pro",
+        "memory": "36 GiB unified",
+        "concurrentLoad": "sampled: load average 3.6–3.7, memory free 37% → 29% (VS Code, other agent sessions idle under the machine lock)"
+      },
+      "caseSet": "combination-v1 coder-reviewer, repeat 3",
+      "budget": "combination totalBudget: 6144 output tokens, 360 s/suite, 30 s/case, 256 tokens per call",
+      "outcome": { "passed": 15, "total": 24 },
+      "metrics": {
+        "latencyMedianMs": 2431,
+        "queueMs": null,
+        "networkMs": 0,
+        "outputTokens": 1407,
+        "resource": null
+      },
+      "failures": { "unavailableMac": null, "disconnectedAuditor": null, "cancellation": null, "uncertainOutcome": null }
+    },
+    {
+      "option": "mini-only",
+      "source": "live",
+      "enrolledTargets": true,
+      "identity": {
+        "model": "qwen2.5:1.5b Q4_K_M, digest 65ec0654…dc57b",
+        "runtime": "Ollama 0.40.16, 8K context, temperature 0, seed 42, parallel 1 (Gauntlet model-run and role-run)",
+        "hardware": "NERV-02, Intel N97 4-core, Windows 11",
+        "memory": "11.75 GiB RAM",
+        "concurrentLoad": "baseline-load@1.0.0, sampled: CPU 3–16%, free memory 6.2–6.3 GB"
+      },
+      "caseSet": "neutral-smoke + role-run both, repeat 3",
+      "budget": "limits-repeat3: 30 s/case, 15 min/suite, 61440 output tokens",
+      "outcome": { "passed": 30, "total": 60 },
+      "metrics": {
+        "latencyMedianMs": 1200,
+        "queueMs": null,
+        "networkMs": 0,
+        "outputTokens": 1106,
+        "resource": "system free memory minimum 5.1 GB sampled; process RSS not sampled on Windows"
+      },
+      "failures": { "unavailableMac": null, "disconnectedAuditor": null, "cancellation": null, "uncertainOutcome": null }
+    },
+    {
+      "option": "mini-only",
+      "source": "live",
+      "enrolledTargets": true,
+      "identity": {
+        "model": "qwen2.5:1.5b Q4_K_M, digest 65ec0654…dc57b",
+        "runtime": "Ollama 0.40.16, 8K context, temperature 0, seed 42, parallel 1 (Gauntlet model-run)",
+        "hardware": "NERV-02, Intel N97 4-core, Windows 11",
+        "memory": "11.75 GiB RAM",
+        "concurrentLoad": "baseline-load@1.0.0, sampled: CPU 3–5%, free memory 6.2 GB"
+      },
+      "caseSet": "neutral-smoke, repeat 3",
+      "budget": "limits-repeat3: 30 s/case, 15 min/suite, 61440 output tokens",
+      "outcome": { "passed": 21, "total": 30 },
+      "metrics": {
+        "latencyMedianMs": 810,
+        "queueMs": null,
+        "networkMs": 0,
+        "outputTokens": 300,
+        "resource": "system free memory minimum 5.1 GB sampled; process RSS not sampled on Windows"
+      },
+      "failures": { "unavailableMac": null, "disconnectedAuditor": null, "cancellation": null, "uncertainOutcome": null }
+    },
+    {
+      "option": "mini-tools-mac-inference",
+      "source": "live",
+      "enrolledTargets": true,
+      "identity": {
+        "model": "gemma4:12b on NERV-01, digest 6114515d…36ed0b",
+        "runtime": "NERV-01 Ollama 0.40.16 via signed WorkerLink model.infer with NERV-01's serve settings (no seed or context override); NERV-02 NERV c9fc9994, POST /api/placement/run P3 (tools/placement-live.mjs)",
+        "hardware": "NERV-02 worker (Intel N97) + NERV-01 inference (Apple M3 Pro)",
+        "memory": "11.75 GiB RAM + 36 GiB unified",
+        "concurrentLoad": "sampled: NERV-02 CPU 12–21%, free memory 6.1 GB; NERV-01 load average 2.0–3.6, memory free 25–28%"
+      },
+      "caseSet": "neutral-smoke, repeat 3",
+      "budget": "limits-repeat3: 30 s/case, 15 min/suite, 61440 output tokens",
+      "outcome": { "passed": 24, "total": 30 },
+      "metrics": {
+        "latencyMedianMs": 4375,
+        "queueMs": null,
+        "networkMs": 119,
+        "outputTokens": 3931,
+        "resource": null
+      },
+      "failures": { "unavailableMac": true, "disconnectedAuditor": null, "cancellation": true, "uncertainOutcome": true }
+    },
+    {
+      "option": "mac-coder-mini-auditor",
+      "source": "live",
+      "enrolledTargets": true,
+      "identity": {
+        "model": "coder gemma4:12b on NERV-01 (digest 6114515d…36ed0b); auditor qwen2.5:1.5b on NERV-02 (digest 65ec0654…dc57b)",
+        "runtime": "coder: NERV-01 Ollama 0.40.16 /api/chat, temperature 0, seed 42, think off; auditor: NERV-02 NERV c9fc9994 placement P2 over SSH, Ollama 0.40.16 (tools/placement-live.mjs)",
+        "hardware": "NERV-01 (Apple M3 Pro) + NERV-02 (Intel N97)",
+        "memory": "36 GiB unified + 11.75 GiB RAM",
+        "concurrentLoad": "sampled: NERV-01 load average 1.9–3.7, memory free 25–29%; NERV-02 normal home baseline"
+      },
+      "caseSet": "combination-v1 coder-reviewer, repeat 3",
+      "budget": "combination totalBudget: 6144 output tokens, 360 s/suite, 30 s/case, 256 tokens per call",
+      "outcome": { "passed": 11, "total": 24 },
+      "metrics": {
+        "latencyMedianMs": 4809,
+        "queueMs": null,
+        "networkMs": 581,
+        "outputTokens": null,
+        "resource": null
+      },
+      "failures": { "unavailableMac": null, "disconnectedAuditor": true, "cancellation": null, "uncertainOutcome": null }
+    }
+  ]
+}
