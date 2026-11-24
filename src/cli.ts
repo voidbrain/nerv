@@ -21,7 +21,8 @@ import { startAutoUpdateScheduler } from './update-scheduler.ts';
 import { buildInfo, checkRevisionSkew, type BuildInfo } from './build.ts';
 import type { UpdateControl } from './server-update.ts';
 import { clickNamedControl } from './browser-control.ts';
-import { createCdpBrowserDriver } from './browser-cdp-driver.ts';
+import { createCdpBrowserDriver, createCdpPageReader } from './browser-cdp-driver.ts';
+import { assertDiyfpvBuildLink, DIYFPV_BUILDER_ORIGIN, parseDiyfpvBuild } from './diyfpv-build.ts';
 import { clickDesktopControl } from './desktop-control.ts';
 import { desktopDriverFor } from './desktop-macos-driver.ts';
 
@@ -974,6 +975,24 @@ try {
           header,
         });
         console.log(JSON.stringify(session.stop(), null, 2));
+        break;
+      }
+      case 'fpv-read-build': {
+        const link = args.find((a) => !a.startsWith('--'));
+        if (!link) throw new Error('Usage: nerv fpv-read-build <diyfpv.com build link>');
+        assertDiyfpvBuildLink(link);
+        const browser = config.browser;
+        if (!browser?.allowedOrigins.includes(DIYFPV_BUILDER_ORIGIN)) {
+          throw new Error(
+            `Add "${DIYFPV_BUILDER_ORIGIN}" to browser.allowedOrigins in config.json and start the dedicated browser profile on browser.debugPort.`,
+          );
+        }
+        const page = await createCdpPageReader({ port: browser.debugPort }).readPageTables(
+          link,
+          browser.allowedOrigins,
+        );
+        const build = parseDiyfpvBuild(page, link);
+        console.log(JSON.stringify(local().fpvBuilds.importBuild(build), null, 2));
         break;
       }
       case 'browser-click': {

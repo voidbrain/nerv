@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 85 h agent + 10.5 h owner across 107 open steps of 36 features and 20 other records. 96.75 h of actual effort recorded on 120 steps. Generated from the task files.
+**Remaining effort:** 84.25 h agent + 10.5 h owner across 107 open steps of 36 features and 20 other records. 98 h of actual effort recorded on 121 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2099,9 +2099,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-099-T04 — Read a diyfpv.com build through the browser adapter (Planned).
+💻 **→** Next: F-099-T04 — Read a diyfpv.com build through the browser adapter (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2113,8 +2113,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-099-t04"></a>F-099-T04 — Read a diyfpv.com build through the browser adapter | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | — |
-| 🟢 Small | **Total** | 2.25 h | 0.25 h (1 of 4 steps recorded) | 0.75 h | 3 of 4 completed | | |
+| 🟢 Small | <a id="f-099-t04"></a>F-099-T04 — Read a diyfpv.com build through the browser adapter | 0.75 h | 1.25 h so far (stated) | 0 h | Implemented; verification pending | 🤖 | [PR #690](https://github.com/voidbrain/nerv/pull/690) implementation |
+| 🟢 Small | **Total** | 2.25 h | 1.5 h (2 of 4 steps recorded) | 0 h | 3 of 4 completed | | |
 
 <details><summary>Done steps (3)</summary>
 
@@ -2133,7 +2133,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-099-T03: [PR #485](https://github.com/voidbrain/nerv/pull/485) implementation. [PR #485](https://github.com/voidbrain/nerv/pull/485) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| PR / evidence | Steps: F-099-T03: [PR #485](https://github.com/voidbrain/nerv/pull/485) implementation · F-099-T04: [PR #690](https://github.com/voidbrain/nerv/pull/690) implementation. [PR #690](https://github.com/voidbrain/nerv/pull/690) (F-099-T04); [PR #485](https://github.com/voidbrain/nerv/pull/485) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-099-T03 verified: [PR #485](https://github.com/voidbrain/nerv/pull/485) merged on green CI. |
 | Reviewed | 2026-11-18 |
