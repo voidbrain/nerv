@@ -900,3 +900,64 @@ test('F-056-T02: Telegram /cards sends pending cards with inline buttons and rea
     rmSync(home, { recursive: true, force: true });
   }
 });
+
+test('F-016-T19: a base without coordinator authority never polls or calls the Bot API; activation hydrates and starts polling', async () => {
+  const token = '123456:' + 'h'.repeat(35);
+  const tg = await fakeTelegram(token);
+  const home = mkdtempSync(join(tmpdir(), 'nerv-handover-'));
+  const store = new Store(join(home, 'nerv.sqlite'));
+  let authorized = false;
+  const saved: number[] = [];
+  const aoba = new TelegramChannel({
+    api: new TelegramApi(token, tg.base),
+    store: store as unknown as StoreApi,
+    chatId: OWNER,
+    statePath: join(home, 'telegram-state.json'),
+    log: () => {},
+    authority: () => authorized,
+    continuity: {
+      load: () => ({ offset: 42 }),
+      save: (state) => {
+        if (state.offset !== undefined) saved.push(state.offset);
+      },
+    },
+    standbyCheckMs: 20,
+  });
+  try {
+    store.add('Water plants', new Date(Date.now() - 1000).toISOString());
+    store.tick();
+    await aoba.start(30);
+    tg.text(OWNER, '/start');
+    await wait(300);
+    assert.deepEqual(tg.calls, [], 'a standby, draining or fenced base makes no Bot API call at all');
+
+    // Activation: the replicated offset is hydrated before the first poll, then the base answers.
+    authorized = true;
+    await until(() => tg.calls.some((c) => c.method === 'getUpdates'));
+    assert.equal(tg.calls.find((c) => c.method === 'getUpdates')!.body.offset, 42);
+    tg.updates.push({
+      update_id: 43,
+      message: {
+        date: Math.floor(Date.now() / 1000),
+        text: '/start',
+        chat: { id: OWNER, type: 'private' },
+        from: { id: OWNER },
+      },
+    });
+    await until(() => tg.sent().some((m) => m.text.startsWith('Aoba here')));
+    await until(() => saved.includes(44));
+
+    // Fenced again: polling and sends stop within the check interval.
+    authorized = false;
+    await wait(200);
+    const frozen = tg.calls.length;
+    tg.text(OWNER, '/start');
+    await wait(300);
+    assert.equal(tg.calls.length, frozen);
+  } finally {
+    await aoba.stop();
+    store.close();
+    await tg.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});

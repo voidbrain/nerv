@@ -6,6 +6,10 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { describe, it } from 'node:test';
 import { createServer } from 'node:net';
+import { createServer as createHttpServer } from 'node:http';
+import { TelegramApi, TelegramChannel } from '../src/telegram.ts';
+import type { StoreApi } from '../src/runtime.ts';
+import { coordinatorChannelAuthority, coordinatorTelegramContinuity } from '../src/coordinator-serve.ts';
 import { KajiLink } from '../src/kaji-link.ts';
 import { allUnrevokedAckedEpoch, pushCoordinatorEpoch, registryPort } from '../src/coordinator-epoch.ts';
 import {
@@ -936,6 +940,161 @@ describe('F-016-T18: /kaji/epoch-push, so the new epoch acks are measured, not a
       assert.ok(wall - start >= RELOCATION_HORIZON_ACKED_MS && wall - start < RELOCATION_HORIZON_CONSERVATIVE_MS);
       assert.deepEqual(events, ['stop', 'start']);
     } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('F-016-T19: Telegram polling is handed over on activation', () => {
+  it('the old main stops answering, the promoted main answers from the replicated offset, and no two bases poll at once', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-tg-handover-'));
+    const token = '123456:' + 'r'.repeat(35);
+    const OWNER = 1111;
+    // A loopback Bot API shared by both bases: it answers 409 to a poll while another is in flight, as Telegram does.
+    const calls: { base: string; method: string; body: Record<string, unknown> }[] = [];
+    const updates: { update_id: number; message: Record<string, unknown> }[] = [];
+    let polling = 0;
+    let conflicts = 0;
+    const server = createHttpServer((req, res) => {
+      let raw = '';
+      req
+        .on('data', (c) => (raw += c))
+        .on('end', async () => {
+          const m = /^\/(a|b)\/bot([^/]+)\/(\w+)$/.exec(req.url ?? '');
+          res.setHeader('content-type', 'application/json');
+          const body = JSON.parse(raw || '{}') as Record<string, unknown>;
+          if (!m || m[2] !== token) {
+            res.statusCode = 401;
+            res.end('{"ok":false}');
+            return;
+          }
+          calls.push({ base: m[1]!, method: m[3]!, body });
+          if (m[3] === 'getUpdates') {
+            if (polling > 0) {
+              conflicts++;
+              res.statusCode = 409;
+              res.end('{"ok":false,"description":"Conflict"}');
+              return;
+            }
+            polling++;
+            const from = (body.offset as number | undefined) ?? 0;
+            for (let i = 0; i < 10 && !updates.some((u) => u.update_id >= from); i++)
+              await new Promise((r) => setTimeout(r, 20));
+            polling--;
+            res.end(JSON.stringify({ ok: true, result: updates.filter((u) => u.update_id >= from) }));
+            return;
+          }
+          res.end(JSON.stringify({ ok: true, result: { message_id: calls.length } }));
+        });
+    });
+    await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
+    const base = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
+    let next = 1;
+    const say = (text: string) =>
+      updates.push({
+        update_id: next++,
+        message: {
+          date: Math.floor(Date.now() / 1000),
+          text,
+          chat: { id: OWNER, type: 'private' },
+          from: { id: OWNER },
+        },
+      });
+    const replies = (b: string) =>
+      calls.filter((c) => c.base === b && c.method === 'sendMessage').map((c) => String(c.body.text));
+    const until = async (check: () => boolean) => {
+      const end = Date.now() + 8000;
+      while (!check()) {
+        if (Date.now() > end) throw new Error('timed out');
+        await new Promise((r) => setTimeout(r, 20));
+      }
+    };
+    const homeA = join(dir, 'a');
+    const homeB = join(dir, 'b');
+    mkdirSync(homeA, { recursive: true });
+    mkdirSync(homeB, { recursive: true });
+    const storeA = new Store(join(homeA, 'nerv.sqlite'));
+    setState(storeA.db, 2, 'active', 7, 'digest-7');
+    storeA.db.prepare('UPDATE coordinator_state SET lease_expires_at = ? WHERE id = 1').run(Date.now() + 600_000);
+    new Store(join(homeB, 'nerv.sqlite')).close();
+    const standby = new Store(join(homeB, STANDBY_DB_FILE));
+    setState(standby.db, 2, 'standby', 7, 'digest-7');
+    standby.close();
+    const channel = (home: string, tag: 'a' | 'b', store: Store) =>
+      new TelegramChannel({
+        api: new TelegramApi(token, `${base}/${tag}`),
+        store: store as unknown as StoreApi,
+        chatId: OWNER,
+        statePath: join(home, 'telegram-state.json'),
+        log: () => {},
+        authority: coordinatorChannelAuthority({
+          home,
+          databasePath: join(home, 'nerv.sqlite'),
+          baseId: tag === 'a' ? 'NERV-01' : 'NERV-02',
+          root: undefined,
+        }),
+        continuity: coordinatorTelegramContinuity(join(home, 'nerv.sqlite')),
+        standbyCheckMs: 30,
+      });
+    const storeB0 = new Store(join(homeB, 'nerv.sqlite'));
+    const a = channel(homeA, 'a', storeA);
+    let b = channel(homeB, 'b', storeB0);
+    try {
+      await a.start(50);
+      await b.start(50);
+      say('/start');
+      await until(() => replies('a').length === 1);
+      await new Promise((r) => setTimeout(r, 200));
+      assert.equal(
+        calls.filter((c) => c.base === 'b').length,
+        0,
+        'the standby makes no Bot API call while the old main answers',
+      );
+
+      // Planned move: A drains (fenced), the offset it reached is in the replicated coordinator state.
+      const oldKey = generateKeyPairSync('ed25519');
+      const offset = (
+        storeA.db.prepare('SELECT telegram_offset FROM coordinator_state WHERE id = 1').get() as {
+          telegram_offset: number | null;
+        }
+      ).telegram_offset;
+      assert.equal(offset, 2, 'the active main persisted its offset into the coordinator state');
+      const drain = signDrainReceipt(
+        oldKey.privateKey,
+        drainCoordinator(storeA.db, { baseId: 'NERV-01', coordinatorEpoch: 2, newMainBaseId: 'NERV-02', newEpoch: 3 }),
+      );
+      const sb = new DatabaseSync(join(homeB, STANDBY_DB_FILE));
+      sb.prepare('UPDATE coordinator_state SET telegram_offset = ? WHERE id = 1').run(offset);
+      sb.close();
+      // As kaji promote does: the service stops, the stores swap, the service starts again.
+      await b.stop();
+      storeB0.close();
+      Store.relocateCoordinator({
+        mainDbPath: join(homeB, 'nerv.sqlite'),
+        standbyDbPath: join(homeB, STANDBY_DB_FILE),
+        selfBaseId: 'NERV-02',
+        previousMainBaseId: 'NERV-01',
+        registryMain: { baseId: 'NERV-02', coordinatorEpoch: 3 },
+        soleCoordinator: true,
+        liveness: { kind: 'planned', drain, oldMainPublicKey: oldKey.publicKey },
+      });
+      const storeB = new Store(join(homeB, 'nerv.sqlite'));
+      b = channel(homeB, 'b', storeB);
+      await b.start(50);
+      say('/start');
+      await until(() => replies('b').length === 1);
+      await new Promise((r) => setTimeout(r, 200));
+      assert.equal(replies('a').length, 1, 'the old main no longer answers');
+      assert.equal(replies('b').length, 1, 'the new main answered only the new message, not the replayed one');
+      assert.equal(calls.find((c) => c.base === 'b' && c.method === 'getUpdates')!.body.offset, 2);
+      assert.equal(conflicts, 0, 'no 409 polling race');
+      await b.stop();
+      storeB.close();
+    } finally {
+      await a.stop();
+      await b.stop();
+      storeA.close();
+      await new Promise<void>((done) => server.close(() => done()));
       rmSync(dir, { recursive: true, force: true });
     }
   });
