@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-006",
   "id": "F-006-T24",
-  "status": "planned",
+  "status": "implemented",
   "title": "Run combination-v1 coder-alone vs coder-reviewer for mac-only and mac-coder-mini-auditor",
   "goal": "Both placements have combination-v1 results for coder-alone and coder-reviewer under one totalBudget",
   "capabilities": [
@@ -14,7 +14,7 @@
   ],
   "privacy": "Repository-owned neutral fixtures and the gauntlet packs only; local models on the enrolled NERV-01 and NERV-02 over Tailscale; 0 paid cloud tokens; raw reports stay in ~/.nerv-private on their base; NERV-01's live service (~/.nerv-app, ~/.nerv) is never stopped, updated or edited.",
   "acceptance": [
-    "combination-v1, 8 cases \u00d7 repeat 3 per mode, coder-alone and coder-reviewer under the same totalBudget (6144 output tokens, 360 s suite, 30 s case) with the protected grader",
+    "combination-v1, 8 cases × repeat 3 per mode, coder-alone and coder-reviewer under the same totalBudget (6144 output tokens, 360 s suite, 30 s case) with the protected grader",
     "Run for mac-only and for mac-coder-mini-auditor (coder on NERV-01, auditor on NERV-02)",
     "Pass rate, false rejections, missed flaws and shared blind spots recorded per mode and placement"
   ],
@@ -27,7 +27,9 @@
     "docs/acceptance/f006-placement-p2-p4.md",
     "docs/evaluations/2026-11-23-f006-t12-placement-evidence.json",
     "docs/work/records/F-006.md",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "tools/placement-live.mjs",
+    "test/placement-live.test.mjs"
   ],
   "validation": [
     "Recorded evidence for this slice; scoped checks and required CI"
@@ -39,12 +41,20 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "1.5 h agent",
-    "basis": "Estimated 2026-11-24 (F-006-T22): 96 bounded combination runs over two placements; cross-node auditor wiring may need a bounded harness adapter.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 (F-006-T22): 96 bounded combination runs over two placements; cross-node auditor wiring may need a bounded harness adapter. Implemented 2026-11-24 in 1.0 h: combination-v1 under one totalBudget: mac-only coder-alone 9/24, coder-reviewer 15/24 (3 false rejections); mac-coder-mini-auditor coder-alone 9/24, coder-reviewer 11/24 (4 false rejections, 3 missed flaws).",
     "reviewed": "2026-11-24",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "ownerHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 1.5
-  }
+    "estimateAgentHours": 1.5,
+    "actualAgentHours": 1.0,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 698,
+      "note": "equivalent placement runs and updated report; CI pending"
+    }
+  ]
 }
