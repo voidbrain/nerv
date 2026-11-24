@@ -236,12 +236,14 @@ CREATE TABLE IF NOT EXISTS coordinator_lease_seq (
 /** The next lease sequence of this coordinator, persisted before it is sent so a restart never reuses one. */
 export function nextLeaseSeq(db: DatabaseSync): number {
   db.exec(LEASE_SEQ_SCHEMA);
-  const row = db.prepare('SELECT seq FROM coordinator_lease_seq WHERE id = 1').get() as { seq: number } | undefined;
-  const seq = (row?.seq ?? 0) + 1;
-  db.prepare(
-    'INSERT INTO coordinator_lease_seq(id, seq) VALUES (1, ?) ON CONFLICT(id) DO UPDATE SET seq = excluded.seq',
-  ).run(seq);
-  return seq;
+  // One statement: read and increment cannot interleave with another writer (serve and a CLI probe).
+  return (
+    db
+      .prepare(
+        'INSERT INTO coordinator_lease_seq(id, seq) VALUES (1, 1) ON CONFLICT(id) DO UPDATE SET seq = seq + 1 RETURNING seq',
+      )
+      .get() as { seq: number }
+  ).seq;
 }
 
 export interface CoordinatorLeaseKeeperOptions {
