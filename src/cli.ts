@@ -611,6 +611,8 @@ try {
             ...config,
             onStop: () => close(),
             lifecycleHost: localServiceHost,
+            // B-113: dashboard sessions survive the restart an update makes (hashed, bound to the admin token).
+            sessionFile: join(home, 'sessions.json'),
             // B-108: Update now and the scheduled apply hand the update to its own OS job outside this service.
             startUpdater: async (input) => {
               await startUpdaterJob(localServiceHost().context, input, async (program, args) => {

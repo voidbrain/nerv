@@ -193,9 +193,9 @@ export const HELP_GROUPS: HelpGroup[] = [
       },
       {
         name: 'fleet',
-        args: 'drones|parts|spares',
+        args: 'drones|parts|spares|import',
         about: 'Drones, parts and spares',
-        usage: ['fleet drones | fleet parts <drone> | fleet spares [category]'],
+        usage: ['fleet drones | fleet parts <drone> | fleet spares [category]', 'fleet import <fleet.json>'],
       },
       { name: 'card-copy', args: 'MOUNT LABEL RULES.json', about: 'Copy files from a memory card by rules' },
       { name: 'slice', args: 'IN OUT PROFILE ALLOWLIST', about: 'Slice a model for the 3D printer' },
@@ -206,12 +206,13 @@ export const HELP_GROUPS: HelpGroup[] = [
     commands: [
       {
         name: 'kaji',
-        args: 'enrol|revoke|main|offer|seat|list|export|import',
+        args: 'enrol|revoke|main|relocate|drain|offer|seat|list|export|import',
         about: 'Enrolled bases',
         usage: [
           'kaji enrol BASE-ID "Name" PUBKEY|self ADDRESS | kaji revoke BASE-ID | kaji list',
           'kaji main [BASE-ID] | kaji offer [ACTION…|none] | kaji seat BASE-ID shadow|veto|off',
           'kaji export [FILE] | kaji import FILE --root FINGERPRINT',
+          'kaji relocate BASE-ID [--revoke LOST-ID] | kaji drain [FILE]',
         ],
       },
       {
