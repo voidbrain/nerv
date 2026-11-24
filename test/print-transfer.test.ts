@@ -361,13 +361,13 @@ test('F-121-T04: the transfer cap fits the largest part file, and the prints con
   assert.throws(() => validatePrintsConfig({ other: true }), /Invalid prints/);
 });
 
-test('F-121-T04: receivePartTransfer refuses a malformed message', () => {
+test('F-121-T04: receivePartTransfer refuses a malformed message', async () => {
   const home = mkdtempSync(join(tmpdir(), 'nerv-print-receive-'));
   try {
     for (const body of [null, {}, { version: 2 }, { version: 1, request: { version: 1 } }]) {
-      assert.equal(receivePartTransfer(home, ['NERV-01'], 'NERV-01', body).status, 400);
+      assert.equal((await receivePartTransfer(home, ['NERV-01'], 'NERV-01', body)).status, 400);
     }
-    assert.equal(receivePartTransfer(home, [], 'NERV-01', {}).status, 403);
+    assert.equal((await receivePartTransfer(home, [], 'NERV-01', {})).status, 403);
     assert.deepEqual(readdirSync(home), []);
   } finally {
     rmSync(home, { recursive: true, force: true });
@@ -430,5 +430,38 @@ test('F-121-T04: the default slicer runner is asynchronous and kills a slicer th
     );
   } finally {
     clearInterval(timer);
+  }
+});
+
+test('F-121-T04: one slicer runs and one request waits; a third is told the base is busy', async () => {
+  const home = mkdtempSync(join(tmpdir(), 'nerv-print-busy-'));
+  try {
+    writeFileSync(join(home, 'slicer-profiles.json'), JSON.stringify(PROFILES));
+    const slow: SlicerExecAsyncFn = async (_bin, args) => {
+      await new Promise((r) => setTimeout(r, 300));
+      writeFileSync(args[args.indexOf('--export-3mf') + 1]!, 'PK-sliced');
+      return 'estimated printing time: 1m\n';
+    };
+    const message = {
+      version: 1,
+      request: {
+        version: 1,
+        part: { file: 'kite-5/foot.stl', sha256: sha(FOOT), bytes: FOOT.length },
+        profileName: 'Test TPU 0.4',
+        prints: 1,
+      },
+      content: Buffer.from(FOOT).toString('base64'),
+    };
+    const answers = await Promise.all(
+      [1, 2, 3].map(() => receivePartTransfer(home, ['NERV-01'], 'NERV-01', message, { exec: slow })),
+    );
+    assert.deepEqual(
+      answers.map((a) => a.status),
+      [200, 200, 503],
+    );
+    assert.match((answers[2]!.value as { error: string }).error, /busy/);
+    assert.deepEqual(readdirSync(join(home, 'prints-cache')), [`${sha(FOOT)}.stl`]);
+  } finally {
+    rmSync(home, { recursive: true, force: true });
   }
 });

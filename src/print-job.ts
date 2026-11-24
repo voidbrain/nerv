@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   closeSync,
   constants,
@@ -19,8 +19,11 @@ import {
   readSlicerProfiles,
   resolveAllowedSlicerProfile,
   sliceModelWithProfile,
+  sliceModelWithProfileAsync,
   type SliceResult,
+  type SlicerExecAsyncFn,
   type SlicerExecFn,
+  type SlicerProfile,
 } from './slicer.ts';
 
 /**
@@ -274,6 +277,27 @@ export function sliceLibraryPart(
   content: Buffer,
   exec?: SlicerExecFn,
 ): SliceResult {
+  const staged = stageLibraryPart(home, request, content);
+  return sliceModelWithProfile(staged.slice, staged.allowlist, exec);
+}
+
+/** F-121-T04: `sliceLibraryPart` with the slicer run asynchronously, as the slicing base serving other bases does. */
+export async function sliceLibraryPartAsync(
+  home: string,
+  request: PartSliceRequest,
+  content: Buffer,
+  exec?: SlicerExecAsyncFn,
+): Promise<SliceResult> {
+  const staged = stageLibraryPart(home, request, content);
+  return sliceModelWithProfileAsync(staged.slice, staged.allowlist, exec);
+}
+
+/** Check hash and allowlist, put the content in the cache under its hash, and clear a stale output. */
+function stageLibraryPart(
+  home: string,
+  request: PartSliceRequest,
+  content: Buffer,
+): { allowlist: SlicerProfile[]; slice: { inputPath: string; outputPath: string; profileName: string } } {
   const file = validatePrintPath(request.part.file);
   const digest = createHash('sha256').update(content).digest('hex');
   if (
@@ -291,17 +315,27 @@ export function sliceLibraryPart(
   mkdirSync(cache, { recursive: true, mode: 0o700 });
   mkdirSync(out, { recursive: true, mode: 0o700 });
   const input = join(cache, `${digest}${ext}`);
-  const cached = existsSync(input) ? createHash('sha256').update(readFileSync(input)).digest('hex') : undefined;
-  if (cached !== digest) {
-    const temp = `${input}.${process.pid}.tmp`;
-    writeFileSync(temp, content, { mode: 0o600 });
-    renameSync(temp, input);
+  if (cachedHash(input) !== digest) {
+    // A unique temporary name, then a rename: two writers of one hash write the same bytes, and a reader never sees
+    // a half-written file. On Windows a rename onto a file another process holds open can fail; the copy already
+    // there is then used when it has the right hash.
+    const temp = `${input}.${randomUUID()}.tmp`;
+    try {
+      writeFileSync(temp, content, { mode: 0o600 });
+      renameSync(temp, input);
+    } catch (error) {
+      if (existsSync(temp)) unlinkSync(temp);
+      if (cachedHash(input) !== digest) throw error;
+    }
   }
   const output = join(out, `${digest.slice(0, 16)}-${profileSlug(profile.name)}.gcode.3mf`);
   // A stale output would pass for a slice that never ran.
   if (existsSync(output)) unlinkSync(output);
-  return sliceModelWithProfile({ inputPath: input, outputPath: output, profileName: profile.name }, allowlist, exec);
+  return { allowlist, slice: { inputPath: input, outputPath: output, profileName: profile.name } };
 }
+
+const cachedHash = (path: string) =>
+  existsSync(path) ? createHash('sha256').update(readFileSync(path)).digest('hex') : undefined;
 
 /** "1h 24m 10s" → seconds; undefined when the slicer's time text has another shape. */
 function seconds(text: string): number | undefined {

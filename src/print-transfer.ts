@@ -6,13 +6,13 @@ import {
   finishPrintPart,
   MAX_PART_FILE_BYTES,
   readLibraryPart,
-  sliceLibraryPart,
+  sliceLibraryPartAsync,
   type PartSliceRequest,
   type PendingRemotePrint,
   type PrintPartReply,
   type SlicedPlate,
 } from './print-job.ts';
-import type { SliceEstimate, SlicerExecFn } from './slicer.ts';
+import type { SliceEstimate, SlicerExecAsyncFn } from './slicer.ts';
 
 /**
  * F-121-T04: a print request carries the part file from the base holding the library (the Mac) to the slicing base
@@ -107,16 +107,42 @@ function parseRequest(value: unknown): PartSliceRequest | undefined {
 const sha256 = (content: Buffer) => createHash('sha256').update(content).digest('hex');
 
 /**
+ * F-121-T04: one slicer at a time per data home, and at most one request waiting behind it. The request stays a
+ * plain signed request and reply (no 202 and later result): the slicer is killed at its 120 s timeout, so the longest
+ * wait (one running, one queued, plus the transfer) stays inside the sender's 5 min timeout; a third request is told
+ * the base is busy (503) instead of waiting longer.
+ */
+const MAX_WAITING = 1;
+const lanes = new Map<string, { tail: Promise<unknown>; waiting: number }>();
+
+function inLane<T>(home: string, work: () => Promise<T>): Promise<T> | undefined {
+  const lane = lanes.get(home) ?? { tail: Promise.resolve(), waiting: 0 };
+  if (lane.waiting > MAX_WAITING) return undefined;
+  lane.waiting += 1;
+  lanes.set(home, lane);
+  const run = lane.tail.then(work, work);
+  lane.tail = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  void lane.tail.then(() => {
+    lane.waiting -= 1;
+    if (lane.waiting === 0 && lanes.get(home) === lane) lanes.delete(home);
+  });
+  return run;
+}
+
+/**
  * The slicing base's side of `POST /kaji/print`. Nothing is written unless the sender is accepted and the content
  * matches the declared size and hash; a cached copy with the same hash is sliced without the content being sent.
  */
-export function receivePartTransfer(
+export async function receivePartTransfer(
   home: string,
   accept: readonly string[],
   from: string,
   body: unknown,
-  options: { exec?: SlicerExecFn; maxBytes?: number } = {},
-): PartTransferAnswer {
+  options: { exec?: SlicerExecAsyncFn; maxBytes?: number } = {},
+): Promise<PartTransferAnswer> {
   if (!accept.includes(from)) return { status: 403, value: { error: `this base does not slice parts for ${from}` } };
   const message = body as Partial<PartTransfer> | null;
   const request =
@@ -137,40 +163,49 @@ export function receivePartTransfer(
   if (request.part.bytes > maxBytes) {
     return { status: 413, value: { error: `Part file is larger than ${formatBytes(maxBytes)}; nothing was written.` } };
   }
-  let content: Buffer;
+  let sent: Buffer | undefined;
   if (message!.content !== undefined) {
-    content = Buffer.from(message!.content, 'base64');
-    if (content.length > maxBytes) {
+    sent = Buffer.from(message!.content, 'base64');
+    if (sent.length > maxBytes) {
       return {
         status: 413,
         value: { error: `Part file is larger than ${formatBytes(maxBytes)}; nothing was written.` },
       };
     }
-    if (content.length !== request.part.bytes || sha256(content) !== request.part.sha256) {
+    if (sent.length !== request.part.bytes || sha256(sent) !== request.part.sha256) {
       return {
         status: 422,
         value: { error: `Part file prints/${file} does not match its SHA-256; nothing was written.` },
       };
     }
-  } else {
-    const cached = join(
-      home,
-      'prints-cache',
-      `${request.part.sha256}${file.slice(file.lastIndexOf('.')).toLowerCase()}`,
-    );
-    const copy = existsSync(cached) ? readFileSync(cached) : undefined;
-    if (!copy || sha256(copy) !== request.part.sha256) return { status: 200, value: { need: 'content' } };
-    content = copy;
   }
-  try {
-    const result = sliceLibraryPart(home, request, content, options.exec);
-    return {
-      status: 200,
-      value: { sliced: { outputPath: result.outputPath, profileName: result.profile.name, estimate: result.estimate } },
-    };
-  } catch (error) {
-    return { status: 422, value: { error: (error as Error).message.slice(0, 500) } };
-  }
+  const queued = inLane(home, async (): Promise<PartTransferAnswer> => {
+    let content = sent;
+    if (!content) {
+      const cached = join(
+        home,
+        'prints-cache',
+        `${request.part.sha256}${file.slice(file.lastIndexOf('.')).toLowerCase()}`,
+      );
+      const copy = existsSync(cached) ? readFileSync(cached) : undefined;
+      if (!copy || sha256(copy) !== request.part.sha256) return { status: 200, value: { need: 'content' } };
+      content = copy;
+    }
+    try {
+      const result = await sliceLibraryPartAsync(home, request, content, options.exec);
+      return {
+        status: 200,
+        value: {
+          sliced: { outputPath: result.outputPath, profileName: result.profile.name, estimate: result.estimate },
+        },
+      };
+    } catch (error) {
+      return { status: 422, value: { error: (error as Error).message.slice(0, 500) } };
+    }
+  });
+  return (
+    queued ?? { status: 503, value: { error: 'This base is busy slicing other parts; ask again in a few minutes.' } }
+  );
 }
 
 const formatBytes = (bytes: number) =>

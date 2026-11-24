@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execFile, execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
 
@@ -30,6 +30,8 @@ export interface SliceResult {
 }
 
 export type SlicerExecFn = (bin: string, args: string[], timeoutMs: number) => string;
+/** F-121-T04: the slicer runner on a slicing base that serves other bases; it must not block the event loop. */
+export type SlicerExecAsyncFn = (bin: string, args: string[], timeoutMs: number) => string | Promise<string>;
 
 const ALLOWED_INPUT_EXTENSIONS = new Set(['.stl', '.3mf', '.obj', '.step']);
 const DEFAULT_SLICER_BIN = 'bambu-studio';
@@ -105,6 +107,31 @@ export function parseSlicerEstimate(output: string): SliceEstimate {
   };
 }
 
+/**
+ * F-121-T04: runs the slicer as a child process without blocking; at `timeoutMs` the slicer is killed (SIGKILL; on
+ * Windows TerminateProcess) and the promise rejects. No shell: arguments are passed as they are.
+ */
+export function execSlicerAsync(bin: string, args: string[], timeoutMs: number): Promise<string> {
+  return new Promise((done, fail) => {
+    execFile(
+      bin,
+      args,
+      { encoding: 'utf8', timeout: timeoutMs, killSignal: 'SIGKILL', windowsHide: true, maxBuffer: 16 * 1024 * 1024 },
+      (error, stdout) => {
+        if (!error) return done(stdout);
+        const timedOut = (error as { killed?: boolean }).killed || (error as { signal?: string }).signal === 'SIGKILL';
+        fail(
+          new Error(
+            timedOut
+              ? `Slicer timed out after ${timeoutMs / 1000} s and was killed.`
+              : `Slicer failed: ${error.message.slice(0, 300)}`,
+          ),
+        );
+      },
+    );
+  });
+}
+
 function defaultExecSlicer(bin: string, args: string[], timeoutMs: number): string {
   return execFileSync(bin, args, {
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -121,6 +148,28 @@ export function sliceModelWithProfile(
   allowlist: readonly SlicerProfile[],
   execFn: SlicerExecFn = defaultExecSlicer,
 ): SliceResult {
+  const plan = planSlice(request, allowlist);
+  return finishSlice(plan, request, execFn(plan.bin, plan.args, plan.timeoutMs));
+}
+
+/** F-121-T04: the same slice, with the slicer run asynchronously (a slicing base keeps answering meanwhile). */
+export async function sliceModelWithProfileAsync(
+  request: SliceRequest,
+  allowlist: readonly SlicerProfile[],
+  execFn: SlicerExecAsyncFn = execSlicerAsync,
+): Promise<SliceResult> {
+  const plan = planSlice(request, allowlist);
+  return finishSlice(plan, request, await execFn(plan.bin, plan.args, plan.timeoutMs));
+}
+
+interface SlicePlan {
+  profile: SlicerProfile;
+  bin: string;
+  args: string[];
+  timeoutMs: number;
+}
+
+function planSlice(request: SliceRequest, allowlist: readonly SlicerProfile[]): SlicePlan {
   const profile = resolveAllowedSlicerProfile(request.profileName, allowlist);
   const ext = extname(request.inputPath).toLowerCase();
   if (!ALLOWED_INPUT_EXTENSIONS.has(ext)) {
@@ -129,7 +178,6 @@ export function sliceModelWithProfile(
   if (!request.outputPath.trim().endsWith('.gcode.3mf')) {
     throw new Error('Output path must end with .gcode.3mf.');
   }
-
   const bin = request.slicerBin?.trim() || DEFAULT_SLICER_BIN;
   const args = [
     '--slice',
@@ -142,16 +190,18 @@ export function sliceModelWithProfile(
     request.outputPath,
     request.inputPath,
   ];
-  const stdout = execFn(bin, args, request.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+  return { profile, bin, args, timeoutMs: request.timeoutMs ?? DEFAULT_TIMEOUT_MS };
+}
+
+function finishSlice(plan: SlicePlan, request: SliceRequest, stdout: string): SliceResult {
   if (!existsSync(request.outputPath)) {
     throw new Error(`Slicer completed without producing expected file: ${request.outputPath}`);
   }
-
   return {
     outputPath: request.outputPath,
-    profile,
+    profile: plan.profile,
     estimate: parseSlicerEstimate(stdout),
-    command: [bin, ...args],
+    command: [plan.bin, ...plan.args],
   };
 }
 
