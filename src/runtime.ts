@@ -1133,14 +1133,17 @@ export class Runtime implements StoreApi {
     }
     return new HealthSampleStore(this.healthDb);
   }
+  /** B-118: the child processes are always stopped (bounded by ProcessClient.close), even when a step before throws. */
   async close() {
-    this.healthDb?.close();
-    this.healthDb = undefined;
-    this.requestQueue.close();
-    this.instrumentalityController.stopTimers();
-    this.peersController.stopTimers();
-    if (this.toolsClient) await this.toolsClient.close();
-    this.approvalsController.stopTimers();
-    await Promise.allSettled([this.nervous.close(), this.brain.close()]);
+    try {
+      this.healthDb?.close();
+      this.healthDb = undefined;
+      this.requestQueue.close();
+      this.instrumentalityController.stopTimers();
+      this.peersController.stopTimers();
+      this.approvalsController.stopTimers();
+    } finally {
+      await Promise.allSettled([this.toolsClient?.close(), this.nervous.close(), this.brain.close()]);
+    }
   }
 }

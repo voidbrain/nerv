@@ -87,6 +87,101 @@ export interface CrashRecord {
   crashedAt: string;
 }
 
+/** F-098-T05: one part line of a fleet import file; `positions` expands to one slot each, else "main". */
+export interface FleetImportPart {
+  category: string;
+  model: string;
+  positions?: string[];
+}
+
+export interface FleetImportDrone {
+  name: string;
+  frame?: string;
+  notes?: string;
+  parts: FleetImportPart[];
+}
+
+/** F-098-T05: `{ "version": 1, "drones": [ { name, frame?, notes?, parts: [ { category, model, positions? } ] } ] }`. */
+export interface FleetImportFile {
+  version: 1;
+  drones: FleetImportDrone[];
+}
+
+export interface FleetImportReport {
+  drones: { created: string[]; present: string[] };
+  parts: { created: number; present: number };
+  spares: { created: string[]; present: string[] };
+}
+
+const DEFAULT_PART_POSITION = 'main';
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function rejectUnknownFields(value: Record<string, unknown>, allowed: readonly string[], where: string): void {
+  for (const key of Object.keys(value)) {
+    if (!allowed.includes(key)) throw new Error(`${where}: unknown field "${key}".`);
+  }
+}
+
+function requiredString(value: unknown, where: string): string {
+  if (typeof value !== 'string' || !value.trim()) throw new Error(`${where} must be a non-empty string.`);
+  return value.trim();
+}
+
+function optionalString(value: unknown, where: string): string | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string') throw new Error(`${where} must be a string when present.`);
+  return value.trim() || undefined;
+}
+
+/**
+ * F-098-T05: validate a fleet import file strictly. Every error names the offending field
+ * (for example `drones[0].parts[1].model`); unknown fields are rejected.
+ */
+export function parseFleetImport(raw: unknown): FleetImportFile {
+  if (!isPlainObject(raw)) throw new Error('The fleet file must be a JSON object.');
+  rejectUnknownFields(raw, ['version', 'drones'], 'fleet file');
+  if (raw.version !== 1) throw new Error('version must be 1.');
+  if (!Array.isArray(raw.drones)) throw new Error('drones must be an array.');
+  const seenNames = new Set<string>();
+  const drones = raw.drones.map((rawDrone, d): FleetImportDrone => {
+    const where = `drones[${d}]`;
+    if (!isPlainObject(rawDrone)) throw new Error(`${where} must be an object.`);
+    rejectUnknownFields(rawDrone, ['name', 'frame', 'notes', 'parts'], where);
+    const name = requiredString(rawDrone.name, `${where}.name`);
+    if (seenNames.has(name.toLowerCase())) throw new Error(`${where}.name: duplicate drone "${name}".`);
+    seenNames.add(name.toLowerCase());
+    const frame = optionalString(rawDrone.frame, `${where}.frame`);
+    const notes = optionalString(rawDrone.notes, `${where}.notes`);
+    if (!Array.isArray(rawDrone.parts)) throw new Error(`${where}.parts must be an array.`);
+    const slots = new Set<string>();
+    const parts = rawDrone.parts.map((rawPart, p): FleetImportPart => {
+      const partWhere = `${where}.parts[${p}]`;
+      if (!isPlainObject(rawPart)) throw new Error(`${partWhere} must be an object.`);
+      rejectUnknownFields(rawPart, ['category', 'model', 'positions'], partWhere);
+      const category = requiredString(rawPart.category, `${partWhere}.category`);
+      const model = requiredString(rawPart.model, `${partWhere}.model`);
+      let positions: string[] | undefined;
+      if (rawPart.positions !== undefined) {
+        if (!Array.isArray(rawPart.positions) || rawPart.positions.length === 0) {
+          throw new Error(`${partWhere}.positions must be a non-empty array of strings.`);
+        }
+        positions = rawPart.positions.map((position, i) => requiredString(position, `${partWhere}.positions[${i}]`));
+      }
+      for (const position of positions ?? [DEFAULT_PART_POSITION]) {
+        const slot = `${normalizePartCategory(category)}/${normalizePosition(position)}`;
+        if (slots.has(slot)) throw new Error(`${partWhere}: duplicate slot ${slot}.`);
+        slots.add(slot);
+      }
+      return { category, model, ...(positions ? { positions } : {}) };
+    });
+    return { name, ...(frame ? { frame } : {}), ...(notes ? { notes } : {}), parts };
+  });
+  return { version: 1, drones };
+}
+
 /**
  * F-098-T01: Local FPV fleet & spares store (drones by name, parts by position + component model,
  * and spares inventory with separate new and used counts).
@@ -316,6 +411,63 @@ export class FleetStore {
         Record<string, unknown> | undefined;
       if (!row) throw new Error('Crash record was not persisted.');
       return mapCrash(row);
+    });
+  }
+
+  /**
+   * F-098-T05: load a whole fleet in one transaction. Missing drones and part slots are created;
+   * an existing drone (by name) keeps its row and its parts; every distinct component model gets a
+   * spares record at 0 new and 0 used unless one exists, whose counts are kept.
+   */
+  importFleet(file: FleetImportFile, now = new Date().toISOString()): FleetImportReport {
+    const report: FleetImportReport = {
+      drones: { created: [], present: [] },
+      parts: { created: 0, present: 0 },
+      spares: { created: [], present: [] },
+    };
+    // First occurrence of each model (case-insensitive, as getSpare matches) sets its spares category.
+    const spareModels = new Map<string, { model: string; category: string }>();
+    return transaction(this.db, () => {
+      for (const input of file.drones) {
+        let drone = this.getDroneByName(input.name);
+        if (drone) {
+          report.drones.present.push(drone.name);
+        } else {
+          drone = this.addDrone({ name: input.name, frame: input.frame, notes: input.notes, createdAt: now });
+          report.drones.created.push(drone.name);
+        }
+        for (const part of input.parts) {
+          const category = normalizePartCategory(part.category);
+          const model = part.model.trim();
+          if (!spareModels.has(model.toLowerCase())) spareModels.set(model.toLowerCase(), { model, category });
+          for (const rawPosition of part.positions ?? [DEFAULT_PART_POSITION]) {
+            const position = normalizePosition(rawPosition);
+            const existing = this.db
+              .prepare('SELECT id FROM drone_parts WHERE drone_id = ? AND category = ? AND position = ?')
+              .get(drone.id, category, position);
+            if (existing) {
+              report.parts.present += 1;
+              continue;
+            }
+            this.db
+              .prepare(
+                'INSERT INTO drone_parts(id, drone_id, category, position, component_model, status, installed_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+              )
+              .run(`part-${randomUUID()}`, drone.id, category, position, model, 'installed', now);
+            report.parts.created += 1;
+          }
+        }
+      }
+      for (const { model, category } of spareModels.values()) {
+        const existing = this.getSpare(model);
+        if (existing) {
+          report.spares.present.push(existing.componentModel);
+        } else {
+          this.upsertSpare({ componentModel: model, category, newCount: 0, usedCount: 0, updatedAt: now });
+          report.spares.created.push(model);
+        }
+      }
+      return report;
     });
   }
 
