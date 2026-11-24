@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 89 h agent + 10.25 h owner across 122 open steps of 36 features and 23 other records. 114.5 h of actual effort recorded on 133 steps. Generated from the task files.
+**Remaining effort:** 89 h agent + 10.25 h owner across 122 open steps of 36 features and 23 other records. 117 h of actual effort recorded on 134 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -445,7 +445,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-118-T03, the same teardown for test/watch-runtime.test.ts, which now holds the run.
+💻 **→** Next: five full Windows runs within 12 minutes without reruns (B-118-T03 implemented in PR #706; the first, run 45325080543, took 8.6 min).
 
 | | |
 |---|---|
@@ -459,8 +459,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-118-t01"></a>B-118-T01 — Make the Windows test step fit its limit with margin | 4 h | 2.5 h so far (stated) | 0.5 h | Implemented; verification pending | — | — | [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split |
 | 🟢 Small | <a id="b-118-t02"></a>B-118-T02 — Worker-link test files always exit; find why they time out on Windows | 2.5 h | 2 h so far (stated) | 0.5 h | Implemented; verification pending | — | [B-118-T03](#b-118-t03) | [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain |
-| 🟡 Medium | <a id="b-118-t03"></a>B-118-T03 — Other Runtime test files always exit; failing tests named in a stopped run | 2 h | 0 h | 2 h | Planned | [B-118-T02](#b-118-t02) | — | — |
-| 🟡 Medium | **Total** | 8.5 h | 4.5 h (2 of 3 steps recorded) | 3 h | 0 of 3 completed | | | |
+| 🟡 Medium | <a id="b-118-t03"></a>B-118-T03 — Other Runtime test files always exit; failing tests named in a stopped run | 2 h | 2.5 h so far (stated) | 2 h | Implemented; verification pending | [B-118-T02](#b-118-t02) | — | [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen |
+| 🟡 Medium | **Total** | 8.5 h | 7 h | 3 h | 0 of 3 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -469,9 +469,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-118-T01: [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split · B-118-T02: [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain. [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776) |
+| PR / evidence | Steps: B-118-T01: [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split · B-118-T02: [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain · B-118-T03: [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen. [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776) |
 | Opened | 2026-11-24 |
-| Verification | Unit/integration 2026-11-24: `test/worker-link-exit.test.ts` and the worker-link files pass locally (4 of 4 runs). CI 2026-11-24 run 45314998906 (Windows): worker-link files all finish; step still stopped at 18 min by watch-runtime (B-118-T03). Five Windows runs within 12 min: Pending. |
+| Verification | Unit/integration 2026-11-24: `test/worker-link-exit.test.ts` and the worker-link files pass locally (4 of 4 runs). CI 2026-11-24 run 45314998906 (Windows): worker-link files all finish; step still stopped at 18 min by watch-runtime (B-118-T03). Unit/integration 2026-11-24 (B-118-T03): `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs`, watch-runtime and the worker-link files pass locally (2 of 2 runs). CI 2026-11-24 run 45325080543 (Windows): `npm test` 8 min 38 s, every file finished. Five Windows runs within 12 min: 1 of 5 (run 45325080543). |
 | Reviewed | 2026-11-24 |
 
 </details>
