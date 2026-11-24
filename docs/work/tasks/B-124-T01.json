@@ -8,10 +8,12 @@
   "acceptance": [
     "A committed test fails first: B runs epoch 3 through D, the owner relocates to C at 4, C's promote is refused, and B is still acting",
     "kaji relocate no longer fences the running main on its own; the decision doc and the relocation guide say how the records reach the target",
-    "The owner agrees the change to kaji relocate before work starts"
+    "The owner agrees the change to kaji relocate before work starts",
+    "Owner agreed 2026-11-24: P1; relocate pushes nothing until the target passes its prechecks"
   ],
   "dependsOn": [
-    "B-121-T02"
+    "B-121-T02",
+    "F-016-T20"
   ],
   "resources": [
     "src/cli-kaji.ts",
