@@ -163,6 +163,10 @@ export interface BambuChecklistInput {
   plateType?: string;
   nozzleSize?: string;
   amsMapping?: string;
+  /** F-121-T02: the library file the plate was sliced from, relative to the print library. */
+  sourceFile?: string;
+  /** F-121-T02: times to print this plate. */
+  repeats?: number;
 }
 
 export interface BambuHandoffRequest extends BambuChecklistInput {
@@ -202,6 +206,10 @@ export function buildBambuOwnerChecklist(input: BambuChecklistInput): string[] {
     .join(', ');
 
   return [
+    ...(input.sourceFile ? [`Model file: ${input.sourceFile}`] : []),
+    ...(input.repeats && input.repeats > 1
+      ? [`Repeat: print this plate ${input.repeats} times (one plate per print)`]
+      : []),
     `Printer: ${input.printerName?.trim() || 'confirm target printer'}`,
     `Build plate: ${input.plateType?.trim() || 'confirm clean, matching build plate'}`,
     `Nozzle: ${input.nozzleSize?.trim() || 'confirm installed nozzle matches profile'}`,

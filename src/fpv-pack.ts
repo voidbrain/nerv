@@ -113,6 +113,7 @@ export const fpvPackManifest: PackManifest = {
     'batteries.due',
     'batteries.resistance',
     'fleet.chat',
+    'fleet.print',
     'fpv.blackbox_report',
     'fpv.import_build',
     'fpv.add_doc',

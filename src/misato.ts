@@ -466,7 +466,7 @@ const DOMAIN_INTENT_PATTERNS: Record<ToolDomain, RegExp> = {
   batteries:
     /\b(batter[iy]|batteri[ae]|lipo|li-ion|liion|celle|cell|voltag|tension|storage|scarica|ricarica|carica|mah|resistenz|resistance|pack|packs|1s|2s|3s|4s|6s)\b/i,
   fleet:
-    /\b(fleet|flotta|droni|drone|velivoli|aircraft|hangar|manutenzion|maintenance|crash\w*|voli|flight|flights|part[ei]|ricambi|scort[ae]|spares?|motore|motori|motors?|props?|frame|telaio|sostituit\w*|replaced|braccio|arm|elica|eliche|rotto|rotta|broken|damaged|danneggiat\w*|printed|stampat\w*)\b/i,
+    /\b(fleet|flotta|droni|drone|velivoli|aircraft|hangar|manutenzion|maintenance|crash\w*|voli|flight|flights|part[ei]|ricambi|scort[ae]|spares?|motore|motori|motors?|props?|frame|telaio|sostituit\w*|replaced|braccio|arm|elica|eliche|rotto|rotta|broken|damaged|danneggiat\w*|printed|print|stampat\w*|stampa(?:mi|re)?)\b/i,
 };
 
 const DOMAIN_PREFIXES: readonly ToolDomain[] = ['fpv', 'pantry', 'gmail', 'batteries', 'fleet'];
@@ -518,7 +518,9 @@ export function filterToolsByIntent<T extends { name: string }>(
 }
 
 export function misatoAsk(input: StepInput, preferredRoute: RouteName): Ask {
-  const route = input.history.some((step) => step.tool === 'fleet.chat') ? 'local' : preferredRoute;
+  const route = input.history.some((step) => step.tool === 'fleet.chat' || step.tool === 'fleet.print')
+    ? 'local'
+    : preferredRoute;
   // Keep the newest steps when the history is long: the planner needs the latest outcome most.
   let steps = input.history.map((s) =>
     s.result === undefined ? s : { ...s, result: localize(s.result, input.timeZone) },

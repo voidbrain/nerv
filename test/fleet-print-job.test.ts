@@ -7,7 +7,7 @@ import { describe, it } from 'node:test';
 import { execute } from '../src/executors.ts';
 import { parsePrintPartPhrase, sliceLibraryPart, type PrintPartReply } from '../src/print-job.ts';
 import type { BambuHandoffResult, SlicerExecFn } from '../src/slicer.ts';
-import { Store } from '../src/store.ts';
+import { MISATO_SOURCE, Store } from '../src/store.ts';
 
 // Invented models, parts, paths and profiles only: the owner's real list stays in private fleet data.
 const PROFILES = [
@@ -58,8 +58,21 @@ function withPrintFleet(work: (store: Store, home: string, slicer: FakeSlicer) =
           {
             name: 'Kite 5.1',
             parts: [
-              { name: 'motor foot', aliases: ['piedini', 'feet'], file: 'kite-5/foot.stl', count: 4 },
-              { name: 'camera band', aliases: ['fasce'], file: 'kite-5/bands.3mf', count: 1, objectsPerPrint: 2 },
+              {
+                name: 'motor foot',
+                aliases: ['piedini', 'feet'],
+                file: 'kite-5/foot.stl',
+                count: 4,
+                profile: 'Test TPU 0.4',
+              },
+              {
+                name: 'camera band',
+                aliases: ['fasce'],
+                file: 'kite-5/bands.3mf',
+                count: 1,
+                objectsPerPrint: 2,
+                profile: 'test tpu 0.4',
+              },
               { name: 'camera mount', file: 'kite-5/mount.stl', count: 1, profile: 'Test PLA 0.4' },
             ],
           },
@@ -94,15 +107,16 @@ describe('F-121-T02: print phrases', () => {
     it(`parses "${phrase}"`, () => assert.deepEqual(parsePrintPartPhrase(phrase), expected));
   }
   it('leaves other phrases alone', () => {
-    assert.equal(parsePrintPartPhrase('print my reminders'), undefined);
     assert.equal(parsePrintPartPhrase('stampa'), undefined);
+    assert.equal(parsePrintPartPhrase('print feet'), undefined);
+    assert.equal(parsePrintPartPhrase('ricordami di stampare i piedini'), undefined);
   });
 });
 
 describe('F-121-T02: print a part by chat, across the join', () => {
   it('chat phrase → fleet.print → slice request → Orange bambu.handoff card → Bambu Connect link', () => {
     withPrintFleet((store, home, slicer) => {
-      const sortie = store.ledger.openSortie('owner', 'stampa i piedini di Wisp', 'trusted');
+      const sortie = store.ledger.openSortie(MISATO_SOURCE, 'stampa i piedini di Wisp', 'trusted');
       const sliced = store.runAction(sortie, {
         tool: 'fleet.print',
         stage: 'production',
@@ -235,10 +249,7 @@ describe('F-121-T02: print a part by chat, across the join', () => {
         profileName: 'Test TPU 0.4',
         prints: 1,
       };
-      assert.throws(
-        () => sliceLibraryPart(home, request, Buffer.from('tampered'), slicer.exec),
-        /does not match/,
-      );
+      assert.throws(() => sliceLibraryPart(home, request, Buffer.from('tampered'), slicer.exec), /does not match/);
       assert.equal(slicer.calls.length, 0);
       const result = sliceLibraryPart(home, request, Buffer.from(FOOT), slicer.exec);
       assert.equal(result.estimate.filamentGrams, 7.5);
