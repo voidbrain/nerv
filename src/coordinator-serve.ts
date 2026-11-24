@@ -58,6 +58,19 @@ export function coordinatorLeaseService(input: {
         standby.close();
       }
     },
+    /**
+     * The Kaji line's coordinator handlers as `serve` wires them (#721 review: one place, tested end to end): lease
+     * acks, the newest epoch enforced on incoming headers, and what epoch-push replies say (a standby store held;
+     * B-121-T02, the newest epoch this base ran or acked).
+     */
+    kajiOptions() {
+      return {
+        onLeaseRenew: this.onLeaseRenew,
+        minCoordinatorEpoch: this.mainEpoch,
+        holdsStandby: () => existsSync(join(input.home, STANDBY_DB_FILE)),
+        ranOrAckedEpoch: this.ranOrAckedEpoch,
+      };
+    },
     /** The keeper with the Kaji line's signed renewal; `serve` starts it. */
     keeper(
       renew: (standbyBaseId: string, request: LeaseRenewRequest) => Promise<LeaseRenewResult>,

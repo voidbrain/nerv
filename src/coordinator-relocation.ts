@@ -65,6 +65,11 @@ export interface SignedDrainReceipt {
  * with the lease cleared) in one transaction and returns the drain receipt, bound to the new main
  * and epoch the owner signed. Idempotent for the same epoch so a lost reply can be fetched again;
  * refuses any other epoch. The fencing state is read inside the write transaction.
+ *
+ * B-121 (review of #721): a receipt says this base's epoch ran last, so it refuses when the verified registry
+ * holds a main record signed between that epoch and the target: that base may have promoted and run (with a
+ * receipt this base gave it, or unplanned), and this base cannot know it did not. Such a re-target goes through
+ * an unplanned `kaji promote`, which hears from every unrevoked base which epochs ran.
  */
 export function drainCoordinator(
   db: DatabaseSync,
@@ -73,11 +78,20 @@ export function drainCoordinator(
     readonly coordinatorEpoch: number;
     readonly newMainBaseId: string;
     readonly newEpoch: number;
+    /** Every verified owner-signed main record in this base's registry. */
+    readonly registryMains: readonly { readonly baseId: string | undefined; readonly coordinatorEpoch: number }[];
     readonly nowMs?: number;
   },
 ): DrainReceipt {
   if (input.newEpoch <= input.coordinatorEpoch)
     throw new Error(`The new epoch ${input.newEpoch} must be later than ${input.coordinatorEpoch}.`);
+  const between = input.registryMains
+    .filter((m) => m.coordinatorEpoch > input.coordinatorEpoch && m.coordinatorEpoch < input.newEpoch)
+    .sort((a, b) => a.coordinatorEpoch - b.coordinatorEpoch);
+  if (between.length)
+    throw new Error(
+      `The owner named ${between.map((m) => `${m.baseId ?? 'a base'} at epoch ${m.coordinatorEpoch}`).join(', ')} after this coordinator's epoch ${input.coordinatorEpoch}: it may have run, so a receipt from here cannot say epoch ${input.coordinatorEpoch} ran last. Move with kaji promote on ${input.newMainBaseId} without a receipt (every unrevoked base must answer).`,
+    );
   const nowMs = input.nowMs ?? Date.now();
   db.exec('BEGIN IMMEDIATE');
   try {

@@ -9,7 +9,11 @@ import { createServer } from 'node:net';
 import { createServer as createHttpServer } from 'node:http';
 import { TelegramApi, TelegramChannel } from '../src/telegram.ts';
 import type { StoreApi } from '../src/runtime.ts';
-import { coordinatorChannelAuthority, coordinatorTelegramContinuity } from '../src/coordinator-serve.ts';
+import {
+  coordinatorChannelAuthority,
+  coordinatorLeaseService,
+  coordinatorTelegramContinuity,
+} from '../src/coordinator-serve.ts';
 import { KajiLink } from '../src/kaji-link.ts';
 import { allUnrevokedAckedEpoch, pushCoordinatorEpoch, registryPort } from '../src/coordinator-epoch.ts';
 import { spawnSync } from 'node:child_process';
@@ -116,7 +120,16 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
         .run('reconciled', t);
       standby.close();
 
-      const drainTo = { baseId: 'NERV-01', coordinatorEpoch: 2, newMainBaseId: 'NERV-02', newEpoch: 3 };
+      const drainTo = {
+        baseId: 'NERV-01',
+        coordinatorEpoch: 2,
+        newMainBaseId: 'NERV-02',
+        newEpoch: 3,
+        registryMains: [
+          { baseId: 'NERV-01', coordinatorEpoch: 2 },
+          { baseId: 'NERV-02', coordinatorEpoch: 3 },
+        ],
+      };
       // Without a drain receipt or horizon, a reachable old main blocks promotion.
       const early: RelocationLiveness = {
         kind: 'unplanned',
@@ -438,9 +451,31 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
     const standby = new Store(':memory:');
     setState(standby.db, 2, 'standby', 7, 'digest-7');
     // The owner signed NERV-02 at epoch 3, which never promoted, then NERV-03 at epoch 4.
+    // B-121 (review of #721), requirement changed deliberately: a base that holds the epoch-3 record cannot know
+    // NERV-02 never ran, so it gives no receipt; that re-target goes through an unplanned kaji promote.
+    const to4 = { baseId: 'NERV-01', coordinatorEpoch: 2, newMainBaseId: 'NERV-03', newEpoch: 4 };
+    assert.throws(
+      () =>
+        drainCoordinator(oldMain.db, {
+          ...to4,
+          registryMains: [
+            { baseId: 'NERV-01', coordinatorEpoch: 2 },
+            { baseId: 'NERV-02', coordinatorEpoch: 3 },
+            { baseId: 'NERV-03', coordinatorEpoch: 4 },
+          ],
+        }),
+      /NERV-02 at epoch 3/,
+    );
+    // An old main that never received the epoch-3 record (so never drained to NERV-02, nor acked its push) does.
     const drain = signDrainReceipt(
       oldKey.privateKey,
-      drainCoordinator(oldMain.db, { baseId: 'NERV-01', coordinatorEpoch: 2, newMainBaseId: 'NERV-03', newEpoch: 4 }),
+      drainCoordinator(oldMain.db, {
+        ...to4,
+        registryMains: [
+          { baseId: 'NERV-01', coordinatorEpoch: 2 },
+          { baseId: 'NERV-03', coordinatorEpoch: 4 },
+        ],
+      }),
     );
     const ready = checkRelocationReadiness({
       candidateDb: standby.db,
@@ -505,7 +540,16 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
     // Drained for NERV-02 at epoch 3: NERV-03, later named main at epoch 4, cannot reuse it.
     const drain = signDrainReceipt(
       oldKey.privateKey,
-      drainCoordinator(oldMain.db, { baseId: 'NERV-01', coordinatorEpoch: 2, newMainBaseId: 'NERV-02', newEpoch: 3 }),
+      drainCoordinator(oldMain.db, {
+        baseId: 'NERV-01',
+        coordinatorEpoch: 2,
+        newMainBaseId: 'NERV-02',
+        newEpoch: 3,
+        registryMains: [
+          { baseId: 'NERV-01', coordinatorEpoch: 2 },
+          { baseId: 'NERV-02', coordinatorEpoch: 3 },
+        ],
+      }),
     );
     assert.equal(drain.receipt.newMainBaseId, 'NERV-02');
     const check = (selfBaseId: string, coordinatorEpoch: number) =>
@@ -668,6 +712,10 @@ describe('F-016-T17: nerv kaji promote stops the service, derives its inputs fro
           coordinatorEpoch: 2,
           newMainBaseId: 'NERV-02',
           newEpoch: 3,
+          registryMains: [
+            { baseId: 'NERV-01', coordinatorEpoch: 2 },
+            { baseId: 'NERV-02', coordinatorEpoch: 3 },
+          ],
         }),
       );
       oldMain.close();
@@ -1080,6 +1128,86 @@ describe('F-016-T18: /kaji/epoch-push, so the new epoch acks are measured, not a
     }
   });
 
+  it("B-121-T02 (#721 review): serve wires the field from the base's own stores: the lease service answers the epoch push", async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-epoch-wiring-'));
+    const root = generateKeyPairSync('ed25519');
+    const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+    const port = await new Promise<number>((resolve) => {
+      const srv = createServer();
+      srv.listen(0, '127.0.0.1', () => {
+        const p = (srv.address() as { port: number }).port;
+        srv.close(() => resolve(p));
+      });
+    });
+    const homes = ['NERV-02', 'NERV-03'].map((id) => {
+      const home = join(dir, id);
+      mkdirSync(home, { recursive: true });
+      setBase(home, { id, name: id });
+      pinKajiRoot(home, rootPub, true);
+      const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+      return { id, home, store, reg: new Registry(store.db, rootPub), key: baseKey(home) };
+    });
+    const [pusher, peer] = homes as [(typeof homes)[0], (typeof homes)[0]];
+    let serial = 0;
+    for (const body of [
+      { kind: 'enrol', baseId: pusher.id, name: pusher.id, publicKey: pusher.key.publicKey, address: '127.0.0.1:9' },
+      { kind: 'enrol', baseId: peer.id, name: peer.id, publicKey: peer.key.publicKey, address: `127.0.0.1:${port}` },
+      { kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 },
+    ]) {
+      const r = signRecord(root.privateKey, {
+        ...body,
+        serial: ++serial,
+        issued: '2026-11-24T10:00:00.000Z',
+      } as unknown as RegistryBody);
+      for (const h of homes) h.reg.add(r);
+    }
+    // The peer's store was a coordinator at epoch 2; its standby store holds epoch 2 and acked a lease at 3.
+    setState(peer.store.db, 2, 'fenced', 7, 'digest-7');
+    const standby = new Store(join(peer.home, STANDBY_DB_FILE));
+    setState(standby.db, 2, 'standby', 7, 'digest-7');
+    standby.db.exec(STANDBY_LEASE_SCHEMA);
+    standby.db.prepare("INSERT INTO standby_lease_state VALUES (1, 3, 9, ?, 'boot')").run(Date.now());
+    standby.close();
+    const lease = coordinatorLeaseService({
+      home: peer.home,
+      databasePath: join(peer.home, 'nerv.sqlite'),
+      baseId: peer.id,
+      root: rootPub,
+      ownPublicKey: peer.key.publicKey,
+    });
+    const listening = new KajiLink({
+      ...lease.kajiOptions(),
+      baseId: peer.id,
+      key: peer.key.privateKey,
+      publicKey: peer.key.publicKey,
+      registry: registryPort(peer.reg),
+    });
+    const client = new KajiLink({
+      baseId: pusher.id,
+      key: pusher.key.privateKey,
+      publicKey: pusher.key.publicKey,
+      registry: registryPort(pusher.reg),
+    });
+    await listening.start(60_000);
+    try {
+      assert.deepEqual(await client.pushEpoch(peer.id, []), {
+        maxSeenCoordinatorEpoch: 3,
+        standby: true,
+        ranOrAckedEpoch: 3,
+      });
+      // It reads the stores on every reply: a later ack shows at once.
+      const sb = new DatabaseSync(join(peer.home, STANDBY_DB_FILE));
+      sb.prepare('UPDATE standby_lease_state SET standby_coordinator_epoch = 4 WHERE id = 1').run();
+      sb.close();
+      assert.equal((await client.pushEpoch(peer.id, [])).ranOrAckedEpoch, 4);
+    } finally {
+      await listening.stop();
+      lease.stop();
+      for (const h of homes) h.store.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('kaji promote measures the acks itself: every unrevoked base acked and the lease was acked here, so no confirmation and the 65 s wait', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-acks-'));
     try {
@@ -1289,7 +1417,16 @@ describe('F-016-T19: Telegram polling is handed over on activation', () => {
       assert.equal(offset, 2, 'the active main persisted its offset into the coordinator state');
       const drain = signDrainReceipt(
         oldKey.privateKey,
-        drainCoordinator(storeA.db, { baseId: 'NERV-01', coordinatorEpoch: 2, newMainBaseId: 'NERV-02', newEpoch: 3 }),
+        drainCoordinator(storeA.db, {
+          baseId: 'NERV-01',
+          coordinatorEpoch: 2,
+          newMainBaseId: 'NERV-02',
+          newEpoch: 3,
+          registryMains: [
+            { baseId: 'NERV-01', coordinatorEpoch: 2 },
+            { baseId: 'NERV-02', coordinatorEpoch: 3 },
+          ],
+        }),
       );
       const sb = new DatabaseSync(join(homeB, STANDBY_DB_FILE));
       sb.prepare('UPDATE coordinator_state SET telegram_offset = ? WHERE id = 1').run(offset);

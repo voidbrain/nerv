@@ -312,6 +312,10 @@ export async function runKajiCommand(
       coordinatorEpoch: state.coordinatorEpoch,
       newMainBaseId,
       newEpoch: registry.mainEpoch(),
+      registryMains: registry
+        .records()
+        .filter((r) => r.body.kind === 'main')
+        .map((r) => ({ baseId: r.body.baseId, coordinatorEpoch: r.body.coordinatorEpoch ?? 0 })),
     });
     const out = JSON.stringify(signDrainReceipt(baseKey(home).privateKey, receipt), null, 2) + '\n';
     if (args[1]) {
