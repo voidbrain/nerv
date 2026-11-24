@@ -2244,7 +2244,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | None yet |
+| PR / evidence | [PR #726](https://github.com/voidbrain/nerv/pull/726) |
 | Opened | 2026-11-24 |
 | Verification | 2026-11-24: committed first and failing on main: `test/pairing-qr.test.ts` "B-128 join" (session mints from 127.0.0.1, localhost and [::1] pages → link at the injected tailnet address; with no address → loopback link and hint) and `test/evaluation.browser.mjs` "B-128" (production dashboard at 127.0.0.1, Settings → Pair a device → QR of the tailnet link, no loopback warning) plus the F-118-T05 browser test's hint assertion; the join test then spends each code (at most three pending), unchanged in what it asserts. With the fix: `test/pairing-qr.test.ts` 13/13 (new unit tests for the serve port, resolver cache and config); every test reading live.js or web/src plus config-reading and touched tests 509/511 (2 skipped); `npm test` first caught the EVA runner reading `config.ts` without the vendored encoder (`test/eva-runner.test.ts`), so the address checks moved to the import-free `src/pairing-address.ts`, then `npm test` passes; `test:headless` and `check:evals` pass; gauntlet system cases all pass; the four multi-step-agent model cases stay pending (they need an owner-approved model budget). Tests never run tailscale (resolver injected). A real phone scan is not yet observed. |
 | Reviewed | 2026-11-24 |
