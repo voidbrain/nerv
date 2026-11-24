@@ -24,6 +24,7 @@ import {
   RelocationRefusedError,
   STANDBY_DB_FILE,
   drainCoordinator,
+  ranOrAckedCoordinatorEpoch,
   signDrainReceipt,
 } from '../src/coordinator-relocation.ts';
 import { coordinatorChannelAuthority, coordinatorLeaseService } from '../src/coordinator-serve.ts';
@@ -193,6 +194,8 @@ class Mesh {
   partition: string[][] | undefined;
   /** Bases running an older NERV: their epoch-push reply has no `ranOrAckedEpoch` (B-121-T02). */
   readonly olderPeers = new Set<string>();
+  /** Every epoch push sent (a probe carries no records). */
+  readonly pushes: { from: string; to: string; records: number }[] = [];
   readonly effects: Effect[] = [];
   /** Who held coordinator authority at each step (ms since start). */
   readonly timeline: { at: number; holders: string[] }[] = [];
@@ -352,6 +355,7 @@ class Mesh {
 
   /** `POST /kaji/epoch-push` as KajiLink routes it. */
   async pushEpoch(from: string, to: string, records: SignedRecord[]) {
+    this.pushes.push({ from, to, records: records.length });
     const target = this.answering(from, to);
     const epoch = this.withRegistry(target, (reg) => {
       for (const r of records) {
@@ -436,12 +440,12 @@ class Mesh {
   }
 
   /**
-   * `nerv kaji drain` on a base (src/cli-kaji.ts), its service stopped: drains its coordinator state for the newest
-   * main record in its registry and writes the signed receipt. The verified main records go with the request.
+   * `nerv kaji drain` on a base (src/cli-kaji.ts): drains its coordinator state for the newest main record in its
+   * registry and writes the signed receipt; its service keeps running (fenced), as with the real command. The
+   * verified main records and (#721 fourth check) the newest epoch this base ran or acked go with the request.
    */
   drain(id: string): string {
     const b = this.base(id);
-    this.stop(id);
     const db = new DatabaseSync(b.db);
     try {
       const reg = new Registry(db, this.rootPub);
@@ -455,6 +459,7 @@ class Mesh {
           .records()
           .filter((r) => r.body.kind === 'main')
           .map((r) => ({ baseId: r.body.baseId, coordinatorEpoch: r.body.coordinatorEpoch ?? 0 })),
+        ranOrAckedEpoch: ranOrAckedCoordinatorEpoch(db, join(b.home, STANDBY_DB_FILE)),
       });
       const file = join(this.dir, `receipt-${id}-${receipt.newMainBaseId}-${receipt.newEpoch}.json`);
       writeFileSync(file, JSON.stringify(signDrainReceipt(this.keys[id]!.privateKey, receipt)));
@@ -897,5 +902,47 @@ describe('B-121 (#721 review): a planned re-target never hands over from state o
     // D wakes and answers that it acked epoch 3: C's epoch-2 state is behind.
     m.wake(D);
     await assert.rejects(m.promote(C, { drainReceiptFile: second }), refused('standby_behind', /epoch 3/));
+  });
+
+  it('#721 fourth check: an earlier receipt (X at 2 to B at 3) is refused for C at 4 before any probe or push', async () => {
+    const m = (mesh = new Mesh([X, B, C, D], [B, C, D]));
+    await m.advance(30_000);
+    const toB = [m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 })];
+    m.importRecords(X, toB);
+    const toBReceipt = m.drain(X);
+    m.importRecords(C, [...toB, m.sign({ kind: 'main', baseId: C, coordinatorEpoch: 4 })]);
+    await assert.rejects(m.promote(C, { drainReceiptFile: toBReceipt }), refused('drain_receipt_invalid'));
+    assert.deepEqual(m.pushes, [], 'neither the probe nor the push went out');
+    assert.equal(m.registryOf(D).epoch, 2);
+  });
+
+  it('#721 fourth check: a drained main that acked a later epoch from its own standby store says so in its receipt', async () => {
+    // X keeps a standby store too: drained to B at 3, X goes on serving, and B renews through X.
+    const m = (mesh = new Mesh([X, B, C, D], [X, B, C, D]));
+    await m.advance(30_000);
+    const toB = [m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 })];
+    m.importRecords(X, toB);
+    m.importRecords(B, toB);
+    const first = m.drain(X);
+    const b = await m.promote(B, { drainReceiptFile: first });
+    assert.ok(!('resumed' in b) && b.newEpoch === 3);
+    m.setStandby(B, X);
+    await m.advance(30_000);
+    assert.deepEqual(m.holders(), [B]);
+    // B is lost and revoked, X out of reach; D (which never acked epoch 3) answers. X drains again, to C at 4.
+    m.sleep(B);
+    m.sleep(X);
+    const toC = [
+      m.sign({ kind: 'revoke', baseId: B, publicKey: m.base(B).publicKey }),
+      m.sign({ kind: 'main', baseId: C, coordinatorEpoch: 4 }),
+    ];
+    m.importRecords(X, toC);
+    m.importRecords(C, [...toB, ...toC]);
+    m.importRecords(D, [...toB, ...toC]);
+    const second = m.drain(X);
+    m.pushes.length = 0;
+    await assert.rejects(m.promote(C, { drainReceiptFile: second }), refused('standby_behind', /epoch 3/));
+    assert.deepEqual(m.pushes, [], 'refused from the receipt, before any probe or push');
+    assert.equal(existsSync(join(m.base(C).home, PROMOTION_MARKER_FILE)), false);
   });
 });
