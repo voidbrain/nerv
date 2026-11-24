@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 97.75 h agent + 11.25 h owner across 140 open steps of 38 features and 29 other records. 159.5 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 99.25 h agent + 11.25 h owner across 141 open steps of 38 features and 29 other records. 161.5 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -334,7 +334,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h agent + 1 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.75 h agent + 1 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-016-T07 — Step 4a — Relocation building blocks: readiness, drain receipt, promotion with quarantine; never a context-only takeover (Implemented; verification pending).
 
@@ -356,10 +356,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-016-t18"></a>F-016-T18 — &#96;/kaji/epoch-push&#96; so every peer acknowledges the new epoch | 2 h | 2 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | 🤖 | [PR #703](https://github.com/voidbrain/nerv/pull/703) /kaji/epoch-push, recorded acks, measured promotion horizon |
 | 🟢 Small | <a id="f-016-t19"></a>F-016-T19 — Telegram polling handed over on activation | 1 h | 1.25 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | 🤖 | [PR #704](https://github.com/voidbrain/nerv/pull/704) Telegram hand-over: authority gate, hydration, no 409 race |
 | 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 3.5 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07), [F-016-T16](#f-016-t16), [F-016-T17](#f-016-t17), [F-016-T18](#f-016-t18), [F-016-T19](#f-016-t19) | [F-016-T09](#f-016-t09), [F-016-T20](#f-016-t20) | 🤖 | [PR #717](https://github.com/voidbrain/nerv/pull/717) Partition, sleep and reconnect fixtures; B-120 and B-121 fixes |
-| 🟢 Small | <a id="f-016-t20"></a>F-016-T20 — Seed the standby store and ship replication batches while serve runs | 3 h | 3.5 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T08](#f-016-t08) | [F-016-T09](#f-016-t09) | 🤖 | [PR #725](https://github.com/voidbrain/nerv/pull/725) Live standby seeding and replication while serve runs |
+| 🟢 Small | <a id="f-016-t20"></a>F-016-T20 — Seed the standby store and ship replication batches while serve runs | 3 h | 5.5 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T08](#f-016-t08) | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) | 🤖 | [PR #725](https://github.com/voidbrain/nerv/pull/725) Live standby seeding and replication while serve runs |
 | 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | [F-016-T08](#f-016-t08), [F-016-T20](#f-016-t20) | [F-016-T11](#f-016-t11) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-016-T09](#f-016-t09) | — | ⏳ 🤖 | — |
-| 🟢 Small | **Total** | 21.25 h (19 of 20 steps) | 28.75 h (16 of 20 steps recorded) | 0.25 h agent + 1 h owner | 11 of 20 completed | | | | |
+| 🟡 Medium | <a id="f-016-t21"></a>F-016-T21 — Export the seed snapshot off serve's event loop | 1.5 h | 0 h | 1.5 h | Planned | [F-016-T20](#f-016-t20) | — | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 22.75 h (20 of 21 steps) | 30.75 h (16 of 21 steps recorded) | 1.75 h agent + 1 h owner | 11 of 21 completed | | | | |
 
 <details><summary>Done steps (11)</summary>
 
