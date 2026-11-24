@@ -275,6 +275,11 @@ export function makeServer(
           reply(400, { error: 'Send the pairing code and a device name (1 to 40 characters).' });
           return;
         }
+        // Review of #707: a full book refuses before the code is taken, so the code stays usable after a revoke.
+        if (devices.full()) {
+          reply(409, { error: 'Too many paired devices: revoke one first.' });
+          return;
+        }
         const taken = pairing.take(code.slice(0, 32), req.socket.remoteAddress ?? '');
         if (typeof taken === 'object') {
           res.setHeader('Retry-After', String(Math.ceil(taken.retryAfterMs / 1000)));
@@ -414,6 +419,9 @@ export function makeServer(
         if (value.confirmExecute !== true) throw new Error('Placement execution needs confirmExecute: true.');
         const { confirmExecute: _confirmExecute, ...input } = value;
         const probe = placementProbe(input);
+        // The probe may outlast the server's 15 s idle timeout; hold the socket for its own budget.
+        req.setTimeout(probe.requestBudgetMs);
+        res.once('finish', () => req.socket.setTimeout(15000));
         const result = await store.runOrchestratedJob({
           orchestration: probe.orchestration,
           ask: probe.ask,
