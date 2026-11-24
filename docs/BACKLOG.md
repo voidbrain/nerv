@@ -427,7 +427,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Steps: B-121-T01: [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks · B-121-T02: [PR #721](https://github.com/voidbrain/nerv/pull/721) ranOrAckedEpoch in the epoch-push reply; record-free probe before the push; #721 review fixes. [PR #717](https://github.com/voidbrain/nerv/pull/717) (Test: `test/coordinator-partition.test.ts`, mixed epochs) · B-121-T02: [PR #721](https://github.com/voidbrain/nerv/pull/721) (Test: `test/coordinator-partition.test.ts`, B-121-T02; `test/coordinator-relocation.test.ts`, epoch-push witness) |
 | Opened | 2026-11-24 |
-| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and the coordinator suites pass locally, B-121-T02 included; full `npm test` 1373 pass, 0 fail (2 skipped) after the #721 third-check fixes; gauntlet: the 10 pending cases ran and passed again (ledger committed in PR #721). On main: Pending. |
+| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and the coordinator suites pass locally, B-121-T02 included; full `npm test` 1375 pass, 0 fail (2 skipped) after the #721 fourth-check fixes; gauntlet: the 10 pending cases ran and passed again (ledger committed in PR #721). On main: Pending. |
 | Reviewed | 2026-11-24 |
 
 </details>
