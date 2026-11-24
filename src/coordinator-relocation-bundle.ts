@@ -60,6 +60,9 @@ export function stageRegistryRecords(
   rootPublicKey: string | undefined,
   records: readonly SignedRecord[],
 ): void {
+  // #734 review: only TEMP tables are written, in a deferred transaction (Registry.add nests a savepoint in it), so
+  // staging never takes the store's write lock and runs while the service writes.
+  db.exec('PRAGMA busy_timeout = 5000');
   db.exec('DROP TABLE IF EXISTS temp.registry; DROP TABLE IF EXISTS temp.registry_roots');
   db.exec('CREATE TEMP TABLE registry AS SELECT * FROM main.registry');
   const scoped = !!db.prepare("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='registry_roots'").get();
@@ -68,7 +71,14 @@ export function stageRegistryRecords(
       ? 'CREATE TEMP TABLE registry_roots AS SELECT * FROM main.registry_roots'
       : 'CREATE TEMP TABLE registry_roots(id TEXT, root TEXT)',
   );
-  addRegistryRecords(db, rootPublicKey, records);
+  db.exec('BEGIN');
+  try {
+    addRegistryRecords(db, rootPublicKey, records);
+    db.exec('COMMIT');
+  } catch (err) {
+    db.exec('ROLLBACK');
+    throw err;
+  }
 }
 
 /** Stores `records` in this registry (each verified; a record already held is skipped). */

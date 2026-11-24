@@ -8,6 +8,7 @@ import {
   STANDBY_DB_FILE,
   checkRelocationReadiness,
   checkStandbyCandidate,
+  ranOrAckedCoordinatorEpoch,
   relocateCoordinator,
   standbyLastAckMs,
   verifyDrainReceipt,
@@ -393,6 +394,7 @@ function localPrecheck(
   | undefined {
   const db = new DatabaseSync(mainDbPath);
   try {
+    db.exec('PRAGMA busy_timeout = 5000');
     if (input.relocation) stageRegistryRecords(db, input.rootPublicKey, input.relocation);
     const registry = new Registry(db, input.rootPublicKey);
     const own = keyIdentity(input.ownPublicKey);
@@ -410,6 +412,39 @@ function localPrecheck(
     if (ownEpoch !== undefined) {
       if (input.drainReceiptFile)
         refuse('drain_receipt_invalid', 'This base takes back its own coordinator state: it takes no drain receipt.');
+      // #734 review BLOCKER: a main named between this base's state and the new epoch may have run. An unrevoked one
+      // must answer the probe at or below this state's epoch (as every unrevoked base must); a revoked one cannot be
+      // asked, so its epoch may have run with effects this state lacks: only a verified standby or an owner-approved
+      // cold restore may take over then, never this older state.
+      const revoked = new Set(
+        registry
+          .bases()
+          .filter((b) => b.status === 'revoked')
+          .map((b) => b.baseId),
+      );
+      const between = registry
+        .records()
+        .filter(
+          (r) =>
+            r.body.kind === 'main' &&
+            (r.body.coordinatorEpoch ?? 0) > ownEpoch &&
+            (r.body.coordinatorEpoch ?? 0) < newEpoch &&
+            r.body.baseId !== undefined &&
+            revoked.has(r.body.baseId),
+        )
+        .map((r) => `${r.body.baseId} (epoch ${r.body.coordinatorEpoch})`);
+      if (between.length)
+        refuse(
+          'standby_behind',
+          `${between.join(', ')} was named main after the epoch ${ownEpoch} state this base holds and is revoked, so it cannot say whether it ran: taking this state back could undo what it did. Promote a verified standby of it, or run an owner-approved cold restore. No base was told the new epoch.`,
+        );
+      // This base's own stores (lease acks included) must not show a later epoch either.
+      const ownRan = ranOrAckedCoordinatorEpoch(db, standbyDbPath);
+      if (ownRan > ownEpoch)
+        refuse(
+          'standby_behind',
+          `This base ran or acked a coordinator lease at epoch ${ownRan}, after the epoch ${ownEpoch} state it holds. No base was told the new epoch.`,
+        );
       return { standbyEpoch: ownEpoch, skippedMains: [], reinstate: true };
     }
     const records = registry.records();

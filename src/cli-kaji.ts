@@ -274,6 +274,12 @@ export async function runKajiCommand(
     }
     if (!registry.bases().some((b) => b.baseId === id && b.status === 'enrolled'))
       throw new Error('No enrolled base with that id (see kaji list).');
+    // #734 review (B-124): once a coordinator has moved, or runs here, a stored main record stops it unchecked.
+    const held = store.coordinatorFencingState();
+    if (registry.main() && registry.main() !== id && (registry.mainEpoch() >= 2 || (held?.coordinatorEpoch ?? 0) >= 2))
+      throw new Error(
+        `${registry.main()} is main at coordinator epoch ${registry.mainEpoch()}: move it with kaji relocate ${id} FILE (then kaji promote --relocation FILE on ${id}). kaji main names the first main only.`,
+      );
     const root = await unlock();
     new Registry(store.db, root.publicKey).add(
       signRecord(root.privateKey, {
