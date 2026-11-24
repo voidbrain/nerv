@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 1 | 1 | 4 | 1 |
+| **This week** | 1 | 1 | 6 | 1 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 35 | 16 |
-| **Require Human 🧑** | 11 | 7 |
+| **Open** | 35 | 18 |
+| **Require Human 🧑** | 10 | 8 |
 
 ### Require Human 🧑
 
@@ -28,13 +28,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-086](#f-086) |  | [B-096](#b-096) |  |
 | [F-087](#f-087) |  | [B-106](#b-106) |  |
 | [F-092](#f-092) |  | [B-110](#b-110) |  |
-| [F-060](#f-060) |  |  |  |
+| [F-060](#f-060) |  | [B-112](#b-112) |  |
 | [F-007](#f-007) |  |  |  |
-| [F-100](#f-100) |  |  |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 68.5 h agent + 11 h owner across 96 open steps of 34 features and 16 other records. 96 h of actual effort recorded on 119 steps. Generated from the task files.
+**Remaining effort:** 68.5 h agent + 10.5 h owner across 98 open steps of 34 features and 18 other records. 96 h of actual effort recorded on 119 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -753,7 +752,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.25 h | — | [F-102-T04](#f-102-t04), [F-117-T02](#f-117-t02) | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.5 h | — | [F-102-T04](#f-102-t04), [F-117-T02](#f-117-t02) | 🤖 | — | — |
 
 💻 **→** Next: B-108-T01 — Update now runs from a detached helper outside the service (Implemented; verification pending).
 
@@ -768,8 +767,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-108-t01"></a>B-108-T01 — Update now runs from a detached helper outside the service | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | — | [B-108-T02](#b-108-t02), [F-102-T04](#f-102-t04), [F-117-T02](#f-117-t02) |
-| 🟢 Small | <a id="b-108-t02"></a>B-108-T02 — The restarted service reports the updater result in the inbox and on the dashboard | 1 h | 0 h | 1 h | Planned | [B-108-T01](#b-108-t01) | [F-102-T04](#f-102-t04) |
-| 🟡 Medium | **Total** | 1.25 h | 0 h (0 of 2 steps recorded) | 1.25 h | 0 of 2 completed | | |
+| 🟢 Small | <a id="b-108-t02"></a>B-108-T02 — The restarted service reports the updater result in the inbox and on the dashboard | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [B-108-T01](#b-108-t01) | [F-102-T04](#f-102-t04) |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h | 0 of 2 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -778,7 +777,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #668](https://github.com/voidbrain/nerv/pull/668); B-108-T01 in [PR #672](https://github.com/voidbrain/nerv/pull/672) and [PR #673](https://github.com/voidbrain/nerv/pull/673). |
+| PR / evidence | Opened in [PR #668](https://github.com/voidbrain/nerv/pull/668); B-108-T01 in [PR #672](https://github.com/voidbrain/nerv/pull/672) and [PR #673](https://github.com/voidbrain/nerv/pull/673); B-108-T02 in [PR #685](https://github.com/voidbrain/nerv/pull/685). |
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: `nerv nodes lifecycle-inspect --action update` on NERV-01 with the service running listed "Stop the selected service and descendants first." |
 | Reviewed | 2026-11-23 |
@@ -1984,6 +1983,92 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-109"></a>[🐞 B-109](#top)
+
+**Blackbox analysis rejects a real Blackbox Explorer CSV export**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | [F-100-T04](#f-100-t04) | 🤖 | — | — |
+
+💻 **→** Next: B-109-T01 — Read Blackbox Explorer CSV exports that start with a settings preamble (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-23 running F-100-T04 on the owner's real fleet log: Betaflight Blackbox Explorer's CSV export starts with about 150 `"key",value` settings lines before the column header, and `parseBlackboxCsv` took the first line as the header, so the analysis failed with "missing required time, gyroADC[0..2], or motor[0..3] columns". |
+| **Reproduce** | Export a log to CSV with Blackbox Explorer and analyse it. |
+| **Check** | Test committed failing first (`test/blackbox.test.ts`, B-109): a CSV with a settings preamble is read in full, using unfiltered gyro and eRPM; a CSV without a recognisable header still reports the missing columns. The real log then decodes (84,789 samples). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-109-t01"></a>B-109-T01 — Read Blackbox Explorer CSV exports that start with a settings preamble | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | — | [F-100-T04](#f-100-t04) |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-109.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #674](https://github.com/voidbrain/nerv/pull/674) |
+| Opened | 2026-11-23 |
+| Verification | 2026-11-23: `node --test test/blackbox.test.ts` 4/4; the owner's real CSV export decodes. |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+### <a id="f-100"></a>[✨ F-100](#top)
+
+**FPV blackbox analysis for vibration**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | [B-109-T01](#b-109-t01) | — | 🤖 | — | — |
+
+💻 **→** Next: F-100-T04 — Analyse a real fleet log (Supernova) with GYRO data and eRPM (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: "Smoke vibrates and shakes; props changed, the problem stays; the frame seems fine: frame, motors or ESC? Analyse the blackbox." NERV cannot read Betaflight blackbox logs. |
+| **Reproduce** | Send a blackbox log of the shaking flight and ask what causes the vibration. |
+| **Check** | Feasibility first: decode the log locally and read the gyro spectrum per axis and motor; then a report that names candidate causes with the evidence for each (motor-specific peaks, frame resonance, prop or ESC signs) and says what the log cannot tell. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-100-t04"></a>F-100-T04 — Analyse a real fleet log (Supernova) with GYRO data and eRPM | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [B-109-T01](#b-109-t01) | — | 🤖 | — |
+| 🟢 Small | **Total** | 1.75 h | 0.25 h (1 of 4 steps recorded) | 0.25 h | 3 of 4 completed | | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-100-t01"></a>F-100-T01 — Feasibility: decoding blackbox logs and reading vibration | 0.75 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-100-t02"></a>F-100-T02 — Owner decides the analysis scope | 0 h | 0 h | Completed | — |
+| — | <a id="f-100-t03"></a>F-100-T03 — Vibration report from a blackbox log | 0.75 h | 0 h | Completed | [PR #486](https://github.com/voidbrain/nerv/pull/486) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-100.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-100-T03: [PR #486](https://github.com/voidbrain/nerv/pull/486) implementation. [PR #486](https://github.com/voidbrain/nerv/pull/486) (merged; CI green); [FPV blackbox feasibility](design/fpv-blackbox-feasibility.md) (`F-100-T01`); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-100-T03 verified: [PR #486](https://github.com/voidbrain/nerv/pull/486) merged on green CI. `F-100-T01`: `npm run check:fast` passed. |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
 ### <a id="f-101"></a>[✨ F-101](#top)
 
 **Share the FPV battery manager outside NERV**
@@ -2309,54 +2394,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-100"></a>[✨ F-100](#top)
-
-**FPV blackbox analysis for vibration**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h owner | — | — | — | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](work/records/F-100.md) F-100-T04 — Owner check: real Smoke log with GYRO&#95;SCALED and eRPM (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-14: "Smoke vibrates and shakes; props changed, the problem stays; the frame seems fine: frame, motors or ESC? Analyse the blackbox." NERV cannot read Betaflight blackbox logs. |
-| **Reproduce** | Send a blackbox log of the shaking flight and ask what causes the vibration. |
-| **Check** | Feasibility first: decode the log locally and read the gyro spectrum per axis and motor; then a report that names candidate causes with the evidence for each (motor-specific peaks, frame resonance, prop or ESC signs) and says what the log cannot tell. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-100-t04"></a>F-100-T04 — Owner check: real Smoke log with GYRO&#95;SCALED and eRPM | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [🧑‍🔧](work/records/F-100.md) | — |
-| 🟢 Small | **Total** | 1.5 h | 0.25 h (1 of 4 steps recorded) | 0.5 h owner | 3 of 4 completed | | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-100-t01"></a>F-100-T01 — Feasibility: decoding blackbox logs and reading vibration | 0.75 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-100-t02"></a>F-100-T02 — Owner decides the analysis scope | 0 h | 0 h | Completed | — |
-| — | <a id="f-100-t03"></a>F-100-T03 — Vibration report from a blackbox log | 0.75 h | 0 h | Completed | [PR #486](https://github.com/voidbrain/nerv/pull/486) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-100.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-100-T03: [PR #486](https://github.com/voidbrain/nerv/pull/486) implementation. [PR #486](https://github.com/voidbrain/nerv/pull/486) (merged; CI green); [FPV blackbox feasibility](design/fpv-blackbox-feasibility.md) (`F-100-T01`); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-100-T03 verified: [PR #486](https://github.com/voidbrain/nerv/pull/486) merged on green CI. `F-100-T01`: `npm run check:fast` passed. |
-| Reviewed | 2026-11-18 |
-
-</details>
-
----
 ### <a id="b-056"></a>[🐞 B-056](#top)
 
 **A renewal the companion refuses on the Mac says it was not confirmed**
@@ -2521,6 +2558,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #680](https://github.com/voidbrain/nerv/pull/680) |
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: `node --test test/manual-update.test.ts test/dashboard.test.ts` 58/58. |
+| Reviewed | 2026-11-23 |
+
+</details>
+
+---
+### <a id="b-112"></a>[🐞 B-112](#top)
+
+**Sephirot flow lights routes the sortie did not take and hides the map when no sortie is selected**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update, open a few sorties (S-6AD9, one answered without an action, one that asked you something) and deselect: check the routes below.
+
+| | |
+|---|---|
+| **Issue** | Owner review 2026-11-23 of S-6AD9: Detection → Naoko Desk, Naoko Desk → Gendo and Detection → Gendo all lit, because an edge lit whenever both its nodes ran (Sync Ratio → Entry Plug likewise lit beside Sync Ratio → Misato's Apt → Entry Plug). The Misato → Debrief answer route was drawn at the start of every sortie (no actions yet). Deselecting hid only the conditional routes, and the three loops back to Misato never lit. |
+| **Reproduce** | Select S-6AD9 (or any sortie through Naoko Desk); start a new sortie; deselect. |
+| **Check** | Tests committed failing first (`test/dashboard.test.ts`, B-112): a shortcut lights only when the step it bypasses did not run; the answer route appears once Misato planned with no action; with no sortie every route is drawn, conditional ones as `cond` (dashed, dimmed); MAGI → Misato lights after a rejection Misato planned past, Misato's Apt → Misato after your answer or an approval followed by another step, EVA Cage → Misato when a result led to a next step. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-112-t01"></a>B-112-T01 — Sephirot: routes light only when taken; answer route after planning; full map; loops when taken | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-112.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #682](https://github.com/voidbrain/nerv/pull/682) |
+| Opened | 2026-11-23 |
+| Verification | 2026-11-23: `node --test test/dashboard.test.ts` 51/51. |
 | Reviewed | 2026-11-23 |
 
 </details>

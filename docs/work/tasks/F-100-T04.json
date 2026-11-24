@@ -2,18 +2,19 @@
   "version": 1,
   "parent": "F-100",
   "id": "F-100-T04",
-  "status": "planned",
-  "title": "Owner check: real Smoke log with GYRO_SCALED and eRPM",
-  "goal": "The report on a real shaking flight names candidate causes with evidence",
+  "status": "implemented",
+  "title": "Analyse a real fleet log (Supernova) with GYRO data and eRPM",
+  "goal": "The report on a real flight log names candidate causes with evidence and states what the log cannot tell",
   "capabilities": [
     "bounded-edit"
   ],
   "privacy": "Owner flight logs stay local-only; tests use invented logs.",
   "acceptance": [
-    "The owner flies Smoke with debug_mode GYRO_SCALED and bidirectional DShot over a hover-to-full-throttle sweep and sends the .bbl",
+    "A real fleet log with unfiltered gyro and bidirectional DShot eRPM is decoded locally by src/blackbox.ts",
     "The report names candidate causes with the frequency and motor evidence and states what the log cannot tell"
   ],
   "dependsOn": [
+    "B-109-T01",
     "F-100-T03"
   ],
   "resources": [
@@ -27,14 +28,11 @@
   ],
   "effort": {
     "size": "small",
-    "reviewed": "2026-11-15",
-    "basis": "Estimated 2026-11-15 at agent speed (harness 8.14.3: implementation steps 0.75 h, decision revisions 0.5 h). Not a measurement.",
-    "estimate": "0.5 h owner",
-    "agentHours": 0,
-    "baselineAgentHours": 0,
-    "estimateAgentHours": 0,
-    "ownerHours": 0.5,
-    "ownerKind": "procedure"
-  },
-  "ownerLink": "docs/work/records/F-100.md"
+    "estimate": "0.25 h agent",
+    "basis": "Owner decision 2026-11-23: the agent analyses a fleet log the owner provides (Supernova); Smoke shaking was an example.",
+    "reviewed": "2026-11-23",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.25
+  }
 }
