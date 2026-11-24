@@ -44,6 +44,7 @@
     "verification:plan": "node tools/plan-verification.mjs",
     "test:affected": "node tools/selected-tests.mjs",
     "work:build": "node tools/work-items.mjs build",
+    "work:close": "node tools/work-items.mjs close",
     "check:work": "node tools/work-items.mjs check",
     "work:tasks": "node tools/work-items.mjs tasks",
     "work:next": "node tools/work-items.mjs next",
