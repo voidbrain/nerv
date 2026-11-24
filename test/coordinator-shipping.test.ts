@@ -16,6 +16,8 @@ import { coordinatorLeaseService, coordinatorTelegramContinuity } from '../src/c
 import {
   ReplicationShipper,
   captureReplicationBatch,
+  installReplicationCapture,
+  replicationApplyFault,
   replicationBatchAt,
   replicationStatus,
   seedStandbyStore,
@@ -145,6 +147,7 @@ async function twoBases() {
   const dir = mkdtempSync(join(tmpdir(), 'nerv-ship-'));
   cpSync(t.dir, dir, { recursive: true });
   const sides: Record<string, Side> = {};
+  let serial = t.serial;
   const linkFor = (s: Omit<Side, 'link'>) =>
     new KajiLink({
       ...s.lease.kajiOptions(),
@@ -181,7 +184,7 @@ async function twoBases() {
     rootPub: t.rootPub,
     /** The owner signs a record with the root key. */
     sign: (body: Record<string, unknown>) =>
-      signRecord(t.rootKey, { ...body, serial: t.serial + 1, issued: ISSUED } as unknown as RegistryBody),
+      signRecord(t.rootKey, { ...body, serial: ++serial, issued: ISSUED } as unknown as RegistryBody),
     x: sides[X]!,
     b: sides[B]!,
     /** B's serve restarts its Kaji line (same port, same handlers). */
@@ -572,6 +575,113 @@ describe('F-016-T20 review (#725)', () => {
       outboxRow(x.store.db, OUT_2);
       assert.equal(await x.lease.shipper(x.link).tick(), 'refused');
       assert.match(replicationStatus(x.store.db).peer?.lastError ?? '', /unreadable/);
+    } finally {
+      await t.close();
+    }
+  });
+});
+
+describe('F-016-T20 re-check (#725): every standby-feed refusal', () => {
+  it('the feed takes the old main only while the standby store holds its epoch, unpromoted, unrevoked, with no later ack; a fenced main sends nothing', async () => {
+    const t = await twoBases();
+    try {
+      const { x, b } = t;
+      await kaji(x.home, x.store, ['standby', B]);
+      const record = t.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 });
+      new Registry(x.store.db, t.rootPub).add(record);
+      new Registry(b.store.db, t.rootPub).add(record);
+      const standbyDb = join(b.home, STANDBY_DB_FILE);
+      const onStandby = (sql: string, ...args: (string | number)[]) => {
+        const db = new DatabaseSync(standbyDb);
+        try {
+          db.prepare(sql).run(...args);
+        } finally {
+          db.close();
+        }
+      };
+      const shipper = x.lease.shipper(x.link);
+      // Baseline: accepted, over the line too.
+      assert.equal(b.lease.standbyFeedFrom(X, 2), true);
+      outboxRow(x.store.db, OUT_2);
+      assert.equal(await shipper.tick(), 'current');
+      const before = readStandby(b.home, headOf);
+
+      // A promotion marker on the standby: refused (403 over the line), nothing applied.
+      writeFileText(join(b.home, 'coordinator-promotion.json'), '{}');
+      assert.equal(b.lease.standbyFeedFrom(X, 2), false, 'promotion marker');
+      x.store.outboxDone(OUT_2, { ok: true });
+      assert.equal(await shipper.tick(), 'refused');
+      assert.match(replicationStatus(x.store.db).peer?.lastError ?? '', /403/);
+      assert.deepEqual(readStandby(b.home, headOf), before);
+      rmSync(join(b.home, 'coordinator-promotion.json'));
+
+      // Another epoch than the one the store holds.
+      assert.equal(b.lease.standbyFeedFrom(X, 1), false, 'batch epoch other than the store');
+      assert.equal(b.lease.standbyFeedFrom(X, 3), false, 'X is not named main at 3');
+      onStandby('UPDATE coordinator_state SET coordinator_epoch = 1 WHERE id = 1');
+      assert.equal(b.lease.standbyFeedFrom(X, 2), false, 'store at another epoch');
+      onStandby('UPDATE coordinator_state SET coordinator_epoch = 2 WHERE id = 1');
+
+      // The standby acked a lease at a later epoch (a later coordinator ran).
+      onStandby('UPDATE standby_lease_state SET standby_coordinator_epoch = 3 WHERE id = 1');
+      assert.equal(b.lease.standbyFeedFrom(X, 2), false, 'later lease ack');
+      onStandby('UPDATE standby_lease_state SET standby_coordinator_epoch = 2 WHERE id = 1');
+      assert.equal(b.lease.standbyFeedFrom(X, 2), true, 'baseline again');
+
+      // A fenced X sends nothing at all.
+      x.store.db.prepare("UPDATE coordinator_state SET replication_mode = 'fenced' WHERE id = 1").run();
+      assert.equal(await shipper.tick(), 'inactive');
+      x.store.db.prepare("UPDATE coordinator_state SET replication_mode = 'active' WHERE id = 1").run();
+      assert.equal(await shipper.tick(), 'current');
+
+      // A revoked sender: refused for good.
+      const xEntry = new Registry(b.store.db, t.rootPub).bases().find((e) => e.baseId === X)!;
+      new Registry(b.store.db, t.rootPub).add(t.sign({ kind: 'revoke', baseId: X, publicKey: xEntry.publicKey }));
+      assert.equal(b.lease.standbyFeedFrom(X, 2), false, 'revoked');
+    } finally {
+      await t.close();
+    }
+  });
+
+  it('minor (a): a busy standby store is retried with the same batch, never reseeded', () => {
+    assert.equal(replicationApplyFault(Object.assign(new Error('database is locked'), { errcode: 5 })), 'busy');
+    assert.equal(replicationApplyFault(new Error('database table is locked')), 'busy');
+    assert.equal(replicationApplyFault(new Error('no such table: kaji_outbox_pilots')), 'not_standby');
+  });
+
+  it('minor (b): --cancel after the relocation was imported says effects stay off', async () => {
+    const t = await twoBases();
+    try {
+      const { x } = t;
+      new Registry(x.store.db, t.rootPub).add(t.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }));
+      x.store.db.prepare("UPDATE coordinator_state SET replication_mode = 'draining' WHERE id = 1").run();
+      const out = await kaji(x.home, x.store, ['drain', '--cancel']);
+      assert.match(out, /NERV-02 at epoch 3/);
+      assert.match(out, /no coordinator effects/);
+      assert.doesNotMatch(out, /renews or fences it as before/);
+    } finally {
+      await t.close();
+    }
+  });
+
+  it('minor (c): a named standby whose position at this epoch is unknown counts as not replicated', async () => {
+    const t = await twoBases();
+    try {
+      const { x } = t;
+      installReplicationCapture(x.store.db);
+      x.store.db.prepare('UPDATE coordinator_state SET standby_base_id = ? WHERE id = 1').run(B);
+      assert.throws(
+        () =>
+          drainCoordinator(x.store.db, {
+            baseId: X,
+            coordinatorEpoch: 2,
+            newMainBaseId: B,
+            newEpoch: 3,
+            registryMains: [],
+            ranOrAckedEpoch: 2,
+          }),
+        /not yet replicated/,
+      );
     } finally {
       await t.close();
     }
