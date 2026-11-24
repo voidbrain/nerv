@@ -538,12 +538,19 @@ export class TelegramChannel {
     continuity?: TelegramContinuity;
     /** How often a base without authority checks whether it gained it (and an active poll whether it lost it). */
     standbyCheckMs?: number;
+    /**
+     * After taking over from another base (the replicated offset is ahead of this base's own), wait this long
+     * before the first poll, so the old main's last long poll has ended (it checks every `standbyCheckMs`,
+     * 5 s by default). Default: twice `standbyCheckMs`.
+     */
+    handoverGraceMs?: number;
   }) {
     this.one = options.oneChannel;
     this.remote = options.remote;
     this.authority = options.authority;
     this.continuity = options.continuity;
     this.standbyCheckMs = options.standbyCheckMs ?? 5000;
+    this.handoverGraceMs = options.handoverGraceMs ?? 2 * this.standbyCheckMs;
     this.api = options.authority ? guardedApi(options.api, options.authority) : options.api;
     this.store = options.store;
     this.chatId = options.chatId;
@@ -561,6 +568,7 @@ export class TelegramChannel {
   private readonly authority: (() => boolean) | undefined;
   private readonly continuity: TelegramContinuity | undefined;
   private readonly standbyCheckMs: number;
+  private readonly handoverGraceMs: number;
   private authorized(): boolean {
     try {
       return !this.authority || this.authority();
@@ -568,11 +576,15 @@ export class TelegramChannel {
       return false;
     }
   }
-  /** On activation: the replicated state wins where it is ahead (offset, inbox), cards and messages merge. */
-  private hydrate() {
+  /**
+   * On activation: the replicated state wins where it is ahead (offset, inbox), cards and messages merge.
+   * Returns whether this base took over from another one (the replicated offset was ahead of its own).
+   */
+  private hydrate(): boolean {
     const r = this.continuity?.load();
-    if (!r) return;
+    if (!r) return false;
     const s = this.state;
+    const tookOver = r.offset !== undefined && (s.offset === undefined || r.offset > s.offset);
     this.state = {
       ...s,
       ...(r.offset !== undefined && (s.offset === undefined || r.offset > s.offset) ? { offset: r.offset } : {}),
@@ -590,6 +602,7 @@ export class TelegramChannel {
       ...(r.brief && !s.brief ? { brief: r.brief } : {}),
     };
     this.save();
+    return tookOver;
   }
   private save() {
     const tmp = this.statePath + '.tmp';
@@ -661,7 +674,12 @@ export class TelegramChannel {
       }
       if (held) {
         held = false;
-        this.hydrate();
+        if (this.hydrate())
+          await new Promise<void>((done) => {
+            const t = setTimeout(done, this.handoverGraceMs);
+            this.stopping.signal.addEventListener('abort', () => (clearTimeout(t), done()), { once: true });
+          });
+        continue;
       }
       // Outbound inbox deliveries use main, but either configured bot still accepts owner requests.
       await this.quiet();
