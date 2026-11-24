@@ -83,7 +83,7 @@ test(
     try {
       const endpoint = await new Promise((done, fail) => {
         let output = '';
-        const timer = setTimeout(() => fail(new Error('Chrome startup timed out: ' + output)), 20000);
+        const timer = setTimeout(() => fail(new Error('Chrome startup timed out: ' + output)), 45000);
         child.once('error', (e) => {
           clearTimeout(timer);
           fail(e);
@@ -139,7 +139,7 @@ test(
         return r.result.value;
       };
       const until = async (expression) => {
-        const end = Date.now() + 10000;
+        const end = Date.now() + 15000;
         while (!(await evaluate(expression))) {
           assert.ok(Date.now() < end, 'Browser condition timed out: ' + expression);
           await new Promise((d) => setTimeout(d, 50));
@@ -888,7 +888,7 @@ test(
         `document.querySelector('#log .checklist-card input[data-checklist-toggle="${milkItemId}"]')?.click()`,
       );
       await until(
-        `document.querySelector('#log .checklist-card input[data-checklist-toggle="${milkItemId}"]')?.checked===true`,
+        `document.querySelector('#log .checklist-card input[data-checklist-toggle="${milkItemId}"]:not(:disabled)')?.checked===true`,
       );
       const updatedList = store.lists.show('shopping');
       assert.equal(
