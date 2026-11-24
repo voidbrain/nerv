@@ -845,6 +845,7 @@ describe('F-016-T18: /kaji/epoch-push, so the new epoch acks are measured, not a
           publicKey: x.key.publicKey,
           registry: registryPort(x.reg),
           minCoordinatorEpoch: () => x.reg.mainEpoch(),
+          holdsStandby: () => x.id === 'NERV-03',
           onLeaseRenew: async () => ({ ok: false, reason: 'promoting', error: 'not a standby' }),
         }),
     );
@@ -867,6 +868,8 @@ describe('F-016-T18: /kaji/epoch-push, so the new epoch acks are measured, not a
       assert.deepEqual([first.acked, first.missing], [['NERV-03'], ['NERV-01']]);
       assert.equal(c.reg.main(), 'NERV-02');
       assert.equal(c.reg.mainEpoch(), 3, 'the peer persisted the new epoch');
+      // The signed reply says whether the base holds a standby store (re-review: only such a base may be named).
+      assert.equal((await links[0]!.pushEpoch('NERV-03', [])).standby, true);
       assert.equal(
         allUnrevokedAckedEpoch({ db: b.store.db, rootPublicKey: rootPub, ownPublicKey: b.key.publicKey, epoch: 3 }),
         false,
@@ -1084,8 +1087,8 @@ describe('F-016-T17 review fixes (#702)', () => {
   });
 });
 
-describe('F-016-T18 review (#703): the promoted main names a base that acked the new epoch', () => {
-  it('prefers an acked base as its standby over an unreachable one', async () => {
+describe('F-016-T18 review (#703): the promoted main names a base that acked the new epoch from a standby store', () => {
+  it('names an acked base that holds a standby store; never an unreachable one or one without a store (re-review)', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-standby-'));
     try {
       const home = join(dir, 'home');
@@ -1117,11 +1120,15 @@ describe('F-016-T18 review (#703): the promoted main names a base that acked the
       });
       add({ kind: 'enrol', baseId: 'NERV-03', name: 'Relay', publicKey: pub(), address: '127.0.0.1:3' });
       add({ kind: 'enrol', baseId: 'NERV-04', name: 'Harbor', publicKey: pub(), address: '127.0.0.1:4' });
+      add({ kind: 'enrol', baseId: 'NERV-00', name: 'Worker', publicKey: pub(), address: '127.0.0.1:5' });
       add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
       add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
       store.close();
       const standby = new Store(join(home, STANDBY_DB_FILE));
       setState(standby.db, 2, 'standby', 7, 'digest-7');
+      // The old main renewed through this base: a bare confirmation is accepted (F-016-T17 re-review).
+      standby.db.exec(STANDBY_LEASE_SCHEMA);
+      standby.db.prepare("INSERT INTO standby_lease_state VALUES (1, 2, 9, ?, 'boot')").run(Date.now());
       standby.close();
       let wall = Date.now();
       let mono = 0n;
@@ -1140,8 +1147,10 @@ describe('F-016-T18 review (#703): the promoted main names a base that acked the
           },
         },
         pushEpoch: async (id) => {
+          // NERV-00 acks but is a worker without a standby store; it sorts first and must still not be named.
+          if (id === 'NERV-00') return { maxSeenCoordinatorEpoch: 3, standby: false };
           if (id !== 'NERV-04') throw new Error('unreachable');
-          return { maxSeenCoordinatorEpoch: 3 };
+          return { maxSeenCoordinatorEpoch: 3, standby: true };
         },
       });
       const db = new DatabaseSync(join(home, 'nerv.sqlite'));
