@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 89 h agent + 10.25 h owner across 122 open steps of 36 features and 23 other records. 117 h of actual effort recorded on 134 steps. Generated from the task files.
+**Remaining effort:** 89 h agent + 10.25 h owner across 122 open steps of 36 features and 23 other records. 117.75 h of actual effort recorded on 135 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -173,7 +173,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | [F-006-T27](#f-006-t27) | 🤖 | — | — |
 
-💻 **→** Next: B-119-T01 — Let placement probes run to their own budget (Planned).
+💻 **→** Next: merge PR #708 (B-119-T01 implemented), then rerun the P3 role comparison (F-006-T27).
 
 | | |
 |---|---|
@@ -185,8 +185,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-119-t01"></a>B-119-T01 — Let placement probes run to their own budget | 1 h | 0 h | 1 h | Planned | — | [F-006-T27](#f-006-t27) |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | | |
+| 🟢 Small | <a id="b-119-t01"></a>B-119-T01 — Let placement probes run to their own budget | 1 h | 0.75 h so far (stated) | 1 h | Implemented; verification pending | — | [F-006-T27](#f-006-t27) |
+| 🟢 Small | **Total** | 1 h | 0.75 h | 1 h | 0 of 1 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -195,9 +195,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #698](https://github.com/voidbrain/nerv/pull/698) (opened); F-006-T23 evidence in the [F-006-T26 report](evaluations/2026-11-24-f006-t26-placement-report.md) |
+| PR / evidence | [PR #708](https://github.com/voidbrain/nerv/pull/708) (socket budget; Test: `test/placement-campaign.test.ts`); [PR #698](https://github.com/voidbrain/nerv/pull/698) (opened); F-006-T23 evidence in the [F-006-T26 report](evaluations/2026-11-24-f006-t26-placement-report.md) |
 | Opened | 2026-11-24 |
-| Verification | Pending |
+| Verification | Unit/integration 2026-11-24: `test/placement-campaign.test.ts` passes locally (4 of 4 tests). Live P3 probe over 15 s on NERV-02: Pending (F-006-T27). |
 | Reviewed | 2026-11-24 |
 
 </details>
