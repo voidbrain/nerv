@@ -221,8 +221,8 @@ export const HELP_GROUPS: HelpGroup[] = [
           'kaji enrol BASE-ID "Name" PUBKEY|self ADDRESS | kaji revoke BASE-ID | kaji list',
           'kaji main [BASE-ID] | kaji offer [ACTION…|none] | kaji seat BASE-ID shadow|veto|off',
           'kaji export [FILE] | kaji import FILE --root FINGERPRINT',
-          'kaji relocate BASE-ID [--revoke LOST-ID] | kaji drain [FILE] | kaji standby [BASE-ID]',
-          'kaji promote [--drain-receipt FILE]',
+          'kaji relocate BASE-ID FILE [--revoke LOST-ID] | kaji drain [RECEIPT] [--relocation FILE] | kaji standby [BASE-ID]',
+          'kaji promote [--drain-receipt RECEIPT] [--relocation FILE]',
         ],
       },
       {

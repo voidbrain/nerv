@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { generateKeyPairSync, type KeyObject } from 'node:crypto';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -35,6 +35,7 @@ import {
 import type { ReplicationBatch } from '../src/coordinator-replication.ts';
 import { COORDINATOR_STATE_SCHEMA } from '../src/coordinator-snapshot.ts';
 import { runKajiCommand } from '../src/cli-kaji.ts';
+import { readRelocationBundle } from '../src/coordinator-relocation-bundle.ts';
 import {
   ROOT_KEY_FILE,
   Registry,
@@ -368,9 +369,8 @@ class Mesh {
     } finally {
       log.mock.restore();
     }
-    const records = existsSync(file)
-      ? (JSON.parse(readFileSync(file, 'utf8')) as { records: SignedRecord[] }).records
-      : [];
+    // What `kaji promote --relocation FILE` and `kaji drain --relocation FILE` read (verified against the root).
+    const records = existsSync(file) ? readRelocationBundle(file, this.rootPub).records : [];
     this.serial = Math.max(this.serial, ...records.map((r) => r.body.serial));
     return records;
   }
@@ -691,7 +691,7 @@ describe('F-016-T08: partition, sleep and reconnect keep one authority and run n
     m.importRecords(B, records);
     const promoteAt = m.elapsed();
     const res = await m.promote(B);
-    assert.ok(!('resumed' in res) && res.newEpoch === 3 && res.quarantined === 1);
+    assert.ok('quarantined' in res && res.newEpoch === 3 && res.quarantined === 1);
     await m.advance(30_000);
     const b = m.span(B)!;
     assert.ok(b.first >= promoteAt + 65_000, `B acted at ${b.first} ms`);
@@ -1230,7 +1230,7 @@ describe('F-016-T20: live replication carries what the old main did across a par
     m.importRecords(B, records);
     const res = await m.promote(B);
     // Both sends are settled in B's state: nothing is parked as uncertain, and nothing is sent again.
-    assert.ok(!('resumed' in res) && res.newEpoch === 3 && res.quarantined === 0);
+    assert.ok('quarantined' in res && res.newEpoch === 3 && res.quarantined === 0);
     // The promoted main resumes Telegram from the offset X had shipped (the channel hydrates it on activation).
     assert.equal(coordinatorTelegramContinuity(m.base(B).db).load()?.offset, shippedOffset);
     await m.advance(30_000);

@@ -375,7 +375,7 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
     }
   });
 
-  it('kaji relocate signs revoke + main E+1; kaji drain refuses before it and signs a receipt after', async () => {
+  it('kaji relocate signs revoke + main E+1 into a bundle (B-124: nothing stored or pushed); kaji drain refuses before it and stores it with the fence', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'nerv-kaji-reloc-'));
     try {
       const home = join(dir, 'home');
@@ -414,18 +414,22 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
       );
       setState(store.db, 2, 'active', 4, 'digest-4');
       const config = { kaji: { root: key.publicKey } } as unknown as Parameters<typeof runKajiCommand>[3];
+      const pushes: string[] = [];
       const ctx = {
         readSecret: async () => PASS,
         flag: (n: string) => (n === '--revoke' ? 'NERV-03' : undefined),
-        // F-016-T18: relocate pushes the new records; these test bases are offline.
+        // B-124: relocate pushes nothing (it used to push the new records to every reachable base).
         promotion: {
-          pushEpoch: async (): Promise<never> => {
+          pushEpoch: async (to: string): Promise<never> => {
+            pushes.push(to);
             throw new Error('offline');
           },
         },
       };
       const noFlags = { ...ctx, flag: () => undefined };
       const receiptPath = join(dir, 'receipt.json');
+      const bundlePath = join(dir, 'relocation.json');
+      const withBundle = { ...ctx, flag: (n: string) => (n === '--relocation' ? bundlePath : undefined) };
 
       await assert.rejects(
         runKajiCommand(['drain', receiptPath], home, store, config, noFlags),
@@ -433,12 +437,27 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
       );
       assert.equal(store.coordinatorFencingState()?.replicationMode, 'active');
 
-      await runKajiCommand(['relocate', 'NERV-02'], home, store, config, ctx);
-      assert.equal(reg.main(), 'NERV-02');
+      await runKajiCommand(['relocate', 'NERV-02', bundlePath], home, store, config, ctx);
+      assert.deepEqual(pushes, [], 'relocate pushed nothing');
+      assert.equal(reg.main(), 'NERV-01', 'relocate stored nothing in its own registry');
+      assert.equal(reg.mainEpoch(), 2);
+      const bundle = JSON.parse(readFileSync(bundlePath, 'utf8')) as { relocation: unknown };
+      assert.deepEqual(bundle.relocation, { baseId: 'NERV-02', coordinatorEpoch: 3, revoked: 'NERV-03' });
+      // A relocation bundle is never imported: held in a registry it would reach every base unchecked.
+      await assert.rejects(
+        runKajiCommand(['import', bundlePath], home, store, config, noFlags),
+        /relocation bundle: run kaji promote --relocation FILE on NERV-02/,
+      );
+      assert.equal(reg.mainEpoch(), 2);
+      await assert.rejects(
+        runKajiCommand(['drain', receiptPath], home, store, config, noFlags),
+        /Sign the relocation first/,
+      );
+
+      await runKajiCommand(['drain', receiptPath], home, store, config, withBundle);
+      assert.equal(reg.main(), 'NERV-02', 'the drain stored the records with the fence');
       assert.equal(reg.mainEpoch(), 3);
       assert.equal(reg.bases().find((b) => b.baseId === 'NERV-03')?.status, 'revoked');
-
-      await runKajiCommand(['drain', receiptPath], home, store, config, noFlags);
       const signed = JSON.parse(readFileSync(receiptPath, 'utf8')) as SignedDrainReceipt;
       assert.equal(signed.receipt.baseId, 'NERV-01');
       assert.equal(signed.receipt.finalSeq, 4);
