@@ -335,3 +335,23 @@ test(
     }
   },
 );
+test(
+  'F-016-T18: once a worker holds a newer main record, its open WebSocket to the old main stops taking work',
+  { timeout: 30000 },
+  async () => {
+    const f = await fixture();
+    try {
+      await f.start();
+      assert.equal(((await f.main.run('NERV-02', item(30), 5000)) as { outcome: string }).outcome, 'grant');
+      const c = keys();
+      await f.rb.kaji.add([
+        f.record({ kind: 'enrol', baseId: 'NERV-03', name: 'Relay', publicKey: c.publicKey, address: '127.0.0.1:1' }),
+        f.record({ kind: 'main', baseId: 'NERV-03', coordinatorEpoch: 2 }),
+      ]);
+      await until(() => !f.link.connected('NERV-01'));
+      await assert.rejects(f.main.run('NERV-02', item(31), 2000));
+    } finally {
+      await f.close();
+    }
+  },
+);

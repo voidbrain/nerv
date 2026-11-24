@@ -54,6 +54,7 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'n
 
 import { OWNER_SOURCE, Store } from './store.ts';
 import { argsHash } from './ledger.ts';
+import { formatDevices, matchDevice, type DeviceInfo } from './device-book.ts';
 
 import {
   savePilots,
@@ -688,6 +689,33 @@ export async function tryRunCliCommand(
     console.log(
       `${value.exchanges} exchange(s) consolidated · ${value.proposed} fact(s) proposed as cards · ${value.skipped} already known${value.summary ? `\n${value.summary}` : ''}`,
     );
+  } else if (command === 'devices') {
+    // F-118-T03: the paired phones (name, last use) and revoking one; its next request is refused and it asks to pair.
+    const [sub = 'list', ...rest] = args;
+    if (!(sub === 'list' && !rest.length) && !(sub === 'revoke' && rest.length))
+      throw new Error('Usage: devices [list] | devices revoke NAME|ID');
+    const config = readConfig(home);
+    const call = async (path: string, method = 'GET') => {
+      const response = await fetch(`http://127.0.0.1:${config.port}/api/${path}`, {
+        method,
+        headers: { authorization: `Bearer ${readToken(home)}` },
+      }).catch(() => {
+        throw new Error('NERV Agency is not running: start it with serve, launch or service start.');
+      });
+      const value = (await response.json()) as { devices?: DeviceInfo[]; error?: string };
+      if (!response.ok) throw new Error(value.error ?? `Request failed (${response.status}).`);
+      return value;
+    };
+    const list = (await call('devices')).devices ?? [];
+    if (sub === 'list') console.log(formatDevices(list, Date.now()));
+    else {
+      const found = matchDevice(list, rest.join(' '));
+      if ('error' in found) throw new Error(found.error);
+      await call(`devices/${encodeURIComponent(found.device.id)}`, 'DELETE');
+      console.log(
+        `Revoked ${found.device.name} (${found.device.id}): its next request is refused and it asks to pair again (nerv open --phone).`,
+      );
+    }
   } else if (command === 'sessions') {
     // Ends every dashboard session (F-039): each open dashboard asks to sign in again; the admin token is unchanged.
     if (args[0] !== 'revoke') throw new Error('Usage: sessions revoke');

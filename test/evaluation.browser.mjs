@@ -388,3 +388,79 @@ test(
     }
   },
 );
+
+// F-118-T03: across the join, the dashboard's Settings (production build) lists the paired devices from the real
+// server and DeviceBook, with name, pairing day and last use, marks this one and revokes: a stale device revoked there
+// is refused on its next request, and this app revoking itself shows "pairing ended" and forgets its credential.
+test(
+  'F-118-T03: Settings lists paired devices and revokes one; revoking this device ends its pairing',
+  { timeout: 120000 },
+  async () => {
+    const home = mkdtempSync(join(tmpdir(), 'nerv-devices-browser-')),
+      token = 'f'.repeat(32);
+    const store = new Store(':memory:');
+    const server = makeServer(store, token, {
+      webRoot: resolve('dist/web/browser'),
+      deviceFile: join(home, 'devices.json'),
+      language: 'en',
+      timeZone: 'Europe/Rome',
+    });
+    await new Promise((done) => server.listen(0, '127.0.0.1', done));
+    const origin = `http://127.0.0.1:${server.address().port}`;
+    const admin = { authorization: 'Bearer ' + token };
+    const mint = async () =>
+      (await (await fetch(origin + '/api/device/codes', { method: 'POST', headers: admin })).json()).code;
+    const devices = async () => (await (await fetch(origin + '/api/devices', { headers: admin })).json()).devices;
+    const status = async (bearer) =>
+      (await fetch(origin + '/api/status', { headers: { authorization: 'Bearer ' + bearer } })).status;
+    const banner = `document.querySelector('.banner').textContent`;
+    const signedIn = `${banner}.includes('LIVE ·')&&!${banner}.includes('NOT SIGNED IN')&&!${banner}.includes('SIGNING IN')`;
+    const rows = `[...document.querySelectorAll('#settings-devices [data-device]')]`;
+    try {
+      // A stale device paired from a browser tab before the fix of #707.
+      const stale = await (
+        await fetch(origin + '/api/device/pair', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ code: await mint(), name: 'Mac · dashboard app' }),
+        })
+      ).json();
+      await browser(async ({ page, evaluate, until, errors }) => {
+        await page('Page.addScriptToEvaluateOnNewDocument', {
+          source: `Object.defineProperty(Navigator.prototype,'standalone',{configurable:true,get:()=>true});window.confirm=()=>true`,
+        });
+        await page('Page.navigate', { url: origin + '/dashboard/' });
+        await until(`${banner}.includes('NOT SIGNED IN')`);
+        await evaluate(
+          `{const i=document.querySelector('#live-token');i.value=${JSON.stringify(await mint())};document.querySelector('#live-signin').requestSubmit()}`,
+        );
+        await until(signedIn);
+        await until(`${rows}.length===2`);
+        const shown = await evaluate(`${rows}.map(r=>r.textContent)`);
+        assert.match(shown[0], /Mac · dashboard app/);
+        assert.match(shown[0], /paired .*last used/);
+        assert.doesNotMatch(shown[0], /this device/);
+        assert.match(shown[1], / · dashboard app.*this device/);
+        // Revoke the stale device: gone from the list, refused on its next request.
+        assert.equal(await status(stale.token), 200);
+        await evaluate(`document.querySelector('[data-device="${stale.device.id}"] button[data-revoke]').click()`);
+        await until(`${rows}.length===1`);
+        assert.equal(await status(stale.token), 401, 'the revoked device is refused');
+        assert.equal((await devices()).length, 1);
+        // Revoke this device: the app says the pairing ended and forgets its credential.
+        await evaluate(`document.querySelector('#settings-devices button[data-revoke]').click()`);
+        await until(`${banner}.includes('NOT SIGNED IN')&&${banner}.includes('pairing ended')`);
+        assert.equal(await evaluate(`localStorage.getItem('nerv.device')`), null);
+        assert.equal((await devices()).length, 0);
+        assert.deepEqual(errors, [], 'no browser runtime exceptions');
+      });
+    } finally {
+      await new Promise((done) => {
+        server.close(done);
+        server.closeAllConnections();
+      });
+      store.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);

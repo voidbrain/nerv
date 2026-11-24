@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  PROBE_PROMPT_LIMIT,
-  foldAsk,
+  PROBE_PROMPT_BYTES,
+  PROBE_SYSTEM_BYTES,
   gradeSmoke,
   parseVote,
+  probeBody,
+  probeRefusal,
+  roleItems,
   runSuite,
   runCombination,
   smokeCases,
@@ -12,10 +15,32 @@ import {
 
 const limits = { caseMs: 30000, suiteMs: 900000, repeat: 3, outputTokens: 61440 };
 
-test('foldAsk joins system and prompt and refuses what the placement probe cannot carry', () => {
-  assert.equal(foldAsk({ system: 'S', prompt: 'P' }), 'S\n\nP');
-  assert.equal(foldAsk({ prompt: 'P' }), 'P');
-  assert.equal(foldAsk({ system: 'x'.repeat(PROBE_PROMPT_LIMIT), prompt: 'P' }), null);
+test('the probe body keeps the system message apart and every role case fits the probe (F-006-T27)', async () => {
+  assert.deepEqual(probeBody('P3', { system: 'S', prompt: 'P' }, { maxTokens: 99999, timeoutMs: 30000 }), {
+    placement: 'P3',
+    system: 'S',
+    prompt: 'P',
+    endpoint: 'mac',
+    timeoutMs: 30000,
+    maxOutputTokens: 4096,
+    confirmExecute: true,
+  });
+  assert.deepEqual(probeBody('P2', { prompt: 'P' }, { maxTokens: 10, timeoutMs: 500 }), {
+    placement: 'P2',
+    prompt: 'P',
+    timeoutMs: 1000,
+    maxOutputTokens: 10,
+    confirmExecute: true,
+  });
+  const items = await roleItems();
+  assert.deepEqual(
+    items.filter((i) => probeRefusal(i.ask)).map((i) => i.id),
+    [],
+  );
+  assert.ok(items.some((i) => i.id.startsWith('misato:') && i.ask.system.length > 17_000));
+  assert.match(probeRefusal({ system: 's'.repeat(PROBE_SYSTEM_BYTES + 1), prompt: 'p' }), /system/);
+  assert.match(probeRefusal({ prompt: 'é'.repeat(PROBE_PROMPT_BYTES / 2 + 1) }), /prompt/);
+  assert.equal(probeRefusal({ system: 's'.repeat(PROBE_SYSTEM_BYTES), prompt: 'p'.repeat(PROBE_PROMPT_BYTES) }), null);
 });
 
 test('gradeSmoke matches the Gauntlet engine: raw JSON deep equality, no repair', () => {

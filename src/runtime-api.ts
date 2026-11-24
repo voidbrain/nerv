@@ -163,7 +163,7 @@ export interface StoreApi {
   ): Promise<import('./model.ts').OrchestrationSelection>;
   runOrchestratedJob?(input: {
     orchestration: import('./model.ts').OrchestrationRequest;
-    ask: { prompt: string; maxTokens?: number; temperature?: number };
+    ask: { prompt: string; system?: string; maxTokens?: number; temperature?: number };
     timeoutMs?: number;
   }): Promise<{
     selection: import('./model.ts').OrchestrationSelection;
