@@ -2,7 +2,8 @@ import { recordHealth } from './milestones.ts';
 import type { WorkerItem, WorkerContext, WorkerLease } from './worker-jobs.ts';
 import type { RunReason } from './instrumentality-runs.ts';
 import { parsePrices, type UsageObservation } from './model-usage.ts';
-import { MISATO_SOURCE, OWNER_SOURCE, Store } from './store.ts';
+import { MISATO_SOURCE, OWNER_SOURCE, Store, settledOutcome } from './store.ts';
+import { createCdpBrowserDriver } from './browser-cdp-driver.ts';
 import { underTestRunner } from './slicer.ts';
 import { appendFileSync } from 'node:fs';
 import { CoordinatorAuthorityError } from './coordinator-authority.ts';
@@ -27,6 +28,11 @@ if (bambuLaunchLog && underTestRunner()) {
     appendFileSync(bambuLaunchLog, `${importLink}\n`);
     return { opened: true };
   };
+}
+// F-089-T06: under the test runner only, a test's Runtime lets browser.click attach the CDP driver to the fake
+// DevTools endpoint on config.json's debugging port (the default driver refuses under the test runner).
+if (process.argv.includes('--browser-cdp-test') && underTestRunner()) {
+  store.browserDriver = (port) => createCdpBrowserDriver({ port, settleMs: 1 });
 }
 // F-016-T16: a standby, fenced or lease-expired base runs no coordinator tick (the authority check refuses it),
 // quietly; worker-scoped expiry still runs.
@@ -203,11 +209,13 @@ process.on('message', (value: unknown) => {
       case 'batteries.register':
         return store.registerBattery(params as unknown as import('./batteries.ts').RegisterBatteryInput);
       case 'approvals.decide':
-        return store.decide(
-          params.id as string,
-          params.decision as 'approve' | 'reject' | 'edit',
-          params.source as string,
-          params.useSuggestedFix === true ? { useSuggestedFix: true } : undefined,
+        return settledOutcome(
+          store.decide(
+            params.id as string,
+            params.decision as 'approve' | 'reject' | 'edit',
+            params.source as string,
+            params.useSuggestedFix === true ? { useSuggestedFix: true } : undefined,
+          ),
         );
       case 'events.page':
         return store.events(
@@ -470,17 +478,19 @@ process.on('message', (value: unknown) => {
         return store.ledger.preview(params.sortieId as string, params.tool as string);
       case 'actions.act':
         store.ledger.setExternal(external());
-        return store.runAction(
-          params.sortieId as string,
-          {
-            tool: params.tool as string,
-            args: params.args as Record<string, unknown>,
-            stage: params.stage as 'production',
-            ...(params.casper ? { casper: params.casper as Verdict } : {}),
-            ...(Array.isArray(params.extras) ? { extras: params.extras as Verdict[] } : {}),
-          },
-          params.worker as unknown as WorkerLease | undefined,
-          params.agency as AgencySnapshot | undefined,
+        return settledOutcome(
+          store.runAction(
+            params.sortieId as string,
+            {
+              tool: params.tool as string,
+              args: params.args as Record<string, unknown>,
+              stage: params.stage as 'production',
+              ...(params.casper ? { casper: params.casper as Verdict } : {}),
+              ...(Array.isArray(params.extras) ? { extras: params.extras as Verdict[] } : {}),
+            },
+            params.worker as unknown as WorkerLease | undefined,
+            params.agency as AgencySnapshot | undefined,
+          ),
         );
       case 'inbox.page':
         return store.inboxPage(

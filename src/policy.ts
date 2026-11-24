@@ -12,6 +12,8 @@ export interface Tool {
   inverse?: string;
   owner?: true;
   removes?: true;
+  /** F-089-T06: every call waits for the owner's approval card, whatever the Sync Ratio; the pattern stays its effect class. */
+  card?: true;
   /** F-021: the EVA class an MCP tool was granted for (B-025). */ eva?: Executor;
 }
 /** The Scrolls: owner rules. Unknown keys are rejected so a typo cannot silently relax a rule. */
@@ -369,6 +371,7 @@ export function ballot(
   if (needsCasper && (!casper || casper.vote !== 'approve'))
     return { ...base, outcome: 'approval', reason: 'Casper (intent) verdict unavailable; the owner decides.' };
   if (pattern === 'blue') return { ...base, outcome: 'approval', reason: 'Pattern Blue always needs the owner.' };
+  if (tool?.card) return { ...base, outcome: 'approval', reason: 'Every call of this tool waits for the owner.' };
   if (value < policy.syncThreshold)
     return { ...base, outcome: 'approval', reason: `Sync Ratio ${value}% below ${policy.syncThreshold}%.` };
   return { ...base, outcome: 'grant', reason: `Sync Ratio ${value}%.` };

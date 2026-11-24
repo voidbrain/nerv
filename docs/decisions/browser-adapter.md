@@ -23,6 +23,13 @@ Status: Accepted (decision for F-089)
 - `nerv browser-click <control> --approved` acts on the most recently used page target, only when it is visible and its origin is allowed. Controls are found by accessible name in the page; password, payment-autocomplete fields and controls inside an open page dialog are refused; a click that opens a JavaScript dialog stops with a message and the dialog is left for the owner.
 - `test/browser-click.browser.mjs` runs it against a local fixture page in headless Chrome.
 
+## Chat tool (F-089-T06)
+
+- Misato's `browser.click` tool takes `{"control": "<accessible name>"}` (1–200 characters, no other argument) and runs the same adapter as the CLI (`clickNamedControl` over the CDP driver on `browser.debugPort`): the same `browser.allowedOrigins`, refusals and `tainted: true` page text.
+- It is Orange (`write-external`) and every call waits for the owner's approval card, whatever the Sync Ratio (the gate's `card` tool flag); the click runs only once that card is approved, and the executor passes `approved` only for a grant from an approved card. In a sortie that is already tainted it is Blue, like every external action there.
+- The page text it returns taints the sortie, so nothing read from the page can drive a later external action without the owner.
+- Tests inject the driver; the default driver refuses under the test runner, so no test clicks in a browser on the desktop.
+
 ## Owner decision: a chat tool for browser clicks (F-089-T05)
 
 Today the Chrome DevTools driver is reachable only from the CLI (`nerv browser-click`) and from the F-012 web-chat resume. Misato has no chat tool that calls it, so a chat request such as "click the skip button" cannot reach the browser. Should Misato get one?

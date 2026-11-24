@@ -1,5 +1,6 @@
 import type { CodingJobPrOpener } from './coding-job.ts';
 import type { BambuConnectLauncher, SlicerExecFn } from './slicer.ts';
+import type { BrowserAdapterDriver } from './browser-control.ts';
 import { Watch, type WatchWork } from './watch.ts';
 import {
   DEFAULT_HEALTH_THRESHOLDS,
@@ -126,6 +127,25 @@ export interface ActResult {
   approvalIds?: string[];
   result?: unknown;
   error?: string;
+  /** F-089-T06: an executor that answers later; settles once the ledger has recorded its outcome (`settledOutcome`). */
+  pending?: Promise<RunOutcome>;
+}
+/** The owner's decision, and what the approved executor came to (or will: `pending`). */
+export interface DecideResult {
+  decision: string;
+  result?: unknown;
+  error?: string;
+  pending?: Promise<RunOutcome>;
+}
+/** What a granted executor came to. */
+export type RunOutcome = { result: unknown } | { error: string };
+/** Waits for an executor that answers later and folds its result or error into the reply (F-089-T06). */
+export async function settledOutcome<T extends { pending?: Promise<RunOutcome> }>(
+  value: T,
+): Promise<Omit<T, 'pending'> & { result?: unknown; error?: string }> {
+  if (!value.pending) return value;
+  const { pending, ...rest } = value;
+  return { ...rest, ...(await pending) };
 }
 /** Sorties the owner starts directly hold one action and close once it settles. */
 export const OWNER_SOURCE = 'owner';
@@ -152,6 +172,8 @@ export class Store {
   pushFetch: typeof fetch = fetch;
   codingPrOpener?: CodingJobPrOpener;
   bambuLauncher?: BambuConnectLauncher;
+  /** F-089-T06: the browser driver for browser.click (tests inject one; the default refuses under the test runner). */
+  browserDriver?: (port: number) => BrowserAdapterDriver;
   /** F-121-T02: the slicer process runner; tests set a fake slicer. */
   slicerExec?: SlicerExecFn;
   /** The data home, when known: the schedule tool writes config.json there. */
@@ -560,12 +582,7 @@ export class Store {
   releaseWorker(id: string, reason: string, confirmedStopped: boolean): void {
     this.sortiesController.releaseWorker(id, reason, confirmedStopped);
   }
-  decide(
-    id: string,
-    decision: Decision,
-    source = 'api',
-    options?: { useSuggestedFix?: boolean },
-  ): { decision: string; result?: unknown; error?: string } {
+  decide(id: string, decision: Decision, source = 'api', options?: { useSuggestedFix?: boolean }): DecideResult {
     if (!this.workerJobs.approval(id)) this.assertActiveCoordinator();
     return this.sortiesController.decide(id, decision, source, options);
   }

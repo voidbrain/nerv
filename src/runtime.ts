@@ -102,12 +102,14 @@ export class Runtime implements StoreApi {
   /**
    * `test.bambuLaunchLog` (tests only, needs `home`): the nervous process records Bambu Connect hand-offs to that
    * file instead of opening the app; it is honoured only under the test runner.
+   * `test.browserCdp` (tests only): browser.click may attach the CDP driver to the test's fake DevTools endpoint on
+   * config.json's debugging port; honoured only under the test runner.
    */
   constructor(
     database: string,
     brainEntry = new URL('./brain-process.ts', import.meta.url),
     home?: string,
-    test: { bambuLaunchLog?: string } = {},
+    test: { bambuLaunchLog?: string; browserCdp?: boolean } = {},
   ) {
     this.database = database;
     this.home = home;
@@ -115,7 +117,12 @@ export class Runtime implements StoreApi {
     this.nervous = new ProcessClient(
       new URL('./nervous-process.ts', import.meta.url),
       home
-        ? [database, home, ...(test.bambuLaunchLog ? [`--bambu-launch-log=${test.bambuLaunchLog}`] : [])]
+        ? [
+            database,
+            home,
+            ...(test.bambuLaunchLog ? [`--bambu-launch-log=${test.bambuLaunchLog}`] : []),
+            ...(test.browserCdp ? ['--browser-cdp-test'] : []),
+          ]
         : [database],
       'nervous',
     );

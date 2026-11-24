@@ -134,7 +134,11 @@ describe('F-089-T06: browser.click chat tool', () => {
         store.browserDriver = fakeSessionDriver(page(c.url), clicks);
         try {
           const sortie = store.ledger.openSortie(MISATO_SOURCE, 'click it', 'trusted');
-          const card = store.runAction(sortie, { tool: 'browser.click', stage: 'production', args: { control: c.control } });
+          const card = store.runAction(sortie, {
+            tool: 'browser.click',
+            stage: 'production',
+            args: { control: c.control },
+          });
           assert.equal(card.outcome, 'approval');
           const decided = await settledOutcome(store.decide(card.approvalId!, 'approve', 'owner'));
           assert.match(String(decided.error), c.error);
@@ -211,7 +215,9 @@ async function fakeCdpEndpoint(p: FakePage, clicks: string[]) {
     socket.on('message', (data) => {
       const msg = JSON.parse(String(data)) as { id: number; method: string; params?: { expression?: string } };
       const result =
-        msg.method === 'Runtime.evaluate' ? { result: { value: answer(p, clicks, String(msg.params?.expression)) } } : {};
+        msg.method === 'Runtime.evaluate'
+          ? { result: { value: answer(p, clicks, String(msg.params?.expression)) } }
+          : {};
       socket.send(JSON.stringify({ id: msg.id, result }));
     });
   });
