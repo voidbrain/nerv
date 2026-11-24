@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 86.5 h agent + 10.5 h owner across 124 open steps of 36 features and 23 other records. 123 h of actual effort recorded on 138 steps. Generated from the task files.
+**Remaining effort:** 86.5 h agent + 10.5 h owner across 124 open steps of 36 features and 23 other records. 123.25 h of actual effort recorded on 139 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -691,9 +691,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-119-T01 — First skill discovery review (Planned).
+💻 **→** Next: merge PR on green CI and close.
 
 | | |
 |---|---|
@@ -703,10 +703,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-119-t01"></a>F-119-T01 — First skill discovery review | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-119-t01"></a>F-119-T01 — First skill discovery review | 1 h | 0.25 h so far (stated) | 1 h | Implemented; verification pending | [PR #709](https://github.com/voidbrain/nerv/pull/709) first skill discovery review (docs/reviews/skills/2026-11-24.md) |
+| 🟢 Small | **Total** | 1 h | 0.25 h | 1 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -715,10 +715,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| PR / evidence | Steps: F-119-T01: [PR #709](https://github.com/voidbrain/nerv/pull/709) first skill discovery review (docs/reviews/skills/2026-11-24.md). [PR #709](https://github.com/voidbrain/nerv/pull/709) ([2026-11-24.md](reviews/skills/2026-11-24.md)); opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
 | Opened | 2026-11-23 |
-| Verification | — |
-| Reviewed | 2026-11-23 |
+| Verification | Documentation 2026-11-24: [2026-11-24.md](reviews/skills/2026-11-24.md) written per docs/agents/skills.md; `npm run check:freshness` and `npm run check:fast` pass. |
+| Reviewed | 2026-11-24 |
 
 </details>
 
