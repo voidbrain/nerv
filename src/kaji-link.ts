@@ -1114,7 +1114,8 @@ export class KajiLink {
     // shipper acts on (F-016-T20); a refusal by the line (not main, stale epoch or lease) is an error.
     if (res.status === 409 || res.status === 400) {
       const parsed = JSON.parse(res.text) as ApplyReplicationBatchResult & { reason?: string; error?: string };
-      if (parsed.ok === false && ['need_resync', 'not_standby', 'invalid_batch'].includes(parsed.reason)) return parsed;
+      if (parsed.ok === false && ['need_resync', 'not_standby', 'invalid_batch', 'busy'].includes(parsed.reason))
+        return parsed;
     }
     throw new Error(`${baseId} refused (${res.status}): ${res.text}`);
   }

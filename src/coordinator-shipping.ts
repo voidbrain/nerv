@@ -488,6 +488,18 @@ export class StandbySeedReceiver {
   }
 }
 
+/**
+ * #725 re-check: an apply that failed because the standby store was locked (another connection writing) is
+ * retried with the same batch; any other fault (an older schema, an unreadable file) asks for a new seed.
+ */
+export function replicationApplyFault(err: unknown): 'busy' | 'not_standby' {
+  const code = (err as { errcode?: unknown } | undefined)?.errcode;
+  const message = err instanceof Error ? err.message : '';
+  return code === 5 || code === 6 || /database (table )?is (locked|busy)|SQLITE_(BUSY|LOCKED)/i.test(message)
+    ? 'busy'
+    : 'not_standby';
+}
+
 /** What the main needs from the Kaji line to ship (KajiLink, or a simulated line in tests). */
 export interface ShippingLink {
   replicate(baseId: string, batch: ReplicationBatch, leaseExpiresAt: number): Promise<ApplyReplicationBatchResult>;
@@ -780,6 +792,10 @@ export class ReplicationShipper {
         this.o.log?.(
           `Replication: ${standby} is ahead of this main at epoch ${epoch} (seq ${res.expectedSeq - 1} > ${head}); it is seeded from this main.`,
         );
+      if (res.reason === 'busy') {
+        this.noteError(standby, 'the standby store was busy; the same batch is sent again');
+        return 'behind';
+      }
       if (res.reason === 'invalid_batch') {
         this.noteError(standby, 'the standby refused a batch as invalid');
         return 'refused';

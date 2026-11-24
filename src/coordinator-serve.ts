@@ -18,6 +18,7 @@ import {
 import {
   ReplicationShipper,
   StandbySeedReceiver,
+  replicationApplyFault,
   seedStandbyStore,
   type ReplicationShipperOptions,
   type SeedReply,
@@ -140,10 +141,11 @@ export function coordinatorLeaseService(input: {
           expectedMainBaseId: from,
           minCoordinatorEpoch: fromMain ? reg.mainEpoch() : batch.coordinatorEpoch,
         });
-      } catch {
+      } catch (err) {
         // #725 review: a store this NERV cannot apply to (unreadable, or an older schema) is seeded again by the
-        // main rather than failing every second; the seed itself reports a store it cannot read.
-        return { ok: false, reason: 'not_standby', expectedSeq: 0 };
+        // main rather than failing every second; the seed itself reports a store it cannot read. A locked store
+        // (re-check) is only busy: the main sends the same batch again.
+        return { ok: false, reason: replicationApplyFault(err), expectedSeq: 0 };
       } finally {
         standby?.close();
       }

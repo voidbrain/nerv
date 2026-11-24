@@ -71,7 +71,8 @@ export type ApplyReplicationBatchResult =
   | { ok: true; duplicate?: boolean; headSeq: number; stateDigest: string }
   | {
       ok: false;
-      reason: 'need_resync' | 'invalid_batch' | 'not_standby';
+      /** `busy`: the standby store was locked (F-016-T20 re-check): the same batch is sent again. */
+      reason: 'need_resync' | 'invalid_batch' | 'not_standby' | 'busy';
       expectedSeq: number;
       /** F-016-T20: the epoch the standby holds, so the main tells a gap from an epoch change. */
       coordinatorEpoch?: number;

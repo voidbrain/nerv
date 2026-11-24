@@ -332,7 +332,15 @@ export async function runKajiCommand(
           "UPDATE coordinator_state SET replication_mode = 'active' WHERE id = 1 AND replication_mode = 'draining'",
         )
         .run();
-      console.log('Drain cancelled: this main is active again (its lease keeper renews or fences it as before).');
+      const named = registry.main();
+      const self = registry.bases().find((b) => b.publicKey === me && b.status === 'enrolled');
+      // F-016-T20 re-check: once the relocation is imported here the registry names the new main, so the
+      // authority check keeps every coordinator effect off whatever the mode says.
+      console.log(
+        named && self && named !== self.baseId
+          ? `Drain cancelled: the mode is active again, but this base's registry names ${named} at epoch ${registry.mainEpoch()}, so it runs no coordinator effects. The move goes on with a drain and kaji promote on ${named}.`
+          : 'Drain cancelled: this main is active again (its lease keeper renews or fences it as before).',
+      );
       return;
     }
     const self = registry.bases().find((b) => b.publicKey === me && b.status === 'enrolled');

@@ -161,7 +161,13 @@ function unreplicatedChanges(db: DatabaseSync, epoch: number): number {
           .prepare('SELECT coordinator_epoch, acked_seq FROM coordinator_replication_peer WHERE base_id = ?')
           .get(row.standby_base_id) as { coordinator_epoch: number; acked_seq: number } | undefined)
       : undefined;
-  const unacked = peer && peer.coordinator_epoch === epoch ? Math.max(row.head_seq - peer.acked_seq, 0) : 0;
+  // F-016-T20 re-check: a named standby whose position at this epoch is unknown (never acked here, or only at
+  // another epoch) counts as not holding the head; `kaji drain` ships or seeds it, then fences.
+  const unacked = !row.standby_base_id
+    ? 0
+    : peer && peer.coordinator_epoch === epoch
+      ? Math.max(row.head_seq - peer.acked_seq, 0)
+      : Math.max(row.head_seq, 1);
   return pending + unacked;
 }
 
