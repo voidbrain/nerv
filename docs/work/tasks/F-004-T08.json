@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "id": "F-004-T08",
+  "parent": "F-004",
+  "title": "Dashboard Settings → Notifications: enable push on the installed app",
+  "goal": "The installed dashboard app (the one paired by QR, F-118) asks for notification permission on a tap in Settings and registers its push subscription with the service, as the workspace toggle does (owner report 2026-11-24: no permission prompt on the iPhone)",
+  "status": "implemented",
+  "acceptance": [
+    "Settings → Notifications shows the state: On, Off, Blocked (with where to allow it), not supported, or that a Safari tab needs the Home Screen app",
+    "Enable notifications asks for permission on the tap, subscribes with the service's VAPID key through the dashboard's own service worker (sw.js, scope /dashboard/) and stores the subscription with POST /api/push/subscribe; Turn off removes it there and unsubscribes",
+    "A paired device credential (F-118) is accepted by the push endpoints as a dashboard session is",
+    "The service offers no test-notification endpoint, so there is no Send a test notification button; a reminder due in a minute is the test (docs/acceptance/f004-t06-phone-push-procedure.md)",
+    "A browser test on the production build across the join: dashboard at /dashboard/ with a device credential, Settings button, permission (stubbed), subscribe (stubbed push service), the server stores the subscription",
+    "Gauntlet: nerv-system-flows/browser and multi-step-agent/* went pending on this source; an owner-approved gauntlet run covers them before this step is verified"
+  ],
+  "dependsOn": [
+    "F-004-T05"
+  ],
+  "resources": [
+    "web/public/dashboard/live.js",
+    "web/public/dashboard/index.html",
+    "web/public/dashboard/sw.js",
+    "web/public/dashboard/manifest.webmanifest",
+    "test/evaluation.browser.mjs",
+    "docs/acceptance/f004-t06-phone-push-procedure.md",
+    "docs/agents/areas/frontend.md",
+    "docs/work/records/F-004.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no real push service, subscription or device data in Git or tests.",
+  "validation": [
+    "node --test --test-name-pattern=F-004-T08 test/evaluation.browser.mjs (after npm run build)",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h remaining (gauntlet run and merge)",
+    "basis": "Estimated 2026-11-24 at agent speed (1.5 h agent). Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0.25,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.75,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
+  }
+}
