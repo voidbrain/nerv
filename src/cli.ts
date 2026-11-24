@@ -1,5 +1,5 @@
 #!/usr/bin/env -S node --use-system-ca
-import { tryRunCliCommand } from './cli-commands.ts';
+import { phoneBaseFor, tryRunCliCommand } from './cli-commands.ts';
 import { runKajiCommand, runKajiPromoteCommand } from './cli-kaji.ts';
 import { startSnapshots } from './snapshots.ts';
 
@@ -36,6 +36,7 @@ import { nodesCommand } from './nodes-cli.ts';
 import { placementEvidence, placementReport } from './placement-report.ts';
 import { backupCommand } from './backup-cli.ts';
 import { storeReceived } from './offhost.ts';
+import { admitPartTransfer, completeRemotePrint, receivePartTransfer } from './print-transfer.ts';
 
 import { checkUpdateAvailability } from './update-availability.ts';
 
@@ -636,6 +637,8 @@ try {
             sessionFile: join(home, 'sessions.json'),
             // F-118: paired devices (hashed, 90 days unused, bound to the admin token).
             deviceFile: join(home, 'devices.json'),
+            // B-128: the phone's address for a Settings QR minted from 127.0.0.1, as nerv open --phone --qr finds it.
+            phoneBase: phoneBaseFor(home, config.port),
             // B-123: the updater's status for the dashboard's Health row (kept in this data home).
             updaterHome: home,
             // B-108: Update now and the scheduled apply hand the update to its own OS job outside this service.
@@ -842,6 +845,9 @@ try {
                 return 'refused';
               }
             },
+            // F-121-T04: a part another base sends to slice here, when `prints.accept` names that base.
+            admitPartTransfer: (from, bytes) => admitPartTransfer(home, live().prints?.accept ?? [], from, bytes),
+            onPartTransfer: async (from, body) => receivePartTransfer(home, live().prints?.accept ?? [], from, body),
             ...createPeerHandlers({
               base: config.base,
               getAoba: () => aoba,
@@ -871,6 +877,10 @@ try {
           runtime.setLinkMetricsProvider(() => kaji?.linkMetrics() ?? []);
           if (kaji) {
             const link = kaji;
+            // F-121-T04: a print request sends the part to the slicing base (`prints.slicer`) over this line.
+            runtime.useRemotePrint((pending) =>
+              completeRemotePrint(home, pending, (base, message) => link.sendPartTransfer(base, message)),
+            );
             runtime.setRemoteSortie(
               (baseId, sortieId) =>
                 link.inspectSortie(baseId, sortieId) as Promise<{
