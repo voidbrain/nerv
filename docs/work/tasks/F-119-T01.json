@@ -4,7 +4,7 @@
   "parent": "F-119",
   "title": "First skill discovery review",
   "goal": "The project looks for skill candidates and records the outcomes",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "docs/reviews/skills/<date>.md written per docs/agents/skills.md",
     "Each candidate ends in one of the four outcomes, with backlog records for any adopted"
@@ -30,9 +30,17 @@
     "size": "small",
     "estimate": "1 h agent",
     "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
-    "reviewed": "2026-11-23",
+    "reviewed": "2026-11-24",
     "agentHours": 1,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
-  }
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 709,
+      "note": "first skill discovery review (docs/reviews/skills/2026-11-24.md)"
+    }
+  ]
 }
