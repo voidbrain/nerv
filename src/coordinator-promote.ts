@@ -333,8 +333,9 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
   const d = derive(input, mainDbPath, standbyDbPath, monoSinceNs);
   if (d.alreadyActive) {
     if (!existsSync(marker)) throw new Error(`This base is already the active coordinator at epoch ${d.newEpoch}.`);
-    await input.service.start();
+    // F-016-T08: the marker goes first, or the service it starts refuses to run (serve checks the marker).
     rmSync(marker, { force: true });
+    await input.service.start();
     return { resumed: true, newEpoch: d.newEpoch };
   }
 
@@ -372,8 +373,9 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
     try {
       const nowMs = clock.wall();
       const result = relocateCoordinator({ ...d.relocation, nowMs, liveness: d.liveness(nowMs, clock.mono()) });
-      await input.service.start();
+      // The swap is done: remove the marker before the start, which serve would otherwise refuse (F-016-T08).
       rmSync(marker, { force: true });
+      await input.service.start();
       return result;
     } catch (err) {
       if (!(err instanceof RelocationRefusedError)) throw err; // mid-swap: the marker keeps serve down until a re-run
