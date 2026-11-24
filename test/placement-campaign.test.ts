@@ -3,7 +3,7 @@ import test from 'node:test';
 import { toolDocs } from '../src/executors.ts';
 import { misatoAsk } from '../src/misato.ts';
 import { WORKER_MAX_INFER_PROMPT_BYTES, WORKER_MAX_INFER_SYSTEM_BYTES } from '../src/model.ts';
-import { placementProbe } from '../src/placement-campaign.ts';
+import { PLACEMENT_PROBE_TEMPLATE_TOKENS, placementProbe } from '../src/placement-campaign.ts';
 import { makeServer } from '../src/server.ts';
 
 /** Misato's own ask for a neutral request: a system message of about 17,600 characters (F-006-T27). */
@@ -27,7 +27,8 @@ test('placement probes keep P2 local and P3 remote without execution fallback', 
     waitBudgetMs: 0,
     maxAttempts: 1,
     maxOutputTokens: 512,
-    maxTotalTokens: 1024,
+    // B-131: the total covers the probe's input bound (13 bytes + template allowance) and its 512 output tokens.
+    maxTotalTokens: 13 + PLACEMENT_PROBE_TEMPLATE_TOKENS + 512,
     maxDelegations: 1,
     delegationDepth: 0,
   });
@@ -125,6 +126,30 @@ test('the placement HTTP routes accept a Misato-sized probe and pass its system 
   } finally {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
+});
+
+test('a placement probe total budget covers its input bound and its output, within the orchestration ceiling (B-131)', () => {
+  const ask = misato();
+  const bytes = Buffer.byteLength(ask.prompt, 'utf8') + Buffer.byteLength(ask.system ?? '', 'utf8');
+  const sized = placementProbe({
+    placement: 'P3',
+    endpoint: 'mac',
+    system: ask.system,
+    prompt: ask.prompt,
+    maxOutputTokens: 2048,
+  });
+  assert.equal(sized.orchestration.maxOutputTokens, 2048);
+  assert.equal(sized.ask.maxTokens, 2048);
+  assert.equal(sized.orchestration.maxTotalTokens, bytes + PLACEMENT_PROBE_TEMPLATE_TOKENS + 2048);
+  assert.ok(sized.orchestration.maxTotalTokens! > 2 * 2048);
+  // The largest valid probe reaches the orchestration ceiling exactly, never beyond it.
+  const largest = placementProbe({
+    placement: 'P3',
+    system: 's'.repeat(WORKER_MAX_INFER_SYSTEM_BYTES),
+    prompt: 'p'.repeat(WORKER_MAX_INFER_PROMPT_BYTES),
+    maxOutputTokens: 4096,
+  });
+  assert.equal(largest.orchestration.maxTotalTokens, 65_536);
 });
 
 test('placement HTTP plans without inference and runs only with explicit confirmation', async () => {

@@ -3,6 +3,12 @@ import { WORKER_MAX_INFER_PROMPT_BYTES, WORKER_MAX_INFER_SYSTEM_BYTES, type Orch
 /** Room for a probe body with the largest prompt and system message under ordinary JSON escaping; a larger body is refused before parsing. */
 export const PLACEMENT_PROBE_BODY_BYTES = 2 * (WORKER_MAX_INFER_PROMPT_BYTES + WORKER_MAX_INFER_SYSTEM_BYTES) + 4096;
 
+/**
+ * Tokens a chat template may add around the probe's messages (role markers, special tokens).
+ * With the byte limits above, the largest probe's total budget is exactly the orchestration ceiling of 65,536.
+ */
+export const PLACEMENT_PROBE_TEMPLATE_TOKENS = 4096;
+
 export type PlacementId = 'P2' | 'P3' | 'P4';
 
 export interface PlacementProbe {
@@ -63,6 +69,13 @@ export function placementProbe(value: unknown): {
   const maxOutputTokens = integer('maxOutputTokens', 512, 1, 4096);
   const timeoutMs = integer('timeoutMs', placement === 'P4' ? 20_000 : 120_000, 1_000, 120_000);
   const waitBudgetMs = integer('waitBudgetMs', placement === 'P4' ? 5_000 : 0, 0, 120_000);
+  // B-131: the runtime counts input and output tokens against maxTotalTokens. Every model token encodes at least one
+  // UTF-8 byte of text, so the probe's own bytes bound its input; the budget covers that input before anything is
+  // sent, and a reply reporting more is still refused.
+  const inputBound =
+    Buffer.byteLength(v.prompt, 'utf8') +
+    (v.system === undefined ? 0 : Buffer.byteLength(v.system as string, 'utf8')) +
+    PLACEMENT_PROBE_TEMPLATE_TOKENS;
   const endpoint = v.endpoint ?? 'mac';
   if (placement !== 'P2' && (typeof endpoint !== 'string' || !/^[a-z][a-z0-9-]{0,31}$/.test(endpoint)))
     throw new Error('endpoint must be a configured endpoint name.');
@@ -74,7 +87,7 @@ export function placementProbe(value: unknown): {
       waitBudgetMs,
       maxAttempts: 1,
       maxOutputTokens,
-      maxTotalTokens: maxOutputTokens * 2,
+      maxTotalTokens: inputBound + maxOutputTokens,
       maxDelegations: 1,
       delegationDepth: 0,
     },
