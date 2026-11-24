@@ -4,7 +4,7 @@
   "parent": "F-121",
   "title": "Printed parts on drone models",
   "goal": "Drone models carry printed parts (name, aliases, count, side/variant, file, material, profile, spool); drones inherit them",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Store migration: drone model, printed part (count, variant such as left/right, file path, material, slicer profile, external spool flag); a drone links to its model",
     "Fleet import (F-098-T05) and chat (F-098-T06) can add a model, its parts and link a drone; unknown profiles are refused against the F-087 allowlist",
@@ -15,9 +15,15 @@
   "dependsOn": [],
   "resources": [
     "src/fleet.ts",
-    "src/store.ts",
-    "src/fleet-import.ts",
-    "test/fleet.test.ts",
+    "src/fleet-chat.ts",
+    "src/print-library.ts",
+    "src/slicer.ts",
+    "src/executors.ts",
+    "src/misato.ts",
+    "src/cli-commands.ts",
+    "src/cli-help.ts",
+    "test/fleet-prints.test.ts",
+    "docs/work/tasks/F-121-T01.json",
     "docs/work/records/F-121.md",
     "generated:backlog-views"
   ],
@@ -27,6 +33,7 @@
   ],
   "privacy": "Neutral fixtures only; the owner's part list and file paths stay in private fleet data.",
   "validation": [
+    "node --test test/fleet-prints.test.ts test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts test/misato.test.ts test/slicer.test.ts test/cli-help.test.ts",
     "npm run check:fast",
     "npm test"
   ],
@@ -35,11 +42,19 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "3 h agent",
-    "basis": "Estimated 2026-11-24 at agent speed. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 at agent speed (3 h agent). Actual includes the print library resolver, the home slicer-profiles.json allowlist reader and the fleet models/prints CLI listings. Not a measurement.",
     "reviewed": "2026-11-24",
-    "agentHours": 3.0,
+    "agentHours": 0,
     "baselineAgentHours": 3.0,
-    "estimateAgentHours": 3.0
-  }
+    "estimateAgentHours": 3.0,
+    "actualAgentHours": 2.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 715,
+      "note": "implementation"
+    }
+  ]
 }
