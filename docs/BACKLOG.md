@@ -400,7 +400,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) (Test: `test/coordinator-partition.test.ts`, B-124; `test/coordinator-relocation.test.ts`, kaji relocate bundle) |
 | Opened | 2026-11-24 |
-| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` 20 pass; full `npm test` 1441 pass, 0 fail (2 skipped). GAUNTLETLINE On main: Pending. |
+| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` 20 pass; full `npm test` 1441 pass, 0 fail (2 skipped). Gauntlet 2026-11-24 (owner-approved pattern, under the machine lock, after build): the 7 `nerv-system-flows` cases (no models) and the 4 `multi-step-agent` cases (local `gemma4-12b` profile) passed; `gauntlet:pending` lists none (ledger committed here). On main: Pending. |
 | Reviewed | 2026-11-24 |
 
 </details>
