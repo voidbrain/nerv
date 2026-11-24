@@ -8,6 +8,15 @@ import { UpdatePrompt } from './update-prompt';
 import { DoctorView } from './doctor-view';
 import { SurfaceRenderer } from './surface-renderer';
 import { BatteryCards, type BatteryCardItem } from './battery-cards';
+import {
+  deviceLabel,
+  forgetDevice,
+  isInstalled,
+  isPairingCode,
+  keepDevice,
+  keptDevice,
+  pairDevice,
+} from './device-pairing';
 /** F-004-T01: API calls go straight to the service; the service worker never sees or holds them. */
 const SW_BYPASS = { 'ngsw-bypass': '1' };
 interface Page<T> {
@@ -31,7 +40,7 @@ interface Reminder {
   template: `
 <div class="shell"><aside><a class="brand" href="/"><img ngSrc="brand.svg" priority width="48" height="36" alt="NERV Agency">NERV<span>{{t().agent}}</span></a><nav [attr.aria-label]="t().workspace"><button (click)="view.set('home')" [class.active]="view()==='home'">◈ &nbsp; {{t().overview}}</button><button (click)="view.set('reminders')" [class.active]="view()==='reminders'">◷ &nbsp; {{t().reminders}}</button><button (click)="view.set('doctor')" [class.active]="view()==='doctor'">+ &nbsp; {{t().doctor}}</button></nav><div class="sidebar-foot"><i></i> Nodo · v0.1<br><small>{{t().foot}}</small></div></aside>
 <main><nerv-update-prompt [t]="t()" /><header><label class="language">Lingua / Language <select #languageSelect [value]="language()" (change)="changeLanguage(languageSelect.value)"><option value="it">Italiano</option><option value="en">English</option></select></label><span>{{t().workspace}}</span><button class="quiet refresh-btn" (click)="refresh()">{{t().refresh}}</button>@if(connected()&&pushSupported()){<button class="quiet push-toggle" [class.active]="pushSubscribed()" [attr.aria-pressed]="pushSubscribed()" [disabled]="pushPending()" (click)="togglePush()">{{pushSubscribed()?t().pushActive:t().pushInactive}}</button>}</header><section class="intro"><p class="eyebrow">{{t().tagline}}</p><h1>{{t().world}}<br><em>{{t().together}}</em></h1><p>{{t().intro}}</p></section>
-@if(!connected()){<section class="connect panel"><h2>{{t().connectTitle}}</h2><p>{{t().connectHint}}</p><label>{{t().token}}<input #token type="password" autocomplete="off" placeholder="NERV_TOKEN"></label><button (click)="connect(token.value);token.value=''">{{t().connect}}</button></section>}
+@if(!connected()){<section class="connect panel"><h2>{{t().connectTitle}}</h2><p>{{t().connectHint}}</p><form (submit)="$event.preventDefault();signIn(token.value);token.value=''"><label>{{t().token}}<input #token name="signin" type="password" autocomplete="off" placeholder="XXXX-XXXX"></label><button type="submit">{{t().connect}}</button></form></section>}
 @if(error()){<p role="alert" class="error">{{error()}}</p>}
 @if(connected()){<nerv-surface-renderer [surface]="statusSurface()" [t]="t()" (checklistToggle)="onChecklistToggle($event)"></nerv-surface-renderer>
 @if(view()!=='doctor'){<div class="section-heading"><h2>{{view()==='home'?t().horizon:t().reminders}}</h2><span>{{reminders().length}} {{t().recorded}}</span></div><div class="grid"><section class="panel"><h3>{{t().keep}}</h3><label>{{t().what}}<input #title [placeholder]="t().example" maxlength="500"></label><label>{{t().when}} <small>{{t().browserTime}}</small><input #due type="datetime-local"></label><button (click)="add(title.value,due.value,title,due)">{{t().tie}}</button><p class="hint">{{t().delivery}}</p></section><section class="panel"><h3>{{t().horizon}}</h3>@for(r of reminders();track r.id){@if(editingId()!==r.id){<article class="reminder" [attr.data-reminder-id]="r.id"><div><strong>{{r.title}}</strong><p>{{formatReminder(r)}}</p><small>{{r.cancelled?t().cancelled:r.delivered?t().delivered:t().scheduled}}</small></div>@if(!r.cancelled&&!r.delivered){<div class="reminder-actions"><button class="quiet cancel-btn" (click)="cancel(r.id)" [attr.aria-label]="t().cancel+' '+r.title">×</button><button class="quiet edit-btn" (click)="startEdit(r)" [attr.aria-label]="t().edit+' '+r.title">{{t().edit}}</button></div>}</article>}@if(editingId()===r.id){<article class="reminder editing" [attr.data-reminder-id]="r.id"><form class="rem-edit" (submit)="saveEdit($event,r.id)" novalidate><label [attr.for]="'rem-edit-title-'+r.id">{{t().what}}</label><input [id]="'rem-edit-title-'+r.id" type="text" [value]="editTitle()" (input)="editTitle.set($any($event.target).value)" maxlength="500"><label [attr.for]="'rem-edit-due-'+r.id">{{t().when}} <small>{{t().browserTime}}</small></label><input [id]="'rem-edit-due-'+r.id" type="datetime-local" [value]="editDue()" (input)="editDue.set($any($event.target).value)"><div class="edit-actions"><button type="submit" class="save-btn">{{t().save}}</button><button type="button" class="quiet keep-btn" (click)="cancelEdit(r.id)">{{t().keepAsIs}}</button></div></form></article>}}@empty{<p class="empty">{{t().empty}}</p>}<div role="group" data-history="reminders" [attr.aria-label]="t().reminderPages"><button class="quiet" (click)="pageReminders(false)" [disabled]="reminderBefore().length===1" [attr.aria-disabled]="paging()||reminderBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageReminders(true)" [disabled]="reminderNext()===null" [attr.aria-disabled]="paging()||reminderNext()===null">{{t().next}}</button></div></section></div><section class="panel inbox"><h3>{{t().inbox}}</h3>@for(message of inbox();track $index){<p>{{message}}</p>}@empty{<p class="hint">{{t().inboxHint}}</p>}<div role="group" data-history="inbox" [attr.aria-label]="t().inboxPages"><button class="quiet" (click)="pageInbox(false)" [disabled]="inboxBefore().length===1" [attr.aria-disabled]="paging()||inboxBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageInbox(true)" [disabled]="inboxNext()===null" [attr.aria-disabled]="paging()||inboxNext()===null">{{t().next}}</button></div><div role="status">{{paging()?t().loading:t().pageReady}}</div></section>}
@@ -219,13 +228,69 @@ class App {
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + this.token, ...SW_BYPASS },
     });
     const data: unknown = await response.json();
-    if (!response.ok) throw new Error((data as { error?: string }).error ?? 'Request failed');
+    if (!response.ok)
+      throw Object.assign(new Error((data as { error?: string }).error ?? 'Request failed'), {
+        status: response.status,
+      });
     return data;
   }
   async connect(token: string) {
     this.token = token;
     await this.refresh();
     await this.checkPushSubscription();
+  }
+  /** F-118-T02: true while signed in with a device credential (paired); its 401 means the pairing ended. */
+  private paired = false;
+  /** The app's persistent storage, or undefined where the browser blocks it. */
+  private storage(): Storage | undefined {
+    try {
+      return window.localStorage;
+    } catch {
+      return undefined;
+    }
+  }
+  /** The sign-in box: a short code pairs this device; anything else is the admin token, kept in memory only. */
+  async signIn(value: string) {
+    const typed = value.trim();
+    if (!typed) return;
+    if (!isPairingCode(typed)) {
+      this.paired = false;
+      await this.connect(typed);
+      return;
+    }
+    this.error.set('');
+    const installed = isInstalled(window);
+    const outcome = await pairDevice(
+      typed,
+      deviceLabel(navigator.userAgent, installed ? 'workspace app' : 'workspace'),
+      (input, init) => fetch(input, init),
+      SW_BYPASS,
+    );
+    if ('error' in outcome) {
+      const t = this.t();
+      this.error.set(
+        outcome.status === 429
+          ? t.pairLimit
+          : outcome.status === 409
+            ? t.pairFull
+            : outcome.status === 0
+              ? t.connectionError
+              : t.pairError,
+      );
+      return;
+    }
+    this.paired = true;
+    // Installed, the credential survives relaunches and updates; a browser tab keeps it in memory, like a session.
+    if (installed) keepDevice(this.storage(), outcome.token);
+    await this.connect(outcome.token);
+  }
+  /** The pairing ended (revoked, 90 days unused or a rotated admin token): forget it and show the sign-in box. */
+  private pairingEnded() {
+    forgetDevice(this.storage());
+    this.paired = false;
+    this.token = '';
+    this.connected.set(false);
+    this.error.set(this.t().deviceEnded);
   }
   private listChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('nerv-lists') : null;
   private applyChecklistToggle(listId: string, itemId: string, done: boolean) {
@@ -302,6 +367,13 @@ class App {
     if (match) {
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
       void this.exchange(match[1]!);
+    } else if (isInstalled(window)) {
+      // F-118-T02: an installed app that was paired signs itself in.
+      const kept = keptDevice(this.storage());
+      if (kept) {
+        this.paired = true;
+        void this.connect(kept);
+      }
     }
   }
   async checkPushSubscription() {
@@ -416,8 +488,10 @@ class App {
         if (language) this.changeLanguage(language);
       }
       this.connected.set(true);
-    } catch {
-      if (revision === this.revision) {
+    } catch (e) {
+      if (revision === this.revision && this.paired && (e as { status?: number }).status === 401) {
+        this.pairingEnded();
+      } else if (revision === this.revision) {
         this.runtimeState.set('error');
         this.error.set(this.t().connectionError);
       }

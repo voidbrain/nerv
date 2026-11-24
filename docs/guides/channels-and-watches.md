@@ -6,6 +6,8 @@
 
 `nerv open --phone` prints a one-use pairing code (`XXXX-XXXX`, 5 minutes) for a phone. `POST /api/device/pair` with `{code, name}` swaps it once for a device credential that the phone sends as its bearer: same powers as a dashboard session, stored only as a hash in `devices.json` (mode 0600), lapsing after 90 days without use, revocable per device (`GET`/`DELETE /api/devices`, admin token) and ended by rotating the admin token. Failed codes are limited to 5 a minute per client; 20 a minute in all lock pairing for a minute, doubling up to an hour and back to a minute after an equally long quiet period. Pending pairing and login codes end when the admin token rotates, and both code exchanges take `Content-Type: application/json` only (415 otherwise).
 
+On the phone, type the code into the sign-in box of the installed workspace or dashboard (Home Screen app). The installed app keeps the device credential in its own storage and signs itself in on every later launch until the device is revoked, lapses or the admin token rotates; it then says the pairing ended and asks for a new code. A code typed in a browser tab pairs too, but the tab keeps the credential only like a session (memory in the workspace, the tab's storage in the dashboard).
+
 - **Sorties & search:** `/` filters loaded sorties; **Load older sorties** pages history in chunks of 50 (`GET /api/sorties`).
 - **Approvals:** `a` approves once and `r` rejects in two presses (`Esc` cancels). **Spear this sortie** stands down cards and revokes unused grants.
 - **Reminders & Memory:** edit/cancel pending reminders (`PATCH`/`DELETE /api/reminders/ID`), manage Lilith facts, and reload `config.json` from the Health panel.

@@ -18,9 +18,14 @@ export const messages = {
     intro: 'NERV Agency tiene il filo tra i tuoi impegni, strumenti e dispositivi.',
     connectTitle: 'Connetti il tuo NERV Agency locale',
     connectHint:
-      'Avvia il servizio e inserisci il token, oppure esegui npm start -- open per entrare direttamente. Il token resta soltanto nella memoria di questa scheda.',
+      'Per abbinare questo dispositivo esegui nerv open --phone sul computer e inserisci qui il codice: l’app installata resta collegata. Oppure esegui npm start -- open, o inserisci il token di accesso (resta soltanto nella memoria di questa scheda).',
     codeError: 'Codice di accesso non valido, già usato o scaduto: esegui di nuovo npm start -- open.',
-    token: 'Token di accesso',
+    pairError: 'Codice di abbinamento non valido, già usato o scaduto: esegui di nuovo nerv open --phone.',
+    pairLimit: 'Troppi tentativi di abbinamento: attendi un minuto e riprova.',
+    pairFull: 'Troppi dispositivi abbinati: revocane uno prima.',
+    deviceEnded:
+      'L’abbinamento di questo dispositivo è terminato (revocato, 90 giorni senza uso o token cambiato): esegui nerv open --phone e inserisci il nuovo codice.',
+    token: 'Codice di abbinamento o token di accesso',
     connect: 'Connetti',
     horizon: 'All’orizzonte',
     recorded: 'in questa pagina',
@@ -142,9 +147,14 @@ export const messages = {
     intro: 'NERV Agency keeps the thread between your tasks, tools and machines.',
     connectTitle: 'Connect to your local NERV Agency',
     connectHint:
-      'Start the service and enter its token, or run npm start -- open to sign in directly. It stays in this tab’s memory.',
+      'To pair this device, run nerv open --phone on the computer and type the code here: the installed app stays signed in. Or run npm start -- open, or enter the access token (kept in this tab’s memory only).',
     codeError: 'Login code invalid, used or expired: run npm start -- open again.',
-    token: 'Access token',
+    pairError: 'Pairing code invalid, used or expired: run nerv open --phone again.',
+    pairLimit: 'Too many pairing attempts: wait a minute and try again.',
+    pairFull: 'Too many paired devices: revoke one first.',
+    deviceEnded:
+      'This device’s pairing ended (revoked, 90 days unused or a changed token): run nerv open --phone and type the new code.',
+    token: 'Pairing code or access token',
     connect: 'Connect',
     horizon: 'On your horizon',
     recorded: 'on this page',
