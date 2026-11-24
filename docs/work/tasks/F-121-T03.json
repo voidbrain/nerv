@@ -10,7 +10,8 @@
     "Owner asks to print one part and confirms the Bambu Connect hand-off opens with the right file, count and profile"
   ],
   "dependsOn": [
-    "F-121-T02"
+    "F-121-T02",
+    "F-121-T04"
   ],
   "resources": [
     "docs/work/records/F-121.md"

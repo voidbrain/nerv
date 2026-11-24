@@ -10,7 +10,7 @@
     "Count comes from the part (feet x4, bands x2 one per side) unless the owner names a number; the plate or repeat count is stated before slicing",
     "Default material TPU from the external spool with the profile's own temperatures; the reply names file, count, profile, time and grams; the hand-off stays an Orange action (F-087-T03)",
     "A test across the join: chat request to slicer request to hand-off card, with a fake slicer",
-    "The slicing base resolves the part file inside its own prints folder; a missing file is reported with the expected relative path and nothing is sliced"
+    "A missing library file is reported with the expected relative path and nothing is sent or sliced"
   ],
   "dependsOn": [
     "F-121-T01"

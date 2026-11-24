@@ -9,7 +9,7 @@
     "Store migration: drone model, printed part (count, variant such as left/right, file path, material, slicer profile, external spool flag); a drone links to its model",
     "Fleet import (F-098-T05) and chat (F-098-T06) can add a model, its parts and link a drone; unknown profiles are refused against the F-087 allowlist",
     "Neutral fixtures only; tests cover inheritance and a shared part (the same GPS/buzzer enclosure on two models)",
-    "Part files are stored as paths relative to the slicing base's prints folder (%USERPROFILE%\\.nerv\\prints on NERV-02); absolute paths, .. segments and links outside it are refused",
+    "Part files are stored as paths relative to the Mac's library folder (~/.nerv/prints); absolute paths, .. segments and links outside it are refused",
     "A part can be one file holding several objects (AOS 5.1 camera bands: one file, both sides), so its count is per print, not per object"
   ],
   "dependsOn": [],

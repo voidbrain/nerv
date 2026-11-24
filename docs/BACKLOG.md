@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 93.5 h agent + 10.75 h owner across 125 open steps of 37 features and 23 other records. 118.5 h of actual effort recorded on 135 steps. Generated from the task files.
+**Remaining effort:** 96.5 h agent + 10.75 h owner across 126 open steps of 37 features and 23 other records. 118.5 h of actual effort recorded on 135 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2372,7 +2372,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 6 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟣 Very large | 9 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-121-T01 — Printed parts on drone models (Planned).
 
@@ -2387,9 +2387,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
 | 🟡 Medium | <a id="f-121-t01"></a>F-121-T01 — Printed parts on drone models | 3 h | 0 h | 3 h | Planned | — | [F-121-T02](#f-121-t02) |
-| 🟡 Medium | <a id="f-121-t02"></a>F-121-T02 — Print a part by chat | 3 h | 0 h | 3 h | Planned | [F-121-T01](#f-121-t01) | [F-121-T03](#f-121-t03) |
-| 🟢 Small | <a id="f-121-t03"></a>F-121-T03 — Owner: enter the parts and print one | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-121-T02](#f-121-t02) | — |
-| 🔴 Large | **Total** | 6 h | 0 h (0 of 3 steps recorded) | 6 h agent + 0.5 h owner | 0 of 3 completed | | |
+| 🟡 Medium | <a id="f-121-t02"></a>F-121-T02 — Print a part by chat | 3 h | 0 h | 3 h | Planned | [F-121-T01](#f-121-t01) | [F-121-T03](#f-121-t03), [F-121-T04](#f-121-t04) |
+| 🟡 Medium | <a id="f-121-t04"></a>F-121-T04 — Send the part file with the print job | 3 h | 0 h | 3 h | Planned | [F-121-T02](#f-121-t02) | [F-121-T03](#f-121-t03) |
+| 🟢 Small | <a id="f-121-t03"></a>F-121-T03 — Owner: enter the parts and print one | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-121-T02](#f-121-t02), [F-121-T04](#f-121-t04) | — |
+| 🟣 Very large | **Total** | 9 h | 0 h (0 of 4 steps recorded) | 9 h agent + 0.5 h owner | 0 of 4 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
