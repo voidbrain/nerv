@@ -74,7 +74,7 @@ Return the four command summaries (P2, P3, P4 unavailable, P4 recovered). Keep t
 
 ## 6. Role-sized probes: put both bases on the same revision (F-006-T28)
 
-A probe may carry `system` (at most 24,576 bytes) beside `prompt` (at most 32,768 bytes), so Casper's and Misato's own system messages (Misato's is about 18 KB) travel unchanged. WorkerLink checks the system bound on the receiving base too: a base on a revision before PR #PR_T27 refuses a system message over 8 KiB with `Remote inference system prompt exceeds 8192 bytes.` (no fallback). The P3 role rerun therefore needs NERV-01 and NERV-02 both on a `main` revision that includes PR #PR_T27 (and PR #708, B-119).
+A probe may carry `system` (at most 24,576 bytes) beside `prompt` (at most 32,768 bytes), so Casper's and Misato's own system messages (Misato's is about 18 KB) travel unchanged. WorkerLink checks the system bound on the receiving base too: a base on a revision before PR #714 refuses a system message over 8 KiB with `Remote inference system prompt exceeds 8192 bytes.` (no fallback). The P3 role rerun therefore needs NERV-01 and NERV-02 both on a `main` revision that includes PR #714 (and PR #708, B-119).
 
 On Neo Tokyo-3 (`NERV-01`), in a local Terminal, on power. `nerv update` updates the install folder `~/.nerv-app` through the lifecycle (backup, rehearsal, build, start, verify); the development checkout only runs the command:
 

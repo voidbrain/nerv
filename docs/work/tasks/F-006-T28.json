@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures and the gauntlet packs only; local models on the enrolled NERV-01 and NERV-02 over Tailscale; 0 paid cloud tokens; raw reports stay in ~/.nerv-private on their base; NERV-01's live service (~/.nerv-app, ~/.nerv) is never stopped, updated or edited.",
+  "escalation": [
+    "Owner action: NERV-01's live service is updated only by the owner; the agent never stops, updates or edits it"
+  ],
+  "id": "F-006-T28",
+  "status": "planned",
+  "title": "Owner: put NERV-01 and NERV-02 on the revision with role-sized probes",
+  "goal": "Both bases run a main revision that includes PR #714 and PR #708, so a role-sized P3 probe crosses WorkerLink",
+  "acceptance": [
+    "NERV-01 updated through `nerv update` and NERV-02 through its documented update; doctor shows no revision skew and kaji list shows both online"
+  ],
+  "dependsOn": [
+    "F-006-T27",
+    "B-119-T01"
+  ],
+  "resources": [
+    "docs/acceptance/f006-placement-p2-p4.md",
+    "docs/work/records/F-006.md"
+  ],
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "ownerLink": "docs/acceptance/f006-placement-p2-p4.md#6-role-sized-probes-put-both-bases-on-the-same-revision-f-006-t28",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-24 (F-006-T27): one lifecycle update on each base. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}
