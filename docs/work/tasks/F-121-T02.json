@@ -4,7 +4,7 @@
   "parent": "F-121",
   "title": "Print a part by chat",
   "goal": "\"Print Smoke's feet\" resolves drone, model, part, file and count, slices with the part's profile and asks approval for the Bambu Connect hand-off",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Italian and English phrasing; a drone name or a model name both resolve; an ambiguous part asks which one",
     "Count comes from the part (feet x4, bands x2 one per side) unless the owner names a number; the plate or repeat count is stated before slicing",
@@ -16,12 +16,14 @@
     "F-121-T01"
   ],
   "resources": [
+    "src/print-job.ts",
     "src/executors.ts",
     "src/slicer.ts",
-    "src/fleet.ts",
+    "src/store.ts",
     "src/misato.ts",
-    "test/fleet.test.ts",
-    "test/slicer.test.ts",
+    "src/fpv-pack.ts",
+    "test/fleet-print-job.test.ts",
+    "test/misato.test.ts",
     "docs/work/records/F-121.md",
     "generated:backlog-views"
   ],
@@ -31,6 +33,7 @@
   ],
   "privacy": "Neutral fixtures only; the owner's part list and file paths stay in private fleet data.",
   "validation": [
+    "node --test test/fleet-print-job.test.ts test/misato.test.ts test/slicer.test.ts test/fleet-prints.test.ts test/fleet-chat.test.ts",
     "npm run check:fast",
     "npm test"
   ],
@@ -39,11 +42,19 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "3 h agent",
-    "basis": "Estimated 2026-11-24 at agent speed. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 at agent speed (3 h agent). Actual includes the point-of-use read, the slicing-base side (hash and allowlist check, hash-named cache) for F-121-T04 and the chat-path test with a fake slicer on PATH. Not a measurement.",
     "reviewed": "2026-11-24",
-    "agentHours": 3.0,
+    "agentHours": 0,
     "baselineAgentHours": 3.0,
-    "estimateAgentHours": 3.0
-  }
+    "estimateAgentHours": 3.0,
+    "actualAgentHours": 3.0,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 718,
+      "note": "implementation"
+    }
+  ]
 }
