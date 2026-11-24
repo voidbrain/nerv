@@ -1,12 +1,21 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { PairingCodes, PAIRING_CODE_TTL_MS, QR_PAIRING_CODE_TTL_MS } from '../src/device-book.ts';
 import { initialize, readToken } from '../src/config.ts';
-import { pairingBase, pairingLink, qrRows, tailscaleBase, terminalQr, type QrEncoder } from '../src/pairing-qr.ts';
+import {
+  pairingBase,
+  pairingLink,
+  qrEncoder,
+  qrRows,
+  tailscaleBase,
+  terminalQr,
+  type QrEncoder,
+} from '../src/pairing-qr.ts';
 import { makeServer } from '../src/server.ts';
 import { Store } from '../src/store.ts';
 
@@ -223,6 +232,84 @@ test('F-118-T05 join: Settings (a dashboard session) mints a QR code; a paired d
         assert.match(minted.qrError ?? '', /encoder/);
       },
     );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// F-118-T05 (owner 2026-11-24, "uqr ok"): the vendored encoder, uqr 0.1.3, pinned by hash; it is the default.
+test('F-118-T05: the vendored encoder is uqr 0.1.3, byte for byte, with its MIT licence', () => {
+  const manifest = JSON.parse(readFileSync('vendor/uqr.json', 'utf8')) as {
+    name: string;
+    version: string;
+    license: string;
+    files: Record<string, string>;
+    tarballSha256: string;
+  };
+  assert.equal(manifest.name, 'uqr');
+  assert.equal(manifest.version, '0.1.3');
+  assert.equal(manifest.license, 'MIT');
+  assert.equal(manifest.tarballSha256, '5636ef70bfb9f2685d885a4c0fbfe53fec9d6e8346361bd3f149146f1a9ec1af');
+  assert.equal(manifest.files['index.mjs'], '7f0e61c2f13bb3724edee7bfb876e13c54ac9ee4fcfa283c9fa93cfb1241c325');
+  for (const [file, sha] of Object.entries(manifest.files))
+    assert.equal(
+      createHash('sha256')
+        .update(readFileSync(join('vendor/uqr', file)))
+        .digest('hex'),
+      sha,
+      file,
+    );
+  assert.match(readFileSync('vendor/uqr/LICENSE', 'utf8'), /MIT License[\s\S]*Project Nayuki/);
+});
+
+test('F-118-T05: the real encoder draws a standard QR: size, finder patterns, timing, dark module', () => {
+  const link = 'https://base.tailnet-fixture.ts.net/dashboard/#pair=ABCD-EFGH&until=1700000600000';
+  const m = qrEncoder(link);
+  const n = m.length;
+  assert.ok(n >= 21 && (n - 17) % 4 === 0, `size ${n} is 17 + 4 × version`);
+  assert.ok(
+    m.every((row) => row.length === n),
+    'square, no quiet zone',
+  );
+  // A 7×7 finder pattern (dark ring, light ring, dark 3×3 centre) in three corners.
+  const finder = (ox: number, oy: number) => {
+    for (let y = 0; y < 7; y++)
+      for (let x = 0; x < 7; x++) {
+        const ring = Math.max(Math.abs(x - 3), Math.abs(y - 3));
+        assert.equal(m[oy + y]![ox + x], ring !== 2, `finder at ${ox},${oy} module ${x},${y}`);
+      }
+  };
+  finder(0, 0);
+  finder(n - 7, 0);
+  finder(0, n - 7);
+  // Timing patterns alternate along row and column 6; the dark module sits at (8, n − 8).
+  for (let i = 8; i < n - 8; i++) {
+    assert.equal(m[6]![i], i % 2 === 0, `timing row ${i}`);
+    assert.equal(m[i]![6], i % 2 === 0, `timing column ${i}`);
+  }
+  assert.equal(m[n - 8]![8], true, 'dark module');
+  // Deterministic: the same link gives the same matrix; another code gives another.
+  assert.deepEqual(qrEncoder(link), m);
+  assert.notDeepEqual(qrEncoder(link.replace('ABCD', 'WXYZ')), m);
+});
+
+test('F-118-T05 join: by default the server encodes the link with the vendored encoder', async () => {
+  const dir = temp();
+  const admin = 'a'.repeat(32);
+  try {
+    const store = new Store(join(dir, 'nerv.sqlite'));
+    const server = makeServer(store, admin, { deviceFile: join(dir, 'devices.json') });
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const url = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
+      const r = await post(url + '/api/device/codes', admin, { base: 'https://base.tailnet-fixture.ts.net' });
+      const minted = (await r.json()) as { link: string; qr?: string[]; qrError?: string };
+      assert.equal(minted.qrError, undefined);
+      assert.deepEqual(minted.qr, qrRows(qrEncoder(minted.link)));
+    } finally {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+      store.close();
+    }
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
