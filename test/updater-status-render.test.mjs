@@ -60,7 +60,7 @@ test('B-123: every server-provided field is escaped', () => {
     reasons: ['<script>alert(1)</script>'],
     recovery: ['a & b'],
   });
-  assert.doesNotMatch(html, /<script>|<img/);
+  assert.doesNotMatch(html, /<\s*(script|img|b)\b/i);
   assert.match(html, /&lt;script&gt;/);
   assert.match(html, /a &amp; b/);
 });
