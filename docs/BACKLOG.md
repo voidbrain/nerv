@@ -347,22 +347,22 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-004-t08"></a>F-004-T08 — Dashboard Settings → Notifications: enable push on the installed app | 1.75 h | 1.5 h so far (stated) | 0.25 h | Implemented; verification pending | — | [F-004-T06](#f-004-t06) | 🤖 |
-| 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | [F-004-T08](#f-004-t08) | [F-004-T07](#f-004-t07) | ⏳ 🧑‍🔧 |
-| 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-004-T06](#f-004-t06) | — | ⏳ 🤖 |
-| 🟢 Small | **Total** | 14 h (7 of 8 steps) | 4.5 h (6 of 8 steps recorded) | 0.5 h agent + 0.5 h owner | 5 of 8 completed | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-004-t08"></a>F-004-T08 — Dashboard Settings → Notifications: enable push on the installed app | 1.75 h | 1.5 h so far (stated) | 0.25 h | Implemented; verification pending | — | [F-004-T06](#f-004-t06) | 🤖 | [PR #729](https://github.com/voidbrain/nerv/pull/729) |
+| 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | [F-004-T08](#f-004-t08) | [F-004-T07](#f-004-t07) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-004-T06](#f-004-t06) | — | ⏳ 🤖 | — |
+| 🟢 Small | **Total** | 14 h (7 of 8 steps) | 4.5 h (6 of 8 steps recorded) | 0.5 h agent + 0.5 h owner | 5 of 8 completed | | | | |
 
 <details><summary>Done steps (5)</summary>
 
-| Effort | Step | Estimate | Actual | Status |
-|---|---|---|---|---|
-| — | <a id="f-004-t01"></a>F-004-T01 — Installable PWA shell: manifest, service worker and update prompt | 1.5 h | 0.5 h (stated) | Completed |
-| — | <a id="f-004-t02"></a>F-004-T02 — Reminder CRUD in the workspace | 3 h | 0.75 h (stated) | Completed |
-| — | <a id="f-004-t03"></a>F-004-T03 — Doctor view | 1.5 h | 0.5 h (stated) | Completed |
-| — | <a id="f-004-t04"></a>F-004-T04 — Schema-validated registered component renderer (GenUI) | 3 h | 0.75 h (stated) | Completed |
-| — | <a id="f-004-t05"></a>F-004-T05 — Web push subscription and delivery | 3 h | 0.5 h (stated) | Completed |
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-004-t01"></a>F-004-T01 — Installable PWA shell: manifest, service worker and update prompt | 1.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-004-t02"></a>F-004-T02 — Reminder CRUD in the workspace | 3 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-004-t03"></a>F-004-T03 — Doctor view | 1.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-004-t04"></a>F-004-T04 — Schema-validated registered component renderer (GenUI) | 3 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-004-t05"></a>F-004-T05 — Web push subscription and delivery | 3 h | 0.5 h (stated) | Completed | — |
 
 </details>
 
@@ -373,7 +373,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
+| PR / evidence | Steps: F-004-T08: [PR #729](https://github.com/voidbrain/nerv/pull/729). F-004-T08 [PR #729](https://github.com/voidbrain/nerv/pull/729) dashboard push (test/evaluation.browser.mjs); Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks |
 | Opened | 2026-11-01 |
 | Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Phone install/push acceptance pending (F-004-T06). |
 | Reviewed | 2026-11-12 |
