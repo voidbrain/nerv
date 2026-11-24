@@ -303,14 +303,8 @@ test('F-118-T01 join: wrong, expired and too many codes are refused; a device ha
           assert.equal((await post(url + path, device)).status, 403, path);
         // F-118-T03 (requirement changed: Settings lists and revokes devices) opened GET/DELETE /api/devices to
         // sessions and devices; the F-118-T03 join test covers them.
-        // A dashboard session cannot mint pairing codes either.
-        const login = (await (await post(url + '/api/session/codes', token)).json()) as { code: string };
-        const session = (
-          (await (await post(url + '/api/session/exchange', undefined, { code: login.code })).json()) as {
-            token: string;
-          }
-        ).token;
-        assert.equal((await post(url + '/api/device/codes', session)).status, 403);
+        // F-118-T05 (requirement changed, owner acceptance 2026-11-24: Settings → Pair a device shows a QR): a dashboard
+        // session may mint pairing codes; a paired device still may not (above). test/pairing-qr.test.ts covers it.
       },
       () => now,
     );
@@ -454,7 +448,7 @@ const sessionFor = async (url: string, admin: string) => {
 };
 type Listed = { id: string; name: string; created: number; lastUse: number; expires: number; current: boolean };
 
-test('F-118-T03 join: Settings (a session or a device) lists devices, marks this one and revokes; codes stay CLI only', async () => {
+test('F-118-T03 join: Settings (a session or a device) lists devices, marks this one and revokes; login codes stay CLI only', async () => {
   const dir = temp();
   const admin = 'a'.repeat(32);
   try {
@@ -499,8 +493,9 @@ test('F-118-T03 join: Settings (a session or a device) lists devices, marks this
         assert.equal((await del(url + '/api/devices/' + phone.device.id, phone.token)).status, 200);
         assert.equal(await doctor(url, phone.token), 401);
         assert.equal((await get(url + '/api/devices', session)).status, 200);
-        // Still CLI only: minting codes, revoking sessions, stopping.
-        for (const path of ['/api/device/codes', '/api/session/codes', '/api/session/revoke', '/api/stop'])
+        // Still CLI only: minting login codes, revoking sessions, stopping. F-118-T05 (requirement changed, owner
+        // acceptance 2026-11-24: Settings → Pair a device) lets a session mint pairing codes; test/pairing-qr.test.ts.
+        for (const path of ['/api/session/codes', '/api/session/revoke', '/api/stop'])
           assert.equal((await post(url + path, session)).status, 403, path);
       },
     );

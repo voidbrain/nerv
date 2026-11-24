@@ -16,7 +16,7 @@
 ## Dashboard theme system
 
 - **Three-part selector:** **Theme** (*Eva* or *Simple*), **Mode** (*dark* or *light*), and **Colour** (*orange*, *blue*, *green*, *violet*, or *ochre*).
-- **Token source:** `palette()` in `web/public/dashboard/dashboard.js` computes all `var(--…)` tokens (`test/dashboard.test.ts` enforces WCAG AA 4.5:1 across all 20 combinations). Eva · Dark · Orange matches `:root`.
+- **Token source:** `palette()` in `web/public/dashboard/dashboard.js` computes all `var(--…)` tokens (`test/dashboard.test.ts` enforces WCAG AA 4.5:1 across all 20 combinations). Eva · Dark · Orange matches `:root`. Pairing QRs use `--qr-ink`/`--qr-paper` (black on white, set in `:root` only), so every palette draws a QR any camera reads.
 
 ## Detailed component specifications
 

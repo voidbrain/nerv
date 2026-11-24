@@ -223,6 +223,8 @@ export function formatDevices(devices: readonly DeviceInfo[], now: number): stri
 /** A pairing code is typed on a phone: 8 characters, shown XXXX-XXXX, without 0/O, 1/I. 32 symbols, 40 bits. */
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const PAIRING_CODE_TTL_MS = 5 * MINUTE;
+/** F-118-T05 (owner 2026-11-24): a QR code also covers scanning, Add to Home Screen and typing it: 10 minutes. */
+export const QR_PAIRING_CODE_TTL_MS = 10 * MINUTE;
 const MAX_PENDING_CODES = 3;
 /**
  * Failed attempts: 5 a minute per client; 20 a minute in all locks pairing for a minute, doubling up to an hour, back to a
@@ -237,8 +239,8 @@ const MAX_CLIENTS = 1024;
 export type PairingResult = 'ok' | 'invalid' | { retryAfterMs: number };
 
 /**
- * One-use pairing codes (F-118), minted only with the admin token and valid five minutes. Taking one compares in
- * constant time against every pending code. Failures are limited per client and in all: behind a proxy (tailscale
+ * One-use pairing codes (F-118), minted with the admin token or a dashboard session (Settings, F-118-T05), valid five
+ * minutes, ten for a QR. Taking one compares in constant time against every pending code. Failures are limited per client and in all: behind a proxy (tailscale
  * serve) every client looks the same, so the global lockout is what bounds guessing.
  */
 export class PairingCodes {
@@ -281,16 +283,16 @@ export class PairingCodes {
     this.failures = this.failures.filter((t) => now - t < WINDOW_MS);
   }
 
-  /** A new code, or undefined while three are unused. */
-  mint(): { code: string; expiresInMs: number } | undefined {
+  /** A new code, or undefined while three are unused. `ttlMs` overrides the default (a QR's). */
+  mint(ttlMs = this.ttlMs): { code: string; expiresInMs: number; expiresAt: number } | undefined {
     const now = this.now();
     this.prune(now);
     if (this.codes.size >= MAX_PENDING_CODES) return undefined;
     let raw: string;
     do raw = [...randomBytes(8)].map((b) => ALPHABET[b & 31]).join('');
     while (this.codes.has(raw));
-    this.codes.set(raw, now + this.ttlMs);
-    return { code: `${raw.slice(0, 4)}-${raw.slice(4)}`, expiresInMs: this.ttlMs };
+    this.codes.set(raw, now + ttlMs);
+    return { code: `${raw.slice(0, 4)}-${raw.slice(4)}`, expiresInMs: ttlMs, expiresAt: now + ttlMs };
   }
 
   /** Swaps a typed code once. Case, spaces and the hyphen do not matter. */

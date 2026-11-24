@@ -14,7 +14,15 @@
   --hdr-bg:#ff6600; --hdr-fg:#000; --brand-bg:#ff6600; --brand-fg:#000; --title:#ffaa66; --kanji:#ff0033;
   --topo:rgba(255,102,0,.42); --land:#0c0a0a; --sea:#050508; --glow:rgba(255,102,0,.35); --on-danger:#000; --eva00:#2a7fff; --eva01:#9b5cff; --eva02:#ff3b30; --eva03:#8a8a8a;
   --radius:0; --font:"Share Tech Mono",ui-monospace,monospace;
+  /* F-118-T05: a pairing QR is dark on light in every palette, so any camera reads it. */
+  --qr-ink:#000; --qr-paper:#fff;
 }
+.pair-code { font-size:20px; letter-spacing:.12em; color:var(--accent); margin:6px 0 2px; }
+b.pair-code { font-size:16px; }
+.pair-steps { margin:4px 0 0; padding-left:20px; }
+.pair-qr { width:180px; max-width:100%; height:auto; }
+.pair-qr rect { fill:var(--qr-paper); }
+.pair-qr path { fill:var(--qr-ink); }
 body.theme-simple { --radius:6px; --font:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; }
 * { box-sizing:border-box; }
 html,body { margin:0; }

@@ -307,7 +307,11 @@ export const HELP_GROUPS: HelpGroup[] = [
       { name: 'revoke', args: 'CLIENT_ID', about: 'Unpair a companion' },
       { name: 'sessions', args: 'revoke', about: 'Sign out every dashboard session' },
       { name: 'devices', args: '[list] | revoke NAME|ID', about: 'Paired phones: list or revoke' },
-      { name: 'open', args: '[dashboard] [--phone]', about: 'Open the dashboard, or pair a phone' },
+      {
+        name: 'open',
+        args: '[dashboard] [--phone [--qr] [--url URL]]',
+        about: 'Open the dashboard, or pair a phone (with a QR)',
+      },
     ],
   },
 ];

@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 93 h agent + 11 h owner across 131 open steps of 38 features and 23 other records. 137 h of actual effort recorded on 145 steps. Generated from the task files.
+**Remaining effort:** 93 h agent + 11 h owner across 131 open steps of 38 features and 23 other records. 140 h of actual effort recorded on 146 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1144,7 +1144,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟣 Very large | 8.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code (Implemented; verification pending).
+💻 **→** Next: independent security review of [PR #716](https://github.com/voidbrain/nerv/pull/716), then F-118-T04.
 
 | | |
 |---|---|
@@ -1159,9 +1159,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟡 Medium | <a id="f-118-t01"></a>F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code | 3 h | 1.5 h so far (stated) | 3 h | Implemented; verification pending | — | [F-118-T02](#f-118-t02), [F-118-T03](#f-118-t03), [F-118-T05](#f-118-t05) |
 | 🟡 Medium | <a id="f-118-t02"></a>F-118-T02 — Workspace and dashboard pair from their own sign-in box; the installed app signs itself in | 2 h | 2.25 h so far (stated) | 2 h | Implemented; verification pending | [F-118-T01](#f-118-t01) | [F-118-T04](#f-118-t04) |
 | 🟡 Medium | <a id="f-118-t03"></a>F-118-T03 — Paired devices in Settings with Revoke; nerv devices list and revoke | 1.5 h | 1.75 h so far (stated) | 1.5 h | Implemented; verification pending | [F-118-T01](#f-118-t01) | — |
+| 🟡 Medium | <a id="f-118-t05"></a>F-118-T05 — Pairing as a QR code: nerv open --phone --qr and Settings → Pair a device | 1.5 h | 3 h so far (stated) | 1.5 h | Implemented; verification pending | [F-118-T01](#f-118-t01) | — |
 | 🟢 Small | <a id="f-118-t04"></a>F-118-T04 — Phone procedure: Tailscale serve, pairing and push, then the owner check | 0.5 h | 0 h | 0.5 h | Planned | [F-118-T02](#f-118-t02) | — |
-| 🟡 Medium | <a id="f-118-t05"></a>F-118-T05 — Pairing as a QR code: nerv open --phone --qr and Settings → Pair a device | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
-| 🟣 Very large | **Total** | 8.5 h | 5.5 h (3 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
+| 🟣 Very large | **Total** | 8.5 h | 8.5 h (4 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1170,9 +1170,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689); F-118-T01 [PR #700](https://github.com/voidbrain/nerv/pull/700); F-118-T02 [PR #707](https://github.com/voidbrain/nerv/pull/707); F-118-T03 [PR #713](https://github.com/voidbrain/nerv/pull/713). |
+| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689); F-118-T01 [PR #700](https://github.com/voidbrain/nerv/pull/700); F-118-T02 [PR #707](https://github.com/voidbrain/nerv/pull/707); F-118-T03 [PR #713](https://github.com/voidbrain/nerv/pull/713); F-118-T05 [PR #716](https://github.com/voidbrain/nerv/pull/716). |
 | Opened | 2026-11-23 |
-| Verification | 2026-11-24: F-118-T01 `test/device-pairing.test.ts` 13/13 (committed failing first, review fixes too); with session, session-persist, dashboard-accounting, decision-client, CLI help and dashboard suites 85/85; `check:fast` green. F-118-T02: `test/evaluation.browser.mjs` F-118-T02 (installed pair → reload → still signed in → revoke → pairing ended, both apps; browser tab keeps no device credential) failed first against main's client, passes; `test/device-pairing-client.test.ts` 5/5; after the review, the browser test (tab refuses the code without calling the endpoint, the code stays usable), `test/device-pairing.test.ts` full book keeps the code and the client tests 19/19. F-118-T03: `test/device-pairing.test.ts` two F-118-T03 join tests (Settings over HTTP; `nerv devices` CLI → server → DeviceBook → next request 401) failed first (403; unknown command), 16/16 pass; `test/evaluation.browser.mjs` F-118-T03 failed first against main's dashboard, passes with F-118-T02; every test reading live.js or web/src 203/203 (2 skipped); gauntlet all pending cases pass. A real iPhone Home Screen launch is not yet observed (F-118-T04). |
+| Verification | 2026-11-24: F-118-T01 and F-118-T02 in the [archive](archive/evidence-2026.md#f-118-moved-2026-11-24). F-118-T03: `test/device-pairing.test.ts` two F-118-T03 join tests (Settings over HTTP; `nerv devices` CLI → server → DeviceBook → next request 401) failed first (403; unknown command), 16/16 pass; `test/evaluation.browser.mjs` F-118-T03 failed first against main's dashboard, passes with F-118-T02; every test reading live.js or web/src 203/203 (2 skipped); gauntlet all pending cases pass. F-118-T05: `test/pairing-qr.test.ts` 9/9 (with the vendored encoder: hashes, QR structure, server default) and `test/evaluation.browser.mjs` F-118-T05 (scanned link in a tab: code and steps shown, fragment cleared, no request carries the code, never pairs, expiry hides it, code still pairs; Settings QR and code) committed failing first, pass; `npm test` 1307/1309 (2 skipped), `test:browser`, `test:headless`, runtime and BOM regressions, `check:evals` and policy evals pass; after vendoring uqr and merging main, every test reading live.js or web/src plus touched tests and `test/gauntlet.test.mjs` run concurrently in one `node --test` gave 211/214 (2 skipped), the one failure F-118-T02's browser test, which fails the same way on main under the same load and passes alone (6/6 twice). Gauntlet: all 10 pending cases pass again after vendoring (gemma4-12b profile, 2026-11-24), none still pending; gauntlet index current. A real iPhone Home Screen launch is not yet observed (F-118-T04). |
 | Reviewed | 2026-11-23 |
 
 </details>
