@@ -2017,6 +2017,38 @@ test('B-112: a shortcut lights only when the step it bypasses did not run', () =
   );
 });
 
+test('B-130: a finished sortie that never needed approval leaves Misato’s Apt unlit like the other unvisited steps, not skipped', () => {
+  const api = sephirot() as unknown as {
+    stepState: (s: unknown, id: string) => string;
+    passedEdge: (s: unknown, e: string[]) => string;
+  };
+  // S-6AD9: granted by the MAGI, ran, finished; the owner was never asked.
+  const finished = sortie({
+    actions: [act('grant')],
+    done: {
+      detect: true,
+      intake: true,
+      route: true,
+      plan: true,
+      magi: true,
+      sync: true,
+      plug: true,
+      eva: true,
+      debrief: true,
+    },
+  });
+  assert.equal(api.stepState(finished, 'apt'), '', 'unused Apt keeps its normal look');
+  assert.equal(api.stepState(finished, 'consult'), 'skip', 'the consult rule is unchanged');
+  assert.equal(api.passedEdge(finished, ['sync', 'apt']), '', 'no faded route into the Apt');
+  assert.equal(api.passedEdge(finished, ['apt', 'plug']), '', 'no faded route out of the Apt');
+  assert.equal(api.passedEdge(finished, ['sync', 'plug']), 'passed', 'the bypass is the route taken');
+  // An answer with no action: the Apt is unvisited too.
+  const answered = sortie({ done: { detect: true, route: true, plan: true, debrief: true } });
+  assert.equal(api.stepState(answered, 'apt'), '');
+  // A forwarded sortie still skips every step between Detection and Debrief.
+  assert.equal(api.stepState(sortie({ forwarded: 'Tabgha', done: { detect: true, debrief: true } }), 'apt'), 'skip');
+});
+
 test('B-112: the answer route appears only once Misato planned without an action', () => {
   const { edgeShown } = sephirot();
   const answer = ['plan', 'debrief', 'answer'];

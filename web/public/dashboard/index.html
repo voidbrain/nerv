@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>NERV Agency — Tactical Command</title>
+<link rel="manifest" href="manifest.webmanifest" />
 <!-- Prototype: local simulation only, no API calls. Names follow NERV-ARCHITECTURE.md. -->
 <style>
 :root {
@@ -472,6 +473,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
 
       <section class="panel" id="p-health">
         <div class="hdr"><span data-l="health">Health</span><button class="btn sm" id="btn-doctor" style="color:inherit;border-color:currentColor">Run doctor</button></div>
+        <div class="pad" id="doctor-result" role="status" aria-live="polite" hidden></div>
         <div class="pad" id="health"></div>
       </section>
 
@@ -479,6 +481,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
         <div class="hdr"><span data-l="settings">Settings</span><span class="sub" id="settings-sub">this base</span></div>
         <div class="pad" id="settings"></div>
         <div class="pad" id="settings-devices"></div>
+        <div class="pad" id="settings-push"></div>
       </section>
 
       <section class="panel" id="p-models">

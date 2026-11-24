@@ -503,7 +503,7 @@ function stepState(s, id) {
   // B-020: while the consultant works the sortie is not yet marked consulted, but its step is the one running.
   if (id === "consult" && !s.consult && s.phase !== "consult") return "skip";
   if (s.phase === id) return s.status === "waiting" || s.status === "waiting-route" ? "wait" : s.status === "active" ? "on" : "done";
-  if (id === "apt" && !s.actions.some(a => a.ballot && a.ballot.outcome !== "grant")) return s.done.apt ? "done" : (s.status === "done" ? "skip" : "");
+  // B-130 (owner 2026-11-24): an Apt the sortie never needed stays unlit like the other unvisited steps, not skipped.
   return s.done[id] ? "done" : "";
 }
 /* Replay: a sortie picked in the list redraws its flow step by step (one step every REPLAY_MS), then shows it as it is.
@@ -1260,7 +1260,8 @@ document.addEventListener("click", e => {
   if (t.dataset.toggle) { const b = BASES.find(x => x.id === t.dataset.toggle); b.status = b.status === "online" ? "offline" : "online"; if (b.status === "online") b.rtt = b.id === "tokyo3" ? 0 : 120; log(b.name + " → " + b.status, b.status === "online" ? "ok" : "warn"); renderAll(); return; }
   if (t.id === "btn-seen") { state.lastVisit = Date.now(); if (LIVE) window.liveSeen(); renderAll(); return; }
   if (t.id === "btn-reload" && LIVE) { window.liveReload(); return; }
-  if (t.id === "btn-doctor") { log("Doctor: scheduler ok · brain ok · routes " + (state.dummy ? "unreachable" : "ok") + " · SQLite integrity ok", state.dummy ? "warn" : "ok"); renderHealth(); return; }
+  // B-129: the live dashboard asks the service (GET /api/doctor); the demo has no service to ask.
+  if (t.id === "btn-doctor") { if (LIVE) { window.liveDoctor(); return; } log("Demo: Run doctor needs the live service; nothing was checked.", "warn"); return; }
 });
 document.addEventListener("keydown", e => { const t = e.target.closest && e.target.closest("[data-s]"); if (t && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); t.click(); } });
 /* Keyboard: / searches sorties; a and r approve or reject a card, always in two presses (the first arms the card and says
