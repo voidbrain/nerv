@@ -14,15 +14,15 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 37 | 27 |
-| **Require Human 🧑** | 11 | 9 |
+| **Require Human 🧑** | 10 | 9 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-089](#f-089) | [B-057](#b-057) | — |
-| [F-011](#f-011) | [F-116](#f-116) | [B-068](#b-068) |  |
+| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
+| [F-011](#f-011) |  | [B-068](#b-068) |  |
 | [F-004](#f-004) |  | [B-107](#b-107) |  |
 | [F-012](#f-012) |  | [B-113](#b-113) |  |
 | [F-086](#f-086) |  | [B-122](#b-122) |  |
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 85.5 h agent + 11.25 h owner across 119 open steps of 36 features and 27 other records. 158.5 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 88 h agent + 11 h owner across 119 open steps of 36 features and 27 other records. 158.5 h of actual effort recorded on 151 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1370,6 +1370,56 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-089"></a>[✨ F-089](#top)
+
+**Browser control: act on a named control in an open page**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-089-T06 (owner chose A on 2026-11-24: a `browser.click` chat tool behind an approval card).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
+| **Reproduce** | Ask NERV to click a named button on an open tab. |
+| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
+| 🟡 Medium | <a id="f-089-t06"></a>F-089-T06 — A browser.click chat tool for Misato | 2.5 h | 0 h | 2.5 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 6.5 h (5 of 6 steps) | 3.25 h (3 of 6 steps recorded) | 2.5 h agent + 0.25 h owner | 3 of 6 completed | | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
+| — | <a id="f-089-t05"></a>F-089-T05 — Decision: a chat tool for browser clicks | 0 h | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-089.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-106"></a>[✨ F-106](#top)
 
 **Per-turn prompt size on the local route, then deferred domain tool loading**
@@ -1874,55 +1924,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-087-T02 verified: [PR #491](https://github.com/voidbrain/nerv/pull/491) merged on green CI. `F-087-T01` decision written in [bambu-print-handoff.md](decisions/bambu-print-handoff.md); verified with `npm run check:fast`. 2026-11-22: F-087-T03 verified (`bambu.handoff` Orange gate + `handOffToBambuConnect` + owner checklist); `node --test test/slicer.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-089"></a>[✨ F-089](#top)
-
-**Browser control: act on a named control in an open page**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h owner | — | — | 🤖 | — | 🤔 |
-
-🧑 **→** [Decide](decisions/browser-adapter.md#owner-decision-a-chat-tool-for-browser-clicks-f-089-t05) whether Misato gets a chat tool for browser clicks (F-089-T05).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
-| **Reproduce** | Ask NERV to click a named button on an open tab. |
-| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
-| 🟢 Small | <a id="f-089-t05"></a>F-089-T05 — Decision: a chat tool for browser clicks | — | 0 h | 0 h agent + 0.25 h owner | Planned | — | — | [🤔](decisions/browser-adapter.md#owner-decision-a-chat-tool-for-browser-clicks-f-089-t05) | — |
-| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 4 h (3 of 5 steps) | 3.25 h (3 of 5 steps recorded) | 0.5 h owner | 2 of 5 completed | | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-089.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
-| Reviewed | 2026-11-24 |
 
 </details>
 
