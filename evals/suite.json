@@ -89,6 +89,7 @@
         "test/worker-link.test.ts",
         "test/worker-link-heartbeat.test.ts",
         "test/worker-link-admission.test.ts",
+        "test/worker-link-exit.test.ts",
         "test/worker-outbox.test.ts",
         "test/protocol.test.ts"
       ],

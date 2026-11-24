@@ -20,6 +20,7 @@ import {
   type ImportStandbySnapshotInput,
   type PromoteStandbySwapInput,
 } from './coordinator-snapshot.ts';
+import { relocateCoordinator, type RelocateCoordinatorInput } from './coordinator-relocation.ts';
 import {
   appendReplicationBatch,
   applyReplicationBatch,
@@ -672,6 +673,10 @@ export class Store {
   }
   static promoteStandby(input: PromoteStandbySwapInput) {
     return promoteStandbyDatabase(input);
+  }
+  /** Owner-initiated relocation (F-016-T07): readiness check, promotion swap, quarantine and lease. */
+  static relocateCoordinator(input: RelocateCoordinatorInput) {
+    return relocateCoordinator(input);
   }
   appendReplicationBatch(input: AppendReplicationBatchInput) {
     return appendReplicationBatch(this.db, input);

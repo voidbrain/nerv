@@ -20,6 +20,8 @@ import {
   type WorkerInferRequest,
 } from './model.ts';
 export const WORKER_PROTOCOL_VERSION = 1;
+/** How long stop() waits for a connection attempt and session cleanups still in flight (B-118). */
+const WORKER_STOP_GRACE_MS = 5000;
 const PATH = '/kaji/worker';
 const MAX_WORKER_BODY_BYTES = WORKER_MAX_INFER_PROMPT_BYTES + WORKER_MAX_INFER_SYSTEM_BYTES + 4096;
 // Four requests and their four responses may arrive in one WebSocket read.
@@ -866,7 +868,13 @@ export class WorkerLink {
     this.connectingSocket?.terminate();
     this.client?.end();
     this.dropIncoming();
-    await this.connecting;
-    await Promise.allSettled([...this.cleanup]);
+    // B-118: what is still in flight (a connection attempt waiting on the store, session cleanups) gets a bounded
+    // grace period; it settles on its own afterwards. An unbounded wait here held every later close behind it.
+    let grace: NodeJS.Timeout | undefined;
+    await Promise.race([
+      Promise.allSettled([this.connecting, ...this.cleanup]),
+      new Promise<void>((done) => (grace = setTimeout(done, WORKER_STOP_GRACE_MS))),
+    ]);
+    clearTimeout(grace);
   }
 }

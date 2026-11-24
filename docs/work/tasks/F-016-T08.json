@@ -17,7 +17,11 @@
     "Partition, sleep and reconnect fixtures proving one authority and no duplicate effects"
   ],
   "dependsOn": [
-    "F-016-T07"
+    "F-016-T07",
+    "F-016-T16",
+    "F-016-T17",
+    "F-016-T18",
+    "F-016-T19"
   ],
   "resources": [
     "src/**",
