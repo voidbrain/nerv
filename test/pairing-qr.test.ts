@@ -52,13 +52,16 @@ test('F-118-T05: a terminal QR draws the matrix with a light quiet zone, two row
   assert.equal(lines.length, 3);
   assert.ok(lines.every((l) => [...l].length === 6));
   assert.equal(lines[0], '██████', 'quiet zone is light');
-  assert.equal(lines[1], '██ ▀██', 'row 2 (quiet) over row 3 (dark, light)');
-  assert.equal(lines[2], '██▄ ██', 'row 4 (light, dark) over row 5 (quiet)');
+  assert.equal(lines[1], '██▄▀██', 'matrix row 1 (dark, light) over row 2 (light, dark)');
+  assert.equal(lines[2], '██████', 'quiet zone below');
   assert.throws(() => qrRows([[true], [false, true]]));
 });
 
 test('F-118-T05: the tailnet address comes from tailscale status', () => {
-  assert.equal(tailscaleBase({ Self: { DNSName: 'Base-One.tailnet-fixture.ts.net.' } }), 'https://base-one.tailnet-fixture.ts.net');
+  assert.equal(
+    tailscaleBase({ Self: { DNSName: 'Base-One.tailnet-fixture.ts.net.' } }),
+    'https://base-one.tailnet-fixture.ts.net',
+  );
   assert.equal(tailscaleBase({ Self: { DNSName: '' } }), undefined);
   assert.equal(tailscaleBase(null), undefined);
 });
@@ -124,10 +127,17 @@ test('F-118-T05 join: nerv open --phone --qr prints a QR of the fragment link an
         const port = new URL(url).port;
         const child = spawn(
           process.execPath,
-          ['src/cli.ts', 'open', '--phone', '--qr', '--url=https://base.tailnet-fixture.ts.net'],
+          ['src/cli.ts', 'open', '--phone', '--qr', '--url', 'https://base.tailnet-fixture.ts.net'],
           {
             cwd: process.cwd(),
-            env: { ...process.env, NERV_HOME: home, NERV_PORT: port, NERV_TOKEN: undefined, HOME: dir, USERPROFILE: dir },
+            env: {
+              ...process.env,
+              NERV_HOME: home,
+              NERV_PORT: port,
+              NERV_TOKEN: undefined,
+              HOME: dir,
+              USERPROFILE: dir,
+            },
           },
         );
         let out = '';
@@ -141,7 +151,10 @@ test('F-118-T05 join: nerv open --phone --qr prints a QR of the fragment link an
         assert.match(out, /valid 10 minutes/);
         assert.equal(encoder.texts.length, 1, 'the server encoded one link');
         const link = encoder.texts[0]!;
-        assert.match(link, new RegExp(`^https://base\\.tailnet-fixture\\.ts\\.net/dashboard/#pair=${code}&until=\\d+$`));
+        assert.match(
+          link,
+          new RegExp(`^https://base\\.tailnet-fixture\\.ts\\.net/dashboard/#pair=${code}&until=\\d+$`),
+        );
         assert.ok(out.includes(link), 'the link is printed too');
         // The QR block: 21 modules + quiet zone = 25 columns, 13 lines of half blocks.
         const block = out.split('\n').filter((l) => /^[█▀▄ ]{25}$/.test(l));
@@ -171,10 +184,19 @@ test('F-118-T05 join: Settings (a dashboard session) mints a QR code; a paired d
       ).token;
       const r = await post(url + '/api/device/codes', session, { base: 'https://base.tailnet-fixture.ts.net' });
       assert.equal(r.status, 201);
-      const minted = (await r.json()) as { code: string; expiresInMs: number; expiresAt: number; link: string; qr: string[] };
+      const minted = (await r.json()) as {
+        code: string;
+        expiresInMs: number;
+        expiresAt: number;
+        link: string;
+        qr: string[];
+      };
       assert.match(minted.code, CODE);
       assert.equal(minted.expiresInMs, 10 * MINUTE);
-      assert.equal(minted.link, `https://base.tailnet-fixture.ts.net/dashboard/#pair=${minted.code}&until=${minted.expiresAt}`);
+      assert.equal(
+        minted.link,
+        `https://base.tailnet-fixture.ts.net/dashboard/#pair=${minted.code}&until=${minted.expiresAt}`,
+      );
       assert.equal(minted.qr.length, 21);
       assert.ok(minted.qr.every((row) => /^[01]{21}$/.test(row)));
       // A bad address is refused before a code is minted.

@@ -53,6 +53,8 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'n
 import { OWNER_SOURCE, Store } from './store.ts';
 import { argsHash } from './ledger.ts';
 import { formatDevices, matchDevice, type DeviceInfo } from './device-book.ts';
+import { pairingBase, tailscaleBase, terminalQr } from './pairing-qr.ts';
+import { execFileSync } from 'node:child_process';
 
 import {
   savePilots,
@@ -90,6 +92,17 @@ export interface CliCommandContext {
   openPage: (home: string, page: '/' | '/dashboard/', print: boolean) => Promise<void>;
   reloadIfRunning: (homeDir: string, port: number) => Promise<string>;
   flag: (name: string) => string | undefined;
+}
+
+/** This machine's tailnet HTTPS address, or undefined without Tailscale. */
+function tailnetBase(): string | undefined {
+  try {
+    return tailscaleBase(
+      JSON.parse(execFileSync('tailscale', ['status', '--json'], { encoding: 'utf8', timeout: 5000 })),
+    );
+  } catch {
+    return undefined;
+  }
 }
 
 export async function tryRunCliCommand(
@@ -539,20 +552,56 @@ export async function tryRunCliCommand(
     }
   } else if (command === 'open' && args.includes('--phone')) {
     // F-118: open --phone mints a one-use pairing code (5 minutes) that the installed phone app swaps for a device credential.
+    // F-118-T05: --qr also shows a QR of the dashboard link with the code in its fragment (10 minutes): scanned, Safari
+    // shows the code and how to install the app; the installed app takes it. --url is the address the phone opens,
+    // otherwise this machine's tailnet name (where tailscale serve answers).
     const config = readConfig(home);
+    const qr = args.includes('--qr');
+    let base: string | undefined;
+    if (qr) {
+      const given = ctx.flag('--url');
+      base = given !== undefined ? pairingBase(given) : tailnetBase();
+      if (given !== undefined && !base) throw new Error('--url takes the http(s) address the phone opens.');
+      if (!base)
+        throw new Error(
+          'No address for the phone: give it with --url https://NAME.TAILNET.ts.net (where tailscale serve answers).',
+        );
+    }
     const response = await fetch(`http://127.0.0.1:${config.port}/api/device/codes`, {
       method: 'POST',
-      headers: { authorization: `Bearer ${readToken(home)}` },
+      headers: {
+        authorization: `Bearer ${readToken(home)}`,
+        ...(base ? { 'content-type': 'application/json' } : {}),
+      },
+      body: base ? JSON.stringify({ base }) : undefined,
     }).catch(() => {
       throw new Error('NERV Agency is not running: start it with serve, launch or service start.');
     });
-    const value = (await response.json()) as { code?: string; expiresInMs?: number; error?: string };
+    const value = (await response.json()) as {
+      code?: string;
+      expiresInMs?: number;
+      link?: string;
+      qr?: string[];
+      qrError?: string;
+      error?: string;
+    };
     if (!response.ok || !value.code) throw new Error(value.error ?? 'Could not create a pairing code.');
-    console.log(
-      `Pairing code: ${value.code} (one use, valid ${Math.round((value.expiresInMs ?? 0) / 60_000)} minutes)\n` +
-        `Link: http://127.0.0.1:${config.port}/ on this computer, or its address on your network (Tailscale).\n` +
-        'On the phone, open NERV from the Home Screen and type the code.',
-    );
+    const valid = `one use, valid ${Math.round((value.expiresInMs ?? 0) / 60_000)} minutes`;
+    if (qr)
+      console.log(
+        (value.qr ? terminalQr(value.qr) + '\n' : `No QR: ${value.qrError ?? 'none returned'}\n`) +
+          `Pairing code: ${value.code} (${valid})\n` +
+          `Link: ${value.link}\n` +
+          'Scan it with the phone: Safari opens the dashboard and shows the code (it never pairs). There, Share → Add to ' +
+          'Home Screen, open NERV from the Home Screen and type the code. (iOS opens a scanned link in Safari, never in ' +
+          'the installed app.)',
+      );
+    else
+      console.log(
+        `Pairing code: ${value.code} (${valid})\n` +
+          `Link: http://127.0.0.1:${config.port}/ on this computer, or its address on your network (Tailscale).\n` +
+          'On the phone, open NERV from the Home Screen and type the code. For a QR to scan: nerv open --phone --qr.',
+      );
   } else if (command === 'open') {
     // open dashboard: the same sign-in, landing on the live dashboard instead of the workspace.
     await ctx.openPage(home, args.includes('dashboard') ? '/dashboard/' : '/', args.includes('--print'));
