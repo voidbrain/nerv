@@ -76,16 +76,18 @@ Return the four command summaries (P2, P3, P4 unavailable, P4 recovered). Keep t
 
 A probe may carry `system` (at most 24,576 bytes) beside `prompt` (at most 32,768 bytes), so Casper's and Misato's own system messages (Misato's is about 18 KB) travel unchanged. WorkerLink checks the system bound on the receiving base too: a base on a revision before PR #714 refuses a system message over 8 KiB with `Remote inference system prompt exceeds 8192 bytes.` (no fallback). The P3 role rerun therefore needs NERV-01 and NERV-02 both on a `main` revision that includes PR #714 (and PR #708, B-119).
 
-On Neo Tokyo-3 (`NERV-01`), in a local Terminal, on power. `nerv update` updates the install folder `~/.nerv-app` through the lifecycle (backup, rehearsal, build, start, verify); the development checkout only runs the command:
+Update both bases before any role-sized probe: a base on earlier code that receives a body over its old bound closes the WorkerLink session ("Invalid worker envelope"), failing every request in flight on it until it reconnects.
+
+On Neo Tokyo-3 (`NERV-01`): its install (`~/.nerv-app`, `9ab9139f`) has the dashboard's **Update now** (B-108, B-110), which hands the update to its own job outside the service (backup, rehearsal, build, start, verify). Open the dashboard, go to **Health**, and once the availability line shows a newer `main` revision that includes PR #714, press **Update now**.
+
+Expected: the button reads "Updating…", the dashboard reconnects after the restart, and the inbox and Health report the update `completed` with the new revision. If it reports `refused` or `uncertain`, stop and paste the message and its recovery lines. To check by hand afterwards:
 
 ```bash
-cd ~/Projects/NERV/NERV && git switch main && git pull --ff-only && npm ci
-node src/cli.ts update --check
-node src/cli.ts update
-node src/cli.ts update --check
+git -C ~/.nerv-app log -1 --format='%h %s'
+launchctl print gui/$(id -u)/io.nerv.agent | grep -E '^\s*(state|pid) ='
 ```
 
-Expected: behind by N commits; then the update summary ending with the outcome `completed`; then up to date.
+Expected: the new revision and `state = running`.
 
 On Tabgha (`NERV-02`), in PowerShell. Its checkout predates `nerv update`, so it takes the documented manual update (as on 2026-11-12):
 

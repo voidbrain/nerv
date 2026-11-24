@@ -49,12 +49,15 @@ function resolvePhotoOwner(s: PhotoStoreHost, kind: PhotoOwnerKind, id: string):
   return builtinPackRegistry.resolvePhotoOwner(s, kind, id);
 }
 async function body(req: IncomingMessage, limit = 8192): Promise<Record<string, unknown>> {
-  let text = '';
+  const chunks: Buffer[] = [];
+  let size = 0;
   for await (const chunk of req) {
-    text += chunk;
-    if (Buffer.byteLength(text) > limit) throw new Error('Request too large.');
+    const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk));
+    size += bytes.length;
+    if (size > limit) throw new Error('Request too large.');
+    chunks.push(bytes);
   }
-  const value: unknown = JSON.parse(text);
+  const value: unknown = JSON.parse(Buffer.concat(chunks).toString('utf8'));
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Expected JSON object.');
   return value as Record<string, unknown>;
 }

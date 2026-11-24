@@ -17,7 +17,7 @@
   "title": "Owner: put NERV-01 and NERV-02 on the revision with role-sized probes",
   "goal": "Both bases run a main revision that includes PR #714 and PR #708, so a role-sized P3 probe crosses WorkerLink",
   "acceptance": [
-    "NERV-01 updated through `nerv update` and NERV-02 through its documented update; doctor shows no revision skew and kaji list shows both online"
+    "NERV-01 updated with the dashboard's Update now (its install folder's own updater) and NERV-02 through its documented update, both before any role-sized probe; doctor shows no revision skew and kaji list shows both online"
   ],
   "dependsOn": [
     "F-006-T27",

@@ -1,6 +1,6 @@
 import { WORKER_MAX_INFER_PROMPT_BYTES, WORKER_MAX_INFER_SYSTEM_BYTES, type OrchestrationRequest } from './model.ts';
 
-/** The largest request body a valid probe can need: its prompt and system message, each JSON-escaped, plus fields. */
+/** Room for a probe body with the largest prompt and system message under ordinary JSON escaping; a larger body is refused before parsing. */
 export const PLACEMENT_PROBE_BODY_BYTES = 2 * (WORKER_MAX_INFER_PROMPT_BYTES + WORKER_MAX_INFER_SYSTEM_BYTES) + 4096;
 
 export type PlacementId = 'P2' | 'P3' | 'P4';
