@@ -198,9 +198,13 @@ export const HELP_GROUPS: HelpGroup[] = [
       },
       {
         name: 'fleet',
-        args: 'drones|parts|spares|import',
-        about: 'Drones, parts and spares',
-        usage: ['fleet drones | fleet parts <drone> | fleet spares [category]', 'fleet import <fleet.json>'],
+        args: 'drones|parts|spares|import|models|prints',
+        about: 'Drones, parts, spares and printed parts',
+        usage: [
+          'fleet drones | fleet parts <drone> | fleet spares [category]',
+          'fleet import <fleet.json>',
+          'fleet models | fleet prints <drone|model>',
+        ],
       },
       { name: 'card-copy', args: 'MOUNT LABEL RULES.json', about: 'Copy files from a memory card by rules' },
       { name: 'slice', args: 'IN OUT PROFILE ALLOWLIST', about: 'Slice a model for the 3D printer' },
@@ -303,7 +307,11 @@ export const HELP_GROUPS: HelpGroup[] = [
       { name: 'revoke', args: 'CLIENT_ID', about: 'Unpair a companion' },
       { name: 'sessions', args: 'revoke', about: 'Sign out every dashboard session' },
       { name: 'devices', args: '[list] | revoke NAME|ID', about: 'Paired phones: list or revoke' },
-      { name: 'open', args: '[dashboard] [--phone]', about: 'Open the dashboard, or pair a phone' },
+      {
+        name: 'open',
+        args: '[dashboard] [--phone [--qr] [--url URL]]',
+        about: 'Open the dashboard, or pair a phone (with a QR)',
+      },
     ],
   },
 ];

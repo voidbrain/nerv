@@ -71,3 +71,37 @@ node src/cli.ts placement run "$HOME\.nerv-private\placement\p4.json" --execute 
 Expected: remote inference provenance names NERV-01 and endpoint `mac`, local execution remains NERV-02, and the text is `READY` within the 20-second probe timeout.
 
 Return the four command summaries (P2, P3, P4 unavailable, P4 recovered). Keep the private JSON files on their originating base.
+
+## 6. Role-sized probes: put both bases on the same revision (F-006-T28)
+
+A probe may carry `system` (at most 24,576 bytes) beside `prompt` (at most 32,768 bytes), so Casper's and Misato's own system messages (Misato's is about 18 KB) travel unchanged. WorkerLink checks the system bound on the receiving base too: a base on a revision before PR #714 refuses a system message over 8 KiB with `Remote inference system prompt exceeds 8192 bytes.` (no fallback). The P3 role rerun therefore needs NERV-01 and NERV-02 both on a `main` revision that includes PR #714 (and PR #708, B-119).
+
+Update both bases before any role-sized probe: a base on earlier code that receives a body over its old bound closes the WorkerLink session ("Invalid worker envelope"), failing every request in flight on it until it reconnects.
+
+On Neo Tokyo-3 (`NERV-01`): its install (`~/.nerv-app`, `9ab9139f`) has the dashboard's **Update now** (B-108, B-110), which hands the update to its own job outside the service (backup, rehearsal, build, start, verify). Open the dashboard, go to **Health**, and once the availability line shows a newer `main` revision that includes PR #714, press **Update now**.
+
+Expected: the button reads "Updating…", the dashboard reconnects after the restart, and the inbox and Health report the update `completed` with the new revision. If it reports `refused` or `uncertain`, stop and paste the message and its recovery lines. To check by hand afterwards:
+
+```bash
+git -C ~/.nerv-app log -1 --format='%h %s'
+launchctl print gui/$(id -u)/io.nerv.agent | grep -E '^\s*(state|pid) ='
+```
+
+Expected: the new revision and `state = running`.
+
+On Tabgha (`NERV-02`), in PowerShell. Its checkout predates `nerv update`, so it takes the documented manual update (as on 2026-11-12):
+
+```powershell
+Set-Location $HOME\Projects\NERV\NERV
+node src/cli.ts service stop
+Copy-Item $HOME\.nerv\nerv.sqlite "$HOME\.nerv-private\nerv-before-f006-t28.sqlite"
+git pull --ff-only
+npm ci --ignore-scripts
+npm run build
+node src/cli.ts service start
+node src/cli.ts doctor
+node src/cli.ts kaji list
+```
+
+Expected: the service stops and starts without error; `doctor` reports the new revision with no revision skew; `kaji list` shows NERV-01 and NERV-02 online. Reply `F-006-T28 done` with the two revisions; the agent then runs the P3 role rerun (F-006-T29) under the Mac's machine lock.
+

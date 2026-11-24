@@ -19,6 +19,11 @@ function dronePartsTable(name: string): string {
 );`;
 }
 
+/**
+ * F-121-T01: drone models and their printed parts are new tables only (drone_models, printed_parts,
+ * drone_model_parts, drone_model_links), so opening a live fleet database leaves its rows untouched.
+ * A printed part is one library file; two models sharing it link the same row with their own name and count.
+ */
 export const FLEET_SCHEMA = `
 CREATE TABLE IF NOT EXISTS drones(
   id TEXT PRIMARY KEY,
@@ -51,6 +56,38 @@ CREATE TABLE IF NOT EXISTS drone_crashes(
   crashed_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS drone_crashes_time_idx ON drone_crashes(crashed_at DESC);
+CREATE TABLE IF NOT EXISTS drone_models(
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  notes TEXT,
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS printed_parts(
+  id TEXT PRIMARY KEY,
+  file TEXT NOT NULL,
+  file_key TEXT NOT NULL UNIQUE,
+  material TEXT NOT NULL DEFAULT 'TPU',
+  slicer_profile TEXT NOT NULL,
+  external_spool INTEGER NOT NULL DEFAULT 1 CHECK (external_spool IN (0, 1)),
+  objects_per_print INTEGER NOT NULL DEFAULT 1 CHECK (objects_per_print >= 1),
+  variant TEXT,
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS drone_model_parts(
+  model_id TEXT NOT NULL REFERENCES drone_models(id) ON DELETE CASCADE,
+  part_id TEXT NOT NULL REFERENCES printed_parts(id) ON DELETE RESTRICT,
+  name TEXT NOT NULL COLLATE NOCASE,
+  aliases TEXT NOT NULL DEFAULT '[]',
+  count INTEGER NOT NULL DEFAULT 1 CHECK (count >= 1),
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (model_id, part_id),
+  UNIQUE (model_id, name)
+);
+CREATE TABLE IF NOT EXISTS drone_model_links(
+  drone_id TEXT PRIMARY KEY REFERENCES drones(id) ON DELETE CASCADE,
+  model_id TEXT NOT NULL REFERENCES drone_models(id) ON DELETE RESTRICT,
+  linked_at TEXT NOT NULL
+);
 `;
 
 export type PartStatus = 'installed' | 'damaged' | 'removed';
@@ -109,16 +146,202 @@ export interface FleetImportDrone {
   parts: FleetImportPart[];
 }
 
-/** F-098-T05: `{ "version": 1, "drones": [ { name, frame?, notes?, parts: [ { category, model, positions? } ] } ] }`. */
+/**
+ * F-121-T01: one printed part of a drone model. `file` is relative to the print library (~/.nerv/prints);
+ * `count` is prints per drone (a file holding both camera bands is count 1 with objectsPerPrint 2).
+ * A file already in the fleet may be named alone (or by name only) to share it with another model.
+ */
+export interface PrintedPartInput {
+  name: string;
+  aliases?: string[];
+  file?: string;
+  count?: number;
+  variant?: string;
+  objectsPerPrint?: number;
+  material?: string;
+  profile?: string;
+  externalSpool?: boolean;
+}
+
+export interface FleetImportModel {
+  name: string;
+  notes?: string;
+  parts: PrintedPartInput[];
+}
+
+/**
+ * F-098-T05: `{ "version": 1, "drones": [ { name, frame?, notes?, parts: [ { category, model, positions? } ] } ] }`.
+ * F-121-T01 adds optional `models: [ { name, notes?, parts: [PrintedPartInput] } ]` and a drone's `model`.
+ */
 export interface FleetImportFile {
   version: 1;
-  drones: FleetImportDrone[];
+  models?: FleetImportModel[];
+  drones: Array<FleetImportDrone & { model?: string }>;
 }
 
 export interface FleetImportReport {
   drones: { created: string[]; present: string[] };
   parts: { created: number; present: number };
   spares: { created: string[]; present: string[] };
+  models: { created: string[]; present: string[] };
+  /** created: new library files; shared: an existing file linked to another model; present: link already there. */
+  printedParts: { created: number; shared: number; present: number };
+  droneModels: { linked: number; present: number };
+}
+
+export interface DroneModelRecord {
+  id: string;
+  name: string;
+  notes?: string;
+  createdAt: string;
+}
+
+/** F-121-T01: a printed part as a model carries it (and a drone of that model inherits it). */
+export interface ModelPrintedPart {
+  id: string;
+  model: string;
+  name: string;
+  aliases: string[];
+  file: string;
+  count: number;
+  objectsPerPrint: number;
+  variant?: string;
+  material: string;
+  slicerProfile: string;
+  externalSpool: boolean;
+}
+
+const PRINT_FILE_EXTENSIONS: readonly string[] = ['.stl', '.3mf', '.obj', '.step'];
+const DEFAULT_PRINT_MATERIAL = 'TPU';
+
+/**
+ * F-121-T01: a part file path as the fleet stores it: Unicode NFC, relative to the print library, `/`
+ * between folders, no `..`, `.` or empty segments, names Windows accepts, and a slicer input extension. Links leaving the library are refused
+ * when the file is resolved (src/print-library.ts).
+ */
+export function validatePrintPath(raw: string): string {
+  const path = raw.trim().normalize('NFC');
+  if (!path) throw new Error('A part file path is required.');
+  if (/[\u0000-\u001f]/.test(path)) throw new Error(`Part file "${path}" contains a control character.`);
+  if (path.startsWith('/') || path.startsWith('\\') || path.startsWith('~') || /^[A-Za-z]:/.test(path)) {
+    throw new Error(`Part file "${path}" must be relative to the print library (~/.nerv/prints), not absolute.`);
+  }
+  if (path.includes('\\')) throw new Error(`Part file "${path}" must use / between folders.`);
+  const segments = path.split('/');
+  if (segments.includes('..')) throw new Error(`Part file "${path}" must not contain ".." segments.`);
+  if (segments.some((segment) => segment === '' || segment === '.')) {
+    throw new Error(`Part file "${path}" has an empty or "." segment.`);
+  }
+  // Windows names (Tabgha, NERV-02, writes these files): no reserved characters or device names, and no
+  // segment ending in "." or a space, which Windows silently strips.
+  if (/[:<>"|?*]/.test(path))
+    throw new Error(`Part file "${path}" contains a character Windows refuses (: < > " | ? *).`);
+  const reserved = segments.find((segment) => /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(segment));
+  if (reserved) throw new Error(`Part file "${path}" uses the reserved Windows name "${reserved}".`);
+  const trailing = segments.find((segment) => /[. ]$/.test(segment));
+  if (trailing) throw new Error(`Part file "${path}": "${trailing}" must not end in "." or a space.`);
+  const lower = path.toLowerCase();
+  if (!PRINT_FILE_EXTENSIONS.some((ext) => lower.endsWith(ext))) {
+    throw new Error(`Part file "${path}" must end in .stl, .3mf, .obj or .step.`);
+  }
+  return path;
+}
+
+/**
+ * F-121-T01: the identity of a library file. SQLite's NOCASE folds ASCII only, while APFS (and NTFS) treat
+ * NFC/NFD forms and Unicode case variants (É/é) as one file, so the key is NFC and Unicode lower case.
+ */
+function printFileKey(file: string): string {
+  return file.normalize('NFC').toLowerCase();
+}
+
+/** F-121-T01: the allowlisted (F-087) profile name, in the allowlist's spelling; unknown names are refused. */
+function allowedProfile(name: string, allowed: readonly string[]): string {
+  const wanted = name.trim().toLowerCase();
+  const match = allowed.find((entry) => entry.trim().toLowerCase() === wanted);
+  if (!wanted || !match) {
+    throw new Error(`Unknown slicer profile "${name.trim()}". Allowed profiles: ${allowed.join(', ') || '(none)'}.`);
+  }
+  return match;
+}
+
+function positiveInteger(value: unknown, where: string): number {
+  if (!Number.isInteger(value) || (value as number) < 1) throw new Error(`${where} must be a positive integer.`);
+  return value as number;
+}
+
+function parsePrintedPart(raw: unknown, where: string, slicerProfiles: readonly string[]): PrintedPartInput {
+  if (!isPlainObject(raw)) throw new Error(`${where} must be an object.`);
+  rejectUnknownFields(
+    raw,
+    ['name', 'aliases', 'file', 'count', 'variant', 'objectsPerPrint', 'material', 'profile', 'externalSpool'],
+    where,
+  );
+  const name = requiredString(raw.name, `${where}.name`);
+  let aliases: string[] | undefined;
+  if (raw.aliases !== undefined) {
+    if (!Array.isArray(raw.aliases)) throw new Error(`${where}.aliases must be an array of strings.`);
+    aliases = raw.aliases.map((alias, i) => requiredString(alias, `${where}.aliases[${i}]`));
+  }
+  let file: string | undefined;
+  if (raw.file !== undefined) {
+    const value = requiredString(raw.file, `${where}.file`);
+    try {
+      file = validatePrintPath(value);
+    } catch (error) {
+      throw new Error(`${where}.file: ${(error as Error).message}`);
+    }
+  }
+  const variant = optionalString(raw.variant, `${where}.variant`);
+  const material = optionalString(raw.material, `${where}.material`);
+  let profile: string | undefined;
+  if (raw.profile !== undefined) {
+    try {
+      profile = allowedProfile(requiredString(raw.profile, `${where}.profile`), slicerProfiles);
+    } catch (error) {
+      throw new Error(`${where}.profile: ${(error as Error).message}`);
+    }
+  }
+  if (raw.externalSpool !== undefined && typeof raw.externalSpool !== 'boolean') {
+    throw new Error(`${where}.externalSpool must be true or false.`);
+  }
+  return {
+    name,
+    ...(aliases ? { aliases } : {}),
+    ...(file ? { file } : {}),
+    ...(raw.count !== undefined ? { count: positiveInteger(raw.count, `${where}.count`) } : {}),
+    ...(variant ? { variant } : {}),
+    ...(raw.objectsPerPrint !== undefined
+      ? { objectsPerPrint: positiveInteger(raw.objectsPerPrint, `${where}.objectsPerPrint`) }
+      : {}),
+    ...(material ? { material } : {}),
+    ...(profile ? { profile } : {}),
+    ...(raw.externalSpool !== undefined ? { externalSpool: raw.externalSpool } : {}),
+  };
+}
+
+function parseImportModels(raw: unknown, slicerProfiles: readonly string[]): FleetImportModel[] {
+  if (!Array.isArray(raw)) throw new Error('models must be an array.');
+  const seen = new Set<string>();
+  return raw.map((rawModel, m): FleetImportModel => {
+    const where = `models[${m}]`;
+    if (!isPlainObject(rawModel)) throw new Error(`${where} must be an object.`);
+    rejectUnknownFields(rawModel, ['name', 'notes', 'parts'], where);
+    const name = requiredString(rawModel.name, `${where}.name`);
+    if (seen.has(name.toLowerCase())) throw new Error(`${where}.name: duplicate model "${name}".`);
+    seen.add(name.toLowerCase());
+    const notes = optionalString(rawModel.notes, `${where}.notes`);
+    if (!Array.isArray(rawModel.parts)) throw new Error(`${where}.parts must be an array.`);
+    const names = new Set<string>();
+    const parts = rawModel.parts.map((rawPart, p) => {
+      const part = parsePrintedPart(rawPart, `${where}.parts[${p}]`, slicerProfiles);
+      if (names.has(part.name.toLowerCase()))
+        throw new Error(`${where}.parts[${p}].name: duplicate part "${part.name}".`);
+      names.add(part.name.toLowerCase());
+      return part;
+    });
+    return { name, ...(notes ? { notes } : {}), parts };
+  });
 }
 
 const DEFAULT_PART_POSITION = 'main';
@@ -173,17 +396,19 @@ function optionalString(value: unknown, where: string): string | undefined {
  * F-098-T05: validate a fleet import file strictly. Every error names the offending field
  * (for example `drones[0].parts[1].model`); unknown fields are rejected.
  */
-export function parseFleetImport(raw: unknown): FleetImportFile {
+export function parseFleetImport(raw: unknown, options: { slicerProfiles?: readonly string[] } = {}): FleetImportFile {
   if (!isPlainObject(raw)) throw new Error('The fleet file must be a JSON object.');
-  rejectUnknownFields(raw, ['version', 'drones'], 'fleet file');
+  rejectUnknownFields(raw, ['version', 'models', 'drones'], 'fleet file');
   if (raw.version !== 1) throw new Error('version must be 1.');
+  const models = raw.models === undefined ? undefined : parseImportModels(raw.models, options.slicerProfiles ?? []);
   if (!Array.isArray(raw.drones)) throw new Error('drones must be an array.');
   const seenNames = new Set<string>();
   const drones = raw.drones.map((rawDrone, d): FleetImportDrone => {
     const where = `drones[${d}]`;
     if (!isPlainObject(rawDrone)) throw new Error(`${where} must be an object.`);
-    rejectUnknownFields(rawDrone, ['name', 'frame', 'notes', 'parts'], where);
+    rejectUnknownFields(rawDrone, ['name', 'frame', 'notes', 'model', 'parts'], where);
     const name = requiredString(rawDrone.name, `${where}.name`);
+    const model = optionalString(rawDrone.model, `${where}.model`);
     if (seenNames.has(name.toLowerCase())) throw new Error(`${where}.name: duplicate drone "${name}".`);
     seenNames.add(name.toLowerCase());
     const frame = optionalString(rawDrone.frame, `${where}.frame`);
@@ -210,9 +435,9 @@ export function parseFleetImport(raw: unknown): FleetImportFile {
       }
       return { category, model, ...(positions ? { positions } : {}) };
     });
-    return { name, ...(frame ? { frame } : {}), ...(notes ? { notes } : {}), parts };
+    return { name, ...(frame ? { frame } : {}), ...(notes ? { notes } : {}), ...(model ? { model } : {}), parts };
   });
-  return { version: 1, drones };
+  return { version: 1, ...(models ? { models } : {}), drones };
 }
 
 /**
@@ -597,16 +822,47 @@ ALTER TABLE drone_parts_next RENAME TO drone_parts;`);
    * an existing drone (by name) keeps its row and its parts; every distinct component model gets a
    * spares record at 0 new and 0 used unless one exists, whose counts are kept.
    */
-  importFleet(file: FleetImportFile, now = new Date().toISOString()): FleetImportReport {
+  importFleet(
+    file: FleetImportFile,
+    now = new Date().toISOString(),
+    options: { slicerProfiles?: readonly string[] } = {},
+  ): FleetImportReport {
     const report: FleetImportReport = {
       drones: { created: [], present: [] },
       parts: { created: 0, present: 0 },
       spares: { created: [], present: [] },
+      models: { created: [], present: [] },
+      printedParts: { created: 0, shared: 0, present: 0 },
+      droneModels: { linked: 0, present: 0 },
     };
     // First occurrence of each model (case-insensitive, as getSpare matches) sets its spares category.
     const spareModels = new Map<string, { model: string; category: string }>();
     return transaction(this.db, () => {
-      for (const input of file.drones) {
+      // F-121-T01: models and their printed parts first, so drones can link to a model from the same file.
+      for (const [m, input] of (file.models ?? []).entries()) {
+        const existing = this.getDroneModel(input.name);
+        if (existing) report.models.present.push(existing.name);
+        else
+          report.models.created.push(this.addDroneModel({ name: input.name, notes: input.notes, createdAt: now }).name);
+        for (const [p, part] of input.parts.entries()) {
+          let result;
+          try {
+            result = this.addPrintedPart(input.name, part, options.slicerProfiles ?? [], now);
+          } catch (error) {
+            throw new Error(`models[${m}].parts[${p}]: ${(error as Error).message}`);
+          }
+          if (result.created) report.printedParts.created += 1;
+          else if (result.linked) report.printedParts.shared += 1;
+          else report.printedParts.present += 1;
+        }
+      }
+      for (const [d, input] of file.drones.entries()) {
+        const model = input.model ? this.getDroneModel(input.model) : undefined;
+        if (input.model && !model) {
+          throw new Error(
+            `drones[${d}].model: drone model "${input.model}" is neither in this file's models nor in the fleet.`,
+          );
+        }
         let drone = this.getDroneByName(input.name);
         if (drone) {
           report.drones.present.push(drone.name);
@@ -632,6 +888,19 @@ ALTER TABLE drone_parts_next RENAME TO drone_parts;`);
             report.parts.created += 1;
           }
         }
+        if (model) {
+          const current = this.droneModel(drone.name);
+          if (current?.id === model.id) {
+            report.droneModels.present += 1;
+          } else if (current) {
+            throw new Error(
+              `drones[${d}].model: ${drone.name} is already a ${current.name}; relink it by chat ("il drone ${drone.name} è un ${model.name}").`,
+            );
+          } else {
+            this.linkDroneModel(drone.name, model.name, now);
+            report.droneModels.linked += 1;
+          }
+        }
       }
       for (const { model, category } of spareModels.values()) {
         const existing = this.getSpare(model);
@@ -644,6 +913,217 @@ ALTER TABLE drone_parts_next RENAME TO drone_parts;`);
       }
       return report;
     });
+  }
+
+  /** F-121-T01: add a drone model (printed parts hang off it); the name is unique, ignoring case. */
+  addDroneModel(input: { name: string; notes?: string; createdAt?: string }): DroneModelRecord {
+    const name = input.name.trim();
+    if (!name) throw new Error('Drone model name is required.');
+    if (this.getDroneModel(name)) throw new Error(`Drone model already exists: ${name}`);
+    const id = `model-${randomUUID()}`;
+    this.db
+      .prepare('INSERT INTO drone_models(id, name, notes, created_at) VALUES (?, ?, ?, ?)')
+      .run(id, name, input.notes?.trim() || null, input.createdAt ?? new Date().toISOString());
+    return this.getDroneModel(name)!;
+  }
+
+  getDroneModel(name: string): DroneModelRecord | undefined {
+    const row = this.db.prepare('SELECT * FROM drone_models WHERE name = ?').get(name.trim()) as
+      Record<string, unknown> | undefined;
+    return row ? mapDroneModel(row) : undefined;
+  }
+
+  listDroneModels(): DroneModelRecord[] {
+    const rows = this.db.prepare('SELECT * FROM drone_models ORDER BY name ASC').all() as Array<
+      Record<string, unknown>
+    >;
+    return rows.map(mapDroneModel);
+  }
+
+  /** F-121-T01: a drone is one model; linking again moves it to the new model and returns the previous one. */
+  linkDroneModel(
+    droneName: string,
+    modelName: string,
+    linkedAt = new Date().toISOString(),
+  ): { previous?: DroneModelRecord; model: DroneModelRecord } {
+    const drone = this.getDroneByName(droneName);
+    if (!drone) throw new Error(`Drone not found: ${droneName}`);
+    const model = this.getDroneModel(modelName);
+    if (!model) throw new Error(`Drone model not found: ${modelName}`);
+    const previous = this.droneModel(drone.name);
+    this.db
+      .prepare(
+        `INSERT INTO drone_model_links(drone_id, model_id, linked_at) VALUES (?, ?, ?)
+         ON CONFLICT(drone_id) DO UPDATE SET model_id = excluded.model_id, linked_at = excluded.linked_at`,
+      )
+      .run(drone.id, model.id, linkedAt);
+    return { ...(previous && previous.id !== model.id ? { previous } : {}), model };
+  }
+
+  /** F-121-T01: the model a drone is linked to, if any. */
+  droneModel(droneName: string): DroneModelRecord | undefined {
+    const row = this.db
+      .prepare(
+        `SELECT m.* FROM drone_model_links l JOIN drones d ON d.id = l.drone_id JOIN drone_models m ON m.id = l.model_id
+         WHERE lower(d.name) = lower(?)`,
+      )
+      .get(droneName.trim()) as Record<string, unknown> | undefined;
+    return row ? mapDroneModel(row) : undefined;
+  }
+
+  /**
+   * F-121-T01: put a printed part on a model. A new library file needs an allowlisted slicer profile; a file
+   * already in the fleet (given by path, or by a part name or alias that names one file) is shared: the model
+   * links the same row with its own name, aliases and count, and any material, profile, spool, objects or
+   * variant given must match the stored ones. Linking again updates the count and aliases given.
+   */
+  addPrintedPart(
+    modelName: string,
+    input: PrintedPartInput,
+    slicerProfiles: readonly string[],
+    now = new Date().toISOString(),
+  ): { part: ModelPrintedPart; created: boolean; linked: boolean } {
+    const model = this.getDroneModel(modelName);
+    if (!model) throw new Error(`Drone model not found: ${modelName}`);
+    const name = input.name.trim();
+    if (!name) throw new Error('Printed part name is required.');
+    const count = input.count === undefined ? undefined : positiveInteger(input.count, 'count');
+    const objectsPerPrint =
+      input.objectsPerPrint === undefined ? undefined : positiveInteger(input.objectsPerPrint, 'objectsPerPrint');
+    const profile = input.profile === undefined ? undefined : allowedProfile(input.profile, slicerProfiles);
+    const material = input.material?.trim() || undefined;
+    const variant = input.variant?.trim() || undefined;
+    const aliases = input.aliases?.map((alias) => alias.trim()).filter(Boolean);
+    return transaction(this.db, () => {
+      const file = input.file === undefined ? this.sharedFileByName(name, model.id) : validatePrintPath(input.file);
+      let row = this.db.prepare('SELECT * FROM printed_parts WHERE file_key = ?').get(printFileKey(file)) as
+        Record<string, unknown> | undefined;
+      const created = !row;
+      if (row) {
+        const stored = row;
+        const clash = [
+          profile !== undefined && profile !== String(stored.slicer_profile)
+            ? `profile ${String(stored.slicer_profile)}`
+            : '',
+          material !== undefined && material.toLowerCase() !== String(stored.material).toLowerCase()
+            ? `material ${String(stored.material)}`
+            : '',
+          input.externalSpool !== undefined && input.externalSpool !== (Number(stored.external_spool) === 1)
+            ? Number(stored.external_spool) === 1
+              ? 'the external spool'
+              : 'the AMS'
+            : '',
+          objectsPerPrint !== undefined && objectsPerPrint !== Number(stored.objects_per_print)
+            ? `${Number(stored.objects_per_print)} object(s) per print`
+            : '',
+          variant !== undefined && variant !== (stored.variant ?? undefined)
+            ? `variant ${String(stored.variant ?? '(none)')}`
+            : '',
+        ].filter(Boolean);
+        if (clash.length) {
+          throw new Error(
+            `File ${String(stored.file)} is already a printed part with ${clash.join(', ')}; a shared file keeps one profile, material, spool and variant.`,
+          );
+        }
+      } else {
+        if (!profile) {
+          throw new Error(
+            `A new printed part needs a slicer profile (allowed: ${slicerProfiles.join(', ') || '(none)'}).`,
+          );
+        }
+        this.db
+          .prepare(
+            `INSERT INTO printed_parts(id, file, file_key, material, slicer_profile, external_spool, objects_per_print, variant, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          )
+          .run(
+            `print-${randomUUID()}`,
+            file,
+            printFileKey(file),
+            material ?? DEFAULT_PRINT_MATERIAL,
+            profile,
+            input.externalSpool === false ? 0 : 1,
+            objectsPerPrint ?? 1,
+            variant ?? null,
+            now,
+          );
+        row = this.db.prepare('SELECT * FROM printed_parts WHERE file_key = ?').get(printFileKey(file)) as Record<
+          string,
+          unknown
+        >;
+      }
+      const partId = String(row.id);
+      const link = this.db
+        .prepare('SELECT * FROM drone_model_parts WHERE model_id = ? AND part_id = ?')
+        .get(model.id, partId) as Record<string, unknown> | undefined;
+      const sameName = this.db
+        .prepare('SELECT part_id FROM drone_model_parts WHERE model_id = ? AND name = ? AND part_id <> ?')
+        .get(model.id, name, partId) as { part_id: string } | undefined;
+      if (sameName) throw new Error(`${model.name} already has a different printed part named "${name}".`);
+      if (link) {
+        this.db
+          .prepare('UPDATE drone_model_parts SET name = ?, aliases = ?, count = ? WHERE model_id = ? AND part_id = ?')
+          .run(
+            name,
+            aliases ? JSON.stringify(aliases) : String(link.aliases),
+            count ?? Number(link.count),
+            model.id,
+            partId,
+          );
+      } else {
+        this.db
+          .prepare(
+            'INSERT INTO drone_model_parts(model_id, part_id, name, aliases, count, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+          )
+          .run(model.id, partId, name, JSON.stringify(aliases ?? []), count ?? 1, now);
+      }
+      const part = this.printedPartsForModel(model.name).find((entry) => entry.id === partId)!;
+      return { part, created, linked: !link };
+    });
+  }
+
+  /**
+   * The library file a part name or alias names: on the target model first (so a name-only update of that
+   * model's part works even when another model has a part of the same name), then across all models.
+   * None or several files is an error.
+   */
+  private sharedFileByName(name: string, modelId: string): string {
+    const wanted = name.toLowerCase();
+    const rows = this.db
+      .prepare(
+        'SELECT l.model_id, l.name, l.aliases, p.file FROM drone_model_parts l JOIN printed_parts p ON p.id = l.part_id',
+      )
+      .all() as Array<{ model_id: string; name: string; aliases: string; file: string }>;
+    const matching = rows.filter(
+      (row) =>
+        row.name.toLowerCase() === wanted ||
+        (JSON.parse(row.aliases) as string[]).some((alias) => alias.toLowerCase() === wanted),
+    );
+    const own = [...new Set(matching.filter((row) => row.model_id === modelId).map((row) => row.file))];
+    const files = own.length ? own : [...new Set(matching.map((row) => row.file))];
+    if (files.length === 1) return files[0]!;
+    if (files.length === 0) throw new Error(`No printed part named "${name}" yet: give its file to add it.`);
+    throw new Error(`"${name}" names several part files (${files.join(', ')}): give the file to share.`);
+  }
+
+  /** F-121-T01: a model's printed parts, by name. */
+  printedPartsForModel(modelName: string): ModelPrintedPart[] {
+    const model = this.getDroneModel(modelName);
+    if (!model) return [];
+    const rows = this.db
+      .prepare(
+        `SELECT p.*, l.name, l.aliases, l.count, m.name AS model FROM drone_model_parts l
+         JOIN printed_parts p ON p.id = l.part_id JOIN drone_models m ON m.id = l.model_id
+         WHERE l.model_id = ? ORDER BY l.name ASC`,
+      )
+      .all(model.id) as Array<Record<string, unknown>>;
+    return rows.map(mapModelPrintedPart);
+  }
+
+  /** F-121-T01: a drone inherits its model's printed parts; none when it has no model. */
+  printedPartsForDrone(droneName: string): ModelPrintedPart[] {
+    const model = this.droneModel(droneName);
+    return model ? this.printedPartsForModel(model.name) : [];
   }
 
   getCrash(id: string): CrashRecord | undefined {
@@ -820,6 +1300,31 @@ function mapDrone(row: Record<string, unknown>): DroneRecord {
     ...(row.frame !== null && row.frame !== undefined ? { frame: String(row.frame) } : {}),
     ...(row.notes !== null && row.notes !== undefined ? { notes: String(row.notes) } : {}),
     createdAt: String(row.created_at),
+  };
+}
+
+function mapDroneModel(row: Record<string, unknown>): DroneModelRecord {
+  return {
+    id: String(row.id),
+    name: String(row.name),
+    ...(row.notes !== null && row.notes !== undefined ? { notes: String(row.notes) } : {}),
+    createdAt: String(row.created_at),
+  };
+}
+
+function mapModelPrintedPart(row: Record<string, unknown>): ModelPrintedPart {
+  return {
+    id: String(row.id),
+    model: String(row.model),
+    name: String(row.name),
+    aliases: JSON.parse(String(row.aliases)) as string[],
+    file: String(row.file),
+    count: Number(row.count),
+    objectsPerPrint: Number(row.objects_per_print),
+    ...(row.variant !== null && row.variant !== undefined ? { variant: String(row.variant) } : {}),
+    material: String(row.material),
+    slicerProfile: String(row.slicer_profile),
+    externalSpool: Number(row.external_spool) === 1,
   };
 }
 

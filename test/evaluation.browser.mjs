@@ -464,3 +464,119 @@ test(
     }
   },
 );
+
+// F-118-T05 (owner 2026-11-24): across the join, the real server's QR pairing codes and the production dashboard. A
+// scanned link opens the dashboard in a browser tab with the code in the fragment: the page clears the fragment (so Add to
+// Home Screen saves the clean address and keeps no code), shows the code with the steps while it is valid, makes no
+// request carrying it and never pairs; the code stays usable for the installed app. Settings → Pair a device shows the
+// QR (from a test double for the encoder) and the same code.
+test(
+  'F-118-T05: a scanned pairing link shows the code in Safari without pairing; Settings shows the QR',
+  { timeout: 120000 },
+  async () => {
+    const home = mkdtempSync(join(tmpdir(), 'nerv-pairing-qr-browser-')),
+      token = 'f'.repeat(32);
+    const texts = [];
+    const qrEncoder = (text) => {
+      texts.push(text);
+      return Array.from({ length: 21 }, (_, y) => Array.from({ length: 21 }, (_, x) => (x * y + x) % 3 === 0));
+    };
+    const store = new Store(':memory:');
+    const server = makeServer(store, token, {
+      webRoot: resolve('dist/web/browser'),
+      deviceFile: join(home, 'devices.json'),
+      language: 'en',
+      timeZone: 'Europe/Rome',
+      qrEncoder,
+    });
+    const seen = [];
+    server.on('request', (req) => seen.push({ url: req.url, referer: req.headers.referer ?? '' }));
+    await new Promise((done) => server.listen(0, '127.0.0.1', done));
+    const origin = `http://127.0.0.1:${server.address().port}`;
+    const admin = { authorization: 'Bearer ' + token };
+    const mintQr = async () =>
+      (
+        await fetch(origin + '/api/device/codes', {
+          method: 'POST',
+          headers: { ...admin, 'content-type': 'application/json' },
+          body: JSON.stringify({ base: origin }),
+        })
+      ).json();
+    const devices = async () => (await (await fetch(origin + '/api/devices', { headers: admin })).json()).devices;
+    const pairWith = async (code) =>
+      (
+        await fetch(origin + '/api/device/pair', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ code, name: 'Fixture phone' }),
+        })
+      ).status;
+    const banner = `document.querySelector('.banner').textContent`;
+    try {
+      const manifest = await (await fetch(origin + '/manifest.webmanifest')).json();
+      assert.ok(!String(manifest.start_url).includes('#'), 'the installed app starts without a fragment');
+      await browser(async ({ page, evaluate, until, errors }) => {
+        // A browser tab (Safari after a scan).
+        const minted = await mintQr();
+        assert.equal(minted.link, `${origin}/dashboard/#pair=${minted.code}&until=${minted.expiresAt}`);
+        assert.equal(minted.expiresInMs, 10 * 60_000);
+        seen.length = 0;
+        await page('Page.navigate', { url: minted.link });
+        await until(`${banner}.includes(${JSON.stringify(minted.code)})&&${banner}.includes('Add to Home Screen')`);
+        const shown = await evaluate(banner);
+        assert.match(shown, /Open NERV from the Home Screen/);
+        assert.match(shown, /valid until \d{1,2}[:.]\d{2}/);
+        assert.equal(await evaluate('location.hash'), '', 'the fragment is cleared after reading');
+        assert.equal(
+          await evaluate('location.href'),
+          origin + '/dashboard/',
+          'Add to Home Screen saves the clean address',
+        );
+        assert.equal(await evaluate(`localStorage.getItem('nerv.device')`), null, 'no device credential');
+        assert.ok(
+          !seen.some((r) => r.url.includes(minted.code) || r.referer.includes(minted.code)),
+          'no request carries the code',
+        );
+        assert.ok(!seen.some((r) => r.url.startsWith('/api/device/pair')), 'the page never pairs');
+        assert.equal((await devices()).length, 0);
+        // Expiry: a code past its time is not shown; one that runs out while open disappears.
+        await page('Page.navigate', { url: `${origin}/dashboard/#pair=ABCD-EFGH&until=${Date.now() - 1000}` });
+        await until(`${banner}.includes('expired')`);
+        assert.ok(!(await evaluate(banner)).includes('ABCD-EFGH'), 'an expired code is not shown');
+        await page('Page.navigate', { url: `${origin}/dashboard/#pair=ABCD-EFGH&until=${Date.now() + 1500}` });
+        await until(`${banner}.includes('ABCD-EFGH')`);
+        await until(`${banner}.includes('expired')&&!${banner}.includes('ABCD-EFGH')`, 10000);
+        // The code was never spent: the installed app pairs with it.
+        assert.equal(await pairWith(minted.code), 200, 'the code shown in Safari still pairs');
+        assert.deepEqual(errors, [], 'no browser runtime exceptions');
+      });
+      // Settings → Pair a device, from a dashboard session (nerv open dashboard).
+      await browser(async ({ page, evaluate, until, errors }) => {
+        const login = await (await fetch(origin + '/api/session/codes', { method: 'POST', headers: admin })).json();
+        await page('Page.addScriptToEvaluateOnNewDocument', { source: `window.confirm=()=>true` });
+        await page('Page.navigate', { url: `${origin}/dashboard/#code=${login.code}` });
+        await until(`document.querySelector('#btn-pair-device')!==null&&!${banner}.includes('SIGNING IN')`);
+        await evaluate(`document.querySelector('#btn-pair-device').click()`);
+        await until(`document.querySelector('#settings-pair svg.pair-qr')!==null`);
+        const link = texts.at(-1);
+        const code = /#pair=([A-Z2-9]{4}-[A-Z2-9]{4})&until=\d+$/.exec(link)?.[1];
+        assert.ok(code && link.startsWith(origin + '/dashboard/#pair='), link);
+        const box = await evaluate(`document.querySelector('#settings-pair').textContent`);
+        assert.ok(box.includes(code), 'Settings shows the code next to the QR');
+        assert.match(box, /valid until/);
+        assert.match(box, /127\.0\.0\.1/, 'says a phone cannot open this loopback address');
+        const modules = await evaluate(`document.querySelector('#settings-pair svg.pair-qr path').getAttribute('d')`);
+        assert.equal((modules.match(/M/g) ?? []).length, 245, 'the QR draws every dark module of the encoder rows');
+        assert.equal(await pairWith(code), 200, 'the Settings code pairs the installed app');
+        assert.deepEqual(errors, [], 'no browser runtime exceptions');
+      });
+    } finally {
+      await new Promise((done) => {
+        server.close(done);
+        server.closeAllConnections();
+      });
+      store.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);

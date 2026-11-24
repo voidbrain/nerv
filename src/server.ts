@@ -1,5 +1,6 @@
 import { SessionBook } from './session-book.ts';
-import { DEVICE_IDLE_MS, DeviceBook, deviceName, PairingCodes } from './device-book.ts';
+import { DEVICE_IDLE_MS, DeviceBook, deviceName, PairingCodes, QR_PAIRING_CODE_TTL_MS } from './device-book.ts';
+import { pairingBase, pairingLink, qrEncoder, qrRows, type QrEncoder } from './pairing-qr.ts';
 import { DashboardFeed } from './dashboard-feed.ts';
 import { toolListing } from './tool-listing.ts';
 import { createServer, type IncomingMessage, type RequestListener } from 'node:http';
@@ -30,7 +31,7 @@ import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.
 import { readConfig } from './config.ts';
 import { COMMAND_CATALOG } from './chat-command.ts';
 import { builtinPackRegistry, fpvFleetSnapshot } from './packs.ts';
-import { placementProbe } from './placement-campaign.ts';
+import { PLACEMENT_PROBE_BODY_BYTES, placementProbe } from './placement-campaign.ts';
 
 type PhotoStoreHost = StoreApi & {
   photos?: PhotoStore;
@@ -49,12 +50,15 @@ function resolvePhotoOwner(s: PhotoStoreHost, kind: PhotoOwnerKind, id: string):
   return builtinPackRegistry.resolvePhotoOwner(s, kind, id);
 }
 async function body(req: IncomingMessage, limit = 8192): Promise<Record<string, unknown>> {
-  let text = '';
+  const chunks: Buffer[] = [];
+  let size = 0;
   for await (const chunk of req) {
-    text += chunk;
-    if (Buffer.byteLength(text) > limit) throw new Error('Request too large.');
+    const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk));
+    size += bytes.length;
+    if (size > limit) throw new Error('Request too large.');
+    chunks.push(bytes);
   }
-  const value: unknown = JSON.parse(text);
+  const value: unknown = JSON.parse(Buffer.concat(chunks).toString('utf8'));
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Expected JSON object.');
   return value as Record<string, unknown>;
 }
@@ -92,6 +96,8 @@ export function makeServer(
     deviceFile?: string;
     /** F-118: the clock for paired devices and pairing codes; tests move it. */
     clock?: () => number;
+    /** F-118-T05: the QR encoder for pairing links; the vendored one by default (tests pass a double). */
+    qrEncoder?: QrEncoder;
     /** Health sampling interval (F-103-T01 default 60 s); tests shorten it. */
     healthSampleIntervalMs?: number;
   } = {},
@@ -403,7 +409,7 @@ export function makeServer(
           return;
         }
         if (!store.selectExecution) throw new Error('Placement planning is unavailable.');
-        const probe = placementProbe(await body(req));
+        const probe = placementProbe(await body(req, PLACEMENT_PROBE_BODY_BYTES));
         reply(200, {
           placement: probe.placement,
           selection: await store.selectExecution(probe.orchestration),
@@ -415,7 +421,7 @@ export function makeServer(
           return;
         }
         if (!store.runOrchestratedJob) throw new Error('Placement execution is unavailable.');
-        const value = await body(req);
+        const value = await body(req, PLACEMENT_PROBE_BODY_BYTES);
         if (value.confirmExecute !== true) throw new Error('Placement execution needs confirmExecute: true.');
         const { confirmExecute: _confirmExecute, ...input } = value;
         const probe = placementProbe(input);
@@ -629,19 +635,45 @@ export function makeServer(
       } else if (
         !options.native &&
         !root &&
-        (path === '/api/session/codes' ||
-          path === '/api/session/revoke' ||
-          path === '/api/stop' ||
-          path === '/api/device/codes')
+        (path === '/api/session/codes' || path === '/api/session/revoke' || path === '/api/stop')
       )
         reply(403, {
           error:
             'Only the CLI (with the admin token) can mint login or pairing codes, revoke sessions or stop the service.',
         });
-      else if (!options.native && root && req.method === 'POST' && path === '/api/device/codes') {
-        const minted = pairing.mint();
+      else if (!options.native && !root && !sessions.has(bearer) && path === '/api/device/codes')
+        // F-118-T05: Settings (a dashboard session) may show a pairing QR too; a paired device never mints, so a
+        // stolen phone cannot pair others.
+        reply(403, { error: 'Only the CLI or a dashboard session can mint pairing codes, not a paired device.' });
+      else if (!options.native && req.method === 'POST' && path === '/api/device/codes') {
+        // F-118-T05: with { base } (the address the phone opens) the code lasts 10 minutes and comes with the dashboard
+        // link carrying it in the fragment, and the link's QR as rows of 1 (dark) and 0 (light).
+        let base: string | undefined;
+        if (req.headers['content-length'] !== '0' && (req.headers['content-type'] ?? '').includes('json')) {
+          let value: Record<string, unknown>;
+          try {
+            value = await body(req, 1024);
+          } catch {
+            reply(400, { error: 'Invalid request.' });
+            return;
+          }
+          base = pairingBase(value.base);
+          if (Object.keys(value).some((k) => k !== 'base') || (value.base !== undefined && !base)) {
+            reply(400, { error: 'Send { base }: the http(s) address the phone opens.' });
+            return;
+          }
+        }
+        const minted = pairing.mint(base ? QR_PAIRING_CODE_TTL_MS : undefined);
         if (!minted) reply(429, { error: 'Too many unused pairing codes; wait a few minutes.' });
-        else reply(201, minted);
+        else if (!base) reply(201, minted);
+        else {
+          const link = pairingLink(base, minted.code, minted.expiresAt);
+          try {
+            reply(201, { ...minted, link, qr: qrRows((options.qrEncoder ?? qrEncoder)(link)) });
+          } catch (e) {
+            reply(201, { ...minted, link, qrError: e instanceof Error ? e.message : 'No QR.' });
+          }
+        }
       } else if (!options.native && req.method === 'GET' && path === '/api/devices') {
         // F-118-T03: Settings lists the paired devices for the owner (admin token, dashboard session or a paired
         // device) and marks the one asking; a device revoked here is refused (401) on its next request.

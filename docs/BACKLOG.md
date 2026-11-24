@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 100.25 h agent + 10.75 h owner across 133 open steps of 38 features and 25 other records. 136.75 h of actual effort recorded on 146 steps. Generated from the task files.
+**Remaining effort:** 96.25 h agent + 11 h owner across 135 open steps of 38 features and 25 other records. 144.75 h of actual effort recorded on 149 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -171,9 +171,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | [F-006-T27](#f-006-t27) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | [F-006-T27](#f-006-t27), [F-006-T28](#f-006-t28) | 🤖 | — | — |
 
-💻 **→** Next: merge PR #708 (B-119-T01 implemented), then rerun the P3 role comparison (F-006-T27).
+💻 **→** Next: the live P3 probe over 15 s, in the P3 role rerun (F-006-T29), once both bases are updated (F-006-T28).
 
 | | |
 |---|---|
@@ -185,7 +185,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-119-t01"></a>B-119-T01 — Let placement probes run to their own budget | 1 h | 0.75 h so far (stated) | 1 h | Implemented; verification pending | — | [F-006-T27](#f-006-t27) |
+| 🟢 Small | <a id="b-119-t01"></a>B-119-T01 — Let placement probes run to their own budget | 1 h | 0.75 h so far (stated) | 1 h | Implemented; verification pending | — | [F-006-T27](#f-006-t27), [F-006-T28](#f-006-t28) |
 | 🟢 Small | **Total** | 1 h | 0.75 h | 1 h | 0 of 1 completed | | |
 
 <details>
@@ -197,7 +197,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [PR #708](https://github.com/voidbrain/nerv/pull/708) (socket budget; Test: `test/placement-campaign.test.ts`); [PR #698](https://github.com/voidbrain/nerv/pull/698) (opened); F-006-T23 evidence in the [F-006-T26 report](evaluations/2026-11-24-f006-t26-placement-report.md) |
 | Opened | 2026-11-24 |
-| Verification | Unit/integration 2026-11-24: `test/placement-campaign.test.ts` passes locally (4 of 4 tests). Live P3 probe over 15 s on NERV-02: Pending (F-006-T27). |
+| Verification | Unit/integration 2026-11-24: `test/placement-campaign.test.ts` passes locally (4 of 4 tests). Live P3 probe over 15 s on NERV-02: Pending (F-006-T29). |
 | Reviewed | 2026-11-24 |
 
 </details>
@@ -209,7 +209,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h | [B-119-T01](#b-119-t01) | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h agent + 0.25 h owner | [B-119-T01](#b-119-t01) | — | 🤖 | — | — |
 
 💻 **→** Next: F-006-T12 — T04c — Placement report and recommendation (Implemented; verification pending).
 
@@ -228,8 +228,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-006-t24"></a>F-006-T24 — Run combination-v1 coder-alone vs coder-reviewer for mac-only and mac-coder-mini-auditor | 1.5 h | 1 h so far (stated) | 0 h | Implemented; verification pending | — | [F-006-T26](#f-006-t26) | 🤖 | [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending |
 | 🟢 Small | <a id="f-006-t25"></a>F-006-T25 — Check a disconnected auditor, a cancellation and an uncertain outcome live | 1.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-006-T26](#f-006-t26) | 🤖 | [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending |
 | 🟢 Small | <a id="f-006-t26"></a>F-006-T26 — Update the placement report and recommendation with the new evidence | 0.75 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | [F-006-T23](#f-006-t23), [F-006-T24](#f-006-t24), [F-006-T25](#f-006-t25) | [F-006-T27](#f-006-t27) | 🤖 | [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending |
-| 🟡 Medium | <a id="f-006-t27"></a>F-006-T27 — Rerun the P3 role cases once the placement probe carries role-sized prompts | 2 h | 0 h | 2 h | Planned | [F-006-T26](#f-006-t26), [B-119-T01](#b-119-t01) | — | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 17.5 h (24 of 27 steps) | 10.5 h (18 of 27 steps recorded) | 2 h | 21 of 27 completed | | | | |
+| 🟢 Small | <a id="f-006-t27"></a>F-006-T27 — Make the placement probe carry role-sized prompts | 2 h | 2 h so far (stated) | 0 h | Implemented; verification pending | [F-006-T26](#f-006-t26), [B-119-T01](#b-119-t01) | [F-006-T28](#f-006-t28) | 🤖 | [PR #714](https://github.com/voidbrain/nerv/pull/714) probe system field, role-sized limits, frame refusal without ending the session; CI pending |
+| 🟢 Small | <a id="f-006-t28"></a>F-006-T28 — Owner: put NERV-01 and NERV-02 on the revision with role-sized probes | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-006-T27](#f-006-t27), [B-119-T01](#b-119-t01) | [F-006-T29](#f-006-t29) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-006-t29"></a>F-006-T29 — Rerun the P3 role cases with role-sized probes and update the report | 1 h | 0 h | 1 h | Planned | [F-006-T28](#f-006-t28) | — | ⏳ 🤖 | — |
+| 🟢 Small | **Total** | 18.5 h (26 of 29 steps) | 12.5 h (19 of 29 steps recorded) | 1 h agent + 0.25 h owner | 21 of 29 completed | | | | |
 
 <details><summary>Done steps (21)</summary>
 
@@ -267,7 +269,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
-| PR / evidence | Steps: F-006-T12: [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending · F-006-T13: [PR #528](https://github.com/voidbrain/nerv/pull/528) results · F-006-T14: [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure · F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation · F-006-T21: [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending · F-006-T22: [PR #697](https://github.com/voidbrain/nerv/pull/697) owner decision recorded; T23–T26 planned · F-006-T23: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T24: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T25: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T26: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending. [PR #698](https://github.com/voidbrain/nerv/pull/698) F-006-T23–T26 equivalent placement runs and updated report; [PR #697](https://github.com/voidbrain/nerv/pull/697) F-006-T22 owner decision and T23–T26 steps; [PR #679](https://github.com/voidbrain/nerv/pull/679) F-006-T12 placement report; [PR #638](https://github.com/voidbrain/nerv/pull/638) F-006-T21 placement probes and owner page; [PR #631](https://github.com/voidbrain/nerv/pull/631) F-006-T14 report; [PR #466](https://github.com/voidbrain/nerv/pull/466); [PR #468](https://github.com/voidbrain/nerv/pull/468) (merged; CI green); older entries in the [evidence archive](archive/evidence-2026.md#f-006-moved-2026-11-18) |
+| PR / evidence | Steps: F-006-T12: [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending · F-006-T13: [PR #528](https://github.com/voidbrain/nerv/pull/528) results · F-006-T14: [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure · F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation · F-006-T21: [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending · F-006-T22: [PR #697](https://github.com/voidbrain/nerv/pull/697) owner decision recorded; T23–T26 planned · F-006-T23: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T24: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T25: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T26: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T27: [PR #714](https://github.com/voidbrain/nerv/pull/714) probe system field, role-sized limits, frame refusal without ending the session; CI pending. [PR #714](https://github.com/voidbrain/nerv/pull/714) F-006-T27 role-sized placement probes; [PR #698](https://github.com/voidbrain/nerv/pull/698) F-006-T23–T26 equivalent placement runs and updated report; [PR #697](https://github.com/voidbrain/nerv/pull/697) F-006-T22 owner decision and T23–T26 steps; [PR #679](https://github.com/voidbrain/nerv/pull/679) F-006-T12 placement report; [PR #638](https://github.com/voidbrain/nerv/pull/638) F-006-T21 placement probes and owner page; [PR #631](https://github.com/voidbrain/nerv/pull/631) F-006-T14 report; [PR #466](https://github.com/voidbrain/nerv/pull/466); [PR #468](https://github.com/voidbrain/nerv/pull/468) (merged; CI green); older entries in the [evidence archive](archive/evidence-2026.md#f-006-moved-2026-11-18) |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-006-T04 and F-006-T05 closed (were Verified). 2026-11-18: F-006-T19 verified: [PR #466](https://github.com/voidbrain/nerv/pull/466) merged on green CI; F-006-T20 verified: [PR #468](https://github.com/voidbrain/nerv/pull/468) merged on green CI. |
 | Reviewed | 2026-11-24 |
@@ -1182,7 +1184,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟣 Very large | 8.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code (Implemented; verification pending).
+💻 **→** Next: independent security review of [PR #716](https://github.com/voidbrain/nerv/pull/716), then F-118-T04.
 
 | | |
 |---|---|
@@ -1197,9 +1199,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟡 Medium | <a id="f-118-t01"></a>F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code | 3 h | 1.5 h so far (stated) | 3 h | Implemented; verification pending | — | [F-118-T02](#f-118-t02), [F-118-T03](#f-118-t03), [F-118-T05](#f-118-t05) |
 | 🟡 Medium | <a id="f-118-t02"></a>F-118-T02 — Workspace and dashboard pair from their own sign-in box; the installed app signs itself in | 2 h | 2.25 h so far (stated) | 2 h | Implemented; verification pending | [F-118-T01](#f-118-t01) | [F-118-T04](#f-118-t04) |
 | 🟡 Medium | <a id="f-118-t03"></a>F-118-T03 — Paired devices in Settings with Revoke; nerv devices list and revoke | 1.5 h | 1.75 h so far (stated) | 1.5 h | Implemented; verification pending | [F-118-T01](#f-118-t01) | — |
+| 🟡 Medium | <a id="f-118-t05"></a>F-118-T05 — Pairing as a QR code: nerv open --phone --qr and Settings → Pair a device | 1.5 h | 3 h so far (stated) | 1.5 h | Implemented; verification pending | [F-118-T01](#f-118-t01) | — |
 | 🟢 Small | <a id="f-118-t04"></a>F-118-T04 — Phone procedure: Tailscale serve, pairing and push, then the owner check | 0.5 h | 0 h | 0.5 h | Planned | [F-118-T02](#f-118-t02) | — |
-| 🟡 Medium | <a id="f-118-t05"></a>F-118-T05 — Pairing as a QR code: nerv open --phone --qr and Settings → Pair a device | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
-| 🟣 Very large | **Total** | 8.5 h | 5.5 h (3 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
+| 🟣 Very large | **Total** | 8.5 h | 8.5 h (4 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1208,9 +1210,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689); F-118-T01 [PR #700](https://github.com/voidbrain/nerv/pull/700); F-118-T02 [PR #707](https://github.com/voidbrain/nerv/pull/707); F-118-T03 [PR #713](https://github.com/voidbrain/nerv/pull/713). |
+| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689); F-118-T01 [PR #700](https://github.com/voidbrain/nerv/pull/700); F-118-T02 [PR #707](https://github.com/voidbrain/nerv/pull/707); F-118-T03 [PR #713](https://github.com/voidbrain/nerv/pull/713); F-118-T05 [PR #716](https://github.com/voidbrain/nerv/pull/716). |
 | Opened | 2026-11-23 |
-| Verification | 2026-11-24: F-118-T01 `test/device-pairing.test.ts` 13/13 (committed failing first, review fixes too); with session, session-persist, dashboard-accounting, decision-client, CLI help and dashboard suites 85/85; `check:fast` green. F-118-T02: `test/evaluation.browser.mjs` F-118-T02 (installed pair → reload → still signed in → revoke → pairing ended, both apps; browser tab keeps no device credential) failed first against main's client, passes; `test/device-pairing-client.test.ts` 5/5; after the review, the browser test (tab refuses the code without calling the endpoint, the code stays usable), `test/device-pairing.test.ts` full book keeps the code and the client tests 19/19. F-118-T03: `test/device-pairing.test.ts` two F-118-T03 join tests (Settings over HTTP; `nerv devices` CLI → server → DeviceBook → next request 401) failed first (403; unknown command), 16/16 pass; `test/evaluation.browser.mjs` F-118-T03 failed first against main's dashboard, passes with F-118-T02; every test reading live.js or web/src 203/203 (2 skipped); gauntlet all pending cases pass. A real iPhone Home Screen launch is not yet observed (F-118-T04). |
+| Verification | 2026-11-24: F-118-T01 and F-118-T02 in the [archive](archive/evidence-2026.md#f-118-moved-2026-11-24). F-118-T03: `test/device-pairing.test.ts` two F-118-T03 join tests (Settings over HTTP; `nerv devices` CLI → server → DeviceBook → next request 401) failed first (403; unknown command), 16/16 pass; `test/evaluation.browser.mjs` F-118-T03 failed first against main's dashboard, passes with F-118-T02; every test reading live.js or web/src 203/203 (2 skipped); gauntlet all pending cases pass. F-118-T05: `test/pairing-qr.test.ts` 9/9 (with the vendored encoder: hashes, QR structure, server default) and `test/evaluation.browser.mjs` F-118-T05 (scanned link in a tab: code and steps shown, fragment cleared, no request carries the code, never pairs, expiry hides it, code still pairs; Settings QR and code) committed failing first, pass; `npm test` 1307/1309 (2 skipped), `test:browser`, `test:headless`, runtime and BOM regressions, `check:evals` and policy evals pass; after vendoring uqr and merging main, every test reading live.js or web/src plus touched tests and `test/gauntlet.test.mjs` run concurrently in one `node --test` gave 211/214 (2 skipped), the one failure F-118-T02's browser test, which fails the same way on main under the same load and passes alone (6/6 twice). Gauntlet: all 10 pending cases pass again after vendoring (gemma4-12b profile, 2026-11-24), none still pending; gauntlet index current. A real iPhone Home Screen launch is not yet observed (F-118-T04). |
 | Reviewed | 2026-11-23 |
 
 </details>
@@ -2490,9 +2492,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟣 Very large | 9 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🔴 Large | 6 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-121-T01 — Printed parts on drone models (Planned).
+💻 **→** Next: F-121-T01 — Printed parts on drone models (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2502,13 +2504,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-121-t01"></a>F-121-T01 — Printed parts on drone models | 3 h | 0 h | 3 h | Planned | — | [F-121-T02](#f-121-t02) |
-| 🟡 Medium | <a id="f-121-t02"></a>F-121-T02 — Print a part by chat | 3 h | 0 h | 3 h | Planned | [F-121-T01](#f-121-t01) | [F-121-T03](#f-121-t03), [F-121-T04](#f-121-t04) |
-| 🟡 Medium | <a id="f-121-t04"></a>F-121-T04 — Send the part file with the print job | 3 h | 0 h | 3 h | Planned | [F-121-T02](#f-121-t02) | [F-121-T03](#f-121-t03) |
-| 🟢 Small | <a id="f-121-t03"></a>F-121-T03 — Owner: enter the parts and print one | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-121-T02](#f-121-t02), [F-121-T04](#f-121-t04) | — |
-| 🟣 Very large | **Total** | 9 h | 0 h (0 of 4 steps recorded) | 9 h agent + 0.5 h owner | 0 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-121-t01"></a>F-121-T01 — Printed parts on drone models | 3 h | 3 h so far (stated) | 0 h | Implemented; verification pending | — | [F-121-T02](#f-121-t02) | [PR #715](https://github.com/voidbrain/nerv/pull/715) implementation |
+| 🟡 Medium | <a id="f-121-t02"></a>F-121-T02 — Print a part by chat | 3 h | 0 h | 3 h | Planned | [F-121-T01](#f-121-t01) | [F-121-T03](#f-121-t03), [F-121-T04](#f-121-t04) | — |
+| 🟡 Medium | <a id="f-121-t04"></a>F-121-T04 — Send the part file with the print job | 3 h | 0 h | 3 h | Planned | [F-121-T02](#f-121-t02) | [F-121-T03](#f-121-t03) | — |
+| 🟢 Small | <a id="f-121-t03"></a>F-121-T03 — Owner: enter the parts and print one | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-121-T02](#f-121-t02), [F-121-T04](#f-121-t04) | — | — |
+| 🔴 Large | **Total** | 9 h | 3 h (1 of 4 steps recorded) | 6 h agent + 0.5 h owner | 0 of 4 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2517,9 +2519,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #712](https://github.com/voidbrain/nerv/pull/712). |
+| PR / evidence | Steps: F-121-T01: [PR #715](https://github.com/voidbrain/nerv/pull/715) implementation. [PR #715](https://github.com/voidbrain/nerv/pull/715) (F-121-T01 printed parts on drone models); opened in [PR #712](https://github.com/voidbrain/nerv/pull/712). |
 | Opened | 2026-11-24 |
-| Verification | — |
+| Verification | 2026-11-24: F-121-T01 `node --test test/fleet-prints.test.ts test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts test/misato.test.ts test/slicer.test.ts test/cli-help.test.ts` and related suites (126 passed), `npm run typecheck`, `npm run check:conventions`, `npm run check:fast` passed locally; full `npm test` 1310 tests (1308 passed, 2 skipped); `npm run build` passed; gauntlet `all` (gemma4-12b profile, owner-approved) passed with 0 cases still pending, ledger committed. Review fixes: `node --test` fleet-prints, fleet-chat, fleet, fleet-import, misato, slicer, cli-help, photos, telegram, batteries (142 passed), typecheck, lint, `npm run check:conventions` passed; build and gauntlet `all` (gemma4-12b, owner-approved) passed, 0 still pending, ledger committed; CI pending. |
 | Reviewed | 2026-11-24 |
 
 </details>

@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures and the gauntlet packs only; local models on the enrolled NERV-01 and NERV-02 over Tailscale; 0 paid cloud tokens; raw reports stay in ~/.nerv-private on their base; NERV-01's live service (~/.nerv-app, ~/.nerv) is never stopped, updated or edited.",
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "A stop rule of the placement campaign aborts the run without fallback or retry",
+    "Anything that needs a credential, an unreachable host or the owner goes back to the owner; NERV-02 is left running"
+  ],
+  "id": "F-006-T29",
+  "status": "planned",
+  "title": "Rerun the P3 role cases with role-sized probes and update the report",
+  "goal": "P3 has a live role-run result on the same cases and budget as P1, so the role half of the P3 comparison is settled",
+  "acceptance": [
+    "The P3 role-run (Casper and Misato, repeat 3, limits-repeat3) is rerun on NERV-02 through its NERV service, with the Mac run under the machine lock, and recorded",
+    "The evidence and report are updated through placementReport"
+  ],
+  "dependsOn": [
+    "F-006-T28"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "docs/decisions/placement-campaign.md",
+    "docs/acceptance/f006-placement-p2-p4.md",
+    "docs/evaluations/2026-11-24-f006-t26-placement-evidence.json",
+    "docs/evaluations/2026-11-24-f006-t26-placement-report.md",
+    "tools/placement-live.mjs",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Recorded evidence for this slice; scoped checks and required CI"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-24 (F-006-T27 split): rerun about 15 min plus evidence and report update, as F-006-T26 (0.75 h). Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 1,
+    "ownerHours": 0,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}
