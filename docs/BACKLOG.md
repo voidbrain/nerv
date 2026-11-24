@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 7 | 3 | 21 | 6 |
+| **This week** | 7 | 3 | 23 | 6 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 28 |
-| **Require Human 🧑** | 9 | 10 |
+| **Open** | 39 | 30 |
+| **Require Human 🧑** | 9 | 12 |
 
 ### Require Human 🧑
 
@@ -26,15 +26,17 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-012](#f-012) |  | [B-107](#b-107) |  |
 | [F-086](#f-086) |  | [B-113](#b-113) |  |
 | [F-087](#f-087) |  | [B-122](#b-122) |  |
-| [F-092](#f-092) |  | [B-128](#b-128) |  |
-| [F-060](#f-060) |  | [B-056](#b-056) |  |
-| [F-007](#f-007) |  | [B-096](#b-096) |  |
+| [F-092](#f-092) |  | [B-129](#b-129) |  |
+| [F-060](#f-060) |  | [B-128](#b-128) |  |
+| [F-007](#f-007) |  | [B-056](#b-056) |  |
+|  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
 |  |  | [B-112](#b-112) |  |
+|  |  | [B-130](#b-130) |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 94.75 h agent + 12 h owner across 127 open steps of 38 features and 28 other records. 165.5 h of actual effort recorded on 153 steps. Generated from the task files.
+**Remaining effort:** 96 h agent + 12 h owner across 129 open steps of 38 features and 30 other records. 165.5 h of actual effort recorded on 153 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2194,6 +2196,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-129"></a>[🐞 B-129](#top)
+
+**Health → Run doctor logs a canned "all ok" line and never asks the service**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update reaches the service, on the Mac run `nerv open dashboard`, Health → **Run doctor**: under the button a block reads "Doctor · all checks pass" (or lists the problems) with "Revision …", "Database: integrity ok · schema N · M pending reminders" and "Update: …"; Comms shows Maya's line "Doctor: … · details in Health.".
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-24: Health → Run doctor (`web/public/dashboard/dashboard.js`) logged a hard-coded "Doctor: scheduler ok · brain ok · routes ok · SQLite integrity ok", a leftover of the demo; it never called `GET /api/doctor`, so it showed a pass whatever the service's state. |
+| **Reproduce** | `nerv open dashboard`, Health → Run doctor: the same line appears with the service stopped, and no request reaches `/api/doctor`. |
+| **Check** | A click calls `GET /api/doctor` and shows the answer next to the button until the next run (ok or each problem, revision and skew, database checks, update status), escaped, style-guide tokens only; an unreachable service and a 401 are said as such; Maya's line only points to it; the demo says it checked nothing. A committed test fails first (render and a browser test on the production build against the real server). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-129-t01"></a>B-129-T01 — Run doctor calls GET /api/doctor and shows the answer next to the button | 1 h | 0 h | 1 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-129.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [#731](https://github.com/voidbrain/nerv/pull/731) (Test: `test/doctor-run.test.mjs`, `test/doctor-run.browser.mjs`) |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-24: committed first and failing on main: `test/doctor-run.test.mjs` (the helper did not exist) and `test/doctor-run.browser.mjs` (no `#doctor-result` next to the button); the browser test's sign-in wait then changed from the Health text, which the demo also renders, to the live banner, its assertions unchanged. With the fix both pass (5/5, 1/1 on the production build against `makeServer`). Before the PR: `npm test` 1,443 pass (2 skipped); the browser tests reading live.js, dashboard.js or web/src (`test/angular.browser.mjs`, `test/evaluation.browser.mjs`, `test/pwa.browser.mjs`, `test/updater-status.browser.mjs`, `test/doctor-run.browser.mjs`) 11/11 on the production build; `npm run gauntlet:all` (owner-approved, gemma4-12b profile) passed, none pending. A real Run doctor on the owner's base is not yet observed. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="b-128"></a>[🐞 B-128](#top)
 
 **Settings → Pair a device on a 127.0.0.1 dashboard puts a loopback address in the QR, which a phone cannot open**
@@ -3161,6 +3201,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: `node --test test/dashboard.test.ts` 51/51. |
 | Reviewed | 2026-11-23 |
+
+</details>
+
+---
+### <a id="b-130"></a>[🐞 B-130](#top)
+
+**A finished sortie that never needed approval shows Misato's Apt faded as skipped, unlike the other unvisited steps**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update reaches the service, on the Mac run `nerv open dashboard` and select a finished sortie the MAGI granted without asking you (S-6AD9 or a new one): Misato's Apt looks like MAGI, Sync, Plug and EVA when unvisited (no dashed border, no "· skipped"), and the line from Sync goes straight to the plug.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-24 on S-6AD9: `stepState` in `web/public/dashboard/dashboard.js` returned `skip` for Misato's Apt when a finished sortie never needed approval, so it was faded and dashed while the other steps the sortie did not visit stayed normal. Owner decision (option c): drop that special case. |
+| **Reproduce** | Select a finished sortie whose actions were all granted by the MAGI: the Apt node reads "MISATO'S APT · skipped" with a dashed border; the Sync → Apt and Apt → Plug routes are faded. |
+| **Check** | An unused Apt has no state class, like other unvisited steps; the forwarded-sortie skip and the consult rule are unchanged; the bypass route (Sync → Plug) stays the one lit and the Apt routes stay unlit. A committed test fails first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-130-t01"></a>B-130-T01 — An unused Misato's Apt keeps its normal look in a finished sortie's flow | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-130.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [#731](https://github.com/voidbrain/nerv/pull/731) (Test: `test/dashboard.test.ts` "B-130") |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-24: `test/dashboard.test.ts` "B-130" committed first and failing on main (`skip` for the Apt); with the fix it passes with the B-044 and B-112 flow tests unchanged. Before the PR: `npm test` 1,443 pass (2 skipped); the browser tests reading live.js, dashboard.js or web/src (`test/angular.browser.mjs`, `test/evaluation.browser.mjs`, `test/pwa.browser.mjs`, `test/updater-status.browser.mjs`, `test/doctor-run.browser.mjs`) 11/11 on the production build; `npm run gauntlet:all` (owner-approved, gemma4-12b profile) passed, none pending. Browser look on a real sortie not yet observed. |
+| Reviewed | 2026-11-24 |
 
 </details>
 
