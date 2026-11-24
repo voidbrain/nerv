@@ -114,7 +114,7 @@ describe('F-121-T02: print phrases', () => {
 });
 
 describe('F-121-T02: print a part by chat, across the join', () => {
-  it('chat phrase → fleet.print → slice request → Orange bambu.handoff card → Bambu Connect link', () => {
+  it('chat phrase → fleet.print → slice request → Blue bambu.handoff owner card → Bambu Connect link', () => {
     withPrintFleet((store, home, slicer) => {
       const sortie = store.ledger.openSortie(MISATO_SOURCE, 'stampa i piedini di Wisp', 'trusted');
       const sliced = store.runAction(sortie, {
@@ -160,7 +160,7 @@ describe('F-121-T02: print a part by chat, across the join', () => {
       };
       const card = store.runAction(sortie, { tool: 'bambu.handoff', stage: 'production', args: result.handoff! });
       assert.equal(card.outcome, 'approval');
-      assert.equal(card.pattern, 'orange');
+      assert.equal(card.pattern, 'blue');
       assert.equal(launched, '');
       const decided = store.decide(card.approvalId!, 'approve', 'owner');
       const handoff = decided.result as BambuHandoffResult;

@@ -1061,7 +1061,7 @@ test('F-121-T02: print phrases unlock the fleet domain (fleet.print)', () => {
   );
   assert.equal(ask.route, 'local', 'part names and library paths stay local');
 });
-test('F-121-T02: "stampa i piedini di Wisp" through chat: fleet.print slices with the slicer on PATH, then the Orange hand-off waits for the owner', async () => {
+test('F-121-T02: "stampa i piedini di Wisp" through chat: fleet.print slices with the slicer on PATH, then the hand-off waits for the owner even when Casper approves', async () => {
   const foot = 'solid foot\nendsolid foot\n';
   const script = ['{"action":{"tool":"fleet.print","args":{"phrase":"stampa i piedini di Wisp"}}}'];
   // A fake bambu-studio first on PATH: the nervous process inherits PATH and runs it as the real slicer.
@@ -1146,8 +1146,8 @@ test('F-121-T02: "stampa i piedini di Wisp" through chat: fleet.print slices wit
         assert.match(readFileSync(launches, 'utf8'), /^bambu-connect:\/\/import-file\?path=.*prints-out/);
       },
       undefined,
-      // Orange: an unreadable Casper reply is no verdict, so the owner decides (and no Bambu Connect opens here).
-      'not a verdict',
+      // Owner decision 2026-11-24: opening Bambu Connect always waits for the owner, even when Casper approves.
+      undefined,
       setup,
     );
   } finally {

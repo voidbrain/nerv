@@ -105,7 +105,7 @@ describe('F-087-T02 slice with a material profile', () => {
 });
 
 describe('F-087-T03 hand off to Bambu Connect with the owner checklist', () => {
-  it('requires Orange approval, opens Bambu Connect import link, returns owner checklist, and never says print started', () => {
+  it("requires the owner's approval (Blue), opens Bambu Connect import link, returns owner checklist, and never says print started", () => {
     const dir = makeDir();
     const gcodePath = join(dir, 'bracket.gcode.3mf');
     writeFileSync(gcodePath, 'PK_MOCK_3MF', 'utf8');
@@ -133,7 +133,8 @@ describe('F-087-T03 hand off to Bambu Connect with the owner checklist', () => {
       },
     });
     assert.equal(proposal.outcome, 'approval');
-    assert.equal(proposal.pattern, 'orange');
+    // Owner decision 2026-11-24 (F-121): the hand-off is Blue, always the owner's card (was Orange in F-087-T03).
+    assert.equal(proposal.pattern, 'blue');
     assert.equal(launchedUrl, '');
 
     const decided = store.decide(proposal.approvalId!, 'approve', 'owner');
