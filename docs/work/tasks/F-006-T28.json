@@ -13,7 +13,7 @@
     "Owner action: NERV-01's live service is updated only by the owner; the agent never stops, updates or edits it"
   ],
   "id": "F-006-T28",
-  "status": "planned",
+  "status": "closed",
   "title": "Owner: put NERV-01 and NERV-02 on the revision with role-sized probes",
   "goal": "Both bases run a main revision that includes PR #714 and PR #708, so a role-sized P3 probe crosses WorkerLink",
   "acceptance": [
@@ -33,13 +33,13 @@
   "ownerLink": "docs/acceptance/f006-placement-p2-p4.md#6-role-sized-probes-put-both-bases-on-the-same-revision-f-006-t28",
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-24 (F-006-T27): one lifecycle update on each base. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 (F-006-T27): one lifecycle update on each base. Done by the owner 2026-11-24: NERV-01 ~/.nerv-app at c43bbb57, NERV-02 C:\\Projects\\nerv at d9d9aed4 (detached HEAD: git fetch origin; git checkout --detach origin/main); both include PR #714 and PR #708; the agent checked NERV-02 doctor (no revision skew) and kaji list (NERV-01 and NERV-02 enrolled), and the NERV-01 install revision read-only. No actual: owner time not measured.",
     "reviewed": "2026-11-24",
     "agentHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "procedure"
   }
 }
