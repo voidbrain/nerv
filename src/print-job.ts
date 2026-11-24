@@ -328,9 +328,9 @@ function stageLibraryPart(
       if (cachedHash(input) !== digest) throw error;
     }
   }
-  const output = join(out, `${digest.slice(0, 16)}-${profileSlug(profile.name)}.gcode.3mf`);
-  // A stale output would pass for a slice that never ran.
-  if (existsSync(output)) unlinkSync(output);
+  // One file per slice: a later slice never replaces the file an earlier hand-off card points at, and a file that
+  // already exists can never pass for a slice that did not run.
+  const output = join(out, `${digest.slice(0, 16)}-${profileSlug(profile.name)}-${randomUUID().slice(0, 8)}.gcode.3mf`);
   return { allowlist, slice: { inputPath: input, outputPath: output, profileName: profile.name } };
 }
 

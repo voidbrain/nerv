@@ -11,6 +11,7 @@ import { Registry, createRootKey, signRecord, unlockRootKey, type RegistryBody }
 import { execute } from '../src/executors.ts';
 import { MAX_PART_FILE_BYTES, type PrintPartReply } from '../src/print-job.ts';
 import {
+  admitPartTransfer,
   completeRemotePrint,
   receivePartTransfer,
   validatePrintsConfig,
@@ -142,6 +143,7 @@ async function bases(
     publicKey: B.publicKey,
     registry: port(rb),
     log: () => {},
+    admitPartTransfer: (from, bytes) => admitPartTransfer(tabgha, options.accept ?? ['NERV-01'], from, bytes),
     onPartTransfer: async (from, body) =>
       receivePartTransfer(tabgha, options.accept ?? ['NERV-01'], from, body, {
         exec: options.exec ?? fake,

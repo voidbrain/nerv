@@ -115,9 +115,11 @@ const sha256 = (content: Buffer) => createHash('sha256').update(content).digest(
 const MAX_WAITING = 1;
 const lanes = new Map<string, { tail: Promise<unknown>; waiting: number }>();
 
+const laneFull = (home: string) => (lanes.get(home)?.waiting ?? 0) > MAX_WAITING;
+
 function inLane<T>(home: string, work: () => Promise<T>): Promise<T> | undefined {
+  if (laneFull(home)) return undefined;
   const lane = lanes.get(home) ?? { tail: Promise.resolve(), waiting: 0 };
-  if (lane.waiting > MAX_WAITING) return undefined;
   lane.waiting += 1;
   lanes.set(home, lane);
   const run = lane.tail.then(work, work);
@@ -163,36 +165,38 @@ export async function receivePartTransfer(
   if (request.part.bytes > maxBytes) {
     return { status: 413, value: { error: `Part file is larger than ${formatBytes(maxBytes)}; nothing was written.` } };
   }
-  let sent: Buffer | undefined;
-  if (message!.content !== undefined) {
-    sent = Buffer.from(message!.content, 'base64');
-    if (sent.length > maxBytes) {
+  let content: Buffer;
+  if (message!.content === undefined) {
+    // Only a cached copy is sliced without the file; asking is answered at once, never queued behind a slicer.
+    const cached = join(
+      home,
+      'prints-cache',
+      `${request.part.sha256}${file.slice(file.lastIndexOf('.')).toLowerCase()}`,
+    );
+    const copy = existsSync(cached) ? readFileSync(cached) : undefined;
+    if (!copy || sha256(copy) !== request.part.sha256) return { status: 200, value: { need: 'content' } };
+    content = copy;
+  } else {
+    // A full lane refuses before the content is decoded or hashed.
+    if (laneFull(home)) return BUSY;
+    content = Buffer.from(message!.content, 'base64');
+    if (content.length > maxBytes) {
       return {
         status: 413,
         value: { error: `Part file is larger than ${formatBytes(maxBytes)}; nothing was written.` },
       };
     }
-    if (sent.length !== request.part.bytes || sha256(sent) !== request.part.sha256) {
+    if (content.length !== request.part.bytes || sha256(content) !== request.part.sha256) {
       return {
         status: 422,
         value: { error: `Part file prints/${file} does not match its SHA-256; nothing was written.` },
       };
     }
   }
+  const sliceIt = content;
   const queued = inLane(home, async (): Promise<PartTransferAnswer> => {
-    let content = sent;
-    if (!content) {
-      const cached = join(
-        home,
-        'prints-cache',
-        `${request.part.sha256}${file.slice(file.lastIndexOf('.')).toLowerCase()}`,
-      );
-      const copy = existsSync(cached) ? readFileSync(cached) : undefined;
-      if (!copy || sha256(copy) !== request.part.sha256) return { status: 200, value: { need: 'content' } };
-      content = copy;
-    }
     try {
-      const result = await sliceLibraryPartAsync(home, request, content, options.exec);
+      const result = await sliceLibraryPartAsync(home, request, sliceIt, options.exec);
       return {
         status: 200,
         value: {
@@ -203,9 +207,31 @@ export async function receivePartTransfer(
       return { status: 422, value: { error: (error as Error).message.slice(0, 500) } };
     }
   });
-  return (
-    queued ?? { status: 503, value: { error: 'This base is busy slicing other parts; ask again in a few minutes.' } }
-  );
+  return queued ?? BUSY;
+}
+
+const BUSY: PartTransferAnswer = {
+  status: 503,
+  value: { error: 'This base is busy slicing other parts; ask again in a few minutes.' },
+};
+
+/** A message larger than this carries the file; a smaller one only asks (the request alone is under 2 KB). */
+const ASKING_BYTES = 64 * 1024;
+
+/**
+ * Before the body is read (`/kaji/print`): refuse a sender this base does not slice for, and a file while the lane is
+ * full. The sender id here is the unverified header; the signed check after the body still decides everything else.
+ */
+export function admitPartTransfer(
+  home: string,
+  accept: readonly string[],
+  claimedFrom: string,
+  declaredBytes: number,
+): { status: number; error: string } | undefined {
+  if (!accept.includes(claimedFrom)) return { status: 403, error: 'this base does not slice parts for that base' };
+  if (declaredBytes > ASKING_BYTES && laneFull(home))
+    return { status: 503, error: (BUSY.value as { error: string }).error };
+  return undefined;
 }
 
 const formatBytes = (bytes: number) =>

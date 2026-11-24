@@ -36,7 +36,7 @@ import { nodesCommand } from './nodes-cli.ts';
 import { placementEvidence, placementReport } from './placement-report.ts';
 import { backupCommand } from './backup-cli.ts';
 import { storeReceived } from './offhost.ts';
-import { completeRemotePrint, receivePartTransfer } from './print-transfer.ts';
+import { admitPartTransfer, completeRemotePrint, receivePartTransfer } from './print-transfer.ts';
 
 import { checkUpdateAvailability } from './update-availability.ts';
 
@@ -844,6 +844,7 @@ try {
               }
             },
             // F-121-T04: a part another base sends to slice here, when `prints.accept` names that base.
+            admitPartTransfer: (from, bytes) => admitPartTransfer(home, live().prints?.accept ?? [], from, bytes),
             onPartTransfer: async (from, body) => receivePartTransfer(home, live().prints?.accept ?? [], from, body),
             ...createPeerHandlers({
               base: config.base,

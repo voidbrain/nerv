@@ -256,6 +256,8 @@ export class KajiLink {
     onBackup?: (from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>;
     /** F-121-T04: slices a part file another base sends (`POST /kaji/print`); the answer is signed back as is. */
     onPartTransfer?: (from: string, body: unknown) => Promise<{ status: number; value: unknown }>;
+    /** F-121-T04: refuses a part transfer before its body is read (claimed sender, declared size). */
+    admitPartTransfer?: (claimedFrom: string, declaredBytes: number) => { status: number; error: string } | undefined;
     /** F-016-T04: applies an incremental coordinator replication batch on a standby base. */
     onReplicate?: (from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>;
     /** F-016-T06: handles standby-acked coordinator lease renewal on a standby base. */
@@ -281,6 +283,7 @@ export class KajiLink {
     this.onRelay = options.onRelay;
     this.onBackup = options.onBackup;
     this.onPartTransfer = options.onPartTransfer;
+    this.admitPartTransfer = options.admitPartTransfer;
     this.onReplicate = options.onReplicate;
     this.onLeaseRenew = options.onLeaseRenew;
     this.checkCoordinatorAuthority = options.checkCoordinatorAuthority;
@@ -373,6 +376,8 @@ export class KajiLink {
   private readonly onBackup: ((from: string, date: string, copy: Buffer) => Promise<'stored' | 'refused'>) | undefined;
   private readonly onPartTransfer:
     ((from: string, body: unknown) => Promise<{ status: number; value: unknown }>) | undefined;
+  private readonly admitPartTransfer:
+    ((claimedFrom: string, declaredBytes: number) => { status: number; error: string } | undefined) | undefined;
   private readonly onReplicate:
     ((from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>) | undefined;
   private readonly onLeaseRenew: ((from: string, req: LeaseRenewRequest) => Promise<LeaseRenewResult>) | undefined;
@@ -526,6 +531,25 @@ export class KajiLink {
       end(body);
     };
     try {
+      // F-121-T04: a part transfer too large, from a base not accepted, or while the slicer lane is full is refused
+      // before its body is read.
+      if (req.method === 'POST' && req.url === '/kaji/print') {
+        const declared = Number(req.headers['content-length'] ?? 0);
+        if (!Number.isFinite(declared) || declared > MAX_PART_TRANSFER_BODY) {
+          reply(413, { error: 'part transfer too large' });
+          return;
+        }
+        const claimed = req.headers['x-kaji-base'];
+        const refusal = this.admitPartTransfer
+          ? this.admitPartTransfer(typeof claimed === 'string' ? claimed : '', declared)
+          : this.onPartTransfer
+            ? undefined
+            : { status: 403, error: 'this base does not slice parts' };
+        if (refusal) {
+          reply(refusal.status, { error: refusal.error });
+          return;
+        }
+      }
       let body = '';
       const limit =
         req.method === 'POST' && (req.url === '/kaji/backup' || req.url === '/kaji/replicate')

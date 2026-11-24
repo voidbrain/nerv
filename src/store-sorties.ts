@@ -348,7 +348,9 @@ export class StoreSorties {
     if (p.grantId && hasExecutor(proposal.tool)) {
       const outcome = this.run(sortieId, p.actionId, p.grantId, proposal.tool, proposal.args, agency, true);
       // F-121-T04: a part sent to the slicing base finishes in the coordinator (actions.finished), like an MCP call.
-      if ('result' in outcome && isPendingRemotePrint(outcome.result)) return { ...base, ...outcome };
+      if (proposal.tool === 'fleet.print' && 'result' in outcome && isPendingRemotePrint(outcome.result)) {
+        return { ...base, ...outcome };
+      }
       this.settle(sortieId, 'error' in outcome ? 'failed' : 'done');
       return { ...base, ...outcome };
     }
@@ -412,7 +414,7 @@ export class StoreSorties {
       );
     }
     if ('result' in outcome && tool === 'agency.status') this.host.ledger.intake(sortieId, 'tool:' + tool, 'trusted');
-    if ('result' in outcome && isPendingRemotePrint(outcome.result)) {
+    if (tool === 'fleet.print' && 'result' in outcome && isPendingRemotePrint(outcome.result)) {
       if (deferRemote) return outcome;
       // Approved on a card: no coordinator is waiting to send the part, so nothing is sent or half done.
       const { base, prepared } = outcome.result.remote;
@@ -524,6 +526,8 @@ export class StoreSorties {
       new Date(),
       durationMs,
     );
+    // F-121-T04 (review of #722): a part sliced on another base finishes here, so its owner action closes here too.
+    if (tool === 'fleet.print') this.settle(sortieId, 'error' in outcome ? 'failed' : 'done');
     return true;
   }
 
