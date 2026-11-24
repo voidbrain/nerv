@@ -218,6 +218,27 @@ export async function runKajiCommand(
         `Drained epoch ${receipt.coordinatorEpoch} at seq ${receipt.finalSeq} for ${newMainBaseId} at epoch ${receipt.newEpoch}; receipt written to ${args[1]}.`,
       );
     } else process.stdout.write(out);
+  } else if (sub === 'standby') {
+    // F-016-T16 review: the owner names the base the active main renews its lease through.
+    const id = (args[1] ?? '').toUpperCase();
+    const state = store.coordinatorFencingState();
+    if (!id) {
+      const row = state
+        ? (store.db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as {
+            standby_base_id: string | null;
+          })
+        : undefined;
+      console.log(row?.standby_base_id ? `Standby: ${row.standby_base_id}` : 'No standby named.');
+      return;
+    }
+    const entry = registry.bases().find((b) => b.baseId === id && b.status === 'enrolled');
+    if (!entry) throw new Error('No enrolled base with that id (see kaji list).');
+    if (keyIdentity(entry.publicKey) === keyIdentity(me))
+      throw new Error('Name another enrolled base: a coordinator never acks its own lease.');
+    if (!state || (state.replicationMode !== 'active' && state.replicationMode !== 'fenced'))
+      throw new Error('This base holds no coordinator state to name a standby for.');
+    store.db.prepare('UPDATE coordinator_state SET standby_base_id = ? WHERE id = 1').run(id);
+    console.log(`Standby: ${id}. The lease renews through it from the next renewal (every 15 s).`);
   } else if (sub === 'lease-rearm') {
     const confirmSole = args.includes('--confirm-sole-coordinator');
     const ownPub = baseKey(home).publicKey;
@@ -302,7 +323,7 @@ export async function runKajiCommand(
     );
   } else
     throw new Error(
-      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [--revoke LOST-ID] | drain [FILE] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
+      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [--revoke LOST-ID] | drain [FILE] | standby [BASE-ID] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
     );
   return;
 }

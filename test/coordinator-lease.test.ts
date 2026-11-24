@@ -512,10 +512,8 @@ describe('F-016-T16: serve wiring joins the keeper, the standby ack, the authori
       });
       assert.deepEqual([ready.previousEpoch, ready.newEpoch], [2, 3]);
 
-      // The old main's next renewal is refused by the standby (403: it is no longer main there): it fences
-      // itself once the lease passes.
-      assert.equal(await keeper.renewOnce(), 'waiting');
-      mainStore.db.prepare('UPDATE coordinator_state SET lease_expires_at = ? WHERE id = 1').run(Date.now() - 1);
+      // The standby holds the newer main record: its signed refusal names epoch 3, so the old main fences at
+      // once (F-016-T16 review fix 2; it used to wait for its lease to pass).
       assert.equal(await keeper.renewOnce(), 'fenced');
       assert.throws(() => mainStore.add('After the move', later(2)), /fenced mode/);
     } finally {
@@ -554,9 +552,9 @@ describe('F-016-T16 review fixes (#701)', () => {
   }
   const ackVia =
     (standby: Store, maxSeen: () => number, nowMs: () => number) =>
-    async (_id: string, request: { coordinatorEpoch: number; leaseSeq: number }) =>
+    async (id: string, request: { coordinatorEpoch: number; leaseSeq: number }) =>
       standby.handleStandbyLeaseRenew({
-        standbyBaseId: 'NERV-02',
+        standbyBaseId: id,
         request,
         maxSeenCoordinatorEpoch: maxSeen(),
         processBootId: 'boot',

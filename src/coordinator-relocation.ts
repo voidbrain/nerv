@@ -346,6 +346,11 @@ export interface RelocateCoordinatorInput extends Omit<RelocationReadinessInput,
   readonly standbyDbPath: string;
   /** No other enrolled, unrevoked base remains to ack the lease: arm a single-base lease. */
   readonly soleCoordinator: boolean;
+  /**
+   * The enrolled, unrevoked base this coordinator renews its lease through (F-016-T16 review). Without it a
+   * coordinator with other bases enrolled holds no lease until the owner names one (`nerv kaji standby`).
+   */
+  readonly standbyBaseId?: string;
   readonly quiesce?: () => void;
   readonly restart?: () => void;
   readonly nowMs?: number;
@@ -388,10 +393,10 @@ export function relocateCoordinator(input: RelocateCoordinatorInput): RelocateCo
     ...(input.failAfterStep ? { failAfterStep: input.failAfterStep } : {}),
     activate: (db) => {
       quarantined = quarantineUncertainOutbox(db, readiness.previousEpoch, new Date(nowMs).toISOString());
-      // The standby the old main renewed through is this base: the new main has none until one is seeded.
+      // The standby the old main renewed through was this base: the new main renews through the one named here.
       db.prepare(
-        'UPDATE coordinator_state SET lease_issued_at = NULL, lease_expires_at = 0, standby_base_id = NULL WHERE id = 1',
-      ).run();
+        'UPDATE coordinator_state SET lease_issued_at = NULL, lease_expires_at = 0, standby_base_id = ? WHERE id = 1',
+      ).run(input.soleCoordinator ? null : (input.standbyBaseId ?? null));
       if (input.soleCoordinator)
         leaseExpiresAt = applyCoordinatorLease(db, {
           coordinatorEpoch: readiness.newEpoch,
