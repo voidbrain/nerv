@@ -17,7 +17,8 @@
     "Two-device relocation acceptance"
   ],
   "dependsOn": [
-    "F-016-T08"
+    "F-016-T08",
+    "F-016-T20"
   ],
   "resources": [
     "src/**",
