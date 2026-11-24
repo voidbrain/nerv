@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -180,7 +180,10 @@ async function agent(
   );
   if (scrolls) writeFileSync(join(home, 'scrolls.json'), JSON.stringify(scrolls), { mode: 0o600 });
   setup?.(home);
-  const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+  // No test opens the real Bambu Connect: the nervous process records hand-offs to this file instead.
+  const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home, {
+    bambuLaunchLog: join(home, 'bambu-launches.log'),
+  });
   const token = 'c'.repeat(32);
   const server = makeServer(runtime, token);
   try {
@@ -1118,7 +1121,7 @@ test('F-121-T02: "stampa i piedini di Wisp" through chat: fleet.print slices wit
   try {
     await agent(
       script,
-      async (runtime) => {
+      async (runtime, _m, _base, _headers, home) => {
         const chat = await runtime.chat('stampa i piedini di Wisp');
         assert.deepEqual(
           chat.steps.map((step) => [step.tool, step.outcome]),
@@ -1136,6 +1139,11 @@ test('F-121-T02: "stampa i piedini di Wisp" through chat: fleet.print slices wit
         assert.equal(cards.length, 1);
         assert.equal(cards[0]!.card.tool, 'bambu.handoff');
         assert.deepEqual(cards[0]!.card.args, sliced.handoff, 'the card carries the slice result, unchanged');
+        const launches = join(home, 'bambu-launches.log');
+        assert.equal(existsSync(launches), false, 'nothing opens before the owner approves');
+        const decided = (await runtime.decide(cards[0]!.id, 'approve')) as { result?: { printStarted: boolean } };
+        assert.equal(decided.result?.printStarted, false);
+        assert.match(readFileSync(launches, 'utf8'), /^bambu-connect:\/\/import-file\?path=.*prints-out/);
       },
       undefined,
       // Orange: an unreadable Casper reply is no verdict, so the owner decides (and no Bambu Connect opens here).
