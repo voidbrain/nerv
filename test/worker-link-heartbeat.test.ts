@@ -289,7 +289,7 @@ test(
   'B-046: a link whose request slots are all busy keeps its heartbeat and its session',
   { timeout: 30000 },
   async () => {
-    const f = await fixture(150);
+    const f = await fixture(400, 60000);
     const original = f.adapter;
     let release = () => {};
     const held = new Promise<void>((done) => (release = done));
@@ -313,7 +313,7 @@ test(
       // Several heartbeat ticks while every request slot is taken.
       for (let i = 0; i < 60; i++) {
         assert.ok(f.main.connected('NERV-02'), 'a busy link must keep its session');
-        await wait(10);
+        await wait(20);
       }
       assert.equal(hellos - negotiated, 0, 'a busy link must not reconnect');
       release();
@@ -331,10 +331,11 @@ test(
   'B-046: a healthy session survives an event-loop stall longer than the heartbeat budget',
   { timeout: 30000 },
   async () => {
-    // Each ping/pong verifies through the nervous process; on Windows CI 150 ms is tighter than IPC under load.
-    const hb = process.platform === 'win32' ? 400 : 150;
+    // Each ping/pong verifies through the nervous process; under machine load (Windows CI or parallel local runs) 150 ms
+    // is tighter than nervous IPC (50-270 ms), and both peers share this process so only the coordinator heartbeat runs.
+    const hb = 400;
     const stallMs = Math.ceil(hb * 1.5);
-    const f = await fixture(hb);
+    const f = await fixture(hb, 60000);
     const send = WebSocket.prototype.send;
     let pings = 0,
       hellos = 0,

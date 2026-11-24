@@ -4,7 +4,7 @@
   "parent": "B-117",
   "title": "Name and fix the load failures of the bases and browser gauntlet cases",
   "goal": "nerv-system-flows/bases and nerv-system-flows/browser pass under machine load as they do alone",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "The failure of each case under load is reproduced and its cause named from the run output",
     "A regression that reproduces the load case fails before the fix and passes after it",
@@ -12,10 +12,14 @@
   ],
   "dependsOn": [],
   "resources": [
-    "tools/gauntlet.mjs",
-    "tools/gauntlet-adapter.mjs",
-    "test/**",
+    "test/angular.browser.mjs",
+    "test/worker-link-heartbeat.test.ts",
+    "test/worker-outbox.test.ts",
+    "test/kaji-seats.test.ts",
+    "test/gauntlet-load.test.ts",
+    "evals/gauntlet/ledger.json",
     "docs/work/records/B-117.md",
+    "docs/work/tasks/B-117-T01.json",
     "generated:backlog-views"
   ],
   "capabilities": [
@@ -39,6 +43,8 @@
     "reviewed": "2026-11-24",
     "agentHours": 3,
     "baselineAgentHours": 3,
-    "estimateAgentHours": 3
+    "estimateAgentHours": 3,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
   }
 }

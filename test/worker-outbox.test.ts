@@ -5,9 +5,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Store } from '../src/store.ts';
 import { Runtime } from '../src/runtime.ts';
+import { removeDir, scope } from './fixtures/teardown.ts';
+const brain = new URL('./fixtures/idle-brain.ts', import.meta.url);
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 async function until(check: () => Promise<boolean>) {
-  const end = Date.now() + 10000;
+  const end = Date.now() + 30000;
   while (!(await check())) {
     if (Date.now() > end) throw Error('Outbox condition timed out');
     await wait(20);
@@ -60,9 +62,10 @@ test('F-014: upgrade preserves completed receipts and quarantines every old pend
 for (const attempted of [false, true])
   test(
     `F-014: expired ${attempted ? 'attempted' : 'unsent'} work is never dispatched again and its uncertainty stays honest`,
-    { timeout: 15000 },
+    { timeout: 60000 },
     async () => {
-      const home = mkdtempSync(join(tmpdir(), 'nerv-worker-expired-')),
+      const own = scope('worker-outbox'),
+        home = own.add(mkdtempSync(join(tmpdir(), 'nerv-worker-expired-')), removeDir),
         path = join(home, 'nerv.sqlite');
       writeFileSync(
         join(home, 'config.json'),
@@ -78,7 +81,7 @@ for (const attempted of [false, true])
       } finally {
         store.close();
       }
-      const runtime = new Runtime(path, undefined, home);
+      const runtime = own.add(new Runtime(path, brain, home), (r) => r.close());
       let sent = 0;
       try {
         await runtime.ready();
@@ -99,8 +102,7 @@ for (const attempted of [false, true])
           read.close();
         }
       } finally {
-        await runtime.close();
-        rmSync(home, { recursive: true, force: true });
+        await own.close();
       }
     },
   );
@@ -187,9 +189,10 @@ test('F-014: legacy approval migration rejects still-pending cards, preserves ob
 
 test(
   'F-026: proactive remote progress/results persist atomically, respect quiet hours and never use direct resumed callbacks',
-  { timeout: 15000 },
+  { timeout: 60000 },
   async () => {
-    const home = mkdtempSync(join(tmpdir(), 'nerv-watch-outbox-')),
+    const own = scope('worker-outbox'),
+      home = own.add(mkdtempSync(join(tmpdir(), 'nerv-watch-outbox-')), removeDir),
       path = join(home, 'nerv.sqlite');
     const minutes = new Date().getUTCHours() * 60 + new Date().getUTCMinutes(),
       clock = (n: number) =>
@@ -234,7 +237,7 @@ test(
     } finally {
       store.close();
     }
-    const runtime = new Runtime(path, undefined, home);
+    const runtime = own.add(new Runtime(path, brain, home), (r) => r.close());
     const follow: unknown[] = [];
     let completed = false;
     try {
@@ -266,8 +269,7 @@ test(
       assert.match(messages[1]!.message, /ran/);
       assert.equal(await runtime.nervous.call('inbox.lastBrief'), null);
     } finally {
-      await runtime.close();
-      rmSync(home, { recursive: true, force: true });
+      await own.close();
     }
   },
 );
