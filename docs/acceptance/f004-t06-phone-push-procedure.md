@@ -15,6 +15,8 @@ Goal: install the NERV PWA on a phone over HTTPS, subscribe to web push, and com
    Expected: service status reports running and listening on port `4317`.
 2. Open the HTTPS NERV workspace URL on the phone, install the PWA to the home screen, and open the installed app.
    Expected: app opens in standalone mode without browser chrome.
+   To pair the dashboard by QR instead: run `npm start -- open --phone --qr` on the Mac and scan the QR with the phone's camera. iOS opens a scanned link in Safari, never in the installed app, so Safari shows the code and the steps: Share → Add to Home Screen, open NERV from the Home Screen, type the code (valid 10 minutes).
+   Expected: the installed app signs in and stays signed in after a relaunch; Safari never signed in.
 3. Enable push notifications in the workspace header toggle and grant notification permission when prompted.
    Expected: toggle stays enabled and no error alert appears.
 4. Create a reminder due in 1–2 minutes from the workspace (or CLI):

@@ -5,6 +5,12 @@
   if (!LIVE) return;
   const match = /^#code=([a-f0-9]{32})$/.exec(location.hash); const code = match ? match[1] : null;
   if (match) history.replaceState(null, "", location.pathname + location.search);
+  // F-118-T05: a scanned pairing QR opens #pair=XXXX-XXXX&until=<ms>. The fragment never reaches the server; it is cleared
+  // at once, so Add to Home Screen saves the clean address and the installed app keeps no code. A tab only shows it.
+  const pairFragment = /^#pair=([A-Z2-9]{4}-[A-Z2-9]{4})&until=(\d{1,15})$/.exec(location.hash);
+  if (pairFragment) history.replaceState(null, "", location.pathname + location.search);
+  // A scan while the dashboard is already open in that tab only changes the fragment: load the page again to read it.
+  addEventListener("hashchange", () => { if (/^#pair=/.test(location.hash)) location.reload(); });
   const consulted = new Set();
   let older = [], matches = [], shown = [], searchSeq = 0, searchTimer = null; let editing = null;
   let usageBefore = null, usageBack = [], usageBusy = false, usageNext = null, usagePage = null, usageError = false;
@@ -1112,13 +1118,43 @@
   function renderDevices() {
     const box = document.getElementById("settings-devices"); if (!box) return;
     const list = state.devices, msg = state.devicesMsg;
-    box.innerHTML = "<div class='row small' style='justify-content:space-between;align-items:center'><b>Paired devices</b><button class='btn sm' type='button' id='btn-devices-refresh'>Refresh</button></div>" +
-      (list === null ? "<div class='tiny muted'>Loading…</div>" : !list.length ? "<div class='tiny muted'>No paired devices. Pair a phone with <code>nerv open --phone</code>.</div>" :
+    box.innerHTML = "<div class='row small' style='justify-content:space-between;align-items:center'><b>Paired devices</b><span class='row' style='gap:4px'><button class='btn sm' type='button' id='btn-pair-device'>Pair a device</button><button class='btn sm' type='button' id='btn-devices-refresh'>Refresh</button></span></div>" + pairingHtml() +
+      (list === null ? "<div class='tiny muted'>Loading…</div>" : !list.length ? "<div class='tiny muted'>No paired devices. Pair a phone with Pair a device or <code>nerv open --phone --qr</code>.</div>" :
         "<div class='list'>" + list.map(d => "<div class='row small' data-device='" + esc(d.id) + "' style='justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap'>" +
           "<span><b>" + esc(d.name) + "</b>" + (d.current ? " <span class='ok'>· this device</span>" : "") +
           "<br><span class='tiny muted'>paired " + esc(deviceDay(d.created)) + " · last used " + esc(deviceAgo(d.lastUse)) + " · lapses " + esc(deviceDay(d.expires)) + "</span></span>" +
           "<button class='btn sm danger' type='button' data-revoke='" + esc(d.id) + "' aria-label='Revoke " + esc(d.name) + (d.current ? " (this device)" : "") + "'>Revoke</button></div>").join("") + "</div>") +
       "<div role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : "A revoked device must pair again with a new code; each lapses after 90 days unused.") + "</div>";
+  }
+  // F-118-T05: Settings → Pair a device mints a 10-minute code (a dashboard session may; a paired device may not) and
+  // shows it with the QR of the dashboard link carrying it in the fragment, for this page's address.
+  state.pairing = null;
+  const LOOPBACK = /^(127\.|localhost$|\[::1\]$)/.test(location.hostname);
+  const qrSvg = rows => {
+    if (!Array.isArray(rows) || !rows.every(r => typeof r === "string" && /^[01]+$/.test(r) && r.length === rows.length)) return "";
+    const n = rows.length + 8; let d = "";
+    rows.forEach((r, y) => { for (let x = 0; x < r.length; x++) if (r[x] === "1") d += "M" + (x + 4) + " " + (y + 4) + "h1v1h-1z"; });
+    return "<svg class='pair-qr' viewBox='0 0 " + n + " " + n + "' role='img' aria-label='QR code of the pairing link' shape-rendering='crispEdges'><rect width='" + n + "' height='" + n + "'/><path d='" + d + "'/></svg>";
+  };
+  function pairingHtml() {
+    const p = state.pairing; if (!p) return "<div id='settings-pair'></div>";
+    if (p.error) return "<div id='settings-pair' role='status' class='tiny danger'>" + esc(p.error) + "</div>";
+    if (p.expired) return "<div id='settings-pair' role='status' class='tiny muted'>The pairing code expired: press Pair a device for a new one.</div>";
+    const at = new Date(p.expiresAt).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+    return "<div id='settings-pair' class='list'>" + (p.qr ? qrSvg(p.qr) : "<div class='tiny muted'>No QR: " + esc(p.qrError || "none returned") + "</div>") +
+      "<div class='small'>Pairing code <b class='pair-code'>" + esc(p.code) + "</b> <span class='tiny muted'>one use, valid until " + esc(at) + "</span></div>" +
+      "<div class='tiny muted'>Scan it with the phone: Safari opens the dashboard and shows the code (it never pairs). There, Share → Add to Home Screen, open NERV from the Home Screen and type the code. A scanned link opens in Safari, never in the installed app.</div>" +
+      (LOOPBACK ? "<div class='tiny warn'>This page is on " + esc(location.host) + ", which a phone cannot open: open the dashboard at its Tailscale address (https://…ts.net) to pair from here, or run <code>nerv open --phone --qr</code>.</div>" : "") + "</div>";
+  }
+  let pairingExpiry = null;
+  async function pairDevice() {
+    clearTimeout(pairingExpiry);
+    try {
+      const p = await api("device/codes", { method:"POST", body:JSON.stringify({ base:location.origin }) });
+      state.pairing = p;
+      pairingExpiry = setTimeout(() => { state.pairing = { expired:true }; renderDevices(); }, Math.max(0, Math.min(p.expiresAt - Date.now(), 2147483647)));
+    } catch (e) { if (e.status === 401) return; state.pairing = { error:e.status === 403 ? "A paired device cannot pair others: use nerv open --phone --qr, or Settings from nerv open dashboard." : e.message }; }
+    renderDevices();
   }
   async function loadDevices() {
     try { state.devices = (await api("devices")).devices || []; }
@@ -1127,6 +1163,7 @@
   }
   document.addEventListener("click", async e => {
     if (e.target && e.target.closest && e.target.closest("#btn-devices-refresh")) { state.devicesMsg = null; void loadDevices(); return; }
+    if (e.target && e.target.closest && e.target.closest("#btn-pair-device")) { void pairDevice(); return; }
     const b = e.target && e.target.closest && e.target.closest("#settings-devices button[data-revoke]"); if (!b) return;
     const d = (state.devices || []).find(x => x.id === b.getAttribute("data-revoke")); if (!d) return;
     if (!confirm("Revoke " + d.name + (d.current ? " (this device)" : "") + "? It must pair again with a new code from nerv open --phone.")) return;
@@ -1259,7 +1296,18 @@
       setBanner("<b>LIVE · OFFLINE</b> <span class='muted'>— the service was not reached; trying again in " + Math.round(wait / 1000) + " s…</span>"); setTimeout(() => resumeDevice(Math.min(wait * 2, 300000)), wait);
     });
   };
-  if (code) {
+  // F-118-T05: the page a scanned QR opens in Safari: the code and the steps while it is valid; no request, no pairing.
+  const showPairingCode = (value, until) => {
+    const at = new Date(until).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+    const expired = () => setBanner("<b>LIVE · PAIRING CODE EXPIRED</b> <span class='muted'>— this code expired at " + esc(at) + ". Run <code>nerv open --phone --qr</code> again (or Settings → Pair a device) and scan the new QR.</span>");
+    if (Date.now() >= until) { expired(); return; }
+    setBanner("<b>LIVE · PAIR THIS PHONE</b> <span class='muted'>— this page only shows the code; it never pairs.</span>" +
+      "<div class='pair-code' aria-label='Pairing code " + esc(value) + "'>" + esc(value) + "</div>" +
+      "<ol class='pair-steps'><li>Share → Add to Home Screen.</li><li>Open NERV from the Home Screen.</li><li>Type this code: <b>" + esc(value) + "</b> (valid until " + esc(at) + ").</li></ol>");
+    setTimeout(expired, Math.min(until - Date.now(), 2147483647));
+  };
+  if (pairFragment && !INSTALLED) showPairingCode(pairFragment[1], Number(pairFragment[2]));
+  else if (code) {
     setBanner("<b>LIVE · SIGNING IN</b> <span class='muted'>— exchanging the one-use login code…</span>");
     fetch("/api/session/exchange", { method:"POST", headers:{ "Content-Type":"application/json", "ngsw-bypass":"1" }, body:JSON.stringify({ code }) })
       .then(r => r.json().then(d => { if (!r.ok || !d.token) throw new Error(d.error || "Login failed"); token = d.token; keepSession(token); begin(); }))

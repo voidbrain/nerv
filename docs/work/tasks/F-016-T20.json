@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T20",
+  "status": "planned",
+  "title": "Seed the standby store and ship replication batches while serve runs",
+  "goal": "A running main keeps its named standby's coordinator-standby.sqlite current, so a move starts from the main's latest state",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "distributed-contracts",
+    "architecture-review"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "A command or serve loop seeds a base's standby store from a signed snapshot of the running main, and serve ships each committed batch over /kaji/replicate to the named standby (tests across both bases)",
+    "A fixture shows an effect the old main ran before a partition is known to the promoted main",
+    "Owner agreed 2026-11-24 to add this step to the adopted plan, before F-016-T09"
+  ],
+  "dependsOn": [
+    "F-016-T08"
+  ],
+  "resources": [
+    "src/cli.ts",
+    "src/cli-kaji.ts",
+    "src/kaji-link.ts",
+    "src/store.ts",
+    "src/coordinator-snapshot.ts",
+    "src/coordinator-replication.ts",
+    "test/coordinator-partition.test.ts",
+    "docs/decisions/coordinator-relocation.md",
+    "docs/work/records/F-016.md",
+    "generated:backlog-views",
+    "contract:coordinator-authority"
+  ],
+  "validation": [
+    "Directed regressions across two bases; final required CI"
+  ],
+  "escalation": [
+    "Found by F-016-T08 on 2026-11-24; adds a step to the adopted plan: the owner agrees scope and order (before F-016-T09) first",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h agent",
+    "basis": "Estimated 2026-11-24 from F-016-T16 to F-016-T19 (1–1.5 h each stated): seeding command, shipping loop, standby apply wiring and fixtures. Not a measurement; uncertain until the owner sets the scope.",
+    "reviewed": "2026-11-24",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  }
+}
