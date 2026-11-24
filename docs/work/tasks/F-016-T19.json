@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T19",
+  "status": "planned",
+  "title": "Telegram polling handed over on activation",
+  "goal": "After relocation only the new main polls and answers Telegram; the old main stops",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "A fenced, draining or standby base never runs poll() or sends Bot API calls; the new main hydrates Telegram state and starts polling on activation (tests)",
+    "A relocation test shows the old main stops answering and the new main answers, with no 409 polling race"
+  ],
+  "dependsOn": [
+    "F-016-T07"
+  ],
+  "resources": [
+    "src/telegram.ts",
+    "src/nervous-process.ts",
+    "src/coordinator-relocation.ts",
+    "test/telegram.test.ts",
+    "test/coordinator-relocation.test.ts",
+    "docs/work/tasks/F-016-T19.json",
+    "docs/work/records/F-016.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Directed regressions in the named test files",
+    "npm run check:fast",
+    "final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Split from F-016-T07 on 2026-11-23 by owner decision (option a) after the PR #677 review; estimated from F-016-T06 and F-016-T07 (1.5 h each actual). Not a measurement.",
+    "reviewed": "2026-11-23",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}
