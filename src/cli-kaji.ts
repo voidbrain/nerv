@@ -20,7 +20,13 @@ import {
 } from './kaji.ts';
 
 import { builtinTools } from './executors.ts';
-import { RelocationRefusedError, drainCoordinator, signDrainReceipt } from './coordinator-relocation.ts';
+import {
+  RelocationRefusedError,
+  STANDBY_DB_FILE,
+  drainCoordinator,
+  ranOrAckedCoordinatorEpoch,
+  signDrainReceipt,
+} from './coordinator-relocation.ts';
 import { pushCoordinatorEpoch, registryPort } from './coordinator-epoch.ts';
 import { KajiLink, type EpochPushReply } from './kaji-link.ts';
 import {
@@ -316,6 +322,7 @@ export async function runKajiCommand(
         .records()
         .filter((r) => r.body.kind === 'main')
         .map((r) => ({ baseId: r.body.baseId, coordinatorEpoch: r.body.coordinatorEpoch ?? 0 })),
+      ranOrAckedEpoch: ranOrAckedCoordinatorEpoch(store.db, join(home, STANDBY_DB_FILE)),
     });
     const out = JSON.stringify(signDrainReceipt(baseKey(home).privateKey, receipt), null, 2) + '\n';
     if (args[1]) {

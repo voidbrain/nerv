@@ -59,6 +59,12 @@ export interface DrainReceipt {
    * standby's state. Absent from a receipt an older NERV wrote.
    */
   readonly skippedMains?: readonly { readonly baseId: string; readonly coordinatorEpoch: number }[];
+  /**
+   * #721 fourth check: the newest coordinator epoch the drained base ran or acked a lease at (its stores, a standby
+   * store it keeps included), so a promote refuses when it is later than the standby's state. Absent from a receipt
+   * an older NERV wrote.
+   */
+  readonly ranOrAckedEpoch?: number;
 }
 
 export interface SignedDrainReceipt {
@@ -85,6 +91,8 @@ export function drainCoordinator(
     readonly newEpoch: number;
     /** Every verified owner-signed main record in this base's registry. */
     readonly registryMains: readonly { readonly baseId: string | undefined; readonly coordinatorEpoch: number }[];
+    /** `ranOrAckedCoordinatorEpoch` of this base's stores, read before the drain. */
+    readonly ranOrAckedEpoch: number;
     readonly nowMs?: number;
   },
 ): DrainReceipt {
@@ -122,6 +130,7 @@ export function drainCoordinator(
       newMainBaseId: input.newMainBaseId,
       newEpoch: input.newEpoch,
       skippedMains,
+      ranOrAckedEpoch: input.ranOrAckedEpoch,
     };
   } catch (err) {
     db.exec('ROLLBACK');

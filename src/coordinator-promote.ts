@@ -301,7 +301,10 @@ function localPrecheck(
   | {
       readonly standbyEpoch: number;
       readonly skippedMains: readonly { readonly baseId: string }[];
-      /** Planned: the drained main that signed the receipt (it is stopped, and its receipt is its answer). */
+      /**
+       * Planned: the drained main that signed the receipt. `kaji drain` leaves its service running (fenced), so it
+       * usually answers the probe; when it does not, its receipt (with the epochs it ran or acked) answers for it.
+       */
       readonly drainedBy?: string;
     }
   | undefined {
@@ -351,6 +354,19 @@ function localPrecheck(
     }
     if (!drain?.receipt || !verifyDrainReceipt(drain, publicKeyFrom(enrolment.body.publicKey!)))
       refuse('drain_receipt_invalid', `The drain receipt is not signed by ${previousMainBaseId}.`);
+    // #721 fourth check: the receipt hands this epoch over to this base, from the standby's epoch (readiness checks
+    // it again); and the drained base never ran or acked a later epoch than that state.
+    const r = drain.receipt;
+    if (r.coordinatorEpoch !== standbyEpoch || r.newMainBaseId !== self.baseId || r.newEpoch !== newEpoch)
+      refuse(
+        'drain_receipt_invalid',
+        `The receipt hands epoch ${r.coordinatorEpoch} to ${r.newMainBaseId} at ${r.newEpoch}; this move takes epoch ${standbyEpoch} to ${self.baseId} at ${newEpoch}. No base was told the new epoch.`,
+      );
+    if (typeof r.ranOrAckedEpoch === 'number' && r.ranOrAckedEpoch > standbyEpoch)
+      refuse(
+        'standby_behind',
+        `${previousMainBaseId} ran or acked a coordinator lease at epoch ${r.ranOrAckedEpoch}, after the epoch ${standbyEpoch} state this standby holds: re-seed it from the epoch ${r.ranOrAckedEpoch} coordinator first. No base was told the new epoch.`,
+      );
     const listed: unknown = drain.receipt.skippedMains;
     const skippedMains = (Array.isArray(listed) ? (listed as { baseId?: unknown }[]) : []).flatMap((m) =>
       typeof m?.baseId === 'string' ? [{ baseId: m.baseId }] : [],
@@ -422,7 +438,7 @@ async function remotePrecheck(
     // its standby. Then, as unplanned, every unrevoked base must answer, with the field, at or below the standby's
     // epoch.
     const skipped = [...local.skippedMains, ...registryBetween].some((m) => m.baseId !== selfBaseId);
-    // The drained main signed the receipt and is stopped: its receipt answers for it.
+    // An unanswering drained main is exempt: its signed receipt says which epochs it ran or acked.
     const silent = skipped ? probe.unreachable.filter((id) => id !== local.drainedBy) : [];
     if (silent.length)
       refuse(

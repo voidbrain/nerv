@@ -126,6 +126,7 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
         coordinatorEpoch: 2,
         newMainBaseId: 'NERV-02',
         newEpoch: 3,
+        ranOrAckedEpoch: 2,
         registryMains: [
           { baseId: 'NERV-01', coordinatorEpoch: 2 },
           { baseId: 'NERV-02', coordinatorEpoch: 3 },
@@ -176,6 +177,8 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
         newEpoch: 3,
         // B-121 (#721 re-check): no main record was signed between epochs 2 and 3.
         skippedMains: [],
+        // #721 fourth check: the newest epoch the drained base ran or acked.
+        ranOrAckedEpoch: 2,
       });
       assert.equal(readCoordinatorFencingState(oldMain.db)?.replicationMode, 'fenced');
       assert.throws(() => oldMain.assertActiveCoordinator(), /fenced mode/);
@@ -462,6 +465,7 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
         coordinatorEpoch: 2,
         newMainBaseId: 'NERV-03',
         newEpoch: 4,
+        ranOrAckedEpoch: 2,
         registryMains: [
           { baseId: 'NERV-01', coordinatorEpoch: 2 },
           { baseId: 'NERV-02', coordinatorEpoch: 3 },
@@ -507,6 +511,7 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
       coordinatorEpoch: 2,
       newMainBaseId: 'NERV-03',
       newEpoch: 5,
+      ranOrAckedEpoch: 2,
       registryMains: mains,
     });
     // Each may have run: the planned promote must hear from each that it did not run later than the standby.
@@ -535,6 +540,7 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
         coordinatorEpoch: 2,
         newMainBaseId: 'NERV-02',
         newEpoch: 3,
+        ranOrAckedEpoch: 2,
         registryMains: [
           { baseId: 'NERV-01', coordinatorEpoch: 2 },
           { baseId: 'NERV-02', coordinatorEpoch: 3 },
@@ -702,6 +708,7 @@ describe('F-016-T17: nerv kaji promote stops the service, derives its inputs fro
           coordinatorEpoch: 2,
           newMainBaseId: 'NERV-02',
           newEpoch: 3,
+          ranOrAckedEpoch: 2,
           registryMains: [
             { baseId: 'NERV-01', coordinatorEpoch: 2 },
             { baseId: 'NERV-02', coordinatorEpoch: 3 },
@@ -1430,6 +1437,7 @@ describe('F-016-T19: Telegram polling is handed over on activation', () => {
           coordinatorEpoch: 2,
           newMainBaseId: 'NERV-02',
           newEpoch: 3,
+          ranOrAckedEpoch: 2,
           registryMains: [
             { baseId: 'NERV-01', coordinatorEpoch: 2 },
             { baseId: 'NERV-02', coordinatorEpoch: 3 },
