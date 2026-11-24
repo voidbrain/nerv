@@ -14,15 +14,15 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 37 | 28 |
-| **Require Human 🧑** | 10 | 10 |
+| **Require Human 🧑** | 9 | 10 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-089](#f-089) | [B-057](#b-057) | — |
-| [F-011](#f-011) | [F-116](#f-116) | [B-068](#b-068) |  |
+| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
+| [F-011](#f-011) |  | [B-068](#b-068) |  |
 | [F-012](#f-012) |  | [B-107](#b-107) |  |
 | [F-086](#f-086) |  | [B-113](#b-113) |  |
 | [F-087](#f-087) |  | [B-122](#b-122) |  |
@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 87.25 h agent + 11.25 h owner across 121 open steps of 36 features and 28 other records. 160 h of actual effort recorded on 152 steps. Generated from the task files.
+**Remaining effort:** 88.25 h agent + 11 h owner across 122 open steps of 36 features and 28 other records. 165.5 h of actual effort recorded on 153 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -427,7 +427,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h | [B-121-T02](#b-121-t02), [F-016-T20](#f-016-t20) | [F-016-T09](#f-016-t09) | ⏳ | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h | [B-121-T02](#b-121-t02), [F-016-T20](#f-016-t20) | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) | ⏳ | — | — |
 
 💻 **→** Next: B-124-T01 after F-016-T20. Owner 2026-11-24: P1, and the change to `kaji relocate` (push nothing until the target's prechecks pass) is agreed; F-016-T09 waits for it ([PR #724](https://github.com/voidbrain/nerv/pull/724)).
 
@@ -441,7 +441,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-124-t01"></a>B-124-T01 — kaji relocate pushes a re-target only after the target's prechecks pass | 2 h | 0 h | 2 h | Planned | [B-121-T02](#b-121-t02), [F-016-T20](#f-016-t20) | [F-016-T09](#f-016-t09) |
+| 🟡 Medium | <a id="b-124-t01"></a>B-124-T01 — kaji relocate pushes a re-target only after the target's prechecks pass | 2 h | 0 h | 2 h | Planned | [B-121-T02](#b-121-t02), [F-016-T20](#f-016-t20) | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) |
 | 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | | |
 
 <details>
@@ -465,7 +465,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 3.25 h agent + 1 h owner | [B-124-T01](#b-124-t01) | [B-124-T01](#b-124-t01) | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.75 h agent + 1 h owner | [B-124-T01](#b-124-t01) | [B-124-T01](#b-124-t01) | 🤖 | — | — |
 
 💻 **→** Next: F-016-T07 — Step 4a — Relocation building blocks: readiness, drain receipt, promotion with quarantine; never a context-only takeover (Implemented; verification pending).
 
@@ -487,10 +487,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-016-t18"></a>F-016-T18 — &#96;/kaji/epoch-push&#96; so every peer acknowledges the new epoch | 2 h | 2 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | 🤖 | [PR #703](https://github.com/voidbrain/nerv/pull/703) /kaji/epoch-push, recorded acks, measured promotion horizon |
 | 🟢 Small | <a id="f-016-t19"></a>F-016-T19 — Telegram polling handed over on activation | 1 h | 1.25 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | 🤖 | [PR #704](https://github.com/voidbrain/nerv/pull/704) Telegram hand-over: authority gate, hydration, no 409 race |
 | 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 3.5 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07), [F-016-T16](#f-016-t16), [F-016-T17](#f-016-t17), [F-016-T18](#f-016-t18), [F-016-T19](#f-016-t19) | [F-016-T09](#f-016-t09), [F-016-T20](#f-016-t20) | 🤖 | [PR #717](https://github.com/voidbrain/nerv/pull/717) Partition, sleep and reconnect fixtures; B-120 and B-121 fixes |
-| 🟡 Medium | <a id="f-016-t20"></a>F-016-T20 — Seed the standby store and ship replication batches while serve runs | 3 h | 0 h | 3 h | Planned | [F-016-T08](#f-016-t08) | [B-124-T01](#b-124-t01), [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-016-t20"></a>F-016-T20 — Seed the standby store and ship replication batches while serve runs | 3 h | 5.5 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T08](#f-016-t08) | [B-124-T01](#b-124-t01), [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) | 🤖 | [PR #725](https://github.com/voidbrain/nerv/pull/725) Live standby seeding and replication while serve runs |
 | 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | [F-016-T08](#f-016-t08), [F-016-T20](#f-016-t20), [B-124-T01](#b-124-t01) | [F-016-T11](#f-016-t11) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-016-T09](#f-016-t09) | — | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 21.25 h (19 of 20 steps) | 25.25 h (15 of 20 steps recorded) | 3.25 h agent + 1 h owner | 11 of 20 completed | | | | |
+| 🟡 Medium | <a id="f-016-t21"></a>F-016-T21 — Export the seed snapshot off serve's event loop | 1.5 h | 0 h | 1.5 h | Planned | [F-016-T20](#f-016-t20), [B-124-T01](#b-124-t01) | — | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 22.75 h (20 of 21 steps) | 30.75 h (16 of 21 steps recorded) | 1.75 h agent + 1 h owner | 11 of 21 completed | | | | |
 
 <details><summary>Done steps (11)</summary>
 
@@ -517,7 +518,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-016-T03: [PR #546](https://github.com/voidbrain/nerv/pull/546) implementation; CI green · F-016-T04: [PR #555](https://github.com/voidbrain/nerv/pull/555) implementation; CI green · F-016-T05: [PR #564](https://github.com/voidbrain/nerv/pull/564) implementation · F-016-T06: [PR #567](https://github.com/voidbrain/nerv/pull/567) implementation · F-016-T07: [PR #677](https://github.com/voidbrain/nerv/pull/677) implementation and review fixes · F-016-T08: [PR #717](https://github.com/voidbrain/nerv/pull/717) Partition, sleep and reconnect fixtures; B-120 and B-121 fixes · F-016-T10: [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review · F-016-T13: [PR #548](https://github.com/voidbrain/nerv/pull/548) implementation; CI green · F-016-T14: [PR #550](https://github.com/voidbrain/nerv/pull/550) implementation; CI green · F-016-T15: [PR #552](https://github.com/voidbrain/nerv/pull/552) implementation; CI green · F-016-T16: [PR #701](https://github.com/voidbrain/nerv/pull/701) lease renewal, self-fencing, lease 0 rule, registry inputs, monotonic wait · F-016-T17: [PR #702](https://github.com/voidbrain/nerv/pull/702) kaji promote, serve swap guard, verified inputs, crash resume · F-016-T18: [PR #703](https://github.com/voidbrain/nerv/pull/703) /kaji/epoch-push, recorded acks, measured promotion horizon · F-016-T19: [PR #704](https://github.com/voidbrain/nerv/pull/704) Telegram hand-over: authority gate, hydration, no 409 race. [PR #717](https://github.com/voidbrain/nerv/pull/717) F-016-T08 (`test/coordinator-partition.test.ts`; B-120, B-121 fixes); [PR #704](https://github.com/voidbrain/nerv/pull/704) F-016-T19; [PR #703](https://github.com/voidbrain/nerv/pull/703) F-016-T18; [PR #702](https://github.com/voidbrain/nerv/pull/702) F-016-T17; [PR #701](https://github.com/voidbrain/nerv/pull/701) F-016-T16; [PR #677](https://github.com/voidbrain/nerv/pull/677) F-016-T07 (`src/coordinator-relocation.ts`, `src/coordinator-snapshot.ts`, `src/cli-kaji.ts`, `test/coordinator-relocation.test.ts`); [PR #567](https://github.com/voidbrain/nerv/pull/567) F-016-T06 (`src/coordinator-lease.ts`, `src/store.ts`, `src/kaji-link.ts`, `src/cli-kaji.ts`, `test/coordinator-lease.test.ts`); [PR #564](https://github.com/voidbrain/nerv/pull/564) F-016-T05 (`src/kaji.ts`, `src/cli-kaji.ts`, `src/coordinator-authority.ts`, `src/store.ts`, `src/kaji-link.ts`, `test/coordinator-authority.test.ts`); [PR #555](https://github.com/voidbrain/nerv/pull/555) F-016-T04 (`src/coordinator-replication.ts`, `src/store.ts`, `src/kaji-link.ts`, `test/coordinator-replication.test.ts`); [PR #552](https://github.com/voidbrain/nerv/pull/552) F-016-T15 (`src/coordinator-snapshot.ts`, `src/store.ts`, `test/coordinator-snapshot.test.ts`); [PR #550](https://github.com/voidbrain/nerv/pull/550) F-016-T14 (`src/worker-jobs.ts`, `src/store-sorties.ts`, `src/store-kaji-outbox.ts`, `test/coordinator-snapshot.test.ts`); [PR #548](https://github.com/voidbrain/nerv/pull/548) F-016-T13 (`src/coordinator-snapshot.ts`, `src/store.ts`, `test/coordinator-snapshot.test.ts`); [PR #546](https://github.com/voidbrain/nerv/pull/546) F-016-T03 (`src/coordinator-snapshot.ts`, `test/coordinator-snapshot.test.ts`); [PR #454](https://github.com/voidbrain/nerv/pull/454) (owner agreement); [PR #470](https://github.com/voidbrain/nerv/pull/470) (merged; CI green); [PR #417](https://github.com/voidbrain/nerv/pull/417) F-016-T10 revised decision and clean second review (`docs/decisions/coordinator-relocation.md`, `docs/reviews/2026-11-14-f016-relocation-review-2.md`); [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #307](https://github.com/voidbrain/nerv/pull/307) F-016-T01 decision (`docs/decisions/coordinator-relocation.md`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; [CI 43240473540](https://github.com/voidbrain/nerv/actions/runs/43240473540) passed plan, native-macos, windows and validate (full-suite skipped by scoped verification), merged main `e821c11` |
+| PR / evidence | Steps: F-016-T03: [PR #546](https://github.com/voidbrain/nerv/pull/546) implementation; CI green · F-016-T04: [PR #555](https://github.com/voidbrain/nerv/pull/555) implementation; CI green · F-016-T05: [PR #564](https://github.com/voidbrain/nerv/pull/564) implementation · F-016-T06: [PR #567](https://github.com/voidbrain/nerv/pull/567) implementation · F-016-T07: [PR #677](https://github.com/voidbrain/nerv/pull/677) implementation and review fixes · F-016-T08: [PR #717](https://github.com/voidbrain/nerv/pull/717) Partition, sleep and reconnect fixtures; B-120 and B-121 fixes · F-016-T10: [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review · F-016-T13: [PR #548](https://github.com/voidbrain/nerv/pull/548) implementation; CI green · F-016-T14: [PR #550](https://github.com/voidbrain/nerv/pull/550) implementation; CI green · F-016-T15: [PR #552](https://github.com/voidbrain/nerv/pull/552) implementation; CI green · F-016-T16: [PR #701](https://github.com/voidbrain/nerv/pull/701) lease renewal, self-fencing, lease 0 rule, registry inputs, monotonic wait · F-016-T17: [PR #702](https://github.com/voidbrain/nerv/pull/702) kaji promote, serve swap guard, verified inputs, crash resume · F-016-T18: [PR #703](https://github.com/voidbrain/nerv/pull/703) /kaji/epoch-push, recorded acks, measured promotion horizon · F-016-T19: [PR #704](https://github.com/voidbrain/nerv/pull/704) Telegram hand-over: authority gate, hydration, no 409 race · F-016-T20: [PR #725](https://github.com/voidbrain/nerv/pull/725) Live standby seeding and replication while serve runs. [PR #725](https://github.com/voidbrain/nerv/pull/725) F-016-T20 (`src/coordinator-shipping.ts`, `test/coordinator-shipping.test.ts`); [PR #717](https://github.com/voidbrain/nerv/pull/717) F-016-T08 (`test/coordinator-partition.test.ts`; B-120, B-121 fixes); [PR #704](https://github.com/voidbrain/nerv/pull/704) F-016-T19; [PR #703](https://github.com/voidbrain/nerv/pull/703) F-016-T18; [PR #702](https://github.com/voidbrain/nerv/pull/702) F-016-T17; [PR #701](https://github.com/voidbrain/nerv/pull/701) F-016-T16; [PR #677](https://github.com/voidbrain/nerv/pull/677) F-016-T07 (`src/coordinator-relocation.ts`, `src/coordinator-snapshot.ts`, `src/cli-kaji.ts`, `test/coordinator-relocation.test.ts`); [PR #567](https://github.com/voidbrain/nerv/pull/567) F-016-T06 (`src/coordinator-lease.ts`, `src/store.ts`, `src/kaji-link.ts`, `src/cli-kaji.ts`, `test/coordinator-lease.test.ts`); [PR #564](https://github.com/voidbrain/nerv/pull/564) F-016-T05 (`src/kaji.ts`, `src/cli-kaji.ts`, `src/coordinator-authority.ts`, `src/store.ts`, `src/kaji-link.ts`, `test/coordinator-authority.test.ts`); [PR #555](https://github.com/voidbrain/nerv/pull/555) F-016-T04 (`src/coordinator-replication.ts`, `src/store.ts`, `src/kaji-link.ts`, `test/coordinator-replication.test.ts`); [PR #552](https://github.com/voidbrain/nerv/pull/552) F-016-T15 (`src/coordinator-snapshot.ts`, `src/store.ts`, `test/coordinator-snapshot.test.ts`); [PR #550](https://github.com/voidbrain/nerv/pull/550) F-016-T14 (`src/worker-jobs.ts`, `src/store-sorties.ts`, `src/store-kaji-outbox.ts`, `test/coordinator-snapshot.test.ts`); [PR #548](https://github.com/voidbrain/nerv/pull/548) F-016-T13 (`src/coordinator-snapshot.ts`, `src/store.ts`, `test/coordinator-snapshot.test.ts`); [PR #546](https://github.com/voidbrain/nerv/pull/546) F-016-T03 (`src/coordinator-snapshot.ts`, `test/coordinator-snapshot.test.ts`); [PR #454](https://github.com/voidbrain/nerv/pull/454) (owner agreement); [PR #470](https://github.com/voidbrain/nerv/pull/470) (merged; CI green); [PR #417](https://github.com/voidbrain/nerv/pull/417) F-016-T10 revised decision and clean second review (`docs/decisions/coordinator-relocation.md`, `docs/reviews/2026-11-14-f016-relocation-review-2.md`); [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #307](https://github.com/voidbrain/nerv/pull/307) F-016-T01 decision (`docs/decisions/coordinator-relocation.md`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; [CI 43240473540](https://github.com/voidbrain/nerv/actions/runs/43240473540) passed plan, native-macos, windows and validate (full-suite skipped by scoped verification), merged main `e821c11` |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-016-T10 verified: [PR #417](https://github.com/voidbrain/nerv/pull/417) merged on green CI (second fresh-context review found no blocker). F-016-T12 closed with the accepted decision revision and zero-blocking review in PR #470; scoped CI passed. Remaining distributed relocation acceptance is open. |
 | Reviewed | 2026-11-24 |
@@ -1372,6 +1373,56 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-089"></a>[✨ F-089](#top)
+
+**Browser control: act on a named control in an open page**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-089-T06 (owner chose A on 2026-11-24: a `browser.click` chat tool behind an approval card).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
+| **Reproduce** | Ask NERV to click a named button on an open tab. |
+| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
+| 🟡 Medium | <a id="f-089-t06"></a>F-089-T06 — A browser.click chat tool for Misato | 2.5 h | 0 h | 2.5 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 6.5 h (5 of 6 steps) | 3.25 h (3 of 6 steps recorded) | 2.5 h agent + 0.25 h owner | 3 of 6 completed | | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
+| — | <a id="f-089-t05"></a>F-089-T05 — Decision: a chat tool for browser clicks | 0 h | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-089.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-106"></a>[✨ F-106](#top)
 
 **Per-turn prompt size on the local route, then deferred domain tool loading**
@@ -1876,55 +1927,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-087-T02 verified: [PR #491](https://github.com/voidbrain/nerv/pull/491) merged on green CI. `F-087-T01` decision written in [bambu-print-handoff.md](decisions/bambu-print-handoff.md); verified with `npm run check:fast`. 2026-11-22: F-087-T03 verified (`bambu.handoff` Orange gate + `handOffToBambuConnect` + owner checklist); `node --test test/slicer.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-089"></a>[✨ F-089](#top)
-
-**Browser control: act on a named control in an open page**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h owner | — | — | 🤖 | — | 🤔 |
-
-🧑 **→** [Decide](decisions/browser-adapter.md#owner-decision-a-chat-tool-for-browser-clicks-f-089-t05) whether Misato gets a chat tool for browser clicks (F-089-T05).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
-| **Reproduce** | Ask NERV to click a named button on an open tab. |
-| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
-| 🟢 Small | <a id="f-089-t05"></a>F-089-T05 — Decision: a chat tool for browser clicks | — | 0 h | 0 h agent + 0.25 h owner | Planned | — | — | [🤔](decisions/browser-adapter.md#owner-decision-a-chat-tool-for-browser-clicks-f-089-t05) | — |
-| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 4 h (3 of 5 steps) | 3.25 h (3 of 5 steps recorded) | 0.5 h owner | 2 of 5 completed | | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-089.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
-| Reviewed | 2026-11-24 |
 
 </details>
 

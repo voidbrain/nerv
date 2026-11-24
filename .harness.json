@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "10.7.0",
+  "version": "10.9.0",
   "stacks": [
     "core",
     "angular"
@@ -25,6 +25,7 @@
     "docs/agents/mcp.md": "core/docs/agents/mcp.md",
     "docs/agents/solution-profile.md": "core/docs/agents/solution-profile.md",
     "docs/agents/skills.md": "core/docs/agents/skills.md",
+    "docs/agents/skills-discovery.md": "core/docs/agents/skills-discovery.md",
     "tools/reconcile-preview.mjs": "core/tools/reconcile-preview.mjs",
     "tools/friction.mjs": "core/tools/friction.mjs",
     "docs/agents/maintenance.md": "core/docs/agents/maintenance.md",
@@ -64,7 +65,8 @@
     "docs/agents/solution-refresh.md": "core/docs/agents/solution-refresh.md",
     "docs/agents/audit-findings.md": "core/docs/agents/audit-findings.md",
     "docs/agents/work-usage-sources.md": "core/docs/agents/work-usage-sources.md",
-    "docs/agents/work-usage-effectiveness.md": "core/docs/agents/work-usage-effectiveness.md"
+    "docs/agents/work-usage-effectiveness.md": "core/docs/agents/work-usage-effectiveness.md",
+    "docs/agents/work-usage-launch.md": "core/docs/agents/work-usage-launch.md"
   },
   "forked": {},
   "freshness": {
@@ -693,10 +695,12 @@
     "docs/backlog/ordering.md": "core/docs/backlog/ordering.md",
     "docs/backlog/ownership.md": "core/docs/backlog/ownership.md",
     "docs/backlog/records.md": "core/docs/backlog/records.md",
+    "docs/backlog/human-action.md": "core/docs/backlog/human-action.md",
     "docs/backlog/review.md": "core/docs/backlog/review.md",
     "docs/backlog/steps.md": "core/docs/backlog/steps.md",
     "docs/backlog/feature-plans.md": "core/docs/backlog/feature-plans.md",
     "docs/backlog/outcomes.md": "core/docs/backlog/outcomes.md",
+    "docs/backlog/ledger-header.md": "core/docs/backlog/ledger-header.md",
     "docs/agents/pull-requests.md": "core/docs/agents/pull-requests.md",
     "docs/agents/angular.md": "angular/docs/agents/angular.md"
   },
@@ -719,6 +723,7 @@
       "docs/agents/mcp.md",
       "docs/agents/solution-profile.md",
       "docs/agents/skills.md",
+      "docs/agents/skills-discovery.md",
       "docs/agents/audit.md",
       "tools/work-items.mjs",
       "tools/task-claims.mjs",
@@ -728,6 +733,7 @@
       "docs/agents/task-context.md",
       "tools/work-usage.mjs",
       "docs/agents/work-usage.md",
+      "docs/agents/work-usage-launch.md",
       "tools/usage-launch.mjs",
       "docs/backlog/closure.md",
       "docs/backlog/documentation.md",
@@ -736,7 +742,9 @@
       "docs/backlog/ordering.md",
       "docs/backlog/ownership.md",
       "docs/backlog/records.md",
+      "docs/backlog/human-action.md",
       "docs/backlog/review.md",
+      "docs/backlog/ledger-header.md",
       "docs/backlog/steps.md",
       "docs/backlog/feature-plans.md",
       "docs/backlog/outcomes.md",

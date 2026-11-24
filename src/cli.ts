@@ -820,6 +820,7 @@ try {
             baseId: config.base.id,
             root: config.kaji.root,
             ownPublicKey: own.publicKey,
+            privateKey: own.privateKey,
           });
           stopLease = () => lease.stop();
           kaji = new KajiLink({
@@ -919,6 +920,8 @@ try {
           void kaji.start();
           const leaseLink = kaji;
           lease.keeper((standbyBaseId, request) => leaseLink.renewLease(standbyBaseId, request)).start();
+          // F-016-T20: while this base is the active main, each committed batch goes to the named standby.
+          lease.shipper(leaseLink, { log: (line) => console.log(line) }).start();
         }
         process.once('SIGINT', close);
         process.once('SIGTERM', close);
