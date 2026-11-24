@@ -148,7 +148,7 @@ export type RelocationLiveness =
       readonly epochSeenAtMs: number;
       readonly allUnrevokedAckedNewEpoch: boolean;
       /**
-       * Owner confirmation that the old host is down (`--confirm-old-host-down`), or a root-signed revoke of it.
+       * A root-signed revoke of the old main is held here (`kaji promote` sets this only from the registry).
        * Required unless this standby acked the old main's lease for the epoch that last ran (so the old main
        * renews through it and fences itself past the lease, F-016-T16) and every unrevoked base acked the new epoch.
        */
@@ -294,7 +294,7 @@ export function checkRelocationReadiness(input: RelocationReadinessInput): Reloc
     if (!live.oldHostDownConfirmed && !(hasAckHistory && live.allUnrevokedAckedNewEpoch))
       refuse(
         'old_host_unconfirmed',
-        'The wait alone does not bound the old main here: confirm the old host is down (--confirm-old-host-down) or revoke it first.',
+        'The wait alone does not bound the old main here: revoke it with the root key first (kaji relocate BASE-ID --revoke OLD-ID, then kaji import here).',
       );
     const horizon = relocationHorizonMs({
       allUnrevokedAckedNewEpoch: live.allUnrevokedAckedNewEpoch,

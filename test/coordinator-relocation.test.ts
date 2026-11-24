@@ -1044,5 +1044,33 @@ describe('F-016-T17 re-review fixes (#702)', () => {
     } finally {
       rmSync(f.dir, { recursive: true, force: true });
     }
+describe('F-016-T16 fourth review: the refusal names the revoke, not a removed flag', () => {
+  it('an unplanned move without ack history asks for a root-signed revoke', () => {
+    const standby = new Store(':memory:');
+    setState(standby.db, 2, 'standby', 7, 'digest-7');
+    assert.throws(
+      () =>
+        checkRelocationReadiness({
+          candidateDb: standby.db,
+          selfBaseId: 'NERV-02',
+          previousMainBaseId: 'NERV-01',
+          registryMain: { baseId: 'NERV-02', coordinatorEpoch: 3 },
+          liveness: {
+            kind: 'unplanned',
+            epochSeenAtMs: 0,
+            allUnrevokedAckedNewEpoch: false,
+            oldHostDownConfirmed: false,
+            nowMs: 10 * RELOCATION_HORIZON_CONSERVATIVE_MS,
+            monoSinceNs: 0n,
+            monoNowNs: ms(10 * RELOCATION_HORIZON_CONSERVATIVE_MS),
+          },
+        }),
+      (err: unknown) =>
+        err instanceof RelocationRefusedError &&
+        err.reason === 'old_host_unconfirmed' &&
+        /revoke/.test(err.message) &&
+        !/confirm-old-host-down/.test(err.message),
+    );
+    standby.close();
   });
 });
