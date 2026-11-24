@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { generateKeyPairSync } from 'node:crypto';
 import { createServer as httpServer } from 'node:http';
-import { createServer } from 'node:net';
+import { createServer, type Server } from 'node:net';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -17,13 +17,37 @@ async function until(check: () => boolean | Promise<boolean>, ms = 15000) {
     await wait(25);
   }
 }
-const freePort = async () => {
-  const s = createServer();
-  await new Promise<void>((d) => s.listen(0, '127.0.0.1', d));
-  const p = (s.address() as { port: number }).port;
-  await new Promise<void>((d) => s.close(() => d()));
-  return p;
-};
+/** Keep every port bound while allocating the next, so one fixture cannot receive the same ephemeral port twice. */
+async function reservePorts(count: number) {
+  const servers: Server[] = [];
+  const ports: number[] = [];
+  let released = false;
+  const release = async () => {
+    if (released) return;
+    released = true;
+    await Promise.all(servers.map((s) => new Promise<void>((done, fail) => s.close((e) => (e ? fail(e) : done())))));
+  };
+  try {
+    for (let i = 0; i < count; i++) {
+      const s = createServer();
+      servers.push(s);
+      await new Promise<void>((done, fail) => {
+        s.once('error', fail);
+        s.listen(0, '127.0.0.1', () => {
+          s.off('error', fail);
+          done();
+        });
+      });
+      ports.push((s.address() as { port: number }).port);
+    }
+  } catch (e) {
+    await Promise.allSettled(
+      servers.filter((s) => s.listening).map((s) => new Promise<void>((done) => s.close(() => done()))),
+    );
+    throw e;
+  }
+  return { ports, release };
+}
 const keys = () => {
   const k = generateKeyPairSync('ed25519');
   return {
@@ -114,12 +138,13 @@ test('peer seats are veto-only: a shadow reject is shown and never counted, a ve
 test(
   "through two runtimes: the main base asks the other base's Casper; shadow shows its vote, veto lets it stop the action, an absent base abstains",
   { timeout: 60000 },
-  async () => {
+  async (t) => {
     const { Runtime } = await import('../src/runtime.ts');
     const A = keys(),
       B = keys();
-    const pa = await freePort(),
-      pb = await freePort();
+    const reserved = await reservePorts(2);
+    const [pa, pb] = reserved.ports;
+    t.after(() => reserved.release());
     const yes = await casperSays('approve'),
       no = await casperSays('reject', true);
     const ha = mkdtempSync(join(tmpdir(), 'nerv-seat-a-')),
@@ -178,8 +203,8 @@ test(
         log: () => {},
         onVerdict: (_f, ask) => b.peerVerdict(ask),
       });
-      await la.start(200);
-      await lb.start(200);
+      await reserved.release();
+      await Promise.all([la.start(200), lb.start(200)]);
       // Wired as serve does on the main base.
       a.usePeerSeats(la, () => seats, 30000);
       await until(async () => (await a.bases()).some((x) => x.baseId === 'NERV-02' && x.online));
