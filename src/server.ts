@@ -1,6 +1,6 @@
 import { SessionBook } from './session-book.ts';
 import { DEVICE_IDLE_MS, DeviceBook, deviceName, PairingCodes, QR_PAIRING_CODE_TTL_MS } from './device-book.ts';
-import { noQrEncoder, pairingBase, pairingLink, qrRows, type QrEncoder } from './pairing-qr.ts';
+import { pairingBase, pairingLink, qrEncoder, qrRows, type QrEncoder } from './pairing-qr.ts';
 import { DashboardFeed } from './dashboard-feed.ts';
 import { toolListing } from './tool-listing.ts';
 import { createServer, type IncomingMessage, type RequestListener } from 'node:http';
@@ -93,7 +93,7 @@ export function makeServer(
     deviceFile?: string;
     /** F-118: the clock for paired devices and pairing codes; tests move it. */
     clock?: () => number;
-    /** F-118-T05: the QR encoder for pairing links; none until the vendored one is approved (tests pass a double). */
+    /** F-118-T05: the QR encoder for pairing links; the vendored one by default (tests pass a double). */
     qrEncoder?: QrEncoder;
     /** Health sampling interval (F-103-T01 default 60 s); tests shorten it. */
     healthSampleIntervalMs?: number;
@@ -666,7 +666,7 @@ export function makeServer(
         else {
           const link = pairingLink(base, minted.code, minted.expiresAt);
           try {
-            reply(201, { ...minted, link, qr: qrRows((options.qrEncoder ?? noQrEncoder)(link)) });
+            reply(201, { ...minted, link, qr: qrRows((options.qrEncoder ?? qrEncoder)(link)) });
           } catch (e) {
             reply(201, { ...minted, link, qrError: e instanceof Error ? e.message : 'No QR.' });
           }

@@ -1,3 +1,5 @@
+import { encode } from '../vendor/uqr/index.mjs';
+
 // F-118-T05 (owner 2026-11-24): pairing as a QR code. The QR holds the dashboard's address with the pairing code in the
 // URL fragment (#pair=XXXX-XXXX&until=<ms>): a browser never sends a fragment to the server, so the code is not logged
 // and never reaches a referrer. Scanned, Safari opens the dashboard, which shows the code and how to install the app; it
@@ -6,10 +8,8 @@
 /** A QR encoder: the text in, the module matrix out (true = dark), without a quiet zone. */
 export type QrEncoder = (text: string) => boolean[][];
 
-/** Until the encoder is vendored (named to the owner first), a QR is unavailable and the code is shown alone. */
-export const noQrEncoder: QrEncoder = () => {
-  throw new Error('No QR encoder is installed in this version: type the code shown instead.');
-};
+/** The vendored encoder (uqr 0.1.3, vendor/uqr.json; owner approved 2026-11-24): medium error correction, no border. */
+export const qrEncoder: QrEncoder = (text) => encode(text, { ecc: 'M', border: 0 }).data;
 
 /** The address the phone opens: an http(s) origin, nothing else (no credentials, path, query or fragment kept). */
 export function pairingBase(value: unknown): string | undefined {
