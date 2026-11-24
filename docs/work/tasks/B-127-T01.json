@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "B-127-T01",
+  "parent": "B-127",
+  "title": "Name what the F-118-T02 browser test waits on under load and fix or bound it",
+  "goal": "test/evaluation.browser.mjs F-118-T02 passes when it runs with many test files",
+  "status": "planned",
+  "acceptance": [
+    "The wait that runs out under load is named from the run output",
+    "A regression reproduces the load case and fails before the fix, or the test states the bound that absorbs it",
+    "The concurrent run that failed (live.js/web/src tests plus test/gauntlet.test.mjs) passes"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/evaluation.browser.mjs",
+    "test/**",
+    "docs/work/records/B-127.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/evaluation.browser.mjs",
+    "npm run test:browser",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-24 in the reconciliation: reproduce under load, name the wait, fix or bound. Not a measurement. Checked against node tools/work-items.mjs calibrate 2026-11-24 (bug median 1.0x over 12 steps; B-117-T01, a load investigation, took 0.17x, while B-118-T01 to T03 took 2–2.5 h each), so kept.",
+    "reviewed": "2026-11-24",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

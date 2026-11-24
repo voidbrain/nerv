@@ -4,7 +4,7 @@
   "parent": "F-094",
   "title": "Open app and file, save as, step by step",
   "goal": "A planned sequence runs with readback after each step",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "One approval for the whole plan; readback each step; stops on a step outside the plan",
     "Save as never overwrites without asking"
@@ -33,9 +33,9 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement.",
-    "reviewed": "2026-11-14",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement. Closed 2026-11-24 in the reconciliation: PR #688 merged on green CI; the live check is F-094-T04.",
+    "reviewed": "2026-11-24",
     "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5,

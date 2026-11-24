@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-100",
   "id": "F-100-T04",
-  "status": "implemented",
+  "status": "closed",
   "title": "Analyse a real fleet log (Supernova) with GYRO data and eRPM",
   "goal": "The report on a real flight log names candidate causes with evidence and states what the log cannot tell",
   "capabilities": [
@@ -28,11 +28,16 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h agent",
-    "basis": "Owner decision 2026-11-23: the agent analyses a fleet log the owner provides (Supernova); Smoke shaking was an example.",
-    "reviewed": "2026-11-23",
-    "agentHours": 0.25,
+    "estimate": "0 remaining",
+    "basis": "Owner decision 2026-11-23: the agent analyses a fleet log the owner provides (Supernova); Smoke shaking was an example. Closed 2026-11-24 in the reconciliation: PR #674 merged on green CI; the real Supernova log was analysed and reported. No actual: the elapsed time was not recorded when the step was done and is not known to this reconciliation.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 674
+    }
+  ]
 }
