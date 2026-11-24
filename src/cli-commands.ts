@@ -55,8 +55,7 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'n
 import { OWNER_SOURCE, Store } from './store.ts';
 import { argsHash } from './ledger.ts';
 import { formatDevices, matchDevice, type DeviceInfo } from './device-book.ts';
-import { pairingBase, tailscaleBase, terminalQr } from './pairing-qr.ts';
-import { execFileSync } from 'node:child_process';
+import { pairingBase, phoneBaseResolver, tailnetBase, terminalQr, type PhoneBase } from './pairing-qr.ts';
 
 import {
   savePilots,
@@ -96,15 +95,16 @@ export interface CliCommandContext {
   flag: (name: string) => string | undefined;
 }
 
-/** This machine's tailnet HTTPS address, or undefined without Tailscale. */
-function tailnetBase(): string | undefined {
-  try {
-    return tailscaleBase(
-      JSON.parse(execFileSync('tailscale', ['status', '--json'], { encoding: 'utf8', timeout: 5000 })),
-    );
-  } catch {
-    return undefined;
-  }
+/**
+ * B-128: the address a phone opens for a pairing QR, for both `nerv open --phone --qr` and Settings (serve): config
+ * phone.url (read each time, so an edit needs no restart), else this machine's tailnet name, looked up at most once a
+ * minute.
+ */
+export function phoneBaseFor(home: string, port: number): PhoneBase {
+  return phoneBaseResolver({
+    configured: () => readConfig(home).phone?.url,
+    tailnet: () => tailnetBase(port),
+  });
 }
 
 export async function tryRunCliCommand(
@@ -592,17 +592,18 @@ export async function tryRunCliCommand(
     // F-118: open --phone mints a one-use pairing code (5 minutes) that the installed phone app swaps for a device credential.
     // F-118-T05: --qr also shows a QR of the dashboard link with the code in its fragment (10 minutes): scanned, Safari
     // shows the code and how to install the app; the installed app takes it. --url is the address the phone opens,
-    // otherwise this machine's tailnet name (where tailscale serve answers).
+    // otherwise config phone.url, else this machine's tailnet name (where tailscale serve answers): the same helper as
+    // Settings (B-128).
     const config = readConfig(home);
     const qr = args.includes('--qr');
     let base: string | undefined;
     if (qr) {
       const given = ctx.flag('--url');
-      base = given !== undefined ? pairingBase(given) : tailnetBase();
+      base = given !== undefined ? pairingBase(given) : await phoneBaseFor(home, config.port)();
       if (given !== undefined && !base) throw new Error('--url takes the http(s) address the phone opens.');
       if (!base)
         throw new Error(
-          'No address for the phone: give it with --url https://NAME.TAILNET.ts.net (where tailscale serve answers).',
+          'No address for the phone: give it with --url https://NAME.TAILNET.ts.net (where tailscale serve answers), or set "phone": {"url": …} in config.json.',
         );
     }
     const response = await fetch(`http://127.0.0.1:${config.port}/api/device/codes`, {

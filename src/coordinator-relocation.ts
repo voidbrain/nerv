@@ -113,6 +113,14 @@ export function drainCoordinator(
     if (state.coordinatorEpoch !== input.coordinatorEpoch)
       throw new Error(`Coordinator epoch ${state.coordinatorEpoch} does not match ${input.coordinatorEpoch}.`);
     if (state.replicationMode === 'standby') throw new Error('A standby has no coordinator authority to drain.');
+    // F-016-T20 review (#725): a change committed after the final batch was shipped (an effect in flight) would be
+    // missing from the standby while the receipt claims a complete drain. Refused, the main stays draining:
+    // `kaji drain` ships it and tries again.
+    const unreplicated = unreplicatedChanges(db, state.coordinatorEpoch);
+    if (unreplicated)
+      throw new Error(
+        `${unreplicated} committed change(s) are not yet replicated to the standby: run kaji drain again.`,
+      );
     if (state.replicationMode === 'active')
       db.prepare("UPDATE coordinator_state SET replication_mode = 'draining' WHERE id = 1").run();
     db.prepare("UPDATE coordinator_state SET replication_mode = 'fenced', lease_expires_at = 0 WHERE id = 1").run();
@@ -136,6 +144,31 @@ export function drainCoordinator(
     db.exec('ROLLBACK');
     throw err;
   }
+}
+
+/** Noted changes not yet in a batch, plus batches the named standby has not acked (when it is tracked). */
+function unreplicatedChanges(db: DatabaseSync, epoch: number): number {
+  const has = (name: string) => !!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?").get(name);
+  if (!has('coordinator_replication_pending')) return 0;
+  const pending = (db.prepare('SELECT COUNT(*) AS n FROM coordinator_replication_pending').get() as { n: number }).n;
+  const row = db.prepare('SELECT head_seq, standby_base_id FROM coordinator_state WHERE id = 1').get() as {
+    head_seq: number;
+    standby_base_id: string | null;
+  };
+  const peer =
+    row.standby_base_id && has('coordinator_replication_peer')
+      ? (db
+          .prepare('SELECT coordinator_epoch, acked_seq FROM coordinator_replication_peer WHERE base_id = ?')
+          .get(row.standby_base_id) as { coordinator_epoch: number; acked_seq: number } | undefined)
+      : undefined;
+  // F-016-T20 re-check: a named standby whose position at this epoch is unknown (never acked here, or only at
+  // another epoch) counts as not holding the head; `kaji drain` ships or seeds it, then fences.
+  const unacked = !row.standby_base_id
+    ? 0
+    : peer && peer.coordinator_epoch === epoch
+      ? Math.max(row.head_seq - peer.acked_seq, 0)
+      : Math.max(row.head_seq, 1);
+  return pending + unacked;
 }
 
 export function signDrainReceipt(privateKey: KeyObject, receipt: DrainReceipt): SignedDrainReceipt {
@@ -203,7 +236,7 @@ function standbyLastAckMs(db: DatabaseSync, epoch: number): number | undefined {
 }
 
 /** The newest epoch this standby acked a lease for (`standby_lease_state`), 0 when it never acked one. */
-function standbyAckedEpoch(db: DatabaseSync): number {
+export function standbyAckedEpoch(db: DatabaseSync): number {
   if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='standby_lease_state'").get()) return 0;
   const row = db.prepare('SELECT standby_coordinator_epoch FROM standby_lease_state WHERE id = 1').get() as
     { standby_coordinator_epoch: number } | undefined;
@@ -344,7 +377,7 @@ export function checkRelocationReadiness(input: RelocationReadinessInput): Reloc
       refuse('restore_mismatch', 'The snapshot digest is not the one the owner approved.');
     if (manifest.headSeq < restore.minHeadSeq)
       refuse('restore_mismatch', `The snapshot head ${manifest.headSeq} is older than ${restore.minHeadSeq}.`);
-    if (stateDigest !== manifest.sha256 || headSeq !== manifest.headSeq)
+    if (stateDigest !== (manifest.headDigest ?? manifest.sha256) || headSeq !== manifest.headSeq)
       refuse('restore_mismatch', 'The standby store does not hold the approved snapshot.');
     source = 'cold-restore';
   }

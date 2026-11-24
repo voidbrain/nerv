@@ -6,6 +6,7 @@ import { verifyOperatorEntry, type SignedOperatorEntry } from './operator-direct
 import type { KeyObject } from 'node:crypto';
 import { KAJI_CLOCK_SKEW_MS, signedHeaders, verifySigned, Nonces, type RootTrust } from './kaji-auth.ts';
 import type { ApplyReplicationBatchResult, ReplicationBatch } from './coordinator-replication.ts';
+import type { SeedReply } from './coordinator-shipping.ts';
 import type { ActiveCoordinatorCheckResult } from './coordinator-authority.ts';
 import type { LeaseRenewRequest, LeaseRenewResult } from './coordinator-lease.ts';
 export { signedHeaders, verifySigned, Nonces } from './kaji-auth.ts';
@@ -267,6 +268,14 @@ export class KajiLink {
     admitPartTransfer?: (claimedFrom: string, declaredBytes: number) => { status: number; error: string } | undefined;
     /** F-016-T04: applies an incremental coordinator replication batch on a standby base. */
     onReplicate?: (from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>;
+    /** F-016-T20: one frame of a signed seed snapshot from the main, applied as this base's standby store. */
+    onSeed?: (from: string, frame: string) => Promise<SeedReply>;
+    /**
+     * F-016-T20 review (#725): whether this base, still a standby, takes batches from `from` at `coordinatorEpoch`
+     * although its registry already names a newer main (the relocation records reached it before the drain): only
+     * the base named main at the epoch its standby store holds, for exactly that epoch.
+     */
+    standbyFeedFrom?: (from: string, coordinatorEpoch: number) => boolean;
     /** F-016-T06: handles standby-acked coordinator lease renewal on a standby base. */
     onLeaseRenew?: (from: string, req: LeaseRenewRequest) => Promise<LeaseRenewResult>;
     /** F-016-T05: synchronous coordinator authority check for coordinator-hosted endpoints. */
@@ -294,6 +303,8 @@ export class KajiLink {
     this.onPartTransfer = options.onPartTransfer;
     this.admitPartTransfer = options.admitPartTransfer;
     this.onReplicate = options.onReplicate;
+    this.onSeed = options.onSeed;
+    this.standbyFeedFrom = options.standbyFeedFrom;
     this.onLeaseRenew = options.onLeaseRenew;
     this.checkCoordinatorAuthority = options.checkCoordinatorAuthority;
     this.minCoordinatorEpoch = options.minCoordinatorEpoch;
@@ -391,6 +402,18 @@ export class KajiLink {
     ((claimedFrom: string, declaredBytes: number) => { status: number; error: string } | undefined) | undefined;
   private readonly onReplicate:
     ((from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>) | undefined;
+  private readonly onSeed: ((from: string, frame: string) => Promise<SeedReply>) | undefined;
+  private readonly standbyFeedFrom: ((from: string, coordinatorEpoch: number) => boolean) | undefined;
+  /** F-016-T20: a coordinator stream request carries a lease that has not passed (beyond the clock skew). */
+  private staleLeaseReply(
+    headers: IncomingMessage['headers'],
+    reply: (status: number, value: unknown) => void,
+  ): boolean {
+    const leaseExpiresAt = Number(headers['x-kaji-lease-expires-at']);
+    if (Number.isFinite(leaseExpiresAt) && Date.now() - KAJI_CLOCK_SKEW_MS <= leaseExpiresAt) return false;
+    reply(409, { error: 'stale_coordinator_lease' });
+    return true;
+  }
   private readonly onLeaseRenew: ((from: string, req: LeaseRenewRequest) => Promise<LeaseRenewResult>) | undefined;
   private readonly onDecide: ((approvalId: string, decision: 'approve' | 'reject') => Promise<string>) | undefined;
   private readonly onSortie:
@@ -563,7 +586,8 @@ export class KajiLink {
       }
       let body = '';
       const limit =
-        req.method === 'POST' && (req.url === '/kaji/backup' || req.url === '/kaji/replicate')
+        req.method === 'POST' &&
+        (req.url === '/kaji/backup' || req.url === '/kaji/replicate' || req.url === '/kaji/standby/seed')
           ? MAX_BACKUP_BODY
           : req.method === 'POST' && req.url === '/kaji/print'
             ? MAX_PART_TRANSFER_BODY
@@ -739,25 +763,38 @@ export class KajiLink {
         return;
       }
       if (req.method === 'POST' && req.url === '/kaji/replicate') {
-        if ((await this.port.main?.()) !== from || !this.onReplicate) {
+        const epochHdr = Number(req.headers['x-kaji-coordinator-epoch']);
+        const batch = JSON.parse(body) as ReplicationBatch;
+        const fromMain = (await this.port.main?.()) === from;
+        // F-016-T20 review (#725): the old main's final batches still reach a standby that already holds the
+        // relocation records, for the epoch its store holds only.
+        const feed = !fromMain && this.standbyFeedFrom?.(from, batch.coordinatorEpoch) === true;
+        if ((!fromMain && !feed) || !this.onReplicate) {
           reply(403, { error: 'only the main base replicates here' });
           return;
         }
-        const epochHdr = Number(req.headers['x-kaji-coordinator-epoch']);
-        const leaseExpiresAt = Number(req.headers['x-kaji-lease-expires-at']);
-        const batch = JSON.parse(body) as ReplicationBatch;
-        if (
-          !Number.isInteger(epochHdr) ||
-          epochHdr < 1 ||
-          epochHdr !== batch.coordinatorEpoch ||
-          !Number.isFinite(leaseExpiresAt) ||
-          Date.now() - KAJI_CLOCK_SKEW_MS > leaseExpiresAt
-        ) {
+        // F-016-T20: never a batch from an older epoch than this base holds (the feed is bound to its store's epoch).
+        if (!feed && this.staleEpochReply(req.headers, reply)) return;
+        if (!Number.isInteger(epochHdr) || epochHdr < 1 || epochHdr !== batch.coordinatorEpoch) {
           reply(409, { error: 'stale_coordinator_lease' });
           return;
         }
+        if (this.staleLeaseReply(req.headers, reply)) return;
         const result = await this.onReplicate(from, batch);
         reply(result.ok ? 200 : result.reason === 'need_resync' ? 409 : 400, result);
+        return;
+      }
+      // F-016-T20: a seed snapshot frame from the main (its signature, root and epoch are verified on import).
+      // A seed carries state, not authority, so it needs no live lease: a promoted main seeds its first standby
+      // before any base acks its lease (only a standby store acks).
+      if (req.method === 'POST' && req.url === '/kaji/standby/seed') {
+        if ((await this.port.main?.()) !== from || !this.onSeed) {
+          reply(403, { error: 'only the main base seeds a standby here' });
+          return;
+        }
+        if (this.staleEpochReply(req.headers, reply)) return;
+        const result = await this.onSeed(from, body);
+        reply(result.ok ? 200 : 409, result);
         return;
       }
       if (req.method === 'POST' && req.url === '/kaji/decide') {
@@ -1074,60 +1111,97 @@ export class KajiLink {
       };
     }
   }
-  /** Ships an incremental coordinator replication batch to an enrolled standby base (F-016-T04). */
-  async replicate(
+  /** A coordinator stream request (replicate, seed): epoch, fence and lease headers, a signed body and reply. */
+  private async coordinatorPost(
     baseId: string,
-    batch: ReplicationBatch,
-    leaseExpiresAt: number,
-  ): Promise<ApplyReplicationBatchResult> {
+    path: string,
+    body: string,
+    coordinator: { epoch: number; fence?: number; leaseExpiresAt: number },
+    timeoutMs: number,
+  ): Promise<{ status: number; text: string }> {
     const peer = (await this.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
     if (!peer) throw new Error(`Base ${baseId} is not enrolled.`);
-    const body = JSON.stringify(batch);
     const { host, port } = endpoint(peer.address);
     const res = await send(
       host,
       port,
       'POST',
-      '/kaji/replicate',
+      path,
       {
         'content-type': 'application/json',
-        'x-kaji-coordinator-epoch': String(batch.coordinatorEpoch),
-        'x-kaji-coordinator-fence': String(batch.coordinatorFence),
-        'x-kaji-lease-expires-at': String(leaseExpiresAt),
+        'x-kaji-coordinator-epoch': String(coordinator.epoch),
+        ...(coordinator.fence !== undefined ? { 'x-kaji-coordinator-fence': String(coordinator.fence) } : {}),
+        'x-kaji-lease-expires-at': String(coordinator.leaseExpiresAt),
         ...signedHeaders(
           this.baseId,
           this.key,
           'req',
           'POST',
-          '/kaji/replicate',
+          path,
           body,
           undefined,
           this.trust?.required ? this.trust.root : undefined,
         ),
       },
       body,
-      10000,
+      timeoutMs,
     );
     const replyFrom = verifySigned(
       res.headers,
       'res',
       'POST',
-      '/kaji/replicate',
+      path,
       res.text,
       [peer],
       this.nonces,
       undefined,
       this.trust,
     );
-    if (replyFrom !== peer.baseId) throw new Error('Unexpected base answered replication.');
+    if (replyFrom !== peer.baseId) throw new Error(`Unexpected base answered ${path}.`);
+    return res;
+  }
+  /** Ships an incremental coordinator replication batch to an enrolled standby base (F-016-T04). */
+  async replicate(
+    baseId: string,
+    batch: ReplicationBatch,
+    leaseExpiresAt: number,
+  ): Promise<ApplyReplicationBatchResult> {
+    const res = await this.coordinatorPost(
+      baseId,
+      '/kaji/replicate',
+      JSON.stringify(batch),
+      { epoch: batch.coordinatorEpoch, fence: batch.coordinatorFence, leaseExpiresAt },
+      10000,
+    );
     if (res.status === 200) {
       return JSON.parse(res.text) as ApplyReplicationBatchResult;
     }
-    if (res.status === 409) {
+    // The standby's own answer (a gap, another epoch, no standby store, an invalid batch) is a result the
+    // shipper acts on (F-016-T20); a refusal by the line (not main, stale epoch or lease) is an error.
+    if (res.status === 409 || res.status === 400) {
       const parsed = JSON.parse(res.text) as ApplyReplicationBatchResult & { reason?: string; error?: string };
-      if (parsed.reason === 'need_resync') return parsed;
+      if (parsed.ok === false && ['need_resync', 'not_standby', 'invalid_batch', 'busy'].includes(parsed.reason))
+        return parsed;
     }
-    throw new Error(`${peer.baseId} refused (${res.status}): ${res.text}`);
+    throw new Error(`${baseId} refused (${res.status}): ${res.text}`);
+  }
+  /** F-016-T20: sends one frame of a signed seed snapshot to the standby base. */
+  async seedStandby(
+    baseId: string,
+    frame: Buffer,
+    coordinatorEpoch: number,
+    leaseExpiresAt: number,
+  ): Promise<SeedReply> {
+    const res = await this.coordinatorPost(
+      baseId,
+      '/kaji/standby/seed',
+      frame.toString('utf8'),
+      { epoch: coordinatorEpoch, leaseExpiresAt },
+      BACKUP_TIMEOUT_MS,
+    );
+    const parsed = JSON.parse(res.text) as SeedReply & { error?: string };
+    if (res.status === 200 || (res.status === 409 && 'ok' in parsed)) return parsed;
+    throw new Error(`${baseId} refused (${res.status}): ${res.text}`);
   }
   /**
    * F-016-T18: pushes owner-signed records to a base; returns the coordinator epoch it holds afterwards and, when

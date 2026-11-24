@@ -4,6 +4,8 @@ Optional metadata accounting, enabled by `workUsage.enabled` in `.harness.json`.
 
 Moved to [usage sources](work-usage-sources.md): "Subscription allowance snapshots", "Save a private report", "Selected native metadata adapters", "Import actual counters".
 
+Moved to [client launch](work-usage-launch.md): "Client instruction entry points", "Explicit prelaunch registration". Read it before you set up a client bridge or launch an agent through `work:launch`.
+
 Moved to [effectiveness observations](work-usage-effectiveness.md): "Effectiveness observations (optional)".
 
 ## In short
@@ -31,20 +33,8 @@ The default store is outside the checkout at `~/.local/state/project-harness/wor
 
 If the host/tool is unavailable, keep the source coverage unknown and state that limitation in the owning work record. Do not block unrelated authorized work or manufacture a count. End the job with complete, partial or unavailable coverage and done, failed or interrupted outcome. A complete declaration is an attestation about source coverage, not an independently verified audit. Empty or unknown measurements do not become a zero total.
 
-## Client instruction entry points
-
-This guide owns the rule; AGENTS routes here when `workUsage.enabled`. Claude's existing CLAUDE bridge imports it. Optional GEMINI.md, QWEN.md and `.github/copilot-instructions.md` bridges point to the same authority; merge them into existing client instructions when useful, preserving local rules. Verify the actual client's instruction loading and telemetry access in a neutral job; a filename is not proof that it loaded. ChatGPT/Codex tools with repository access can follow AGENTS; a chat-only session without repository/usage access needs an explicitly supplied task/metadata export and reports missing coverage.
-
-These bridges request registration/import where available; they do not install exporters, scrape conversation history, enable prompt logging, discover credentials, guarantee compliance or provide live client acceptance. Exact source model/version and actual input/output/cache counters remain unknown until observed. No owner needs to predict which agent will eventually run a job for the job to register its observed identity.
-
 ## Step reports and linked evidence
 
 Use the stable child task ID for attributable jobs. `report --task=F-048-T02` filters jobs before aggregation; an optional item filter must match its parent. `byTask` groups by repository plus task ID, keeping feature-only jobs in a separately labelled `ITEM:unassigned` group. Feature totals count every distinct source event once; the step groups partition the same jobs/events, including unknown/empty-job coverage. Two repositories with the same step ID stay separate. No existing feature-only job is retrospectively assigned to a step.
 
 Keep work-session, verification and review evidence linked from its task validation/parent evidence. This ledger stores permitted usage metadata only; it does not collect operational service logs, test transcripts or review conversation text. Link relevant acceptance evidence under existing privacy rules. Missing native adapters, usage counters or source coverage remain explicit, not zero.
-
-## Explicit prelaunch registration
-
-Optionally adopt `tools/usage-launch.mjs` and `work:launch`. Invoke `node tools/usage-launch.mjs --repository=project-harness --item=F-048 --task=F-048-T02 --agent=CLIENT -- executable arguments`. It registers before starting the exact supplied command, inherits normal permissions and stdio, and passes `HARNESS_USAGE_JOB` and `HARNESS_USAGE_STORE`. It never stores command text or captures a transcript. The caller must already be authorized to run that command; this helper is not a model-run grant, sandbox or background hook.
-
-`start` and the launcher accept optional `--parent=JOB_UUID` for an open same-repository parent. Read the child's stored parent identity for handoff; do not reuse a parent's event IDs/counters. Finish retains command failure/interruption and declares coverage unavailable because process success alone cannot prove telemetry coverage. Registration failure prevents launch. External host/client integration owns metadata extraction, actual instruction loading and signal/process supervision. An already running agent cannot retrospectively obtain prelaunch coverage from this helper; ordinary available job registration remains required.

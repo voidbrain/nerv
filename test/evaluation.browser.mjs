@@ -565,9 +565,66 @@ test(
         assert.ok(box.includes(code), 'Settings shows the code next to the QR');
         assert.match(box, /valid until/);
         assert.match(box, /127\.0\.0\.1/, 'says a phone cannot open this loopback address');
+        // B-128: no configured address and no Tailscale here, so the hint says how to set one.
+        assert.match(box, /tailscale serve/, 'says how to give the phone an address');
         const modules = await evaluate(`document.querySelector('#settings-pair svg.pair-qr path').getAttribute('d')`);
         assert.equal((modules.match(/M/g) ?? []).length, 245, 'the QR draws every dark module of the encoder rows');
         assert.equal(await pairWith(code), 200, 'the Settings code pairs the installed app');
+        assert.deepEqual(errors, [], 'no browser runtime exceptions');
+      });
+    } finally {
+      await new Promise((done) => {
+        server.close(done);
+        server.closeAllConnections();
+      });
+      store.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);
+
+// B-128 (owner 2026-11-24): across the join, Settings → Pair a device on a dashboard opened at 127.0.0.1 (nerv open
+// dashboard) gets a QR of the tailnet address the server resolves (a test double here; Tailscale never runs in tests),
+// and no loopback warning.
+test(
+  'B-128: Settings on a 127.0.0.1 page shows a QR of the tailnet address, not the loopback one',
+  { timeout: 120000 },
+  async () => {
+    const home = mkdtempSync(join(tmpdir(), 'nerv-pairing-tailnet-browser-')),
+      token = 'f'.repeat(32);
+    const texts = [];
+    const qrEncoder = (text) => {
+      texts.push(text);
+      return Array.from({ length: 21 }, (_, y) => Array.from({ length: 21 }, (_, x) => (x * y + x) % 3 === 0));
+    };
+    const store = new Store(':memory:');
+    const server = makeServer(store, token, {
+      webRoot: resolve('dist/web/browser'),
+      deviceFile: join(home, 'devices.json'),
+      language: 'en',
+      timeZone: 'Europe/Rome',
+      qrEncoder,
+      phoneBase: async () => 'https://base.tailnet-fixture.ts.net',
+    });
+    await new Promise((done) => server.listen(0, '127.0.0.1', done));
+    const origin = `http://127.0.0.1:${server.address().port}`;
+    const admin = { authorization: 'Bearer ' + token };
+    const banner = `document.querySelector('.banner').textContent`;
+    try {
+      await browser(async ({ page, evaluate, until, errors }) => {
+        const login = await (await fetch(origin + '/api/session/codes', { method: 'POST', headers: admin })).json();
+        await page('Page.navigate', { url: `${origin}/dashboard/#code=${login.code}` });
+        await until(`document.querySelector('#btn-pair-device')!==null&&!${banner}.includes('SIGNING IN')`);
+        await evaluate(`document.querySelector('#btn-pair-device').click()`);
+        await until(`document.querySelector('#settings-pair svg.pair-qr')!==null`);
+        const link = texts.at(-1);
+        assert.match(
+          link,
+          /^https:\/\/base\.tailnet-fixture\.ts\.net\/dashboard\/#pair=[A-Z2-9]{4}-[A-Z2-9]{4}&until=\d+$/,
+        );
+        const box = await evaluate(`document.querySelector('#settings-pair').textContent`);
+        assert.ok(!box.includes('which a phone cannot open'), 'no loopback warning: ' + box);
+        assert.match(box, /base\.tailnet-fixture\.ts\.net/, 'says which address the QR opens');
         assert.deepEqual(errors, [], 'no browser runtime exceptions');
       });
     } finally {

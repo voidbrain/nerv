@@ -36,6 +36,12 @@ import {
   type PromotionServiceControl,
 } from './coordinator-promote.ts';
 import { nextLeaseSeq, type LeaseRenewRequest, type LeaseRenewResult } from './coordinator-lease.ts';
+import {
+  ReplicationShipper,
+  formatReplicationStatus,
+  replicationStatus,
+  type ShippingLink,
+} from './coordinator-shipping.ts';
 import { OFFER_NAME, toolName } from './mcp.ts';
 
 /**
@@ -118,6 +124,8 @@ export async function runKajiCommand(
     };
     /** Tests inject the lease renewal `kaji standby` probes with. */
     renewLease?: (baseId: string, req: LeaseRenewRequest) => Promise<LeaseRenewResult>;
+    /** Tests inject the line `kaji standby` seeds and `kaji drain` ships the final batch over. */
+    shippingLink?: ShippingLink;
   },
 ): Promise<void> {
   const registry = new Registry(store.db, config.kaji?.root);
@@ -131,6 +139,20 @@ export async function runKajiCommand(
       publicKey: me,
       registry: registryPort(new Registry(store.db, config.kaji?.root)),
       log: () => {},
+    });
+  // F-016-T20: seeding a standby and the drain's final batch go over the same line as serve's shipper.
+  let client: KajiLink | undefined;
+  const shipper = (baseId = config.base.id) =>
+    new ReplicationShipper({
+      db: store.db,
+      baseId,
+      root: config.kaji?.root ?? '',
+      privateKey: () => baseKey(home).privateKey,
+      // The Kaji client is built only when a batch or seed is sent (a drain with no standby sends none).
+      link: ctx.shippingLink ?? {
+        replicate: (id, batch, lease) => (client ??= kajiClient()).replicate(id, batch, lease),
+        seedStandby: (id, frame, epoch, lease) => (client ??= kajiClient()).seedStandby(id, frame, epoch, lease),
+      },
     });
   const [sub] = args;
   const unlock = async () => {
@@ -302,6 +324,25 @@ export async function runKajiCommand(
   } else if (sub === 'drain') {
     // F-016-T07: planned relocation, old main side. Only after the owner signed a newer main record.
     const state = store.coordinatorFencingState();
+    // #725 review: an interrupted drain left effects stopped; the owner returns the main to active.
+    if (args.includes('--cancel')) {
+      if (state?.replicationMode !== 'draining') throw new Error('No drain to cancel: this main is not draining.');
+      store.db
+        .prepare(
+          "UPDATE coordinator_state SET replication_mode = 'active' WHERE id = 1 AND replication_mode = 'draining'",
+        )
+        .run();
+      const named = registry.main();
+      const self = registry.bases().find((b) => b.publicKey === me && b.status === 'enrolled');
+      // F-016-T20 re-check: once the relocation is imported here the registry names the new main, so the
+      // authority check keeps every coordinator effect off whatever the mode says.
+      console.log(
+        named && self && named !== self.baseId
+          ? `Drain cancelled: the mode is active again, but this base's registry names ${named} at epoch ${registry.mainEpoch()}, so it runs no coordinator effects. The move goes on with a drain and kaji promote on ${named}.`
+          : 'Drain cancelled: this main is active again (its lease keeper renews or fences it as before).',
+      );
+      return;
+    }
     const self = registry.bases().find((b) => b.publicKey === me && b.status === 'enrolled');
     if (!state || !self) throw new Error('This base holds no coordinator state to drain.');
     if (registry.mainEpoch() <= state.coordinatorEpoch)
@@ -313,17 +354,37 @@ export async function runKajiCommand(
       throw new Error(
         'The newest main record names no other enrolled base: sign the relocation (kaji relocate BASE-ID).',
       );
-    const receipt = drainCoordinator(store.db, {
-      baseId: self.baseId,
-      coordinatorEpoch: state.coordinatorEpoch,
-      newMainBaseId,
-      newEpoch: registry.mainEpoch(),
-      registryMains: registry
-        .records()
-        .filter((r) => r.body.kind === 'main')
-        .map((r) => ({ baseId: r.body.baseId, coordinatorEpoch: r.body.coordinatorEpoch ?? 0 })),
-      ranOrAckedEpoch: ranOrAckedCoordinatorEpoch(store.db, join(home, STANDBY_DB_FILE)),
-    });
+    // F-016-T20: effects stop (draining) and the standby receives the final batch before the lease is given up,
+    // so the receipt's final seq is what the standby holds. A standby that does not confirm it leaves this
+    // main active: nothing is drained. #725 review: a drain interrupted in `draining` flushes again on a re-run,
+    // and a change committed after the flush (an effect in flight) refuses the fence: it is shipped and tried again.
+    const drainNow = () =>
+      drainCoordinator(store.db, {
+        baseId: self.baseId,
+        coordinatorEpoch: state.coordinatorEpoch,
+        newMainBaseId,
+        newEpoch: registry.mainEpoch(),
+        registryMains: registry
+          .records()
+          .filter((r) => r.body.kind === 'main')
+          .map((r) => ({ baseId: r.body.baseId, coordinatorEpoch: r.body.coordinatorEpoch ?? 0 })),
+        ranOrAckedEpoch: ranOrAckedCoordinatorEpoch(store.db, join(home, STANDBY_DB_FILE)),
+      });
+    const flushing =
+      (state.replicationMode === 'active' || state.replicationMode === 'draining') && !!config.kaji?.root;
+    let receipt: ReturnType<typeof drainCoordinator> | undefined;
+    for (let attempt = 0; !receipt; attempt += 1) {
+      if (flushing) {
+        const flushed = await shipper(self.baseId).flush();
+        if (flushed.headSeq)
+          console.log(`Final batch: the standby holds seq ${flushed.ackedSeq} of ${flushed.headSeq}.`);
+      }
+      try {
+        receipt = drainNow();
+      } catch (err) {
+        if (!flushing || attempt >= 2 || !/not yet replicated/.test(err instanceof Error ? err.message : '')) throw err;
+      }
+    }
     const out = JSON.stringify(signDrainReceipt(baseKey(home).privateKey, receipt), null, 2) + '\n';
     if (args[1]) {
       writeFileSync(args[1], out);
@@ -344,6 +405,9 @@ export async function runKajiCommand(
           })
         : undefined;
       console.log(row?.standby_base_id ? `Standby: ${row.standby_base_id}` : 'No standby named.');
+      // F-016-T20: the seed and how far the standby is behind this main.
+      if (state && state.replicationMode !== 'standby')
+        console.log(formatReplicationStatus(replicationStatus(store.db)));
       return;
     }
     const entry = registry.bases().find((b) => b.baseId === id && b.status === 'enrolled');
@@ -380,14 +444,30 @@ export async function runKajiCommand(
           },
           log: () => {},
         }).renewLease(base, req));
-    const leaseSeq = nextLeaseSeq(store.db);
-    const probe = await renew(id, { coordinatorEpoch: state.coordinatorEpoch, leaseSeq }).catch(
-      (err: unknown): LeaseRenewResult => ({
-        ok: false,
-        reason: 'not_standby',
-        error: err instanceof Error ? err.message : 'unreachable',
-      }),
-    );
+    const probeOnce = async () => {
+      const leaseSeq = nextLeaseSeq(store.db);
+      const result = await renew(id, { coordinatorEpoch: state.coordinatorEpoch, leaseSeq }).catch(
+        (err: unknown): LeaseRenewResult => ({
+          ok: false,
+          reason: 'not_standby',
+          error: err instanceof Error ? err.message : 'unreachable',
+        }),
+      );
+      return { result, leaseSeq };
+    };
+    let { result: probe, leaseSeq } = await probeOnce();
+    // F-016-T20: a base without a standby store is seeded from a signed snapshot of this main, then probed again.
+    if (!probe.ok && probe.reason === 'not_standby' && config.kaji?.root) {
+      const { headSeq } = await shipper()
+        .seed(id)
+        .catch((err: unknown) => {
+          throw new Error(
+            `${id} holds no standby store and could not be seeded (${err instanceof Error ? err.message : 'unreachable'}).`,
+          );
+        });
+      console.log(`Seeded ${id}'s standby store from this main at seq ${headSeq}.`);
+      ({ result: probe, leaseSeq } = await probeOnce());
+    }
     if (!probe.ok || probe.standbyBaseId !== id || probe.ackSeq !== leaseSeq)
       throw new Error(
         `${id} did not ack a lease from a standby store (${probe.ok ? 'mismatched ack' : probe.reason}): name a base that holds the replicated standby store.`,
