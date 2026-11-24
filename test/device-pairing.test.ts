@@ -226,7 +226,15 @@ test('F-118-T01 join: pair, use, restart, list, revoke and rotation over HTTP', 
       ).json()) as {
         devices: Record<string, unknown>[];
       };
-      assert.deepEqual(Object.keys(list.devices[0]!).sort(), ['created', 'expires', 'id', 'lastUse', 'name']);
+      // F-118-T03 added `current` (Settings marks the device asking; never true for the admin token).
+      assert.deepEqual(Object.keys(list.devices[0]!).sort(), [
+        'created',
+        'current',
+        'expires',
+        'id',
+        'lastUse',
+        'name',
+      ]);
       const del = await fetch(url + '/api/devices/' + device.device.id, {
         method: 'DELETE',
         headers: { authorization: 'Bearer ' + admin },
@@ -293,13 +301,8 @@ test('F-118-T01 join: wrong, expired and too many codes are refused; a device ha
         assert.equal(await doctor(url, device), 200);
         for (const path of ['/api/device/codes', '/api/session/codes', '/api/session/revoke', '/api/stop'])
           assert.equal((await post(url + path, device)).status, 403, path);
-        const list = await fetch(url + '/api/devices', { headers: { authorization: 'Bearer ' + device } });
-        assert.equal(list.status, 403);
-        const del = await fetch(url + '/api/devices/x', {
-          method: 'DELETE',
-          headers: { authorization: 'Bearer ' + device },
-        });
-        assert.equal(del.status, 403);
+        // F-118-T03 (requirement changed: Settings lists and revokes devices) opened GET/DELETE /api/devices to
+        // sessions and devices; the F-118-T03 join test covers them.
         // A dashboard session cannot mint pairing codes either.
         const login = (await (await post(url + '/api/session/codes', token)).json()) as { code: string };
         const session = (
