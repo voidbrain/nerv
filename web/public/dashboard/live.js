@@ -559,7 +559,7 @@
     // shows the outside updater's own status from the server, which outlives a restart and a reload.
     const shownStatus = mu && mu.outcome !== "started"
       ? { state:mu.outcome, revision:mu.revision, at:mu.at, reasons:mu.reasons || [], recovery:mu.recovery || [] }
-      : state.updaterStatus;
+      : state.updaterStatus || (mu ? { state:"running", revision:mu.revision, at:mu.at, reasons:[], recovery:[] } : null);
     const statusHtml = updaterStatusHtml(shownStatus);
     if (availabilityRow) availabilityRow[4] = statusHtml;
     const updateResultHtml = availabilityRow ? "" : statusHtml;
