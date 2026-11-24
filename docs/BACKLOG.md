@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 5 | 1 | 12 | 2 |
+| **This week** | 5 | 1 | 13 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 23 |
+| **Open** | 39 | 24 |
 | **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 93 h agent + 11 h owner across 131 open steps of 38 features and 23 other records. 140 h of actual effort recorded on 146 steps. Generated from the task files.
+**Remaining effort:** 94.5 h agent + 11.25 h owner across 133 open steps of 38 features and 24 other records. 141.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1616,6 +1616,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-117-T01: [PR #710](https://github.com/voidbrain/nerv/pull/710) name and fix bases and browser gauntlet load failures; failing-first test/gauntlet-load.test.ts. [PR #710](https://github.com/voidbrain/nerv/pull/710) (Test: `test/gauntlet-load.test.ts`); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened) |
 | Opened | 2026-11-24 |
 | Verification | Unit/integration 2026-11-24: `node --test test/gauntlet-load.test.ts test/worker-outbox.test.ts test/kaji-seats.test.ts test/worker-link-heartbeat.test.ts` (24/24 pass); `npm run gauntlet:run` for `nerv-system-flows/bases` and `nerv-system-flows/browser` passed concurrently under load and alone (`npm run check:gauntlet-runs` and `npm run check:fast` pass). |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-122"></a>[🐞 B-122](#top)
+
+**Update now is refused with "ownership is unknown" while NERV runs as a foreground `nerv launch`**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: merge the PR on green CI; then the owner check (B-122-T02).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 on NERV-01: the dashboard's Update now (B-108 updater job, B-110 button) was refused twice, at revision `fd0f2a0`, with "Service or runtime ownership is unknown or belongs elsewhere." and nothing stopped. The launchd service `io.nerv.agent` was not registered (stopped with `nerv service stop`); port 4317 was served by a foreground `nerv launch` from a terminal, through the global `nerv` link into the development checkout. The update refuses to stop a process the service manager did not start, which is right, but the reason did not say so, and process discovery did not even find that process (it matched only `…/src/cli.ts serve|launch`, not `…/bin/nerv launch`). |
+| **Reproduce** | On a base whose service was moved to the install folder: `nerv service stop`, then `nerv launch` in a terminal, then press Update now. Steps for the owner: [update from a foreground launch](acceptance/b122-update-from-foreground-2026-11-24.md). |
+| **Check** | A committed test fails first: after a service move, with the service not registered and a foreground `nerv launch` serving the base, the outside updater's refusal names the foreground process and what to do, not the generic ownership reason, and stops nothing; once it is stopped the same update plan has no blockers; a moved, registered service is observed owned. On NERV-01 the owner updates through the service and, after the fix is installed, sees the new reason (B-122-T02). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="b-122-t01"></a>B-122-T01 — Name a foreground NERV when an update is refused | 1.5 h | 1.5 h so far (stated) | 1.5 h | Implemented; verification pending | — | [B-122-T02](#b-122-t02) | 🤖 |
+| 🟢 Small | <a id="b-122-t02"></a>B-122-T02 — Owner updates NERV-01 and sees the foreground reason | — | 0 h | 0 h agent + 0.25 h owner | Planned | [B-122-T01](#b-122-t01) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 1.5 h (1 of 2 steps) | 1.5 h (1 of 2 steps recorded) | 1.5 h agent + 0.25 h owner | 0 of 2 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-122.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | B-122-T01 (Test: `test/update-foreground-runtime.test.ts`) |
+| Opened | 2026-11-24 |
+| Verification | Unit/integration 2026-11-24: `test/update-foreground-runtime.test.ts` (2 of 2) and the lifecycle suites pass locally. Owner check on NERV-01: Pending (B-122-T02). |
 | Reviewed | 2026-11-24 |
 
 </details>
