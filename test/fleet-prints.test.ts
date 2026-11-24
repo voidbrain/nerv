@@ -82,6 +82,20 @@ describe('F-121-T01: part file paths stay inside the print library', () => {
     ['./foot.stl', /\./],
     ['kite-5/foot.txt', /\.stl/],
     ['', /required/],
+    // Windows hazards: Tabgha (NERV-02) writes these names, so they are refused on the Mac already.
+    ['kite-5/fo:ot.stl', /character/],
+    ['kite-5/foot<1>.stl', /character/],
+    ['kite-5/"foot".stl', /character/],
+    ['kite-5/foot|a.stl', /character/],
+    ['kite-5/foot?.stl', /character/],
+    ['kite-5/foot*.stl', /character/],
+    ['con/foot.stl', /reserved/],
+    ['kite-5/NUL.stl', /reserved/],
+    ['kite-5/com1.stl', /reserved/],
+    ['LPT9/foot.stl', /reserved/],
+    ['aux.tail/foot.stl', /reserved/],
+    ['kite-5./foot.stl', /end in/],
+    ['kite-5 /foot.stl', /end in/],
   ] as const) {
     it(`refuses ${JSON.stringify(path)}`, () => {
       assert.throws(() => validatePrintPath(path), reason);
@@ -453,11 +467,6 @@ describe('F-121-T01: printed parts by chat', () => {
   it('asks instead of guessing: unknown model, unknown profile, bad path', () => {
     withStore((store) => {
       store.fleet.addDrone({ name: 'Kestrel' });
-      const linkUnknown = handleFleetEditChat(store.fleet, 'il drone Kestrel è un Kite 5', undefined, {
-        slicerProfiles: PROFILES,
-      });
-      assert.equal(linkUnknown.needsAnswer, true);
-      assert.match(linkUnknown.reply!, /nuovo modello di drone Kite 5/);
       handleFleetEditChat(store.fleet, 'nuovo modello di drone Kite 5');
       for (const phrase of [
         'parte stampata per Kite 5: foot, file kite-5/foot.stl, profilo Mystery PETG',
@@ -511,6 +520,82 @@ describe('F-121-T01: printed parts by chat', () => {
         [['sensor case', 'shared/sensor-case.stl', 'Test TPU 0.4']],
       );
       assert.equal(store.fleet.printedPartsForDrone('Kestrel').length, 2);
+    });
+  });
+});
+
+describe('F-121-T01 review: duplicates, phrase shadowing and name-only updates', () => {
+  it('stores paths in NFC and treats Unicode case and normalisation variants as one file', () => {
+    const nfd = 'kite-5/pie\u0301.stl';
+    assert.equal(validatePrintPath(nfd), 'kite-5/pi\u00e9.stl');
+    withStore((store) => {
+      const fleet = store.fleet;
+      fleet.addDroneModel({ name: 'Kite 5' });
+      fleet.addDroneModel({ name: 'Moth 2' });
+      fleet.addPrintedPart('Kite 5', { name: 'foot', file: 'kite-5/pi\u00e9.stl', profile: 'Test TPU 0.4' }, PROFILES);
+      assert.throws(
+        () => fleet.addPrintedPart('Moth 2', { name: 'foot', file: nfd, profile: 'Test PLA 0.4' }, PROFILES),
+        /already a printed part with profile Test TPU 0\.4/,
+      );
+      assert.throws(
+        () =>
+          fleet.addPrintedPart(
+            'Moth 2',
+            { name: 'foot', file: 'KITE-5/PI\u00c9.STL', profile: 'Test PLA 0.4' },
+            PROFILES,
+          ),
+        /already a printed part with profile Test TPU 0\.4/,
+      );
+      const shared = fleet.addPrintedPart('Moth 2', { name: 'foot', file: 'Kite-5/Pi\u00c9.stl' }, PROFILES);
+      assert.equal(shared.created, false);
+      assert.equal(shared.part.file, 'kite-5/pi\u00e9.stl');
+    });
+  });
+
+  it('a link phrase is claimed only when the named model exists; other drone and battery phrases go on', () => {
+    withStore((store) => {
+      store.fleet.addDrone({ name: 'Smoke' });
+      store.fleet.addDroneModel({ name: 'Kite 5' });
+      for (const phrase of [
+        'il drone Smoke è caduto',
+        'il drone Smoke è fermo',
+        'drone Smoke is down',
+        'the drone Smoke is broken',
+        'il drone Ghost è un Moth 9',
+        'La batteria 42 blu presenta danni ma sembra ancora buona',
+      ]) {
+        assert.deepEqual(handleFleetEditChat(store.fleet, phrase), { handled: false }, phrase);
+      }
+      assert.equal(store.fleet.droneModel('Smoke'), undefined);
+      assert.match(handleFleetEditChat(store.fleet, 'il drone Smoke è un Kite 5').reply!, /Smoke is now a Kite 5/);
+      assert.match(
+        handleFleetEditChat(store.fleet, 'il drone Ghost è un Kite 5').reply!,
+        /I don't know a drone named "Ghost"/,
+      );
+    });
+  });
+
+  it('a name-only update resolves within the target model before looking across models', () => {
+    withStore((store) => {
+      const fleet = store.fleet;
+      fleet.addDroneModel({ name: 'Kite 5' });
+      fleet.addDroneModel({ name: 'Moth 2' });
+      fleet.addDroneModel({ name: 'Wasp 3' });
+      fleet.addPrintedPart(
+        'Kite 5',
+        { name: 'foot', file: 'kite-5/foot.stl', count: 4, profile: 'Test TPU 0.4' },
+        PROFILES,
+      );
+      fleet.addPrintedPart(
+        'Moth 2',
+        { name: 'foot', file: 'moth-2/foot.stl', count: 2, profile: 'Test TPU 0.4' },
+        PROFILES,
+      );
+      const updated = fleet.addPrintedPart('Kite 5', { name: 'foot', count: 6 }, PROFILES);
+      assert.equal(updated.part.file, 'kite-5/foot.stl');
+      assert.equal(updated.part.count, 6);
+      assert.equal(fleet.printedPartsForModel('Moth 2')[0]!.count, 2);
+      assert.throws(() => fleet.addPrintedPart('Wasp 3', { name: 'foot' }, PROFILES), /several part files/);
     });
   });
 });
