@@ -430,11 +430,10 @@ describe('F-016-T20 review (#725)', () => {
       const receipt = (JSON.parse(readFileSync(file, 'utf8')) as SignedDrainReceipt).receipt;
       const standby = readStandby(b.home, headOf);
       assert.deepEqual([standby.head_seq, standby.state_digest], [receipt.finalSeq, receipt.stateDigest]);
-      // Another base (not named main at the standby's epoch) is still refused.
+      // The feed holds only for the epoch the standby's store holds: X never sends epoch-3 batches to B.
       const head = headOf(x.store.db).head_seq;
-      const forged = { ...replicationBatchAt(x.store.db, 2, head)!, sourceBaseId: B };
-      await x.link.start(600_000);
-      await assert.rejects(b.link.replicate(X, forged, Date.now() + 60_000), /\(403\)/);
+      const later = { ...replicationBatchAt(x.store.db, 2, head)!, coordinatorEpoch: 3 };
+      await assert.rejects(x.link.replicate(B, later, Date.now() + 60_000), /\(403\)/);
     } finally {
       await t.close();
     }

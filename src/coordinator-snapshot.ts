@@ -106,8 +106,10 @@ export interface ExportCoordinatorSnapshotInput {
   privateKey: KeyObject;
   exportedAt?: string;
   maxBodyBytes?: number;
-  /** F-016-T20: read inside the caller's transaction (the seed holds the write lock while it drains capture). */
+  /** F-016-T20: read inside the caller's transaction. */
   inTransaction?: boolean;
+  /** #725 review: with `inTransaction`, commit the caller's (read) transaction once the tables are read. */
+  commitAfterRead?: boolean;
 }
 
 export interface ExportedCoordinatorSnapshot {
@@ -194,9 +196,9 @@ export function exportCoordinatorSnapshot(input: ExportCoordinatorSnapshotInput)
       tables[table] = rows;
       tableCounts[table] = rows.length;
     }
-    if (!input.inTransaction) input.db.exec('COMMIT');
+    if (!input.inTransaction || input.commitAfterRead) input.db.exec('COMMIT');
   } catch (err) {
-    if (input.inTransaction) throw err;
+    if (input.inTransaction && !input.commitAfterRead) throw err;
     try {
       input.db.exec('ROLLBACK');
     } catch {

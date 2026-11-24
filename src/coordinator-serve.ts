@@ -8,7 +8,8 @@ import {
   type LeaseRenewRequest,
   type LeaseRenewResult,
 } from './coordinator-lease.ts';
-import { STANDBY_DB_FILE, ranOrAckedCoordinatorEpoch } from './coordinator-relocation.ts';
+import { STANDBY_DB_FILE, ranOrAckedCoordinatorEpoch, standbyAckedEpoch } from './coordinator-relocation.ts';
+import { PROMOTION_MARKER_FILE } from './coordinator-promote.ts';
 import {
   applyReplicationBatch,
   type ApplyReplicationBatchResult,
@@ -66,6 +67,35 @@ export function coordinatorLeaseService(input: {
       localMode: readCoordinatorFencingState(db)?.replicationMode,
     });
   });
+  /**
+   * #725 review: `kaji relocate` pushes the new main record to every reachable base, the standby included, before
+   * the old main drains. While this base is still a standby (not promoting) it keeps taking batches from the base
+   * named main at the epoch its store holds, for that epoch only, and only if it acked no later lease.
+   */
+  const standbyFeedFrom = (from: string, coordinatorEpoch: number): boolean => {
+    if (!existsSync(standbyPath) || existsSync(join(input.home, PROMOTION_MARKER_FILE))) return false;
+    const reg = registry();
+    if (!reg.bases().some((b) => b.baseId === from && b.status === 'enrolled')) return false;
+    const named = reg
+      .records()
+      .some((r) => r.body.kind === 'main' && r.body.baseId === from && r.body.coordinatorEpoch === coordinatorEpoch);
+    if (!named) return false;
+    let standby: DatabaseSync | undefined;
+    try {
+      standby = new DatabaseSync(standbyPath);
+      standby.exec('PRAGMA busy_timeout = 5000');
+      const state = readCoordinatorFencingState(standby);
+      return (
+        state?.replicationMode === 'standby' &&
+        state.coordinatorEpoch === coordinatorEpoch &&
+        standbyAckedEpoch(standby) <= coordinatorEpoch
+      );
+    } catch {
+      return false;
+    } finally {
+      standby?.close();
+    }
+  };
   return {
     /** F-016-T18: the newest coordinator epoch this base holds; older-epoch headers are refused. */
     mainEpoch: (): number => registry().mainEpoch(),
@@ -97,18 +127,28 @@ export function coordinatorLeaseService(input: {
      */
     onReplicate: async (from: string, batch: ReplicationBatch): Promise<ApplyReplicationBatchResult> => {
       if (!input.root || !existsSync(standbyPath)) return { ok: false, reason: 'not_standby', expectedSeq: 0 };
-      const standby = new DatabaseSync(standbyPath);
+      const reg = registry();
+      const fromMain = reg.main() === from;
+      if (!fromMain && !standbyFeedFrom(from, batch.coordinatorEpoch))
+        return { ok: false, reason: 'invalid_batch', expectedSeq: 0 };
+      let standby: DatabaseSync | undefined;
       try {
+        standby = new DatabaseSync(standbyPath);
         standby.exec('PRAGMA busy_timeout = 5000');
         return applyReplicationBatch(standby, batch, {
           expectedRoot: input.root,
           expectedMainBaseId: from,
-          minCoordinatorEpoch: registry().mainEpoch(),
+          minCoordinatorEpoch: fromMain ? reg.mainEpoch() : batch.coordinatorEpoch,
         });
+      } catch {
+        // #725 review: a store this NERV cannot apply to (unreadable, or an older schema) is seeded again by the
+        // main rather than failing every second; the seed itself reports a store it cannot read.
+        return { ok: false, reason: 'not_standby', expectedSeq: 0 };
       } finally {
-        standby.close();
+        standby?.close();
       }
     },
+    standbyFeedFrom: (from: string, coordinatorEpoch: number): boolean => standbyFeedFrom(from, coordinatorEpoch),
     /** F-016-T20: standby side of `POST /kaji/standby/seed` (one frame of a signed snapshot). */
     onSeed: async (from: string, frame: string): Promise<SeedReply> => seeds.receive(from, frame),
     /**
@@ -121,6 +161,7 @@ export function coordinatorLeaseService(input: {
         onLeaseRenew: this.onLeaseRenew,
         onReplicate: this.onReplicate,
         onSeed: this.onSeed,
+        standbyFeedFrom: this.standbyFeedFrom,
         minCoordinatorEpoch: this.mainEpoch,
         holdsStandby: () => existsSync(join(input.home, STANDBY_DB_FILE)),
         ranOrAckedEpoch: this.ranOrAckedEpoch,

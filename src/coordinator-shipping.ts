@@ -50,9 +50,13 @@ const MAX_BATCH_BYTES = 1024 * 1024;
 /** A seed frame stays under the Kaji line's body limit for `/kaji/standby/seed`. */
 const SEED_FRAME_BYTES = MAX_BACKUP_BODY - 64 * 1024;
 const MAX_SEED_CHUNKS = 16;
-/** After a seed the standby refused, wait this long before the next one; after one that did not arrive, less. */
+/**
+ * After a seed that failed, wait before the next one: from 10 s (it did not arrive) or 60 s (the standby
+ * refused), doubling with each failure in a row, at most 10 minutes (#725 review: each one is a full export).
+ */
 const SEED_REFUSED_BACKOFF_MS = 60_000;
 const SEED_UNREACHABLE_BACKOFF_MS = 10_000;
+const SEED_MAX_BACKOFF_MS = 10 * 60_000;
 
 const CAPTURE_PREFIX = 'nerv_repl1_';
 const APPENDING = "('active', 'draining')";
@@ -201,8 +205,21 @@ function captureInTransaction(db: DatabaseSync, source: Source): ReplicationBatc
     bytes += JSON.stringify(change).length;
     if (bytes >= MAX_BATCH_BYTES) break;
   }
-  const batch = appendReplicationBatchInTransaction(db, { ...source, changes, ...(telegram ? { telegram } : {}) });
+  // #725 review: a cut batch is not a state the main had. The Telegram offset (saved before the update is
+  // handled) goes only with the batch that holds every change noted before it, else it moves to the end of the
+  // queue: a promoted main never holds an offset ahead of the rows its updates wrote.
+  const deferTelegram =
+    telegram !== undefined && !!db.prepare('SELECT 1 FROM coordinator_replication_pending WHERE id > ?').get(lastId);
+  const batch = appendReplicationBatchInTransaction(db, {
+    ...source,
+    changes,
+    ...(telegram && !deferTelegram ? { telegram } : {}),
+  });
   db.prepare('DELETE FROM coordinator_replication_pending WHERE id <= ?').run(lastId);
+  if (deferTelegram)
+    db.prepare(
+      `INSERT INTO coordinator_replication_pending(tbl, key_json) VALUES ('coordinator_state', '{"telegram":1}')`,
+    ).run();
   return batch;
 }
 
@@ -276,31 +293,49 @@ export function replicationBatchAt(
 }
 
 /**
- * The signed seed snapshot of the active main. In one write transaction: every noted change becomes a batch
- * (so none is both in the snapshot and in a later batch), then the tables are read at that head.
+ * The signed seed snapshot of the active main. Every noted change first becomes a batch (a short write
+ * transaction); then the tables, the head and the digest are read in one read transaction that finds nothing
+ * noted, so no change is both in the snapshot and in a later batch. Serialising and signing run after that
+ * transaction ends (#725 review: writers and the lease keeper are not held up by a large export).
  */
 export function exportSeedSnapshot(
   db: DatabaseSync,
   input: Source & { readonly privateKey: KeyObject; readonly maxBodyBytes?: number },
 ): ExportedCoordinatorSnapshot {
   installReplicationCapture(db);
-  return inWriteTransaction(db, () => {
-    if (readCoordinatorFencingState(db)?.replicationMode !== 'active')
-      throw new Error('This base is not the active main: only the active main seeds a standby.');
-    while (captureInTransaction(db, input));
-    let state = db
-      .prepare(
-        'SELECT coordinator_epoch, coordinator_fence, head_seq, state_digest FROM coordinator_state WHERE id = 1',
-      )
-      .get() as { coordinator_epoch: number; coordinator_fence: number; head_seq: number; state_digest: string | null };
-    // A chain starts with a batch: a main that never appended one gives the standby a digest to chain onto.
-    if (!state.state_digest) {
-      appendReplicationBatchInTransaction(db, { ...input, changes: [] });
-      state = db
-        .prepare(
-          'SELECT coordinator_epoch, coordinator_fence, head_seq, state_digest FROM coordinator_state WHERE id = 1',
-        )
-        .get() as typeof state;
+  const flush = () =>
+    inWriteTransaction(db, () => {
+      if (readCoordinatorFencingState(db)?.replicationMode !== 'active')
+        throw new Error('This base is not the active main: only the active main seeds a standby.');
+      while (captureInTransaction(db, input));
+      const digest = (
+        db.prepare('SELECT state_digest FROM coordinator_state WHERE id = 1').get() as { state_digest: string | null }
+      ).state_digest;
+      // A chain starts with a batch: a main that never appended one gives the standby a digest to chain onto.
+      if (!digest) appendReplicationBatchInTransaction(db, { ...input, changes: [] });
+    });
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    flush();
+    db.exec('BEGIN');
+    let state:
+      { coordinator_epoch: number; coordinator_fence: number; head_seq: number; state_digest: string } | undefined;
+    try {
+      const noted = db.prepare('SELECT 1 FROM coordinator_replication_pending LIMIT 1').get();
+      state = noted
+        ? undefined
+        : (db
+            .prepare(
+              'SELECT coordinator_epoch, coordinator_fence, head_seq, state_digest FROM coordinator_state WHERE id = 1',
+            )
+            .get() as typeof state);
+    } catch (err) {
+      db.exec('ROLLBACK');
+      throw err;
+    }
+    if (!state) {
+      // A write landed between the two transactions: batch it and read again.
+      db.exec('COMMIT');
+      continue;
     }
     return exportCoordinatorSnapshot({
       db,
@@ -309,12 +344,14 @@ export function exportSeedSnapshot(
       coordinatorEpoch: state.coordinator_epoch,
       coordinatorFence: state.coordinator_fence,
       headSeq: state.head_seq,
-      headDigest: state.state_digest!,
+      headDigest: state.state_digest,
       privateKey: input.privateKey,
       maxBodyBytes: input.maxBodyBytes ?? SEED_FRAME_BYTES,
       inTransaction: true,
+      commitAfterRead: true,
     });
-  });
+  }
+  throw new Error('The main kept writing while the seed was read; it is tried again.');
 }
 
 /** The standby's answer to one seed frame. */
@@ -349,8 +386,9 @@ export function seedStandbyStore(input: {
   let heldEpoch = 0;
   let ack: Record<string, string | number | null> | undefined;
   if (existsSync(path)) {
-    const old = new DatabaseSync(path);
+    let old: DatabaseSync | undefined;
     try {
+      old = new DatabaseSync(path);
       old.exec('PRAGMA busy_timeout = 5000');
       old.exec(STANDBY_LEASE_SCHEMA);
       ack = old.prepare('SELECT * FROM standby_lease_state WHERE id = 1').get() as typeof ack;
@@ -358,8 +396,15 @@ export function seedStandbyStore(input: {
         readCoordinatorFencingState(old)?.coordinatorEpoch ?? 0,
         Number(ack?.standby_coordinator_epoch ?? 0),
       );
+    } catch (err) {
+      // Its lease ack history cannot be read, so the epoch it acked is unknown: never replaced unattended.
+      return {
+        ok: false,
+        reason: 'standby_unreadable',
+        error: `The standby store ${STANDBY_DB_FILE} is unreadable (${err instanceof Error ? err.message : 'error'}): the owner moves it aside on this base, then the main seeds it again.`,
+      };
     } finally {
-      old.close();
+      old?.close();
     }
   }
   const tmp = `${path}.seed`;
@@ -393,8 +438,14 @@ export function seedStandbyStore(input: {
   }
   // Windows: every handle on both files is closed before the swap (a file still open cannot be replaced).
   store.close();
-  for (const suffix of ['-wal', '-shm', '-journal']) rmSync(path + suffix, { force: true });
-  renameSync(tmp, path);
+  try {
+    for (const suffix of ['-wal', '-shm', '-journal']) rmSync(path + suffix, { force: true });
+    renameSync(tmp, path);
+  } catch (err) {
+    // Windows: a handle another process still holds on the store refuses the swap; the old store stays.
+    removeDbFiles(tmp);
+    return { ok: false, reason: 'swap_failed', error: err instanceof Error ? err.message : 'not swapped' };
+  }
   return { ok: true, complete: true, headSeq };
 }
 
@@ -548,6 +599,10 @@ export interface ReplicationShipperOptions {
   readonly keepBatches?: number;
   readonly maxBatchesPerTick?: number;
   readonly log?: (line: string) => void;
+  /** The wall clock the seed backoff reads (tests inject one). */
+  readonly now?: () => number;
+  /** How `flush()` waits between rounds (tests inject one). */
+  readonly sleep?: (ms: number) => Promise<void>;
 }
 
 /**
@@ -560,6 +615,7 @@ export class ReplicationShipper {
   private running: Promise<ShipOutcome> | undefined;
   private installed = false;
   private seedRetryAt = 0;
+  private seedFailures = 0;
   private pruned = false;
 
   constructor(options: ReplicationShipperOptions) {
@@ -633,16 +689,23 @@ export class ReplicationShipper {
     return { headSeq };
   }
 
+  private clock(): number {
+    return this.o.now?.() ?? Date.now();
+  }
+
   private async reseed(standby: string): Promise<ShipOutcome> {
-    if (Date.now() < this.seedRetryAt) return 'behind';
+    if (this.clock() < this.seedRetryAt) return 'behind';
     try {
       await this.seed(standby);
       this.seedRetryAt = 0;
+      this.seedFailures = 0;
       return 'seeded';
     } catch (err) {
       const message = err instanceof Error ? err.message : 'seed failed';
       const refused = /refused/.test(message);
-      this.seedRetryAt = Date.now() + (refused ? SEED_REFUSED_BACKOFF_MS : SEED_UNREACHABLE_BACKOFF_MS);
+      const base = refused ? SEED_REFUSED_BACKOFF_MS : SEED_UNREACHABLE_BACKOFF_MS;
+      this.seedRetryAt = this.clock() + Math.min(base * 2 ** this.seedFailures, SEED_MAX_BACKOFF_MS);
+      this.seedFailures += 1;
       this.noteError(standby, `seed: ${message}`);
       return refused ? 'refused' : 'unreachable';
     }
@@ -713,6 +776,10 @@ export class ReplicationShipper {
         next = res.expectedSeq;
         continue;
       }
+      if (res.reason === 'need_resync' && res.coordinatorEpoch === epoch && res.expectedSeq > head + 1)
+        this.o.log?.(
+          `Replication: ${standby} is ahead of this main at epoch ${epoch} (seq ${res.expectedSeq - 1} > ${head}); it is seeded from this main.`,
+        );
       if (res.reason === 'invalid_batch') {
         this.noteError(standby, 'the standby refused a batch as invalid');
         return 'refused';
@@ -747,8 +814,11 @@ export class ReplicationShipper {
       "UPDATE coordinator_state SET replication_mode = 'draining' WHERE id = 1 AND replication_mode = 'active'",
     ).run();
     let outcome: ShipOutcome = 'behind';
-    for (let i = 0; i < attempts && outcome !== 'current' && outcome !== 'no-standby'; i += 1)
+    const sleep = this.o.sleep ?? ((ms: number) => new Promise<void>((done) => setTimeout(done, ms)));
+    for (let i = 0; i < attempts && outcome !== 'current' && outcome !== 'no-standby'; i += 1) {
+      if (i > 0) await sleep(1000);
       outcome = await this.tick();
+    }
     const status = replicationStatus(db);
     if (outcome === 'current' || outcome === 'no-standby')
       return { ackedSeq: status.peer?.ackedSeq ?? 0, headSeq: status.headSeq };

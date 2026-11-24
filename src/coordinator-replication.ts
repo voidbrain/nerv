@@ -282,6 +282,18 @@ export function applyReplicationBatch(
   }
   if (batch.seq !== expectedSeq || batch.prevDigest !== (state.state_digest ?? '')) return resync;
 
+  const primaryKeys = new Map<string, string[]>();
+  const primaryKeyOf = (table: string): string[] => {
+    let pk = primaryKeys.get(table);
+    if (!pk) {
+      pk = (standbyDb.prepare(`PRAGMA table_info("${table}")`).all() as { name: string; pk: number }[])
+        .filter((c) => c.pk > 0)
+        .sort((a, b) => a.pk - b.pk)
+        .map((c) => c.name);
+      primaryKeys.set(table, pk);
+    }
+    return pk;
+  };
   let touchedFacts = false;
   let touchedEpisodes = false;
   standbyDb.exec('PRAGMA foreign_keys = OFF');
@@ -295,8 +307,23 @@ export function applyReplicationBatch(
         const cols = keys.map((k) => (k === '_rowid_' ? 'rowid' : `"${k.replace(/"/g, '""')}"`));
         const placeholders = keys.map(() => '?').join(', ');
         const values = keys.map((k) => (m.row[k] ?? null) as string | number | Uint8Array | null);
+        // #725 review: an updated row keeps its rowid (reminder history, keyset cursors and watch notices
+        // order by it): an upsert on the primary key, never a delete and re-insert. `deliveries` carries its
+        // exact rowid.
+        const pk = m.table === 'deliveries' ? [] : primaryKeyOf(m.table);
+        const update = keys
+          .filter((k) => !pk.includes(k))
+          .map((k) => `"${k.replace(/"/g, '""')}" = excluded."${k.replace(/"/g, '""')}"`);
+        const conflict =
+          m.table === 'deliveries'
+            ? ''
+            : pk.length
+              ? ` ON CONFLICT(${pk.map((c) => `"${c.replace(/"/g, '""')}"`).join(', ')}) DO ${update.length ? `UPDATE SET ${update.join(', ')}` : 'NOTHING'}`
+              : '';
         standbyDb
-          .prepare(`INSERT OR REPLACE INTO "${m.table}" (${cols.join(', ')}) VALUES (${placeholders})`)
+          .prepare(
+            `INSERT ${m.table === 'deliveries' ? 'OR REPLACE ' : ''}INTO "${m.table}" (${cols.join(', ')}) VALUES (${placeholders})${conflict}`,
+          )
           .run(...values);
       } else {
         const keys = Object.keys(m.where);

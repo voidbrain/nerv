@@ -263,6 +263,12 @@ export class KajiLink {
     onReplicate?: (from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>;
     /** F-016-T20: one frame of a signed seed snapshot from the main, applied as this base's standby store. */
     onSeed?: (from: string, frame: string) => Promise<SeedReply>;
+    /**
+     * F-016-T20 review (#725): whether this base, still a standby, takes batches from `from` at `coordinatorEpoch`
+     * although its registry already names a newer main (the relocation records reached it before the drain): only
+     * the base named main at the epoch its standby store holds, for exactly that epoch.
+     */
+    standbyFeedFrom?: (from: string, coordinatorEpoch: number) => boolean;
     /** F-016-T06: handles standby-acked coordinator lease renewal on a standby base. */
     onLeaseRenew?: (from: string, req: LeaseRenewRequest) => Promise<LeaseRenewResult>;
     /** F-016-T05: synchronous coordinator authority check for coordinator-hosted endpoints. */
@@ -289,6 +295,7 @@ export class KajiLink {
     this.onBackup = options.onBackup;
     this.onReplicate = options.onReplicate;
     this.onSeed = options.onSeed;
+    this.standbyFeedFrom = options.standbyFeedFrom;
     this.onLeaseRenew = options.onLeaseRenew;
     this.checkCoordinatorAuthority = options.checkCoordinatorAuthority;
     this.minCoordinatorEpoch = options.minCoordinatorEpoch;
@@ -383,6 +390,7 @@ export class KajiLink {
   private readonly onReplicate:
     ((from: string, batch: ReplicationBatch) => Promise<ApplyReplicationBatchResult>) | undefined;
   private readonly onSeed: ((from: string, frame: string) => Promise<SeedReply>) | undefined;
+  private readonly standbyFeedFrom: ((from: string, coordinatorEpoch: number) => boolean) | undefined;
   /** F-016-T20: a coordinator stream request carries a lease that has not passed (beyond the clock skew). */
   private staleLeaseReply(
     headers: IncomingMessage['headers'],
@@ -713,14 +721,18 @@ export class KajiLink {
         return;
       }
       if (req.method === 'POST' && req.url === '/kaji/replicate') {
-        if ((await this.port.main?.()) !== from || !this.onReplicate) {
+        const epochHdr = Number(req.headers['x-kaji-coordinator-epoch']);
+        const batch = JSON.parse(body) as ReplicationBatch;
+        const fromMain = (await this.port.main?.()) === from;
+        // F-016-T20 review (#725): the old main's final batches still reach a standby that already holds the
+        // relocation records, for the epoch its store holds only.
+        const feed = !fromMain && this.standbyFeedFrom?.(from, batch.coordinatorEpoch) === true;
+        if ((!fromMain && !feed) || !this.onReplicate) {
           reply(403, { error: 'only the main base replicates here' });
           return;
         }
-        const epochHdr = Number(req.headers['x-kaji-coordinator-epoch']);
-        const batch = JSON.parse(body) as ReplicationBatch;
-        // F-016-T20: never a batch from an older epoch than this base holds.
-        if (this.staleEpochReply(req.headers, reply)) return;
+        // F-016-T20: never a batch from an older epoch than this base holds (the feed is bound to its store's epoch).
+        if (!feed && this.staleEpochReply(req.headers, reply)) return;
         if (!Number.isInteger(epochHdr) || epochHdr < 1 || epochHdr !== batch.coordinatorEpoch) {
           reply(409, { error: 'stale_coordinator_lease' });
           return;
