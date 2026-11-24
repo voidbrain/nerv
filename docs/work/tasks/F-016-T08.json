@@ -41,13 +41,13 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h (feature steps closed since 2026-11-13 took 0.75–1 h). 2026-11-24: implemented in PR #717; actual stated 3 h, four times the estimate: the fixtures needed a multi-base mesh (real homes, keeper, standby ack, authority gate, outbox and promote; simulated clocks and Kaji line), and they found two bugs (B-120, B-121) fixed in the same PR test-first, plus a gap filed as F-016-T20.",
+    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h (feature steps closed since 2026-11-13 took 0.75–1 h). 2026-11-24: implemented in PR #717; actual stated 3 h, four times the estimate: the fixtures needed a multi-base mesh (real homes, keeper, standby ack, authority gate, outbox and promote; simulated clocks and Kaji line), and they found two bugs (B-120, B-121) fixed in the same PR test-first, plus a gap filed as F-016-T20. 2026-11-24: #717 review fixes added 0.5 h (stated).",
     "reviewed": "2026-11-24",
     "baselineDays": 1.5,
     "agentHours": 0,
     "baselineAgentHours": 2.25,
     "estimateAgentHours": 0.75,
-    "actualAgentHours": 3,
+    "actualAgentHours": 3.5,
     "actualSource": "stated"
   },
   "prs": [

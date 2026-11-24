@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 100.25 h agent + 10.75 h owner across 133 open steps of 38 features and 25 other records. 135.75 h of actual effort recorded on 146 steps. Generated from the task files.
+**Remaining effort:** 100.25 h agent + 10.75 h owner across 133 open steps of 38 features and 25 other records. 136.75 h of actual effort recorded on 146 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -353,11 +353,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-016-t17"></a>F-016-T17 — &#96;nerv kaji promote&#96;: stop the service, verify and swap | 1.5 h | 3 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | 🤖 | [PR #702](https://github.com/voidbrain/nerv/pull/702) kaji promote, serve swap guard, verified inputs, crash resume |
 | 🟢 Small | <a id="f-016-t18"></a>F-016-T18 — &#96;/kaji/epoch-push&#96; so every peer acknowledges the new epoch | 2 h | 2 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | 🤖 | [PR #703](https://github.com/voidbrain/nerv/pull/703) /kaji/epoch-push, recorded acks, measured promotion horizon |
 | 🟢 Small | <a id="f-016-t19"></a>F-016-T19 — Telegram polling handed over on activation | 1 h | 1.25 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | 🤖 | [PR #704](https://github.com/voidbrain/nerv/pull/704) Telegram hand-over: authority gate, hydration, no 409 race |
-| 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 3 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07), [F-016-T16](#f-016-t16), [F-016-T17](#f-016-t17), [F-016-T18](#f-016-t18), [F-016-T19](#f-016-t19) | [F-016-T09](#f-016-t09), [F-016-T20](#f-016-t20) | 🤖 | [PR #717](https://github.com/voidbrain/nerv/pull/717) Partition, sleep and reconnect fixtures; B-120 and B-121 fixes |
+| 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 3.5 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07), [F-016-T16](#f-016-t16), [F-016-T17](#f-016-t17), [F-016-T18](#f-016-t18), [F-016-T19](#f-016-t19) | [F-016-T09](#f-016-t09), [F-016-T20](#f-016-t20) | 🤖 | [PR #717](https://github.com/voidbrain/nerv/pull/717) Partition, sleep and reconnect fixtures; B-120 and B-121 fixes |
 | 🟡 Medium | <a id="f-016-t20"></a>F-016-T20 — Seed the standby store and ship replication batches while serve runs | 3 h | 0 h | 3 h | Planned | [F-016-T08](#f-016-t08) | [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | [F-016-T08](#f-016-t08), [F-016-T20](#f-016-t20) | [F-016-T11](#f-016-t11) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-016-T09](#f-016-t09) | — | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 21.25 h (19 of 20 steps) | 24.75 h (15 of 20 steps recorded) | 3.25 h agent + 1 h owner | 11 of 20 completed | | | | |
+| 🟡 Medium | **Total** | 21.25 h (19 of 20 steps) | 25.25 h (15 of 20 steps recorded) | 3.25 h agent + 1 h owner | 11 of 20 completed | | | | |
 
 <details><summary>Done steps (11)</summary>
 
@@ -458,9 +458,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-121-t01"></a>B-121-T01 — Refuse a move from a standby that acked a later epoch than its state | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | — | [B-121-T02](#b-121-t02) | [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks |
+| 🟢 Small | <a id="b-121-t01"></a>B-121-T01 — Refuse a move from a standby that acked a later epoch than its state | 0.5 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | [B-121-T02](#b-121-t02) | [PR #717](https://github.com/voidbrain/nerv/pull/717) standby&#95;behind refusal from the standby's own lease acks |
 | 🟢 Small | <a id="b-121-t02"></a>B-121-T02 — Epoch-push replies report the newest epoch a base ran or acked | 1 h | 0 h | 1 h | Planned | [B-121-T01](#b-121-t01) | — | — |
-| 🟢 Small | **Total** | 1.5 h | 0.5 h (1 of 2 steps recorded) | 1 h | 0 of 2 completed | | | |
+| 🟢 Small | **Total** | 1.5 h | 0.75 h (1 of 2 steps recorded) | 1 h | 0 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1641,8 +1641,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-120-t01"></a>B-120-T01 — kaji promote removes its marker before it starts the service | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | [PR #717](https://github.com/voidbrain/nerv/pull/717) Marker removed before the service starts |
-| 🟢 Small | **Total** | 0.25 h | 0.25 h | 0 h | 0 of 1 completed | |
+| 🟢 Small | <a id="b-120-t01"></a>B-120-T01 — kaji promote removes its marker before it starts the service | 0.25 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | [PR #717](https://github.com/voidbrain/nerv/pull/717) Marker removed before the service starts |
+| 🟢 Small | **Total** | 0.25 h | 0.5 h | 0 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>

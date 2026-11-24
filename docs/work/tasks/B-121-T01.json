@@ -36,12 +36,12 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Found and fixed 2026-11-24 inside F-016-T08 (PR #717); time counted in F-016-T08.",
+    "basis": "Found and fixed 2026-11-24 inside F-016-T08 (PR #717); time counted in F-016-T08. 2026-11-24: #717 review fixes added 0.25 h (stated).",
     "reviewed": "2026-11-24",
     "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5,
-    "actualAgentHours": 0.5,
+    "actualAgentHours": 0.75,
     "actualSource": "stated"
   },
   "prs": [

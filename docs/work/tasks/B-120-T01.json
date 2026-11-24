@@ -33,12 +33,12 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Found and fixed 2026-11-24 inside F-016-T08 (PR #717): the order of two lines; the fixture was the failing test. Time counted in F-016-T08.",
+    "basis": "Found and fixed 2026-11-24 inside F-016-T08 (PR #717): the order of two lines; the fixture was the failing test. Time counted in F-016-T08. 2026-11-24: #717 review fixes added 0.25 h (stated).",
     "reviewed": "2026-11-24",
     "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25,
-    "actualAgentHours": 0.25,
+    "actualAgentHours": 0.5,
     "actualSource": "stated"
   },
   "prs": [
