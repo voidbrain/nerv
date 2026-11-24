@@ -28,6 +28,7 @@ import {
   type PromotionClock,
   type PromotionServiceControl,
 } from './coordinator-promote.ts';
+import { nextLeaseSeq, type LeaseRenewRequest, type LeaseRenewResult } from './coordinator-lease.ts';
 import { OFFER_NAME, toolName } from './mcp.ts';
 
 export async function runKajiCommand(
@@ -44,6 +45,8 @@ export async function runKajiCommand(
       clock?: PromotionClock;
       pushEpoch?: (baseId: string, records: SignedRecord[]) => Promise<{ maxSeenCoordinatorEpoch: number }>;
     };
+    /** Tests inject the lease renewal `kaji standby` probes with. */
+    renewLease?: (baseId: string, req: LeaseRenewRequest) => Promise<LeaseRenewResult>;
   },
 ): Promise<void> {
   const registry = new Registry(store.db, config.kaji?.root);
@@ -291,6 +294,39 @@ export async function runKajiCommand(
       throw new Error('Name another enrolled base: a coordinator never acks its own lease.');
     if (!state || (state.replicationMode !== 'active' && state.replicationMode !== 'fenced'))
       throw new Error('This base holds no coordinator state to name a standby for.');
+    // F-016-T16 re-review: only a base that acks from a standby store may be named; one lease renewal proves it.
+    const renew =
+      ctx.renewLease ??
+      ((base: string, req: LeaseRenewRequest) =>
+        new KajiLink({
+          ...(config.kaji?.root
+            ? { trust: { root: config.kaji.root, required: config.kaji.rootBinding === true } }
+            : {}),
+          baseId: config.base.id,
+          key: baseKey(home).privateKey,
+          publicKey: me,
+          registry: {
+            bases: async () => registry.bases(),
+            records: async () => registry.records(),
+            add: async () => 0,
+            seen: async () => {},
+            lastSeen: async () => ({}),
+            main: async () => registry.main(),
+          },
+          log: () => {},
+        }).renewLease(base, req));
+    const leaseSeq = nextLeaseSeq(store.db);
+    const probe = await renew(id, { coordinatorEpoch: state.coordinatorEpoch, leaseSeq }).catch(
+      (err: unknown): LeaseRenewResult => ({
+        ok: false,
+        reason: 'not_standby',
+        error: err instanceof Error ? err.message : 'unreachable',
+      }),
+    );
+    if (!probe.ok || probe.standbyBaseId !== id || probe.ackSeq !== leaseSeq)
+      throw new Error(
+        `${id} did not ack a lease from a standby store (${probe.ok ? 'mismatched ack' : probe.reason}): name a base that holds the replicated standby store.`,
+      );
     store.db.prepare('UPDATE coordinator_state SET standby_base_id = ? WHERE id = 1').run(id);
     console.log(`Standby: ${id}. The lease renews through it from the next renewal (every 15 s).`);
   } else if (sub === 'lease-rearm') {

@@ -3,7 +3,12 @@ import { generateKeyPairSync } from 'node:crypto';
 import { createServer } from 'node:net';
 import { describe, it } from 'node:test';
 import { CoordinatorAuthorityError, assertActiveCoordinator } from '../src/coordinator-authority.ts';
-import { CoordinatorLeaseKeeper, LEASE_EFFECTIVE_TTL_MS, LEASE_TTL_MS } from '../src/coordinator-lease.ts';
+import {
+  CoordinatorLeaseKeeper,
+  LEASE_EFFECTIVE_TTL_MS,
+  LEASE_TTL_MS,
+  handleStandbyLeaseRenew,
+} from '../src/coordinator-lease.ts';
 import { COORDINATOR_STATE_SCHEMA } from '../src/coordinator-snapshot.ts';
 import { KajiLink, type RegistryPort } from '../src/kaji-link.ts';
 import {
@@ -623,7 +628,7 @@ describe('F-016-T16 review fixes (#701)', () => {
     }
   });
 
-  it('BLOCKER: kaji standby names an enrolled base on the active main; serve acks from nerv.sqlite where no standby store exists', async () => {
+  it('BLOCKER: kaji standby names only a base that acks from a standby store; a base without one never acks (re-review)', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'nerv-kaji-standby-'));
     try {
       const home = join(dir, 'home');
@@ -656,9 +661,35 @@ describe('F-016-T16 review fixes (#701)', () => {
       const config = { kaji: { root: rootPub, rootBinding: true }, base: { id: 'NERV-01' } } as unknown as Parameters<
         typeof runKajiCommand
       >[3];
-      const ctx = { readSecret: async () => '', flag: () => undefined };
+      let holdsStandby = false;
+      const ctx = {
+        readSecret: async () => '',
+        flag: () => undefined,
+        // The probe a real run sends over the Kaji line: a lease renewal only a standby store acks.
+        renewLease: async (id: string, req: { coordinatorEpoch: number; leaseSeq: number }) =>
+          holdsStandby
+            ? {
+                ok: true as const,
+                standbyBaseId: id,
+                coordinatorEpoch: req.coordinatorEpoch,
+                ackSeq: req.leaseSeq,
+                headSeq: 0,
+                leaseTtlMs: LEASE_TTL_MS,
+              }
+            : { ok: false as const, reason: 'not_standby' as const, error: 'no standby store' },
+      };
       await assert.rejects(runKajiCommand(['standby', 'NERV-09'], home, store, config, ctx), /enrolled/);
       await assert.rejects(runKajiCommand(['standby', 'NERV-01'], home, store, config, ctx), /another/);
+      await assert.rejects(runKajiCommand(['standby', 'NERV-02'], home, store, config, ctx), /standby store/);
+      assert.equal(
+        (
+          store.db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as {
+            standby_base_id: string | null;
+          }
+        ).standby_base_id,
+        null,
+      );
+      holdsStandby = true;
       await runKajiCommand(['standby', 'NERV-02'], home, store, config, ctx);
       const row = store.db.prepare('SELECT standby_base_id FROM coordinator_state WHERE id = 1').get() as {
         standby_base_id: string;
@@ -666,7 +697,7 @@ describe('F-016-T16 review fixes (#701)', () => {
       assert.equal(row.standby_base_id, 'NERV-02');
       store.close();
 
-      // A drained old main has no standby store: it acks from its own (fenced) nerv.sqlite.
+      // A drained old main (or any base) without a standby store never acks: not from its own nerv.sqlite either.
       const ackHome = join(dir, 'acker');
       mkdirSync(ackHome, { recursive: true });
       const acker = new Store(join(ackHome, 'nerv.sqlite'));
@@ -685,10 +716,20 @@ describe('F-016-T16 review fixes (#701)', () => {
         ownPublicKey: other,
       });
       try {
-        // maxSeenCoordinatorEpoch is 0 without a root here, so it answers as a base that saw no newer epoch.
-        const r = await svc.onLeaseRenew('NERV-02', { coordinatorEpoch: 3, leaseSeq: 1 });
+        const r = await svc.onLeaseRenew('NERV-02', { coordinatorEpoch: 2, leaseSeq: 1 });
         assert.equal(r.ok, false);
-        if (!r.ok) assert.equal(r.reason, 'stale_coordinator_epoch');
+        if (!r.ok) assert.equal(r.reason, 'not_standby');
+        // And the handler itself refuses a store that is not a standby.
+        const db = new DatabaseSync(join(ackHome, 'nerv.sqlite'));
+        const direct = handleStandbyLeaseRenew(db, {
+          standbyBaseId: 'NERV-01',
+          request: { coordinatorEpoch: 2, leaseSeq: 1 },
+          maxSeenCoordinatorEpoch: 2,
+          processBootId: 'boot',
+        });
+        db.close();
+        assert.equal(direct.ok, false);
+        if (!direct.ok) assert.equal(direct.reason, 'not_standby');
       } finally {
         svc.stop();
       }
@@ -869,5 +910,80 @@ describe('F-016-T16 review fixes (#701)', () => {
     assert.equal(await keeper().renewOnce(), 'renewed');
     store.close();
     peer.close();
+  });
+
+  it('re-review BLOCKER: a partitioned main renewing through a worker without a standby store fences and stays fenced', async () => {
+    // A (main at 2) names worker C; B holds the replication store; A and C cannot reach B; B is promoted.
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-partition-'));
+    try {
+      const homeC = join(dir, 'c');
+      mkdirSync(homeC, { recursive: true });
+      new Store(join(homeC, 'nerv.sqlite')).close();
+      const c = coordinatorLeaseService({
+        home: homeC,
+        databasePath: join(homeC, 'nerv.sqlite'),
+        baseId: 'NERV-03',
+        root: undefined,
+        ownPublicKey: generateKeyPairSync('ed25519')
+          .publicKey.export({ type: 'spki', format: 'der' })
+          .toString('base64'),
+      });
+      let wall = 1_700_000_000_000;
+      let mono = 9_000_000_000_000n;
+      const a = main(2, 'NERV-03', wall + 30_000);
+      const fenced: string[] = [];
+      const keeper = new CoordinatorLeaseKeeper({
+        db: a.db,
+        renew: (_id, req) => c.onLeaseRenew('NERV-01', req),
+        hasOtherEnrolledBases: () => true,
+        // A's own registry is partitioned: it still names A at 2, so only the acker can stop a re-arm.
+        selfBaseId: 'NERV-01',
+        registryMain: () => ({ baseId: 'NERV-01', epoch: 2 }),
+        wallNow: () => wall,
+        monoNow: () => mono,
+        onFenced: (detail) => fenced.push(detail),
+      });
+      try {
+        assert.equal(await keeper.renewOnce(), 'waiting');
+        wall += 31_000;
+        mono += 31_000_000_000n;
+        assert.equal(await keeper.renewOnce(), 'fenced');
+        assert.match(fenced[0]!, /NERV-03/);
+        assert.match(fenced[0]!, /not_standby|standby store/);
+        for (let i = 0; i < 3; i++) {
+          wall += 15_000;
+          mono += 15_000_000_000n;
+          assert.equal(await keeper.renewOnce(), 'inactive');
+        }
+        assert.equal(a.coordinatorFencingState()?.replicationMode, 'fenced');
+      } finally {
+        a.close();
+        c.stop();
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('re-review fix 3: an ack for another lease sequence never renews or re-arms the lease', async () => {
+    const wall = 1_700_000_000_000;
+    const store = main(2, 'NERV-02', wall + 20_000);
+    const keeper = new CoordinatorLeaseKeeper({
+      db: store.db,
+      renew: async (id, req) => ({
+        ok: true,
+        standbyBaseId: id,
+        coordinatorEpoch: req.coordinatorEpoch,
+        ackSeq: req.leaseSeq - 1,
+        headSeq: 0,
+        leaseTtlMs: LEASE_TTL_MS,
+      }),
+      hasOtherEnrolledBases: () => true,
+      wallNow: () => wall,
+      monoNow: () => BigInt(wall) * 1_000_000n,
+    });
+    assert.equal(await keeper.renewOnce(), 'waiting');
+    assert.equal(store.coordinatorFencingState()?.leaseExpiresAt, wall + 20_000);
+    store.close();
   });
 });
