@@ -3,12 +3,14 @@
   "id": "F-118-T05",
   "parent": "F-118",
   "title": "Pairing as a QR code: nerv open --phone --qr and Settings → Pair a device",
-  "goal": "Scanning a QR pairs a browser in one step; the code is generated locally",
+  "goal": "Scanning a QR opens the dashboard in Safari on a page that shows the pairing code; the owner types it in the installed app, which pairs (owner decision 2026-11-24)",
   "status": "planned",
   "acceptance": [
     "A vendored, pinned, dependency-free MIT QR encoder (named to the owner before adding)",
     "nerv open --phone --qr prints a terminal QR plus the short code; Settings shows the same",
-    "The iOS limit (a scan opens Safari, not the installed app) is stated in the procedure"
+    "The iOS limit (a scan opens Safari, not the installed app) is stated in the procedure",
+    "Owner decision 2026-11-24: the QR link opens the Safari dashboard on a page that displays the short pairing code (and how to open the installed app) without spending it; Safari never pairs. The code is spent only when typed in the installed app, which stores the 90-day device credential",
+    "The code travels in the URL fragment (#), never the query, so it is not sent to the server, logged or kept in the referrer; the page shows it only while unexpired"
   ],
   "dependsOn": [
     "F-118-T01"

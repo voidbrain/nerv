@@ -275,6 +275,11 @@ export function makeServer(
           reply(400, { error: 'Send the pairing code and a device name (1 to 40 characters).' });
           return;
         }
+        // Review of #707: a full book refuses before the code is taken, so the code stays usable after a revoke.
+        if (devices.full()) {
+          reply(409, { error: 'Too many paired devices: revoke one first.' });
+          return;
+        }
         const taken = pairing.take(code.slice(0, 32), req.socket.remoteAddress ?? '');
         if (typeof taken === 'object') {
           res.setHeader('Retry-After', String(Math.ceil(taken.retryAfterMs / 1000)));
