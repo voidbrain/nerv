@@ -16,7 +16,7 @@
   "acceptance": [
     "nerv kaji promote stops the running service (serve swap-quiesce guard) before the file swap and restarts it after (test)",
     "Inside the function, main base, new epoch, previous main and the old main public key are derived from verified registry records; lastAckMs from standby_lease_state; the drain receipt from a file (tests)",
-    "--confirm-old-host-down or a root-signed revoke of the previous main is required for an unplanned promotion; a re-run after a crash resumes (tests)"
+    "An unplanned promotion needs every unrevoked base other than this one to acknowledge the new epoch push and, unless the old main acknowledged, a root-signed revoke of the old main; the owner's word alone never suffices; a re-run after a crash resumes (tests)"
   ],
   "dependsOn": [
     "F-016-T07"

@@ -63,5 +63,5 @@ Peers omit `--new-key`. Migration enables `kaji.rootBinding: true` (schema 6). I
 
 ## Relocating the coordinator
 
-`nerv kaji relocate BASE-ID [--revoke OLD-ID]` (on the base holding the root key), `nerv kaji drain FILE` (old main, planned), `nerv kaji promote [--drain-receipt FILE]` (new main) and `nerv kaji standby BASE-ID`. An unplanned move without the old main's ack needs a revoke of the old main signed with the root key: keep its offline backup (USB copy of `key-of-nebuchadnezzar.enc` and the passphrase). Details and recovery: [coordinator relocation](../decisions/coordinator-relocation.md), section 4.
+`nerv kaji relocate BASE-ID [--revoke OLD-ID]` (on the base holding the root key), `nerv kaji drain FILE` (old main, planned), `nerv kaji promote [--drain-receipt FILE]` (new main) and `nerv kaji standby BASE-ID`. An unplanned move needs every other unrevoked base to acknowledge the new epoch, and, without the old main's own ack, a revoke of the old main signed with the root key: keep its offline backup (USB copy of `key-of-nebuchadnezzar.enc` and the passphrase). Details and recovery: [coordinator relocation](../decisions/coordinator-relocation.md), section 4.
 
