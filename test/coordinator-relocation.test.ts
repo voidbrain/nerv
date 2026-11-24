@@ -5,7 +5,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { describe, it } from 'node:test';
-import { assertActiveCoordinator, readCoordinatorFencingState } from '../src/coordinator-authority.ts';
+import {
+  CoordinatorAuthorityError,
+  assertActiveCoordinator,
+  readCoordinatorFencingState,
+} from '../src/coordinator-authority.ts';
+import { STANDBY_LEASE_SCHEMA } from '../src/coordinator-lease.ts';
 import {
   RELOCATION_HORIZON_ACKED_MS,
   RELOCATION_HORIZON_CONSERVATIVE_MS,
@@ -34,6 +39,8 @@ function setState(db: DatabaseSync, epoch: number, mode: string, headSeq: number
        head_seq = excluded.head_seq, state_digest = excluded.state_digest`,
   ).run(epoch, mode, headSeq, digest);
 }
+
+const ms = (n: number) => BigInt(n) * 1_000_000n;
 
 function refusal(fn: () => unknown, reason: string) {
   assert.throws(fn, (err: unknown) => err instanceof RelocationRefusedError && err.reason === reason);
@@ -68,11 +75,12 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
       // Without a drain receipt or horizon, a reachable old main blocks promotion.
       const early: RelocationLiveness = {
         kind: 'unplanned',
-        lastAckMs: 1_000,
         epochSeenAtMs: 1_000,
         allUnrevokedAckedNewEpoch: true,
         oldHostDownConfirmed: true,
         nowMs: 1_000 + RELOCATION_HORIZON_ACKED_MS - 1,
+        monoSinceNs: 0n,
+        monoNowNs: ms(RELOCATION_HORIZON_ACKED_MS - 1),
       };
       const base = {
         mainDbPath: mainPath,
@@ -131,9 +139,18 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
 
       const promoted = new Store(mainPath);
       try {
-        const st = assertActiveCoordinator({ db: promoted.db });
-        assert.equal(st?.coordinatorEpoch, 3);
-        assert.equal(st?.leaseExpiresAt, 0, 'the old-epoch lease is never inherited');
+        // F-016-T16 (requirement changed): lease 0 is not authority after a relocation; the new main
+        // waits for its first standby-acked renewal before any effect.
+        assert.equal(readCoordinatorFencingState(promoted.db)?.coordinatorEpoch, 3);
+        assert.equal(
+          readCoordinatorFencingState(promoted.db)?.leaseExpiresAt,
+          0,
+          'the old-epoch lease is never inherited',
+        );
+        assert.throws(
+          () => assertActiveCoordinator({ db: promoted.db }),
+          (err: unknown) => err instanceof CoordinatorAuthorityError && err.reason === 'stale_coordinator_lease',
+        );
         const parked = promoted.cancelledWorkerOutbox();
         assert.deepEqual(
           parked.map((r) => r.id),
@@ -155,6 +172,8 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
       allUnrevokedAckedNewEpoch: false,
       oldHostDownConfirmed: true,
       nowMs: RELOCATION_HORIZON_CONSERVATIVE_MS,
+      monoSinceNs: 0n,
+      monoNowNs: ms(RELOCATION_HORIZON_CONSERVATIVE_MS),
     };
     const check = (db: DatabaseSync, registryMain = { baseId: 'NERV-02', coordinatorEpoch: 3 }) =>
       checkRelocationReadiness({
@@ -257,6 +276,8 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
           allUnrevokedAckedNewEpoch: false,
           oldHostDownConfirmed: true,
           nowMs: RELOCATION_HORIZON_CONSERVATIVE_MS,
+          monoSinceNs: 0n,
+          monoNowNs: ms(RELOCATION_HORIZON_CONSERVATIVE_MS),
         } as RelocationLiveness,
       };
       refusal(
@@ -454,6 +475,8 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
               allUnrevokedAckedNewEpoch: false,
               oldHostDownConfirmed: true,
               nowMs: RELOCATION_HORIZON_CONSERVATIVE_MS,
+              monoSinceNs: 0n,
+              monoNowNs: ms(RELOCATION_HORIZON_CONSERVATIVE_MS),
             },
           }),
         /Injected crash after step 5/,
@@ -472,10 +495,12 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
     }
   });
 
-  it('never promotes on an unplanned move from the wait alone: the old host must be confirmed down or revoked (BLOCKER 1 interim)', () => {
+  it('F-016-T16: an unplanned move drops the owner confirmation only when the old lease was acked here and every unrevoked base acked the new epoch, after both clocks pass the horizon', () => {
+    // Requirement changed from the F-016-T07 interim (always confirm): the old main now renews through this
+    // standby and fences itself past its lease, so a standby-acked lease bounds it.
     const standby = new Store(':memory:');
     setState(standby.db, 2, 'standby', 7, 'digest-7');
-    const check = (oldHostDownConfirmed: boolean) =>
+    const check = (o: { confirmed?: boolean; allAcked?: boolean; wallMs?: number; monoMs?: number }) =>
       checkRelocationReadiness({
         candidateDb: standby.db,
         selfBaseId: 'NERV-02',
@@ -483,15 +508,61 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
         registryMain: { baseId: 'NERV-02', coordinatorEpoch: 3 },
         liveness: {
           kind: 'unplanned',
-          lastAckMs: 1_000,
           epochSeenAtMs: 1_000,
-          allUnrevokedAckedNewEpoch: true,
-          oldHostDownConfirmed,
-          // Far past both horizons: the wait alone does not bound an old main whose lease never expires.
-          nowMs: 1_000 + 10 * RELOCATION_HORIZON_CONSERVATIVE_MS,
+          allUnrevokedAckedNewEpoch: o.allAcked ?? true,
+          oldHostDownConfirmed: o.confirmed ?? false,
+          nowMs: o.wallMs ?? 1_000 + RELOCATION_HORIZON_ACKED_MS,
+          monoSinceNs: 0n,
+          monoNowNs: ms(o.monoMs ?? RELOCATION_HORIZON_ACKED_MS),
         },
       });
-    refusal(() => check(false), 'old_host_unconfirmed');
-    assert.equal(check(true).newEpoch, 3);
+    // No ack history: the old main may never have armed a lease, so the owner must confirm or revoke.
+    refusal(() => check({}), 'old_host_unconfirmed');
+    standby.db.exec(STANDBY_LEASE_SCHEMA);
+    standby.db.prepare("INSERT INTO standby_lease_state VALUES (1, 1, 9, 1000, 'boot')").run();
+    refusal(() => check({}), 'old_host_unconfirmed');
+    // Acked here for the epoch that last ran: the 65 s horizon bounds it.
+    standby.db.prepare('UPDATE standby_lease_state SET standby_coordinator_epoch = 2 WHERE id = 1').run();
+    assert.equal(check({}).newEpoch, 3);
+    // A base that did not ack the new epoch keeps the confirmation and the conservative wait.
+    refusal(() => check({ allAcked: false }), 'old_host_unconfirmed');
+    refusal(() => check({ allAcked: false, confirmed: true }), 'horizon_not_passed');
+    // Both clocks must pass: a wall-clock jump alone does not end the wait, nor does an early monotonic reading.
+    refusal(() => check({ wallMs: 1_000 + 10 * RELOCATION_HORIZON_CONSERVATIVE_MS, monoMs: 1 }), 'horizon_not_passed');
+    refusal(() => check({ wallMs: 1_000 + RELOCATION_HORIZON_ACKED_MS - 1 }), 'horizon_not_passed');
+    // The last ack counts from the standby's own record, not from the caller.
+    standby.db.prepare('UPDATE standby_lease_state SET last_ack_wall_ms = 30000 WHERE id = 1').run();
+    refusal(() => check({}), 'horizon_not_passed');
+  });
+});
+
+describe('F-016-T16 fourth review: the refusal names the revoke, not a removed flag', () => {
+  it('an unplanned move without ack history asks for a root-signed revoke', () => {
+    const standby = new Store(':memory:');
+    setState(standby.db, 2, 'standby', 7, 'digest-7');
+    assert.throws(
+      () =>
+        checkRelocationReadiness({
+          candidateDb: standby.db,
+          selfBaseId: 'NERV-02',
+          previousMainBaseId: 'NERV-01',
+          registryMain: { baseId: 'NERV-02', coordinatorEpoch: 3 },
+          liveness: {
+            kind: 'unplanned',
+            epochSeenAtMs: 0,
+            allUnrevokedAckedNewEpoch: false,
+            oldHostDownConfirmed: false,
+            nowMs: 10 * RELOCATION_HORIZON_CONSERVATIVE_MS,
+            monoSinceNs: 0n,
+            monoNowNs: ms(10 * RELOCATION_HORIZON_CONSERVATIVE_MS),
+          },
+        }),
+      (err: unknown) =>
+        err instanceof RelocationRefusedError &&
+        err.reason === 'old_host_unconfirmed' &&
+        /revoke/.test(err.message) &&
+        !/confirm-old-host-down/.test(err.message),
+    );
+    standby.close();
   });
 });

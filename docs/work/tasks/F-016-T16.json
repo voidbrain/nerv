@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T16",
-  "status": "planned",
+  "status": "implemented",
   "title": "Coordinator lease renewal and self-fencing on the active main",
   "goal": "An active coordinator holds an expiring lease and fences itself when renewals stop, so an unreachable old main stops within the horizon",
   "capabilities": [
@@ -46,11 +46,19 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h agent",
-    "basis": "Split from F-016-T07 on 2026-11-23 by owner decision (option a) after the PR #677 review; estimated from F-016-T06 and F-016-T07 (1.5 h each actual). Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Split from F-016-T07 on 2026-11-23 by owner decision (option a) after the PR #677 review; estimated from F-016-T06 and F-016-T07 (1.5 h each actual). Not a measurement. 2026-11-24: implemented in PR #701; actual stated 1.5 h (keeper, serve wiring, Store identity, relocation wait, join tests).",
     "reviewed": "2026-11-23",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 1.5
-  }
+    "estimateAgentHours": 1.5,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 701,
+      "note": "lease renewal, self-fencing, lease 0 rule, registry inputs, monotonic wait"
+    }
+  ]
 }

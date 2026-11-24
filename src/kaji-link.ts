@@ -26,6 +26,10 @@ const MAX_BODY = 256 * 1024,
 /** F-062-T06: an encrypted backup copy (base64 in JSON) may be larger than any other Kaji message. */
 export const MAX_BACKUP_BODY = 64 * 1024 * 1024;
 const BACKUP_TIMEOUT_MS = 120_000;
+/** The newest coordinator epoch among owner-signed main records (legacy records count as 0). */
+export function maxMainEpoch(records: SignedRecord[]): number {
+  return records.reduce((m, r) => (r.body.kind === 'main' ? Math.max(m, r.body.coordinatorEpoch ?? 0) : m), 0);
+}
 /** What the link needs from the registry, implemented by the scheduler process (or directly in tests). */
 export interface RegistryPort {
   bases(): Promise<BaseEntry[]>;
@@ -716,7 +720,7 @@ export class KajiLink {
         return;
       }
       if (req.method === 'POST' && req.url === '/kaji/lease/renew') {
-        if ((await this.port.main?.()) !== from || !this.onLeaseRenew) {
+        if (!this.onLeaseRenew) {
           reply(403, { error: 'only the main base may renew its lease' });
           return;
         }
@@ -735,6 +739,20 @@ export class KajiLink {
         const epochHdr = Number(req.headers['x-kaji-coordinator-epoch']);
         if (!Number.isSafeInteger(epochHdr) || epochHdr !== parsed.coordinatorEpoch) {
           reply(400, { error: 'mismatched coordinator epoch header' });
+          return;
+        }
+        if ((await this.port.main?.()) !== from) {
+          // F-016-T16 review: a base holding a newer owner-signed main answers with that epoch (a signed reply),
+          // so the old main fences at once; a base that merely lags answers 403 and fences nobody.
+          const maxSeen = maxMainEpoch(await this.port.records());
+          if (maxSeen > parsed.coordinatorEpoch)
+            reply(409, {
+              ok: false,
+              reason: 'stale_coordinator_epoch',
+              maxSeenCoordinatorEpoch: maxSeen,
+              error: `This base holds a main record at coordinator epoch ${maxSeen}.`,
+            } satisfies LeaseRenewResult);
+          else reply(403, { error: 'only the main base may renew its lease' });
           return;
         }
         const result = await this.onLeaseRenew(from, {

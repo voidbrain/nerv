@@ -120,6 +120,13 @@ export class DeviceBook {
     return { id, name: clean, credential };
   }
 
+  /** True when no device can pair until one is revoked or lapses. */
+  full(): boolean {
+    const book = this.current();
+    this.dropLapsed(book, this.now());
+    return book.size >= this.max;
+  }
+
   /** True for a live device credential, without moving its limit (a stream's keep-alive check). */
   has(credential: string): boolean {
     if (!credential) return false;

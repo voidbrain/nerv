@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 89 h agent + 10.25 h owner across 122 open steps of 36 features and 23 other records. 117.5 h of actual effort recorded on 135 steps. Generated from the task files.
+**Remaining effort:** 87.5 h agent + 10.25 h owner across 122 open steps of 36 features and 23 other records. 122.25 h of actual effort recorded on 139 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -173,7 +173,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | [F-006-T27](#f-006-t27) | 🤖 | — | — |
 
-💻 **→** Next: B-119-T01 — Let placement probes run to their own budget (Planned).
+💻 **→** Next: merge PR #708 (B-119-T01 implemented), then rerun the P3 role comparison (F-006-T27).
 
 | | |
 |---|---|
@@ -185,8 +185,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-119-t01"></a>B-119-T01 — Let placement probes run to their own budget | 1 h | 0 h | 1 h | Planned | — | [F-006-T27](#f-006-t27) |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | | |
+| 🟢 Small | <a id="b-119-t01"></a>B-119-T01 — Let placement probes run to their own budget | 1 h | 0.75 h so far (stated) | 1 h | Implemented; verification pending | — | [F-006-T27](#f-006-t27) |
+| 🟢 Small | **Total** | 1 h | 0.75 h | 1 h | 0 of 1 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -195,9 +195,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #698](https://github.com/voidbrain/nerv/pull/698) (opened); F-006-T23 evidence in the [F-006-T26 report](evaluations/2026-11-24-f006-t26-placement-report.md) |
+| PR / evidence | [PR #708](https://github.com/voidbrain/nerv/pull/708) (socket budget; Test: `test/placement-campaign.test.ts`); [PR #698](https://github.com/voidbrain/nerv/pull/698) (opened); F-006-T23 evidence in the [F-006-T26 report](evaluations/2026-11-24-f006-t26-placement-report.md) |
 | Opened | 2026-11-24 |
-| Verification | Pending |
+| Verification | Unit/integration 2026-11-24: `test/placement-campaign.test.ts` passes locally (4 of 4 tests). Live P3 probe over 15 s on NERV-02: Pending (F-006-T27). |
 | Reviewed | 2026-11-24 |
 
 </details>
@@ -332,7 +332,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 7 h agent + 1 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 5.5 h agent + 1 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-016-T07 — Step 4a — Relocation building blocks: readiness, drain receipt, promotion with quarantine; never a context-only takeover (Implemented; verification pending).
 
@@ -349,14 +349,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-016-t07"></a>F-016-T07 — Step 4a — Relocation building blocks: readiness, drain receipt, promotion with quarantine; never a context-only takeover | 0.75 h | 2.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-016-T08](#f-016-t08), [F-016-T16](#f-016-t16), [F-016-T17](#f-016-t17), [F-016-T18](#f-016-t18), [F-016-T19](#f-016-t19) | 🤖 | [PR #677](https://github.com/voidbrain/nerv/pull/677) implementation and review fixes |
-| 🟡 Medium | <a id="f-016-t16"></a>F-016-T16 — Coordinator lease renewal and self-fencing on the active main | 1.5 h | 0 h | 1.5 h | Planned | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-016-t16"></a>F-016-T16 — Coordinator lease renewal and self-fencing on the active main | 1.5 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | 🤖 | [PR #701](https://github.com/voidbrain/nerv/pull/701) lease renewal, self-fencing, lease 0 rule, registry inputs, monotonic wait |
 | 🟡 Medium | <a id="f-016-t17"></a>F-016-T17 — &#96;nerv kaji promote&#96;: stop the service, verify and swap | 1.5 h | 0 h | 1.5 h | Planned | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-016-t18"></a>F-016-T18 — &#96;/kaji/epoch-push&#96; so every peer acknowledges the new epoch | 2 h | 0 h | 2 h | Planned | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t19"></a>F-016-T19 — Telegram polling handed over on activation | 1 h | 0 h | 1 h | Planned | [F-016-T07](#f-016-t07) | [F-016-T08](#f-016-t08) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t08"></a>F-016-T08 — Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects | 0.75 h | 0 h | 0.75 h | Planned | [F-016-T07](#f-016-t07), [F-016-T16](#f-016-t16), [F-016-T17](#f-016-t17), [F-016-T18](#f-016-t18), [F-016-T19](#f-016-t19) | [F-016-T09](#f-016-t09) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | [F-016-T08](#f-016-t08) | [F-016-T11](#f-016-t11) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-016-T09](#f-016-t09) | — | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 18.25 h (18 of 19 steps) | 12.25 h (10 of 19 steps recorded) | 7 h agent + 1 h owner | 11 of 19 completed | | | | |
+| 🔴 Large | **Total** | 18.25 h (18 of 19 steps) | 13.75 h (11 of 19 steps recorded) | 5.5 h agent + 1 h owner | 11 of 19 completed | | | | |
 
 <details><summary>Done steps (11)</summary>
 
@@ -383,7 +383,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-016-T03: [PR #546](https://github.com/voidbrain/nerv/pull/546) implementation; CI green · F-016-T04: [PR #555](https://github.com/voidbrain/nerv/pull/555) implementation; CI green · F-016-T05: [PR #564](https://github.com/voidbrain/nerv/pull/564) implementation · F-016-T06: [PR #567](https://github.com/voidbrain/nerv/pull/567) implementation · F-016-T07: [PR #677](https://github.com/voidbrain/nerv/pull/677) implementation and review fixes · F-016-T10: [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review · F-016-T13: [PR #548](https://github.com/voidbrain/nerv/pull/548) implementation; CI green · F-016-T14: [PR #550](https://github.com/voidbrain/nerv/pull/550) implementation; CI green · F-016-T15: [PR #552](https://github.com/voidbrain/nerv/pull/552) implementation; CI green. [PR #677](https://github.com/voidbrain/nerv/pull/677) F-016-T07 (`src/coordinator-relocation.ts`, `src/coordinator-snapshot.ts`, `src/cli-kaji.ts`, `test/coordinator-relocation.test.ts`); [PR #567](https://github.com/voidbrain/nerv/pull/567) F-016-T06 (`src/coordinator-lease.ts`, `src/store.ts`, `src/kaji-link.ts`, `src/cli-kaji.ts`, `test/coordinator-lease.test.ts`); [PR #564](https://github.com/voidbrain/nerv/pull/564) F-016-T05 (`src/kaji.ts`, `src/cli-kaji.ts`, `src/coordinator-authority.ts`, `src/store.ts`, `src/kaji-link.ts`, `test/coordinator-authority.test.ts`); [PR #555](https://github.com/voidbrain/nerv/pull/555) F-016-T04 (`src/coordinator-replication.ts`, `src/store.ts`, `src/kaji-link.ts`, `test/coordinator-replication.test.ts`); [PR #552](https://github.com/voidbrain/nerv/pull/552) F-016-T15 (`src/coordinator-snapshot.ts`, `src/store.ts`, `test/coordinator-snapshot.test.ts`); [PR #550](https://github.com/voidbrain/nerv/pull/550) F-016-T14 (`src/worker-jobs.ts`, `src/store-sorties.ts`, `src/store-kaji-outbox.ts`, `test/coordinator-snapshot.test.ts`); [PR #548](https://github.com/voidbrain/nerv/pull/548) F-016-T13 (`src/coordinator-snapshot.ts`, `src/store.ts`, `test/coordinator-snapshot.test.ts`); [PR #546](https://github.com/voidbrain/nerv/pull/546) F-016-T03 (`src/coordinator-snapshot.ts`, `test/coordinator-snapshot.test.ts`); [PR #454](https://github.com/voidbrain/nerv/pull/454) (owner agreement); [PR #470](https://github.com/voidbrain/nerv/pull/470) (merged; CI green); [PR #417](https://github.com/voidbrain/nerv/pull/417) F-016-T10 revised decision and clean second review (`docs/decisions/coordinator-relocation.md`, `docs/reviews/2026-11-14-f016-relocation-review-2.md`); [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #307](https://github.com/voidbrain/nerv/pull/307) F-016-T01 decision (`docs/decisions/coordinator-relocation.md`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; [CI 43240473540](https://github.com/voidbrain/nerv/actions/runs/43240473540) passed plan, native-macos, windows and validate (full-suite skipped by scoped verification), merged main `e821c11` |
+| PR / evidence | Steps: F-016-T03: [PR #546](https://github.com/voidbrain/nerv/pull/546) implementation; CI green · F-016-T04: [PR #555](https://github.com/voidbrain/nerv/pull/555) implementation; CI green · F-016-T05: [PR #564](https://github.com/voidbrain/nerv/pull/564) implementation · F-016-T06: [PR #567](https://github.com/voidbrain/nerv/pull/567) implementation · F-016-T07: [PR #677](https://github.com/voidbrain/nerv/pull/677) implementation and review fixes · F-016-T10: [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review · F-016-T13: [PR #548](https://github.com/voidbrain/nerv/pull/548) implementation; CI green · F-016-T14: [PR #550](https://github.com/voidbrain/nerv/pull/550) implementation; CI green · F-016-T15: [PR #552](https://github.com/voidbrain/nerv/pull/552) implementation; CI green · F-016-T16: [PR #701](https://github.com/voidbrain/nerv/pull/701) lease renewal, self-fencing, lease 0 rule, registry inputs, monotonic wait. [PR #701](https://github.com/voidbrain/nerv/pull/701) F-016-T16 (`src/coordinator-lease.ts`, `src/coordinator-authority.ts`, `src/coordinator-relocation.ts`, `src/coordinator-serve.ts`, `src/store.ts`, `test/coordinator-lease.test.ts`, `test/coordinator-authority.test.ts`, `test/coordinator-relocation.test.ts`); [PR #677](https://github.com/voidbrain/nerv/pull/677) F-016-T07 (`src/coordinator-relocation.ts`, `src/coordinator-snapshot.ts`, `src/cli-kaji.ts`, `test/coordinator-relocation.test.ts`); [PR #567](https://github.com/voidbrain/nerv/pull/567) F-016-T06 (`src/coordinator-lease.ts`, `src/store.ts`, `src/kaji-link.ts`, `src/cli-kaji.ts`, `test/coordinator-lease.test.ts`); [PR #564](https://github.com/voidbrain/nerv/pull/564) F-016-T05 (`src/kaji.ts`, `src/cli-kaji.ts`, `src/coordinator-authority.ts`, `src/store.ts`, `src/kaji-link.ts`, `test/coordinator-authority.test.ts`); [PR #555](https://github.com/voidbrain/nerv/pull/555) F-016-T04 (`src/coordinator-replication.ts`, `src/store.ts`, `src/kaji-link.ts`, `test/coordinator-replication.test.ts`); [PR #552](https://github.com/voidbrain/nerv/pull/552) F-016-T15 (`src/coordinator-snapshot.ts`, `src/store.ts`, `test/coordinator-snapshot.test.ts`); [PR #550](https://github.com/voidbrain/nerv/pull/550) F-016-T14 (`src/worker-jobs.ts`, `src/store-sorties.ts`, `src/store-kaji-outbox.ts`, `test/coordinator-snapshot.test.ts`); [PR #548](https://github.com/voidbrain/nerv/pull/548) F-016-T13 (`src/coordinator-snapshot.ts`, `src/store.ts`, `test/coordinator-snapshot.test.ts`); [PR #546](https://github.com/voidbrain/nerv/pull/546) F-016-T03 (`src/coordinator-snapshot.ts`, `test/coordinator-snapshot.test.ts`); [PR #454](https://github.com/voidbrain/nerv/pull/454) (owner agreement); [PR #470](https://github.com/voidbrain/nerv/pull/470) (merged; CI green); [PR #417](https://github.com/voidbrain/nerv/pull/417) F-016-T10 revised decision and clean second review (`docs/decisions/coordinator-relocation.md`, `docs/reviews/2026-11-14-f016-relocation-review-2.md`); [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #307](https://github.com/voidbrain/nerv/pull/307) F-016-T01 decision (`docs/decisions/coordinator-relocation.md`); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #3](https://github.com/voidbrain/nerv/pull/3); local checks and scoped audit pass; [CI 43240473540](https://github.com/voidbrain/nerv/actions/runs/43240473540) passed plan, native-macos, windows and validate (full-suite skipped by scoped verification), merged main `e821c11` |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-016-T10 verified: [PR #417](https://github.com/voidbrain/nerv/pull/417) merged on green CI (second fresh-context review found no blocker). F-016-T12 closed with the accepted decision revision and zero-blocking review in PR #470; scoped CI passed. Remaining distributed relocation acceptance is open. |
 | Reviewed | 2026-11-18 |
@@ -689,9 +689,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-119-T01 — First skill discovery review (Planned).
+💻 **→** Next: merge PR on green CI and close.
 
 | | |
 |---|---|
@@ -701,10 +701,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-119-t01"></a>F-119-T01 — First skill discovery review | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-119-t01"></a>F-119-T01 — First skill discovery review | 1 h | 0.25 h so far (stated) | 1 h | Implemented; verification pending | [PR #709](https://github.com/voidbrain/nerv/pull/709) first skill discovery review (docs/reviews/skills/2026-11-24.md) |
+| 🟢 Small | **Total** | 1 h | 0.25 h | 1 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -713,10 +713,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
+| PR / evidence | Steps: F-119-T01: [PR #709](https://github.com/voidbrain/nerv/pull/709) first skill discovery review (docs/reviews/skills/2026-11-24.md). [PR #709](https://github.com/voidbrain/nerv/pull/709) ([2026-11-24.md](reviews/skills/2026-11-24.md)); opened in [PR #689](https://github.com/voidbrain/nerv/pull/689). |
 | Opened | 2026-11-23 |
-| Verification | — |
-| Reviewed | 2026-11-23 |
+| Verification | Documentation 2026-11-24: [2026-11-24.md](reviews/skills/2026-11-24.md) written per docs/agents/skills.md; `npm run check:freshness` and `npm run check:fast` pass. |
+| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -1108,18 +1108,18 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | **Issue** | Owner 2026-11-23 (decision 1): the installed phone app (workspace or dashboard) cannot sign in: the sign-in box takes only the admin token, a QR or link opens Safari, and the session lived in tab storage that iOS clears on relaunch. The owner chose pairing: once per device, revocable, lapsing after 90 days unused; plus a QR option. |
 | **Reproduce** | Install the dashboard to the iPhone Home Screen and open it: "NOT SIGNED IN". |
-| **Check** | A short code typed into the installed app pairs it; it stays signed in through restarts and updates; Settings and nerv devices revoke it; a QR pairs browsers in one step. |
+| **Check** | A short code typed into the installed app pairs it; it stays signed in through restarts and updates; Settings and nerv devices revoke it; a scanned QR opens the Safari dashboard showing the code, which the installed app then takes. |
 
 **Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
 | 🟡 Medium | <a id="f-118-t01"></a>F-118-T01 — Device credentials and pairing: hashed, 90-day sliding limit, short phone code | 3 h | 1.5 h so far (stated) | 3 h | Implemented; verification pending | — | [F-118-T02](#f-118-t02), [F-118-T03](#f-118-t03), [F-118-T05](#f-118-t05) |
-| 🟡 Medium | <a id="f-118-t02"></a>F-118-T02 — Workspace and dashboard pair from their own sign-in box; the installed app signs itself in | 2 h | 0 h | 2 h | Planned | [F-118-T01](#f-118-t01) | [F-118-T04](#f-118-t04) |
+| 🟡 Medium | <a id="f-118-t02"></a>F-118-T02 — Workspace and dashboard pair from their own sign-in box; the installed app signs itself in | 2 h | 2.25 h so far (stated) | 2 h | Implemented; verification pending | [F-118-T01](#f-118-t01) | [F-118-T04](#f-118-t04) |
 | 🟡 Medium | <a id="f-118-t03"></a>F-118-T03 — Paired devices in Settings with Revoke; nerv devices list and revoke | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
 | 🟢 Small | <a id="f-118-t04"></a>F-118-T04 — Phone procedure: Tailscale serve, pairing and push, then the owner check | 0.5 h | 0 h | 0.5 h | Planned | [F-118-T02](#f-118-t02) | — |
 | 🟡 Medium | <a id="f-118-t05"></a>F-118-T05 — Pairing as a QR code: nerv open --phone --qr and Settings → Pair a device | 1.5 h | 0 h | 1.5 h | Planned | [F-118-T01](#f-118-t01) | — |
-| 🟣 Very large | **Total** | 8.5 h | 1.5 h (1 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
+| 🟣 Very large | **Total** | 8.5 h | 3.75 h (2 of 5 steps recorded) | 8.5 h | 0 of 5 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1128,9 +1128,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689); F-118-T01 [PR #700](https://github.com/voidbrain/nerv/pull/700). |
+| PR / evidence | Opened in [PR #689](https://github.com/voidbrain/nerv/pull/689); F-118-T01 [PR #700](https://github.com/voidbrain/nerv/pull/700); F-118-T02 [PR #707](https://github.com/voidbrain/nerv/pull/707). |
 | Opened | 2026-11-23 |
-| Verification | 2026-11-24: F-118-T01 `test/device-pairing.test.ts` 13/13 (committed failing first, review fixes too); with session, session-persist, dashboard-accounting, decision-client, CLI help and dashboard suites 85/85; `check:fast` green. |
+| Verification | 2026-11-24: F-118-T01 `test/device-pairing.test.ts` 13/13 (committed failing first, review fixes too); with session, session-persist, dashboard-accounting, decision-client, CLI help and dashboard suites 85/85; `check:fast` green. F-118-T02: `test/evaluation.browser.mjs` F-118-T02 (installed pair → reload → still signed in → revoke → pairing ended, both apps; browser tab keeps no device credential) failed first against main's client, passes; `test/device-pairing-client.test.ts` 5/5; after the review, the browser test (tab refuses the code without calling the endpoint, the code stays usable), `test/device-pairing.test.ts` full book keeps the code and the client tests 19/19. A real iPhone Home Screen launch is not yet observed (F-118-T04). |
 | Reviewed | 2026-11-23 |
 
 </details>
