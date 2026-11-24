@@ -50,15 +50,19 @@ async function runProbe(name: string) {
 }
 
 for (const name of ['times out while the fixture starts', 'times out with both links connected']) {
-  test(`B-118: a worker-link test file exits when a test ${name.replace('times out', 'is cancelled')}`, {
-    timeout: EXIT_MS + 15_000,
-  }, async () => {
-    const run = await runProbe(name);
-    assert.notEqual(run.code, 'hung', `the probe file was still running after ${EXIT_MS} ms:\n${run.output}`);
-    // The probe's test itself failed on its timeout: the cancellation this test is about really happened.
-    assert.match(run.output, /failureType: 'testTimeoutFailure'/, run.output);
-    assert.match(run.output, /# cancelled 1\b/, run.output);
-  });
+  test(
+    `B-118: a worker-link test file exits when a test ${name.replace('times out', 'is cancelled')}`,
+    {
+      timeout: EXIT_MS + 15_000,
+    },
+    async () => {
+      const run = await runProbe(name);
+      assert.notEqual(run.code, 'hung', `the probe file was still running after ${EXIT_MS} ms:\n${run.output}`);
+      // The probe's test itself failed on its timeout: the cancellation this test is about really happened.
+      assert.match(run.output, /failureType: 'testTimeoutFailure'/, run.output);
+      assert.match(run.output, /# cancelled 1\b/, run.output);
+    },
+  );
 }
 
 // The fixture closes its links first; a stop that waits on a connection attempt stuck in the worker's store (here an

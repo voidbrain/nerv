@@ -18,16 +18,34 @@ export const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 // (Windows run 45307748925 stopped at its 18-minute limit). Every fixture therefore registers each resource as it
 // creates it, and these hooks close what is still open after every test (also a timed-out one) and after the file.
 // A close is idempotent and bounded, and a fixture whose test already ended stops building and closes what it made.
-const open = new Set<{ close: () => Promise<void> }>();
-const closeOpen = () => Promise.all([...open].map((f) => f.close()));
+// A fixture still open here was left by a test that did not close it (cancelled at its timeout, most likely): its last
+// step is printed so a CI report names where the test was waiting.
+const open = new Set<{ close: () => Promise<void>; last: () => string }>();
+const closeOpen = () =>
+  Promise.all(
+    [...open].map((f) => {
+      process.stderr.write(`B-118: worker-link fixture left open by its test; last step ${f.last()}\n`);
+      return f.close();
+    }),
+  );
 afterEach(closeOpen);
 after(closeOpen);
+const brain = new URL('./idle-brain.ts', import.meta.url);
 /** Resolves after `ms` without holding the process open. */
 const grace = (ms: number) => new Promise<void>((done) => setTimeout(done, ms).unref());
 function scope() {
   const closers: (() => unknown)[] = [];
-  let closing: Promise<void> | undefined;
+  const born = performance.now();
+  let closing: Promise<void> | undefined,
+    step = 'creating the fixture',
+    stepAt = born;
   const self = {
+    /** Names what the fixture is waiting for now, for the report above. */
+    step(name: string) {
+      step = name;
+      stepAt = performance.now();
+    },
+    last: () => `"${step}", ${Math.round(stepAt - born)} ms after the fixture started`,
     /** Registers a resource's closer; once the scope is closed, closes the resource at once and stops the caller. */
     add<T>(resource: T, close: (resource: T) => unknown): T {
       if (closing) {
@@ -137,9 +155,11 @@ export async function fixture(heartbeatMs = 500, workerHeartbeatMs = heartbeatMs
     };
     return runtime;
   };
-  const ra = own.add(timed(new Runtime(join(homeA, 'nerv.sqlite'), undefined, homeA), 'coordinator'), (r) => r.close());
-  let rb = own.add(timed(new Runtime(join(homeB, 'nerv.sqlite'), undefined, homeB), 'worker'), (r) => r.close());
+  const ra = own.add(timed(new Runtime(join(homeA, 'nerv.sqlite'), brain, homeA), 'coordinator'), (r) => r.close());
+  let rb = own.add(timed(new Runtime(join(homeB, 'nerv.sqlite'), brain, homeB), 'worker'), (r) => r.close());
+  own.step('waiting for both Runtimes to be ready');
   await Promise.all([ra.ready(), rb.ready()]);
+  own.step('enrolling both bases');
   const server = own.add(
     createServer((_req, res) => {
       res.writeHead(404);
@@ -198,6 +218,7 @@ export async function fixture(heartbeatMs = 500, workerHeartbeatMs = heartbeatMs
       reconnectMs: 30,
     });
   let link = own.guard(worker());
+  own.step('fixture built; in the test');
   return {
     main,
     get link() {
@@ -221,20 +242,26 @@ export async function fixture(heartbeatMs = 500, workerHeartbeatMs = heartbeatMs
     start: async () => {
       main.start();
       link.start();
+      own.step('start(): waiting for both sides of the link');
       // B-066: the worker marks its client session ready only when the coordinator's acknowledgement arrives, which can
       // land after the coordinator already counts the worker; under CI load F-006-T11 asserted the worker side too early.
       await until(() => main.connected('NERV-02') && link.connected('NERV-01'));
+      own.step('started; in the test');
     },
     restartWorker: async () => {
+      own.step('restartWorker(): stopping the worker');
       await link.stop();
       await rb.close();
       // Registered again (closing a Runtime twice is harmless): if the test already ended, it is closed at once.
-      rb = own.add(timed(new Runtime(join(homeB, 'nerv.sqlite'), undefined, homeB), 'worker'), (r) => r.close());
+      rb = own.add(timed(new Runtime(join(homeB, 'nerv.sqlite'), brain, homeB), 'worker'), (r) => r.close());
       await rb.ready();
       link = own.guard(worker());
       link.start();
+      own.step('restartWorker(): waiting for both sides of the link');
       await until(() => main.connected('NERV-02') && link.connected('NERV-01'));
+      own.step('worker restarted; in the test');
     },
+    step: (name: string) => own.step(name),
     raw: async (headers: Record<string, string>, path = '/kaji/worker') => {
       return own.add(new WebSocket('ws://' + address + path, { headers }), (socket) => socket.terminate());
     },
@@ -242,6 +269,7 @@ export async function fixture(heartbeatMs = 500, workerHeartbeatMs = heartbeatMs
   };
 }
 export async function rawReady(f: Awaited<ReturnType<typeof fixture>>, id = 'NERV-02', key = f.b.privateKey) {
+  f.step('rawReady(): opening a raw channel');
   const socket = await f.raw(signedHeaders(id, key, 'req', 'GET', '/kaji/worker', ''));
   await new Promise<void>((done, fail) => {
     socket.once('open', done);
@@ -262,7 +290,9 @@ export async function rawReady(f: Awaited<ReturnType<typeof fixture>>, id = 'NER
     socket.once('message', (raw) => done(JSON.parse(JSON.parse(raw.toString()).body).rpc));
     socket.once('close', (code) => fail(Error(`Worker channel closed (${code}) before the hello reply.`)));
   });
+  f.step('rawReady(): waiting for the hello reply');
   socket.send(hello);
   assert.equal(((await reply) as { result: { version: number } }).result.version, 1);
+  f.step('raw channel ready; in the test');
   return { socket, frame, hello, session };
 }
