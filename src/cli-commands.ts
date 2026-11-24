@@ -9,6 +9,7 @@ import { EvaJobs, runEva03Durably } from './eva-jobs.ts';
 
 import { recordPromotion } from './milestones.ts';
 import { SeatPool } from './seat-pool.ts';
+import { parseFleetImport } from './fleet.ts';
 import { formatBatteryStateLines, formatDueResistancePrompt, type OneMoreBatteryExport } from './batteries.ts';
 import {
   detectVoiceLanguage,
@@ -274,8 +275,18 @@ export async function tryRunCliCommand(
         console.log(JSON.stringify(store.fleet.listParts(args[1]), null, 2));
       } else if (sub === 'spares') {
         console.log(JSON.stringify(store.fleet.listSpares(args[1]), null, 2));
+      } else if (sub === 'import' && args[1]) {
+        let raw: unknown;
+        try {
+          raw = JSON.parse(readFileSync(resolve(args[1]), 'utf8'));
+        } catch (error) {
+          throw new Error(`${args[1]} is not readable JSON: ${(error as Error).message}`);
+        }
+        console.log(JSON.stringify(store.fleet.importFleet(parseFleetImport(raw)), null, 2));
       } else {
-        throw new Error('Usage: fleet drones | fleet parts <drone> | fleet spares [category]');
+        throw new Error(
+          'Usage: fleet drones | fleet parts <drone> | fleet spares [category] | fleet import <fleet.json>',
+        );
       }
     } finally {
       store.close();
@@ -525,6 +536,22 @@ export async function tryRunCliCommand(
         console.log(`Aoba linked to ${pick.name} (chat ${pick.chatId}). Restart the service to start it.`);
       }
     }
+  } else if (command === 'open' && args.includes('--phone')) {
+    // F-118: open --phone mints a one-use pairing code (5 minutes) that the installed phone app swaps for a device credential.
+    const config = readConfig(home);
+    const response = await fetch(`http://127.0.0.1:${config.port}/api/device/codes`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${readToken(home)}` },
+    }).catch(() => {
+      throw new Error('NERV Agency is not running: start it with serve, launch or service start.');
+    });
+    const value = (await response.json()) as { code?: string; expiresInMs?: number; error?: string };
+    if (!response.ok || !value.code) throw new Error(value.error ?? 'Could not create a pairing code.');
+    console.log(
+      `Pairing code: ${value.code} (one use, valid ${Math.round((value.expiresInMs ?? 0) / 60_000)} minutes)\n` +
+        `Link: http://127.0.0.1:${config.port}/ on this computer, or its address on your network (Tailscale).\n` +
+        'On the phone, open NERV from the Home Screen and type the code.',
+    );
   } else if (command === 'open') {
     // open dashboard: the same sign-in, landing on the live dashboard instead of the workspace.
     await ctx.openPage(home, args.includes('dashboard') ? '/dashboard/' : '/', args.includes('--print'));

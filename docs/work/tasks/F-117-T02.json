@@ -4,7 +4,7 @@
   "parent": "F-117",
   "title": "nerv update [--check]: fetch, compare and run the lifecycle update",
   "goal": "One command checks origin/main and, when behind, runs stop, lifecycle update and start, then probes the dashboard",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "--check prints up to date or behind by N commits without changing anything",
     "A behind base completes stop → update → start through planService/applyService and reports the new revision",
@@ -16,8 +16,10 @@
   "resources": [
     "src/cli.ts",
     "src/cli-help.ts",
-    "src/manual-update.ts",
-    "test/manual-update.test.ts",
+    "src/nerv-update.ts",
+    "src/update-cli.ts",
+    "src/nodes-cli.ts",
+    "test/nerv-update.test.ts",
     "docs/work/records/F-117.md",
     "generated:backlog-views"
   ],
@@ -27,7 +29,7 @@
   ],
   "privacy": "Neutral fixtures only; no personal data.",
   "validation": [
-    "node --test test/manual-update.test.ts",
+    "node --test test/nerv-update.test.ts test/manual-update.test.ts test/cli-help.test.ts",
     "npm run check:fast"
   ],
   "escalation": [
@@ -35,11 +37,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h agent",
-    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement.",
-    "reviewed": "2026-11-23",
-    "agentHours": 2,
+    "estimate": "0.25 h agent",
+    "basis": "Implemented 2026-11-24; the live run on NERV-01 is F-117-T05.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0.25,
     "baselineAgentHours": 2,
-    "estimateAgentHours": 2
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 1,
+    "actualSource": "stated"
   }
 }

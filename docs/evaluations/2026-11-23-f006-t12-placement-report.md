@@ -1,5 +1,7 @@
 # F-006-T12 placement report and recommendation
 
+Updated by the [F-006-T26 report](2026-11-24-f006-t26-placement-report.md) with the equivalent live runs; this file stays as the 2026-11-23 evidence.
+
 This report applies the decision criteria of the [placement campaign](../decisions/placement-campaign.md) (section 5) to the live evidence recorded so far. No model was run for it. The verdicts come from `placementReport` in `src/placement-report.ts` over the committed aggregates in [2026-11-23-f006-t12-placement-evidence.json](2026-11-23-f006-t12-placement-evidence.json); `test/placement-report.test.ts` checks that this file still yields the verdicts below. `node src/cli.ts placement report EVIDENCE.json` prints the same verdicts for an updated evidence file, offline and without a model call. Raw reports stay private on their originating base.
 
 ## Placements compared
