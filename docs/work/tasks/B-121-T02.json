@@ -52,5 +52,11 @@
     "estimateAgentHours": 1.25,
     "actualAgentHours": 1.25,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 721,
+      "note": "ranOrAckedEpoch in the epoch-push reply; record-free probe before the push"
+    }
+  ]
 }
