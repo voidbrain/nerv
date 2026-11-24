@@ -23,7 +23,12 @@ import { explainRecord, type WhyRecord } from './why.ts';
 import { OFFER_NAME, descriptorVersion, type ToolDescriptor } from './mcp.ts';
 import { builtinPackRegistry } from './packs.ts';
 import { TOOL_SUBJECT_SUMMARIES, subjectDocs } from './tool-index.ts';
-import { clickNamedControl, type BrowserAdapterDriver } from './browser-control.ts';
+import {
+  bindClickToActiveTab,
+  clickNamedControl,
+  type BoundClick,
+  type BrowserAdapterDriver,
+} from './browser-control.ts';
 import { liveBrowserDriver } from './browser-cdp-driver.ts';
 export interface AgencyBaseSnapshot {
   baseId: string;
@@ -688,6 +693,59 @@ function ids(args: Record<string, unknown>): string[] {
     throw new Error('ids must be 1–20 distinct reminder ids.');
   return list as string[];
 }
+function clickControlName(args: Record<string, unknown>): string {
+  const control = text(args, 'control');
+  if (!control.trim() || control.length > 200) throw new Error('control must be 1–200 characters.');
+  return control;
+}
+function browserConfig(backend: ReminderBackend) {
+  const browser = backend.home ? readConfig(backend.home).browser : undefined;
+  if (!browser || browser.allowedOrigins.length === 0) {
+    throw new Error(
+      'No browser origins allowed. Add "browser": {"allowedOrigins": ["https://..."], "debugPort": 9222} to config.json and start the dedicated browser profile with that remote debugging port.',
+    );
+  }
+  return browser;
+}
+function browserDriverFor(backend: ReminderBackend, port: number): BrowserAdapterDriver {
+  return (backend.browserDriver ?? liveBrowserDriver)(port);
+}
+/**
+ * F-089-T06: what the planner proposes for browser.click ({control}) is bound to the active tab before the gate, so
+ * the owner's card names the tab, its origin and page, and the grant's argument hash binds them.
+ */
+export async function bindBrowserClick(backend: ReminderBackend, args: Record<string, unknown>): Promise<BoundClick> {
+  only(args, ['control']);
+  const control = clickControlName(args);
+  const browser = browserConfig(backend);
+  return bindClickToActiveTab(browserDriverFor(backend, browser.debugPort), control, browser.allowedOrigins);
+}
+
+/**
+ * Executors that answer later (a promise) and how long the store waits for each before it records action.failed
+ * (B-132). The browser driver makes a few DevTools calls of at most 5 s each; a desktop replay lasts up to 120 s.
+ */
+const LATE_EXECUTOR_MS: Readonly<Record<string, number>> = {
+  'browser.click': 30_000,
+  'desktop.replay': 150_000,
+  'gmail.search': 60_000,
+  'gmail.read': 60_000,
+  'gmail.draft': 60_000,
+  'gmail.send': 60_000,
+};
+export function lateExecutorMs(tool: string): number {
+  return LATE_EXECUTOR_MS[tool] ?? 60_000;
+}
+/**
+ * How long the coordinator waits for actions.act or approvals.decide on this tool over IPC: the executor's bound plus
+ * the browser binding and a margin; undefined keeps the process default for tools that answer at once. An unknown
+ * tool (a card the coordinator could not look up) gets the longest bound.
+ */
+export function gateCallTimeoutMs(tool: string | undefined): number | undefined {
+  if (tool === undefined) return Math.max(...Object.values(LATE_EXECUTOR_MS)) + 30_000;
+  if (!(tool in LATE_EXECUTOR_MS)) return undefined;
+  return lateExecutorMs(tool) + (tool === 'browser.click' ? 20_000 : 0) + 10_000;
+}
 /** `ownerApproved`: the grant came from the owner approving this action's card (F-089-T06). */
 export interface ExecuteContext {
   sortieId?: string;
@@ -1327,19 +1385,20 @@ function executeRaw(
       );
     }
     case 'browser.click': {
-      // F-089-T06: the CLI's adapter, allowlist and refusals unchanged; approved only by the owner's card.
-      only(args, ['control']);
-      const control = text(args, 'control');
-      if (!control.trim() || control.length > 200) throw new Error('control must be 1–200 characters.');
-      const browser = backend.home ? readConfig(backend.home).browser : undefined;
-      if (!browser || browser.allowedOrigins.length === 0) {
-        throw new Error(
-          'No browser origins allowed. Add "browser": {"allowedOrigins": ["https://..."], "debugPort": 9222} to config.json and start the dedicated browser profile with that remote debugging port.',
-        );
-      }
-      return clickNamedControl((backend.browserDriver ?? liveBrowserDriver)(browser.debugPort), {
+      // F-089-T06: the CLI's adapter, allowlist and refusals unchanged; approved only by the owner's card, and only on
+      // the tab and origin the card names (bound when proposed, see bindBrowserClick).
+      only(args, ['control', 'tabId', 'origin', 'url']);
+      const control = clickControlName(args);
+      const tabId = text(args, 'tabId');
+      const origin = text(args, 'origin');
+      const browser = browserConfig(backend);
+      if (!browser.allowedOrigins.includes(origin))
+        throw new Error(`Origin "${origin}" is not in browser.allowedOrigins.`);
+      return clickNamedControl(browserDriverFor(backend, browser.debugPort), {
         controlName: control,
         allowedOrigins: browser.allowedOrigins,
+        expectedTabId: tabId,
+        expectedOrigin: origin,
         approved: context.ownerApproved === true,
       });
     }

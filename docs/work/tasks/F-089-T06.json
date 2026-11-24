@@ -8,7 +8,8 @@
   "acceptance": [
     "A browser.click tool reaches the F-089-T04 live driver from chat; each click is Orange behind an approval card",
     "The CLI's allowlist, refusals and tainted page text apply unchanged; a page or control outside the allowlist is refused without a click",
-    "A test across the join: chat request → tool → approval card → fake CDP driver click (no real browser launched in tests)"
+    "A test across the join: chat request → tool → approval card → fake CDP driver click (no real browser launched in tests)",
+    "Security review on #733: the click is bound to the tab and origin proposed (card shows them, grant binds them); another tab, a closed tab or another origin is refused without a click"
   ],
   "dependsOn": [
     "F-089-T05"
@@ -39,12 +40,12 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 from the decision's 2–3 h. Implemented 2026-11-24 in about 2.5 h agent (stated, not measured).",
+    "basis": "Estimated 2026-11-24 from the decision's 2–3 h. Implemented 2026-11-24 in about 4 h agent with the review fixes (stated, not measured).",
     "reviewed": "2026-11-24",
     "agentHours": 0,
     "baselineAgentHours": 2.5,
     "estimateAgentHours": 2.5,
-    "actualAgentHours": 2.5,
+    "actualAgentHours": 4,
     "actualSource": "stated"
   },
   "prs": [

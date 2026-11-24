@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 7 | 3 | 21 | 6 |
+| **This week** | 7 | 3 | 22 | 6 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 28 |
+| **Open** | 39 | 29 |
 | **Require Human 🧑** | 9 | 10 |
 
 ### Require Human 🧑
@@ -34,7 +34,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 92.25 h agent + 12 h owner across 127 open steps of 38 features and 28 other records. 168 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 92.25 h agent + 12 h owner across 128 open steps of 38 features and 29 other records. 171 h of actual effort recorded on 155 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1249,9 +1249,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
-| 🟢 Small | <a id="f-089-t06"></a>F-089-T06 — A browser.click chat tool for Misato | 2.5 h | 2.5 h so far (stated) | 0 h | Implemented; verification pending | — | — | 🤖 | [PR #733](https://github.com/voidbrain/nerv/pull/733) implementation |
+| 🟢 Small | <a id="f-089-t06"></a>F-089-T06 — A browser.click chat tool for Misato | 2.5 h | 4 h so far (stated) | 0 h | Implemented; verification pending | — | — | 🤖 | [PR #733](https://github.com/voidbrain/nerv/pull/733) implementation |
 | 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | **Total** | 6.5 h (5 of 6 steps) | 5.75 h (4 of 6 steps recorded) | 0.25 h owner | 3 of 6 completed | | | | |
+| 🟢 Small | **Total** | 6.5 h (5 of 6 steps) | 7.25 h (4 of 6 steps recorded) | 0.25 h owner | 3 of 6 completed | | | | |
 
 <details><summary>Done steps (3)</summary>
 
@@ -1716,6 +1716,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-120-T01: [PR #717](https://github.com/voidbrain/nerv/pull/717) Marker removed before the service starts. [PR #717](https://github.com/voidbrain/nerv/pull/717) (Test: `test/coordinator-partition.test.ts`) |
 | Opened | 2026-11-24 |
 | Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and `test/coordinator-relocation.test.ts` pass locally. Live promotion with the installed service: Pending (F-016-T09). |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-132"></a>[🐞 B-132](#top)
+
+**An executor that answers later reached the ledger and the caller as `{}`, and its failure was never caught**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-132-T01 implemented in [PR #733](https://github.com/voidbrain/nerv/pull/733), waiting for its checks.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 while adding `browser.click` (F-089-T06): the store ran executors synchronously, so a tool whose executor returns a promise (`gmail.*`, `desktop.replay`, `browser.click`) recorded `{}` as its result in the ledger and returned a promise the IPC reply serialised as `{}`; a rejection was an unhandled rejection, a promise that never settled left the sortie open, and a worker job got `{}` as its result. No such executor was wired to the live store yet. |
+| **Reproduce** | In a test, give the store a Gmail client whose `send` rejects, approve a `gmail.send` card: the ledger records `action.done` with `{}` and the rejection is unhandled. |
+| **Check** | The store waits for an executor that answers later: its result or error is recorded when it settles (`action.done` / `action.failed`) and returned to the caller over IPC; one that never answers ends as `action.failed` after its tool's bound; the coordinator's IPC calls for those tools wait that bound, not the 5 s default, and resume waiting sorties even on a timeout; a worker-bound card finishes its job with the settled outcome, and a job released meanwhile is no error. Committed tests fail first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-132-t01"></a>B-132-T01 — Wait for executors that answer later, within a bound | 1.5 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | [PR #733](https://github.com/voidbrain/nerv/pull/733) implementation |
+| 🟢 Small | **Total** | 1.5 h | 1.5 h | 0 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-132.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-132-T01: [PR #733](https://github.com/voidbrain/nerv/pull/733) implementation. [PR #733](https://github.com/voidbrain/nerv/pull/733) |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-24: `test/async-executors.test.ts` committed first: 4/4 fail on origin/main, 4/4 pass with the fix. |
 | Reviewed | 2026-11-24 |
 
 </details>

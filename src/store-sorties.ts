@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
 import { readConfig } from './config.ts';
-import { execute, hasExecutor, type AgencyBaseSnapshot, type AgencySnapshot } from './executors.ts';
+import { execute, hasExecutor, lateExecutorMs, type AgencyBaseSnapshot, type AgencySnapshot } from './executors.ts';
 import type { InstrumentalityRuns } from './instrumentality-runs.ts';
 import { Registry } from './kaji.ts';
 import type { Decision, Ledger, Proposal } from './ledger.ts';
@@ -194,7 +194,12 @@ export class StoreSorties {
         return {
           ...rest,
           pending: pending.then((o) => {
-            finish({ ...rest, ...o });
+            // The job may have been released or cancelled while the executor ran: the action's own outcome stands.
+            try {
+              finish({ ...rest, ...o });
+            } catch {
+              /* the worker job no longer takes a result */
+            }
             return o;
           }),
         };
@@ -418,11 +423,22 @@ export class StoreSorties {
       return this.ran(sortieId, actionId, tool, failed(e), execT0, deferRemote);
     }
     // F-089-T06: an executor that answers later (the browser driver) is recorded in the ledger when it settles.
+    // B-132: one that never answers ends as action.failed after its bound, so no sortie hangs on it.
     if (raw instanceof Promise) {
-      return raw.then(
-        (result: unknown) => this.ran(sortieId, actionId, tool, { result }, execT0, deferRemote),
-        (e: unknown) => this.ran(sortieId, actionId, tool, failed(e), execT0, deferRemote),
-      );
+      const bound = this.host.store.executorTimeoutMs ?? lateExecutorMs(tool);
+      let timer: NodeJS.Timeout | undefined;
+      const late = new Promise<never>((_, fail) => {
+        timer = setTimeout(
+          () => fail(new Error(`${tool} did not answer within ${Math.round(bound / 1000)} s; it may still finish.`)),
+          bound,
+        );
+      });
+      return Promise.race([raw, late])
+        .then(
+          (result: unknown) => this.ran(sortieId, actionId, tool, { result }, execT0, deferRemote),
+          (e: unknown) => this.ran(sortieId, actionId, tool, failed(e), execT0, deferRemote),
+        )
+        .finally(() => clearTimeout(timer));
     }
     return this.ran(sortieId, actionId, tool, { result: raw }, execT0, deferRemote);
   }

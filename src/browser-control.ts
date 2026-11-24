@@ -24,6 +24,8 @@ export interface ClickNamedControlRequest {
   controlName: string;
   allowedOrigins: readonly string[];
   expectedTabId?: string;
+  /** F-089-T06: the origin the owner's card names; the active tab must still be on it. */
+  expectedOrigin?: string;
   approved: boolean;
 }
 
@@ -39,7 +41,7 @@ export interface ClickNamedControlResult {
 const SENSITIVE_CONTROL_PATTERN =
   /\b(password|passcode|pin|credit\s*card|cvv|pay\s*now|purchase|authorize\s*payment)\b/i;
 
-function assertAllowedOrigin(rawUrl: string, allowedOrigins: readonly string[]): void {
+function assertAllowedOrigin(rawUrl: string, allowedOrigins: readonly string[]): URL {
   let parsed: URL;
   try {
     parsed = new URL(rawUrl);
@@ -52,6 +54,7 @@ function assertAllowedOrigin(rawUrl: string, allowedOrigins: readonly string[]):
   if (!allowedOrigins.includes(parsed.origin)) {
     throw new Error(`Origin "${parsed.origin}" is not in browser.allowedOrigins.`);
   }
+  return parsed;
 }
 
 /**
@@ -77,7 +80,12 @@ export async function clickNamedControl(
   if (request.expectedTabId && beforeTab.tabId !== request.expectedTabId) {
     throw new Error(`Active tab "${beforeTab.tabId}" does not match expected tab "${request.expectedTabId}".`);
   }
-  assertAllowedOrigin(beforeTab.url, request.allowedOrigins);
+  const origin = assertAllowedOrigin(beforeTab.url, request.allowedOrigins).origin;
+  if (request.expectedOrigin !== undefined && origin !== request.expectedOrigin) {
+    throw new Error(
+      `The tab moved to another origin ("${origin}", not "${request.expectedOrigin}"); nothing was clicked.`,
+    );
+  }
 
   const match = beforeTab.controls.find((c) => c.name.trim().toLowerCase() === targetName.toLowerCase());
   if (!match) {
@@ -99,6 +107,30 @@ export async function clickNamedControl(
     before: { url: beforeTab.url, title: beforeTab.title, textSummary: beforeTab.textSummary },
     after: { url: afterTab.url, title: afterTab.title, textSummary: afterTab.textSummary },
   };
+}
+
+/** A click bound to the tab it was proposed on: the owner's card shows these, and the grant's argument hash binds them. */
+export interface BoundClick {
+  control: string;
+  tabId: string;
+  origin: string;
+  /** Origin and path only (no query or fragment), for the card. */
+  url: string;
+}
+
+/**
+ * F-089-T06: binds a proposed click to the active tab when it is proposed. Refuses a non-active tab or an origin
+ * outside the allowlist before any card exists; the click itself later runs only on this tab and origin.
+ */
+export async function bindClickToActiveTab(
+  driver: BrowserAdapterDriver,
+  control: string,
+  allowedOrigins: readonly string[],
+): Promise<BoundClick> {
+  const tab = await driver.getActiveTab();
+  if (!tab.active) throw new Error('Refusing to act on a non-active browser tab.');
+  const parsed = assertAllowedOrigin(tab.url, allowedOrigins);
+  return { control, tabId: tab.tabId, origin: parsed.origin, url: (parsed.origin + parsed.pathname).slice(0, 300) };
 }
 
 /** config.json `browser`: the owner-set origin allowlist and the dedicated profile's local debugging port (F-089-T04). */

@@ -25,7 +25,7 @@ Status: Accepted (decision for F-089)
 
 ## Chat tool (F-089-T06)
 
-- Misato's `browser.click` tool takes `{"control": "<accessible name>"}` (1–200 characters, no other argument) and runs the same adapter as the CLI (`clickNamedControl` over the CDP driver on `browser.debugPort`): the same `browser.allowedOrigins`, refusals and `tainted: true` page text.
+- Misato's `browser.click` tool takes `{"control": "<accessible name>"}` (1–200 characters, no other argument). When it is proposed, the nervous process binds it to the active tab: the owner's card shows `{control, tabId, origin, url}` (url without query or fragment) and the grant's argument hash binds them, so on approval the click runs only on that tab and origin; another tab, a closed tab or a tab that moved to another origin is refused without a click, and an unlisted origin or a missing allowlist is refused before any card. It runs the same adapter as the CLI (`clickNamedControl` over the CDP driver on `browser.debugPort`): the same `browser.allowedOrigins`, refusals and `tainted: true` page text.
 - It is Orange (`write-external`) and every call waits for the owner's approval card, whatever the Sync Ratio (the gate's `card` tool flag); the click runs only once that card is approved, and the executor passes `approved` only for a grant from an approved card. In a sortie that is already tainted it is Blue, like every external action there.
 - The page text it returns taints the sortie, so nothing read from the page can drive a later external action without the owner.
 - Tests inject the driver; the default driver refuses under the test runner, so no test clicks in a browser on the desktop.

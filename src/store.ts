@@ -42,7 +42,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
-import { builtinTools, type AgencySnapshot } from './executors.ts';
+import { bindBrowserClick, builtinTools, type AgencySnapshot } from './executors.ts';
 import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circuits.ts';
 import { createFpvStoreSlice, type FpvStoreSlice, type RegisterBatteryInput } from './packs.ts';
@@ -172,6 +172,8 @@ export class Store {
   pushFetch: typeof fetch = fetch;
   codingPrOpener?: CodingJobPrOpener;
   bambuLauncher?: BambuConnectLauncher;
+  /** B-132: overrides how long an executor that answers later may take before it ends as action.failed (tests). */
+  executorTimeoutMs?: number;
   /** F-089-T06: the browser driver for browser.click (tests inject one; the default refuses under the test runner). */
   browserDriver?: (port: number) => BrowserAdapterDriver;
   /** F-121-T02: the slicer process runner; tests set a fake slicer. */
@@ -588,6 +590,14 @@ export class Store {
   }
   refuseWorkerApproval(id: string, reason: string): { refused: string } {
     return this.sortiesController.refuseWorkerApproval(id, reason);
+  }
+  /**
+   * F-089-T06: what the nervous process does with a proposal before the gate. browser.click is bound to the active
+   * tab (its id, origin and page join the arguments the card shows and the grant binds); a refusal here means no card.
+   */
+  async prepareProposal(proposal: Proposal): Promise<Proposal> {
+    if (proposal.tool !== 'browser.click') return proposal;
+    return { ...proposal, args: { ...(await bindBrowserClick(this, proposal.args)) } };
   }
   /** One owner action through the gate (F-017): ballot, then on a grant the executor runs at once; otherwise it waits for the owner or stops. */
   runAction(sortieId: string, proposal: Proposal, worker?: WorkerLease, agency?: AgencySnapshot): ActResult {

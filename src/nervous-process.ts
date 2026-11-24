@@ -9,7 +9,7 @@ import { appendFileSync } from 'node:fs';
 import { CoordinatorAuthorityError } from './coordinator-authority.ts';
 import type { AgencySnapshot } from './executors.ts';
 import type { Verdict } from './policy.ts';
-import { dispatchRpc, MAX_FRAME_BYTES, READY } from './rpc.ts';
+import { dispatchRpc, MAX_FRAME_BYTES, READY, REFUSED_BEFORE_GATE, RpcFault } from './rpc.ts';
 import { readConfig, readScrolls } from './config.ts';
 import { Registry, type SignedRecord } from './kaji.ts';
 import { factKey } from './memory.ts';
@@ -478,20 +478,27 @@ process.on('message', (value: unknown) => {
         return store.ledger.preview(params.sortieId as string, params.tool as string);
       case 'actions.act':
         store.ledger.setExternal(external());
-        return settledOutcome(
-          store.runAction(
-            params.sortieId as string,
-            {
-              tool: params.tool as string,
-              args: params.args as Record<string, unknown>,
-              stage: params.stage as 'production',
-              ...(params.casper ? { casper: params.casper as Verdict } : {}),
-              ...(Array.isArray(params.extras) ? { extras: params.extras as Verdict[] } : {}),
-            },
-            params.worker as unknown as WorkerLease | undefined,
-            params.agency as AgencySnapshot | undefined,
-          ),
-        );
+        return store
+          .prepareProposal({
+            tool: params.tool as string,
+            args: params.args as Record<string, unknown>,
+            stage: params.stage as 'production',
+            ...(params.casper ? { casper: params.casper as Verdict } : {}),
+            ...(Array.isArray(params.extras) ? { extras: params.extras as Verdict[] } : {}),
+          })
+          .catch((e: unknown) => {
+            throw new RpcFault(REFUSED_BEFORE_GATE, e instanceof Error ? e.message.slice(0, 500) : 'Refused.');
+          })
+          .then((proposal) =>
+            settledOutcome(
+              store.runAction(
+                params.sortieId as string,
+                proposal,
+                params.worker as unknown as WorkerLease | undefined,
+                params.agency as AgencySnapshot | undefined,
+              ),
+            ),
+          );
       case 'inbox.page':
         return store.inboxPage(
           params.after as number | undefined,

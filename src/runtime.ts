@@ -6,6 +6,7 @@ import type { InstrumentalityRun } from './instrumentality-runs.ts';
 import type { KeyObject } from 'node:crypto';
 import { type UsageRecord } from './model-usage.ts';
 import { type Method } from './rpc.ts';
+import { gateCallTimeoutMs } from './executors.ts';
 import type { HistoryPage } from './history.ts';
 import type { ChannelState, HeardChannel } from './channel-state.ts';
 import { ProcessClient } from './process-client.ts';
@@ -265,20 +266,28 @@ export class Runtime implements StoreApi {
     const pending = await this.approvals(50).catch(() => []);
     const match = pending.find((a) => a.id === id);
     const keys = match ? itemKeysForTool(match.card.tool, match.card.args) : [];
-    const result = (await this.itemLocks.withLock(keys, () =>
-      this.nervous.call('approvals.decide', {
-        id,
-        decision,
-        source,
-        ...(options?.useSuggestedFix ? { useSuggestedFix: true } : {}),
-      }),
-    )) as {
-      decision: string;
-      result?: unknown;
-      error?: string;
-    };
-    this.approvalsController.sweepIfResuming();
-    return result;
+    try {
+      // B-132: an approved executor that answers later is awaited here, within its own bound (not the IPC default).
+      return (await this.itemLocks.withLock(keys, () =>
+        this.nervous.call(
+          'approvals.decide',
+          {
+            id,
+            decision,
+            source,
+            ...(options?.useSuggestedFix ? { useSuggestedFix: true } : {}),
+          },
+          decision === 'approve' ? gateCallTimeoutMs(match?.card.tool) : undefined,
+        ),
+      )) as {
+        decision: string;
+        result?: unknown;
+        error?: string;
+      };
+    } finally {
+      // Resume the sorties waiting on this card even when the call timed out or failed.
+      this.approvalsController.sweepIfResuming();
+    }
   }
   /** Spear of Longinus for one sortie: revoke its unused grants, stand down its cards, close it; executed effects are reported. */
   async spear(id: string, reason: string) {
