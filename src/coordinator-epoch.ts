@@ -7,7 +7,8 @@ const EPOCH_ACKS_SCHEMA = `
 CREATE TABLE IF NOT EXISTS coordinator_epoch_acks (
   base_id TEXT PRIMARY KEY,
   coordinator_epoch INTEGER NOT NULL,
-  acked_at INTEGER NOT NULL
+  acked_at INTEGER NOT NULL,
+  standby INTEGER NOT NULL DEFAULT 0
 );`;
 
 /** A registry port over a local store, for a command that talks on the Kaji line without the service. */
@@ -56,7 +57,10 @@ function otherBases(scope: EpochScope): { registry: Registry; others: string[] }
  */
 export async function pushCoordinatorEpoch(
   input: EpochScope & {
-    readonly push: (baseId: string, records: SignedRecord[]) => Promise<{ maxSeenCoordinatorEpoch: number }>;
+    readonly push: (
+      baseId: string,
+      records: SignedRecord[],
+    ) => Promise<{ maxSeenCoordinatorEpoch: number; standby?: boolean }>;
     readonly nowMs?: number;
   },
 ): Promise<{ epoch: number; acked: string[]; missing: string[] }> {
@@ -73,11 +77,12 @@ export async function pushCoordinatorEpoch(
         if (reply.maxSeenCoordinatorEpoch < epoch) throw new Error('older epoch');
         input.db
           .prepare(
-            `INSERT INTO coordinator_epoch_acks(base_id, coordinator_epoch, acked_at) VALUES (?, ?, ?)
-             ON CONFLICT(base_id) DO UPDATE SET coordinator_epoch = excluded.coordinator_epoch, acked_at = excluded.acked_at
+            `INSERT INTO coordinator_epoch_acks(base_id, coordinator_epoch, acked_at, standby) VALUES (?, ?, ?, ?)
+             ON CONFLICT(base_id) DO UPDATE SET coordinator_epoch = excluded.coordinator_epoch,
+               acked_at = excluded.acked_at, standby = excluded.standby
              WHERE excluded.coordinator_epoch >= coordinator_epoch_acks.coordinator_epoch`,
           )
-          .run(baseId, reply.maxSeenCoordinatorEpoch, input.nowMs ?? Date.now());
+          .run(baseId, reply.maxSeenCoordinatorEpoch, input.nowMs ?? Date.now(), reply.standby === true ? 1 : 0);
         acked.push(baseId);
       } catch {
         missing.push(baseId);
@@ -97,12 +102,14 @@ export function allUnrevokedAckedEpoch(input: EpochScope & { readonly epoch: num
   );
 }
 
-/** The bases this base recorded as holding `epoch` or later. */
-export function basesAckedEpoch(db: DatabaseSync, epoch: number): Set<string> {
+/** The bases that acked `epoch` or later and said they hold a standby store (the only ones that can ack a lease). */
+export function standbyBasesAckedEpoch(db: DatabaseSync, epoch: number): Set<string> {
   db.exec(EPOCH_ACKS_SCHEMA);
   return new Set(
     (
-      db.prepare('SELECT base_id FROM coordinator_epoch_acks WHERE coordinator_epoch >= ?').all(epoch) as {
+      db
+        .prepare('SELECT base_id FROM coordinator_epoch_acks WHERE coordinator_epoch >= ? AND standby = 1')
+        .all(epoch) as {
         base_id: string;
       }[]
     ).map((r) => r.base_id),

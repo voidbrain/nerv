@@ -16,7 +16,7 @@ import {
 } from './coordinator-relocation.ts';
 import { databasePath, readConfig } from './config.ts';
 import { Registry, canonical, keyIdentity, publicKeyFrom, type SignedRecord } from './kaji.ts';
-import { allUnrevokedAckedEpoch, pushCoordinatorEpoch } from './coordinator-epoch.ts';
+import { allUnrevokedAckedEpoch, pushCoordinatorEpoch, standbyBasesAckedEpoch } from './coordinator-epoch.ts';
 import { service } from './service.ts';
 
 /** While this file exists in the data home a promotion is unfinished and `serve` refuses to start. */
@@ -112,7 +112,10 @@ export interface PromoteCoordinatorInput {
    * `KajiLink.pushEpoch`: before the readiness check the owner-signed records go to every enrolled, unrevoked
    * base (F-016-T18); the acks are recorded here and decide `allUnrevokedAckedNewEpoch`.
    */
-  readonly pushEpoch?: (baseId: string, records: SignedRecord[]) => Promise<{ maxSeenCoordinatorEpoch: number }>;
+  readonly pushEpoch?: (
+    baseId: string,
+    records: SignedRecord[],
+  ) => Promise<{ maxSeenCoordinatorEpoch: number; standby?: boolean }>;
   /** Test-only crash injection, passed to the promotion swap. */
   readonly failAfterStep?: RelocateCoordinatorInput['failAfterStep'];
 }
@@ -205,6 +208,8 @@ function derive(
       .filter((b) => b.status === 'enrolled' && b.baseId !== self.baseId)
       .map((b) => b.baseId)
       .sort();
+    const standbyStores = standbyBasesAckedEpoch(db, newEpoch);
+    const standbyBaseId = others.find((id) => standbyStores.has(id));
     let liveness: (nowMs: number, monoNowNs: bigint) => RelocationLiveness;
     if (input.drainReceiptFile) {
       if (!enrolment || previousRevoked)
@@ -251,8 +256,10 @@ function derive(
         previousMainBaseId,
         registryMain: { baseId: registry.main(), coordinatorEpoch: newEpoch },
         soleCoordinator: others.length === 0,
-        // Re-review BLOCKER: only a base holding a standby store may ack the lease, and nothing here proves that
-        // of any base; the owner names one with `nerv kaji standby BASE-ID`, whose probe must be acked.
+        // Re-review BLOCKER: only a base holding a standby store may ack the lease. Named here only when a base
+        // acked the new epoch and said it holds one (a false claim only leaves the lease unarmed); otherwise the
+        // owner names one with `nerv kaji standby BASE-ID`, whose probe must be acked.
+        ...(standbyBaseId ? { standbyBaseId } : {}),
         ...(input.failAfterStep ? { failAfterStep: input.failAfterStep } : {}),
       },
     };
