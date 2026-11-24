@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T25",
+  "status": "planned",
+  "title": "Check a disconnected auditor, a cancellation and an uncertain outcome live",
+  "goal": "Bounded live checks show the cross-node placements keep privacy, leases and permission gates when the auditor disconnects, a run is cancelled or an outcome is uncertain",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures and the gauntlet packs only; local models on the enrolled NERV-01 and NERV-02 over Tailscale; 0 paid cloud tokens; raw reports stay in ~/.nerv-private on their base; NERV-01's live service (~/.nerv-app, ~/.nerv) is never stopped, updated or edited.",
+  "acceptance": [
+    "Disconnected auditor: NERV on NERV-02 stopped during a bounded cross-node run; no fallback, clean degraded reason; NERV-02 restarted and confirmed healthy afterwards",
+    "Cancellation: a bounded cross-node run is cancelled; leases released and no effect applied",
+    "Uncertain outcome: a bounded run whose outcome cannot be confirmed is reported as uncertain, not as passed, and no permission gate is bypassed"
+  ],
+  "dependsOn": [
+    "F-006-T22"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "docs/decisions/placement-campaign.md",
+    "docs/acceptance/f006-placement-p2-p4.md",
+    "docs/evaluations/2026-11-23-f006-t12-placement-evidence.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Recorded evidence for this slice; scoped checks and required CI"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "A stop rule of the placement campaign aborts the run without fallback or retry",
+    "Anything that needs a credential, an unreachable host or the owner goes back to the owner; NERV-02 is left running"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-24 (F-006-T22): three bounded probes on live bases with one NERV-02 stop and restart; owner allowed stopping NERV on NERV-02 only.",
+    "reviewed": "2026-11-24",
+    "agentHours": 1.5,
+    "ownerHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}
