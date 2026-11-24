@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 5 | 1 | 18 | 2 |
+| **This week** | 5 | 1 | 19 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 29 |
-| **Require Human 🧑** | 11 | 8 |
+| **Open** | 39 | 30 |
+| **Require Human 🧑** | 11 | 9 |
 
 ### Require Human 🧑
 
@@ -25,11 +25,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-011](#f-011) | [F-116](#f-116) | [B-068](#b-068) |  |
 | [F-004](#f-004) |  | [B-107](#b-107) |  |
 | [F-012](#f-012) |  | [B-113](#b-113) |  |
-| [F-086](#f-086) |  | [B-056](#b-056) |  |
-| [F-087](#f-087) |  | [B-096](#b-096) |  |
-| [F-092](#f-092) |  | [B-110](#b-110) |  |
-| [F-060](#f-060) |  | [B-112](#b-112) |  |
-| [F-007](#f-007) |  |  |  |
+| [F-086](#f-086) |  | [B-128](#b-128) |  |
+| [F-087](#f-087) |  | [B-056](#b-056) |  |
+| [F-092](#f-092) |  | [B-096](#b-096) |  |
+| [F-060](#f-060) |  | [B-110](#b-110) |  |
+| [F-007](#f-007) |  | [B-112](#b-112) |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
@@ -1852,44 +1852,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-128"></a>[🐞 B-128](#top)
-
-**Settings → Pair a device on a 127.0.0.1 dashboard puts a loopback address in the QR, which a phone cannot open**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-128-T01 (failing join test, then the fix).
-
-| | |
-|---|---|
-| **Issue** | Owner report 2026-11-24: Settings → Pair a device (F-118-T05, [PR #716](https://github.com/voidbrain/nerv/pull/716)) builds the QR link from the address the dashboard was opened at, so on the Mac (`nerv open dashboard`) it encodes `http://127.0.0.1:4317/dashboard/#pair=…`, which a phone cannot open; Settings only warns. `nerv open --phone --qr` already uses this machine's tailnet name. |
-| **Reproduce** | `nerv open dashboard` on the Mac, Settings → Pair a device: the QR opens `127.0.0.1` on the phone. |
-| **Check** | From a loopback page the server resolves the phone's address itself (config `phone.url`, else the tailnet name, as the CLI does, through one shared helper); only without either does the loopback link stay, with a hint how to set one. A committed join test fails first. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-128-t01"></a>B-128-T01 — Settings pairing QR uses the phone's address, not 127.0.0.1 | 1.5 h | 0 h | 1.5 h | Ready |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-128.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | None yet |
-| Opened | 2026-11-24 |
-| Verification | Pending |
-| Reviewed | 2026-11-24 |
-
-</details>
-
----
 ### <a id="f-086"></a>[✨ F-086](#top)
 
 **Gmail: search and read, then draft and send behind approval**
@@ -2248,6 +2210,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: session tests 14/14; dashboard and manual-update suites 61/61. |
 | Reviewed | 2026-11-23 |
+
+</details>
+
+---
+### <a id="b-128"></a>[🐞 B-128](#top)
+
+**Settings → Pair a device on a 127.0.0.1 dashboard puts a loopback address in the QR, which a phone cannot open**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update reaches the service, on the Mac run `nerv open dashboard`, Settings → Pair a device: the note under the QR reads "The QR opens NAME.TAILNET.ts.net, this Mac's address for the phone."; scan it with the phone: Safari opens the dashboard and shows the code.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-24: Settings → Pair a device (F-118-T05, [PR #716](https://github.com/voidbrain/nerv/pull/716)) builds the QR link from the address the dashboard was opened at, so on the Mac (`nerv open dashboard`) it encodes `http://127.0.0.1:4317/dashboard/#pair=…`, which a phone cannot open; Settings only warns. `nerv open --phone --qr` already uses this machine's tailnet name. |
+| **Reproduce** | `nerv open dashboard` on the Mac, Settings → Pair a device: the QR opens `127.0.0.1` on the phone. |
+| **Check** | From a loopback page the server resolves the phone's address itself (config `phone.url`, else the tailnet name, as the CLI does, through one shared helper); only without either does the loopback link stay, with a hint how to set one. A committed join test fails first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-128-t01"></a>B-128-T01 — Settings pairing QR uses the phone's address, not 127.0.0.1 | 1.5 h | 0 h | 1.5 h | Implemented; verification pending |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-128.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | None yet |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-24: committed first and failing on main: `test/pairing-qr.test.ts` "B-128 join" (session mints from 127.0.0.1, localhost and [::1] pages → link at the injected tailnet address; with no address → loopback link and hint) and `test/evaluation.browser.mjs` "B-128" (production dashboard at 127.0.0.1, Settings → Pair a device → QR of the tailnet link, no loopback warning) plus the F-118-T05 browser test's hint assertion; the join test then spends each code (at most three pending), unchanged in what it asserts. With the fix: `test/pairing-qr.test.ts` 13/13 (new unit tests for the serve port, resolver cache and config); every test reading live.js or web/src plus config-reading and touched tests 509/511 (2 skipped); `npm test` first caught the EVA runner reading `config.ts` without the vendored encoder (`test/eva-runner.test.ts`), so the address checks moved to the import-free `src/pairing-address.ts`, then `npm test` passes; `test:headless` and `check:evals` pass; gauntlet system cases all pass; the four multi-step-agent model cases stay pending (they need an owner-approved model budget). Tests never run tailscale (resolver injected). A real phone scan is not yet observed. |
+| Reviewed | 2026-11-24 |
 
 </details>
 

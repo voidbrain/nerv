@@ -6,13 +6,18 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { PairingCodes, PAIRING_CODE_TTL_MS, QR_PAIRING_CODE_TTL_MS } from '../src/device-book.ts';
-import { initialize, readToken } from '../src/config.ts';
+import { initialize, readConfig, readToken } from '../src/config.ts';
+import { writeFileSync } from 'node:fs';
 import {
+  isLoopbackBase,
   pairingBase,
   pairingLink,
+  phoneBaseResolver,
   qrEncoder,
   qrRows,
+  tailnetBase,
   tailscaleBase,
+  tailscaleServePort,
   terminalQr,
   type QrEncoder,
 } from '../src/pairing-qr.ts';
@@ -332,8 +337,9 @@ test('B-128 join: Settings on a loopback page gets a QR of the tailnet address; 
   let asked = 0;
   const sessionOf = async (url: string) => {
     const login = (await (await post(url + '/api/session/codes', admin)).json()) as { code: string };
-    return ((await (await post(url + '/api/session/exchange', undefined, { code: login.code })).json()) as { token: string })
-      .token;
+    return (
+      (await (await post(url + '/api/session/exchange', undefined, { code: login.code })).json()) as { token: string }
+    ).token;
   };
   type Minted = { code: string; expiresAt: number; link: string; qr?: string[]; phoneHint?: string };
   try {
@@ -350,6 +356,8 @@ test('B-128 join: Settings on a loopback page gets a QR of the tailnet address; 
           assert.equal(minted.link, `${tailnet}/dashboard/#pair=${minted.code}&until=${minted.expiresAt}`, page);
           assert.equal(encoder.texts.at(-1), minted.link, 'the QR encodes the tailnet link');
           assert.equal(minted.phoneHint, undefined);
+          // Spend it: at most three codes may be pending.
+          assert.equal((await pair(url, minted.code)).status, 200);
         }
         // A page already on a phone-reachable address keeps it; the resolver is not asked.
         const before = asked;
@@ -384,6 +392,115 @@ test('B-128 join: Settings on a loopback page gets a QR of the tailnet address; 
       undefined,
       { phoneBase: async () => undefined },
     );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('B-128: the tailnet address, with the port tailscale serve exposes for this service', async () => {
+  const status = JSON.stringify({ Self: { DNSName: 'base.tailnet-fixture.ts.net.' } });
+  const serve = (host: string, proxy: string) =>
+    JSON.stringify({ TCP: {}, Web: { [host]: { Handlers: { '/': { Proxy: proxy } } } } });
+  const runner = (serveOut: string | Error) => {
+    const calls: string[] = [];
+    const run = async (args: string[]) => {
+      calls.push(args.join(' '));
+      if (args[0] === 'status') return status;
+      if (serveOut instanceof Error) throw serveOut;
+      return serveOut;
+    };
+    return { run, calls };
+  };
+  const on443 = runner(serve('base.tailnet-fixture.ts.net:443', 'http://127.0.0.1:4317'));
+  assert.equal(await tailnetBase(4317, on443.run), 'https://base.tailnet-fixture.ts.net');
+  assert.deepEqual(on443.calls, ['status --json', 'serve status --json']);
+  assert.equal(
+    await tailnetBase(4317, runner(serve('base.tailnet-fixture.ts.net:8443', 'http://127.0.0.1:4317')).run),
+    'https://base.tailnet-fixture.ts.net:8443',
+  );
+  // Another service on 8443, or no serve config: the default HTTPS port (what the CLI always used).
+  assert.equal(
+    await tailnetBase(4317, runner(serve('base.tailnet-fixture.ts.net:8443', 'http://127.0.0.1:9999')).run),
+    'https://base.tailnet-fixture.ts.net',
+  );
+  assert.equal(await tailnetBase(4317, runner(new Error('no serve')).run), 'https://base.tailnet-fixture.ts.net');
+  assert.equal(
+    await tailnetBase(4317, async () => {
+      throw new Error('tailscale: not found');
+    }),
+    undefined,
+  );
+  assert.equal(await tailnetBase(4317, async () => '{"Self":{}}'), undefined);
+  assert.equal(tailscaleServePort(null, 4317), undefined);
+  assert.equal(
+    tailscaleServePort({ Web: { 'x:443': { Handlers: { '/': { Proxy: 'http://localhost:4317/' } } } } }, 4317),
+    443,
+  );
+});
+
+test('B-128: the phone address: config first, else the tailnet lookup at most once a minute; never loopback', async () => {
+  for (const b of ['http://127.0.0.1:4317', 'http://localhost:4317', 'http://[::1]:4317', 'http://127.1.2.3'])
+    assert.ok(isLoopbackBase(b), b);
+  for (const b of ['https://base.tailnet-fixture.ts.net', 'http://100.64.0.1:4317', 'not a url'])
+    assert.ok(!isLoopbackBase(b), b);
+  let now = 0;
+  let lookups = 0;
+  let configured: string | undefined;
+  let tailnet: string | undefined = 'https://base.tailnet-fixture.ts.net';
+  const resolve = phoneBaseResolver({
+    configured: () => configured,
+    tailnet: async () => {
+      lookups++;
+      return tailnet;
+    },
+    clock: () => now,
+  });
+  assert.equal(await resolve(), 'https://base.tailnet-fixture.ts.net');
+  tailnet = undefined;
+  assert.equal(await resolve(), 'https://base.tailnet-fixture.ts.net', 'cached');
+  assert.equal(lookups, 1);
+  now += 60_000;
+  assert.equal(await resolve(), undefined, 'looked up again after a minute');
+  assert.equal(lookups, 2);
+  configured = 'https://phone.tailnet-fixture.ts.net/ignored/path';
+  assert.equal(await resolve(), 'https://phone.tailnet-fixture.ts.net', 'config wins, as an origin');
+  assert.equal(lookups, 2);
+  configured = 'http://127.0.0.1:4317';
+  now += 60_000;
+  tailnet = 'http://localhost:4317';
+  assert.equal(await resolve(), undefined, 'a loopback address is never the phone address');
+  const failing = phoneBaseResolver({
+    configured: () => {
+      throw new Error('Invalid config.json.');
+    },
+    tailnet: async () => {
+      throw new Error('boom');
+    },
+  });
+  assert.equal(await failing(), undefined);
+});
+
+test('B-128: config phone.url takes an http(s) address a phone opens, nothing else', () => {
+  const dir = temp();
+  const home = join(dir, 'home');
+  try {
+    initialize(home);
+    const config = JSON.parse(readFileSync(join(home, 'config.json'), 'utf8')) as Record<string, unknown>;
+    const withPhone = (phone: unknown) => {
+      writeFileSync(join(home, 'config.json'), JSON.stringify({ ...config, phone }));
+      return readConfig(home).phone;
+    };
+    assert.deepEqual(withPhone({ url: 'https://base.tailnet-fixture.ts.net/dashboard/' }), {
+      url: 'https://base.tailnet-fixture.ts.net',
+    });
+    for (const bad of [
+      { url: 'http://127.0.0.1:4317' },
+      { url: 'javascript:alert(1)' },
+      { url: 'https://base.tailnet-fixture.ts.net', extra: 1 },
+      'https://base.tailnet-fixture.ts.net',
+      null,
+    ])
+      assert.throws(() => withPhone(bad), /Invalid phone/, JSON.stringify(bad));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

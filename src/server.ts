@@ -1,6 +1,15 @@
 import { SessionBook } from './session-book.ts';
 import { DEVICE_IDLE_MS, DeviceBook, deviceName, PairingCodes, QR_PAIRING_CODE_TTL_MS } from './device-book.ts';
-import { pairingBase, pairingLink, qrEncoder, qrRows, type QrEncoder } from './pairing-qr.ts';
+import {
+  isLoopbackBase,
+  pairingBase,
+  pairingLink,
+  phoneBaseHint,
+  qrEncoder,
+  qrRows,
+  type PhoneBase,
+  type QrEncoder,
+} from './pairing-qr.ts';
 import { DashboardFeed } from './dashboard-feed.ts';
 import { toolListing } from './tool-listing.ts';
 import { createServer, type IncomingMessage, type RequestListener } from 'node:http';
@@ -100,6 +109,11 @@ export function makeServer(
     clock?: () => number;
     /** F-118-T05: the QR encoder for pairing links; the vendored one by default (tests pass a double). */
     qrEncoder?: QrEncoder;
+    /**
+     * B-128: the address a phone opens (config phone.url, else this machine's tailnet name), used when Settings asks from
+     * a loopback page; none by default (tests inject one; Tailscale never runs in tests).
+     */
+    phoneBase?: PhoneBase;
     /** Health sampling interval (F-103-T01 default 60 s); tests shorten it. */
     healthSampleIntervalMs?: number;
   } = {},
@@ -666,15 +680,24 @@ export function makeServer(
             return;
           }
         }
+        // B-128: a page opened at 127.0.0.1 (nerv open dashboard) sends an address a phone cannot open; the server
+        // puts its own phone address in its place, never one the client names. Without one, the link stays, with a hint.
+        let phoneHint: string | undefined;
+        if (base && isLoopbackBase(base)) {
+          const phone = pairingBase(await (options.phoneBase?.() ?? Promise.resolve(undefined)).catch(() => undefined));
+          if (phone && !isLoopbackBase(phone)) base = phone;
+          else phoneHint = phoneBaseHint(req.socket.localPort ?? 4317);
+        }
         const minted = pairing.mint(base ? QR_PAIRING_CODE_TTL_MS : undefined);
         if (!minted) reply(429, { error: 'Too many unused pairing codes; wait a few minutes.' });
         else if (!base) reply(201, minted);
         else {
           const link = pairingLink(base, minted.code, minted.expiresAt);
+          const extra = phoneHint ? { phoneHint } : {};
           try {
-            reply(201, { ...minted, link, qr: qrRows((options.qrEncoder ?? qrEncoder)(link)) });
+            reply(201, { ...minted, link, ...extra, qr: qrRows((options.qrEncoder ?? qrEncoder)(link)) });
           } catch (e) {
-            reply(201, { ...minted, link, qrError: e instanceof Error ? e.message : 'No QR.' });
+            reply(201, { ...minted, link, ...extra, qrError: e instanceof Error ? e.message : 'No QR.' });
           }
         }
       } else if (!options.native && req.method === 'GET' && path === '/api/devices') {

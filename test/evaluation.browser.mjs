@@ -618,7 +618,10 @@ test(
         await evaluate(`document.querySelector('#btn-pair-device').click()`);
         await until(`document.querySelector('#settings-pair svg.pair-qr')!==null`);
         const link = texts.at(-1);
-        assert.match(link, /^https:\/\/base\.tailnet-fixture\.ts\.net\/dashboard\/#pair=[A-Z2-9]{4}-[A-Z2-9]{4}&until=\d+$/);
+        assert.match(
+          link,
+          /^https:\/\/base\.tailnet-fixture\.ts\.net\/dashboard\/#pair=[A-Z2-9]{4}-[A-Z2-9]{4}&until=\d+$/,
+        );
         const box = await evaluate(`document.querySelector('#settings-pair').textContent`);
         assert.ok(!box.includes('which a phone cannot open'), 'no loopback warning: ' + box);
         assert.match(box, /base\.tailnet-fixture\.ts\.net/, 'says which address the QR opens');
