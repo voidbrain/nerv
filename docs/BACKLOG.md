@@ -1629,7 +1629,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: merge the PR on green CI; then the owner check (B-122-T02).
+💻 **→** Next: merge PR #719 on green CI; then the owner check (B-122-T02).
 
 | | |
 |---|---|
@@ -1652,9 +1652,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | B-122-T01 (Test: `test/update-foreground-runtime.test.ts`) |
+| PR / evidence | [PR #719](https://github.com/voidbrain/nerv/pull/719) (Test: `test/update-foreground-runtime.test.ts`) |
 | Opened | 2026-11-24 |
-| Verification | Unit/integration 2026-11-24: `test/update-foreground-runtime.test.ts` (2 of 2) and the lifecycle suites pass locally. Owner check on NERV-01: Pending (B-122-T02). |
+| Verification | Unit/integration 2026-11-24: `test/update-foreground-runtime.test.ts` (2 of 2) and the lifecycle suites pass locally; `npm test` 1358 pass, 0 fail; gauntlet `nerv-system-flows` (incl. stress, browser) passed. Owner check on NERV-01: Pending (B-122-T02). |
 | Reviewed | 2026-11-24 |
 
 </details>
