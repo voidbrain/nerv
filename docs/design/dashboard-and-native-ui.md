@@ -5,7 +5,7 @@ Detailed component, visual, and interaction rules for the NERV dashboard (`web/p
 ## Dashboard themes and lore
 
 - **Three-part selector:** **Theme** (*Eva* or *Simple*), **Mode** (*dark* or *light*), **Colour** (*orange*, *blue*, *green*, *violet*, or *ochre*).
-- **Tokens:** `palette()` in `dashboard.js` is the single source of truth; `test/dashboard.test.ts` enforces WCAG AA (4.5:1) across all 20 combinations. Eva · Dark · Orange matches `:root`. Legacy names map to their nearest combination.
+- **Tokens:** `palette()` in `dashboard.js` is the single source of truth; `test/dashboard.test.ts` enforces WCAG AA (4.5:1) across all 20 combinations. Eva · Dark · Orange matches `:root`. Legacy names map to their nearest combination. `--qr-ink`/`--qr-paper` (pairing QR, F-118-T05) stay black on white outside `palette()`.
 - **Eva lore scripts (`.jp-only`):** Japanese kanji (`.mk`, `--kanji`) for MAGI seats and Hebrew (`lang="he"`, no letter-spacing) for the 11 numbered Sephirot nodes; hidden in *Simple* theme.
 - **Build badge:** outlined header button next to the clock showing `v1.N` (first-parent commits on `main`, package version fallback), with `git rev-parse --short` hover/copy state.
 
