@@ -7,6 +7,7 @@ import {
   RelocationRefusedError,
   STANDBY_DB_FILE,
   checkRelocationReadiness,
+  checkStandbyCandidate,
   relocateCoordinator,
   type RelocateCoordinatorInput,
   type RelocateCoordinatorResult,
@@ -284,6 +285,41 @@ function derive(
 }
 
 /**
+ * #717 review: the refusals this base's own stores decide (not named, not a verified standby, a standby behind
+ * an epoch it acked) come before the epoch push, so a move that cannot happen never tells another base the new
+ * epoch (which would fence the main that is running). A base already active at the new epoch skips them.
+ */
+function localPrecheck(input: PromoteCoordinatorInput, mainDbPath: string, standbyDbPath: string): void {
+  const db = new DatabaseSync(mainDbPath);
+  try {
+    const registry = new Registry(db, input.rootPublicKey);
+    const own = keyIdentity(input.ownPublicKey);
+    const self = registry.bases().find((b) => b.status === 'enrolled' && keyIdentity(b.publicKey) === own);
+    if (!self) refuse('not_named_main', 'This base is not enrolled under the pinned root.');
+    const newEpoch = registry.mainEpoch();
+    const current = readCoordinatorFencingState(db);
+    if (
+      registry.main() === self.baseId &&
+      current?.replicationMode === 'active' &&
+      current.coordinatorEpoch === newEpoch
+    )
+      return;
+    const candidate = existsSync(standbyDbPath) ? new DatabaseSync(standbyDbPath) : db;
+    try {
+      checkStandbyCandidate({
+        candidateDb: candidate,
+        selfBaseId: self.baseId,
+        registryMain: { baseId: registry.main(), coordinatorEpoch: newEpoch },
+      });
+    } finally {
+      if (candidate !== db) candidate.close();
+    }
+  } finally {
+    db.close();
+  }
+}
+
+/**
  * `nerv kaji promote` (F-016-T17): checks readiness from verified records, stops the service (the marker
  * keeps `serve` from starting while the stores swap), waits out the old lease on both clocks, promotes,
  * and starts the service again. A re-run after a crash resumes: the swap recovers from any step, and a
@@ -311,6 +347,7 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
   if (!existsSync(mainDbPath) && existsSync(archivePath) && existsSync(standbyDbPath))
     renameSync(standbyDbPath, mainDbPath);
   if (!existsSync(mainDbPath)) throw new Error(`No store at ${mainDbPath}: nothing to promote.`);
+  localPrecheck(input, mainDbPath, standbyDbPath);
   if (input.pushEpoch) {
     const db = new DatabaseSync(mainDbPath);
     try {
@@ -332,8 +369,9 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
   }
   const d = derive(input, mainDbPath, standbyDbPath, monoSinceNs);
   if (d.alreadyActive) {
-    if (!existsSync(marker)) throw new Error(`This base is already the active coordinator at epoch ${d.newEpoch}.`);
     // F-016-T08: the marker goes first, or the service it starts refuses to run (serve checks the marker).
+    // #717 review: with no marker, an earlier run failed or died between removing it and starting the service:
+    // start it again (idempotent), so running kaji promote again always recovers.
     rmSync(marker, { force: true });
     await input.service.start();
     return { resumed: true, newEpoch: d.newEpoch };
