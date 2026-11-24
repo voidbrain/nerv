@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { generateKeyPairSync } from 'node:crypto';
-import { mkdtempSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -15,6 +15,7 @@ import {
   RELOCATION_HORIZON_ACKED_MS,
   RELOCATION_HORIZON_CONSERVATIVE_MS,
   RelocationRefusedError,
+  STANDBY_DB_FILE,
   checkRelocationReadiness,
   drainCoordinator,
   relocationHorizonMs,
@@ -24,7 +25,17 @@ import {
 } from '../src/coordinator-relocation.ts';
 import { COORDINATOR_STATE_SCHEMA } from '../src/coordinator-snapshot.ts';
 import { runKajiCommand } from '../src/cli-kaji.ts';
-import { Registry, baseKey, createRootKey, enrolmentArgs, signRecord, ROOT_KEY_FILE } from '../src/kaji.ts';
+import {
+  Registry,
+  baseKey,
+  createRootKey,
+  enrolmentArgs,
+  signRecord,
+  ROOT_KEY_FILE,
+  type RegistryBody,
+} from '../src/kaji.ts';
+import { pinKajiRoot, setBase } from '../src/config.ts';
+import { PROMOTION_MARKER_FILE, assertNoPromotionInProgress, promoteCoordinator } from '../src/coordinator-promote.ts';
 import { Store } from '../src/store.ts';
 
 const PASS = 'neutral test passphrase';
@@ -533,5 +544,203 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
     // The last ack counts from the standby's own record, not from the caller.
     standby.db.prepare('UPDATE standby_lease_state SET last_ack_wall_ms = 30000 WHERE id = 1').run();
     refusal(() => check({}), 'horizon_not_passed');
+  });
+});
+
+describe('F-016-T17: nerv kaji promote stops the service, derives its inputs from verified records and resumes', () => {
+  /** A base (NERV-02) holding the owner's main record at epoch 3 and a verified standby of epoch 2 from NERV-01. */
+  async function promotionHome(o: { revokeOld?: boolean } = {}) {
+    const dir = mkdtempSync(join(tmpdir(), 'nerv-promote-'));
+    const home = join(dir, 'home');
+    mkdirSync(home, { recursive: true });
+    const root = generateKeyPairSync('ed25519');
+    const rootPub = root.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+    setBase(home, { id: 'NERV-02', name: 'Tabgha' });
+    pinKajiRoot(home, rootPub, true);
+    const oldKey = generateKeyPairSync('ed25519');
+    const oldPub = oldKey.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+    const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+    const reg = new Registry(store.db, rootPub);
+    let serial = 0;
+    const add = (body: Record<string, unknown>) =>
+      reg.add(
+        signRecord(root.privateKey, {
+          ...body,
+          serial: ++serial,
+          issued: '2026-11-24T10:00:00.000Z',
+        } as unknown as RegistryBody),
+      );
+    add({ kind: 'enrol', baseId: 'NERV-01', name: 'Tokyo', publicKey: oldPub, address: '127.0.0.1:4320' });
+    add({
+      kind: 'enrol',
+      baseId: 'NERV-02',
+      name: 'Tabgha',
+      publicKey: baseKey(home).publicKey,
+      address: '127.0.0.1:4321',
+    });
+    add({ kind: 'main', baseId: 'NERV-01', coordinatorEpoch: 2 });
+    if (o.revokeOld) add({ kind: 'revoke', baseId: 'NERV-01', publicKey: oldPub });
+    add({ kind: 'main', baseId: 'NERV-02', coordinatorEpoch: 3 });
+    store.close();
+    const standby = new Store(join(home, STANDBY_DB_FILE));
+    setState(standby.db, 2, 'standby', 7, 'digest-7');
+    standby.close();
+    const oldMain = new Store(':memory:');
+    setState(oldMain.db, 2, 'active', 7, 'digest-7');
+    const receipt = signDrainReceipt(
+      oldKey.privateKey,
+      drainCoordinator(oldMain.db, { baseId: 'NERV-01', coordinatorEpoch: 2, newMainBaseId: 'NERV-02', newEpoch: 3 }),
+    );
+    const receiptFile = join(dir, 'receipt.json');
+    writeFileSync(receiptFile, JSON.stringify(receipt));
+    const events: string[] = [];
+    const state = () => {
+      const db = new DatabaseSync(join(home, 'nerv.sqlite'));
+      try {
+        return readCoordinatorFencingState(db);
+      } finally {
+        db.close();
+      }
+    };
+    const service = {
+      stop: async () => {
+        events.push(`stop:${existsSync(join(home, STANDBY_DB_FILE)) ? 'standby-present' : 'swapped'}`);
+        assert.throws(() => assertNoPromotionInProgress(home), /promotion is in progress/);
+      },
+      start: async () => {
+        events.push(`start:${state()?.replicationMode ?? 'none'}`);
+      },
+    };
+    let wall = Date.now();
+    let mono = 0n;
+    const clock = {
+      wall: () => wall,
+      mono: () => mono,
+      sleep: async (ms: number) => {
+        wall += ms;
+        mono += BigInt(ms) * 1_000_000n;
+      },
+    };
+    return {
+      dir,
+      home,
+      oldKey,
+      receiptFile,
+      events,
+      state,
+      service,
+      clock,
+      ownPublicKey: baseKey(home).publicKey,
+      rootPub,
+      cleanup: () => rmSync(dir, { recursive: true, force: true }),
+    };
+  }
+
+  it('planned: stops the service before the swap, verifies the receipt against the registry key, restarts after', async () => {
+    const f = await promotionHome();
+    try {
+      const base = {
+        home: f.home,
+        rootPublicKey: f.rootPub,
+        ownPublicKey: f.ownPublicKey,
+        confirmOldHostDown: false,
+        service: f.service,
+        clock: f.clock,
+      };
+      // A receipt signed by a key the registry does not hold for the previous main is refused, service untouched.
+      const forged = join(f.dir, 'forged.json');
+      const other = generateKeyPairSync('ed25519');
+      const signed = JSON.parse(readFileSync(f.receiptFile, 'utf8')) as SignedDrainReceipt;
+      writeFileSync(forged, JSON.stringify(signDrainReceipt(other.privateKey, signed.receipt)));
+      await assert.rejects(
+        promoteCoordinator({ ...base, drainReceiptFile: forged }),
+        (err: unknown) => err instanceof RelocationRefusedError && err.reason === 'drain_receipt_invalid',
+      );
+      assert.deepEqual(f.events, []);
+      assert.doesNotThrow(() => assertNoPromotionInProgress(f.home));
+
+      const res = await promoteCoordinator({ ...base, drainReceiptFile: f.receiptFile });
+      assert.ok(!('resumed' in res));
+      assert.deepEqual(f.events, ['stop:standby-present', 'start:active']);
+      assert.equal(f.state()?.coordinatorEpoch, 3);
+      assert.doesNotThrow(() => assertNoPromotionInProgress(f.home));
+      // NERV-01 is still enrolled: no sole lease; the new main waits for its first standby ack.
+      assert.equal(f.state()?.leaseExpiresAt, 0);
+    } finally {
+      f.cleanup();
+    }
+  });
+
+  it('unplanned: needs the owner confirmation or a root-signed revoke, waits on both clocks, and resumes after a crash', async () => {
+    const f = await promotionHome();
+    try {
+      await assert.rejects(
+        promoteCoordinator({
+          home: f.home,
+          rootPublicKey: f.rootPub,
+          ownPublicKey: f.ownPublicKey,
+          confirmOldHostDown: false,
+          service: f.service,
+          clock: f.clock,
+        }),
+        (err: unknown) => err instanceof RelocationRefusedError && err.reason === 'old_host_unconfirmed',
+      );
+      assert.deepEqual(f.events, []);
+    } finally {
+      f.cleanup();
+    }
+
+    const g = await promotionHome({ revokeOld: true });
+    try {
+      const base = {
+        home: g.home,
+        rootPublicKey: g.rootPub,
+        ownPublicKey: g.ownPublicKey,
+        confirmOldHostDown: false,
+        service: g.service,
+        clock: g.clock,
+      };
+      const start = g.clock.wall();
+      await assert.rejects(promoteCoordinator({ ...base, failAfterStep: 4 }), /Injected crash after step 4/);
+      assert.ok(g.clock.wall() - start >= RELOCATION_HORIZON_CONSERVATIVE_MS, 'the conservative wait passed first');
+      assert.deepEqual(g.events, ['stop:standby-present']);
+      // The service stays down while the promotion is unfinished.
+      assert.throws(() => assertNoPromotionInProgress(g.home), /promotion is in progress/);
+
+      const res = await promoteCoordinator(base);
+      assert.ok(!('resumed' in res));
+      assert.deepEqual(g.events, ['stop:standby-present', 'stop:swapped', 'start:active']);
+      assert.equal(g.state()?.coordinatorEpoch, 3);
+      assert.ok((g.state()?.leaseExpiresAt ?? 0) > 0, 'the only enrolled base arms its own lease');
+
+      // A crash after activation: a re-run only finishes (restart, guard cleared).
+      writeFileSync(join(g.home, PROMOTION_MARKER_FILE), '{}');
+      const again = await promoteCoordinator(base);
+      assert.ok('resumed' in again);
+      assert.equal(g.events.at(-1), 'start:active');
+      assert.doesNotThrow(() => assertNoPromotionInProgress(g.home));
+    } finally {
+      g.cleanup();
+    }
+  });
+
+  it('kaji promote runs from the CLI with the receipt file and the injected service control', async () => {
+    const f = await promotionHome();
+    try {
+      const store = new Store(join(f.home, 'nerv.sqlite'), undefined, { home: f.home });
+      const config = { kaji: { root: f.rootPub, rootBinding: true }, base: { id: 'NERV-02' } } as unknown as Parameters<
+        typeof runKajiCommand
+      >[3];
+      store.close();
+      await runKajiCommand(['promote', '--drain-receipt', f.receiptFile], f.home, store, config, {
+        readSecret: async () => PASS,
+        flag: (n: string) => (n === '--drain-receipt' ? f.receiptFile : undefined),
+        promotion: { service: f.service, clock: f.clock },
+      });
+      assert.deepEqual(f.events, ['stop:standby-present', 'start:active']);
+      assert.equal(f.state()?.coordinatorEpoch, 3);
+    } finally {
+      f.cleanup();
+    }
   });
 });
