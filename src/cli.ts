@@ -191,6 +191,10 @@ let store: Store | undefined;
 let running = false;
 try {
   const home = dataHome();
+  // F-016-T17 fourth review: while a promotion is unfinished no command opens the store (it would create or write
+  // an empty nerv.sqlite mid-swap); only kaji promote resumes it, and help and service still answer.
+  if (!(command === 'kaji' && args[0] === 'promote') && !['help', 'service', undefined].includes(command))
+    assertNoPromotionInProgress(home);
   if (!['root-migration', 'nodes', 'help'].includes(command ?? 'help')) assertRootMigrationReady(home);
   if (
     !['nodes', 'help', 'backup'].includes(command ?? 'help') &&

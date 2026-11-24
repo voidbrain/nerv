@@ -218,6 +218,14 @@ function derive(
       // standby-store base since this one acked it). Unplanned, the old main is revoked with the root key, or
       // every unrevoked base, the old main included, acked the new epoch.
       const oldHostDownConfirmed = previousRevoked;
+      // Fourth review: a revoke stops the old main only where the base acking its lease holds that revoke. Every
+      // unrevoked base must hold the new epoch (and so the revoke) before an unplanned move; epoch pushes measure
+      // that (F-016-T18). Without a measurement, only a base with no other unrevoked base may promote.
+      if (others.length)
+        refuse(
+          'old_host_unconfirmed',
+          `Not every unrevoked base is known to hold the new epoch and the revoke (${others.join(', ')}): one of them could still ack ${previousMainBaseId}'s lease. Import the records there (kaji export, kaji import) and push again.`,
+        );
       liveness = (nowMs, monoNowNs) => ({
         kind: 'unplanned',
         epochSeenAtMs,
