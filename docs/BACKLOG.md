@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 5 | 3 | 20 | 6 |
+| **This week** | 5 | 3 | 21 | 6 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 37 | 27 |
-| **Require Human 🧑** | 11 | 9 |
+| **Open** | 37 | 28 |
+| **Require Human 🧑** | 11 | 10 |
 
 ### Require Human 🧑
 
@@ -26,14 +26,15 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-004](#f-004) |  | [B-107](#b-107) |  |
 | [F-012](#f-012) |  | [B-113](#b-113) |  |
 | [F-086](#f-086) |  | [B-122](#b-122) |  |
-| [F-087](#f-087) |  | [B-056](#b-056) |  |
-| [F-092](#f-092) |  | [B-096](#b-096) |  |
-| [F-060](#f-060) |  | [B-110](#b-110) |  |
-| [F-007](#f-007) |  | [B-112](#b-112) |  |
+| [F-087](#f-087) |  | [B-128](#b-128) |  |
+| [F-092](#f-092) |  | [B-056](#b-056) |  |
+| [F-060](#f-060) |  | [B-096](#b-096) |  |
+| [F-007](#f-007) |  | [B-110](#b-110) |  |
+|  |  | [B-112](#b-112) |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 85.5 h agent + 11.25 h owner across 119 open steps of 36 features and 27 other records. 158.5 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 87 h agent + 11.25 h owner across 120 open steps of 36 features and 28 other records. 158.5 h of actual effort recorded on 151 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2185,6 +2186,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-122-T01: [PR #719](https://github.com/voidbrain/nerv/pull/719). [PR #719](https://github.com/voidbrain/nerv/pull/719) (Test: `test/update-foreground-runtime.test.ts`) |
 | Opened | 2026-11-24 |
 | Verification | Unit/integration 2026-11-24: `test/update-foreground-runtime.test.ts` (2 of 2) and the lifecycle suites pass locally; `npm test` 1358 pass, 0 fail; gauntlet `nerv-system-flows` (incl. stress, browser) passed. Owner check on NERV-01: Pending (B-122-T02). |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-128"></a>[🐞 B-128](#top)
+
+**Settings → Pair a device on a 127.0.0.1 dashboard puts a loopback address in the QR, which a phone cannot open**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update reaches the service, on the Mac run `nerv open dashboard`, Settings → Pair a device: the note under the QR reads "The QR opens NAME.TAILNET.ts.net, this Mac's address for the phone."; scan it with the phone: Safari opens the dashboard and shows the code.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-24: Settings → Pair a device (F-118-T05, [PR #716](https://github.com/voidbrain/nerv/pull/716)) builds the QR link from the address the dashboard was opened at, so on the Mac (`nerv open dashboard`) it encodes `http://127.0.0.1:4317/dashboard/#pair=…`, which a phone cannot open; Settings only warns. `nerv open --phone --qr` already uses this machine's tailnet name. |
+| **Reproduce** | `nerv open dashboard` on the Mac, Settings → Pair a device: the QR opens `127.0.0.1` on the phone. |
+| **Check** | From a loopback page the server resolves the phone's address itself (config `phone.url`, else the tailnet name, as the CLI does, through one shared helper); only without either does the loopback link stay, with a hint how to set one. A committed join test fails first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-128-t01"></a>B-128-T01 — Settings pairing QR uses the phone's address, not 127.0.0.1 | 1.5 h | 0 h | 1.5 h | Implemented; verification pending |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-128.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #726](https://github.com/voidbrain/nerv/pull/726) |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-24: committed first and failing on main: `test/pairing-qr.test.ts` "B-128 join" (session mints from 127.0.0.1, localhost and [::1] pages → link at the injected tailnet address; with no address → loopback link and hint) and `test/evaluation.browser.mjs` "B-128" (production dashboard at 127.0.0.1, Settings → Pair a device → QR of the tailnet link, no loopback warning) plus the F-118-T05 browser test's hint assertion; the join test then spends each code (at most three pending), unchanged in what it asserts. With the fix: `test/pairing-qr.test.ts` 13/13 (new unit tests for the serve port, resolver cache and config); every test reading live.js or web/src plus config-reading and touched tests 509/511 (2 skipped); `npm test` first caught the EVA runner reading `config.ts` without the vendored encoder (`test/eva-runner.test.ts`), so the address checks moved to the import-free `src/pairing-address.ts`, then `npm test` passes; `test:headless` and `check:evals` pass; gauntlet system cases all pass; the four multi-step-agent model cases stay pending (they need an owner-approved model budget). Tests never run tailscale (resolver injected). A real phone scan is not yet observed. |
 | Reviewed | 2026-11-24 |
 
 </details>
