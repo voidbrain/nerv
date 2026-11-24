@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { generateKeyPairSync, type KeyObject } from 'node:crypto';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -10,10 +10,16 @@ import { runKajiCommand } from '../src/cli-kaji.ts';
 import { readCoordinatorFencingState } from '../src/coordinator-authority.ts';
 import { registryPort } from '../src/coordinator-epoch.ts';
 import { applyCoordinatorLease } from '../src/coordinator-lease.ts';
-import { STANDBY_DB_FILE, type SignedDrainReceipt } from '../src/coordinator-relocation.ts';
+import { STANDBY_DB_FILE, drainCoordinator, type SignedDrainReceipt } from '../src/coordinator-relocation.ts';
 import type { ReplicationBatch } from '../src/coordinator-replication.ts';
 import { coordinatorLeaseService, coordinatorTelegramContinuity } from '../src/coordinator-serve.ts';
-import { replicationBatchAt, replicationStatus, seedStandbyStore } from '../src/coordinator-shipping.ts';
+import {
+  ReplicationShipper,
+  captureReplicationBatch,
+  replicationBatchAt,
+  replicationStatus,
+  seedStandbyStore,
+} from '../src/coordinator-shipping.ts';
 import { COORDINATOR_STATE_SCHEMA } from '../src/coordinator-snapshot.ts';
 import { pinKajiRoot, readConfig, setBase } from '../src/config.ts';
 import { KajiLink } from '../src/kaji-link.ts';
@@ -194,6 +200,12 @@ async function twoBases() {
     },
   };
 }
+
+function writeFileText(path: string, text: string) {
+  writeFileSync(path, text);
+}
+
+const modeOf = (db: DatabaseSync) => readCoordinatorFencingState(db)?.replicationMode;
 
 async function kaji(home: string, store: Store, args: string[]): Promise<string> {
   const lines: string[] = [];
@@ -393,6 +405,174 @@ describe('F-016-T20: the standby store is seeded and kept current while serve ru
         2,
       );
       assert.equal(readCoordinatorFencingState(x.store.db)?.replicationMode, 'fenced');
+    } finally {
+      await t.close();
+    }
+  });
+});
+
+describe('F-016-T20 review (#725)', () => {
+  it('BLOCKER 1: kaji relocate pushed the new main record to the standby; the drain still ships the final batch to it', async () => {
+    const t = await twoBases();
+    try {
+      const { x, b } = t;
+      await kaji(x.home, x.store, ['standby', B]);
+      // kaji relocate pushes the signed records to every reachable base, the standby included.
+      const record = t.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 });
+      new Registry(x.store.db, t.rootPub).add(record);
+      new Registry(b.store.db, t.rootPub).add(record);
+      outboxRow(x.store.db, OUT_2);
+      // serve's shipper still reaches the standby with the old main's batches (same epoch as its store).
+      assert.equal(await x.lease.shipper(x.link).tick(), 'current');
+      outboxRow(x.store.db, '00000000-0000-4000-8000-0000000000d3');
+      const file = join(t.dir, 'receipt.json');
+      assert.match(await kaji(x.home, x.store, ['drain', file]), /Drained epoch 2/);
+      const receipt = (JSON.parse(readFileSync(file, 'utf8')) as SignedDrainReceipt).receipt;
+      const standby = readStandby(b.home, headOf);
+      assert.deepEqual([standby.head_seq, standby.state_digest], [receipt.finalSeq, receipt.stateDigest]);
+      // Another base (not named main at the standby's epoch) is still refused.
+      const head = headOf(x.store.db).head_seq;
+      const forged = { ...replicationBatchAt(x.store.db, 2, head)!, sourceBaseId: B };
+      await x.link.start(600_000);
+      await assert.rejects(b.link.replicate(X, forged, Date.now() + 60_000), /\(403\)/);
+    } finally {
+      await t.close();
+    }
+  });
+
+  it('BLOCKER 2 and SHOULD-FIX 3: a write after the flush stops the fence; a re-run (or interrupted) drain flushes again; --cancel returns to active', async () => {
+    const t = await twoBases();
+    try {
+      const { x, b } = t;
+      await kaji(x.home, x.store, ['standby', B]);
+      new Registry(x.store.db, t.rootPub).add(t.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }));
+      outboxRow(x.store.db, OUT_2);
+      await x.lease.shipper(x.link).flush();
+      // An effect in flight commits after the flush confirmed the head.
+      x.store.outboxDone(OUT_2, { ok: true });
+      const drain = () =>
+        drainCoordinator(x.store.db, {
+          baseId: X,
+          coordinatorEpoch: 2,
+          newMainBaseId: B,
+          newEpoch: 3,
+          registryMains: [],
+          ranOrAckedEpoch: 2,
+        });
+      assert.throws(drain, /not yet replicated/);
+      assert.equal(modeOf(x.store.db), 'draining', 'interrupted: effects stay stopped, nothing fenced');
+      // The owner runs kaji drain again: it flushes from draining, then fences.
+      const file = join(t.dir, 'receipt.json');
+      assert.match(await kaji(x.home, x.store, ['drain', file]), /Drained epoch 2/);
+      const receipt = (JSON.parse(readFileSync(file, 'utf8')) as SignedDrainReceipt).receipt;
+      const standby = readStandby(b.home, headOf);
+      assert.deepEqual([standby.head_seq, standby.state_digest], [receipt.finalSeq, receipt.stateDigest]);
+      assert.ok(
+        readStandby(
+          b.home,
+          (db) => db.prepare('SELECT done FROM kaji_outbox WHERE id = ?').get(OUT_2) as { done: string },
+        ).done,
+      );
+    } finally {
+      await t.close();
+    }
+  });
+
+  it('SHOULD-FIX 3: kaji drain --cancel returns an interrupted drain to active', async () => {
+    const t = await twoBases();
+    try {
+      const { x } = t;
+      x.store.db.prepare("UPDATE coordinator_state SET replication_mode = 'draining' WHERE id = 1").run();
+      assert.match(await kaji(x.home, x.store, ['drain', '--cancel']), /active again/);
+      assert.equal(modeOf(x.store.db), 'active');
+    } finally {
+      await t.close();
+    }
+  });
+
+  it('SHOULD-FIX 4: the Telegram offset ships only with the batch that holds every change before it', async () => {
+    const t = await twoBases();
+    try {
+      const { x } = t;
+      await kaji(x.home, x.store, ['standby', B]);
+      // The channel saves its offset before it handles the update; the rows it writes are noted after.
+      coordinatorTelegramContinuity(join(x.home, 'nerv.sqlite')).save({ offset: 900, cards: [] });
+      for (let i = 0; i < 250; i += 1)
+        outboxRow(x.store.db, `00000000-0000-4000-8000-${String(1000 + i).padStart(12, '0')}`);
+      const source = { root: t.rootPub, sourceBaseId: X };
+      const first = captureReplicationBatch(x.store.db, source)!;
+      assert.equal(first.telegram, undefined, 'a cut batch carries no offset ahead of its rows');
+      const second = captureReplicationBatch(x.store.db, source)!;
+      assert.equal(second.telegram?.offset, 900);
+      assert.equal(captureReplicationBatch(x.store.db, source), undefined);
+    } finally {
+      await t.close();
+    }
+  });
+
+  it('SHOULD-FIX 5: an updated row keeps its place (rowid order) on the standby', async () => {
+    const t = await twoBases();
+    try {
+      const { x, b } = t;
+      await kaji(x.home, x.store, ['standby', B]);
+      outboxRow(x.store.db, OUT_2);
+      x.store.outboxDone(OUT_1, { ok: true });
+      assert.equal(await x.lease.shipper(x.link).tick(), 'current');
+      const order = (db: DatabaseSync) =>
+        (db.prepare('SELECT id FROM kaji_outbox ORDER BY rowid').all() as { id: string }[]).map((r) => r.id);
+      assert.deepEqual(readStandby(b.home, order), order(x.store.db));
+      assert.deepEqual(order(x.store.db), [OUT_1, OUT_2]);
+    } finally {
+      await t.close();
+    }
+  });
+
+  it('SHOULD-FIX 6: a seed that does not arrive is retried with a growing backoff, not every tick', async () => {
+    const t = await twoBases();
+    try {
+      const { x } = t;
+      x.store.db.prepare('UPDATE coordinator_state SET standby_base_id = ? WHERE id = 1').run(B);
+      let now = 1_000_000;
+      let seeds = 0;
+      const shipper = new ReplicationShipper({
+        db: x.store.db,
+        baseId: X,
+        root: t.rootPub,
+        privateKey: () => baseKey(x.home).privateKey,
+        now: () => now,
+        link: {
+          // The standby answers (it holds no store) but the seed frames never arrive.
+          replicate: async () => ({ ok: false as const, reason: 'not_standby' as const, expectedSeq: 0 }),
+          seedStandby: async () => {
+            seeds += 1;
+            throw new Error('unreachable');
+          },
+        },
+      });
+      outboxRow(x.store.db, OUT_2);
+      assert.equal(await shipper.tick(), 'unreachable');
+      assert.equal(await shipper.tick(), 'behind');
+      now += 10_000;
+      assert.equal(await shipper.tick(), 'unreachable');
+      now += 15_000;
+      assert.equal(await shipper.tick(), 'behind', 'the second wait is longer');
+      now += 10_000;
+      assert.equal(await shipper.tick(), 'unreachable');
+      assert.equal(seeds, 3);
+    } finally {
+      await t.close();
+    }
+  });
+
+  it('minor: an unreadable standby store is reported, never a crash loop', async () => {
+    const t = await twoBases();
+    try {
+      const { x, b } = t;
+      await kaji(x.home, x.store, ['standby', B]);
+      writeFileText(join(b.home, STANDBY_DB_FILE), 'not a database at all, neutral fixture bytes'.repeat(200));
+      outboxRow(x.store.db, OUT_2);
+      assert.equal(await x.lease.shipper(x.link).tick(), 'refused');
+      assert.match(replicationStatus(x.store.db).peer?.lastError ?? '', /unreadable/);
     } finally {
       await t.close();
     }
