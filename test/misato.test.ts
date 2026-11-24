@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
+import { createHash, generateKeyPairSync } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
@@ -15,6 +15,9 @@ import {
 } from '../src/misato.ts';
 import { measureMisatoPrompt } from '../src/prompt-samples.ts';
 import { toolDocs } from '../src/executors.ts';
+import { KajiLink } from '../src/kaji-link.ts';
+import { Registry, createRootKey, signRecord, unlockRootKey, type RegistryBody } from '../src/kaji.ts';
+import { completeRemotePrint, receivePartTransfer, type PartTransfer } from '../src/print-transfer.ts';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
 import { Store } from '../src/store.ts';
@@ -1178,3 +1181,189 @@ test(
     }
   },
 );
+
+// F-121-T04 across every process: the Mac's nervous process resolves and hashes the part, its coordinator sends it over
+// a real Kaji line to Tabgha, which verifies, caches and slices it with a fake slicer; the hand-off is proposed on Tabgha.
+test('F-121-T04: "stampa i piedini di Wisp" with NERV-02 as the slicing base: the part goes over the Kaji line, the hand-off card targets NERV-02', async () => {
+  const foot = 'solid foot\nendsolid foot\n';
+  const digest = createHash('sha256').update(foot).digest('hex');
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-tabgha-'));
+  const tabgha = join(dir, 'home');
+  mkdirSync(tabgha);
+  const profiles = [{ name: 'Test TPU 0.4', machineProfile: 'test-machine.json', materialProfile: 'test-tpu.json' }];
+  writeFileSync(join(tabgha, 'slicer-profiles.json'), JSON.stringify(profiles));
+  const rootKey = unlockRootKey(createRootKey('a long test passphrase').file, 'a long test passphrase');
+  const pair = () => {
+    const k = generateKeyPairSync('ed25519');
+    return {
+      privateKey: k.privateKey,
+      publicKey: k.publicKey.export({ type: 'spki', format: 'der' }).toString('base64'),
+    };
+  };
+  const A = pair(),
+    B = pair();
+  const freePort = () =>
+    new Promise<number>((done) => {
+      const s = createServer();
+      s.listen(0, '127.0.0.1', () => {
+        const p = (s.address() as { port: number }).port;
+        s.close(() => done(p));
+      });
+    });
+  const pa = await freePort(),
+    pb = await freePort();
+  const sb = new Store(':memory:');
+  const rb = new Registry(sb.db, rootKey.publicKey);
+  let serial = 0;
+  const records = [
+    { kind: 'enrol', baseId: 'NERV-01', name: 'Neo Tokyo-3', publicKey: A.publicKey, address: `127.0.0.1:${pa}` },
+    { kind: 'enrol', baseId: 'NERV-02', name: 'Tabgha', publicKey: B.publicKey, address: `127.0.0.1:${pb}` },
+    { kind: 'main', baseId: 'NERV-01' },
+  ].map((body) =>
+    signRecord(rootKey.privateKey, { ...body, serial: ++serial, issued: new Date().toISOString() } as RegistryBody),
+  );
+  for (const r of records) rb.add(r);
+  const registry = (reg: Registry) => ({
+    bases: async () => reg.bases(),
+    records: async () => reg.records(),
+    add: async () => 0,
+    seen: async (u: Record<string, string>) => reg.seen(u),
+    lastSeen: async () => reg.lastSeen(),
+  });
+  const sliced: string[] = [];
+  let la: KajiLink | undefined;
+  const lb = new KajiLink({
+    baseId: 'NERV-02',
+    key: B.privateKey,
+    publicKey: B.publicKey,
+    registry: registry(rb),
+    log: () => {},
+    // Tabgha offers the hand-off to the main base (owner step: `nerv kaji offer bambu.handoff` there).
+    offers: () => ['bambu.handoff'],
+    onPartTransfer: async (from, body) =>
+      receivePartTransfer(tabgha, ['NERV-01'], from, body, {
+        exec: (_bin, args) => {
+          sliced.push(args.at(-1)!);
+          writeFileSync(args[args.indexOf('--export-3mf') + 1]!, 'PK-sliced');
+          return 'estimated printing time: 42m\ntotal filament used [g] = 7.5\n';
+        },
+      }),
+  });
+  const handoff = {
+    gcode3mfPath: join(tabgha, 'prints-out', `${digest.slice(0, 16)}-test-tpu-0-4.gcode.3mf`),
+    profileName: 'Test TPU 0.4',
+    printTimeText: '42m',
+    filamentGrams: 7.5,
+    amsMapping: 'External spool (TPU)',
+    sourceFile: 'kite-5/foot.stl',
+    repeats: 4,
+  };
+  const script = [
+    '{"action":{"tool":"fleet.print","args":{"phrase":"stampa i piedini di Wisp"}}}',
+    JSON.stringify({ action: { tool: 'kaji.run', args: { base: 'NERV-02', tool: 'bambu.handoff', args: handoff } } }),
+  ];
+  const setup = (home: string) => {
+    const config = JSON.parse(readFileSync(join(home, 'config.json'), 'utf8')) as Record<string, unknown>;
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({ ...config, kaji: { root: rootKey.publicKey }, prints: { slicer: 'NERV-02' } }),
+    );
+    writeFileSync(join(home, 'slicer-profiles.json'), JSON.stringify(profiles));
+    mkdirSync(join(home, 'prints', 'kite-5'), { recursive: true });
+    writeFileSync(join(home, 'prints', 'kite-5', 'foot.stl'), foot);
+    const store = new Store(join(home, 'nerv.sqlite'));
+    store.fleet.importFleet(
+      {
+        version: 1,
+        models: [
+          {
+            name: 'Kite 5.1',
+            parts: [
+              { name: 'motor foot', aliases: ['piedini'], file: 'kite-5/foot.stl', count: 4, profile: 'Test TPU 0.4' },
+            ],
+          },
+        ],
+        drones: [{ name: 'Wisp', model: 'Kite 5.1', parts: [] }],
+      },
+      undefined,
+      { slicerProfiles: ['Test TPU 0.4'] },
+    );
+    store.close();
+  };
+  try {
+    await agent(
+      script,
+      async (runtime, _m, _base, _headers, home) => {
+        await runtime.kaji.add(records);
+        runtime.setBaseKey(A.publicKey);
+        // Wired as serve does: the Mac's link hears Tabgha's offers and sends parts for the gate.
+        const link = new KajiLink({
+          baseId: 'NERV-01',
+          key: A.privateKey,
+          publicKey: A.publicKey,
+          registry: runtime.kaji,
+          log: () => {},
+          onOffers: (id, tools) => runtime.notePeerOffers(id, tools),
+        });
+        la = link;
+        const sent: PartTransfer[] = [];
+        runtime.useRemotePrint((pending) =>
+          completeRemotePrint(home, pending, (base, message) => {
+            sent.push(message);
+            return link.sendPartTransfer(base, message);
+          }),
+        );
+        await Promise.all([link.start(200), lb.start(200)]);
+        for (const end = Date.now() + 10_000; !(await runtime.remoteOffers()).length;) {
+          if (Date.now() > end)
+            throw new Error('Tabgha never offered bambu.handoff ' + JSON.stringify(await runtime.bases()));
+          await new Promise((r) => setTimeout(r, 50));
+        }
+        const chat = await runtime.chat('stampa i piedini di Wisp');
+        assert.deepEqual(
+          chat.steps.map((step) => [step.tool, step.outcome]),
+          [
+            ['fleet.print', 'grant'],
+            ['kaji.run', 'approval'],
+          ],
+        );
+        const result = chat.steps[0]!.result as {
+          reply: string;
+          handoff: Record<string, unknown>;
+          handoffBase: string;
+        };
+        assert.match(result.reply, /^Sliced on NERV-02 motor foot/);
+        assert.equal(result.handoffBase, 'NERV-02');
+        assert.deepEqual(result.handoff, handoff);
+        assert.deepEqual(
+          sent.map((m) => m.content !== undefined),
+          [false, true],
+        );
+        assert.deepEqual(sliced, [join(tabgha, 'prints-cache', `${digest}.stl`)]);
+        // The Mac sliced nothing and kept no copy; the hand-off is the owner's card for NERV-02.
+        assert.equal(existsSync(join(home, 'prints-cache')), false);
+        const cards = await runtime.approvals();
+        assert.equal(cards.length, 1);
+        assert.equal(cards[0]!.card.tool, 'kaji.run');
+        assert.deepEqual(cards[0]!.card.args, { base: 'NERV-02', tool: 'bambu.handoff', args: handoff });
+        // The ledger records the slice once, as it came back from NERV-02.
+        const events = (await runtime.events(chat.sortieId)) as {
+          kind: string;
+          payload: { tool?: string; result?: { text?: string } };
+        }[];
+        const done = events.filter((e) => e.kind === 'action.done' && e.payload.tool === 'fleet.print');
+        assert.equal(done.length, 1);
+        assert.match(done[0]!.payload.result!.text!, /Sliced on NERV-02/);
+        assert.equal(existsSync(join(home, 'bambu-launches.log')), false, 'nothing opens before the owner approves');
+      },
+      undefined,
+      undefined,
+      setup,
+    );
+  } finally {
+    await la?.stop();
+    await lb.stop();
+    sb.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

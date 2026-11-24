@@ -36,6 +36,7 @@ import { nodesCommand } from './nodes-cli.ts';
 import { placementEvidence, placementReport } from './placement-report.ts';
 import { backupCommand } from './backup-cli.ts';
 import { storeReceived } from './offhost.ts';
+import { completeRemotePrint, receivePartTransfer } from './print-transfer.ts';
 
 import { checkUpdateAvailability } from './update-availability.ts';
 
@@ -842,6 +843,8 @@ try {
                 return 'refused';
               }
             },
+            // F-121-T04: a part another base sends to slice here, when `prints.accept` names that base.
+            onPartTransfer: async (from, body) => receivePartTransfer(home, live().prints?.accept ?? [], from, body),
             ...createPeerHandlers({
               base: config.base,
               getAoba: () => aoba,
@@ -871,6 +874,10 @@ try {
           runtime.setLinkMetricsProvider(() => kaji?.linkMetrics() ?? []);
           if (kaji) {
             const link = kaji;
+            // F-121-T04: a print request sends the part to the slicing base (`prints.slicer`) over this line.
+            runtime.useRemotePrint((pending) =>
+              completeRemotePrint(home, pending, (base, message) => link.sendPartTransfer(base, message)),
+            );
             runtime.setRemoteSortie(
               (baseId, sortieId) =>
                 link.inspectSortie(baseId, sortieId) as Promise<{

@@ -89,7 +89,15 @@ async function bases(options: { accept?: string[]; maxBytes?: number; profiles?:
       models: [
         {
           name: 'Kite 5.1',
-          parts: [{ name: 'motor foot', aliases: ['piedini'], file: 'kite-5/foot.stl', count: 4, profile: 'Test TPU 0.4' }],
+          parts: [
+            {
+              name: 'motor foot',
+              aliases: ['piedini', 'feet'],
+              file: 'kite-5/foot.stl',
+              count: 4,
+              profile: 'Test TPU 0.4',
+            },
+          ],
         },
       ],
       drones: [{ name: 'Wisp', model: 'Kite 5.1', parts: [] }],
@@ -118,7 +126,13 @@ async function bases(options: { accept?: string[]; maxBytes?: number; profiles?:
     ra.add(r);
     rb.add(r);
   }
-  const la = new KajiLink({ baseId: 'NERV-01', key: A.privateKey, publicKey: A.publicKey, registry: port(ra), log: () => {} });
+  const la = new KajiLink({
+    baseId: 'NERV-01',
+    key: A.privateKey,
+    publicKey: A.publicKey,
+    registry: port(ra),
+    log: () => {},
+  });
   const lb = new KajiLink({
     baseId: 'NERV-02',
     key: B.privateKey,
@@ -191,7 +205,10 @@ test('F-121-T04: the Mac sends the part over the Kaji line; Tabgha verifies, cac
       assert.ok(reply.reply.includes(text), `${text} in: ${reply.reply}`);
     }
     assert.equal(reply.handoffBase, 'NERV-02');
-    assert.equal(reply.handoff!.gcode3mfPath, join(b.tabgha, 'prints-out', `${sha(FOOT).slice(0, 16)}-test-tpu-0-4.gcode.3mf`));
+    assert.equal(
+      reply.handoff!.gcode3mfPath,
+      join(b.tabgha, 'prints-out', `${sha(FOOT).slice(0, 16)}-test-tpu-0-4.gcode.3mf`),
+    );
     assert.equal(reply.handoff!.repeats, 4);
   } finally {
     await b.done();
