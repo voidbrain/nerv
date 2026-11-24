@@ -25,6 +25,9 @@ test(
     const home = mkdtempSync(join(tmpdir(), 'nerv-b123-home-'));
     cpSync(resolve('dist/web/browser'), root, { recursive: true });
     const store = new Store(':memory:');
+  // The adapters the dashboard's poll reads, as test/angular.browser.mjs sets them.
+  store.modelUsage = async (before, limit) => store.usage.page(before, limit);
+  store.lilith = { list: async () => store.memory.list(), episodes: async () => store.memory.episodes() };
     const token = 'u'.repeat(32);
     const handed = [];
     const server = makeServer(store, token, {
