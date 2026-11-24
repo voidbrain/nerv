@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-121-T03",
+  "parent": "F-121",
+  "title": "Owner: enter the parts and print one",
+  "goal": "The owner's printed parts are in the fleet and one part prints from chat",
+  "status": "planned",
+  "acceptance": [
+    "Owner adds the AOS 5 and Pavo20 Pro parts (file paths, TPU profile) via import or chat",
+    "Owner asks to print one part and confirms the Bambu Connect hand-off opens with the right file, count and profile"
+  ],
+  "dependsOn": [
+    "F-121-T02"
+  ],
+  "resources": [
+    "docs/work/records/F-121.md"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; the owner's part list and file paths stay in private fleet data.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h owner",
+    "basis": "Estimated 2026-11-24 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0.0,
+    "baselineAgentHours": 0.0,
+    "estimateAgentHours": 0.0,
+    "ownerHours": 0.5
+  }
+}

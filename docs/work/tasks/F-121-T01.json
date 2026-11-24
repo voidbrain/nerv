@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-121-T01",
+  "parent": "F-121",
+  "title": "Printed parts on drone models",
+  "goal": "Drone models carry printed parts (name, aliases, count, side/variant, file, material, profile, spool); drones inherit them",
+  "status": "planned",
+  "acceptance": [
+    "Store migration: drone model, printed part (count, variant such as left/right, file path, material, slicer profile, external spool flag); a drone links to its model",
+    "Fleet import (F-098-T05) and chat (F-098-T06) can add a model, its parts and link a drone; unknown profiles are refused against the F-087 allowlist",
+    "Neutral fixtures only; tests cover inheritance and a shared part (the same GPS/buzzer enclosure on two models)"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/fleet.ts",
+    "src/store.ts",
+    "src/fleet-import.ts",
+    "test/fleet.test.ts",
+    "docs/work/records/F-121.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; the owner's part list and file paths stay in private fleet data.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h agent",
+    "basis": "Estimated 2026-11-24 at agent speed. Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 3.0,
+    "baselineAgentHours": 3.0,
+    "estimateAgentHours": 3.0
+  }
+}
