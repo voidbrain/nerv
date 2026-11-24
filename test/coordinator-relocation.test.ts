@@ -174,6 +174,8 @@ describe('F-016-T07: owner-initiated relocation with restore; never a context-on
         leaseRevokedAt: 10,
         newMainBaseId: 'NERV-02',
         newEpoch: 3,
+        // B-121 (#721 re-check): no main record was signed between epochs 2 and 3.
+        skippedMains: [],
       });
       assert.equal(readCoordinatorFencingState(oldMain.db)?.replicationMode, 'fenced');
       assert.throws(() => oldMain.assertActiveCoordinator(), /fenced mode/);

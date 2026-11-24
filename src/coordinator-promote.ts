@@ -334,8 +334,32 @@ async function remotePrecheck(
 ): Promise<void> {
   const db = new DatabaseSync(mainDbPath);
   let probe: Awaited<ReturnType<typeof probeCoordinatorEpochs>>;
+  let newEpoch: number;
+  let selfBaseId: string | undefined;
+  let revoked: Set<string>;
+  let registryBetween: { baseId: string; coordinatorEpoch: number }[];
   try {
     db.exec('PRAGMA busy_timeout = 5000');
+    const registry = new Registry(db, input.rootPublicKey);
+    newEpoch = registry.mainEpoch();
+    const own = keyIdentity(input.ownPublicKey);
+    selfBaseId = registry.bases().find((b) => b.status === 'enrolled' && keyIdentity(b.publicKey) === own)?.baseId;
+    revoked = new Set(
+      registry
+        .bases()
+        .filter((b) => b.status === 'revoked')
+        .map((b) => b.baseId),
+    );
+    registryBetween = registry
+      .records()
+      .filter(
+        (r) =>
+          r.body.kind === 'main' &&
+          r.body.baseId !== undefined &&
+          (r.body.coordinatorEpoch ?? 0) > standbyEpoch &&
+          (r.body.coordinatorEpoch ?? 0) < newEpoch,
+      )
+      .map((r) => ({ baseId: r.body.baseId!, coordinatorEpoch: r.body.coordinatorEpoch ?? 0 }));
     probe = await probeCoordinatorEpochs({
       db,
       rootPublicKey: input.rootPublicKey,
@@ -355,7 +379,40 @@ async function remotePrecheck(
       `${ahead.map(([id, epoch]) => `${id} (epoch ${epoch})`).join(', ')} ran or acked a coordinator lease after the epoch ${standbyEpoch} state this standby holds: re-seed it from the epoch ${newest} coordinator first. No base was told the new epoch.`,
     );
   }
-  if (input.drainReceiptFile) return;
+  if (input.drainReceiptFile) {
+    // #721 re-check: a planned move goes on past a base that does not answer, unless that base may have run an
+    // epoch after the standby's state: a main record the drain receipt lists as skipped, or one this base holds.
+    // Each must answer, with the field, at or below the standby's epoch (a revoked base cannot act).
+    let listed: unknown;
+    try {
+      listed = (JSON.parse(readFileSync(input.drainReceiptFile, 'utf8')) as SignedDrainReceipt).receipt?.skippedMains;
+    } catch {
+      listed = undefined; // readiness refuses an unreadable receipt
+    }
+    const skipped = [...(Array.isArray(listed) ? (listed as { baseId?: unknown }[]) : []), ...registryBetween]
+      .map((m) => m.baseId)
+      .filter((id): id is string => typeof id === 'string' && id !== selfBaseId && !revoked.has(id));
+    const must = [...new Set(skipped)].sort();
+    const silent = must.filter((id) => !probe.ranOrAcked.has(id) && !probe.unknown.includes(id));
+    if (silent.length)
+      refuse(
+        'old_host_unconfirmed',
+        `${silent.join(', ')} did not answer: the owner named it main after the epoch ${standbyEpoch} state this standby holds, so it may have run. Reach it (or revoke it with the root key) and run kaji promote again. No base was told the new epoch.`,
+      );
+    // An older NERV says only the newest main record it holds, signed: one later than the standby's state (and
+    // not the new one) may have run, and so may a listed base that cannot say.
+    const unsure = probe.unknown.filter(
+      (id) =>
+        must.includes(id) ||
+        ((probe.unknownMaxSeen.get(id) ?? 0) > standbyEpoch && (probe.unknownMaxSeen.get(id) ?? 0) < newEpoch),
+    );
+    if (unsure.length)
+      refuse(
+        'peer_epoch_unknown',
+        `${unsure.join(', ')} run(s) an older NERV that holds a main record after the epoch ${standbyEpoch} state this standby holds and does not report the epochs it ran: update it (or revoke it with the root key) and run kaji promote again. No base was told the new epoch.`,
+      );
+    return;
+  }
   if (probe.unreachable.length)
     refuse(
       'old_host_unconfirmed',

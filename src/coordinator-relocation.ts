@@ -53,6 +53,12 @@ export interface DrainReceipt {
   readonly newMainBaseId: string;
   /** The epoch the owner signed for the new main: a receipt is never reused for a later relocation. */
   readonly newEpoch: number;
+  /**
+   * B-121 (#721 re-check): every main record this base held that was signed between its epoch and the new one.
+   * Each named base may have run; the planned promote needs each to answer that it did not run later than the
+   * standby's state. Absent from a receipt an older NERV wrote.
+   */
+  readonly skippedMains?: readonly { readonly baseId: string; readonly coordinatorEpoch: number }[];
 }
 
 export interface SignedDrainReceipt {
@@ -66,10 +72,9 @@ export interface SignedDrainReceipt {
  * and epoch the owner signed. Idempotent for the same epoch so a lost reply can be fetched again;
  * refuses any other epoch. The fencing state is read inside the write transaction.
  *
- * B-121 (review of #721): a receipt says this base's epoch ran last, so it refuses when the verified registry
- * holds a main record signed between that epoch and the target: that base may have promoted and run (with a
- * receipt this base gave it, or unplanned), and this base cannot know it did not. Such a re-target goes through
- * an unplanned `kaji promote`, which hears from every unrevoked base which epochs ran.
+ * B-121 (#721 review and re-check): this base cannot know that a main signed between its epoch and the target
+ * never ran (it may have promoted with a receipt from here, or unplanned), so the receipt lists every such record
+ * it holds (`skippedMains`, signed with the rest); the planned promote asks each of those bases.
  */
 export function drainCoordinator(
   db: DatabaseSync,
@@ -85,13 +90,13 @@ export function drainCoordinator(
 ): DrainReceipt {
   if (input.newEpoch <= input.coordinatorEpoch)
     throw new Error(`The new epoch ${input.newEpoch} must be later than ${input.coordinatorEpoch}.`);
-  const between = input.registryMains
-    .filter((m) => m.coordinatorEpoch > input.coordinatorEpoch && m.coordinatorEpoch < input.newEpoch)
+  const skippedMains = input.registryMains
+    .filter(
+      (m): m is { baseId: string; coordinatorEpoch: number } =>
+        m.baseId !== undefined && m.coordinatorEpoch > input.coordinatorEpoch && m.coordinatorEpoch < input.newEpoch,
+    )
+    .map((m) => ({ baseId: m.baseId, coordinatorEpoch: m.coordinatorEpoch }))
     .sort((a, b) => a.coordinatorEpoch - b.coordinatorEpoch);
-  if (between.length)
-    throw new Error(
-      `The owner named ${between.map((m) => `${m.baseId ?? 'a base'} at epoch ${m.coordinatorEpoch}`).join(', ')} after this coordinator's epoch ${input.coordinatorEpoch}: it may have run, so a receipt from here cannot say epoch ${input.coordinatorEpoch} ran last. Move with kaji promote on ${input.newMainBaseId} without a receipt (every unrevoked base must answer).`,
-    );
   const nowMs = input.nowMs ?? Date.now();
   db.exec('BEGIN IMMEDIATE');
   try {
@@ -116,6 +121,7 @@ export function drainCoordinator(
       leaseRevokedAt: nowMs,
       newMainBaseId: input.newMainBaseId,
       newEpoch: input.newEpoch,
+      skippedMains,
     };
   } catch (err) {
     db.exec('ROLLBACK');

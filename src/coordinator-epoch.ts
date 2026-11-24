@@ -96,10 +96,17 @@ export async function pushCoordinatorEpoch(
  */
 export async function probeCoordinatorEpochs(
   input: EpochScope & { readonly push: (baseId: string, records: SignedRecord[]) => Promise<EpochPushReply> },
-): Promise<{ ranOrAcked: Map<string, number>; unknown: string[]; unreachable: string[] }> {
+): Promise<{
+  ranOrAcked: Map<string, number>;
+  unknown: string[];
+  /** The signed newest main epoch each base without the field holds (an older NERV says only that). */
+  unknownMaxSeen: Map<string, number>;
+  unreachable: string[];
+}> {
   const { others } = otherBases(input);
   const ranOrAcked = new Map<string, number>();
   const unknown: string[] = [];
+  const unknownMaxSeen = new Map<string, number>();
   const unreachable: string[] = [];
   await Promise.all(
     others.map(async (baseId) => {
@@ -110,11 +117,13 @@ export async function probeCoordinatorEpochs(
         unreachable.push(baseId);
         return;
       }
-      if (reply.ranOrAckedEpoch === undefined) unknown.push(baseId);
-      else ranOrAcked.set(baseId, reply.ranOrAckedEpoch);
+      if (reply.ranOrAckedEpoch === undefined) {
+        unknown.push(baseId);
+        unknownMaxSeen.set(baseId, reply.maxSeenCoordinatorEpoch);
+      } else ranOrAcked.set(baseId, reply.ranOrAckedEpoch);
     }),
   );
-  return { ranOrAcked, unknown: unknown.sort(), unreachable: unreachable.sort() };
+  return { ranOrAcked, unknown: unknown.sort(), unknownMaxSeen, unreachable: unreachable.sort() };
 }
 
 /** Every enrolled, unrevoked base other than this one acked `epoch` or later, from this base's recorded acks. */
