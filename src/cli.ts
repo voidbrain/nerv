@@ -1,6 +1,6 @@
 #!/usr/bin/env -S node --use-system-ca
 import { tryRunCliCommand } from './cli-commands.ts';
-import { runKajiCommand } from './cli-kaji.ts';
+import { runKajiCommand, runKajiPromoteCommand } from './cli-kaji.ts';
 import { startSnapshots } from './snapshots.ts';
 
 import { createPeerHandlers } from './peer-handlers.ts';
@@ -288,6 +288,10 @@ try {
     const detail = args[0] ? formatCommandHelp(args[0]) : undefined;
     if (args[0] && !detail) throw new Error(`Unknown command: ${args[0]}. Run nerv help for the list.`);
     console.log(detail ?? formatHelp(Math.min(process.stdout.columns || 100, 100)));
+  } else if (command === 'kaji' && args[0] === 'promote') {
+    // F-016-T17 third review: kaji promote never opens a Store first (that would create an empty nerv.sqlite in
+    // the middle of an interrupted swap).
+    await runKajiPromoteCommand(args, home, readConfig(home), { flag });
   } else {
     const config = readConfig(home);
     const scrolls = readScrolls(home);

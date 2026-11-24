@@ -163,7 +163,7 @@ export type RelocationLiveness =
     };
 
 /** Wall time of the last lease ack this standby gave for `epoch` (`standby_lease_state`), if any. */
-export function standbyLastAckMs(db: DatabaseSync, epoch: number): number | undefined {
+function standbyLastAckMs(db: DatabaseSync, epoch: number): number | undefined {
   if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='standby_lease_state'").get())
     return undefined;
   const row = db
