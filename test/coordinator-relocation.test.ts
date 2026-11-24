@@ -1118,6 +1118,7 @@ describe('F-016-T19: Telegram polling is handed over on activation', () => {
         handoverGraceMs: 1000,
       });
     const storeB0 = new Store(join(homeB, 'nerv.sqlite'));
+    let storeB: Store | undefined;
     const a = channel(homeA, 'a', storeA);
     let b = channel(homeB, 'b', storeB0);
     try {
@@ -1159,7 +1160,7 @@ describe('F-016-T19: Telegram polling is handed over on activation', () => {
         soleCoordinator: true,
         liveness: { kind: 'planned', drain, oldMainPublicKey: oldKey.publicKey },
       });
-      const storeB = new Store(join(homeB, 'nerv.sqlite'));
+      storeB = new Store(join(homeB, 'nerv.sqlite'));
       b = channel(homeB, 'b', storeB);
       await b.start(50);
       // The old main's last long poll is still open here (its next authority check is at 400 ms).
@@ -1171,14 +1172,16 @@ describe('F-016-T19: Telegram polling is handed over on activation', () => {
       assert.equal(replies('b').length, 1, 'the new main answered only the new message, not the replayed one');
       assert.equal(calls.find((c) => c.base === 'b' && c.method === 'getUpdates')!.body.offset, 2);
       assert.equal(conflicts, 0, 'no 409 polling race');
-      await b.stop();
-      storeB.close();
     } finally {
+      // Every handle in the two homes is closed before they are removed: Windows cannot delete an open file
+      // (the channels' stop also closes their authority connections).
       await a.stop();
       await b.stop();
       storeA.close();
+      if (storeB0.db.isOpen) storeB0.close();
+      if (storeB?.db.isOpen) storeB.close();
       await new Promise<void>((done) => server.close(() => done()));
-      rmSync(dir, { recursive: true, force: true });
+      rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 });

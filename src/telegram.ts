@@ -534,7 +534,7 @@ export class TelegramChannel {
      * F-016-T19: whether this base holds coordinator authority now. Without it (standby, draining, fenced,
      * lease expired) the channel never polls and makes no Bot API call, so no two bases answer the owner.
      */
-    authority?: () => boolean;
+    authority?: (() => boolean) & { close?: () => void };
     continuity?: TelegramContinuity;
     /** How often a base without authority checks whether it gained it (and an active poll whether it lost it). */
     standbyCheckMs?: number;
@@ -565,7 +565,7 @@ export class TelegramChannel {
       }
     }
   }
-  private readonly authority: (() => boolean) | undefined;
+  private readonly authority: ((() => boolean) & { close?: () => void }) | undefined;
   private readonly continuity: TelegramContinuity | undefined;
   private readonly standbyCheckMs: number;
   private readonly handoverGraceMs: number;
@@ -647,6 +647,8 @@ export class TelegramChannel {
       this.cardQueue,
       this.markupQueue,
     ]);
+    // Releases what the authority check holds open (its store connection), once nothing is in flight.
+    this.authority?.close?.();
   }
   private track(task: Promise<void>): void {
     const p = task

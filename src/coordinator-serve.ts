@@ -94,12 +94,16 @@ export function coordinatorChannelAuthority(input: {
   readonly databasePath: string;
   readonly baseId: string;
   readonly root: string | undefined;
-}): () => boolean {
+}): (() => boolean) & { close(): void } {
   // One connection per channel; the registry is verified again only when the store changed (`data_version`,
   // which moves on every commit by another connection). The lease is checked against the clock on every call.
+  // `close()` (the channel calls it when it stops) releases the connection for good: a closed check answers no,
+  // so a stopped channel never reopens the store (Windows cannot remove or swap a file that is still open).
   let db: DatabaseSync | undefined;
+  let closed = false;
   let cache: { version: number; mainBaseId: string | undefined; epoch: number } | undefined;
-  return () => {
+  const check = () => {
+    if (closed) return false;
     if (!db) {
       db = new DatabaseSync(input.databasePath);
       db.exec('PRAGMA busy_timeout = 1000');
@@ -117,6 +121,13 @@ export function coordinatorChannelAuthority(input: {
       maxSeenCoordinatorEpoch: cache.epoch,
     }).ok;
   };
+  return Object.assign(check, {
+    close: () => {
+      closed = true;
+      db?.close();
+      db = undefined;
+    },
+  });
 }
 
 /** F-016-T19: the Telegram state in `coordinator_state`, replicated to the standby and hydrated on activation. */
