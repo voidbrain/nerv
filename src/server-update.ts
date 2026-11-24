@@ -17,6 +17,7 @@ import {
   type AutoUpdatePolicy,
   type AutoUpdateSchemaCheck,
 } from './update-policy.ts';
+import { dismissUpdaterStatus, readUpdaterStatus, trackUpdaterStart } from './updater-status.ts';
 
 export interface ServerUpdateOptions {
   base?: { id: string; name: string };
@@ -30,6 +31,11 @@ export interface ServerUpdateOptions {
   checkSchemaSafety?: (revision?: string) => Promise<AutoUpdateSchemaCheck> | AutoUpdateSchemaCheck;
   /** Re-read the saved policy on every use, so `nerv update-policy`, the dashboard and the scheduler agree. */
   readUpdatePolicy?: () => AutoUpdatePolicy;
+  /**
+   * B-123: the data home where the outside updater leaves its status; `GET /api/update/status` reads it and the
+   * hand-off marks the run started there. Absent: the route answers null and nothing is read or written.
+   */
+  updaterHome?: string;
   /** F-102-T02: hands the scheduler the same cache and in-flight guard the routes use. */
   exposeUpdateControl?: (control: UpdateControl) => void;
 }
@@ -51,6 +57,10 @@ export function createUpdateHandlers(params: {
   let updateInFlight = false;
   let configuredPolicy = options.updatePolicy ? validateAutoUpdatePolicy(options.updatePolicy) : undefined;
   let lastAutoUpdate: AutoUpdateEvaluation | undefined;
+  const updaterHome = options.updaterHome;
+  // B-123: Update now and the scheduled apply both hand off here, so both runs are shown in Health.
+  const startUpdater =
+    options.startUpdater && updaterHome ? trackUpdaterStart(updaterHome, options.startUpdater) : options.startUpdater;
   const readPolicy = (): AutoUpdatePolicy => {
     if (options.readUpdatePolicy) return options.readUpdatePolicy();
     if (configuredPolicy) return configuredPolicy;
@@ -96,7 +106,7 @@ export function createUpdateHandlers(params: {
           resolveUpdate,
           ...(options.lifecycleHost ? { lifecycleHost: options.lifecycleHost } : {}),
           inService: true,
-          ...(options.startUpdater ? { startUpdater: options.startUpdater } : {}),
+          ...(startUpdater ? { startUpdater } : {}),
           ...(options.checkSchemaSafety ? { checkSchemaSafety: options.checkSchemaSafety } : {}),
           countActiveRuns: async () => (await store.sorties(50)).filter((s) => s.closed === null).length,
           countPendingApprovals: async () => (await store.approvals(20)).filter((a) => a.decision === null).length,
@@ -130,6 +140,18 @@ export function createUpdateHandlers(params: {
       const channel = parseUpdateChannel(url.searchParams.get('channel') ?? undefined);
       const refresh = url.searchParams.get('refresh') === '1';
       reply(200, await resolveUpdate(channel, refresh));
+      return true;
+    }
+    if (req.method === 'GET' && path === '/api/update/status') {
+      const status = updaterHome ? readUpdaterStatus(updaterHome) : null;
+      reply(200, { updater: status && !status.dismissed ? status : null });
+      return true;
+    }
+    if (req.method === 'POST' && path === '/api/update/status/dismiss') {
+      const outcome = updaterHome ? dismissUpdaterStatus(updaterHome) : 'none';
+      if (outcome === 'running')
+        reply(409, { error: 'An update is in progress; its result can be dismissed once it ends.' });
+      else reply(200, { updater: null });
       return true;
     }
     if (req.method === 'GET' && path === '/api/update/policy') {
@@ -210,7 +232,7 @@ export function createUpdateHandlers(params: {
                 resolveUpdate,
                 ...(options.lifecycleHost ? { lifecycleHost: options.lifecycleHost } : {}),
                 inService: true,
-                ...(options.startUpdater ? { startUpdater: options.startUpdater } : {}),
+                ...(startUpdater ? { startUpdater } : {}),
               },
               input,
             );

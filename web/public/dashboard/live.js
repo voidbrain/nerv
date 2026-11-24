@@ -82,12 +82,15 @@
     if (polling || !token) return; polling = true;
     const historySince = state.lastVisit;
     try {
-      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy, evaData, healthMetrics, scheduleSettings] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null), api("eva/instances").catch(() => null), api("health/metrics").catch(() => null), api("settings/schedule").catch(() => null)]);
+      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy, evaData, healthMetrics, scheduleSettings, updaterStatus] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null), api("eva/instances").catch(() => null), api("health/metrics").catch(() => null), api("settings/schedule").catch(() => null), api("update/status").catch(() => null)]);
       state.evaMachines = evaData && Array.isArray(evaData.machines) ? evaData.machines : null;
       state.healthMetrics = healthMetrics || null;
       state.scheduleSettings = scheduleSettings || null;
       state.update = update || doctor.update || null;
       state.updatePolicy = updatePolicy || null;
+      state.updaterStatus = (updaterStatus && updaterStatus.updater) || null;
+      // B-123: an update running when the page (re)opens keeps the button busy and is followed to its outcome.
+      if (state.updaterStatus && state.updaterStatus.state === "running" && !state.manualUpdateBusy) { state.manualUpdateBusy = true; void awaitRestart(state.updaterStatus.revision); }
       await loadUsage();
       // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
       const byId = new Map(); for (const x of [...latest20, ...older, ...matches]) if (!byId.has(x.id)) byId.set(x.id, x);
@@ -495,6 +498,30 @@
       return [ROUTE_NAMES[k], h.state === "ok" ? "ok" : h.state === "down" ? "danger" : "warn", h.state === "ok" ? "reachable" + at : h.state === "down" ? "down" + at + " · " + (h.error || "unreachable") : "not checked yet"];
     });
   }
+  // B-123: updater status (start)
+  /** B-123: the outside updater's last run, beside Update now: in progress (its step), then its outcome until dismissed. */
+  function updaterStatusHtml(s) {
+    if (!s || typeof s.state !== "string") return "";
+    const rev = typeof s.revision === "string" ? s.revision.slice(0, 7) : "";
+    const on = rev ? " · " + rev : "";
+    const title = s.state === "running" ? "Update in progress" + on + " · " + (s.step || "started")
+      : s.state === "completed" ? "Update completed" + (rev ? " · now on " + rev : "")
+        : s.state === "refused" ? "Update refused" + on
+          : s.state === "failed" ? "Update failed" + on
+            : "Update outcome uncertain" + on;
+    const tone = s.state === "completed" ? "ok" : s.state === "refused" ? "warn" : s.state === "running" ? "muted" : "danger";
+    const t = Date.parse(s.at);
+    const time = Number.isFinite(t) ? new Date(t).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }) + " local" : "";
+    const reasons = Array.isArray(s.reasons) ? s.reasons : [];
+    const recovery = Array.isArray(s.recovery) ? s.recovery : [];
+    return "<div id='update-status' class='small " + tone + "' style='margin-top:6px'>" +
+      "<div class='row'><strong>" + esc(title) + "</strong><span class='row' style='gap:6px'>" + (time ? "<span class='muted'>" + esc(time) + "</span>" : "") +
+      (s.state !== "running" ? "<button class='btn sm' id='btn-dismiss-update-status' type='button'>Dismiss</button>" : "") + "</span></div>" +
+      (reasons.length ? "<ul style='margin:4px 0 0 16px;padding:0'>" + reasons.map(r => "<li>" + esc(r) + "</li>").join("") + "</ul>" : "") +
+      (recovery.length ? "<div class='muted' style='margin-top:4px'>Recovery:<ol style='margin:2px 0 0 16px;padding:0'>" + recovery.map(r => "<li>" + esc(r) + "</li>").join("") + "</ol></div>" : "") +
+      "</div>";
+  }
+  // B-123: updater status (end)
   window.renderHealth = function () {
     const d = state.doctor; if (!d) { document.getElementById("health").innerHTML = "<div class='muted small'>Waiting for doctor…</div>"; return; }
     const p = d.processes || {}; const m = d.models || {}; const roles = m.roles || {};
@@ -526,14 +553,16 @@
     const updateActionHtml = u && u.status === "update-available"
       ? "<button class='btn sm' id='btn-apply-update' type='button'" + (state.manualUpdateBusy ? " disabled" : "") + ">" + (state.manualUpdateBusy ? "Updating…" : "Update now") + "</button>"
       : "";
-    if (updateActionHtml) { const row = rows.find(r => r[0] === "Update availability"); if (row) row[3] = updateActionHtml; }
-    const updateResultHtml = mu
-      ? "<div class='small " + (mu.outcome === "completed" || mu.outcome === "started" ? "ok" : mu.outcome === "refused" ? "warn" : "danger") + "' style='margin-top:6px'>" +
-        "<div><strong>Manual update " + esc(mu.outcome) + "</strong>" + (mu.revision ? " · " + esc(mu.revision.slice(0, 7)) : "") + (mu.planDigest ? " · plan " + esc(mu.planDigest.slice(0, 7)) : "") + "</div>" +
-        ((mu.reasons || []).length ? "<ul style='margin:4px 0 0 16px;padding:0'>" + mu.reasons.map(r => "<li>" + esc(r) + "</li>").join("") + "</ul>" : "") +
-        ((mu.recovery || []).length ? "<div class='muted' style='margin-top:4px'>Recovery:<ol style='margin:2px 0 0 16px;padding:0'>" + mu.recovery.map(s => "<li>" + esc(s) + "</li>").join("") + "</ol></div>" : "") +
-        "</div>"
-      : "";
+    const availabilityRow = rows.find(r => r[0] === "Update availability");
+    if (updateActionHtml && availabilityRow) availabilityRow[3] = updateActionHtml;
+    // B-123: an answer this click got at once (a refusal before the hand-off) shows as it is; a hand-off ("started")
+    // shows the outside updater's own status from the server, which outlives a restart and a reload.
+    const shownStatus = mu && mu.outcome !== "started"
+      ? { state:mu.outcome, revision:mu.revision, at:mu.at, reasons:mu.reasons || [], recovery:mu.recovery || [] }
+      : state.updaterStatus || (mu ? { state:"running", revision:mu.revision, at:mu.at, reasons:[], recovery:[] } : null);
+    const statusHtml = updaterStatusHtml(shownStatus);
+    if (availabilityRow) availabilityRow[4] = statusHtml;
+    const updateResultHtml = availabilityRow ? "" : statusHtml;
     // F-102-T02: the automatic update switch (20:00 check, notice, 03:00 apply unless the owner says wait).
     const up = state.updatePolicy && state.updatePolicy.policy;
     const la = state.updatePolicy && state.updatePolicy.lastAttempt;
@@ -557,7 +586,7 @@
     const warningsHtml = warnings.length
       ? "<div id='health-warnings' style='margin-top:4px'>" + warnings.map(w => "<div class='small warn' data-health-warning='" + esc(w.key) + "'>▲ " + esc(w.message) + "</div>").join("") + "</div>"
       : "";
-    document.getElementById("health").innerHTML = degraded + rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='row' style='gap:6px'><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span>" + (c[3] || "") + "</span></div>").join("") +
+    document.getElementById("health").innerHTML = degraded + rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='row' style='gap:6px'><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span>" + (c[3] || "") + "</span></div>" + (c[4] || "")).join("") +
       sampleHtml +
       linksHtml +
       warningsHtml +
@@ -967,12 +996,12 @@
     renderHealth();
     try {
       const result = await api("update/apply", { method:"POST", body:JSON.stringify({ channel }) });
-      state.manualUpdate = result;
+      state.manualUpdate = Object.assign({ at:new Date().toISOString() }, result);
       const summary = "Manual update " + result.outcome + (result.revision ? " (" + result.revision.slice(0, 7) + ")" : "") +
         ((result.reasons || []).length ? ": " + result.reasons.join("; ") : "");
       log(summary, result.outcome === "completed" ? "ok" : result.outcome === "refused" ? "warn" : "danger", null, "maya");
     } catch (e) {
-      state.manualUpdate = { outcome:"refused", channel, revision:null, reasons:[e.message], recovery:["Inspect /api/update and lifecycle status before retrying."] };
+      state.manualUpdate = { outcome:"refused", channel, revision:null, at:new Date().toISOString(), reasons:[e.message], recovery:["Inspect /api/update and lifecycle status before retrying."] };
       log("Manual update error: " + e.message, "danger", null, "maya");
     } finally {
       // B-113: started means NERV stops, updates and restarts: keep the button busy until the new revision answers.
@@ -983,20 +1012,35 @@
     }
   };
   async function awaitRestart(revision) {
-    const until = Date.now() + 10 * 60_000;
+    // B-123: the server calls a run silent for 15 minutes uncertain; wait a little longer than that.
+    const until = Date.now() + 16 * 60_000;
     while (Date.now() < until) {
       await new Promise(r => setTimeout(r, 5000));
       try {
+        // B-123: the updater's own outcome ends the wait: a refusal or a failure leaves the old revision running.
+        const st = await api("update/status").catch(() => null);
+        const s = st && st.updater;
+        if (s && s.state !== "running" && s.revision === revision) { state.updaterStatus = s; state.manualUpdate = null; state.manualUpdateBusy = false; renderHealth(); poll(); return; }
         const u = await api("update");
         // Only the new revision, actually running, ends the wait (B-113 review): "up to date" alone can be the old process.
         if (u && u.runningRevision === revision && !u.restartRequired) { state.update = u; state.manualUpdateBusy = false; renderHealth(); poll(); return; }
       } catch { /* restarting: not answering yet */ }
     }
     state.manualUpdateBusy = false;
-    state.manualUpdate = { outcome:"uncertain", channel:"main", revision, reasons:["NERV did not answer on the new revision within 10 minutes."], recovery:["Check ~/.nerv/updater.log and the inbox for the updater's result."] };
+    if (!state.updaterStatus) state.manualUpdate = { outcome:"uncertain", channel:"main", revision, at:new Date().toISOString(), reasons:["NERV did not answer on the new revision within 16 minutes."], recovery:["Check ~/.nerv/updater.log and the inbox for the updater's result."] };
     renderHealth();
     poll();
   }
+  // B-123: Dismiss hides the shown outcome for every page until a new run.
+  document.addEventListener("click", e => {
+    const t = e.target && e.target.closest && e.target.closest("#btn-dismiss-update-status");
+    if (!t) return;
+    e.preventDefault();
+    state.manualUpdate = null;
+    state.updaterStatus = null;
+    renderHealth();
+    void api("update/status/dismiss", { method:"POST" }).catch(e2 => log("Could not dismiss the update result: " + e2.message, "warn", null, "maya"));
+  });
   document.addEventListener("click", e => {
     const t = e.target && e.target.closest && e.target.closest("#btn-apply-update");
     if (!t) return;

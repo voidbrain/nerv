@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 5 | 1 | 15 | 2 |
+| **This week** | 5 | 1 | 16 | 2 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 26 |
+| **Open** | 39 | 27 |
 | **Require Human 🧑** | 11 | 8 |
 
 ### Require Human 🧑
@@ -33,7 +33,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 94.75 h agent + 11.25 h owner across 137 open steps of 38 features and 26 other records. 149.75 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 97.75 h agent + 11.25 h owner across 138 open steps of 38 features and 27 other records. 152.25 h of actual effort recorded on 152 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1733,6 +1733,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #719](https://github.com/voidbrain/nerv/pull/719) (Test: `test/update-foreground-runtime.test.ts`) |
 | Opened | 2026-11-24 |
 | Verification | Unit/integration 2026-11-24: `test/update-foreground-runtime.test.ts` (2 of 2) and the lifecycle suites pass locally; `npm test` 1358 pass, 0 fail; gauntlet `nerv-system-flows` (incl. stress, browser) passed. Owner check on NERV-01: Pending (B-122-T02). |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-123"></a>[🐞 B-123](#top)
+
+**After Update now the dashboard never shows the updater's result**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: CI on PR #720, then a real Update now on the base once B-122 is merged shows the outcome in Health.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-24: after pressing Update now in the dashboard's Health row, the page showed only "Manual update started · fd0f2a0" and nothing after. The outside updater (B-108) refused ("Service or runtime ownership is unknown or belongs elsewhere.", "Nothing was stopped…") and wrote that to `updater-result.json`, the inbox and `updater.log`, but the dashboard reads none of them, and it kept the button busy for 10 minutes before saying "uncertain". |
+| **Reproduce** | Press Update now on a base where the updater refuses (the B-122 case) or fails; the Health row stays on "Manual update started" and never shows the refusal, its reasons or recovery. |
+| **Check** | A committed test that fails first, across the join: the updater writes its result → `GET /api/update/status` returns it → the dashboard's Health row shows it beside the button (in progress with its step, completed, refused, failed or uncertain, with reasons and recovery) after a reload too, until dismissed or superseded; the inbox still reports it exactly once. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-123-t01"></a>B-123-T01 — Show the updater's status beside Update now | 3 h | 2.5 h so far (stated) | 3 h | Implemented; verification pending |
+| 🟡 Medium | **Total** | 3 h | 2.5 h | 3 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-123.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #720](https://github.com/voidbrain/nerv/pull/720) (status file, route, Health row; Test: `test/updater-status.test.ts`, `test/updater-status-render.test.mjs`, `test/updater-status.browser.mjs`) |
+| Opened | 2026-11-24 |
+| Verification | Unit/integration 2026-11-24: `npm test` 1,364 pass, `test:headless` pass, gauntlet system flows pass locally. Browser/accessibility 2026-11-24: `test/updater-status.browser.mjs` passes locally on the production build. Human (a real Update now on the base, after B-122): Pending. |
 | Reviewed | 2026-11-24 |
 
 </details>

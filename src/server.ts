@@ -84,6 +84,8 @@ export function makeServer(
     updateCheck?: (options: { channel: string; refresh: boolean }) => Promise<UpdateAvailability>;
     lifecycleHost?: () => ServiceHost;
     startUpdater?: ManualUpdateDeps['startUpdater'];
+    /** B-123: where the outside updater leaves its status for `GET /api/update/status`. */
+    updaterHome?: string;
     manualUpdate?: (input: { channel?: string; revision?: string }) => Promise<ManualUpdateResult>;
     updatePolicy?: AutoUpdatePolicy;
     saveUpdatePolicy?: (policy: AutoUpdatePolicy) => AutoUpdatePolicy | Promise<AutoUpdatePolicy>;
@@ -336,6 +338,7 @@ export function makeServer(
           '/api/health/metrics',
           '/api/update',
           '/api/update/policy',
+          '/api/update/status',
           '/api/push/key',
           '/api/push/status',
           '/api/reminders',
