@@ -1,4 +1,5 @@
 import { recordHealth } from './milestones.ts';
+import type { DeliveryChannel, DeliveryOutcome } from './delivery-state.ts';
 import type { WorkerItem, WorkerContext, WorkerLease } from './worker-jobs.ts';
 import type { RunReason } from './instrumentality-runs.ts';
 import { parsePrices, type UsageObservation } from './model-usage.ts';
@@ -6,6 +7,7 @@ import { MISATO_SOURCE, OWNER_SOURCE, Store, settledOutcome } from './store.ts';
 import { createCdpBrowserDriver } from './browser-cdp-driver.ts';
 import { underTestRunner } from './slicer.ts';
 import { appendFileSync } from 'node:fs';
+import { startupWatch } from './startup-watch.ts';
 import { CoordinatorAuthorityError } from './coordinator-authority.ts';
 import type { AgencySnapshot } from './executors.ts';
 import type { Verdict } from './policy.ts';
@@ -18,18 +20,21 @@ import { runSessionLimitTick } from './session-limit-resume.ts';
 // B-126-T02: each start-up step is reported before it runs, and one turn of the event loop lets the report go out, so
 // a coordinator still waiting for READY at its deadline can say whether this child was loading, opening the database
 // or ticking.
+// B-126-T03: a step that blocks the main thread (an SQLite call) cannot be reported over IPC; the watch, on its own
+// thread, writes the step it is stuck in to the error output after 10 s, which a not-ready error quotes.
+const watch = startupWatch('nervous', 10_000);
 const step = async (name: string) => {
+  watch.step(name);
   process.send?.(startupStep(name));
   await new Promise((done) => setImmediate(done));
 };
 await step('modules loaded');
 await step('opening the database');
 // argv: database path, then the data home whose scrolls.json sets the gate rules (defaults when absent).
-const store = new Store(
-  process.argv[2]!,
-  process.argv[3] ? readScrolls(process.argv[3]) : undefined,
-  process.argv[3] ? { home: process.argv[3] } : {},
-);
+const store = new Store(process.argv[2]!, process.argv[3] ? readScrolls(process.argv[3]) : undefined, {
+  ...(process.argv[3] ? { home: process.argv[3] } : {}),
+  onStep: (name) => watch.step(name),
+});
 // F-121-T02: under the test runner only, a test's Runtime records Bambu Connect hand-offs to a file.
 const bambuLaunchLog = process.argv.find((arg) => arg.startsWith('--bambu-launch-log='))?.slice(19);
 if (bambuLaunchLog && underTestRunner()) {
@@ -195,6 +200,15 @@ process.on('message', (value: unknown) => {
         return { ok: true };
       case 'push.unsubscribe':
         return { ok: store.deletePushSubscription(params.endpoint as string) };
+      case 'deliveries.record':
+        return store.recordDelivery(
+          params.id as string,
+          params.channel as DeliveryChannel,
+          params.outcome as DeliveryOutcome,
+          params.reason as string | undefined,
+        );
+      case 'deliveries.state':
+        return store.deliveryState(params.id as string);
       case 'push.status': {
         const subs = store.listPushSubscriptions();
         return { subscribed: subs.length > 0, count: subs.length };
@@ -546,4 +560,5 @@ function stop() {
 process.on('disconnect', stop);
 process.once('SIGTERM', stop);
 process.once('SIGINT', stop);
+watch.done();
 process.send?.(READY);

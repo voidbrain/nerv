@@ -764,6 +764,10 @@
     "enforce": false
   },
   "conventions": {
+    "sourceDirs": [
+      "web/src",
+      "src"
+    ],
     "pureDirs": []
   },
   "coverage": {
