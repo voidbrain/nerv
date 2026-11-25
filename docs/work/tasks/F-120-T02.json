@@ -6,7 +6,8 @@
   "goal": "The owner-accepted cases from F-120-T01 exist in NERV's system pack and pass",
   "status": "planned",
   "acceptance": [
-    "Owner accepts the proposed case list before building",
+    "Owner accepts the proposed case list (docs/reviews/gauntlet-coverage/2026-11-25.md) before building",
+    "Proposed system-pack cases: scheduling-reminders (area scheduling-time; F-043 reminder time windows, F-046 duplicate/update pre-check), memory-and-chronicle (area conversation-memory; F-044 atomic fact splitting, spelling-fix proposal and fuzzy recall, F-020 grounded personas, F-054 fact-grounded chronicle), pilots-and-packs (area tools; F-045 specialist/consultant routing, F-021 MCP deny-by-default binding and descriptor-drift suspension, F-111 typed read-tool result validation, F-114 domain pack toggling and phrase-collision refusal), external-project-intake (area research; F-085 quarantine project intake and planted-instruction refusal, F-027 Ireul taint propagation and egress allowlist), federated-handoff (area distributed-coordination; F-050 whole-job forwarding, Scrolls locality/taint refusal and silent-worker reconciliation, F-070 operator directory resolution), coding-jobs (area security-permissions; F-084 worktree sandbox coding job, instruction budget check and step handoffs, F-091 pinned harness template application)",
     "Each case: failing acceptance first, deterministic grader, index entry (npm run gauntlet:index)",
     "Cases show pending until an owner-approved run passes them; the ledger records the run"
   ],
@@ -34,8 +35,8 @@
   "effort": {
     "size": "medium",
     "estimate": "3 h agent",
-    "basis": "Estimated 2026-11-24 at agent speed. Not a measurement.",
-    "reviewed": "2026-11-24",
+    "basis": "Estimated 2026-11-24 at agent speed; 6 proposed system-pack cases added 2026-11-25 from F-120-T01 review. Not a measurement.",
+    "reviewed": "2026-11-25",
     "agentHours": 3.0,
     "baselineAgentHours": 3.0,
     "estimateAgentHours": 3.0

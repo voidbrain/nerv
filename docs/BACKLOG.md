@@ -39,7 +39,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 103.75 h agent + 12.25 h owner across 126 open steps of 38 features and 33 other records. 165.25 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 102.5 h agent + 12.25 h owner across 126 open steps of 38 features and 33 other records. 165.25 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -752,9 +752,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.75 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-120-T01 — Catch-up Gauntlet coverage review of closed features (Planned).
+💻 **→** Next: F-120-T01 — Catch-up Gauntlet coverage review of closed features (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -764,12 +764,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | 1.5 h | Planned | — | [F-120-T02](#f-120-t02) |
-| 🟢 Small | <a id="f-120-t03"></a>F-120-T03 — Adopt the Gauntlet domain packs when released | 0.5 h | 0 h | 0.5 h | Planned | — | — |
-| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | [F-120-T01](#f-120-t01) | — |
-| 🔴 Large | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 5 h | 0 of 3 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | 0.25 h | Implemented; verification pending | — | [F-120-T02](#f-120-t02) | [PR #752](https://github.com/voidbrain/nerv/pull/752) |
+| 🟢 Small | <a id="f-120-t03"></a>F-120-T03 — Adopt the Gauntlet domain packs when released | 0.5 h | 0 h | 0.5 h | Planned | — | — | — |
+| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | [F-120-T01](#f-120-t01) | — | — |
+| 🟡 Medium | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 3.75 h | 0 of 3 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -778,10 +778,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711). |
+| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752). Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review). |
 | Opened | 2026-11-24 |
-| Verification | — |
-| Reviewed | 2026-11-24 |
+| Verification | Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
+| Reviewed | 2026-11-25 |
 
 </details>
 
