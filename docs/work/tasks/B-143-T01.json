@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "B-143-T01",
+  "parent": "B-143",
+  "title": "Anchor relative reminder times to the request time",
+  "goal": "\"in 2 minutes\" is due 2 minutes after the owner asked, however long the model rounds take",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails first: \"in 2 minutes\" with a model due anchored to a later step is stored at request time + 2 minutes (English and Italian, minutes and hours)",
+    "Misato's prompt \"Now\" is the request time (sortie created, or when an answer to her question arrived)",
+    "Clock times, dates and parts of day keep their current handling"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/reminder-time.ts",
+    "src/runtime-planning.ts",
+    "src/brain-process.ts",
+    "src/rpc-schemas.ts",
+    "src/executors.ts",
+    "test/misato.test.ts",
+    "docs/work/records/B-143.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design",
+    "typescript"
+  ],
+  "privacy": "Neutral invented reminders only; live evidence read with sqlite3 -readonly.",
+  "validation": [
+    "node --test test/misato.test.ts",
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A change to how Misato's prompt describes time beyond the request anchor goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-25: read the sortie evidence, a deterministic relative-time rule, the request time through coordinator, brain and executors, and a failing-first test. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

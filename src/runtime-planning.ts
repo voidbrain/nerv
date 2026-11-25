@@ -98,6 +98,15 @@ export class RuntimePlanning {
   ): Promise<ChatReply> {
     const waiting: ChatReply['waiting'] = [];
     const proactive = followup?.watch;
+    // B-143: relative times ("in 2 minutes") count from when the owner asked: the sortie opens with the request
+    // (an answer to Misato's question arrives now), never from the model step that writes the call minutes later.
+    const requestedAt = followup?.answering
+      ? new Date().toISOString()
+      : await this.host.nervous
+          .call('sorties.get', { id: sortieId })
+          .then((s) => (s as { created?: unknown } | null)?.created)
+          .then((c) => (typeof c === 'string' && Number.isFinite(Date.parse(c)) ? c : new Date().toISOString()))
+          .catch(() => new Date().toISOString());
     const queryText = [message, ...context.map((t) => t.request)].join(' ').slice(0, 8000);
     // LCL fill: Lilith's facts and matching pending reminders for this request and its recent conversation.
     const memory = (await this.host.nervous.call('memory.recall', { text: queryText }).catch(() => [])) as Recalled[];
@@ -333,6 +342,7 @@ export class RuntimePlanning {
               : {}),
             ...(followup?.answering && turn === 0 ? { clarification: true } : {}),
             request: message,
+            requestedAt,
             history: steps.slice(-12),
             ...(named.length ? { bases: named } : {}),
             ...(remote.length ? { remote } : {}),
@@ -533,6 +543,7 @@ export class RuntimePlanning {
       const cfg = shouldReconcile && this.host.home ? readConfig(this.host.home) : undefined;
       let args = shouldReconcile
         ? reconcileReminderArgs(message, out.plan.action.args, {
+            now: new Date(requestedAt),
             timeZone: cfg?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
             briefAt: cfg?.brief?.at ?? '08:00',
           })

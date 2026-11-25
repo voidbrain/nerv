@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 12 | 5 | 33 | 13 |
+| **This week** | 12 | 5 | 34 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 42 | 33 |
+| **Open** | 42 | 34 |
 | **Require Human 🧑** | 14 | 17 |
 
 ### Require Human 🧑
@@ -41,7 +41,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 106 h agent + 14 h owner across 134 open steps of 42 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 107.5 h agent + 14 h owner across 135 open steps of 42 features and 34 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -250,6 +250,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="b-143"></a>[🐞 B-143](#top)
+
+**A relative reminder time counts from the model step that writes the call, not from when the owner asked**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-143-T01 — Anchor relative reminder times to the request time (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-25, NERV-01, sortie `148eef28`: "Remember me to drink water in 2 minutes" asked at 19:16:25; the consultant took 69 s, `tools.read` ran at 19:18:28 and `reminders.add` at 19:19:18; the reminder's `due` was 19:20:28 instead of about 19:18:25, two minutes late. The model computes the absolute time from the "Now" in its prompt, which the brain process set to the start of each planning step (`new Date()` in `src/brain-process.ts`); `reconcileReminderArgs` (`src/reminder-time.ts`) kept the model's time for a relative request. |
+| **Reproduce** | Ask "remind me to drink water in 2 minutes" on a slow model route: the stored `due` is 2 minutes after the step that proposed `reminders.add`, not after the request. |
+| **Check** | "in N minutes/hours" ("tra/fra N minuti/ore") is due N after the request time, whatever time the model wrote; Misato's prompt gives the request time as "Now"; a committed test fails first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-143-t01"></a>B-143-T01 — Anchor relative reminder times to the request time | 1.5 h | 0 h | 1.5 h | Implemented; verification pending |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-143.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/misato.test.ts` (B-143 test, committed failing first); owner report 2026-11-25, NERV-01, sortie `148eef28` (events 1482–1498) |
+| Opened | 2026-11-25 |
+| Verification | Unit/integration: 2026-11-25 passed locally (`test/misato.test.ts`). Human: Pending (a live "in 2 minutes" reminder on NERV-01 is due 2 minutes after the request). |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
 ### <a id="b-118"></a>[🐞 B-118](#top)
 
 **Windows CI: the test step runs into its 18-minute limit**

@@ -378,6 +378,16 @@ const RE_AT_IT = new RegExp(
 const RE_RELATIVE_OR_PART_OF_DAY =
   /\b(?:in\s+\d+\s+(?:minute|minutes|min|mins|hour|hours|hr|hrs)|(?:tra|fra)\s+\d+\s+(?:minut[oi]|or[ae])|morning|afternoon|evening|tonight|stamattina|stasera|stanotte|mattina|pomeriggio|sera)\b/i;
 
+const RE_RELATIVE_DURATION = /\b(?:in|tra|fra)\s+(\d{1,4})\s+(minutes?|mins?|minut[oi]|hours?|hrs?|or[ae])\b/i;
+
+/** The offset of a request's "in N minutes/hours" ("tra N minuti/ore"), or undefined when it names none. */
+function relativeOffsetMs(text: string): number | undefined {
+  const m = RE_RELATIVE_DURATION.exec(text);
+  if (!m) return undefined;
+  const n = Number(m[1]);
+  return /^(?:h|or)/i.test(m[2]!) ? n * 3_600_000 : n * 60_000;
+}
+
 const RE_EXPLICIT_ALL_DAY = /\b(?:all[\s-]day|tutto\s+il\s+giorno)\b/i;
 
 interface ParsedDateInfo {
@@ -604,6 +614,12 @@ export function parseReminderRequest(
 
   // 5. Relative time or part-of-day ("in 2 hours", "tomorrow morning", "domani mattina") -> stays 'at'
   if (RE_RELATIVE_OR_PART_OF_DAY.test(text) && !RE_EXPLICIT_ALL_DAY.test(text)) {
+    // B-143: "in 2 minutes" counts from when the owner asked (`now` is the request time), never from the model's step.
+    const offset = relativeOffsetMs(text);
+    if (offset !== undefined) {
+      const dueDate = new Date(now.getTime() + offset);
+      return { kind: 'at', due: dueDate.toISOString(), end: null, dayKey: localParts(dueDate, timeZone).dayKey };
+    }
     if (fallbackDue && Number.isFinite(Date.parse(fallbackDue))) {
       const dueDate = new Date(Date.parse(fallbackDue));
       return {
