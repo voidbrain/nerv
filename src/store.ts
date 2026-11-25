@@ -229,12 +229,17 @@ export class Store {
     this.instrumentality = new InstrumentalityRuns(this.db);
     // B-126-T03: each start-up statement below commits on its own, and at synchronous=FULL each commit waits for the
     // disk; a loaded Windows runner took over 30 s for them. They are idempotent (IF NOT EXISTS) or their own
-    // transaction (a migration), so a lost one reruns at the next start: in WAL mode, NORMAL commits without waiting
-    // and never corrupts. The connection's own setting returns once the Store is open.
+    // transaction (a migration), so a lost one reruns at the next start. NORMAL is safe only in WAL mode (outside it a
+    // power loss can corrupt the file), so it is set only once the switch to WAL has taken; the switch itself is still
+    // reported as part of "first reads". The connection's own setting returns once the Store is open.
     const durability = (this.db.prepare('PRAGMA synchronous').get() as { synchronous: number }).synchronous;
-    if (durability > 1) this.db.exec('PRAGMA synchronous=NORMAL');
+    const wal =
+      (this.db.prepare('PRAGMA journal_mode=WAL').get() as { journal_mode: string }).journal_mode.toLowerCase() ===
+      'wal';
+    const lowered = durability > 1 && wal;
+    if (lowered) this.db.exec('PRAGMA synchronous=NORMAL');
     step('journal mode and core schema');
-    this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
+    this.db.exec(`PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
       CREATE TABLE IF NOT EXISTS reminder_times(reminder_id TEXT PRIMARY KEY REFERENCES reminders(id) ON DELETE CASCADE, kind TEXT NOT NULL DEFAULT 'at', "end" TEXT);
       CREATE TABLE IF NOT EXISTS deliveries(id TEXT PRIMARY KEY, reminder_id TEXT UNIQUE REFERENCES reminders(id), kind TEXT NOT NULL DEFAULT 'reminder', message TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT);
@@ -351,7 +356,7 @@ export class Store {
         .all(new Date().toISOString()) as { id: string }[];
       for (const approval of pending) this.sortiesController.deliverApproval(approval.id);
     });
-    if (durability > 1) this.db.exec(`PRAGMA synchronous=${durability}`);
+    if (lowered) this.db.exec(`PRAGMA synchronous=${durability}`);
   }
   private readonly watchStarted = new Date();
   private _watchController?: StoreWatch;
