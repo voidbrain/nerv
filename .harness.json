@@ -188,7 +188,9 @@
         "docs/BACKLOG.md",
         "docs/archive/backlog-*.md",
         "tools/backlog-recap.mjs",
-        "tools/archive-recap.mjs"
+        "tools/archive-recap.mjs",
+        "docs/work/records/**",
+        "docs/work/tasks/**"
       ],
       "then": "Regenerate the active-ledger recap and weekly archive closure indices; preserve all historical record lines.",
       "run": "npm run backlog:recap",
@@ -223,7 +225,9 @@
         "docs/archive/backlog-*.md",
         "docs/ROADMAP.md",
         "tools/roadmap-status.mjs",
-        "tools/backlog-recap.mjs"
+        "tools/backlog-recap.mjs",
+        "docs/work/records/**",
+        "docs/work/tasks/**"
       ],
       "then": "Place every open feature in one milestone's Records cell and regenerate the roadmap status table from the records.",
       "run": "npm run roadmap:status",
@@ -279,7 +283,9 @@
         "docs/BACKLOG.md",
         "docs/archive/backlog-*.md",
         "tools/backlog-dependencies.mjs",
-        "tools/work-items.mjs"
+        "tools/work-items.mjs",
+        "docs/work/records/**",
+        "docs/work/tasks/**"
       ],
       "then": "Validate linked prerequisites; work-items build shows Depends on · Unlocks in each record (5.5.0).",
       "run": "npm run check:dependencies",
@@ -293,7 +299,9 @@
         "docs/ROADMAP.md",
         "tools/backlog-queue.mjs",
         ".harness.json",
-        "tools/backlog-dependencies.mjs"
+        "tools/backlog-dependencies.mjs",
+        "docs/work/records/**",
+        "docs/work/tasks/**"
       ],
       "then": "Validate the work queue that orders the generated ledger (workItems.order queue).",
       "run": "npm run check:queue",
