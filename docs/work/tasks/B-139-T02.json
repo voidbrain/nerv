@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-139-T02",
+  "parent": "B-139",
+  "title": "Owner: turn off CodeQL's default setup after the advanced workflow is merged",
+  "goal": "Only .github/workflows/codeql.yml analyses the repository, and its uploads are accepted",
+  "status": "planned",
+  "acceptance": [
+    "After B-139-T01 is merged, the default setup reads not-configured and the next CodeQL run on main passes and uploads"
+  ],
+  "dependsOn": [
+    "B-139-T01"
+  ],
+  "resources": [
+    "docs/verification.md",
+    "docs/work/records/B-139.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "gh api repos/voidbrain/nerv/code-scanning/default-setup -q .state prints not-configured"
+  ],
+  "escalation": [
+    "A repository setting is the owner's; the agent never runs the command"
+  ],
+  "ownerLink": "docs/verification.md#codeql-default-setup-off",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-25 when opened: one command, a check and one rerun. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

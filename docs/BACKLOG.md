@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 10 | 5 | 32 | 13 |
+| **This week** | 10 | 5 | 33 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 40 | 32 |
+| **Open** | 40 | 33 |
 | **Require Human 🧑** | 13 | 16 |
 
 ### Require Human 🧑
@@ -40,7 +40,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 112 h agent + 13.25 h owner across 131 open steps of 40 features and 32 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 114 h agent + 13.5 h owner across 133 open steps of 40 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -249,6 +249,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="b-139"></a>[🐞 B-139](#top)
+
+**CI: macOS runners not acquired cancel required jobs; docs-only PRs and every PR's Swift CodeQL wait on Windows and macOS runners**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-139-T01, merge the PR on green CI and independent review; then the owner turns off CodeQL's default setup (B-139-T02).
+
+| | |
+|---|---|
+| **Issue** | On 2026-11-25 three macOS jobs ended at about 15 minutes with no step run: CI `native-macos` (run 45626156780, a required check) and CodeQL default setup `Analyze (swift)` (runs 45640205435, 45644029795). Each says "The job was not acquired by Runner of type hosted even after multiple attempts" (GitHub macOS arm64 capacity); `timeout-minutes` (30 on `native-macos`) does not govern acquisition. Every PR, records and docs included, still starts a Windows and a macOS runner, and the default setup analyses Swift on every PR (about 12 minutes on macOS) because it cannot filter by path. |
+| **Reproduce** | Open a PR that changes only `docs/work/records/*.md`: CI starts `windows` and `native-macos` runners that only print their scope, and CodeQL starts `Analyze (swift)`. |
+| **Check** | On a docs-only PR (every changed file under `docs/`, a root `*.md` or `LICENSE`) `windows` and `native-macos` report skipped and the PR can merge; any other path, and every push to `main`, runs them; CodeQL runs `actions` and `javascript-typescript` on every PR and push and `Analyze (swift)` only when Swift changed, after the default setup is off. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="b-139-t01"></a>B-139-T01 — Skip the Windows and macOS jobs on docs-only PRs; CodeQL advanced setup with Swift only when Swift changed | 2 h | 0 h | 2 h | Implemented; verification pending | — | [B-139-T02](#b-139-t02) | 🤖 |
+| 🟢 Small | <a id="b-139-t02"></a>B-139-T02 — Owner: turn off CodeQL's default setup after the advanced workflow is merged | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-139-T01](#b-139-t01) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 2 steps recorded) | 2 h agent + 0.25 h owner | 0 of 2 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-139.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/verification-policy.test.mjs` (B-139 test), `test/ci-pins.test.mjs`; runs 45626156780, 45640205435, 45644029795 (runner not acquired) |
+| Opened | 2026-11-25 |
+| Verification | Unit 2026-11-25: Test: `test/verification-policy.test.mjs` and `test/ci-pins.test.mjs` pass locally. CI: Pending (a docs-only PR with both OS jobs skipped; CodeQL after B-139-T02). |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
 ### <a id="b-118"></a>[🐞 B-118](#top)
 
 **Windows CI: the test step runs into its 18-minute limit**
