@@ -9,6 +9,8 @@
  */
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { accessSync, constants, statSync } from 'node:fs';
+import { delimiter, dirname, isAbsolute, join } from 'node:path';
 import { effects, type Effect } from './policy.ts';
 
 export interface McpTool {
@@ -207,9 +209,52 @@ export function resultText(result: unknown, max = 8000): string {
     .slice(0, max);
 }
 
+/** Commands that ship with node: looked for next to the running node first (B-148). */
+const NODE_COMMANDS = new Set(['node', 'npx', 'npm']);
+const isExecutable = (file: string) => {
+  try {
+    if (!statSync(file).isFile()) return false;
+    accessSync(file, constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
+/**
+ * B-148: the absolute file a bare MCP command runs. Under launchd the service PATH lacks the node folder (node runs by
+ * absolute path), so `npx` and `node` are looked for next to the running node first, then in the service PATH; only
+ * absolute folders count, nothing runs through a shell. A command with a slash is used as written. `nodeDir` is set
+ * when the file came from the node folder: that child (and only it) gets the folder on its PATH, because npx and the
+ * packages it starts run `#!/usr/bin/env node`.
+ */
+export function resolveCommand(
+  command: string,
+  where: { nodeDir?: string; path?: string } = {},
+): { file: string; nodeDir?: string } {
+  if (command.includes('/') || command.includes('\\')) return { file: command };
+  const nodeDir = where.nodeDir ?? dirname(process.execPath);
+  const extensions = process.platform === 'win32' ? ['.exe', '.cmd', ''] : [''];
+  const searched: string[] = [];
+  const find = (dir: string) => extensions.map((x) => join(dir, command + x)).find(isExecutable);
+  if (NODE_COMMANDS.has(command)) {
+    searched.push(nodeDir);
+    const file = find(nodeDir);
+    if (file) return { file, nodeDir };
+  }
+  for (const dir of (where.path ?? process.env.PATH ?? '').split(delimiter)) {
+    if (!dir || !isAbsolute(dir) || searched.includes(dir)) continue;
+    searched.push(dir);
+    const file = find(dir);
+    if (file) return { file };
+  }
+  throw new Error(
+    `${command} not found (searched ${searched.join(', ') || 'no folders'}): set its absolute path as the command in config.json.`,
+  );
+}
+
 /** One MCP server over stdio. Requests time out; the process is ended on close. Environment: PATH, HOME, LANG only. */
 export class McpClient implements McpConnection {
-  private child: ChildProcess;
+  private child?: ChildProcess;
   private buffer = '';
   private next = 1;
   private pending = new Map<
@@ -222,12 +267,30 @@ export class McpClient implements McpConnection {
   private stderr = '';
   constructor(server: McpStdioServer, timeoutMs = 20_000) {
     this.timeoutMs = timeoutMs;
-    this.child = spawn(server.command, server.args, {
+    // B-148: an absolute file from known folders, never a shell; a command found nowhere is not started at all.
+    let resolved: { file: string; nodeDir?: string };
+    try {
+      resolved = resolveCommand(server.command);
+    } catch (e) {
+      this.closed = true;
+      this.ready = Promise.reject(new Error(`MCP server could not start: ${(e as Error).message}`));
+      this.ready.catch(() => {});
+      return;
+    }
+    const path = process.env.PATH ?? '';
+    const child = spawn(resolved.file, server.args, {
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: { PATH: process.env.PATH ?? '', HOME: process.env.HOME ?? '', LANG: process.env.LANG ?? 'C.UTF-8' },
+      shell: false,
+      env: {
+        // Only this child gets the node folder, so npx's `#!/usr/bin/env node` finds the node that resolved it.
+        PATH: resolved.nodeDir ? [resolved.nodeDir, path].filter(Boolean).join(delimiter) : path,
+        HOME: process.env.HOME ?? '',
+        LANG: process.env.LANG ?? 'C.UTF-8',
+      },
     });
-    this.child.stdout!.setEncoding('utf8');
-    this.child.stdout!.on('data', (d: string) => {
+    this.child = child;
+    child.stdout!.setEncoding('utf8');
+    child.stdout!.on('data', (d: string) => {
       this.buffer += d;
       let i;
       while ((i = this.buffer.indexOf('\n')) >= 0) {
@@ -237,8 +300,8 @@ export class McpClient implements McpConnection {
       }
     });
     // B-019: the last lines of the server's error output, so "it ended" says why (a broken npx, a wrong path).
-    this.child.stderr!.setEncoding('utf8');
-    this.child.stderr!.on('data', (d: string) => {
+    child.stderr!.setEncoding('utf8');
+    child.stderr!.on('data', (d: string) => {
       this.stderr = (this.stderr + d).slice(-2000);
     });
     const tail = () => {
@@ -261,8 +324,8 @@ export class McpClient implements McpConnection {
       }
       this.pending.clear();
     };
-    this.child.on('error', (e) => fail(`MCP server could not start: ${e.message}`));
-    this.child.on('exit', (code) => fail(`MCP server ended${code !== null ? ` (exit ${code})` : ''}${tail()}.`));
+    child.on('error', (e) => fail(`MCP server could not start: ${e.message}`));
+    child.on('exit', (code) => fail(`MCP server ended${code !== null ? ` (exit ${code})` : ''}${tail()}.`));
     this.ready = this.request('initialize', {
       protocolVersion: '2025-06-18',
       capabilities: {},
@@ -289,7 +352,7 @@ export class McpClient implements McpConnection {
   }
   private notify(method: string, params?: object) {
     if (!this.closed)
-      this.child.stdin!.write(JSON.stringify({ jsonrpc: '2.0', method, ...(params ? { params } : {}) }) + '\n');
+      this.child!.stdin!.write(JSON.stringify({ jsonrpc: '2.0', method, ...(params ? { params } : {}) }) + '\n');
   }
   private request(method: string, params: object): Promise<unknown> {
     if (this.closed) return Promise.reject(new Error('MCP server is not running.'));
@@ -300,7 +363,7 @@ export class McpClient implements McpConnection {
         reject(new Error(`MCP server did not answer ${method} in time.`));
       }, this.timeoutMs);
       this.pending.set(id, { resolve, reject, timer });
-      this.child.stdin!.write(JSON.stringify({ jsonrpc: '2.0', id, method, params }) + '\n');
+      this.child!.stdin!.write(JSON.stringify({ jsonrpc: '2.0', id, method, params }) + '\n');
     });
   }
   async listTools(): Promise<McpTool[]> {
@@ -328,7 +391,7 @@ export class McpClient implements McpConnection {
     this.closed = true;
     for (const p of this.pending.values()) clearTimeout(p.timer);
     this.pending.clear();
-    this.child.kill();
+    this.child?.kill();
   }
 }
 

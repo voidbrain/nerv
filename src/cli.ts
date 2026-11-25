@@ -508,14 +508,17 @@ try {
         break;
       case 'doctor': {
         let runningBuild: BuildInfo = buildInfo();
+        // B-148: MCP servers are started by the service, with its PATH, so only the service can say whether they start.
+        let mcp: unknown = 'not checked: the service is not running here';
         try {
           const res = await fetch(`http://127.0.0.1:${config.port}/api/doctor`, {
             headers: { authorization: `Bearer ${readToken(home)}` },
-            signal: AbortSignal.timeout(500),
+            signal: AbortSignal.timeout(5000),
           });
           if (res.ok) {
-            const live = (await res.json()) as { build?: BuildInfo };
+            const live = (await res.json()) as { build?: BuildInfo; mcp?: unknown };
             if (live.build) runningBuild = live.build;
+            if (live.mcp !== undefined) mcp = live.mcp;
           }
         } catch {
           /* service not running locally: compare against local buildInfo */
@@ -532,6 +535,7 @@ try {
               build: runningBuild,
               revisionSkew: checkRevisionSkew(runningBuild),
               ...local().doctor(),
+              mcp,
               update: await checkUpdateAvailability({ offline: true }),
               delivery: 'Durable local inbox; phone notifications not configured.',
               workers: {

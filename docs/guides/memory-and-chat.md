@@ -32,7 +32,7 @@ nerv memory history ID
 
 ## Tools
 
-MCP servers are **deny-by-default** and run in NERV's isolated `tools` process (`PATH`, `HOME`, `LANG` only):
+MCP servers are **deny-by-default** and run in NERV's isolated `tools` process (`PATH`, `HOME`, `LANG` only; the node folder is added to `PATH` only for a server started as `node`, `npx` or `npm`):
 
 ```bash
 nerv tools add files npx -y @modelcontextprotocol/server-filesystem@x.y.z ~/NERV-files

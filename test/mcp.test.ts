@@ -253,6 +253,56 @@ test(
   },
 );
 test(
+  'B-148: doctor, through the tools process with no node on its PATH, lists each MCP server and why one cannot start',
+  { timeout: 60000 },
+  async () => {
+    const { Runtime } = await import('../src/runtime.ts');
+    const home = mkdtempSync(join(tmpdir(), 'nerv-mcp-'));
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({
+        models: { local: { baseUrl: 'http://127.0.0.1:9/v1', model: 'm' }, roles: { misato: { route: 'local' } } },
+        tools: {
+          mcp: [
+            { id: 'notes', command: 'node', args: [FAKE] },
+            { id: 'broken', command: 'nerv-no-such-mcp-server', args: [] },
+          ],
+          grants: [],
+        },
+      }),
+    );
+    const r = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+    try {
+      await r.ready();
+      type Doc = { mcp: { server: string; tools?: number; error?: string }[]; degraded: string[] };
+      let doc: Doc | undefined;
+      // The tools process starts with the PATH launchd gives the service: no node folder on it.
+      const saved = process.env.PATH;
+      const empty = mkdtempSync(join(tmpdir(), 'nerv-path-'));
+      process.env.PATH = empty;
+      try {
+        for (let i = 0; i < 20; i++) {
+          doc = (await r.doctor()) as Doc;
+          if (!doc.mcp.some((x) => /still starting/.test(x.error ?? ''))) break;
+        }
+      } finally {
+        process.env.PATH = saved;
+        rmSync(empty, { recursive: true, force: true });
+      }
+      assert.deepEqual(doc!.mcp[0], { server: 'notes', tools: 2 });
+      assert.equal(doc!.mcp[1]!.server, 'broken');
+      assert.match(doc!.mcp[1]!.error ?? '', /could not start: nerv-no-such-mcp-server not found \(searched /);
+      assert.ok(
+        doc!.degraded.some((d) => d.startsWith('MCP server broken: ')),
+        doc!.degraded.join(' | '),
+      );
+    } finally {
+      await r.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);
+test(
   'the CLI: tools add, list, a destructive tool refused as a read, grant pinned to the description, revoke (F-021)',
   { timeout: 60000 },
   async () => {
