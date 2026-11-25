@@ -483,8 +483,9 @@ test("the route colours: advice that was given is a passed step (green); Misato'
     /const done = \{ detect:true, intake:true, route:true, consult:consulted\.has\(s\.id\),/,
     'ADVISE is passed when the consultant advised',
   );
-  assert.match(js, /if \(st === "done" && el\.dataset\.n === "apt"\) el\.classList\.add\("owner"\);/);
-  assert.match(js, /el\.classList\.remove\("on", "done", "wait", "skip", "owner"\)/);
+  // B-145: each class is toggled to its value (an unchanged node is not touched), with the same meaning as before.
+  assert.match(js, /el\.classList\.toggle\("owner", st === "done" && el\.dataset\.n === "apt"\);/);
+  assert.match(js, /for \(const c of \["on", "done", "wait", "skip"\]\) el\.classList\.toggle\(c, st === c\);/);
   assert.match(html, /\.snode\.done\.owner \{ border-color:var\(--warn\); \}/);
   assert.match(
     html,
@@ -987,6 +988,8 @@ test('B-040: an active planning step alone never renders a continuously communic
     'EDGES',
     'nodeEl',
     'passedEdge',
+    'setAttr',
+    'patchHTML',
     `${take('liveEdges')}\n${take('edgeShown')}\n${take('drawEdges')}\nreturn drawEdges;`,
   )(
     document,
@@ -996,6 +999,8 @@ test('B-040: an active planning step alone never renders a continuously communic
       getBoundingClientRect: () => ({ ...bounds, top: id === 'plan' ? 100 : 0, bottom: id === 'plan' ? 140 : 40 }),
     }),
     () => 'passed',
+    () => {},
+    (el: { innerHTML: string }, html: string) => (el.innerHTML = html),
   ) as (s: unknown) => void;
   draw({ status: 'active', phase: 'plan', current: 0, done: { route: true }, actions: [], note: '' });
   assert.match(svg.innerHTML, /class='passed'/, 'the observed route can remain visible');
@@ -1554,9 +1559,13 @@ test('B-106: answer edge activates with debrief and Sephirot markers are filled 
 test('the flow header names the sortie by its code only; every EVA class header stacks its name and status (F-108, F-049-T09)', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
-  const line = src.split('\n').find((l) => l.includes('getElementById("flow-sub").textContent'))!;
+  const line = src.split('\n').find((l) => l.includes('setText(document.getElementById("flow-sub")'))!;
   const el = { textContent: '' };
-  new Function('document', 's', line)({ getElementById: () => el }, { id: 'S-6E26', title: 'Remind me at 9' });
+  new Function('document', 's', 'setText', line)(
+    { getElementById: () => el },
+    { id: 'S-6E26', title: 'Remind me at 9' },
+    (e: { textContent: string }, t: string) => (e.textContent = t),
+  );
   assert.equal(el.textContent, 'S-6E26');
   const html = readFileSync('web/public/dashboard/index.html', 'utf8');
   const rule = /\.eva-class-hdr \{([^}]*)\}/.exec(html)![1]!;
