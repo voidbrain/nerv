@@ -40,7 +40,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 112 h agent + 13.25 h owner across 131 open steps of 40 features and 32 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 110.5 h agent + 13.25 h owner across 131 open steps of 40 features and 32 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -399,9 +399,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟣 Very large | 11.5 h | — | [F-004-T09](#f-004-t09) | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟣 Very large | 10 h | — | [F-004-T09](#f-004-t09) | 🤖 | — | — |
 
-💻 **→** Next: F-124-T01 — Shared delivery state across Telegram and the phone app (Planned).
+💻 **→** Next: F-124-T01 — Shared delivery state across Telegram and the phone app (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -411,13 +411,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-124-t01"></a>F-124-T01 — Shared delivery state across Telegram and the phone app | 2 h | 0 h | 2 h | Planned | — | [F-004-T09](#f-004-t09), [F-124-T02](#f-124-t02), [F-124-T03](#f-124-t03) |
-| 🟡 Medium | <a id="f-124-t02"></a>F-124-T02 — An approval answered in Telegram or the app clears the other | 2 h | 0 h | 2 h | Planned | [F-124-T01](#f-124-t01) | [F-124-T04](#f-124-t04) |
-| 🟡 Medium | <a id="f-124-t03"></a>F-124-T03 — A reminder opened on the phone is not re-sent on Telegram | 1.5 h | 0 h | 1.5 h | Planned | [F-124-T01](#f-124-t01) | [F-124-T04](#f-124-t04) |
-| 🔴 Large | <a id="f-124-t04"></a>F-124-T04 — Chat with Midori in the phone app | 6 h | 0 h | 6 h | Planned | [F-124-T02](#f-124-t02), [F-124-T03](#f-124-t03) | — |
-| 🟣 Very large | **Total** | 11.5 h | 0 h (0 of 4 steps recorded) | 11.5 h | 0 of 4 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-124-t01"></a>F-124-T01 — Shared delivery state across Telegram and the phone app | 2 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-004-T09](#f-004-t09), [F-124-T02](#f-124-t02), [F-124-T03](#f-124-t03) | [PR #758](https://github.com/voidbrain/nerv/pull/758) |
+| 🟡 Medium | <a id="f-124-t02"></a>F-124-T02 — An approval answered in Telegram or the app clears the other | 2 h | 0 h | 2 h | Planned | [F-124-T01](#f-124-t01) | [F-124-T04](#f-124-t04) | — |
+| 🟡 Medium | <a id="f-124-t03"></a>F-124-T03 — A reminder opened on the phone is not re-sent on Telegram | 1.5 h | 0 h | 1.5 h | Planned | [F-124-T01](#f-124-t01) | [F-124-T04](#f-124-t04) | — |
+| 🔴 Large | <a id="f-124-t04"></a>F-124-T04 — Chat with Midori in the phone app | 6 h | 0 h | 6 h | Planned | [F-124-T02](#f-124-t02), [F-124-T03](#f-124-t03) | — | — |
+| 🟣 Very large | **Total** | 11.5 h | 0 h (0 of 4 steps recorded) | 10 h | 0 of 4 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -426,9 +426,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #737](https://github.com/voidbrain/nerv/pull/737). |
+| PR / evidence | Steps: F-124-T01: [PR #758](https://github.com/voidbrain/nerv/pull/758). F-124-T01 [PR #758](https://github.com/voidbrain/nerv/pull/758) shared delivery state (test/delivery-state.test.ts); opened in [PR #737](https://github.com/voidbrain/nerv/pull/737). |
 | Opened | 2026-11-25 |
-| Verification | — |
+| Verification | Unit/integration pending: test/delivery-state.test.ts on CI for [PR #758](https://github.com/voidbrain/nerv/pull/758). |
 | Reviewed | 2026-11-25 |
 
 </details>

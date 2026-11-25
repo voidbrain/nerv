@@ -4,7 +4,7 @@
   "parent": "F-124",
   "title": "Shared delivery state across Telegram and the phone app",
   "goal": "One record per message says where it was sent, delivered and opened, so both channels read the same state",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A delivery has a per-channel state (sent, failed, opened) in one store, additive migration",
     "A test across Telegram and push delivery shows both states on one delivery"
@@ -34,10 +34,15 @@
   "effort": {
     "size": "small",
     "estimate": "2 h agent",
-    "basis": "Estimated 2026-11-25: one additive table and the writes from both channels. Not a measurement.",
+    "basis": "Estimated 2026-11-25: one additive table and the writes from both channels. Not a measurement. 2026-11-25: implemented in PR #758 (delivery_channels, Telegram and push writes, coordinator RPC); remaining: CI and merge.",
     "reviewed": "2026-11-25",
-    "agentHours": 2,
+    "agentHours": 0.5,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
-  }
+  },
+  "prs": [
+    {
+      "pr": 758
+    }
+  ]
 }
