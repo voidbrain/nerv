@@ -552,7 +552,7 @@
       "kept": "One HISTORY_LIMIT source is imported by RPC schemas; test/history.test.ts asserts serialized Unicode history pages fit HISTORY_BYTES and MAX_FRAME_BYTES."
     },
     {
-      "value": "Reviewed GitHub Action release and commit pins in CI and maintenance",
+      "value": "Reviewed GitHub Action release and commit pins in CI, CodeQL and maintenance",
       "places": [
         {
           "file": ".harness.json",
@@ -567,11 +567,15 @@
           "what": "Copied upstream checkout/setup-node pins"
         },
         {
+          "file": ".github/workflows/codeql.yml",
+          "what": "Pinned checkout and CodeQL init/autobuild/analyze actions (B-139)"
+        },
+        {
           "file": "test/ci-pins.test.mjs",
           "what": "Every workflow action must match the reviewed manifest"
         }
       ],
-      "kept": "test/ci-pins.test.mjs asserts both workflows use the same reviewed tag/SHA pairs; adoption verified each pair with git ls-remote against its official actions repository."
+      "kept": "test/ci-pins.test.mjs asserts all three workflows use the same reviewed tag/SHA pairs; adoption verified each pair with git ls-remote against its official actions repository."
     },
     {
       "value": "RPC connection and in-flight budgets",
@@ -814,6 +818,10 @@
     "actions/upload-artifact": {
       "release": "v7.0.2",
       "sha": "cf430e030ddbb5b0abf93d22962f4752f3646cd9"
+    },
+    "github/codeql-action": {
+      "release": "v4.39.5",
+      "sha": "915412ff23e8b7659517e607487dbeae018f2934"
     }
   },
   "workQueue": {
