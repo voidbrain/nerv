@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 3 | 6 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 4 | 7 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -6652,6 +6652,76 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | Opened | 2026-11-23 |
 | Verification | Documentation 2026-11-24: [2026-11-24.md](../reviews/skills/2026-11-24.md) written per docs/agents/skills.md; `npm run check:freshness` and `npm run check:fast` pass. |
 | Reviewed | 2026-11-24 |
+
+</details>
+
+---
+
+## Closed 2026-11-25
+
+### B-121
+
+**A re-targeted move can take over from a standby older than an epoch that ran**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-25: PR #717 and PR #721 merged on green CI (runs 45422935936, 45461777302); Check items automated (test/coordinator-partition.test.ts, test/coordinator-relocation.test.ts); Review: #721 four fresh-context design reviews.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 by the F-016-T08 mixed-epoch fixture: B promoted to epoch 3 and renewed through C; the owner then re-targeted the move to C at epoch 4. C's standby store still held epoch-2 state (nothing re-seeds it), yet readiness took over from it (previous epoch 2, previous main X revoked), so C would undo what B did at epoch 3 and could repeat it. The decision allows taking over from the standby's epoch only when the first target never promoted. |
+| **Reproduce** | `test/coordinator-partition.test.ts`, "mixed epochs": X at 2; revoke X, main B at 3, B promotes and renews through C; main C at 4; `kaji promote` on C. |
+| **Check** | C is refused (`standby_behind`) while any unrevoked base, C itself included, ran or acked a lease at a later epoch than C's standby state. T01 covers C's own acks; T02 (owner agreed the scope 2026-11-24) adds `ranOrAckedEpoch` to the signed `/kaji/epoch-push` reply and asks every other unrevoked base before any push, so a refused move leaves the running main acting. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-25: PR #717 and PR #721 merged on green CI (runs 45422935936, 45461777302); Check items automated (test/coordinator-partition.test.ts, test/coordinator-relocation.test.ts); Review: #721 four fresh-context design reviews. 2026-11-25 reconciliation: verified and closed. Every Check item is automated: [PR #721](https://github.com/voidbrain/nerv/pull/721) merged on green CI ([run 45461777302](https://github.com/voidbrain/nerv/actions/runs/45461777302) attempt 3; attempts 1 and 2 failed only on Windows in unrelated tests: telegram and watch-runtime with "nervous process not ready" (B-126) and three worker-link tests timed out (B-066)); [PR #717](https://github.com/voidbrain/nerv/pull/717) (B-121-T01) merged on green CI (run 45422935936). Review: #721 design review in a fresh context, four rounds, the fourth clean with three minors fixed in the PR (below). Left to other records: reply signatures not bound to the request ([B-125](../work/records/B-121.md#b-125)), `kaji relocate` fencing before the target's checks ([B-124](../work/records/B-121.md#b-124)). 2026-11-24 (#721 fourth check: clean, three minors): `kaji drain` does not stop the old main's service (the mesh helper had; it no longer does, and the earlier "it is stopped" rationale is corrected); the receipt now carries the drainer's `ranOrAckedEpoch`, and before any probe or push promote refuses `standby_behind` when it is later than the standby's state (closing the drained-main-with-a-standby-store residual) and `drain_receipt_invalid` unless the receipt hands the standby's epoch to this base at the epoch being promoted. Test first: a9acbed9 failed (X's receipt for B at 3 passed to C at 4: probe and push went out; drained X that acked B at 3 from its own standby store: "Missing expected rejection"); fix c54d3ef7. 2026-11-24 (#721 third check: one blocker, one minor): the planned branch dropped revoked skipped mains from the bases that must answer; revoking B does not undo epoch 3, which D acked (X drains to B at 3, B runs through D, B lost and revoked, D asleep, X drains to C at 4 listing B: C took over from epoch 2). Now any skipped main (listed or held here, revoked or not) makes a planned move need every unrevoked base to answer (the drained main is exempt only when it does not answer: its receipt answers for it) at or below the standby's epoch. Minor: the receipt's signature is verified before the probe and the push (a tampered receipt had passed them, fencing the running main, before readiness refused it). Test first: b79252bb failed ("Missing expected rejection"; tampered receipt: probe and push `[0, 4]`); fix 1f88cbef. 2026-11-24 (#721 re-check: two should-fix, one record): the drain refusal is replaced, keeping the adopted planned re-target (F-016-T07 SHOULD-FIX 3 test restored; it only passes the verified main records now) and its final-batch check. A receipt lists, signed, every main record the drained main holds between its epoch and the target (`skippedMains`); before any push a planned promote needs each listed base, and each its own registry names main in that range, to answer with `ranOrAckedEpoch` at or below the standby's epoch unless revoked (unanswered `old_host_unconfirmed`, newer `standby_behind`, field-less `peer_epoch_unknown`); a field-less reply whose signed `maxSeenCoordinatorEpoch` lies after the standby's epoch and before the new one also refuses a planned move. Test first: 1ff883e3 failed (reviewer repro and the planned re-target: the drain threw; older-peer planned move: "Missing expected rejection", C took over); fix 44100398. Reply signatures not bound to the request nonce: [B-125](../work/records/B-121.md#b-125). Earlier the same day (#721 review: one blocker, two should-fix): a drained, fenced old main gave a second receipt (X drained to B at 3; B ran through D; B and D asleep; main C at 4; X drained again; C took over from epoch 2 while B acted); fixed first by refusing that drain (385685e2, 52e7b874), now by the listed-base answers above. Should-fix 1: [B-124](../work/records/B-121.md#b-124) for `kaji relocate` fencing the running main before the target's checks. Should-fix 2: planned-path probe tests and the serve wiring (`coordinatorLeaseService.kajiOptions`) answering a real epoch push. 2026-11-24 (B-121-T02): `/kaji/epoch-push` replies carry `ranOrAckedEpoch`, the newest coordinator epoch in the base's stores or lease acks (`ranOrAckedCoordinatorEpoch`). After the local precheck, `kaji promote` probes every other unrevoked base with a record-free push (it commits nothing) and refuses `standby_behind` when any reports a later epoch than the standby's state; an unplanned move also refuses before any push when a base does not answer (`old_host_unconfirmed`) or answers without the field, an older NERV (`peer_epoch_unknown`); a planned move goes on, bound by its drain receipt. Test first: bb38e264 failed on main (mesh "B runs epoch 3 through D, re-target to C": "Missing expected rejection", C promoted from epoch-2 state; older-peer mesh: same; contract: reply lacked the field); fix bdec7c39. Three promote tests whose mocked peers answered unplanned pushes now report the field (requirement changed deliberately, B-121-T02). Open risk, not in scope: `kaji relocate` still pushes the records it signs, so a re-target signed while a coordinator runs fences it even if the target's promote is then refused. 2026-11-24 (#717 review should-fix 2): the `standby_behind` refusal came after the epoch push, so a refused re-target had already told B and D epoch 4 and nobody could act. `checkStandbyCandidate` (named main, verified standby, `standby_behind`) now runs before the push; B and D keep epoch 3 and B re-arms through D. Test first: a10429ff (mixed epochs, expectation changed deliberately: local refusals precede the push) failed (`registryOf(B).epoch` 4, expected 3); fix c45c5db1. 2026-11-24 (B-121-T01, [PR #717](https://github.com/voidbrain/nerv/pull/717)): `checkRelocationReadiness` refuses `standby_behind` when the candidate's `standby_lease_state` holds a later epoch than its store, before the service stops. Test first: commit f9a75fbd failed on main ("Missing expected rejection" in the mixed-epoch fixture); the fix (7ecbf37b) makes it pass. Open: B-121-T02, for when B renewed through another base (D), so C never acked epoch 3 itself.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #717](https://github.com/voidbrain/nerv/pull/717) (Test: `test/coordinator-partition.test.ts`, mixed epochs) · B-121-T02: [PR #721](https://github.com/voidbrain/nerv/pull/721) (Test: `test/coordinator-partition.test.ts`, B-121-T02; `test/coordinator-relocation.test.ts`, epoch-push witness) |
+| Opened | 2026-11-24 |
+| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and the coordinator suites pass locally, B-121-T02 included; full `npm test` 1375 pass, 0 fail (2 skipped) after the #721 fourth-check fixes; gauntlet: the 10 pending cases ran and passed again (ledger committed in PR #721). CI 2026-11-24: [run 45461777302](https://github.com/voidbrain/nerv/actions/runs/45461777302) (PR #721) green. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+
+### F-115
+
+**Grouped, alphabetical CLI help**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-25: PR #595 and PR #630 merged on green CI; test/cli-help.test.ts 4/4 at main 774a08f; gauntlet pending none.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-20: `nerv help` printed every command on one long line, in no order and without themes, and it had drifted: `batteries`, `fleet`, `skills`, `eva`, `seats` and others were missing. |
+| **Reproduce** | `nerv help` on main before this change. |
+| **Check** | `nerv help` groups commands by theme, sorts them alphabetically within each group and aligns the descriptions in one column within 100 characters; `nerv help COMMAND` prints that command's full usage and an unknown command says so; a test fails when a command the CLI dispatches is missing from the help or the help lists one it does not handle. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-25: PR #595 and PR #630 merged on green CI; test/cli-help.test.ts 4/4 at main 774a08f; gauntlet pending none. 2026-11-25 reconciliation (coordinator gap review): verified and closed. F-115-T01 ([PR #595](https://github.com/voidbrain/nerv/pull/595)) and F-115-T02 ([PR #630](https://github.com/voidbrain/nerv/pull/630)) closed, both merged on green CI. The Check holds at main `774a08f`: `node --test test/cli-help.test.ts` 4/4 pass (every dispatched command listed once and no command the CLI does not handle; groups sorted alphabetically; lines within the width with aligned descriptions; `nerv help COMMAND` gives full usage and an unknown command says so: `nerv help nope` prints "Unknown command: nope. Run nerv help for the list."); `node tools/gauntlet.mjs pending` lists none. Opened and implemented 2026-11-20: `src/cli-help.ts`, `test/cli-help.test.ts`. Next: from tasks.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #595](https://github.com/voidbrain/nerv/pull/595) (CI green); [PR #630](https://github.com/voidbrain/nerv/pull/630) (F-115-T02 gauntlet reruns, CI green); `test/cli-help.test.ts` |
+| Opened | 2026-11-20 |
+| Verification | Unit/integration 2026-11-25: `test/cli-help.test.ts` 4/4 at main `774a08f`; CI green on PR #595 and every main run since. |
+| Reviewed | 2026-11-25 |
 
 </details>
 

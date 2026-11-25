@@ -579,6 +579,15 @@
     return "Doctor: " + (n ? n + " problem" + (n === 1 ? "" : "s") : "all checks pass") + " · details in Health.";
   }
   // B-129: doctor run (end)
+  /** B-134: the Phone push line: subscribed devices and the last delivery result, read-only from the doctor. */
+  function pushRow(p) {
+    if (!p) return ["Phone push", "warn", "unknown"];
+    const n = p.devices || 0, last = p.last;
+    const devices = n + (n === 1 ? " device" : " devices");
+    if (!last) return ["Phone push", n ? "ok" : "warn", devices + " · no delivery yet"];
+    const when = new Date(last.at).toLocaleString();
+    return ["Phone push", last.ok ? "ok" : "danger", devices + " · " + (last.ok ? "last ok (" + last.status + ")" : "last failed (" + last.status + (last.reason ? " " + last.reason : "") + ")") + " · " + when];
+  }
   window.renderHealth = function () {
     const d = state.doctor; if (!d) { document.getElementById("health").innerHTML = "<div class='muted small'>Waiting for doctor…</div>"; return; }
     const p = d.processes || {}; const m = d.models || {}; const roles = m.roles || {};
@@ -587,7 +596,8 @@
       ...routeRows(d),
       ["Misato", roles.misato && !/not set/.test(roles.misato) ? "ok" : "warn", roles.misato || "—"], ["Casper", roles.casper && /^local \(/.test(roles.casper) ? "ok" : "warn", roles.casper || "—"],
       ["Central Dogma (SQLite)", d.database && d.database.quick_check === "ok" ? "ok" : "danger", "schema " + ((d.schema || {}).user_version ?? "?") + " · " + ((d.database || {}).quick_check || "?")],
-      ["Pending reminders", "ok", String(((d.pending || {}).count) ?? 0)]];
+      ["Pending reminders", "ok", String(((d.pending || {}).count) ?? 0)],
+      pushRow(d.push)];
     const u = state.update || d.update;
     if (u && typeof u.status === "string") {
       const short = rev => typeof rev === "string" && rev.length >= 7 ? rev.slice(0, 7) : "?";

@@ -11,7 +11,8 @@
   ],
   "dependsOn": [
     "F-121-T02",
-    "F-121-T04"
+    "F-121-T04",
+    "B-133-T01"
   ],
   "resources": [
     "docs/work/records/F-121.md"
@@ -33,9 +34,9 @@
     "estimate": "0.5 h owner",
     "basis": "Estimated 2026-11-24 at agent speed. Not a measurement.",
     "reviewed": "2026-11-24",
-    "agentHours": 0.0,
-    "baselineAgentHours": 0.0,
-    "estimateAgentHours": 0.0,
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
     "ownerHours": 0.5
   }
 }

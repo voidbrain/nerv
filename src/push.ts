@@ -29,11 +29,40 @@ export function generateVapidKeys(): { publicKey: string; privateKey: string } {
   };
 }
 
+/** Apple rejects a VAPID `sub` that is not a real https URL or mailto (B-134: `mailto:nerv@agency.local` gave 403 BadJwtToken). */
+export const DEFAULT_VAPID_SUBJECT = 'https://github.com/voidbrain/nerv';
+
+/** Validates a VAPID subject: an https URL or a mailto with a dotted domain, never .local or localhost. Returns it. */
+export function validateVapidSubject(value: unknown): string {
+  const fail = (): never => {
+    throw new Error(
+      'Invalid push.subject: an https URL or mailto:name@domain.tld with a real domain (not .local or localhost).',
+    );
+  };
+  if (typeof value !== 'string' || value.length > 256) return fail();
+  let host: string;
+  if (value.startsWith('https://')) {
+    try {
+      host = new URL(value).hostname;
+    } catch {
+      return fail();
+    }
+  } else {
+    const m = /^mailto:[^\s@]+@([^\s@]+)$/.exec(value);
+    if (!m) return fail();
+    host = m[1]!;
+  }
+  host = host.toLowerCase();
+  if (!host.includes('.') || host === 'localhost' || host.endsWith('.local') || host.endsWith('.localhost'))
+    return fail();
+  return value;
+}
+
 export function buildVapidHeader(
   endpoint: string,
   vapidPublicKey: string,
   vapidPrivateKey: string,
-  subject = 'mailto:nerv@agency.local',
+  subject = DEFAULT_VAPID_SUBJECT,
   expSeconds = 12 * 3600,
 ): string {
   const origin = new URL(endpoint).origin;
@@ -114,7 +143,7 @@ export async function sendWebPush(
   payload: string | object,
   vapid: { publicKey: string; privateKey: string; subject?: string },
   fetchFn: typeof fetch = fetch,
-): Promise<{ ok: boolean; status: number; expired?: boolean }> {
+): Promise<{ ok: boolean; status: number; expired?: boolean; reason?: string }> {
   const payloadStr = typeof payload === 'string' ? payload : JSON.stringify(payload);
   const body = encryptPayload(
     payloadStr,
@@ -126,7 +155,7 @@ export async function sendWebPush(
     subscription.endpoint,
     vapid.publicKey,
     vapid.privateKey,
-    vapid.subject ?? 'mailto:nerv@agency.local',
+    vapid.subject ?? DEFAULT_VAPID_SUBJECT,
   );
 
   const res = await fetchFn(subscription.endpoint, {
@@ -143,5 +172,24 @@ export async function sendWebPush(
   });
 
   const expired = res.status === 404 || res.status === 410;
-  return { ok: res.ok, status: res.status, expired };
+  if (res.ok) return { ok: true, status: res.status, expired };
+  return { ok: false, status: res.status, expired, reason: await pushFailureReason(res) };
+}
+
+/** The push service's reason (Apple: {"reason":"BadJwtToken"}), short and printable; never the request. */
+async function pushFailureReason(res: Response): Promise<string | undefined> {
+  try {
+    const text = (await res.text()).trim();
+    if (!text) return undefined;
+    try {
+      const parsed = JSON.parse(text) as { reason?: unknown; error?: unknown };
+      const r = parsed.reason ?? parsed.error;
+      if (typeof r === 'string') return r.slice(0, 120);
+    } catch {
+      // not JSON: use the text
+    }
+    return text.replace(/[^\x20-\x7e]/g, ' ').slice(0, 120);
+  } catch {
+    return undefined;
+  }
 }
