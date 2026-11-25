@@ -1780,7 +1780,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-140-T01, independent review and merge of the PR on green CI; then "Update now" on NERV-01 after the next update.
+💻 **→** Next: B-140-T01, independent review and merge of [#765](https://github.com/voidbrain/nerv/pull/765) on green CI; then "Update now" on NERV-01 after the next update.
 
 | | |
 |---|---|
@@ -1790,10 +1790,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-140-t01"></a>B-140-T01 — Give the update check's network git commands their own budget, retry a failed fetch, name the command in a timeout | 1.5 h | 0 h | 1.5 h | Implemented; verification pending |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-140-t01"></a>B-140-T01 — Give the update check's network git commands their own budget, retry a failed fetch, name the command in a timeout | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [PR #765](https://github.com/voidbrain/nerv/pull/765) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1802,7 +1802,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/update-availability.test.ts` (B-140 tests); owner report 2026-11-25 |
+| PR / evidence | Steps: B-140-T01: [PR #765](https://github.com/voidbrain/nerv/pull/765). [#765](https://github.com/voidbrain/nerv/pull/765); Test: `test/update-availability.test.ts` (B-140 tests); owner report 2026-11-25 |
 | Opened | 2026-11-25 |
 | Verification | Unit 2026-11-25: Test: `test/update-availability.test.ts` passes locally. Real-device: Pending ("Update now" on NERV-01 after the update). |
 | Reviewed | 2026-11-25 |
