@@ -1,4 +1,5 @@
 import { recordHealth } from './milestones.ts';
+import type { DeliveryChannel, DeliveryOutcome } from './delivery-state.ts';
 import type { WorkerItem, WorkerContext, WorkerLease } from './worker-jobs.ts';
 import type { RunReason } from './instrumentality-runs.ts';
 import { parsePrices, type UsageObservation } from './model-usage.ts';
@@ -199,6 +200,15 @@ process.on('message', (value: unknown) => {
         return { ok: true };
       case 'push.unsubscribe':
         return { ok: store.deletePushSubscription(params.endpoint as string) };
+      case 'deliveries.record':
+        return store.recordDelivery(
+          params.id as string,
+          params.channel as DeliveryChannel,
+          params.outcome as DeliveryOutcome,
+          params.reason as string | undefined,
+        );
+      case 'deliveries.state':
+        return store.deliveryState(params.id as string);
       case 'push.status': {
         const subs = store.listPushSubscriptions();
         return { subscribed: subs.length > 0, count: subs.length };

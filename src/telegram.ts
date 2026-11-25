@@ -943,6 +943,14 @@ export class TelegramChannel {
     });
     return this.delivery;
   }
+  /** F-124-T01: Telegram's part of the shared delivery state; never blocks or repeats a delivery when it cannot be written. */
+  private async recordDelivery(id: string, outcome: 'sent' | 'failed', reason?: string): Promise<void> {
+    try {
+      await this.store.recordDelivery?.(id, 'telegram', outcome, reason);
+    } catch (e) {
+      this.log(`Telegram delivery state: ${e instanceof Error ? e.message : 'not recorded'}.`);
+    }
+  }
   private async deliverOnce(): Promise<void> {
     try {
       await this.reconcile();
@@ -979,7 +987,15 @@ export class TelegramChannel {
         const page = await this.store.inboxPage(at.sequence, 5, at.id);
         // Checkpoint after every message: a stop or crash resends at most the one in flight.
         for (const item of page.items) {
-          if (item.kind !== 'approval') await this.out(item.kind === 'brief' ? item.message : `⏰ ${item.message}`);
+          if (item.kind !== 'approval') {
+            try {
+              await this.out(item.kind === 'brief' ? item.message : `⏰ ${item.message}`);
+            } catch (e) {
+              await this.recordDelivery(item.id, 'failed', e instanceof Error ? e.message : 'send failed');
+              throw e;
+            }
+            await this.recordDelivery(item.id, 'sent');
+          }
           this.state.inbox = { sequence: item.sequence, id: item.id };
           this.save();
         }

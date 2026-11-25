@@ -1,9 +1,11 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { formatReminderPushPayload, generateVapidKeys, sendWebPush, type PushSubscriptionRecord } from './push.ts';
 import type { Reminder } from './store.ts';
+import type { DeliveryChannels } from './delivery-state.ts';
 
 export interface StorePushHost {
   readonly db: DatabaseSync;
+  readonly deliveries: DeliveryChannels;
   getPushFetch(): typeof fetch;
   getPushSubject(): string | undefined;
 }
@@ -89,13 +91,19 @@ export class StorePush {
     }
     for (const reminder of reminders) {
       const payload = formatReminderPushPayload(reminder);
+      // F-124-T01: the push service accepted it for at least one device (sent), or for none (failed, last reason).
+      let accepted = false;
+      let lastReason = 'send failed';
       for (const sub of subs) {
         const host = endpointHost(sub.endpoint);
         try {
           const res = await sendWebPush(sub, payload, { ...vapid, subject }, pushFetch);
           this.recordResult(res.ok, res.status, res.reason);
-          if (!res.ok)
-            console.error(`push: delivery to ${host} failed: HTTP ${res.status}${res.reason ? ` ${res.reason}` : ''}`);
+          if (res.ok) accepted = true;
+          else {
+            lastReason = `HTTP ${res.status}${res.reason ? ` ${res.reason}` : ''}`;
+            console.error(`push: delivery to ${host} failed: ${lastReason}`);
+          }
           if (res.expired) {
             this.deletePushSubscription(sub.endpoint);
           }
@@ -103,9 +111,20 @@ export class StorePush {
           // Push dispatch error does not break local delivery, but it is no longer silent.
           const reason = error instanceof Error ? error.message.slice(0, 120) : 'send failed';
           this.recordResult(false, 0, reason);
+          lastReason = reason;
           console.error(`push: delivery to ${host} failed: ${reason}`);
         }
       }
+      const delivery = this.host.db.prepare('SELECT id FROM deliveries WHERE reminder_id=?').get(reminder.id) as
+        { id: string } | undefined;
+      if (delivery)
+        this.host.deliveries.record(
+          delivery.id,
+          'push',
+          accepted ? 'sent' : 'failed',
+          new Date(),
+          accepted ? undefined : lastReason,
+        );
     }
   }
 

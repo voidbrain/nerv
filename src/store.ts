@@ -30,6 +30,7 @@ import {
   type ReplicationBatch,
 } from './coordinator-replication.ts';
 import { transaction } from './sqlite-transaction.ts';
+import { DeliveryChannels, type DeliveryChannel, type DeliveryOutcome, type DeliveryState } from './delivery-state.ts';
 import type { WorkerLease } from './worker-jobs.ts';
 import { credentialAges, readConfig } from './config.ts';
 import { UPGRADE_CONTRACT } from './upgrade-contract.ts';
@@ -160,6 +161,7 @@ export class Store {
   readonly ledger: Ledger;
   readonly watch: Watch;
   readonly memory: Memory;
+  readonly deliveryChannels: DeliveryChannels;
   readonly circuits: IncidentCircuitStore;
   private readonly fpv: FpvStoreSlice;
   readonly resumeIntents: ResumeIntentStore;
@@ -282,6 +284,8 @@ export class Store {
        CREATE TABLE IF NOT EXISTS push_vapid(id TEXT PRIMARY KEY, public_key TEXT NOT NULL, private_key TEXT NOT NULL, created TEXT NOT NULL);
        CREATE TABLE IF NOT EXISTS push_last_result(id TEXT PRIMARY KEY, at TEXT NOT NULL, ok INTEGER NOT NULL, status INTEGER NOT NULL, reason TEXT);`,
     );
+    // F-124-T01, additive: per-channel delivery state (Telegram, push) of each inbox item.
+    this.deliveryChannels = new DeliveryChannels(this.db);
     this.db.exec(RESUME_INTENT_SCHEMA);
     this.db.exec(SESSION_LIMIT_SCHEMA);
     this.db.exec(LISTS_SCHEMA);
@@ -458,6 +462,7 @@ export class Store {
   private get pushController(): StorePush {
     return (this._pushController ??= new StorePush({
       db: this.db,
+      deliveries: this.deliveryChannels,
       getPushFetch: () => this.pushFetch,
       getPushSubject: () => (this.home ? readConfig(this.home).push?.subject : undefined),
     }));
@@ -479,6 +484,14 @@ export class Store {
   }
   getPushSubscription(endpoint: string): PushSubscriptionRecord | null {
     return this.pushController.getPushSubscription(endpoint);
+  }
+  /** F-124-T01: records what a channel did with an inbox item (sent, failed, opened); false when there is no such item. */
+  recordDelivery(deliveryId: string, channel: DeliveryChannel, outcome: DeliveryOutcome, reason?: string): boolean {
+    return this.deliveryChannels.record(deliveryId, channel, outcome, new Date(), reason);
+  }
+  /** F-124-T01: every channel's state for one inbox item. */
+  deliveryState(deliveryId: string): DeliveryState {
+    return this.deliveryChannels.state(deliveryId);
   }
   /** B-134: subscribed devices and the last delivery result, for the Health line. */
   pushHealth() {

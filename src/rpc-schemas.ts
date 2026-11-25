@@ -232,6 +232,23 @@ export const methodSchemas = {
     additionalProperties: false,
   },
   'push.status': empty,
+  'deliveries.record': {
+    type: 'object',
+    required: ['id', 'channel', 'outcome'],
+    properties: {
+      id: { type: 'string', minLength: 1, maxLength: 64 },
+      channel: { enum: ['telegram', 'push'] },
+      outcome: { enum: ['sent', 'failed', 'opened'] },
+      reason: { type: 'string', maxLength: 500 },
+    },
+    additionalProperties: false,
+  },
+  'deliveries.state': {
+    type: 'object',
+    required: ['id'],
+    properties: { id: { type: 'string', minLength: 1, maxLength: 64 } },
+    additionalProperties: false,
+  },
   'inbox.list': empty,
   'inbox.brief': {
     type: 'object',
