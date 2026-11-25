@@ -23,6 +23,14 @@ export const DELIVERY_CHANNELS_SCHEMA = `CREATE TABLE IF NOT EXISTS delivery_cha
  */
 export const PUSH_FALLBACK_MS = 10 * 60_000;
 
+/**
+ * Owner decision 2026-11-25 (B, at least once): a Telegram fallback claimed but left without an outcome (NERV stopped
+ * mid-send) is handed out again once this lease has passed since the claim, accepting one possible duplicate. Passes
+ * never overlap and a Bot API call times out after 15 s, so a live send never outlasts it; the re-offer is a new
+ * claim with a new lease, so each crash causes at most one re-offer.
+ */
+export const FALLBACK_CLAIM_LEASE_MS = 2 * 60_000;
+
 /** A Telegram fallback the store handed out: the inbox item to send once. */
 export interface FallbackItem {
   id: string;
@@ -118,13 +126,15 @@ export class DeliveryChannels {
   /**
    * F-004-T09: hands out, once, the items queued for the phone that Telegram must now send: the push failed, or it was
    * not opened within `deadlineMs` of being queued (also when the push never left because NERV stopped first). Each one
-   * is claimed in the same transaction, so a receipt arriving later, a second pass or a restart never sends it again;
-   * only a send that failed (recorded) is handed out again. An item already read in the app, or whose reminder was
+   * is claimed in the same transaction, so a receipt arriving later or a second pass never sends it again. A send that
+   * failed (recorded) is handed out again, and so is a claim with no outcome once its lease (`FALLBACK_CLAIM_LEASE_MS`)
+   * has passed: NERV stopped mid-send, and at least once means one possible duplicate rather than a lost copy. An item already read in the app, or whose reminder was
    * cancelled there, is never handed out: the owner has seen it.
    */
   claimFallback(deadlineMs: number, now = new Date(), limit = 5): FallbackItem[] {
     if (!Number.isSafeInteger(deadlineMs) || deadlineMs < 0) throw new Error('Invalid fallback deadline.');
     const cutoff = new Date(now.getTime() - deadlineMs).toISOString();
+    const leaseEnd = new Date(now.getTime() - FALLBACK_CLAIM_LEASE_MS).toISOString();
     return transaction(this.db, () => {
       const due = this.db
         .prepare(
@@ -134,10 +144,12 @@ export class DeliveryChannels {
            LEFT JOIN reminders r ON r.id=d.reminder_id
            WHERE p.opened_at IS NULL AND d.read_at IS NULL AND r.cancelled IS NULL
              AND ((p.failed_at IS NOT NULL AND p.sent_at IS NULL) OR p.created<=?)
-             AND (t.delivery_id IS NULL OR (t.sent_at IS NULL AND t.failed_at IS NOT NULL AND (t.attempt_at IS NULL OR t.failed_at>=t.attempt_at)))
+             AND (t.delivery_id IS NULL OR (t.sent_at IS NULL AND (
+               (t.failed_at IS NOT NULL AND (t.attempt_at IS NULL OR t.failed_at>=t.attempt_at))
+               OR (t.attempt_at IS NOT NULL AND t.attempt_at<=? AND (t.failed_at IS NULL OR t.failed_at<t.attempt_at)))))
            ORDER BY d.rowid LIMIT ?`,
         )
-        .all(cutoff, limit) as unknown as FallbackItem[];
+        .all(cutoff, leaseEnd, limit) as unknown as FallbackItem[];
       const at = now.toISOString();
       for (const item of due) {
         this.db
