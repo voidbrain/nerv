@@ -328,24 +328,39 @@ class Mesh {
 
   /** One round of the heartbeat registry sync between every pair of serving bases that reach each other. */
   syncRegistries(): void {
-    for (const a of this.bases.values())
-      for (const b of this.bases.values()) {
-        if (a === b || !a.awake || !a.service) continue;
-        try {
-          this.answering(a.id, b.id);
-        } catch {
-          continue;
-        }
-        const theirs = this.withRegistry(b, (reg) => reg.records());
-        this.withRegistry(a, (reg) => {
+    // B-118-T04: one connection per base for the whole round (it runs every 5 simulated seconds; a connection per
+    // pair cost thousands of opens per file on Windows). Same order and the same records as before.
+    const open = new Map<string, DatabaseSync>();
+    const registry = (b: Base) => {
+      let db = open.get(b.id);
+      if (!db) {
+        db = new DatabaseSync(b.db);
+        db.exec('PRAGMA busy_timeout = 1000');
+        open.set(b.id, db);
+      }
+      return new Registry(db, this.rootPub);
+    };
+    try {
+      for (const a of this.bases.values())
+        for (const b of this.bases.values()) {
+          if (a === b || !a.awake || !a.service) continue;
+          try {
+            this.answering(a.id, b.id, registry);
+          } catch {
+            continue;
+          }
+          const theirs = registry(b).records();
+          const reg = registry(a);
           for (const r of theirs)
             try {
               reg.add(r);
             } catch {
               // Not signed by the pinned root, or an older main record: dropped, as KajiLink drops it.
             }
-        });
-      }
+        }
+    } finally {
+      for (const db of open.values()) db.close();
+    }
   }
 
   /**
@@ -419,12 +434,11 @@ class Mesh {
   }
 
   /** The receiving KajiLink: it answers only when awake, serving and reachable, and refuses unknown or revoked senders. */
-  private answering(from: string, to: string): Base {
+  private answering(from: string, to: string, registry?: (b: Base) => Registry): Base {
     const target = this.base(to);
     if (!this.reachable(from, to) || !target.awake || !target.service) throw new Error(`${to} unreachable`);
-    const trusted = this.withRegistry(target, (reg) =>
-      reg.bases().some((e) => e.baseId === from && e.status === 'enrolled'),
-    );
+    const enrolled = (reg: Registry) => reg.bases().some((e) => e.baseId === from && e.status === 'enrolled');
+    const trusted = registry ? enrolled(registry(target)) : this.withRegistry(target, enrolled);
     if (!trusted) throw new Error(`${to} refused ${from}: unknown or revoked base`);
     return target;
   }
