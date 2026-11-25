@@ -217,6 +217,21 @@ export interface StoreApi {
     | null
     | Promise<{ list: OwnerList; item: ListItem; view: ListView } | null>;
   pushPublicKey?(): Promise<string> | string;
+  /** F-124-T01: shared delivery state: what a channel did with an inbox item, and every channel's state of it. */
+  recordDelivery?(
+    id: string,
+    channel: import('./delivery-state.ts').DeliveryChannel,
+    outcome: import('./delivery-state.ts').DeliveryOutcome,
+    reason?: string,
+  ): boolean | Promise<boolean>;
+  /** F-004-T09: push first, Telegram as fallback: due fallbacks (claimed once) and the phone's open receipt. */
+  pushFallback?(
+    deadlineMs: number,
+  ): import('./delivery-state.ts').FallbackItem[] | Promise<import('./delivery-state.ts').FallbackItem[]>;
+  pushOpened?(receipt: string): boolean | Promise<boolean>;
+  deliveryState?(
+    id: string,
+  ): import('./delivery-state.ts').DeliveryState | Promise<import('./delivery-state.ts').DeliveryState>;
   savePushSubscription?(sub: {
     endpoint: string;
     p256dh: string;

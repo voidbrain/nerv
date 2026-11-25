@@ -18,6 +18,8 @@ export interface StoreRemindersHost {
   readonly db: DatabaseSync;
   readonly home?: string;
   dispatchPushReminders(reminders: Reminder[]): Promise<void>;
+  /** F-004-T09: queues a new reminder delivery for the phone first when a device is subscribed (same transaction). */
+  queuePushFirst?(deliveryId: string, now: Date): void;
 }
 
 /**
@@ -243,11 +245,13 @@ export class StoreReminders {
           .all(now.toISOString()) as Reminder[]
       ).map((r) => this.normalizeRow(r));
       for (const r of rows) {
-        this.host.db
+        const deliveryId = randomUUID();
+        const inserted = this.host.db
           .prepare(
             "INSERT OR IGNORE INTO deliveries(id,reminder_id,kind,message,created,read_at) VALUES(?,?,'reminder',?,?,NULL)",
           )
-          .run(randomUUID(), r.id, formatInboxReminderMessage(r, timeZone, lang), now.toISOString());
+          .run(deliveryId, r.id, formatInboxReminderMessage(r, timeZone, lang), now.toISOString());
+        if (inserted.changes) this.host.queuePushFirst?.(deliveryId, now);
         this.host.db.prepare('UPDATE reminders SET delivered=? WHERE id=?').run(now.toISOString(), r.id);
       }
       return rows;
