@@ -1161,7 +1161,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner request 2026-11-25; prompted by [B-144](work/records/F-130.md#b-144) |
+| PR / evidence | Owner request 2026-11-25; prompted by [B-144](work/records/F-130.md#b-144); opened in [#770](https://github.com/voidbrain/nerv/pull/770) |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-25 |
