@@ -1,7 +1,7 @@
 import type { DatabaseSync } from 'node:sqlite';
 import type { EpochPushReply, RegistryPort } from './kaji-link.ts';
 import { Registry, keyIdentity, type SignedRecord } from './kaji.ts';
-import { KAJI_REPLY_UNBOUND } from './kaji-auth.ts';
+import { KAJI_REPLY_MISMATCH, KAJI_REPLY_UNBOUND } from './kaji-auth.ts';
 
 /** Base-local: which base acknowledged which coordinator epoch, as measured by this base's own pushes (F-016-T18). */
 const EPOCH_ACKS_SCHEMA = `
@@ -103,8 +103,10 @@ export async function probeCoordinatorEpochs(
   /** The signed newest main epoch each base without the field holds (an older NERV says only that). */
   unknownMaxSeen: Map<string, number>;
   unreachable: string[];
-  /** B-125: bases whose signed reply is not bound to this request (an older NERV): their answer cannot be trusted. */
+  /** B-125: bases whose signed reply is not bound to this request (an older NERV, or altered on the way). */
   unbound: string[];
+  /** B-125: bases whose answer came as a reply signed for another request (replayed on the way). */
+  replayed: string[];
 }> {
   const { others } = otherBases(input);
   const ranOrAcked = new Map<string, number>();
@@ -112,13 +114,15 @@ export async function probeCoordinatorEpochs(
   const unknownMaxSeen = new Map<string, number>();
   const unreachable: string[] = [];
   const unbound: string[] = [];
+  const replayed: string[] = [];
   await Promise.all(
     others.map(async (baseId) => {
       let reply: EpochPushReply;
       try {
         reply = await input.push(baseId, []);
       } catch (e) {
-        ((e as { code?: unknown }).code === KAJI_REPLY_UNBOUND ? unbound : unreachable).push(baseId);
+        const code = (e as { code?: unknown }).code;
+        (code === KAJI_REPLY_UNBOUND ? unbound : code === KAJI_REPLY_MISMATCH ? replayed : unreachable).push(baseId);
         return;
       }
       if (reply.ranOrAckedEpoch === undefined) {
@@ -133,6 +137,7 @@ export async function probeCoordinatorEpochs(
     unknownMaxSeen,
     unreachable: unreachable.sort(),
     unbound: unbound.sort(),
+    replayed: replayed.sort(),
   };
 }
 

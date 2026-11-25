@@ -568,11 +568,16 @@ async function remotePrecheck(
   } finally {
     db.close();
   }
-  // B-125: an older NERV signs its reply without binding it to the request, so a captured reply could stand in for it.
-  if (probe.unbound.length)
+  // B-125: a reply not bound to this request (an older NERV, or altered on the way) or signed for another request
+  // (replayed on the way) says nothing trustworthy about the epochs that base ran.
+  const untrusted = [
+    ...probe.unbound.map((id) => `${id} (reply_unbound)`),
+    ...probe.replayed.map((id) => `${id} (reply_not_bound_to_this_request)`),
+  ];
+  if (untrusted.length)
     refuse(
       'peer_epoch_unknown',
-      `${probe.unbound.join(', ')} answered with a reply not bound to this request (reply_unbound: it runs an older NERV), so its answer cannot be trusted: update it (or revoke it with the root key) and run kaji promote again. No base was told the new epoch.`,
+      `${untrusted.join(', ')} answered with a reply not bound to this request (an older NERV, or the reply was altered on the way), so its answer cannot be trusted: update that base or check the line to it (or revoke it with the root key), then run kaji promote again. No base was told the new epoch.`,
     );
   const ahead = [...probe.ranOrAcked]
     .filter(([, epoch]) => epoch > standbyEpoch)
