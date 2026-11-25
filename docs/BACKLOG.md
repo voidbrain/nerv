@@ -9,30 +9,31 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 12 | 5 | 32 | 13 |
+| **This week** | 12 | 5 | 33 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 42 | 32 |
-| **Require Human 🧑** | 14 | 16 |
+| **Open** | 42 | 33 |
+| **Require Human 🧑** | 14 | 17 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
-| [F-011](#f-011) | [F-122](#f-122) | [B-068](#b-068) |  |
-| [F-004](#f-004) |  | [B-107](#b-107) |  |
-| [F-012](#f-012) |  | [B-113](#b-113) |  |
-| [F-016](#f-016) |  | [B-122](#b-122) |  |
-| [F-086](#f-086) |  | [B-123](#b-123) |  |
-| [F-087](#f-087) |  | [B-128](#b-128) |  |
-| [F-092](#f-092) |  | [B-129](#b-129) |  |
-| [F-098](#f-098) |  | [B-134](#b-134) |  |
-| [F-060](#f-060) |  | [B-135](#b-135) |  |
-| [F-007](#f-007) |  | [B-125](#b-125) |  |
-| [F-123](#f-123) |  | [B-056](#b-056) |  |
+| [F-062](#f-062) | [F-116](#f-116) | [B-139](#b-139) | — |
+| [F-011](#f-011) | [F-122](#f-122) | [B-057](#b-057) |  |
+| [F-004](#f-004) |  | [B-068](#b-068) |  |
+| [F-012](#f-012) |  | [B-107](#b-107) |  |
+| [F-016](#f-016) |  | [B-113](#b-113) |  |
+| [F-086](#f-086) |  | [B-122](#b-122) |  |
+| [F-087](#f-087) |  | [B-123](#b-123) |  |
+| [F-092](#f-092) |  | [B-128](#b-128) |  |
+| [F-098](#f-098) |  | [B-129](#b-129) |  |
+| [F-060](#f-060) |  | [B-134](#b-134) |  |
+| [F-007](#f-007) |  | [B-135](#b-135) |  |
+| [F-123](#f-123) |  | [B-125](#b-125) |  |
+|  |  | [B-056](#b-056) |  |
 |  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
 |  |  | [B-112](#b-112) |  |
@@ -40,7 +41,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 107.75 h agent + 13.75 h owner across 132 open steps of 42 features and 32 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 108.5 h agent + 14 h owner across 134 open steps of 42 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -602,6 +603,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-016-T03: [PR #546](https://github.com/voidbrain/nerv/pull/546) implementation; CI green · F-016-T04: [PR #555](https://github.com/voidbrain/nerv/pull/555) implementation; CI green · F-016-T05: [PR #564](https://github.com/voidbrain/nerv/pull/564) implementation · F-016-T06: [PR #567](https://github.com/voidbrain/nerv/pull/567) implementation · F-016-T07: [PR #677](https://github.com/voidbrain/nerv/pull/677) implementation and review fixes · F-016-T08: [PR #717](https://github.com/voidbrain/nerv/pull/717) Partition, sleep and reconnect fixtures; B-120 and B-121 fixes · F-016-T10: [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review · F-016-T13: [PR #548](https://github.com/voidbrain/nerv/pull/548) implementation; CI green · F-016-T14: [PR #550](https://github.com/voidbrain/nerv/pull/550) implementation; CI green · F-016-T15: [PR #552](https://github.com/voidbrain/nerv/pull/552) implementation; CI green · F-016-T16: [PR #701](https://github.com/voidbrain/nerv/pull/701) lease renewal, self-fencing, lease 0 rule, registry inputs, monotonic wait · F-016-T17: [PR #702](https://github.com/voidbrain/nerv/pull/702) kaji promote, serve swap guard, verified inputs, crash resume · F-016-T18: [PR #703](https://github.com/voidbrain/nerv/pull/703) /kaji/epoch-push, recorded acks, measured promotion horizon · F-016-T19: [PR #704](https://github.com/voidbrain/nerv/pull/704) Telegram hand-over: authority gate, hydration, no 409 race · F-016-T20: [PR #725](https://github.com/voidbrain/nerv/pull/725) Live standby seeding and replication while serve runs. [PR #725](https://github.com/voidbrain/nerv/pull/725) F-016-T20 (`src/coordinator-shipping.ts`, `test/coordinator-shipping.test.ts`); [PR #717](https://github.com/voidbrain/nerv/pull/717) F-016-T08 (`test/coordinator-partition.test.ts`; B-120, B-121 fixes); earlier PRs (#3 to #704): [moved 2026-11-25](archive/evidence-2026.md#f-016-moved-2026-11-25); [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750) |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-016-T10 verified: [PR #417](https://github.com/voidbrain/nerv/pull/417) merged on green CI (second fresh-context review found no blocker). F-016-T12 closed with the accepted decision revision and zero-blocking review in PR #470; scoped CI passed. Remaining distributed relocation acceptance is open. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="b-139"></a>[🐞 B-139](#top)
+
+**CI: macOS runners not acquired cancel required jobs; docs-only PRs and every PR's Swift CodeQL wait on Windows and macOS runners**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h agent + 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** Turn off CodeQL's default setup ([procedure](verification.md#codeql-default-setup-off), B-139-T02); then the agent reruns #756's CodeQL until green, and #756 merges only after that.
+
+| | |
+|---|---|
+| **Issue** | On 2026-11-25 three macOS jobs ended at about 15 minutes with no step run: CI `native-macos` (run 45626156780, a required check) and CodeQL default setup `Analyze (swift)` (runs 45640205435, 45644029795). Each says "The job was not acquired by Runner of type hosted even after multiple attempts" (GitHub macOS arm64 capacity); `timeout-minutes` (30 on `native-macos`) does not govern acquisition. Every PR, records and docs included, still starts a Windows and a macOS runner, and the default setup analyses Swift on every PR (about 12 minutes on macOS) because it cannot filter by path. |
+| **Reproduce** | Open a PR that changes only `docs/work/records/*.md`: CI starts `windows` and `native-macos` runners that only print their scope, and CodeQL starts `Analyze (swift)`. |
+| **Check** | On a docs-only PR (a rename counts both its old and new path) (every changed file under `docs/`, a root `*.md` or `LICENSE`) `windows` and `native-macos` report skipped and the PR can merge; any other path, and every push to `main`, runs them; CodeQL runs `actions` and `javascript-typescript` on every PR and push and `Analyze (swift)` only when Swift changed, after the default setup is off. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="b-139-t02"></a>B-139-T02 — Owner: turn off CodeQL's default setup before the advanced workflow's PR merges | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | — | [B-139-T01](#b-139-t01) | [🧑‍🔧](verification.md#codeql-default-setup-off) | — |
+| 🟡 Medium | <a id="b-139-t01"></a>B-139-T01 — Skip the Windows and macOS jobs on docs-only PRs; CodeQL advanced setup with Swift only when Swift changed | 2 h | 0 h | 2 h | Implemented; verification pending | [B-139-T02](#b-139-t02) | — | 🤖 | [PR #756](https://github.com/voidbrain/nerv/pull/756) docs-only OS-job skip; CodeQL advanced setup |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 2 steps recorded) | 2 h agent + 0.25 h owner | 0 of 2 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-139.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-139-T01: [PR #756](https://github.com/voidbrain/nerv/pull/756) docs-only OS-job skip; CodeQL advanced setup. Test: `test/verification-policy.test.mjs` (B-139 test), `test/ci-pins.test.mjs`; runs 45626156780, 45640205435, 45644029795 (runner not acquired); [#756](https://github.com/voidbrain/nerv/pull/756) |
+| Opened | 2026-11-25 |
+| Verification | Unit 2026-11-25: Test: `test/verification-policy.test.mjs` and `test/ci-pins.test.mjs` pass locally. CI: Pending (a docs-only PR with both OS jobs skipped; CodeQL after B-139-T02). |
 | Reviewed | 2026-11-25 |
 
 </details>
@@ -2570,9 +2610,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 4.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-126-T01 — Repeatable local model speed benchmark (Planned).
+💻 **→** Next: F-126-T01 — Repeatable local model speed benchmark (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2584,11 +2624,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | 1.5 h | Planned | — | [F-126-T02](#f-126-t02) | 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟢 Small | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | 0.25 h | Implemented; verification pending | — | [F-126-T02](#f-126-t02) | 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run |
 | 🟡 Medium | <a id="f-126-t02"></a>F-126-T02 — Rerun the gemma4:12b quality evidence with gemma4:26b | 2 h | 0 h | 2 h | Planned | [F-126-T01](#f-126-t01) | [F-126-T03](#f-126-t03) | ⏳ 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
 | 🟢 Small | <a id="f-126-t03"></a>F-126-T03 — Owner decides whether to switch the chat model to gemma4:26b | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-126-T02](#f-126-t02) | [F-126-T04](#f-126-t04) | ⏳ 🤔 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
 | 🟢 Small | <a id="f-126-t04"></a>F-126-T04 — Switch the configured chat model to gemma4:26b | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T03](#f-126-t03) | — | ⏳ 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
-| 🔴 Large | **Total** | 4.25 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 4.25 h agent + 0.25 h owner | 0 of 4 completed | | | | |
+| 🟡 Medium | **Total** | 4.25 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h agent + 0.25 h owner | 0 of 4 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2597,9 +2637,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); F-126-T01 speed benchmark in [2026-11-25-f126-t01-speed-benchmark.md](evaluations/2026-11-25-f126-t01-speed-benchmark.md); [#761](https://github.com/voidbrain/nerv/pull/761) |
 | Opened | 2026-11-25 |
-| Verification | — |
+| Verification | Unit/integration: 2026-11-25 `test/speed-benchmark.test.mjs` passed (2/2); local benchmark run recorded in `docs/evaluations/2026-11-25-f126-t01-speed-benchmark.md`; quality evaluation pending F-126-T02. |
 | Reviewed | 2026-11-25 |
 
 </details>
