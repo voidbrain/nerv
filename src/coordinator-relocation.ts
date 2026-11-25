@@ -94,6 +94,11 @@ export function drainCoordinator(
     /** `ranOrAckedCoordinatorEpoch` of this base's stores, read before the drain. */
     readonly ranOrAckedEpoch: number;
     readonly nowMs?: number;
+    /**
+     * B-124: `kaji drain --relocation FILE` stores the bundle's records here, in the transaction that fences this
+     * main: a drain that fails leaves both undone, and no running keeper can re-arm between the two.
+     */
+    readonly commit?: (db: DatabaseSync) => void;
   },
 ): DrainReceipt {
   if (input.newEpoch <= input.coordinatorEpoch)
@@ -124,6 +129,7 @@ export function drainCoordinator(
     if (state.replicationMode === 'active')
       db.prepare("UPDATE coordinator_state SET replication_mode = 'draining' WHERE id = 1").run();
     db.prepare("UPDATE coordinator_state SET replication_mode = 'fenced', lease_expires_at = 0 WHERE id = 1").run();
+    input.commit?.(db);
     const row = db.prepare('SELECT head_seq, state_digest FROM coordinator_state WHERE id = 1').get() as {
       head_seq: number;
       state_digest: string | null;
@@ -226,7 +232,7 @@ export type RelocationLiveness =
     };
 
 /** Wall time of the last lease ack this standby gave for `epoch` (`standby_lease_state`), if any. */
-function standbyLastAckMs(db: DatabaseSync, epoch: number): number | undefined {
+export function standbyLastAckMs(db: DatabaseSync, epoch: number): number | undefined {
   if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='standby_lease_state'").get())
     return undefined;
   const row = db
@@ -411,7 +417,7 @@ export function checkRelocationReadiness(input: RelocationReadinessInput): Reloc
     if (!live.oldHostDownConfirmed && !(hasAckHistory && live.allUnrevokedAckedNewEpoch))
       refuse(
         'old_host_unconfirmed',
-        'The wait alone does not bound the old main here: revoke it with the root key first (kaji relocate BASE-ID --revoke OLD-ID, then kaji import here).',
+        'The wait alone does not bound the old main here: revoke it with the root key first (kaji relocate BASE-ID FILE --revoke OLD-ID, then kaji promote --relocation FILE here).',
       );
     const horizon = relocationHorizonMs({
       allUnrevokedAckedNewEpoch: live.allUnrevokedAckedNewEpoch,

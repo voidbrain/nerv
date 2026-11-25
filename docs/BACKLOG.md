@@ -36,7 +36,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 96 h agent + 12 h owner across 129 open steps of 38 features and 30 other records. 165.5 h of actual effort recorded on 153 steps. Generated from the task files.
+**Remaining effort:** 96 h agent + 12 h owner across 129 open steps of 38 features and 30 other records. 168 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -429,9 +429,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h | [B-121-T02](#b-121-t02), [F-016-T20](#f-016-t20) | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) | ⏳ | — | — |
+| 🟡 Implemented | 🔺 P1 | 🟡 Medium | 2 h | [B-121-T02](#b-121-t02), [F-016-T20](#f-016-t20) | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) | 🤖 | — | — |
 
-💻 **→** Next: B-124-T01 after F-016-T20. Owner 2026-11-24: P1, and the change to `kaji relocate` (push nothing until the target's prechecks pass) is agreed; F-016-T09 waits for it ([PR #724](https://github.com/voidbrain/nerv/pull/724)).
+💻 **→** Next: independent review of [PR #734](https://github.com/voidbrain/nerv/pull/734) (P1), then green CI and merge; verification follows on main. Owner 2026-11-24: P1, and the change to `kaji relocate` (push nothing until the target's prechecks pass) is agreed; F-016-T09 waits for it ([PR #724](https://github.com/voidbrain/nerv/pull/724)).
 
 | | |
 |---|---|
@@ -441,10 +441,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-124-t01"></a>B-124-T01 — kaji relocate pushes a re-target only after the target's prechecks pass | 2 h | 0 h | 2 h | Planned | [B-121-T02](#b-121-t02), [F-016-T20](#f-016-t20) | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-124-t01"></a>B-124-T01 — kaji relocate pushes a re-target only after the target's prechecks pass | 2 h | 2.5 h so far (stated) | 2 h | Implemented; verification pending | [B-121-T02](#b-121-t02), [F-016-T20](#f-016-t20) | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) | [PR #734](https://github.com/voidbrain/nerv/pull/734) relocate writes a bundle; promote/drain --relocation store and push after the checks; reinstatement way out |
+| 🟡 Medium | **Total** | 2 h | 2.5 h | 2 h | 0 of 1 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -453,9 +453,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | None yet |
+| PR / evidence | Steps: B-124-T01: [PR #734](https://github.com/voidbrain/nerv/pull/734) relocate writes a bundle; promote/drain --relocation store and push after the checks; reinstatement way out. [PR #734](https://github.com/voidbrain/nerv/pull/734) (Test: `test/coordinator-partition.test.ts`, B-124; `test/coordinator-relocation.test.ts`, kaji relocate bundle) |
 | Opened | 2026-11-24 |
-| Verification | Pending |
+| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` 20 pass; full `npm test` 1441 pass, 0 fail (2 skipped). Gauntlet 2026-11-24 (owner-approved pattern, under the machine lock, after build): the 7 `nerv-system-flows` cases (no models) and the 4 `multi-step-agent` cases (local `gemma4-12b` profile) passed; `gauntlet:pending` lists none (ledger committed here). On main: Pending. |
 | Reviewed | 2026-11-24 |
 
 </details>
