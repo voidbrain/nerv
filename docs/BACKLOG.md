@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 12 | 5 | 37 | 13 |
+| **This week** | 13 | 5 | 38 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 42 | 37 |
+| **Open** | 43 | 38 |
 | **Require Human 🧑** | 14 | 19 |
 
 ### Require Human 🧑
@@ -43,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 111.5 h agent + 14 h owner across 138 open steps of 42 features and 37 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 116.5 h agent + 14.25 h owner across 142 open steps of 43 features and 38 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1774,6 +1774,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-144"></a>[🐞 B-144](#top)
+
+**The dashboard rewrites the EVA cages on every poll, so their images reload with no change**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-144-T01 — Leave the EVA cages in place when a poll changes nothing (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-25: "evas img refresh for nothing". `live.js` polls and calls `renderAll`, whose `renderCages` (`web/public/dashboard/dashboard.js`) rebuilt the cages' `innerHTML` every time, so each EVA image and heartbeat canvas was replaced and reloaded although nothing had changed. |
+| **Reproduce** | Open the live dashboard with no EVA activity and watch the EVA cage images: they flicker or reload at each poll. |
+| **Check** | Rendering the cages twice with the same state leaves the DOM in place; a changed state still updates it; a committed test fails first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-144-t01"></a>B-144-T01 — Leave the EVA cages in place when a poll changes nothing | 1 h | 0 h | 1 h | Implemented; verification pending | [PR #769](https://github.com/voidbrain/nerv/pull/769) |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-144.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-144-T01: [PR #769](https://github.com/voidbrain/nerv/pull/769). Test: `test/dashboard-cages.test.ts` (committed failing first); owner report 2026-11-25; [#769](https://github.com/voidbrain/nerv/pull/769) |
+| Opened | 2026-11-25 |
+| Verification | Unit/integration: 2026-11-25 passed locally (`test/dashboard-cages.test.ts`). Browser: Pending (the owner watches the EVA cages through several polls with no change: no flicker). |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
 ### <a id="b-136"></a>[🐞 B-136](#top)
 
 **`nerv chat` gets an "(invalid reply)" from the planner before every answer**
@@ -2619,6 +2657,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | F-109-T03: `node --test test/dashboard.test.ts test/pilot-controls.test.mjs` and `npm run check:fast` passed; live dashboard check pending owner. |
 | Reviewed | 2026-11-20 |
+
+</details>
+
+---
+### <a id="f-129"></a>[✨ F-129](#top)
+
+**The sortie view shows model thinking time next to EVA activity**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 4 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-129-T01 — List a sortie's model rounds with role, model and duration (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-25, from sortie `148eef28` on NERV-01 ([B-143](work/records/F-129.md#b-143)): EVA activity covered milliseconds (`tools.read` 4 ms, `reminders.add` 22 ms) while the consultant took 69 s and four Misato rounds 16–50 s each, so the sortie view hides where the time went. The ledger already records `durationMs` (and the model on `misato.consult`) for model rounds; the sortie view does not show them as activity. |
+| **Reproduce** | Open a finished chat sortie in the dashboard: its activity lists the EVA actions and their milliseconds, with no row for the consultant's or Misato's model time. |
+| **Check** | Each model round of a sortie (consultant, each Misato step and the reply) shows in order as a row such as "Misato thinking (gemma4:12b) · 69 s", next to the EVA rows; a round without a recorded model says the role only; a test across the ledger query and the dashboard rendering; the owner's visual check on a live sortie. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-129-t01"></a>F-129-T01 — List a sortie's model rounds with role, model and duration | 2 h | 0 h | 2 h | Planned | — | [F-129-T02](#f-129-t02) | 🤖 |
+| 🟡 Medium | <a id="f-129-t02"></a>F-129-T02 — Show model thinking rows in the dashboard sortie view | 2 h | 0 h | 2 h | Planned | [F-129-T01](#f-129-t01) | [F-129-T03](#f-129-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-129-t03"></a>F-129-T03 — Owner: check model thinking rows on a live sortie | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-129-T02](#f-129-t02) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 4 h | 0 h (0 of 3 steps recorded) | 4 h agent + 0.25 h owner | 0 of 3 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-129.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner request 2026-11-25, NERV-01 sortie `148eef28`; opened in [#769](https://github.com/voidbrain/nerv/pull/769) |
+| Opened | 2026-11-25 |
+| Verification | — |
+| Reviewed | 2026-11-25 |
 
 </details>
 
