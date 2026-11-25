@@ -12,6 +12,7 @@
     "F-123-T01"
   ],
   "resources": [
+    "docs/acceptance/f123-t02-grover-tools.md",
     "docs/work/records/F-123.md",
     "generated:backlog-views"
   ],
@@ -36,5 +37,6 @@
     "estimateAgentHours": 0,
     "ownerHours": 0.5,
     "ownerKind": "procedure"
-  }
+  },
+  "ownerLink": "docs/acceptance/f123-t02-grover-tools.md"
 }
