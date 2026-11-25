@@ -43,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 184.5 h agent + 16.5 h owner across 168 open steps of 45 features and 41 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 186 h agent + 16.5 h owner across 169 open steps of 45 features and 41 other records. 161 h of actual effort recorded on 148 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1113,9 +1113,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟣 Very large | 50.5 h agent + 1.5 h owner | [F-004-T09](#f-004-t09) | [B-147-T01](#b-147-t01), [F-131-T02](#f-131-t02) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 52 h agent + 1.5 h owner | [F-004-T09](#f-004-t09) | [B-147-T01](#b-147-t01), [F-131-T02](#f-131-t02) | 🤖 | — | — |
 
-💻 **→** Next: F-130-T15 — Inventory the simple workspace page (Nodo) in web/src (Planned).
+💻 **→** Next: F-130-T15 — Inventory the simple workspace page (Nodo) in web/src (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1127,8 +1127,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-130-t15"></a>F-130-T15 — Inventory the simple workspace page (Nodo) in web/src | 0.5 h | 0 h | 0.5 h | Planned | — | [F-130-T01](#f-130-t01), [F-130-T16](#f-130-t16) | 🤖 | [PR #773](https://github.com/voidbrain/nerv/pull/773) |
-| 🟡 Medium | <a id="f-130-t01"></a>F-130-T01 — Workspace dashboard shell and live data service | 4 h | 0 h | 4 h | Planned | [F-130-T15](#f-130-t15) | [F-130-T02](#f-130-t02), [F-130-T03](#f-130-t03), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T06](#f-130-t06), [F-130-T08](#f-130-t08), [F-130-T09](#f-130-t09), [F-130-T10](#f-130-t10), [F-130-T11](#f-130-t11), [F-130-T12](#f-130-t12) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-130-t15"></a>F-130-T15 — Inventory the simple workspace page (Nodo) in web/src | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-130-T01](#f-130-t01), [F-130-T16](#f-130-t16) | 🤖 | [PR #773](https://github.com/voidbrain/nerv/pull/773); [PR #776](https://github.com/voidbrain/nerv/pull/776) |
+| 🟡 Medium | <a id="f-130-t01"></a>F-130-T01 — Workspace dashboard shell and live data service | 4 h | 0 h | 4 h | Planned | [F-130-T15](#f-130-t15) | [F-130-T02](#f-130-t02), [F-130-T03](#f-130-t03), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T06](#f-130-t06), [F-130-T08](#f-130-t08), [F-130-T09](#f-130-t09), [F-130-T10](#f-130-t10), [F-130-T11](#f-130-t11), [F-130-T12](#f-130-t12), [F-130-T17](#f-130-t17) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-130-t02"></a>F-130-T02 — Health section in Angular | 3 h | 0 h | 3 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13), [F-130-T16](#f-130-t16) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-130-t03"></a>F-130-T03 — Settings section in Angular: schedule, update policy, models reload, devices and pairing | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-130-t04"></a>F-130-T04 — Push and the service worker move to the workspace | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01), [F-004-T09](#f-004-t09) | [F-130-T13](#f-130-t13), [F-130-T16](#f-130-t16) | ⏳ 🤖 | — |
@@ -1141,9 +1141,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟡 Medium | <a id="f-130-t11"></a>F-130-T11 — Bases map, chronicle and Lilith | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-130-t12"></a>F-130-T12 — Header chrome and demo mode | 3.5 h | 0 h | 3.5 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13), [F-130-T16](#f-130-t16) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-130-t16"></a>F-130-T16 — Simple view: chat, essentials and a link to the full dashboard | 3 h | 0 h | 3 h | Planned | [F-130-T15](#f-130-t15), [F-130-T02](#f-130-t02), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T08](#f-130-t08), [F-130-T12](#f-130-t12) | [F-130-T13](#f-130-t13), [F-131-T02](#f-131-t02) | ⏳ 🤖 | — |
-| 🟡 Medium | <a id="f-130-t13"></a>F-130-T13 — Retire the old dashboard | 4 h | 0 h | 4 h | Planned | [F-130-T02](#f-130-t02), [F-130-T03](#f-130-t03), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T06](#f-130-t06), [F-130-T07](#f-130-t07), [F-130-T08](#f-130-t08), [F-130-T09](#f-130-t09), [F-130-T10](#f-130-t10), [F-130-T11](#f-130-t11), [F-130-T12](#f-130-t12), [F-130-T16](#f-130-t16) | [F-130-T14](#f-130-t14) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-130-t17"></a>F-130-T17 — Reminders and inbox as workspace components | 2 h | 0 h | 2 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 | [PR #776](https://github.com/voidbrain/nerv/pull/776) |
+| 🟡 Medium | <a id="f-130-t13"></a>F-130-T13 — Retire the old dashboard | 4 h | 0 h | 4 h | Planned | [F-130-T02](#f-130-t02), [F-130-T03](#f-130-t03), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T06](#f-130-t06), [F-130-T07](#f-130-t07), [F-130-T08](#f-130-t08), [F-130-T09](#f-130-t09), [F-130-T10](#f-130-t10), [F-130-T11](#f-130-t11), [F-130-T12](#f-130-t12), [F-130-T16](#f-130-t16), [F-130-T17](#f-130-t17) | [F-130-T14](#f-130-t14) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-130-t14"></a>F-130-T14 — Owner: check the full dashboard and the simple view on the Mac and the installed phone app | 0 h | 0 h | 0 h agent + 1.5 h owner | Planned | [F-130-T13](#f-130-t13) | — | ⏳ 🧑‍🔧 | — |
-| 🟣 Very large | **Total** | 50.5 h | 0 h (0 of 16 steps recorded) | 50.5 h agent + 1.5 h owner | 0 of 16 completed | | | | |
+| 🟣 Very large | **Total** | 52.5 h | 0.5 h (1 of 17 steps recorded) | 52 h agent + 1.5 h owner | 0 of 17 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1152,7 +1153,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-130-T09: [PR #773](https://github.com/voidbrain/nerv/pull/773) · F-130-T15: [PR #773](https://github.com/voidbrain/nerv/pull/773). Owner request 2026-11-25; simple view kept by owner decision 2026-11-25 ([#772](https://github.com/voidbrain/nerv/pull/772)); FPV screens from FPVBuddy through MCP ([#773](https://github.com/voidbrain/nerv/pull/773)); prompted by [B-144](work/records/F-130.md#b-144); opened in [#770](https://github.com/voidbrain/nerv/pull/770) |
+| PR / evidence | Steps: F-130-T09: [PR #773](https://github.com/voidbrain/nerv/pull/773) · F-130-T15: [PR #773](https://github.com/voidbrain/nerv/pull/773); [PR #776](https://github.com/voidbrain/nerv/pull/776) · F-130-T17: [PR #776](https://github.com/voidbrain/nerv/pull/776). Owner request 2026-11-25; simple view kept by owner decision 2026-11-25 ([#772](https://github.com/voidbrain/nerv/pull/772)); FPV screens from FPVBuddy through MCP ([#773](https://github.com/voidbrain/nerv/pull/773)); prompted by [B-144](work/records/F-130.md#b-144); opened in [#770](https://github.com/voidbrain/nerv/pull/770); [#776](https://github.com/voidbrain/nerv/pull/776) |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-25 |
