@@ -904,7 +904,11 @@ function renderCages() {
         return "<div class='eva-machine' data-machine='" + esc(m.machineId) + "'><div class='eva-machine-hdr'><span class='b " + (m.online ? "ok" : "muted") + "'>" + esc(m.machineName) + "</span><span class='tiny muted'>" + esc(statusText + limitText) + "</span></div>" + note + "</div>";
       }).join("") + "</div>"
     : "<div class='eva-empty'>No machines reported.</div>";
-  box.innerHTML = cagesHtml + machinesHtml;
+  const html = cagesHtml + machinesHtml;
+  // B-144: a poll with no change leaves the DOM alone, so the EVA images do not reload and the heartbeats keep drawing.
+  if (html === renderCages.shown && box.innerHTML) return;
+  renderCages.shown = html;
+  box.innerHTML = html;
   if (typeof fillAvatars === "function") fillAvatars(box);
 }
 function renderChatSurface(surface) {

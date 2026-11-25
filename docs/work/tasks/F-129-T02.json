@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-129-T02",
+  "parent": "F-129",
+  "title": "Show model thinking rows in the dashboard sortie view",
+  "goal": "The sortie view shows \"Misato thinking (model) · 69 s\" rows in order next to the EVA rows",
+  "status": "planned",
+  "acceptance": [
+    "A test across the API and the dashboard rendering: a sortie with model rounds renders one row per round with role, model and seconds, in event order with the EVA rows",
+    "A round with no recorded model shows the role only; text follows docs/STYLE-GUIDE.md and var(--…) tokens"
+  ],
+  "dependsOn": [
+    "F-129-T01"
+  ],
+  "resources": [
+    "web/public/dashboard/dashboard.js",
+    "web/public/dashboard/live.js",
+    "test/**",
+    "docs/STYLE-GUIDE.md",
+    "docs/work/records/F-129.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented sorties and model names only.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A new visual element or token goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-25: rows in the sortie view from the new rounds field and a render test. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}
