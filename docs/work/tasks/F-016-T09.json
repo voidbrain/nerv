@@ -39,11 +39,12 @@
   "effort": {
     "size": "small",
     "estimate": "1 h owner",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. 2026-11-25: the owner's turn once B-124-T01 closed; owner page written in the reconciliation.",
+    "reviewed": "2026-11-25",
     "baselineDays": 1,
     "ownerHours": 1,
     "agentHours": 0,
     "ownerKind": "procedure"
-  }
+  },
+  "ownerLink": "docs/acceptance/f016-t09-two-device-relocation.md"
 }
