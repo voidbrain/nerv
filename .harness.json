@@ -68,7 +68,8 @@
     "docs/agents/work-usage-effectiveness.md": "core/docs/agents/work-usage-effectiveness.md",
     "docs/agents/work-usage-launch.md": "core/docs/agents/work-usage-launch.md",
     "docs/agents/solution-dashboard.md": "core/docs/agents/solution-dashboard.md",
-    "docs/agents/solution-gaps.md": "core/docs/agents/solution-gaps.md"
+    "docs/agents/solution-gaps.md": "core/docs/agents/solution-gaps.md",
+    ".github/workflows/backlog-views.yml": "core/.github/workflows/backlog-views.yml"
   },
   "forked": {},
   "freshness": {
@@ -1000,6 +1001,7 @@
     "profiles": "docs/agents/model-profiles.json",
     "featurePlans": true,
     "order": "queue",
+    "views": "built",
     "estimation": {
       "since": "2026-11-24"
     },

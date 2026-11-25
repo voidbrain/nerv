@@ -8,7 +8,7 @@
 - **Models & pilots:** Local S² routes (Ollama/LM Studio), optional Umbilical cloud route (Claude for Misato), Dummy Plug outage detection, specialist pilots, and SQLite token/cost accounting.
 - **Channels & UI:** Bilingual (EN/IT) Angular workspace and live NERV dashboard, Aoba Telegram bot, Hyuga daily briefs and proactive watches, and macOS menu-bar companion preview.
 - **Multi-base & operations:** Signed Kaji line over Tailscale, remote worker execution, `nerv nodes` discovery/inspection/bootstrap, local Mac lifecycle updates with rehearsal, CycloneDX BOM, and versioned evaluations.
-- **Planned & open work:** See [the roadmap](docs/ROADMAP.md) and [the backlog](docs/BACKLOG.md) for upcoming milestones, platform adapters, and open features.
+- **Planned & open work:** See [the roadmap](docs/ROADMAP.md) and [the backlog](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md) (published from `main`; `npm run work:build` then `node tools/backlog-recap.mjs` builds it locally) for upcoming milestones, platform adapters, and open features.
 
 ## Quick start
 
@@ -45,7 +45,7 @@ Verification: `npm test`, `npm run typecheck`, `npm run test:headless`, `npm run
 | [docs/INSTALL.md](docs/INSTALL.md) | Installation, user services, and topic guides |
 | [docs/STYLE-GUIDE.md](docs/STYLE-GUIDE.md) | Brand tokens, accessibility, and UI specifications |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System boundaries, trust, and vocabulary |
-| [docs/ROADMAP.md](docs/ROADMAP.md) & [docs/BACKLOG.md](docs/BACKLOG.md) | Milestones, open work, and queue order |
+| [docs/ROADMAP.md](docs/ROADMAP.md) & [backlog](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md) | Milestones, open work, and queue order |
 
 ## Contributing
 

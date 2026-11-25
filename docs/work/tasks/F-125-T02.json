@@ -4,7 +4,7 @@
   "parent": "F-125",
   "title": "Enable built backlog views and log view incidents over about 10 merged PRs",
   "goal": "NERV runs with workItems.views built and records whether the views held up over about 10 merged PRs",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "workItems.views is \"built\", docs/BACKLOG.md is ignored and untracked, CI and the backlog-views workflow follow the harness docs/apply/built-views.md",
     "The backlog-views branch publishes the ledger after the first push to main and the README links it",
@@ -38,16 +38,19 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent plus observation",
-    "basis": "Estimated 2026-11-25: the switch is a setting, ignore line and copied workflow; observation spans about 10 merged PRs. Not a measurement.",
+    "estimate": "0.5 h agent observation remaining",
+    "basis": "Estimated 2026-11-25: the switch is a setting, ignore line and copied workflow; observation spans about 10 merged PRs. Not a measurement. 2026-11-25: the switch is in PR #PRNUM; remaining is confirming the first publication and logging about 10 merged PRs in F-125's view incident log. Actual stated, not measured.",
     "reviewed": "2026-11-25",
-    "agentHours": 1,
+    "agentHours": 0.5,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   },
   "prs": [
     {
       "pr": 748
+    },
+    {
+      "pr": "PRNUM"
     }
   ]
 }
