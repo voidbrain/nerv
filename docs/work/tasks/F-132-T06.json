@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-132-T06",
+  "parent": "F-132",
+  "title": "Owner: create the fine-grained GitHub token and place it in NERV",
+  "goal": "The owner creates a fine-grained token limited to Actions read and write on voidbrain/coordinator and places it on the main base as F-132-T01 describes",
+  "status": "planned",
+  "acceptance": [
+    "A fine-grained token: resource owner voidbrain, only voidbrain/coordinator, repository permission Actions: Read and write (Metadata read-only is added by GitHub), an expiry date",
+    "Placed on NERV-01 with the command from F-132-T02 as a private file; never pasted in chat, git or a ticket; `nerv doctor` shows its age only"
+  ],
+  "dependsOn": [
+    "F-132-T02"
+  ],
+  "resources": [
+    "docs/work/records/F-132.md"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented repositories, workflows and runs in tests; the GitHub token never in git, config.json, tests, logs, chat or the relocation snapshot.",
+  "validation": [
+    "Owner procedure, recorded in F-132 Verification"
+  ],
+  "escalation": [
+    "The owner decides the token expiry"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: a few minutes on github.com and one command. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  },
+  "prs": []
+}

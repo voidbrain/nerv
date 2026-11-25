@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-132-T03",
+  "parent": "F-132",
+  "title": "GitHub pilot at the prototype stage, its grant and \"Refresh the overview\" from chat",
+  "goal": "A GitHub pilot on the roster that owns the two tools, enters at prototype, and answers \"Refresh the overview\" by dispatching the coordinator refresh and reporting the run",
+  "status": "planned",
+  "acceptance": [
+    "The roster has a GitHub pilot (domain GitHub workflows, tools github.workflow.dispatch and github.runs.status, stage prototype) chosen for GitHub requests like other pilots (F-045)",
+    "At prototype a dispatch is shown as an owner-approved card; after approval the pilot watches the run with github.runs.status and replies with its result and link",
+    "Demotion signals (F-025-T04) apply to the pilot like any other",
+    "A test across chat routing, the approval gate and the fake GitHub API: \"Refresh the overview\" ends with one dispatch after approval and none without it"
+  ],
+  "dependsOn": [
+    "F-132-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-132.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral invented repositories, workflows and runs in tests; the GitHub token never in git, config.json, tests, logs, chat or the relocation snapshot.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "Promoting the pilot past prototype is the owner's decision"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2.5 h",
+    "basis": "Estimated 2026-11-26: a roster entry, a grant and a chat route over existing pilots and approvals. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2.5,
+    "baselineAgentHours": 2.5,
+    "estimateAgentHours": 2.5
+  },
+  "prs": []
+}

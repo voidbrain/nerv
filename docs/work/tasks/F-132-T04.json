@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-132-T04",
+  "parent": "F-132",
+  "title": "Optional hourly coordinator refresh owned by the main base",
+  "goal": "An opt-in hourly job that dispatches the coordinator refresh from the main base (NERV-01 until F-016 is done) and skips when a run is already queued or running",
+  "status": "planned",
+  "acceptance": [
+    "Off by default; the owner turns it on in settings; it runs only on the base that holds the coordinator role and only when the pilot's stage and grant admit an unattended write-external call, otherwise it records why it skipped",
+    "Skips when github.runs.status shows a queued or in-progress run; a failed dispatch is retried at the next hour, never in a loop",
+    "Tests with a fake clock and the fake GitHub API: one dispatch per hour, none on a non-main base, none while a run is in progress, none when not admitted"
+  ],
+  "dependsOn": [
+    "F-132-T03"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-132.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design",
+    "concurrency-control"
+  ],
+  "privacy": "Neutral invented repositories, workflows and runs in tests; the GitHub token never in git, config.json, tests, logs, chat or the relocation snapshot.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A schedule more often than hourly goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26: one scheduled job on the existing scheduler with main-base and admission checks. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": []
+}

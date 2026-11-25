@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-132-T07",
+  "parent": "F-132",
+  "title": "Owner: refresh the overview from chat and see the hourly job run",
+  "goal": "The owner asks NERV to refresh the overview, approves it, sees the run finish, and checks the hourly job and GitHub's backup schedule",
+  "status": "planned",
+  "acceptance": [
+    "On NERV-01 after the update: \"Refresh the overview\" in chat shows an approval card; after approval the coordinator refresh-views run starts and NERV reports its result and link",
+    "With the hourly job turned on and the pilot promoted, runs appear about hourly in voidbrain/coordinator Actions; GitHub's own schedule still runs as the backup"
+  ],
+  "dependsOn": [
+    "F-132-T04",
+    "F-132-T06"
+  ],
+  "resources": [
+    "docs/work/records/F-132.md"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented repositories, workflows and runs in tests; the GitHub token never in git, config.json, tests, logs, chat or the relocation snapshot.",
+  "validation": [
+    "Owner check, recorded in F-132 Verification"
+  ],
+  "escalation": [
+    "The owner decides whether the hourly job stays on"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h owner",
+    "basis": "Estimated 2026-11-26: one chat request and a look at the Actions page after an hour. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.5,
+    "ownerKind": "procedure"
+  },
+  "prs": []
+}

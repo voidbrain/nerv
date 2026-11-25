@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-132-T05",
+  "parent": "F-132",
+  "title": "\"Refresh the overview\" quick-command button",
+  "goal": "A quick command (F-131) that asks the GitHub pilot to refresh the coordinator overview and shows the run's result",
+  "status": "planned",
+  "acceptance": [
+    "The quick-command list offers \"Refresh the overview\", which goes through the same approval as the chat request",
+    "A test across the quick-command API and the pilot with the fake GitHub API"
+  ],
+  "dependsOn": [
+    "F-132-T03",
+    "F-131-T02"
+  ],
+  "resources": [
+    "src/**",
+    "web/src/**",
+    "test/**",
+    "docs/work/records/F-132.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented repositories, workflows and runs in tests; the GitHub token never in git, config.json, tests, logs, chat or the relocation snapshot.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A button that skips the approval goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: one entry in the F-131 list and a join test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": []
+}
