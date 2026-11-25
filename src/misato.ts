@@ -518,6 +518,41 @@ export function filterToolsByIntent<T extends { name: string }>(
   });
 }
 
+/**
+ * B-136: the shape of one planning turn, sent to an OpenAI-compatible route as structured output. Without it a local
+ * model answered a granted result in prose, an invalid turn that cost a whole prompt read. parsePlan stays the judge.
+ */
+export const MISATO_PLAN_SCHEMA: NonNullable<Ask['schema']> = {
+  name: 'misato_plan',
+  schema: {
+    anyOf: [
+      {
+        type: 'object',
+        properties: {
+          action: {
+            type: 'object',
+            properties: { tool: { type: 'string' }, args: { type: 'object' } },
+            required: ['tool', 'args'],
+          },
+        },
+        required: ['action'],
+        additionalProperties: false,
+      },
+      ...['reply', 'ask', 'script'].map((key) => ({
+        type: 'object',
+        properties: { [key]: { type: 'string' } },
+        required: [key],
+        additionalProperties: false,
+      })),
+      {
+        type: 'object',
+        properties: { newRequest: { type: 'boolean', enum: [true] } },
+        required: ['newRequest'],
+        additionalProperties: false,
+      },
+    ],
+  },
+};
 export function misatoAsk(input: StepInput, preferredRoute: RouteName): Ask {
   const route = input.history.some((step) => step.tool === 'fleet.chat' || step.tool === 'fleet.print')
     ? 'local'
@@ -572,6 +607,7 @@ export function misatoAsk(input: StepInput, preferredRoute: RouteName): Ask {
     ),
     privacy: route === 'local' ? 'local-only' : 'any',
     route,
+    schema: MISATO_PLAN_SCHEMA,
   };
 }
 /** Strict: the first JSON object must be exactly one action (a tool name and an argument object) or a non-empty reply. */

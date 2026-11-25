@@ -207,19 +207,30 @@ export async function completeOpenAICompatible(
   try {
     let response: Response;
     try {
-      response = await (options.fetch ?? fetch)(endpoint.baseUrl.replace(/\/$/, '') + '/chat/completions', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          model: endpoint.model,
-          messages,
-          max_tokens: MAX_TOKENS,
-          stream: true,
-          stream_options: { include_usage: true },
-        }),
-        signal: limit.signal,
-        redirect: 'error',
-      });
+      const post = (structured: boolean) =>
+        (options.fetch ?? fetch)(endpoint.baseUrl.replace(/\/$/, '') + '/chat/completions', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            model: endpoint.model,
+            messages,
+            max_tokens: MAX_TOKENS,
+            stream: true,
+            stream_options: { include_usage: true },
+            // B-136: structured outputs, so a local model cannot answer in prose or wrap two objects.
+            ...(structured && ask.schema
+              ? { response_format: { type: 'json_schema', json_schema: { ...ask.schema, strict: true } } }
+              : {}),
+          }),
+          signal: limit.signal,
+          redirect: 'error',
+        });
+      response = await post(true);
+      // A server without structured outputs refuses the field: ask once more without it (the reply is parsed strictly).
+      if (ask.schema && (response.status === 400 || response.status === 422)) {
+        await response.body?.cancel().catch(() => undefined);
+        response = await post(false);
+      }
     } catch (e) {
       throw limit.signal.aborted || (e instanceof Error && e.name === 'TimeoutError')
         ? cutOff()
