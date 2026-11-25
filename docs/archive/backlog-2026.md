@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 4 | 7 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 5 | 7 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -6721,6 +6721,40 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | PR / evidence | [PR #595](https://github.com/voidbrain/nerv/pull/595) (CI green); [PR #630](https://github.com/voidbrain/nerv/pull/630) (F-115-T02 gauntlet reruns, CI green); `test/cli-help.test.ts` |
 | Opened | 2026-11-20 |
 | Verification | Unit/integration 2026-11-25: `test/cli-help.test.ts` 4/4 at main `774a08f`; CI green on PR #595 and every main run since. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+
+### F-021
+
+**MCP and standardized tool/expert protocol**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🔴 Large |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-25: PR #563 merged on green CI run 44618006632; every step closed (T02 #381, T03 #547, T04 #556, T05 #563).
+
+| | |
+|---|---|
+| **Issue** | Tool and expert integration is currently undefined; custom wrappers will not scale. |
+| **Reproduce** | Register a tool/expert via MCP or OpenAPI descriptor; invoke from a task; confirm schema validation, capability scope and audit. |
+| **Check** | Versioned tool descriptors (from MCP servers and NERV's own tools); deny-by-default capability binding to Misato and to each pilot (a pilot lists the tools it may use, F-045); works for local and remote (other-machine) endpoints; the registered tools are listed in the dashboard; no silent privilege escalation. (Wording corrected 2026-11-05: "expert roster (F-018)" predates F-045; tools are actions, skills are procedures, pilots are agents that use both.) |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-25: PR #563 merged on green CI run 44618006632; every step closed (T02 #381, T03 #547, T04 #556, T05 #563). 2026-11-25: F-021-T05 closed and the record closes: PR #563 merged 2026-11-19 on CI run 44618006632 (plan, validate, windows, native-macos, full-suite and CodeQL passed on the first attempt; an earlier head's failed run 44609450749 was superseded by fixes in the PR). Live wiring checked on main: the dashboard's Tools panel (`web/public/dashboard/index.html` `#tools-list`) is filled by `loadTools` in `live.js` from `GET /api/tools` in `src/server.ts`; `test/tool-listing.test.ts` passes 3/3 on main. Every Check item has its step closed: versioned descriptors (T02, #381), deny-by-default per-pilot binding with no escalation without a grant (T03, #547), remote endpoints over Kaji with the same grant checks (T04, #556), dashboard listing with axe (T05, #563). No review: records-only closure; the code it cites merged through its own PRs (T04's had a fresh-context design review). 2026-11-19: F-021-T05 implemented: `GET /api/tools` (`src/tool-listing.ts`) lists NERV's own tools and the MCP tools granted now, with descriptor versions, grant and EVA class, and the suspended grants with why; the static dashboard has its own Tools panel (owner's choice, separate from the Marduk Institute pilots and Kaji's watermelons skills): granted MCP tools and suspended grants first, NERV's own in a collapsed list. Tests: `test/tool-listing.test.ts` (listing, the route through the server with and without a runtime, the panel's HTML and escaping) and axe on the panel in `test/evaluation.browser.mjs`. Awaiting CI on [PR #563](https://github.com/voidbrain/nerv/pull/563). 2026-11-19: F-021-T04 closed: PR #556, CI run 44573406969 green on attempt 2 (no macOS runner on attempt 1). 2026-11-19: Review of PR #556 (design-reviewer, fresh context): two blockers, fixed in the PR: (1) the approval refusal never rejected the card (its source failed the RPC schema, silently) and left the worker job open: now one store transaction rejects the card (source `kaji-mcp`) and finishes the job with the refusal the main base hears; (2) the MCP output reached the main base's sortie as trusted: it is now marked tainted when the result arrives, even after the sortie closed (`Ledger.taintLate`). Should-fix done: the job's sortie on the other base closes with the call's outcome and records its duration; `kaji offer` lists only MCP names the name rule accepts; the guide says what the refusal does. Tests added for the refusal path, a stale fingerprint, an EVA-03 grant, and the taint and closing on both bases. 2026-11-19: F-021-T04 implemented (owner approved the scope, 0.75 h → 2.5 h): a base can offer its granted MCP tools over Kaji (`nerv kaji offer notes.read_note`); the base that runs one re-checks that it is granted now (a changed or removed tool is suspended), refuses EVA-03 grants, and makes the call through its tools process after its own gate. One that its gate sends to the owner there is refused and its card rejected, since nothing would make the call after an approval. Tool names everywhere offers and jobs pass (offers, config, worker link and jobs, RPC schema, verdict request, kaji.run) share one rule, `OFFER_NAME` in `src/mcp.ts`. Join test across two bases (`test/kaji-run.test.ts`): the MCP fixture answers on Tabgha through kaji.run, an offered but ungranted tool is refused there; plus the `kaji offer` CLI and the name rule. Awaiting CI on [PR #556](https://github.com/voidbrain/nerv/pull/556). Earlier evidence: [moved 2026-11-22](evidence-2026.md#f-021-moved-2026-11-22).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #743](https://github.com/voidbrain/nerv/pull/743) closure; [PR #563](https://github.com/voidbrain/nerv/pull/563) dashboard Tools panel; [PR #556](https://github.com/voidbrain/nerv/pull/556) MCP over Kaji; [PR #547](https://github.com/voidbrain/nerv/pull/547) per-pilot binding; [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool descriptors; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links. |
+| Opened | 2026-11-02 |
+| Verification | 2026-11-25: every Check item closed by its step (T02 #381, T03 #547, T04 #556, T05 #563, each on green CI); `test/tool-listing.test.ts` 3/3 on main. Earlier: unit/integration and CI 2026-11-13: every built-in registration has a stable versioned descriptor; MCP fingerprints remain compatible; PR #381 CI 43496658350 passed validate, native-macos, windows, plan and full-suite. |
 | Reviewed | 2026-11-25 |
 
 </details>
