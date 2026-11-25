@@ -267,11 +267,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="b-139-t01"></a>B-139-T01 — Skip the Windows and macOS jobs on docs-only PRs; CodeQL advanced setup with Swift only when Swift changed | 2 h | 0 h | 2 h | Implemented; verification pending | — | [B-139-T02](#b-139-t02) | 🤖 |
-| 🟢 Small | <a id="b-139-t02"></a>B-139-T02 — Owner: turn off CodeQL's default setup after the advanced workflow is merged | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-139-T01](#b-139-t01) | — | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 2 steps recorded) | 2 h agent + 0.25 h owner | 0 of 2 completed | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="b-139-t01"></a>B-139-T01 — Skip the Windows and macOS jobs on docs-only PRs; CodeQL advanced setup with Swift only when Swift changed | 2 h | 0 h | 2 h | Implemented; verification pending | — | [B-139-T02](#b-139-t02) | 🤖 | [PR #756](https://github.com/voidbrain/nerv/pull/756) docs-only OS-job skip; CodeQL advanced setup |
+| 🟢 Small | <a id="b-139-t02"></a>B-139-T02 — Owner: turn off CodeQL's default setup after the advanced workflow is merged | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-139-T01](#b-139-t01) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 2 steps recorded) | 2 h agent + 0.25 h owner | 0 of 2 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -280,7 +280,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/verification-policy.test.mjs` (B-139 test), `test/ci-pins.test.mjs`; runs 45626156780, 45640205435, 45644029795 (runner not acquired); [#756](https://github.com/voidbrain/nerv/pull/756) |
+| PR / evidence | Steps: B-139-T01: [PR #756](https://github.com/voidbrain/nerv/pull/756) docs-only OS-job skip; CodeQL advanced setup. Test: `test/verification-policy.test.mjs` (B-139 test), `test/ci-pins.test.mjs`; runs 45626156780, 45640205435, 45644029795 (runner not acquired); [#756](https://github.com/voidbrain/nerv/pull/756) |
 | Opened | 2026-11-25 |
 | Verification | Unit 2026-11-25: Test: `test/verification-policy.test.mjs` and `test/ci-pins.test.mjs` pass locally. CI: Pending (a docs-only PR with both OS jobs skipped; CodeQL after B-139-T02). |
 | Reviewed | 2026-11-25 |

@@ -44,5 +44,11 @@
     "agentHours": 2,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
-  }
+  },
+  "prs": [
+    {
+      "pr": 756,
+      "note": "docs-only OS-job skip; CodeQL advanced setup"
+    }
+  ]
 }
