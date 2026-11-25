@@ -268,10 +268,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-143-t01"></a>B-143-T01 — Anchor relative reminder times to the request time | 1.5 h | 0 h | 1.5 h | Implemented; verification pending |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-143-t01"></a>B-143-T01 — Anchor relative reminder times to the request time | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [PR #768](https://github.com/voidbrain/nerv/pull/768) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -280,7 +280,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/misato.test.ts` (B-143 test, committed failing first); owner report 2026-11-25, NERV-01, sortie `148eef28` (events 1482–1498) |
+| PR / evidence | Steps: B-143-T01: [PR #768](https://github.com/voidbrain/nerv/pull/768). Test: `test/misato.test.ts` (B-143 test, committed failing first); owner report 2026-11-25, NERV-01, sortie `148eef28` (events 1482–1498); [#768](https://github.com/voidbrain/nerv/pull/768) |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration: 2026-11-25 passed locally (`test/misato.test.ts`). Human: Pending (a live "in 2 minutes" reminder on NERV-01 is due 2 minutes after the request). |
 | Reviewed | 2026-11-25 |
