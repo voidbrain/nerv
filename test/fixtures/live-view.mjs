@@ -10,8 +10,9 @@ const flush = () => new Promise((done) => realTimeout(done, 0));
 
 /** The dashboard simulation (dashboard.js, demo mode) in a linkedom page, with a frozen clock and no timers. */
 export function loadDashboard(now = Date.UTC(2030, 0, 2, 9, 0, 0)) {
-  const html = readFileSync('web/public/dashboard/index.html', 'utf8').replace(/<script[^>]*><\/script>/g, '');
-  const { window, document } = parseHTML(html);
+  const { window, document } = parseHTML(readFileSync('web/public/dashboard/index.html', 'utf8'));
+  // The page's own <script> tags go through the DOM; the test runs dashboard.js itself below.
+  document.querySelectorAll('script').forEach((n) => n.remove());
   const noop = () => {};
   const ctx2d = new Proxy(
     {},
