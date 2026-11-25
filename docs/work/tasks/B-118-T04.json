@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "B-118-T04",
+  "parent": "B-118",
+  "title": "Cut the Windows cost of the coordinator test files",
+  "goal": "The Windows npm test step finishes within 12 minutes: the coordinator files no longer run 10-30 times slower there than on Linux",
+  "status": "implemented",
+  "acceptance": [
+    "The slowest Windows files are measured against Linux from the timing logs of 2026-11-24/25 and the Windows-only cost named",
+    "The test processes skip SQLite's disk flush (a test preload, covered by its own test), and the partition mesh's registry sync opens each store once per round; no timeout raised, no test skipped, product code unchanged",
+    "The PR's Windows run shows the coordinator files' times against the 20 runs before; then five full Windows runs within 12 minutes without reruns (B-118's Check)"
+  ],
+  "dependsOn": [
+    "B-118-T03"
+  ],
+  "resources": [
+    "test/fixtures/sqlite-no-fsync.ts",
+    "test/sqlite-no-fsync.test.ts",
+    "test/coordinator-partition.test.ts",
+    "package.json",
+    "tools/selected-tests.mjs",
+    "docs/work/records/B-118.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "evidence-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/sqlite-no-fsync.test.ts test/coordinator-partition.test.ts",
+    "npm test",
+    "npm run check:fast",
+    "CI windows job timings against runs 45511684500-45559316942"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "If the flush is not the Windows cost, the next step (fewer store opens in promote's 5 s horizon poll, src/coordinator-promote.ts) changes product code and gets its own task and review"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-25 when opened: aggregate 20 Windows timing logs, compare with Linux, count store opens, two test-side changes, measure on the PR. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": []
+}
