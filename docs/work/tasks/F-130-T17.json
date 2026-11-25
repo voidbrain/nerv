@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-130-T17",
+  "parent": "F-130",
+  "title": "Reminders and inbox as workspace components",
+  "goal": "The Nodo reminder editor (add, edit, cancel, pages) and the inbox history move out of the app component into section components the full dashboard (beside Coming up) and, if the owner keeps them, the simple view both use",
+  "status": "planned",
+  "acceptance": [
+    "Reminders and inbox are their own components over the live data service of F-130-T01, with the same API calls (/api/reminders/page, POST, PATCH and DELETE /api/reminders, /api/inbox/history), paging, focus return and errors as today",
+    "Lists render with @for track by id; a test renders the same page twice and the rows stay in place",
+    "A test across the API and the component adds, edits and cancels a reminder; the browser check keeps its axe pass"
+  ],
+  "dependsOn": [
+    "F-130-T01"
+  ],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented reminders only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "Whether the simple view keeps reminders goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-25 (F-130-T15 inventory): the existing reminder and inbox code moves into two components with a keyed-row test. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": [
+    {
+      "pr": 776
+    }
+  ]
+}
