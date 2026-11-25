@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "B-126-T03",
+  "parent": "B-126",
+  "title": "Name the second cause of the Windows not-ready failures from the new error and fix it",
+  "goal": "Runtime tests stop failing with \"nervous process not ready\" on Windows CI",
+  "status": "planned",
+  "acceptance": [
+    "The cause is named from the first Windows failure whose error carries B-126-T02's exit, start-up step and error output",
+    "A committed test fails first, then the fix; the ready deadline is raised only if measurements show a start slower than 30 s is the cause, and still fails a dead child",
+    "No \"nervous process not ready\" in the next five Windows runs"
+  ],
+  "dependsOn": [
+    "B-126-T02"
+  ],
+  "resources": [
+    "src/process-client.ts",
+    "src/nervous-process.ts",
+    "src/store.ts",
+    "test/**",
+    "docs/work/records/B-126.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "A committed regression fails before the fix",
+    "npm test",
+    "npm run check:fast",
+    "CI windows job on five runs"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-25 from B-126-T01 (1.5 h, cause named from the child's error output). Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

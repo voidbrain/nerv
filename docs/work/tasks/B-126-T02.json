@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "B-126-T02",
+  "parent": "B-126",
+  "title": "Say why the nervous child was not ready: its exit, last start-up step and error output",
+  "goal": "A not-ready failure on Windows CI names how the nervous child ended or where it stopped, so the second cause can be named from one run",
+  "status": "implemented",
+  "acceptance": [
+    "The not-ready error names the exit code or signal, or that the child is still running at the deadline (pid), its last start-up step and its last error lines",
+    "Committed tests fail first: a child that exits early with error output, one still running at the deadline, one that stalls in a reported step, and the real Runtime with a database it refuses",
+    "The run log and a reproduction under load on Windows are compared with the 30 s ready deadline; the deadline is not raised without measurements"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/process-client.ts",
+    "src/nervous-process.ts",
+    "src/rpc.ts",
+    "test/process-client.test.ts",
+    "docs/work/records/B-126.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "A committed regression fails before the fix",
+    "npm test",
+    "npm run check:fast",
+    "node --test test/process-client.test.ts on Windows"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2.5 h",
+    "basis": "Estimated 2026-11-25 from B-126-T01 (1.5 h): read the run, reproduce on Windows under load, failing-first diagnostics. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0.5,
+    "baselineAgentHours": 2.5,
+    "estimateAgentHours": 2.5
+  },
+  "prs": [
+    {
+      "pr": 755
+    }
+  ]
+}

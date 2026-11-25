@@ -9,12 +9,21 @@ import { appendFileSync } from 'node:fs';
 import { CoordinatorAuthorityError } from './coordinator-authority.ts';
 import type { AgencySnapshot } from './executors.ts';
 import type { Verdict } from './policy.ts';
-import { dispatchRpc, MAX_FRAME_BYTES, READY, REFUSED_BEFORE_GATE, RpcFault } from './rpc.ts';
+import { dispatchRpc, MAX_FRAME_BYTES, READY, REFUSED_BEFORE_GATE, RpcFault, startupStep } from './rpc.ts';
 import { readConfig, readScrolls } from './config.ts';
 import { Registry, type SignedRecord } from './kaji.ts';
 import { factKey } from './memory.ts';
 import { toolName } from './mcp.ts';
 import { runSessionLimitTick } from './session-limit-resume.ts';
+// B-126-T02: each start-up step is reported before it runs, and one turn of the event loop lets the report go out, so
+// a coordinator still waiting for READY at its deadline can say whether this child was loading, opening the database
+// or ticking.
+const step = async (name: string) => {
+  process.send?.(startupStep(name));
+  await new Promise((done) => setImmediate(done));
+};
+await step('modules loaded');
+await step('opening the database');
 // argv: database path, then the data home whose scrolls.json sets the gate rules (defaults when absent).
 const store = new Store(
   process.argv[2]!,
@@ -44,6 +53,7 @@ const schedule = () => {
   }
   store.expire();
 };
+await step('first scheduler tick');
 schedule();
 const timer = setInterval(() => {
   try {
