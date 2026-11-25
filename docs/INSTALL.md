@@ -50,6 +50,7 @@ nerv service uninstall # remove service definition (keeps data)
 |---|---|
 | [Models and Pilots](guides/models-and-pilots.md) | S² (Ollama/LM Studio), Umbilical (Claude), API keys, Dummy Plug outage handling, specialist pilots |
 | [Memory, Chat, Tools, and Gate Rules](guides/memory-and-chat.md) | Misato chat, Lilith memory & Instrumentality, MCP tools, Scrolls gate rules, CycloneDX BOM |
+| [A Remote MCP Server on the Tailnet](guides/remote-mcp.md) | Register an HTTPS MCP server (a hub on the tailnet), effect classes, an unreachable server |
 | [Channels, Dashboard, and Proactive Watches](guides/channels-and-watches.md) | Dashboard shortcuts & Battery, Telegram (Aoba), daily briefs, chronicle, Hyuga watches |
 | [Kaji Line, Remote Workers, and Node Setup](guides/kaji-and-nodes.md) | Base enrollment, Tailscale live link, remote actions, `nerv nodes` bootstrap, lifecycle & root migration |
 | [Backups](guides/backups.md) | Nightly snapshots, encrypted off-host copies, `nerv backup keygen\|status\|decrypt` |

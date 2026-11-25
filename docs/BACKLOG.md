@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 38 | 30 |
-| **Require Human 🧑** | 12 | 16 |
+| **Require Human 🧑** | 13 | 16 |
 
 ### Require Human 🧑
 
@@ -22,7 +22,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
-| [F-011](#f-011) |  | [B-068](#b-068) |  |
+| [F-011](#f-011) | [F-122](#f-122) | [B-068](#b-068) |  |
 | [F-004](#f-004) |  | [B-107](#b-107) |  |
 | [F-012](#f-012) |  | [B-113](#b-113) |  |
 | [F-016](#f-016) |  | [B-122](#b-122) |  |
@@ -2355,7 +2355,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 2.5 h agent + 0.5 h owner | — | [F-122-T02](#f-122-t02) | 🤖 | — | — |
 
-💻 **→** Next: F-123-T01 — Register a remote MCP server on the tailnet (Planned).
+💻 **→** Next: F-123-T01 — Register a remote MCP server on the tailnet (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2365,11 +2365,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-123-t01"></a>F-123-T01 — Register a remote MCP server on the tailnet | 2.5 h | 0 h | 2.5 h | Planned | — | [F-122-T02](#f-122-t02), [F-123-T02](#f-123-t02) | 🤖 |
-| 🟢 Small | <a id="f-123-t02"></a>F-123-T02 — Owner check: NERV lists the Grover tools | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-123-T01](#f-123-t01) | — | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 2 steps recorded) | 2.5 h agent + 0.5 h owner | 0 of 2 completed | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-123-t01"></a>F-123-T01 — Register a remote MCP server on the tailnet | 2.5 h | 0 h | 2.5 h | Implemented; verification pending | — | [F-122-T02](#f-122-t02), [F-123-T02](#f-123-t02) | 🤖 | [PR #746](https://github.com/voidbrain/nerv/pull/746) |
+| 🟢 Small | <a id="f-123-t02"></a>F-123-T02 — Owner check: NERV lists the Grover tools | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-123-T01](#f-123-t01) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 2 steps recorded) | 2.5 h agent + 0.5 h owner | 0 of 2 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2378,7 +2378,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730). |
+| PR / evidence | Steps: F-123-T01: [PR #746](https://github.com/voidbrain/nerv/pull/746). Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); F-123-T01 in [PR #746](https://github.com/voidbrain/nerv/pull/746). |
 | Opened | 2026-11-24 |
 | Verification | — |
 | Reviewed | 2026-11-24 |
@@ -2516,46 +2516,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-24 |
 | Verification | 2026-11-24: F-121-T04 `node --test test/print-transfer.test.ts` (failing first: module missing) and the cross-process join test in `test/misato.test.ts` (failed with the coordinator step removed); affected suites (82 passed); full `npm test` 1393 (1391 passed, 2 skipped); `npm run build` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed. CI 2026-11-24: [run 45475646483](https://github.com/voidbrain/nerv/actions/runs/45475646483) green (PR #722); on the PR head the cache-probe test failed once on Windows (run 45472575103 attempt 1, [B-133](work/records/F-121.md#b-133)). Earlier: F-121-T04 pre-review runs and F-121-T01, F-121-T02: [moved 2026-11-25](archive/evidence-2026.md#f-121-moved-2026-11-25). |
 | Reviewed | 2026-11-25 |
-
-</details>
-
----
-### <a id="f-122"></a>[✨ F-122](#top)
-
-**Deliver Grover alerts**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 4 h agent + 0.5 h owner | [F-123-T01](#f-123-t01) | — | 🤖 | — | — |
-
-💻 **→** Next: F-122-T01 — Design Grover alert delivery (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner 2026-11-24 (coordinator gap review): Grover's hub raises and clears alerts (pH, EC, temperature or level out of the phase range, an agent offline, a driver fault) and lists them through an MCP tool, but nothing delivers them to the owner. Grover F-008-T03 waits on this record (grover:F-008-T03). |
-| **Reproduce** | With the hub reachable, `nerv chat "ci sono allarmi Grover?"` has no answer source, and a new Grover alert reaches no channel. |
-| **Check** | A new Grover alert reaches the owner once through NERV's channels (Telegram, phone push, inbox) with its value and range; a cleared alert is reported once; repeats inside the hub's hysteresis are not re-sent; delivery survives a NERV restart without duplicates. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-122-t01"></a>F-122-T01 — Design Grover alert delivery | 1 h | 0 h | 1 h | Planned | — | [F-122-T02](#f-122-t02) | 🤖 |
-| 🟡 Medium | <a id="f-122-t02"></a>F-122-T02 — Deliver Grover alerts through NERV's channels | 3 h | 0 h | 3 h | Planned | [F-122-T01](#f-122-t01), [F-123-T01](#f-123-t01) | [F-122-T03](#f-122-t03) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-122-t03"></a>F-122-T03 — Owner check: a real Grover alert arrives | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-122-T02](#f-122-t02) | — | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 4 h | 0 h (0 of 3 steps recorded) | 4 h agent + 0.5 h owner | 0 of 3 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-122.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730). |
-| Opened | 2026-11-24 |
-| Verification | — |
-| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -3012,6 +2972,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-122"></a>[✨ F-122](#top)
+
+**Deliver Grover alerts**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 4 h agent + 0.5 h owner | [F-123-T01](#f-123-t01) | — | 🤖 | — | 🤔 |
+
+🧑 **→** Answer the four owner questions in [the Grover alert delivery design](decisions/grover-alert-delivery.md#owner-questions) before F-122-T02 starts.
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24 (coordinator gap review): Grover's hub raises and clears alerts (pH, EC, temperature or level out of the phase range, an agent offline, a driver fault) and lists them through an MCP tool, but nothing delivers them to the owner. Grover F-008-T03 waits on this record (grover:F-008-T03). |
+| **Reproduce** | With the hub reachable, `nerv chat "ci sono allarmi Grover?"` has no answer source, and a new Grover alert reaches no channel. |
+| **Check** | A new Grover alert reaches the owner once through NERV's channels (Telegram, phone push, inbox) with its value and range; a cleared alert is reported once; repeats inside the hub's hysteresis are not re-sent; delivery survives a NERV restart without duplicates. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-122-t01"></a>F-122-T01 — Design Grover alert delivery | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-122-T02](#f-122-t02) | 🤖 | [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md |
+| 🟡 Medium | <a id="f-122-t02"></a>F-122-T02 — Deliver Grover alerts through NERV's channels | 3 h | 0 h | 3 h | Planned | [F-122-T01](#f-122-t01), [F-123-T01](#f-123-t01) | [F-122-T03](#f-122-t03) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-122-t03"></a>F-122-T03 — Owner check: a real Grover alert arrives | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-122-T02](#f-122-t02) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 4 h | 0 h (0 of 3 steps recorded) | 4 h agent + 0.5 h owner | 0 of 3 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-122.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-122-T01: [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md. Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); design in [#747](https://github.com/voidbrain/nerv/pull/747) |
+| Opened | 2026-11-24 |
+| Verification | — |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="b-056"></a>[🐞 B-056](#top)
 
 **A renewal the companion refuses on the Mac says it was not confirmed**

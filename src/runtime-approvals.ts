@@ -1,4 +1,5 @@
-import { gateCallTimeoutMs, type AgencySnapshot } from './executors.ts';
+import { gateCallTimeoutMs, hasExecutor, type AgencySnapshot } from './executors.ts';
+import { callGrantedMcp } from './runtime-tools.ts';
 import { ItemLockManager, itemKeysForTool } from './item-locks.ts';
 import type { Verdict } from './policy.ts';
 import type { ProcessClient } from './process-client.ts';
@@ -12,6 +13,7 @@ import {
   runExtraSeat,
   type ActReply,
   type ChatReply,
+  type ExternalTools,
   type ExtraSeatSpec,
   type OwnerAction,
   type PeerSeat,
@@ -70,6 +72,9 @@ export interface RuntimeApprovalsHost {
     context: Turn[],
     opts?: { consult: boolean; advice?: string; conversation?: string; watch?: WatchWork },
   ): Promise<ChatReply>;
+  /** F-123: granted MCP tools and the process that calls them, for an MCP action the owner approved. */
+  externalTools?(force?: boolean): Promise<ExternalTools>;
+  toolsProcess?(): ProcessClient;
 }
 
 /**
@@ -452,6 +457,46 @@ export class RuntimeApprovals {
     return this.host.enqueueWatchWork(() => this.resumeCore(sortieId, proactive));
   }
 
+  /**
+   * F-123: an MCP tool's call the owner approved on a card runs now, once, under the grant the approval issued, and only
+   * while the tool is still granted with the description the owner saw. Otherwise it did not run, and Misato is told why.
+   */
+  private async runApprovedMcp(
+    sortieId: string,
+    d: { actionId: string; tool: string },
+  ): Promise<{ result: { text: string } } | { error: string; notRun?: true }> {
+    const ext = await this.host.externalTools?.(true).catch(() => undefined);
+    const granted = ext?.byName.get(d.tool);
+    if (!granted || !this.host.toolsProcess) {
+      const why = ext?.suspended.find((x) => x.name === d.tool)?.why ?? 'it is not granted on this base now';
+      return { error: `Approved, but it did not run: ${why}.`, notRun: true };
+    }
+    if (granted.eva === '03')
+      return { error: 'Approved, but it did not run: EVA-03 needs a sandbox NERV does not have yet.', notRun: true };
+    let args: Record<string, unknown>;
+    try {
+      ({ args } = (await this.host.nervous.call('actions.authorizeApproved', { sortieId, actionId: d.actionId })) as {
+        args: Record<string, unknown>;
+      });
+    } catch (e) {
+      return {
+        error: `Approved, but it did not run: ${e instanceof Error ? e.message : 'the grant was refused'}`,
+        notRun: true,
+      };
+    }
+    const toolsProcess = this.host.toolsProcess;
+    const out: { text?: string; error?: string } = await callGrantedMcp({
+      nervous: this.host.nervous,
+      toolsProcess: () => toolsProcess(),
+      sortieId,
+      actionId: d.actionId,
+      tool: d.tool,
+      granted,
+      args,
+    }).catch((e: unknown) => ({ error: e instanceof Error ? e.message : 'The MCP call could not finish.' }));
+    return out.error ? { error: out.error } : { result: { text: out.text ?? '' } };
+  }
+
   private async resumeCore(sortieId: string, proactive?: WatchWork): Promise<ChatReply | null> {
     const claim = (await this.host.nervous.call('misato.claim', { sortieId })) as {
       request: string;
@@ -467,16 +512,26 @@ export class RuntimeApprovals {
     } | null;
     if (!claim) return null;
     const steps = claim.steps.map((s) => s.step);
-    for (const d of claim.decisions) {
+    for (const claimed of claim.decisions) {
+      const d: (typeof claim.decisions)[number] & { notRun?: true } =
+        claimed.decision === 'approve' && claimed.result === undefined && !claimed.error && !hasExecutor(claimed.tool)
+          ? { ...claimed, ...(await this.runApprovedMcp(sortieId, claimed)) }
+          : claimed;
       const step: Step =
         d.decision === 'approve'
           ? {
               tool: d.tool,
               args: d.args,
               outcome: 'grant',
-              reason: d.error ? 'The owner approved it; it ran and failed.' : 'The owner approved it; it ran.',
+              reason: d.notRun
+                ? 'The owner approved it, but it did not run.'
+                : d.error
+                  ? 'The owner approved it; it ran and failed.'
+                  : 'The owner approved it; it ran.',
               ...(d.result !== undefined ? { result: d.result } : {}),
               ...(d.error ? { error: d.error } : {}),
+              // An MCP result is data from outside, never instructions (F-021).
+              ...(!hasExecutor(d.tool) ? { source: 'mcp:' + d.tool, tainted: true } : {}),
             }
           : {
               tool: d.tool,
