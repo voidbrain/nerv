@@ -4,7 +4,7 @@
   "parent": "F-122",
   "title": "Design Grover alert delivery",
   "goal": "The design names the source (Grover's alerts MCP tool), polling or subscription, deduplication across restarts and the channels used",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The design names the source (Grover's alerts MCP tool), polling or subscription, deduplication across restarts and the channels used"
   ],
@@ -28,10 +28,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.0 h agent",
-    "basis": "Estimated 2026-11-24 when opened from the coordinator gap review. Not a measurement.",
-    "reviewed": "2026-11-24",
-    "agentHours": 1.0,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 when opened from the coordinator gap review. Not a measurement. Closed 2026-11-25: PR #747 merged on green CI (run 45597956955, docs-only); the acceptance is the design document. No actual: this reconcile session cannot tell when the step started.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
     "baselineAgentHours": 1.0,
     "estimateAgentHours": 1.0
   },

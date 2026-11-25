@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-128-T02",
+  "parent": "F-128",
+  "title": "Run long coding jobs as steps with a persisted handoff",
+  "goal": "A coding job longer than one step runs each step in a fresh session that starts from a handoff persisted in SQLite",
+  "status": "planned",
+  "acceptance": [
+    "A failing-first test across the join (coding job -> runner -> handoff store): a two-step job starts step 2 in a fresh session whose prompt holds step 1 handoff and the full instruction load",
+    "The handoff survives a NERV restart between steps and a step never runs twice",
+    "Each step passes F-128-T01 admission"
+  ],
+  "dependsOn": [
+    "F-128-T01"
+  ],
+  "resources": [
+    "src/coding-job.ts",
+    "src/store.ts",
+    "src/**",
+    "test/coding-job.test.ts",
+    "test/**",
+    "docs/decisions/coding-job-contract.md",
+    "docs/work/records/F-128.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design",
+    "typescript"
+  ],
+  "privacy": "Neutral fixtures and a scratch repository only; no personal data, no paid route.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A change of gate class, a paid route or a material effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h agent",
+    "basis": "Estimated 2026-11-25: a step loop with a SQLite handoff table, restart handling and a join test. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3.0,
+    "baselineAgentHours": 3.0,
+    "estimateAgentHours": 3.0
+  }
+}

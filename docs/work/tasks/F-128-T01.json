@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-128-T01",
+  "parent": "F-128",
+  "title": "Measure a coding job's instruction load and refuse a route that cannot hold it",
+  "goal": "Before each step NERV counts the instruction load and task prompt and refuses a route whose context cannot hold it with headroom",
+  "status": "planned",
+  "acceptance": [
+    "A failing-first test: a coding job on a route with a context window below instructionTokens + taskTokens + 16,384 (or below 32,768) is refused at admission with the measured numbers in the reason, and nothing runs",
+    "The load counts AGENTS.md, CLAUDE.md, the procedure files the step triggers and the task prompt, with the route token counter or characters / 4 when it has none",
+    "A route that holds the load is admitted unchanged; coding-job-contract.md section 4 names the code"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/coding-job.ts",
+    "src/**",
+    "test/coding-job.test.ts",
+    "test/**",
+    "docs/decisions/coding-job-contract.md",
+    "docs/work/records/F-128.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design",
+    "typescript"
+  ],
+  "privacy": "Neutral fixtures and a scratch repository only; no personal data, no paid route.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A change of gate class, a paid route or a material effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2.5 h agent",
+    "basis": "Estimated 2026-11-25: a counter over the instruction files, an admission check in the coding job and its tests. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 2.5,
+    "baselineAgentHours": 2.5,
+    "estimateAgentHours": 2.5
+  }
+}

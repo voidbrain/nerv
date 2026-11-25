@@ -4,7 +4,7 @@
   "parent": "F-125",
   "title": "Reconcile to the latest harness release",
   "goal": "NERV runs the latest project-harness release, reconciled once the template backlog is empty",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Started only once the project-harness template backlog is empty (external prerequisite; harness 10.9.0 has no cross-repository dependsOn)",
     ".harness.json names the latest release and every copied, forked and adapted file is reconciled",
@@ -38,10 +38,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h agent",
-    "basis": "Estimated 2026-11-25: reconcile from 10.9.0 through the releases published since, mostly copied tools and procedure text. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-25: reconcile from 10.9.0 through the releases published since, mostly copied tools and procedure text. Not a measurement. Closed 2026-11-25: PR #753 merged on green CI (run 45629193344; native-macos cancelled once with no runner, B-139); .harness.json names 10.21.1 and check:freshness reports the copied files match it. No actual: this reconcile session cannot tell when the step started.",
     "reviewed": "2026-11-25",
-    "agentHours": 2,
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
   },
