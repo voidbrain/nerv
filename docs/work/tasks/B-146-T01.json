@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "B-146-T01",
+  "parent": "B-146",
+  "title": "Two-column Settings on a phone; Enable notifications spaced and only when possible",
+  "goal": "Settings keeps two columns at 390 px and the Enable button shows, with space around it, only when enabling can work",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails first",
+    "At 390 px two columns, no horizontal scroll",
+    "Enable only when push is supported, permission not denied and this device not subscribed; subscribed shows Turn off; denied a short muted hint"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/index.html",
+    "web/public/dashboard/live.js",
+    "test/dashboard-settings.test.mjs",
+    "docs/STYLE-GUIDE.md",
+    "docs/work/records/B-146.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented machine and job names only.",
+  "validation": [
+    "node --test test/dashboard-settings.test.mjs",
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A change to how a section looks goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-25: CSS media rule, a header class, the push view states and a test. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 771
+    }
+  ]
+}

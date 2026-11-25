@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 14 | 5 | 38 | 13 |
+| **This week** | 14 | 5 | 40 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 44 | 38 |
+| **Open** | 44 | 40 |
 | **Require Human 🧑** | 14 | 19 |
 
 ### Require Human 🧑
@@ -43,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 163 h agent + 15.25 h owner across 156 open steps of 44 features and 38 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 167.5 h agent + 15.25 h owner across 158 open steps of 44 features and 40 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1934,6 +1934,82 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-140-T01: [PR #765](https://github.com/voidbrain/nerv/pull/765). [#765](https://github.com/voidbrain/nerv/pull/765); Test: `test/update-availability.test.ts` (B-140 tests); owner report 2026-11-25 |
 | Opened | 2026-11-25 |
 | Verification | Unit 2026-11-25: Test: `test/update-availability.test.ts` passes locally. Real-device: Pending ("Update now" on NERV-01 after the update). |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="b-145"></a>[🐞 B-145](#top)
+
+**The dashboard rewrites whole sections on every poll, so Web Inspector collapses what the owner expanded**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-145-T01 — Update only changed values in the sections that rewrote the most DOM (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-25: Web Inspector can't be used on the dashboard; nodes he expands collapse again. Each poll redrew sections whatever had changed (innerHTML, className, classList remove-then-add). B-144 fixed this only for the EVA cages. Measured in headless Chrome on an in-memory store, two polls with no change: 1961 DOM mutations, almost all from the EVA heartbeat status (1682), the questions strip (99), the flow (90) and Misato's apartment (18). |
+| **Reproduce** | Open the live dashboard, open Web Inspector, expand a node in the questions strip, the flow or an EVA cage header, and wait for a poll: the node collapses. |
+| **Check** | Rendering each of those sections twice with the same state writes nothing; one changed value changes only the nodes that show it; a committed test fails first. Remaining sections (Health, Bases, Sorties, Models, Lilith, Settings…) still rebuild once per poll: they move to the Angular workspace with F-130, not here (owner, 2026-11-25). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-145-t01"></a>B-145-T01 — Update only changed values in the sections that rewrote the most DOM | 3 h | 0 h | 3 h | Implemented; verification pending | [PR #771](https://github.com/voidbrain/nerv/pull/771) |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 1 steps recorded) | 3 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-145.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-145-T01: [PR #771](https://github.com/voidbrain/nerv/pull/771). Test: `test/dashboard-live-views.test.mjs` with helper `test/fixtures/live-view.mjs` (committed failing first); owner report 2026-11-25; relates to B-144 ([#769](https://github.com/voidbrain/nerv/pull/769)); [#771](https://github.com/voidbrain/nerv/pull/771) |
+| Opened | 2026-11-25 |
+| Verification | Unit/integration: 2026-11-25 passed locally (`test/dashboard-live-views.test.mjs`). Browser: 2026-11-25 headless Chrome mutation count on an in-memory store (no NERV home), 1961 → 81 over two polls. Owner: Pending (expand nodes in Web Inspector in the questions strip, flow and EVA headers; they stay open through several polls). |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="b-146"></a>[🐞 B-146](#top)
+
+**Settings stacks into one column on a phone, and Enable notifications sits against the column edge and shows when it cannot work**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-146-T01 — Two-column Settings on a phone; Enable notifications spaced and only when possible (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner feedback 2026-11-25 after #766: (1) Settings should stay two columns on a phone ("I think there is space"); (2) on desktop the Enable notifications button touches the right column's edge, and it shows even when enabling cannot work (permission denied, or this device already subscribed while the check runs). |
+| **Reproduce** | Open the dashboard at 390 px: Settings stacks. At 1440 px: the Notifications row pushes the button to the column edge; with permission denied the long warning shows; before the subscription check ends Enable shows on a subscribed device. |
+| **Check** | At 390 px Settings keeps two columns with no horizontal scroll; Enable shows only when push is supported, permission is not denied and this device is not subscribed; subscribed shows Turn off; denied shows a short muted hint; a committed test fails first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-146-t01"></a>B-146-T01 — Two-column Settings on a phone; Enable notifications spaced and only when possible | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [PR #771](https://github.com/voidbrain/nerv/pull/771) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-146.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-146-T01: [PR #771](https://github.com/voidbrain/nerv/pull/771). Test: `test/dashboard-settings.test.mjs` (committed failing first); owner feedback 2026-11-25; [#771](https://github.com/voidbrain/nerv/pull/771) |
+| Opened | 2026-11-25 |
+| Verification | Unit: 2026-11-25 passed locally. Browser: 2026-11-25 headless Chrome on an in-memory store (no NERV home), 1440 and 390 px: two columns, `scrollWidth` equals the viewport, no Settings element past the panel's right edge; notification permission granted to see the Enable button. Device: Pending (the owner's iPhone Home Screen app: two columns, Enable only when possible). |
 | Reviewed | 2026-11-25 |
 
 </details>

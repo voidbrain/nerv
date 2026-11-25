@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "B-145-T01",
+  "parent": "B-145",
+  "title": "Update only changed values in the sections that rewrote the most DOM",
+  "goal": "The questions strip, Misato's apartment, the flow and the EVA heartbeat status write nothing on a poll that changes nothing, so Web Inspector keeps what the owner expanded",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails first: each of those sections rendered twice with the same state writes nothing",
+    "One changed value changes only the nodes that show it; no node is replaced",
+    "The rule is written in the style guide and the Frontend area notes"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/dashboard.js",
+    "web/public/dashboard/live.js",
+    "test/dashboard-live-views.test.mjs",
+    "test/fixtures/live-view.mjs",
+    "docs/STYLE-GUIDE.md",
+    "docs/agents/areas/frontend.md",
+    "docs/work/records/B-145.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented machine and job names only.",
+  "validation": [
+    "node --test test/dashboard-live-views.test.mjs",
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A change to how a section looks goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-25: measure mutations per section, fix the top ones with value-only writes, a linkedom test helper. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  },
+  "prs": [
+    {
+      "pr": 771
+    }
+  ]
+}
