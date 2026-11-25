@@ -2454,7 +2454,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-135-T01: [PR #745](https://github.com/voidbrain/nerv/pull/745). this PR (Tests: `test/update-doctor-slow.test.ts`, B-135 case in `test/linux-service-lifecycle.test.ts`; shared fixture `test/moved-service-fixture.ts`) |
+| PR / evidence | Steps: B-135-T01: [PR #745](https://github.com/voidbrain/nerv/pull/745). [#745](https://github.com/voidbrain/nerv/pull/745) (Tests: `test/update-doctor-slow.test.ts`, B-135 case in `test/linux-service-lifecycle.test.ts`; shared fixture `test/moved-service-fixture.ts`) |
 | Opened | 2026-11-25 |
 | Verification | 2026-11-25: the regression committed first (650ad815) fails 4 of 5 cases on main; with the fix it passes, and the B-122, Linux, Windows and upgrade lifecycle tests pass unchanged. Windows shares the probe and the blockers but has no dedicated slow-doctor test. The shipped service is not yet observed. |
 | Reviewed | 2026-11-25 |
