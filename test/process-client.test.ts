@@ -5,7 +5,9 @@ import { mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from 'no
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { DatabaseSync } from 'node:sqlite';
 import { ProcessClient } from '../src/process-client.ts';
+import { Runtime } from '../src/runtime.ts';
 // A stand-in child: waits `delay` ms before it handles requests and says READY (never, if delay<0), records what it got.
 const child = (dir: string, delay: number) => {
   const f = join(dir, `child${delay}.mjs`);
@@ -39,6 +41,68 @@ test('a child that never says ready: the call fails as not ready, and nothing wa
     assert.equal(existsSync(join(dir, 'got')) ? readFileSync(join(dir, 'got'), 'utf8') : '', '');
   } finally {
     await c.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+// B-126-T02: a child that fails before READY is named by how it ended and its last error output, not "nothing was sent" alone.
+test('B-126: a child that exits before ready: the error names its exit code and last error output', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-pc-'));
+  const f = join(dir, 'dies.mjs');
+  writeFileSync(
+    f,
+    `process.stderr.write('opening the store\\nError: cannot open the database file\\n');process.exit(3);`,
+  );
+  const c = new ProcessClient(pathToFileURL(f), [], 'nervous', 200, 10_000);
+  try {
+    const started = Date.now();
+    await assert.rejects(c.call('runtime.ping'), (e: Error) => {
+      assert.match(e.message, /^nervous process not ready; nothing was sent\. /);
+      assert.match(e.message, /exited with code 3/);
+      assert.match(e.message, /Error: cannot open the database file/);
+      return true;
+    });
+    assert.ok(Date.now() - started < 5000, 'an exit is reported at once, not at the start-up deadline');
+  } finally {
+    await c.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+test('B-126: a child still running at the ready deadline: the error says so, with its pid, wait and error output', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-pc-'));
+  const f = join(dir, 'stuck.mjs');
+  writeFileSync(
+    f,
+    `process.stderr.write('stuck before ready\\n');setInterval(()=>{},1000);process.on('disconnect',()=>process.exit(0));process.on('SIGTERM',()=>process.exit(0));`,
+  );
+  const c = new ProcessClient(pathToFileURL(f), [], 'nervous', 200, 1500);
+  try {
+    await assert.rejects(c.call('runtime.ping'), (e: Error) => {
+      assert.match(e.message, /^nervous process not ready; nothing was sent\. /);
+      assert.match(e.message, new RegExp(`no READY after 1500 ms; still running \\(pid ${c.child.pid}\\)`));
+      assert.match(e.message, /stuck before ready/);
+      return true;
+    });
+  } finally {
+    await c.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+test('B-126 join: Runtime.ready names why the real nervous child stopped (a database newer than this version)', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-pc-'));
+  const database = join(dir, 'nerv.sqlite');
+  const db = new DatabaseSync(database);
+  db.exec('PRAGMA user_version = 9999');
+  db.close();
+  const runtime = new Runtime(database);
+  try {
+    await assert.rejects(runtime.ready(), (e: Error) => {
+      assert.match(e.message, /^nervous process not ready; nothing was sent\. /);
+      assert.match(e.message, /exited with code 1/);
+      assert.match(e.message, /Database schema is newer than this NERV Agency version/);
+      return true;
+    });
+  } finally {
+    await runtime.close();
     rmSync(dir, { recursive: true, force: true });
   }
 });
