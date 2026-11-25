@@ -11,6 +11,7 @@ npm run evals -- --only=conversation --seed=7       # explicit partial selection
 npm run evals:stress -- --only=stress --seed=7      # three bounded repetitions
 npm run evals:model -- --role=casper --model=gemma4:12b
 npm run evals:model -- --role=misato --model=gemma4:12b
+node evals/speed-benchmark.mjs --execute --models=gemma4:12b,gemma4:26b --repeat=3
 ```
 
 Control-flow runs use scripted providers, disposable databases, loopback peers and mock Telegram. No real owner account, external action or phone receipt is involved. Real-model mode calls only an explicitly selected loopback model, asks it to review/plan synthetic cases, and executes no proposed action. Planner results check ask/action/new-request shape and exact tool arguments; marked language checks require independent review of the recorded text. Casper checks intent votes. An unsuccessful real-model result is useful competence evidence, not a reason to loosen a case.
@@ -73,3 +74,5 @@ Suite `nerv-golden-v5` adds F-026 watch admission/runtime, quiet-hour channel de
 [First common Gemma smoke review](2026-11-09-gemma-common-smoke.md): owner-provided Gauntlet0.3 report completed10 cases,7 passed/3 JSON parse failures,4/4 holdouts passed; requested profile/budget retained, no qualification.
 
 [F-074-T09 ledger-covered run, 2026-11-12](2026-11-12-gauntlet-t09.md): all 48 common model cases and 7 system cases covered with gemma4-12b; neutral-smoke change-mind, missing-input and tool-choice fail, all else passes. The last 7 expanded cases needed a 90 s case limit (owner-approved). No qualification.
+
+[F-126-T01 local model speed benchmark, 2026-11-25](2026-11-25-f126-t01-speed-benchmark.md): repeatable ~3,880-token uncached prompt-reading and 256-token generation benchmark on the owner's M3 Pro Mac (`evals/speed-benchmark.mjs`); `gemma4:26b` (`420.34` / `27.95` median tok/s, `15.92 GiB` resident) vs `gemma4:12b` (`164.89` / `24.51` median tok/s). Throughput evidence only; quality comparison remains in F-126-T02.
