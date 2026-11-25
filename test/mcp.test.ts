@@ -89,6 +89,51 @@ test('an MCP server over stdio: tools listed, a call answered, the fingerprint f
     c2.close();
   }
 });
+/** B-148: run `make` with PATH set to a folder that holds no node, as under launchd (PATH=/usr/bin:/bin:...). */
+function withoutNodeOnPath<T>(make: (empty: string) => T): T {
+  const saved = process.env.PATH;
+  const empty = mkdtempSync(join(tmpdir(), 'nerv-path-'));
+  process.env.PATH = empty;
+  try {
+    return make(empty);
+  } finally {
+    process.env.PATH = saved;
+  }
+}
+test('B-148: an MCP server configured with a bare node starts when PATH lacks the node folder', async () => {
+  let folder = '';
+  const c = withoutNodeOnPath((empty) => {
+    folder = empty;
+    return new McpClient({ id: 'notes', command: 'node', args: [FAKE] });
+  });
+  try {
+    assert.deepEqual(
+      (await c.listTools()).map((t) => t.name),
+      ['read_note', 'delete_note'],
+    );
+  } finally {
+    c.close();
+    rmSync(folder, { recursive: true, force: true });
+  }
+});
+test('B-148: a bare command found nowhere names the command and the folders searched', async () => {
+  let searched = '';
+  const c = withoutNodeOnPath((empty) => {
+    searched = empty;
+    return new McpClient({ id: 'notes', command: 'nerv-no-such-mcp-server', args: [] });
+  });
+  try {
+    await assert.rejects(c.listTools(), (e: Error) => {
+      assert.match(e.message, /nerv-no-such-mcp-server/);
+      assert.match(e.message, /not found/);
+      assert.ok(e.message.includes(searched), `names the PATH folder searched: ${e.message}`);
+      return true;
+    });
+  } finally {
+    c.close();
+    rmSync(searched, { recursive: true, force: true });
+  }
+});
 /** A fake local model: Misato follows its script; every system prompt (the tools Misato is offered) is kept. */
 async function model(script: string[]) {
   const systems: string[] = [],

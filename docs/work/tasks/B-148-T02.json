@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "parent": "B-148",
+  "privacy": "Neutral invented commands and folders only; no config contents, tokens or personal paths in tests or logs.",
+  "prs": [],
+  "id": "B-148-T02",
+  "title": "Resolve bare MCP commands from the node folder, then PATH; doctor reports servers that cannot start",
+  "goal": "A bare node, npx or npm resolves from the running node's folder, any bare command then from the service PATH, and nerv doctor names each MCP server that cannot start with the reason",
+  "status": "implemented",
+  "acceptance": [
+    "Order: dirname(process.execPath) for node, npx, npm; then absolute PATH folders; otherwise an error naming the command and every folder searched",
+    "No shell; the spawned file is an absolute path from those folders; only the MCP child resolved from the node folder gets that folder prepended to its own PATH (npx's #!/usr/bin/env node needs it), nothing else changes",
+    "The service doctor (/api/doctor, nerv doctor) lists MCP servers with their tool count or error, and a server that cannot start is in degraded",
+    "B-148-T01's tests pass unedited"
+  ],
+  "dependsOn": [
+    "B-148-T01"
+  ],
+  "resources": [
+    "src/mcp.ts",
+    "src/runtime-routes.ts",
+    "src/runtime.ts",
+    "src/cli.ts",
+    "test/mcp-command.test.ts",
+    "docs/work/records/B-148.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "security-review"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26: a resolver in mcp.ts, its unit tests and one doctor field. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.25,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

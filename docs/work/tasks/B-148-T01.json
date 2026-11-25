@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "parent": "B-148",
+  "privacy": "Neutral invented commands and folders only; no config contents, tokens or personal paths in tests or logs.",
+  "prs": [],
+  "id": "B-148-T01",
+  "title": "Failing test: a bare node command starts without the node folder on PATH",
+  "goal": "Committed tests fail on main: an MCP stdio server configured with a bare node starts when PATH lacks the node folder, and a command found nowhere names the command and the folders searched",
+  "status": "implemented",
+  "acceptance": [
+    "test/mcp.test.ts \"B-148: …\" sets PATH to an empty folder while the client starts",
+    "Both fail on main with spawn ENOENT and are not edited to pass"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/mcp.test.ts",
+    "docs/work/records/B-148.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "validation": [
+    "The new tests fail before the fix",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: two client tests against the existing fake MCP server. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
