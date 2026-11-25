@@ -1871,7 +1871,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-126-t01"></a>B-126-T01 — Name why the nervous child is not ready on Windows and fix it | 1.5 h | 0 h | 1.5 h | Planned |
+| 🟡 Medium | <a id="b-126-t01"></a>B-126-T01 — Name why the nervous child is not ready on Windows and fix it | 1.5 h | 0 h | 1.5 h | Implemented; verification pending |
 | 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
 
 <details>
@@ -1883,7 +1883,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925); [run 45362462549](https://github.com/voidbrain/nerv/actions/runs/45362462549); [run 45387061669](https://github.com/voidbrain/nerv/actions/runs/45387061669); opened in [PR #723](https://github.com/voidbrain/nerv/pull/723); [#736](https://github.com/voidbrain/nerv/pull/736) |
 | Opened | 2026-11-24 |
-| Verification | Pending. |
+| Verification | Unit: `test/store-open-busy.test.ts` (failing first, then passing). Five Windows runs without the error: Pending. |
 | Reviewed | 2026-11-25 |
 
 </details>

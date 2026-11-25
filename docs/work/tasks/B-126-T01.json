@@ -4,7 +4,7 @@
   "parent": "B-126",
   "title": "Name why the nervous child is not ready on Windows and fix it",
   "goal": "pilot-model.test.ts and other Runtime tests stop failing with \"nervous process not ready\" on a slow runner",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "The cause is named from the three CI logs of 2026-11-24 and a local reproduction under load",
     "A committed test fails first (a slow nervous child start), then the fix; the ready deadline still fails a truly dead child",
