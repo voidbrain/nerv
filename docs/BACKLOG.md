@@ -43,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 167.5 h agent + 15.25 h owner across 158 open steps of 44 features and 40 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 171.5 h agent + 15.75 h owner across 160 open steps of 44 features and 40 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1162,35 +1162,37 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟣 Very large | 47 h agent + 1 h owner | [F-004-T09](#f-004-t09) | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 51 h agent + 1.5 h owner | [F-004-T09](#f-004-t09) | — | 🤖 | — | — |
 
-💻 **→** Next: F-130-T01 — Workspace dashboard shell and live data service (Planned).
+💻 **→** Next: F-130-T15 — Inventory the simple workspace page (Nodo) in web/src (Planned).
 
 | | |
 |---|---|
 | **Issue** | Owner request 2026-11-25, after [B-144](work/records/F-130.md#b-144). The dashboard in `web/public/dashboard/` is hand-written JavaScript (`index.html` about 48 KB, `live.js` about 135 KB, `dashboard.js` about 126 KB) that rebuilds each section with `innerHTML` on every poll, so unchanged state is redrawn (B-144: EVA images reloaded for nothing). Health and Settings exist only there; the Angular workspace (`web/src`, Angular 22) holds the overview, reminders, doctor and battery cards. Two front ends repeat the same session, pairing and push rules. |
 | **Reproduce** | Open `/dashboard/` and `/` on the same service: Health, Settings, sorties, approvals, EVA cages, pilots, comms, the debrief, bases and push exist only in the first, rendered by string building in `live.js` and `dashboard.js`. |
-| **Check** | Every dashboard section (at-a-glance strip, Misato's apartment approvals and memory, sorties and plan detail, Sephirot flow, comms and slash commands, debrief, coming up, Health, Settings with devices and pairing, push, models, budget, battery, bases map, chronicle, EVA cages, pilots, tools, skills, Lilith, header chrome) runs in the workspace with the same behaviour, each with a test across the API and the component; an unchanged poll leaves the DOM in place; push taps still post the receipt (F-004-T09); `/dashboard/` and the installed app lead to the workspace and the old files are gone; the owner's check on the Mac and the phone. |
+| **Check** | Every dashboard section (at-a-glance strip, Misato's apartment approvals and memory, sorties and plan detail, Sephirot flow, comms and slash commands, debrief, coming up, Health, Settings with devices and pairing, push, models, budget, battery, bases map, chronicle, EVA cages, pilots, tools, skills, Lilith, header chrome) runs in the workspace with the same behaviour, each with a test across the API and the component; an unchanged poll leaves the DOM in place; push taps still post the receipt (F-004-T09); `/dashboard/` and the installed app lead to the workspace and the old files are gone; a simple view (chat, pending approvals, health at a glance, push on/off, a link to the full dashboard) stays beside the full dashboard over the same components and theme tokens; the owner's check of both views on the Mac and the phone. |
 
 **Feature steps**
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
 |---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-130-t01"></a>F-130-T01 — Workspace dashboard shell and live data service | 4 h | 0 h | 4 h | Planned | — | [F-130-T02](#f-130-t02), [F-130-T03](#f-130-t03), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T06](#f-130-t06), [F-130-T08](#f-130-t08), [F-130-T09](#f-130-t09), [F-130-T10](#f-130-t10), [F-130-T11](#f-130-t11), [F-130-T12](#f-130-t12) | 🤖 |
-| 🟡 Medium | <a id="f-130-t02"></a>F-130-T02 — Health section in Angular | 3 h | 0 h | 3 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-130-t15"></a>F-130-T15 — Inventory the simple workspace page (Nodo) in web/src | 0.5 h | 0 h | 0.5 h | Planned | — | [F-130-T01](#f-130-t01), [F-130-T16](#f-130-t16) | 🤖 |
+| 🟡 Medium | <a id="f-130-t01"></a>F-130-T01 — Workspace dashboard shell and live data service | 4 h | 0 h | 4 h | Planned | [F-130-T15](#f-130-t15) | [F-130-T02](#f-130-t02), [F-130-T03](#f-130-t03), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T06](#f-130-t06), [F-130-T08](#f-130-t08), [F-130-T09](#f-130-t09), [F-130-T10](#f-130-t10), [F-130-T11](#f-130-t11), [F-130-T12](#f-130-t12) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t02"></a>F-130-T02 — Health section in Angular | 3 h | 0 h | 3 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13), [F-130-T16](#f-130-t16) | ⏳ 🤖 |
 | 🟡 Medium | <a id="f-130-t03"></a>F-130-T03 — Settings section in Angular: schedule, update policy, models reload, devices and pairing | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
-| 🟡 Medium | <a id="f-130-t04"></a>F-130-T04 — Push and the service worker move to the workspace | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01), [F-004-T09](#f-004-t09) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
-| 🟡 Medium | <a id="f-130-t05"></a>F-130-T05 — At-a-glance strip and Misato's apartment (approvals, questions, memory) | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t04"></a>F-130-T04 — Push and the service worker move to the workspace | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01), [F-004-T09](#f-004-t09) | [F-130-T13](#f-130-t13), [F-130-T16](#f-130-t16) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t05"></a>F-130-T05 — At-a-glance strip and Misato's apartment (approvals, questions, memory) | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13), [F-130-T16](#f-130-t16) | ⏳ 🤖 |
 | 🟡 Medium | <a id="f-130-t06"></a>F-130-T06 — Sorties list, filter and Misato plan detail | 3 h | 0 h | 3 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T07](#f-130-t07), [F-130-T13](#f-130-t13) | ⏳ 🤖 |
 | 🟡 Medium | <a id="f-130-t07"></a>F-130-T07 — Sephirot sortie flow, MAGI and timeline | 4 h | 0 h | 4 h | Planned | [F-130-T06](#f-130-t06) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
-| 🟡 Medium | <a id="f-130-t08"></a>F-130-T08 — Comms chat, slash commands and the away debrief | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t08"></a>F-130-T08 — Comms chat, slash commands and the away debrief | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13), [F-130-T16](#f-130-t16) | ⏳ 🤖 |
 | 🟡 Medium | <a id="f-130-t09"></a>F-130-T09 — Coming up, models, budget and battery tabs | 3 h | 0 h | 3 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
 | 🟡 Medium | <a id="f-130-t10"></a>F-130-T10 — EVA cages, pilots, tools and skills | 3 h | 0 h | 3 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
 | 🟡 Medium | <a id="f-130-t11"></a>F-130-T11 — Bases map, chronicle and Lilith | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
-| 🟡 Medium | <a id="f-130-t12"></a>F-130-T12 — Header chrome and demo mode | 3 h | 0 h | 3 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
-| 🟡 Medium | <a id="f-130-t13"></a>F-130-T13 — Retire the old dashboard | 4 h | 0 h | 4 h | Planned | [F-130-T02](#f-130-t02), [F-130-T03](#f-130-t03), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T06](#f-130-t06), [F-130-T07](#f-130-t07), [F-130-T08](#f-130-t08), [F-130-T09](#f-130-t09), [F-130-T10](#f-130-t10), [F-130-T11](#f-130-t11), [F-130-T12](#f-130-t12) | [F-130-T14](#f-130-t14) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-130-t14"></a>F-130-T14 — Owner: check the Angular dashboard on the Mac and the installed phone app | 0 h | 0 h | 0 h agent + 1 h owner | Planned | [F-130-T13](#f-130-t13) | — | ⏳ 🧑‍🔧 |
-| 🟣 Very large | **Total** | 47 h | 0 h (0 of 14 steps recorded) | 47 h agent + 1 h owner | 0 of 14 completed | | | |
+| 🟡 Medium | <a id="f-130-t12"></a>F-130-T12 — Header chrome and demo mode | 3.5 h | 0 h | 3.5 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13), [F-130-T16](#f-130-t16) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t16"></a>F-130-T16 — Simple view: chat, essentials and a link to the full dashboard | 3 h | 0 h | 3 h | Planned | [F-130-T15](#f-130-t15), [F-130-T02](#f-130-t02), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T08](#f-130-t08), [F-130-T12](#f-130-t12) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t13"></a>F-130-T13 — Retire the old dashboard | 4 h | 0 h | 4 h | Planned | [F-130-T02](#f-130-t02), [F-130-T03](#f-130-t03), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T06](#f-130-t06), [F-130-T07](#f-130-t07), [F-130-T08](#f-130-t08), [F-130-T09](#f-130-t09), [F-130-T10](#f-130-t10), [F-130-T11](#f-130-t11), [F-130-T12](#f-130-t12), [F-130-T16](#f-130-t16) | [F-130-T14](#f-130-t14) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-130-t14"></a>F-130-T14 — Owner: check the full dashboard and the simple view on the Mac and the installed phone app | 0 h | 0 h | 0 h agent + 1.5 h owner | Planned | [F-130-T13](#f-130-t13) | — | ⏳ 🧑‍🔧 |
+| 🟣 Very large | **Total** | 51 h | 0 h (0 of 16 steps recorded) | 51 h agent + 1.5 h owner | 0 of 16 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1199,7 +1201,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner request 2026-11-25; prompted by [B-144](work/records/F-130.md#b-144); opened in [#770](https://github.com/voidbrain/nerv/pull/770) |
+| PR / evidence | Owner request 2026-11-25; simple view kept by owner decision 2026-11-25 ([#772](https://github.com/voidbrain/nerv/pull/772)); prompted by [B-144](work/records/F-130.md#b-144); opened in [#770](https://github.com/voidbrain/nerv/pull/770) |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-25 |

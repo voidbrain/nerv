@@ -3,11 +3,12 @@
   "id": "F-130-T13",
   "parent": "F-130",
   "title": "Retire the old dashboard",
-  "goal": "/dashboard/ leads to the workspace dashboard, and web/public/dashboard (index.html, live.js, dashboard.js, sw.js, manifest) and its tests are removed",
+  "goal": "/dashboard/ leads to the workspace dashboard, and web/public/dashboard (index.html, live.js, dashboard.js, sw.js, manifest) and its tests are removed; the simple view stays",
   "status": "planned",
   "acceptance": [
     "/dashboard/ redirects to the workspace view and nerv open opens it; the old worker is replaced by one that unregisters itself, so installed apps move",
-    "Old dashboard files, their tests and docs mentions are removed (no dead code); every section's join test passes"
+    "Old dashboard files, their tests and docs mentions are removed (no dead code); every section's join test passes",
+    "The simple view (F-130-T16) is kept and still links to the full dashboard; only the old web/public/dashboard page is retired"
   ],
   "dependsOn": [
     "F-130-T02",
@@ -20,7 +21,8 @@
     "F-130-T09",
     "F-130-T10",
     "F-130-T11",
-    "F-130-T12"
+    "F-130-T12",
+    "F-130-T16"
   ],
   "resources": [
     "web/public/dashboard/**",

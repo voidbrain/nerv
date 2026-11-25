@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "F-130-T16",
+  "parent": "F-130",
+  "title": "Simple view: chat, essentials and a link to the full dashboard",
+  "goal": "A second, deliberate layout over the same components as the full dashboard shows only the chat, pending approvals, health at a glance and push on/off, with a link to the full dashboard; it grows from the web/src page (Nodo)",
+  "status": "planned",
+  "acceptance": [
+    "The simple view reuses the components of F-130-T02 (health), F-130-T04 (push), F-130-T05 (approvals) and F-130-T08 (chat) and the live data service of F-130-T01; no section logic is copied (later extracted as shared bricks, solution:F-012)",
+    "It shows the chat, the pending approvals with their decisions, a one-line health state that links to Health, the push on/off toggle, and a link to the full dashboard; the full dashboard links back",
+    "Both layouts read the same theme tokens (docs/STYLE-GUIDE.md); the plain style is the default and EVA is an optional theme in either",
+    "A test renders both layouts from the same state and checks the simple one shows only its parts; an unchanged poll leaves its DOM in place; it works at phone width"
+  ],
+  "dependsOn": [
+    "F-130-T15",
+    "F-130-T02",
+    "F-130-T04",
+    "F-130-T05",
+    "F-130-T08",
+    "F-130-T12"
+  ],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "docs/STYLE-GUIDE.md",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "accessibility",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-25 (owner decision: keep a simple view): a layout and route over existing components, the link both ways and a two-layout test. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  }
+}
