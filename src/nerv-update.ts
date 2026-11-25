@@ -2,7 +2,9 @@ import { executeManualUpdate, type ManualUpdateDeps, type ManualUpdateResult } f
 import { command, type ServiceHost } from './node-lifecycle-execution.ts';
 import {
   checkUpdateAvailability,
+  gitTimeoutMessage,
   parseUpdateChannel,
+  retryFetchOnce,
   type UpdateAvailability,
   type UpdateGitRunner,
 } from './update-availability.ts';
@@ -33,15 +35,19 @@ export interface NervUpdateReport {
 const short = (sha: string | null) => (sha ? sha.slice(0, 7) : 'unknown');
 const GIT_TIMEOUT_MS = 120000;
 
-/** Git in a given folder for the update: never prompts for credentials; a timeout or spawn failure is a status 1. */
-export const lifecycleGit: UpdateGitRunner = async (args, cwd) => {
+/**
+ * Git in a given folder for the update: never prompts for credentials; a timeout or spawn failure is a status 1. A
+ * timeout names the command and its budget, and a failed fetch is tried once more (B-140).
+ */
+export const lifecycleGit: UpdateGitRunner = retryFetchOnce(async (args, cwd) => {
   try {
     const r = await command('git', ['-C', cwd, ...args], undefined, GIT_TIMEOUT_MS, { GIT_TERMINAL_PROMPT: '0' });
     return { status: r.status ?? 1, out: r.out.trim(), err: r.err.trim() };
   } catch (error) {
-    return { status: 1, out: '', err: error instanceof Error ? error.message : String(error) };
+    const message = error instanceof Error ? error.message : String(error);
+    return { status: 1, out: '', err: /timed out/.test(message) ? gitTimeoutMessage(args, GIT_TIMEOUT_MS) : message };
   }
-};
+});
 
 /** The dependencies of the updater outside the service, shared by `nodes self-update` and `nerv update`. */
 export function outsideUpdaterDeps(deps: Omit<NervUpdateDeps, 'writeResult' | 'channel'>): ManualUpdateDeps {

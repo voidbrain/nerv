@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "B-140-T01",
+  "parent": "B-140",
+  "title": "Give the update check's network git commands their own budget, retry a failed fetch, name the command in a timeout",
+  "goal": "A slow remote no longer makes \"Update now\" refuse with \"Update check timed out.\"",
+  "status": "implemented",
+  "acceptance": [
+    "fetch and ls-remote run with a 60 s budget, local git commands with 15 s",
+    "A failed git fetch is retried once; other commands run once",
+    "A timeout names the command and the budget, e.g. \"git fetch from origin did not finish within 60 s.\"",
+    "lifecycleGit retries a failed fetch once and names the command in a timeout",
+    "Safety checks unchanged: no credential prompt, bounded output, SHA validation, sanitized reason"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/update-availability.ts",
+    "src/nerv-update.ts",
+    "test/update-availability.test.ts",
+    "docs/work/records/B-140.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/update-availability.test.ts",
+    "npm run check:fast",
+    "npm test",
+    "\"Update now\" on NERV-01 after the update (real device)"
+  ],
+  "escalation": [
+    "Touching the live service or the install folder goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-25 when opened: one runner, one wrapper, three tests. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 765
+    }
+  ]
+}
