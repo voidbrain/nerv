@@ -41,7 +41,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 109.75 h agent + 14 h owner across 134 open steps of 42 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 108.5 h agent + 14 h owner across 134 open steps of 42 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1570,9 +1570,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-098-T04](#f-098-t04) | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | [F-098-T04](#f-098-t04) | 🤖 | — | — |
 
-💻 **→** Next: B-138-T01, name why the reply after a granted `fleet.chat` step drops its result, and fix it with a failing-first test.
+💻 **→** Next: B-138-T01 — Answer a spares question from the fleet.chat result (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1584,8 +1584,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-138-t01"></a>B-138-T01 — Answer a spares question from the fleet.chat result | 1.5 h | 0 h | 1.5 h | Planned | — | [F-098-T04](#f-098-t04) | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | | |
+| 🟢 Small | <a id="b-138-t01"></a>B-138-T01 — Answer a spares question from the fleet.chat result | 1.5 h | 0 h | 0.25 h | Implemented; verification pending | — | [F-098-T04](#f-098-t04) | [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #762](https://github.com/voidbrain/nerv/pull/762) category-scoped spares reply and planner grounding |
+| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1594,9 +1594,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-138-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751). — (owner report 2026-11-25, NERV-01 at `2627d483`); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| PR / evidence | Steps: B-138-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #762](https://github.com/voidbrain/nerv/pull/762) category-scoped spares reply and planner grounding. Test: `test/fleet-chat.test.ts`, `test/misato.test.ts` (committed failing first in `2b25814f`); owner report 2026-11-25, NERV-01 at `2627d483`; opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); [#762](https://github.com/voidbrain/nerv/pull/762) |
 | Opened | 2026-11-25 |
-| Verification | Pending. |
+| Verification | Unit/integration: 2026-11-25 passed locally (`test/fleet-chat.test.ts`, `test/misato.test.ts`); live NERV-01 check pending. |
 | Reviewed | 2026-11-25 |
 
 </details>

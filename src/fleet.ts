@@ -1221,12 +1221,22 @@ export function normalizePosition(raw: string): string {
   return value;
 }
 
+const SPARE_QUERY_CATEGORY_RE =
+  /\b(motori|motore|motors|motor|eliche|elica|propellers|propeller|props|prop|bracci|braccio|arms|arm|frame|telaio|fc|esc|vtx|telecamera|camera|ricevitore|receiver|rx|antenna|gps)\b/iu;
+
+export interface FleetChatSpareSummary {
+  componentModel: string;
+  category: string;
+  newCount: number;
+  usedCount: number;
+}
+
 export function handleFleetChat(
   fleet: FleetStore,
   batteries: BatteryRegistry,
   phrase: string,
   now = new Date().toISOString(),
-): { handled: boolean; reply?: string } {
+): { handled: boolean; reply?: string; category?: string; spares?: FleetChatSpareSummary[] } {
   const trimmed = phrase.trim();
   if (!trimmed || trimmed.length > 500) throw new Error('Fleet chat phrase must contain 1–500 characters.');
 
@@ -1262,15 +1272,6 @@ export function handleFleetChat(
     };
   }
 
-  if (/(scorta|scorte|spares?\s+left|rimasti|remaining\s+spares)/i.test(trimmed)) {
-    const spares = fleet.listSpares();
-    if (spares.length === 0) return { handled: true, reply: 'No spares recorded.' };
-    const lines = spares.map(
-      (spare) => `${spare.componentModel} (${spare.category}): ${spare.newCount} new, ${spare.usedCount} used`,
-    );
-    return { handled: true, reply: `Spares left: ${lines.join('; ')}.` };
-  }
-
   const batteryMatch = trimmed.match(
     /^(?:la\s+)?(?:batteria|battery)\s+(\d+)(?:\s+([\p{L}-]+))?\s+(?:presenta\s+danni|ha\s+danni|has\s+damage|damaged)(.*)$/iu,
   );
@@ -1288,6 +1289,41 @@ export function handleFleetChat(
     if (!battery) throw new Error('Battery lookup returned no result.');
     const saved = batteries.addNote(battery.id, trimmed, now);
     return { handled: true, reply: `Recorded damage note on ${battery.label}: "${saved.note}".` };
+  }
+
+  if (
+    // A spares word, or "left/remaining" with a part category: "how many …" or "any …" alone asks about drones.
+    /\b(scorta|scorte|ricambi|spares?)\b|\b(?:rimast[ioea]|restano)\b.*\b(motori|motore|eliche|elica|bracci|braccio|frame|telaio|fc|esc|vtx|telecamera|camera|ricevitore|rx|antenna|gps)\b|\b(motors?|props?|propellers?|arms?|frame|fc|esc|vtx|camera|receiver|rx|antenna|gps)\b.*\b(?:remaining|left)\b/iu.test(
+      trimmed,
+    )
+  ) {
+    const catMatch = SPARE_QUERY_CATEGORY_RE.exec(trimmed);
+    const category = catMatch ? normalizePartCategory(catMatch[1]!) : undefined;
+    const spares = category ? fleet.listSpares(category) : fleet.listSpares();
+    if (spares.length === 0) {
+      return {
+        handled: true,
+        ...(category ? { category } : {}),
+        spares: [],
+        reply: category ? `No ${category} spares registered.` : 'No spares recorded.',
+      };
+    }
+    const summary: FleetChatSpareSummary[] = spares.map((spare) => ({
+      componentModel: spare.componentModel,
+      category: spare.category,
+      newCount: spare.newCount,
+      usedCount: spare.usedCount,
+    }));
+    const lines = spares.map(
+      (spare) => `${spare.componentModel} (${spare.category}): ${spare.newCount} new, ${spare.usedCount} used`,
+    );
+    const prefix = category ? `${category[0]!.toUpperCase()}${category.slice(1)} spares left` : 'Spares left';
+    return {
+      handled: true,
+      ...(category ? { category } : {}),
+      spares: summary,
+      reply: `${prefix}: ${lines.join('; ')}.`,
+    };
   }
 
   return { handled: false };

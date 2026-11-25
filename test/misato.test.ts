@@ -1384,3 +1384,84 @@ test('F-121-T04: "stampa i piedini di Wisp" with NERV-02 as the slicing base: th
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('B-138: after a granted fleet.chat spares step, chat answers with the spare outcome instead of a generic greeting', async () => {
+  const setup = (home: string) => {
+    const store = new Store(join(home, 'nerv.sqlite'));
+    store.fleet.importFleet({
+      version: 1,
+      drones: [{ name: 'Testquad', frame: 'Testframe 5', parts: [{ category: 'frame', model: 'Testframe 5' }] }],
+    });
+    store.close();
+  };
+
+  await agent(
+    [
+      // 1) No motor spares registered: planner proposes fleet.chat, then twice tries a generic Misato greeting.
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"quanti motori di scorta mi restano?"}}}',
+      '{"reply":"Ciao! Sono pronta ad aiutarti, dimmi pure."}',
+      '{"reply":"Ciao! Di cosa hai bisogno oggi?"}',
+      // 2) Motor spares registered: planner proposes fleet.chat, greets once (rejected), then answers from steps.
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"quanti motori di scorta mi restano?"}}}',
+      '{"reply":"Ciao! Come posso aiutarti?"}',
+      '{"reply":"Per Testmot 2207 hai 3 nuovi e 2 usati di scorta."}',
+    ],
+    async (runtime) => {
+      const chatNone = await runtime.chat('quanti motori di scorta mi restano?');
+      assert.equal(chatNone.steps[0]?.tool, 'fleet.chat');
+      assert.equal(chatNone.steps[0]?.outcome, 'grant');
+      const noneResult = chatNone.steps[0]?.result as { handled?: boolean; reply?: string };
+      assert.equal(noneResult?.handled, true);
+      assert.match(noneResult?.reply ?? '', /no motor spares registered/i);
+      assert.doesNotMatch(chatNone.reply ?? '', /Ciao|aiutarti|bisogno/i);
+      assert.match(
+        chatNone.reply ?? '',
+        /non risultano motori di scorta registrati|nessun motore di scorta registrato/i,
+      );
+
+      await runtime.act({
+        request: 'sostituito motore anteriore sinistro di Testquad con Testmot 2207',
+        tool: 'fleet.chat',
+        args: { phrase: 'sostituito motore anteriore sinistro di Testquad con Testmot 2207' },
+      });
+      await runtime.act({
+        request: 'ho 3 motori Testmot 2207 nuovi e 2 usati',
+        tool: 'fleet.chat',
+        args: { phrase: 'ho 3 motori Testmot 2207 nuovi e 2 usati' },
+      });
+
+      const chatSome = await runtime.chat('quanti motori di scorta mi restano?');
+      assert.equal(chatSome.steps[0]?.tool, 'fleet.chat');
+      assert.equal(chatSome.steps[0]?.outcome, 'grant');
+      const someResult = chatSome.steps[0]?.result as { handled?: boolean; reply?: string };
+      assert.match(someResult?.reply ?? '', /Testmot 2207.*3 new, 2 used/);
+      assert.doesNotMatch(chatSome.reply ?? '', /Ciao|posso aiutarti/i);
+      assert.match(chatSome.reply ?? '', /Testmot 2207/);
+      assert.match(chatSome.reply ?? '', /3\s+nuov/i);
+      assert.match(chatSome.reply ?? '', /2\s+usat/i);
+    },
+    undefined,
+    undefined,
+    setup,
+  );
+
+  const ask = misatoAsk(
+    {
+      request: 'quanti motori di scorta mi restano?',
+      history: [
+        {
+          tool: 'fleet.chat',
+          args: { phrase: 'quanti motori di scorta mi restano?' },
+          outcome: 'grant',
+          result: { handled: true, reply: 'No motor spares registered.' },
+        },
+      ],
+      tools: toolDocs,
+      now: '2030-01-01T08:00:00.000Z',
+      timeZone: 'Europe/Rome',
+      language: 'it',
+    },
+    'local',
+  );
+  assert.match(ask.system!, /"steps" holds/);
+});

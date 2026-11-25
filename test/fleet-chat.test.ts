@@ -470,3 +470,51 @@ describe('F-098-T06: fleet.chat executor joins the edit phrases to the real stor
     });
   });
 });
+
+describe('B-138: fleet.chat answers category-scoped spares queries with none-registered or new/used counts', () => {
+  it('reports when no spares exist for the asked category instead of listing another category, and gives new/used counts when present', () => {
+    withStore((store) => {
+      const run = (phrase: string) =>
+        execute(store as unknown as Parameters<typeof execute>[0], 'fleet.chat', { phrase }) as {
+          handled: boolean;
+          reply?: string;
+        };
+      // Invented fleet with only a frame spare row at 0/0 and no motor spares.
+      run('nuovo drone Testquad, frame Testframe 5');
+      assert.equal(store.fleet.listSpares().length, 1);
+      assert.equal(store.fleet.listSpares('motor').length, 0);
+
+      for (const phrase of ['quanti motori di scorta mi restano?', 'how many spare motors do I have?']) {
+        const res = run(phrase);
+        assert.equal(res.handled, true, phrase);
+        assert.match(res.reply ?? '', /no motor spares registered/i, phrase);
+        assert.doesNotMatch(res.reply ?? '', /Testframe 5/, phrase);
+      }
+
+      store.fleet.upsertSpare({
+        componentModel: 'Testmot 2207 1850KV',
+        category: 'motor',
+        newCount: 3,
+        usedCount: 2,
+      });
+
+      for (const phrase of ['quanti motori di scorta mi restano?', 'how many spare motors do I have?']) {
+        const res = run(phrase);
+        assert.equal(res.handled, true, phrase);
+        assert.match(res.reply ?? '', /Testmot 2207 1850KV.*3 new, 2 used/, phrase);
+        assert.doesNotMatch(res.reply ?? '', /Testframe 5/, phrase);
+      }
+
+      // A question about the drones, not the spares shelf, is not read as a spares query.
+      for (const phrase of ['quanti droni hanno il gps?', 'does any drone have a camera?']) {
+        assert.equal(run(phrase).handled, false, phrase);
+      }
+      assert.match(run('motors left?').reply ?? '', /Testmot 2207 1850KV/);
+
+      const all = run('quali ricambi di scorta mi restano?');
+      assert.equal(all.handled, true);
+      assert.match(all.reply ?? '', /Testframe 5/);
+      assert.match(all.reply ?? '', /Testmot 2207 1850KV/);
+    });
+  });
+});
