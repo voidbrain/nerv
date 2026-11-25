@@ -6,11 +6,13 @@
   "goal": "A new and a cleared Grover alert each reach the owner once, with a test across the join (fake Grover MCP server → NERV → inbox/Telegram/push fakes)",
   "status": "planned",
   "acceptance": [
-    "A new and a cleared Grover alert each reach the owner once, with a test across the join (fake Grover MCP server → NERV → inbox/Telegram/push fakes)"
+    "A new and a cleared Grover alert each reach the owner once, with a test across the join (fake Grover MCP server → NERV → inbox/Telegram/push fakes)",
+    "The owner decisions of 2026-11-25 in docs/decisions/grover-alert-delivery.md hold under test: alerts open at the first poll or first seen after a reconnect delivered once as one listing message; 22:00–07:00 quiet hours hold minor alerts while serious ones (pH or EC out of range, a stopped feed, an unknown kind) break through, classified by alert kind; one unreachable message after 15 min and one when contact returns, never a clear"
   ],
   "dependsOn": [
     "F-122-T01",
-    "F-123-T01"
+    "F-123-T01",
+    "F-004-T10"
   ],
   "resources": [
     "src/**",
@@ -32,11 +34,17 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "3.0 h agent",
-    "basis": "Estimated 2026-11-24 when opened from the coordinator gap review. Not a measurement.",
-    "reviewed": "2026-11-24",
-    "agentHours": 3.0,
+    "estimate": "3.5 h agent",
+    "basis": "Estimated 2026-11-24 when opened from the coordinator gap review. Not a measurement. Reassessed 2026-11-25 after the owner decisions: +0.5 h for classifying alerts by kind (probe kinds from grover_overview, the serious/minor table, its test) and the single listing message for the first poll; the unreachable messages and the F-004-T10 order were already in the design.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3.5,
     "baselineAgentHours": 3.0,
-    "estimateAgentHours": 3.0
-  }
+    "estimateAgentHours": 3.5
+  },
+  "prs": [
+    {
+      "pr": 775,
+      "note": "owner decisions recorded in the design"
+    }
+  ]
 }

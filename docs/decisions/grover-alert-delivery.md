@@ -1,6 +1,6 @@
 # Grover alert delivery
 
-Assessment date: 2026-11-25. Baseline: NERV main `e05aae22`, with the remote MCP registry of F-123-T01 (PR #746, open when this was written); Grover main `b62a29b`. Scope: F-122-T01 design. F-122-T02 builds it; F-122-T03 is the owner's check on the rig. Nothing here is implemented yet.
+Assessment date: 2026-11-25. Baseline: NERV main `e05aae22`, with the remote MCP registry of F-123-T01 (PR #746, open when this was written); Grover main `b62a29b`. Scope: F-122-T01 design. F-122-T02 builds it; F-122-T03 is the owner's check on the rig. Nothing here is implemented yet. Owner decisions 2026-11-25 (see [Owner decisions](#owner-decisions)) settle the four questions the design left open; Grover main `db0a4c9` was read for the alert kinds and levels.
 
 ## What Grover offers
 
@@ -21,7 +21,7 @@ Grover's hub keeps the list of things that need the owner (`apps/hub/src/alerts.
 
 ### Source: the granted `grover_alerts` tool through the F-123 registry
 
-The owner registers the hub once (`nerv tools add grover https://<machine>.<tailnet>.ts.net/mcp`) and grants `grover/grover_alerts` as `read` (Green). NERV's alert poller calls that tool through the same registry connection Misato uses, so it inherits F-123's rules: deny by default, the URL as registered (no redirects), a grant pinned to the tool's description (a changed description suspends it), and unreachable servers reported rather than hidden.
+The owner registers the hub once (`nerv tools add grover https://<machine>.<tailnet>.ts.net/mcp`) and grants `grover/grover_alerts` and `grover/grover_overview` as `read` (Green); the overview gives each probe's kind, which quiet hours need (see [Quiet hours](#quiet-hours)). NERV's alert poller calls that tool through the same registry connection Misato uses, so it inherits F-123's rules: deny by default, the URL as registered (no redirects), a grant pinned to the tool's description (a changed description suspends it), and unreachable servers reported rather than hidden.
 
 The poller is deterministic code in A (the scheduler process), not a planner request: no model reads the alert text to decide whether to send it. It runs only where Telegram's outbound deliveries run (the coordinator, F-036/F-016), so two bases never poll and deliver the same hub. Without a granted `grover_alerts` the poller does nothing and `nerv doctor` says why. The configuration names the registered server id, so a later second hub is a second entry, not new code:
 
@@ -29,7 +29,7 @@ The poller is deterministic code in A (the scheduler process), not a planner req
 "grover": { "server": "grover", "pollSeconds": 60, "unreachableMinutes": 15, "quietHours": { "from": "22:00", "until": "07:00" } }
 ```
 
-The values above are proposals (see Owner questions); `pollSeconds` is bounded 30–600.
+The window and the 15 minutes are the owner's decisions of 2026-11-25; `pollSeconds` is bounded 30–600.
 
 Answering `nerv chat "ci sono allarmi Grover?"` needs no new code: Misato calls the same granted read tool (F-123). The poller adds proactive delivery only.
 
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS grover_alerts(
   seen_at TEXT NOT NULL, raised_delivery TEXT UNIQUE REFERENCES deliveries(id),
   absent_polls INTEGER NOT NULL DEFAULT 0, cleared_at TEXT, cleared_delivery TEXT UNIQUE REFERENCES deliveries(id),
   PRIMARY KEY(server, alert_key, since));
-CREATE TABLE IF NOT EXISTS grover_poll(server TEXT PRIMARY KEY, ok_at TEXT, failing_since TEXT, unreachable_delivery TEXT, baseline_at TEXT);
+CREATE TABLE IF NOT EXISTS grover_poll(server TEXT PRIMARY KEY, ok_at TEXT, failing_since TEXT, unreachable_delivery TEXT);
 ```
 
 Each successful poll runs in one SQLite transaction:
@@ -71,13 +71,13 @@ NERV does not re-derive thresholds or margins: Grover owns the ranges. While the
 ### While the hub is unreachable
 
 - Open episodes stay open; nothing is cleared and nothing is re-sent. The poller keeps trying at the normal interval.
-- `grover_poll.failing_since` records the start. After `unreachableMinutes` (proposed 15) of failures, one delivery says the hub is unreachable and why (F-123's reason: unreachable, certificate, HTTP status, timeout, suspended grant). When a poll succeeds again, one delivery says it is back; both are once per outage. The Tools panel already shows the suspended tools (F-123).
-- The first successful poll after an outage is diffed like any other: alerts raised meanwhile are delivered once, alerts gone are cleared after the second poll confirms. An episode raised and cleared entirely within the outage is not seen.
+- `grover_poll.failing_since` records the start. After `unreachableMinutes` (15, owner decision 2026-11-25) without contact, one delivery says the hub is unreachable and why (F-123's reason: unreachable, certificate, HTTP status, timeout, suspended grant). When a poll succeeds again, one delivery says it is back; both are once per outage. Unreachable is never a clear: no episode closes because the hub could not be asked. The Tools panel already shows the suspended tools (F-123).
+- The first successful poll after an outage is diffed like any other: alerts raised meanwhile are delivered once, alerts already delivered before the outage are not sent again, alerts gone are cleared after the second poll confirms. An episode raised and cleared entirely within the outage is not seen.
 - A NERV restart is the same case from NERV's side: the ledger carries the state across it.
 
 ### First poll of a hub
 
-On the first successful poll of a server with no ledger rows, the alerts already open are either delivered once each or recorded silently as a baseline (`baseline_at`), so registering a hub with five open alerts does not ring five times. The owner chooses (Owner questions, 1).
+Owner decision 2026-11-25: the alerts already open at the first successful poll of a server with no ledger rows are **delivered once, not recorded silently**. They go out as one message listing them, so registering a hub with five open alerts rings once, not five times; each still gets its own ledger row, inbox entry and later clear. The same holds after a long reconnect: an alert first seen on the poll after an outage is delivered once (it has no ledger row yet), an alert already delivered before it is not. With several new episodes on one poll, the same single listing message is used.
 
 ### Channels
 
@@ -99,7 +99,20 @@ Privacy: alert text (room names, sensor values) leaves the base only through the
 
 ### Quiet hours
 
-During the configured window the inbox row is written at once, but push and Telegram are held. At the end of the window the held alerts and clears of that night go out as one message (an alert raised and cleared inside the window reads as one line, "raised 02:10, cleared 03:40"), so each alert and each clear still reaches each channel once. Whether a `bad` alert (today: an agent offline, the tent running on its own schedules) breaks through quiet hours is the owner's choice (Owner questions, 2). The window uses the owner's IANA timezone and the same clock rules as Hyuga watch (`watchQuiet`).
+Owner decision 2026-11-25: quiet hours are **22:00–07:00** local. During the window the inbox row is written at once. A **serious** alert, and its clear, goes out at once as outside the window. A **minor** one is held from push and Telegram; at 07:00 the held alerts and clears of that night go out as one message (an alert raised and cleared inside the window reads as one line, "raised 02:10, cleared 03:40"), so each alert and each clear still reaches each channel once. The window uses the owner's IANA timezone and the same clock rules as Hyuga watch (`watchQuiet`).
+
+**Serious is defined by alert kind, not by Grover's `level`.** Grover's alerts do carry a severity field (`level`: `warn` or `bad`), but it does not follow the owner's split: a pH or EC reading out of range is raised as `warn`, an agent going offline as `bad` (Grover `db0a4c9`, `apps/hub/src/alerts.ts` and `feeder.ts`). Using it would hold pH alerts overnight and ring for an agent blip, the opposite of the decision. So the poller classifies by the key, explicitly:
+
+| Alert (key shape) | Grover's level | Class at night |
+|---|---|---|
+| `probe:<id>:below` / `probe:<id>:above` where the probe's kind is `ph` or `ec` (pH or EC out of range) | `warn` | **Serious**: breaks through |
+| `feed:<pot>` raised as `bad` (a feed stopped mid-run, everything switched off: a pump or driver fault) | `bad` | **Serious**: breaks through |
+| `probe:<id>:below` / `:above` for `air_temperature`, `water_temperature` or `water_level` (for example a supply tank low) | `warn` | Minor: waits until 07:00 |
+| `feed:<pot>` raised as `warn` (a feed refused before it started, for example a tank low or the agent refusing) | `warn` | Minor: waits until 07:00 |
+| `agent:<id>` (an agent offline, the tent on its own schedules) | `bad` | Minor: waits until 07:00 |
+| Any other key shape, or a probe whose kind cannot be read | — | **Serious**: breaks through, and `nerv doctor` names the unknown kind |
+
+The probe's kind comes from `grover_overview` (`probes[].id`, `kind`), read on the first poll and again whenever a probe alert names an id NERV has not seen; a failed or ungranted overview leaves the kind unknown, which counts as serious. The `feed:<pot>` split uses the level because Grover raises both cases under the same key. Unknown kinds break through rather than wait so that an alert kind Grover adds later (a dedicated driver fault, for example) is not silenced overnight before this table names it; a new kind is added here and in the classifier's test in the same change. The clear of an alert follows its alert's class.
 
 ## Alternatives rejected
 
@@ -109,14 +122,14 @@ During the configured window the inbox row is written at once, but push and Tele
 - **Ask a model whether to notify**: no judgement is needed, and the alert text is untrusted input.
 - **Change Grover to add alert ids or history**: not needed for the acceptance; this repository does not change Grover (one repository, one backlog).
 
-## Owner questions
+## Owner decisions
 
-These are 🧑 decisions in F-122; T02 builds the recommended choice unless the owner answers otherwise.
+The owner answered the four questions on 2026-11-25; the sections above apply the answers.
 
-1. **First poll**: deliver the alerts already open when a hub is first registered, once each, or record them silently? Recommended: deliver them once, as a single message listing them.
-2. **Quiet hours**: which window (proposed 22:00–07:00), and does a `bad` alert (agent offline) break through? Recommended: yes, `bad` breaks through; `warn` waits.
-3. **Unreachable hub**: send one "hub unreachable" message after 15 minutes and one "back" message, or only show it in the Tools panel and doctor? Recommended: send them.
-4. **Order against F-004-T09**: T02 needs the push-first router of F-004-T09. Build T02 after it, or ship T02 first on inbox, push and Telegram together and switch to the router when F-004-T09 lands? Recommended: after F-004-T09.
+1. **First poll and long reconnects**: the alerts already open are delivered once, as one message listing them, not recorded silently ([First poll of a hub](#first-poll-of-a-hub)).
+2. **Quiet hours**: 22:00–07:00 local. Serious alerts always break through (pH or EC out of range, pump or driver faults); minor ones, such as an agent briefly offline, wait until morning. Grover's `level` does not match that split, so serious is defined by alert kind, listed in [Quiet hours](#quiet-hours). The question had proposed "`bad` breaks through"; the owner's answer replaces it.
+3. **Unreachable hub**: one message after 15 minutes without contact, one when contact returns; unreachable is never a clear ([While the hub is unreachable](#while-the-hub-is-unreachable)).
+4. **Order**: F-122-T02 is built after F-004-T09 is live and owner-checked, that is after F-004-T10; it uses the push-first router and does not ship its own channel order first.
 
 ## Test plan for F-122-T02
 
@@ -131,12 +144,13 @@ One test across the join, in `test/grover-alerts.test.ts`: a **fake Grover MCP s
 | 5 | `[A]`; close and reopen the Store on the same file, new poller; `[A]` | no second delivery, Telegram sends nothing new |
 | 6 | Crash after the ledger commit, before any send (stop the poller after the transaction) | after restart each channel sends the alert exactly once |
 | 7 | `[A]`, server stopped for longer than `unreachableMinutes`, restarted with `[B]` | A stays open while down; one unreachable and one back message; then B delivered, A cleared after two polls |
-| 8 | Clock inside quiet hours, `[A warn]`, `[]`, `[]`; clock moves past the window | inbox at once; one push at the end with "raised … cleared …"; a `bad` alert per the owner's answer to question 2 |
+| 8 | Clock inside quiet hours, `[agent:agent-1]`, `[]`, `[]`; clock moves past 07:00 | inbox at once; one push at 07:00 with "raised … cleared …" |
+| 8a | Clock inside quiet hours, `[probe:ph-1:below]` (overview: kind `ph`), `[feed:pot-1 bad]`, `[probe:tank-water:below]` (kind `water_level`), `[probe:x:above]` (unknown kind) | the pH, the bad feed and the unknown-kind alert pushed at once; the tank alert held to 07:00; doctor names the unknown kind |
 | 9 | Push fake answers 500, then no device subscribed | Telegram sends the alert once in each case (F-004-T09 rule) |
 | 10 | Tool not granted; grant suspended by a changed description | no poll call, no delivery, doctor names the reason |
 | 11 | A malformed entry next to a valid one; a 2 000-character message with Markdown | the valid one delivered; message capped and sent as plain text; doctor counts the skipped entry |
 | 12 | Store opened as a standby base | it does not poll |
-| 13 | First poll with two open alerts | per the owner's answer to question 1 |
+| 13 | First poll with two open alerts; then an outage past `unreachableMinutes` and a reconnect with one alert already delivered and one new | first poll: one message listing both, two inbox rows; after the reconnect: only the new one delivered, none cleared during the outage |
 
 ## Reconsider when
 
