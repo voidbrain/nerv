@@ -34,12 +34,13 @@
     "npm run check:fast"
   ],
   "escalation": [
-    "A material scope or effort increase goes to the owner"
+    "A material scope or effort increase goes to the owner",
+    "🧑 Owner question: at most once (a crash at the wrong moment can lose the Telegram copy; built) vs at least once (a crash can cause one duplicate)"
   ],
   "effort": {
     "size": "small",
     "estimate": "2 h agent",
-    "basis": "Estimated 2026-11-25: ordering rule on the existing deliveries plus the not-opened timer. Not a measurement. 2026-11-25: implemented in PR #760 with the phone's open receipt (F-124-T03); the 10-minute deadline is the owner's (decision 2026-11-25). Remaining: CI and merge; the phone check is F-004-T10.",
+    "basis": "Estimated 2026-11-25: ordering rule on the existing deliveries plus the not-opened timer. Not a measurement. 2026-11-25: implemented in PR #760 with the phone's open receipt (F-124-T03); the 10-minute deadline is the owner's (decision 2026-11-25). Remaining: CI and merge; the phone check is F-004-T10. Owner decision 2026-11-25: delivered means tapped; a reminder read only on the lock screen still reaches Telegram at the deadline. Review fixes in the same PR: workspace taps post the receipt, read or cancelled items never fall back.",
     "reviewed": "2026-11-25",
     "agentHours": 0.5,
     "baselineAgentHours": 2,

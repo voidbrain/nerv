@@ -119,7 +119,8 @@ export class DeliveryChannels {
    * F-004-T09: hands out, once, the items queued for the phone that Telegram must now send: the push failed, or it was
    * not opened within `deadlineMs` of being queued (also when the push never left because NERV stopped first). Each one
    * is claimed in the same transaction, so a receipt arriving later, a second pass or a restart never sends it again;
-   * only a send that failed (recorded) is handed out again.
+   * only a send that failed (recorded) is handed out again. An item already read in the app, or whose reminder was
+   * cancelled there, is never handed out: the owner has seen it.
    */
   claimFallback(deadlineMs: number, now = new Date(), limit = 5): FallbackItem[] {
     if (!Number.isSafeInteger(deadlineMs) || deadlineMs < 0) throw new Error('Invalid fallback deadline.');
@@ -130,7 +131,8 @@ export class DeliveryChannels {
           `SELECT d.id, d.kind, d.message FROM deliveries d
            JOIN delivery_channels p ON p.delivery_id=d.id AND p.channel='push'
            LEFT JOIN delivery_channels t ON t.delivery_id=d.id AND t.channel='telegram'
-           WHERE p.opened_at IS NULL
+           LEFT JOIN reminders r ON r.id=d.reminder_id
+           WHERE p.opened_at IS NULL AND d.read_at IS NULL AND r.cancelled IS NULL
              AND ((p.failed_at IS NOT NULL AND p.sent_at IS NULL) OR p.created<=?)
              AND (t.delivery_id IS NULL OR (t.sent_at IS NULL AND t.failed_at IS NOT NULL AND (t.attempt_at IS NULL OR t.failed_at>=t.attempt_at)))
            ORDER BY d.rowid LIMIT ?`,
