@@ -426,7 +426,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-124-T01: [PR #758](https://github.com/voidbrain/nerv/pull/758). F-124-T01 [PR #758](https://github.com/voidbrain/nerv/pull/758) shared delivery state (test/delivery-state.test.ts); opened in [PR #737](https://github.com/voidbrain/nerv/pull/737). |
+| PR / evidence | Steps: F-124-T01: [PR #758](https://github.com/voidbrain/nerv/pull/758). F-124-T01 [PR #758](https://github.com/voidbrain/nerv/pull/758) shared delivery state (test/delivery-state.test.ts); opened in [PR #737](https://github.com/voidbrain/nerv/pull/737).; [#759](https://github.com/voidbrain/nerv/pull/759) |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration pending: test/delivery-state.test.ts on CI for [PR #758](https://github.com/voidbrain/nerv/pull/758). |
 | Reviewed | 2026-11-25 |
