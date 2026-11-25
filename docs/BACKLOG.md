@@ -1695,7 +1695,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: watch five Windows `npm test` runs with #767 for any "nervous process not ready" (B-126-T03).
+💻 **→** Next: B-126 stays open until five Windows `npm test` runs with #767 show no "nervous process not ready" (B-126-T03); if one does, the watch names the step.
 
 | | |
 |---|---|
