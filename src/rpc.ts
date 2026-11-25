@@ -96,6 +96,8 @@ export const communicationGraph = [
       'push.subscribe',
       'push.unsubscribe',
       'push.status',
+      'deliveries.record',
+      'deliveries.state',
       'inbox.list',
       'inbox.brief',
       'inbox.lastBrief',

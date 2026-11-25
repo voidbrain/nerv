@@ -34,6 +34,7 @@ Aoba uses outgoing HTTPS polling only (no open ports). Note that Telegram bot ch
 - `/status`, `/status BASE`, and `/help` answer from recorded state before planning.
 - If `fetch failed` occurs behind a corporate/system CA while `curl` works, reinstall the service (`nerv service install`) so Node runs with `--use-system-ca`.
 - **Map & routing visibility:** Midori shows recent Bot API checks separately from route checks (`via main`, `local fallback`, `local channel`, `unavailable`, `unknown`).
+- **Shared delivery state (F-124-T01):** each inbox item keeps one row per channel in `delivery_channels` (`telegram`, `push`) with when it was sent, when it last failed and why, and when it was opened there; Telegram and Web Push both write it, so either channel reads what the other did. A push counts as sent when the push service accepted it for at least one device, which is not yet delivery on the phone.
 
 ## Hyuga's daily brief & base chronicle
 

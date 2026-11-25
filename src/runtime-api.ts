@@ -217,6 +217,16 @@ export interface StoreApi {
     | null
     | Promise<{ list: OwnerList; item: ListItem; view: ListView } | null>;
   pushPublicKey?(): Promise<string> | string;
+  /** F-124-T01: shared delivery state: what a channel did with an inbox item, and every channel's state of it. */
+  recordDelivery?(
+    id: string,
+    channel: import('./delivery-state.ts').DeliveryChannel,
+    outcome: import('./delivery-state.ts').DeliveryOutcome,
+    reason?: string,
+  ): boolean | Promise<boolean>;
+  deliveryState?(
+    id: string,
+  ): import('./delivery-state.ts').DeliveryState | Promise<import('./delivery-state.ts').DeliveryState>;
   savePushSubscription?(sub: {
     endpoint: string;
     p256dh: string;
