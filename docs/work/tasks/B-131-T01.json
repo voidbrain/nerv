@@ -40,6 +40,8 @@
     "estimateAgentHours": 1
   },
   "prs": [
-    735
+    {
+      "pr": 735
+    }
   ]
 }
