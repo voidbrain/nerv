@@ -79,3 +79,32 @@ console.log(JSON.stringify({ during: [...during], after }));`,
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+// B-126-T03 review (#767): synchronous=NORMAL is safe only in WAL mode; outside it a power loss can corrupt the file.
+test('B-126: a fresh database is in WAL mode before the Store lowers its durability for start-up', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-sw-'));
+  const script = join(dir, 'open.ts');
+  writeFileSync(
+    script,
+    `import { Store } from ${JSON.stringify(pathToFileURL(join(process.cwd(), 'src/store.ts')).href)};
+const seen: string[] = [];
+new Store(process.argv[2]!, undefined, {
+  onStep: (_step, db) => {
+    if (!db?.isOpen) return;
+    const sync = (db.prepare('PRAGMA synchronous').get() as { synchronous: number }).synchronous;
+    const mode = (db.prepare('PRAGMA journal_mode').get() as { journal_mode: string }).journal_mode;
+    if (sync < 2) seen.push(mode);
+  },
+}).db.close();
+console.log(JSON.stringify(seen));`,
+  );
+  try {
+    const run = spawnSync(process.execPath, [script, join(dir, 'nerv.sqlite')], { encoding: 'utf8' });
+    assert.equal(run.status, 0, run.stderr);
+    const modes = JSON.parse(run.stdout) as string[];
+    assert.ok(modes.length > 0, 'start-up ran at a lowered durability');
+    assert.deepEqual([...new Set(modes)], ['wal']);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
