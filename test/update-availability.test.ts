@@ -6,6 +6,12 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import {
   checkUpdateAvailability,
+  gitTimeoutMessage,
+  retryFetchOnce,
+  runUpdateGit,
+  updateGitTimeoutMs,
+  UPDATE_GIT_LOCAL_TIMEOUT_MS,
+  UPDATE_GIT_NETWORK_TIMEOUT_MS,
   validateUpdateAvailability,
   type UpdateGitRunner,
 } from '../src/update-availability.ts';
@@ -235,3 +241,51 @@ test(
     }
   },
 );
+
+test(
+  'B-140: a git command past its budget names the command and the budget',
+  { skip: process.platform === 'win32', timeout: 15_000 },
+  async () => {
+    const git = slowGit(3);
+    try {
+      const r = await runUpdateGit(['ls-remote', '--exit-code', 'origin', 'refs/heads/main'], git.dir, {
+        timeoutMs: 300,
+      });
+      assert.equal(r.status, 1);
+      assert.equal(r.err, 'git ls-remote from origin did not finish within 0.3 s.');
+    } finally {
+      git.restore();
+    }
+  },
+);
+
+test('B-140: network commands get their own budget; only a failed fetch is retried, once', async () => {
+  assert.equal(updateGitTimeoutMs(['fetch', '--no-tags', 'origin', A]), UPDATE_GIT_NETWORK_TIMEOUT_MS);
+  assert.equal(updateGitTimeoutMs(['ls-remote', 'origin']), UPDATE_GIT_NETWORK_TIMEOUT_MS);
+  assert.equal(updateGitTimeoutMs(['rev-parse', 'HEAD']), UPDATE_GIT_LOCAL_TIMEOUT_MS);
+  assert.ok(UPDATE_GIT_NETWORK_TIMEOUT_MS >= 60_000);
+  assert.equal(
+    gitTimeoutMessage(['fetch', '--no-tags', 'origin', A], 60_000),
+    'git fetch from origin did not finish within 60 s.',
+  );
+  assert.equal(gitTimeoutMessage(['rev-parse', 'HEAD'], 15_000), 'git rev-parse did not finish within 15 s.');
+
+  const calls: string[][] = [];
+  let fails = 1;
+  const flaky: UpdateGitRunner = async (args) => {
+    calls.push(args);
+    return fails-- > 0 ? { status: 1, out: '', err: 'HTTP 500' } : { status: 0, out: '', err: '' };
+  };
+  assert.equal((await retryFetchOnce(flaky)(['fetch', 'origin', A], '/x')).status, 0);
+  assert.equal(calls.length, 2);
+
+  calls.length = 0;
+  fails = 5;
+  const failed = await retryFetchOnce(flaky)(['fetch', 'origin', A], '/x');
+  assert.deepEqual([failed.status, failed.err, calls.length], [1, 'HTTP 500', 2]);
+
+  calls.length = 0;
+  fails = 5;
+  assert.equal((await retryFetchOnce(flaky)(['ls-remote', 'origin'], '/x')).status, 1);
+  assert.equal(calls.length, 1);
+});
