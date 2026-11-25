@@ -40,7 +40,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 112.75 h agent + 13.25 h owner across 130 open steps of 41 features and 32 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 111.5 h agent + 13.25 h owner across 130 open steps of 41 features and 32 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2924,6 +2924,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-137"></a>[🐞 B-137](#top)
+
+**Fleet chat reads a new drone's model and version as part categories**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-137-T01 — Add a drone by chat with its model and version (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Seen by the owner on NERV-01 at `2627d483` on 2026-11-25 at about 12:00. `nerv chat "aggiungi il drone Smoke, modello AOS 5, v. 5.1"` answered (after two "(invalid reply)" lines, [B-136](work/records/B-137.md#b-136)) "Quale categoria intendevi per 'modello'? Devo scegliere tra: frame, motor, prop, arm, fc, esc, vtx, camera, rx, antenna, gps.": the drone's model was taken for a part category. Answering `nerv chat "frame"` (again two "(invalid reply)" lines) gave "Non riesco a registrare 'v. 5.1' perché non corrisponde a una delle categorie di componenti valide…": the version became another category. The conversation loops instead of adding the drone with frame "AOS 5 v5.1". Likely place: `parseAddDrone` in `src/fleet-chat.ts` splits the text after the name on commas and reads each segment's first word as a part category; drone models live in `drone_models` (F-121-T01). |
+| **Reproduce** | With an invented drone: `nerv chat "aggiungi il drone Testdrone, modello Testframe 5, v. 5.1"`; today: a question about the category "modello"; answering `nerv chat "frame"`: a refusal of "v. 5.1" as a category. |
+| **Check** | A committed test fails first: adding a drone with "modello <model>" (Italian and English) and a version records the drone with that model (frame or `drone_models` link, as F-121 defines), or asks once whether to create the model; a version segment ("v. 5.1", "v5.1") joins the model; answering the follow-up never loops back to the same question. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-137-t01"></a>B-137-T01 — Add a drone by chat with its model and version | 1.5 h | 0 h | 0.25 h | Implemented; verification pending | [PR #764](https://github.com/voidbrain/nerv/pull/764) parse drone model and version segments on add-drone |
+| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-137.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-137-T01: [PR #764](https://github.com/voidbrain/nerv/pull/764) parse drone model and version segments on add-drone. Test: `test/fleet-chat.test.ts` (committed failing first in `2fc02d29`); owner report 2026-11-25, NERV-01 at `2627d483`; [#750](https://github.com/voidbrain/nerv/pull/750); [#764](https://github.com/voidbrain/nerv/pull/764) |
+| Opened | 2026-11-25 |
+| Verification | Unit/integration: 2026-11-25 passed locally (`test/fleet-chat.test.ts`, `test/fleet-prints.test.ts`, `test/fleet.test.ts`); live NERV-01 check pending. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
 ### <a id="b-094"></a>[🐞 B-094](#top)
 
 **Remote action wording: a doubled full stop, "queued" for a finished job, "offline" for a revoked base**
@@ -2968,44 +3006,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: B-094-T02 by CI run 44486070427 (PR #535). B-094-T03 by CI run 44516436567 (PR #545, attempt 2); live check pending. |
 | Reviewed | 2026-11-19 |
-
-</details>
-
----
-### <a id="b-137"></a>[🐞 B-137](#top)
-
-**Fleet chat reads a new drone's model and version as part categories**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-137-T01, accept a drone's model and version when adding a drone by chat (or ask whether to create the model), with a failing-first test.
-
-| | |
-|---|---|
-| **Issue** | Seen by the owner on NERV-01 at `2627d483` on 2026-11-25 at about 12:00. `nerv chat "aggiungi il drone Smoke, modello AOS 5, v. 5.1"` answered (after two "(invalid reply)" lines, [B-136](work/records/B-137.md#b-136)) "Quale categoria intendevi per 'modello'? Devo scegliere tra: frame, motor, prop, arm, fc, esc, vtx, camera, rx, antenna, gps.": the drone's model was taken for a part category. Answering `nerv chat "frame"` (again two "(invalid reply)" lines) gave "Non riesco a registrare 'v. 5.1' perché non corrisponde a una delle categorie di componenti valide…": the version became another category. The conversation loops instead of adding the drone with frame "AOS 5 v5.1". Likely place: `parseAddDrone` in `src/fleet-chat.ts` splits the text after the name on commas and reads each segment's first word as a part category; drone models live in `drone_models` (F-121-T01). |
-| **Reproduce** | With an invented drone: `nerv chat "aggiungi il drone Testdrone, modello Testframe 5, v. 5.1"`; today: a question about the category "modello"; answering `nerv chat "frame"`: a refusal of "v. 5.1" as a category. |
-| **Check** | A committed test fails first: adding a drone with "modello <model>" (Italian and English) and a version records the drone with that model (frame or `drone_models` link, as F-121 defines), or asks once whether to create the model; a version segment ("v. 5.1", "v5.1") joins the model; answering the follow-up never loops back to the same question. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-137-t01"></a>B-137-T01 — Add a drone by chat with its model and version | 1.5 h | 0 h | 1.5 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-137.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | — (owner report 2026-11-25, NERV-01 at `2627d483`); [#750](https://github.com/voidbrain/nerv/pull/750) |
-| Opened | 2026-11-25 |
-| Verification | Pending. |
-| Reviewed | 2026-11-25 |
 
 </details>
 

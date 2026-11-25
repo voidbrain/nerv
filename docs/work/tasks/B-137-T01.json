@@ -4,7 +4,7 @@
   "parent": "B-137",
   "title": "Add a drone by chat with its model and version",
   "goal": "Adding a drone with \"modello <model>, v. <version>\" records the model or asks once whether to create it, never asks for a part category",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A committed test fails first: \"aggiungi il drone X, modello M, v. 5.1\" and its English form record the drone with model \"M v5.1\" (frame or drone_models link) or ask once whether to create the model",
     "Answering the follow-up never loops back to the category question"
@@ -32,11 +32,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-25 when opened: phrase parsing for model and version and the follow-up answer, with failing-first tests. Not a measurement.",
+    "estimate": "0.25 h agent",
+    "basis": "Implemented 2026-11-25 in src/fleet-chat.ts with failing-first tests in test/fleet-chat.test.ts; CI and merge remain. Not a measurement.",
     "reviewed": "2026-11-25",
-    "agentHours": 1.5,
+    "agentHours": 0.25,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 764,
+      "note": "parse drone model and version segments on add-drone"
+    }
+  ]
 }
