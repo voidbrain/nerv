@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "B-147-T01",
+  "parent": "B-147",
+  "title": "Failing test: a 21 ms EVA action lights its flow arrow",
+  "goal": "A committed test fails on the current flow: an ordered sortie event sequence with a 21 ms EVA action between two long Misato rounds never shows the EVA-to-Misato arrow",
+  "status": "planned",
+  "acceptance": [
+    "The fixture is an invented event sequence shaped like sortie dd35e6d2 on NERV-01: misato.consult 31 s, reminders.add on an EVA for 21 ms, a misato.step of 33 s, the reply after 22 s",
+    "The test drives the workspace flow (F-130-T07) as polls sampled every few seconds and asserts each step, the 21 ms action included, is shown in order for at least the minimum visible time, with the EVA cage to Misato arrow lit",
+    "It fails on main before B-147-T02 and is not edited to pass"
+  ],
+  "dependsOn": [
+    "F-130-T07"
+  ],
+  "resources": [
+    "web/src/**",
+    "test/**",
+    "docs/work/records/B-147.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "The new test fails before the fix",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-25: one fixture and a fake-timer test against the flow component from F-130-T07. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": 774
+    }
+  ]
+}
