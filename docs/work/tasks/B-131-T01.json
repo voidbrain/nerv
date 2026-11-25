@@ -32,10 +32,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h",
-    "basis": "Estimated 2026-11-24: failing test and a budget sized from the probe input, like B-119-T01 (0.75 h actual). Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24: failing test and a budget sized from the probe input, like B-119-T01 (0.75 h actual). Not a measurement. Implemented in #735; live check passed 2026-11-25 in F-006-T31 (#738). No actual: time not measured.",
     "reviewed": "2026-11-25",
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   },
