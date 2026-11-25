@@ -2,12 +2,13 @@
   "version": 1,
   "id": "F-130-T14",
   "parent": "F-130",
-  "title": "Owner: check the Angular dashboard on the Mac and the installed phone app",
-  "goal": "The owner confirms every section works in the workspace dashboard and push taps still confirm delivery",
+  "title": "Owner: check the full dashboard and the simple view on the Mac and the installed phone app",
+  "goal": "The owner confirms every section works in the full workspace dashboard, the simple view shows only its essentials, and push taps still confirm delivery",
   "status": "planned",
   "acceptance": [
-    "On the Mac, open the dashboard after the update: each section shows live data and an idle poll reloads nothing",
-    "On the phone, the installed app opens the new dashboard; a test reminder's push tap marks it delivered with no Telegram fallback"
+    "On the Mac, open the full dashboard after the update: each section shows live data and an idle poll reloads nothing; switching the theme between plain and EVA changes both layouts",
+    "On the Mac and the phone, open the simple view: it shows the chat, pending approvals, health at a glance, push on/off and a link to the full dashboard, and nothing else; the link opens the full dashboard and back",
+    "On the phone, the installed app opens the workspace; a test reminder's push tap marks it delivered with no Telegram fallback"
   ],
   "dependsOn": [
     "F-130-T13"
@@ -27,13 +28,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h owner",
-    "basis": "Estimated 2026-11-25: a walk through every section and one push tap. Not a measurement.",
+    "estimate": "1.5 h owner",
+    "basis": "Estimated 2026-11-25: a walk through every section and one push tap. Re-estimated 2026-11-25 (+0.5 h): the simple view and the theme switch too. Not a measurement.",
     "reviewed": "2026-11-25",
     "agentHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,
-    "ownerHours": 1,
+    "ownerHours": 1.5,
     "ownerKind": "procedure"
   }
 }
