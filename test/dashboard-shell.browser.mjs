@@ -16,6 +16,15 @@ const require = createRequire(import.meta.url);
 const axe = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
 const AXE = `axe.run(document.querySelector('nerv-dashboard')).then(r=>r.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target),why:v.nodes.map(n=>n.any.map(a=>a.message).join(' '))})))`;
 
+/** The header selects, in order: language, theme, mode, colour. */
+const SELECT = { lang: 0, theme: 1, mode: 2, accent: 3 };
+async function choose(evaluate, index, value) {
+  await evaluate(
+    `(() => { const s = document.querySelectorAll('nerv-dashboard select')[${index}]; s.value = '${value}'; s.dispatchEvent(new Event('change')); })()`,
+  );
+  await new Promise((done) => setTimeout(done, 100));
+}
+
 test(
   'F-130-T01: the workspace dashboard shell signs in, keeps unchanged rows and passes axe',
   { timeout: 180000 },
@@ -34,10 +43,26 @@ test(
         const login = await (
           await fetch(origin + '/api/session/codes', { method: 'POST', headers: { authorization: 'Bearer ' + token } })
         ).json();
+        // Not signed in: the sign-in box passes axe in the plain and the EVA theme, and speaks Italian when chosen.
+        await page('Page.navigate', { url: origin + '/full' });
+        await until(`!!document.querySelector('nerv-sign-in input#signin-value')`, 30000);
+        await evaluate(axe);
+        await choose(evaluate, SELECT.theme, 'simple');
+        assert.deepEqual(await evaluate(AXE), [], 'axe sign-in · simple');
+        await choose(evaluate, SELECT.theme, 'eva');
+        assert.deepEqual(await evaluate(AXE), [], 'axe sign-in · eva');
+        await choose(evaluate, SELECT.lang, 'it');
+        await until(`document.querySelector('nerv-sign-in h2').textContent.trim() === 'Accedi'`);
+        assert.equal(await evaluate(`document.documentElement.lang`), 'it');
+        assert.deepEqual(await evaluate(AXE), [], 'axe sign-in · Italian');
+        await choose(evaluate, SELECT.lang, 'en');
+        await choose(evaluate, SELECT.theme, 'simple');
+
+        await page('Page.navigate', { url: 'about:blank' });
         await page('Page.navigate', { url: origin + '/full#code=' + login.code });
         await until(`document.querySelectorAll('nerv-dashboard [data-key]').length === 2`, 30000);
         assert.equal(await evaluate('location.hash'), '', 'the login code left the address');
-        assert.equal(await evaluate(`sessionStorage.getItem('nerv.workspace.session') !== null`), true, 'session kept');
+        assert.equal(await evaluate(`sessionStorage.length`), 0, 'the session stays in memory, as on the simple page');
         await until(`document.querySelector('nerv-dashboard [role=status]').textContent.trim() === 'Connected · live'`);
 
         // B-144: mark every row node, then change something the rows do not show (a new reminder). The stream says
@@ -69,13 +94,28 @@ test(
         await evaluate(axe);
         for (const theme of ['simple', 'eva'])
           for (const mode of ['dark', 'light']) {
-            await evaluate(
-              `(() => { const s = document.querySelector('select'); s.value = '${theme}'; s.dispatchEvent(new Event('change')); const m = document.querySelectorAll('select')[1]; m.value = '${mode}'; m.dispatchEvent(new Event('change')); })()`,
-            );
+            await choose(evaluate, SELECT.theme, theme);
+            await choose(evaluate, SELECT.mode, mode);
             await until(`document.querySelector('nerv-dashboard').dataset.theme === '${theme}'`);
-            await new Promise((done) => setTimeout(done, 100));
             assert.deepEqual(await evaluate(AXE), [], `axe ${theme} · ${mode}`);
           }
+        // Every EVA colour, dark and light (the accent tints text and borders).
+        for (const mode of ['dark', 'light'])
+          for (const accent of ['orange', 'blue', 'green', 'violet', 'ochre']) {
+            await choose(evaluate, SELECT.mode, mode);
+            await choose(evaluate, SELECT.accent, accent);
+            assert.deepEqual(await evaluate(AXE), [], `axe eva · ${mode} · ${accent}`);
+          }
+
+        // A hidden page pauses the feed; visible again, it reconnects.
+        await evaluate(
+          `Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange'))`,
+        );
+        await until(`document.querySelector('nerv-dashboard [role=status]').textContent.includes('paused')`);
+        await evaluate(
+          `Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange'))`,
+        );
+        await until(`document.querySelector('nerv-dashboard [role=status]').textContent.trim() === 'Connected · live'`);
         assert.equal(
           await evaluate(`JSON.parse(localStorage.getItem('nerv.workspace.theme')).theme`),
           'eva',
