@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-130-T02",
+  "parent": "F-130",
+  "title": "Health section in Angular",
+  "goal": "Health (doctor run, problems, health metrics, model-down and degraded banners, updater status) renders in the workspace with the same behaviour as live.js",
+  "status": "planned",
+  "acceptance": [
+    "Doctor run, its result and chat line, /api/health/metrics rows, the degraded banner and updater status (/api/update/status, dismiss, apply) match live.js for the same API data",
+    "A test across the API handler and the component checks the rows; the old Health panel links to the new one"
+  ],
+  "dependsOn": [
+    "F-130-T01"
+  ],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "web/public/dashboard/**",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "api-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-25: reuses doctor-view; ports healthRowHtml, healthMetricRows, doctorRunHtml and the updater rows. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  }
+}

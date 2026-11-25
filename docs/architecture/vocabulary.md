@@ -1,6 +1,6 @@
 # NERV vocabulary
 
-Current project meanings, reviewed 8 November 2026. Code uses plain names; lore labels do not grant permissions or prove a planned capability exists. [Runtime boundaries](runtime.md) own implementation claims; [backlog records](../BACKLOG.md) own unfinished work.
+Current project meanings, reviewed 8 November 2026. Code uses plain names; lore labels do not grant permissions or prove a planned capability exists. [Runtime boundaries](runtime.md) own implementation claims; [backlog records](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md) own unfinished work.
 
 | Name | Meaning and current limit |
 |---|---|

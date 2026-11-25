@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-130-T03",
+  "parent": "F-130",
+  "title": "Settings section in Angular: schedule, update policy, models reload, devices and pairing",
+  "goal": "Settings (schedule, update policy, model reload, paired devices, pairing codes) works in the workspace with the same validation and results as live.js",
+  "status": "planned",
+  "acceptance": [
+    "Settings draft, /api/settings/schedule, /api/update/policy and /api/models/reload behave as live.js, including the restart wait",
+    "Devices list, revoke and pairing codes (/api/devices, /api/device/codes) match live.js; a test across the handlers and the component",
+    "The old Settings panel links to the new one"
+  ],
+  "dependsOn": [
+    "F-130-T01"
+  ],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "web/public/dashboard/**",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "api-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "4 h",
+    "basis": "Estimated 2026-11-25: the largest form in live.js (settingsModel, readSettingsDraft, renderDevices, pairingHtml). Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 4,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  }
+}

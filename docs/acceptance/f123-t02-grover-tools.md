@@ -1,6 +1,6 @@
 # F-123: NERV lists the Grover tools
 
-Owner steps for [F-123](../BACKLOG.md#f-123) (step F-123-T02). Run every command in a Terminal on the owner's Mac (NERV-01), with Grover's hub running on the Pi and published on the tailnet at `https://<pi>.<tailnet>.ts.net/mcp`. Replace `<pi>.<tailnet>` with the Pi's tailnet name (`tailscale status` on the Pi shows it). The [remote MCP guide](../guides/remote-mcp.md) explains each command.
+Owner steps for [F-123](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md#f-123) (step F-123-T02). Run every command in a Terminal on the owner's Mac (NERV-01), with Grover's hub running on the Pi and published on the tailnet at `https://<pi>.<tailnet>.ts.net/mcp`. Replace `<pi>.<tailnet>` with the Pi's tailnet name (`tailscale status` on the Pi shows it). The [remote MCP guide](../guides/remote-mcp.md) explains each command.
 
 ## 1. The installed service has F-123-T01
 

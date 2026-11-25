@@ -1,6 +1,6 @@
 # F-016-T09: two-device coordinator relocation
 
-Owner steps for [F-016](../BACKLOG.md#f-016) (step F-016-T09, with the live check of B-120). A planned move of the coordinator from Neo Tokyo-3 (`NERV-01`, the main, with the root key) to Tabgha (`NERV-02`), then back. The commands follow the [relocation guide](../guides/kaji-and-nodes.md#relocating-the-coordinator) and [the decision](../decisions/coordinator-relocation.md), section 4. Paste one block at a time and **stop at the first unexpected result or refusal**: note its text in F-016 and do not work around it (never `kaji main`, never a copied store). Keep the relocation and receipt files outside Git, under `~/.nerv-private/relocation` on NERV-01 and `$HOME\.nerv-private\relocation` on NERV-02.
+Owner steps for [F-016](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md#f-016) (step F-016-T09, with the live check of B-120). A planned move of the coordinator from Neo Tokyo-3 (`NERV-01`, the main, with the root key) to Tabgha (`NERV-02`), then back. The commands follow the [relocation guide](../guides/kaji-and-nodes.md#relocating-the-coordinator) and [the decision](../decisions/coordinator-relocation.md), section 4. Paste one block at a time and **stop at the first unexpected result or refusal**: note its text in F-016 and do not work around it (never `kaji main`, never a copied store). Keep the relocation and receipt files outside Git, under `~/.nerv-private/relocation` on NERV-01 and `$HOME\.nerv-private\relocation` on NERV-02.
 
 ## 0. Before you start
 

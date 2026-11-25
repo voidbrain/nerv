@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-130-T10",
+  "parent": "F-130",
+  "title": "EVA cages, pilots, tools and skills",
+  "goal": "EVA cages with heartbeats, the Marduk pilots, tools and Kaji's watermelons work in the workspace without reloading images on an unchanged poll",
+  "status": "planned",
+  "acceptance": [
+    "/api/eva/instances, /api/pilots and /api/tools match live.js; heartbeats keep animating",
+    "B-144's check holds in Angular: two polls with the same state keep the cage images and canvases (test)"
+  ],
+  "dependsOn": [
+    "F-130-T01"
+  ],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "web/public/dashboard/**",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "api-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-25: cages, heartbeat canvas and three lists. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  }
+}

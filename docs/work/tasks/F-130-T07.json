@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-130-T07",
+  "parent": "F-130",
+  "title": "Sephirot sortie flow, MAGI and timeline",
+  "goal": "The sortie flow diagram (stages, MAGI vote, timeline) renders in the workspace from real stages and timings",
+  "status": "planned",
+  "acceptance": [
+    "Stage nodes, edges, MAGI result and timeline match live.js for the same sortie; no simulated stages in live mode",
+    "A test from a recorded sortie fixture to the rendered stages"
+  ],
+  "dependsOn": [
+    "F-130-T06"
+  ],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "web/public/dashboard/**",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "api-contracts",
+    "regression-design",
+    "svg"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "4 h",
+    "basis": "Estimated 2026-11-25: SVG diagram with edges, the least mechanical port. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 4,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  }
+}

@@ -1,6 +1,6 @@
 # NERV target schema
 
-Corrected on 8 November 2026 against main `7d3d091`. This is the active conceptual architecture, with implemented and planned boundaries distinguished. [Runtime](runtime.md) owns concrete behavior; [backlog](../BACKLOG.md) owns acceptance. The [original target](../archive/design-inputs/NERV-ARCHITECTURE-2026-11-04.md) remains unchanged historical evidence.
+Corrected on 8 November 2026 against main `7d3d091`. This is the active conceptual architecture, with implemented and planned boundaries distinguished. [Runtime](runtime.md) owns concrete behavior; [backlog](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md) owns acceptance. The [original target](../archive/design-inputs/NERV-ARCHITECTURE-2026-11-04.md) remains unchanged historical evidence.
 
 Labels: **I** = implemented mechanism, not every acceptance check; **Partial** = some delivered behavior plus named open work; **P** = planned. Solid arrows describe the implemented core flow. Dotted arrows labelled planned are intended extensions, not observed activity. The diagram does not establish real-host, physical-device, signing or notification acceptance.
 

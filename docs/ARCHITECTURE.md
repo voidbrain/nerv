@@ -9,7 +9,7 @@ Current system boundaries and terminology are kept separately from historical ta
 | [NERV vocabulary](architecture/vocabulary.md) | Current lore-to-code meanings; a name does not establish implementation |
 | [Decisions](decisions/README.md) | Retained design rationale, rejected alternatives and reconsideration conditions |
 | [Roadmap](ROADMAP.md) | Milestone scope and acceptance |
-| [Backlog](BACKLOG.md) | Current outcome status, next actions and evidence |
+| [Backlog](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md) | Current outcome status, next actions and evidence |
 | [Review register](reviews/README.md) | Actual assessments, last execution and next conditions |
 
 The [original target and mixed design inputs](archive/design-inputs/README.md) remain historical sources. Superseded UI prototypes and artwork remain in the [retired-reference holding area](../remove/README.md). The [documentation map](README.md) explains source ownership and folder placement.
