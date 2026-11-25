@@ -58,10 +58,10 @@ jobs:
       - name: Install Linux EVA sandbox (bubblewrap)
         if: needs.plan.outputs.full == 'true' || needs.plan.outputs.unit == 'true'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq bubblewrap
+      - name: Source-owned records, tasks and model profiles (before every step that reads the ledger)
+        run: npm run check:work
       - name: Backlog prerequisite validation
         run: npm run check:dependencies
-      - name: Source-owned records, tasks and model profiles
-        run: npm run check:work
       - name: Backlog work-queue validation
         run: npm run check:queue
 

@@ -44,8 +44,20 @@ function directory(path) {
 }
 function store(path, cwd) {
   // Resolve existing ancestors before creating anything; reject links and stores inside the checkout.
-  const p = resolve(path),
-    root = realpathSync(cwd);
+  // The checkout is the nearest ancestor of cwd holding .git (a directory or a worktree marker file);
+  // a working folder in no checkout (home, /) may enclose the store (B-051).
+  const p = resolve(path);
+  let root = null;
+  for (let a = realpathSync(cwd); ; a = dirname(a)) {
+    try {
+      lstatSync(join(a, '.git'));
+      root = a;
+      break;
+    } catch (e) {
+      if (e.code !== 'ENOENT') throw e;
+    }
+    if (a === dirname(a)) break;
+  }
   let ancestor = p;
   for (;;) {
     try {
@@ -58,7 +70,7 @@ function store(path, cwd) {
     }
   }
   const actual = resolve(realpathSync(ancestor), relative(ancestor, p));
-  const rel = relative(root, actual);
+  const rel = root === null ? '..' : relative(root, actual);
   if (rel === '' || (rel !== '..' && !rel.startsWith('..' + sep) && !isAbsolute(rel)))
     throw Error('Usage store must be outside the checkout');
   for (let a = ancestor; ; a = dirname(a)) {

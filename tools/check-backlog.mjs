@@ -11,6 +11,16 @@ const kindOf = (pair) => {
     : undefined;
 };
 
+// F-096-T04: with workItems.views "built" the ledger is a build output: build it from the sources before reading it.
+const builtViews = (() => {
+  try {
+    const items = JSON.parse(readFileSync(new URL('../.harness.json', import.meta.url), 'utf8')).workItems;
+    return Boolean(items?.enabled && items.views === 'built');
+  } catch {
+    return false;
+  }
+})();
+if (builtViews) (await import('./work-items.mjs')).buildView(fileURLToPath(new URL('..', import.meta.url)));
 const text = readFileSync(new URL('../docs/BACKLOG.md', import.meta.url), 'utf8');
 // 8.16.0 (F-081): the generated Done steps table is a <details> block of its own; record checks read the ledger without it.
 const records = text.replace(/^<details><summary>Done steps \(\d+\)<\/summary>\n[\s\S]*?^<\/details>\n\n/gm, '');
@@ -48,7 +58,13 @@ const branch =
     ?.trim()
     .replace(/^origin\//, '') ??
   'main';
-const mainText = git('show', `origin/${branch}:docs/BACKLOG.md`) ?? '';
+// Built views are not on the default branch: its published build on backlog-views stands in for it (F-096-T04).
+const mainText =
+  git('show', builtViews ? 'origin/backlog-views:docs/BACKLOG.md' : `origin/${branch}:docs/BACKLOG.md`) ?? '';
+if (builtViews && !mainText)
+  console.warn(
+    'No origin/backlog-views ledger (not published yet, or not fetched: CI needs fetch-depth: 0): the checks that compare with the default branch see nothing there.',
+  );
 // docs/BACKLOG-RULES.md is the procedure this enforces; an empty ledger is valid.
 const HEADING_RE = /^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d+)(?:\]\(#top\))?$/;
 const headings = [...records.matchAll(new RegExp(HEADING_RE.source, 'gm'))];

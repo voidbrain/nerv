@@ -4,7 +4,7 @@
   "parent": "F-125",
   "title": "Reconcile to the latest harness release",
   "goal": "NERV runs the latest project-harness release, reconciled once the template backlog is empty",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Started only once the project-harness template backlog is empty (external prerequisite; harness 10.9.0 has no cross-repository dependsOn)",
     ".harness.json names the latest release and every copied, forked and adapted file is reconciled",
@@ -48,6 +48,9 @@
   "prs": [
     {
       "pr": 748
+    },
+    {
+      "pr": 753
     }
   ]
 }
