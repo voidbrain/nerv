@@ -47,7 +47,7 @@ The six domain packs are consumed like every common pack (no exclusion in `evals
 
 `evals/gauntlet/runners.json` registers the three reference runners shipped in the pinned package (`node_modules/@voidbrain/gauntlet-protocol/examples/<pack>-v1/runner.mjs`, layer `coding`, `allowModels: true`). They ask the profile's model from their own process, so their cases follow the model digest, runtime and scenario like any model case, and their source key is `releaseSourceKey()` (the pin manifest and the registry), not NERV's source: a NERV change does not make them pending, a pin or registry change does. NERV's own runners (`scripted-agent`, the system adapter) are model-free and keep `systemSourceKey`.
 
-CI never downloads a toolchain or runs these packs (owner decision 2026-11-25): it runs no model pack, and NERV's tests exclude the three runner packs and use the fixture runtime for the others; the release's own contract tests use stand-in graders. A missing container engine, image, `arduino-cli` or core gives an `error` result naming the fix, which covers nothing, so the case stays pending. `gauntlet:all` blocks every domain case without `--allow-models --profile`, and the four sketch cases also without `--allow-expensive`.
+CI never downloads a toolchain or runs these packs (owner decision 2026-11-25): it runs no model pack, and NERV's tests exclude the three runner packs and use the fixture runtime for the others; the release's own contract tests use stand-in graders. A missing container engine, image, `arduino-cli` or core gives an `error` result naming the fix, which covers nothing, so the case stays pending. `gauntlet:all` blocks every domain case without `--allow-models --profile`. Only the four sketch cases also need `--allow-expensive`: the `coding` cases and the four `cad-3d` OpenSCAD cases are not marked expensive, so `--execute --allow-models` alone starts Docker containers and may `docker pull` a missing image (up to 600 s each).
 
 Owner-approved campaign (paste in a development checkout, not `~/.nerv-app`; the out directory must not exist yet):
 
@@ -55,6 +55,7 @@ Owner-approved campaign (paste in a development checkout, not `~/.nerv-app`; the
 docker version --format '{{.Server.Version}}'          # expect a version; start Docker Desktop or colima first
 arduino-cli core list                                  # expect arduino:avr 1.8.6 and esp32:esp32 3.0.7
 npm run gauntlet:all -- --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json --allow-models --execute --out-dir=/private/tmp/nerv-domain-new
+# this starts Docker containers for coding/* and the cad-3d OpenSCAD cases, pulling missing images first (up to 600 s)
 # add --allow-expensive to include the four Arduino/ESP32 compiles
 npm run gauntlet:pending                               # expect no coding/, logic-math/, embedded/, italian-quality/, cad-3d/ or code-review/ line
 ```
