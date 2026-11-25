@@ -41,7 +41,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 112.5 h agent + 14 h owner across 135 open steps of 42 features and 34 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 107.5 h agent + 14 h owner across 135 open steps of 42 features and 34 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1570,9 +1570,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-098-T04](#f-098-t04) | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h | — | [F-098-T04](#f-098-t04) | 🤖 | — | — |
 
-💻 **→** Next: B-138-T01, name why the reply after a granted `fleet.chat` step drops its result, and fix it with a failing-first test.
+💻 **→** Next: B-138-T01 — Answer a spares question from the fleet.chat result (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -1584,8 +1584,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-138-t01"></a>B-138-T01 — Answer a spares question from the fleet.chat result | 1.5 h | 0 h | 1.5 h | Planned | — | [F-098-T04](#f-098-t04) | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | | |
+| 🟢 Small | <a id="b-138-t01"></a>B-138-T01 — Answer a spares question from the fleet.chat result | 1.5 h | 0 h | 0.25 h | Implemented; verification pending | — | [F-098-T04](#f-098-t04) | [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #762](https://github.com/voidbrain/nerv/pull/762) category-scoped spares reply and planner grounding |
+| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1594,9 +1594,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-138-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751). — (owner report 2026-11-25, NERV-01 at `2627d483`); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| PR / evidence | Steps: B-138-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #762](https://github.com/voidbrain/nerv/pull/762) category-scoped spares reply and planner grounding. Test: `test/fleet-chat.test.ts`, `test/misato.test.ts` (committed failing first in `2b25814f`); owner report 2026-11-25, NERV-01 at `2627d483`; opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); [#762](https://github.com/voidbrain/nerv/pull/762) |
 | Opened | 2026-11-25 |
-| Verification | Pending. |
+| Verification | Unit/integration: 2026-11-25 passed locally (`test/fleet-chat.test.ts`, `test/misato.test.ts`); live NERV-01 check pending. |
 | Reviewed | 2026-11-25 |
 
 </details>
@@ -1693,9 +1693,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟠 Investigate | 🔶 P2 | 🟡 Medium | 2 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-126-T03, read the Store step the next Windows failure names ("still in start-up step …") and fix that step test-first.
+💻 **→** Next: B-126 stays open until five Windows `npm test` runs with #767 show no "nervous process not ready" (B-126-T03); if one does, the watch names the step.
 
 | | |
 |---|---|
@@ -1708,8 +1708,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-126-t02"></a>B-126-T02 — Say why the nervous child was not ready: its exit, last start-up step and error output | 2.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [B-126-T03](#b-126-t03) | [PR #755](https://github.com/voidbrain/nerv/pull/755) |
-| 🟡 Medium | <a id="b-126-t03"></a>B-126-T03 — Name the Store start-up step where the Windows nervous child stalls, and fix it | 1.5 h | 0 h | 1.5 h | Planned | [B-126-T02](#b-126-t02) | — | [PR #757](https://github.com/voidbrain/nerv/pull/757) |
-| 🟡 Medium | **Total** | 5.5 h | 0 h (0 of 3 steps recorded) | 2 h | 1 of 3 completed | | | |
+| 🟢 Small | <a id="b-126-t03"></a>B-126-T03 — Name and fix the Store start-up step where the Windows nervous child stalls | 1.5 h | 0 h | 0.25 h | Implemented; verification pending | [B-126-T02](#b-126-t02) | — | [PR #757](https://github.com/voidbrain/nerv/pull/757) start-up watch; [PR #767](https://github.com/voidbrain/nerv/pull/767) fix |
+| 🟢 Small | **Total** | 5.5 h | 0 h (0 of 3 steps recorded) | 0.75 h | 1 of 3 completed | | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1726,7 +1726,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-126-T01: [PR #739](https://github.com/voidbrain/nerv/pull/739) · B-126-T02: [PR #755](https://github.com/voidbrain/nerv/pull/755) · B-126-T03: [PR #757](https://github.com/voidbrain/nerv/pull/757). [run 45632224825](https://github.com/voidbrain/nerv/actions/runs/45632224825) attempt 1 (PR #754); diagnostics in [#755](https://github.com/voidbrain/nerv/pull/755); [run 45647383080](https://github.com/voidbrain/nerv/actions/runs/45647383080) (PR #754); start-up watch in [#757](https://github.com/voidbrain/nerv/pull/757); first cause: [#739](https://github.com/voidbrain/nerv/pull/739), [archived record](archive/backlog-2026.md#b-126); [#758](https://github.com/voidbrain/nerv/pull/758) |
+| PR / evidence | Steps: B-126-T01: [PR #739](https://github.com/voidbrain/nerv/pull/739) · B-126-T02: [PR #755](https://github.com/voidbrain/nerv/pull/755) · B-126-T03: [PR #757](https://github.com/voidbrain/nerv/pull/757) start-up watch; [PR #767](https://github.com/voidbrain/nerv/pull/767) fix. [run 45632224825](https://github.com/voidbrain/nerv/actions/runs/45632224825) attempt 1 (PR #754); diagnostics in [#755](https://github.com/voidbrain/nerv/pull/755); [run 45647383080](https://github.com/voidbrain/nerv/actions/runs/45647383080) (PR #754); start-up watch in [#757](https://github.com/voidbrain/nerv/pull/757); [run 45670901865](https://github.com/voidbrain/nerv/actions/runs/45670901865) (PR #761); fix in [#767](https://github.com/voidbrain/nerv/pull/767); first cause: [#739](https://github.com/voidbrain/nerv/pull/739), [archived record](archive/backlog-2026.md#b-126); [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-24 |
 | Verification | Unit: Test: `test/process-client.test.ts` and `test/startup-watch.test.ts` (B-126 tests, failing first, passing on macOS and on Windows). CI: Pending (five Windows runs without "nervous process not ready"). |
 | Reviewed | 2026-11-25 |
@@ -2648,9 +2648,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 4.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-126-T01 — Repeatable local model speed benchmark (Planned).
+💻 **→** Next: F-126-T01 — Repeatable local model speed benchmark (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2662,11 +2662,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | 1.5 h | Planned | — | [F-126-T02](#f-126-t02) | 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟢 Small | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | 0.25 h | Implemented; verification pending | — | [F-126-T02](#f-126-t02) | 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run |
 | 🟡 Medium | <a id="f-126-t02"></a>F-126-T02 — Rerun the gemma4:12b quality evidence with gemma4:26b | 2 h | 0 h | 2 h | Planned | [F-126-T01](#f-126-t01) | [F-126-T03](#f-126-t03) | ⏳ 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
 | 🟢 Small | <a id="f-126-t03"></a>F-126-T03 — Owner decides whether to switch the chat model to gemma4:26b | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-126-T02](#f-126-t02) | [F-126-T04](#f-126-t04) | ⏳ 🤔 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
 | 🟢 Small | <a id="f-126-t04"></a>F-126-T04 — Switch the configured chat model to gemma4:26b | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T03](#f-126-t03) | — | ⏳ 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
-| 🔴 Large | **Total** | 4.25 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 4.25 h agent + 0.25 h owner | 0 of 4 completed | | | | |
+| 🟡 Medium | **Total** | 4.25 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h agent + 0.25 h owner | 0 of 4 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2675,9 +2675,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); F-126-T01 speed benchmark in [2026-11-25-f126-t01-speed-benchmark.md](evaluations/2026-11-25-f126-t01-speed-benchmark.md); [#761](https://github.com/voidbrain/nerv/pull/761) |
 | Opened | 2026-11-25 |
-| Verification | — |
+| Verification | Unit/integration: 2026-11-25 `test/speed-benchmark.test.mjs` passed (2/2); local benchmark run recorded in `docs/evaluations/2026-11-25-f126-t01-speed-benchmark.md`; quality evaluation pending F-126-T02. |
 | Reviewed | 2026-11-25 |
 
 </details>
@@ -3041,6 +3041,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-137"></a>[🐞 B-137](#top)
+
+**Fleet chat reads a new drone's model and version as part categories**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-137-T01 — Add a drone by chat with its model and version (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Seen by the owner on NERV-01 at `2627d483` on 2026-11-25 at about 12:00. `nerv chat "aggiungi il drone Smoke, modello AOS 5, v. 5.1"` answered (after two "(invalid reply)" lines, [B-136](work/records/B-137.md#b-136)) "Quale categoria intendevi per 'modello'? Devo scegliere tra: frame, motor, prop, arm, fc, esc, vtx, camera, rx, antenna, gps.": the drone's model was taken for a part category. Answering `nerv chat "frame"` (again two "(invalid reply)" lines) gave "Non riesco a registrare 'v. 5.1' perché non corrisponde a una delle categorie di componenti valide…": the version became another category. The conversation loops instead of adding the drone with frame "AOS 5 v5.1". Likely place: `parseAddDrone` in `src/fleet-chat.ts` splits the text after the name on commas and reads each segment's first word as a part category; drone models live in `drone_models` (F-121-T01). |
+| **Reproduce** | With an invented drone: `nerv chat "aggiungi il drone Testdrone, modello Testframe 5, v. 5.1"`; today: a question about the category "modello"; answering `nerv chat "frame"`: a refusal of "v. 5.1" as a category. |
+| **Check** | A committed test fails first: adding a drone with "modello <model>" (Italian and English) and a version records the drone with that model (frame or `drone_models` link, as F-121 defines), or asks once whether to create the model; a version segment ("v. 5.1", "v5.1") joins the model; answering the follow-up never loops back to the same question. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-137-t01"></a>B-137-T01 — Add a drone by chat with its model and version | 1.5 h | 0 h | 0.25 h | Implemented; verification pending | [PR #764](https://github.com/voidbrain/nerv/pull/764) parse drone model and version segments on add-drone |
+| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-137.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-137-T01: [PR #764](https://github.com/voidbrain/nerv/pull/764) parse drone model and version segments on add-drone. Test: `test/fleet-chat.test.ts` (committed failing first in `2fc02d29`); owner report 2026-11-25, NERV-01 at `2627d483`; [#750](https://github.com/voidbrain/nerv/pull/750); [#764](https://github.com/voidbrain/nerv/pull/764) |
+| Opened | 2026-11-25 |
+| Verification | Unit/integration: 2026-11-25 passed locally (`test/fleet-chat.test.ts`, `test/fleet-prints.test.ts`, `test/fleet.test.ts`); live NERV-01 check pending. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
 ### <a id="b-094"></a>[🐞 B-094](#top)
 
 **Remote action wording: a doubled full stop, "queued" for a finished job, "offline" for a revoked base**
@@ -3085,44 +3123,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: B-094-T02 by CI run 44486070427 (PR #535). B-094-T03 by CI run 44516436567 (PR #545, attempt 2); live check pending. |
 | Reviewed | 2026-11-19 |
-
-</details>
-
----
-### <a id="b-137"></a>[🐞 B-137](#top)
-
-**Fleet chat reads a new drone's model and version as part categories**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-137-T01, accept a drone's model and version when adding a drone by chat (or ask whether to create the model), with a failing-first test.
-
-| | |
-|---|---|
-| **Issue** | Seen by the owner on NERV-01 at `2627d483` on 2026-11-25 at about 12:00. `nerv chat "aggiungi il drone Smoke, modello AOS 5, v. 5.1"` answered (after two "(invalid reply)" lines, [B-136](work/records/B-137.md#b-136)) "Quale categoria intendevi per 'modello'? Devo scegliere tra: frame, motor, prop, arm, fc, esc, vtx, camera, rx, antenna, gps.": the drone's model was taken for a part category. Answering `nerv chat "frame"` (again two "(invalid reply)" lines) gave "Non riesco a registrare 'v. 5.1' perché non corrisponde a una delle categorie di componenti valide…": the version became another category. The conversation loops instead of adding the drone with frame "AOS 5 v5.1". Likely place: `parseAddDrone` in `src/fleet-chat.ts` splits the text after the name on commas and reads each segment's first word as a part category; drone models live in `drone_models` (F-121-T01). |
-| **Reproduce** | With an invented drone: `nerv chat "aggiungi il drone Testdrone, modello Testframe 5, v. 5.1"`; today: a question about the category "modello"; answering `nerv chat "frame"`: a refusal of "v. 5.1" as a category. |
-| **Check** | A committed test fails first: adding a drone with "modello <model>" (Italian and English) and a version records the drone with that model (frame or `drone_models` link, as F-121 defines), or asks once whether to create the model; a version segment ("v. 5.1", "v5.1") joins the model; answering the follow-up never loops back to the same question. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-137-t01"></a>B-137-T01 — Add a drone by chat with its model and version | 1.5 h | 0 h | 1.5 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-137.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | — (owner report 2026-11-25, NERV-01 at `2627d483`); [#750](https://github.com/voidbrain/nerv/pull/750) |
-| Opened | 2026-11-25 |
-| Verification | Pending. |
-| Reviewed | 2026-11-25 |
 
 </details>
 
