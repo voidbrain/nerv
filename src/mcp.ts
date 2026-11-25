@@ -443,17 +443,34 @@ export class McpHttpClient implements McpConnection {
         `MCP server ${this.host} answered ${method} with HTTP ${res.status}${res.status === 404 ? ': is the path right (…/mcp)?' : ''}.`,
       );
     }
-    let body: string;
-    try {
-      body = await res.text();
-    } catch (e) {
-      throw new Error(sentence(`MCP server ${httpFailure(this.host, e)}`));
-    }
-    if (body.length > MAX_BODY) throw new Error(`MCP server ${this.host} sent an answer too large to read.`);
+    const body = await this.read(res);
     const m = answerIn(body, res.headers.get('content-type') ?? '', id);
     if (!m) throw new Error(`${this.host} did not answer ${method} as an MCP server.`);
     if (m.error) throw new Error((m.error as { message?: string }).message ?? 'MCP error.');
     return m.result;
+  }
+  /** The answer's body, read as it streams and cut off past MAX_BODY bytes, so a runaway answer is never held whole. */
+  private async read(res: Response): Promise<string> {
+    if (!res.body) return '';
+    const reader = res.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        size += value.byteLength;
+        if (size > MAX_BODY) {
+          await reader.cancel().catch(() => undefined);
+          throw new Error(`MCP server ${this.host} sent an answer too large to read.`);
+        }
+        chunks.push(value);
+      }
+    } catch (e) {
+      if (e instanceof Error && e.message.endsWith('too large to read.')) throw e;
+      throw new Error(sentence(`MCP server ${httpFailure(this.host, e)}`));
+    }
+    return Buffer.concat(chunks).toString('utf8');
   }
   private init(): Promise<void> {
     this.ready ??= this.request('initialize', {

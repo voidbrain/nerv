@@ -10,6 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { McpHttpClient, grantRefusal, httpFailure, urlRefusal, validateTools } from '../src/mcp.ts';
 import { toolListing } from '../src/tool-listing.ts';
+import { Store } from '../src/store.ts';
 import type { ChatReply } from '../src/runtime-api.ts';
 
 const TOOLS = [
@@ -188,6 +189,87 @@ test('the HTTP client: a session kept, an SSE answer read, a wrong path and a de
   await assert.rejects(new McpHttpClient({ id: 'hub', url: hub.url }).listTools(), /unreachable \(ECONN[A-Z]+\)/);
 });
 
+test('an answer larger than 4 MiB is cut off while it streams, for a listing and a call (F-123)', async () => {
+  let sent = 0;
+  let mode: 'list' | 'call' = 'list';
+  const s = createServer((req, res) => {
+    let raw = '';
+    req
+      .on('data', (d) => (raw += d))
+      .on('end', () => {
+        const m = JSON.parse(raw) as { id?: number; method: string };
+        if (m.id === undefined) return res.writeHead(202).end();
+        res.setHeader('content-type', 'application/json');
+        if (m.method === 'initialize' || (mode === 'call' && m.method === 'tools/list'))
+          return res.end(JSON.stringify({ jsonrpc: '2.0', id: m.id, result: { tools: [] } }));
+        // Streams without end: 64 KiB chunks until the client stops reading (or 64 MiB, a bound for the test).
+        const chunk = 'x'.repeat(64 * 1024);
+        res.write(`{"jsonrpc":"2.0","id":${m.id},"result":{"pad":"`);
+        const pump = () => {
+          while (sent < 64 * 1024 * 1024 && !res.destroyed) {
+            sent += chunk.length;
+            if (!res.write(chunk)) return void res.once('drain', pump);
+          }
+          res.end('"}}');
+        };
+        pump();
+      });
+  });
+  await new Promise<void>((d) => s.listen(0, '127.0.0.1', d));
+  const url = `http://127.0.0.1:${(s.address() as { port: number }).port}/mcp`;
+  try {
+    await assert.rejects(new McpHttpClient({ id: 'big', url }).listTools(), /too large/);
+    assert.ok(sent < 16 * 1024 * 1024, `stopped reading early (${sent} bytes sent)`);
+    sent = 0;
+    mode = 'call';
+    await assert.rejects(new McpHttpClient({ id: 'big', url }).callTool('t', {}), /too large/);
+    assert.ok(sent < 16 * 1024 * 1024, `stopped reading early (${sent} bytes sent)`);
+  } finally {
+    await new Promise<void>((d) => {
+      s.close(() => d());
+      s.closeAllConnections();
+    });
+  }
+});
+
+test('an approved MCP action runs at most once: a replay is refused, an expired grant does not run (F-123)', () => {
+  const home = mkdtempSync(join(tmpdir(), 'nerv-mcp-grant-'));
+  const store = new Store(join(home, 'nerv.sqlite'));
+  try {
+    store.ledger.setExternal([{ name: 'hub.hub_run_pump', effect: 'physical', eva: 'eva-01' }]);
+    const card = (pumpId: string) => {
+      const sortie = store.ledger.openSortie('misato', `Run pump ${pumpId}`, 'trusted');
+      const r = store.runAction(sortie, { tool: 'hub.hub_run_pump', stage: 'production', args: { pumpId } });
+      assert.equal(r.outcome, 'approval', 'physical: Pattern Blue, a card');
+      return { sortie, actionId: r.actionId!, approvalId: r.approvalId! };
+    };
+    // Before the owner decides there is no grant to use.
+    const one = card('p1');
+    assert.throws(() => store.authorizeApproved(one.sortie, one.actionId), /No approved MCP action/);
+    store.decide(one.approvalId, 'approve', 'owner');
+    assert.deepEqual(store.authorizeApproved(one.sortie, one.actionId), {
+      tool: 'hub.hub_run_pump',
+      args: { pumpId: 'p1' },
+    });
+    // A replay (a second resume, the same card approved again) never gets a second call.
+    assert.throws(() => store.authorizeApproved(one.sortie, one.actionId), /already used/);
+    store.decide(one.approvalId, 'approve', 'owner');
+    assert.throws(() => store.authorizeApproved(one.sortie, one.actionId), /already used/);
+    // The approval's grant lasts 60 s: a resume after that does not run the call.
+    const two = card('p2');
+    store.decide(two.approvalId, 'approve', 'owner');
+    store.db.prepare('UPDATE grants SET expires=? WHERE action_id=?').run('2000-01-01T00:00:00.000Z', two.actionId);
+    assert.throws(() => store.authorizeApproved(two.sortie, two.actionId), /expired/);
+    // A rejected card never authorizes a call.
+    const three = card('p3');
+    store.decide(three.approvalId, 'reject', 'owner');
+    assert.throws(() => store.authorizeApproved(three.sortie, three.actionId), /No approved MCP action/);
+  } finally {
+    store.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
 test(
   'across the join: registered by URL, listed, a read runs Green, a pump waits for the card and runs once approved, a dead hub is reported (F-123)',
   { timeout: 90000 },
@@ -299,6 +381,11 @@ test(
       assert.deepEqual((ev.find((e) => e.kind === 'action.done')!.payload as { result: unknown }).result, {
         text: 'Pump p1 ran.',
       });
+
+      // The same card approved again: the call does not run a second time.
+      await r.decide(ask.waiting[0]!.approvalId, 'approve');
+      await new Promise((d) => setTimeout(d, 500));
+      assert.equal(hub.calls.filter((c) => c.name === 'hub_run_pump').length, 1, 'no second call on a replay');
 
       // A card waits while the hub goes away: approved, the call does not run, and Misato is told so.
       const ask2 = await r.chat('Run pump p2');

@@ -14,7 +14,7 @@ nerv tools
 ```
 
 - The id (`hub`) is lower-case letters and digits; it prefixes each tool's name (`hub.hub_overview`).
-- The URL must be `https://`. Plain `http://` is accepted only for `127.0.0.1` or `localhost` (a server on the same machine). A user name or password in the URL is refused: `config.json` is not a secret store.
+- The URL must be `https://`. Plain `http://` is accepted only for `127.0.0.1` or `localhost` (a server on the same machine; `localhost` is whatever `/etc/hosts` maps it to, so `127.0.0.1` is the safer choice). A user name or password in the URL is refused: `config.json` is not a secret store.
 - Adding a server again under the same id replaces it and drops its old grants.
 - `nerv tools` lists each tool with what the server says about it (`read-only`, `destructive`) and whether it is granted.
 
@@ -34,6 +34,7 @@ nerv tools grant hub/hub_take_cuttings --effect write-external
 nerv tools grant hub/hub_run_pump --effect physical       # hardware: a card for every call
 ```
 
+- Without `--effect`, a grant is a `read` (Green: it runs without asking). A tool that carries no annotations is not checked against that default, so choose its class deliberately: give anything that changes state, records or hardware the class that fits it.
 - A tool the server marks as not read-only cannot be granted as `read`. A tool it marks as destructive must be `irreversible` or `physical`, so every call is yours to approve.
 - `write-local` is refused for a server on another machine: its changes are outside this base.
 - A change runs in EVA-01 by default (`--eva 01`); EVA-00 is shadow work and refuses outside effects. EVA-03 does not run yet.
@@ -49,6 +50,7 @@ An unreachable server is reported, not hidden:
 - `nerv tools` prints `could not list its tools:` with the reason: unreachable (the machine is off or this base is not on the tailnet), a certificate this base does not trust, `HTTP 404` (check the path ends in `/mcp`), no answer in time, or not an MCP server.
 - Its granted tools leave Misato's list and appear as suspended, with the same reason, in the dashboard's Tools panel (`GET /api/tools`). They come back by themselves once the server answers again.
 - An action you approved while the server was unreachable does not run. Misato is told it was approved but did not run, and why.
+- An approval issues a single-use grant that lasts 60 seconds. NERV normally makes the call within a few seconds of your approval. If it gets to it later (for example, the service was stopped), the call does not run and Misato says why: ask again. An approval never runs a call twice.
 
 ## Check it
 

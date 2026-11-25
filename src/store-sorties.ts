@@ -585,7 +585,6 @@ export class StoreSorties {
     return this.host.ledger.timingSummary(since);
   }
 
-  /** F-021: what an external tool returned, recorded on its action like a built-in tool's result. */
   /**
    * F-123: an MCP action the owner approved on a card. Nothing ran when the card was decided (the tools process is the
    * coordinator's): the coordinator asks here, uses the single-use grant the approval issued, and then makes the call.
@@ -604,6 +603,7 @@ export class StoreSorties {
     return { tool: row.tool, args };
   }
 
+  /** F-021: what an external tool returned, recorded on its action like a built-in tool's result. */
   finishedExternal(
     sortieId: string,
     actionId: string,
