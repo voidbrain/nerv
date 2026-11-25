@@ -4,7 +4,7 @@
   "parent": "B-128",
   "title": "Settings pairing QR uses the phone's address, not 127.0.0.1",
   "goal": "A pairing QR minted from Settings on a loopback dashboard opens on the phone: the server resolves the tailnet address as nerv open --phone --qr does",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed join test fails first: Settings on a loopback page mints a QR whose link uses the tailnet address; with none, the old link and a hint",
     "One helper resolves the phone address for CLI and server: config phone.url, else tailscale status (cached briefly), never an arbitrary client origin",
@@ -43,11 +43,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h agent",
-    "basis": "Estimated 2026-11-24: shared resolver, config key, Settings text, two join tests. Not a measurement.",
-    "reviewed": "2026-11-24",
-    "agentHours": 1.5,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24: shared resolver, config key, Settings text, two join tests. Not a measurement. 2026-11-25: closed in the reconciliation: PR #726 merged on green CI (run 45487580334, one attempt). No actual: the implementing session recorded none.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 726,
+      "note": "implementation"
+    }
+  ]
 }

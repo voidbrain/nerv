@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T20",
-  "status": "implemented",
+  "status": "closed",
   "title": "Seed the standby store and ship replication batches while serve runs",
   "goal": "A running main keeps its named standby's coordinator-standby.sqlite current, so a move starts from the main's latest state",
   "capabilities": [
@@ -44,8 +44,8 @@
   "effort": {
     "size": "medium",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 from F-016-T16 to F-016-T19 (1–1.5 h each stated): seeding command, shipping loop, standby apply wiring and fixtures. Not a measurement; uncertain until the owner sets the scope. 2026-11-24: implemented in PR #725; actual stated 3.5 h (capture triggers, seed endpoint and swap, shipper, drain flush, status, fixtures across two bases and the mesh). 2026-11-24: #725 design review fixes (2 blockers, 4 should-fixes, minors) added 2 h (stated).",
-    "reviewed": "2026-11-24",
+    "basis": "Estimated 2026-11-24 from F-016-T16 to F-016-T19 (1–1.5 h each stated): seeding command, shipping loop, standby apply wiring and fixtures. Not a measurement; uncertain until the owner sets the scope. 2026-11-24: implemented in PR #725; actual stated 3.5 h (capture triggers, seed endpoint and swap, shipper, drain flush, status, fixtures across two bases and the mesh). 2026-11-24: #725 design review fixes (2 blockers, 4 should-fixes, minors) added 2 h (stated). 2026-11-25: closed in the reconciliation: PR #725 merged on green CI (run 45490724151) after its design reviews; no coordinator test failed in a CI run since (reruns were worker-link, B-066). Live proof is the two-device acceptance, F-016-T09.",
+    "reviewed": "2026-11-25",
     "agentHours": 0,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3,

@@ -29,7 +29,7 @@ import { canRunRemotePilot, chooseAdvisers, rankPilots, type Chosen, type Pilot,
 import { defaultPolicy } from './policy.ts';
 import type { ProcessClient } from './process-client.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
-import type { Method } from './rpc.ts';
+import { REFUSED_BEFORE_GATE, RpcFault, type Method } from './rpc.ts';
 import {
   guardActionDuplicates,
   type ActReply,
@@ -656,9 +656,13 @@ export class RuntimePlanning {
           args,
           ...(context.length ? { earlier: context.slice(-3) } : {}),
         })
-        .catch(() => ({
+        .catch((e: unknown) => ({
           outcome: 'invalid' as const,
-          reason: 'The gate refused this action as malformed (unknown shape or too large).',
+          // F-089-T06: a browser click the nervous process could not bind says why (wrong page, no allowlist).
+          reason:
+            e instanceof RpcFault && e.code === REFUSED_BEFORE_GATE
+              ? e.message
+              : 'The gate refused this action as malformed (unknown shape or too large).',
         }));
       // F-021: granted and gated: the tools process makes the call; the result is recorded on the action like any other.
       const granted = ext.byName.get(tool);

@@ -8,7 +8,9 @@ import {
   STANDBY_DB_FILE,
   checkRelocationReadiness,
   checkStandbyCandidate,
+  ranOrAckedCoordinatorEpoch,
   relocateCoordinator,
+  standbyLastAckMs,
   verifyDrainReceipt,
   type RelocateCoordinatorInput,
   type RelocateCoordinatorResult,
@@ -26,6 +28,8 @@ import {
   standbyBasesAckedEpoch,
 } from './coordinator-epoch.ts';
 import { service } from './service.ts';
+import { addRegistryRecords, stageRegistryRecords } from './coordinator-relocation-bundle.ts';
+import { applyCoordinatorLease } from './coordinator-lease.ts';
 
 /** While this file exists in the data home a promotion is unfinished and `serve` refuses to start. */
 export const PROMOTION_MARKER_FILE = 'coordinator-promotion.json';
@@ -129,12 +133,90 @@ export interface PromoteCoordinatorInput {
    * base (F-016-T18); the acks are recorded here and decide `allUnrevokedAckedNewEpoch`.
    */
   readonly pushEpoch?: (baseId: string, records: SignedRecord[]) => Promise<EpochPushReply>;
+  /**
+   * B-124: the records of a `kaji relocate` bundle (`--relocation FILE`). The checks read them as if held, on
+   * connections of their own; they are stored here, and pushed, only once the local check and the probe passed.
+   */
+  readonly relocation?: readonly SignedRecord[];
   /** Test-only crash injection, passed to the promotion swap. */
   readonly failAfterStep?: RelocateCoordinatorInput['failAfterStep'];
 }
 
 export type PromoteCoordinatorResult =
-  RelocateCoordinatorResult | { readonly resumed: true; readonly newEpoch: number };
+  | RelocateCoordinatorResult
+  | { readonly resumed: true; readonly newEpoch: number }
+  | {
+      /** B-124: the old main took its own coordinator state back at a new epoch (the way out of a refused move). */
+      readonly reinstated: true;
+      readonly newEpoch: number;
+      readonly previousEpoch: number;
+      readonly leaseExpiresAt: number;
+    };
+
+/**
+ * B-124 way out: a base with no standby store whose own store holds coordinator state (active, draining or
+ * fenced) at an epoch a main record named it for, now named again at a later epoch. Returns that epoch.
+ */
+function reinstateEpoch(
+  db: DatabaseSync,
+  registry: Registry,
+  selfBaseId: string,
+  newEpoch: number,
+  standbyDbPath: string,
+): number | undefined {
+  if (existsSync(standbyDbPath) || registry.main() !== selfBaseId) return undefined;
+  const state = readCoordinatorFencingState(db);
+  if (!state || state.replicationMode === 'standby' || state.coordinatorEpoch >= newEpoch) return undefined;
+  const ran = registry
+    .records()
+    .some(
+      (r) =>
+        r.body.kind === 'main' && r.body.baseId === selfBaseId && r.body.coordinatorEpoch === state.coordinatorEpoch,
+    );
+  return ran ? state.coordinatorEpoch : undefined;
+}
+
+/**
+ * B-124 way out, after the probe found no base that ran or acked a later epoch than this base's own state and the
+ * new records were pushed: the state moves to the new epoch, fenced with no lease, so the lease keeper re-arms it
+ * only when its standby acks the new epoch (a sole coordinator arms its own lease here, as a promotion does).
+ */
+function reinstateCoordinator(
+  mainDbPath: string,
+  previousEpoch: number,
+  newEpoch: number,
+  sole: boolean,
+  clock: PromotionClock,
+): number {
+  const db = new DatabaseSync(mainDbPath);
+  try {
+    db.exec('PRAGMA busy_timeout = 5000');
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      const state = readCoordinatorFencingState(db);
+      if (!state || state.replicationMode === 'standby' || state.coordinatorEpoch !== previousEpoch)
+        refuse('epoch_not_next', `This base's coordinator state is no longer at epoch ${previousEpoch}.`);
+      db.prepare(
+        `UPDATE coordinator_state SET coordinator_epoch = ?, coordinator_fence = coordinator_fence + 1,
+           replication_mode = ?, lease_issued_at = NULL, lease_expires_at = 0 WHERE id = 1`,
+      ).run(newEpoch, sole ? 'active' : 'fenced');
+      const leaseExpiresAt = sole
+        ? applyCoordinatorLease(db, {
+            coordinatorEpoch: newEpoch,
+            reqStartedWallMs: clock.wall(),
+            reqStartedMonoNs: clock.mono(),
+          }).leaseExpiresAt
+        : 0;
+      db.exec('COMMIT');
+      return leaseExpiresAt;
+    } catch (err) {
+      if (db.isTransaction) db.exec('ROLLBACK');
+      throw err;
+    }
+  } finally {
+    db.close();
+  }
+}
 
 type Derived =
   | { readonly alreadyActive: true; readonly newEpoch: number }
@@ -306,10 +388,14 @@ function localPrecheck(
        * usually answers the probe; when it does not, its receipt (with the epochs it ran or acked) answers for it.
        */
       readonly drainedBy?: string;
+      /** B-124 way out: this base takes back its own coordinator state (no standby store, no receipt). */
+      readonly reinstate?: true;
     }
   | undefined {
   const db = new DatabaseSync(mainDbPath);
   try {
+    db.exec('PRAGMA busy_timeout = 5000');
+    if (input.relocation) stageRegistryRecords(db, input.rootPublicKey, input.relocation);
     const registry = new Registry(db, input.rootPublicKey);
     const own = keyIdentity(input.ownPublicKey);
     const self = registry.bases().find((b) => b.status === 'enrolled' && keyIdentity(b.publicKey) === own);
@@ -322,19 +408,73 @@ function localPrecheck(
       current.coordinatorEpoch === newEpoch
     )
       return undefined;
+    const ownEpoch = reinstateEpoch(db, registry, self.baseId, newEpoch, standbyDbPath);
+    if (ownEpoch !== undefined) {
+      if (input.drainReceiptFile)
+        refuse('drain_receipt_invalid', 'This base takes back its own coordinator state: it takes no drain receipt.');
+      // #734 review BLOCKER: a main named between this base's state and the new epoch may have run. An unrevoked one
+      // must answer the probe at or below this state's epoch (as every unrevoked base must); a revoked one cannot be
+      // asked, so its epoch may have run with effects this state lacks: only a verified standby or an owner-approved
+      // cold restore may take over then, never this older state.
+      const revoked = new Set(
+        registry
+          .bases()
+          .filter((b) => b.status === 'revoked')
+          .map((b) => b.baseId),
+      );
+      const between = registry
+        .records()
+        .filter(
+          (r) =>
+            r.body.kind === 'main' &&
+            (r.body.coordinatorEpoch ?? 0) > ownEpoch &&
+            (r.body.coordinatorEpoch ?? 0) < newEpoch &&
+            r.body.baseId !== undefined &&
+            revoked.has(r.body.baseId),
+        )
+        .map((r) => `${r.body.baseId} (epoch ${r.body.coordinatorEpoch})`);
+      if (between.length)
+        refuse(
+          'standby_behind',
+          `${between.join(', ')} was named main after the epoch ${ownEpoch} state this base holds and is revoked, so it cannot say whether it ran: taking this state back could undo what it did. Promote a verified standby of it, or run an owner-approved cold restore. No base was told the new epoch.`,
+        );
+      // This base's own stores (lease acks included) must not show a later epoch either.
+      const ownRan = ranOrAckedCoordinatorEpoch(db, standbyDbPath);
+      if (ownRan > ownEpoch)
+        refuse(
+          'standby_behind',
+          `This base ran or acked a coordinator lease at epoch ${ownRan}, after the epoch ${ownEpoch} state it holds. No base was told the new epoch.`,
+        );
+      return { standbyEpoch: ownEpoch, skippedMains: [], reinstate: true };
+    }
+    const records = registry.records();
     const candidate = existsSync(standbyDbPath) ? new DatabaseSync(standbyDbPath) : db;
-    let standbyEpoch: number;
+    let standby: ReturnType<typeof checkStandbyCandidate>;
+    let ackedHere: boolean;
     try {
-      standbyEpoch = checkStandbyCandidate({
+      standby = checkStandbyCandidate({
         candidateDb: candidate,
         selfBaseId: self.baseId,
         registryMain: { baseId: registry.main(), coordinatorEpoch: newEpoch },
-      }).previousEpoch;
+      });
+      ackedHere = standbyLastAckMs(candidate, standby.previousEpoch) !== undefined;
     } finally {
       if (candidate !== db) candidate.close();
     }
-    if (!input.drainReceiptFile) return { standbyEpoch, skippedMains: [] };
-    const records = registry.records();
+    const standbyEpoch = standby.previousEpoch;
+    if (!input.drainReceiptFile) {
+      // B-124: readiness refuses this after the push too; here it refuses before any base is told the new epoch.
+      const previous = records
+        .filter((r) => r.body.kind === 'main' && (r.body.coordinatorEpoch ?? 0) === standbyEpoch)
+        .at(-1)?.body.baseId;
+      const revoked = registry.bases().some((b) => b.baseId === previous && b.status === 'revoked');
+      if (previous && !revoked && !ackedHere)
+        refuse(
+          'old_host_unconfirmed',
+          `This standby never acked ${previous}'s lease at epoch ${standbyEpoch}, so the wait does not bound it: drain it (planned), or revoke it with the root key (kaji relocate BASE-ID --revoke ${previous} FILE). No base was told the new epoch.`,
+        );
+      return { standbyEpoch, skippedMains: [] };
+    }
     const previousMain = records
       .filter((r) => r.body.kind === 'main' && (r.body.coordinatorEpoch ?? 0) === standbyEpoch)
       .at(-1);
@@ -367,6 +507,12 @@ function localPrecheck(
         'standby_behind',
         `${previousMainBaseId} ran or acked a coordinator lease at epoch ${r.ranOrAckedEpoch}, after the epoch ${standbyEpoch} state this standby holds: re-seed it from the epoch ${r.ranOrAckedEpoch} coordinator first. No base was told the new epoch.`,
       );
+    // B-124: readiness checks this after the push too; a standby that lacks the final batch is refused first.
+    if (standby.headSeq !== r.finalSeq || standby.stateDigest !== r.stateDigest)
+      refuse(
+        'standby_behind',
+        `The standby is at ${standby.headSeq}; the drained coordinator ended at ${r.finalSeq}. Replicate the final batch first. No base was told the new epoch.`,
+      );
     const listed: unknown = drain.receipt.skippedMains;
     const skippedMains = (Array.isArray(listed) ? (listed as { baseId?: unknown }[]) : []).flatMap((m) =>
       typeof m?.baseId === 'string' ? [{ baseId: m.baseId }] : [],
@@ -398,6 +544,7 @@ async function remotePrecheck(
   let registryBetween: { baseId: string; coordinatorEpoch: number }[];
   try {
     db.exec('PRAGMA busy_timeout = 5000');
+    if (input.relocation) stageRegistryRecords(db, input.rootPublicKey, input.relocation);
     const registry = new Registry(db, input.rootPublicKey);
     newEpoch = registry.mainEpoch();
     const own = keyIdentity(input.ownPublicKey);
@@ -502,6 +649,19 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
   const local = localPrecheck(input, mainDbPath, standbyDbPath);
   if (input.pushEpoch && local !== undefined)
     await remotePrecheck({ ...input, pushEpoch: input.pushEpoch }, mainDbPath, local);
+  else if (local?.reinstate)
+    refuse('old_host_unconfirmed', "Taking back this base's own state needs every other base asked: run kaji promote.");
+  // B-124: the checks passed: the relocation's records are stored here (the heartbeat sync now carries them too).
+  if (input.relocation) {
+    const db = new DatabaseSync(mainDbPath);
+    try {
+      db.exec('PRAGMA busy_timeout = 5000');
+      addRegistryRecords(db, input.rootPublicKey, input.relocation);
+    } finally {
+      db.close();
+    }
+  }
+  let othersCount = 0;
   if (input.pushEpoch) {
     const db = new DatabaseSync(mainDbPath);
     try {
@@ -517,9 +677,22 @@ export async function promoteCoordinator(input: PromoteCoordinatorInput): Promis
         `Epoch ${pushed.epoch} acked by ${pushed.acked.join(', ') || 'no base'}` +
           (pushed.missing.length ? `; not acked: ${pushed.missing.join(', ')}.` : '.'),
       );
+      othersCount = pushed.acked.length + pushed.missing.length;
     } finally {
       db.close();
     }
+  }
+  if (local?.reinstate) {
+    const newEpoch = (() => {
+      const db = new DatabaseSync(mainDbPath);
+      try {
+        return new Registry(db, input.rootPublicKey).mainEpoch();
+      } finally {
+        db.close();
+      }
+    })();
+    const leaseExpiresAt = reinstateCoordinator(mainDbPath, local.standbyEpoch, newEpoch, othersCount === 0, clock);
+    return { reinstated: true, newEpoch, previousEpoch: local.standbyEpoch, leaseExpiresAt };
   }
   const d = derive(input, mainDbPath, standbyDbPath, monoSinceNs);
   if (d.alreadyActive) {

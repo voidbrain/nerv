@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "B-128-T02",
+  "parent": "B-128",
+  "title": "Owner: scan the Settings pairing QR from the Mac with the phone",
+  "goal": "Settings → Pair a device on the Mac's 127.0.0.1 dashboard shows a QR of this Mac's tailnet address that the phone opens",
+  "status": "planned",
+  "acceptance": [
+    "The note under the QR reads \"The QR opens NAME.TAILNET.ts.net, this Mac's address for the phone.\"",
+    "The phone camera opens the dashboard at that address in Safari and shows the pairing code"
+  ],
+  "dependsOn": [
+    "B-128-T01"
+  ],
+  "resources": [
+    "docs/acceptance/b128-pairing-qr-tailnet.md",
+    "docs/work/records/B-128.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "Owner-observed check on NERV-01 and the iPhone"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-25 in the reconciliation: open Settings, read the note, scan once. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "ownerHours": 0.25,
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/b128-pairing-qr-tailnet.md"
+}
