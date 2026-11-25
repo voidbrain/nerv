@@ -280,7 +280,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/verification-policy.test.mjs` (B-139 test), `test/ci-pins.test.mjs`; runs 45626156780, 45640205435, 45644029795 (runner not acquired) |
+| PR / evidence | Test: `test/verification-policy.test.mjs` (B-139 test), `test/ci-pins.test.mjs`; runs 45626156780, 45640205435, 45644029795 (runner not acquired); [#756](https://github.com/voidbrain/nerv/pull/756) |
 | Opened | 2026-11-25 |
 | Verification | Unit 2026-11-25: Test: `test/verification-policy.test.mjs` and `test/ci-pins.test.mjs` pass locally. CI: Pending (a docs-only PR with both OS jobs skipped; CodeQL after B-139-T02). |
 | Reviewed | 2026-11-25 |
