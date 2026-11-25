@@ -15,7 +15,7 @@
     "Anything that needs a credential, an unreachable host or the owner goes back to the owner; NERV-02 is left running"
   ],
   "id": "F-006-T31",
-  "status": "planned",
+  "status": "implemented",
   "title": "Rerun the P3 Misato cases with the fixed probe budget and update the report",
   "goal": "P3 has a live Misato result on the same cases and budget as P1, so the full role half of the P3 comparison is settled",
   "acceptance": [
@@ -33,19 +33,29 @@
     "docs/evaluations/2026-11-24-f006-t29-placement-report.md",
     "tools/placement-live.mjs",
     "docs/work/records/F-006.md",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "docs/evaluations/2026-11-25-f006-t31-placement-evidence.json",
+    "docs/evaluations/2026-11-25-f006-t31-placement-report.md",
+    "test/placement-report.test.ts"
   ],
   "validation": [
     "Recorded evidence for this slice; scoped checks and required CI"
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Estimated 2026-11-24 (F-006-T29): rerun about 6 min plus evidence and report update, as F-006-T29 (0.75 h). Not a measurement.",
-    "reviewed": "2026-11-24",
-    "agentHours": 1,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 (F-006-T29): rerun about 6 min plus evidence and report update. Implemented 2026-11-25 in 0.75 h: Casper 15/15, Misato 8/15 with 0 errors (B-131 live check passed); P3 47/60 vs mac-only 48/60 (keep baseline) and mini-only 30/60 (prefer candidate); evidence and report through placementReport.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
     "ownerHours": 0,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
-  }
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 738
+    }
+  ]
 }

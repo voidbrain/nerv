@@ -38,7 +38,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 104.25 h agent + 12.5 h owner across 127 open steps of 39 features and 33 other records. 168.75 h of actual effort recorded on 153 steps. Generated from the task files.
+**Remaining effort:** 104.25 h agent + 12.25 h owner across 127 open steps of 39 features and 33 other records. 169.5 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -170,51 +170,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="b-131"></a>[🐞 B-131](#top)
-
-**Role-sized placement probes fail their own token budget: it counts the prompt but is sized from the output limit**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | [F-006-T30](#f-006-t30) | 🤖 | — | — |
-
-💻 **→** Next: B-131-T01, a failing test, then a probe budget that covers the prompt.
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-24 in F-006-T29 on NERV-02: `placementProbe` (`src/placement-campaign.ts`) sets `maxTotalTokens` to 2 × `maxOutputTokens`, and the orchestrated runtime counts input and output tokens against it after the remote reply. A role-sized probe (Misato's own system message, about 4,500 input tokens) with `maxOutputTokens` 2048 therefore ends with `Orchestrated token budget exhausted (4781–5206 > 4096).` after the Mac has already generated the answer: all 15 Misato P3 cases failed this way, so role-sized probes (F-006-T27) still cannot carry Misato. |
-| **Reproduce** | On NERV-02, `node tools/placement-live.mjs roles --transport=nerv,P3 --execute`: every `misato:*` case errors with `Orchestrated token budget exhausted`; the Casper cases (about 350 input tokens) pass. |
-| **Check** | A committed test that fails first: a P3 placement run whose prompt and system message take more input tokens than 2 × `maxOutputTokens` (within the probe's byte limits) returns its result; the total budget still bounds the run. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-131-t01"></a>B-131-T01 — Size the placement probe token budget to cover its prompt | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-006-T30](#f-006-t30) | [PR #735](https://github.com/voidbrain/nerv/pull/735) |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-131.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-131-T01: [PR #735](https://github.com/voidbrain/nerv/pull/735). [#732](https://github.com/voidbrain/nerv/pull/732) (opened), [#735](https://github.com/voidbrain/nerv/pull/735) (fix: failing test 63da1369, then the budget from the input bound plus output; F-006-T29 evidence in the [F-006-T29 report](evaluations/2026-11-24-f006-t29-placement-report.md)) |
-| Opened | 2026-11-24 |
-| Verification | Unit/integration: the B-131 regression across the placement route passes in #735. Live Misato P3 probe on NERV-02: Pending (F-006-T31). |
-| Reviewed | 2026-11-24 |
-
-</details>
-
----
 ### <a id="f-006"></a>[✨ F-006](#top)
 
 **Orchestrate agents and models across nodes**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 1 h agent + 0.25 h owner | [B-131-T01](#b-131-t01) | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-006-T29 — Rerun the P3 role cases with role-sized probes and update the report (Implemented; verification pending).
 
@@ -226,14 +188,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-006-t29"></a>F-006-T29 — Rerun the P3 role cases with role-sized probes and update the report | 1 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | — | 🤖 | — |
-| 🟢 Small | <a id="f-006-t30"></a>F-006-T30 — Owner: put NERV-02 on the revision with the B-131 probe budget | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-131-T01](#b-131-t01) | [F-006-T31](#f-006-t31) | ⏳ 🧑‍🔧 | — |
-| 🟢 Small | <a id="f-006-t31"></a>F-006-T31 — Rerun the P3 Misato cases with the fixed probe budget and update the report | 1 h | 0 h | 1 h | Planned | [F-006-T30](#f-006-t30) | — | ⏳ 🤖 | — |
-| 🟢 Small | **Total** | 19.5 h (28 of 31 steps) | 13.25 h (20 of 31 steps recorded) | 1 h agent + 0.25 h owner | 28 of 31 completed | | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-006-t29"></a>F-006-T29 — Rerun the P3 role cases with role-sized probes and update the report | 1 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | 🤖 | — |
+| 🟢 Small | <a id="f-006-t31"></a>F-006-T31 — Rerun the P3 Misato cases with the fixed probe budget and update the report | 1 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | 🤖 | [PR #738](https://github.com/voidbrain/nerv/pull/738) |
+| 🟢 Small | **Total** | 19.5 h (28 of 31 steps) | 14 h (21 of 31 steps recorded) | 0 h | 29 of 31 completed | | |
 
-<details><summary>Done steps (28)</summary>
+<details><summary>Done steps (29)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -265,6 +226,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-006-t26"></a>F-006-T26 — Update the placement report and recommendation with the new evidence | 0.75 h | 0.75 h (stated) | Completed | [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending |
 | — | <a id="f-006-t27"></a>F-006-T27 — Make the placement probe carry role-sized prompts | 2 h | 2 h (stated) | Completed | [PR #714](https://github.com/voidbrain/nerv/pull/714) probe system field, role-sized limits, frame refusal without ending the session; CI pending |
 | — | <a id="f-006-t28"></a>F-006-T28 — Owner: put NERV-01 and NERV-02 on the revision with role-sized probes | 0 h | 0 h | Completed | — |
+| — | <a id="f-006-t30"></a>F-006-T30 — Owner: put NERV-02 on the revision with the B-131 probe budget | 0 h | 0 h | Completed | [PR #738](https://github.com/voidbrain/nerv/pull/738) |
 
 </details>
 
@@ -276,10 +238,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
-| PR / evidence | Steps: F-006-T12: [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending · F-006-T13: [PR #528](https://github.com/voidbrain/nerv/pull/528) results · F-006-T14: [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure · F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation · F-006-T21: [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending · F-006-T22: [PR #697](https://github.com/voidbrain/nerv/pull/697) owner decision recorded; T23–T26 planned · F-006-T23: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T24: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T25: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T26: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T27: [PR #714](https://github.com/voidbrain/nerv/pull/714) probe system field, role-sized limits, frame refusal without ending the session; CI pending. [#732](https://github.com/voidbrain/nerv/pull/732) F-006-T28/T29 P3 role rerun and report; [PR #714](https://github.com/voidbrain/nerv/pull/714) F-006-T27 role-sized placement probes; [PR #698](https://github.com/voidbrain/nerv/pull/698) F-006-T23–T26 equivalent placement runs and updated report; [PR #697](https://github.com/voidbrain/nerv/pull/697) F-006-T22 owner decision; [PR #679](https://github.com/voidbrain/nerv/pull/679) F-006-T12 placement report; older entries in the [evidence archive](archive/evidence-2026.md#f-006-moved-2026-11-24) |
+| PR / evidence | Steps: F-006-T12: [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending · F-006-T13: [PR #528](https://github.com/voidbrain/nerv/pull/528) results · F-006-T14: [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure · F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation · F-006-T21: [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending · F-006-T22: [PR #697](https://github.com/voidbrain/nerv/pull/697) owner decision recorded; T23–T26 planned · F-006-T23: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T24: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T25: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T26: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T27: [PR #714](https://github.com/voidbrain/nerv/pull/714) probe system field, role-sized limits, frame refusal without ending the session; CI pending · F-006-T30: [PR #738](https://github.com/voidbrain/nerv/pull/738) · F-006-T31: [PR #738](https://github.com/voidbrain/nerv/pull/738). [#738](https://github.com/voidbrain/nerv/pull/738) F-006-T30/T31 P3 Casper and Misato rerun and report; [#732](https://github.com/voidbrain/nerv/pull/732) F-006-T28/T29 P3 role rerun and report; [PR #714](https://github.com/voidbrain/nerv/pull/714) F-006-T27 role-sized placement probes; [PR #698](https://github.com/voidbrain/nerv/pull/698) F-006-T23–T26 equivalent placement runs and updated report; [PR #697](https://github.com/voidbrain/nerv/pull/697) F-006-T22 owner decision; [PR #679](https://github.com/voidbrain/nerv/pull/679) F-006-T12 placement report; older entries in the [evidence archive](archive/evidence-2026.md#f-006-moved-2026-11-24) |
 | Opened | 2026-11-01 |
-| Verification | Unit/integration 2026-11-24: `test/placement-report.test.ts` binds the report to the committed evidence; `test/placement-campaign.test.ts` and `test/orchestration-selection.test.ts` (role-sized probe across bases) pass; CI green on PRs #679, #698, #714. Live 2026-11-24: P2/P3 smoke, combination and failure checks on NERV-01 + NERV-02 recorded in the report; P3 Casper cases with role-sized probes 2026-11-24 (F-006-T29): 15/15 in the [F-006-T29 report](evaluations/2026-11-24-f006-t29-placement-report.md); P3 Misato cases: Pending (B-131, F-006-T31). |
-| Reviewed | 2026-11-24 |
+| Verification | Unit/integration 2026-11-24: `test/placement-report.test.ts` binds the report to the committed evidence; `test/placement-campaign.test.ts` and `test/orchestration-selection.test.ts` (role-sized probe across bases) pass; CI green on PRs #679, #698, #714. Live 2026-11-24: P2/P3 smoke, combination and failure checks on NERV-01 + NERV-02 recorded in the report; P3 Casper cases with role-sized probes 2026-11-24 (F-006-T29): 15/15 in the [F-006-T29 report](evaluations/2026-11-24-f006-t29-placement-report.md); P3 Misato cases 2026-11-25 (F-006-T31): 8/15, 0 errors, in the [F-006-T31 report](evaluations/2026-11-25-f006-t31-placement-report.md). |
+| Reviewed | 2026-11-25 |
 
 </details>
 
@@ -492,9 +454,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: five full Windows runs within 12 minutes without reruns; the time limit is no longer reached since PR #706, the reruns are test failures tracked in B-066, B-076 and B-126.
+💻 **→** Next: B-118-T04 (PR #741) cut the Windows step to 489 s on its first run; then five full Windows runs within 12 minutes without reruns; the reruns are test failures tracked in B-066, B-076 and B-126.
 
 | | |
 |---|---|
@@ -508,8 +470,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-118-t01"></a>B-118-T01 — Make the Windows test step fit its limit with margin | 4 h | 2.5 h so far (stated) | 0.5 h | Implemented; verification pending | — | — | [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split |
 | 🟢 Small | <a id="b-118-t02"></a>B-118-T02 — Worker-link test files always exit; find why they time out on Windows | 2.5 h | 2 h so far (stated) | 0.5 h | Implemented; verification pending | — | [B-118-T03](#b-118-t03) | [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain |
-| 🟡 Medium | <a id="b-118-t03"></a>B-118-T03 — Other Runtime test files always exit; failing tests named in a stopped run | 2 h | 2.5 h so far (stated) | 2 h | Implemented; verification pending | [B-118-T02](#b-118-t02) | — | [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen |
-| 🟡 Medium | **Total** | 8.5 h | 7 h | 3 h | 0 of 3 completed | | | |
+| 🟡 Medium | <a id="b-118-t03"></a>B-118-T03 — Other Runtime test files always exit; failing tests named in a stopped run | 2 h | 2.5 h so far (stated) | 2 h | Implemented; verification pending | [B-118-T02](#b-118-t02) | [B-118-T04](#b-118-t04) | [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen |
+| 🟡 Medium | <a id="b-118-t04"></a>B-118-T04 — Cut the Windows cost of the coordinator test files | 2 h | 0 h | 2 h | Implemented; verification pending | [B-118-T03](#b-118-t03) | — | [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round |
+| 🔴 Large | **Total** | 10.5 h | 7 h (3 of 4 steps recorded) | 5 h | 0 of 4 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -518,10 +481,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-118-T01: [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split · B-118-T02: [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain · B-118-T03: [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen. [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776) |
+| PR / evidence | Steps: B-118-T01: [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split · B-118-T02: [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain · B-118-T03: [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen · B-118-T04: [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round. B-118-T04: Test: `test/sqlite-no-fsync.test.ts`; timing logs of runs 45506622094 to 45559316942 (Windows) and [run 45548137584](https://github.com/voidbrain/nerv/actions/runs/45548137584) (Linux); [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776); [#741](https://github.com/voidbrain/nerv/pull/741) |
 | Opened | 2026-11-24 |
-| Verification | Unit/integration 2026-11-24: Test: `test/worker-link-exit.test.ts` (B-118-T02) and `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs` (B-118-T03) pass locally. CI 2026-11-24 after PR #706: no Windows step reached the 18-minute limit in 50 attempts (438–796 s), 20 failed on a test. Five Windows runs within 12 min without reruns: not met. |
-| Reviewed | 2026-11-24 |
+| Verification | Unit 2026-11-25: Test: `test/sqlite-no-fsync.test.ts` and `test/coordinator-partition.test.ts` pass locally (B-118-T04). CI 2026-11-25: Windows `npm test` 489 s in run 45566852563 (three preload failures there, fixed in PR #741). Unit/integration 2026-11-24: Test: `test/worker-link-exit.test.ts` (B-118-T02) and `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs` (B-118-T03) pass locally. CI 2026-11-24 after PR #706: no Windows step reached the 18-minute limit in 50 attempts (438–796 s), 20 failed on a test. Five Windows runs within 12 min without reruns: not met. |
+| Reviewed | 2026-11-25 |
 
 </details>
 
@@ -1775,6 +1738,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-131"></a>[🐞 B-131](#top)
+
+**Role-sized placement probes fail their own token budget: it counts the prompt but is sized from the output limit**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — | — |
+
+💻 **→** Next: close after [#738](https://github.com/voidbrain/nerv/pull/738) merges (fix merged in #735, live check passed in F-006-T31).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 in F-006-T29 on NERV-02: `placementProbe` (`src/placement-campaign.ts`) sets `maxTotalTokens` to 2 × `maxOutputTokens`, and the orchestrated runtime counts input and output tokens against it after the remote reply. A role-sized probe (Misato's own system message, about 4,500 input tokens) with `maxOutputTokens` 2048 therefore ends with `Orchestrated token budget exhausted (4781–5206 > 4096).` after the Mac has already generated the answer: all 15 Misato P3 cases failed this way, so role-sized probes (F-006-T27) still cannot carry Misato. |
+| **Reproduce** | On NERV-02, `node tools/placement-live.mjs roles --transport=nerv,P3 --execute`: every `misato:*` case errors with `Orchestrated token budget exhausted`; the Casper cases (about 350 input tokens) pass. |
+| **Check** | A committed test that fails first: a P3 placement run whose prompt and system message take more input tokens than 2 × `maxOutputTokens` (within the probe's byte limits) returns its result; the total budget still bounds the run. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 0 h | 1 of 1 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-131-t01"></a>B-131-T01 — Size the placement probe token budget to cover its prompt | 1 h | 0 h | Verified | [PR #735](https://github.com/voidbrain/nerv/pull/735) |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-131.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-131-T01: [PR #735](https://github.com/voidbrain/nerv/pull/735). [#732](https://github.com/voidbrain/nerv/pull/732) (opened), [#735](https://github.com/voidbrain/nerv/pull/735) (fix: failing test 63da1369, then the budget from the input bound plus output; F-006-T29 evidence in the [F-006-T29 report](evaluations/2026-11-24-f006-t29-placement-report.md)) |
+| Opened | 2026-11-24 |
+| Verification | Unit/integration: the B-131 regression across the placement route passes in #735. Live 2026-11-25 (F-006-T31, [#738](https://github.com/voidbrain/nerv/pull/738)): passed: on NERV-02 at `e05aae22` all 15 Misato P3 probes returned a graded answer (8 passed, 3 failed, 4 invalid), none with `Orchestrated token budget exhausted` or any other error; longest 28.1 s ([F-006-T31 report](evaluations/2026-11-25-f006-t31-placement-report.md)). |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
 ### <a id="b-132"></a>[🐞 B-132](#top)
 
 **An executor that answers later reached the ledger and the caller as `{}`, and its failure was never caught**
@@ -1821,7 +1829,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-125-T01 (design and fix); the owner agrees the change to the signed reply before work starts.
+💻 **→** Next: land [#740](https://github.com/voidbrain/nerv/pull/740) (B-125-T01), then update every base together.
 
 | | |
 |---|---|
@@ -1831,10 +1839,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-125-t01"></a>B-125-T01 — Bind every signed Kaji reply to the request it answers | 2 h | 0 h | 2 h | Planned |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-125-t01"></a>B-125-T01 — Bind every signed Kaji reply to the request it answers | 2 h | 0 h | 2 h | Implemented; verification pending | [PR #740](https://github.com/voidbrain/nerv/pull/740) |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1843,10 +1851,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | None yet (found in [PR #721](https://github.com/voidbrain/nerv/pull/721)) |
+| PR / evidence | Steps: B-125-T01: [PR #740](https://github.com/voidbrain/nerv/pull/740). [#740](https://github.com/voidbrain/nerv/pull/740) (failing test 793d00c0, then the binding; found in [PR #721](https://github.com/voidbrain/nerv/pull/721)) |
 | Opened | 2026-11-24 |
-| Verification | Pending |
-| Reviewed | 2026-11-24 |
+| Verification | Unit/integration: the replayed epoch-push reply is refused across a real requester and responder in #740. Live check on the updated bases: Pending. |
+| Reviewed | 2026-11-25 |
 
 </details>
 
@@ -1869,10 +1877,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-126-t01"></a>B-126-T01 — Name why the nervous child is not ready on Windows and fix it | 1.5 h | 0 h | 1.5 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-126-t01"></a>B-126-T01 — Name why the nervous child is not ready on Windows and fix it | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [PR #739](https://github.com/voidbrain/nerv/pull/739) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1881,9 +1889,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925); [run 45362462549](https://github.com/voidbrain/nerv/actions/runs/45362462549); [run 45387061669](https://github.com/voidbrain/nerv/actions/runs/45387061669); opened in [PR #723](https://github.com/voidbrain/nerv/pull/723); [#736](https://github.com/voidbrain/nerv/pull/736) |
+| PR / evidence | Steps: B-126-T01: [PR #739](https://github.com/voidbrain/nerv/pull/739). [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925); [run 45362462549](https://github.com/voidbrain/nerv/actions/runs/45362462549); [run 45387061669](https://github.com/voidbrain/nerv/actions/runs/45387061669); opened in [PR #723](https://github.com/voidbrain/nerv/pull/723); [#736](https://github.com/voidbrain/nerv/pull/736); fix in [#739](https://github.com/voidbrain/nerv/pull/739) |
 | Opened | 2026-11-24 |
-| Verification | Pending. |
+| Verification | Unit: `test/store-open-busy.test.ts` (failing first, then passing). Five Windows runs without the error: Pending. |
 | Reviewed | 2026-11-25 |
 
 </details>
