@@ -90,6 +90,19 @@ export function sampleHostLoad() {
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
+/**
+ * Conditions that make a run unrepresentative: the model not fully in GPU memory (part of it runs on the CPU)
+ * or a 1-minute load average above the core count. The report keeps the numbers and names why they are suspect.
+ */
+export function runWarnings({ residentSizeBytes, residentVramBytes, loadBefore, loadAfter, cores }) {
+  const warnings = [];
+  if (Number.isFinite(residentSizeBytes) && Number.isFinite(residentVramBytes) && residentVramBytes < residentSizeBytes)
+    warnings.push(`model only ${Math.round((residentVramBytes / residentSizeBytes) * 100)}% in GPU memory: part ran on the CPU`);
+  const peak = Math.max(loadBefore?.loadAvg1m ?? 0, loadAfter?.loadAvg1m ?? 0);
+  if (cores > 0 && peak > cores) warnings.push(`host load average ${peak} above ${cores} cores: other work shared the machine`);
+  return warnings;
+}
+
 export function median(values) {
   const nums = values.filter((v) => typeof v === 'number' && Number.isFinite(v)).sort((a, b) => a - b);
   if (!nums.length) return null;
@@ -307,6 +320,7 @@ export async function runSpeedBenchmark(rawArgs = [], { fetch: fetchImpl = fetch
       wasResidentBefore: initiallyResident.has(modelName),
       loadBefore,
       loadAfter,
+      warnings: runWarnings({ residentSizeBytes, residentVramBytes, loadBefore, loadAfter, cores: machine.cores }),
       summary: {
         repetitions: iterations.length,
         cacheDefeatedAll: iterations.every((it) => it.cacheDefeated),

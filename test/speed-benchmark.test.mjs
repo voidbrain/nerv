@@ -10,6 +10,7 @@ import {
   computeIterationMetrics,
   readBenchmarkFixture,
   runSpeedBenchmark,
+  runWarnings,
 } from '../evals/speed-benchmark.mjs';
 
 test('F-126-T01: speed benchmark fixture is neutral, ~3,900 tokens, and plan mode makes no network calls', async () => {
@@ -145,6 +146,32 @@ test('F-126-T01: speed benchmark measures uncached prompt and generation tok/s, 
     assert.equal(typeof report.machine.cpu, 'string');
     assert.ok(report.machine.memoryBytes > 0);
     assert.equal(typeof m12.loadBefore.loadAvg1m, 'number');
+    assert.ok(Array.isArray(m12.warnings));
+
+    // A model partly on the CPU, or a loaded host, is named in the report rather than silently averaged in.
+    assert.deepEqual(
+      runWarnings({
+        residentSizeBytes: 8_000_000_000,
+        residentVramBytes: 1_000_000_000,
+        loadBefore: { loadAvg1m: 40 },
+        loadAfter: { loadAvg1m: 56.2 },
+        cores: 12,
+      }),
+      [
+        'model only 13% in GPU memory: part ran on the CPU',
+        'host load average 56.2 above 12 cores: other work shared the machine',
+      ],
+    );
+    assert.deepEqual(
+      runWarnings({
+        residentSizeBytes: 8_000_000_000,
+        residentVramBytes: 8_000_000_000,
+        loadBefore: { loadAvg1m: 3 },
+        loadAfter: { loadAvg1m: 4 },
+        cores: 12,
+      }),
+      [],
+    );
 
     // Refuses to overwrite an existing output path.
     await assert.rejects(
