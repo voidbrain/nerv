@@ -164,6 +164,21 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .rem .acts { display:flex; gap:4px; }
 .models-form { display:grid; grid-template-columns:auto 1fr; gap:4px 8px; align-items:center; }
 .models-form select { min-width:0; width:100%; }
+.cols-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 8px; align-items:start; }
+@media (max-width:720px) { .cols-2 { grid-template-columns:minmax(0,1fr); } }
+.field-grid { display:grid; grid-template-columns:auto minmax(0,1fr); gap:4px 8px; align-items:center; }
+.field-grid > .field { display:flex; flex-wrap:wrap; align-items:center; gap:4px; min-width:0; }
+.field-grid > .wide { grid-column:1 / -1; }
+.field-grid input { padding:4px; }
+.field-grid input[type=number] { width:4ch; appearance:textfield; }
+.field-grid input[type=number]::-webkit-inner-spin-button { appearance:none; margin:0; }
+.field-grid select { width:100%; }
+.nowrap { white-space:nowrap; }
+.health-row { align-items:baseline; }
+.health-row > .health-label { flex:none; white-space:nowrap; }
+.health-row > .health-value { gap:6px; min-width:0; justify-content:flex-end; text-align:right; }
+.update-status { margin-top:6px; padding:6px 8px; border:1px solid currentColor; border-left-width:3px; border-radius:var(--radius); background:color-mix(in srgb,currentColor 10%,transparent); font-size:11px; font-weight:700; }
+.update-status .muted { font-weight:400; }
 .pilot-model-form button:disabled { opacity:.5; cursor:default; }
 .rem-edit { display:flex; flex-wrap:wrap; gap:4px; padding:4px 0; }
 .rem-edit input[type=text] { flex:1 1 100%; }
@@ -479,9 +494,13 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
 
       <section class="panel" id="p-settings">
         <div class="hdr"><span data-l="settings">Settings</span><span class="sub" id="settings-sub">this base</span></div>
-        <div class="pad" id="settings"></div>
-        <div class="pad" id="settings-devices"></div>
-        <div class="pad" id="settings-push"></div>
+        <div class="cols-2" id="settings-cols">
+          <div class="pad" id="settings"></div>
+          <div>
+            <div class="pad" id="settings-devices"></div>
+            <div class="pad" id="settings-push"></div>
+          </div>
+        </div>
       </section>
 
       <section class="panel" id="p-models">
