@@ -13,7 +13,7 @@
     "Owner action: NERV-02 is updated by the owner; NERV-01's live service is never stopped, updated or edited by the agent"
   ],
   "id": "F-006-T30",
-  "status": "planned",
+  "status": "closed",
   "title": "Owner: put NERV-02 on the revision with the B-131 probe budget",
   "goal": "NERV-02 runs a main revision that includes the B-131 fix, so a Misato-sized P3 probe is not refused by its own token budget",
   "acceptance": [
@@ -32,13 +32,18 @@
   "ownerLink": "docs/acceptance/f006-placement-p2-p4.md#6-role-sized-probes-put-both-bases-on-the-same-revision-f-006-t28",
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-24 (F-006-T29): one manual update on NERV-02 only; the budget is applied on the executing base. Not a measurement.",
-    "reviewed": "2026-11-24",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 (F-006-T29): one manual update on NERV-02 only. Done 2026-11-25 ~06:15 CET by the agent on the owner's standing instruction to update Tabgha: service stopped, nerv.sqlite backed up to %USERPROFILE%\\.nerv-private\\nerv-before-f006-t30.sqlite, C:\\Projects\\nerv detached at origin/main e05aae22, npm ci --ignore-scripts, npm run build, service started; doctor build 1.735 commit e05aae22, revisionSkew.skewed false; kaji list: NERV-01, NERV-02 and NERV-03 enrolled. No actual: time not measured.",
+    "reviewed": "2026-11-25",
     "agentHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "procedure"
-  }
+  },
+  "prs": [
+    {
+      "pr": 738
+    }
+  ]
 }
