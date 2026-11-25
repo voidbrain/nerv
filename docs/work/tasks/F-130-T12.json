@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-130-T12",
+  "parent": "F-130",
+  "title": "Header chrome and demo mode",
+  "goal": "Theme, mode, accent, CRT, clock, build, Dummy Plug banner and the ?demo simulation are settled in the workspace",
+  "status": "planned",
+  "acceptance": [
+    "Header controls and the Dummy Plug banner match the old page, using STYLE-GUIDE tokens",
+    "The demo simulation (dashboard.js) is ported as a fixture-driven mode or dropped with the owner's agreement; never mixed with live data"
+  ],
+  "dependsOn": [
+    "F-130-T01"
+  ],
+  "resources": [
+    "web/src/**",
+    "docs/STYLE-GUIDE.md",
+    "test/**",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "angular",
+    "accessibility"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-25: the chrome is small; demo mode is the open question. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  }
+}

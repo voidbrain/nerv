@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-130-T14",
+  "parent": "F-130",
+  "title": "Owner: check the Angular dashboard on the Mac and the installed phone app",
+  "goal": "The owner confirms every section works in the workspace dashboard and push taps still confirm delivery",
+  "status": "planned",
+  "acceptance": [
+    "On the Mac, open the dashboard after the update: each section shows live data and an idle poll reloads nothing",
+    "On the phone, the installed app opens the new dashboard; a test reminder's push tap marks it delivered with no Telegram fallback"
+  ],
+  "dependsOn": [
+    "F-130-T13"
+  ],
+  "resources": [
+    "docs/work/records/F-130.md"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented reminders only.",
+  "validation": [
+    "Owner visual and device check, recorded in F-130 Verification"
+  ],
+  "escalation": [
+    "The owner decides whether the dashboard matches; the agent records the result"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h owner",
+    "basis": "Estimated 2026-11-25: a walk through every section and one push tap. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 1,
+    "ownerKind": "procedure"
+  }
+}
