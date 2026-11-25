@@ -3,6 +3,7 @@ import { ONLINE_MS, type RunItem } from './kaji-link.ts';
 import type { RemoteOffer } from './misato.ts';
 import { canRunRemotePilot, type Pilot, type PilotOffer, type PilotRegistry, type RegisteredPilot } from './pilots.ts';
 import type { ProcessClient } from './process-client.ts';
+import { callGrantedMcp } from './runtime-tools.ts';
 import {
   remoteOutcomeText,
   type ActReply,
@@ -255,27 +256,16 @@ export class RuntimePeers {
       return done ? { refused, settled: true } : { refused };
     }
     if (!('external' in r) || !r.external || r.outcome !== 'grant') return r;
-    const t0 = performance.now();
-    const out = (await this.host
-      .toolsProcess()
-      .call(
-        'tools.call',
-        { server: granted.server, tool: granted.tool, args: item.args, fingerprint: granted.fingerprint },
-        120_000,
-      )
-      .catch((e) => ({ error: e instanceof Error ? e.message : 'The tools process did not answer.' }))) as {
-      text?: string;
-      error?: string;
-    };
-    await this.host.nervous
-      .call('actions.finished', {
-        sortieId: r.sortieId,
-        actionId: r.actionId,
-        tool: item.tool,
-        durationMs: Math.max(0, Math.round(performance.now() - t0)),
-        ...(out.error ? { error: out.error.slice(0, 1000) } : { text: (out.text ?? '').slice(0, 8000) }),
-      })
-      .catch(() => undefined);
+    const out = await callGrantedMcp({
+      nervous: this.host.nervous,
+      toolsProcess: () => this.host.toolsProcess(),
+      sortieId: r.sortieId,
+      actionId: r.actionId,
+      tool: item.tool,
+      granted,
+      args: item.args,
+      finishBestEffort: true,
+    });
     // No planner closes this sortie here: the job is over, so it closes with the call's outcome.
     await this.host.nervous
       .call('sorties.finish', { sortieId: r.sortieId, status: out.error ? 'failed' : 'done' })

@@ -2570,7 +2570,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 2.5 h agent + 0.5 h owner | — | [F-122-T02](#f-122-t02) | 🤖 | — | — |
 
-💻 **→** Next: F-123-T01 — Register a remote MCP server on the tailnet (Planned).
+💻 **→** Next: F-123-T01 — Register a remote MCP server on the tailnet (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2580,11 +2580,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-123-t01"></a>F-123-T01 — Register a remote MCP server on the tailnet | 2.5 h | 0 h | 2.5 h | Planned | — | [F-122-T02](#f-122-t02), [F-123-T02](#f-123-t02) | 🤖 |
-| 🟢 Small | <a id="f-123-t02"></a>F-123-T02 — Owner check: NERV lists the Grover tools | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-123-T01](#f-123-t01) | — | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 2 steps recorded) | 2.5 h agent + 0.5 h owner | 0 of 2 completed | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-123-t01"></a>F-123-T01 — Register a remote MCP server on the tailnet | 2.5 h | 0 h | 2.5 h | Implemented; verification pending | — | [F-122-T02](#f-122-t02), [F-123-T02](#f-123-t02) | 🤖 | [PR #746](https://github.com/voidbrain/nerv/pull/746) |
+| 🟢 Small | <a id="f-123-t02"></a>F-123-T02 — Owner check: NERV lists the Grover tools | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-123-T01](#f-123-t01) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 2 steps recorded) | 2.5 h agent + 0.5 h owner | 0 of 2 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2593,7 +2593,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730). |
+| PR / evidence | Steps: F-123-T01: [PR #746](https://github.com/voidbrain/nerv/pull/746). Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); F-123-T01 in [PR #746](https://github.com/voidbrain/nerv/pull/746). |
 | Opened | 2026-11-24 |
 | Verification | — |
 | Reviewed | 2026-11-24 |

@@ -44,7 +44,8 @@ nerv tools remove files
 
 - `nerv tools` lists NERV's built-in tools and configured MCP tools through one registry. Every descriptor has a stable version; changing a name, effect, description or argument schema changes that version.
 - Pin package versions (`package@x.y.z`); NERV pins grants to the tool's description fingerprint and suspends a tool if its description changes.
-- Only non-destructive read tools can be granted as Pattern Green (`EVA-03` is currently disabled; see [the roadmap](../ROADMAP.md) for planned isolation work).
+- A grant names an effect class (`--effect read` by default): a read is Pattern Green; `write-external` is Orange; `irreversible` and `physical` are Blue, a card for every call, which runs once you approve it. A tool the server marks as destructive must be `irreversible` or `physical` (`EVA-03` is currently disabled; see [the roadmap](../ROADMAP.md) for planned isolation work).
+- A server already running on another machine, such as a hub on the tailnet, is added by its URL: `nerv tools add hub https://<machine>.<tailnet>.ts.net/mcp`. See [A remote MCP server on the tailnet](remote-mcp.md).
 
 ## Gate rules (the Scrolls)
 

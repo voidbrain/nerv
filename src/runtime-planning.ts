@@ -24,6 +24,7 @@ import {
 import { MODEL_TIMEOUT_MS } from './model.ts';
 import { EvaSandboxUnavailableError } from './eva-runner.ts';
 import { runScriptPlanInEva03 } from './script-plan.ts';
+import { callGrantedMcp } from './runtime-tools.ts';
 import type { OperatorResolution } from './operator-directory.ts';
 import { canRunRemotePilot, chooseAdvisers, rankPilots, type Chosen, type Pilot, type PilotOffer } from './pilots.ts';
 import { defaultPolicy } from './policy.ts';
@@ -444,26 +445,14 @@ export class RuntimePlanning {
               const ext = await this.host.externalTools();
               const granted = ext.byName.get(t);
               if (granted && g && 'external' in g && g.external) {
-                const extT0 = performance.now();
-                const outExt = (await this.host
-                  .toolsProcess()
-                  .call(
-                    'tools.call',
-                    { server: granted.server, tool: granted.tool, args: a, fingerprint: granted.fingerprint },
-                    120_000,
-                  )
-                  .catch((e) => ({ error: e instanceof Error ? e.message : 'The tools process did not answer.' }))) as {
-                  text?: string;
-                  error?: string;
-                };
-                await this.host.nervous.call('actions.finished', {
+                const outExt = await callGrantedMcp({
+                  nervous: this.host.nervous,
+                  toolsProcess: () => this.host.toolsProcess(),
                   sortieId,
                   actionId: g.actionId,
                   tool: t,
-                  durationMs: Math.max(0, Math.round(performance.now() - extT0)),
-                  ...(outExt.error
-                    ? { error: outExt.error.slice(0, 1000) }
-                    : { text: (outExt.text ?? '').slice(0, 8000) }),
+                  granted,
+                  args: a,
                 });
                 if (outExt.error) throw new Error(outExt.error);
                 return outExt.text ?? '';
@@ -667,25 +656,14 @@ export class RuntimePlanning {
       // F-021: granted and gated: the tools process makes the call; the result is recorded on the action like any other.
       const granted = ext.byName.get(tool);
       if (granted && 'external' in r && r.external) {
-        const extT0 = performance.now();
-        const out = (await this.host
-          .toolsProcess()
-          .call(
-            'tools.call',
-            { server: granted.server, tool: granted.tool, args, fingerprint: granted.fingerprint },
-            120_000,
-          )
-          .catch((e) => ({ error: e instanceof Error ? e.message : 'The tools process did not answer.' }))) as {
-          text?: string;
-          error?: string;
-        };
-        const extDurationMs = Math.max(0, Math.round(performance.now() - extT0));
-        await this.host.nervous.call('actions.finished', {
+        const out = await callGrantedMcp({
+          nervous: this.host.nervous,
+          toolsProcess: () => this.host.toolsProcess(),
           sortieId,
           actionId: r.actionId,
           tool,
-          durationMs: extDurationMs,
-          ...(out.error ? { error: out.error.slice(0, 1000) } : { text: (out.text ?? '').slice(0, 8000) }),
+          granted,
+          args,
         });
         r = out.error ? { ...r, error: out.error } : { ...r, result: { text: out.text ?? '' } };
       }

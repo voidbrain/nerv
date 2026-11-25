@@ -95,3 +95,42 @@ export async function loadExternalTools(options: {
   }
   return { value, cache: { at: Date.now(), value } };
 }
+
+/**
+ * F-021: a granted, gated MCP call: the tools process makes it and the action is finished with its outcome in the
+ * ledger. Shared by Misato's plans, script plans, offers from another base and, F-123, a call the owner approved.
+ */
+export async function callGrantedMcp(options: {
+  nervous: ProcessClient;
+  toolsProcess: () => ProcessClient;
+  sortieId: string;
+  actionId: string;
+  tool: string;
+  granted: { server: string; tool: string; fingerprint: string };
+  args: Record<string, unknown>;
+  /** Report the call's outcome even when recording it fails (a job for another base, already done). */
+  finishBestEffort?: boolean;
+}): Promise<{ text?: string; error?: string }> {
+  const t0 = performance.now();
+  const { granted } = options;
+  const out = (await options
+    .toolsProcess()
+    .call(
+      'tools.call',
+      { server: granted.server, tool: granted.tool, args: options.args, fingerprint: granted.fingerprint },
+      120_000,
+    )
+    .catch((e) => ({ error: e instanceof Error ? e.message : 'The tools process did not answer.' }))) as {
+    text?: string;
+    error?: string;
+  };
+  const finished = options.nervous.call('actions.finished', {
+    sortieId: options.sortieId,
+    actionId: options.actionId,
+    tool: options.tool,
+    durationMs: Math.max(0, Math.round(performance.now() - t0)),
+    ...(out.error ? { error: out.error.slice(0, 1000) } : { text: (out.text ?? '').slice(0, 8000) }),
+  });
+  await (options.finishBestEffort ? finished.catch(() => undefined) : finished);
+  return out;
+}
