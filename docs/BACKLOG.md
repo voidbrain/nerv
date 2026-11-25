@@ -494,7 +494,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-118-T04 is measured on its PR's Windows run (coordinator files against the 20 runs before), then five full Windows runs within 12 minutes without reruns; the reruns are test failures tracked in B-066, B-076 and B-126.
+💻 **→** Next: B-118-T04 (PR #741) cut the Windows step to 489 s on its first run; then five full Windows runs within 12 minutes without reruns; the reruns are test failures tracked in B-066, B-076 and B-126.
 
 | | |
 |---|---|
@@ -521,7 +521,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Steps: B-118-T01: [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split · B-118-T02: [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain · B-118-T03: [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen · B-118-T04: [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round. B-118-T04: Test: `test/sqlite-no-fsync.test.ts`; timing logs of runs 45506622094 to 45559316942 (Windows) and [run 45548137584](https://github.com/voidbrain/nerv/actions/runs/45548137584) (Linux); [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776); [#741](https://github.com/voidbrain/nerv/pull/741) |
 | Opened | 2026-11-24 |
-| Verification | Unit 2026-11-25: Test: `test/sqlite-no-fsync.test.ts` and `test/coordinator-partition.test.ts` pass locally (B-118-T04); its Windows effect not yet measured. Unit/integration 2026-11-24: Test: `test/worker-link-exit.test.ts` (B-118-T02) and `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs` (B-118-T03) pass locally. CI 2026-11-24 after PR #706: no Windows step reached the 18-minute limit in 50 attempts (438–796 s), 20 failed on a test. Five Windows runs within 12 min without reruns: not met. |
+| Verification | Unit 2026-11-25: Test: `test/sqlite-no-fsync.test.ts` and `test/coordinator-partition.test.ts` pass locally (B-118-T04). CI 2026-11-25: Windows `npm test` 489 s in run 45566852563 (three preload failures there, fixed in PR #741). Unit/integration 2026-11-24: Test: `test/worker-link-exit.test.ts` (B-118-T02) and `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs` (B-118-T03) pass locally. CI 2026-11-24 after PR #706: no Windows step reached the 18-minute limit in 50 attempts (438–796 s), 20 failed on a test. Five Windows runs within 12 min without reruns: not met. |
 | Reviewed | 2026-11-25 |
 
 </details>

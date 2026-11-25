@@ -17,8 +17,15 @@ const Original = sqlite.DatabaseSync;
 class TestDatabaseSync extends Original {
   constructor(...args: ConstructorParameters<typeof Original>) {
     super(...args);
-    // A connection opened later (`open: false`) keeps the default.
-    if (this.isOpen) this.exec('PRAGMA synchronous=OFF');
+    // A connection opened later (`open: false`) keeps the default. A file that is not a readable database fails
+    // here; the connection then stays as the code opened it, so the code's own first read reports it and closes it
+    // (throwing here would leak the open handle, and Windows cannot remove a file that is still open).
+    if (this.isOpen)
+      try {
+        this.exec('PRAGMA synchronous=OFF');
+      } catch {
+        // left to the code under test
+      }
   }
 }
 

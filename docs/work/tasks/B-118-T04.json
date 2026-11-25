@@ -8,7 +8,8 @@
   "acceptance": [
     "The slowest Windows files are measured against Linux from the timing logs of 2026-11-24/25 and the Windows-only cost named",
     "The test processes skip SQLite's disk flush (a test preload, covered by its own test), and the partition mesh's registry sync opens each store once per round; no timeout raised, no test skipped, product code unchanged",
-    "The PR's Windows run shows the coordinator files' times against the 20 runs before; then five full Windows runs within 12 minutes without reruns (B-118's Check)"
+    "The PR's Windows run shows the coordinator files' times against the 20 runs before; then five full Windows runs within 12 minutes without reruns (B-118's Check)",
+    "Pending cases this change makes (listed for check:gauntlet-runs): multi-step-agent/*; rerunning them is an owner-approved gauntlet run (package.json and test/ are their source inputs)"
   ],
   "dependsOn": [
     "B-118-T03"
