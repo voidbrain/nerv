@@ -78,7 +78,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18 |
+| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18; [#742](https://github.com/voidbrain/nerv/pull/742) |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-21 Unit/integration: PR #620 merged after CI run 44935993196 attempt 2 passed validate, Windows, native-macos, CodeQL and full-suite; failing-first journal retry and launcher-drift regressions pass. Real-device: live Tabgha stop/update remains pending after the recovery; read-only inspection found the service healthy and the checkout clean at `d8eeba7d`. |
 | Reviewed | 2026-11-25 |
