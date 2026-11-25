@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-132-T02",
+  "parent": "F-132",
+  "title": "Tools: github.workflow.dispatch and github.runs.status, tested against a fake GitHub API",
+  "goal": "Two governed tools that start an allow-listed workflow and read its recent runs through the GitHub REST API",
+  "status": "planned",
+  "acceptance": [
+    "github.workflow.dispatch posts workflow_dispatch only for an allow-listed repository + workflow + ref; anything else is refused before any network call; it is registered as write-external and needs a grant",
+    "github.runs.status returns the latest runs of an allow-listed workflow (status, conclusion, created and updated times, URL) and is read-only and Green",
+    "Tests against a fake GitHub API on loopback: dispatch sends the right request and Authorization header; a refused pair makes no call; 401, 403, 404, 422, a rate limit and a timeout give bounded errors that never echo the token; status parses runs",
+    "The token is read from the private file at call time and never logged, returned or put in an error"
+  ],
+  "dependsOn": [
+    "F-132-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-132.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "api-contracts",
+    "privacy-review",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented repositories, workflows and runs in tests; the GitHub token never in git, config.json, tests, logs, chat or the relocation snapshot.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A wider token scope or another repository on the allow-list goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-26: two small REST tools on the existing executor and grant registry, with a loopback fake server. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  },
+  "prs": [
+    {
+      "pr": 781
+    }
+  ]
+}
