@@ -568,6 +568,12 @@ async function remotePrecheck(
   } finally {
     db.close();
   }
+  // B-125: an older NERV signs its reply without binding it to the request, so a captured reply could stand in for it.
+  if (probe.unbound.length)
+    refuse(
+      'peer_epoch_unknown',
+      `${probe.unbound.join(', ')} answered with a reply not bound to this request (reply_unbound: it runs an older NERV), so its answer cannot be trusted: update it (or revoke it with the root key) and run kaji promote again. No base was told the new epoch.`,
+    );
   const ahead = [...probe.ranOrAcked]
     .filter(([, epoch]) => epoch > standbyEpoch)
     .sort(([a], [b]) => a.localeCompare(b));

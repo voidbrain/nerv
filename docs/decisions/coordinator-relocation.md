@@ -155,6 +155,14 @@ Every coordinator mutation, external send, worker dispatch, background loop and 
 - **Reconnect of the old coordinator (F-016-T08, F-016-T09)**:
   - On wake or reconnect, `Date.now() < coordinator_state.lease_expires_at` already fences coordinator ticks, pushes, outbox/resumer work, coordinator REST/CLI writes, Kaji handlers and Telegram `poll()` / `local-fallback`. On first Kaji/registry sync or `kaji import`, it merges higher-serial `main`/`revoke` records, transitions permanently out of `active` into non-main standby/worker state, closes stale `/api/dashboard/stream` SSE clients, drops pre-cutover timers/coordinator grants, and can later re-seed a fresh `coordinator-standby.sqlite` if enrolled and unrevoked.
 
+### 5. Signed replies are bound to their request (B-125)
+
+Decided by the owner on 2026-11-25. Every Kaji HTTP reply is signed over its method, path, time, its own nonce and body digest, and also the nonce of the request it answers (the `reply-to-v1` line, sent as `x-kaji-reply-to`). The requesting base refuses a reply bound to another request (`reply_not_bound_to_this_request`). Before this, a reply was bound to nothing but its own nonce, so an attacker on the path could answer an epoch-push probe with a genuine reply the base had signed for another base's request up to 120 s earlier, hiding a newer `ranOrAckedEpoch` or `maxSeenCoordinatorEpoch` (lease renewals and the other signed replies alike).
+
+**Mixed versions.** The binding is inside the one reply signature, so it cannot be stripped. The cost is compatibility during an update: an older base refuses an updated base's reply (its code checks the old signed text and reports `bad signature`), and an updated base refuses an older base's unbound reply with the named error `reply_unbound` ("update that base"). `kaji promote` turns `reply_unbound` from a probed base into a `peer_epoch_unknown` refusal that names it. The reason this is accepted: the owner runs three bases and updates them together, so the window lasts only while an update is under way. Worker WebSocket frames are not affected: their replies are bound by session and sequence counter.
+
+Alternatives rejected: a second, optional binding signature next to the old one kept older bases working, but an attacker could strip it and present the reply as an older base's, so it fixed nothing; a recognisable reply nonce derived from the request nonce was compatible both ways but changed what the nonce means and refused a small share of older bases' genuine replies.
+
 ## Alternatives rejected
 
 | Alternative | Why not |
