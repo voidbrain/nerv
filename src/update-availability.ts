@@ -36,7 +36,44 @@ function sanitizeReason(text: string): string {
     .slice(0, 200);
 }
 
-export async function runUpdateGit(args: string[], cwd: string): Promise<{ status: number; out: string; err: string }> {
+/**
+ * B-140: time budgets for the update's git commands. A command that talks to the remote (`fetch`, `ls-remote`) waits
+ * for the network: a fetch after many commits, a slow GitHub or a loaded machine easily takes more than a few seconds.
+ * A local one (`rev-parse`, `cat-file`, `merge-base`, `rev-list`) reads only the repository.
+ */
+export const UPDATE_GIT_NETWORK_TIMEOUT_MS = 60_000;
+export const UPDATE_GIT_LOCAL_TIMEOUT_MS = 15_000;
+const NETWORK_COMMANDS = new Set(['fetch', 'ls-remote']);
+
+function isNetworkGitCommand(args: readonly string[]): boolean {
+  return NETWORK_COMMANDS.has(args[0] ?? '');
+}
+
+export function updateGitTimeoutMs(args: readonly string[]): number {
+  return isNetworkGitCommand(args) ? UPDATE_GIT_NETWORK_TIMEOUT_MS : UPDATE_GIT_LOCAL_TIMEOUT_MS;
+}
+
+/** "git fetch from origin did not finish within 60 s": names the command and the budget it exceeded. */
+export function gitTimeoutMessage(args: readonly string[], timeoutMs: number): string {
+  const remote = isNetworkGitCommand(args) && args.includes('origin') ? ' from origin' : '';
+  return `git ${args[0] ?? ''}${remote} did not finish within ${Number((timeoutMs / 1000).toFixed(1))} s.`;
+}
+
+/** B-140: a failed `git fetch` is tried once more (a transient HTTP 500 or reset); every other command runs once. */
+export function retryFetchOnce(git: UpdateGitRunner): UpdateGitRunner {
+  return async (args, cwd) => {
+    const first = await git(args, cwd);
+    if (first.status === 0 || args[0] !== 'fetch') return first;
+    const second = await git(args, cwd);
+    return second.status === 0 ? second : { ...second, err: second.err || first.err };
+  };
+}
+
+async function runUpdateGitOnce(
+  args: string[],
+  cwd: string,
+  timeoutMs: number,
+): Promise<{ status: number; out: string; err: string }> {
   return await new Promise((resolve) => {
     const child = spawn('git', ['-C', cwd, ...args], {
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -53,9 +90,9 @@ export async function runUpdateGit(args: string[], cwd: string): Promise<{ statu
     };
     const timer = setTimeout(() => {
       child.kill('SIGTERM');
-      err = err || 'Update check timed out.';
+      err = gitTimeoutMessage(args, timeoutMs);
       done(1);
-    }, 5000);
+    }, timeoutMs);
     child.stdout.on('data', (d: Buffer) => {
       if (out.length < 4096) out += d.toString('utf8');
     });
@@ -68,6 +105,16 @@ export async function runUpdateGit(args: string[], cwd: string): Promise<{ statu
     });
     child.on('close', (code) => done(code ?? 1));
   });
+}
+
+/** Git for the update check: never prompts; network commands get their own budget and a failed fetch one retry. */
+export async function runUpdateGit(
+  args: string[],
+  cwd: string,
+  options: { timeoutMs?: number } = {},
+): Promise<{ status: number; out: string; err: string }> {
+  const timeoutMs = options.timeoutMs ?? updateGitTimeoutMs(args);
+  return retryFetchOnce((a, c) => runUpdateGitOnce(a, c, timeoutMs))(args, cwd);
 }
 
 export async function checkUpdateAvailability(

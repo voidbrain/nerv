@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 12 | 5 | 33 | 13 |
+| **This week** | 12 | 5 | 34 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 42 | 33 |
+| **Open** | 42 | 34 |
 | **Require Human 🧑** | 14 | 17 |
 
 ### Require Human 🧑
@@ -41,7 +41,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 106 h agent + 14 h owner across 134 open steps of 42 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 107.5 h agent + 14 h owner across 135 open steps of 42 features and 34 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1767,6 +1767,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | — (owner report 2026-11-25, NERV-01 at `2627d483`); [#750](https://github.com/voidbrain/nerv/pull/750) |
 | Opened | 2026-11-25 |
 | Verification | Pending. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="b-140"></a>[🐞 B-140](#top)
+
+**"Update now" refused with "Update check timed out.": every update-check git command, the network ones included, was killed after 5 s**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-140-T01, independent review and merge of [#765](https://github.com/voidbrain/nerv/pull/765) on green CI; then "Update now" on NERV-01 after the next update.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-25 ~18:15 CET: "Update now" in the PWA on NERV-01 was refused with "Update check timed out." `runUpdateGit` (`src/update-availability.ts`) killed every git command of the update check after a fixed 5000 ms, including `git ls-remote origin` to GitHub. A slow GitHub (several HTTP 500s that day), a fetch after many commits or a loaded machine exceeds that; a moment later `git ls-remote` answered in 0.6–0.9 s. The message did not say which command or which budget. |
+| **Reproduce** | With a `git` on PATH whose `ls-remote` answers after 6 s, `checkUpdateAvailability` reports `offline` with "Update check timed out." (`test/update-availability.test.ts`, B-140 tests). |
+| **Check** | A network git command (`fetch`, `ls-remote`) slower than 5 s but within 60 s is not a timeout; local commands keep their own 15 s budget; a failed `git fetch` is tried once more; a timeout says e.g. "git ls-remote from origin did not finish within 60 s."; "Update now" on NERV-01 is no longer refused for a slow remote. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-140-t01"></a>B-140-T01 — Give the update check's network git commands their own budget, retry a failed fetch, name the command in a timeout | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [PR #765](https://github.com/voidbrain/nerv/pull/765) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-140.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-140-T01: [PR #765](https://github.com/voidbrain/nerv/pull/765). [#765](https://github.com/voidbrain/nerv/pull/765); Test: `test/update-availability.test.ts` (B-140 tests); owner report 2026-11-25 |
+| Opened | 2026-11-25 |
+| Verification | Unit 2026-11-25: Test: `test/update-availability.test.ts` passes locally. Real-device: Pending ("Update now" on NERV-01 after the update). |
 | Reviewed | 2026-11-25 |
 
 </details>
