@@ -66,6 +66,9 @@ async function setup(opts: { pushStatus?: number; device?: boolean; fallbackMs: 
     get store() {
       return store;
     },
+    get server() {
+      return server;
+    },
     phone: () => phone(`http://127.0.0.1:${(server.address() as { port: number }).port}`),
     /** A reminder falls due and the scheduler ticks: the delivery decision. Returns its inbox item id. */
     async due(title: string) {
@@ -230,6 +233,69 @@ test('F-004-T09: a fallback claimed but cut off by a crash is not sent again; a 
     assert.equal(claim().length, 0);
     assert.equal(store.pushOpened('not-a-receipt'), false);
     assert.equal(store.pushOpened('A'.repeat(24)), false, 'an unknown receipt opens nothing');
+  } finally {
+    store.close();
+  }
+});
+
+test('F-004-T09 review: a tap in the workspace app (Angular worker) also posts the receipt', async () => {
+  const t = await setup({ fallbackMs: 60_000 });
+  try {
+    const id = await t.due('Stendere il bucato');
+    await until(() => t.push.received.length === 1);
+    const listeners = new Map<string, (e: unknown) => void>();
+    const imported: string[] = [];
+    const self = { addEventListener: (type: string, fn: (e: unknown) => void) => listeners.set(type, fn) };
+    const origin = `http://127.0.0.1:${(t.server.address() as { port: number }).port}`;
+    runInNewContext(readFileSync('web/public/workspace-sw.js', 'utf8'), {
+      self,
+      importScripts: (...urls: string[]) => imported.push(...urls),
+      fetch: (path: string, init: RequestInit) => fetch(origin + path, init),
+      JSON,
+    });
+    assert.deepEqual(
+      imported,
+      ['ngsw-worker.js'],
+      'the Angular worker still runs: offline shell, updates, its own click',
+    );
+    const work: Promise<unknown>[] = [];
+    listeners.get('notificationclick')!({
+      notification: { data: t.push.received[0]!.notification.data },
+      waitUntil: (p: Promise<unknown>) => work.push(p),
+    });
+    await Promise.all(work);
+    assert.equal(t.store.deliveryState(id).push?.state, 'opened');
+    assert.match(readFileSync('web/src/main.ts', 'utf8'), /provideServiceWorker\('workspace-sw\.js'/);
+  } finally {
+    await t.close();
+  }
+});
+
+test('F-004-T09 review: a reminder read or cancelled in the app is never sent to Telegram as the fallback', async () => {
+  const store = new Store(':memory:');
+  const device = createECDH('prime256v1');
+  device.generateKeys();
+  store.pushFetch = (async () => new Response(null, { status: 201 })) as typeof fetch;
+  try {
+    store.savePushSubscription({
+      endpoint: 'https://push.example.test/device-2',
+      p256dh: device.getPublicKey().toString('base64url'),
+      auth: randomBytes(16).toString('base64url'),
+    });
+    for (const title of ['Letto in app', 'Annullato in app', 'Ancora da vedere'])
+      store.add(title, '2030-06-01T07:00:00Z');
+    store.tick(new Date('2030-06-01T07:01:00Z'));
+    const item = (title: string) => store.inboxPage(0, 20).items.find((i) => i.message.includes(title))!;
+    store.db.prepare('UPDATE deliveries SET read_at=? WHERE id=?').run('2030-06-01T07:02:00Z', item('Letto in app').id);
+    store.db
+      .prepare('UPDATE reminders SET cancelled=? WHERE id=(SELECT reminder_id FROM deliveries WHERE id=?)')
+      .run('2030-06-01T07:03:00Z', item('Annullato in app').id);
+    const due = store.deliveryChannels.claimFallback(PUSH_FALLBACK_MS, new Date('2030-06-01T07:30:00Z'));
+    assert.deepEqual(
+      due.map((d) => d.id),
+      [item('Ancora da vedere').id],
+      'only the one nobody saw',
+    );
   } finally {
     store.close();
   }
