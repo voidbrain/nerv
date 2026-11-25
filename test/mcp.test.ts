@@ -5,10 +5,10 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { McpClient, fingerprint, grantRefusal, validateTools, type McpServer } from '../src/mcp.ts';
+import { McpClient, fingerprint, grantRefusal, validateTools, type McpStdioServer } from '../src/mcp.ts';
 import { builtinToolDescriptors, builtinTools, toolDocs } from '../src/executors.ts';
 const FAKE = fileURLToPath(new URL('./fixtures/fake-mcp.mjs', import.meta.url));
-const server = (id = 'notes', v2 = false): McpServer => ({
+const server = (id = 'notes', v2 = false): McpStdioServer => ({
   id,
   command: process.execPath,
   args: [FAKE, ...(v2 ? ['--v2'] : [])],
@@ -21,7 +21,7 @@ test("NERV's own tools expose stable versioned descriptors in the tool registry 
   assert.equal(new Set(builtinToolDescriptors.map((tool) => tool.name)).size, builtinToolDescriptors.length);
   assert.equal(builtinToolDescriptors.find((tool) => tool.name === 'reminders.add')?.effect, 'write-local');
 });
-test('the tools config: reserved server ids refused, grants only for known servers, reads only for now (F-021)', () => {
+test('the tools config: reserved server ids refused, grants only for known servers, a known effect class (F-021, F-123)', () => {
   assert.throws(() => validateTools({ mcp: [{ id: 'reminders', command: 'x' }] }), /not one of NERV's own/);
   assert.throws(
     () =>
@@ -35,9 +35,9 @@ test('the tools config: reserved server ids refused, grants only for known serve
     () =>
       validateTools({
         mcp: [{ id: 'notes', command: 'x' }],
-        grants: [{ server: 'notes', tool: 't', effect: 'write-local', eva: '00', fingerprint: '0123456789abcdef' }],
+        grants: [{ server: 'notes', tool: 't', effect: 'everything', eva: '00', fingerprint: '0123456789abcdef' }],
       }),
-    /only "read" for now/,
+    /effect is one of/,
   );
   assert.deepEqual(
     validateTools({
@@ -50,7 +50,9 @@ test('the tools config: reserved server ids refused, grants only for known serve
     grantRefusal({ name: 'd', annotations: { destructiveHint: true } }, 'read', '00')!,
     /cannot be granted as a read/,
   );
-  assert.match(grantRefusal({ name: 'r' }, 'write-local', '00')!, /only "read"/);
+  // F-123: a write is granted with its effect class, and the gate then decides (writes were refused before).
+  assert.equal(grantRefusal({ name: 'r' }, 'write-local', '01'), undefined);
+  assert.match(grantRefusal({ name: 'r' }, 'everything', '01')!, /effect is one of/);
   assert.equal(grantRefusal({ name: 'r', annotations: { readOnlyHint: true } }, 'read', '00'), undefined);
 });
 test('an MCP server over stdio: tools listed, a call answered, the fingerprint follows the description (F-021)', async () => {
@@ -137,7 +139,7 @@ test(
     ];
     const m = await model(script);
     const home = mkdtempSync(join(tmpdir(), 'nerv-mcp-'));
-    const config = (srv: McpServer, eva = '00') =>
+    const config = (srv: McpStdioServer, eva = '00') =>
       writeFileSync(
         join(home, 'config.json'),
         JSON.stringify({

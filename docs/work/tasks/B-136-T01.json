@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "B-136-T01",
+  "parent": "B-136",
+  "title": "Name why the planner's first chat reply is invalid and fix it",
+  "goal": "A plain nerv chat question plans on its first turn, with no \"(invalid reply)\" line",
+  "status": "planned",
+  "acceptance": [
+    "The cause is named from the raw first reply of sortie 89cb6711 on NERV-01 (prompt, model output, parser)",
+    "A committed test fails first with that reply shape (invented wording) and passes with the fix",
+    "A plain chat question on the default local model shows no \"(invalid reply)\" line"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/runtime-planning.ts",
+    "src/brain-process.ts",
+    "docs/work/records/B-136.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "A committed regression fails before the fix",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-25 when opened: read the raw reply, find the parser or prompt cause, failing-first test, fix. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}
