@@ -254,6 +254,15 @@ export function journal(c: ServiceContext, write = false): DatabaseSync | undefi
   return db;
 }
 
+/**
+ * B-091: open the live NERV database from a lifecycle handler with a busy handler. A stop polls it while the stopped
+ * `serve` releases it; without a timeout the read failed at once ("database is locked", or on Windows after
+ * `taskkill /F` a WAL "disk I/O error"), and the stop ended uncertain at `stop:started`.
+ */
+export function liveDatabase(path: string, readOnly = true): DatabaseSync {
+  return new DatabaseSync(path, { readOnly, timeout: 5000 });
+}
+
 function transientJournalError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
   const e = error as { code?: unknown; errcode?: unknown; message?: unknown };
@@ -756,7 +765,7 @@ export async function compatibleServiceRevision(
   run: typeof command = command,
 ): Promise<boolean> {
   if (!/^[a-f0-9]{40}$/.test(revision)) return false;
-  const db = new DatabaseSync(databasePath(c.home), { readOnly: true });
+  const db = liveDatabase(databasePath(c.home));
   let schema: number;
   try {
     schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
