@@ -1872,9 +1872,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-136-T01, name why the planner's first reply is not one JSON action, question or reply, and fix it with a failing-first test.
+💻 **→** Next: CI and merge, then on NERV-01 a reminder and a fleet chat show no "(invalid reply)" line; close with it.
 
 | | |
 |---|---|
@@ -1884,10 +1884,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-136-t01"></a>B-136-T01 — Name why the planner's first chat reply is invalid and fix it | 1.5 h | 0 h | 1.5 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-136-t01"></a>B-136-T01 — Name why the planner's first chat reply is invalid and fix it | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [PR #778](https://github.com/voidbrain/nerv/pull/778) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1896,9 +1896,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — (owner report 2026-11-25, NERV-01 at `2627d483`); [#750](https://github.com/voidbrain/nerv/pull/750) |
+| PR / evidence | Steps: B-136-T01: [PR #778](https://github.com/voidbrain/nerv/pull/778). Owner report 2026-11-25, NERV-01 at `2627d483`; [#750](https://github.com/voidbrain/nerv/pull/750); B-136-T01 in [PR #778](https://github.com/voidbrain/nerv/pull/778) |
 | Opened | 2026-11-25 |
-| Verification | Pending. |
+| Verification | Pending: local reproduction and tests only; the live check on NERV-01 is not done. |
 | Reviewed | 2026-11-25 |
 
 </details>

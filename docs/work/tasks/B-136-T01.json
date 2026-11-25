@@ -4,9 +4,9 @@
   "parent": "B-136",
   "title": "Name why the planner's first chat reply is invalid and fix it",
   "goal": "A plain nerv chat question plans on its first turn, with no \"(invalid reply)\" line",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
-    "The cause is named from the raw first reply of sortie 89cb6711 on NERV-01 (prompt, model output, parser)",
+    "The cause is named from the invalid planning steps on NERV-01 and a local reproduction with the default model (prompt, model output, parser)",
     "A committed test fails first with that reply shape (invented wording) and passes with the fix",
     "A plain chat question on the default local model shows no \"(invalid reply)\" line"
   ],
@@ -38,5 +38,10 @@
     "agentHours": 1.5,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 778
+    }
+  ]
 }
