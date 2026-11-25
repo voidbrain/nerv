@@ -45,6 +45,7 @@ import {
   type RegistryBody,
   type SignedRecord,
 } from '../src/kaji.ts';
+import { KAJI_REPLY_MISMATCH, KAJI_REPLY_UNBOUND } from '../src/kaji-auth.ts';
 import { Store } from '../src/store.ts';
 
 /*
@@ -218,6 +219,10 @@ class Mesh {
   partition: string[][] | undefined;
   /** Bases running an older NERV: their epoch-push reply has no `ranOrAckedEpoch` (B-121-T02). */
   readonly olderPeers = new Set<string>();
+  /** B-125: bases whose signed reply is not bound to the request (an older NERV, as an updated base sees it). */
+  readonly unboundPeers = new Set<string>();
+  /** B-125 review: bases whose answer arrives as a reply signed for another request (replayed on the path). */
+  readonly replayedPeers = new Set<string>();
   /** Every epoch push sent (a probe carries no records). */
   readonly pushes: { from: string; to: string; records: number }[] = [];
   readonly effects: Effect[] = [];
@@ -487,6 +492,14 @@ class Mesh {
   async pushEpoch(from: string, to: string, records: SignedRecord[]) {
     this.pushes.push({ from, to, records: records.length });
     const target = this.answering(from, to);
+    if (this.replayedPeers.has(to))
+      throw Object.assign(new Error(`${KAJI_REPLY_MISMATCH}: the reply answers another request`), {
+        code: KAJI_REPLY_MISMATCH,
+      });
+    if (this.unboundPeers.has(to))
+      throw Object.assign(new Error(`${KAJI_REPLY_UNBOUND}: ${to} answered without binding the reply`), {
+        code: KAJI_REPLY_UNBOUND,
+      });
     const epoch = this.withRegistry(target, (reg) => {
       for (const r of records) {
         try {
@@ -1124,6 +1137,52 @@ describe('B-124: kaji relocate tells no base the new epoch before the target pas
       [B, C, D].map((id) => m.registryOf(id).epoch),
       [3, 3, 3],
     );
+  });
+});
+
+describe('B-125: a base whose reply is not bound to the request is not trusted to say which epochs ran', () => {
+  it('an older NERV answering unbound keeps a move refused by name until it is updated', async () => {
+    const m = (mesh = new Mesh([X, B, D], [B, D]));
+    await m.advance(30_000);
+    m.unboundPeers.add(D);
+    m.sleep(X);
+    m.importRecords(B, [
+      m.sign({ kind: 'revoke', baseId: X, publicKey: m.base(X).publicKey }),
+      m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }),
+    ]);
+    await assert.rejects(m.promote(B), refused('peer_epoch_unknown', /NERV-04.*reply_unbound/));
+    assert.equal(m.registryOf(D).epoch, 2, 'D was not told epoch 3');
+    m.unboundPeers.delete(D);
+    const res = await m.promote(B);
+    assert.ok(!('resumed' in res) && res.newEpoch === 3);
+  });
+
+  it('a reply replayed from another request is reported by its own code, not as an unreachable base', async () => {
+    const m = (mesh = new Mesh([X, B, D], [B, D]));
+    await m.advance(30_000);
+    m.replayedPeers.add(D);
+    m.sleep(X);
+    m.importRecords(B, [
+      m.sign({ kind: 'revoke', baseId: X, publicKey: m.base(X).publicKey }),
+      m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }),
+    ]);
+    await assert.rejects(
+      m.promote(B),
+      refused('peer_epoch_unknown', /NERV-04.*reply_not_bound_to_this_request.*altered on the way/),
+    );
+    assert.equal(m.registryOf(D).epoch, 2, 'D was not told epoch 3');
+  });
+
+  it('an unbound reply is not blamed on an older NERV alone: the path may have altered it', async () => {
+    const m = (mesh = new Mesh([X, B, D], [B, D]));
+    await m.advance(30_000);
+    m.unboundPeers.add(D);
+    m.sleep(X);
+    m.importRecords(B, [
+      m.sign({ kind: 'revoke', baseId: X, publicKey: m.base(X).publicKey }),
+      m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }),
+    ]);
+    await assert.rejects(m.promote(B), refused('peer_epoch_unknown', /reply_unbound.*altered on the way/));
   });
 });
 

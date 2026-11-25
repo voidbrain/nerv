@@ -51,6 +51,7 @@ nerv nodes lifecycle-status --digest PLAN_DIGEST
 ```
 
 - For `update --revision FULL_SHA`: fetch the commit first (`git fetch origin FULL_SHA`); **never `git pull` the live service checkout**. Updates take a consistent backup, rehearse the candidate reader on a private copy (`nerv nodes upgrade-rehearse --backup DIR`), then advance, install (`--ignore-scripts`), build, and verify. See [upgrade decision](../decisions/node-upgrades.md).
+- **Update every base together.** Since B-125 a Kaji reply is signed for the request it answers: until all bases run the same release, an older base refuses an updated base's replies (`bad signature`) and an updated base refuses an older one's (`reply_unbound`), so heartbeats, relays and `kaji promote` fail between them. Update all bases in one sitting ([decision](../decisions/coordinator-relocation.md), section 5).
 - Unresolved operations lock mutations until inspected and released (`nodes lifecycle-release --receipt FILE --evidence FILE` after verifying handler and descendants stopped).
 
 ## Explicit Kaji root migration

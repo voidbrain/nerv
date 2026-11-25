@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 8 | 4 | 27 | 7 |
+| **This week** | 8 | 5 | 28 | 8 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 33 |
-| **Require Human 🧑** | 11 | 14 |
+| **Open** | 38 | 33 |
+| **Require Human 🧑** | 11 | 15 |
 
 ### Require Human 🧑
 
@@ -30,6 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-092](#f-092) |  | [B-128](#b-128) |  |
 | [F-060](#f-060) |  | [B-129](#b-129) |  |
 | [F-007](#f-007) |  | [B-134](#b-134) |  |
+|  |  | [B-135](#b-135) |  |
 |  |  | [B-056](#b-056) |  |
 |  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
@@ -38,7 +39,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 103.25 h agent + 12.25 h owner across 127 open steps of 39 features and 33 other records. 169.5 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 103.75 h agent + 12.25 h owner across 126 open steps of 38 features and 33 other records. 165.25 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -54,13 +55,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | [F-005-T29](#f-005-t29) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | [F-005-T29](#f-005-t29) | 🤖 | — | — |
 
 💻 **→** Next: B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete (Implemented; verification pending).
 
 | | |
 |---|---|
-| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24), from the desktop session: the fenced stop removed the task and ended NERV-02, then printed "disk I/O error" and left the receipt `uncertain` with `stop:started`. The disk was fine (115 GB free) and the lifecycle journal had been written at 18:43. Likely cause, not confirmed: the stopping `serve` still held the lifecycle journal (`~/.nerv-lifecycle/journal.sqlite`) open when the handler wrote the receipt. A later stop on the same machine completed. |
+| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24), from the desktop session: the fenced stop removed the task and ended NERV-02, then printed "disk I/O error" and left the receipt `uncertain` with `stop:started`. The disk was fine (115 GB free) and the lifecycle journal had been written at 18:43. Cause (named 2026-11-25): the stop's poll read the live database read-only with no busy handler while the killed `serve` left its WAL behind. A later stop on the same machine completed. |
 | **Reproduce** | On Windows, a fenced stop of a running NERV service from the desktop session; intermittent (once in two stops). |
 | **Check** | The failing write is named (journal and statement); a committed test fails first if the cause is in code (for example a retry on SQLITE_IOERR or BUSY while the stopped process releases the file); a fenced stop on Tabgha completes its receipt. |
 
@@ -68,8 +69,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 2 h | 0 h | 2 h | Implemented; verification pending | — | [F-005-T29](#f-005-t29) | [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | | | |
+| 🟡 Medium | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 3 h | 0 h | 3 h | Implemented; verification pending | — | [F-005-T29](#f-005-t29) | [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix; [PR #742](https://github.com/voidbrain/nerv/pull/742) inspect read cause and fix |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 1 steps recorded) | 3 h | 0 of 1 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -78,10 +79,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18 |
+| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix; [PR #742](https://github.com/voidbrain/nerv/pull/742) inspect read cause and fix. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18; [#742](https://github.com/voidbrain/nerv/pull/742) |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-21 Unit/integration: PR #620 merged after CI run 44935993196 attempt 2 passed validate, Windows, native-macos, CodeQL and full-suite; failing-first journal retry and launcher-drift regressions pass. Real-device: live Tabgha stop/update remains pending after the recovery; read-only inspection found the service healthy and the checkout clean at `d8eeba7d`. |
-| Reviewed | 2026-11-21 |
+| Reviewed | 2026-11-25 |
 
 </details>
 
@@ -247,56 +248,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-021"></a>[✨ F-021](#top)
-
-**MCP and standardized tool/expert protocol**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-021-T05 — Dashboard tool listing (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Tool and expert integration is currently undefined; custom wrappers will not scale. |
-| **Reproduce** | Register a tool/expert via MCP or OpenAPI descriptor; invoke from a task; confirm schema validation, capability scope and audit. |
-| **Check** | Versioned tool descriptors (from MCP servers and NERV's own tools); deny-by-default capability binding to Misato and to each pilot (a pilot lists the tools it may use, F-045); works for local and remote (other-machine) endpoints; the registered tools are listed in the dashboard; no silent privilege escalation. (Wording corrected 2026-11-05: "expert roster (F-018)" predates F-045; tools are actions, skills are procedures, pilots are agents that use both.) |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-021-t05"></a>F-021-T05 — Dashboard tool listing | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [PR #563](https://github.com/voidbrain/nerv/pull/563) tool listing; CI pending |
-| 🟢 Small | **Total** | 4.75 h (4 of 5 steps) | 3.75 h (3 of 5 steps recorded) | 0.25 h | 4 of 5 completed | |
-
-<details><summary>Done steps (4)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-021-t01"></a>F-021-T01 — MCP stdio client, tools process and deny-by-default grants | — | 0 days | Completed | — |
-| — | <a id="f-021-t02"></a>F-021-T02 — Versioned descriptors for NERV's own tools | 1.5 h | 0.25 h (stated) | Completed | [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors |
-| — | <a id="f-021-t03"></a>F-021-T03 — Per-pilot tool binding | 0.5 h | 1 h (stated) | Completed | [PR #547](https://github.com/voidbrain/nerv/pull/547) the fix; CI green |
-| — | <a id="f-021-t04"></a>F-021-T04 — Remote (other-machine) endpoints | 2.5 h | 2.5 h (stated) | Completed | [PR #556](https://github.com/voidbrain/nerv/pull/556) MCP over Kaji; CI pending; CI green |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-021.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-021-T02: [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors · F-021-T03: [PR #547](https://github.com/voidbrain/nerv/pull/547) the fix; CI green · F-021-T04: [PR #556](https://github.com/voidbrain/nerv/pull/556) MCP over Kaji; CI pending; CI green · F-021-T05: [PR #563](https://github.com/voidbrain/nerv/pull/563) tool listing; CI pending. [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool descriptors; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links. |
-| Opened | 2026-11-02 |
-| Verification | Unit/integration and CI 2026-11-13: every built-in registration has a stable versioned descriptor; MCP fingerprints remain compatible; PR #381 CI 43496658350 passed validate, native-macos, windows, plan and full-suite. Remaining parent acceptance is pending. |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
-
 ### <a id="b-124"></a>[🐞 B-124](#top)
 
 **A re-target `kaji relocate` signs fences the running main before the target's checks run**
@@ -398,52 +349,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-016-T10 verified: [PR #417](https://github.com/voidbrain/nerv/pull/417) merged on green CI (second fresh-context review found no blocker). F-016-T12 closed with the accepted decision revision and zero-blocking review in PR #470; scoped CI passed. Remaining distributed relocation acceptance is open. |
 | Reviewed | 2026-11-25 |
-
-</details>
-
----
-### <a id="b-082"></a>[🐞 B-082](#top)
-
-**Windows: a service installed from an SSH session cannot register its logon task**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24): the fenced install over SSH ended `uncertain` at the register step; `schtasks /Create` with NERV's task XML answered "ERROR: No mapping between account names and security IDs" because the XML named `WORKGROUP\\<user>`: `renderService` used `USERDOMAIN\\USERNAME`, and an SSH session on a workgroup machine reports `USERDOMAIN=WORKGROUP`, which names no account (the account is `KITCHEN\\<user>`). |
-| **Reproduce** | On a workgroup Windows machine, over SSH: `nodes lifecycle-inspect --action install`, then `lifecycle-apply`. |
-| **Check** | Test committed failing first: `windowsServiceUser` gives `COMPUTERNAME\\user` for a local account (also when USERDOMAIN is WORKGROUP) and `USERDOMAIN\\user` when USERDNSDOMAIN is set; on Tabgha an SSH install registers the task. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-082-t01"></a>B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded |
-| 🟢 Small | **Total** | 1.5 h | 0.5 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="b-082-t02"></a>B-082-T02 — Windows: keep the logon account for Entra ID and domain users | 0.75 h | 0 h | Completed | [PR #591](https://github.com/voidbrain/nerv/pull/591) opened; [PR #601](https://github.com/voidbrain/nerv/pull/601) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-082.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-082-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded · B-082-T02: [PR #591](https://github.com/voidbrain/nerv/pull/591) opened; [PR #601](https://github.com/voidbrain/nerv/pull/601) implementation. [PR #601](https://github.com/voidbrain/nerv/pull/601) (B-082-T02); Test: `test/node-inspection.test.ts` "B-082: the Windows task user keeps Entra and domain accounts but repairs workgroup users" (committed failing first in B-082-T02); Review: fresh-context P1 review found no blocking code, security, privacy or compliance issue and confirmed the later test edit is formatting-only; prior T01 test committed failing first |
-| Opened | 2026-11-18 |
-| Verification | 2026-11-21: B-082-T02 CI run 44815656209 and required fresh-context review passed. Local: targeted regression 2/2, full tests 1,041 pass / 2 platform skips, build, `check:fast`, headless 5 pass / 1 Windows skip. Pending: the live desktop-session install on Tabgha after B-087-T01. |
-| Reviewed | 2026-11-21 |
 
 </details>
 
@@ -1829,7 +1734,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-125-T01 (design and fix); the owner agrees the change to the signed reply before work starts.
+💻 **→** Next: land [#740](https://github.com/voidbrain/nerv/pull/740) (B-125-T01), then update every base together.
 
 | | |
 |---|---|
@@ -1839,10 +1744,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-125-t01"></a>B-125-T01 — Bind every signed Kaji reply to the request it answers | 2 h | 0 h | 2 h | Planned |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-125-t01"></a>B-125-T01 — Bind every signed Kaji reply to the request it answers | 2 h | 0 h | 2 h | Implemented; verification pending | [PR #740](https://github.com/voidbrain/nerv/pull/740) |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1851,10 +1756,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | None yet (found in [PR #721](https://github.com/voidbrain/nerv/pull/721)) |
+| PR / evidence | Steps: B-125-T01: [PR #740](https://github.com/voidbrain/nerv/pull/740). [#740](https://github.com/voidbrain/nerv/pull/740) (failing test 793d00c0, then the binding; found in [PR #721](https://github.com/voidbrain/nerv/pull/721)) |
 | Opened | 2026-11-24 |
-| Verification | Pending |
-| Reviewed | 2026-11-24 |
+| Verification | Unit/integration: the replayed epoch-push reply is refused across a real requester and responder in #740. Live check on the updated bases: Pending. |
+| Reviewed | 2026-11-25 |
 
 </details>
 
@@ -2419,6 +2324,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #737](https://github.com/voidbrain/nerv/pull/737) (Tests: `test/push-subject.test.ts`, `test/push-health-row.test.mjs`) |
 | Opened | 2026-11-25 |
 | Verification | 2026-11-25: tests committed first and failing on main; with the fix they pass with `test/push.test.ts` unchanged. A real push to the owner's iPhone with the new subject was verified by hand on 2026-11-25; the shipped service is not yet observed. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="b-135"></a>[🐞 B-135](#top)
+
+**Update now on a busy Mac is refused as an ownership problem when NERV's health check is slow**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update reaches the service, press Update now in the dashboard while the Mac is busy (for example during a full `npm test` in another checkout): the update either goes through, or, if NERV is slower than 2 × 5 s, the refusal reads "NERV did not answer its health check within 5.0 s (2 attempts, … s in all; the machine may be busy) … Nothing was stopped; try again in a minute." and never "Service or runtime ownership is unknown or belongs elsewhere.".
+
+| | |
+|---|---|
+| **Issue** | Owner-reported 2026-11-25 on NERV-01: Update now (03316fbd → fa9ab0b3) was refused at 07:49:50Z with "Service or runtime ownership is unknown or belongs elsewhere." while the load average was about 25–40; the same checks passed on 2026-11-24 23:44Z. The running commit, the checkout and the launchd job all matched (the live `launchctl print` and plist were checked read-only against `macRegistrationMatches` and the rendered definition: both owned). The observation (`src/node-lifecycle-mac.ts`, also Linux and Windows) gave `/api/doctor` 1.5 s once; a timeout or non-OK answer left `runtime = 'unknown'`, which `blockers()` reported as the generic ownership refusal. |
+| **Reproduce** | A registered, owned service whose doctor answers after 2 s (or not at all): `planService(host, 'update', next)` lists the ownership refusal. |
+| **Check** | A committed test fails first across the observation and the blockers: a doctor answering within 5 s, or on its second attempt, is owned; one that does not answer, or answers non-OK, is named with its measured time or status and "Nothing was stopped", never as ownership, and the runtime stays `unknown` (never owned); a doctor answering for another revision is still the ownership refusal. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-135-t01"></a>B-135-T01 — A slow or failing doctor probe is named as such, not as an ownership refusal | 1.5 h | 0 h | 0 h | Implemented; verification pending | [PR #745](https://github.com/voidbrain/nerv/pull/745) |
+| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 0 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-135.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-135-T01: [PR #745](https://github.com/voidbrain/nerv/pull/745). [#745](https://github.com/voidbrain/nerv/pull/745) (Tests: `test/update-doctor-slow.test.ts`, B-135 case in `test/linux-service-lifecycle.test.ts`; shared fixture `test/moved-service-fixture.ts`) |
+| Opened | 2026-11-25 |
+| Verification | 2026-11-25: the regression committed first (650ad815) fails 4 of 5 cases on main; with the fix it passes, and the B-122, Linux, Windows and upgrade lifecycle tests pass unchanged. Windows shares the probe and the blockers but has no dedicated slow-doctor test. The shipped service is not yet observed. |
 | Reviewed | 2026-11-25 |
 
 </details>
