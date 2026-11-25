@@ -365,7 +365,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in the PR that carries B-134-T01. |
+| PR / evidence | Opened in [PR #737](https://github.com/voidbrain/nerv/pull/737). |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-25 |
@@ -2307,7 +2307,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in the PR that carries B-134-T01 (Tests: `test/push-subject.test.ts`, `test/push-health-row.test.mjs`) |
+| PR / evidence | [PR #737](https://github.com/voidbrain/nerv/pull/737) (Tests: `test/push-subject.test.ts`, `test/push-health-row.test.mjs`) |
 | Opened | 2026-11-25 |
 | Verification | 2026-11-25: tests committed first and failing on main; with the fix they pass with `test/push.test.ts` unchanged. A real push to the owner's iPhone with the new subject was verified by hand on 2026-11-25; the shipped service is not yet observed. |
 | Reviewed | 2026-11-25 |
