@@ -10,6 +10,7 @@
 //                                           header above it is longer than two short lines
 import {readFileSync,writeFileSync,readdirSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
+import {pathToFileURL} from 'node:url';
 import {run as archiveRecaps} from './archive-recap.mjs';
 
 const ROOT=process.cwd();const BACKLOG=join(ROOT,'docs/BACKLOG.md');const ARCHIVE=join(ROOT,'docs/archive');
@@ -89,7 +90,8 @@ export function place(text,block){
 export function builtViews(root=ROOT){
  try{const w=JSON.parse(readFileSync(join(root,'.harness.json'),'utf8')).workItems;return Boolean(w?.enabled&&w.views==='built');}catch{return false;}
 }
-if(import.meta.url===`file://${process.argv[1]}`){
+// Compared as URLs: a Windows path is not file:// plus the path (F-125-T02, the Windows CI run of PR #763).
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const built=builtViews();
  if(built)(await import('./work-items.mjs')).buildView(ROOT);
  const records=allRecords();const text=readFileSync(BACKLOG,'utf8');

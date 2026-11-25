@@ -6,6 +6,7 @@
 //   node tools/roadmap-status.mjs --check   fail on an unknown ID, an open feature placed nowhere or twice, or a stale block
 import {readFileSync,writeFileSync,readdirSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
+import {pathToFileURL} from 'node:url';
 import {parseRecords,builtViews} from './backlog-recap.mjs';
 
 const ROOT=process.cwd();const ROADMAP=join(ROOT,'docs/ROADMAP.md');const BACKLOG=join(ROOT,'docs/BACKLOG.md');const ARCHIVE=join(ROOT,'docs/archive');
@@ -70,7 +71,8 @@ function records(){
  const archived=existsSync(ARCHIVE)?readdirSync(ARCHIVE).filter(f=>/^backlog-\d{4}\.md$/.test(f)).flatMap(f=>parseRecords(readFileSync(join(ARCHIVE,f),'utf8'),true)):[];
  return {active,archived};
 }
-if(import.meta.url===`file://${process.argv[1]}`){
+// Compared as URLs: a Windows path is not file:// plus the path (F-125-T02, the Windows CI run of PR #763).
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  // F-125-T02: with built views the ledger is rebuilt from the record sources before it is read.
  if(builtViews(ROOT))(await import('./work-items.mjs')).buildView(ROOT);
  const {active,archived}=records();const text=readFileSync(ROADMAP,'utf8');
