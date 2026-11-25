@@ -9,9 +9,12 @@
     "A dashboard route or view in web/src signs in like live.js (session exchange, kept session, typed pairing code) and reads /api/dashboard/stream with /api/dashboard/history as the fallback poll",
     "Section state lives in signals; lists render with @for track by id, so an unchanged poll leaves the DOM in place (a test renders the same state twice, as B-144)",
     "Feed parsing (toSortie, toApproval, mapStatus and similar) moves to framework-free src/ helpers with unit tests; live.js keeps its copy until its section moves",
-    "The old dashboard header links to the new view; the workspace build and CSP checks pass"
+    "The old dashboard header links to the new view; the workspace build and CSP checks pass",
+    "The workspace keeps the simple page (Nodo) as the base of the simple view (F-130-T16); the dashboard is a second layout beside it, not a replacement"
   ],
-  "dependsOn": [],
+  "dependsOn": [
+    "F-130-T15"
+  ],
   "resources": [
     "web/src/**",
     "src/**",
