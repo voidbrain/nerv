@@ -187,8 +187,16 @@ export class Store {
   ) {
     if (options.home) this.home = options.home;
     if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
-    this.db = new DatabaseSync(path);
-    const version = this.db.prepare('PRAGMA user_version').get() as { user_version: number };
+    // B-126: wait for a briefly held lock from the first statement; busy_timeout below came too late for the reads.
+    this.db = new DatabaseSync(path, { timeout: 5000 });
+    let version: { user_version: number };
+    try {
+      version = this.db.prepare('PRAGMA user_version').get() as { user_version: number };
+    } catch (e) {
+      // B-126: a Store that cannot open must not keep the file handle (Windows then cannot remove or reopen the file).
+      this.db.close();
+      throw e;
+    }
     if (version.user_version > UPGRADE_CONTRACT.readerSchema) {
       this.db.close();
       throw new Error('Database schema is newer than this NERV Agency version.');
