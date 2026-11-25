@@ -8,7 +8,7 @@ import { createECDH, randomBytes } from 'node:crypto';
 import { Store } from '../src/store.ts';
 import { makeServer } from '../src/server.ts';
 import { TelegramApi, TelegramChannel } from '../src/telegram.ts';
-import { PUSH_FALLBACK_MS } from '../src/delivery-state.ts';
+import { FALLBACK_CLAIM_LEASE_MS, PUSH_FALLBACK_MS } from '../src/delivery-state.ts';
 import { fakeBotApi, fakePushService, until, wait } from './fixtures/delivery-fakes.ts';
 
 const OWNER = 5150;
@@ -204,7 +204,9 @@ test('F-004-T09: across a NERV restart the fallback is sent once, and an opened 
   }
 });
 
-test('F-004-T09: a fallback claimed but cut off by a crash is not sent again; a failed send is retried once it works', async () => {
+// Owner decision 2026-11-25 (B, at least once): this test used to pin "a claim cut off by a crash is never re-offered".
+// The requirement changed deliberately: such a claim is re-offered once its lease ends, accepting one duplicate.
+test('F-004-T09: a fallback claimed but cut off by a crash is re-offered once after its lease (at least once); a failed send is retried', async () => {
   const store = new Store(':memory:');
   const device = createECDH('prime256v1');
   device.generateKeys();
@@ -224,13 +226,20 @@ test('F-004-T09: a fallback claimed but cut off by a crash is not sent again; a 
     await until(() => pushed === 1);
     const id = store.inboxPage(0, 5).items[0]!.id;
     const later = new Date('2030-05-01T07:20:00Z');
-    const claim = () => store.deliveryChannels.claimFallback(PUSH_FALLBACK_MS, later);
+    const claim = (at = later) => store.deliveryChannels.claimFallback(PUSH_FALLBACK_MS, at);
     assert.equal(claim().length, 1, 'due once the deadline passed');
-    assert.equal(claim().length, 0, 'claimed: in flight, never handed out twice (also after a crash)');
-    store.deliveryChannels.record(id, 'telegram', 'failed', new Date('2030-05-01T07:20:01Z'), 'HTTP 503');
-    assert.equal(claim().length, 1, 'a recorded failure is retried');
+    assert.equal(claim().length, 0, 'claimed: in flight, not handed out twice while its lease runs');
+    const leaseOver = new Date(later.getTime() + FALLBACK_CLAIM_LEASE_MS + 1000);
+    assert.equal(
+      claim(leaseOver).length,
+      1,
+      'a claim with no outcome (NERV crashed mid-send) is re-offered after its lease',
+    );
+    assert.equal(claim(leaseOver).length, 0, 'once per crash: the re-offer is a new claim with a new lease');
+    store.deliveryChannels.record(id, 'telegram', 'failed', new Date(leaseOver.getTime() + 1000), 'HTTP 503');
+    assert.equal(claim(new Date(leaseOver.getTime() + 2000)).length, 1, 'a recorded failure is retried');
     store.recordDelivery(id, 'telegram', 'sent');
-    assert.equal(claim().length, 0);
+    assert.equal(claim(new Date(leaseOver.getTime() + 10 * FALLBACK_CLAIM_LEASE_MS)).length, 0, 'sent: never again');
     assert.equal(store.pushOpened('not-a-receipt'), false);
     assert.equal(store.pushOpened('A'.repeat(24)), false, 'an unknown receipt opens nothing');
   } finally {
