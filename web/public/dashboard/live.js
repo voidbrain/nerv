@@ -509,12 +509,12 @@
         : s.state === "refused" ? "Update refused" + on
           : s.state === "failed" ? "Update failed" + on
             : "Update outcome uncertain" + on;
-    const tone = s.state === "completed" ? "ok" : s.state === "refused" ? "warn" : s.state === "running" ? "muted" : "danger";
+    const tone = s.state === "completed" ? "ok" : s.state === "refused" || s.state === "running" ? "warn" : "danger";
     const t = Date.parse(s.at);
     const time = Number.isFinite(t) ? new Date(t).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }) + " local" : "";
     const reasons = Array.isArray(s.reasons) ? s.reasons : [];
     const recovery = Array.isArray(s.recovery) ? s.recovery : [];
-    return "<div id='update-status' class='small " + tone + "' style='margin-top:6px'>" +
+    return "<div id='update-status' class='update-status small " + tone + "'>" +
       "<div class='row'><strong>" + esc(title) + "</strong><span class='row' style='gap:6px'>" + (time ? "<span class='muted'>" + esc(time) + "</span>" : "") +
       (s.state !== "running" ? "<button class='btn sm' id='btn-dismiss-update-status' type='button'>Dismiss</button>" : "") + "</span></div>" +
       (reasons.length ? "<ul style='margin:4px 0 0 16px;padding:0'>" + reasons.map(r => "<li>" + esc(r) + "</li>").join("") + "</ul>" : "") +
@@ -588,6 +588,27 @@
     const when = new Date(last.at).toLocaleString();
     return ["Phone push", last.ok ? "ok" : "danger", devices + " · " + (last.ok ? "last ok (" + last.status + ")" : "last failed (" + last.status + (last.reason ? " " + last.reason : "") + ")") + " · " + when];
   }
+  // B-140: health rows (start)
+  /** One Health row: a label that never wraps, then the value (marker, text, optional action); c[4] follows the row, c[5] adds attributes. */
+  function healthRowHtml(c) {
+    const mark = c[1] === "ok" ? "✓ " : c[1] === "muted" ? "· " : "✗ ";
+    return "<div class='row small health-row'" + (c[5] || "") + "><span class='health-label'>" + esc(c[0]) + "</span><span class='row health-value'><span class='" + c[1] + "'>" + mark + esc(c[2]) + "</span>" + (c[3] || "") + "</span></div>" + (c[4] || "");
+  }
+  /** The service sample and peer link rows, shaped like every other Health row; a row with a warning is warn. */
+  function healthMetricRows(hm) {
+    const warned = prefix => (hm && Array.isArray(hm.warnings) ? hm.warnings : []).some(w => String(w.key).startsWith(prefix));
+    const s = hm && hm.latestSample;
+    const mb = n => (Number(n) / 1048576).toFixed(1);
+    const sample = s
+      ? ["Service sample", warned("sample:") ? "warn" : "ok", "RSS " + mb(s.rssBytes) + " MB · Heap " + mb(s.heapUsedBytes) + " MB · Loop " + s.eventLoopDelayMs + " ms · Polls " + s.pollCount, "", "", " id='health-sample-row'"]
+      : ["Service sample", "muted", "No health samples yet.", "", "", " id='health-sample-row'"];
+    const links = hm && Array.isArray(hm.links) ? hm.links : [];
+    const linkRows = links.length
+      ? links.map(l => ["Link · " + l.peerId, warned("link:" + l.peerId + ":") ? "warn" : "ok", l.bytesSent + "B↑ / " + l.bytesReceived + "B↓ · " + (l.lastLatencyMs == null ? "—" : l.lastLatencyMs + " ms") + " · in-flight " + l.inFlight + " · reconnects " + l.reconnects, "", "", " data-link-peer='" + esc(l.peerId) + "'"])
+      : [["Link load", "muted", "No peer link traffic recorded.", "", "", " id='health-links-empty'"]];
+    return [sample, ...linkRows];
+  }
+  // B-140: health rows (end)
   window.renderHealth = function () {
     const d = state.doctor; if (!d) { document.getElementById("health").innerHTML = "<div class='muted small'>Waiting for doctor…</div>"; return; }
     const p = d.processes || {}; const m = d.models || {}; const roles = m.roles || {};
@@ -642,20 +663,13 @@
         (la ? "<div class='small " + (la.outcome === "completed" || la.outcome === "started" ? "ok" : la.outcome === "refused" ? "warn" : "muted") + "'>Last automatic attempt: " + esc(la.outcome) + (la.revision ? " · " + esc(la.revision.slice(0, 7)) : "") + ((la.reasons || []).length ? " · " + esc(la.reasons.join("; ")) : "") + "</div>" : "")
       : "";
     const hm = state.healthMetrics;
-    const sampleHtml = hm && hm.latestSample
-      ? "<div class='row small' id='health-sample-row'><span>Service sample</span><span class='muted'>RSS " + (hm.latestSample.rssBytes / 1048576).toFixed(1) + " MB · Heap " + (hm.latestSample.heapUsedBytes / 1048576).toFixed(1) + " MB · Loop " + hm.latestSample.eventLoopDelayMs + " ms · Polls " + hm.latestSample.pollCount + "</span></div>"
-      : "<div class='row small muted' id='health-sample-row'><span>Service sample</span><span>No health samples yet.</span></div>";
-    const links = hm && Array.isArray(hm.links) ? hm.links : [];
-    const linksHtml = links.length
-      ? links.map(l => "<div class='row small' data-link-peer='" + esc(l.peerId) + "'><span>Link · " + esc(l.peerId) + "</span><span class='muted'>" + l.bytesSent + "B↑ / " + l.bytesReceived + "B↓ · " + (l.lastLatencyMs == null ? "—" : l.lastLatencyMs + " ms") + " · in-flight " + l.inFlight + " · reconnects " + l.reconnects + "</span></div>").join("")
-      : "<div class='row small muted' id='health-links-empty'><span>Link load</span><span>No peer link traffic recorded.</span></div>";
     const warnings = hm && Array.isArray(hm.warnings) ? hm.warnings : [];
     const warningsHtml = warnings.length
       ? "<div id='health-warnings' style='margin-top:4px'>" + warnings.map(w => "<div class='small warn' data-health-warning='" + esc(w.key) + "'>▲ " + esc(w.message) + "</div>").join("") + "</div>"
       : "";
-    document.getElementById("health").innerHTML = degraded + rows.map(c => "<div class='row small'><span>" + c[0] + "</span><span class='row' style='gap:6px'><span class='" + c[1] + "'>" + (c[1] === "ok" ? "✓ " : "✗ ") + esc(c[2]) + "</span>" + (c[3] || "") + "</span></div>" + (c[4] || "")).join("") +
-      sampleHtml +
-      linksHtml +
+    // B-140: the service sample and link rows belong to the table; Update availability (with the updater status) ends it.
+    const table = rows.filter(r => r !== availabilityRow).concat(healthMetricRows(hm), availabilityRow ? [availabilityRow] : []);
+    document.getElementById("health").innerHTML = degraded + "<div class='health-table'>" + table.map(healthRowHtml).join("") + "</div>" +
       warningsHtml +
       policyHtml +
       updateResultHtml +
@@ -1152,20 +1166,19 @@
     const m = settingsModel();
     const busy = !!state.settingsBusy;
     const msg = state.settingsMsg;
+    const hour = (label, value) => " aria-label='" + label + "' type='number' min='0' max='23' step='1' value='" + esc(value) + "'" + (busy ? " disabled" : "") + ">";
+    // Update schedule: one label and its controls per line, so the fields align in their column.
     box.innerHTML = "<form id='settings-form' class='list'>" +
-      "<div class='row small' style='flex-wrap:wrap;gap:6px;align-items:center'>" +
-      "<label style='display:inline-flex;align-items:center;gap:4px'><input type='checkbox' id='set-auto-enabled'" + (m.enabled ? " checked" : "") + (busy ? " disabled" : "") + "> Automatic updates</label>" +
-      "<select id='set-update-mode' aria-label='Update mode'" + (busy ? " disabled" : "") + "><option value='apply'" + (m.mode === "apply" ? " selected" : "") + ">Apply after notice</option><option value='notify'" + (m.mode === "notify" ? " selected" : "") + ">Notify only</option></select>" +
-      "<span>Check at</span><input id='set-check-hour' aria-label='Check hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.checkHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>:00</span>" +
-      "<span>Apply at</span><input id='set-apply-hour' aria-label='Apply hour (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.applyHour) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>:00</span>" +
-      "<span>Quiet hours</span><input id='set-quiet-from' aria-label='No-apply from (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietFrom) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>:00 –</span><input id='set-quiet-until' aria-label='No-apply until (0–23)' type='number' min='0' max='23' step='1' value='" + esc(m.quietUntil) + "'" + (busy ? " disabled" : "") + " style='width:48px'><span>:00</span>" +
+      "<div class='field-grid small'>" +
+      "<span>Updates</span><label class='field'><input type='checkbox' id='set-auto-enabled'" + (m.enabled ? " checked" : "") + (busy ? " disabled" : "") + "> Automatic</label>" +
+      "<span class='field wide'><select id='set-update-mode' aria-label='Update mode'" + (busy ? " disabled" : "") + "><option value='apply'" + (m.mode === "apply" ? " selected" : "") + ">Apply after notice</option><option value='notify'" + (m.mode === "notify" ? " selected" : "") + ">Notify only</option></select></span>" +
+      "<span>Check at</span><span class='field'><input id='set-check-hour'" + hour("Check hour (0–23)", m.checkHour) + "<span>:00</span></span>" +
+      "<span>Apply at</span><span class='field'><input id='set-apply-hour'" + hour("Apply hour (0–23)", m.applyHour) + "<span>:00</span></span>" +
+      "<span>Quiet hours</span><span class='field'><span class='nowrap'><input id='set-quiet-from'" + hour("No-apply from (0–23)", m.quietFrom) + " :00 –</span><span class='nowrap'><input id='set-quiet-until'" + hour("No-apply until (0–23)", m.quietUntil) + " :00</span></span>" +
+      "<span>Daily brief</span><span class='field'><input type='checkbox' id='set-brief-enabled' aria-label='Daily brief'" + (m.briefEnabled ? " checked" : "") + (busy ? " disabled" : "") + "><input id='set-brief-at' aria-label='Daily brief time (HH:MM)' type='time' value='" + esc(m.briefAt) + "'" + (busy || !m.briefEnabled ? " disabled" : "") + "></span>" +
       "</div>" +
-      "<div class='row small' style='flex-wrap:wrap;gap:6px;align-items:center'>" +
-      "<label style='display:inline-flex;align-items:center;gap:4px'><input type='checkbox' id='set-brief-enabled'" + (m.briefEnabled ? " checked" : "") + (busy ? " disabled" : "") + "> Daily brief at</label>" +
-      "<input id='set-brief-at' aria-label='Daily brief time (HH:MM)' type='time' value='" + esc(m.briefAt) + "'" + (busy || !m.briefEnabled ? " disabled" : "") + ">" +
-      "<span class='tiny muted'>Time zone " + esc(m.timeZone) + " · Sync Ratio 80% · Telegram 90 s</span>" +
-      "</div>" +
-      "<div class='row' style='margin-top:4px'><button class='btn sm primary' id='btn-save-settings' type='submit'" + (busy ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button>" +
+      "<div class='tiny muted'>Time zone " + esc(m.timeZone) + " · Sync Ratio 80% · Telegram 90 s</div>" +
+      "<div class='row'><button class='btn sm primary' id='btn-save-settings' type='submit'" + (busy ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button>" +
       "<span id='settings-status' role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : (state.settingsDraft ? "Unsaved changes" : "")) + "</span></div>" +
       "</form>";
   };
@@ -1244,7 +1257,7 @@
     const box = document.getElementById("settings-devices"); if (!box) return;
     const list = state.devices, msg = state.devicesMsg;
     box.innerHTML = "<div class='row small' style='justify-content:space-between;align-items:center'><b>Paired devices</b><span class='row' style='gap:4px'><button class='btn sm' type='button' id='btn-pair-device'>Pair a device</button><button class='btn sm' type='button' id='btn-devices-refresh'>Refresh</button></span></div>" + pairingHtml() +
-      (list === null ? "<div class='tiny muted'>Loading…</div>" : !list.length ? "<div class='tiny muted'>No paired devices. Pair a phone with Pair a device or <code>nerv open --phone --qr</code>.</div>" :
+      (list === null ? "<div class='tiny muted'>Loading…</div>" : !list.length ? "<div class='tiny muted'>No paired devices. Pair a phone with Pair a device or nerv open --phone --qr.</div>" :
         "<div class='list'>" + list.map(d => "<div class='row small' data-device='" + esc(d.id) + "' style='justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap'>" +
           "<span><b>" + esc(d.name) + "</b>" + (d.current ? " <span class='ok'>· this device</span>" : "") +
           "<br><span class='tiny muted'>paired " + esc(deviceDay(d.created)) + " · last used " + esc(deviceAgo(d.lastUse)) + " · lapses " + esc(deviceDay(d.expires)) + "</span></span>" +

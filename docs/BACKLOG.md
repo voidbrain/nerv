@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 12 | 5 | 33 | 13 |
+| **This week** | 12 | 5 | 35 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 42 | 33 |
-| **Require Human 🧑** | 14 | 17 |
+| **Open** | 42 | 35 |
+| **Require Human 🧑** | 14 | 19 |
 
 ### Require Human 🧑
 
@@ -32,16 +32,18 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-098](#f-098) |  | [B-129](#b-129) |  |
 | [F-060](#f-060) |  | [B-134](#b-134) |  |
 | [F-007](#f-007) |  | [B-135](#b-135) |  |
-| [F-123](#f-123) |  | [B-125](#b-125) |  |
+| [F-123](#f-123) |  | [B-140](#b-140) |  |
+|  |  | [B-125](#b-125) |  |
 |  |  | [B-056](#b-056) |  |
 |  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
 |  |  | [B-112](#b-112) |  |
 |  |  | [B-130](#b-130) |  |
+|  |  | [B-141](#b-141) |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 111 h agent + 14 h owner across 134 open steps of 42 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 113.5 h agent + 14 h owner across 136 open steps of 42 features and 35 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2337,6 +2339,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-140"></a>[🐞 B-140](#top)
+
+**Dashboard Health: the service sample and link rows are built outside the table and look malformed**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update reaches the service, on the Mac run `nerv open dashboard` and look at Health (phone too, from the Home Screen app): "Service sample" and every "Link · …" (or "Link load") row read on one line as label left, ✓/✗/· and value right, like Scheduler above them; Update availability is the last row, with the updater status boxed under it.
+
+| | |
+|---|---|
+| **Issue** | Seen by the owner on 2026-11-25 (dashboard and PWA): Health looked malformed around "service", "sample" and "link". The HTML was valid (each row had two cells), but `live.js` built those rows apart from the table: the value was a bare muted span without the ✓/✗ marker, the label shrank and wrapped ("Service / sample", "Link · NERV- / 02") because nothing kept it on one line, the empty rows greyed the label too, and the rows came after the updater status box, splitting the table in two. |
+| **Reproduce** | Serve the dashboard with a health sample and a peer link (as `test/health-samples.test.ts` records them) and an update available: in a 384 px wide Health panel the labels wrap and the two rows sit below the Update refused box. |
+| **Check** | `test/health-settings-layout.test.mjs` renders the sample, link and empty rows and asserts each is one `health-row` with a nowrap `health-label` and a right-aligned `health-value` holding the marker and text, escaped; the metric rows join the table before Update availability. Owner visual check above. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-140-t01"></a>B-140-T01 — Render the Health service sample and link rows as table rows | 1 h | 0 h | 1 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-140.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/health-settings-layout.test.mjs` |
+| Opened | 2026-11-25 |
+| Verification | Unit 2026-11-25: `test/health-settings-layout.test.mjs` passes locally. Visual 2026-11-25: headless Chrome screenshots (desktop 1440 px, phone 390 px) on a test home. Human: Pending. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
 ### <a id="b-125"></a>[🐞 B-125](#top)
 
 **A signed Kaji reply is not bound to its request, so an old epoch-push reply can be replayed**
@@ -3518,6 +3558,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-24 |
 | Verification | 2026-11-24: `test/dashboard.test.ts` "B-130" committed first and failing on main (`skip` for the Apt); with the fix it passes with the B-044 and B-112 flow tests unchanged. Before the PR: `npm test` 1,443 pass (2 skipped); the browser tests reading live.js, dashboard.js or web/src (`test/angular.browser.mjs`, `test/evaluation.browser.mjs`, `test/pwa.browser.mjs`, `test/updater-status.browser.mjs`, `test/doctor-run.browser.mjs`) 11/11 on the production build; `npm run gauntlet:all` (owner-approved, gemma4-12b profile) passed, none pending. Browser look on a real sortie not yet observed. |
 | Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-141"></a>[🐞 B-141](#top)
+
+**Dashboard: the updater status is lost among the Health rows, and Settings is misaligned**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟡 Medium | 1.5 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update reaches the service, on the Mac run `nerv open dashboard`: an updater status under Update availability is a bordered box in its state colour (yellow in progress or refused, red failed or uncertain, green completed) with a bold title; Settings shows the update schedule on the left (Updates, mode, Check at, Apply at, Quiet hours, Daily brief, Apply) and Paired devices (Pair a device, Revoke) and Notifications on the right. On the phone (Home Screen app) Settings is one column.
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-25: the updater's status line (B-123) gets lost among the other Health rows (same size as the rows, in progress in the muted colour); Settings wraps its schedule fields into one ragged flex line ("Check at" at a line end, ":00 –" alone), and the pairing command renders as a full-width block. |
+| **Reproduce** | Open the dashboard with an updater refusal and look at Health and Settings at 1440 px. |
+| **Check** | `test/health-settings-layout.test.mjs`: each updater state carries `update-status` and its tone (warn, danger, ok), the box is bold and bordered with `currentColor` and tokens only; `#p-settings` holds a `cols-2` grid with `#settings` left and `#settings-devices` + `#settings-push` right, one column at 720 px or less, and the schedule is a `field-grid` with no inline styles. Owner visual check above. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-141-t01"></a>B-141-T01 — Make the updater status stand out and split Settings into two columns | 1.5 h | 0 h | 1.5 h | Implemented; verification pending |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-141.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/health-settings-layout.test.mjs`, `test/updater-status-render.test.mjs` |
+| Opened | 2026-11-25 |
+| Verification | Unit 2026-11-25: both tests pass locally. Visual 2026-11-25: headless Chrome screenshots (desktop 1440 px, phone 390 px) on a test home. Human: Pending. |
+| Reviewed | 2026-11-25 |
 
 </details>
 

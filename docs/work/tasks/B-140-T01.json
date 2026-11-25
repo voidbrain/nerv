@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "B-140-T01",
+  "parent": "B-140",
+  "title": "Render the Health service sample and link rows as table rows",
+  "goal": "Every Health row, sample and links included, has one shape: nowrap label, marker and value right",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test renders the sample, link and empty rows and asserts their structure; it fails on main",
+    "The metric rows join the table before Update availability",
+    "Owner visual check on the dashboard and the phone"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/live.js",
+    "web/public/dashboard/index.html",
+    "test/health-settings-layout.test.mjs",
+    "docs/work/records/B-140.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "frontend",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "A committed test fails before the change",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-25 when opened from the owner report. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}
