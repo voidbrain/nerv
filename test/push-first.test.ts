@@ -274,7 +274,8 @@ test('F-004-T09 review: a tap in the workspace app (Angular worker) also posts t
     });
     await Promise.all(work);
     assert.equal(t.store.deliveryState(id).push?.state, 'opened');
-    assert.match(readFileSync('web/src/main.ts', 'utf8'), /provideServiceWorker\('workspace-sw\.js'/);
+    // F-130-T01: the providers moved from main.ts to app.ts (appConfig).
+    assert.match(readFileSync('web/src/app.ts', 'utf8'), /provideServiceWorker\('workspace-sw\.js'/);
   } finally {
     await t.close();
   }
