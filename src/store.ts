@@ -191,10 +191,11 @@ export class Store {
   constructor(
     path: string,
     scrolls: { policy: Policy; source: string } = { policy: defaultPolicy, source: 'default' },
-    /** B-126-T03: `onStep` hears each start-up step before it runs (the nervous child's start-up watch). */
-    options: { home?: string; onStep?: (step: string) => void } = {},
+    /** B-126-T03: `onStep` hears each start-up step before it runs, with the connection once it is open (the nervous
+     child's start-up watch, and tests). */
+    options: { home?: string; onStep?: (step: string, db: DatabaseSync | undefined) => void } = {},
   ) {
-    const step = (name: string) => options.onStep?.(`database: ${name}`);
+    const step = (name: string) => options.onStep?.(`database: ${name}`, this.db as DatabaseSync | undefined);
     if (options.home) this.home = options.home;
     step('open the file');
     if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
@@ -226,6 +227,12 @@ export class Store {
     }
     this.usage = new UsageStore(this.db);
     this.instrumentality = new InstrumentalityRuns(this.db);
+    // B-126-T03: each start-up statement below commits on its own, and at synchronous=FULL each commit waits for the
+    // disk; a loaded Windows runner took over 30 s for them. They are idempotent (IF NOT EXISTS) or their own
+    // transaction (a migration), so a lost one reruns at the next start: in WAL mode, NORMAL commits without waiting
+    // and never corrupts. The connection's own setting returns once the Store is open.
+    const durability = (this.db.prepare('PRAGMA synchronous').get() as { synchronous: number }).synchronous;
+    if (durability > 1) this.db.exec('PRAGMA synchronous=NORMAL');
     step('journal mode and core schema');
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
@@ -344,6 +351,7 @@ export class Store {
         .all(new Date().toISOString()) as { id: string }[];
       for (const approval of pending) this.sortiesController.deliverApproval(approval.id);
     });
+    if (durability > 1) this.db.exec(`PRAGMA synchronous=${durability}`);
   }
   private readonly watchStarted = new Date();
   private _watchController?: StoreWatch;
