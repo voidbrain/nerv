@@ -2504,7 +2504,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); F-126-T01 speed benchmark in [2026-11-25-f126-t01-speed-benchmark.md](evaluations/2026-11-25-f126-t01-speed-benchmark.md) |
+| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); F-126-T01 speed benchmark in [2026-11-25-f126-t01-speed-benchmark.md](evaluations/2026-11-25-f126-t01-speed-benchmark.md); [#761](https://github.com/voidbrain/nerv/pull/761) |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration: 2026-11-25 `test/speed-benchmark.test.mjs` passed (2/2); local benchmark run recorded in `docs/evaluations/2026-11-25-f126-t01-speed-benchmark.md`; quality evaluation pending F-126-T02. |
 | Reviewed | 2026-11-25 |
