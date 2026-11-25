@@ -2649,7 +2649,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730). |
+| PR / evidence | Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730).; [#746](https://github.com/voidbrain/nerv/pull/746) |
 | Opened | 2026-11-24 |
 | Verification | — |
 | Reviewed | 2026-11-24 |
