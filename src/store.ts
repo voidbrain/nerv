@@ -187,7 +187,8 @@ export class Store {
   ) {
     if (options.home) this.home = options.home;
     if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
-    this.db = new DatabaseSync(path);
+    // B-126: wait for a briefly held lock from the first statement; busy_timeout below came too late for the reads.
+    this.db = new DatabaseSync(path, { timeout: 5000 });
     const version = this.db.prepare('PRAGMA user_version').get() as { user_version: number };
     if (version.user_version > UPGRADE_CONTRACT.readerSchema) {
       this.db.close();
