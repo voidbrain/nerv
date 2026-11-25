@@ -11,7 +11,8 @@
     "The battery and fleet views are not migrated: by the owner decision of 2026-11-25 they come from FPVBuddy through MCP (F-101-T06, F-101-T07); the old battery tab goes with web/public/dashboard in F-130-T13"
   ],
   "dependsOn": [
-    "F-130-T01"
+    "F-130-T01",
+    "F-130-T18"
   ],
   "resources": [
     "web/src/**",
@@ -41,7 +42,7 @@
     "size": "medium",
     "estimate": "2.5 h",
     "basis": "Re-estimated 2026-11-25: battery tab dropped (FPVBuddy owns its screens, shown through MCP); mostly read-only tables remain. Was 3 h. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-26",
     "agentHours": 2.5,
     "baselineAgentHours": 3,
     "estimateAgentHours": 2.5

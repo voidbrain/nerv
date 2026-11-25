@@ -4,7 +4,7 @@ Owner steps for [F-016](https://github.com/voidbrain/nerv/blob/backlog-views/doc
 
 ## 0. Before you start
 
-Both bases on `main` at `2627d483` or later (B-124 and B-125 included). NERV-03 is offline as of 2026-11-25 and runs the older reply format; a planned move goes on without its answer, but if it is online and refuses (`reply_unbound` or `bad signature`), update it first ([B-125 page](b125-nerv03-update.md)).
+Both bases on `main` at `2627d483` or later (B-124 and B-125 included). NERV-03 (Calvary) is on `eff68a3a` since 2026-11-25 (B-125 closed); if a base still refuses (`reply_unbound` or `bad signature`), update it first ([B-125 page](b125-nerv03-update.md)).
 
 On NERV-01 (Terminal):
 

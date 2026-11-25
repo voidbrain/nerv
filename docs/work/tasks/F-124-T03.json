@@ -4,7 +4,7 @@
   "parent": "F-124",
   "title": "A reminder opened on the phone is not re-sent on Telegram",
   "goal": "Opening the push notification marks the delivery opened; the Telegram copy is cancelled or never sent",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The service worker reports a notification click to the service, which marks the delivery opened",
     "An opened reminder produces no Telegram message; an unopened one still falls back (F-004-T09)"
@@ -36,10 +36,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h agent",
-    "basis": "Estimated 2026-11-25: one authenticated endpoint, the click handler and the cancel rule. Not a measurement. 2026-11-25: implemented in PR #760 together with F-004-T09, which needs the open signal: the receipt endpoint takes a one-off receipt from the push payload instead of a bearer, because the service worker holds none.",
-    "reviewed": "2026-11-25",
-    "agentHours": 0.25,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-25: one authenticated endpoint, the click handler and the cancel rule. Not a measurement. 2026-11-25: implemented in PR #760 together with F-004-T09, which needs the open signal: the receipt endpoint takes a one-off receipt from the push payload instead of a bearer, because the service worker holds none. Closed 2026-11-26: #760 merged on green CI (run 45662255126; attempt 1 lost native-macos with no runner, B-139); test/push-first.test.ts covers the opened and unopened cases.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },

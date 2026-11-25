@@ -10,7 +10,8 @@
     "A test across the chat handler and the component; the old panels link to the new ones"
   ],
   "dependsOn": [
-    "F-130-T01"
+    "F-130-T01",
+    "F-130-T18"
   ],
   "resources": [
     "web/src/**",
@@ -40,7 +41,7 @@
     "size": "medium",
     "estimate": "4 h",
     "basis": "Estimated 2026-11-25: chat form, slash menu keyboard handling and the log. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-26",
     "agentHours": 4,
     "baselineAgentHours": 4,
     "estimateAgentHours": 4

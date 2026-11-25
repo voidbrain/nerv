@@ -37,9 +37,14 @@
     "size": "small",
     "estimate": "1.5 h agent",
     "basis": "Estimated 2026-11-25 when opened from the owner report. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-26",
     "agentHours": 1.5,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 766
+    }
+  ]
 }

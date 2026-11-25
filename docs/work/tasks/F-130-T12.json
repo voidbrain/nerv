@@ -11,7 +11,8 @@
     "Theme is a setting over shared STYLE-GUIDE tokens used by both the full dashboard and the simple view: the plain (non-Evangelion) style is the default, EVA (with CRT) an optional theme"
   ],
   "dependsOn": [
-    "F-130-T01"
+    "F-130-T01",
+    "F-130-T18"
   ],
   "resources": [
     "web/src/**",
@@ -38,7 +39,7 @@
     "size": "medium",
     "estimate": "3.5 h",
     "basis": "Estimated 2026-11-25: the chrome is small; demo mode is the open question. Re-estimated 2026-11-25 (+0.5 h): themes become shared tokens for two layouts. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-26",
     "agentHours": 3.5,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3.5

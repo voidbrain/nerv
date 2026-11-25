@@ -12,7 +12,8 @@
   ],
   "dependsOn": [
     "F-130-T01",
-    "F-004-T09"
+    "F-004-T09",
+    "F-130-T18"
   ],
   "resources": [
     "web/src/**",
@@ -44,7 +45,7 @@
     "size": "medium",
     "estimate": "4 h",
     "basis": "Estimated 2026-11-25: ngsw shows pushes but does not post the receipt, so it needs a worker script beside it; iOS limits uncertain. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-26",
     "agentHours": 4,
     "baselineAgentHours": 4,
     "estimateAgentHours": 4

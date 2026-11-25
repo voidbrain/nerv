@@ -4,7 +4,7 @@
   "parent": "B-125",
   "title": "Bind every signed Kaji reply to the request it answers",
   "goal": "A captured reply cannot answer a later request: the client refuses a reply not signed for its own request nonce",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test fails first: an epoch-push reply captured for one request is replayed to answer another and is refused",
     "Reply signatures cover the request nonce; the decision states how an older peer is treated",
@@ -42,10 +42,10 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "2 h agent",
-    "basis": "Estimated 2026-11-24 from B-121-T02 (stated): signing helper, both call paths, a replay test, decision text. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 from B-121-T02 (stated): signing helper, both call paths, a replay test, decision text. Not a measurement. Closed 2026-11-26.",
     "reviewed": "2026-11-25",
-    "agentHours": 2,
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
   },

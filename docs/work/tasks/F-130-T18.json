@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "id": "F-130-T18",
+  "parent": "F-130",
+  "title": "Upgrade NERV's Angular 22.2.6 → 22.3+ and consume @voidbrain/bricks",
+  "goal": "The workspace runs Angular 22.3 or later and imports @voidbrain/bricks 0.1.0 (tokens, themes, components, surfaces), so the migrated sections are built from bricks rather than copies",
+  "status": "planned",
+  "acceptance": [
+    "Every @angular/* package and the Angular CLI and build tooling are on one 22.3.x or later version (bricks 0.1.0 declares peers @angular/core and @angular/common ^22.3.0); package-lock updated with npm ci clean",
+    "@voidbrain/bricks 0.1.0 is a pinned dependency; the workspace imports its tokens and themes, and one existing component renders through a bricks component with no visible change",
+    "npm run build, npm test (browser tests included) and check:conventions pass; docs/STYLE-GUIDE.md names bricks as the source of tokens and shared components"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "package.json",
+    "package-lock.json",
+    "web/src/**",
+    "angular.json",
+    "docs/STYLE-GUIDE.md",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm ci",
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "npm run check:conventions"
+  ],
+  "escalation": [
+    "A breaking change in the 22.3 update or in bricks that changes how a page looks or behaves goes to the owner",
+    "A bricks defect is reported in the bricks repository, not patched in NERV"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26: a minor Angular update with ng update, one pinned package, its tokens and themes wired into styles.css, one component swapped as the proof, the style guide line. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": [
+    {
+      "pr": 779,
+      "note": "planned in the reconciliation"
+    }
+  ]
+}
