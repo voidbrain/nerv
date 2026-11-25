@@ -40,5 +40,11 @@
     "agentHours": 3.5,
     "baselineAgentHours": 3.0,
     "estimateAgentHours": 3.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 775,
+      "note": "owner decisions recorded in the design"
+    }
+  ]
 }
