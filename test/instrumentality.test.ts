@@ -166,7 +166,14 @@ test('Instrumentality runs once a local day at its time, and a failed digest is 
   const t = await setup(['{"reply":"ok"}'], 'not json');
   try {
     await t.runtime.chat('hello', 'cli');
-    t.runtime.startInstrumentality(() => ({ mode: { at: '00:00' }, timeZone: 'Europe/Rome' }), 50);
+    // A fixed clock: on the real one, a run that crosses midnight in Rome is a new local day, which rightly runs
+    // again (4 digest calls on the Windows runner of PR #778 at 23:58–00:05 Rome).
+    const at = new Date();
+    t.runtime.startInstrumentality(
+      () => ({ mode: { at: '00:00' }, timeZone: 'Europe/Rome' }),
+      50,
+      () => at,
+    );
     // B-104: until both attempts happened (a fixed 400 ms saw none on a slow Windows runner), then a settle time in
     // which a looping retry would show up.
     const digests = () => t.asked.filter((a) => a === 'digest').length;
