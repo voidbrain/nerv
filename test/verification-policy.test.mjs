@@ -60,6 +60,43 @@ test('CI has PR and push-to-main triggers, manual/periodic selection and a full 
   assert.doesNotMatch(workflow, /pull_request_target|secrets\./);
 });
 
+test('B-139: a docs-only PR skips the Windows and macOS jobs at job level; any other path or event runs them', () => {
+  const job = (name) =>
+    workflow.slice(
+      workflow.indexOf('\n  ' + name + ':\n'),
+      workflow.indexOf('runs-on:', workflow.indexOf('\n  ' + name + ':\n')),
+    );
+  // A job-level if leaves a required check "skipped" (passing); workflow-level paths would leave it pending.
+  assert.doesNotMatch(workflow.slice(0, workflow.indexOf('jobs:')), /paths(-ignore)?:/);
+  assert.match(job('windows'), /if: needs.plan.outputs.docs_only != 'true' \|\| needs.plan.outputs.unit == 'true'/);
+  assert.match(
+    job('native-macos'),
+    /if: needs.plan.outputs.docs_only != 'true' \|\| needs.plan.outputs.native == 'true'/,
+  );
+  assert.match(workflow, /docs_only: \$\{\{ steps.changes.outputs.docs_only \}\}/);
+  const step = workflow.slice(workflow.indexOf('- id: changes'));
+  assert.match(step, /if \[ "\$EVENT" = pull_request \]/, 'only a pull request can be docs-only');
+  const docsOnly = new RegExp(/grep -vE '([^']+)'/.exec(step)[1]);
+  for (const file of [
+    'docs/work/records/B-139.md',
+    'docs/work/tasks/B-139-T01.json',
+    'docs/BACKLOG.md',
+    'README.md',
+    'LICENSE',
+  ])
+    assert.ok(docsOnly.test(file), file + ' is docs-only');
+  for (const file of [
+    'native/README.md',
+    'web/src/app/x.md',
+    'src/store.ts',
+    'test/a.test.ts',
+    '.github/workflows/ci.yml',
+    'package.json',
+    'docs',
+  ])
+    assert.ok(!docsOnly.test(file), file + ' runs the OS jobs');
+});
+
 test('shared event persistence/privacy requires full verification and route recovery selects its integration case', () => {
   assert.equal(
     plan(config.verification, { ...fresh, files: ['src/events.ts'] }).full,
