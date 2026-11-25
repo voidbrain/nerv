@@ -1612,7 +1612,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | | |
 |---|---|
 | **Issue** | Reopened 2026-11-25. The first cause (the Store's first reads without a busy timeout, "database is locked") was fixed in #739 and closed; history in the [2026 archive](archive/backlog-2026.md#b-126). On 2026-11-25 Windows CI [run 45632224825](https://github.com/voidbrain/nerv/actions/runs/45632224825) attempt 1 (PR #754, config and records only) failed 11 tests at `Runtime.ready` with `nervous process not ready; nothing was sent.`, with no "database is locked" and no error output from the child: `memory.test.ts:126`, `mcp.test.ts:126`, `mcp-remote.test.ts:288`, `telegram.test.ts:165`, `:331`, `:383` (and `:497` timed out at 20 s), `tool-index.test.ts:167`, `:203`, `:222`, `watch-runtime.test.ts:5`, `:48`. The error did not say whether the child had exited or why. |
-| **Reproduce** | Windows CI `npm test`: run 45632224825 attempt 1 (job 139268338287). Locally on Windows: `npm test` (not reproduced on a 4-core Windows host, idle or under CPU load). |
+| **Reproduce** | Windows CI `npm test`: run 45632224825 attempts 1 (job 139268338287) and 3 (job 139284899678). Locally on Windows: `npm test` (not reproduced on a 4-core Windows host, idle or under CPU load). |
 | **Check** | The not-ready error names the child's exit code or signal, or that it is still running at the deadline, its last start-up step and its last error output (B-126-T02); the second cause is named from that output and fixed test-first, the ready deadline raised only if measurements show the cause is a start slower than 30 s (B-126-T03); no "nervous process not ready" in the next five Windows runs. |
 
 **Steps**
