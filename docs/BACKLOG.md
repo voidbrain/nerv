@@ -282,7 +282,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-118-T01: [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split · B-118-T02: [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain · B-118-T03: [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen · B-118-T04: [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round. B-118-T04: Test: `test/sqlite-no-fsync.test.ts`; timing logs of runs 45506622094 to 45559316942 (Windows) and [run 45548137584](https://github.com/voidbrain/nerv/actions/runs/45548137584) (Linux); [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776); [#741](https://github.com/voidbrain/nerv/pull/741); [#750](https://github.com/voidbrain/nerv/pull/750) |
+| PR / evidence | Steps: B-118-T01: [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split · B-118-T02: [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain · B-118-T03: [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen · B-118-T04: [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round. B-118-T04: Test: `test/sqlite-no-fsync.test.ts`; timing logs of runs 45506622094 to 45559316942 (Windows) and [run 45548137584](https://github.com/voidbrain/nerv/actions/runs/45548137584) (Linux); [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776); [#741](https://github.com/voidbrain/nerv/pull/741); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-24 |
 | Verification | CI 2026-11-25 (later): 573, 545, 440 and 359 s (runs 45602256057, 45618960815, 45629193344, 45640302693); the first two needed a test rerun; two clean runs since. Unit 2026-11-25: Test: `test/sqlite-no-fsync.test.ts` and `test/coordinator-partition.test.ts` pass locally (B-118-T04). CI 2026-11-25: after PR #741 four Windows `npm test` runs took 352–506 s on the first attempt (runs 45572380286, 45577116814, 45580660697, 45589471622); five needed. Unit/integration 2026-11-24: Test: `test/worker-link-exit.test.ts` (B-118-T02) and `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs` (B-118-T03) pass locally. |
 | Reviewed | 2026-11-25 |
@@ -748,7 +748,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749). Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review). |
+| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749). Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review).; [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-24 |
 | Verification | Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
 | Reviewed | 2026-11-25 |
@@ -1349,7 +1349,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [F-120-T01 review](reviews/gauntlet-coverage/2026-11-25.md) ([PR #752](https://github.com/voidbrain/nerv/pull/752)); opened in this PR |
+| PR / evidence | [F-120-T01 review](reviews/gauntlet-coverage/2026-11-25.md) ([PR #752](https://github.com/voidbrain/nerv/pull/752)); opened in [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-25 |
@@ -1600,7 +1600,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-066-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #512](https://github.com/voidbrain/nerv/pull/512) fixture budget. [PR #684](https://github.com/voidbrain/nerv/pull/684) (F-006-T11 fixture race); [PR #464](https://github.com/voidbrain/nerv/pull/464) (merged; CI green); [PR #414](https://github.com/voidbrain/nerv/pull/414) (opened record & decision doc); prior context: [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02), [PR #293](https://github.com/voidbrain/nerv/pull/293) and [PR #361](https://github.com/voidbrain/nerv/pull/361) (B-046).; [#736](https://github.com/voidbrain/nerv/pull/736) |
+| PR / evidence | Steps: B-066-T03: [PR #510](https://github.com/voidbrain/nerv/pull/510) verification sweep; [PR #512](https://github.com/voidbrain/nerv/pull/512) fixture budget. [PR #684](https://github.com/voidbrain/nerv/pull/684) (F-006-T11 fixture race); [PR #464](https://github.com/voidbrain/nerv/pull/464) (merged; CI green); [PR #414](https://github.com/voidbrain/nerv/pull/414) (opened record & decision doc); prior context: [PR #411](https://github.com/voidbrain/nerv/pull/411) (B-060-T02), [PR #293](https://github.com/voidbrain/nerv/pull/293) and [PR #361](https://github.com/voidbrain/nerv/pull/361) (B-046).; [#736](https://github.com/voidbrain/nerv/pull/736); [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-14 |
 | Verification | Unit/integration 2026-11-23: fixture waits for both sides ([PR #684](https://github.com/voidbrain/nerv/pull/684)). CI 2026-11-24: worker-link tests failed in 8 CI attempts after PR #684 (listed above); a week of CI without this failure: not met. |
 | Reviewed | 2026-11-25 |
@@ -1685,7 +1685,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-126-T01: [PR #739](https://github.com/voidbrain/nerv/pull/739) · B-126-T02: [PR #755](https://github.com/voidbrain/nerv/pull/755). [run 45632224825](https://github.com/voidbrain/nerv/actions/runs/45632224825) attempt 1 (PR #754); diagnostics in [#755](https://github.com/voidbrain/nerv/pull/755); first cause: [#739](https://github.com/voidbrain/nerv/pull/739), [archived record](archive/backlog-2026.md#b-126) |
+| PR / evidence | Steps: B-126-T01: [PR #739](https://github.com/voidbrain/nerv/pull/739) · B-126-T02: [PR #755](https://github.com/voidbrain/nerv/pull/755). [run 45632224825](https://github.com/voidbrain/nerv/actions/runs/45632224825) attempt 1 (PR #754); diagnostics in [#755](https://github.com/voidbrain/nerv/pull/755); first cause: [#739](https://github.com/voidbrain/nerv/pull/739), [archived record](archive/backlog-2026.md#b-126); [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-24 |
 | Verification | Unit: Test: `test/process-client.test.ts` (B-126 tests, failing first, passing on macOS and on Windows). CI: Pending (five Windows runs without "nervous process not ready"). |
 | Reviewed | 2026-11-25 |
@@ -2372,7 +2372,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-125-T01: [PR #748](https://github.com/voidbrain/nerv/pull/748); [PR #753](https://github.com/voidbrain/nerv/pull/753) · F-125-T02: [PR #748](https://github.com/voidbrain/nerv/pull/748). Opened in [PR #748](https://github.com/voidbrain/nerv/pull/748); F-125-T01 reconciled in [PR #753](https://github.com/voidbrain/nerv/pull/753). |
+| PR / evidence | Steps: F-125-T01: [PR #748](https://github.com/voidbrain/nerv/pull/748); [PR #753](https://github.com/voidbrain/nerv/pull/753) · F-125-T02: [PR #748](https://github.com/voidbrain/nerv/pull/748). Opened in [PR #748](https://github.com/voidbrain/nerv/pull/748); F-125-T01 reconciled in [PR #753](https://github.com/voidbrain/nerv/pull/753).; [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-25 |
@@ -2878,7 +2878,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound · B-076-T03: [PR #695](https://github.com/voidbrain/nerv/pull/695). [PR #540](https://github.com/voidbrain/nerv/pull/540) B-076-T01; [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2; [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750) |
+| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound · B-076-T03: [PR #695](https://github.com/voidbrain/nerv/pull/695). [PR #540](https://github.com/voidbrain/nerv/pull/540) B-076-T01; [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2; [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-25 |
@@ -3190,7 +3190,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-123-T01: [PR #746](https://github.com/voidbrain/nerv/pull/746). Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); F-123-T01 in [PR #746](https://github.com/voidbrain/nerv/pull/746). |
+| PR / evidence | Steps: F-123-T01: [PR #746](https://github.com/voidbrain/nerv/pull/746). Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); F-123-T01 in [PR #746](https://github.com/voidbrain/nerv/pull/746).; [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-24 |
 | Verification | CI 2026-11-25: F-123-T01, Test: `test/mcp-remote.test.ts` green in run 45602256057 (#746). Owner check F-123-T02 pending. |
 | Reviewed | 2026-11-25 |
@@ -3237,7 +3237,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-122-T01: [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md. Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); design in [#747](https://github.com/voidbrain/nerv/pull/747) |
+| PR / evidence | Steps: F-122-T01: [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md. Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); design in [#747](https://github.com/voidbrain/nerv/pull/747); [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-24 |
 | Verification | — |
 | Reviewed | 2026-11-25 |
