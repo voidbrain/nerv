@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 8 | 5 | 27 | 7 |
+| **This week** | 8 | 5 | 27 | 8 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 38 | 33 |
+| **Open** | 38 | 32 |
 | **Require Human 🧑** | 10 | 14 |
 
 ### Require Human 🧑
@@ -38,7 +38,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 104 h agent + 12.25 h owner across 126 open steps of 38 features and 33 other records. 165.75 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 103.75 h agent + 12.25 h owner across 125 open steps of 38 features and 32 other records. 165.25 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -348,52 +348,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-016-T10 verified: [PR #417](https://github.com/voidbrain/nerv/pull/417) merged on green CI (second fresh-context review found no blocker). F-016-T12 closed with the accepted decision revision and zero-blocking review in PR #470; scoped CI passed. Remaining distributed relocation acceptance is open. |
 | Reviewed | 2026-11-25 |
-
-</details>
-
----
-### <a id="b-082"></a>[🐞 B-082](#top)
-
-**Windows: a service installed from an SSH session cannot register its logon task**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24): the fenced install over SSH ended `uncertain` at the register step; `schtasks /Create` with NERV's task XML answered "ERROR: No mapping between account names and security IDs" because the XML named `WORKGROUP\\<user>`: `renderService` used `USERDOMAIN\\USERNAME`, and an SSH session on a workgroup machine reports `USERDOMAIN=WORKGROUP`, which names no account (the account is `KITCHEN\\<user>`). |
-| **Reproduce** | On a workgroup Windows machine, over SSH: `nodes lifecycle-inspect --action install`, then `lifecycle-apply`. |
-| **Check** | Test committed failing first: `windowsServiceUser` gives `COMPUTERNAME\\user` for a local account (also when USERDOMAIN is WORKGROUP) and `USERDOMAIN\\user` when USERDNSDOMAIN is set; on Tabgha an SSH install registers the task. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-082-t01"></a>B-082-T01 — Windows: a service installed from an SSH session cannot register its logon task | 0.75 h | 0.5 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded |
-| 🟢 Small | **Total** | 1.5 h | 0.5 h (1 of 2 steps recorded) | 0.25 h | 1 of 2 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="b-082-t02"></a>B-082-T02 — Windows: keep the logon account for Entra ID and domain users | 0.75 h | 0 h | Completed | [PR #591](https://github.com/voidbrain/nerv/pull/591) opened; [PR #601](https://github.com/voidbrain/nerv/pull/601) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-082.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-082-T01: [PR #517](https://github.com/voidbrain/nerv/pull/517) implementation (merged on green CI 2026-11-18); [PR #591](https://github.com/voidbrain/nerv/pull/591) review recorded · B-082-T02: [PR #591](https://github.com/voidbrain/nerv/pull/591) opened; [PR #601](https://github.com/voidbrain/nerv/pull/601) implementation. [PR #601](https://github.com/voidbrain/nerv/pull/601) (B-082-T02); Test: `test/node-inspection.test.ts` "B-082: the Windows task user keeps Entra and domain accounts but repairs workgroup users" (committed failing first in B-082-T02); Review: fresh-context P1 review found no blocking code, security, privacy or compliance issue and confirmed the later test edit is formatting-only; prior T01 test committed failing first |
-| Opened | 2026-11-18 |
-| Verification | 2026-11-21: B-082-T02 CI run 44815656209 and required fresh-context review passed. Local: targeted regression 2/2, full tests 1,041 pass / 2 platform skips, build, `check:fast`, headless 5 pass / 1 Windows skip. Pending: the live desktop-session install on Tabgha after B-087-T01. |
-| Reviewed | 2026-11-21 |
 
 </details>
 
