@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-004-T01",
+  "parent": "F-004",
+  "title": "Installable PWA shell: manifest, service worker and update prompt",
+  "goal": "Installable PWA shell: manifest, service worker and update prompt",
+  "status": "closed",
+  "acceptance": [
+    "Lighthouse-installable manifest and icons; offline shell; an update shows a prompt, never a silent reload"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 1.5 hours agent; former 1-day estimate at 1.5 agent hours per focused day. Method: 1.5 h/day judged rate (PR #277). Estimate, not a measurement; baselineDays 1 kept as history. Revised 2026-11-12 (PR #286): implemented with browser acceptance (test/pwa.browser.mjs) and file checks (test/pwa.test.mjs); about 0.25 h spent so far (stated: worktree created 06:09 UTC, PR opened 06:17 UTC; reading the records before that not counted separately). About 0.5 h remains: fresh-context design review, CI on #286, merge. Baseline 1.5 h unchanged. Closed 2026-11-12 in the reconcile of PR #288: PR #286 merged into main f88d4b7 at 06:37 UTC. CI 43168006619 attempt 1 failed validate only on test/evaluation.browser.mjs golden-v1/dashboard (an existing test, recorded as B-050), while F-004-T01's browser acceptance passed; attempt 2 (failed jobs rerun, same head 94e3a0a) passed every job, browser group 3 of 3. Lighthouse itself was not run; the acceptance's installability is Chrome's own installability check (no errors), which is the check Lighthouse reports. Actual 0.5 h agent (stated): worktree 06:09 UTC to merge 06:37 UTC, review and CI included, from Git and GitHub timestamps.",
+    "reviewed": "2026-11-12",
+    "baselineDays": 1,
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  }
+}

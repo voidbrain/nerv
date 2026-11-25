@@ -1,0 +1,1949 @@
+// Optional record sources and bounded executable tasks. No models or commands are executed.
+import {
+  existsSync,
+  readFileSync,
+  readdirSync,
+  mkdirSync,
+  writeFileSync,
+  lstatSync,
+  realpathSync,
+  statSync,
+  unlinkSync,
+} from 'node:fs';
+import { resolve, join, relative, isAbsolute, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+import { spawnSync } from 'node:child_process';
+export const TASK = /^[BF]-\d{3}-T\d{2}$/;
+// F-095-T01: a step of another repository, `<repo>:<STEP-ID>`, where <repo> is a solution manifest ID. This repository
+// never resolves it: it is an external prerequisite that waits until the step records it in `externalMet`.
+export const EXTERNAL_STEP = /^([a-z][a-z0-9-]*):([BF]-\d{3}-T\d{2})$/;
+// The prerequisites a step still waits on: every dependsOn entry except external ones the step records as met.
+export const waitsOn = (t) => (t.dependsOn ?? []).filter((d) => !(t.externalMet ?? []).includes(d));
+// An external step reference, linked to the other repository's ledger row when workItems.externalRepositories names
+// its GitHub owner/name, else plain code text.
+const externalRef = (d, externals = {}) => {
+  const [, repo, step] = EXTERNAL_STEP.exec(d);
+  return externals[repo]
+    ? `[${d}](https://github.com/${externals[repo]}/blob/HEAD/docs/BACKLOG.md#${step.toLowerCase()})`
+    : `\`${d}\``;
+};
+const recap = /<!-- recap:start[^>]*-->[\s\S]*?<!-- recap:end[^>]*-->/;
+// Generated effort totals (F-053): the layout places the markers, renderLedger fills them from task files.
+const totalsBlock = /<!-- totals:start -->[\s\S]*?<!-- totals:end -->/;
+export const normalizeLedger = (text) => text.replace(recap, '<!-- derived recap -->');
+function local(root, path) {
+  if (
+    typeof path !== 'string' ||
+    isAbsolute(path) ||
+    path.split(/[\\/]/).some((p) => p === '..' || p === '') ||
+    path.includes('\\')
+  )
+    throw Error('Expected a repository-relative path');
+  const full = resolve(root, path);
+  let at = full;
+  while (!existsSync(at)) at = dirname(at);
+  const resolved = realpathSync(at);
+  if (relative(realpathSync(root), resolved).startsWith('..') || isAbsolute(relative(realpathSync(root), resolved)))
+    throw Error('Path escapes repository');
+  if (existsSync(full) && lstatSync(full).isSymbolicLink()) throw Error('Symlink source refused');
+  return full;
+}
+// F-100: workItems.publishHooks names project build steps run after the views are built and before they are published,
+// e.g. "node tools/backlog-recap.mjs". Each entry is `node <repository script> [arguments]`, single-spaced, from a
+// character set with no shell meaning; it runs as argv (process.execPath, no shell), never with write access.
+const HOOK_WORD = /^[A-Za-z0-9_@%+=:,./-]+$/;
+function hookArgv(entry) {
+  const words = typeof entry === 'string' ? entry.split(' ') : [];
+  const [program, script = '', ...args] = words;
+  if (
+    program !== 'node' ||
+    !words.slice(1).every((word) => HOOK_WORD.test(word)) ||
+    script.startsWith('-') ||
+    !/\.(mjs|cjs|js)$/.test(script) ||
+    script.split('/').some((part) => ['', '.', '..'].includes(part))
+  )
+    throw Error(
+      `Invalid workItems.publishHooks entry ${JSON.stringify(entry)}: use "node <repository script>.mjs [arguments]", single spaces, letters, digits and _@%+=:,./- only (run as argv, never through a shell)`,
+    );
+  return [script, ...args];
+}
+export const publishHooks = (config) => (config?.publishHooks ?? []).map(hookArgv);
+// F-066: workItems.repository is "owner/name" on GitHub, used to link the PRs a task file records; without it they
+// are plain text.
+const repositorySetting = (config) => {
+  if (config.repository !== undefined && !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(config.repository))
+    throw Error('Invalid workItems.repository (owner/name)');
+  const externals = config.externalRepositories;
+  if (
+    externals !== undefined &&
+    (!externals ||
+      typeof externals !== 'object' ||
+      Array.isArray(externals) ||
+      Object.entries(externals).some(
+        ([id, repo]) =>
+          !/^[a-z][a-z0-9-]*$/.test(id) || typeof repo !== 'string' || !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo),
+      ))
+  )
+    throw Error('Invalid workItems.externalRepositories ({"<manifest id>": "owner/name"})');
+};
+// F-096-T02: with workItems.views "built" the ledger is a build output, ignored by git and never committed, so parallel
+// PRs that change different sources never conflict on it.
+const builtViews = (config) => config.views === 'built';
+export function settings(root = process.cwd()) {
+  const harness = JSON.parse(readFileSync(join(root, '.harness.json'), 'utf8'));
+  const config = harness.workItems;
+  if (!config?.enabled) return null;
+  if (config.order !== undefined && !['id', 'queue'].includes(config.order)) throw Error('Invalid workItems.order');
+  if (config.estimation !== undefined) estimationSettings(config.estimation);
+  if (config.featurePlans !== undefined && typeof config.featurePlans !== 'boolean')
+    throw Error('Invalid featurePlans setting');
+  if (config.views !== undefined && !['committed', 'built'].includes(config.views))
+    throw Error('Invalid workItems.views: use "committed" (the default) or "built"');
+  if (config.publishHooks !== undefined) {
+    if (!Array.isArray(config.publishHooks) || !config.publishHooks.length || config.publishHooks.length > 10)
+      throw Error('Invalid workItems.publishHooks: a list of 1 to 10 entries');
+    config.publishHooks.forEach(hookArgv);
+    if (config.views !== 'built')
+      throw Error('workItems.publishHooks needs workItems.views "built": hooks run only when the views are published');
+  }
+  repositorySetting(config);
+  for (const name of ['layout', 'records', 'tasks', 'profiles']) local(root, config[name]);
+  // Queue order reads the roadmap the work queue uses, so the ledger and the queue page agree.
+  if (config.order === 'queue' && harness.workQueue?.roadmap !== undefined) {
+    local(root, harness.workQueue.roadmap);
+    return { ...config, queueRoadmap: harness.workQueue.roadmap };
+  }
+  return config;
+}
+function readJSON(path) {
+  if (lstatSync(path).size > 1024 * 1024) throw Error('Input exceeds 1 MiB');
+  return JSON.parse(readFileSync(path, 'utf8'));
+}
+function relocateLinks(text, fromFile, toFile, referenceIds = new Set()) {
+  const change = (url) => {
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(url) || url.startsWith('/')) return url;
+    if (/[\s<>\\()]/.test(url)) throw Error('Unsupported Markdown link; review relocation before migration');
+    const [, path, suffix] = url.match(/^([^?#]*)(.*)$/),
+      target = path ? resolve(dirname(fromFile), path) : fromFile;
+    return (target === toFile ? '' : relative(dirname(toFile), target).replaceAll('\\', '/')) + suffix;
+  };
+  const prose = (part) => {
+    // Delimiters of any backtick length protect literal inline examples.
+    const code = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/g;
+    let out = '',
+      cursor = 0;
+    const links = (chunk) => {
+      if (/^ {0,3}\[[^\]]+\]:\s*(?![a-zA-Z][a-zA-Z0-9+.-]*:|\/)[^\n]+/m.test(chunk))
+        throw Error('Unsupported Markdown link reference; review relocation before migration');
+      const inline = /\[([^\]]+)\]\(([\s\S]*?)\)/g;
+      const remaining = chunk.replace(inline, '');
+      if (
+        /\[[^\]]*\]\s*\[[^\]]*\]/.test(remaining) ||
+        [...remaining.matchAll(/\[([^\]]+)\]/g)].some((m) =>
+          referenceIds.has(m[1].trim().replace(/\s+/g, ' ').toLowerCase()),
+        )
+      )
+        throw Error('Unsupported Markdown link/reference notation; review relocation before migration');
+      return chunk.replace(inline, (whole, label, url) => '[' + label + '](' + change(url) + ')');
+    };
+    for (const match of part.matchAll(code)) {
+      out += links(part.slice(cursor, match.index)) + match[0];
+      cursor = match.index + match[0].length;
+    }
+    return out + links(part.slice(cursor));
+  };
+  let out = '',
+    pending = '',
+    fence = null;
+  for (const line of text.match(/[^\n]*\n|[^\n]+$/g) || []) {
+    const marker = line.match(/^ {0,3}(`{3,}|~{3,})(.*?)(?:\n)?$/);
+    if (fence) {
+      out += line;
+      if (marker && marker[1][0] === fence.char && marker[1].length >= fence.length && !marker[2].trim()) fence = null;
+    } else if (marker) {
+      out += prose(pending) + line;
+      pending = '';
+      fence = { char: marker[1][0], length: marker[1].length };
+    } else pending += line;
+  }
+  return out + prose(pending);
+}
+// Optional numbers next to the words: `days` is the remaining focused days, `baselineDays` the estimate accepted when
+// the step was planned (set once, kept at close). Quarter days, at most 20.
+const quarterDays = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 20 && Number.isInteger(v * 4);
+const effortKeys = ['size', 'estimate', 'basis', 'reviewed'],
+  numericEffortKeys = ['days', 'baselineDays'],
+  // F-054/F-056: effort spent on a step in focused days (final when closed, so far when open), measured or stated.
+  actualKeys = ['actualDays', 'actualSource'],
+  // F-058: agent hours, the unit agent-run steps are estimated in, with the owner's own time kept apart. Quarter hours.
+  // F-063: estimateAgentHours, the latest whole-step estimate (set with agentHours at each re-estimation; the baseline
+  // until then). The steps table shows it; calibration keeps comparing actual with baseline.
+  hourKeys = ['agentHours', 'ownerHours', 'baselineAgentHours', 'estimateAgentHours', 'actualAgentHours'];
+// F-068: what an owner step asks of the owner (run or check something, decide, or both). A ready one (not started,
+// every prerequisite step verified or closed) marks its record's Procedures and Decisions cells.
+const ownerKinds = ['procedure', 'decision', 'both'];
+const actualDays = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 100;
+const quarterHours = (v) =>
+  typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 200 && Number.isInteger(v * 4);
+// The unit a step is estimated in: hours once it has any hour field, otherwise days (before 5.6.0), otherwise none.
+const inHours = (e) => hourKeys.some((k) => k in (e ?? {}));
+const hoursKnown = (e) => typeof e?.agentHours === 'number' || typeof e?.ownerHours === 'number';
+// Whether a step has a remaining estimate in its own unit.
+const remainingKnown = (e) => (inHours(e) ? hoursKnown(e) : typeof e?.days === 'number');
+function validateEffort(e, status) {
+  if (
+    !e ||
+    typeof e !== 'object' ||
+    Array.isArray(e) ||
+    !effortKeys.every((k) => k in e) ||
+    Object.keys(e).some(
+      (k) => ![...effortKeys, ...numericEffortKeys, ...actualKeys, ...hourKeys, 'ownerKind'].includes(k),
+    ) ||
+    ('ownerKind' in e && !ownerKinds.includes(e.ownerKind)) ||
+    hourKeys.some((k) => k in e && !quarterHours(e[k])) ||
+    ('actualDays' in e && inHours(e)) ||
+    'actualSource' in e !== ('actualDays' in e || 'actualAgentHours' in e) ||
+    (('actualDays' in e || 'actualAgentHours' in e) &&
+      (status === 'planned' ||
+        ('actualDays' in e && !actualDays(e.actualDays)) ||
+        !['measured', 'stated'].includes(e.actualSource))) ||
+    (status === 'closed' && (e.agentHours ?? 0) + (e.ownerHours ?? 0) !== 0) ||
+    numericEffortKeys.some((k) => k in e && !quarterDays(e[k])) ||
+    (status === 'closed' && 'days' in e && e.days !== 0) ||
+    !['small', 'medium', 'large'].includes(e.size) ||
+    !['estimate', 'basis'].every((k) => typeof e[k] === 'string' && e[k].trim() && e[k].length <= 2000) ||
+    typeof e.reviewed !== 'string' ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(e.reviewed) ||
+    !Number.isFinite(Date.parse(e.reviewed)) ||
+    new Date(e.reviewed).toISOString().slice(0, 10) !== e.reviewed
+  )
+    throw Error('Invalid task effort');
+}
+// Re-estimation trigger settings (F-054). false turns the trigger off; missing fields take the defaults.
+export const estimationDefaults = { minSamples: 5, ratio: 1.5, outlier: 3, hoursPerDay: 6 };
+function estimationSettings(e) {
+  if (e === false) return null;
+  if (!e || typeof e !== 'object' || Array.isArray(e))
+    throw Error('Invalid workItems.estimation: use an object or false');
+  const unknown = Object.keys(e).find((k) => !['minSamples', 'ratio', 'outlier', 'hoursPerDay', 'since'].includes(k));
+  if (unknown) throw Error(`Invalid workItems.estimation: unknown field ${unknown}`);
+  const out = { ...estimationDefaults, ...e };
+  const problem = !(Number.isInteger(out.minSamples) && out.minSamples >= 1)
+    ? 'minSamples must be a positive integer'
+    : !(typeof out.ratio === 'number' && out.ratio > 1)
+      ? 'ratio must be a number above 1'
+      : !(typeof out.outlier === 'number' && out.outlier >= out.ratio)
+        ? `outlier ${out.outlier} must be at least ratio ${out.ratio}`
+        : !(typeof out.hoursPerDay === 'number' && out.hoursPerDay > 0 && out.hoursPerDay <= 24)
+          ? 'hoursPerDay must be above 0 and at most 24'
+          : out.since !== undefined &&
+              (!/^\d{4}-\d{2}-\d{2}$/.test(out.since) ||
+                !Number.isFinite(Date.parse(out.since)) ||
+                new Date(out.since).toISOString().slice(0, 10) !== out.since)
+            ? 'since must be a YYYY-MM-DD date'
+            : null;
+  if (problem) throw Error('Invalid workItems.estimation: ' + problem);
+  return out;
+}
+const round = (n) => Math.round(n * 100) / 100;
+const stats = (list) => {
+  const r = list.map((x) => x.ratio).sort((a, b) => a - b);
+  if (!r.length) return { n: 0 };
+  const mid = Math.floor(r.length / 2);
+  return {
+    n: r.length,
+    median: round(r.length % 2 ? r[mid] : (r[mid - 1] + r[mid]) / 2),
+    min: round(r[0]),
+    max: round(r.at(-1)),
+    ...(r.length < 3 ? { note: 'too few samples' } : {}),
+  };
+};
+// Read-only comparison of actual with baseline effort for closed steps (closed on or after `since`, by their
+// reviewed date). Never rewrites an estimate; `due` says whether open steps should be re-estimated, and why.
+export function calibrate(tasks, estimation = estimationDefaults) {
+  const e = estimationSettings(estimation) ?? null;
+  // Actual and baseline in the same unit: agent hours when the step has them, days otherwise.
+  const pair = (f) =>
+    inHours(f) ? [f.actualAgentHours, f.baselineAgentHours, 'hours'] : [f.actualDays, f.baselineDays, 'days'];
+  const samples = tasks
+    .filter((t) => {
+      const [actual, baseline] = pair(t.effort ?? {});
+      return (
+        t.status === 'closed' &&
+        typeof actual === 'number' &&
+        actual > 0 &&
+        baseline > 0 &&
+        // `reviewed` is set to the close date when the actual is recorded; `since` is the last re-estimation day.
+        (!e?.since || t.effort.reviewed > e.since)
+      );
+    })
+    .map((t) => {
+      const [actual, baseline, unit] = pair(t.effort);
+      // B- steps are bug work, F- steps feature work (BACKLOG-RULES IDs); judged apart, same formula.
+      const kind = { B: 'bug', F: 'feature' }[(t.parent ?? t.id)[0]] ?? 'other';
+      return { id: t.id, size: t.effort.size, source: t.effort.actualSource, unit, kind, ratio: actual / baseline };
+    });
+  const by = (key) =>
+    Object.fromEntries(
+      [...new Set(samples.map((x) => x[key]))].sort().map((v) => [v, stats(samples.filter((x) => x[key] === v))]),
+    );
+  const all = stats(samples);
+  const byKind = by('kind');
+  const reasons = [];
+  const off = (s) => s.n >= e.minSamples && (s.median > e.ratio || s.median < 1 / e.ratio);
+  if (e) {
+    if (off(all))
+      reasons.push(
+        `median actual/baseline ${all.median} over ${all.n} closed steps is outside ${round(1 / e.ratio)}–${e.ratio}`,
+      );
+    // With more than one kind, each kind is also judged on its own: one can drift while the pooled median hides it.
+    if (Object.keys(byKind).length > 1)
+      for (const [kind, s] of Object.entries(byKind))
+        if (off(s))
+          reasons.push(
+            `${kind} steps: median actual/baseline ${s.median} over ${s.n} is outside ${round(1 / e.ratio)}–${e.ratio}`,
+          );
+    for (const x of samples)
+      if (x.ratio >= e.outlier || x.ratio <= 1 / e.outlier)
+        reasons.push(`${x.id} took ${round(x.ratio)}x its baseline (outlier threshold ${e.outlier}x)`);
+  }
+  const open = tasks.filter((t) => t.status !== 'closed').map((t) => t.id);
+  return {
+    since: e?.since ?? null,
+    all,
+    bySize: by('size'),
+    bySource: by('source'),
+    byUnit: by('unit'),
+    byKind,
+    due: reasons.length > 0,
+    reasons,
+    reestimate: reasons.length ? open : [],
+  };
+}
+const dayText = (n) => `${Number(n.toFixed(2))} ${n === 1 ? 'day' : 'days'}`;
+const hourText = (n) => `${Number(n.toFixed(2))} h`;
+// "2 h", "2 h agent + 0.5 h owner", "1.5 days", or both units when a set mixes them. A unit whose total is 0 is left
+// out (F-063: "22.75 h agent + 6 h owner", not "… and 0 days"); 0 in the set's own unit when nothing is left.
+const amount = (agentHours, ownerHours, days, hasHours, hasDays) =>
+  [
+    ...(hasHours && (agentHours || ownerHours)
+      ? [
+          ownerHours
+            ? `${agentHours ? `${hourText(agentHours)} agent + ` : ''}${hourText(ownerHours)} owner`
+            : hourText(agentHours),
+        ]
+      : []),
+    ...(hasDays && days ? [dayText(days)] : []),
+  ].join(' and ') || (hasHours ? hourText(0) : dayText(0));
+// F-063: the size of a step or record in hours is read from its remaining agent hours, owner time apart: up to 1 h
+// Small, up to 4 h Medium, up to 8 h Large, more Very large. Steps in days keep their authored size.
+export const sizeOfHours = (h) => (h <= 1 ? '🟢 Small' : h <= 4 ? '🟡 Medium' : h <= 8 ? '🔴 Large' : '🟣 Very large');
+const sizes = { small: '🟢 Small', medium: '🟡 Medium', large: '🔴 Large' };
+const stepSize = (t) =>
+  t.status === 'closed'
+    ? '—'
+    : inHours(t.effort) && hoursKnown(t.effort)
+      ? sizeOfHours(t.effort.agentHours ?? 0)
+      : sizes[t.effort.size];
+// A record's size from its steps when every open step is in hours; null keeps the authored size, also when no step
+// is open (B-017: a record awaiting verification keeps a size word, which the summary and the queue need).
+function recordSize(steps) {
+  const open = steps.filter((t) => t.status !== 'closed');
+  if (!open.length || open.some((t) => !inHours(t.effort) || !hoursKnown(t.effort))) return null;
+  return sizeOfHours(open.reduce((n, t) => n + (t.effort.agentHours ?? 0), 0));
+}
+// Remaining, baseline and actual totals over a set of steps. Steps without a number are counted (remainingUnknown,
+// baselineKnown, actualKnown); the renderers name those counts instead of passing an unknown off as 0.
+export function effortTotals(steps) {
+  const open = steps.filter((t) => t.status !== 'closed');
+  const sum = (list, k) => list.reduce((n, t) => n + (typeof t.effort?.[k] === 'number' ? t.effort[k] : 0), 0);
+  const hours = (list) => list.filter((t) => inHours(t.effort)),
+    days = (list) => list.filter((t) => !inHours(t.effort));
+  return {
+    steps: steps.length,
+    open: open.length,
+    // Hours and days are never added together; a step in neither is unknown.
+    remainingAgentHours: sum(hours(open), 'agentHours'),
+    remainingOwnerHours: sum(hours(open), 'ownerHours'),
+    remainingHoursSteps: hours(open).filter((t) => hoursKnown(t.effort)).length,
+    remainingDays: sum(days(open), 'days'),
+    remainingDaysSteps: days(open).filter((t) => typeof t.effort?.days === 'number').length,
+    remainingUnknown: open.filter((t) => !remainingKnown(t.effort)).length,
+    baselineAgentHours: sum(hours(steps), 'baselineAgentHours'),
+    baselineDays: sum(days(steps), 'baselineDays'),
+    baselineKnown: steps.filter(
+      (t) => typeof (inHours(t.effort) ? t.effort.baselineAgentHours : t.effort?.baselineDays) === 'number',
+    ).length,
+    actualAgentHours: sum(hours(steps), 'actualAgentHours'),
+    actualDays: sum(days(steps), 'actualDays'),
+    actualKnown: steps.filter(
+      (t) => typeof (inHours(t.effort) ? t.effort.actualAgentHours : t.effort?.actualDays) === 'number',
+    ).length,
+  };
+}
+const unknownText = (n) => (n ? ` (${n} open ${n === 1 ? 'step' : 'steps'} without an estimate)` : '');
+const cell = (value) =>
+  String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('|', '&#124;')
+    .replaceAll('\n', ' ')
+    .replaceAll('\r', ' ')
+    .replaceAll('`', '&#96;')
+    .replaceAll('[', '&#91;')
+    .replaceAll(']', '&#93;')
+    .replaceAll('*', '&#42;')
+    .replaceAll('_', '&#95;')
+    .replaceAll('\\', '&#92;');
+// The latest whole-step estimate (F-063): estimateAgentHours, else the baseline; a step in days shows its baseline.
+const estimateOf = (e) => (inHours(e) ? (e.estimateAgentHours ?? e.baselineAgentHours) : e.baselineDays);
+const stepEstimate = (e) =>
+  typeof estimateOf(e) !== 'number' ? '—' : inHours(e) ? hourText(estimateOf(e)) : dayText(estimateOf(e));
+const stepActual = (t) => {
+  const e = t.effort,
+    v = inHours(e) ? e.actualAgentHours : e.actualDays;
+  if (typeof v !== 'number') return inHours(e) ? hourText(0) : dayText(0);
+  return `${inHours(e) ? hourText(v) : dayText(v)}${['verified', 'closed'].includes(t.status) ? '' : ' so far'} (${e.actualSource})`;
+};
+const stepRemaining = (e, status) => {
+  if (inHours(e)) {
+    if (status === 'closed') return hourText(0);
+    const parts = [
+      ...(typeof e.agentHours === 'number' ? [`${hourText(e.agentHours)}${e.ownerHours ? ' agent' : ''}`] : []),
+      ...(e.ownerHours ? [`${hourText(e.ownerHours)} owner`] : []),
+    ];
+    return parts.length ? parts.join(' + ') : cell(e.estimate);
+  }
+  if (typeof e.days !== 'number') return cell(e.estimate);
+  return dayText(e.days);
+};
+function totalRow(steps) {
+  const t = effortTotals(steps);
+  const anyHours = steps.some((x) => inHours(x.effort)),
+    anyDays = steps.some((x) => !inHours(x.effort));
+  const estimated = steps.filter((x) => typeof estimateOf(x.effort) === 'number'),
+    sumOf = (list) => list.reduce((n, x) => n + estimateOf(x.effort), 0),
+    estimateHours = estimated.filter((x) => inHours(x.effort)),
+    estimateDays = estimated.filter((x) => !inHours(x.effort));
+  const estimate = estimated.length
+    ? `${amount(sumOf(estimateHours), 0, sumOf(estimateDays), estimateHours.length > 0 || !estimateDays.length, estimateDays.length > 0)}${estimated.length < t.steps ? ` (${estimated.length} of ${t.steps} steps)` : ''}`
+    : '—';
+  // A step row without a recorded actual shows 0 (owner choice, 2026-11-11); the total names how many steps
+  // recorded one, so an unrecorded 0 never reads as measured.
+  // Name a unit only where an actual was recorded in it; with none recorded, the step's own unit.
+  const recordedHours = steps.some((x) => inHours(x.effort) && typeof x.effort.actualAgentHours === 'number'),
+    recordedDays = steps.some((x) => !inHours(x.effort) && typeof x.effort?.actualDays === 'number'),
+    none = !recordedHours && !recordedDays;
+  const actual = `${amount(t.actualAgentHours, 0, t.actualDays, recordedHours || (none && anyHours), recordedDays || (none && !anyHours))}${t.actualKnown < t.steps ? ` (${t.actualKnown} of ${t.steps} steps recorded)` : ''}`;
+  const remaining = amount(
+    t.remainingAgentHours,
+    t.remainingOwnerHours,
+    t.remainingDays,
+    t.remainingHoursSteps > 0 || !anyDays,
+    t.remainingDaysSteps > 0,
+  );
+  // The Total row sizes the remaining work: — when no step is open, blank when the record keeps its authored size.
+  return `| ${t.open ? (recordSize(steps) ?? '') : '—'} | **Total** | ${estimate} | ${actual} | ${remaining}${unknownText(t.remainingUnknown)} | ${steps.filter((s) => ['verified', 'closed'].includes(s.status)).length} of ${t.steps} completed |`; // B-046: as the Done table counts
+}
+// The one-line backlog total placed between the totals markers of the layout.
+function ledgerTotals(tasks, active) {
+  const steps = tasks.filter((t) => active.has(t.parent));
+  const t = effortTotals(steps);
+  const records = new Set(steps.filter((s) => s.status !== 'closed').map((s) => s.parent));
+  const features = [...records].filter((id) => id.startsWith('F-')).length,
+    others = records.size - features;
+  const hoursActual = steps.some((x) => inHours(x.effort) && typeof x.effort.actualAgentHours === 'number'),
+    daysActual = steps.some((x) => !inHours(x.effort) && typeof x.effort?.actualDays === 'number');
+  const spent = t.actualKnown
+    ? ` ${amount(t.actualAgentHours, 0, t.actualDays, hoursActual, daysActual)} of actual effort recorded on ${t.actualKnown} ${t.actualKnown === 1 ? 'step' : 'steps'}.`
+    : '';
+  const remaining = amount(
+    t.remainingAgentHours,
+    t.remainingOwnerHours,
+    t.remainingDays,
+    t.remainingHoursSteps > 0,
+    t.remainingDaysSteps > 0,
+  );
+  const line = t.open
+    ? `**Remaining effort:** ${remaining} across ${t.open} open ${t.open === 1 ? 'step' : 'steps'} of ${features} ${features === 1 ? 'feature' : 'features'}${others ? ` and ${others} other ${others === 1 ? 'record' : 'records'}` : ''}${unknownText(t.remainingUnknown)}.`
+    : '**Remaining effort:** no open steps.';
+  return `<!-- totals:start -->\n${line}${spent} Generated from the task files.\n<!-- totals:end -->`;
+}
+// The header segment (F-066): "Current work ledger, reviewed <date> against <branch> `<sha>`. <summary>", from the
+// newest `## <date> — <branch> `<sha>`` entry of the reconciliation log (docs/archive/reconciliation-<year>.md).
+// Entries are appended (merge=union keeps parallel appends), so the newest is chosen by date, then by git ancestry
+// when two share a day. Older bullet-style lines are history and ignored. The entry's first paragraph is the summary.
+const ENTRY = /^## (\d{4}-\d{2}-\d{2}) — ([A-Za-z0-9._/-]+) `([0-9a-f]{7,40})`\n\n([^\n]+(?:\n[^\n]+)*)/gm;
+const MONTHS = 'January February March April May June July August September October November December'.split(' ');
+// Fenced code blocks are examples, not entries; CRLF files read as LF.
+const logText = (path) =>
+  readFileSync(path, 'utf8')
+    .replace(/\r\n/g, '\n')
+    .replace(/^(`{3,}|~{3,})[^\n]*\n[\s\S]*?^\1[^\n]*$/gm, '');
+const descends = (root, child, parent) =>
+  spawnSync('git', ['merge-base', '--is-ancestor', parent, child], { cwd: root, stdio: 'ignore' }).status === 0;
+export function headerSegment(root, path, built = false) {
+  const dir = local(root, path);
+  const files = existsSync(dir)
+    ? readdirSync(dir)
+        .filter((f) => /^reconciliation-\d{4}\.md$/.test(f))
+        .sort()
+    : [];
+  const entries = files.flatMap((f) =>
+    [...logText(join(dir, f)).matchAll(ENTRY)].map((m) => ({
+      date: m[1],
+      branch: m[2],
+      sha: m[3],
+      // The paragraph may wrap; it reads as one line.
+      summary: m[4].replace(/\s*\n\s*/g, ' ').trim(),
+    })),
+  );
+  if (!entries.length) throw Error(`No reconciliation entry (## <date> — <branch> \`<sha>\`) under ${path}`);
+  for (const e of entries) {
+    if (new Date(e.date + 'T00:00:00Z').toISOString().slice(0, 10) !== e.date)
+      throw Error(`Reconciliation entry ${e.date} ${e.sha}: invalid date`);
+    if (e.summary.length > 300)
+      throw Error(`Reconciliation entry ${e.date} ${e.sha}: keep the first paragraph under 300 characters`);
+  }
+  const latest = entries.reduce((a, b) => (b.date > a.date ? b : a)).date;
+  const tied = entries.filter((e) => e.date === latest);
+  // B-022: ancestry needs both commits; a single-commit CI checkout has neither. Then the header already committed in
+  // docs/BACKLOG.md chooses among the tied entries, so the result does not change with clone depth.
+  const known = (sha) =>
+    spawnSync('git', ['cat-file', '-e', `${sha}^{commit}`], { cwd: root, stdio: 'ignore' }).status === 0;
+  // F-096-T02: a built view is a build output, never an input: only ancestry orders tied entries (CI fetches history).
+  const committed = built
+    ? undefined
+    : existsSync(join(root, 'docs/BACKLOG.md'))
+      ? readFileSync(join(root, 'docs/BACKLOG.md'), 'utf8').match(
+          /^Current work ledger, reviewed [^\n]*? against [^\s`]+ `([0-9a-f]{7,40})`/m,
+        )?.[1]
+      : undefined;
+  const chosen =
+    tied.length > 1 && !tied.every((e) => known(e.sha)) && committed
+      ? tied.find((e) => e.sha.startsWith(committed) || committed.startsWith(e.sha))
+      : undefined;
+  const newest = chosen ?? tied.reduce((a, b) => (descends(root, b.sha, a.sha) ? b : a));
+  const [y, mo, d] = newest.date.split('-').map(Number);
+  const date = `${d} ${MONTHS[mo - 1]} ${y}`;
+  return `Current work ledger, reviewed ${date} against ${newest.branch} \`${newest.sha}\`. ${newest.summary}\n`;
+}
+// Step evidence (F-066): the PRs and review a task file records, as links when workItems.repository is set.
+const prText = (t, repository) =>
+  (t.prs ?? [])
+    .map(
+      (p) =>
+        (repository ? `[PR #${p.pr}](https://github.com/${repository}/pull/${p.pr})` : `PR #${p.pr}`) +
+        (p.note ? ` ${cell(p.note)}` : ''),
+    )
+    .join('; ');
+const NEXT_FROM_TASKS = /^(💻 \*\*→ Human action required: No\*\*<br \/>)Next: from tasks\.$/m;
+function featurePlan(text, id, tasks, repository, ownerHref = (link) => link, externals = {}) {
+  const steps = tasks.filter((t) => t.parent === id);
+  // F-059: with feature plans every active record, bugs included, has at least one step (owner, 2026-11-12).
+  if (!steps.length) throw Error(`${id.startsWith('F-') ? 'Feature' : 'Record'} needs an upfront task plan: ${id}`);
+  const states = {
+    planned: 'Planned',
+    ready: 'Ready',
+    implemented: 'Implemented; verification pending',
+    verified: 'Verified',
+    closed: 'Completed',
+  };
+  for (const t of steps) validateEffort(t.effort, t.status);
+  // F-066: a step's PRs and review live in its task file; they lead the record's PR / evidence cell.
+  const evidenced = steps.filter((t) => t.prs?.length || t.review);
+  if (evidenced.length) {
+    const row = /^\| PR \/ evidence \| /m;
+    if (!row.test(text)) throw Error(`${id}: no PR / evidence row to place the step evidence in`);
+    const summary = evidenced
+      .map(
+        (t) =>
+          `${t.id}: ${[prText(t, repository), t.review && `step review: ${cell(t.review)}`].filter(Boolean).join('; ')}`,
+      )
+      .join(' · ');
+    text = text.replace(row, (m) => `${m}Steps: ${summary}. `);
+  }
+  const evidence = steps.some((t) => t.prs?.length);
+  // F-071: Procedure and Decision columns when a step asks for owner work, linked to the step's ownerLink page;
+  // a step waiting on an open step of another record names it in its Depends on cell (F-085).
+  const owners = steps.some(
+    (t) => t.effort?.ownerKind || (t.status === 'implemented' && (t.effort?.ownerHours ?? 0) > 0),
+  );
+  const finished = new Set(tasks.filter((t) => ['closed', 'verified'].includes(t.status)).map((t) => t.id));
+  // F-072 (8.9.0): an owner step whose prerequisites are not all verified or closed is not the owner's turn yet: ⏳
+  // in its owner column and the steps it waits on in its Depends on cell; 🤖 marks a step with agent work.
+  const unmet = (t) => (['planned', 'ready'].includes(t.status) ? waitsOn(t).filter((d) => !finished.has(d)) : []);
+  // F-074 (8.11.0): one Who cell per step, since a step has one actor (8.10.0): 🤖 agent work, 🧑‍🔧 / 🤔 the owner's
+  // procedure or decision linked to its page, ⏳ before the face while the step still waits (agent or owner). A step not yet
+  // split shows each actor it has.
+  const face = (t, icon) =>
+    unmet(t).length ? `${WAITING} ${icon}` : t.ownerLink ? `[${icon}](${ownerHref(t.ownerLink)})` : icon;
+  // 8.16.0: once implemented, the cell names who the remaining work waits on: the owner while owner hours remain
+  // (🧑 when the step names no ownerKind), 🤖 while agent hours remain or nobody else is named (the agent reconciles
+  // the evidence); the baseline no longer marks agent work then. Verified and closed steps move to the done table.
+  const who = (t) => {
+    const e = t.effort ?? {};
+    const k = e.ownerKind;
+    const built = t.status === 'implemented';
+    const owed = (e.ownerHours ?? 0) > 0;
+    const agent = built
+      ? (e.agentHours ?? 0) > 0 || !owed
+      : !k || (e.agentHours ?? 0) > 0 || (e.baselineAgentHours ?? 0) > 0;
+    return [
+      agent ? (unmet(t).length ? `${WAITING} ${AGENT}` : AGENT) : null,
+      ['procedure', 'both'].includes(k) && (!built || owed) ? face(t, PROCEDURE) : null,
+      ['decision', 'both'].includes(k) && (!built || owed) ? face(t, DECISION) : null,
+      built && !k && owed ? face(t, OWNER) : null,
+    ]
+      .filter(Boolean)
+      .join(' ');
+  };
+  // F-066: the next action of a 💻 record whose line says "Next: from tasks." is the first open step whose
+  // prerequisites are done (closed or verified), an agent one first, else the first open step, else a prompt to close.
+  // When that step is the owner's turn (its Who cell names only the owner, nothing waiting), the line says 🧑 with the
+  // kind of the step and leads with its linked face, so an owner step never hides behind 💻.
+  if (NEXT_FROM_TASKS.test(text)) {
+    const done = new Set(tasks.filter((t) => ['closed', 'verified'].includes(t.status)).map((t) => t.id));
+    const open = steps.filter((t) => !done.has(t.id));
+    const runnable = open.filter((t) => waitsOn(t).every((d) => done.has(d)));
+    // An agent step that can start comes first, so a record with agent work stays among the agent candidates.
+    const next = runnable.find((t) => who(t).split(' ').includes(AGENT)) ?? runnable[0] ?? open[0];
+    const face = next ? who(next) : '';
+    const owner = face && !face.includes(AGENT) && !face.startsWith(WAITING);
+    const kind = { decision: 'Decision', both: 'Both' }[next?.effort?.ownerKind] ?? 'Procedure';
+    text = text.replace(
+      NEXT_FROM_TASKS,
+      `${owner ? `🧑 **→ Human action required: ${kind}**<br />` : '$1'}Next: ${owner ? face + ' ' : ''}${next ? `${next.id} — ${cell(next.title)} (${states[next.status]})` : 'all steps closed; verify and close the record'}.`,
+    );
+  }
+  // F-085 (10.1.0): every open step shows its open prerequisites (Depends on) and the open steps that wait on it
+  // (Unlocks), in any record, each linked to its row; verified and closed steps are not shown. The columns appear when
+  // some open step of the record has one. Before, a waiting step's Status named its prerequisites (F-074, 8.11.0).
+  // F-095-T01: a step of another repository is shown as `repo:STEP-ID`, linked there when its repository is known.
+  const stepRef = (d) =>
+    EXTERNAL_STEP.test(d) ? externalRef(d, externals) : `[${d}](${ownerHref('docs/BACKLOG.md')}#${d.toLowerCase()})`;
+  const pending = (t) => !finished.has(t.id);
+  const dependsCell = (t) => waitsOn(t).filter((d) => !finished.has(d));
+  const unlocksCell = (t) =>
+    tasks
+      .filter((u) => pending(u) && u.dependsOn.includes(t.id))
+      .map((u) => u.id)
+      .sort();
+  const linked = steps.some((t) => pending(t) && (dependsCell(t).length || unlocksCell(t).length));
+  const refs = (ids) => ids.map(stepRef).join(', ') || '—';
+  const status = (t) => states[t.status] + (linked ? ` | ${refs(dependsCell(t))} | ${refs(unlocksCell(t))}` : '');
+  // F-074: rows in the order work can happen: steps that can move now (open, every prerequisite verified or closed),
+  // then waiting steps, each below every prerequisite it has in this record, then verified and closed steps; ties by ID.
+  const done = (t) => ['verified', 'closed'].includes(t.status);
+  const rank = (t) => (done(t) ? 2 : unmet(t).length ? 1 : 0);
+  const here = new Map(steps.map((t) => [t.id, t]));
+  const ordered = [];
+  const left = new Set(steps.map((t) => t.id));
+  while (left.size) {
+    const free = [...left]
+      .map((i) => here.get(i))
+      .filter((t) => t.dependsOn.every((d) => !left.has(d) || done(here.get(d))))
+      .sort((a, b) => rank(a) - rank(b) || a.id.localeCompare(b.id));
+    const next = free[0] ?? here.get([...left].sort()[0]); // a cycle cannot reach here: the catalogue refuses it
+    ordered.push(next);
+    left.delete(next.id);
+  }
+  // Compact table (F-055): one line per step; dated basis lives in the per-record / task files.
+  // 8.16.0: verified and closed steps leave the main table for a collapsed done table below it; the total row
+  // still counts every step.
+  const finishedRows = ordered.filter(done);
+  const doneTable = finishedRows.length
+    ? `<details><summary>Done steps (${finishedRows.length})</summary>\n\n| Effort | Step | Estimate | Actual | Status |${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|${evidence ? '---|' : ''}\n` +
+      finishedRows
+        .map(
+          (t) =>
+            `| ${stepSize(t)} | <a id="${t.id.toLowerCase()}"></a>${t.id} — ${cell(t.title)} | ${stepEstimate(t.effort)} | ${stepActual(t)} | ${states[t.status]} |${evidence ? ` ${prText(t, repository) || '—'} |` : ''}`,
+        )
+        .join('\n') +
+      '\n\n</details>\n\n'
+    : '';
+  const table =
+    `**${id.startsWith('F-') ? 'Feature steps' : 'Steps'}**\n\n| Effort | Step | Estimate | Actual | Remaining | Status |${linked ? ' Depends on | Unlocks |' : ''}${owners ? ' Who |' : ''}${evidence ? ' PRs |' : ''}\n|---|---|---|---|---|---|${linked ? '---|---|' : ''}${owners ? ':---:|' : ''}${evidence ? '---|' : ''}\n` +
+    ordered
+      .filter((t) => !done(t))
+      .map(
+        (t) =>
+          `| ${stepSize(t)} | <a id="${t.id.toLowerCase()}"></a>${t.id} — ${cell(t.title)} | ${stepEstimate(t.effort)} | ${stepActual(t)} | ${stepRemaining(t.effort, t.status)} | ${status(t)} |${owners ? ` ${who(t)} |` : ''}${evidence ? ` ${prText(t, repository) || '—'} |` : ''}\n`,
+      )
+      .join('') + // B-043: no row line when every step is done, so the Total row follows the header
+    totalRow(steps) +
+    (linked ? ' | |' : '') +
+    (owners ? ' |' : '') +
+    (evidence ? ' |' : '') +
+    '\n\n' +
+    doneTable;
+  // The record's own details block is a line holding only <details>; a mention of the tag inside a cell is not.
+  const details = /^<details>\n(?:<summary>[^\n]*<\/summary>\n)?/m.exec(text);
+  if (!details) throw Error('Feature plan requires record details: ' + id);
+  return text.slice(0, details.index) + table + text.slice(details.index);
+}
+function compactDetails(text, relRecord) {
+  const m = /^(<details>\n(?:<summary>[^\n]*<\/summary>\n)?)([\s\S]*?)^<\/details>/m.exec(text);
+  if (!m) return text;
+  const lines = m[2].split('\n');
+  const start = lines.findIndex((line) => /^\| *Field *\| *Value *\|/.test(line));
+  const tableLines = [];
+  if (start >= 0) {
+    for (let i = start; i < lines.length && lines[i].startsWith('|'); i++) tableLines.push(lines[i]);
+  }
+  const body = `[Full notes & evidence](${relRecord})` + (tableLines.length ? '\n\n' + tableLines.join('\n') : '');
+  return text.slice(0, m.index) + `${m[1]}\n${body}\n\n</details>` + text.slice(m.index + m[0].length);
+}
+// Work-queue order (F-055): rank each active record by tools/backlog-queue.mjs over the ID-ordered ledger, its
+// archives and the configured roadmap: priority, then lane (agent candidates, prerequisite review, human action,
+// blocked), then an open prerequisite above the first record that waits on it (F-067).
+// Records the queue leaves out (closed) follow, by ID. Content does not depend on order, so the ranking is stable.
+function withArchives(root, ledger) {
+  const sources = [{ file: 'docs/BACKLOG.md', text: ledger }];
+  const archive = join(root, 'docs/archive');
+  if (existsSync(archive))
+    for (const name of readdirSync(archive)
+      .filter((n) => /^backlog-\d{4}\.md$/.test(n))
+      .sort())
+      sources.push({ file: `docs/archive/${name}`, text: readFileSync(local(root, `docs/archive/${name}`), 'utf8') });
+  return sources;
+}
+// Depends on and Unlocks of each record (F-057), from tools/backlog-dependencies.mjs when the project has it. The
+// authored Depends on row in the details stays the source; Unlocks are its reverse links. Null without the helper.
+function dependencyLinks(root, config, tasks = null) {
+  const helper = new URL('./backlog-dependencies.mjs', import.meta.url);
+  if (!existsSync(helper)) return null;
+  const { graph } = createRequire(import.meta.url)('./backlog-dependencies.mjs');
+  const all = graph(withArchives(root, renderLedger(root, { ...config, order: 'id' }, false)));
+  const link = (r) => `[${r.id}](${r.file === 'docs/BACKLOG.md' ? '' : r.file.slice(5)}#${r.id.toLowerCase()})`;
+  const isClosed = (r) =>
+    r.file !== 'docs/BACKLOG.md' ||
+    /^\| (?:🔴|🟠|🟡|🟢|🟣|🔵) Closed \|/m.test(r.body) ||
+    /^\| [^|]+ \| [^|]+ \| Closed \|/m.test(r.body);
+  // F-071: a step that waits on an open step of another record shows that step, linked to its record.
+  // F-074: an active record's step links to its row; a step of an archived record links to that record.
+  const stepLink = (stepId, parent) => {
+    const r = all.get(parent);
+    if (!r) return stepId;
+    return r.file === 'docs/BACKLOG.md'
+      ? `[${stepId}](#${stepId.toLowerCase()})`
+      : `[${stepId}](${r.file.slice(5)}#${parent.toLowerCase()})`;
+  };
+  const steps = tasks ?? [];
+  const byId = new Map(steps.map((t) => [t.id, t]));
+  const open = (t) => t && !['closed', 'verified'].includes(t.status);
+  const crossing = steps.flatMap((t) =>
+    open(t)
+      ? t.dependsOn
+          .map((d) => byId.get(d))
+          .filter((d) => open(d) && d.parent !== t.parent)
+          .map((d) => [t, d])
+      : [],
+  );
+  const links = new Map();
+  for (const record of all.values()) {
+    if (record.file !== 'docs/BACKLOG.md') continue;
+    const depends = record.dependencies
+      .filter((d) => d.external || !isClosed(all.get(d.id)))
+      .map((d) => (d.external ? `[${d.id}](${d.url})` : link(all.get(d.id))));
+    const unlocks = [...all.values()]
+      .filter((r) => r.dependencies.some((d) => !d.external && d.id === record.id))
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map(link);
+    for (const [t, d] of crossing) {
+      if (t.parent === record.id) depends.push(stepLink(d.id, d.parent));
+      if (d.parent === record.id) unlocks.push(stepLink(t.id, t.parent));
+    }
+    // F-095-T01: an open step's external prerequisites not yet recorded as met.
+    for (const t of steps)
+      if (t.parent === record.id && open(t))
+        for (const d of waitsOn(t))
+          if (EXTERNAL_STEP.test(d)) depends.push(externalRef(d, config.externalRepositories));
+    links.set(record.id, {
+      depends: [...new Set(depends)].join(', ') || '—',
+      unlocks: [...new Set(unlocks)].join(', ') || '—',
+    });
+  }
+  return links;
+}
+// A record's remaining effort over its task steps, in the units they are estimated in; — without steps (F-059).
+function remainingCell(steps) {
+  if (!steps.length) return '—';
+  const t = effortTotals(steps);
+  const anyDays = steps.some((x) => !inHours(x.effort));
+  if (t.open && t.remainingUnknown === t.open) return `${t.open} unestimated`;
+  return (
+    amount(
+      t.remainingAgentHours,
+      t.remainingOwnerHours,
+      t.remainingDays,
+      t.remainingHoursSteps > 0 || !anyDays,
+      t.remainingDaysSteps > 0,
+    ) + (t.remainingUnknown ? ` + ${t.remainingUnknown} unestimated` : '')
+  );
+}
+// The generated summary table (F-059): the authored Signal | Priority | Status | Effort table gains Remaining, Depends
+// on and Unlocks (when the dependency helper is adopted) and the human-action kind as Procedures and Decisions cells
+// (8.0.0: 🧑 where the cue is Procedure, Decision or Both, — otherwise; F-068: also where a ready owner step asks for
+// that kind, so a record an agent can advance still shows what waits on the owner), and the authored human-action
+// line keeps only its icon and sentence. F-063: Signal merges into Status ("🔴 Open"), and Effort is read from the remaining
+// agent hours when every open step is in hours. Record sources keep the authored form.
+export const HUMAN_LINE = /^(🧑|💻) \*\*→ Human action required: (Procedure|Decision|Both|No)\*\*<br \/>(.+)$/m;
+// The two generated cells for a cue kind: Procedures (someone runs or checks something) and Decisions.
+// F-071 (8.8.0): different faces, 🧑‍🔧 for a procedure and 🤔 for a decision; readers still accept 🧑 in either cell.
+export const PROCEDURE = '🧑‍🔧',
+  DECISION = '🤔',
+  AGENT = '🤖',
+  WAITING = '⏳',
+  // 8.16.0: owner work whose step names no ownerKind (procedure or decision unknown).
+  OWNER = '🧑';
+export const humanCells = (kind) => [
+  ['Procedure', 'Both'].includes(kind) ? PROCEDURE : '—',
+  ['Decision', 'Both'].includes(kind) ? DECISION : '—',
+];
+// F-068: the kinds asked by a record's ready owner steps: not started (planned or ready; once implemented the owner
+// has acted), effort.ownerKind set, every prerequisite step verified or closed, as task-claims reads a prerequisite
+// (one the catalogue does not hold counts as open).
+function ownerAsks(steps, all) {
+  const done = new Set(all.filter((t) => ['verified', 'closed'].includes(t.status)).map((t) => t.id));
+  const kinds = steps
+    .filter(
+      (t) => ['planned', 'ready'].includes(t.status) && t.effort?.ownerKind && waitsOn(t).every((d) => done.has(d)),
+    )
+    .map((t) => t.effort.ownerKind);
+  return [kinds.some((k) => k !== 'decision'), kinds.some((k) => k !== 'procedure')];
+}
+// F-073 (8.10.0): whether an agent can move the record now: 🤖 a planned or ready step with agent work (no ownerKind, or
+// agent hours on a step not yet split) has every prerequisite verified or closed, ⏳ such steps all wait, — none.
+// 8.16.1 (B-028): an implemented step the agent still verifies (agent hours left, or no owner hours owed) is agent
+// work it can do now, as its Who cell says (8.16.0). Prerequisites are not checked: an implemented step is past them,
+// and who() never marks one as waiting either.
+function agentNow(steps, all) {
+  const done = new Set(all.filter((t) => ['verified', 'closed'].includes(t.status)).map((t) => t.id));
+  const verify = steps.some(
+    (t) => t.status === 'implemented' && ((t.effort?.agentHours ?? 0) > 0 || !((t.effort?.ownerHours ?? 0) > 0)),
+  );
+  const open = steps.filter(
+    (t) => (!t.effort?.ownerKind || (t.effort.agentHours ?? 0) > 0) && ['planned', 'ready'].includes(t.status),
+  );
+  if (verify) return AGENT;
+  if (!open.length) return '—';
+  return open.some((t) => waitsOn(t).every((d) => done.has(d))) ? AGENT : WAITING;
+}
+function summaryTable(text, id, { remaining, size, links, asks = [false, false], agent = null }) {
+  const lines = text.split('\n');
+  const at = lines.findIndex(
+    (l, i) =>
+      l.trim().startsWith('|') &&
+      l
+        .split('|')
+        .slice(1, -1)
+        .map((c) => c.trim())
+        .join('|') === 'Signal|Priority|Status|Effort' &&
+      /^\|[\s:|-]+\|$/.test((lines[i + 1] ?? '').trim()) &&
+      (lines[i + 2] ?? '').trim().startsWith('|'),
+  );
+  // Without a summary table check:backlog reports the record; only dependency links would be lost, so those fail here.
+  if (at < 0) {
+    if (links && (links.depends !== '—' || links.unlocks !== '—'))
+      throw Error(`${id}: no summary table to place its Depends on / Unlocks under`);
+    return text;
+  }
+  const human = HUMAN_LINE.exec(text);
+  const extra = [
+    ['Remaining', remaining],
+    ...(links
+      ? [
+          ['Depends on', links.depends],
+          ['Unlocks', links.unlocks],
+        ]
+      : []),
+    ...(agent ? [['Agent', agent]] : []),
+    ['Procedures', asks[0] ? PROCEDURE : human ? humanCells(human[2])[0] : '—'],
+    ['Decisions', asks[1] ? DECISION : human ? humanCells(human[2])[1] : '—'],
+  ];
+  const [signal, priority, status, effort] = lines[at + 2]
+    .trim()
+    .split('|')
+    .slice(1, -1)
+    .map((c) => c.trim());
+  lines[at] = '| Status | Priority | Effort |' + extra.map(([h]) => ` ${h} |`).join('');
+  lines[at + 1] =
+    '|---|---|---|' +
+    extra.map(([h]) => (['Agent', 'Procedures', 'Decisions'].includes(h) ? ':---:|' : '---|')).join('');
+  lines[at + 2] =
+    `| ${signal} ${status} | ${priority} | ${size ?? effort} |` + extra.map(([, v]) => ` ${v} |`).join('');
+  const out = lines.join('\n');
+  return human ? out.replace(HUMAN_LINE, `${human[1]} **→** ${human[3]}`) : out;
+}
+function queueRank(root, config, plannedTasks = null) {
+  const sources = withArchives(root, renderLedger(root, { ...config, order: 'id' }));
+  const roadmap = config.queueRoadmap ? readFileSync(local(root, config.queueRoadmap), 'utf8') : '';
+  const lanes = ['Agent candidates', 'Prerequisite review', 'Human action', 'Blocked'];
+  // Loaded only for queue order: the work queue is an optional adoption (APPLY, work queue).
+  // require() of an ES module needs Node 22.12 or newer.
+  let queue;
+  try {
+    ({ queue } = createRequire(import.meta.url)('./backlog-queue.mjs'));
+  } catch (e) {
+    throw Error(
+      e.code === 'MODULE_NOT_FOUND'
+        ? 'workItems.order queue needs tools/backlog-queue.mjs (adopt the work queue)'
+        : `workItems.order queue could not load backlog-queue.mjs (Node 22.12 or newer is required): ${e.message}`,
+    );
+  }
+  const records = queue(sources, roadmap);
+  // B-019: a step that waits on an open step of another record counts like a record-level dependency for order (the
+  // prerequisite gets credit for what it unblocks and moves up), not for lanes: the rest of the record is free.
+  const stepDeps = new Map(),
+    stepUnlocks = new Map();
+  if (config.featurePlans) {
+    const tasks = plannedTasks ?? taskCatalog(root, config).tasks;
+    const byId = new Map(tasks.map((t) => [t.id, t]));
+    const open = (t) => t && !['closed', 'verified'].includes(t.status);
+    for (const t of tasks)
+      if (open(t))
+        for (const d of t.dependsOn.map((x) => byId.get(x)))
+          if (open(d) && d.parent !== t.parent) {
+            if (!stepDeps.has(t.parent)) stepDeps.set(t.parent, new Set());
+            stepDeps.get(t.parent).add(d.parent);
+            if (!stepUnlocks.has(d.parent)) stepUnlocks.set(d.parent, new Set());
+            stepUnlocks.get(d.parent).add(t.parent);
+          }
+  }
+  const unlocks = (r) => new Set([...r.unlocks, ...(stepUnlocks.get(r.id) ?? [])]).size;
+  const effort = { '🟢 Small': 0, '🟡 Medium': 1, '🔴 Large': 2, '🟣 Very large': 3 };
+  const laneRank = Object.fromEntries(lanes.map((l, i) => [l, i]));
+  const priorityOf = (r) => Number(r.priority.at(-1));
+  // The queue's own order (explicit Queue order, milestone, what it unblocks, effort, ID) under priority and lane.
+  const sorted = [...records].sort(
+    (a, b) =>
+      priorityOf(a) - priorityOf(b) ||
+      laneRank[a.lane] - laneRank[b.lane] ||
+      a.order - b.order ||
+      (a.milestone?.rank ?? Infinity) - (b.milestone?.rank ?? Infinity) ||
+      unlocks(b) - unlocks(a) ||
+      effort[a.effort] - effort[b.effort] ||
+      a.id.localeCompare(b.id),
+  );
+  // F-067: within a layout group, a record is never listed above an active record it waits on. Each open prerequisite
+  // of the same group (and its own, first) moves up to just above its first dependent; everything else keeps the
+  // priority order. Bugs and features are one group only under a {"records": "all"} segment.
+  const single = readJSON(local(root, config.layout)).segments.some((s) => s.records === 'all');
+  const group = (r) => (single ? 'all' : r.id[0]);
+  const placed = new Set(),
+    out = [];
+  const place = (r) => {
+    if (placed.has(r.id)) return;
+    placed.add(r.id);
+    for (const p of sorted)
+      if (
+        group(p) === group(r) &&
+        (r.unresolved.some((d) => !d.external && d.id === p.id) || stepDeps.get(r.id)?.has(p.id))
+      )
+        place(p);
+    out.push(r);
+  };
+  sorted.forEach(place);
+  return new Map(out.map((r, i) => [r.id + '.md', i]));
+}
+export function renderLedger(root, config, withPlans = true) {
+  repositorySetting(config);
+  const layout = readJSON(local(root, config.layout));
+  if (layout.version !== 1 || !Array.isArray(layout.segments)) throw Error('Invalid ledger layout');
+  const dir = local(root, config.records),
+    files = existsSync(dir) ? readdirSync(dir).sort() : [],
+    seen = new Set();
+  for (const file of files) if (!/^[BF]-\d{3}\.md$/.test(file)) throw Error('Unknown record source: ' + file);
+  const referenceText =
+    layout.segments
+      .filter((s) => typeof s.text === 'string')
+      .map((s) => s.text)
+      .join('\n') +
+    '\n' +
+    files.map((f) => readFileSync(local(root, config.records + '/' + f), 'utf8')).join('\n');
+  const referenceIds = new Set(
+    [...referenceText.matchAll(/\[([^\]]+)\]:/g)].map((m) => m[1].trim().replace(/\s+/g, ' ').toLowerCase()),
+  );
+  // F-096-T04: a built view is never an input, so its recap block is not carried into the next build either.
+  const current =
+    !builtViews(config) && existsSync(join(root, 'docs/BACKLOG.md'))
+      ? readFileSync(join(root, 'docs/BACKLOG.md'), 'utf8')
+      : '';
+  const derived = current.match(recap)?.[0];
+  const plannedTasks = withPlans && config.featurePlans ? taskCatalog(root, config).tasks : null;
+  const wantsTotals = withPlans && layout.segments.some((s) => typeof s.text === 'string' && totalsBlock.test(s.text));
+  const totals = wantsTotals
+    ? ledgerTotals(plannedTasks ?? taskCatalog(root, config).tasks, new Set(files.map((f) => f.slice(0, -3))))
+    : null;
+  const rank = withPlans && config.order === 'queue' ? queueRank(root, config, plannedTasks) : null;
+  const links = withPlans ? dependencyLinks(root, config, plannedTasks) : null;
+  const stepsOf = withPlans
+    ? (() => {
+        // Steps are read only where the project keeps them; a record without steps shows — as its remaining.
+        const kept = (path) => typeof path === 'string' && existsSync(local(root, path));
+        const all =
+          plannedTasks ?? (kept(config.tasks) && kept(config.profiles) ? taskCatalog(root, config).tasks : []);
+        return Object.assign((id) => all.filter((t) => t.parent === id), { all });
+      })()
+    : null;
+  const ordered = rank
+    ? [...files].sort((a, b) => (rank.get(a) ?? Infinity) - (rank.get(b) ?? Infinity) || a.localeCompare(b))
+    : files;
+  let output = '';
+  for (const segment of layout.segments) {
+    if (Object.keys(segment).length !== 1) throw Error('Invalid layout segment');
+    if (typeof segment.text === 'string') {
+      const text = derived ? segment.text.replace(recap, derived) : segment.text;
+      output += totals ? text.replace(totalsBlock, totals) : text;
+    } else if (typeof segment.header === 'string') {
+      output += headerSegment(root, segment.header, builtViews(config));
+    } else if (['B', 'F', 'all'].includes(segment.records)) {
+      // "all" lists bugs and features as one list in the ledger order (F-059); B and F keep separate groups.
+      const groups = segment.records === 'all' ? ['B', 'F'] : [segment.records];
+      if (groups.some((g) => seen.has(g))) throw Error('Duplicate record group');
+      for (const g of groups) seen.add(g);
+      for (const file of ordered.filter((f) => groups.includes(f[0]))) {
+        const text = readFileSync(local(root, config.records + '/' + file), 'utf8');
+        if (
+          !text.startsWith('### ' + file.slice(0, -3) + '\n') ||
+          /^### [BF]-\d{3}$/m.test(text.slice(text.indexOf('\n') + 1))
+        )
+          throw Error('Record identity mismatch: ' + file);
+        if (!plannedTasks && withPlans && NEXT_FROM_TASKS.test(text))
+          throw Error(`${file.slice(0, -3)}: "Next: from tasks." needs workItems.featurePlans`);
+        const relocated = relocateLinks(
+          plannedTasks
+            ? featurePlan(
+                text,
+                file.slice(0, -3),
+                plannedTasks,
+                config.repository,
+                (link) =>
+                  /^https:\/\//.test(link)
+                    ? link
+                    : relative(local(root, config.records), join(root, link)).replaceAll('\\', '/'),
+                config.externalRepositories,
+              )
+            : text,
+          local(root, config.records + '/' + file),
+          join(root, 'docs/BACKLOG.md'),
+          referenceIds,
+        );
+        const id = file.slice(0, -3);
+        const rendered = stepsOf
+          ? summaryTable(relocated, id, {
+              remaining: remainingCell(stepsOf(id)),
+              size: recordSize(stepsOf(id)),
+              links: links?.get(id) ?? null,
+              asks: ownerAsks(stepsOf(id), stepsOf.all),
+              agent: plannedTasks ? agentNow(stepsOf(id), stepsOf.all) : null,
+            })
+          : relocated;
+        const icon = id.startsWith('F-') ? '✨' : '🐞';
+        const relRecord =
+          (config.records.startsWith('docs/') ? config.records.slice(5) : '../' + config.records) + '/' + file;
+        output += withPlans
+          ? compactDetails(
+              rendered.replace(`### ${id}\n`, `### <a id="${id.toLowerCase()}"></a>[${icon} ${id}](#top)\n`),
+              relRecord,
+            )
+          : rendered;
+      }
+    } else throw Error('Invalid layout segment');
+  }
+  for (const file of files) if (!seen.has(file[0])) throw Error('Unreferenced record group');
+  return output;
+}
+export function migrateLedger(root, config) {
+  const path = join(root, 'docs/BACKLOG.md'),
+    text = readFileSync(path, 'utf8');
+  for (const name of ['layout', 'records'])
+    if (existsSync(local(root, config[name]))) throw Error('Migration destination already exists');
+  const matches = [...text.matchAll(/^### ([BF]-\d{3})\n[\s\S]*?(?=^### [BF]-\d{3}\n|^## [^\n]+\n|$(?![\s\S]))/gm)];
+  if (!matches.length || new Set(matches.map((m) => m[1])).size !== matches.length)
+    throw Error('Missing or duplicate records');
+  const segments = [],
+    groups = new Set();
+  let cursor = 0,
+    previous = null;
+  for (const match of matches) {
+    const gap = text.slice(cursor, match.index);
+    if (gap) segments.push({ text: gap });
+    const group = match[1][0];
+    if (group !== previous) {
+      if (groups.has(group)) throw Error('Interleaved record groups need explicit layout review');
+      groups.add(group);
+      segments.push({ records: group });
+    } else if (gap) throw Error('Separated groups need explicit layout review');
+    previous = group;
+    cursor = match.index + match[0].length;
+  }
+  if (cursor < text.length) segments.push({ text: text.slice(cursor) });
+  // Preserve the derived block as a marker; its actual values remain owned by the recap tool.
+  for (const s of segments) if (s.text) s.text = s.text.replace(recap, '<!-- recap:start -->\n<!-- recap:end -->');
+  const referenceIds = new Set(
+    [...text.matchAll(/\[([^\]]+)\]:/g)].map((m) => m[1].trim().replace(/\s+/g, ' ').toLowerCase()),
+  );
+  const sources = matches.map((match) => {
+    const file = local(root, config.records + '/' + match[1] + '.md'),
+      source = relocateLinks(match[0], path, file, referenceIds);
+    if (relocateLinks(source, file, path) !== match[0])
+      throw Error('Unsupported link formatting needs explicit migration review');
+    return { file, source };
+  });
+  mkdirSync(local(root, config.records), { recursive: true });
+  mkdirSync(dirname(local(root, config.layout)), { recursive: true });
+  for (const { file, source } of sources) writeFileSync(file, source, { flag: 'wx' });
+  writeFileSync(local(root, config.layout), JSON.stringify({ version: 1, segments }, null, 2) + '\n', { flag: 'wx' });
+  if (renderLedger(root, config, false) !== text)
+    throw Error('Migration did not preserve the exact ledger; inspect generated sources before continuing');
+  return matches.length;
+}
+export function resource(value) {
+  if (
+    typeof value !== 'string' ||
+    value.length > 200 ||
+    !(
+      /^(?:contract|generated):[a-z0-9][a-z0-9.-]*$/.test(value) ||
+      /^[a-zA-Z0-9_.-]+(?:\/[a-zA-Z0-9_.-]+)*(?:\/\*\*)?$/.test(value)
+    )
+  )
+    throw Error('Invalid resource');
+  if (value.split('/').some((part) => part === '..' || part === '.')) throw Error('Invalid resource');
+  return value;
+}
+export function overlaps(a, b) {
+  resource(a);
+  resource(b);
+  return (
+    a === b ||
+    (a.endsWith('/**') && (b === a.slice(0, -3) || b.startsWith(a.slice(0, -2)))) ||
+    (b.endsWith('/**') && (a === b.slice(0, -3) || a.startsWith(b.slice(0, -2))))
+  );
+}
+export function taskCatalog(root, config) {
+  const ledger = renderLedger(root, config, false),
+    parents = new Set(
+      [...ledger.matchAll(/^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d{3})(?:\]\(#top\))?$/gm)].map(
+        (m) => m[1],
+      ),
+    );
+  const archive = join(root, 'docs/archive');
+  if (existsSync(archive))
+    for (const f of readdirSync(archive).filter((f) => /^backlog-.*\.md$/.test(f)))
+      for (const m of readFileSync(join(archive, f), 'utf8').matchAll(/^### ([BF]-\d{3})$/gm)) parents.add(m[1]);
+  const profiles = readJSON(local(root, config.profiles));
+  if (profiles.version !== 1 || !Array.isArray(profiles.profiles)) throw Error('Invalid model profiles');
+  const profileIds = new Set();
+  for (const p of profiles.profiles) {
+    if (
+      !p ||
+      !/^[a-z0-9-]{1,60}$/.test(p.id) ||
+      profileIds.has(p.id) ||
+      !['candidate', 'qualified'].includes(p.status) ||
+      typeof p.model !== 'string' ||
+      !p.model ||
+      !Array.isArray(p.capabilities) ||
+      !p.capabilities.length ||
+      p.capabilities.some((c) => typeof c !== 'string' || !c) ||
+      !Array.isArray(p.evidence) ||
+      p.evidence.some((e) => typeof e !== 'string' || !e) ||
+      (p.status === 'qualified' && !p.evidence.length)
+    )
+      throw Error('Invalid or unevidenced model profile');
+    profileIds.add(p.id);
+  }
+  const dir = local(root, config.tasks),
+    tasks = [];
+  if (!existsSync(dir)) return { version: 1, tasks, profiles: profiles.profiles };
+  for (const file of readdirSync(dir).sort()) {
+    if (!/^[BF]-\d{3}-T\d{2}\.json$/.test(file)) throw Error('Invalid task filename');
+    const t = readJSON(local(root, config.tasks + '/' + file));
+    const allowed = [
+      'version',
+      'id',
+      'parent',
+      'title',
+      'goal',
+      'status',
+      'acceptance',
+      'dependsOn',
+      'resources',
+      'capabilities',
+      'privacy',
+      'validation',
+      'escalation',
+      'suggestedProfile',
+      'effort',
+      'prs',
+      'review',
+      'ownerLink',
+      'externalMet',
+    ];
+    if (
+      Object.keys(t).some((k) => !allowed.includes(k)) ||
+      t.version !== 1 ||
+      t.id !== file.slice(0, -5) ||
+      !TASK.test(t.id) ||
+      t.parent !== t.id.slice(0, 5) ||
+      !parents.has(t.parent) ||
+      !['planned', 'ready', 'implemented', 'verified', 'closed'].includes(t.status)
+    )
+      throw Error('Invalid task identity/status: ' + file);
+    for (const k of ['title', 'goal', 'privacy'])
+      if (typeof t[k] !== 'string' || !t[k].trim() || t[k].length > 2000) throw Error('Invalid ' + k);
+    for (const k of ['acceptance', 'resources', 'capabilities', 'validation', 'escalation', 'dependsOn'])
+      if (
+        !Array.isArray(t[k]) ||
+        (k !== 'dependsOn' && !t[k].length) ||
+        t[k].length > 32 ||
+        t[k].some((v) => typeof v !== 'string' || !v || v.length > 2000) ||
+        new Set(t[k]).size !== t[k].length
+      )
+        throw Error('Invalid ' + k);
+    // F-095-T01: a prerequisite is a step of this repository or `<repo>:<STEP-ID>` of another; externalMet lists the
+    // external ones this step records as met (each must be one of its own external prerequisites).
+    if (t.dependsOn.some((d) => !TASK.test(d) && !EXTERNAL_STEP.test(d)))
+      throw Error('Invalid dependsOn entry (a step ID or <repo>:<STEP-ID>): ' + file);
+    if (
+      t.externalMet !== undefined &&
+      (!Array.isArray(t.externalMet) ||
+        !t.externalMet.length ||
+        new Set(t.externalMet).size !== t.externalMet.length ||
+        t.externalMet.some((d) => typeof d !== 'string' || !EXTERNAL_STEP.test(d) || !t.dependsOn.includes(d)))
+    )
+      throw Error('Invalid externalMet (external prerequisites of this step in dependsOn): ' + file);
+    if (t.effort !== undefined) validateEffort(t.effort, t.status);
+    // F-066: the step's PRs (number and a short note) and its review, so a step PR never edits the record source.
+    if (
+      t.prs !== undefined &&
+      (!Array.isArray(t.prs) ||
+        t.prs.length > 32 ||
+        t.prs.some(
+          (p) =>
+            !p ||
+            typeof p !== 'object' ||
+            !Number.isInteger(p.pr) ||
+            p.pr < 1 ||
+            (p.note !== undefined && (typeof p.note !== 'string' || !p.note.trim() || p.note.length > 200)) ||
+            Object.keys(p).some((k) => !['pr', 'note'].includes(k)),
+        ) ||
+        new Set(t.prs.map((p) => p.pr)).size !== t.prs.length)
+    )
+      throw Error('Invalid prs: ' + file);
+    if (t.review !== undefined && (typeof t.review !== 'string' || !t.review.trim() || t.review.length > 2000))
+      throw Error('Invalid review: ' + file);
+    // Step evidence never stands in for the record's own: the labels check-backlog reads at record level are refused.
+    if (
+      [...(t.prs ?? []).map((p) => p.note ?? ''), t.review ?? ''].some((v) =>
+        /(?:^|[\s;(])(?:No review|Review|Test):/.test(v),
+      )
+    )
+      throw Error('Step evidence must not carry the record-level labels Review:, No review: or Test: — ' + file);
+    if ((t.prs !== undefined || t.review !== undefined) && !config.featurePlans)
+      throw Error('prs and review need workItems.featurePlans: ' + file);
+    // F-071: the page a person follows for an owner step: a repository path (optionally with #anchor) that exists, or
+    // an https link; only on a step that asks for owner work.
+    if (t.ownerLink !== undefined) {
+      const path = typeof t.ownerLink === 'string' ? t.ownerLink.split('#')[0] : '';
+      if (
+        !t.effort?.ownerKind ||
+        typeof t.ownerLink !== 'string' ||
+        t.ownerLink.length > 500 ||
+        /[\s()<>|\\]/.test(t.ownerLink) ||
+        (!/^https:\/\/\S+$/.test(t.ownerLink) &&
+          (!path || isAbsolute(path) || path.split('/').includes('..') || !existsSync(join(root, path))))
+      )
+        throw Error('Invalid ownerLink (an existing repository page or https link, on an owner step): ' + file);
+    }
+    t.resources.forEach(resource);
+    if (t.suggestedProfile && !profileIds.has(t.suggestedProfile)) throw Error('Unknown suggested profile');
+    tasks.push(t);
+  }
+  const byId = new Map(tasks.map((t) => [t.id, t])),
+    done = new Set(),
+    visiting = new Set();
+  function visit(id) {
+    if (done.has(id)) return;
+    if (visiting.has(id)) throw Error('Task dependency cycle');
+    visiting.add(id);
+    for (const dep of byId.get(id).dependsOn) {
+      if (EXTERNAL_STEP.test(dep)) continue; // resolved by the solution coordinator, never here
+      if (!byId.has(dep)) throw Error('Unknown task prerequisite');
+      visit(dep);
+    }
+    visiting.delete(id);
+    done.add(id);
+  }
+  for (const t of tasks) visit(t.id);
+  return { version: 1, tasks, profiles: profiles.profiles };
+}
+// F-077-T04: the steps that can move now, one line each, in ledger order: planned or ready, every prerequisite
+// verified or closed. Who acts comes from effort.ownerKind (owner) or its absence (agent).
+export function nextSteps(root, config, limit = 10) {
+  const order = [
+    ...renderLedger(root, config, false).matchAll(/^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d{3})/gm),
+  ].map((m) => m[1]);
+  const tasks = taskCatalog(root, config).tasks;
+  const done = new Set(tasks.filter((t) => ['verified', 'closed'].includes(t.status)).map((t) => t.id));
+  const rank = (t) => (order.includes(t.parent) ? order.indexOf(t.parent) : order.length);
+  const ready = tasks
+    .filter((t) => ['planned', 'ready'].includes(t.status) && waitsOn(t).every((d) => done.has(d)))
+    .sort((a, b) => rank(a) - rank(b) || a.id.localeCompare(b.id, 'en', { numeric: true }));
+  const who = (t) => (t.effort?.ownerKind ? `owner (${t.effort.ownerKind})` : 'agent');
+  const effort = (t) => t.effort?.estimate ?? (t.effort?.agentHours !== undefined ? `${t.effort.agentHours} h` : '?');
+  const lines = ready.slice(0, limit).map((t) => `${t.id}  ${who(t)}  ${effort(t)}  ${t.title}`);
+  lines.push(
+    ready.length
+      ? `${ready.length} step(s) can move now${ready.length > limit ? `; ${limit} shown (--limit=N for more)` : ''}.`
+      : 'No step can move now: every open step waits on a prerequisite.',
+  );
+  return lines;
+}
+
+// F-096-T02: with workItems.views "built" a view git tracks, or would track, is refused.
+function assertViewUncommitted(root) {
+  const git = (...args) => spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' });
+  if (git('rev-parse', '--is-inside-work-tree').status !== 0) return; // not in git: nothing to commit it to
+  if (git('ls-files', '--error-unmatch', '--', 'docs/BACKLOG.md').status === 0)
+    throw Error('workItems.views is "built" but docs/BACKLOG.md is tracked by git: git rm --cached docs/BACKLOG.md');
+  if (git('check-ignore', '-q', '--', 'docs/BACKLOG.md').status !== 0)
+    throw Error('workItems.views is "built" but docs/BACKLOG.md is not ignored by git: add it to .gitignore');
+}
+// F-096-T04: the readers of docs/BACKLOG.md (check-backlog, check-freshness, the dependency, queue and maintenance
+// checks, reconcile-draft) call these first. With built views the ledger is a build output: they read a fresh build,
+// never what an earlier build left on disk. Committed views: nothing changes (null, false).
+export function builtLedger(root = process.cwd()) {
+  const config = settings(root);
+  return config && builtViews(config) ? renderLedger(root, config) : null;
+}
+export function buildView(root = process.cwd()) {
+  const ledger = builtLedger(root);
+  if (ledger === null) return false;
+  assertViewUncommitted(root);
+  writeFileSync(join(root, 'docs/BACKLOG.md'), ledger);
+  return true;
+}
+export function checkWorkItems(root = process.cwd()) {
+  const config = settings(root);
+  if (!config) return { enabled: false };
+  const expected = renderLedger(root, config);
+  let actual = expected;
+  if (builtViews(config)) {
+    // Checks run on the sources and a fresh build: what is on disk is replaced, never read.
+    assertViewUncommitted(root);
+    writeFileSync(join(root, 'docs/BACKLOG.md'), expected);
+  } else if (
+    normalizeLedger(expected) !== normalizeLedger((actual = readFileSync(join(root, 'docs/BACKLOG.md'), 'utf8')))
+  )
+    throw Error('Backlog differs from record sources; run work-items build');
+  const catalog = taskCatalog(root, config);
+  // B-043: a verified or closed step has no remaining work; hours left on it keep counting in the totals.
+  const doneWithHours = catalog.tasks
+    .filter(
+      (t) =>
+        ['verified', 'closed'].includes(t.status) &&
+        ((t.effort?.agentHours ?? 0) > 0 || (t.effort?.ownerHours ?? 0) > 0 || (t.effort?.days ?? 0) > 0),
+    )
+    .map((t) => t.id);
+  if (doneWithHours.length)
+    throw Error(
+      `${doneWithHours.join(', ')}: verified or closed with remaining effort; set agentHours, ownerHours and days to 0 and record the actual (BACKLOG-RULES, estimates)`,
+    );
+  // Open steps without a day estimate leave the totals incomplete: reported, not an error.
+  const withoutDays = config.featurePlans
+    ? catalog.tasks.filter((t) => t.status !== 'closed' && !remainingKnown(t.effort)).map((t) => t.id)
+    : [];
+  // F-063: an open step whose actual plus remaining agent hours exceed the estimate it shows was re-estimated without
+  // estimateAgentHours (the column then shows the baseline): reported, not an error.
+  const staleEstimates = config.featurePlans
+    ? catalog.tasks
+        .filter(
+          (t) =>
+            t.status !== 'closed' &&
+            inHours(t.effort) &&
+            typeof estimateOf(t.effort) === 'number' &&
+            (t.effort.agentHours ?? 0) + (t.effort.actualAgentHours ?? 0) > estimateOf(t.effort),
+        )
+        .map((t) => t.id)
+    : [];
+  const allStepsClosed = [];
+  if (config.featurePlans) {
+    const byParent = new Map();
+    for (const t of catalog.tasks) {
+      if (!byParent.has(t.parent)) byParent.set(t.parent, []);
+      byParent.get(t.parent).push(t);
+    }
+    for (const [parent, steps] of byParent) {
+      if (!steps.every((t) => t.status === 'closed')) continue;
+      const recFile = join(root, config.records, `${parent}.md`);
+      if (!existsSync(recFile)) continue;
+      const recLines = readFileSync(recFile, 'utf8').split(/\r?\n/);
+      const headerAt = recLines.findIndex((l) =>
+        /^\|\s*Signal\s*\|\s*Priority\s*\|\s*Status\s*\|\s*Effort\s*\|/.test(l),
+      );
+      if (headerAt !== -1 && recLines[headerAt + 2]) {
+        const cols = recLines[headerAt + 2]
+          .trim()
+          .split('|')
+          .slice(1, -1)
+          .map((c) => c.trim());
+        if (cols[2] && cols[2] !== 'Closed') allStepsClosed.push(parent);
+      }
+    }
+  }
+  // F-071: open owner steps without a page to follow, and authored record-level dependencies that name no step.
+  // F-072: only owner steps that are the owner's turn (every prerequisite verified or closed) need their page now; a
+  // waiting step's page is written by the step that makes it runnable. An implemented step still owing owner work is
+  // the owner's turn too, and a missing page fails check:work (it was a warning that let unlinked steps through).
+  const settled = new Set(catalog.tasks.filter((t) => ['verified', 'closed'].includes(t.status)).map((t) => t.id));
+  const ownerStepsWithoutLink = catalog.tasks
+    .filter(
+      (t) =>
+        t.effort?.ownerKind &&
+        !t.ownerLink &&
+        ((['planned', 'ready'].includes(t.status) && waitsOn(t).every((d) => settled.has(d))) ||
+          (t.status === 'implemented' && (t.effort.ownerHours ?? 0) > 0)),
+    )
+    .map((t) => t.id);
+  // B-045: open steps whose turn it is with ownerHours > 0 and no ownerKind have no page and must be classified or split.
+  const ownerStepsWithoutKind = catalog.tasks
+    .filter(
+      (t) =>
+        !['verified', 'closed'].includes(t.status) &&
+        (t.effort?.ownerHours ?? 0) > 0 &&
+        !t.effort?.ownerKind &&
+        waitsOn(t).every((d) => settled.has(d)),
+    )
+    .map((t) => t.id);
+  // F-073: one actor per step. An open step that asks for owner work and also has agent hours, or asks for both a
+  // procedure and a decision, is reported so it can be split into consecutive steps.
+  const mixedSteps = catalog.tasks
+    .filter(
+      (t) =>
+        !['verified', 'closed'].includes(t.status) &&
+        t.effort?.ownerKind &&
+        (t.effort.ownerKind === 'both' || (t.effort.agentHours ?? 0) > 0),
+    )
+    .map((t) => t.id);
+  const recordsDir = local(root, config.records);
+  const active = new Set(existsSync(recordsDir) ? readdirSync(recordsDir).map((f) => f.slice(0, -3)) : []);
+  const recordLevelDependencies = [...active].sort().flatMap((id) => {
+    const row = /^\| *Depends on *\| *(.*?) *\|$/m.exec(readFileSync(join(recordsDir, id + '.md'), 'utf8'));
+    return row
+      ? [...row[1].matchAll(/\[([BF]-\d{3})\]\((?!https?:)/g)]
+          .filter((m) => active.has(m[1]))
+          .map((m) => `${id} → ${m[1]}`)
+      : [];
+  });
+  // F-085: a blocker named only in prose. A record whose newest Next action entry or Check row names another active
+  // record next to waiting words, while none of its open steps depends on a step of that record, is reported: the
+  // ledger and work:next cannot see it. A warning, not a failure: prose can name a record for other reasons.
+  const WAITING_WORDS = /\b(?:wait(?:s|ed|ing)? (?:on|for)|blocked (?:by|on)|depends on|until|needs?|requires?)\b/i;
+  const stepsOf = new Map();
+  for (const t of catalog.tasks) stepsOf.set(t.parent, [...(stepsOf.get(t.parent) ?? []), t]);
+  const proseBlockers = [...active].sort().flatMap((id) => {
+    const text = readFileSync(join(recordsDir, id + '.md'), 'utf8');
+    const next = /^\*\*Next action \/ closure evidence:\*\* *(.*)$/m.exec(text)?.[1] ?? '';
+    // The newest entry, so history is not read as current: entries start with a date ("YYYY-MM-DD:", "**YYYY-MM-DD:**"
+    // or "YYYY-MM-DD —"); the entry with the latest date counts, wherever it stands. Undated text counts whole.
+    const dated = [...next.matchAll(/(?:^|\s)\**(\d{4}-\d{2}-\d{2})(?::\**| —)/g)];
+    const entries = dated.map((m, i) => ({ date: m[1], text: next.slice(m.index, dated[i + 1]?.index) }));
+    const newest = entries.length ? entries.reduce((a, b) => (b.date > a.date ? b : a)).text : next;
+    const check = /^\| \*\*Check\*\* \| (.*) \|$/m.exec(text)?.[1] ?? '';
+    const open = (stepsOf.get(id) ?? []).filter((t) => !settled.has(t.id));
+    if (!open.length) return [];
+    const named = new Set();
+    for (const sentence of `${newest} ${check}`.split(/(?<=[.;])\s+/))
+      if (WAITING_WORDS.test(sentence) && !/\bno longer\b/i.test(sentence))
+        // A step ID (F-001-T02) names its record; `repo:F-001` names another repository's record (F-095-T01).
+        for (const m of sentence.matchAll(/(?<![\w:-])([BF]-\d{3})(?:-T\d+)?\b/g))
+          if (m[1] !== id && active.has(m[1])) named.add(m[1]);
+    return [...named]
+      .sort()
+      .filter((other) => !open.some((t) => t.dependsOn.some((d) => d.startsWith(other + '-T'))))
+      .map((other) => `${id} → ${other}`);
+  });
+  return {
+    enabled: true,
+    records: (actual.match(/^### (?:<a id="[fb]-\d+"><\/a>)?(?:\[(?:✨|🐞) )?([BF]-\d{3})(?:\]\(#top\))?$/gm) || [])
+      .length,
+    tasks: catalog.tasks.length,
+    ...(withoutDays.length ? { withoutDays } : {}),
+    ...(staleEstimates.length ? { staleEstimates } : {}),
+    ...(allStepsClosed.length ? { allStepsClosed } : {}),
+    ...(ownerStepsWithoutLink.length ? { ownerStepsWithoutLink } : {}),
+    ...(ownerStepsWithoutKind.length ? { ownerStepsWithoutKind } : {}),
+    ...(mixedSteps.length ? { mixedSteps } : {}),
+    ...(recordLevelDependencies.length ? { recordLevelDependencies } : {}),
+    ...(proseBlockers.length ? { proseBlockers } : {}),
+  };
+}
+// F-091: close a record whose checks passed, in one step: its steps closed with nothing remaining, the record moved
+// into the year's archive under its closing day, the weekly index regenerated, the ledger rebuilt. A release tag, when
+// named, must already be on GitHub. The reconcile log entry and the ledger header stay with the agent.
+const CLOSE_READY = new Set(['implemented', 'verified', 'closed']);
+const remoteTagExists = (root, tag) => {
+  const result = spawnSync('git', ['ls-remote', '--tags', 'origin', `refs/tags/${tag}`], {
+    cwd: root,
+    encoding: 'utf8',
+  });
+  if (result.status !== 0) throw Error(`Cannot read tags from origin: ${(result.stderr || '').trim()}`);
+  return result.stdout.trim() !== '';
+};
+const localDate = (now) => {
+  const d = new Date(now);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+export async function closeRecord(
+  root,
+  config,
+  id,
+  { evidence, release, verification, date, now = Date.now(), tagExists = remoteTagExists } = {},
+) {
+  if (!/^[BF]-\d{3}$/.test(id ?? '')) throw Error('Name the record to close, as in B-049 or F-091');
+  if (!evidence?.trim()) throw Error('Give the closure evidence: --evidence="<merged PR, CI, check that passed>"');
+  if (/[\n|]/.test(evidence) || (verification && /[\n|]/.test(verification)))
+    throw Error('Evidence and verification are one line without "|"');
+  const day = date ?? localDate(now);
+  const realDay = (d) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(d) && Number.isFinite(Date.parse(d)) && new Date(d).toISOString().startsWith(d);
+  if (!realDay(day)) throw Error('Use --date=YYYY-MM-DD, a real day');
+  if (release !== undefined) {
+    if (!/^v\d+\.\d+\.\d+$/.test(release)) throw Error('A release is a tag like v1.2.3');
+    if (!tagExists(root, release)) throw Error(`${release} is not on origin: tag and publish it first`);
+  }
+  const recordFile = local(root, `${config.records}/${id}.md`);
+  if (!existsSync(recordFile)) throw Error(`No active record ${id} in ${config.records}`);
+  const archiveRel = `docs/archive/backlog-${day.slice(0, 4)}.md`;
+  const archiveFile = local(root, archiveRel);
+  let text = readFileSync(recordFile, 'utf8');
+  // Only a record whose cue says no human action is waiting may close (cues: No, Procedure, Decision, Both).
+  // A reopened record closes again: the archive keeps every closed copy, it only grows.
+  const cue = /^.*Human action required:.*$/m.exec(text)?.[0] ?? '';
+  if (!/Human action required: No\*\*<br \/>/.test(cue)) throw Error(`${id} still waits on a human action`);
+  const tasksDir = local(root, config.tasks);
+  if (config.featurePlans && !existsSync(tasksDir))
+    throw Error(`${id}: featurePlans is on but ${config.tasks} is missing`);
+  // Git keeps no empty folder: a project without task files (featurePlans off) has no tasks folder on a fresh clone.
+  const steps = (existsSync(tasksDir) ? readdirSync(tasksDir) : [])
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => ({ file: join(tasksDir, f), task: readJSON(join(tasksDir, f)) }))
+    .filter(({ task }) => task.parent === id);
+  const open = steps.filter(({ task }) => !CLOSE_READY.has(task.status)).map(({ task }) => task.id);
+  if (open.length) throw Error(`${id} has steps that are not done: ${open.join(', ')}`);
+
+  const summary = /^\|\s*([^|]*?)\s*\|\s*[^|]*?(P\d)\s*\|\s*[^|]*?\s*\|\s*([^|]*?)\s*\|$/m;
+  const header = text.indexOf('| Signal | Priority | Status | Effort |');
+  if (header < 0) throw Error(`${id}: no summary table to close`);
+  const rowStart = text.indexOf('\n', text.indexOf('\n', header) + 1) + 1;
+  const rowEnd = text.indexOf('\n', rowStart);
+  const row = summary.exec(text.slice(rowStart, rowEnd));
+  if (!row) throw Error(`${id}: unexpected summary row`);
+  text = text.slice(0, rowStart) + `| 🔵 | ◻️ ${row[2]} | Closed | ${row[3]} |` + text.slice(rowEnd);
+  // Function replacers: evidence is text, never a replacement pattern ($&, $1, $' would corrupt archive lines).
+  const said = release ? `released in ${release}` : evidence.trim().replace(/\.$/, '');
+  text = text.replace(/(Human action required: No\*\*<br \/>)[^\n]*/, (_, cue) => `${cue}Closed ${day}: ${said}.`);
+  const closure = `Closed ${day}: ${evidence.trim().replace(/\.$/, '')}${release ? `; released in ${release}` : ''}.`;
+  if (!/\*\*Next action \/ closure evidence:\*\* /.test(text)) throw Error(`${id}: no closure evidence line`);
+  text = text.replace(/\*\*Next action \/ closure evidence:\*\* /, (lead) => `${lead}${closure} `);
+  text = text.replace(/\*\*Estimates:\*\*[^\n]*/, () => '**Estimates:** No remaining effort.');
+  if (verification) {
+    if (!/^\| Verification \|[^\n]*\|$/m.test(text)) throw Error(`${id}: no Verification row for --verification`);
+    text = text.replace(/^\| Verification \|[^\n]*\|$/m, () => `| Verification | ${verification} |`);
+  }
+
+  mkdirSync(dirname(archiveFile), { recursive: true });
+  let archive = existsSync(archiveFile)
+    ? readFileSync(archiveFile, 'utf8')
+    : `# Closed backlog — ${day.slice(0, 4)}\n\nClosed records, moved from the [active backlog](../BACKLOG.md) with their full history. Dated evidence, not current status.\n`;
+  const lastDay = [...archive.matchAll(/^## Closed (\d{4}-\d\d-\d\d)\s*$/gm)].at(-1)?.[1];
+  if (lastDay && day < lastDay) throw Error(`${archiveRel} already closes ${lastDay}; a record cannot close before it`);
+  const moved = relocateLinks(text, recordFile, archiveFile).trimEnd();
+  archive = archive.trimEnd() + '\n\n' + (lastDay === day ? '' : `## Closed ${day}\n\n`) + moved + '\n';
+  const recapTool = new URL('./archive-recap.mjs', import.meta.url);
+  if (archive.includes('<!-- archive-recap:start -->') && existsSync(fileURLToPath(recapTool)))
+    archive = (await import(recapTool.href)).archiveRecap(archive);
+
+  for (const { file, task } of steps) {
+    if (task.status === 'closed') continue;
+    const e = { ...task.effort };
+    for (const key of ['agentHours', 'ownerHours', 'days']) if (key in e) e[key] = 0;
+    e.estimate = '0 remaining';
+    e.basis = `${e.basis.trim()} Closed ${day}.`.slice(0, 2000);
+    writeFileSync(file, JSON.stringify({ ...task, status: 'closed', effort: e }, null, 2) + '\n');
+  }
+  // Steps first (a rerun skips closed ones), then the archive, then the active record; the ledger is derived.
+  writeFileSync(archiveFile, archive);
+  unlinkSync(recordFile);
+  try {
+    writeFileSync(join(root, 'docs/BACKLOG.md'), renderLedger(root, config));
+  } catch (e) {
+    throw Error(`${id} is archived, but the ledger did not rebuild: fix it and run npm run work:build (${e.message})`);
+  }
+  return { id, archive: archiveRel, steps: steps.map(({ task }) => task.id), day };
+}
+// F-094: name the PR in its records before it exists, so opening a PR needs no follow-up commit. GitHub numbers
+// issues, pull requests and discussions from one sequence, so the next PR is usually the newest of the three plus one
+// (a transferred or deleted item can shift it). The records are edited and pushed with that number, then the PR is
+// opened; if the number was taken meanwhile, the records are renamed to the real one in a follow-up commit.
+const PR_PLACEHOLDER = /(?<!["“`'])\bthis PR\b(?!["”`'])/gi;
+const REPOSITORY = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
+const prLinkText = (repository, number) => `[#${number}](https://github.com/${repository}/pull/${number})`;
+// `stale`: numbers an earlier run on this branch wrote but never opened; their links become the new one.
+export function nameRecordPr(root, config, ids, number, repository, stale = []) {
+  if (!Number.isSafeInteger(number) || number < 1) throw Error('A PR number is a positive integer');
+  if (!repository || !REPOSITORY.test(repository)) throw Error('Repository is owner/name');
+  const link = prLinkText(repository, number);
+  const changed = [];
+  for (const id of ids) {
+    if (!/^[BF]-\d{3}$/.test(id)) throw Error(`Name records as B-049 or F-091, not ${id}`);
+    const file = local(root, `${config.records}/${id}.md`);
+    if (!existsSync(file)) throw Error(`No active record ${id} in ${config.records}`);
+    const before = readFileSync(file, 'utf8');
+    let text = before.replace(PR_PLACEHOLDER, () => link);
+    for (const old of stale) if (old !== number) text = text.split(prLinkText(repository, old)).join(link);
+    const row = /^\| PR \/ evidence \|\s*(.*?)\s*\|$/m.exec(text);
+    if (!row) throw Error(`${id}: no PR / evidence row`);
+    let value = row[1];
+    // A swapped stale link can leave the new one twice in the row: keep the first.
+    const parts = value.split('; ');
+    value = parts.filter((part, i) => part !== link || parts.indexOf(link) === i).join('; ');
+    if (!new RegExp(`#${number}\\b`).test(value)) value = value === '—' || value === '' ? link : `${value}; ${link}`;
+    text = text.replace(row[0], () => `| PR / evidence | ${value} |`);
+    if (text !== before) {
+      writeFileSync(file, text);
+      changed.push(`${config.records}/${id}.md`);
+    }
+  }
+  return { link, changed };
+}
+const run = (root, cmd, args) => {
+  const r = spawnSync(cmd, args, { cwd: root, encoding: 'utf8' });
+  if (r.status !== 0) throw Error(`${cmd} ${args[0]} failed: ${(r.stderr || r.stdout || '').trim()}`);
+  return r.stdout.trim();
+};
+// F-096-T03: the built views are published on the backlog-views branch (owner decision 2026-11-25, option A). Each
+// publication is the checked-out commit's tree plus the built ledger, so the ledger's relative links resolve there, and
+// a child of the previous publication: the push is a fast-forward of refs/heads/backlog-views and nothing else.
+export const VIEWS_BRANCH = 'backlog-views';
+// F-100: with publishHooks, `ledger` is the file `publish --prepare` wrote in the read-only job; publishing never runs
+// a hook, so without a prepared ledger it refuses rather than publish what the hooks would have added.
+export function publishViews(
+  root,
+  config,
+  { remote = 'origin', git = (args, env) => runEnv(root, args, env), ledger } = {},
+) {
+  if (!builtViews(config)) throw Error('Publish only when workItems.views is "built"');
+  if (ledger === undefined && publishHooks(config).length)
+    throw Error(
+      'workItems.publishHooks is set: run publish --prepare in a read-only job, then publish --ledger=<the prepared file>; publish never runs a hook',
+    );
+  if (ledger !== undefined && (typeof ledger !== 'string' || !ledger.trim()))
+    throw Error('The prepared ledger is empty');
+  assertViewUncommitted(root);
+  if (git(['status', '--porcelain']))
+    throw Error('Publish from a clean checkout: uncommitted changes would be left out');
+  const source = git(['rev-parse', 'HEAD']);
+  writeFileSync(join(root, 'docs/BACKLOG.md'), ledger ?? renderLedger(root, config));
+  const ref = `refs/remotes/${remote}/${VIEWS_BRANCH}`;
+  const listed = git(['ls-remote', remote, `refs/heads/${VIEWS_BRANCH}`]); // the exact ref, not a name suffix
+  if (listed) git(['fetch', '--quiet', remote, `+refs/heads/${VIEWS_BRANCH}:${ref}`]);
+  const parent = listed ? git(['rev-parse', ref]) : '';
+  // A rerun of an older main run would move the views back: skip a source the last publication already descends from.
+  const last = parent && /^Backlog views for ([0-9a-f]{40})$/m.exec(git(['log', '-1', '--format=%B', parent]))?.[1];
+  if (
+    last &&
+    last !== source &&
+    spawnSync('git', ['-C', root, 'merge-base', '--is-ancestor', source, last]).status === 0
+  )
+    return { published: false, commit: parent, source, reason: `${source} is older than the published ${last}` };
+  // A private index: the working tree and the real index stay as they are.
+  const index = { GIT_INDEX_FILE: join(git(['rev-parse', '--absolute-git-dir']), 'backlog-views.index') };
+  git(['read-tree', source], index);
+  const blob = git(['hash-object', '-w', '--', 'docs/BACKLOG.md']);
+  git(['update-index', '--add', '--cacheinfo', `100644,${blob},docs/BACKLOG.md`], index);
+  const tree = git(['write-tree'], index);
+  if (parent && git(['rev-parse', `${parent}^{tree}`]) === tree) return { published: false, commit: parent, source };
+  const commit = git([
+    'commit-tree',
+    tree,
+    ...(parent ? ['-p', parent] : []),
+    '-m',
+    `Backlog views for ${source}\n\nBuilt by work-items publish from ${source}; do not edit this branch.`,
+  ]);
+  git(['push', '--quiet', remote, `${commit}:refs/heads/${VIEWS_BRANCH}`]);
+  return { published: true, commit, source };
+}
+// F-100: the read-only half of publishing. It writes the built ledger, runs each publish hook on it in order, and
+// refuses a hook that fails, runs over ten minutes, commits, or adds or changes a tracked, unignored or new ignored
+// path (a change inside an already ignored directory is not seen; only the ledger leaves the job), or that turns the
+// ledger into a symlink.
+export function prepareViews(root, config, { git = (args) => runEnv(root, args) } = {}) {
+  if (!builtViews(config)) throw Error('Prepare only when workItems.views is "built"');
+  assertViewUncommitted(root);
+  if (git(['status', '--porcelain']))
+    throw Error('Prepare from a clean checkout: uncommitted changes would be left out');
+  const file = join(root, 'docs/BACKLOG.md');
+  writeFileSync(file, renderLedger(root, config));
+  const hooks = publishHooks(config);
+  const state = () => [git(['rev-parse', 'HEAD']), git(['status', '--porcelain', '--ignored'])].join('\n');
+  const before = state();
+  let output = '';
+  for (const argv of hooks) {
+    const name = `node ${argv.join(' ')}`;
+    const script = local(root, argv[0]);
+    if (!existsSync(script) || !statSync(script).isFile())
+      throw Error(`Publish hook ${name}: ${argv[0]} is not a file`);
+    const r = spawnSync(process.execPath, argv, {
+      cwd: root,
+      encoding: 'utf8',
+      shell: false,
+      timeout: 10 * 60 * 1000,
+      maxBuffer: 16 * 1024 * 1024,
+    });
+    output += (r.stdout ?? '') + (r.stderr ?? '');
+    if (r.status !== 0)
+      throw Error(
+        `Publish hook ${name} failed (${r.error?.message ?? `exit ${r.status ?? r.signal}`}): ${output.trim()}`,
+      );
+  }
+  const changed = git(['status', '--porcelain']);
+  if (changed || state() !== before)
+    throw Error(
+      `A publish hook committed or changed a path other than docs/BACKLOG.md, which is all a hook may write:\n${changed || git(['status', '--porcelain', '--ignored'])}`,
+    );
+  if (lstatSync(file).isSymbolicLink()) throw Error('A publish hook made docs/BACKLOG.md a symlink');
+  assertViewUncommitted(root);
+  return { ledger: readFileSync(file, 'utf8'), hooks: hooks.length, output };
+}
+const runEnv = (root, args, env = {}) => {
+  const r = spawnSync('git', args, { cwd: root, encoding: 'utf8', env: { ...process.env, ...env } });
+  if (r.status !== 0) throw Error(`git ${args[0]} failed: ${(r.stderr || r.stdout || '').trim()}`);
+  return r.stdout.trim();
+};
+const NEWEST = 'first:1,orderBy:{field:CREATED_AT,direction:DESC}';
+const NEXT_NUMBER_QUERY = `query($o:String!,$n:String!){repository(owner:$o,name:$n){issues(${NEWEST}){nodes{number}} pullRequests(${NEWEST}){nodes{number}} discussions(${NEWEST}){nodes{number}}}}`;
+export function nextNumber(root, repository, gh = (args) => run(root, 'gh', args)) {
+  if (!REPOSITORY.test(repository ?? '')) throw Error('Repository is owner/name');
+  const [owner, name] = repository.split('/');
+  // -f sends raw strings: -F would turn an all-digit name into a number and read "@file".
+  const data = JSON.parse(
+    gh(['api', 'graphql', '-f', `query=${NEXT_NUMBER_QUERY}`, '-f', `o=${owner}`, '-f', `n=${name}`]),
+  );
+  const repo = data?.data?.repository;
+  if (!repo) throw Error(`Cannot read ${repository} from GitHub`);
+  const numbers = ['issues', 'pullRequests', 'discussions'].map((k) => repo[k]?.nodes?.[0]?.number ?? 0);
+  return Math.max(...numbers) + 1;
+}
+// Options that change which repository or branch the PR opens from, or that print no PR URL, are refused.
+// Short flags may be clustered after gh's boolean ones (-d draft, -f fill): -dw, -fdR.
+const FOREIGN_PR_OPTION = /^(--head|--repo|--web|--dry-run)(=|$)|^-[df]*[wRH]/;
+export async function openPr(
+  root,
+  config,
+  ids,
+  ghArgs,
+  {
+    gh = (args) => run(root, 'gh', args),
+    git = (args) => run(root, 'git', args),
+    env = process.env,
+    trailers: given = [],
+  } = {},
+) {
+  // B-053: the commits this makes end with the project's attribution lines: --trailer, else HARNESS_COMMIT_TRAILER
+  // (one per line), else the Co-Authored-By trailers of the branch's newest commit. Checked before anything is written.
+  const explicit = [...given, ...String(env.HARNESS_COMMIT_TRAILER ?? '').split('\n')]
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const bad = explicit.find((line) => !/^[A-Za-z][A-Za-z0-9-]*: \S.*$/.test(line));
+  if (bad !== undefined) throw Error(`Not a commit trailer ("Key: value"): ${bad}`);
+  if (!ids.length)
+    throw Error('Name the records this PR touches: work-items.mjs pr F-091[,B-049] -- <gh pr create options>');
+  const foreign = ghArgs.find((a) => FOREIGN_PR_OPTION.test(a));
+  if (foreign)
+    throw Error(`The PR opens from the current branch and repository, with its URL printed: drop ${foreign}`);
+  if (env.GH_REPO) throw Error('Unset GH_REPO: the PR opens in this checkout’s repository');
+  const view = JSON.parse(
+    gh(['repo', 'view', ...(config.repository ? [config.repository] : []), '--json', 'nameWithOwner,defaultBranchRef']),
+  );
+  const repository = config.repository ?? view.nameWithOwner;
+  const defaultBranch = view.defaultBranchRef?.name;
+  if (!REPOSITORY.test(repository ?? '') || !defaultBranch)
+    throw Error('Cannot read the repository and its default branch');
+  const branch = git(['rev-parse', '--abbrev-ref', 'HEAD']);
+  if (branch === 'HEAD' || branch === defaultBranch) throw Error(`Open a PR from a work branch, not ${branch}`);
+  if (git(['status', '--porcelain']))
+    throw Error('Commit or set aside your changes first: the helper commits only the records');
+  const open = JSON.parse(gh(['pr', 'list', '--head', branch, '--state', 'open', '--json', 'number']) || '[]');
+  if (open.length) throw Error(`${branch} already has PR #${open[0].number}: name that number in the records instead`);
+  // A rerun after gh pr create failed: this branch's earlier "name PR #N" commits wrote numbers no PR took.
+  git(['fetch', '--quiet', 'origin', defaultBranch]);
+  const subjects = git(['log', '--format=%s', `origin/${defaultBranch}..HEAD`]);
+  const stale = [...subjects.matchAll(/^docs\([^)]*\): name PR #(\d+)$/gm)].map((m) => Number(m[1]));
+  const label = ids.join(', ');
+  const trailers = explicit.length
+    ? explicit
+    : git(['log', '-1', '--format=%(trailers:key=Co-Authored-By,unfold)'])
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+  const commit = (paths, message) => {
+    writeFileSync(join(root, 'docs/BACKLOG.md'), renderLedger(root, config));
+    if (!git(['status', '--porcelain'])) return false;
+    git(['add', '--', ...paths, ...(builtViews(config) ? [] : ['docs/BACKLOG.md'])]);
+    git(['commit', '-m', trailers.length ? `${message}\n\n${trailers.join('\n')}` : message]);
+    return true;
+  };
+  const predicted = nextNumber(root, repository, gh);
+  const { changed } = nameRecordPr(root, config, ids, predicted, repository, stale);
+  commit(changed, `docs(${label}): name PR #${predicted}`);
+  git(['push', '-u', 'origin', branch]);
+  const url = gh(['pr', 'create', '--head', branch, ...ghArgs])
+    .split('\n')
+    .at(-1)
+    .trim();
+  const actual = Number(/\/pull\/(\d+)\s*$/.exec(url)?.[1]);
+  if (!actual) throw Error(`The PR may have opened, but its number is not in gh's output (${url}): check the records`);
+  if (actual === predicted) return { number: actual, url, predicted, followUp: false, trailers: trailers.length };
+  // Something took the predicted number: rename it in the records and push once more.
+  const renamed = nameRecordPr(root, config, ids, actual, repository, [predicted]).changed;
+  if (commit(renamed, `docs(${label}): the PR is #${actual}, not #${predicted}`)) git(['push']);
+  return { number: actual, url, predicted, followUp: true, trailers: trailers.length };
+}
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    const [command, ...extra] = process.argv.slice(2);
+    if (command === 'pr') {
+      const root = process.cwd(),
+        config = settings(root);
+      if (!config) throw Error('Work items not adopted');
+      const dash = extra.indexOf('--');
+      const before = dash < 0 ? extra : extra.slice(0, dash);
+      if (before.includes('--trailer')) throw Error('Write --trailer="Key: value", with "=" (review of B-053)');
+      const trailers = before.filter((a) => a.startsWith('--trailer=')).map((a) => a.slice('--trailer='.length));
+      const ids = before
+        .filter((a) => !a.startsWith('--trailer='))
+        .flatMap((a) => a.split(','))
+        .filter(Boolean);
+      const done = await openPr(root, config, ids, dash < 0 ? [] : extra.slice(dash + 1), { trailers });
+      console.log(
+        done.followUp
+          ? `Opened ${done.url}. #${done.predicted} was taken meanwhile: the records now name #${done.number} in a follow-up commit.`
+          : `Opened ${done.url}; the records already name #${done.number}: no follow-up commit.`,
+      );
+      if (!done.trailers)
+        console.warn(
+          '! Its commits carry no trailer: the branch tip has no Co-Authored-By line; pass --trailer="Key: value" or set HARNESS_COMMIT_TRAILER if the project asks for one.',
+        );
+    } else if (command === 'publish') {
+      const root = process.cwd(),
+        config = settings(root);
+      if (!config) throw Error('Work items not adopted');
+      const prepare = extra.length === 1 && extra[0] === '--prepare';
+      const from = extra.length === 1 ? /^--ledger=(.+)$/s.exec(extra[0])?.[1] : undefined;
+      if (extra.length && !prepare && !from) throw Error('Use work-items.mjs publish [--prepare | --ledger=<file>]');
+      if (prepare) {
+        const done = prepareViews(root, config);
+        if (done.output) process.stdout.write(done.output);
+        console.log(
+          `Built docs/BACKLOG.md${done.hooks ? ` and ran ${done.hooks} publish hook(s) on it` : ''}: publish it with publish --ledger=<file>.`,
+        );
+      } else {
+        let ledger;
+        if (from) {
+          if (!statSync(from).isFile() || statSync(from).size > 16 * 1024 * 1024)
+            throw Error('--ledger names a file of at most 16 MiB');
+          ledger = readFileSync(from, 'utf8');
+        }
+        const done = publishViews(root, config, { ledger });
+        console.log(
+          done.published
+            ? `Published the views of ${done.source} on ${VIEWS_BRANCH} (${done.commit}).`
+            : done.reason
+              ? `Not published: ${done.reason}.`
+              : `The views of ${done.source} are already on ${VIEWS_BRANCH}: nothing to publish.`,
+        );
+      }
+    } else if (command === 'close') {
+      const root = process.cwd(),
+        config = settings(root);
+      if (!config) throw Error('Work items not adopted');
+      const [id, ...flags] = extra,
+        options = {};
+      for (const flag of flags) {
+        const m = /^--(evidence|release|verification|date)=(.*)$/s.exec(flag);
+        if (!m || m[1] in options) throw Error(`Unknown or repeated option: ${flag}`);
+        options[m[1]] = m[2];
+      }
+      const done = await closeRecord(root, config, id, options);
+      console.log(
+        `Closed ${done.id} on ${done.day}: ${done.steps.length} step(s) closed, record moved to ${done.archive}, docs/BACKLOG.md rebuilt.\nNext: npm run reconcile:draft for the log entry, then move the ledger header to the current main.`,
+      );
+    } else {
+      const limit =
+        command === 'next' && extra.length === 1 ? /^--limit=([1-9]\d{0,3})$/.exec(extra[0])?.[1] : undefined;
+      if (
+        (extra.length && limit === undefined) ||
+        !['migrate', 'build', 'check', 'tasks', 'calibrate', 'next'].includes(command)
+      )
+        throw Error(
+          'Use work-items.mjs migrate|build|check|tasks|calibrate|next [--limit=N] | close <ID> --evidence=… [--release=vX.Y.Z] | pr <ID>[,<ID>] [--trailer="Key: value"] -- <gh pr create options> | publish [--prepare | --ledger=<file>]',
+        );
+      const root = process.cwd(),
+        config = settings(root);
+      if (!config) {
+        console.log('Work items not adopted');
+      } else if (command === 'migrate')
+        console.log('Migrated ' + migrateLedger(root, config) + ' records without changing the ledger');
+      else if (command === 'next') console.log(nextSteps(root, config, limit ? Number(limit) : undefined).join('\n'));
+      else if (command === 'build') writeFileSync(join(root, 'docs/BACKLOG.md'), renderLedger(root, config));
+      else if (command === 'calibrate')
+        console.log(JSON.stringify(calibrate(taskCatalog(root, config).tasks, config.estimation), null, 2));
+      else {
+        const result = command === 'check' ? checkWorkItems(root) : taskCatalog(root, config);
+        console.log(JSON.stringify(result, null, 2));
+        if (result.staleEstimates)
+          console.warn(
+            `! ${result.staleEstimates.length} open step(s) have more actual plus remaining agent hours than the estimate they show: set effort.estimateAgentHours with the re-estimate: ${result.staleEstimates.slice(0, 10).join(', ')}${result.staleEstimates.length > 10 ? ` and ${result.staleEstimates.length - 10} more` : ''}`,
+          );
+        if (result.withoutDays)
+          console.warn(
+            `! ${result.withoutDays.length} open step(s) have no remaining estimate (effort.agentHours/ownerHours, or days), so totals count them as unknown: ${result.withoutDays.slice(0, 10).join(', ')}${result.withoutDays.length > 10 ? ` and ${result.withoutDays.length - 10} more` : ''}`,
+          );
+        if (result.ownerStepsWithoutLink) {
+          console.error(
+            `✗ ${result.ownerStepsWithoutLink.length} owner step(s) whose turn it is have no ownerLink to the procedure or decision page: ${result.ownerStepsWithoutLink.join(', ')}`,
+          );
+          process.exitCode = 1;
+        }
+        if (result.ownerStepsWithoutKind)
+          console.warn(
+            `! ${result.ownerStepsWithoutKind.length} open step(s) whose turn it is owe ownerHours without effort.ownerKind (and so have no page); classify with ownerKind or split: ${result.ownerStepsWithoutKind.join(', ')}`,
+          );
+        if (result.mixedSteps)
+          console.warn(
+            `! ${result.mixedSteps.length} open step(s) have more than one actor (agent hours on an owner step, or ownerKind both); split each into consecutive steps with one actor: ${result.mixedSteps.join(', ')}`,
+          );
+        if (result.recordLevelDependencies)
+          console.warn(
+            `! ${result.recordLevelDependencies.length} record-level dependencies name no step; where one step is enough, make the waiting step depend on it (dependsOn) and drop the row: ${result.recordLevelDependencies.join(', ')}`,
+          );
+        if (result.proseBlockers)
+          console.warn(
+            `! ${result.proseBlockers.length} record(s) name a blocker in their Next action or Check that no open step depends on; if it is one, add the blocking step to the waiting step's dependsOn: ${result.proseBlockers.join(', ')}`,
+          );
+        if (result.allStepsClosed)
+          console.warn(
+            `! ${result.allStepsClosed.length} non-closed record(s) have all steps closed; reconcile scope and close or add remaining steps: ${result.allStepsClosed.join(', ')}`,
+          );
+      }
+    }
+  } catch (e) {
+    console.error(e.message);
+    process.exitCode = 1;
+  }
+}

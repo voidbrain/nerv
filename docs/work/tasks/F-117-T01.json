@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-117-T01",
+  "parent": "F-117",
+  "title": "The service runs from its own install folder, apart from the project checkout",
+  "goal": "NERV runs from a dedicated checkout (default ~/.nerv-app) that only the lifecycle update touches; ~/Projects/NERV/NERV becomes an ordinary development checkout",
+  "status": "closed",
+  "acceptance": [
+    "Lifecycle install/update take the install folder as their source; the service definition points there",
+    "A one-time migration clones the installed revision into the install folder, builds it, re-registers the service there and keeps ~/.nerv data unchanged, with a recorded rollback to the old path",
+    "The AGENTS.md project line about the primary checkout names the install folder instead",
+    "Test across the join: rendered service definition, lifecycle plan and migration use the same install path"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/node-lifecycle-execution.ts",
+    "src/node-lifecycle-mac.ts",
+    "src/node-lifecycle-linux.ts",
+    "src/node-lifecycle-apply.ts",
+    "src/service.ts",
+    "src/cli.ts",
+    "AGENTS.md",
+    "test/node-lifecycle.test.ts",
+    "test/node-lifecycle-execution.test.ts",
+    "test/upgrade-lifecycle.test.ts",
+    "docs/work/records/F-117.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "node --test test/node-lifecycle.test.ts test/node-lifecycle-execution.test.ts test/upgrade-lifecycle.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "0 remaining",
+    "basis": "Implemented 2026-11-23; the live NERV-01 move and the AGENTS.md project line remain, after the owner approves the move.",
+    "reviewed": "2026-11-23",
+    "agentHours": 0,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 6,
+    "actualSource": "stated"
+  }
+}

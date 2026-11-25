@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "parent": "B-092",
+  "id": "B-092-T01",
+  "title": "Host construction needs only the data home; planning names missing files",
+  "goal": "Host construction needs only the data home; planning names missing files",
+  "status": "closed",
+  "acceptance": [
+    "Test committed failing first; B-084 message kept at planning"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/node-lifecycle-execution.ts",
+    "test/**",
+    "docs/work/records/B-092.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-18. Not a measurement.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 527,
+      "note": "this change"
+    }
+  ]
+}

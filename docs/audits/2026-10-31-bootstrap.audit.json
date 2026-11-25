@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "scoped",
+  "reviewed": "2026-10-31T23:37:31.254Z",
+  "baseline": "04ca127aaf0f4b8c91fa6ef1b1e8494db3f0b752",
+  "report": "docs/audits/2026-10-31-bootstrap.md",
+  "areas": {
+    "code": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-bootstrap.md: local bootstrap inspection and named checks",
+      "limits": "Scoped initial implementation only; no remote or device acceptance."
+    },
+    "logic": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-bootstrap.md: local bootstrap inspection and named checks",
+      "limits": "Scoped initial implementation only; no remote or device acceptance."
+    },
+    "tests": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-bootstrap.md: local bootstrap inspection and named checks",
+      "limits": "Scoped initial implementation only; no remote or device acceptance."
+    },
+    "documentation": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-bootstrap.md: local bootstrap inspection and named checks",
+      "limits": "Scoped initial implementation only; no remote or device acceptance."
+    },
+    "harness": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-bootstrap.md: local bootstrap inspection and named checks",
+      "limits": "Scoped initial implementation only; no remote or device acceptance."
+    },
+    "security": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-bootstrap.md: local bootstrap inspection and named checks",
+      "limits": "Scoped initial implementation only; no remote or device acceptance."
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-10-31-bootstrap.md: local bootstrap inspection and named checks",
+      "limits": "Scoped initial implementation only; no remote or device acceptance."
+    },
+    "delivery": {
+      "result": "blocked",
+      "evidence": "Local Angular build passed; no hosted pipeline or deployment provisioned.",
+      "limits": "No live remote CI, phone or device checks.",
+      "blocker": "Repository provisioning and external execution hosts unavailable."
+    }
+  }
+}

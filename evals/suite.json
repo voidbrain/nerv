@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "id": "nerv-golden-v5",
+  "groups": [
+    {
+      "id": "policy",
+      "files": [
+        "test/evaluation.test.ts"
+      ],
+      "families": [
+        "effects",
+        "taint",
+        "vote-permutations",
+        "shadow-veto",
+        "budget",
+        "confinement"
+      ],
+      "minimumTests": 90
+    },
+    {
+      "id": "ledger",
+      "files": [
+        "test/ledger.test.ts",
+        "test/gate.test.ts",
+        "test/brief.test.ts",
+        "test/brief-recovery.test.ts",
+        "test/watch.test.ts"
+      ],
+      "families": [
+        "expiry",
+        "single-use-grants",
+        "restart",
+        "executor-effects",
+        "approval-idempotency",
+        "brief-source-recovery",
+        "daily-delivery-idempotency",
+        "proactive-admission",
+        "slot-idempotency",
+        "immutable-stage-action-limits"
+      ],
+      "minimumTests": 50
+    },
+    {
+      "id": "conversation",
+      "files": [
+        "test/clarification.test.ts",
+        "test/misato.test.ts",
+        "test/resume.test.ts",
+        "test/why.test.ts",
+        "test/watch-runtime.test.ts"
+      ],
+      "families": [
+        "ambiguity",
+        "mind-change",
+        "conversation-isolation",
+        "bounded-replanning",
+        "language",
+        "explanations",
+        "proactive-local-planning",
+        "durable-step-reservations",
+        "quiet-hours",
+        "interruption-recovery"
+      ],
+      "minimumTests": 42
+    },
+    {
+      "id": "channels",
+      "files": [
+        "test/telegram.test.ts",
+        "test/one-channel.test.ts",
+        "test/telegram-reconcile.test.ts"
+      ],
+      "families": [
+        "delivery-retry",
+        "cross-channel",
+        "relay",
+        "owner-authorization",
+        "approval-card-reconciliation",
+        "proactive-quiet-delivery"
+      ],
+      "minimumTests": 18
+    },
+    {
+      "id": "bases",
+      "files": [
+        "test/kaji-run.test.ts",
+        "test/kaji-seats.test.ts",
+        "test/worker-jobs.test.ts",
+        "test/worker-link.test.ts",
+        "test/worker-link-heartbeat.test.ts",
+        "test/worker-link-admission.test.ts",
+        "test/worker-link-exit.test.ts",
+        "test/worker-outbox.test.ts",
+        "test/protocol.test.ts"
+      ],
+      "families": [
+        "signed-bases",
+        "remote-idempotency",
+        "seat-delay",
+        "shadow-after-decision",
+        "lease-fencing",
+        "outbound-reconnect",
+        "approval-locks",
+        "signed-cancellation",
+        "legacy-quarantine",
+        "hostile-frames",
+        "connection-admission",
+        "proactive-dispatch-revalidation",
+        "quiet-remote-followups"
+      ],
+      "minimumTests": 48
+    },
+    {
+      "id": "stress",
+      "files": [
+        "test/runtime-load.test.ts",
+        "test/process-client.test.ts"
+      ],
+      "families": [
+        "bounded-queues",
+        "brain-stall",
+        "crash",
+        "parallel-writes",
+        "latency"
+      ],
+      "minimumTests": 8
+    },
+    {
+      "id": "browser",
+      "files": [
+        "test/angular.browser.mjs",
+        "test/evaluation.browser.mjs",
+        "test/pwa.browser.mjs",
+        "test/browser-click.browser.mjs",
+        "test/diyfpv-read.browser.mjs",
+        "test/updater-status.browser.mjs",
+        "test/doctor-run.browser.mjs"
+      ],
+      "families": [
+        "dashboard-operator",
+        "waiting-state",
+        "approval",
+        "topic-change",
+        "accessibility",
+        "pwa-lifecycle"
+      ],
+      "minimumTests": 2
+    },
+    {
+      "id": "script-plans",
+      "files": [
+        "test/script-plan.test.ts"
+      ],
+      "families": [
+        "script-plan-comparison",
+        "eva03-per-call-gate"
+      ],
+      "minimumTests": 2
+    }
+  ],
+  "notCovered": [
+    {
+      "branch": "pilot-execution-and-tool-evolution",
+      "owner": "F-045/F-049",
+      "reason": "Ordinary chat pilots advise; explicit watch local-model/stage binding is covered here. General isolated pilot/tool lifecycle remains unimplemented."
+    },
+    {
+      "branch": "plan-DAG-decomposition-and-specialist-handoffs",
+      "owner": "F-048",
+      "reason": "General coder/reviewer orchestration is not implemented."
+    },
+    {
+      "branch": "unified-remote-dashboard-navigation",
+      "owner": "F-051",
+      "reason": "Authenticated cross-base inspection is not implemented."
+    },
+    {
+      "branch": "physical-phone-receipt",
+      "owner": "F-028",
+      "reason": "Bot fixtures do not establish Telegram device display or receipt."
+    },
+    {
+      "branch": "device-bootstrap-and-physical-execution",
+      "owner": "F-005/F-006",
+      "reason": "These evaluation groups cover enrolled built-in worker fixtures, not the separately tested confirmed-bootstrap implementation. Real-host service/device acceptance and physical adapters remain outside this suite."
+    }
+  ]
+}

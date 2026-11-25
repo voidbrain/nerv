@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T13",
+  "status": "closed",
+  "title": "T05b — Three Mac operating-condition runs",
+  "goal": "Three Mac operating-condition runs.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "acceptance": [
+    "Three Mac operating-condition runs"
+  ],
+  "dependsOn": [
+    "B-077-T01",
+    "F-006-T20"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Run by the owner 2026-11-18 (about 25 min of runs). No actual: owner time not recorded.",
+    "reviewed": "2026-11-18",
+    "baselineDays": 1,
+    "ownerHours": 0,
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f006-mac-runs.md",
+  "prs": [
+    {
+      "pr": 528,
+      "note": "results"
+    }
+  ]
+}

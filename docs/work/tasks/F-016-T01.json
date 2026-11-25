@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T01",
+  "status": "closed",
+  "title": "Step 1a — Decision: replicated state, leader lease and epoch, fencing tokens and restore",
+  "goal": "Decision: replicated state, leader lease and epoch, fencing tokens and restore.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "Decision: replicated state, leader lease and epoch, fencing tokens and restore"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:coordinator-authority"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "0.25 hours owner",
+    "basis": "Owner decision 2026-11-15: agreed to the revised relocation decision (second review: ready to agree), with one change: a non-main base keeps answering chat locally, without coordinator effects, while main is offline (F-016-T12 revises the decision before F-016-T03). No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
+    "baselineDays": 1.5,
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 2.25,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated",
+    "estimateAgentHours": 0.5,
+    "ownerKind": "decision"
+  }
+}

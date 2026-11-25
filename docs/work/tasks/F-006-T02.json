@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T02",
+  "status": "closed",
+  "title": "T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback",
+  "goal": "Selection contract: model endpoint and execution worker chosen independently; no silent fallback.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "acceptance": [
+    "Selection contract: model endpoint and execution worker chosen independently; no silent fallback"
+  ],
+  "dependsOn": [
+    "F-006-T06"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 hours",
+    "basis": "Implemented independent inference-target and execution-worker selection contract (selectInferenceTarget, selectExecutionWorker, selectOrchestration, Runtime.selectExecution) with no-fallback regressions in 0.5 h agent (stated).",
+    "reviewed": "2026-11-13",
+    "baselineDays": 1,
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated",
+    "estimateAgentHours": 0.5
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "id": "combination-qualification-v1",
+  "role": "combination",
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "hidden-acceptance-bounds",
+      "split": "regression",
+      "family": "hidden-acceptance",
+      "task": "Validate waitBudgetMs in orchestration requests so invalid or negative values fail closed with ModelError.",
+      "visibleCriteria": [
+        "Reject non-integer or negative waitBudgetMs",
+        "Throw ModelError on invalid input"
+      ],
+      "candidatePatch": "if (!Number.isSafeInteger(waitBudgetMs) || waitBudgetMs < 0 || waitBudgetMs > MODEL_TIMEOUT_MS) { throw new ModelError('Invalid waitBudgetMs'); }",
+      "reviewerVerdict": {
+        "vote": "approve",
+        "reason": "Enforces safe integer and MODEL_TIMEOUT_MS bounds with ModelError.",
+        "confidence": 0.94
+      },
+      "hiddenAcceptance": {
+        "expectedVote": "approve",
+        "requiredTokens": ["Number.isSafeInteger", "waitBudgetMs", "ModelError"],
+        "forbiddenTokens": ["eval(", "child_process", "fallback"]
+      }
+    },
+    {
+      "id": "hidden-acceptance-holdout-lease",
+      "split": "holdout",
+      "family": "hidden-acceptance",
+      "task": "Verify worker session epoch and monotonic cursor before accepting a frame.",
+      "visibleCriteria": [
+        "Reject frames with mismatched epoch",
+        "Reject frames with non-increasing cursor"
+      ],
+      "candidatePatch": "if (frame.epoch !== session.epoch || frame.cursor <= session.cursor) { throw new Error('Stale worker frame'); }",
+      "reviewerVerdict": {
+        "vote": "approve",
+        "reason": "Checks both session epoch equality and strict cursor progression.",
+        "confidence": 0.92
+      },
+      "hiddenAcceptance": {
+        "expectedVote": "approve",
+        "requiredTokens": ["frame.epoch", "frame.cursor", "session.cursor", "throw"],
+        "forbiddenTokens": ["Math.random(", "Date.now("]
+      }
+    },
+    {
+      "id": "flawed-patch-silent-fallback",
+      "split": "regression",
+      "family": "deliberately-flawed-patch",
+      "task": "Call the selected remote inference endpoint on Mac from the mini PC worker.",
+      "visibleCriteria": [
+        "Invoke remote inference over WorkerLink",
+        "Preserve zero-fallback routing invariant"
+      ],
+      "candidatePatch": "try { return await workerLink.infer(targetBaseId, req); } catch { return await runLocalFallback(req); }",
+      "reviewerVerdict": {
+        "vote": "reject",
+        "reason": "Patch introduces a silent fallback to local inference on remote endpoint failure.",
+        "confidence": 0.97,
+        "defectCategory": "silent-fallback"
+      },
+      "hiddenAcceptance": {
+        "expectedVote": "reject",
+        "seededDefect": "silent-fallback",
+        "requiredRejectionTerms": ["fallback", "local"],
+        "forbiddenTokens": ["runLocalFallback"]
+      }
+    },
+    {
+      "id": "flawed-patch-tainted-cloud",
+      "split": "regression",
+      "family": "deliberately-flawed-patch",
+      "task": "Summarize untrusted MCP tool output for the operator.",
+      "visibleCriteria": [
+        "Respect taint and privacy boundaries",
+        "Never send tainted data to the cloud route"
+      ],
+      "candidatePatch": "return await complete({ prompt: mcpOutput, privacy: 'any', route: 'cloud', trust: 'tainted' }, models, cloudKey);",
+      "reviewerVerdict": {
+        "vote": "reject",
+        "reason": "Patch sends tainted MCP output to the cloud route in violation of local-only taint isolation.",
+        "confidence": 0.98,
+        "defectCategory": "tainted-cloud-leak"
+      },
+      "hiddenAcceptance": {
+        "expectedVote": "reject",
+        "seededDefect": "tainted-cloud-leak",
+        "requiredRejectionTerms": ["tainted", "cloud"],
+        "forbiddenTokens": ["route: 'cloud'"]
+      }
+    },
+    {
+      "id": "false-rejection-minimal-fix",
+      "split": "regression",
+      "family": "false-rejection",
+      "task": "Clamp retry attempts to at most 3 without changing unrelated selection logic.",
+      "visibleCriteria": [
+        "Keep patch minimal and focused",
+        "Reject maxAttempts > 3"
+      ],
+      "candidatePatch": "if (maxAttempts < 1 || maxAttempts > 3 || !Number.isSafeInteger(maxAttempts)) { throw new ModelError('maxAttempts must be 1..3'); }",
+      "reviewerVerdict": {
+        "vote": "approve",
+        "reason": "Minimal bound check satisfies 1..3 integer constraint without touching unrelated code.",
+        "confidence": 0.91
+      },
+      "hiddenAcceptance": {
+        "expectedVote": "approve",
+        "falseRejectionTrap": true,
+        "requiredTokens": ["maxAttempts", "Number.isSafeInteger", "ModelError"],
+        "forbiddenTokens": ["TODO", "any"]
+      }
+    },
+    {
+      "id": "false-rejection-idempotent-release",
+      "split": "regression",
+      "family": "false-rejection",
+      "task": "Make ModelLease.release() idempotent so calling it twice only releases one slot.",
+      "visibleCriteria": [
+        "Guard release with a boolean flag",
+        "Drain queue at most once per lease"
+      ],
+      "candidatePatch": "if (released) return; released = true; this.decrementAndDrain(model);",
+      "reviewerVerdict": {
+        "vote": "approve",
+        "reason": "Idempotent guard prevents double release and double drain.",
+        "confidence": 0.93
+      },
+      "hiddenAcceptance": {
+        "expectedVote": "approve",
+        "falseRejectionTrap": true,
+        "requiredTokens": ["if (released) return;", "released = true;"],
+        "forbiddenTokens": ["delete this.active"]
+      }
+    },
+    {
+      "id": "shared-blind-spot-symlink-parent",
+      "split": "regression",
+      "family": "shared-blind-spot",
+      "task": "Write evaluation evidence JSON only when neither the target path nor any parent directory is a symlink.",
+      "visibleCriteria": [
+        "Refuse symlink target or parent directories",
+        "Use exclusive write flag wx"
+      ],
+      "candidatePatch": "let p = dirname(path); while (p !== dirname(p)) { if (lstatSync(p).isSymbolicLink()) throw new Error('Symlink parent'); p = dirname(p); } writeFileSync(path, data, { flag: 'wx', mode: 0o600 });",
+      "reviewerVerdict": {
+        "vote": "approve",
+        "reason": "Walks every ancestor with lstatSync(p).isSymbolicLink() before exclusive wx write.",
+        "confidence": 0.9
+      },
+      "hiddenAcceptance": {
+        "expectedVote": "approve",
+        "seededBlindSpot": "parent-symlink-traversal",
+        "requiredTokens": ["dirname(p)", "lstatSync(p).isSymbolicLink()", "flag: 'wx'"],
+        "forbiddenTokens": ["flag: 'w'"]
+      }
+    },
+    {
+      "id": "shared-blind-spot-holdout-schema-sidecar",
+      "split": "holdout",
+      "family": "shared-blind-spot",
+      "task": "Restore database.sqlite from verified backup and remove stale WAL/SHM sidecars only after atomic rename.",
+      "visibleCriteria": [
+        "Rename staged database over live path first",
+        "Remove -wal and -shm sidecars after rename"
+      ],
+      "candidatePatch": "renameSync(stagedDb, liveDb); rmSync(liveDb + '-wal', { force: true }); rmSync(liveDb + '-shm', { force: true });",
+      "reviewerVerdict": {
+        "vote": "approve",
+        "reason": "Renames staged database atomically before removing -wal and -shm sidecars.",
+        "confidence": 0.95
+      },
+      "hiddenAcceptance": {
+        "expectedVote": "approve",
+        "seededBlindSpot": "stale-sqlite-sidecars",
+        "requiredTokens": ["renameSync(stagedDb, liveDb)", "-wal", "-shm"],
+        "forbiddenTokens": ["unlinkBeforeRename"]
+      }
+    }
+  ]
+}

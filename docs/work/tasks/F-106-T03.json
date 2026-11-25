@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "F-106-T03",
+  "parent": "F-106",
+  "title": "Domain tool schemas offered by intent",
+  "goal": "Misato sees the core tools always and a domain's tools when the request or history names it",
+  "status": "implemented",
+  "acceptance": [
+    "Domain toolsets (fpv, pantry, gmail, batteries, fleet) are offered when the request or history names the domain, the core set always; regressions in test/misato.test.ts show Misato still reaches each domain tool",
+    "The record cites the F-106-T01 measurement before and after"
+  ],
+  "dependsOn": [
+    "F-106-T01",
+    "F-106-T02"
+  ],
+  "resources": [
+    "src/executors.ts",
+    "src/misato.ts",
+    "src/brain-process.ts",
+    "test/misato.test.ts",
+    "docs/work/records/F-106.md",
+    "docs/work/tasks/F-106-T03.json"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-16: a domain map over toolDocs, intent words in two languages, regressions per domain. Not a measurement.",
+    "reviewed": "2026-11-16",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": [
+    {
+      "pr": 569,
+      "note": "implementation"
+    }
+  ]
+}

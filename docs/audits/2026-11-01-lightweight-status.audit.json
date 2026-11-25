@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "scoped",
+  "reviewed": "2026-11-01T09:01:25.257Z",
+  "baseline": "2a8b9013859a73644b4ad5f1ebfeca66b8f4557a",
+  "report": "docs/audits/2026-11-01-lightweight-status.md",
+  "areas": {
+    "code": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-lightweight-status.md: reviewed join and named tests",
+      "limits": "Scoped health/diagnostic separation; macOS CI and live GUI/OS acceptance remain distinct."
+    },
+    "logic": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-lightweight-status.md: reviewed join and named tests",
+      "limits": "Scoped health/diagnostic separation; macOS CI and live GUI/OS acceptance remain distinct."
+    },
+    "tests": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-lightweight-status.md: reviewed join and named tests",
+      "limits": "Scoped health/diagnostic separation; macOS CI and live GUI/OS acceptance remain distinct."
+    },
+    "documentation": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-lightweight-status.md: reviewed join and named tests",
+      "limits": "Scoped health/diagnostic separation; macOS CI and live GUI/OS acceptance remain distinct."
+    },
+    "harness": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-lightweight-status.md: reviewed join and named tests",
+      "limits": "Scoped health/diagnostic separation; macOS CI and live GUI/OS acceptance remain distinct."
+    },
+    "security": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-lightweight-status.md: reviewed join and named tests",
+      "limits": "Scoped health/diagnostic separation; macOS CI and live GUI/OS acceptance remain distinct."
+    },
+    "delivery": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-lightweight-status.md: reviewed join and named tests",
+      "limits": "Scoped health/diagnostic separation; macOS CI and live GUI/OS acceptance remain distinct."
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-lightweight-status.md: reviewed join and named tests",
+      "limits": "Scoped health/diagnostic separation; macOS CI and live GUI/OS acceptance remain distinct."
+    }
+  }
+}

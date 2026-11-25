@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "parent": "B-094",
+  "id": "B-094-T03",
+  "title": "A remote result that arrived before Misato's reply is in that reply",
+  "goal": "Misato's final reply after a kaji.run reports the worker's outcome when its kaji.result is already recorded, instead of \"queued\"",
+  "status": "implemented",
+  "acceptance": [
+    "Test committed failing first across planner and store: a kaji.result recorded before the final reply makes that reply carry the result text (ran, refused or uncertain); with no result yet the reply keeps saying the result follows",
+    "Design: a read-only nervous RPC returns the sortie's kaji.result texts; the planner's finish appends them to Misato's reply for a sortie with a queued kaji.run step"
+  ],
+  "dependsOn": [
+    "B-094-T02"
+  ],
+  "resources": [
+    "src/runtime-planning.ts",
+    "src/runtime-api.ts",
+    "src/rpc.ts",
+    "src/rpc-schemas.ts",
+    "src/nervous-process.ts",
+    "src/ledger.ts",
+    "src/ledger-queries.ts",
+    "test/kaji-run.test.ts",
+    "test/remote-outcome-text.test.ts",
+    "docs/work/records/B-094.md",
+    "docs/work/tasks/B-094-T03.json",
+    "generated:backlog-views",
+    "evals/gauntlet/ledger.json"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-19 after reading the path (S-B094 events: kaji.result recorded before misato.reply). Not a measurement.",
+    "reviewed": "2026-11-19",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 545,
+      "note": "the fix; CI green on rerun"
+    }
+  ]
+}

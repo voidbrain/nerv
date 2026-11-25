@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T08",
+  "status": "closed",
+  "title": "Step 5a — Partition, sleep and reconnect fixtures proving one authority and no duplicate effects",
+  "goal": "Partition, sleep and reconnect fixtures proving one authority and no duplicate effects.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "Partition, sleep and reconnect fixtures proving one authority and no duplicate effects (test/coordinator-partition.test.ts: partition, benign and relocated sleep, the moved-standby {X, D} | {B} partition, a crash after each swap step, mixed epochs; every simulated second asserts at most one authority and no effect twice)"
+  ],
+  "dependsOn": [
+    "F-016-T07",
+    "F-016-T16",
+    "F-016-T17",
+    "F-016-T18",
+    "F-016-T19"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:coordinator-authority"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h (feature steps closed since 2026-11-13 took 0.75–1 h). 2026-11-24: implemented in PR #717; actual stated 3 h, four times the estimate: the fixtures needed a multi-base mesh (real homes, keeper, standby ack, authority gate, outbox and promote; simulated clocks and Kaji line), and they found two bugs (B-120, B-121) fixed in the same PR test-first, plus a gap filed as F-016-T20. 2026-11-24: #717 review fixes added 0.5 h (stated). 2026-11-25: closed in the reconciliation: PR #717 merged on green CI (run 45422935936, one attempt); its fixtures failed in no CI run since.",
+    "reviewed": "2026-11-25",
+    "baselineDays": 1.5,
+    "agentHours": 0,
+    "baselineAgentHours": 2.25,
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 3.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 717,
+      "note": "Partition, sleep and reconnect fixtures; B-120 and B-121 fixes"
+    }
+  ]
+}

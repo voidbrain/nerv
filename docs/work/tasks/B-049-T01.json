@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "id": "B-049-T01",
+  "parent": "B-049",
+  "title": "Classify and fix the invented reminder title",
+  "goal": "Classify the failure (prompt, plan validation or model choice), fix it with a failing case first, and measure the frozen case in an owner-approved rerun",
+  "status": "closed",
+  "acceptance": [
+    "A request without a title gets a question in the request's language, never an invented title",
+    "A deterministic guard, if chosen, is covered by a failing-first test",
+    "The frozen case is rerun within the owner-approved budget and its rate recorded"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "evals/planner-v1.json",
+    "docs/evaluations/**",
+    "docs/work/records/B-049.md",
+    "docs/work/tasks/B-049-T01.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository fixtures; real-model reruns only on loopback Ollama within the owner's approval, no cloud route or paid usage",
+  "validation": [
+    "Failing-first regression for any guard",
+    "Owner-approved gemma4:12b rerun of italian-missing-title"
+  ],
+  "escalation": [
+    "Stop at the approved budget (12 invocations, 60 minutes of model time)",
+    "A prompt or model change beyond this case goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.25 h agent",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). No actual: not timed by the session that closed it.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 0.25
+  },
+  "prs": [
+    {
+      "pr": 367,
+      "note": "implementation"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "id": "B-128-T01",
+  "parent": "B-128",
+  "title": "Settings pairing QR uses the phone's address, not 127.0.0.1",
+  "goal": "A pairing QR minted from Settings on a loopback dashboard opens on the phone: the server resolves the tailnet address as nerv open --phone --qr does",
+  "status": "closed",
+  "acceptance": [
+    "A committed join test fails first: Settings on a loopback page mints a QR whose link uses the tailnet address; with none, the old link and a hint",
+    "One helper resolves the phone address for CLI and server: config phone.url, else tailscale status (cached briefly), never an arbitrary client origin",
+    "Tests never run tailscale: the resolver is injected"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/pairing-qr.ts",
+    "src/server.ts",
+    "src/cli.ts",
+    "src/cli-commands.ts",
+    "src/config.ts",
+    "src/pairing-address.ts",
+    "web/public/dashboard/live.js",
+    "test/pairing-qr.test.ts",
+    "test/evaluation.browser.mjs",
+    "docs/guides/channels-and-watches.md",
+    "docs/work/records/B-128.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design",
+    "security-review"
+  ],
+  "privacy": "Neutral fixtures only in git (tailnet-fixture.ts.net); tests never run tailscale; no real tailnet name is committed.",
+  "validation": [
+    "A committed regression fails before the fix",
+    "Every test reading live.js or web/src plus touched tests",
+    "npm run check:fast",
+    "final required CI"
+  ],
+  "escalation": [
+    "Never accept an arbitrary origin from the client for the QR link"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24: shared resolver, config key, Settings text, two join tests. Not a measurement. 2026-11-25: closed in the reconciliation: PR #726 merged on green CI (run 45487580334, one attempt). No actual: the implementing session recorded none.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 726,
+      "note": "implementation"
+    }
+  ]
+}

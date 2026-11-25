@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-106-T01",
+  "parent": "B-106",
+  "title": "Fix Sephirot answer-edge activation and marker arrowhead fills",
+  "goal": "plan -> debrief passes as soon as debrief activates and all Sephirot edge arrowheads render filled",
+  "status": "closed",
+  "acceptance": [
+    "Failing test committed first in test/dashboard.test.ts",
+    "passedEdge marks answer/relay/declined passed when debrief is on, wait, or done",
+    ".sephirot svg.edges > path does not strip marker fill and drawEdges emits explicit per-state arrowheads"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/**",
+    "test/dashboard.test.ts",
+    "docs/work/records/B-106.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "node --test test/dashboard.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Fixed 2026-11-22 from owner report on S-F11B.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

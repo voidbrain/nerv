@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-009-T02",
+  "parent": "F-009",
+  "title": "Mac login/logout acceptance",
+  "goal": "Mac login/logout acceptance",
+  "status": "closed",
+  "acceptance": [
+    "Service survives logout/login of the selected Mac user as documented; evidence recorded"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Owner ran it 2026-11-15: after logout and login, launchd restarted io.nerv.agent unaided (state = running, new pid, HTTP 200 on 127.0.0.1:4317). No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
+    "baselineDays": 0.5,
+    "ownerHours": 0,
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f009-service-login-procedure.md#part-1--mac-loginlogout-acceptance-neo-tokyo-3-terminal"
+}

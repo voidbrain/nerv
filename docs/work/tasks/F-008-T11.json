@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "id": "F-008-T11",
+  "parent": "F-008",
+  "title": "Battery cards on the dashboard",
+  "goal": "Each battery shows state, cycles, last resistance and due dates",
+  "status": "closed",
+  "acceptance": [
+    "Card per battery, filter by series and type; accessible (AXE)"
+  ],
+  "dependsOn": [
+    "F-008-T10"
+  ],
+  "resources": [
+    "src/battery-health.ts",
+    "src/runtime-api.ts",
+    "src/store.ts",
+    "src/runtime.ts",
+    "src/nervous-process.ts",
+    "src/rpc-schemas.ts",
+    "src/server.ts",
+    "web/src/battery-cards.ts",
+    "web/src/main.ts",
+    "web/src/i18n.ts",
+    "web/src/styles.css",
+    "test/battery-cards.test.ts",
+    "test/angular.browser.mjs",
+    "docs/work/tasks/F-008-T11.json",
+    "docs/work/records/F-008.md"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. Re-estimated 2026-11-15 from 0.75 h to 0.5 h: `node tools/work-items.mjs calibrate` since 2026-11-14 shows F-007-T04, F-050-T02 and F-054-T03 (bounded product steps of the same shape) at 0.08-0.17x their baselines (stated actuals, n=3); security, distributed and isolation steps not revised. Closed 2026-11-19: PR #554, CI run 44563076417 passed every job on attempt 2 (attempt 1: the Windows test step hit its 18-minute limit; no test failed).",
+    "reviewed": "2026-11-15",
+    "agentHours": 0,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 554,
+      "note": "implementation; CI green"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "F-078-T09",
+  "parent": "F-078",
+  "title": "Tabgha campaign: remote endpoint and small local fallback",
+  "goal": "The approved packs run on Tabgha against the Mac models over models.remote and against qwen2.5:1.5b and qwen2.5:3b locally",
+  "status": "closed",
+  "acceptance": [
+    "Runs recorded with base and model identity, latency and timeouts, including Neo Tokyo-3 asleep",
+    "Memory pressure on the mini PC recorded, not hidden"
+  ],
+  "dependsOn": [
+    "F-078-T05"
+  ],
+  "resources": [
+    "evals/**",
+    "docs/evaluations/**",
+    "docs/agents/model-profiles.json",
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "structured-tools",
+    "privacy-review"
+  ],
+  "privacy": "Reports stay private under artifacts/; only metadata (identity, counts, outcomes) enters Git. No prompts, replies or credentials.",
+  "validation": [
+    "node tools/gauntlet.mjs pending",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A model campaign runs only inside the scope and budget the owner approved in F-078-T02",
+    "A model failure that NERV can fix becomes a B- record with a failing test first"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Re-estimated 2026-11-20 from 0.5 h to 1.5 h (work-items calibrate since 2026-11-15: median 1.0 over 53 steps, but real-device runs took 1.5–3 h): a campaign on Tabgha, like the device acceptance steps F-005-T24/T26 (2.5–3 h).",
+    "reviewed": "2026-11-20",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 643,
+      "note": "Tabgha remote and local fallback campaign (F-078-T09)"
+    }
+  ]
+}

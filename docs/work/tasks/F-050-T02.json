@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-050-T02",
+  "parent": "F-050",
+  "title": "Uncertain handoff reconciliation",
+  "goal": "Implement receipt-bound reconciliation before retry or reassignment",
+  "status": "closed",
+  "acceptance": [
+    "Lost reply, restart and sleeping base cannot duplicate effects",
+    "Load-based forwarding also requires F-048 acceptance"
+  ],
+  "dependsOn": [
+    "F-050-T01"
+  ],
+  "resources": [
+    "contract:whole-job-handoff",
+    "src/**",
+    "src/runtime.ts",
+    "docs/work/tasks/F-050-T02.json",
+    "docs/work/records/F-050.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "distributed-contracts",
+    "recovery-design",
+    "regression-design"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "validation": [
+    "Run affected regressions across the changed boundary and applicable fast checks",
+    "Keep human/device acceptance and independent review distinct from fixture results"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 hours",
+    "basis": "Closed 2026-11-15: implemented WholeJobHandoffStore in src/whole-job-handoff.ts wired into Store.wholeJobHandoffs (src/store.ts), enforcing Scroll privacy/floor, F-048 load-forwarding gate, durable uncertain state and resource locks across lost reply/restart/sleeping base, and receipt-bound reconciliation before retry/reassignment in test/whole-job-handoff.test.ts in 0.25 h agent (stated).",
+    "reviewed": "2026-11-15",
+    "baselineDays": 2,
+    "agentHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 0.75
+  }
+}

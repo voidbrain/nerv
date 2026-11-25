@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "B-104-T01",
+  "parent": "B-104",
+  "title": "Wait for the Instrumentality attempts instead of a fixed 400 ms",
+  "goal": "The daily-run test no longer depends on runner speed",
+  "status": "closed",
+  "acceptance": [
+    "The test waits until both attempts happened, then a settle time, and still expects exactly 2"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/instrumentality.test.ts",
+    "docs/work/records/B-104.md",
+    "docs/work/tasks/B-104-T01.json",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-20 from the Windows CI log. Not a measurement.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 578,
+      "note": "the fix"
+    }
+  ]
+}

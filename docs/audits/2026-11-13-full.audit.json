@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "full",
+  "reviewed": "2026-11-13T16:30:00.000Z",
+  "baseline": "ee11385d8c09d81fd0d3e8ca76aee253cfcd9b11",
+  "report": "docs/audits/2026-11-13-full.md",
+  "areas": {
+    "code": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-13-full.md: TODO and empty-catch scans, check:conventions (72 files, no unused exports), npm outdated; F-077",
+      "limits": "New modules read at their boundaries, not line by line"
+    },
+    "logic": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-13-full.md: auth gate and read-only allowlist, cross-base sortie inspection traced end to end; F-051-T07",
+      "limits": "Kaji line not exercised live; Tabgha not reached"
+    },
+    "tests": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-13-full.md: full suite 739 pass / 2 skip / 0 fail, coverage lines 92.09 % branches 83.04 %, Gauntlet pending cases; F-075",
+      "limits": "Gauntlet cases not rerun (sandbox refused); no browser or device runs"
+    },
+    "documentation": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-13-full.md: top-level doc lengths, 0 broken local links, reorganization content check (#336, #338)",
+      "limits": "Guides and screenshots not re-recorded"
+    },
+    "harness": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-13-full.md: template v8.5.0 match, maintenance check, review exemptions for #336/#338, area-note split restored",
+      "limits": "No harness rule changed; maintenance.yml Node pin left to the template"
+    },
+    "security": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-13-full.md: secret/personal-data scan, npm audit, GitHub alert endpoints, ~/.nerv permissions, server auth gate; F-051-T07, F-077",
+      "limits": "No dynamic or penetration testing; Dependabot and code scanning off (owner setting)"
+    },
+    "delivery": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-13-full.md: ci:status on 41 merged PRs, main and maintenance runs, branch protection, dispatched main run 43461834506; F-076",
+      "limits": "No release or deployment exists"
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-13-full.md: 42 active records reviewed; 11 archived, 6 updated, F-075 to F-077 opened",
+      "limits": "Implemented records keep their pending owner checks"
+    }
+  }
+}

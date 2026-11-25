@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "F-124-T03",
+  "parent": "F-124",
+  "title": "A reminder opened on the phone is not re-sent on Telegram",
+  "goal": "Opening the push notification marks the delivery opened; the Telegram copy is cancelled or never sent",
+  "status": "implemented",
+  "acceptance": [
+    "The service worker reports a notification click to the service, which marks the delivery opened",
+    "An opened reminder produces no Telegram message; an unopened one still falls back (F-004-T09)"
+  ],
+  "dependsOn": [
+    "F-124-T01"
+  ],
+  "resources": [
+    "web/public/dashboard/sw.js",
+    "src/server.ts",
+    "src/store-push.ts",
+    "test/push.test.ts",
+    "test/evaluation.browser.mjs",
+    "docs/work/records/F-124.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, endpoints or personal data in Git.",
+  "validation": [
+    "Targeted push tests",
+    "Every test reading live.js, dashboard.js or web/src",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-25: one authenticated endpoint, the click handler and the cancel rule. Not a measurement. 2026-11-25: implemented in PR #760 together with F-004-T09, which needs the open signal: the receipt endpoint takes a one-off receipt from the push payload instead of a bearer, because the service worker holds none.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0.25,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 760
+    }
+  ]
+}

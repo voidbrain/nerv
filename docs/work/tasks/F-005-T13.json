@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T13",
+  "status": "closed",
+  "title": "T06f — First real lifecycle update on the Mac service",
+  "goal": "Run one update through nodes lifecycle-inspect/apply on the owner-selected Mac and record the evidence",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "The owner runs an update plan to a reviewed later revision; the receipt shows backup, fetch, rehearse, checkout, dependencies, build, start and verify completed",
+    "Running build, data integrity and service ownership are checked after it; a refusal or uncertainty is recorded, not retried silently"
+  ],
+  "dependsOn": [
+    "F-005-T12"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Owner-run copy-paste commands with expected results; receipt and doctor output; acceptance note"
+  ],
+  "escalation": [
+    "Any destructive restore, changed ownership or unresolved physical/worker effects requires explicit reconciliation; general restore remains F-062"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Owner-approved split of the original T06 into lettered slices on 2026-11-11 (T06f). Estimates, not measurements: 2026-11-11 (harness 5.6.0) 0.75 h agent + 0.5 h owner, judged at about 1.5 agent hours per former focused day from NERV merge history; 2026-11-12 after T06e 0.5 h agent (recording only) + 0.75 h owner (put the live checkout back on 2a3448d and stop it through a plan first); 2026-11-12 calibration at 0.6x kept 0.5 h. Closed 2026-11-12: the agent ran the procedure with the owner's approval (owner hours 0) after the owner's first attempt passed the literal STOP_DIGEST placeholder and was refused with nothing changed; update 2a3448d -> f8b8116 completed with every after-check passing, evidence docs/acceptance/node-update-2026-11-12.md. Actual 0.75 h stated: the agent's own account of the run and recording, before CI waits. baselineDays 0.5 kept as history.",
+    "reviewed": "2026-11-12",
+    "baselineDays": 0.5,
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
+  }
+}

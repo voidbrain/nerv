@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "B-054-T01",
+  "parent": "B-054",
+  "title": "Long replies within the output allowance do not time out the model route",
+  "goal": "Measure where the 210 s went and fix it with a failing test first",
+  "status": "closed",
+  "acceptance": [
+    "The cause of the 2026-11-12 timeout is measured (calls, tokens, durations per step)",
+    "A committed test fails before the fix",
+    "No limit widened without a measured rate; one slow reply does not mark the route down"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/engine-provider.ts",
+    "test/model.test.ts",
+    "docs/work/records/B-054.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "regression-design",
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures only; no real paths, tokens or machine data in git.",
+  "validation": [
+    "A committed test fails before the fix",
+    "npm test"
+  ],
+  "escalation": [
+    "A change to a model or time limit needs measured evidence that it fits"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Closed 2026-11-14 after PR #410 (CI 43622463226: plan, windows, native-macos, validate, full-suite green) merged to main.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 1.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
+    "estimateAgentHours": 0.5
+  },
+  "prs": [{ "pr": 410, "note": "stream S² replies so long answers failure does not trip route health" }],
+  "review": "CI run 43622463226 passed all 5 jobs before merge."
+}

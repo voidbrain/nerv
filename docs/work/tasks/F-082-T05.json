@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "parent": "F-082",
+  "id": "F-082-T05",
+  "title": "Show the checklist card in the dashboard chat",
+  "goal": "When Misato shows or changes a list, the dashboard chat shows its checklist card",
+  "status": "closed",
+  "prs": [
+    {
+      "pr": 606,
+      "note": "Show checklist card in dashboard chat and sync toggles"
+    }
+  ],
+  "acceptance": [
+    "A chat reply that shows or changes a list carries the checklist surface and the dashboard chat renders it",
+    "Ticking it there updates the store and Telegram (browser test, AXE passes)"
+  ],
+  "dependsOn": [
+    "F-082-T02"
+  ],
+  "resources": [
+    "src/**",
+    "web/src/**",
+    "test/**",
+    "docs/work/records/F-082.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-18 when the owner approved adding the live binding the owner check needs. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

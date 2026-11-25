@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-126-T01",
+  "parent": "F-126",
+  "title": "Repeatable local model speed benchmark",
+  "goal": "One command or documented procedure under evals measures uncached prompt reading and generation per local model",
+  "status": "implemented",
+  "acceptance": [
+    "A tool or doc under evals runs a fixed neutral prompt of about 3,900 tokens with the prompt cache defeated, and reports prompt reading and generation in tok/s per model, with machine, load and model digest",
+    "Run on the owner's Mac for gemma4:12b and gemma4:26b, with the result recorded in docs/evaluations/"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "evals/suite.json",
+    "tools/evaluate-model.mjs",
+    "docs/evaluations/README.md",
+    "docs/work/records/F-126.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript"
+  ],
+  "privacy": "Local models only; no paid route, prompts are neutral fixtures, raw reports stay private on their base.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h agent",
+    "basis": "Implemented 2026-11-25 in evals/speed-benchmark.mjs and docs/evaluations/2026-11-25-f126-t01-speed-benchmark.md; CI and merge remain. Not a measurement.",
+    "agentHours": 0.25,
+    "reviewed": "2026-11-25",
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 751
+    },
+    {
+      "pr": 761,
+      "note": "speed benchmark tool and gemma4:12b vs gemma4:26b run"
+    }
+  ]
+}

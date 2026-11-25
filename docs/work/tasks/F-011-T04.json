@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-011-T04",
+  "parent": "F-011",
+  "title": "Signed and notarized release",
+  "goal": "Signed and notarized release",
+  "status": "closed",
+  "acceptance": [
+    "Declined by the owner 2026-11-13: the companion stays unsigned and local; reopen when it is distributed"
+  ],
+  "dependsOn": [
+    "F-011-T06"
+  ],
+  "resources": [
+    "native/**",
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.25 h agent + 1 hour owner",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "reviewed": "2026-11-13",
+    "baselineDays": 2,
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

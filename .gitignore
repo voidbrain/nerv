@@ -1,0 +1,28 @@
+node_modules
+dist/
+.angular/
+.nodo/
+.env
+.harness/friction.jsonl
+.harness/friction-session.json
+.claude/settings.local.json
+.claude/worktrees/
+
+native/**/.build/
+native/**/.swiftpm/
+.DS_Store
+coverage/
+
+# Project-local scratch directory
+/~/
+
+# Neutral evaluation run artifacts (selected evidence is reviewed before committing)
+artifacts/evaluations/
+
+# The complete test report the quiet reporter pairs with (tools/quiet-reporter.mjs).
+.test-report.txt
+# Per-file start and finish times of the last npm test (tools/test-timing-reporter.mjs). <!-- project -->
+.test-timings.txt
+
+# The backlog ledger is built, never committed (workItems.views "built"; npm run work:build writes it, F-125-T02). <!-- project -->
+docs/BACKLOG.md

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "B-086-T05",
+  "parent": "B-086",
+  "title": "Rerun the two expensive system cases at this source",
+  "goal": "nerv-system-flows/stress and nerv-system-flows/browser have a covering run at the B-086-T04 source",
+  "status": "closed",
+  "acceptance": [
+    "npm run gauntlet:all -- --execute --allow-expensive records passing runs for nerv-system-flows/stress and nerv-system-flows/browser",
+    "node tools/gauntlet.mjs pending lists neither"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "evals/gauntlet/ledger.json",
+    "docs/work/records/B-086.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures only; no real host names.",
+  "validation": [
+    "npm run check:gauntlet-runs"
+  ],
+  "escalation": [
+    "The expensive run is started by the owner (the session's permission check blocks it for the agent)"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Added 2026-11-19: the B-086-T04 test change made every system case source-changed; closed 2026-11-21 after the owner-authorized system run.",
+    "reviewed": "2026-11-21",
+    "agentHours": 0,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 623,
+      "note": "system verification and closure"
+    }
+  ]
+}

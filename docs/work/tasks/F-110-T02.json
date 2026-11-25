@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-110-T02",
+  "parent": "F-110",
+  "title": "Update schedule settings: mode (apply or notify only), check and apply times, no-apply window",
+  "goal": "Saved, validated and used by the update scheduler",
+  "status": "closed",
+  "acceptance": [
+    "Regression test: the scheduler uses the saved times and the notify-only mode never applies"
+  ],
+  "dependsOn": [
+    "F-110-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-110.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-18. Not a measurement. Closed 2026-11-19: PR #539 merged with its committed regression; CI run 44489977085 passed every job.",
+    "reviewed": "2026-11-19",
+    "agentHours": 0,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2,
+    "actualAgentHours": 2,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 539,
+      "note": "the fix; CI green"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-015-T03",
+  "parent": "F-015",
+  "title": "Live failure, recovery and rotation acceptance",
+  "goal": "Live failure, recovery and rotation acceptance",
+  "status": "closed",
+  "acceptance": [
+    "Lost reply, Keychain failure, revocation and offline TLS/auth rotation exercised on the real host; evidence recorded"
+  ],
+  "dependsOn": [
+    "F-015-T02"
+  ],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Initial plan 0.5 h agent + 0.5 h owner (re-estimated 2026-11-11/12, history in git). 2026-11-12 the owner approved a split into four live cases with a new estimate: T03a revocation 0.25 h, T03b lost renewal reply 0.5 h, T03c Keychain failure 0.25 h, T03d offline TLS/auth rotation 0.5 h, evidence and PR 0.5 h (2 h agent, about 20 min owner). Closed 2026-11-12: all four ran live with recovery, evidence docs/acceptance/f015-live-failures-2026-11-12.md. Actual 2.5 h agent stated (the lost reply needed three ways of slowing the server and two invitation retries); owner about 40 minutes. baselineDays 1 kept as history.",
+    "reviewed": "2026-11-12",
+    "baselineDays": 1,
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 2,
+    "actualAgentHours": 2.5,
+    "actualSource": "stated"
+  }
+}

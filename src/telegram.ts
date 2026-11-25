@@ -1,0 +1,1149 @@
+import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { PUSH_FALLBACK_MS } from './delivery-state.ts';
+import type { StoreApi } from './runtime.ts';
+import type { DocumentStore } from './documents.ts';
+import { builtinPackRegistry } from './packs.ts';
+import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.ts';
+import { formatTelegramChecklist } from './lists.ts';
+import { ONLINE_MS } from './kaji-link.ts';
+import type { ChannelState } from './channel-state.ts';
+import type { Approval } from './ledger.ts';
+import { readCommand, telegramCommands } from './chat-command.ts';
+import { requestLanguage } from './misato.ts';
+import { formatQueuedMessage, formatQueueFullMessage, QueueCancelledError, QueueFullError } from './request-queue.ts';
+/**
+ * Aoba, the Telegram channel (F-003), with Pen Pen's deliveries (F-023). Outbound HTTPS only (long polling): no open
+ * port, no mesh. It answers exactly one private chat, the owner's; everything else is ignored. Messages go to Misato,
+ * approval cards come with buttons that use the same decision path as `approve`, and due reminders are delivered here
+ * as well as to the local inbox. Telegram bot chats are not end-to-end encrypted: Telegram's servers see this text.
+ */
+export const TELEGRAM_API = 'https://api.telegram.org';
+/** The Bot API base: Telegram's, or a loopback stand-in for tests (NERV_TELEGRAM_API). Nothing else, because requests carry the token. */
+export function telegramBase(): string {
+  const value = process.env.NERV_TELEGRAM_API;
+  if (!value) return TELEGRAM_API;
+  const url = new URL(value);
+  if (url.protocol === 'http:' && ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname))
+    return value.replace(/\/$/, '');
+  throw new Error('NERV_TELEGRAM_API must be a loopback address.');
+}
+const POLL_SECONDS = 25;
+const MAX_TEXT = 4000;
+const STALE_SECONDS = 600;
+interface Update {
+  update_id: number;
+  message?: {
+    date: number;
+    text?: string;
+    caption?: string;
+    photo?: { file_id: string; file_size?: number; width: number; height: number }[];
+    chat: { id: number; type: string };
+    from?: { id: number };
+  };
+  callback_query?: {
+    id: string;
+    data?: string;
+    from: { id: number };
+    message?: { message_id: number; chat: { id: number }; reply_markup?: { inline_keyboard?: Button[][] } };
+  };
+}
+interface Button {
+  text: string;
+  callback_data: string;
+}
+/** F-016-T19: a Bot API whose every call is refused while this base holds no coordinator authority. */
+function guardedApi(api: TelegramApi, authority: () => boolean): TelegramApi {
+  const guarded = Object.create(api) as TelegramApi;
+  guarded.call = <T>(method: string, body: object, signal?: AbortSignal): Promise<T> => {
+    let ok: boolean;
+    try {
+      ok = authority();
+    } catch {
+      ok = false;
+    }
+    return ok
+      ? api.call<T>(method, body, signal)
+      : Promise.reject(new Error(`Telegram ${method} refused: this base is not the active coordinator.`));
+  };
+  return guarded;
+}
+export class TelegramApi {
+  private readonly token: string | (() => string);
+  readonly base: string;
+  constructor(token: string | (() => string), base = TELEGRAM_API) {
+    this.token = token;
+    this.base = base;
+  }
+  async call<T>(method: string, body: object, signal?: AbortSignal): Promise<T> {
+    const token = typeof this.token === 'function' ? this.token() : this.token;
+    const response = await fetch(`${this.base}/bot${token}/${method}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: signal ?? AbortSignal.timeout(15000),
+      redirect: 'error',
+    });
+    const value = (await response.json().catch(() => ({}))) as { ok?: boolean; result?: T; description?: string };
+    // Never echo the URL: it contains the token.
+    if (!response.ok || !value.ok)
+      throw new Error(`Telegram ${method} failed: ${value.description ?? 'HTTP ' + response.status}`);
+    return value.result as T;
+  }
+  updates(offset: number | undefined, timeout: number, signal?: AbortSignal) {
+    return this.call<Update[]>(
+      'getUpdates',
+      { ...(offset !== undefined ? { offset } : {}), timeout, allowed_updates: ['message', 'callback_query'] },
+      signal ?? AbortSignal.timeout((timeout + 10) * 1000),
+    );
+  }
+  async downloadFile(fileId: string, maxBytes: number, signal?: AbortSignal): Promise<Buffer> {
+    const info = await this.call<{ file_path?: string }>('getFile', { file_id: fileId }, signal);
+    const filePath = info.file_path;
+    if (!filePath || filePath.startsWith('/') || filePath.includes('..')) {
+      throw new Error('Telegram getFile returned an invalid file path.');
+    }
+    const token = typeof this.token === 'function' ? this.token() : this.token;
+    const response = await fetch(`${this.base}/file/bot${token}/${filePath}`, {
+      method: 'GET',
+      signal: signal ?? AbortSignal.timeout(15000),
+      redirect: 'error',
+    });
+    if (!response.ok) throw new Error(`Telegram file download failed: HTTP ${response.status}`);
+    const lenHeader = response.headers.get('content-length');
+    if (lenHeader && Number(lenHeader) > maxBytes) {
+      throw new Error(`Photo exceeds ${maxBytes} byte limit.`);
+    }
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.length > maxBytes) throw new Error(`Photo exceeds ${maxBytes} byte limit (${bytes.length} bytes).`);
+    return bytes;
+  }
+  send(chatId: number, text: string, buttons?: Button[][]) {
+    return this.call<{ message_id: number }>('sendMessage', {
+      chat_id: chatId,
+      text: text.slice(0, MAX_TEXT),
+      ...(buttons ? { reply_markup: { inline_keyboard: buttons } } : {}),
+    });
+  }
+}
+/** Private chats that sent /start, for `telegram link`: does not confirm updates, so the channel still sees them. */
+export async function startChats(api: TelegramApi): Promise<{ chatId: number; name: string }[]> {
+  const seen = new Map<number, string>();
+  for (const u of await api.updates(undefined, 0)) {
+    const m = u.message;
+    if (m && m.chat.type === 'private' && m.text?.trim().startsWith('/start'))
+      seen.set(
+        m.chat.id,
+        (m.chat as { username?: string; first_name?: string }).username ??
+          (m.chat as { first_name?: string }).first_name ??
+          String(m.chat.id),
+      );
+  }
+  return [...seen].map(([chatId, name]) => ({ chatId, name }));
+}
+/**
+ * Why `telegram link` found no /start, in words the owner can act on (found on the owner's Windows base, 2026-11-04):
+ * the token's bot, a webhook that diverts messages, nothing waiting (another reader, or /start sent to another bot), or
+ * updates of other kinds (the Start button without a /start message, a group).
+ */
+export async function diagnoseNoStart(api: TelegramApi): Promise<string> {
+  const me = await api.call<{ username?: string }>('getMe', {}).catch(() => ({}) as { username?: string });
+  const bot = me.username ? `@${me.username}` : 'this bot';
+  const hook = await api.call<{ url?: string }>('getWebhookInfo', {}).catch(() => ({}) as { url?: string });
+  if (hook.url) {
+    let host = 'a web address';
+    try {
+      host = new URL(hook.url).host;
+    } catch {
+      /* keep generic */
+    }
+    return `${bot} has a webhook (${host}), so Telegram sends its messages there instead. If nothing else uses this bot, remove it with the deleteWebhook call (docs/INSTALL.md, Telegram), then send /start again.`;
+  }
+  const waiting = await api.call<Update[]>('getUpdates', { timeout: 0 }).catch(() => [] as Update[]);
+  if (!waiting.length)
+    return `Nothing is waiting for ${bot}. Either /start went to a different bot (open the chat with exactly ${bot}), or another program reads this bot (another NERV or a script using the same token: give each base its own bot).`;
+  const kinds = [
+    ...new Set(
+      waiting.map((u) =>
+        u.message
+          ? `a message in a ${u.message.chat.type} chat`
+          : Object.keys(u)
+              .filter((k) => k !== 'update_id')
+              .join(', '),
+      ),
+    ),
+  ];
+  return `${bot} has ${waiting.length} update(s) waiting, but no /start in a private chat (${kinds.join('; ')}). Type /start yourself in the private chat with ${bot}, then run this again.`;
+}
+const rowIds = (rows: Button[][]) => [
+  ...new Set(
+    rows.flatMap((row) =>
+      row.flatMap((b) => {
+        const id = /(?:^|:)([a-f0-9-]{36})$/.exec(b.callback_data)?.[1];
+        return id ? [id] : [];
+      }),
+    ),
+  ),
+];
+interface CardMessage {
+  messageId: number;
+  rows: Button[][];
+  baseId?: string;
+}
+export interface State {
+  messages?: CardMessage[];
+  offset?: number;
+  inbox?: { sequence: number; id?: string };
+  cards: string[];
+  /** Before F-028 the brief was sent from here: kept only to read the last one once. */ brief?: {
+    date: string;
+    at: string;
+  };
+}
+/** The other bases' votes on a card (F-036 phase 2): veto-only seats; shadow votes are shown, never counted. */
+function peerLine(verdicts: { seat: string; vote: string; shadow?: boolean }[] | undefined): string[] {
+  const peers = (verdicts ?? []).filter((v) => v.seat.startsWith('extra:'));
+  if (!peers.length) return [];
+  return [
+    `Other bases: ${peers.map((v) => `${v.seat.slice(6)} ${v.vote === 'approve' ? '✓' : v.vote === 'reject' ? '✗' : '·'}${v.shadow ? ' (shadow)' : ''}`).join(', ')}`,
+  ];
+}
+export function card(a: Approval): { text: string; buttons: Button[][] } {
+  const c = a.card;
+  const args = JSON.stringify(c.args);
+  const detail =
+    c.tool === 'memory.edit' && typeof c.args.oldText === 'string' && typeof c.args.text === 'string'
+      ? `${c.tool}: “${c.args.oldText}” → “${c.args.text}”`
+      : `${c.tool} ${args.length > 600 ? args.slice(0, 600) + '…' : args}`;
+  const text = [
+    `Needs you · Pattern ${c.pattern.toUpperCase()}`,
+    detail,
+    `Effect: ${c.effect}. Sync ${c.sync.value}%.`,
+    `Why it stopped: ${c.reason}`,
+    ...peerLine(c.verdicts),
+    `Expires: ${new Date(c.expires).toUTCString()} (expiry never approves)`,
+  ].join('\n');
+  return {
+    text,
+    buttons: [
+      [
+        { text: '✅ Approve once', callback_data: 'a:' + a.id },
+        { text: '❌ Reject', callback_data: 'r:' + a.id },
+      ],
+    ],
+  };
+}
+/** Several facts proposed together (one Instrumentality night, F-022) as one message: each fact keeps its own approval,
+    with a ✅/❌ row; a tap decides that fact only. */
+export function bundle(cards: Approval[]): { text: string; buttons: Button[][] } {
+  const fact = (a: Approval) => {
+    const args = a.card.args as { text?: unknown; suggestedText?: unknown };
+    const t = typeof args.text === 'string' ? args.text : JSON.stringify(a.card.args);
+    const fix =
+      typeof args.suggestedText === 'string' && args.suggestedText !== t
+        ? ` (proposed fix: "${args.suggestedText}")`
+        : '';
+    return `${t}${fix}`;
+  };
+  const text = [
+    `Needs you · ${cards.length} facts to remember (memory.remember, Pattern ${cards[0]!.card.pattern.toUpperCase()})`,
+    'Each one is stored only if you approve it:',
+    ...cards.map((a, i) => `${i + 1}. ${fact(a).slice(0, 300)}`),
+    `Expires: ${new Date(Math.min(...cards.map((a) => Date.parse(a.card.expires)))).toUTCString()} (expiry never approves)`,
+  ].join('\n');
+  return {
+    text,
+    buttons: cards.map((a, i) => [
+      { text: `✅ ${i + 1}`, callback_data: 'a:' + a.id },
+      { text: `❌ ${i + 1}`, callback_data: 'r:' + a.id },
+    ]),
+  };
+}
+/** Fact cards wait this long after they first appear, so the rest of the same night joins them in one message. */
+export const BUNDLE_WAIT_MS = 3000;
+/** What the owner reads after a decision, the same for a tap here and one relayed from the main base. */
+export function decisionText(result: { decision: string; result?: unknown; error?: string }): string {
+  return result.decision === 'approve'
+    ? 'error' in result && result.error
+      ? `Approved, but it failed: ${result.error}`
+      : 'result' in result && result.result !== undefined
+        ? `Approved and done: ${JSON.stringify(result.result).slice(0, 500)}`
+        : 'Approved.'
+    : result.decision === 'reject'
+      ? 'Rejected: nothing ran.'
+      : result.decision === 'expired'
+        ? 'Expired before you decided: nothing ran.'
+        : `Not applied: ${'error' in result ? result.error : result.decision}`;
+}
+/** F-036 phase 2. On a base that is not the main one: while the main base is online, this base's bot is quiet and what
+    it would send goes to the main base's Aoba instead (cards keep their own approvals). */
+export interface OneChannel {
+  destination?(): Promise<string | undefined>;
+  quiet(): Promise<boolean>;
+  relay(text: string, cards: { id: string; label: string }[]): Promise<boolean>;
+}
+/**
+ * F-016-T19: the Telegram state that moves with the coordinator. `load` reads what was replicated into
+ * `coordinator_state`; `save` persists it there while this base is the active coordinator.
+ */
+export interface TelegramContinuity {
+  load(): Partial<State> | undefined;
+  save(state: State): void;
+}
+/** On the main base: a tap on a card relayed from another base is decided there. */
+export interface RemoteDecide {
+  pendingApprovalIds?(baseId: string, ids: string[]): Promise<string[]>;
+  decide(baseId: string, approvalId: string, decision: 'approve' | 'reject'): Promise<string>;
+}
+export class TelegramChannel {
+  readonly api: TelegramApi;
+  readonly store: StoreApi;
+  readonly chatId: number;
+  readonly statePath: string;
+  readonly log: (line: string) => void;
+  private held = new Map<string, { key: string; since: number }>();
+  private readonly one: OneChannel | undefined;
+  private readonly remote: RemoteDecide | undefined;
+  private routeState: ChannelState = { mode: 'unknown', checkedAt: new Date().toISOString() };
+  /** Cached actual route checks and send outcomes; reading telemetry never sends or probes Telegram. */
+  channelState(): ChannelState {
+    return {
+      ...this.routeState,
+      ...(this.routeState.lastDelivery ? { lastDelivery: { ...this.routeState.lastDelivery } } : {}),
+      ...(this.routeState.api ? { api: { ...this.routeState.api } } : {}),
+    };
+  }
+  private async quiet(): Promise<boolean> {
+    let quiet = false;
+    let mode: ChannelState['mode'];
+    const destination = await this.one?.destination?.().catch(() => undefined);
+    try {
+      quiet = !!this.one && (await this.one.quiet());
+      mode = quiet ? 'via-main' : destination ? 'local-fallback' : 'local';
+    } catch {
+      mode = 'unknown';
+    }
+    // A failed relay's local fallback stays visible until a new send or a different route check, at most 90 seconds.
+    const last = this.routeState.lastDelivery;
+    if (
+      quiet &&
+      this.routeState.mode === 'local-fallback' &&
+      this.routeState.destination === destination &&
+      last &&
+      Date.now() - Date.parse(last.at) < ONLINE_MS
+    )
+      mode = 'local-fallback';
+    this.routeState = {
+      ...this.routeState,
+      mode,
+      polling: true,
+      checkedAt: new Date().toISOString(),
+      destination,
+      ...(last ? { lastDelivery: last } : {}),
+    };
+    return quiet;
+  }
+  private delivered(route: 'main' | 'local', result: 'accepted' | 'failed', fallback = false) {
+    this.routeState = {
+      ...this.routeState,
+      mode: route === 'main' ? 'via-main' : fallback ? 'local-fallback' : this.routeState.mode,
+      lastDelivery: { route, result, at: new Date().toISOString() },
+    };
+    if (route === 'local') this.apiResult(result === 'accepted' ? 'responding' : 'failed');
+  }
+  /** Everything this base sends on its own (cards, reminders, brief, follow-ups): relayed while quiet, else its own bot; a failed relay falls back to its own bot, so nothing is lost. */
+  private async out(text: string, buttons?: Button[][]): Promise<void> {
+    const quiet = await this.quiet();
+    if (buttons) {
+      buttons = await this.pendingRows(buttons);
+      if (!buttons.length) return;
+    }
+    if (quiet) {
+      const cards = (buttons ?? []).flatMap((row, i, all) => {
+        const a = row.find((b) => /^a:[a-f0-9-]{36}$/.test(b.callback_data));
+        return a ? [{ id: a.callback_data.slice(2), label: all.length > 1 ? String(i + 1) : '' }] : [];
+      });
+      if (await this.one!.relay(text, cards).catch(() => false)) {
+        this.delivered('main', 'accepted');
+        return;
+      }
+    }
+    await this.sendLocal(text, buttons, quiet || this.routeState.destination !== undefined);
+  }
+  private apiResult(state: 'responding' | 'failed') {
+    this.routeState = { ...this.routeState, api: { state, at: new Date().toISOString() } };
+  }
+  private async pendingRows(rows: Button[][], baseId?: string): Promise<Button[][]> {
+    const isApprovalRow = (row: Button[]) =>
+      row.some((b) => /^(?:[ar]|k:[A-Z0-9-]{1,16}:[ar]):[a-f0-9-]{36}$/.test(b.callback_data));
+    const approvalRows = rows.filter(isApprovalRow);
+    if (!approvalRows.length) return rows;
+    const ids = rowIds(approvalRows);
+    const pending = baseId
+      ? await this.remote?.pendingApprovalIds?.(baseId, ids)
+      : await this.store.pendingApprovalIds(ids);
+    if (!pending) throw new Error('Approval status unavailable; card delivery deferred.');
+    const keep = new Set(pending);
+    return rows.filter((row) => !isApprovalRow(row) || row.some((b) => keep.has(b.callback_data.split(':').at(-1)!)));
+  }
+  private markupQueue: Promise<void> = Promise.resolve();
+  private markup(
+    messageId: number,
+    rows: Button[][],
+    trackedOnly = false,
+    deadline = Date.now() + 3000,
+  ): Promise<void> {
+    const operation = this.markupQueue.then(async () => {
+      if (Date.now() >= deadline) return;
+      const current = this.state.messages?.find((m) => m.messageId === messageId);
+      if (trackedOnly && !current) return;
+      // A stale callback or status response may remove rows, never restore an already removed row.
+      const wanted = new Set(rows.flatMap((row) => row.map((b) => b.callback_data)));
+      const next = current ? current.rows.filter((row) => row.some((b) => wanted.has(b.callback_data))) : rows;
+      if (current && JSON.stringify(next) === JSON.stringify(current.rows)) return;
+      await this.api.call(
+        'editMessageReplyMarkup',
+        { chat_id: this.chatId, message_id: messageId, reply_markup: { inline_keyboard: next } },
+        AbortSignal.timeout(Math.max(1, Math.min(3000, deadline - Date.now()))),
+      );
+      this.state.messages = (this.state.messages ?? []).flatMap((m) =>
+        m.messageId === messageId ? (next.length ? [{ ...m, rows: next }] : []) : [m],
+      );
+      this.save();
+    });
+    this.markupQueue = operation.catch(() => {});
+    return operation;
+  }
+
+  private cleanup?: Promise<void>;
+  private cleanupCursor = 0;
+  private reconcile(): Promise<void> {
+    if (this.cleanup) return this.cleanup;
+    this.cleanup = (async () => {
+      const groups = new Map<string, CardMessage[]>();
+      for (const m of this.state.messages ?? []) {
+        const key = m.baseId ?? '';
+        groups.set(key, [...(groups.get(key) ?? []), m]);
+      }
+      const entries = [...groups.entries()],
+        deadline = Date.now() + 8000;
+      for (let n = 0; n < entries.length && Date.now() < deadline; n++) {
+        const [baseId, messages] = entries[(this.cleanupCursor + n) % entries.length]!;
+        try {
+          const ids = rowIds(messages.flatMap((m) => m.rows));
+          const pending = baseId
+            ? await this.remote?.pendingApprovalIds?.(baseId, ids)
+            : await this.store.pendingApprovalIds(ids);
+          if (!pending) throw new Error('Approval status unavailable.');
+          const keep = new Set(pending);
+          for (const message of messages) {
+            if (Date.now() >= deadline) break;
+            const rows = message.rows.filter((row) => row.some((b) => keep.has(b.callback_data.split(':').at(-1)!)));
+            if (JSON.stringify(rows) !== JSON.stringify(message.rows))
+              await this.markup(message.messageId, rows, true, deadline).catch((e) =>
+                this.log(`Telegram card cleanup: ${e instanceof Error ? e.message : 'failed'}.`),
+              );
+          }
+        } catch (e) {
+          this.log(`Telegram card cleanup: ${e instanceof Error ? e.message : 'failed'}.`);
+        }
+      }
+      this.cleanupCursor = (this.cleanupCursor + 1) % Math.max(1, entries.length);
+    })().finally(() => {
+      this.cleanup = undefined;
+    });
+    return this.cleanup;
+  }
+
+  private cardQueue: Promise<void> = Promise.resolve();
+  private cardWaiters = 0;
+  async sendChecklist(listName: string): Promise<boolean> {
+    const view = await this.store.showList?.(listName);
+    if (!view) return false;
+    const { text, buttons } = formatTelegramChecklist(view);
+    await this.api.send(this.chatId, text, buttons.length ? buttons : undefined);
+    this.delivered('local', 'accepted', false);
+    return true;
+  }
+  private sendLocal(text: string, buttons?: Button[][], fallback = false, baseId?: string): Promise<void> {
+    if (!buttons) return this.sendMessage(text, undefined, fallback, baseId);
+    if (this.cardWaiters >= 16) return Promise.reject(new Error('Telegram card queue is full; delivery deferred.'));
+    this.cardWaiters++;
+    const operation = this.cardQueue.then(() => this.sendMessage(text, buttons, fallback, baseId));
+    this.cardQueue = operation.catch(() => {});
+    return operation.finally(() => {
+      this.cardWaiters--;
+    });
+  }
+  private async sendMessage(text: string, buttons?: Button[][], fallback = false, baseId?: string) {
+    if (buttons) {
+      buttons = await this.pendingRows(buttons, baseId);
+      if (!buttons.length) return;
+      if ((this.state.messages ?? []).reduce((n, m) => n + rowIds(m.rows).length, 0) + rowIds(buttons).length > 200)
+        throw new Error('Telegram card cleanup backlog is full; delivery deferred.');
+    }
+    try {
+      const message = await this.api.send(this.chatId, text, buttons);
+      this.delivered('local', 'accepted', fallback);
+      if (buttons?.length) {
+        this.state.messages = [
+          ...(this.state.messages ?? []),
+          { messageId: message.message_id, rows: buttons, ...(baseId ? { baseId } : {}) },
+        ];
+        this.save();
+        // Close this send's race without delaying a relay acknowledgement for unrelated offline bases.
+        try {
+          const rows = await this.pendingRows(buttons, baseId);
+          if (JSON.stringify(rows) !== JSON.stringify(buttons)) await this.markup(message.message_id, rows, true);
+        } catch (e) {
+          this.log(`Telegram card cleanup: ${e instanceof Error ? e.message : 'failed'}.`);
+        }
+      }
+    } catch (e) {
+      this.delivered('local', 'failed', fallback);
+      throw e;
+    }
+  }
+
+  /** On the main base: shows what another base relayed, its cards with buttons that decide on that base. */
+  async relayed(
+    fromId: string,
+    fromName: string,
+    relay: { text: string; cards: { id: string; label: string }[] },
+  ): Promise<boolean> {
+    const buttons = relay.cards.map((c) => [
+      { text: c.label ? `✅ ${c.label}` : '✅ Approve once', callback_data: `k:${fromId}:a:${c.id}` },
+      { text: c.label ? `❌ ${c.label}` : '❌ Reject', callback_data: `k:${fromId}:r:${c.id}` },
+    ]);
+    await this.sendLocal(`🛰 ${fromName} · ${relay.text}`, buttons.length ? buttons : undefined, false, fromId);
+    return true;
+  }
+  private state: State = { cards: [] };
+  private stopping = new AbortController();
+  private queue: Promise<void> = Promise.resolve();
+  private readonly inflight = new Set<Promise<void>>();
+  private timer?: NodeJS.Timeout;
+  private delivery?: Promise<void>;
+  constructor(options: {
+    api: TelegramApi;
+    store: StoreApi;
+    chatId: number;
+    statePath: string;
+    log?: (line: string) => void;
+    oneChannel?: OneChannel;
+    remote?: RemoteDecide;
+    /**
+     * F-016-T19: whether this base holds coordinator authority now. Without it (standby, draining, fenced,
+     * lease expired) the channel never polls and makes no Bot API call, so no two bases answer the owner.
+     */
+    authority?: (() => boolean) & { close?: () => void };
+    continuity?: TelegramContinuity;
+    /** How often a base without authority checks whether it gained it (and an active poll whether it lost it). */
+    standbyCheckMs?: number;
+    /**
+     * After taking over from another base (the replicated offset is ahead of this base's own), wait this long
+     * before the first poll, so the old main's last long poll has ended (it checks every `standbyCheckMs`,
+     * 5 s by default). Default: twice `standbyCheckMs`.
+     */
+    handoverGraceMs?: number;
+    /** F-004-T09: how long a reminder pushed to the phone waits to be opened before Telegram sends it. */
+    pushFallbackMs?: number;
+  }) {
+    this.pushFallbackMs = options.pushFallbackMs ?? PUSH_FALLBACK_MS;
+    this.one = options.oneChannel;
+    this.remote = options.remote;
+    this.authority = options.authority;
+    this.continuity = options.continuity;
+    this.standbyCheckMs = options.standbyCheckMs ?? 5000;
+    this.handoverGraceMs = options.handoverGraceMs ?? 2 * this.standbyCheckMs;
+    this.api = options.authority ? guardedApi(options.api, options.authority) : options.api;
+    this.store = options.store;
+    this.chatId = options.chatId;
+    this.statePath = options.statePath;
+    this.log = options.log ?? ((line) => console.error(line));
+    if (existsSync(this.statePath)) {
+      try {
+        const saved = JSON.parse(readFileSync(this.statePath, 'utf8')) as Partial<State>;
+        this.state = { ...saved, cards: Array.isArray(saved.cards) ? saved.cards : [] };
+      } catch {
+        this.log('Telegram: unreadable state file; starting fresh.');
+      }
+    }
+  }
+  private readonly authority: ((() => boolean) & { close?: () => void }) | undefined;
+  private readonly continuity: TelegramContinuity | undefined;
+  private readonly standbyCheckMs: number;
+  private readonly handoverGraceMs: number;
+  private readonly pushFallbackMs: number;
+  private authorized(): boolean {
+    try {
+      return !this.authority || this.authority();
+    } catch {
+      return false;
+    }
+  }
+  /**
+   * On activation: the replicated state wins where it is ahead (offset, inbox), cards and messages merge.
+   * Returns whether this base took over from another one (the replicated offset was ahead of its own).
+   */
+  private hydrate(): boolean {
+    const r = this.continuity?.load();
+    if (!r) return false;
+    const s = this.state;
+    const tookOver = r.offset !== undefined && (s.offset === undefined || r.offset > s.offset);
+    this.state = {
+      ...s,
+      ...(r.offset !== undefined && (s.offset === undefined || r.offset > s.offset) ? { offset: r.offset } : {}),
+      ...(r.inbox && (!s.inbox || r.inbox.sequence > s.inbox.sequence) ? { inbox: r.inbox } : {}),
+      cards: [...new Set([...s.cards, ...(r.cards ?? [])])],
+      // One row per Telegram message: merged by messageId, so repeated hydrations never double them.
+      ...(r.messages
+        ? {
+            messages: [
+              ...(s.messages ?? []),
+              ...r.messages.filter((m) => !(s.messages ?? []).some((own) => own.messageId === m.messageId)),
+            ],
+          }
+        : {}),
+      ...(r.brief && !s.brief ? { brief: r.brief } : {}),
+    };
+    this.save();
+    return tookOver;
+  }
+  private save() {
+    const tmp = this.statePath + '.tmp';
+    writeFileSync(tmp, JSON.stringify(this.state), { mode: 0o600 });
+    renameSync(tmp, this.statePath);
+    if (this.continuity && this.authorized()) this.continuity.save(this.state);
+  }
+  async start(deliverEveryMs = 2000): Promise<void> {
+    // First run: reminders already in the inbox are not replayed to the phone.
+    if (!this.state.inbox) {
+      const page = await this.store.inboxPage(0, 1);
+      this.state.inbox = page.head;
+      this.save();
+    }
+    // Misato's follow-up after an approval (F-033) reaches the owner here, after the decision's own message.
+    this.store.onResumed?.((reply) => {
+      this.queue = this.queue
+        .then(async () => {
+          if (this.stopping.signal.aborted) return;
+          await this.out(reply.reply ?? `I could not finish: ${reply.error ?? 'no reply'}`);
+          await this.deliver();
+        })
+        .catch((e) => this.log(`Telegram: ${e instanceof Error ? e.message : 'follow-up failed'}.`));
+    });
+    void this.poll();
+    if (this.authorized())
+      void this.api.call('setMyCommands', { commands: telegramCommands() }).catch((e) => {
+        this.log(`Telegram setMyCommands: ${e instanceof Error ? e.message : 'failed'}.`);
+      });
+    this.timer = setInterval(() => this.tick(), deliverEveryMs);
+    if (this.authorized()) await this.deliver();
+  }
+  /** Waits for a delivery in progress, so a restart never sends the same reminder twice. */
+  async stop() {
+    this.stopping.abort();
+    if (this.timer) clearInterval(this.timer);
+    await Promise.allSettled([
+      this.queue,
+      ...this.inflight,
+      this.delivery,
+      this.followUp,
+      this.cardQueue,
+      this.markupQueue,
+    ]);
+    // Releases what the authority check holds open (its store connection), once nothing is in flight.
+    this.authority?.close?.();
+  }
+  private track(task: Promise<void>): void {
+    const p = task
+      .catch((e) => this.log(`Telegram: ${e instanceof Error ? e.message : 'handling failed'}.`))
+      .finally(() => {
+        this.inflight.delete(p);
+      });
+    this.inflight.add(p);
+  }
+  private owner(id: number | undefined) {
+    return id === this.chatId;
+  }
+  private async poll(): Promise<void> {
+    let held = !!this.authority;
+    while (!this.stopping.signal.aborted) {
+      // F-016-T19: without coordinator authority, wait; on gaining it, take over the replicated state first.
+      if (!this.authorized()) {
+        held = true;
+        this.routeState = { ...this.routeState, polling: false };
+        await new Promise<void>((done) => {
+          const t = setTimeout(done, this.standbyCheckMs);
+          this.stopping.signal.addEventListener('abort', () => (clearTimeout(t), done()), { once: true });
+        });
+        continue;
+      }
+      if (held) {
+        held = false;
+        if (this.hydrate())
+          await new Promise<void>((done) => {
+            const t = setTimeout(done, this.handoverGraceMs);
+            this.stopping.signal.addEventListener('abort', () => (clearTimeout(t), done()), { once: true });
+          });
+        continue;
+      }
+      // Outbound inbox deliveries use main, but either configured bot still accepts owner requests.
+      await this.quiet();
+      // A long poll in flight ends as soon as authority is lost, so the next coordinator polls alone.
+      const lost = new AbortController();
+      const watch = this.authority
+        ? setInterval(() => {
+            if (!this.authorized()) lost.abort();
+          }, this.standbyCheckMs)
+        : undefined;
+      try {
+        const updates = await this.api.updates(
+          this.state.offset,
+          POLL_SECONDS,
+          AbortSignal.any([this.stopping.signal, lost.signal, AbortSignal.timeout((POLL_SECONDS + 10) * 1000)]),
+        );
+        if (lost.signal.aborted) continue;
+        this.apiResult('responding');
+        for (const u of updates) {
+          this.state.offset = u.update_id + 1;
+          this.save();
+          this.track(this.handle(u));
+        }
+      } catch (e) {
+        if (this.stopping.signal.aborted) return;
+        if (lost.signal.aborted) continue;
+        this.apiResult('failed');
+        this.log(`Telegram: ${e instanceof Error ? e.message : 'poll failed'}; retrying in 5 s.`);
+        await new Promise((done) => setTimeout(done, 5000));
+      } finally {
+        if (watch) clearInterval(watch);
+      }
+    }
+  }
+  private async handle(u: Update): Promise<void> {
+    if (u.callback_query) {
+      const q = u.callback_query;
+      if (!this.owner(q.from.id) || !this.owner(q.message?.chat.id)) {
+        this.log('Telegram: ignored a button press from another account.');
+        return;
+      }
+      this.routeState = { ...this.routeState, lastReceived: new Date().toISOString() };
+      const listToggle = /^lt:([A-Za-z0-9_-]{4,60})$/.exec(q.data ?? '');
+      if (listToggle) {
+        const toggled = await this.store.toggleListItem?.(listToggle[1]!);
+        if (!toggled) {
+          await this.api.call('answerCallbackQuery', {
+            callback_query_id: q.id,
+            text: 'The list changed.',
+          });
+          return;
+        }
+        const { text, buttons } = formatTelegramChecklist({ list: toggled.list, items: toggled.items });
+        await this.api.call('answerCallbackQuery', {
+          callback_query_id: q.id,
+          text: toggled.item.done ? 'Checked.' : 'Unchecked.',
+        });
+        if (q.message) {
+          await this.api
+            .call('editMessageText', {
+              chat_id: this.chatId,
+              message_id: q.message.message_id,
+              text,
+              reply_markup: { inline_keyboard: buttons },
+            })
+            .catch(() => {});
+        }
+        return;
+      }
+      const far = /^k:([A-Z0-9-]{1,16}):([ar]):([a-f0-9-]{36})$/.exec(q.data ?? '');
+      if (far && this.remote) {
+        const outcome = await this.remote
+          .decide(far[1]!, far[3]!, far[2] === 'a' ? 'approve' : 'reject')
+          .catch(
+            (e: unknown) =>
+              `Not applied: ${far[1]} could not be reached (${e instanceof Error ? e.message : 'error'}). Try again when it is online.`,
+          );
+        await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: outcome.slice(0, 180) });
+        const rest = (q.message?.reply_markup?.inline_keyboard ?? []).filter(
+          (row) => !row.some((b) => b.callback_data.endsWith(':' + far[3])),
+        );
+        if (q.message && !outcome.startsWith('Not applied: ' + far[1] + ' could not'))
+          await this.markup(q.message.message_id, rest).catch(() => {});
+        await this.sendLocal(`🛰 ${far[1]} · ${outcome}`);
+        return;
+      }
+      const spearMatch = /^spear:(confirm|cancel):([a-f0-9-]{36})$/.exec(q.data ?? '');
+      if (spearMatch) {
+        const [, action, sortieId] = spearMatch;
+        if (action === 'cancel') {
+          await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: 'Cancelled.' });
+          if (q.message) await this.markup(q.message.message_id, []).catch(() => {});
+          await this.sendLocal('Spear cancelled.');
+          return;
+        }
+        if (!this.store.spear) {
+          await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: 'Spear unavailable.' });
+          return;
+        }
+        await this.store.spear(sortieId!, 'telegram:/spear');
+        await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: 'Stopped.' });
+        if (q.message) await this.markup(q.message.message_id, []).catch(() => {});
+        await this.sendLocal(`🔱 Stopped S-${sortieId!.slice(0, 4).toUpperCase()}.`);
+        return;
+      }
+      const match = /^([ar]):([a-f0-9-]{36})$/.exec(q.data ?? '');
+      if (!match) {
+        await this.api.call('answerCallbackQuery', { callback_query_id: q.id, text: 'Unknown button.' });
+        return;
+      }
+      const decision = match[1] === 'a' ? 'approve' : 'reject';
+      const result = await Promise.resolve()
+        .then(() => this.store.decide(match[2]!, decision, 'telegram'))
+        .catch((e: unknown) => ({ decision: 'error', error: e instanceof Error ? e.message : 'Decision failed.' }));
+      await this.api.call('answerCallbackQuery', {
+        callback_query_id: q.id,
+        text: result.decision === 'error' ? 'Could not apply it.' : `Decision: ${result.decision}`,
+      });
+      const outcome = decisionText(result);
+      // Only the decided card's row goes: in a bundle the other facts keep their buttons.
+      const rest = (q.message?.reply_markup?.inline_keyboard ?? []).filter(
+        (row) => !row.some((b) => b.callback_data.endsWith(':' + match[2])),
+      );
+      if (q.message && result.decision !== 'error') await this.markup(q.message.message_id, rest).catch(() => {});
+      await this.sendLocal(outcome);
+      return;
+    }
+    const m = u.message;
+    if (!m || (!m.text && !m.photo?.length)) return;
+    if (m.chat.type !== 'private' || !this.owner(m.chat.id) || (m.from && !this.owner(m.from.id))) {
+      this.log('Telegram: ignored a message from another chat.');
+      return;
+    }
+    this.routeState = { ...this.routeState, lastReceived: new Date().toISOString() };
+    // Messages queued while the service was down for long are not replayed as fresh requests.
+    if (Date.now() / 1000 - m.date > STALE_SECONDS) {
+      await this.sendLocal('I was offline when you sent that; send it again if it still matters.');
+      return;
+    }
+    if (!m.text && m.photo?.length) {
+      await this.handlePhoto(m.photo, m.caption ?? '');
+      return;
+    }
+    if (!m.text) return;
+    const text = m.text.trim();
+    if (text === '/start') {
+      await this.sendLocal('Aoba here. Write what you need; actions that need you arrive with buttons.');
+      return;
+    }
+    if (text.startsWith('/list ')) {
+      const name = text.slice(6).trim();
+      if (!name || !(await this.sendChecklist(name))) {
+        await this.sendLocal(`List "${name}" not found.`);
+      }
+      return;
+    }
+    const packTextReply = await builtinPackRegistry.handleTelegramText(text, this.store);
+    if (packTextReply !== undefined) {
+      await this.sendLocal(packTextReply);
+      return;
+    }
+    if (readCommand(text)?.name === 'cards') {
+      const lang = requestLanguage(text);
+      const pending = await this.store.approvals(10);
+      if (!pending.length) {
+        await this.sendLocal(lang === 'it' ? 'Nessuna scheda in attesa.' : 'No pending approval cards.');
+        return;
+      }
+      for (const a of pending) {
+        const c = card(a);
+        await this.sendLocal(c.text, c.buttons);
+      }
+      return;
+    }
+    const spearCmd = readCommand(text);
+    if (spearCmd?.name === 'spear') {
+      const lang = requestLanguage(text);
+      const list = this.store.sorties ? await this.store.sorties(20) : [];
+      const active = list.filter((s) => s.status === 'open' || s.status === 'waiting');
+      const wanted = spearCmd.target?.trim().replace(/^s-/i, '').toLowerCase();
+      const target = wanted
+        ? active.find((s) => s.id.toLowerCase() === wanted || s.id.toLowerCase().startsWith(wanted))
+        : active[0];
+      if (!target) {
+        await this.sendLocal(
+          lang === 'it' ? 'Nessuna sortita attiva o in attesa da fermare.' : 'No active or waiting sortie to stop.',
+        );
+        return;
+      }
+      const ref = `S-${target.id.slice(0, 4).toUpperCase()}`;
+      const prompt =
+        lang === 'it' ? `🔱 Fermare la sortita ${ref} (${target.title})?` : `🔱 Stop sortie ${ref} (${target.title})?`;
+      await this.sendLocal(prompt, [
+        [
+          {
+            text: lang === 'it' ? '🔱 Conferma Spear' : '🔱 Confirm Spear',
+            callback_data: `spear:confirm:${target.id}`,
+          },
+          { text: lang === 'it' ? 'Annulla' : 'Cancel', callback_data: `spear:cancel:${target.id}` },
+        ],
+      ]);
+      return;
+    }
+    if (!this.store.chat) {
+      await this.sendLocal('The agent loop is not available.');
+      return;
+    }
+    const typing = setInterval(() => {
+      void this.api.call('sendChatAction', { chat_id: this.chatId, action: 'typing' }).catch(() => {});
+    }, 4000);
+    void this.api.call('sendChatAction', { chat_id: this.chatId, action: 'typing' }).catch(() => {});
+    const lang = requestLanguage(text);
+    try {
+      const reply = await this.store.chat(text.slice(0, 4000), `telegram:${this.chatId}`, {
+        signal: this.stopping.signal,
+        onQueued: (ahead) => {
+          void this.sendLocal(formatQueuedMessage(ahead, lang));
+        },
+      });
+      await this.sendLocal(reply.reply ?? `I could not finish: ${reply.error ?? 'no reply'}`);
+      await this.deliver();
+    } catch (e) {
+      if (e instanceof QueueFullError) {
+        await this.sendLocal(formatQueueFullMessage(e.maxQueued, lang));
+        return;
+      }
+      if (e instanceof QueueCancelledError) {
+        await this.sendLocal(lang === 'it' ? 'Richiesta annullata in coda.' : 'Queued request cancelled.');
+        return;
+      }
+      throw e;
+    } finally {
+      clearInterval(typing);
+    }
+  }
+  /**
+   * Pen Pen: new approval cards and newly delivered reminders, each sent once (remembered across restarts).
+   * The pass a caller awaits starts after its call (B-042): a pass already running may have read card status
+   * before the caller's change, so callers share one follow-up pass instead. Passes never overlap.
+   */
+  deliver(): Promise<void> {
+    if (this.stopping.signal.aborted) return this.delivery ?? Promise.resolve();
+    if (this.followUp) return this.followUp;
+    if (!this.delivery) return this.deliverPass();
+    this.followUp = this.delivery.then(() => {
+      this.followUp = undefined;
+      return this.stopping.signal.aborted ? undefined : this.deliverPass();
+    });
+    return this.followUp;
+  }
+  /** The periodic tick: skipped while a pass runs, so a slow pass never queues ticks behind it. */
+  private tick() {
+    if (!this.delivery && this.authorized()) void this.deliver();
+  }
+  private followUp?: Promise<void>;
+  private deliverPass(): Promise<void> {
+    this.delivery = this.deliverOnce().finally(() => {
+      this.delivery = undefined;
+    });
+    return this.delivery;
+  }
+  /** F-124-T01: Telegram's part of the shared delivery state; never blocks or repeats a delivery when it cannot be written. */
+  private async recordDelivery(id: string, outcome: 'sent' | 'failed', reason?: string): Promise<void> {
+    try {
+      await this.store.recordDelivery?.(id, 'telegram', outcome, reason);
+    } catch (e) {
+      this.log(`Telegram delivery state: ${e instanceof Error ? e.message : 'not recorded'}.`);
+    }
+  }
+  private async deliverOnce(): Promise<void> {
+    try {
+      await this.reconcile();
+      const fresh = (await this.store.approvals(20)).filter(
+        (a) => a.notify !== false && !this.state.cards.includes(a.id),
+      );
+      const sent = (ids: string[]) => {
+        this.state.cards = [...this.state.cards, ...ids].slice(-200);
+        this.save();
+      };
+      // Fact cards from one sortie go out together, once none has newly appeared for BUNDLE_WAIT_MS.
+      const facts = new Map<string, Approval[]>();
+      for (const a of fresh) {
+        if (a.card.tool === 'memory.remember') {
+          facts.set(a.card.sortieId, [...(facts.get(a.card.sortieId) ?? []), a]);
+          continue;
+        }
+        const c = card(a);
+        await this.out(c.text, c.buttons);
+        sent([a.id]);
+      }
+      const now = Date.now();
+      for (const [sortie, group] of facts) {
+        const key = sortie + ':' + group.length;
+        if (this.held.get(sortie)?.key !== key) this.held.set(sortie, { key, since: now });
+        if (now - this.held.get(sortie)!.since < BUNDLE_WAIT_MS) continue;
+        this.held.delete(sortie);
+        const c = group.length > 1 ? bundle(group) : card(group[0]!);
+        await this.out(c.text, c.buttons);
+        sent(group.map((a) => a.id));
+      }
+      for (;;) {
+        const at = this.state.inbox ?? { sequence: 0 };
+        const page = await this.store.inboxPage(at.sequence, 5, at.id);
+        // Checkpoint after every message: a stop or crash resends at most the one in flight.
+        for (const item of page.items) {
+          // F-004-T09: a reminder queued for the phone first is Telegram's only as the fallback, below.
+          const pushFirst =
+            item.kind === 'reminder' &&
+            !!this.store.pushFallback &&
+            !!(await this.store.deliveryState?.(item.id))?.push;
+          if (item.kind !== 'approval' && !pushFirst) {
+            try {
+              await this.out(item.kind === 'brief' ? item.message : `⏰ ${item.message}`);
+            } catch (e) {
+              await this.recordDelivery(item.id, 'failed', e instanceof Error ? e.message : 'send failed');
+              throw e;
+            }
+            await this.recordDelivery(item.id, 'sent');
+          }
+          this.state.inbox = { sequence: item.sequence, id: item.id };
+          this.save();
+        }
+        // A reset means the checkpoint no longer matches the inbox (restored database): continue from its head, replay nothing.
+        if (page.reset) {
+          this.state.inbox = page.next;
+          this.save();
+          break;
+        }
+        if (!page.items.length) break;
+        this.state.inbox = page.next;
+        this.save();
+      }
+      await this.pushFallback();
+    } catch (e) {
+      this.log(`Telegram delivery: ${e instanceof Error ? e.message : 'failed'}.`);
+    }
+  }
+  /**
+   * F-004-T09 (owner decision 2026-11-25): push first, Telegram as fallback. The store hands out each reminder whose
+   * push failed or was not opened on the phone within the deadline once, already claimed, so a later receipt, a second
+   * pass or a restart never sends it twice. A failed send is recorded and handed out again on a later pass.
+   */
+  private async pushFallback(): Promise<void> {
+    if (!this.store.pushFallback) return;
+    for (;;) {
+      const due = await this.store.pushFallback(this.pushFallbackMs);
+      if (!due.length) return;
+      let failed = false;
+      for (const item of due) {
+        try {
+          await this.out(`⏰ ${item.message}`);
+          await this.recordDelivery(item.id, 'sent');
+        } catch (e) {
+          failed = true;
+          await this.recordDelivery(item.id, 'failed', e instanceof Error ? e.message : 'send failed');
+        }
+      }
+      if (failed || this.stopping.signal.aborted) return;
+    }
+  }
+
+  private async handlePhoto(
+    sizes: { file_id: string; file_size?: number; width: number; height: number }[],
+    rawCaption: string,
+  ) {
+    const parsed = parsePhotoCaption(rawCaption);
+    if (!parsed) {
+      await this.sendLocal(
+        'Caption a photo with "recipe: <name>" (optional "step N"), "crash: <drone|id>", "part: <drone> <position>", or "battery: <number|label>".',
+      );
+      return;
+    }
+    const s = this.store as StoreApi & {
+      documents?: DocumentStore;
+      photos?: PhotoStore;
+    };
+    if (!s.photos) {
+      await this.sendLocal('Photo storage is not available here.');
+      return;
+    }
+    const target = resolveTelegramPhotoTarget(s, parsed);
+    if (!target) {
+      await this.sendLocal(`No unique ${parsed.ownerKind} matching "${parsed.query}".`);
+      return;
+    }
+    const eligible = sizes
+      .filter((p) => p.file_size === undefined || p.file_size <= MAX_PHOTO_BYTES)
+      .sort((a, b) => b.width * b.height - a.width * a.height);
+    const chosen = eligible[0];
+    if (!chosen) {
+      await this.sendLocal(`Photo exceeds the ${MAX_PHOTO_BYTES} byte limit.`);
+      return;
+    }
+    try {
+      const bytes = await this.api.downloadFile(chosen.file_id, MAX_PHOTO_BYTES, this.stopping.signal);
+      const saved = s.photos.attach({
+        ownerKind: parsed.ownerKind,
+        ownerId: target.id,
+        stepIndex: parsed.stepIndex,
+        bytes,
+        caption: parsed.caption,
+      });
+      const where = saved.stepIndex !== null ? ` (step ${saved.stepIndex + 1})` : '';
+      await this.sendLocal(`Attached photo to "${target.label}"${where}: ${saved.url}`);
+    } catch (e) {
+      await this.sendLocal(`Photo could not be attached: ${e instanceof Error ? e.message : 'invalid photo'}`);
+    }
+  }
+}
+
+export interface ParsedPhotoCaption {
+  ownerKind: PhotoOwnerKind;
+  query: string;
+  stepIndex: number | null;
+  caption: string;
+}
+
+const CAPTION_KIND: Readonly<Record<string, PhotoOwnerKind>> = {
+  recipe: 'recipe',
+  ricetta: 'recipe',
+  crash: 'crash',
+  part: 'part',
+  parte: 'part',
+  battery: 'battery',
+  batteria: 'battery',
+};
+
+/** Parses a Telegram photo caption for a recipe, crash, part, or battery. */
+export function parsePhotoCaption(raw: string): ParsedPhotoCaption | null {
+  const trimmed = raw.trim();
+  const m = /^(recipe|ricetta|crash|part|parte|battery|batteria)\s*:\s*(.+)$/i.exec(trimmed);
+  if (!m) return null;
+  const ownerKind = CAPTION_KIND[m[1]!.toLowerCase()]!;
+  let rest = m[2]!.trim();
+  let stepIndex: number | null = null;
+  if (ownerKind === 'recipe') {
+    const stepMatch = /\s+(?:step|passaggio)\s+(\d+)\s*$/i.exec(rest);
+    if (stepMatch) {
+      const n = Number(stepMatch[1]);
+      if (!Number.isInteger(n) || n < 1) return null;
+      stepIndex = n - 1;
+      rest = rest.slice(0, stepMatch.index).trim();
+    }
+  }
+  if (!rest) return null;
+  return { ownerKind, query: rest, stepIndex, caption: trimmed };
+}
+
+function resolveTelegramPhotoTarget(
+  s: { documents?: DocumentStore },
+  parsed: ParsedPhotoCaption,
+): { id: string; label: string } | undefined {
+  if (parsed.ownerKind === 'recipe' && s.documents) {
+    const exact = s.documents.get(parsed.query);
+    const matches = exact ? [exact] : s.documents.recall(parsed.query);
+    const doc = exact ?? (matches.length === 1 ? matches[0]! : undefined);
+    return doc ? { id: doc.id, label: doc.title } : undefined;
+  }
+  return builtinPackRegistry.resolveTelegramPhoto(s, parsed.ownerKind, parsed.query);
+}

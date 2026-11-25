@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "id": "nerv-system-flows",
+  "version": "1.2.0",
+  "cases": [
+    {
+      "id": "policy",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "effects",
+        "taint",
+        "vote-permutations",
+        "shadow-veto",
+        "budget",
+        "confinement"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "policy",
+      "area": "security-permissions",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/policy.ts",
+        "test/evaluation.test.ts"
+      ]
+    },
+    {
+      "id": "ledger",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "expiry",
+        "single-use-grants",
+        "restart",
+        "executor-effects",
+        "approval-idempotency",
+        "brief-source-recovery",
+        "daily-delivery-idempotency",
+        "proactive-admission",
+        "slot-idempotency",
+        "immutable-stage-action-limits"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "ledger",
+      "area": "security-permissions",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/",
+        "shared/",
+        "test/ledger.test.ts",
+        "test/gate.test.ts",
+        "test/brief.test.ts",
+        "test/brief-recovery.test.ts",
+        "test/watch.test.ts",
+        "test/fixtures/posix.ts"
+      ]
+    },
+    {
+      "id": "conversation",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "ambiguity",
+        "mind-change",
+        "conversation-isolation",
+        "bounded-replanning",
+        "language",
+        "explanations",
+        "proactive-local-planning",
+        "durable-step-reservations",
+        "quiet-hours",
+        "interruption-recovery"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "conversation",
+      "area": "conversation-memory",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/",
+        "shared/",
+        "test/clarification.test.ts",
+        "test/misato.test.ts",
+        "test/resume.test.ts",
+        "test/why.test.ts",
+        "test/watch-runtime.test.ts"
+      ]
+    },
+    {
+      "id": "channels",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "delivery-retry",
+        "cross-channel",
+        "relay",
+        "owner-authorization",
+        "approval-card-reconciliation",
+        "proactive-quiet-delivery"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "channels",
+      "area": "distributed-coordination",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/",
+        "shared/",
+        "test/telegram.test.ts",
+        "test/one-channel.test.ts",
+        "test/telegram-reconcile.test.ts",
+        "test/fixtures/posix.ts"
+      ]
+    },
+    {
+      "id": "bases",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "signed-bases",
+        "remote-idempotency",
+        "seat-delay",
+        "shadow-after-decision",
+        "lease-fencing",
+        "outbound-reconnect",
+        "approval-locks",
+        "signed-cancellation",
+        "legacy-quarantine",
+        "hostile-frames",
+        "connection-admission",
+        "proactive-dispatch-revalidation",
+        "quiet-remote-followups"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "bases",
+      "area": "distributed-coordination",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/",
+        "shared/",
+        "test/kaji-run.test.ts",
+        "test/kaji-seats.test.ts",
+        "test/worker-jobs.test.ts",
+        "test/worker-link.test.ts",
+        "test/worker-link-heartbeat.test.ts",
+        "test/worker-link-admission.test.ts",
+        "test/worker-link-exit.test.ts",
+        "test/fixtures/worker-link.ts",
+        "test/fixtures/worker-link-timeout.probe.ts",
+        "test/fixtures/idle-brain.ts",
+        "test/worker-outbox.test.ts",
+        "test/protocol.test.ts"
+      ]
+    },
+    {
+      "id": "stress",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "bounded-queues",
+        "brain-stall",
+        "crash",
+        "parallel-writes",
+        "latency"
+      ],
+      "critical": true,
+      "expensive": true,
+      "runner": "stress",
+      "area": "ci-operations",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/",
+        "shared/",
+        "test/runtime-load.test.ts",
+        "test/process-client.test.ts"
+      ]
+    },
+    {
+      "id": "browser",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "dashboard-operator",
+        "waiting-state",
+        "approval",
+        "topic-change",
+        "accessibility"
+      ],
+      "critical": true,
+      "expensive": true,
+      "runner": "browser",
+      "area": "ui-visual",
+      "requirements": [
+        "posix-process-groups",
+        "built-browser-assets"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/",
+        "shared/",
+        "web/",
+        "test/angular.browser.mjs",
+        "test/evaluation.browser.mjs",
+        "test/pwa.browser.mjs",
+        "test/browser-click.browser.mjs",
+        "test/diyfpv-read.browser.mjs",
+        "test/updater-status.browser.mjs",
+        "test/doctor-run.browser.mjs",
+        "test/fixtures/browser.mjs"
+      ]
+    },
+    {
+      "id": "script-plans",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "script-plan-comparison",
+        "eva03-per-call-gate"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "script-plans",
+      "area": "security-permissions",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/script-plan.ts",
+        "src/runtime-planning.ts",
+        "src/prompt-samples.ts",
+        "test/script-plan.test.ts"
+      ]
+    }
+  ]
+}

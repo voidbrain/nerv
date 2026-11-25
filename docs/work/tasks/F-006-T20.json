@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T20",
+  "title": "Revise the Mac operating-conditions plan for 3 runs and gemma4:12b",
+  "goal": "The approved Mac plan runs each case 3 times on gemma4:12b within restated budgets",
+  "status": "closed",
+  "acceptance": [
+    "docs/decisions/mac-operating-conditions.md fixes the model profile to gemma4:12b, sets repeat: 3, and restates the per-condition and aggregate budgets (180 cases, about 1.5 h active, a wall-clock cap) and the stop rules",
+    "Status line records the owner approval of 2026-11-15"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/decisions/mac-operating-conditions.md",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-15: model and budget changes in one document. Not a measurement. No actual: not timed by the session that closed it.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": [
+    {
+      "pr": 468,
+      "note": "implementation"
+    }
+  ]
+}

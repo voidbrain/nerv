@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "B-069",
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-069-T01",
+  "title": "An expired or rejected approval ends the step",
+  "goal": "One card per approval-needing step: a declined or expired tool is never proposed again in the sortie",
+  "status": "closed",
+  "acceptance": [
+    "A committed test fails first, unchanged by the fix: after an expired (and, separately, a rejected) approval, the same action proposed again produced a second card",
+    "After the fix the sortie closes with a reply naming the tool and why; no second approval exists; owner-initiated cards are not deferred (no global quiet hours; proactive cards already bundle overnight)"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/store-sorties.ts",
+    "src/ledger-approvals.ts",
+    "src/runtime-approvals.ts",
+    "test/**",
+    "docs/work/records/B-069.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-16: one regression across ledger and sorties, a stop after expiry/reject, quiet-hours check in deliverApproval. Not a measurement. No actual: not timed by the session that closed it.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": 503,
+      "note": "implementation"
+    }
+  ]
+}

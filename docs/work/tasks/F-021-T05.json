@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "id": "F-021-T05",
+  "parent": "F-021",
+  "title": "Dashboard tool listing",
+  "goal": "Dashboard tool listing",
+  "status": "closed",
+  "acceptance": [
+    "Registered tools, versions and grants listed in the dashboard; axe passes"
+  ],
+  "dependsOn": [
+    "F-021-T04"
+  ],
+  "resources": [
+    "src/server.ts",
+    "src/tool-listing.ts",
+    "test/tool-listing.test.ts",
+    "docs/work/records/F-021.md",
+    "docs/work/tasks/F-021-T05.json",
+    "docs/work/records/F-049.md",
+    "docs/work/records/F-083.md",
+    "docs/work/records/B-101.md",
+    "docs/work/tasks/F-049-T07.json",
+    "docs/work/tasks/F-083-T06.json",
+    "docs/work/tasks/B-101-T01.json",
+    "docs/archive/reconciliation-2026.md",
+    "evals/gauntlet/ledger.json",
+    "src/runtime-api.ts",
+    "web/public/dashboard/index.html",
+    "web/public/dashboard/live.js",
+    "test/evaluation.browser.mjs",
+    "generated:backlog-views",
+    "test/dashboard-poll.test.ts"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Closed 2026-11-25: PR #563 merged 2026-11-19, CI run 44618006632 passed every job on the first attempt; actual about 1 h (stated).",
+    "reviewed": "2026-11-13",
+    "baselineDays": 1,
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 1,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 563,
+      "note": "tool listing; CI green, merged"
+    },
+    {
+      "pr": 743,
+      "note": "closure"
+    }
+  ]
+}

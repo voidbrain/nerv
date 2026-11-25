@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-098-T03",
+  "parent": "F-098",
+  "title": "Photos on crashes, parts and batteries",
+  "goal": "A photo sent in Telegram or the dashboard is kept with the record it shows",
+  "status": "closed",
+  "prs": [
+    {
+      "pr": 588,
+      "note": "implementation"
+    }
+  ],
+  "acceptance": [
+    "Stored locally with size and type checks; private by default",
+    "Shown with the crash, part or battery"
+  ],
+  "dependsOn": [
+    "F-098-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "web/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. Re-estimated 2026-11-15 from 0.75 h to 0.5 h: `node tools/work-items.mjs calibrate` since 2026-11-14 shows F-007-T04, F-050-T02 and F-054-T03 (bounded product steps of the same shape) at 0.08-0.17x their baselines (stated actuals, n=3); security, distributed and isolation steps not revised.",
+    "reviewed": "2026-11-15",
+    "agentHours": 0,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  }
+}

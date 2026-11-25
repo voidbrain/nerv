@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-011-T03",
+  "parent": "F-011",
+  "title": "Live notification permission acceptance",
+  "goal": "Live notification permission acceptance",
+  "status": "planned",
+  "acceptance": [
+    "Opt-in OS notifications delivered and checkpointed across restart on the real Mac"
+  ],
+  "dependsOn": [
+    "F-011-T05"
+  ],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
+    "reviewed": "2026-11-13",
+    "baselineDays": 0.5,
+    "ownerHours": 0.25,
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f011-companion-acceptance-procedure.md#part-1--companion-ui-notifications-and-service-controls-neo-tokyo-3-terminal--ui"
+}

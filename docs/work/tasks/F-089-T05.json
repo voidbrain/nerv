@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-089-T05",
+  "parent": "F-089",
+  "title": "Decision: a chat tool for browser clicks",
+  "goal": "The owner decides whether Misato gets a chat tool that reaches the CDP browser driver, which today only the CLI and the F-012 web-chat resume reach",
+  "status": "closed",
+  "ownerLink": "docs/decisions/browser-adapter.md#owner-decision-a-chat-tool-for-browser-clicks-f-089-t05",
+  "acceptance": [
+    "The owner replies \"F-089-T05: A\" (add a browser.click chat tool), \"B\" (keep it CLI-only) or \"C\" (read-only chat tool first), and the decision is recorded on F-089",
+    "Owner decision 2026-11-24: A — add a browser.click chat tool (F-089-T06)"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/decisions/browser-adapter.md",
+    "docs/work/records/F-089.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Added 2026-11-24 at the owner's request; options set out in the browser adapter decision. Owner decision 2026-11-24: A (a browser.click chat tool, planned as F-089-T06). No actual: owner time not measured.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
+    "ownerHours": 0,
+    "ownerKind": "decision",
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-004-T04",
+  "parent": "F-004",
+  "title": "Schema-validated registered component renderer (GenUI)",
+  "goal": "Schema-validated registered component renderer (GenUI)",
+  "status": "closed",
+  "acceptance": [
+    "Only registered components with validated props render; arbitrary component, code or action payloads are rejected and logged"
+  ],
+  "dependsOn": [
+    "F-004-T03"
+  ],
+  "resources": [
+    "web/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "src/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "0 remaining",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: 1.5 h/day judged rate (PR #277). Estimate, not a measurement; baselineDays 2 kept as history. Implemented 2026-11-12 (PR #300): schema-validated registered component renderer (GenUI) via SurfaceRenderer and catalog validator (nerv-status-card, nerv-notice-card); arbitrary component names, action payloads and executable code payloads are strictly rejected and logged with security audit trail; accessible rejection alert passes AXE AA; covered in test/protocol.test.ts, test/surface-dom.test.mjs, and test/angular.browser.mjs. Actual 0.75 h agent (stated).",
+    "reviewed": "2026-11-12",
+    "baselineDays": 2,
+    "agentHours": 0,
+    "baselineAgentHours": 3,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
+  }
+}

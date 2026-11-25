@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "name": "uqr",
+  "version": "0.1.3",
+  "license": "MIT",
+  "repository": "https://github.com/unjs/uqr",
+  "tarball": "https://registry.npmjs.org/uqr/-/uqr-0.1.3.tgz",
+  "tarballSha256": "5636ef70bfb9f2685d885a4c0fbfe53fec9d6e8346361bd3f149146f1a9ec1af",
+  "tarballSha1": "43b5b27508cd28ccc42401ea75b92a39bd8cd510",
+  "tarballIntegrity": "sha512-0rjE8iEJe4YmT9TOhwsZtqCMRLc5DXZUI2UEYUUg63ikBkqqE5EYWaI0etFe/5KUcmcYwLih2RND1kq+hrUJXA==",
+  "files": {
+    "index.mjs": "7f0e61c2f13bb3724edee7bfb876e13c54ac9ee4fcfa283c9fa93cfb1241c325",
+    "index.d.mts": "81f61380f15a2e782ae423f6df08796a3562da20354d735ae79c88117b83e65b",
+    "LICENSE": "b39d50e24727f341a0ebdb2ab040c57efaf4076a8ad5b1d0c8c45beb975b4571"
+  },
+  "copiedFrom": "package/dist/index.mjs, package/dist/index.d.mts and package/LICENSE of the tarball, byte for byte",
+  "reason": "F-118-T05: QR encoder for pairing links; owner approved 2026-11-24 (\"uqr ok\"). Dependency-free MIT port of Project Nayuki's QR Code generator; pinned by hash, never updated in place."
+}

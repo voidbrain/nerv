@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "id": "F-114-T03",
+  "parent": "F-114",
+  "title": "Cooking pack: recipes, cooking sessions and pantry behind the manifest",
+  "goal": "All cooking tools, phrases, captions and panels come from one pack",
+  "status": "closed",
+  "acceptance": [
+    "No cooking import left in the core files outside the pack registration",
+    "Existing cooking tests pass unchanged; a test shows Cooking off hides its tools and keeps its data"
+  ],
+  "dependsOn": [
+    "F-114-T01"
+  ],
+  "resources": [
+    "src/cooking-session.ts",
+    "src/documents.ts",
+    "src/store.ts",
+    "src/runtime-chat.ts",
+    "src/telegram.ts",
+    "src/server.ts",
+    "test/**",
+    "docs/work/records/F-114.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-20: the same move as F-114-T02 for a smaller domain. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 629,
+      "note": "Cooking pack behind the manifest"
+    }
+  ]
+}

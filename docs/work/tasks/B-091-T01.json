@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "parent": "B-091",
+  "id": "B-091-T01",
+  "title": "Name the failing journal write in a Windows stop and make the receipt complete",
+  "goal": "A Windows fenced stop records its receipt",
+  "status": "implemented",
+  "acceptance": [
+    "The failing write is named",
+    "A committed test fails first if the cause is in code",
+    "A fenced stop on Tabgha completes its receipt"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/node-lifecycle-apply.ts",
+    "src/node-lifecycle-execution.ts",
+    "test/node-lifecycle-execution.test.ts",
+    "docs/work/records/B-091.md",
+    "docs/work/tasks/B-091-T01.json",
+    "evals/gauntlet/ledger.json",
+    "src/node-lifecycle-windows.ts",
+    "test/windows-service-lifecycle.test.ts"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "3 h",
+    "basis": "Re-estimated 2026-11-25: 2 h in PRs #557 and #620 plus 1 h to reproduce the inspect-read failure on Tabgha and fix it failing-first.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 3
+  },
+  "prs": [
+    {
+      "pr": 557,
+      "note": "implementation"
+    },
+    {
+      "pr": 617,
+      "note": "live recurrence and recovery evidence"
+    },
+    {
+      "pr": 620,
+      "note": "recurrence fix"
+    },
+    {
+      "pr": 742,
+      "note": "inspect read cause and fix"
+    }
+  ]
+}

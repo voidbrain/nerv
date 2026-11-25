@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "F-120-T03",
+  "parent": "F-120",
+  "title": "Adopt the Gauntlet domain packs when released",
+  "goal": "NERV pins the gauntlet-protocol release carrying the domain packs and runs them, so pilot qualification can use the results",
+  "status": "implemented",
+  "acceptance": [
+    "Starts only after gauntlet-protocol tags a release with the domain packs (tracked in that repository): v0.10.0 and v0.11.0, tagged 2026-11-25; v0.11.1 fixes the coding runner's container errors",
+    "Pin bumped to 0.11.1; the coding, embedded and cad-3d reference runners registered without CI toolchains; capability index regenerated",
+    "Pending cases until an owner-approved run covers them: coding/*, logic-math/*, embedded/*, italian-quality/*, cad-3d/*, code-review/* (new); multi-step-agent/* and nerv-system-flows/* (source-changed by the pin)",
+    "Owner-approved run recorded in the ledger; node tools/gauntlet.mjs pending lists none of these"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "vendor/**",
+    "package.json",
+    "package-lock.json",
+    "evals/gauntlet/**",
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "docs/test-capability-index.md",
+    "docs/evaluations/gauntlet.md",
+    "docs/work/records/F-120.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-24 at agent speed; owner campaign 0.5 h added 2026-11-25 (42 model cases, Docker and arduino-cli on the Mac). Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5,
+    "ownerHours": 0.5,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/evaluations/gauntlet.md#domain-packs-0100-and-0110-f-120-t03",
+  "prs": [
+    {
+      "pr": 749
+    }
+  ]
+}

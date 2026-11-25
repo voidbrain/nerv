@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "id": "F-121-T01",
+  "parent": "F-121",
+  "title": "Printed parts on drone models",
+  "goal": "Drone models carry printed parts (name, aliases, count, side/variant, file, material, profile, spool); drones inherit them",
+  "status": "closed",
+  "acceptance": [
+    "Store migration: drone model, printed part (count, variant such as left/right, file path, material, slicer profile, external spool flag); a drone links to its model",
+    "Fleet import (F-098-T05) and chat (F-098-T06) can add a model, its parts and link a drone; unknown profiles are refused against the F-087 allowlist",
+    "Neutral fixtures only; tests cover inheritance and a shared part (the same GPS/buzzer enclosure on two models)",
+    "Part files are stored as paths relative to the Mac's library folder (~/.nerv/prints); absolute paths, .. segments and links outside it are refused",
+    "A part can be one file holding several objects (AOS 5.1 camera bands: one file, both sides), so its count is per print, not per object"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/fleet.ts",
+    "src/fleet-chat.ts",
+    "src/print-library.ts",
+    "src/slicer.ts",
+    "src/executors.ts",
+    "src/misato.ts",
+    "src/cli-commands.ts",
+    "src/cli-help.ts",
+    "test/fleet-prints.test.ts",
+    "docs/work/tasks/F-121-T01.json",
+    "docs/work/records/F-121.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; the owner's part list and file paths stay in private fleet data.",
+  "validation": [
+    "node --test test/fleet-prints.test.ts test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts test/misato.test.ts test/slicer.test.ts test/cli-help.test.ts",
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 at agent speed (3 h agent). Actual includes the print library resolver, the home slicer-profiles.json allowlist reader and the fleet models/prints CLI listings. Not a measurement. Review round 2026-11-24 (Unicode path key, link phrase shadowing, name-only update scope, Windows path hazards) added 0.5 h. 2026-11-25: closed in the reconciliation: PR #715 merged on green CI.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3,
+    "actualAgentHours": 3,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 715,
+      "note": "implementation"
+    }
+  ]
+}

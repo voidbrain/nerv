@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "id": "F-098-T02",
+  "parent": "F-098",
+  "title": "Crash log and questions by chat",
+  "goal": "Crashes recorded and queried in Italian and English",
+  "status": "closed",
+  "acceptance": [
+    "\"ho crashato Smoke, motore sinistro inferiore rotto\" records the crash; spare counts change only when the phrase explicitly says whether a new or used spare was used",
+    "Answers: last time this part broke, spares left new/used",
+    "A battery damage note goes on the battery record",
+    "A fleet.chat result in follow-up Misato planning remains local-only; cloud inference is never used for chat-derived history"
+  ],
+  "dependsOn": [
+    "F-098-T01",
+    "F-008-T06"
+  ],
+  "resources": [
+    "src/fleet.ts",
+    "src/batteries.ts",
+    "src/executors.ts",
+    "src/misato.ts",
+    "test/fleet.test.ts",
+    "test/misato.test.ts",
+    "docs/work/tasks/F-098-T02.json",
+    "docs/work/records/F-098.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data, including fleet.chat results in follow-up planning, stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. Re-estimated 2026-11-15 from 0.75 h to 0.5 h: `node tools/work-items.mjs calibrate` since 2026-11-14 shows F-007-T04, F-050-T02 and F-054-T03 (bounded product steps of the same shape) at 0.08-0.17x their baselines (stated actuals, n=3); security, distributed and isolation steps not revised. No actual: not timed by the session that closed it.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.5
+  },
+  "prs": [
+    {
+      "pr": 500,
+      "note": "implementation"
+    }
+  ]
+}

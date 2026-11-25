@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T21",
+  "status": "planned",
+  "title": "Export the seed snapshot off serve's event loop",
+  "goal": "A large seed no longer blocks the active main's event loop while it serialises and signs the snapshot",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "distributed-contracts",
+    "architecture-review"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "Serve exports, serialises and signs a seed snapshot in a worker thread (or streams it in chunks), so lease renewals and Kaji requests are served during a seed of a large store (a regression with a store of many rows measures the event-loop delay)",
+    "Owner agreed 2026-11-24 to add this step, after B-124"
+  ],
+  "dependsOn": [
+    "F-016-T20",
+    "B-124-T01"
+  ],
+  "resources": [
+    "src/coordinator-shipping.ts",
+    "src/coordinator-snapshot.ts",
+    "test/coordinator-shipping.test.ts",
+    "docs/decisions/coordinator-relocation.md",
+    "docs/work/records/F-016.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Directed regression measuring event-loop delay during a seed; final required CI"
+  ],
+  "escalation": [
+    "Found by the #725 design review on 2026-11-24 (should-fix 6, the part left after the lock was shortened); owner agreed 2026-11-24 to add it to the adopted plan, after B-124",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-24 from F-016-T20 (seed export already isolated in exportSeedSnapshot). Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

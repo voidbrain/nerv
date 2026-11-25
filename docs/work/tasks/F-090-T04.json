@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "parent": "F-090",
+  "id": "F-090-T04",
+  "title": "Resume automatically when a session limit resets",
+  "goal": "`serve` notices an interrupted coding session and resumes it once after its reset time",
+  "status": "implemented",
+  "acceptance": [
+    "`serve` records a session that stopped at its usage limit with its reset time and runs the headless resume adapter once after it, with the identity recheck",
+    "Restart-survival and once-only tests; needs-attention on change"
+  ],
+  "dependsOn": [
+    "F-090-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-090.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-18 when the owner approved adding the live binding the owner check needs. Not a measurement.",
+    "reviewed": "2026-11-23",
+    "agentHours": 0,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2,
+    "actualAgentHours": 1.75,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 676,
+      "note": "implementation"
+    }
+  ]
+}

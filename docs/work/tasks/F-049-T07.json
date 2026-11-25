@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "id": "F-049-T07",
+  "parent": "F-049",
+  "title": "EVA-00, EVA-01 and EVA-02 profiles on the runner",
+  "goal": "The other three classes run on the same runner, each under its own profile",
+  "status": "closed",
+  "acceptance": [
+    "EVA-00 with no network and no writes outside its scratch space; EVA-01 with writes only in granted paths and connections only to granted localhost ports (an egress proxy); EVA-02 with granted paths and granted ports on any host; no class reaches NERV's own ports",
+    "Join tests per class, each limit also shown to fail through a sandbox-exec that drops the profile"
+  ],
+  "dependsOn": [
+    "F-049-T05",
+    "F-049-T06"
+  ],
+  "resources": [
+    "src/eva-runner.ts",
+    "test/eva-classes-runner.test.ts",
+    "test/eva-gate.test.ts",
+    "docs/decisions/eva-runner.md",
+    "docs/work/records/F-049.md",
+    "docs/work/tasks/F-049-T07.json",
+    "docs/work/tasks/F-049-T14.json",
+    "docs/work/records/F-008.md",
+    "docs/work/records/F-016.md",
+    "docs/work/records/F-021.md",
+    "docs/work/tasks/F-008-T11.json",
+    "docs/work/tasks/F-016-T04.json",
+    "docs/work/tasks/F-021-T04.json",
+    "docs/archive/reconciliation-2026.md",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views",
+    "docs/work/records/B-091.md"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Join tests; full suite"
+  ],
+  "escalation": [
+    "New upstream API work belongs to its owning repository; NERV supplies adapters"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-14 from 0.5 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio. Re-estimated 2026-11-19 from 0.75 h to 3 h and narrowed (owner decision): moving action execution out of the scheduler became F-049-T14.",
+    "reviewed": "2026-11-23",
+    "baselineDays": 2,
+    "agentHours": 0,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3,
+    "actualAgentHours": 3,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 558,
+      "note": "class profiles; CI pending"
+    }
+  ]
+}

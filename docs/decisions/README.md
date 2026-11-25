@@ -1,0 +1,24 @@
+# Design decisions
+
+Decisions preserve rationale and alternatives. A date alone does not make them superseded. Current behavior is summarized by [Architecture](../ARCHITECTURE.md); current acceptance/status stays in the [backlog](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md).
+
+| Decision | Scope | Reconsider when |
+|---|---|---|
+| [Hyuga watch](hyuga-watch.md) | Durable proactive admission, immutable gate limits, local planning and quiet-hour delivery; F-026 accepted | Changed trigger, trust, backfill, cancellation or delivery boundary |
+| [Native approvals](native-approvals.md) | Read-only companion cards and existing dashboard owner authority; rendering/delivery pending F-023 | Observed owner needs require a separately authorized decision capability |
+| [Runtime boundaries](runtime-boundaries.md) | TypeScript/process isolation, RPC, registered components, native pairing and sleeping workers | A measured unmet capability or changed trust/deployment boundary invalidates the recorded assumptions |
+| [Coordinator relocation](coordinator-relocation.md) | Replicated coordinator state vs. base-local secrets, root-signed leader epoch, bounded lease, effect fencing tokens and owner-initiated restore; F-016-T01 proposed | Non-owner bases, changed root-key ceremony, or two-device trials (F-016-T09) require lease/protocol adjustment |
+| [Worker protocol](worker-protocol.md) | Enrolled signed worker actions, receipts, resource ownership and uncertainty | Protocol/version, execution capabilities, authentication or recovery contract changes |
+| [Root migration](node-root-migration.md) | Owner-authorized private replacement-root staging; live activation/storage adapter pending F-005-T03 | New key/bundle generated, recoverable backups and target access available, activation/rollback tests |
+| [Node lifecycle](node-lifecycle.md) | Review-only Unix service ownership and fenced recovery contracts; execution/collection adapters pending F-005 | Owner selects profile/service intent; renderer, platform or durable recovery boundary changes |
+| [Node upgrades](node-upgrades.md) | Reader contract and review-only upgrade rehearsal on a private backup copy; no application upgrade admitted yet (F-005-T06) | Journaled rehearsal step, admission beyond documentation, schema or migration change, Windows support |
+| [Node bootstrap](node-bootstrap.md) | Explicit discovery/inspection and confirmed transactional bootstrap | Service ownership, supported hosts or enrolment/recovery behavior changes |
+| [Configuration qualification](configuration-qualification.md) | Accepted staged individual, combination and NERV/host qualification; implementation pending F-006/F-045 | Changed role/workflow/host boundary or measured campaign benefit |
+| [Remote inference](remote-inference.md) | Enrolled base endpoint identity, owner-bases privacy class, no silent fallback and bounded expiry; F-006-T01 proposed | Worker protocol changes, Tailscale overlay replaced, non-owner host proposed, or waiting budgets adjusted |
+| [Evaluation and improvement](evaluation-and-improvement.md) | Evidence, browser/channel parity and bounded improvement | New flow branches, repeated failures, new model configuration or changed promotion rules |
+| [Specialist orchestration](specialist-orchestration.md) | Bounded chunking, separate coder/reviewer consultants, ordered DAG dependencies, bounded review loops and resumable handoff history; F-048-T04 proposed, not yet implemented | Multi-host chunk placement changes or measured campaign results require limit tuning |
+| [EVA runner](eva-runner.md) | Deterministic isolated runner threat model, least-class admission, host boundaries and pre-execution test gate; F-049-T01 | Host enforcement mechanism choice (T03), admission/runtime changes or new supported OS targets |
+| [FPV packs](fpv-packs.md) | One FPV core repository, web-component pages hosted by NERV and a standalone page, domain packs on and off, Claude skill before MCP; F-101-T02 decided, F-114 open | Pilots need builds or synced data, MCP write grants arrive, or the two page hosts diverge |
+| [Grover alert delivery](grover-alert-delivery.md) | Polling the granted `grover_alerts` MCP tool, a SQLite episode ledger (alert once, clear once, no duplicates across restarts), push first then Telegram, quiet hours; F-122-T01 designed, T02 pending | Grover adds alert history or notifications, a second alert source, or F-004-T09/F-124 change the channel order |
+
+No decision in this folder was found to be wholly superseded in this reorganization. Their latest review evidence and rerun conditions are in the [review register](../reviews/README.md).

@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NERV MAGI / NODO OS v12.0 [COMPLETE MISSION CONTROL]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+        :root {
+            --nerv-orange: #ff6600;
+            --nerv-red: #ff0033;
+            --nerv-yellow: #ffcc00;
+            --nerv-green: #22c55e;
+            --nerv-blue: #0099ff;
+            --nerv-purple: #a855f7;
+            --nerv-bg: #050508;
+            --nerv-panel: #0d0d12;
+            --nerv-border: rgba(255, 102, 0, 0.35);
+        }
+
+        body {
+            background-color: var(--nerv-bg);
+            color: #ffaa66;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+        }
+
+        body.scanlines-active {
+            background-image:
+                radial-gradient(rgba(255, 102, 0, 0.04) 1px, transparent 0),
+                linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0, 0, 0, 0.35) 51%);
+            background-size: 24px 24px, 100% 4px;
+        }
+
+        .nerv-box {
+            background-color: var(--nerv-panel);
+            border: 1px solid var(--nerv-border);
+            position: relative;
+        }
+
+        .nerv-header-block {
+            background: var(--nerv-orange);
+            color: #000;
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .nerv-btn {
+            border: 1px solid var(--nerv-orange);
+            background: rgba(255, 102, 0, 0.1);
+            color: var(--nerv-orange);
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .nerv-btn:hover, .nerv-btn.active {
+            background: var(--nerv-orange);
+            color: #000;
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
+        }
+
+        .nerv-btn-danger {
+            border: 1px solid var(--nerv-red);
+            background: rgba(255, 0, 51, 0.1);
+            color: var(--nerv-red);
+        }
+
+        .nerv-btn-danger:hover {
+            background: var(--nerv-red);
+            color: #fff;
+            box-shadow: 0 0 12px rgba(255, 0, 51, 0.7);
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 99;
+            display: none;
+        }
+
+        body.scanlines-active .scanline { display: block; }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .blink-anim { animation: blink 1.2s infinite ease-in-out; }
+
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #050508; }
+        ::-webkit-scrollbar-thumb { background: var(--nerv-orange); }
+
+        /* MAGI SHAPES WRAPPER SYSTEM (CORRECT SVG POLYGON RENDERING TO PREVENT BORDER CUTTING) */
+        .magi-wrapper-casper {
+            background: #1a0000;
+            border: 2px solid var(--nerv-red);
+            box-shadow: 0 0 10px rgba(255, 0, 51, 0.3);
+            position: relative;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 72%, 84% 100%, 16% 100%, 0% 72%);
+        }
+        .magi-wrapper-balthasar {
+            background: #02120a;
+            border: 2px solid var(--nerv-green);
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+            position: relative;
+            clip-path: polygon(0% 0%, 84% 0%, 100% 18%, 100% 100%, 0% 100%);
+        }
+        .magi-wrapper-melchior {
+            background: #02120a;
+            border: 2px solid var(--nerv-green);
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+            position: relative;
+            clip-path: polygon(16% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 18%);
+        }
+
+        .sephiroth-node {
+            border: 1px dashed rgba(255, 102, 0, 0.4);
+            background: rgba(0, 0, 0, 0.7);
+            transition: all 0.2s ease;
+            text-align: center;
+            padding: 6px;
+            font-size: 9px;
+        }
+        .sephiroth-node.active {
+            border: 2px solid var(--nerv-orange);
+            background: rgba(255, 102, 0, 0.2);
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="p-2 text-xs scanlines-active">
+
+    <div class="scanline"></div>
+
+    <div class="max-w-[1650px] mx-auto flex flex-col gap-2 min-h-screen">
+
+        <!-- HEADER & GEOFRONT NODE SELECTOR -->
+        <header class="nerv-box p-2 border-l-4 border-l-[#ff6600] flex flex-wrap justify-between items-center bg-black/90">
+            <div class="flex items-center gap-3">
+                <div class="bg-[#ff6600] text-black font-black px-2 py-0.5 text-xs tracking-widest flex items-center gap-1">
+                    <span>特務機関NERV</span>
+                    <span class="text-[8px] bg-black text-[#ff6600] px-1">NODO v12</span>
+                </div>
+                <div>
+                    <h1 class="text-xs font-bold tracking-wider text-[#ffaa66]">TACTICAL COMMAND // <span class="text-red-500">中央作戦司令部</span></h1>
+                    <p class="text-[8px] text-zinc-500">SEELE L2/L4 ENFORCEMENT // ADAM & LILITH REPOSITORIES</p>
+                </div>
+            </div>
+
+            <!-- GEOFRONT NODE SELECTOR -->
+            <div class="flex items-center gap-2 bg-zinc-900 px-2 py-0.5 border border-zinc-700">
+                <span class="text-[9px] text-zinc-400">GEOFRONT NODE:</span>
+                <select id="geofront-node-select" onchange="switchGeofrontNode(this.value)" class="bg-black text-[#ff6600] font-bold text-[10px] border border-[#ff6600] px-1 py-0.5 focus:outline-none">
+                    <option value="tokyo3">TOKYO-3 [MAC MINI LOCAL BASE]</option>
+                    <option value="usa">NERV-01 [USA CLOUD BASE]</option>
+                    <option value="germany">NERV-02 [GERMANY EDGE BASE]</option>
+                </select>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="toggleScanlines()" class="nerv-btn px-2 py-0.5 text-[8px]">CRT FX</button>
+                <div class="text-right text-[8px]">
+                    <div id="sys-clock" class="text-[#ff6600] font-bold">2026.11.02 - 16:16:00</div>
+                    <span class="text-emerald-500 font-bold" id="mesh-link-status">KAJI MESH SECURE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="grid grid-cols-12 gap-2 flex-1">
+
+            <!-- LEFT COLUMN: INGRESS, WATERMELONS, SYNC STATE & EYE DIAGRAM, EVA HANGAR -->
+            <section class="col-span-12 lg:col-span-3 flex flex-col gap-2">
+
+                <!-- ENTRY PLUG INGRESS -->
+                <div class="nerv-box p-2">
+                    <div class="nerv-header-block px-2 py-0.5 text-[9px] mb-1.5 flex justify-between items-center">
+                        <span>ENTRY PLUG INGRESS</span>
+                        <button onclick="runAllSimulationCases()" class="text-[7px] bg-black text-[#ff6600] px-1.5 py-0.5 border border-[#ff6600] hover:bg-[#ff6600] hover:text-black font-bold transition-all">▶ RUN 11 SIMULATIONS</button>
+                    </div>
+                    <div class="space-y-1">
+                        <button onclick="triggerTask('BLUE')" class="w-full text-left p-1 border border-blue-900 bg-blue-950/20 hover:bg-blue-900/40 text-blue-300 rounded flex justify-between items-center text-[9px]">
+                            <div>
+                                <span class="font-bold">PATTERN BLUE</span>
+                                <span class="text-[7px] text-blue-400 ml-1">Routine sync</span>
+                            </div>
+                            <span class="text-[7px] px-1 bg-blue-900 text-white">AUTO</span>
+                        </button>
+                        <button onclick="triggerTask('ORANGE')" class="w-full text-left p-1 border border-amber-900 bg-amber-950/20 hover:bg-amber-900/40 text-amber-300 rounded flex justify-between items-center text-[9px]">
+                            <div>
+                                <span class="font-bold">PATTERN ORANGE</span>
+                                <span class="text-[7px] text-amber-400 ml-1">Dataset sync</span>
+                            </div>
+                            <span class="text-[7px] px-1 bg-amber-900 text-white">MAGI</span>
+                        </button>
+                        <button onclick="triggerTask('RED')" class="w-full text-left p-1 border border-red-900 bg-red-950/20 hover:bg-red-900/40 text-red-300 rounded flex justify-between items-center text-[9px]">
+                            <div>
+                                <span class="font-bold">PATTERN RED</span>
+                                <span class="text-[7px] text-red-400 ml-1">DB Mutation</span>
+                            </div>
+                            <span class="text-[7px] px-1 bg-red-600 text-black font-bold">HITL</span>
+                        </button>
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-zinc-800">
+                        <button onclick="triggerSpear()" class="nerv-btn nerv-btn-danger w-full py-1 font-bold text-center text-[8px]">
+                            🗡️ SPEAR OF LONGINUS (ROLLBACK)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TOKEN COST & CONTEXT WINDOW METRICS WIDGET -->
+                <div class="nerv-box p-2">
+                    <div class="nerv-header-block px-2 py-0.5 text-[9px] mb-1.5 flex justify-between">
+                        <span>TOKEN BURN & CONTEXT WINDOW</span>
+                        <span class="text-amber-400 font-bold" id="token-burn-rate">$0.34/hr</span>
+                    </div>
+                    <div class="space-y-1.5 text-[8px]">
+                        <div>
+                            <div class="flex justify-between text-zinc-400 mb-0.5">
+                                <span>CONTEXT WINDOW CAPACITY</span>
+                                <span class="text-emerald-400 font-bold" id="context-pct">42.8% (54.8k / 128k)</span>
+                            </div>
+                            <div class="w-full bg-zinc-900 border border-zinc-700 h-1.5 overflow-hidden">
+                                <div id="context-progress-bar" class="bg-[#ff6600] h-full transition-all duration-300" style="width: 42.8%;"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-1 pt-1 border-t border-zinc-800 text-[8px]">
+                            <div class="bg-black p-1 border border-zinc-800">
+                                <div class="text-zinc-500">INPUT TOKENS:</div>
+                                <div class="text-white font-bold" id="input-token-count">38,820 tks</div>
+                            </div>
+                            <div class="bg-black p-1 border border-zinc-800">
+                                <div class="text-zinc-500">OUTPUT TOKENS:</div>
+                                <div class="text-white font-bold" id="output-token-count">16,010 tks</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KAJI'S WATERMELONS (PROGRESSIVE TRUST PIPELINE) -->
+                <div class="nerv-box p-2">
+                    <div class="nerv-header-block px-2 py-0.5 text-[9px] mb-1.5">KAJI'S WATERMELONS (TRUST STAGE)</div>
+                    <div class="space-y-1.5 text-[8px]">
+                        <div class="bg-black p-1.5 border border-zinc-800 flex justify-between items-center">
+                            <div>
+                                <span class="text-white font-bold">web_scraper_v2.py</span>
+                                <div class="text-zinc-500 text-[7px]">Stage: Shadow Mode (Day 2/3)</div>
+                            </div>
+                            <span class="text-amber-400 font-bold px-1 bg-amber-950">SHADOW</span>
+                        </div>
+                        <div class="bg-black p-1.5 border border-zinc-800 flex justify-between items-center">
+                            <div>
+                                <span class="text-white font-bold">sql_optimizer.py</span>
+                                <div class="text-zinc-500 text-[7px]">Stage: Full Autonomy (Lilith)</div>
+                            </div>
+                            <span class="text-emerald-400 font-bold px-1 bg-emerald-950">PROMOTED</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SYNC STATE & EYE DIAGRAM -->
+                <div class="nerv-box p-2">
+                    <div class="nerv-header-block px-2 py-0.5 text-[9px] mb-1 flex justify-between">
+                        <span>SYNC STATE & EYE DIAGRAM</span>
+                        <span class="text-emerald-400 font-bold" id="sync-ratio-text">94.2% [SYNC OK]</span>
+                    </div>
+                    <div class="bg-black border border-zinc-800 relative h-[100px]">
+                        <canvas id="eyeDiagramCanvas" width="280" height="100" class="w-full h-full"></canvas>
+                        <div class="absolute bottom-1 left-2 text-[7px] text-zinc-500 font-mono">CODE: 473 | SYNC: STABLE</div>
+                    </div>
+                </div>
+
+                <!-- EVA BAY HANGAR -->
+                <div class="nerv-box p-2">
+                    <div class="nerv-header-block px-2 py-0.5 text-[9px] mb-1 flex justify-between">
+                        <span>EVA BAY HANGAR (WORKERS)</span>
+                        <span class="text-emerald-400 font-bold">3 ACTIVE</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <div class="p-1 bg-black border border-emerald-900 flex flex-col items-center text-center">
+                            <div class="w-full h-9 bg-zinc-900 border border-emerald-800 flex flex-col items-center justify-center mb-1">
+                                <span class="text-[8px] text-emerald-400 font-bold">EVA-01</span>
+                                <span class="text-[6px] text-zinc-500">MAC MINI</span>
+                            </div>
+                            <span class="text-[7px] text-emerald-400 font-bold">Shinji</span>
+                        </div>
+                        <div class="p-1 bg-black border border-amber-900 flex flex-col items-center text-center">
+                            <div class="w-full h-9 bg-zinc-900 border border-amber-800 flex flex-col items-center justify-center mb-1">
+                                <span class="text-[8px] text-amber-400 font-bold">EVA-02</span>
+                                <span class="text-[6px] text-zinc-500">RASP PI 5</span>
+                            </div>
+                            <span class="text-[7px] text-amber-400 font-bold">Asuka</span>
+                        </div>
+                        <div class="p-1 bg-black border border-blue-900 flex flex-col items-center text-center">
+                            <div class="w-full h-9 bg-zinc-900 border border-blue-800 flex flex-col items-center justify-center mb-1">
+                                <span class="text-[8px] text-blue-400 font-bold">EVA-00</span>
+                                <span class="text-[6px] text-zinc-500">AWS NAS</span>
+                            </div>
+                            <span class="text-[7px] text-blue-400 font-bold">Rei</span>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- CENTER COLUMN: MAGI CONSENSUS MATRIX, STREAM & CODEC CHAT -->
+            <section class="col-span-12 lg:col-span-6 flex flex-col gap-2">
+
+                <!-- MAGI CONSENSUS MATRIX (EXACT SHAPES + REORDERED EXPERT POOL AT TOP) -->
+                <div class="nerv-box p-2.5 bg-black/90">
+                    <div class="flex justify-between items-center border-b border-[#ff6600] pb-1 mb-1.5">
+                        <div class="text-[9px] font-black tracking-widest text-[#ff6600]">MAGI SYSTEM CONSENSUS MATRIX // 提訴 / 決議</div>
+                        <div class="text-[7px] text-zinc-400 font-mono">CODE: 473 | FILE: MAGI_SYS | PRIORITY: AAA</div>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-1.5">
+                        <!-- OPTIONAL / ON-DEMAND CLOUD MAGIS & EXPERTS BAR MOVED TO TOP -->
+                        <div class="w-full p-1 bg-zinc-900 border border-zinc-700 flex justify-between items-center text-[8px] font-mono">
+                            <span class="text-[#ff6600] font-bold">☁️ OPTIONAL MAGI / EXPERT POOL:</span>
+                            <span class="text-zinc-300" id="expert-pool-text">MELCHIOR-2 (AWS) [READY] | JASPER (Tokens) [ACTIVE] | ZARA (Reversibility) [STANDBY]</span>
+                        </div>
+
+                        <!-- TOP: CASPER 3 -->
+                        <div id="magi-casper-box" class="w-full max-w-[320px] p-2 text-center magi-wrapper-casper">
+                            <div class="flex justify-between text-[7px] text-red-300 font-mono mb-0.5 px-4">
+                                <span>CASPER • 3 (Cloud Ethics)</span>
+                                <span>BATT 84%</span>
+                            </div>
+                            <div id="casper-status" class="text-xl font-black text-red-500 tracking-widest blink-anim">否決</div>
+                        </div>
+
+                        <div class="w-[2px] h-2 bg-[#ff6600]"></div>
+
+                        <!-- BOTTOM: BALTHASAR 2 & MELCHIOR 1 -->
+                        <div class="grid grid-cols-2 gap-3 w-full">
+                            <div id="magi-balthasar-box" class="p-2 text-center magi-wrapper-balthasar">
+                                <div class="flex justify-between text-[7px] text-emerald-300 font-mono mb-0.5 px-2">
+                                    <span>BALTHASAR • 2</span>
+                                    <span>RAM 62%</span>
+                                </div>
+                                <div id="balthasar-status" class="text-xl font-black text-emerald-400 tracking-widest">承認</div>
+                            </div>
+
+                            <div id="magi-melchior-box" class="p-2 text-center magi-wrapper-melchior">
+                                <div class="flex justify-between text-[7px] text-emerald-300 font-mono mb-0.5 px-2">
+                                    <span>MELCHIOR • 1</span>
+                                    <span>CPU 23%</span>
+                                </div>
+                                <div id="melchior-status" class="text-xl font-black text-emerald-400 tracking-widest">承認</div>
+                            </div>
+                        </div>
+
+                        <!-- RESOLUTION BAR -->
+                        <div class="w-full p-1 border border-emerald-500 bg-[#04150d] flex justify-between items-center text-[8px] font-mono">
+                            <span class="text-emerald-400 font-bold">決議:可決</span>
+                            <span class="text-white tracking-wider" id="magi-resolution-text">RESOLUTION APPROVED</span>
+                            <span class="text-emerald-400 font-bold" id="magi-vote-count">2 / 3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABBED AREA: STRICT LINE-BY-LINE LIVE REASONING STREAM VS PERSONAS CODEC CHAT -->
+                <div class="nerv-box p-2.5 flex-1 flex flex-col h-[250px]">
+                    <div class="flex justify-between items-center border-b border-zinc-800 pb-1 mb-1.5">
+                        <div class="flex gap-1">
+                            <button onclick="switchTab('stream')" id="tab-btn-stream" class="nerv-btn active px-2 py-0.5 text-[8px] font-bold">LIVE REASONING STREAM</button>
+                            <button onclick="switchTab('codec')" id="tab-btn-codec" class="nerv-btn px-2 py-0.5 text-[8px] font-bold">PERSONAS CODEC CHAT</button>
+                        </div>
+                        <span class="text-[7px] text-zinc-500">STRICT LINE-BY-LINE COMMS</span>
+                    </div>
+
+                    <!-- TAB 1: LIVE REASONING STREAM (STRICT SINGLE LINE FORMAT) -->
+                    <div id="tab-view-stream" class="tab-pane flex-col bg-black p-2 border border-zinc-800 font-mono overflow-y-auto space-y-1 text-[9px] h-full" style="display: block;">
+                        <div class="text-zinc-400">[16:16:00] [KAJI_MESH] WireGuard tunnel active across Tokyo-3, NERV-01, NERV-02.</div>
+                        <div class="text-zinc-400">[16:16:05] [L1_DOGMA] Terminal Dogma SQLite inbox mounted. Litestream replication nominal.</div>
+                        <div class="text-[#ff6600]">[16:16:07] [ADAM_KERNEL] Raw foundation weights bound. MAGI circuit breakers holding steady.</div>
+                        <div class="text-emerald-400">[16:16:10] [SYSTEM] Ready for task ingestion. Click 'RUN 11 SIMULATIONS' to start test suite.</div>
+                    </div>
+
+                    <!-- TAB 2: PERSONAS CODEC CHAT -->
+                    <div id="tab-view-codec" class="tab-pane flex-1 flex flex-col gap-1.5 h-full" style="display: none;">
+                        <div class="flex gap-1">
+                            <button onclick="switchPersona('naoko')" class="px-1.5 py-0.5 bg-black text-[8px] font-bold text-[#ff6600] border border-[#ff6600]">NAOKO</button>
+                            <button onclick="switchPersona('gendo')" class="px-1.5 py-0.5 bg-black text-[8px] font-bold text-red-500 border border-red-500">GENDO</button>
+                            <button onclick="switchPersona('misato')" class="px-1.5 py-0.5 bg-black text-[8px] font-bold text-blue-400 border border-blue-400">MISATO</button>
+                        </div>
+                        <div class="flex-1 bg-black p-2 border border-zinc-800 overflow-y-auto space-y-2 font-mono text-[9px]" id="persona-chat-log">
+                            <div class="flex gap-2 items-start bg-zinc-900/60 p-1.5 border-l-2 border-l-[#ff6600]">
+                                <div class="w-7 h-7 bg-black border border-[#ff6600] flex items-center justify-center flex-shrink-0">
+                                    <span class="text-[8px] text-[#ff6600] font-bold" id="chat-avatar-lbl">NA</span>
+                                </div>
+                                <div>
+                                    <span class="text-[#ff6600] font-bold" id="chat-sender-lbl">[NAOKO]:</span>
+                                    <span class="text-zinc-200" id="chat-message-text">System initialized. Awaiting task payload.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-1">
+                            <input type="text" id="persona-input" placeholder="Transmit message..." class="flex-1 bg-black border border-zinc-800 p-1 text-white text-[9px] focus:outline-none focus:border-[#ff6600]">
+                            <button onclick="sendPersonaMessage()" class="nerv-btn px-2.5 py-1 text-[8px] font-bold">SEND</button>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- RIGHT COLUMN: SEPHIROTH TREE JOB FLUX, WORLD MAP GLOBE, LORE REGISTRIES -->
+            <section class="col-span-12 lg:col-span-3 flex flex-col gap-2">
+
+                <!-- SEPHIROTH TREE JOB FLUX -->
+                <div class="term-box p-2.5">
+                    <div class="term-header px-2 py-0.5 text-[8px] mb-2 flex justify-between">
+                        <span>EXECUTION PIPELINE (SEPHIROTH TREE)</span>
+                        <span class="text-gray-500 font-bold" id="tree-state-label">STATE: IDLE</span>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5 font-mono text-[9px]">
+                        <div id="tree-1" class="sephiroth-node active w-full rounded">
+                            <span class="font-bold">01. INGRESS & PAYLOAD PARSE</span>
+                        </div>
+
+                        <div class="flex justify-center"><div class="w-[1px] h-2 bg-gray-400"></div></div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div id="tree-2" class="sephiroth-node rounded">
+                                <span class="text-gray-600">02. L3 RISK ROUTER</span>
+                            </div>
+                            <div id="tree-3" class="sephiroth-node rounded">
+                                <span class="text-gray-600">03. L5 CONSENSUS</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center"><div class="w-[1px] h-2 bg-gray-400"></div></div>
+
+                        <div id="tree-4" class="sephiroth-node w-full rounded">
+                            <span class="text-gray-600">04. L4 AST & CONFIDENCE EVAL</span>
+                        </div>
+
+                        <div class="flex justify-center"><div class="w-[1px] h-2 bg-gray-400"></div></div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div id="tree-5" class="sephiroth-node rounded">
+                                <span class="text-gray-600">05. SANDBOX VM</span>
+                            </div>
+                            <div id="tree-6" class="sephiroth-node rounded">
+                                <span class="text-gray-600">06. L1 LEDGER SYNC</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D SPHERICAL WIREFRAME WORLD MAP -->
+                <div class="nerv-box p-2 flex-1">
+                    <div class="nerv-header-block px-2 py-0.5 text-[8px] mb-1.5 flex justify-between">
+                        <span>KAJI MESH GLOBAL SPHERE</span>
+                        <span class="text-amber-400 font-bold">WIREGUARD</span>
+                    </div>
+                    <div class="bg-black border border-[#ff6600]/40 h-[140px] relative flex items-center justify-center overflow-hidden cursor-pointer" onclick="cycleNodeMap()">
+                        <canvas id="worldMapCanvas" width="280" height="140" class="w-full h-full"></canvas>
+                        <div class="absolute bottom-1 left-2 text-[7px] text-[#ff6600] font-bold" id="map-status-label">ACTIVE: TOKYO-3 GEOFRONT</div>
+                    </div>
+                </div>
+
+                <!-- ARCHITECTURAL REGISTRIES -->
+                <div class="nerv-box p-2 flex-1 flex flex-col gap-1 text-[8px]">
+                    <div class="nerv-header-block px-2 py-0.5 text-[8px]">CORE ARCHITECTURAL REGISTRIES</div>
+
+                    <div class="p-1 bg-black border border-zinc-800">
+                        <div class="text-[#ff6600] font-bold">🏛️ DOGMA & LILITH</div>
+                        <div class="text-zinc-400">SQLite inbox ledger + 24 verified Model Context Protocol (MCP) tools.</div>
+                    </div>
+
+                    <div class="p-1 bg-black border border-zinc-800">
+                        <div class="text-amber-400 font-bold">🧬 ADAM & S² ENGINE</div>
+                        <div class="text-zinc-400">Base weights + local Gemma instances for zero-cost edge execution.</div>
+                    </div>
+
+                    <div class="p-1 bg-black border border-zinc-800">
+                        <div class="text-purple-400 font-bold">👁️ SEELE ENFORCEMENT</div>
+                        <div class="text-zinc-400">Deterministic AST parser & JWT capability tokens.</div>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- SCRIPT & ASYNC SIMULATION ENGINE -->
+    <script>
+        // System Clock
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('sys-clock').innerText =
+                now.getFullYear() + '.' +
+                String(now.getMonth()+1).padStart(2,'0') + '.' +
+                String(now.getDate()).padStart(2,'0') + ' - ' +
+                now.toTimeString().split(' ')[0];
+        }, 1000);
+
+        function toggleScanlines() {
+            document.body.classList.toggle('scanlines-active');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('#tab-btn-stream, #tab-btn-codec').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-view-' + tab).style.display = 'flex';
+            document.getElementById('tab-btn-' + tab).classList.add('active');
+        }
+
+        function switchGeofrontNode(node) {
+            const labelMap = {
+                tokyo3: "TOKYO-3 [MAC MINI LOCAL BASE]",
+                usa: "NERV-01 [USA CLOUD BASE]",
+                germany: "NERV-02 [GERMANY EDGE BASE]"
+            };
+            appendStreamLog(`[MESH] Primary active cluster node switched to ${labelMap[node]}`, "text-amber-400 font-bold");
+        }
+
+        // EYE DIAGRAM CANVAS
+        const eyeCanvas = document.getElementById('eyeDiagramCanvas');
+        const eyeCtx = eyeCanvas.getContext('2d');
+        let eyePhase = 0;
+
+        function drawEyeDiagram() {
+            eyeCtx.fillStyle = '#000000';
+            eyeCtx.fillRect(0, 0, eyeCanvas.width, eyeCanvas.height);
+            eyeCtx.lineWidth = 1.2;
+
+            for (let i = 0; i < 4; i++) {
+                eyeCtx.beginPath();
+                eyeCtx.strokeStyle = i % 2 === 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(255, 102, 0, 0.7)';
+
+                for (let x = 0; x < eyeCanvas.width; x += 3) {
+                    const y = (eyeCanvas.height / 2) + Math.sin(x * 0.04 + eyePhase + (i * 0.3)) * 28 * Math.cos((x / eyeCanvas.width) * Math.PI);
+                    if (x === 0) eyeCtx.moveTo(x, y);
+                    else eyeCtx.lineTo(x, y);
+                }
+                eyeCtx.stroke();
+            }
+            eyePhase += 0.05;
+            requestAnimationFrame(drawEyeDiagram);
+        }
+        drawEyeDiagram();
+
+        // 3D SPHERICAL WIREFRAME WORLD MAP
+        const mapCanvas = document.getElementById('worldMapCanvas');
+        const mapCtx = mapCanvas.getContext('2d');
+        let mapRotation = 0;
+        let activeNodeIndex = 0;
+        const nodesList = ["TOKYO-3 GEOFRONT", "NERV-01 (USA BASE)", "NERV-02 (GERMANY BASE)"];
+
+        function drawWorldMap() {
+            mapCtx.fillStyle = '#000000';
+            mapCtx.fillRect(0, 0, mapCanvas.width, mapCanvas.height);
+
+            const cx = mapCanvas.width / 2;
+            const cy = mapCanvas.height / 2;
+            const radius = 50;
+
+            mapCtx.strokeStyle = '#ff6600';
+            mapCtx.lineWidth = 1;
+            mapCtx.beginPath();
+            mapCtx.arc(cx, cy, radius, 0, 2 * Math.PI);
+            mapCtx.stroke();
+
+            for (let lat = -Math.PI / 3; lat <= Math.PI / 3; lat += Math.PI / 6) {
+                let ringRadius = radius * Math.cos(lat);
+                let ringY = cy + radius * Math.sin(lat);
+                mapCtx.beginPath();
+                mapCtx.ellipse(cx, ringY, ringRadius, ringRadius * 0.2, 0, 0, 2 * Math.PI);
+                mapCtx.strokeStyle = 'rgba(255, 102, 0, 0.3)';
+                mapCtx.stroke();
+            }
+
+            for (let i = 0; i < 4; i++) {
+                let angle = mapRotation + (i * Math.PI / 4);
+                mapCtx.beginPath();
+                mapCtx.ellipse(cx, cy, radius * Math.abs(Math.sin(angle)), radius, 0, 0, 2 * Math.PI);
+                mapCtx.strokeStyle = 'rgba(255, 102, 0, 0.3)';
+                mapCtx.stroke();
+            }
+
+            mapRotation += 0.015;
+            requestAnimationFrame(drawWorldMap);
+        }
+        drawWorldMap();
+
+        function cycleNodeMap() {
+            activeNodeIndex = (activeNodeIndex + 1) % nodesList.length;
+            document.getElementById('map-status-label').innerText = "ACTIVE: " + nodesList[activeNodeIndex];
+        }
+
+        // TELEMETRY LOG & TOKEN METRICS METERS
+        let totalInputTokens = 38820;
+        let totalOutputTokens = 16010;
+
+        function appendStreamLog(msg, colorClass = "text-zinc-400") {
+            const stream = document.getElementById('tab-view-stream');
+            const time = new Date().toTimeString().split(' ')[0];
+            stream.innerHTML += `<div class="${colorClass}">[${time}] ${msg}</div>`;
+            stream.scrollTop = stream.scrollHeight;
+
+            totalInputTokens += Math.floor(Math.random() * 220) + 50;
+            totalOutputTokens += Math.floor(Math.random() * 90) + 20;
+            let sumTks = totalInputTokens + totalOutputTokens;
+            let pct = ((sumTks / 128000) * 100).toFixed(1);
+
+            document.getElementById('input-token-count').innerText = totalInputTokens.toLocaleString() + " tks";
+            document.getElementById('output-token-count').innerText = totalOutputTokens.toLocaleString() + " tks";
+            document.getElementById('context-pct').innerText = pct + "% (" + (sumTks/1000).toFixed(1) + "k / 128k)";
+            document.getElementById('context-progress-bar').style.width = Math.min(pct, 100) + "%";
+            document.getElementById('token-burn-rate').innerText = "$" + (0.34 + (sumTks / 450000)).toFixed(2) + "/hr";
+        }
+
+        function updateMagiStatus(m1, m2, m3, resolution, voteCount = "2 / 3") {
+            document.getElementById('melchior-status').innerText = m1 === 'APPROVE' ? '承認' : (m1 === 'ABSTAIN' ? '棄権' : '否決');
+            document.getElementById('balthasar-status').innerText = m2 === 'APPROVE' ? '承認' : (m2 === 'ABSTAIN' ? '棄権' : '否決');
+            document.getElementById('casper-status').innerText = m3 === 'APPROVE' ? '承認' : (m3 === 'ABSTAIN' ? '棄権' : '否決');
+            document.getElementById('magi-resolution-text').innerText = resolution;
+            document.getElementById('magi-vote-count').innerText = voteCount;
+        }
+
+        function activateSephirothNodes(stepList) {
+            for(let i=1; i<=6; i++) document.getElementById(`tree-${i}`).classList.remove('active');
+            stepList.forEach((step, index) => {
+                setTimeout(() => {
+                    document.getElementById(`tree-${step}`).classList.add('active');
+                }, index * 200);
+            });
+        }
+
+        function triggerTask(type) {
+            if(type === 'BLUE') {
+                appendStreamLog("[INGRESS] Pattern Blue task parsed. Direct fast-path execution.", "text-blue-400");
+                updateMagiStatus("APPROVE", "APPROVE", "APPROVE", "RESOLUTION APPROVED", "3 / 3");
+                activateSephirothNodes([1, 3, 5, 6]);
+            } else if(type === 'ORANGE') {
+                appendStreamLog("[ROUTER] Pattern Orange task parsed. Requesting 3-node MAGI consensus.", "text-amber-400");
+                updateMagiStatus("APPROVE", "APPROVE", "APPROVE", "RESOLUTION APPROVED", "3 / 3");
+                activateSephirothNodes([1, 2, 3, 4, 6]);
+            } else if(type === 'RED') {
+                appendStreamLog("[INTERCEPT] Pattern RED mutative task detected! Routed to HITL portal.", "text-red-500 font-bold");
+                updateMagiStatus("APPROVE", "APPROVE", "REJECT", "HITL ESCALATION REQUIRED", "2 / 3");
+                activateSephirothNodes([1, 2, 3, 4]);
+            }
+        }
+
+        function triggerSpear() {
+            appendStreamLog("[SPEAR] Emergency Longinus Rollback invoked! Revoking active JWT tokens & rolling back SQLite ledger...", "text-red-500 font-bold");
+            activateSephirothNodes([1, 6]);
+        }
+
+        // PERSONAS CODEC CHAT LOGIC
+        let currentPersona = 'naoko';
+        function switchPersona(p) {
+            currentPersona = p;
+            const names = { naoko: "NAOKO", gendo: "GENDO", misato: "MISATO" };
+            const avatars = { naoko: "NA", gendo: "GE", misato: "MI" };
+            document.getElementById('chat-avatar-lbl').innerText = avatars[p];
+            document.getElementById('chat-sender-lbl').innerText = `[${names[p]}]:`;
+        }
+
+        function sendPersonaMessage() {
+            const input = document.getElementById('persona-input');
+            if(!input.value.trim()) return;
+            const log = document.getElementById('persona-chat-log');
+            const msg = input.value;
+            log.innerHTML += `
+                <div class="flex gap-2 items-start bg-zinc-900/60 p-1.5 border-l-2 border-l-[#ff6600]">
+                    <div class="w-7 h-7 bg-black border border-[#ff6600] flex items-center justify-center flex-shrink-0">
+                        <span class="text-[8px] text-[#ff6600] font-bold">YOU</span>
+                    </div>
+                    <div>
+                        <span class="text-white font-bold">[OPERATOR]:</span>
+                        <span class="text-zinc-200">${msg}</span>
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // COMPLETE 11-CASE ASYNC SIMULATION SUITE WITH REALISTIC DELAYS
+        async function runAllSimulationCases() {
+            const delay = ms => new Promise(res => setTimeout(res, ms));
+
+            document.getElementById('tree-state-label').innerText = "STATE: RUNNING SIMULATION";
+            appendStreamLog("================================================================", "text-[#ff6600]");
+            appendStreamLog("[SIMULATION] Initiating 11 Real-World Decision Suite Simulations...", "text-[#ff6600] font-bold");
+            appendStreamLog("================================================================", "text-[#ff6600]");
+
+            // Case 1
+            await delay(1200);
+            appendStreamLog("---- [CASE 1/11] 'Remind me N days before car insurance expires' ----", "text-blue-400 font-bold");
+            activateSephirothNodes([1, 2, 3]);
+            await delay(800);
+            updateMagiStatus("APPROVE", "APPROVE", "APPROVE", "RESOLUTION APPROVED", "3 / 3");
+            activateSephirothNodes([4, 6]);
+            appendStreamLog("[CASE 1] Melchior parsed offset N, date, timezone. Written to Terminal Dogma SQLite ledger.", "text-emerald-400");
+
+            // Case 2
+            await delay(1500);
+            appendStreamLog("---- [CASE 2/11] 'Marco is away from 2 to 7 this month' ----", "text-amber-400 font-bold");
+            activateSephirothNodes([1, 2, 3]);
+            await delay(600);
+            updateMagiStatus("APPROVE", "REJECT", "APPROVE", "RECONCILING: ENTITY AMBIGUITY", "2 / 3");
+            appendStreamLog("[CASE 2] Turn 1: Balthasar rejected due to missing entity resolution ('Which Marco?'). Initiating reconciliation loop...", "text-amber-300");
+            await delay(1200);
+            updateMagiStatus("APPROVE", "APPROVE", "APPROVE", "RESOLUTION APPROVED (TURN 2)", "3 / 3");
+            activateSephirothNodes([4, 6]);
+            appendStreamLog("[CASE 2] Turn 2: Melchior added fallback entity lookup query. Dates 2-7 persisted with correction flag.", "text-emerald-400");
+
+            // Case 3
+            await delay(1500);
+            appendStreamLog("---- [CASE 3/11] 'Every morning at 7, send my office route' ----", "text-blue-400 font-bold");
+            activateSephirothNodes([1, 2, 3]);
+            await delay(700);
+            updateMagiStatus("APPROVE", "APPROVE", "APPROVE", "RESOLUTION APPROVED", "3 / 3");
+            activateSephirothNodes([4, 5, 6]);
+            appendStreamLog("[CASE 3] Persisted cron '0 7 * * *'. Casper verified location privacy tokens.", "text-emerald-400");
+
+            // Case 4
+            await delay(1500);
+            appendStreamLog("---- [CASE 4/11] 'Start printing on the printer PC' ----", "text-blue-400 font-bold");
+            activateSephirothNodes([1, 3, 5]);
+            await delay(700);
+            updateMagiStatus("APPROVE", "APPROVE", "ABSTAIN", "DISPATCHED TO SPOOLER", "2 / 3");
+            activateSephirothNodes([6]);
+            appendStreamLog("[CASE 4] Selected Ender-3 spooler. Single print job token dispatched over Kaji Mesh to printer PC.", "text-emerald-400");
+
+            // Case 5
+            await delay(1300);
+            appendStreamLog("---- [CASE 5/11] 'Charge battery 2' ----", "text-blue-400 font-bold");
+            activateSephirothNodes([1, 6]);
+            updateMagiStatus("APPROVE", "APPROVE", "APPROVE", "FAST-PATH AUTOMATED", "3 / 3");
+            appendStreamLog("[CASE 5] Read-only hardware telemetry. Battery #2 state appended to dedicated FPV battery log.", "text-emerald-400");
+
+            // Case 6
+            await delay(1500);
+            appendStreamLog("---- [CASE 6/11] 'Bottom left motor crashed' ----", "text-amber-400 font-bold");
+            activateSephirothNodes([1, 2, 3, 4]);
+            await delay(800);
+            updateMagiStatus("APPROVE", "APPROVE", "APPROVE", "INCIDENT RESOLVED", "3 / 3");
+            activateSephirothNodes([6]);
+            appendStreamLog("[CASE 6] Resolved craft orientation (Motor #3 - CCW). Flagged DAMAGED; spawned inspection task in queue.", "text-emerald-400");
+
+            // Case 7
+            await delay(1600);
+            appendStreamLog("---- [CASE 7/11] 'Fetch live weather forecast for Berlin' ----", "text-blue-400 font-bold");
+            activateSephirothNodes([1, 5]);
+            await delay(900);
+            updateMagiStatus("APPROVE", "APPROVE", "APPROVE", "EDGE DISPATCH (NERV-02)", "3 / 3");
+            appendStreamLog("[CASE 7] Routed query over WireGuard to NERV-02 (Germany Edge Base) to minimize latency. Cached result.", "text-emerald-400");
+
+            // Case 8
+            await delay(1700);
+            appendStreamLog("---- [CASE 8/11] 'Book hotel in Tokyo for $300/night on 2026-11-15' ----", "text-red-500 font-bold");
+            activateSephirothNodes([1, 2, 3]);
+            await delay(1000);
+            updateMagiStatus("APPROVE", "APPROVE", "REJECT", "HITL ESCALATION REQUIRED", "2 / 3");
+            activateSephirothNodes([4]);
+            appendStreamLog("[CASE 8] High-risk financial mutation! Casper rejected auto-checkout. Routed to HITL PWA portal for operator approval.", "text-red-400 font-bold");
+
+            // Case 9
+            await delay(1800);
+            appendStreamLog("---- [CASE 9/11] 'Slice STL file and send G-code to Ender-3' ----", "text-amber-400 font-bold");
+            activateSephirothNodes([1, 2, 3, 4]);
+            await delay(1100);
+            updateMagiStatus("APPROVE", "APPROVE", "APPROVE", "DISPATCHED TO NERV-01", "3 / 3");
+            activateSephirothNodes([5, 6]);
+            appendStreamLog("[CASE 9] Heavy CPU compute job routed to NERV-01 (US Base MiniPC Firecracker VM #2). Streamed G-code back.", "text-emerald-400");
+
+            // Case 10
+            await delay(1900);
+            appendStreamLog("---- [CASE 10/11] 'Merge two STL files into unified mesh' ----", "text-purple-400 font-bold");
+            document.getElementById('expert-pool-text').innerText = "MELCHIOR-2 (AWS) [READY] | JASPER (Tokens) [ACTIVE] | ZARA (Reversibility) [INVOKED & EXECUTING]";
+            activateSephirothNodes([1, 2, 3, 4]);
+            await delay(1200);
+            updateMagiStatus("APPROVE", "APPROVE", "APPROVE", "EXPERT ZARA VALIDATED", "3 / 3 + ZARA");
+            activateSephirothNodes([5, 6]);
+            appendStreamLog("[CASE 10] Federated expert ZARA (Mesh Geometry) invoked alongside core MAGI. Union mesh committed to Dogma.", "text-emerald-400");
+            await delay(500);
+            document.getElementById('expert-pool-text').innerText = "MELCHIOR-2 (AWS) [READY] | JASPER (Tokens) [ACTIVE] | ZARA (Reversibility) [STANDBY]";
+
+            // Case 11
+            await delay(2000);
+            appendStreamLog("---- [CASE 11/11] 'Push modified schema to production DB' ----", "text-red-500 font-bold");
+            activateSephirothNodes([1, 2, 3, 4]);
+            await delay(1200);
+            updateMagiStatus("APPROVE", "REJECT", "REJECT", "MUTATION LOCKED (PATTERN RED)", "1 / 3");
+            appendStreamLog("[CASE 11] Pattern RED extreme risk detected! Schema locked. Transaction key generated. Awaiting manual operator signature key.", "text-red-500 font-bold");
+
+            await delay(1000);
+            appendStreamLog("================================================================", "text-[#ff6600]");
+            appendStreamLog("[SIMULATION COMPLETE] All 11 test cases executed and logged.", "text-[#ff6600] font-bold");
+            appendStreamLog("================================================================", "text-[#ff6600]");
+            document.getElementById('tree-state-label').innerText = "STATE: IDLE";
+        }
+    </script>
+</body>
+</html>

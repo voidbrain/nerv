@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "id": "B-121-T02",
+  "parent": "B-121",
+  "title": "Epoch-push replies report the newest epoch a base ran or acked",
+  "goal": "A re-targeted move is refused when any unrevoked base ran, or acked a lease for, a later epoch than the promoting standby's state, not only when the promoting standby did",
+  "status": "closed",
+  "acceptance": [
+    "A committed test fails first: B runs epoch 3 renewing through D, the owner re-targets to C at epoch 4, and C (which never acked B) is refused with standby_behind",
+    "/kaji/epoch-push replies carry the newest coordinator epoch the base held a lease at or acked; an older peer without the field is treated as unknown and documented",
+    "Owner agreed the scope 2026-11-24 (new field in the /kaji/epoch-push reply)"
+  ],
+  "dependsOn": [
+    "B-121-T01"
+  ],
+  "resources": [
+    "src/kaji-link.ts",
+    "src/coordinator-epoch.ts",
+    "src/coordinator-promote.ts",
+    "src/cli.ts",
+    "test/coordinator-partition.test.ts",
+    "test/coordinator-relocation.test.ts",
+    "docs/decisions/coordinator-relocation.md",
+    "docs/work/records/B-121.md",
+    "generated:backlog-views",
+    "contract:coordinator-authority"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "distributed-contracts",
+    "architecture-review"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "validation": [
+    "A committed regression fails before the fix",
+    "npm run check:fast",
+    "final required CI"
+  ],
+  "escalation": [
+    "Changes the /kaji/epoch-push reply contract: the owner agrees the scope before work starts",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 from F-016-T18 (epoch push, 1 h stated): one reply field, one recorded column, one refusal and a mesh fixture. Not a measurement. 2026-11-24: implemented in 1.25 h agent (stated): the record-free probe phase and the mixed-version rule were added to keep a refused re-target from fencing the running main. 2026-11-24: #721 review fixes (drain refusal, planned-path and wiring tests, B-124) added 0.75 h (stated). 2026-11-24: #721 re-check fixes (skippedMains in the receipt, listed and older bases must answer, B-125) added 0.75 h (stated). 2026-11-24: #721 third-check fixes (revoked skipped mains, receipt verified before the probe) added 0.5 h (stated). 2026-11-24: #721 fourth-check minors (receipt ranOrAckedEpoch and field checks, drain wording) added 0.5 h (stated). Closed 2026-11-25.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 3.75,
+    "actualAgentHours": 3.75,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 721,
+      "note": "ranOrAckedEpoch in the epoch-push reply; record-free probe before the push; #721 review fixes"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "F-074",
+  "id": "F-074-T08",
+  "status": "closed",
+  "title": "T08 — One root command runs NERV and common tests, reusing exact evidence",
+  "goal": "npm run gauntlet:all from the NERV root plans and runs NERV system packs and every common pack; by default it runs only new, changed or stale cases and reuses evidence whose identity matches exactly",
+  "acceptance": [
+    "Plan shows per case, from `gauntlet pending`: run (new/changed/stale/identity mismatch) or reuse (report hash, age), with the aggregate time/output budget, before anything runs",
+    "Reuse requires the same case definition and profile (ledger), and Gauntlet's cache requires the same model/quantisation/runtime/settings, machine scenario and NERV source key before reusing executed evidence; any difference reruns the case; --fresh reruns all. Not met as first written: ledger coverage itself ignores runtime identity, machine scenario and the NERV source key (see escalation; owner decision pending)",
+    "NERV deterministic system cases always run (no model, cheap); model cases need explicit --confirm and the reviewed budget",
+    "A finished run records only admitted reports in the ledger through `gauntlet ledger record`"
+  ],
+  "dependsOn": [
+    "F-074-T06",
+    "F-074-T07"
+  ],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "evals/**",
+    "docs/evaluations/**",
+    "docs/test-capability-index.md",
+    "contract:gauntlet-adoption",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "evidence-review",
+    "regression-design"
+  ],
+  "privacy": "Neutral synthetic cases and private local reports only; no secrets, downloads or production effects.",
+  "validation": [
+    "Fixtures for reuse, each identity mismatch, max age and --fresh; plan output without model execution",
+    "Final applicable CI"
+  ],
+  "escalation": [
+    "Owner 2026-11-11: no default max age. Reuse ends when the identity changes, not on a timer; `--max-age-days` stays opt-in. The only reason for an age limit is identity the ledger does not bind, which F-074-T10 removes.",
+    "Known limit 2026-11-11: ledger coverage is by case definition and profile (Gauntlet 0.6.0); model digest, runtime identity, machine scenario and the NERV source key are not part of it, so a NERV code change does not make system cases pending (CI still runs the NERV tests). Gauntlet's cache still requires them before reusing executed evidence. Owner 2026-11-11: plan the fix; upstream gauntlet-protocol B-002 (PR #36), adoption in F-074-T10."
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Owner request 2026-11-11: NERV always consumes every common Gauntlet pack plus its own, and a pack added or changed raises a run-new-tests item. Estimate, not a measurement. Closed 2026-11-11 after PR #272 merged with CI 43023793222 green on all five jobs (plan, validate, windows, native-macos, full-suite). The identity part of the reuse acceptance moves to F-074-T10.",
+    "reviewed": "2026-11-11"
+  }
+}

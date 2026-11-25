@@ -1,0 +1,15 @@
+# Assistant reliability acceptance — 7 November 2026
+
+Scope: F-003's remaining scheduled Instrumentality recovery and reconciliation of model, Telegram and brief acceptance. F-019 completed first in merged PR #191; its validate, Windows and native-macos jobs all passed in runs 42378326649/42378322818.
+
+Scheduled runs claim a durable local-day slot before model dispatch. At most two attempts are allowed per slot, with an hour after a recorded failure (or after the start of an interrupted attempt) before retry. The existing immediate retry of an unreadable digest stays within an attempt. A pending claim has an unknown outcome; an old pending attempt is a health warning. No new exchanges is an explicit skip, without a provider request. Manual consolidation remains separate from this scheduling limit.
+
+Failure reasons are fixed codes, not prompts, completions or raw provider errors. Health/doctor and bilingual briefs show failed, skipped and recovered states. A successful retry clears its failure reason. The brief places the schedule result before potentially long content, so truncation cannot hide it. Episode/index/checkpoint writes and a scheduled success/skip share one SQLite transaction: both commit or neither does; stale completion rolls back the episode.
+
+`test/instrumentality-runs.test.ts` covers persistent claims and restart, attempt caps/backoff, stale completion fencing, sanitized reasons, localized and bounded briefs, transaction failure after episode insertion, reopen and stale-result refusal. `test/instrumentality.test.ts` crosses real coordinator/brain/scheduler processes for failed digest → restart → backoff → successful recovery, and no-exchange skip. Existing tests cover local-day/idle scheduling, model prompts and owner-approved fact cards.
+
+`test/telegram.test.ts` now covers rejected Bot delivery → unchanged checkpoint → channel/runtime restart → accepted delivery → next restart without replay. A second regression sends Italian then English owner messages through the Bot fixture and real runtime/model processes, checking the language instructions and returned messages. These use neutral loopback fixtures, not a real phone. Existing model tests verify local-only refusal, no cloud fallback and credential/error boundaries; approval/resume and brief tests retain their existing acceptance.
+
+Historical Human evidence remains the owner's 4 November 2026 Ollama Italian/English gated requests and actual Telegram message/reply/reminder arrival recorded in F-003. No new real-phone test or paid cloud call was made, and synthetic Bot acceptance is not phone receipt. Approval refinements, general proactive triggers, model quality evaluation and broader memory behavior retain their own records.
+
+The underlying digest history/input bounds are unchanged: this work does not claim unlimited historical replay, autonomous fact acceptance or new model capabilities. Independent fresh-context P1 review found a crash gap between saved episode and scheduled outcome plus retained failure reasons on success. Both were fixed, covered by regression tests and re-reviewed with no remaining blockers.

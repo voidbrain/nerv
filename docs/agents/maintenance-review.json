@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "reviewed": "2026-11-25T19:15:54.773Z",
+  "policy": "d0120e3ce7a10b9a8fc016edea454bfabf9eb87922d54f5f421333852e7f0477",
+  "inputs": {
+    "AGENTS.md": "5d186e4e46681da311ff0990d5b77d071c4342436079b688d48fa84f5d47f6bd",
+    "docs/BACKLOG-RULES.md": "1481653f4cbe83eb5a22a4afcb13acca2f4579c9efa6d04bd0d85ef3d03eea2b",
+    "docs/agents/architecture-review.md": "5d967314854912b1a5f1446aeab309763b14f9856bceb3c82df5c6c25c166526",
+    "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
+    "docs/agents/audit.md": "e58480c21e8afe9a825df4726fa93b8a7f841557f4267f1fc2c61ac3dac8f642",
+    "docs/agents/change-impact.md": "dc1c473e274f76bd70a87ff57bbc53fc75dc75a35d121cf67baf163a2fd2e975",
+    "docs/agents/coverage-guide.md": "3d539eb8beedfa101a5e47d9973cdf85dce197436fab2ab096f760e12d208106",
+    "docs/agents/maintenance.md": "69f77d944551e4a442de20a0e46badf19a91e42f870bf8048f428c8a64f343a9",
+    "docs/agents/mcp.md": "06efbb58a50f9236506ca0afa9a79bb1d42c12ca380a29ed0254bf0a537f860d",
+    "docs/agents/parallel-work-plans.md": "d171d89ec5431668ff770e5fcb0098ad518da6289a0d12a56aafdae60930d567",
+    "docs/agents/parallel-work.md": "be8887601fefe6eb9f52f8a549abebc36a875f354570d5291900ddfc5f708d0d",
+    "docs/agents/procedures.md": "9b95bf5f3707453ce76392524feea05e754e005a6e96d21a0fe8b7dd95059b2d",
+    "docs/agents/prompt-caching.md": "3b8962bd4f2f713d5730e999e65338ebdd90347ee09dffbd9c8da98e2405a21e",
+    "docs/agents/rule-review.md": "b27cfb4e8e42489b5f234ec42ae4d0cc9dcd4ea8be01fff9754a85b5ff8c86d0",
+    "docs/agents/skills-discovery.md": "ad322a2b93f2dc1b8f27d0b052248d57c050ca852077589ba889447577357057",
+    "docs/agents/skills.md": "7da9fc43bd0886b06580cc15b9a45e47d097c6fa7fca627bf7ed0f0202a409a1",
+    "docs/agents/solution-profile.md": "4248b79a44fd9849a8fd6b563c8a76e3d82078eb4d567075f8118b4bc4cfc6e9",
+    "docs/agents/task-context.md": "c689f02b9571ff747a4866d71690bb01afd7e6654dea640a1ce1c66e7c0fa204",
+    "docs/agents/work-usage-launch.md": "3225858b8b840322d2bb073f30659c376826eea3d1f772df8582fb37eef74465",
+    "docs/agents/work-usage.md": "9a4c574e6cd2b0af3ddd1cb5a70560dc84c962c991d42567b7829b9a25cae3be",
+    "docs/backlog/closure.md": "621d7de170f1cf91b1fdbcbe5024f298a1c72f8fb754af8bae3a1c282d5a3ce1",
+    "docs/backlog/documentation.md": "64bea7a9405d89f07162205381899081daa2a8b7e2f0bc19b861364172892da1",
+    "docs/backlog/estimates.md": "464a51ccad0db3958a2afa36caa2ffd79e780c49fe66cab01d1a7d0793411912",
+    "docs/backlog/evaluations.md": "7540bf69b6b5d40dc09dc9ce82138218525733c5f602945bdaa58d5c3a743f37",
+    "docs/backlog/feature-plans.md": "f2377140ce4f2f38b449516498dd5ff6ba58ca04287aa92381a1029f7416f85b",
+    "docs/backlog/human-action.md": "8c1e2e47da82dae9b6b533988d73d10bbeaa06e0c613fbd4e6d0e58e939c66ae",
+    "docs/backlog/ledger-header.md": "933a71e153faf8ab36f52f416de956b38338dc5f1dfe0851244136ede3b61c4c",
+    "docs/backlog/ordering.md": "d8ce4bc274180852634c5cc33517346653c35c60aac4db669525358c74c43db2",
+    "docs/backlog/outcomes.md": "c6f1d8e4ac3afd85e6d90ac7cef8ae39fba765b13c821522fb005edd2b5b88e4",
+    "docs/backlog/ownership.md": "d2d39a4e2a56fb7a18c5cce2fe5490282a9c89c947574746bacd71f1040c457f",
+    "docs/backlog/records.md": "d7b02554622b29436241c941b42fcefb7b0ec1a104fb5eceb2ad9dadfc14b814",
+    "docs/backlog/review.md": "ef87c07f91c8bf43b56d200dc3ab5d32326fcc35d13733e99a0da2cf5c094d2a",
+    "docs/backlog/steps.md": "98705e1e90b5a908a6a6cc666bf64fbdae82020a2a80cf8d11906ebb19108c8c",
+    "tools/task-claims.mjs": "f22fa98ed34d2914b3c5572353f8352a2a84a77b81e30316575f4b7d7aa17272",
+    "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
+    "tools/work-items.mjs": "e5c668687039afd52e1e9ce533c2755304909855ef05de5d971e06a0c7339bc0",
+    "tools/work-usage.mjs": "780c9ca35d2057e6ac86ca1f6168a8e315622919215dc317ae6238e875bcf023"
+  },
+  "measurements": {
+    "samples": 23,
+    "latestAt": "2026-11-24T20:50:15.050Z",
+    "operations": {
+      "adoption": {
+        "samples": 0,
+        "durationMs": {
+          "observed": 0,
+          "missing": 0,
+          "median": null
+        },
+        "conflicts": {
+          "observed": 0,
+          "missing": 0,
+          "median": null
+        },
+        "unnecessaryPrompts": {
+          "observed": 0,
+          "missing": 0,
+          "median": null
+        },
+        "repeatedContextLoads": {
+          "observed": 0,
+          "missing": 0,
+          "median": null
+        }
+      },
+      "reconciliation": {
+        "samples": 23,
+        "durationMs": {
+          "observed": 23,
+          "missing": 0,
+          "median": 286950
+        },
+        "conflicts": {
+          "observed": 10,
+          "missing": 13,
+          "median": 0
+        },
+        "unnecessaryPrompts": {
+          "observed": 6,
+          "missing": 17,
+          "median": 0
+        },
+        "repeatedContextLoads": {
+          "observed": 6,
+          "missing": 17,
+          "median": 0.5
+        }
+      }
+    }
+  },
+  "outcomes": [
+    {
+      "kind": "tool",
+      "disposition": "implemented",
+      "target": "tools/work-items.mjs",
+      "evidence": "Harness 10.21.3 reconcile (F-125-T02): publish hooks replace NERV's forked backlog-views workflow and tools/publish-views.mjs; workItems.publishHooks runs tools/backlog-recap.mjs in the read-only build job; test/publish-views.test.mjs confirms the published ledger carries the recap. Copied tools match the tag (check-harness --strict)."
+    }
+  ]
+}

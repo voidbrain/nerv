@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "parent": "B-075",
+  "id": "B-075-T02",
+  "title": "Give the F-003 checkpoint test the same Windows bound",
+  "goal": "The F-003 checkpoint test no longer times out on slow Windows runners",
+  "status": "closed",
+  "acceptance": [
+    "The cause and failed runs are in the record",
+    "The Windows job passes without reruns"
+  ],
+  "dependsOn": [
+    "B-075-T01"
+  ],
+  "resources": [
+    "test/telegram.test.ts",
+    "docs/work/records/B-075.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-19: same cause and bound as B-075-T01. Not a measurement.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 571,
+      "note": "bound"
+    }
+  ]
+}

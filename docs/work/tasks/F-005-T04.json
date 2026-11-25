@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "status": "closed",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "No credentials, real host/account/path/public registry data or private keys in git/chat/logs. Neutral fixtures; actual artifacts private outside git. New root/private encrypted key never transferred to peers.",
+  "id": "F-005-T04",
+  "title": "Implement and accept Mac default-profile service lifecycle",
+  "goal": "Deliver ownership-aware current-code Mac default-profile install/start/stop/uninstall and durable recovery; accept an identical-runtime metadata revision update while executable/schema upgrades remain F-005-T06",
+  "acceptance": [
+    "Owner selected Mac default profile; no need to ask that scope decision again. Read-only baseline: current/legacy definitions/registrations absent and configured API not responsive; recheck before effects",
+    "Implement reviewed service ownership/path/session/source checks and fenced durable receipts/resource lifecycle with uncertainty and explicit stopped recovery",
+    "Validate actual install/status/start/stop/uninstall, identical-runtime metadata revision update and partial failure/replay without deleting or overwriting another definition/profile; reject executable/schema upgrades before effects",
+    "Retain data, keys and config; do not install a second isolated-profile service, system daemon or linger",
+    "A default installation is the chosen test target, not mandatory for F-005 closure; broader platform and multi-device acceptance remains explicit"
+  ],
+  "dependsOn": [
+    "F-005-T01"
+  ],
+  "resources": [
+    "src/service.ts",
+    "src/node-lifecycle.ts",
+    "src/nodes-cli.ts",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle",
+    "src/node-bootstrap.ts",
+    "src/node-bootstrap-execution.ts",
+    "src/node-lifecycle-execution.ts",
+    "src/cli.ts"
+  ],
+  "validation": [
+    "Meaningful cross-boundary ownership/session/effect/journal/recovery tests, applicable static/build/headless checks and final CI",
+    "Explicit actual Mac service evidence with baseline, changed state and retained data; mocks and merge are not actual OS acceptance",
+    "Candidate2ab189f: independent restricted-scope review22/22 pass, no remaining code blockers. Committed failing startup/compatibility/public-mode regressions8683354 and rename regressiond330735 precede unchanged-test fixes. Local full atdf1a8e8:552 pass/2 skip, build and headless5 pass/1 skip; final rename fix targeted22/22/typecheck/conventions pass. Read-only actual Mac preflight schema6/session/settled work/current-legacy absence confirmed; no service installed yet. Final CI and actual OS acceptance pending.",
+    "2026-11-10 actual default-profile Mac acceptance passed after PR253 full CI42874665479 at6f21738, mergedtree12a9cfd identical. Injected handler exit86 after owned definition creation retained the receipt/resource/file; ordinary serve/manual-start blocked and cached replay ran no effects. Exact stopped recovery retained the file, then fenced uninstall removed only that owned definition. Actual install/status/stop/start/uninstall/reinstall and forward identical-runtime update completed, fences1..10 (one released,nine completed), no held resource. Private consistent DB/credential backup integrity verified; configuration/credential file hashes, registry rows and existing reminder identity/content/schedule retained, schema6 integrity-ok. Root-bound Tabgha online/worker reconnections observed. Additional-profile service refused. No executable/schema migration, system daemon, isolated service, logout/reboot or broader platform acceptance claimed."
+  ],
+  "escalation": [
+    "Pause for changed/foreign service ownership, live/uncertain descendants, missing session or conflicting active work",
+    "Root activation belongs to T05; service target selection does not authorize dropping trust/history or replaying physical actions"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Closed with existing dated acceptance; original per-step effort was not measured and is not reconstructed.",
+    "reviewed": "2026-11-10"
+  }
+}

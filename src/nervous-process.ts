@@ -1,0 +1,568 @@
+import { recordHealth } from './milestones.ts';
+import type { DeliveryChannel, DeliveryOutcome } from './delivery-state.ts';
+import type { WorkerItem, WorkerContext, WorkerLease } from './worker-jobs.ts';
+import type { RunReason } from './instrumentality-runs.ts';
+import { parsePrices, type UsageObservation } from './model-usage.ts';
+import { MISATO_SOURCE, OWNER_SOURCE, Store, settledOutcome } from './store.ts';
+import { createCdpBrowserDriver } from './browser-cdp-driver.ts';
+import { underTestRunner } from './slicer.ts';
+import { appendFileSync } from 'node:fs';
+import { startupWatch } from './startup-watch.ts';
+import { CoordinatorAuthorityError } from './coordinator-authority.ts';
+import type { AgencySnapshot } from './executors.ts';
+import type { Verdict } from './policy.ts';
+import { dispatchRpc, MAX_FRAME_BYTES, READY, REFUSED_BEFORE_GATE, RpcFault, startupStep } from './rpc.ts';
+import { readConfig, readScrolls } from './config.ts';
+import { Registry, type SignedRecord } from './kaji.ts';
+import { factKey } from './memory.ts';
+import { toolName } from './mcp.ts';
+import { runSessionLimitTick } from './session-limit-resume.ts';
+// B-126-T02: each start-up step is reported before it runs, and one turn of the event loop lets the report go out, so
+// a coordinator still waiting for READY at its deadline can say whether this child was loading, opening the database
+// or ticking.
+// B-126-T03: a step that blocks the main thread (an SQLite call) cannot be reported over IPC; the watch, on its own
+// thread, writes the step it is stuck in to the error output after 10 s, which a not-ready error quotes.
+const watch = startupWatch('nervous', 10_000);
+const step = async (name: string) => {
+  watch.step(name);
+  process.send?.(startupStep(name));
+  await new Promise((done) => setImmediate(done));
+};
+await step('modules loaded');
+await step('opening the database');
+// argv: database path, then the data home whose scrolls.json sets the gate rules (defaults when absent).
+const store = new Store(process.argv[2]!, process.argv[3] ? readScrolls(process.argv[3]) : undefined, {
+  ...(process.argv[3] ? { home: process.argv[3] } : {}),
+  onStep: (name) => watch.step(name),
+});
+// F-121-T02: under the test runner only, a test's Runtime records Bambu Connect hand-offs to a file.
+const bambuLaunchLog = process.argv.find((arg) => arg.startsWith('--bambu-launch-log='))?.slice(19);
+if (bambuLaunchLog && underTestRunner()) {
+  store.bambuLauncher = (importLink) => {
+    appendFileSync(bambuLaunchLog, `${importLink}\n`);
+    return { opened: true };
+  };
+}
+// F-089-T06: under the test runner only, a test's Runtime lets browser.click attach the CDP driver to the fake
+// DevTools endpoint on config.json's debugging port (the default driver refuses under the test runner).
+if (process.argv.includes('--browser-cdp-test') && underTestRunner()) {
+  store.browserDriver = (port) => createCdpBrowserDriver({ port, settleMs: 1 });
+}
+// F-016-T16: a standby, fenced or lease-expired base runs no coordinator tick (the authority check refuses it),
+// quietly; worker-scoped expiry still runs.
+const schedule = () => {
+  try {
+    store.tick();
+  } catch (e) {
+    if (!(e instanceof CoordinatorAuthorityError)) throw e;
+  }
+  store.expire();
+};
+await step('first scheduler tick');
+schedule();
+const timer = setInterval(() => {
+  try {
+    schedule();
+  } catch {
+    console.error('Nervous scheduler tick failed.');
+  }
+}, 250);
+// F-090-T04: coding sessions recorded at their usage limit are resumed once after the reset. The run is an asynchronous
+// child process, so the scheduler keeps ticking meanwhile; one pass at a time.
+let resuming = false;
+const resumeLimited = () => {
+  if (resuming) return;
+  resuming = true;
+  void runSessionLimitTick(store.sessionLimits, store.resumeIntents, {
+    owner: `serve:${process.pid}`,
+    notify: (message) => store.addBrief(message.length > 4000 ? `${message.slice(0, 3999)}…` : message).id,
+  })
+    .catch(() => console.error('Session-limit resume pass failed.'))
+    .finally(() => {
+      resuming = false;
+    });
+};
+const resumeTimer = setInterval(resumeLimited, 60_000);
+resumeLimited();
+const registry = () =>
+  new Registry(
+    store.db,
+    process.argv[3]
+      ? (() => {
+          try {
+            return readConfig(process.argv[3]!).kaji?.root;
+          } catch {
+            return undefined;
+          }
+        })()
+      : undefined,
+  );
+// F-021: granted MCP tools as the gate knows them (effect class from the grant), read from config when asked.
+const external = () => {
+  try {
+    const t = process.argv[3] ? readConfig(process.argv[3]).tools : undefined;
+    return (t?.grants ?? []).map((g) => ({
+      name: toolName(g.server, g.tool),
+      effect: g.effect,
+      eva: `eva-${g.eva}` as const,
+    }));
+  } catch {
+    return [];
+  }
+};
+process.on('message', (value: unknown) => {
+  if (Buffer.byteLength(JSON.stringify(value)) > MAX_FRAME_BYTES) {
+    process.exitCode = 1;
+    stop();
+    return;
+  }
+  void dispatchRpc(value, (method, params) => {
+    switch (method) {
+      case 'instrumentality.claim':
+        return store.instrumentality.claim(params.slot as string, params.now as string);
+      case 'instrumentality.finish':
+        return store.instrumentality.finish(
+          params.id as string,
+          params.status as 'failed' | 'completed' | 'skipped',
+          params.reason as RunReason | null,
+          params.now as string,
+        );
+      case 'instrumentality.latest':
+        return store.instrumentality.latest();
+      case 'dashboard.revision':
+        return store.dashboardRevision();
+      case 'usage.begin':
+        return store.usage.begin(params.operation as string);
+      case 'usage.finish':
+        store.usage.finish(
+          params.id as string,
+          params.observation as UsageObservation | null,
+          parsePrices(params.prices),
+        );
+        return true;
+      case 'usage.page':
+        return store.usage.page(params.before as number | undefined, params.limit as number | undefined);
+      case 'runtime.ping':
+        return { role: 'nervous', pid: process.pid };
+      case 'runtime.doctor':
+        return store.doctor();
+      case 'reminders.list': {
+        const p = store.reminderPage(0, 50);
+        if (p.next) throw new Error('Use reminders.page.');
+        return p.items.sort((a, b) => a.due.localeCompare(b.due));
+      }
+      case 'reminders.page':
+        return store.reminderPage(params.before as number | undefined, params.limit as number | undefined);
+      case 'inbox.history':
+        return store.inboxHistory(params.before as number | undefined, params.limit as number | undefined);
+      case 'dashboard.history':
+        return store.dashboardHistory(params.since as string);
+      case 'reminders.pending':
+        return store.pendingReminders();
+      case 'lists.show':
+        return store.showList(params.list as string);
+      case 'lists.toggle':
+        return store.toggleListItem(params.itemId as string);
+      case 'reminders.add':
+        try {
+          return store.add(params.title as string, params.due as string, new Date(), {
+            ...(params.kind !== undefined ? { kind: params.kind as string } : {}),
+            ...(params.end !== undefined ? { end: params.end as string | null } : {}),
+          });
+        } catch {
+          throw new Error('Invalid reminder.');
+        }
+      case 'reminders.update': {
+        let r;
+        try {
+          r = store.update(params.id as string, {
+            ...(params.title !== undefined ? { title: params.title as string } : {}),
+            ...(params.due !== undefined ? { due: params.due as string } : {}),
+            ...(params.kind !== undefined ? { kind: params.kind as string } : {}),
+            ...(params.end !== undefined ? { end: params.end as string | null } : {}),
+          });
+        } catch {
+          throw new Error('Invalid reminder.');
+        }
+        return r ?? null;
+      }
+      case 'reminders.cancel':
+        return store.cancel(params.id as string);
+      case 'push.key':
+        return store.pushPublicKey();
+      case 'push.subscribe':
+        store.savePushSubscription({
+          endpoint: params.endpoint as string,
+          p256dh: params.p256dh as string,
+          auth: params.auth as string,
+          ...(params.userAgent ? { userAgent: params.userAgent as string } : {}),
+        });
+        return { ok: true };
+      case 'push.unsubscribe':
+        return { ok: store.deletePushSubscription(params.endpoint as string) };
+      case 'deliveries.record':
+        return store.recordDelivery(
+          params.id as string,
+          params.channel as DeliveryChannel,
+          params.outcome as DeliveryOutcome,
+          params.reason as string | undefined,
+        );
+      case 'deliveries.fallback':
+        return store.pushFallback(params.deadlineMs as number);
+      case 'push.opened':
+        return store.pushOpened(params.receipt as string);
+      case 'deliveries.state':
+        return store.deliveryState(params.id as string);
+      case 'push.status': {
+        const subs = store.listPushSubscriptions();
+        return { subscribed: subs.length > 0, count: subs.length };
+      }
+      case 'inbox.list': {
+        const p = store.inboxHistory(0, 50);
+        if (p.next) throw new Error('Use inbox.history.');
+        return p.items;
+      }
+      case 'inbox.brief':
+        return store.addBrief(params.message as string, new Date(), params.day as string | undefined);
+      case 'inbox.lastBrief':
+        return store.lastBrief();
+      case 'approvals.expired':
+        return store.expiredApprovals(params.since as string);
+      case 'approvals.pendingIds':
+        return store.pendingApprovalIds(params.ids as string[]);
+      case 'approvals.pending':
+        return store.approvals(params.limit as number | undefined);
+      case 'batteries.cards':
+        return store.batteryCards();
+      case 'batteries.register':
+        return store.registerBattery(params as unknown as import('./batteries.ts').RegisterBatteryInput);
+      case 'approvals.decide':
+        return settledOutcome(
+          store.decide(
+            params.id as string,
+            params.decision as 'approve' | 'reject' | 'edit',
+            params.source as string,
+            params.useSuggestedFix === true ? { useSuggestedFix: true } : undefined,
+          ),
+        );
+      case 'events.page':
+        return store.events(
+          params.sortieId as string,
+          params.after as number | undefined,
+          params.limit as number | undefined,
+        );
+      case 'sorties.list':
+        return store.sorties(
+          params.limit as number | undefined,
+          params.before as string | undefined,
+          params.q as string | undefined,
+        );
+      case 'sorties.get':
+        return store.sortie(params.id as string);
+      case 'sorties.closedSince':
+        return store.closedSince(params.since as string);
+      case 'pilots.unmatched':
+        return store.unmatched(params.domain as string, params.since as string);
+      case 'actions.shadowVote':
+        return store.shadowVote(params.sortieId as string, params.actionId as string, {
+          seat: params.seat as string,
+          vote: params.vote as 'approve',
+          reason: params.reason as string,
+          ...(typeof params.confidence === 'number' ? { confidence: params.confidence } : {}),
+        });
+      case 'sorties.explain':
+        return store.explain(params.ref as string);
+      case 'sorties.spear':
+        return store.spear(params.id as string, params.reason as string);
+      case 'context.intake':
+        return store.ledger.intake(
+          params.sortieId as string,
+          params.source as string,
+          params.trust as 'trusted' | 'tainted',
+        );
+      case 'watch.poll':
+        return store.watchPoll();
+      case 'watch.recover':
+        return store.watchRecover();
+      case 'watch.claim':
+        return store.watchClaim();
+      case 'watch.get':
+        return store.watchContext(params.sortieId as string);
+      case 'watch.plan':
+        return store.watchPlan(params.sortieId as string);
+      case 'watch.finish':
+        return store.watchFinish(params.sortieId as string, params.status as 'done' | 'failed', params.reply as string);
+      case 'sorties.open':
+        return store.ledger.openSortie(
+          params.source === 'misato'
+            ? MISATO_SOURCE
+            : params.source === 'instrumentality'
+              ? 'instrumentality'
+              : params.source === 'marduk'
+                ? 'marduk'
+                : OWNER_SOURCE,
+          params.title as string,
+          'trusted',
+        );
+      case 'sorties.finish': {
+        const id = params.sortieId as string;
+        if (params.reply)
+          store.ledger.reply(
+            id,
+            params.reply as string,
+            new Date(),
+            typeof params.durationMs === 'number' ? params.durationMs : undefined,
+          );
+        return params.status ? store.ledger.close(id, params.status as 'done' | 'failed') : false;
+      }
+      case 'sorties.remoteResults':
+        return store.ledger.remoteResults(params.sortieId as string);
+      case 'sorties.timings':
+        return store.timingSummary(params.since as string);
+      case 'misato.note':
+        return store.ledger.note(params.sortieId as string, params.kind as 'misato.step', params.payload as never);
+      case 'misato.resumable':
+        return store.ledger.resumable();
+      case 'misato.interrupted':
+        return store.ledger.interrupted(params.before as string);
+      case 'misato.closeInterrupted':
+        return store.ledger.closeInterrupted(params.sortieId as string, params.reply as string);
+      // The owner's own changes (dashboard): source owner, every change in the fact's history.
+      case 'memory.list':
+        return store.memory.list(params.limit as number | undefined);
+      case 'memory.add':
+        return store.memory.add(params.text, 'owner');
+      case 'memory.edit':
+        return store.memory.edit(params.id as string, params.text, 'owner') ?? null;
+      case 'memory.forget':
+        return store.memory.forget(params.id as string, 'owner');
+      case 'memory.share':
+        return store.memory.share(params.id as string, params.shareable as boolean, 'owner') ?? null;
+      case 'memory.history':
+        return store.memory.historyOf(params.id as string);
+      // Kaji registry for the coordinator's link: the root is re-read from config so an import while running applies.
+      // F-083-T06: one saved document by exact title or id, else the only one a recall finds; null when unclear.
+      case 'documents.find': {
+        const q = params.query as string;
+        const exact = store.documents.get(q);
+        const found = exact ? [exact] : store.documents.recall(q);
+        const doc = exact ?? (found.length === 1 ? found[0]! : null);
+        if (!doc) return null;
+        const photos = store.photos.list('recipe', doc.id).map((p) => ({
+          id: p.id,
+          url: p.url,
+          ...(p.caption ? { caption: p.caption } : {}),
+          stepIndex: p.stepIndex,
+        }));
+        return { title: doc.title, body: doc.body, ...(photos.length ? { photos } : {}) };
+      }
+      case 'kaji.bases':
+        return registry().bases();
+      case 'kaji.records':
+        return registry().records();
+      case 'kaji.lastSeen':
+        return registry().lastSeen();
+      case 'kaji.main':
+        return registry().main() ?? null;
+      case 'kaji.outboxCancels':
+        return store.cancelledWorkerOutbox();
+      case 'kaji.outboxAttempt':
+        store.attemptWorkerOutbox(params.id as string);
+        return true;
+      case 'kaji.outboxHeld':
+        return store.heldWorkerOutbox(params.before as number | undefined);
+      case 'kaji.outbox':
+        return store.outbox();
+      case 'kaji.outboxProgress':
+        return store.outboxProgress(params.id as string, params.result, params.said as { base: string; text: string });
+      case 'kaji.outboxDone':
+        return store.outboxDone(
+          params.id as string,
+          params.result,
+          params.said as { base: string; text: string } | undefined,
+        );
+      case 'worker.open': {
+        store.assertWorkerAuthority(params.owner as string, params.key as string, params.ownerKey as string);
+        const opened = store.workerJobs.open(
+          params.owner as string,
+          params.session as string,
+          Date.now(),
+          params.key as string,
+          params.ownerKey as string,
+        );
+        store.expire();
+        return opened;
+      }
+      case 'worker.close':
+        store.workerJobs.close(params.owner as string, params.session as string);
+        store.expire();
+        return true;
+      case 'worker.claim':
+        store.assertWorkerAuthority(params.owner as string, params.key as string, params.ownerKey as string);
+        return store.workerJobs.claim(
+          params.owner as string,
+          params.item as unknown as WorkerItem,
+          params.context as WorkerContext | undefined,
+          Date.now(),
+          params.key as string,
+          params.ownerKey as string,
+        );
+      case 'worker.cancel':
+        store.assertWorkerAuthority(params.owner as string, params.key as string, params.ownerKey as string);
+        return store.cancelWorker(params.owner as string, params.id as string, params.reason as string, 'coordinator');
+      case 'worker.finish':
+        store.workerJobs.finish(params.lease as unknown as WorkerLease, params.result);
+        return true;
+      case 'kaji.add': {
+        const r = registry();
+        let added = 0;
+        for (const rec of params.records as SignedRecord[]) {
+          try {
+            if (r.add(rec) === 'added') added++;
+          } catch {
+            /* a record not signed by our root is dropped */
+          }
+        }
+        return added;
+      }
+      case 'milestones.health':
+        return (
+          recordHealth(
+            store.db,
+            params.scope as 'base' | 'route',
+            params.subject as string,
+            params.ok as boolean,
+            params.at as string,
+          ) ?? null
+        );
+      case 'kaji.seen':
+        return registry().seen(params.updates as Record<string, string>);
+      case 'memory.lastRequest':
+        return store.ledger.lastRequestAt();
+      case 'memory.episodes':
+        return store.memory.episodes(params.limit as number | undefined);
+      case 'memory.exchanges':
+        return store.ledger.exchangesBetween(params.since as string, params.until as string);
+      case 'memory.known': {
+        // Known = already a fact, or already waiting on a memory.remember card: either way no second card.
+        const waiting = store
+          .approvals(5)
+          .filter((a) => a.card.tool === 'memory.remember')
+          .map((a) => String(a.card.args.text ?? ''));
+        const known = new Set([...store.memory.list(200).map((f) => f.text), ...waiting].map(factKey));
+        return (params.texts as string[]).filter((t) => known.has(factKey(t)));
+      }
+      case 'memory.saveEpisode':
+        return store.saveEpisode(params as never);
+      case 'memory.recall': {
+        // Facts first, then up to two of Instrumentality's summaries (F-022); summaries come from the owner's own
+        // conversations, so they are local-only and never offered to the cloud route.
+        const text = params.text as string;
+        return [
+          ...store.memory
+            .recall(text)
+            .map((f) => ({ id: f.id, text: f.text, shareable: f.shareable, tainted: f.tainted, source: f.source })),
+          ...store.memory.recallEpisodes(text, 2).map((e) => ({
+            id: e.id,
+            text: e.summary,
+            shareable: false,
+            tainted: e.tainted !== false,
+            source: 'episode:' + e.id,
+            kind: 'summary',
+            when: e.until.slice(0, 10),
+          })),
+        ];
+      }
+      case 'misato.question':
+        return store.ledger.question(params.conversation as string);
+      case 'misato.ask':
+        return store.ledger.ask(
+          params.sortieId as string,
+          params.text as string,
+          params.conversation as string,
+          params.forwarded as { id: string; name: string } | undefined,
+          new Date(),
+          typeof params.durationMs === 'number' ? params.durationMs : undefined,
+        );
+      case 'misato.answer':
+        return store.ledger.answer(params.conversation as string, params.sequence as number, params.text as string);
+      case 'misato.context':
+        return store.ledger.conversation(params.conversation as string);
+      case 'misato.claim':
+        return store.ledger.claimResume(params.sortieId as string);
+      case 'worker.refuseApproval':
+        return store.refuseWorkerApproval(params.id as string, params.reason as string);
+      case 'actions.authorizeApproved':
+        return store.authorizeApproved(params.sortieId as string, params.actionId as string);
+      case 'actions.finished':
+        return store.finishedExternal(
+          params.sortieId as string,
+          params.actionId as string,
+          params.tool as string,
+          typeof params.error === 'string' ? { error: params.error } : { text: String(params.text ?? '') },
+          typeof params.durationMs === 'number' ? params.durationMs : undefined,
+        );
+      case 'actions.preview':
+        store.watchContext(params.sortieId as string);
+        store.ledger.setExternal(external());
+        return store.ledger.preview(params.sortieId as string, params.tool as string);
+      case 'actions.act':
+        store.ledger.setExternal(external());
+        return store
+          .prepareProposal({
+            tool: params.tool as string,
+            args: params.args as Record<string, unknown>,
+            stage: params.stage as 'production',
+            ...(params.casper ? { casper: params.casper as Verdict } : {}),
+            ...(Array.isArray(params.extras) ? { extras: params.extras as Verdict[] } : {}),
+          })
+          .catch((e: unknown) => {
+            throw new RpcFault(REFUSED_BEFORE_GATE, e instanceof Error ? e.message.slice(0, 500) : 'Refused.');
+          })
+          .then((proposal) =>
+            settledOutcome(
+              store.runAction(
+                params.sortieId as string,
+                proposal,
+                params.worker as unknown as WorkerLease | undefined,
+                params.agency as AgencySnapshot | undefined,
+              ),
+            ),
+          );
+      case 'inbox.page':
+        return store.inboxPage(
+          params.after as number | undefined,
+          params.limit as number | undefined,
+          params.afterId as string | undefined,
+        );
+    }
+  })
+    .then((reply) => {
+      if (reply && process.connected) {
+        if (Buffer.byteLength(JSON.stringify(reply)) > MAX_FRAME_BYTES)
+          process.send?.({
+            jsonrpc: '2.0',
+            id: reply.id,
+            error: { code: -32005, message: 'Response exceeds IPC bound; pagination required.' },
+          });
+        else process.send?.(reply);
+      }
+    })
+    .catch(() => {
+      console.error('Nervous IPC failed.');
+    });
+});
+let stopped = false;
+function stop() {
+  if (stopped) return;
+  stopped = true;
+  clearInterval(timer);
+  clearInterval(resumeTimer);
+  store.close();
+  if (process.connected) process.disconnect();
+}
+process.on('disconnect', stop);
+process.once('SIGTERM', stop);
+process.once('SIGINT', stop);
+watch.done();
+process.send?.(READY);

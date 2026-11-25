@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-100-T02",
+  "parent": "F-100",
+  "title": "Owner decides the analysis scope",
+  "goal": "The owner confirms the approach and supplies a real log",
+  "status": "closed",
+  "acceptance": [
+    "Decision recorded in F-100"
+  ],
+  "dependsOn": [
+    "F-100-T01"
+  ],
+  "resources": [
+    "docs/design/fpv-and-cooking-plan-2026-11-14.md",
+    "docs/work/records/F-100.md"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "ownerLink": "docs/design/fpv-and-cooking-plan-2026-11-14.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Owner decision 2026-11-15: decode locally with the WASM blackbox-log parser inside Node (no Python, no native binary, nothing uploaded); the owner records the real log with debug_mode GYRO_SCALED and bidirectional DShot (eRPM) over a hover-to-full-throttle sweep (F-100-T04). No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0,
+    "ownerKind": "decision"
+  }
+}

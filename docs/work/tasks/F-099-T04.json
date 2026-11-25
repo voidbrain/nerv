@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "F-099",
+  "id": "F-099-T04",
+  "status": "implemented",
+  "title": "Read a diyfpv.com build through the browser adapter",
+  "goal": "NERV reads the parts and wiring of a diyfpv.com build link",
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Owner builds stay local-only; tests use invented builds.",
+  "acceptance": [
+    "The build link is read locally through the F-089 browser adapter into the saved build note, read-only",
+    "Missing or changed page structure fails with a message, never a guessed part or wire; invented test pages"
+  ],
+  "dependsOn": [
+    "F-099-T03",
+    "F-089-T02"
+  ],
+  "resources": [
+    "docs/design/fpv-build-knowledge-feasibility.md",
+    "docs/work/records/F-099.md"
+  ],
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "reviewed": "2026-11-15",
+    "basis": "Estimated 2026-11-15 at agent speed (harness 8.14.3: implementation steps 0.75 h, decision revisions 0.5 h). Not a measurement.",
+    "estimate": "0.75 h",
+    "agentHours": 0,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75,
+    "ownerHours": 0,
+    "actualAgentHours": 1.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 690,
+      "note": "implementation"
+    }
+  ]
+}

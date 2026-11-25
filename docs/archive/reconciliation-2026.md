@@ -1,0 +1,640 @@
+# Backlog reconciliation log 2026
+
+## 2026-11-22 — main `ca35645`
+
+[PR #660](https://github.com/voidbrain/nerv/pull/660) reconciles PRs #657–#659, archives 23 Closed records into `docs/archive/backlog-2026.md`, updates recaps, and moves older evidence from `F-008`, `F-016`, `F-021`, and `F-049` into `docs/archive/evidence-2026.md`.
+
+## 2026-11-22 — main `0194d44`
+
+PR #656 refreshed all 8 `nerv-system-flows/*` and 4 `multi-step-agent/*` entries in `evals/gauntlet/ledger.json` against `0194d44` (0 pending Gauntlet cases remaining).
+
+## 2026-11-22 — main `ba5f9bc`
+
+PRs #646–#652 merged on green CI (#646–#648 docs-only; #649–#652 full CI). They advanced F-078, F-101, F-107, F-108, closed B-073–B-104/F-027, and completed F-112 (closed). Reconciled by PR #653.
+
+## 2026-11-22 — main `c1ad6b7`
+
+PRs #636, #637, #635, #639–#644 and #638 merged on green CI. They advanced F-116, F-084, F-091, F-083, F-114, F-078, B-106 and F-006; their owning records and task evidence are current. Reconciled by PR #645.
+
+## 2026-11-22 — main `c8c6b6c`
+
+PR #631 merged on green CI and closed F-006-T14. PRs #621–#630 and #632–#634 remain reconciled by the preceding entry; records are current.
+
+## 2026-11-22 — main `18cf52a`
+
+PRs #621–#630 and #632–#634 merged on green CI. #622 reconciled B-091; #623 closed B-086; #621/#627–#629 advanced F-114; #624–#626 advanced F-056; #630/#634 advanced F-078/F-116; #632 advanced F-084; #633 advanced F-087. Records are current.
+
+## 2026-11-20 — main `5c6e5a0`
+
+PRs #586–#597 reconciled: 11 of 12 own CI runs green; #587 failed Windows/full-suite, while later combined #595 and #597 passed all five jobs. #591 belongs to B-082, #596 to F-110 and #597 to F-008. Full audit opened B-106 for the lint-tooling advisory.
+
+## 2026-11-20 — main `224e0e8`
+
+PRs #584 and #585 merged on green CI. F-079 closed (F-079-T02, run 44732108271); F-027-T02 waits on its confinement review. Five device-run steps re-estimated to 1.5 h; F-111–F-113 opened from the Agentica review.
+
+## 2026-11-20 — main `53b7671`
+
+PRs #579, #580, #581, #582 and #583 merged on green CI. #579 reconciled the backlog (docs-only); #580 implemented F-049-T09, #581 implemented F-049-T10, #582 fixed B-096, and #583 implemented F-110-T03.
+
+## 2026-11-20 — main `c2150218`
+
+PRs #573, #575, #577 and #578 merged on green CI. F-062 gets F-062-T07, the owner's real restore drill; F-005-T15 re-estimated to 1.25 h.
+
+B-102, B-103 and B-104 stay implemented until seen: B-102 on NERV-01's Skills tab after its next update, B-103 and B-104 on CI without reruns. F-062 had every step closed but no real drill, and off-host copies are not configured on NERV-01. Reconciled in [PR #579](https://github.com/voidbrain/nerv/pull/579).
+
+## 2026-11-20 — main `45be5940`
+
+Harness v10.1.0 reconciled in [PR #575](https://github.com/voidbrain/nerv/pull/575): steps tables show Depends on and Unlocks; `check:work` warns on blockers named only in prose (two false positives on its first run, B-068 and F-012, left as they are).
+
+## 2026-11-19 — main `64db43a`
+
+PRs #558, #559, #561, #562, and #564 merged on green CI (#558: F-049-T07 / F-049-T14; #559: B-101; #561: F-083-T06; #562: F-106-T01; #564: F-016-T05). Marked F-049-T07, F-083-T06, F-106-T01, and F-016-T05 verified, unblocking F-016-T06 and F-106-T03. Reconciled in PR #565.
+
+## 2026-11-18 — main `3b02485`
+
+PRs #529–#530 merged (docs only; the full suite is skipped by design). #530 closed F-005-T28, B-093, B-094-T01 and F-107-T01 on live checks. B-095-T01 implemented; B-096, F-108, F-109 and F-110 opened from the owner's dashboard review. Reconciled in PR #531.
+
+## 2026-11-18 — main `228ab45`
+
+PRs #525–#528 merged on green CI. Closed F-005-T11, F-005-T27, F-005-T37, F-006-T13, F-085 and F-097. F-027-T02 also waits on F-049-T05. Reconciled in PR #529.
+
+B-092, B-093 and B-094-T01 stay Implemented until their live checks on NERV-01, which runs #527 since 22:11. F-049-T05's escape tests prove the network confinement F-027-T02 needs.
+
+## 2026-11-18 — main `d8eeba7`
+
+PRs #513–#524 merged on green CI (#513, #514, #520 after reruns). Closed B-077, B-078, B-079, B-083, B-084, B-089, F-105, F-106-T02; B-085, B-088 after review; F-009 and F-005-T26 (Calvary). Reconciled in PR #525.
+
+## 2026-11-18 — main `ec1ed40`
+
+Owner decision: 22 owner steps move to the agent (PR #514); owner remaining 21.75 h → 11.75 h. #508–#512 merged on green CI after reruns; B-073 fixed; B-074 and B-076 bounds raised.
+
+## 2026-11-18 — main `6c9e27c`
+
+Merged PRs #504–#507, all CI green (#507's windows job passed on rerun: B-073). B-071 verified by #504's CI and closed; F-009-T04 closed; B-073 fixed (identity query through the adapter runner).
+
+Per-PR mapping: #504: B-071 (closed); #505: B-057 (B-057-T03 closed), B-072 opened; #506: B-070 (B-070-T01); #507: B-072 (B-072-T01), B-073 opened. B-072 and B-073 close once a Windows job passes without reruns. Reconciled in PR #508.
+
+## 2026-11-18 — main `1b93fca`
+
+Merged PRs #499–#503, all CI green. Harness 10.0.0 reconciled: owner's-turn Next lines show 🧑 with their page; every open record's Next line comes from its steps (B-071). Archived F-023, F-081, F-095, F-104.
+
+Per-PR mapping: #499: reconciliation; #500: F-098 (F-098-T02); #501: F-102 (F-102-T02); #502: F-104 closed, F-105 and F-106 opened; #503: B-069 (B-069-T01), B-070 opened. Steps implemented by #500, #501 and #503 keep their remaining verification. Reconciled in PR #504.
+
+## 2026-11-16 — main `7a48fb8`
+
+Merged PRs #457–#498 except audit-only #487–#488; all 40 CI green. Added 34 PR references; #457 (harness maintenance) and #482 (test stability) have no product record. Reconciled in PR #499.
+
+Per-PR mapping: #457: no record; #458: F-023; #459: B-057, F-081; #460: F-006; #461: F-006; #462: F-048, F-083, F-084; #463: B-067; #465: B-057; #464: B-066; #466: F-006; #467: B-068; #469: F-079; #471: F-048; #470: F-016; #468: F-006; #472: F-008; #477: F-078; #475: F-078; #484: F-101; #482: no record; #473: F-012; #474: F-049; #476: F-008; #479: F-082; #481: F-083; #490: F-085; #480: F-086; #483: F-082; #493: F-012, F-090; #486: F-100; #492: F-088; #489: F-083; #491: F-087; #494: F-084; #485: F-099; #496: F-092; #498: F-103; #497: F-093; #478: F-095; #495: F-089.
+- Current work ledger, reviewed 12 November 2026 against main `ed580bc`. PRs #310 (F-043) and #311 (F-005 procedure, B-052) passed CI; harness 6.3.0–7.1.1 reconciled: worktree rule, effort sized from remaining agent hours, Status with its colour, human actions link their procedure. F-007 and F-008 lowered to P3 (owner, PR #313).
+
+- Current work ledger, reviewed 12 November 2026 against main `1f714bc`. PR #309 (harness v6.2.0) passed CI; F-043 reminder time kinds implemented (PR #310); B-052 opened: owner actions link their procedure (F-005 T13 procedure now a page).
+
+- Current work ledger, reviewed 12 November 2026 against main `5700ccf`. PRs #302, #304 and #305 passed CI; F-054-T04 closed. B-043 closed: five full Windows runs after the fix with no queue saturation.
+
+- Current work ledger, reviewed 12 November 2026 against main `5bc2566`. PRs #297–#303 passed CI (F-004-T02–T05 and F-054-T01 closed); F-006-T01 awaits owner agreement; F-004-T05 merged; F-004-T06 awaits owner phone install and push acceptance. Open steps re-estimated at 0.6x from calibration in PR #302 (harness 6.1.0; estimation.since 2026-11-12); F-004 and F-054 left to their running sessions.
+
+- Current work ledger, reviewed 12 November 2026 against main `546f64c`. PRs #295–#296 passed CI; F-006-T01 awaits owner agreement; harness 6.1.0 reconciled in PR #297 (mechanical review: copies and template diff match): estimate calibration reports bugs and features apart.
+
+- Current work ledger, reviewed 12 November 2026 against main `b0cedee`. PRs #276–#280 and #282 passed all five CI jobs; #283 (records only) passed with full-suite skipped. B-046 awaits an owner choice; B-021 fixed in #281.
+
+- Current work ledger, reviewed 12 November 2026 against main `f96b6e6`. PRs #276, #278, #279 (B-046) and #277 (harness 5.6.0; #275 superseded) passed all five CI jobs. B-046 mechanism (3) stays open.
+
+- Current work ledger, reviewed 11 November 2026 against main `c629528`. PR #274 CI 43063434882 passed. Harness 5.4.0 and Gauntlet 0.7.1 reconciled; F-074-T09 has 7 cases pending, F-074-T10 is next.
+
+- Current work ledger, reviewed 9 November 2026 against main `5c7997b`. PR #239 CI42624083120 passed all five jobs/full-suite. F-026-T01 admission/gate limits accepted; runtime and quiet-hour delivery T02 is next. F-027 enforced egress still awaits F-049.
+
+- Current work ledger, reviewed 9 November 2026 against main `cd8142d`. PR #238 CI42621969384 passed scoped checks; full-suite skipped. F-027-T01 accepted, B-047 archived; F-027 egress awaits F-049. Owner continued backlog; F-026 is next.
+
+- Current work ledger, reviewed 9 November 2026 against main `81b1106`. PR #237 CI42614209749 passed all five jobs/full-suite. F-027-T01 provenance is accepted; enforced egress awaits F-049 isolation. B-047 fixture expiry is closed.
+
+- Current work ledger, reviewed 9 November 2026 against main `ff982f4`. PR #236 CI42609550077 passed plan, validate, Windows and native-macos; full-suite skipped. F-074 adoption acceptance is reconciled; model/load campaigns remain unclaimed.
+
+- Current work ledger, reviewed 9 November2026 against main `c5323e5`. PR #235 CI42608578429 passed all five jobs/full-suite. Gauntlet0.3 environment adoption T03 is accepted; model/load campaigns and live native acceptance remain unclaimed.
+
+- Current work ledger, reviewed 9 November 2026 against main `12a24ef`. PR #228 CI42581988579 passed scoped checks; full-suite skipped. F-023-T02 native cards implemented with read-only authority; durable delivery and live acceptance remain open.
+
+- Current work ledger, reviewed 9 November 2026 against main `3ec54b9`. PR #227 CI42581319261 passed scoped checks; full-suite skipped. Staged qualification design integrated; F-023-T01 native authority contract complete, T02 ready.
+
+- Current work ledger, reviewed 9 November 2026 against main `cb06e90`. PR #226 CI42574859898 passed scoped checks; full-suite skipped. Owner resumed backlog work; F-074 smoke remains unexecuted. Combination/host qualification is accepted design under F-006/F-045.
+
+- Current work ledger, reviewed 9 November 2026 against main `8fab24c`. PR #225 CI42573854325 passed all five jobs/full-suite. F-074-T01 adoption complete; owner paused before live Gemma T02 and backlog continuation.
+
+Current work ledger, reviewed 8 November 2026 against main `7d3d091`. PR #220 CI 42522846769 passed scoped checks; full-suite skipped. Target-schema restoration and retirement recheck are recorded under Other changes.
+
+Current work ledger, reviewed 8 November 2026 against main `c7f4f84`. PR #219 CI 42521677029 passed all five jobs including full-suite. Documentation organization is complete; model qualification and remaining task decomposition stay explicit.
+
+Current work ledger, reviewed 8 November 2026 against main `30f8de3`. PR #217 CI 42518246797 passed all five jobs including full-suite. Documentation reorganization and review-index maintenance are recorded below.
+
+Current work ledger, reviewed 8 November 2026 against main `081d166`. PR #216 CI 42517545579 passed all five jobs including full-suite. F-072 adoption and shared registry setup complete; runtime/model/device acceptance remains under its owning records.
+
+Current work ledger, reviewed 8 November 2026 against main `1869340`. PR #215 CI 42504431206 passed applicable scoped checks; full-suite skipped. F-011/F-015 retain their recorded human/device acceptance limits.
+
+Current work ledger, reviewed 8 November 2026 against main `a49c6da`. PR #213 CI 42489975323 passed all five jobs including full-suite. F-011/F-015 owner chose this Mac for companion UI only; service host and signing deferred.
+
+Current work ledger, reviewed 8 November 2026 against main `467667d`. PR #212 CI 42489231643 passed targeted checks; full-suite skipped. F-011 awaits native acceptance/signing selection; F-015 is next.
+
+Current work ledger, reviewed 8 November 2026 against main `1db9bb9`. PR #211 CI 42488651230 passed scoped checks; full-suite skipped. F-005 local Mac acceptance reconciled; queue work continues with F-011.
+
+Current work ledger, reviewed 8 November 2026 against main `958d82c`. PR #210 CI 42488053148 passed all five jobs, including full-suite. F-005 isolated local Mac bootstrap completed; pairing/service and remote acceptance remain open.
+
+Current work ledger, reviewed 8 November 2026 against main `4a5e7af`. PR #209 CI 42480862698 passed scoped checks with full-suite skipped; F-071/B-045 closure reconciled. Owner selected F-005; local Mac first.
+
+Current work ledger, reviewed 8 November 2026 against main `a2f3496`. PR #208 CI 42480170710 passed all five jobs, including full-suite; F-071 and B-045 verified and closed. Scoped verification is adopted.
+
+Current work ledger, reviewed 8 November 2026 against main `3d36ec8`. PR #207 runs 42464810366/42464807017 passed all six jobs; F-014 closure reconciled. F-071 owns scoped verification adoption.
+
+Current work ledger, reviewed 8 November 2026 against main `dde59f6`. PR #206 runs 42464014727/42464012081 passed all six jobs; F-014 verified and closed. Production-host acceptance remains F-009.
+
+Current work ledger, reviewed 8 November 2026 against main `092b8a9`. PR #205 runs 42427150716/42427146445 passed all six jobs; closure and queue reconciled. Owner selected F-014 next.
+
+Current work ledger, reviewed 8 November 2026 against main `7ccc692`. PR #204 runs 42426712622/42426709846 passed all six jobs; B-041 verified and closed. F-009 awaits a target-host choice; F-014 is the next agent-ready queue record.
+
+Current work ledger, reviewed 8 November 2026 against main `c4d3c18`. PR #203 runs 42425786736/42425784575 passed all six jobs; B-042 verified and closed. B-041 is next from backlog-queue.
+
+Current work ledger, reviewed 8 November 2026 against main `b196e59`. PR #202 runs 42424820318/42424816395 passed all six jobs; F-029 verified and closed with failed model evidence retained in B-021. Next: B-042, then backlog-queue.
+
+Current work ledger, reviewed 8 November 2026 against main `fa12753`. PR #201 runs 42421593024/42421597561 passed validate, windows and native-macos; B-044 verified and closed. F-029 evaluation implementation precedes B-042 per owner order.
+
+Earlier reconciliation notes moved out of the [backlog](../BACKLOG.md) header, newest first, as written at the time. The header keeps only the latest reconciliation; when it moves to a newer `main`, the sentence it replaces is added at the top of this list. Dated evidence, not current status.
+
+- Current work ledger, reviewed 7 November 2026 against main `30642bb`. PR #200 runs 42404230022/42404234032 passed validate, windows and native-macos; F-057 verified and closed. Owner resumed F-029, followed by B-042, after the advice-route correction.
+- Current work ledger, reviewed 7 November 2026 against main `eb54b23`. PR #199 runs 42402931969/42402936170 passed validate, windows and native-macos. F-053 accepted by owner and closed; F-057 uses Git-verified unique IDs. F-029 paused at owner request.
+- Current work ledger, reviewed 7 November 2026 against main `49c6f23`. PR #196 runs 42399703878/42399707747 passed validate, windows and native-macos; the earlier Chrome startup failure passed its explicit retry. F-053 owner feedback requests stronger, more frequent CRT variants.
+- Current work ledger, reviewed 7 November 2026 against main `b731b0a`. PR #195 runs 42398922334/42398926076 passed validate, windows and native-macos. B-040 verified and closed; CRT awaits owner look, brief and stale-card investigations remain open.
+- Current work ledger, reviewed 7 November 2026 against main `d307175`. PR #194 runs 42398004525/42398009143 passed validate, windows and native-macos. Harness v4.0.0 adoption verified; F-069 closed and archived.
+- Current work ledger, reviewed 7 November 2026 against main `4d9d699`. PR #193 runs 42380376754/42380371599 passed validate, windows and native-macos. Harness v4.0.0 published upstream; adoption and operator-flow findings recorded.
+- Current work ledger, reviewed 7 November 2026 against main `89925ba`. PR #192 runs 42379685099/42379679262 passed validate, windows and native-macos; F-003 verified, closed and archived. B-021/F-029 assessment distinguishes agent-run acceptance from Human/device evidence.
+- Current work ledger, reviewed 7 November 2026 against main `ad08865`. PR #191 runs 42378326649/42378322818 passed validate, windows and native-macos; F-019 verified, closed and archived. F-003 is next, as requested.
+- Current work ledger, reviewed 7 November 2026 against main `92be8f8`. PR #190 runs 42376407868/42376404642 passed validate, windows and native-macos; F-063 closure reconciled. Owner order: F-019, then F-003.
+- Current work ledger, reviewed 7 November 2026 against main `756eb13`. PR #189 runs 42376072311/42376068960 passed validate, windows and native-macos; F-063 backend accounting verified, closed and archived. F-019 retains dashboard display.
+- Current work ledger, reviewed 7 November 2026 against main `89eb167`. PR #188 runs 42373559974/42373555940 passed validate, windows and native-macos; dependency adoption closure reconciled. F-063 implementation in progress.
+- Current work ledger, reviewed 7 November 2026 against main `951ff55`. PR #187 runs 42373292192/42373290475 passed validate, windows and native-macos; harness v3.5.0 dependencies verified and F-068 closed.
+- Current work ledger, reviewed 7 November 2026 against main `8dc6973`. PR #186 runs 42355908976/42355905032 passed validate, windows and native-macos; harness v3.4.0 reconciliation verified and archived.
+- Current work ledger, reviewed 7 November 2026 against main `0d17fdc`. PR #185 runs 42355574146/42355572334 passed validate, windows and native-macos; harness v3.4.0 reconciliation verified and archived.
+- Current work ledger, reviewed 7 November 2026 against main `ffb7f2f`. PR #184 runs 42354868215/42354866279 passed validate, windows and native-macos; F-013/F-067 closure reconciliation complete.
+- Current work ledger, reviewed 7 November 2026 against main `04a8e44`. PR #183 runs 42354533567/42354530104 passed validate, windows and native-macos; dependency SBOM artifact verified. F-013 and F-067 closed and archived.
+- Current work ledger, reviewed 7 November 2026 against main `93114f8`. PRs #181/#182 reconciled through ci:status; #182 runs 42353402738/42353398574 passed validate, windows and native-macos. F-013 verified and archived; F-067 in progress.
+- Current work ledger, reviewed 7 November 2026 against main `058b8ee`. PR #180: CI 42351766963/42351762060 validate, windows and native-macos green; harness v3.3.0 adoption verified and archived.
+- Current work ledger, reviewed 7 November 2026 against main `55ef703`. PR #179: CI 42314165832/42314159364 validate, windows and native-macos green; F-065–F-067 remain proposed work, not implemented.
+- Current work ledger, reviewed 7 November 2026 against main `fe4fd37`. PR #178 reconciled through ci:status (42306441643/42306427872: validate, windows and native-macos green); recap tooling only, no record changed.
+- PR #177 reconciled through ci:status (42303818758/42303806635: validate, windows and native-macos green); B-021 implemented, owner check pending.
+- PR #176 reconciled through ci:status (42301159928: validate, windows and native-macos green); skill notes on F-045/F-007 and harness v3.2.1 adopted.
+- PR #174 and #175 reconciled through ci:status (42296339345/42296334279 and 42295635548/42295631065: validate, windows and native-macos green); header limit enforced, F-002 closed and archived; harness v3.2.1 (MIT licence) adopted.
+- PR #173 reconciled through ci:status (42295005293/42294998432: validate, windows and native-macos green); F-002 verified, closed and archived.
+- PR #172 reconciled through ci:status (42292736254/42292732322: validate, windows and native-macos green); roadmap status generation and F-062/F-063/F-064 proposal records retained.
+- PR #170 reconciled through ci:status (42289559677/42289552958: validate, windows and native-macos green); B-038/B-039/F-061 closed and archived.
+- PR #169 reconciled through ci:status (42288451247/42288444283: validate, windows and native-macos green); F-060 remains the proposed Herdr spike.
+- PR #168 reconciled through ci:status (42285906460/42285896730: validate, windows and native-macos green).
+- PR #167 reconciled through ci:status (42285102671/42285107921: validate, windows and native-macos green).
+- PR #166 reconciled through ci:status: runs 42280638858/42280632455 passed validate, windows and native-macos after the queued/cancelled job was rerun.
+- PR #165 reconciled 2026-11-06 through ci:status (both runs 42253999910/42253993437 green after the relay-fixture synchronization fix).
+- PR #164 reconciled 2026-11-06 through ci:status (both CI runs passed validate, windows and native-macos).
+- PR #163 reconciled 2026-11-06 through ci:status (both runs 42250531835 and 42250519742 passed validate, windows and native-macos).
+- PR #162 reconciled 2026-11-06 through ci:status (validate, windows and both native-macos runs green, runs 42247286378 and 42247282316).
+- PR #161 reconciled 2026-11-06 through GitHub check results (validate, windows and native-macos all green, run 42242239900).
+- PR #160 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42241192687).
+- PR #159 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42233354933 after the cancelled native job was rerun).
+- PR #158 reconciled 2026-11-06 through ci:status (validate including Chrome/axe, windows and native-macos green, run 42226245599).
+- PR #157 reconciled 2026-11-06 through ci:status (validate including Linux Chrome/axe, windows and native-macos green, run 42225026067).
+- PR #156 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42222074318).
+- PR #154 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42220503857).
+- PR #153 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42218258228).
+- PR #152 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216691729).
+- PR #151 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42216202855).
+- PR #150 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42215185296).
+- PR #149 reconciled 2026-11-06 through ci:status (validate, windows and native-macos green, run 42141288422).
+- PR #1–#148 merged after green checks (#53–#148 read with ci:status on 4–5 November: validate and native-macos green on every run; windows green on #95, #96 and #94 after the B-001 fixes) (PR #7–#9: [NERV M2a plan](https://github.com/voidbrain/nerv/pull/7), [gate and ledger](https://github.com/voidbrain/nerv/pull/8), [approvals API](https://github.com/voidbrain/nerv/pull/9); [model routes](https://github.com/voidbrain/nerv/pull/11); dashboard prototype [#12](https://github.com/voidbrain/nerv/pull/12) and [#13](https://github.com/voidbrain/nerv/pull/13); rename [#14](https://github.com/voidbrain/nerv/pull/14) and repository move [#15](https://github.com/voidbrain/nerv/pull/15); versioned events [#16](https://github.com/voidbrain/nerv/pull/16); English default [#17](https://github.com/voidbrain/nerv/pull/17) and [#18](https://github.com/voidbrain/nerv/pull/18); brand marks [#19](https://github.com/voidbrain/nerv/pull/19); Scrolls file [#20](https://github.com/voidbrain/nerv/pull/20); Casper and executors [#21](https://github.com/voidbrain/nerv/pull/21); grant IDs out of events [#22](https://github.com/voidbrain/nerv/pull/22) and [#23](https://github.com/voidbrain/nerv/pull/23); model roles and reload [#24](https://github.com/voidbrain/nerv/pull/24); dashboard map [#25](https://github.com/voidbrain/nerv/pull/25), [#26](https://github.com/voidbrain/nerv/pull/26) and [#27](https://github.com/voidbrain/nerv/pull/27); Misato loop [#28](https://github.com/voidbrain/nerv/pull/28), [#29](https://github.com/voidbrain/nerv/pull/29) and [#30](https://github.com/voidbrain/nerv/pull/30); `open` [#31](https://github.com/voidbrain/nerv/pull/31); Aoba [#32](https://github.com/voidbrain/nerv/pull/32), [#33](https://github.com/voidbrain/nerv/pull/33) and [#34](https://github.com/voidbrain/nerv/pull/34); Misato resume [#35](https://github.com/voidbrain/nerv/pull/35); live dashboard [#36](https://github.com/voidbrain/nerv/pull/36); conversations [#37](https://github.com/voidbrain/nerv/pull/37); daily brief [#38](https://github.com/voidbrain/nerv/pull/38); dashboard slice 2 [#39](https://github.com/voidbrain/nerv/pull/39); Lilith [#40](https://github.com/voidbrain/nerv/pull/40); base identity [#41](https://github.com/voidbrain/nerv/pull/41); federation decision [#42](https://github.com/voidbrain/nerv/pull/42); Windows basics [#43](https://github.com/voidbrain/nerv/pull/43); Instrumentality [#44](https://github.com/voidbrain/nerv/pull/44); schedules by chat [#45](https://github.com/voidbrain/nerv/pull/45); replicated registry [#46](https://github.com/voidbrain/nerv/pull/46); Lilith panel [#47](https://github.com/voidbrain/nerv/pull/47); lore rows [#48](https://github.com/voidbrain/nerv/pull/48); dashboard polish [#49](https://github.com/voidbrain/nerv/pull/49); revert of a direct push [#51](https://github.com/voidbrain/nerv/pull/51), with branch protection enabled on main; backlog tidy-up [#50](https://github.com/voidbrain/nerv/pull/50); Kaji trust layer [#52](https://github.com/voidbrain/nerv/pull/52); main CI green). F-017 and F-024 verified and closed 2026-11-04 (archive); target-OS and browser acceptance remain pending.
+
+
+## 2026-11-09 — PR #222
+
+Reconciled main `fd503d3` using authenticated `npm run ci:status -- 222`: CI 42531104052 plan/validate/windows/native-macos succeeded; full-suite skipped. This reconciled scoped F-072 closure and target-document evidence, not B-046 runtime repair. Prior ledger baseline `2943aad` retained PR #221 CI 42530253552, passed after one failed-job retry; unresolved worker-heartbeat evidence remains B-046.
+
+
+## 2026-11-09 — PR #223
+
+Reconciled main `b15fe37` using authenticated `npm run ci:status -- 223`: CI 42535553841 passed plan, validate, Windows, native-macos and full-suite at exact head737fa53. F-073/T01 accepted and archived after clean-source policy90, six integration tests and independent report-only review. Initial CI 42535069202 failed recap-week validation and an existing Windows remote-card cleanup assertion. Recap was corrected for the owner date, no Telegram/runtime/assertion/timeouts changed, and B-042 remains Investigate despite final CI pass. B-046 remains separate unresolved heartbeat evidence. No model inference/download or production qualification occurred.
+
+
+## 2026-11-09 — PR #224
+
+Authenticated ci:status confirms CI 42536093191 passed scoped plan, validate, Windows and native-macos; full-suite skipped. Reconciled main8a4f469, F-073 closed and T01 closed. Prior implementation acceptance remains PR #223 / full CI42535553841; no repeat product/model campaign claimed.
+
+
+## 2026-11-09 — PR #225
+
+Authenticated ci:status confirms CI42573854325 passed plan, validate, Windows, native-macos and full-suite at exacthead11c963c; merged main8fab24c. F-074-T01 adoption accepted; T02 remains planned and unexecuted because the owner requested pause after adoption. No model qualification or real runtime comparison claimed. Expired fence7 was inspected with stopped-writer evidence; automatic review required explicit owner authorization, which was obtained before recovery/reacquisition; fencing/history preserved.
+
+
+## 2026-11-09 — PR #230 and #231
+
+Authenticated ci:status confirms PR230 CI42585327765 and PR231 CI42586749552 passed scoped plan/validate/windows/native-macos with full-suite skipped. Reconciled main `cba3726`; PR231 registers execution/project ownership assessment and useful F-049/F-006/F-065 acceptance without runtime/upstream changes. Prior full evidence remains PR229 CI42584230832 at merged main `5933855`; F-023-T01/T02 are closed, T03 implementation follows independently. No live Mac or model acceptance follows from these documentation runs.
+
+
+## 2026-11-09 — PR #232
+
+Authenticated ci:status confirms CI42588026092 passed plan, validate, Windows, native-macos and full-suite at exact head1b23c68, merged maincdb4f6. Linux coverage467: 466 passed, one platform skip; headless3 passed and one Windows skip. T03 durable native approval delivery accepted and closed; F-023 remains Implemented with actual paired-Mac menu/VoiceOver/banner/sleep acceptance required. Fresh-context review found no blocking runtime/security issue and its one stale documentation sentence was corrected. No runtime/model campaign, CI retry or test relaxation followed the full run.
+
+
+## 2026-11-09 — PR #235
+
+Authenticated ci:status confirms CI42608578429 passed plan, validate, Windows, native-macos and full-suite at exactheadb4cd887, mergedmainc5323e5. Gauntlet0.3 machine/scenario contracts are independently released; NERV consumes the pinned artifact and owns only its assignment/role acceptance map. F-074-T03 closed after neutral wrapper-to-library cross-consumer reuse/admission joins and fresh-context provenance review; first Gemma T02 and F-006 load/placement campaigns remain unexecuted. No CI retry or assertion relaxation was needed. Generic development usage accounting is separately registered as harnessF-048, not measured here.
+
+
+## 2026-11-10 — PR #244
+
+Reconciled main `d869d8c` using authenticated `npm run ci:status -- 244`: CI42724533046 passed plan, validate, windows and native-macos; full-suite skipped. Owner-selected F-005 then F-006 queue order is retained. This is scoped documentation evidence, not lifecycle/device acceptance; current full evidence remains PR242 CI42687439382.
+
+Prior ledger header context retained: PR242 diagnostic/schema/job-rule adoption T05 accepted; PR240 CI42635119338 established F-026 runtime acceptance. F-026 proactive runtime/quiet delivery accepted and archived; F-027 enforced egress awaits F-049. B-046 session-loss investigation remains open.
+
+
+## 2026-11-10 — PR #245
+
+Authenticated ci:status confirms CI42775093119 passed plan, validate, Windows, native-macos and full-suite at exactheada965a10; mergedmain77b22da. F-005-T01 review-only Unix lifecycle ownership/recovery contracts accepted and closed. The committed controller-path regression069d9b2 passes unchanged with the target-path renderer fix. Local full suite508 pass/2 skips plus stale-built-version failure; rebuilt dashboard30 pass unchanged. No service observation/execution or device acceptance follows. Owner selected isolated-profile enrollment testing; existing-default service work and remote targets remain deferred.
+
+
+## 2026-11-10 — PR #246
+
+Authenticated ci:status confirms CI42776413148 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmain8d1cf09 retains PR245/fullCI42775093119 as the deterministic baseline. Isolated-profile enrollment preparation is recorded, not completed enrollment. Subsequent owner terminal unlock failed before signing; read-only reconciliation confirms no registry enrollment or target-root/database change. Root-passphrase/payload validity remains unresolved; never reset trust to bypass it.
+
+
+## 2026-11-10 — PR #247
+
+Authenticated ci:status confirms CI42777729124 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmain42a853c records the rejected unlock/no-enrollment checks; full evidence remains PR245 CI42775093119. Owner then confirmed no original passphrase or recovery backup. F-005 existing-root enrollment is blocked pending a new scope decision; two enrolled bases retain existing trust. No root replacement/reset or disposable test root has been authorized.
+
+
+## 2026-11-10 — PR #248
+
+Authenticated ci:status confirms CI42778028106 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmainf0e9a29 recorded the existing-root access blocker. Owner subsequently explicitly authorized real root regeneration/migration under F-005-T03, after considering a candidate passphrase and pausing disposable test trust. Private staging preparation/neutral fixtures do not activate a root or migrate either base. Prior full baseline remains PR245 CI42775093119.
+
+
+## 2026-11-10 — PR #249
+
+Authenticated ci:status confirms CI42779886527 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmain48a8b69 records replacement-root preparation. Owner-generated stage is now verified and selected Tabgha read-only SSH/public-trust checks pass; existing absolute Node24.22.2 used, no install/service/trust writes. T03 preparation complete; T05 owns activation/history/backup/recovery and T04 owns owner-selected Mac default-profile service execution. No live migration or service effect is claimed. Full baseline remains PR245 CI42775093119.
+
+
+## 2026-11-10 — PR #250
+
+Authenticated ci:status confirms CI42786283211 passed scoped plan/validate/windows/native-macos; full-suite skipped. Mergedmaine846279 accepts staged-root and selected-host read-only evidence and T03 preparation. Owner explicitly said proceed with both activation and Mac default-profile service work, and confirmed independent encrypted-root backup. T05 candidate activation code and T04 service execution remain separately verified outcomes; no live activation/service effect follows from the documentation merge. Full baseline remains PR245 CI42775093119.
+
+
+## 2026-11-10 — PR #252
+
+Authenticated ci:status confirms full CI42823700687 passed at94228b0; mergedmainc3a550b has the same tree. The unchanged Windows150ms-heartbeat worker-approval test failed attempt1 and passed attempt2 without code/assertion changes; no blanket absence-of-bugs claim. Initial PR251 was closed unmerged after independent blockers; regressions/fixes and independent exact-ee8501f follow-up are retained. Actual Mac/Windows root activation, preservation and authenticated peer/isolated-public-import evidence are recorded separately. T02 files-only enrollment closes; T05 harmless capability approval and T04 selected Mac service execution remain open.
+
+
+## 2026-11-10 — PR #253
+
+Authenticated ci:status confirms full CI42874665479 passed at6f21738, merged12a9cfd tree-identical. Actual selected Mac default-profile service install/status/start/stop/uninstall/reinstall, interrupted-operation recovery/startup fencing and forward identical-runtime update passed with retained credentials/data and verified private backups. T04 closes; T06 executable/schema compatibility and broader platform/device acceptance remain explicit. Earlier review/CI failures are preserved in dated review/acceptance evidence; a green merge alone is not the OS acceptance.
+
+
+## 2026-11-11 — PR #255
+
+Authenticated ci:status confirms CI42889510020 passed plan, validate, windows, native-macos and full-suite; merged main b68802d. Planning and harness4.7.0 reconciliation only: F-005 keeps its dated initial T06–T11 plan, no acceptance advances and no runtime/service/engine effect follows. Previous header: reviewed 10 November 2026 against main `2f85f06`. PR #253 full CI42874665479 passed at6f21738; merged tree matches. T02/T04/T05 selected enrollment, root migration and Mac service accepted. PR #254 CI42878276038 passed plan/validate/platform jobs; its docs-only scope does not claim a new full marker. F-005 remains open with initial T06–T11 delivery plan.
+
+
+## 2026-11-11 — PR #256
+
+Authenticated ci:status confirms CI42928609476 passed plan, validate, windows, native-macos and full-suite; merged main 65a79ad. Harness v4.8.0 copied tool/guide and maintenance receipt only; no NERV rule, runtime or service change. No Claude allowance snapshot observed yet. Previous header: reviewed 11 November 2026 against main `b68802d`. PR #255 CI42889510020 passed all five jobs/full-suite; F-005 stays open with T06–T11 planned, T06 safe upgrades next.
+
+
+## 2026-11-11 — PR #257
+
+Authenticated ci:status confirms CI42930317635 passed plan, validate, windows, native-macos and full-suite; merged main ee9cbb6. F-005-T06 first slice (reader contract, review-only rehearsal); update admission unchanged and no rehearsal was run on actual private data. The review fixes had no second independent review. Previous header: reviewed 11 November 2026 against main `65a79ad`. PR #256 CI42928609476 passed all five jobs/full-suite: harness v4.8.0 reconciled.
+
+
+## 2026-11-11 — PR #258
+
+Authenticated ci:status confirms CI42973361363 passed plan, validate, windows, native-macos and full-suite; merged main 119ac42. F-005-T06 second slice: journaled rehearse step and refused outcome; admission unchanged, no independent review of this slice yet and not exercised on the actual Mac service. One local full-suite run saw the known B-042 one-channel timing failure, which passed three isolated reruns and CI. Previous header: reviewed 11 November 2026 against main `ee9cbb6`. PR #257 CI42930317635 passed all five jobs/full-suite: F-005-T06 first slice merged.
+
+
+## 2026-11-11 — PR #259
+
+Authenticated ci:status confirms CI42974448234 passed plan, validate, windows, native-macos and full-suite; merged main d2bb481. Vendored Gauntlet 0.5.0 (tag v0.5.0); `gauntlet:compare` now needs 2–64 reports and returns the new upstream shape; expanded pack not wired; no model run. Independent review found the first wording understated the compare change; corrected before merge. Previous header: reviewed 11 November 2026 against main `119ac42`. PR #258 CI42973361363 passed all five jobs/full-suite: F-005-T06 journaled rehearsal merged.
+
+
+## 2026-11-11 — PR #260
+
+Authenticated ci:status confirms CI42980951125 passed plan, validate, windows, native-macos and full-suite; merged main 84a5de6. Prettier 3.9.10 with a CI format check; mechanical reformat of 148 files, literals equal to the previous main and one redundant-parenthesis difference. Independent review found a reformatted Angular template and an author check that had not run; both corrected before merge and not re-reviewed. Previous header: reviewed 11 November 2026 against main `d2bb481`. PR #259 CI42974448234 passed all five jobs/full-suite: Gauntlet 0.5.0 pinned.
+
+
+## 2026-11-11 — PR #261
+
+Authenticated ci:status confirms CI42984056330 passed; merged main 6a960bf. Timing reassessment report, a todo regression reproducing the B-046 mechanism and record updates; no runtime code changed and no status changed. Previous header: reviewed 11 November 2026 against main `84a5de6`. PR #260 CI42980951125 passed all five jobs/full-suite: Prettier adopted.
+
+
+## 2026-11-11 — PR #262
+
+Authenticated ci:status confirms CI42986531117 passed plan, validate, windows, native-macos and full-suite on attempt 2; merged main 565a302. F-005-T06 third slice: admission of application upgrades that descend from the installed revision, with a forward-migration refusal; independent review found no blocker and its two findings had failing regressions before the fixes; the fixes were not re-reviewed. Attempt 1 failed only the Windows job: `test/windows-service.integration.ts` ended with `EPERM` removing its temporary directory after the service test, in code this PR does not touch; the unchanged-head rerun of the failed jobs passed. A passing retry is not a causal fix. It recurred on the first attempt of PR #263 and is recorded as B-048. Previous header: reviewed 11 November 2026 against main `6a960bf`. PR #261 CI42984056330 passed its checks: timing reassessment of B-042/B-043/B-046 recorded.
+
+## 2026-11-11 — PR #263
+
+Authenticated ci:status confirms CI42989892523 passed plan, validate, windows, native-macos and full-suite; merged main 2a3448d. Harness 5.0.0 reconciled: ESLint and the tooling check in CI, reconciliation folded into working PRs; independent review found the first revision also excluded NERV's own tools, corrected; B-048 opened for the intermittent Windows service cleanup failure. Previous header: reviewed 11 November 2026 against main `565a302`. PR #262 CI42986531117 passed all five jobs on attempt 2: update admission for schema-preserving application upgrades merged. F-005-T06 stays in progress: forward recovery and a real-target upgrade remain.
+
+## 2026-11-11 — PRs #264 and #265
+
+Authenticated ci:status confirms CI43005607280 (#265) and CI43007427908 (#264) passed plan, validate, windows, native-macos and full-suite; merged main 73a96cc. #265 fixed B-048 (the root-migration check now waits up to 5 s for a database lock); its Windows job passed, and B-048 stays Implemented until five clean runs on `main`. #264 recorded the owner-approved lettered slices for F-005, F-006, F-016 and F-007 as tasks and moved the harness stamp to 5.0.2 (no copied file changed); it conflicted with main after #265 and was resolved by merging main into it, keeping both sides; its run on that head (CI43007427908) is a PR run, not a `main` run; a `node_modules` worktree symlink committed by mistake was removed; fresh-context review of the stamp found no blocker. Previous header: reviewed 11 November 2026 against main `2a3448d`. PR #263 CI42989892523 passed all five jobs: harness 5.0.0 reconciled (ESLint, tooling check). B-048 implemented (#265): CLI commands failed with "database is locked" while the service started. Mac service runs 2a3448d (T06d); owner approved the lettered slices for F-005, F-006, F-016 and F-007 (#264).
+
+## 2026-11-11 — PR #266
+
+Authenticated ci:status confirms CI43010405505 passed plan, validate, windows, native-macos and full-suite; merged main 00b0b22. Harness 5.1.0 reconciled: reviewer agents and `check-harness --strict` copied, Independent review paragraph reconciled by hand; fresh-context design review found no blockers, its should-fix items applied before merge. A further Windows failure on that run's history is recorded on B-046. Previous header: reviewed 11 November 2026 against main `73a96cc`. PRs #264 and #265 passed all five jobs: approved F-005/F-006/F-016/F-007 slices recorded as tasks; B-048 fixed, awaiting five clean `main` runs. Harness 5.1.0 reconciled (PR #266).
+
+## 2026-11-11 — PR #267
+
+Authenticated ci:status confirms CI43013239139 passed plan, validate, windows, native-macos and full-suite; merged main 74c3cee. Harness 5.1.1 reconciled (`node_modules` symlink ignored, CI clones the template at v5.1.1). The first run on that PR (CI43012116246) failed Windows on the B-042 one-channel case with no runtime change; recorded on B-042, and the next push passed. Previous header: reviewed 11 November 2026 against main `00b0b22`. PR #266 CI43010405505 passed all five jobs: harness 5.1.0 reconciled. Harness 5.1.1 reconciled (PR #267); B-048 awaits five clean `main` runs.
+
+## 2026-11-11 — PR #268
+
+Authenticated ci:status confirms CI43015017327 passed plan, validate, windows and native-macos; full-suite skipped by scoped verification (records only); merged main a40f89d. F-074 gained T06–T09 after the gap where the 0.5.0 pin's expanded pack was never run. Previous header: Reviewed 11 November 2026 against main `74c3cee`. PR #267 CI43013239139 passed all five jobs: harness 5.1.1 reconciled. F-074 gains T06–T09: every common Gauntlet pack consumed, new packs raise a run (PR #268); B-048 awaits five clean `main` runs.
+
+## 2026-11-11 — PR #269
+
+Authenticated ci:status confirms CI43016078610 passed plan, validate, windows and native-macos; full-suite skipped by scoped verification (records only); merged main 3c4a283. F-074-T07 now adopts upstream detection (gauntlet-protocol PR #33, F-010; project-harness PR #109, F-052). Previous header: Reviewed 11 November 2026 against main `a40f89d`. PR #268 CI43015017327 passed plan, validate, windows and native-macos (full-suite skipped, records only): F-074 T06–T09 planned. T07 now adopts upstream Gauntlet F-010 and harness F-052 (PR #269); B-048 awaits five clean `main` runs.
+
+## 2026-11-11 — PR #270
+
+Authenticated ci:status confirms CI43017157201 passed plan, validate, windows and native-macos; full-suite skipped by scoped verification (records only); merged main 0c3de0f. F-074 listed its steps T01–T09 in the record (NERV had no featurePlans setting). Previous header: Reviewed 11 November 2026 against main `3c4a283`. PR #269 CI43016078610 passed plan, validate, windows and native-macos (full-suite skipped, records only): F-074-T07 adopts upstream Gauntlet F-010 and harness F-052. F-074 now lists its steps T01–T09 (PR #270); B-048 awaits five clean `main` runs.
+
+## 2026-11-11 — PR #271
+
+Authenticated ci:status confirms CI43021907516 passed plan, validate, windows, native-macos and full-suite; merged main aade3c8. Upfront feature plans adopted (featurePlans: true): 24 features got initial plans and 26 tasks estimates. Its first run (CI43020769457) failed Windows on two F-014 worker-link tests with the B-046 stall assertion, recorded on B-046. Previous header: Reviewed 11 November 2026 against main `0c3de0f`. PR #270 CI43017157201 passed plan, validate, windows and native-macos (full-suite skipped, records only). Feature plans adopted: every feature lists its steps (PR #271); B-048 awaits five clean `main` runs.
+
+## 2026-11-12 — PRs #307, #308
+
+Authenticated ci:status confirms #307 CI43240473540 passed plan, native-macos, windows and validate (full-suite skipped by scoped verification) and #308 CI43238639679 passed plan, windows, native-macos, validate and full-suite; merged main e821c11. F-016 names the passing run; B-046 was already closed and archived by #308. Previous header: Current work ledger, reviewed 12 November 2026 against main `33126e6`. PR #306 passed CI (B-043 closed). B-046 closed: 11 CI runs after remedy (a) (#293) passed every worker-link heartbeat test on Windows and Linux coverage.
+
+## 2026-11-12 — PR #309
+
+Authenticated ci:status confirms #309 CI43255004715 passed plan, native-macos, windows, validate and full-suite; merged main 1f714bc. Reconciled harness v6.2.0 and PRs #307, #308. Previous header: Current work ledger, reviewed 12 November 2026 against main `e821c11`. PRs #307 (F-016-T01 decision) and #308 (B-046 closed) passed CI; harness v6.2.0: a re-estimated step names its baseline (`1 h (planned 1.5)`).
+
+## 2026-11-12 — PR #315
+
+Authenticated ci:status confirms #312 CI43276538572 (plan, windows, native-macos, validate, full-suite passed; merged main 5bcf955) and #313 CI43276077765 (plan, native-macos, windows, validate passed, full-suite skipped by plan). #313's F-007/F-008 records and #312's harness reconcile needed no further record change. Previous header: Current work ledger, reviewed 12 November 2026 against main `ed580bc`. PRs #310 (F-043) and #311 (F-005 procedure, B-052) passed CI; harness 6.3.0–7.1.1 reconciled: worktree rule, effort sized from remaining agent hours, Status with its colour, human actions link their procedure. F-007 and F-008 lowered to P3 (owner, PR #313).
+
+## 2026-11-12 — PR #316 (F-074-T09)
+
+Authenticated ci:status confirms #314 CI43282005793 and #315 CI43280986607 passed; merged main 8c58ee5. #314 updated its own F-042 and F-043 records; #315 is this session's F-005-T13 record. Previous header: Current work ledger, reviewed 12 November 2026 against main `5bcf955`. PRs #310 (F-043 closed), #311 (F-005, B-052), #312 (harness 7.1.1) and #313 (F-007, F-008 P3) passed CI; F-005-T13 done (f8b8116); F-042 agency read tools implemented (PR #314).
+
+## 2026-11-12 — PR #318 (B-008)
+
+Authenticated ci:status confirms #316 CI43289305898 passed plan, native-macos, windows, validate and full-suite (an earlier run, 43286749372, failed validate on the F-029 test recorded as B-053); merged main 78d946d. #316 updated its own F-074 and B-053 records. Previous header: Current work ledger, reviewed 12 November 2026 against main `8c58ee5`. PRs #314 (F-042 read-only agency tools, F-043 records) and #315 (F-005-T13) passed CI; F-074-T09 done: every Gauntlet pack has a ledger-covered run.
+
+## 2026-11-12 — PR #319 (B-008 closed)
+
+Authenticated ci:status confirms #318 CI43290861912 passed plan, native-macos, windows and validate (full-suite skipped by plan); merged main 1d5cc15. #318 updated its own B-008, B-054 and B-055 records. Previous header: Current work ledger, reviewed 12 November 2026 against main `78d946d`. PR #316 (F-074-T09, B-053) passed CI; B-008 not reproduced on Tabgha at 8c58ee5 (owner decides closure); B-054 and B-055 opened.
+
+## 2026-11-12 — PR #322 (F-015-T02)
+
+Authenticated ci:status confirms #317 CI43292206806, #319 CI43291684068 and #320 CI43295160685 passed; merged main 5a18130. #317 and #320 updated their own F-005 records; #319 is this session's B-008/F-015 change. Previous header: Current work ledger, reviewed 12 November 2026 against main `1d5cc15`. PR #318 (B-008 reproduction, B-054, B-055) passed CI; B-008 closed as not reproduced (owner); F-015 trial moves to the agent.
+
+## 2026-11-12 — PR #325 (F-015-T03)
+
+Authenticated ci:status confirms #321 CI43298181723 and #322 CI43297509679 passed; merged main ca0cd66; #323 (CI read with ci:status) merged as 4154b84 and updated its own F-005 records. #321 updated its own F-005 records; #322 is this session's F-015-T02 record. Previous header: Current work ledger, reviewed 12 November 2026 against main `5a18130`. PRs #317 (F-005-T14), #319 (B-008 closed) and #320 (F-005-T07) passed CI; F-015-T02 Keychain trial done, B-056 opened.
+
+## 2026-11-12 — PR #329 (harness 8.0.0)
+
+Authenticated ci:status confirms #324 CI43308935497, #326 CI43307205792 and #327 (CI read with ci:status) passed; merged main 4e55eb5. All three updated their own F-005 records. Review: fresh-context reviewer (Opus) on PR #329, no blocker; one should-fix fixed (an unescaped pipe in the recap test's regex); BACKLOG-RULES paragraphs byte-identical to v8.0.0; the nine cue kinds confirmed; missing procedure/options links on seven of them stay B-052's debt. Previous header: Current work ledger, reviewed 12 November 2026 against main `4154b84`. PRs #321 (F-005-T08), #322 (F-015-T02) and #323 (F-005-T16) passed CI; F-015-T03 live failure cases done, F-015 verified, owner decides closure; B-057 opened.
+
+## 2026-11-12 — main `fbd5458`
+
+PRs #328 (F-005-T18), #331 (F-005-T20, CI43314523726) and #330 (F-005-T09, CI43318667103) passed CI; harness 8.1.0 reconciled (PR #332, fresh-context review: no blockers).
+
+Previous authored header, now retired: Current work ledger, reviewed 12 November 2026 against main `4e55eb5`. PRs #324 (F-005-T19), #326 (F-005-T17) and #327 (F-005-T10) passed CI; harness 8.0.0 reconciled: human cues name Procedure, Decision or Both, and the Require Human table shows both kinds per column.
+
+## 2026-11-13 — PR #346 (harness 8.2.0 queue order)
+
+Owner request: the ledger listed F-021 right after F-005 although it waits on F-049. Template release v8.2.0 (project-harness PR #147, F-067) lists an open prerequisite, with its own first, just above the first record that waits on it and keeps the priority order otherwise. `tools/work-items.mjs` takes that ordering block, identical to v8.2.0; the Optional work queue paragraph of BACKLOG-RULES is carried verbatim; the ledger is rebuilt (F-005, F-045, F-025, F-049, F-021, F-006, F-012, …), no source record or priority changed. Review: fresh-context mechanical reviewer (Haiku) on PR #346, no blocker: the ordering block and the rule paragraph are identical to v8.2.0, the ledger diff is pure reordering, every active prerequisite sits above its dependent; one note answered in the PR (the maintenance receipt is rewritten at each review and reads the primary checkout's local measurement log). Left open: `tools/work-items.mjs` still carries the unreleased template F-066 code (project-harness PR #139) and `.harness.json` names 8.1.0, which has no tag; both wait on that PR's release.
+
+## 2026-11-13 — PR #349 (harness 8.3.0 owner steps)
+
+Owner request: F-005 has ready owner steps (a decision, two acceptance runs) but was listed under neither Procedures nor Decisions. Template release v8.3.0 (project-harness PR #149, F-068) marks the generated cells from ready owner steps as well as from the record's cue (`effort.ownerKind`; planned or ready, prerequisites verified or closed); the record keeps its 💻 line and stays among the agent candidates. `tools/check-backlog.mjs`, `tools/backlog-queue.mjs` and `tools/solution.mjs` are byte copies of v8.3.0; `tools/work-items.mjs` takes the 8.2.0 to 8.3.0 changes; three BACKLOG-RULES sentences carried in this project's wording; ledger and recap rebuilt (F-005 under Procedures and Decisions; F-060, F-006 and F-062 under Procedures), no source record or task changed. Review: fresh-context mechanical reviewer (Haiku) on PR #349, no blocker: the three tools are byte copies of v8.3.0, the work-items changes match the release, and an independent script over 42 records and 203 task files found every Procedures and Decisions cell and the Require Human table as expected; its one should-fix (singular Decision left in BACKLOG-RULES) was checked and does not apply, the rules already say Decisions. Left open as before: `tools/work-items.mjs` still carries the unreleased template F-066 code (project-harness PR #139) and `.harness.json` names 8.1.0.
+
+## 2026-11-13 — main `1340f92`
+
+PRs #374–#382 merged with required CI green; scoped full-suite jobs skipped only for records-only plans. F-021-T02 closed from PR #381 CI 43496658350; F-021 remains open. Merged records already reconcile the other work.
+
+## Archived Other changes (moved from BACKLOG.md on 2026-11-13)
+
+**Harness v5.6.0 reconciliation (5.5.0 included), 2026-11-11 ([PR #277](https://github.com/voidbrain/nerv/pull/277)).** Template F-057 and F-058: `tools/work-items.mjs`, `tools/backlog-queue.mjs`, `tools/backlog-dependencies.mjs` and `tools/check-freshness.mjs` copied byte-identically from v5.6.0; the Linked prerequisites, Optional work queue, Optional upfront feature plans and Estimate calibration paragraphs of BACKLOG-RULES carried verbatim; CI clones the template at v5.6.0.
+
+**Harness v5.4.0 and Gauntlet 0.7.1 reconciliation, 2026-11-11 ([PR #275](https://github.com/voidbrain/nerv/pull/275), superseded by [PR #277](https://github.com/voidbrain/nerv/pull/277)).** Template F-053–F-056: NERV adopts queue order and backlog totals; 158 open steps backfilled with `days` and `baselineDays`; Gauntlet pinned to 0.7.1.
+
+**Harness v5.2.0 reconciliation, 2026-11-11 ([PR #272](https://github.com/voidbrain/nerv/pull/272)).** Template F-052: `.harness.json` `evaluations` declares Gauntlet (`node tools/gauntlet.mjs pending`).
+
+**Upfront feature plans adopted, 2026-11-11 ([PR #271](https://github.com/voidbrain/nerv/pull/271)).** `workItems.featurePlans` enabled across 24 features.
+
+**Harness v5.1.1 / v5.1.0 / v5.0.0 reconciliations, 2026-11-11 ([PR #267](https://github.com/voidbrain/nerv/pull/267), [PR #266](https://github.com/voidbrain/nerv/pull/266), [PR #263](https://github.com/voidbrain/nerv/pull/263)).** `.gitignore` worktree fix, reviewer definitions, Prettier + ESLint tooling enforcement (`check:tooling`), and reconciliation cadence rules.
+
+**Formatter, 2026-11-11 ([PR #260](https://github.com/voidbrain/nerv/pull/260)).** Prettier 3.9.10 added for `src/`, `test/`, and `web/src`.
+
+**Harness reconciliations & assessments, 2026-11-08 – 2026-11-11 ([PR #256](https://github.com/voidbrain/nerv/pull/256), [PR #255](https://github.com/voidbrain/nerv/pull/255), [PR #237](https://github.com/voidbrain/nerv/pull/237), [PR #231](https://github.com/voidbrain/nerv/pull/231), [PR #241](https://github.com/voidbrain/nerv/pull/241)).** Usage/allowance tooling (v4.8.0), F-005 initial plan (v4.7.0), task-context guide (v4.3.0), execution-boundary assessment, B-046 CI evidence, and external-project references.
+
+**Harness v6.0.0 reconciliation, 2026-11-12.** Template F-059 (owner request): `tools/work-items.mjs`, `tools/check-backlog.mjs` and `tools/backlog-queue.mjs` copied byte-identically from v6.0.0; the Record and evidence requirements, Optional upfront feature plans and Optional work queue paragraphs of BACKLOG-RULES carried from the template diff v5.6.0..v6.0.0; CI clones the template at v6.0.0. Bugs and features are one `Work items` list (`{"records": "all"}`); each record's summary table now reads Status, Priority, Effort, Remaining, Depends on, Unlocks, Procedures, Decision. [PR #295](https://github.com/voidbrain/nerv/pull/295).
+
+## 2026-11-13 — main `ee11385`
+
+41 PRs (#332–#373) passed CI; full audit archived 11 closed records, cited #337, #339, #342–#345, and opened F-075 (evals), F-076 (main CI) and F-077 (alerts).
+
+Full audit of 2026-11-13 ([report](../audits/2026-11-13-full.md)). `npm run ci:status` read all 41 PRs merged since `fbd5458`: every run green (`full-suite` skipped by scoped verification on #341, #342, #343, #345 and others). Archived as Closed 2026-11-13: B-042, B-050, B-052, B-053, B-055, F-025, F-042, F-045, F-046, F-052, F-074. Records that did not cite their PR: B-056 (#342), B-057 (#343), B-052 (#345), F-005 (#337 T23/T25, #339 T21), F-007 (#344 T06, next action moved to T01 or T07). F-051: two steps added (T06 EVA cage labels, T07 peer inspection scope). A full CI run on main was dispatched (run 43461834506).
+
+
+## 2026-11-14 — main `a18ebb2`
+
+PR #402 passed all required CI jobs and merged F-078-T03's 144-case Neo Tokyo-3 smoke campaign; the first Windows attempt had one transient temp-directory cleanup failure and its rerun passed unchanged.
+
+## 2026-11-14 — main `dcab6b4`
+
+PR #401 passed all five CI jobs and merged F-062-T06; its record and ledger updates were already included in that PR. This session advances F-078-T03 with the approved Neo Tokyo-3 smoke campaign.
+
+## 2026-11-14 — main `ed203d4`
+
+PR #400 passed CI (F-062-T03 closed); F-062-T06 (encrypted copies to Tabgha over the Kaji line) implemented in #401.
+
+- CI read with `npm run ci:status -- 400`: plan, validate, windows, native-macos and full-suite green.
+- Placed first among the 2026-11-14 entries, as CI's single-commit checkout keeps the first of a same-day tie until harness v8.14.0.
+
+## 2026-11-14 — main `f5f435b`
+
+9 PRs (#391–#399) passed CI; F-020-T01 closed; F-066, B-062 and B-063 closed and archived, F-062-T02 closed, F-062-T03 implemented in #400, F-005-T22 steps 1–2 passed on the VM; step 3 opened B-064.
+
+- CI read with `npm run ci:status`: every run green (`full-suite` skipped by scoped verification on #391 and #393).
+- F-062-T06 (copies to Tabgha over the Kaji line) split from F-062-T03; the owner agreed to the new Kaji message type (2026-11-14).
+- The entry sits before the 7f826ba entry of the same day: CI checks out one commit, so the generator cannot order same-day entries by git ancestry there and keeps the first.
+
+## 2026-11-14 — main `7f826ba`
+
+17 PRs (#374–#390) passed CI; their records were updated in each PR (B-059 Implemented by #390). F-023 gets owner step F-023-T04 (paired Mac check, which had no step). Owner jobs case study: F-082–F-094 opened at P2; F-095 (long source files) opened.
+
+- CI read with `npm run ci:status`: every run green, including #374 (full audit), #380 (owner decisions), #384 (B-060-T01) and #390 (B-059).
+- F-023: T01–T03 closed with the record still awaiting the owner's paired-Mac procedure; that session is now its own step.
+- [Owner jobs case study](../design/owner-jobs-case-study-2026-11-14.md): fourteen jobs mapped to owning records; thirteen new records F-082–F-094, placed on the roadmap.
+
+## 2026-11-14 — main `1ec80b2`
+
+#403 (F-078-T03 closed) merged; CI green, jobs skipped by scoped verification. Harness 8.14.2 reconciled from 8.11.0: rules load by trigger, quiet outputs, reconcile:draft, work:next, code:map.
+
+- AGENTS.md keeps the always-on rules and project lines; Angular rules moved verbatim to `docs/agents/angular.md`; BACKLOG-RULES is an index over `docs/backlog/` (project text carried into documentation.md and review.md). All 9 AGENTS project lines and the BACKLOG-RULES project line kept.
+- Copied tools and guides refreshed from v8.14.1 (18), new ones adopted (14); `.npmrc`, `.test-report.txt`, a CI rule-load step, and the quiet reporter on `npm test`. This reconcile is [#404](https://github.com/voidbrain/nerv/pull/404).
+
+## 2026-11-14 — main `cfa31a9`
+
+Harness 8.14.3 reconciled; rule load within every budget (owner decision): five NERV project lines moved verbatim to pull-requests.md and the BACKLOG-RULES index; always loaded 3,558 → 3,064.
+
+- Moved: scoped verification and the review brief (AGENTS → `docs/agents/pull-requests.md`); the ledger and roadmap lines (AGENTS) and the 400-character header rule (`docs/backlog/review.md`) → `docs/BACKLOG-RULES.md`. Link targets adjusted for the new folders only.
+- 8.14.3: `reconcile-draft` and `rule-load` (generated pages have no file budget); the re-estimation sentence in `docs/backlog/estimates.md`. This change is [#405](https://github.com/voidbrain/nerv/pull/405).
+
+## 2026-11-14 — main `3a0e15c`
+
+Re-estimated 33 open feature implementation steps from their current estimates to 0.75 h each (open agent work 71.25 → 85 h); `estimation.since` 2026-11-14.
+
+- Evidence: since 2026-11-13 eleven steps closed at a median of 1.0x their current estimate; feature implementation (F-066-T01, F-066-T02, F-062-T03, F-044-T01) took 0.75–1 h where the 0.25x pass had set 0.25–1 h, while bug, evidence and small UI steps took 0.25–0.5 h. The freshness reminder (F-062-T03 at 0.33x) compared with the original baseline; against its re-estimate that step took 1.0x.
+- Method (harness 8.14.3): start from each step's current estimate and revise only the steps that resemble the misses; never one ratio for all ([#406](https://github.com/voidbrain/nerv/pull/406)). Unchanged: owner, decision, plan, feasibility, campaign, report, evidence-closing, documentation and refactor steps, bug steps, and steps already at 0.75 h or more.
+
+## 2026-11-14 — main `4a70cc2`
+
+Record-level dependencies moved to steps (owner decision): F-021-T03 and F-027-T02 wait on F-049-T04 (EVA-03 isolation); F-056-T01 waits on F-021-T05 (all of F-021).
+
+- F-050's row on F-048 dropped: F-048-T01–T03 are verified and no F-050 step does load-based forwarding. Rows on closed records (F-045, F-042) stay. [#407](https://github.com/voidbrain/nerv/pull/407)
+
+## 2026-11-14 — main `f83b6a1`
+
+Owner plan for FPV and cooking: F-008 rescoped to batteries inside NERV (T05–T12; the app-adapter steps T01–T04 superseded); new F-098 fleet diary, F-099 build knowledge, F-100 blackbox, F-101 sharing; F-083 gains T05–T09.
+
+- Requirements, proposed defaults for the owner's decisions and the sharing options: [design note](../design/fpv-and-cooking-plan-2026-11-14.md). Implementation steps at 0.75 h (harness 8.14.3); feasibility first for F-099 and F-100.
+
+## 2026-11-14 — main `4bf3d35`
+
+Owner follow-ups: B-065 (a revoked base drawn on the map as offline), F-102 (scheduled automatic updates with advance notice), F-083-T10 (recipe photos), F-008 unparked to P2.
+
+
+## 2026-11-14 — main `dfb0b84`
+
+PRs #410–#413 passed CI (B-054, B-060, B-061, B-064 closed & archived); B-066 opened for owner decision on worker-link IPC decoupling ([#414](https://github.com/voidbrain/nerv/pull/414)).
+
+- `npm run ci:status` read PRs #408–#413: #408 (CI 43619602075) and #409 (CI 43620729177) already reconciled above; #410 (CI 43622463226, B-054), #411 (CI 43622889287, B-060-T02), #412 (CI 43622417765, B-061) and #413 (CI 43622666273, B-064) passed plan, validate, native-macos, windows and full-suite.
+- B-060 closed per owner instruction with root-cause decoupling of `src/worker-link.ts` frame verification from per-frame `nervous` SQLite IPC opened as B-066 (`B-066-T01` decision in `docs/decisions/worker-heartbeat-liveness.md`, `B-066-T02` implementation).
+
+## 2026-11-15 — main `49a9d88`
+
+PRs #414–#426 merged on green CI and their owning records are current. Harness 8.15.0 and Gauntlet 0.9.0 reconciled; the new focused packs remain pending under F-078-T08, and F-097 retains the seven source-changed system reruns. This update is PR #427.
+
+## 2026-11-15 — main `fe91bc4`
+
+PRs #427–#450 reconciled on green CI: nine records closed and archived, F-095 and F-048 get new steps. Harness 8.16.0 reconciled; 16 steps re-estimated; F-103 and F-104 opened. F-097 retains the seven system reruns. This update is PR #451.
+
+Closed: F-020, F-044, F-050, F-054, F-064, F-065, F-077, F-080, F-096 (six PRs skipped only the optional full suite). F-095-T06: cli.ts, runtime.ts and server.ts still over 1,000 lines. F-048-T04: the owner extension had no step. 8.16.0: Who cell of implemented steps and the done steps table; F-005-T15 names its owner procedure. Re-estimation (owner-approved): 16 product steps to 0.5 h from the calibration. F-103: service health and link load between bases; F-104: architecture and token cost compared with outside systems.
+
+## 2026-11-15 — main `abe2f3b6`
+
+PRs #451–#455 merged with green CI (reconcile 8.16.0, B-067, F-006-T04/T05, eight owner decisions, B-068). Harness 8.17.0 reconciled: `check:freshness` empty-backlog/roadmap check, `work-usage` suggested pauses, and `feature-plans.md`.
+
+## 2026-11-19 — main `16bfcc0f`
+
+PRs #531–#540 merged with green CI. Closed B-090; B-094-T02, B-086-T01/T02, F-110-T02 and five expensive reruns closed. F-005-T29 updates on NERV-01 and NERV-03. B-086-T04 from review; B-098 opened.
+
+## 2026-11-19 — main `f66efbcc`
+
+PRs #541–#545 merged with green CI (#545 after Windows reruns: B-066 worker-link, then a Dummy Plug timeout). Closed B-098; B-086-T04 and F-008-T10 closed. B-094-T03 merged, waits on the owner's live check. F-021-T03 implemented.
+
+## 2026-11-19 — main `3cc599a`
+
+PRs #546 and #547 merged with green CI (#546 after a Windows rerun, B-066 worker-link). F-021-T03 closed. F-016-T03 stays for its open follow-up PR #548, which edits the same record. B-099 opened (EVA-03 orphan escape) and implemented; F-049-T05 narrowed and implemented, F-049-T13 opened.
+
+## 2026-11-19 — main `f7e7a43f`
+
+PRs #548 and #549 merged with green CI. F-016-T03 (#546) and F-016-T13 (#548) are left to the open F-016-T14 work, which holds that record; F-049-T05 and B-099-T01 closed. F-049-T06 implemented.
+
+#549 had a fresh-context review: EVA-03 process containment is best effort; B-099-T02 for a dedicated job user. An earlier #549 run failed `test/evaluation.browser.mjs` once (axe `color-contrast` on the waiting flow, a surface #549 does not touch); it passed on the next push. A second occurrence opens a B- record.
+
+## 2026-11-19 — main `161f32d4`
+
+PRs #550 and #551 merged with green CI. F-049-T06 closed; F-016-T14 left to the F-016 work that holds that record. F-049-T13 implemented; B-100 opened.
+
+## 2026-11-19 — main `a5d88c65`
+
+PR #552 merged with green CI. F-016-T03, F-016-T13, F-016-T14 and F-016-T15 closed (#546, #548, #550, #552). F-049-T13 implemented after a fresh-context review.
+
+## 2026-11-19 — main `fc53e05c`
+
+PR #553 merged with green CI after two reruns (GitHub had no macOS runner; nothing ran). F-049-T13 closed. F-021-T04 implemented.
+
+## 2026-11-19 — main `09c8579c`
+
+PRs #554–#556 merged with green CI. F-008-T11, F-016-T04 and F-021-T04 closed. F-049-T07 narrowed and implemented; F-049-T14 opened.
+
+Reruns: #554's Windows test step hit its 18-minute limit once (no test failed); #556 and #553 waited on GitHub macOS capacity.
+
+## 2026-11-19 — main `1bc73812`
+
+PR #557 merged with green CI. B-091-T01 waits on its live check on Tabgha. F-049-T07 reviewed and fixed in PR #558.
+
+## 2026-11-19 — main `37e0a248`
+
+PR #559 merged with green CI: B-101-T01 waits to be seen on NERV-01's dashboard (#558 and #561 are reconciled in #565). #560 (B-100-T01) closed unmerged. F-021-T05 implemented.
+
+## 2026-11-20 — PR #610 (harness PR conventions)
+
+Reconciled `docs/agents/pull-requests.md` from `voidbrain/project-harness#224` in [PR #610](https://github.com/voidbrain/nerv/pull/610) (PR title backlog ID and agent signature rules); fresh-context review passed with no findings.
+
+## 2026-11-21 — main `ed872cc`
+
+PRs #598–#614 merged green. Automated steps closed; #610 is harness maintenance recorded above. Pending Gauntlet cases remain under F-078-T08, B-086-T05 and F-115-T02. Reconciliation: [PR #615](https://github.com/voidbrain/nerv/pull/615).
+
+## 2026-11-21 — main `404f8ff`
+
+PRs #615–#620 merged green. #615 was reconciliation-only; B-105, F-111 and F-056 are current. #617 records F-005/B-091 recovery; #620 merged the fixes, with Tabgha verification pending. Reconciliation: [PR #622](https://github.com/voidbrain/nerv/pull/622).
+
+## 2026-11-23 — main `57fac5a8`
+
+PRs #660–#663 merged green (#660 archive, #661 WorkerLink/model.infer, #662 F-006-T11/FPVBuddy, #663 Italian fleet intent). Reconciled harness v10.3.0 and closed F-006-T15 plus 7 verified tasks in [PR #664](https://github.com/voidbrain/nerv/pull/664).
+
+## 2026-11-23 — main `5438e2ae`
+
+PRs #664–#672 merged green (#664 reconciliation, #665–#667 dashboard fixes for B-107, #668 backlog closures, #669–#671 F-117-T01 install folder, #672 B-108 updater). Reconciled with F-093-T03 in its PR.
+
+## 2026-11-23 — main `2c1c5785`
+
+PRs #673, #675 and #678 merged green (#673 B-108 updater fetch precheck, #675 F-093-T03 shared desktop adapter, #678 F-113-T02 subject index). Reconciled with F-093-T05 in its PR.
+
+## 2026-11-23 — main `9ab9139f`
+
+PRs #680 and #683 merged green (#680 B-110 Update now placement, #683 F-093-T05 macOS desktop driver). Reconciled with F-089-T04 in its PR.
+
+## 2026-11-23 — main `b07508c8`
+
+PRs #681 and #686 merged green (#681 B-111 health samples in serve, #686 F-089-T04 Chrome DevTools browser driver). Reconciled with F-094-T02 in its PR.
+## 2026-11-23 — harness v10.4.0 ([PR #689](https://github.com/voidbrain/nerv/pull/689))
+
+Reconciled harness v10.4.0 (template F-088, owner decision for every project): agents land their PRs through the landing queue, one at a time with at most two in CI (`AGENTS.md` "On its own", `docs/agents/parallel-work.md` "Landing queue", `docs/agents/claims.md`); copied `tools/check-rules.mjs` (v10.3.1, B-048 glob escaping). Enabled the periodic skill discovery review (`reviews.skills.days` 30, owner request); its first run becomes a record in this backlog. Nothing skipped.
+
+## 2026-11-24 — harness v10.7.0 ([PR #696](https://github.com/voidbrain/nerv/pull/696))
+
+Reconciled harness v10.7.0 from v10.4.0 (owner approved 2026-11-24). 10.5.0 (template F-090): `AGENTS.md` re-adapted to the lean template, with the safety block and every project line kept; the Documentation section moved to `docs/backlog/documentation.md` "Top-level documents" (NERV's `docs/guides/` example kept as a project line); copied `docs/agents/work-usage.md`. 10.6.0 (F-089): copied `docs/agents/skills.md`. 10.6.1 (B-049): copied `tools/friction.mjs` and `docs/agents/rule-review.md`, so friction samples now land in the primary checkout. 10.7.0 (F-091): copied `tools/work-items.mjs`, reconciled `docs/backlog/closure.md` and added `npm run work:close`. No new required settings. Nothing skipped.
+
+## 2026-11-24 — main `1cf531c`
+
+PRs #674–#719 (40) merged on green CI; reconciled in PR #723: 23 steps closed, B-109, B-114, B-116, B-117, F-100 and F-119 archived, B-126 and B-127 opened. Windows test reruns continue (B-066, B-076, B-126).
+
+Reconciled in [PR #723](https://github.com/voidbrain/nerv/pull/723), excluding the records still changed by open PRs (F-016, B-121, B-124, B-125 in #721; F-121 in #722; B-123 in #720). `npm run ci:status` for all 40: every merged run green; #692, #697, #709, #711 and #712 are docs-only (full suite skipped). Flake history read from the failed attempts of 2026-11-23/24 before closing anything. Closed steps: B-076-T03, B-109-T01, B-114-T01, B-116-T01, B-117-T01, B-122-T01, F-006-T12, F-006-T23–T27, F-094-T02, F-098-T05, F-098-T06, F-100-T04, F-113-T02, F-117-T02, F-118-T01, F-118-T02, F-118-T03, F-118-T05, F-119-T01. Kept open for a live or owner check: B-108 and B-122-T02 (Update now on NERV-01), F-089-T04 and F-090-T04 (live binding, closes with F-089-T03 and F-090-T03, whose procedure pages are still to write), B-110, B-111, B-112, B-113, B-119 (F-006-T29), B-120 (F-016-T09), F-006-T28, F-087-T04, F-093-T03, F-094-T04, F-098-T04, F-099-T04, F-117-T05, F-118-T04. Not verified: B-066, B-076-T01 and B-118 (Windows reruns on 2026-11-24). New: B-126 (`pilot-model.test.ts` on Windows, three runs), B-127 (F-118-T02 browser test under load). Evidence moved to `docs/archive/evidence-2026.md`: F-006, B-118, B-066, F-098, F-118. Estimate drift (`node tools/work-items.mjs calibrate`): overall median 0.94x over 38 closed steps (bug 1.0x, feature 0.85x), within range; outliers B-074-T01 0.25x, B-117-T01 0.17x, F-006-T14 0.33x, F-006-T25 0.33x, F-016-T05 0.33x, F-119-T01 0.25x, all faster than baseline on steps whose estimate had already been revised or whose kind has no open look-alike; no open estimate changed; `workItems.estimation.since` set to 2026-11-24. #696 (harness v10.7.0) has its own entry above.
+
+## 2026-11-24 — harness v10.9.0 ([PR #727](https://github.com/voidbrain/nerv/pull/727))
+
+Reconciled harness v10.9.0 from v10.7.0 (template backlog empty; template `bb3bc58`, tag v10.9.0). 10.8.0 (template F-093, procedures fit their budget): copied `docs/agents/skills.md`, `procedures.md` and `work-usage.md`, added the copied children `skills-discovery.md` and `work-usage-launch.md`; added the adapted children `docs/backlog/human-action.md` and `ledger-header.md` and carried the template diff into `BACKLOG-RULES.md`, `records.md`, `estimates.md` and `review.md` (the moved bullets held no project lines; the NERV section of BACKLOG-RULES is unchanged); the AGENTS job-usage row names the launch child; new files registered in `.harness.json` `copied`, `adapted` and `maintenance.inputs`. 10.8.1 (B-050) and 10.9.0 (F-094): copied `tools/work-items.mjs`, added `npm run work:pr`, carried the `work:pr` sentence into `docs/agents/pull-requests.md` (its NERV section unchanged) and review step 7. No new required settings. Nothing skipped.
+
+## 2026-11-25 — main `774a08f`
+
+PRs #720–#730 (11) merged on green CI (#727, harness v10.9.0, has its own entry); reconciled in PR #736: 14 steps closed, B-121 and F-115 archived, B-133 opened, F-016 and F-121 evidence archived. Open PRs #731–#735 not reconciled.
+
+Reconciled in [PR #736](https://github.com/voidbrain/nerv/pull/736), excluding the records changed by open PRs (B-129, B-130 in #731; F-006, B-119, B-131 in #732 and #735; F-089 in #733; B-124 in #734). `npm run ci:status` for all 11: every merged run green; #723, #724, #728 and #730 are docs-only (full suite skipped). Flake history read from every failed attempt on the merged branches before closing anything (jobs 138686221613, 138694223651, 138724380031, 138768438517, 138799244220). Closed steps: B-121-T01, B-121-T02, B-123-T01, B-128-T01, F-004-T08, F-016-T07, F-016-T08, F-016-T16 to F-016-T20, F-121-T01, F-121-T02. Closed records: B-121 (P1; every Check item automated, Review: #721's four fresh-context design reviews), F-115 (coordinator gap review: both steps closed, `test/cli-help.test.ts` 4/4 at `774a08f`). Kept open for an owner check, each with a copy-paste page: B-123-T02 (Update now shows the updater's status, `docs/acceptance/b123-update-status.md`), B-128-T02 (scan the Settings QR, `docs/acceptance/b128-pairing-qr-tailnet.md`), F-004-T06 (phone push, now the owner's turn); F-016-T09 waits for B-124-T01. Kept Implemented: F-121-T04, whose own cache-probe test failed once on Windows on the PR head (698 ms against 300 ms): new B-133, and F-121-T03 waits for it. Flakes added: B-066 (three worker-link timeouts, #721), B-076 (runtime-load and isolation, #727), B-126 (telegram and watch-runtime "nervous process not ready", #721: the cause is shared). Evidence moved to `docs/archive/evidence-2026.md`: F-016, F-121. Estimate drift (`node tools/work-items.mjs calibrate`, since 2026-11-24): median 1.17x over 11 closed steps, not due; no open estimate changed. Harness v10.10.0 is out and not reconciled: the template backlog is not empty.
+
+## 2026-11-25 — main `9d0e80f`
+
+PRs #731–#745 (15) merged on green CI; reconciled in PR #750: B-119, B-124, B-126, B-131 and B-132 closed, F-089-T06 closed, B-136 and B-137 opened. Open PRs #746–#749 not reconciled.
+
+Reconciled in [PR #750](https://github.com/voidbrain/nerv/pull/750), excluding the records changed by open PRs (F-123 in #746, F-122 in #747, F-125 in #748, F-120 in #749). `npm run ci:status` for all 15: every merged run green; #736, #743 and #744 are docs-only (full suite skipped). F-021 (#743) and B-082 (#744) were closed and archived in their own PRs. Closed: B-119 (live P3 probes over 15 s, F-006-T29), B-131 (fix #735, live F-006-T31 check in #738), B-126 (fix #739; five Windows `npm test` runs since 07:53Z on heads with the fix, first attempt, no "database is locked": 45572380286, 45573197048, 45577116814, 45580660697, 45589471622; main pushes skip the Windows suite), B-132 (#733, every Check automated), B-124 (P1; #734, every Check automated; Review: #734 review and re-check, findings fixed in the PR), and step F-089-T06 (#733). Implemented, waiting: B-118 (after B-118-T04, #741, four Windows runs of 352–506 s against a median of about 700 s before; one more needed), B-125 (#740; NERV-01 on `2627d483` and NERV-02 on `1c407fb8` use the bound-reply format; NERV-03 offline for 3 days, must update when back: [page](../acceptance/b125-nerv03-update.md)), B-091 (#742; a fenced stop on Tabgha once it is on `2627d483`), B-135 (#745), B-129 and B-130 (#731), B-134 (#737), each with its owner check. F-006-T30 closed and F-006-T31 implemented in #738. Flakes added: B-076 (`runtime-load.test.ts:11` 20 s timeout in run 45539534019, `brief.test.ts:158` in run 45553326990, both distinct from B-126), B-133 (`print-transfer.test.ts:476` "answered in 331 ms", run 45553326990). F-098-T04 owner run: the fleet on NERV-01 is empty (0 drones since 2026-11-19), so the owner registers the drone and reruns ([page](../acceptance/f098-t04-fleet-crash-live.md)); not a NERV defect. New: B-136 (every `nerv chat` first gets an "(invalid reply)"), B-137 (fleet chat reads a drone's model and version as part categories). B-124's closure makes F-016-T09 (two-device relocation, with B-120's live check) the owner's turn: owner page written ([page](../acceptance/f016-t09-two-device-relocation.md)). Evidence moved to `docs/archive/evidence-2026.md`: B-118, B-091, B-076, F-016. Harness v10.17.0 is out and not reconciled here.
+
+## 2026-11-25 — main `9db5bf8`
+
+PRs #746–#753 and #755 (9) merged on green CI; reconciled in PR #758: F-120-T01, F-122-T01, F-123-T01 and F-125-T01 closed, F-128 opened (F-084 gap). B-126 stays Investigate. Open PRs #754, #756 and #757 not reconciled.
+
+Reconciled in [PR #758](https://github.com/voidbrain/nerv/pull/758), excluding the records changed by open PRs (F-127 in #754, B-139 in #756); #757 (B-126-T03) opened during this reconcile, so B-126 gets evidence only. `npm run ci:status` for all 9: every merged run green; #747, #748, #750, #751 and #752 are docs-only (Windows suite skipped). #750 and #751 are records-only and their changes need no reconcile. Closed steps: F-120-T01 (#752, the coverage review), F-122-T01 (#747, the design; F-122 keeps its four 🧑 owner questions), F-123-T01 (#746, `test/mcp-remote.test.ts`; F-123-T02 is the owner's), F-125-T01 (#753, harness v10.21.1). No record closed. Kept Implemented: F-120-T03 (#749 pins gauntlet-protocol 0.11.1; 54 pending cases wait for the owner-approved run), B-126-T02 (#755, diagnostics; B-126-T03 waits for a failure with the new message). Flake history read from every failed attempt: B-126 (#746 run 45602256057 attempt 1: four "nervous process not ready", before the diagnostics; #754 run 45632224825 already in the record), B-076 (`one-channel.test.ts:180` on Linux, #749 run 45615770730; `runtime-load.test.ts:11` on #746 and #754 attempt 2; `root-migration.test.ts:192` ×4 on #746; `node-bootstrap-execution.test.ts:216` on #754 attempt 3), B-066 (three worker-link 30 s timeouts, #749 run 45618960815 attempt 1). B-118: six first-attempt Windows runs within 12 minutes since #741, but #746 and #749 needed test reruns, so two clean of five. macOS: `native-macos` cancelled with no runner acquired on #752 (run 45622970251 attempt 1) and #755 (run 45640302693 attempt 1), and CodeQL `Analyze (swift)` on #754 (run 45644029795); B-139 (open PR #756) covers it. New: F-128, the F-084 closure check's instruction-load admission and step handoffs (owner approved, from the F-120-T01 finding). The rule tying a closed feature to a Gauntlet case is not placed: the owner's decision is open.

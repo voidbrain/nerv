@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-104-T02",
+  "parent": "F-104",
+  "title": "Token cost compared with outside practice",
+  "goal": "Measured usage against current outside techniques, with adopt/adapt/reject",
+  "status": "closed",
+  "acceptance": [
+    "Uses work-usage reports and rule-load numbers",
+    "Proposals become records, not rule changes"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/**",
+    "docs/work/records/F-104.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-15 at agent speed after the calibration of 2026-11-15. Not a measurement.",
+    "reviewed": "2026-11-15",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 488,
+      "note": "token-cost comparison report"
+    }
+  ]
+}

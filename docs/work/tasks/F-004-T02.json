@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-004-T02",
+  "parent": "F-004",
+  "title": "Reminder CRUD in the workspace",
+  "goal": "Reminder CRUD in the workspace",
+  "status": "closed",
+  "acceptance": [
+    "Create, edit, complete and delete reminders through the existing API with validation and errors shown; axe passes"
+  ],
+  "dependsOn": [
+    "F-004-T01"
+  ],
+  "resources": [
+    "web/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "0 remaining",
+    "basis": "Initial plan from the record's Check at featurePlans adoption; estimate, owner may revise. Numbers backfilled 2026-11-11 at harness 5.4.0 from this estimate (rounded up to a quarter day); the baseline is this estimate, not an original one. Re-estimated 2026-11-11 in agent hours (harness 5.6.0): 3 hours agent; former 2-day estimate at 1.5 agent hours per focused day. Method: 1.5 h/day judged rate (PR #277). Estimate, not a measurement; baselineDays 2 kept as history. Revised 2026-11-12 (PR #298): implemented with inline edit form for active reminders, pre-filling local datetime and title, validating future date and 1-500 char title, sending PATCH through existing API, restoring focus upon keep-as-is or save, displaying errors in role=alert, and satisfying AXE AA in Chrome across viewports in English and Italian; covered in test/angular.browser.mjs. Actual 0.75 h agent (stated).",
+    "reviewed": "2026-11-12",
+    "baselineDays": 2,
+    "agentHours": 0,
+    "baselineAgentHours": 3,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
+  }
+}

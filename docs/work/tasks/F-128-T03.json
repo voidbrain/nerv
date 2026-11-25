@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-128-T03",
+  "parent": "F-128",
+  "title": "Run a split coding job on a scratch repository and record it",
+  "goal": "An agent run shows a refused small-context route and a two-step job with its handoff on a scratch repository",
+  "status": "planned",
+  "acceptance": [
+    "On a scratch repository (as docs/acceptance/f084-scratch-repo-check.md), a route below the threshold is refused with its reason and a two-step job completes from its handoff; commands and output recorded in docs/acceptance/"
+  ],
+  "dependsOn": [
+    "F-128-T02"
+  ],
+  "resources": [
+    "docs/acceptance/**",
+    "docs/work/records/F-128.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design",
+    "typescript"
+  ],
+  "privacy": "Neutral fixtures and a scratch repository only; no personal data, no paid route.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A change of gate class, a paid route or a material effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-25: the F-084-T04 procedure with two more checks, run by the agent. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 1.0,
+    "baselineAgentHours": 1.0,
+    "estimateAgentHours": 1.0
+  }
+}

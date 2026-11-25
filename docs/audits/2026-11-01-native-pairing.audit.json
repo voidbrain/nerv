@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "scoped",
+  "reviewed": "2026-11-01T08:36:51.787Z",
+  "baseline": "9248f101f562f7e469b704c26530966d4ad403eb",
+  "report": "docs/audits/2026-11-01-native-pairing.md",
+  "areas": {
+    "code": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-pairing.md: inspected scope and named tests",
+      "limits": "Scoped local source/backend review; native macOS CI and live GUI/Keychain acceptance are distinct."
+    },
+    "logic": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-pairing.md: inspected scope and named tests",
+      "limits": "Scoped local source/backend review; native macOS CI and live GUI/Keychain acceptance are distinct."
+    },
+    "tests": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-pairing.md: inspected scope and named tests",
+      "limits": "Scoped local source/backend review; native macOS CI and live GUI/Keychain acceptance are distinct."
+    },
+    "documentation": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-pairing.md: inspected scope and named tests",
+      "limits": "Scoped local source/backend review; native macOS CI and live GUI/Keychain acceptance are distinct."
+    },
+    "harness": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-pairing.md: inspected scope and named tests",
+      "limits": "Scoped local source/backend review; native macOS CI and live GUI/Keychain acceptance are distinct."
+    },
+    "security": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-pairing.md: inspected scope and named tests",
+      "limits": "Scoped local source/backend review; native macOS CI and live GUI/Keychain acceptance are distinct."
+    },
+    "delivery": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-pairing.md: inspected scope and named tests",
+      "limits": "Scoped local source/backend review; native macOS CI and live GUI/Keychain acceptance are distinct."
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-pairing.md: inspected scope and named tests",
+      "limits": "Scoped local source/backend review; native macOS CI and live GUI/Keychain acceptance are distinct."
+    }
+  }
+}

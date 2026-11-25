@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-049-T12",
+  "parent": "F-049",
+  "title": "Run the first EVA job on the Linux host",
+  "goal": "Run the first EVA job on the Linux host",
+  "status": "planned",
+  "acceptance": [
+    "The agent runs the first EVA job on the Linux host (Calvary, NERV-03; owner decision 2026-11-18) and the result is recorded"
+  ],
+  "dependsOn": [
+    "F-049-T10"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Join tests on Linux CI; owner real-device check"
+  ],
+  "escalation": [
+    "Owner check: first job on the real mini PC",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Re-estimated 2026-11-20 from 0.5 h to 1.5 h (work-items calibrate since 2026-11-15: median 1.0 over 53 steps, but real-device runs took 1.5–3 h): a first job on the Linux host, like F-009-T03 (Linux service acceptance, 1.5 h against 0.5 h).",
+    "reviewed": "2026-11-20",
+    "baselineDays": 2,
+    "ownerHours": 0,
+    "agentHours": 1.5,
+    "estimateAgentHours": 1.5,
+    "baselineAgentHours": 0.5
+  }
+}

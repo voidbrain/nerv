@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-119-T01",
+  "parent": "F-119",
+  "title": "First skill discovery review",
+  "goal": "The project looks for skill candidates and records the outcomes",
+  "status": "closed",
+  "acceptance": [
+    "docs/reviews/skills/<date>.md written per docs/agents/skills.md",
+    "Each candidate ends in one of the four outcomes, with backlog records for any adopted"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/reviews/skills/**",
+    "docs/work/records/F-119.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement. Closed 2026-11-24 in the reconciliation: PR #709 merged on green CI; the review page exists and every candidate has an outcome.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 709,
+      "note": "first skill discovery review (docs/reviews/skills/2026-11-24.md)"
+    }
+  ]
+}

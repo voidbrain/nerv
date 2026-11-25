@@ -1,0 +1,10 @@
+# Text files stay LF in every checkout, Windows included (Node, the shebang of src/cli.ts and every tool here read LF).
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.jpg binary
+*.sqlite binary
+
+# harness: append-only records (archives, reconciliation log): when two branches both add lines, git keeps both
+# sides instead of reporting a conflict. Never for generated files.
+docs/archive/*.md merge=union

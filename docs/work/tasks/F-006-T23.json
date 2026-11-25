@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T23",
+  "status": "closed",
+  "title": "Run P2 and P3 role-run and neutral-smoke under limits-repeat3",
+  "goal": "P2 (mini PC local) and P3 (mini PC worker, Mac inference) have live repeat-3 results on the same cases and budgets as the Mac P1 baseline",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures and the gauntlet packs only; local models on the enrolled NERV-01 and NERV-02 over Tailscale; 0 paid cloud tokens; raw reports stay in ~/.nerv-private on their base; NERV-01's live service (~/.nerv-app, ~/.nerv) is never stopped, updated or edited.",
+  "acceptance": [
+    "role-run --role=both and neutral-smoke for P2 and P3 with limits-repeat3 (30 s/case, 15 min/suite, 61440 output tokens, repeat 3), the same cases as P1",
+    "Model, digest, runtime version, hardware, memory and sampled concurrent load recorded per option, including the mini PC runtime version",
+    "Pass counts, median latency, queue and network time and output tokens recorded as aggregates; raw reports stay private"
+  ],
+  "dependsOn": [
+    "F-006-T22"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "docs/decisions/placement-campaign.md",
+    "docs/acceptance/f006-placement-p2-p4.md",
+    "docs/evaluations/2026-11-23-f006-t12-placement-evidence.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views",
+    "tools/placement-live.mjs",
+    "test/placement-live.test.mjs"
+  ],
+  "validation": [
+    "Recorded evidence for this slice; scoped checks and required CI"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "A stop rule of the placement campaign aborts the run without fallback or retry",
+    "Anything that needs a credential, an unreachable host or the owner goes back to the owner; NERV-02 is left running"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 (F-006-T22): two packs on two placements at repeat 3, about 120 runs bounded by limits-repeat3; F-006-T11 live device steps took 1.5–3 h. Implemented 2026-11-24 in 1.5 h: P2 smoke 21/30 and roles 9/30 on NERV-02 (Gauntlet, limits-repeat3); P3 smoke 24/30 over WorkerLink; P3 roles blocked by B-119 and the probe's prompt limit (F-006-T27). Closed 2026-11-24 in the reconciliation: PR #698 merged on green CI; live runs recorded in the report.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 698,
+      "note": "equivalent placement runs and updated report; CI pending"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "B-102-T01",
+  "parent": "B-102",
+  "title": "No backlog ID in a string the owner or a model sees",
+  "goal": "Strings in the backend and the dashboard script never name a backlog ID; a test keeps it so",
+  "status": "closed",
+  "acceptance": [
+    "Test committed failing first: every string and template literal of src/*.ts and the dashboard script is free of backlog IDs",
+    "The eleven strings keep their meaning"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "web/public/dashboard/dashboard.js",
+    "test/user-text-ids.test.ts",
+    "docs/work/records/B-102.md",
+    "docs/work/tasks/B-102-T01.json",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-20 from the owner's report and the literal scan. Not a measurement.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 573,
+      "note": "the fix"
+    }
+  ]
+}

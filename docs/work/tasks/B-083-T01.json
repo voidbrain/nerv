@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "parent": "B-083",
+  "id": "B-083-T01",
+  "title": "Inspecting a target whose Node is older than 14 fails with a generic error",
+  "goal": "Inspecting a target whose Node is older than 14 fails with a generic error",
+  "status": "closed",
+  "acceptance": [
+    "Test committed failing first: the probe uses no `node:` require and no `??` or `?.`; on Calvary the inspection reports \"Node.js 12.22.12 on the target is below the version NERV requires (>=24.0.0)\"."
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/node-inspection.ts",
+    "test/**",
+    "docs/work/records/B-083.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-18: four require names and a test. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 517,
+      "note": "this change"
+    }
+  ]
+}

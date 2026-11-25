@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-076-T02",
+  "parent": "F-076",
+  "title": "CI runs on merge_group",
+  "goal": "Every queued combination runs the required checks before it reaches main",
+  "status": "closed",
+  "acceptance": [
+    "ci.yml has a merge_group trigger and the plan job selects checks against main for it",
+    "Required checks validate and native-macos report on a merge_group run"
+  ],
+  "dependsOn": [
+    "F-076-T01"
+  ],
+  "resources": [
+    ".github/workflows/**",
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "gh run list --branch main",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "ci.yml is a harness file: decide project-only or template first (AGENTS.md, \"Changing a harness file\")",
+    "Branch protection is changed by the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-13: one trigger or required-check change, then one observed run. Not a measurement. Cancelled 2026-11-18 by the owner: GitHub refuses a merge queue on this user-owned repository, and CI on every push to main (F-076-T05) replaces it. No actual: cancelled.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

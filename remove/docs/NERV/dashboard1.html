@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NERV MAGI / NODO OS v12.0 [COMPLETE MISSION CONTROL]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+        :root {
+            --nerv-orange: #ff6600;
+            --nerv-red: #ff0033;
+            --nerv-yellow: #ffcc00;
+            --nerv-green: #22c55e;
+            --nerv-blue: #0099ff;
+            --nerv-purple: #a855f7;
+            --nerv-bg: #050508;
+            --nerv-panel: #0d0d12;
+            --nerv-border: rgba(255, 102, 0, 0.35);
+        }
+
+        body {
+            background-color: var(--nerv-bg);
+            color: #ffaa66;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+        }
+
+        body.scanlines-active {
+            background-image:
+                radial-gradient(rgba(255, 102, 0, 0.04) 1px, transparent 0),
+                linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0, 0, 0, 0.35) 51%);
+            background-size: 24px 24px, 100% 4px;
+        }
+
+        .nerv-box {
+            background-color: var(--nerv-panel);
+            border: 1px solid var(--nerv-border);
+            position: relative;
+        }
+
+        .nerv-header-block {
+            background: var(--nerv-orange);
+            color: #000;
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .nerv-btn {
+            border: 1px solid var(--nerv-orange);
+            background: rgba(255, 102, 0, 0.1);
+            color: var(--nerv-orange);
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .nerv-btn:hover, .nerv-btn.active {
+            background: var(--nerv-orange);
+            color: #000;
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
+        }
+
+        .nerv-btn-danger {
+            border: 1px solid var(--nerv-red);
+            background: rgba(255, 0, 51, 0.1);
+            color: var(--nerv-red);
+        }
+
+        .nerv-btn-danger:hover {
+            background: var(--nerv-red);
+            color: #fff;
+            box-shadow: 0 0 12px rgba(255, 0, 51, 0.7);
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 99;
+            display: none;
+        }
+
+        body.scanlines-active .scanline { display: block; }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .blink-anim { animation: blink 1.2s infinite ease-in-out; }
+
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #050508; }
+        ::-webkit-scrollbar-thumb { background: var(--nerv-orange); }
+
+        /* EXACT MAGI SYSTEM SHAPES MATCHING REFERENCE IMAGE (WITH FIXED SOLID VISIBLE BORDERS) */
+        /* WRAPPERS: Keeps the layout clean and contains the clip context */
+.magi-wrapper {
+    position: relative;
+    display: inline-block; /* Alternately use block/flex depending on your layout grid */
+    padding: 2px;          /* Prevents the outer boundary from cutting the 2px border corners */
+}
+
+  /* MAGI-1: CASPER */
+  .magi-casper-shape {
+      /* YOUR EXACT ORIGINAL PROPERTIES */
+      clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 85% 100%, 15% 100%, 0% 70%);
+      background: #1a0000;
+      border: 2px solid var(--nerv-red) !important;
+      box-shadow: inset 0 0 10px rgba(255, 0, 51, 0.4);
+  }
+
+  /* MAGI-2: BALTHASAR */
+  .magi-balthasar-shape {
+      /* YOUR EXACT ORIGINAL PROPERTIES */
+      clip-path: polygon(0% 0%, 85% 0%, 100% 20%, 100% 100%, 0% 100%);
+      background: #02120a;
+      border: 2px solid var(--nerv-green) !important;
+      box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.4);
+  }
+
+  /* MAGI-3: MELCHIOR */
+  .magi-melchior-shape {
+      /* YOUR EXACT ORIGINAL PROPERTIES */
+      clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 20%);
+      background: #02120a;
+      border: 2px solid var(--nerv-green) !important;
+      box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.4);
+  }
+
+        .sephiroth-node {
+            border: 1px dashed rgba(255, 102, 0, 0.4);
+            background: rgba(0, 0, 0, 0.7);
+            transition: all 0.2s ease;
+            text-align: center;
+            padding: 6px;
+            font-size: 9px;
+        }
+        .sephiroth-node.active {
+            border: 2px solid var(--nerv-orange);
+            background: rgba(255, 102, 0, 0.2);
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="p-2 text-xs scanlines-active">
+
+    <div class="scanline"></div>
+
+    <div class="max-w-[1600px] mx-auto flex flex-col gap-2 min-h-screen">
+
+        <!-- HEADER & GEOFRONT NODE SELECTOR -->
+        <header class="nerv-box p-2 border-l-4 border-l-[#ff6600] flex flex-wrap justify-between items-center bg-black/90">
+            <div class="flex items-center gap-3">
+                <div class="bg-[#ff6600] text-black font-black px-2 py-0.5 text-xs tracking-widest flex items-center gap-1">
+                    <span>特務機関NERV</span>
+                    <span class="text-[8px] bg-black text-[#ff6600] px-1">NODO v12</span>
+                </div>
+                <div>
+                    <h1 class="text-xs font-bold tracking-wider text-[#ffaa66]">TACTICAL COMMAND // <span class="text-red-500">中央作戦司令部</span></h1>
+                    <p class="text-[8px] text-zinc-500">SEELE L2/L4 ENFORCEMENT // ADAM & LILITH REPOSITORIES</p>
+                </div>
+            </div>
+
+            <!-- GEOFRONT NODE SELECTOR -->
+            <div class="flex items-center gap-2 bg-zinc-900 px-2 py-0.5 border border-zinc-700">
+                <span class="text-[9px] text-zinc-400">NODE:</span>
+                <select id="geofront-node-select" onchange="switchGeofrontNode(this.value)" class="bg-black text-[#ff6600] font-bold text-[10px] border border-[#ff6600] px-1 py-0.5 focus:outline-none">
+                    <option value="tokyo3">TOKYO-3 [MAC MINI LOCAL BASE]</option>
+                    <option value="usa">NERV-01 [USA CLOUD BASE]</option>
+                    <option value="germany">NERV-02 [GERMANY EDGE]</option>
+                </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="toggleScanlines()" class="nerv-btn px-2 py-0.5 text-[8px]">CRT FX</button>
+                <div class="text-right text-[8px]">
+                    <div id="sys-clock" class="text-[#ff6600] font-bold">2026.11.01 - 20:46:12</div>
+                    <span class="text-emerald-500 font-bold">KAJI MESH SECURE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="grid grid-cols-12 gap-2 flex-1">
+
+            <!-- LEFT COLUMN: INGRESS, WATERMELONS, SYNC STATE & EYE DIAGRAM, LORE -->
+            <section class="col-span-12 lg:col-span-3 flex flex-col gap-2">
+
+                <!-- TASK INGRESS -->
+                <div class="nerv-box p-2">
+                    <div class="nerv-header-block px-2 py-0.5 text-[9px] mb-1.5">ENTRY PLUG INGRESS</div>
+                    <div class="space-y-1">
+                        <button onclick="triggerTask('BLUE')" class="w-full text-left p-1 border border-blue-900 bg-blue-950/20 hover:bg-blue-900/40 text-blue-300 rounded flex justify-between items-center text-[9px]">
+                            <div>
+                                <span class="font-bold">PATTERN BLUE</span>
+                                <span class="text-[7px] text-blue-400 ml-1">Routine sync</span>
+                            </div>
+                            <span class="text-[7px] px-1 bg-blue-900 text-white">AUTO</span>
+                        </button>
+                        <button onclick="triggerTask('ORANGE')" class="w-full text-left p-1 border border-amber-900 bg-amber-950/20 hover:bg-amber-900/40 text-amber-300 rounded flex justify-between items-center text-[9px]">
+                            <div>
+                                <span class="font-bold">PATTERN ORANGE</span>
+                                <span class="text-[7px] text-amber-400 ml-1">Dataset sync</span>
+                            </div>
+                            <span class="text-[7px] px-1 bg-amber-900 text-white">MAGI</span>
+                        </button>
+                        <button onclick="triggerTask('RED')" class="w-full text-left p-1 border border-red-900 bg-red-950/20 hover:bg-red-900/40 text-red-300 rounded flex justify-between items-center text-[9px]">
+                            <div>
+                                <span class="font-bold">PATTERN RED</span>
+                                <span class="text-[7px] text-red-400 ml-1">DB Mutation</span>
+                            </div>
+                            <span class="text-[7px] px-1 bg-red-600 text-black font-bold">HITL</span>
+                        </button>
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-zinc-800">
+                        <button onclick="triggerSpear()" class="nerv-btn nerv-btn-danger w-full py-1 font-bold text-center text-[8px]">
+                            🗡️ SPEAR OF LONGINUS (ROLLBACK)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KAJI'S WATERMELONS (PROGRESSIVE TRUST PIPELINE) -->
+                <div class="nerv-box p-2">
+                    <div class="nerv-header-block px-2 py-0.5 text-[9px] mb-1.5">KAJI'S WATERMELONS (TRUST)</div>
+                    <div class="space-y-1.5 text-[8px]">
+                        <div class="bg-black p-1.5 border border-zinc-800 flex justify-between items-center">
+                            <div>
+                                <span class="text-white font-bold">web_scraper_v2.py</span>
+                                <div class="text-zinc-500 text-[7px]">Stage: Shadow Mode (Day 2/3)</div>
+                            </div>
+                            <span class="text-amber-400 font-bold px-1 bg-amber-950">SHADOW</span>
+                        </div>
+                        <div class="bg-black p-1.5 border border-zinc-800 flex justify-between items-center">
+                            <div>
+                                <span class="text-white font-bold">sql_optimizer.py</span>
+                                <div class="text-zinc-500 text-[7px]">Stage: Full Autonomy (Lilith)</div>
+                            </div>
+                            <span class="text-emerald-400 font-bold px-1 bg-emerald-950">PROMOTED</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SYNC STATE & EYE DIAGRAM (RESTORED & PROMINENT) -->
+                <div class="nerv-box p-2">
+                    <div class="nerv-header-block px-2 py-0.5 text-[9px] mb-1 flex justify-between">
+                        <span>SYNC STATE & EYE DIAGRAM</span>
+                        <span class="text-emerald-400 font-bold" id="sync-ratio-text">94.2% [SYNC OK]</span>
+                    </div>
+                    <div class="bg-black border border-zinc-800 relative h-[100px]">
+                        <canvas id="eyeDiagramCanvas" width="280" height="100" class="w-full h-full"></canvas>
+                        <div class="absolute bottom-1 left-2 text-[7px] text-zinc-500 font-mono">CODE: 473 | SYNC: STABLE</div>
+                    </div>
+                </div>
+
+                <!-- COMPACT EVA HANGAR ROW (1/3 EACH AT BOTTOM) -->
+                <div class="nerv-box p-2">
+                    <div class="nerv-header-block px-2 py-0.5 text-[9px] mb-1 flex justify-between">
+                        <span>EVA BAY HANGAR</span>
+                        <span class="text-emerald-400 font-bold">3 ACTIVE</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <div class="p-1 bg-black border border-emerald-900 flex flex-col items-center text-center">
+                            <div class="w-full h-10 bg-zinc-900 border border-emerald-800 flex items-center justify-center overflow-hidden mb-1 relative">
+                                <img src="assets/eva01.png" alt="EVA-01" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                <span class="text-[8px] text-emerald-400 font-bold absolute" style="display:none;">EVA-01</span>
+                            </div>
+                            <span class="text-[8px] text-emerald-400 font-bold">EVA-01 (Shinji)</span>
+                        </div>
+                        <div class="p-1 bg-black border border-red-900 flex flex-col items-center text-center">
+                            <div class="w-full h-10 bg-zinc-900 border border-red-800 flex items-center justify-center overflow-hidden mb-1 relative">
+                                <img src="assets/eva02.png" alt="EVA-02" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                <span class="text-[8px] text-red-400 font-bold absolute" style="display:none;">EVA-02</span>
+                            </div>
+                            <span class="text-[8px] text-red-400 font-bold">EVA-02 (Asuka)</span>
+                        </div>
+                        <div class="p-1 bg-black border border-blue-900 flex flex-col items-center text-center">
+                            <div class="w-full h-10 bg-zinc-900 border border-blue-800 flex items-center justify-center overflow-hidden mb-1 relative">
+                                <img src="assets/eva08.png" alt="EVA-08" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                <span class="text-[8px] text-blue-400 font-bold absolute" style="display:none;">EVA-08</span>
+                            </div>
+                            <span class="text-[8px] text-blue-400 font-bold">EVA-08 (Mari)</span>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+          <!-- CENTER COLUMN: MAGI CONSENSUS MATRIX, STRICT LINE-BY-LINE STREAM & EVA HANGAR -->
+          <section class="col-span-12 lg:col-span-6 flex flex-col gap-2">
+
+
+            <!-- MAGI CONSENSUS MATRIX (EXACT SHAPES MATCHING REFERENCE IMAGE) -->
+            <div class="nerv-box p-2.5 bg-black/90">
+
+
+                  <section class="col-span-6 flex flex-col gap-2">
+                    <div class="flex justify-between items-center border-b border-[#ff6600] pb-1 mb-1.5">
+                        <div class="text-[9px] font-black tracking-widest text-[#ff6600]">MAGI SYSTEM CONSENSUS MATRIX // 提訴 / 決議</div>
+                        <div class="text-[7px] text-zinc-400 font-mono">CODE: 473 | FILE: MAGI_SYS | PRIORITY: AAA</div>
+                    </div>
+                    <div class="flex flex-col items-center gap-1.5">
+                        <!-- TOP: CASPER 3 -->
+                        <div id="magi-casper-box" class="w-full max-w-[320px] p-2 text-center magi-casper-shape">
+                            <div class="flex justify-between text-[7px] text-red-300 font-mono mb-0.5 px-4">
+                                <span>CASPER • 3 (Cloud Ethics)</span>
+                                <span>BATT 84%</span>
+                            </div>
+                            <div id="casper-status" class="text-xl font-black text-red-500 tracking-widest blink-anim">否決</div>
+                        </div>
+
+                        <div class="w-[2px] h-2 bg-[#ff6600]"></div>
+
+                        <!-- BOTTOM: BALTHASAR 2 & MELCHIOR 1 -->
+                        <div class="grid grid-cols-2 gap-3 w-full">
+                            <div id="magi-balthasar-box" class="p-2 text-center magi-balthasar-shape">
+                                <div class="flex justify-between text-[7px] text-emerald-300 font-mono mb-0.5 px-2">
+                                    <span>BALTHASAR • 2</span>
+                                    <span>RAM 62%</span>
+                                </div>
+                                <div id="balthasar-status" class="text-xl font-black text-emerald-400 tracking-widest">承認</div>
+                            </div>
+
+                            <div id="magi-melchior-box" class="p-2 text-center magi-melchior-shape">
+                                <div class="flex justify-between text-[7px] text-emerald-300 font-mono mb-0.5 px-2">
+                                    <span>MELCHIOR • 1</span>
+                                    <span>CPU 23%</span>
+                                </div>
+                                <div id="melchior-status" class="text-xl font-black text-emerald-400 tracking-widest">承認</div>
+                            </div>
+                        </div>
+
+                        <!-- RESOLUTION BAR -->
+                        <div class="w-full p-1 border border-emerald-500 bg-[#04150d] flex justify-between items-center text-[8px] font-mono">
+                            <span class="text-emerald-400 font-bold">決議:可決</span>
+                            <span class="text-white tracking-wider" id="magi-resolution-text">RESOLUTION APPROVED</span>
+                            <span class="text-emerald-400 font-bold">2 / 3</span>
+                        </div>
+
+
+                    </div>
+                  </section>
+
+                  <section class="col-span-6 flex flex-col gap-2">
+                    <!-- OPTIONAL / ON-DEMAND CLOUD MAGIS & EXPERTS BAR -->
+                    <div class="w-full mt-1 p-1 bg-zinc-900 border border-zinc-700 flex justify-between items-center text-[8px] font-mono">
+                        <span class="text-[#ff6600] font-bold">☁️ OPTIONAL MAGI / EXPERT POOL:</span>
+                        <span class="text-zinc-300">MELCHIOR-2 (AWS) [READY] | JASPER (Tokens) [ACTIVE] | ZARA (Reversibility) [STANDBY]</span>
+                    </div>
+                  </section>
+            </div>
+
+            <!-- TABBED AREA: STRICT LINE-BY-LINE LIVE REASONING STREAM VS PERSONAS CODEC CHAT -->
+            <div class="nerv-box p-2.5 flex-1 flex flex-col h-[220px]">
+                <div class="flex justify-between items-center border-b border-zinc-800 pb-1 mb-1.5">
+                    <div class="flex gap-1">
+                        <button onclick="switchTab('stream')" id="tab-btn-stream" class="nerv-btn active px-2 py-0.5 text-[8px] font-bold">LIVE REASONING STREAM</button>
+                        <button onclick="switchTab('codec')" id="tab-btn-codec" class="nerv-btn px-2 py-0.5 text-[8px] font-bold">PERSONAS CODEC CHAT</button>
+                    </div>
+                    <span class="text-[7px] text-zinc-500">STRICT LINE-BY-LINE COMMS</span>
+                </div>
+
+                <!-- TAB 1: LIVE REASONING STREAM (STRICT SINGLE LINE FORMAT) -->
+                <div id="tab-view-stream" class="tab-pane flex-col bg-black p-2 border border-zinc-800 font-mono overflow-y-auto space-y-1 text-[9px]" style="display: block;">
+                    <div class="text-zinc-400">[20:46:00] [KAJI_MESH] WireGuard tunnel active across Tokyo-3, NERV-01, NERV-02.</div>
+                    <div class="text-zinc-400">[20:46:05] [L1_DOGMA] Terminal Dogma SQLite inbox mounted. Litestream replication nominal.</div>
+                    <div class="text-[#ff6600]">[20:46:07] [ADAM_KERNEL] Raw foundation weights bound. MAGI circuit breakers holding steady.</div>
+                    <div class="text-emerald-400">[20:46:10] [SYSTEM] Ready for task ingestion. Awaiting payload.</div>
+                </div>
+
+                <!-- TAB 2: PERSONAS CODEC CHAT -->
+                <div id="tab-view-codec" class="tab-pane flex-1 flex flex-col gap-1.5" style="display: none;">
+                    <div class="flex gap-1">
+                        <button onclick="switchPersona('naoko')" class="px-1.5 py-0.5 bg-black text-[8px] font-bold text-[#ff6600] border border-[#ff6600]">NAOKO</button>
+                        <button onclick="switchPersona('gendo')" class="px-1.5 py-0.5 bg-black text-[8px] font-bold text-red-500 border border-red-500">GENDO</button>
+                        <button onclick="switchPersona('misato')" class="px-1.5 py-0.5 bg-black text-[8px] font-bold text-blue-400 border border-blue-400">MISATO</button>
+                    </div>
+                    <div class="flex-1 bg-black p-2 border border-zinc-800 overflow-y-auto space-y-2 font-mono text-[9px]" id="persona-chat-log">
+                        <div class="flex gap-2 items-start bg-zinc-900/60 p-1.5 border-l-2 border-l-[#ff6600]">
+                            <div class="w-7 h-7 bg-black border border-[#ff6600] flex items-center justify-center flex-shrink-0">
+                                <span class="text-[8px] text-[#ff6600] font-bold" id="chat-avatar-lbl">NA</span>
+                            </div>
+                            <div>
+                                <span class="text-[#ff6600] font-bold" id="chat-sender-lbl">[NAOKO]:</span>
+                                <span class="text-zinc-200">System initialized. Awaiting task payload.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-1">
+                        <input type="text" id="persona-input" placeholder="Transmit message..." class="flex-1 bg-black border border-zinc-800 p-1 text-white text-[9px] focus:outline-none focus:border-[#ff6600]">
+                        <button onclick="sendPersonaMessage()" class="nerv-btn px-2.5 py-1 text-[8px] font-bold">SEND</button>
+                    </div>
+                </div>
+            </div>
+
+          </section>
+
+            <!-- RIGHT COLUMN: VERTICAL TREE-OF-LIFE JOB FLUX & TRUE 3D SPHERICAL WORLD MAP -->
+            <section class="col-span-12 lg:col-span-3 flex flex-col gap-2">
+
+                <!-- SEPHIROTH TREE JOB FLUX (STATE MACHINE TOPOLOGY) -->
+                <div class="term-box p-2.5">
+                    <div class="term-header px-2 py-0.5 text-[8px] mb-2 flex justify-between">
+                        <span>EXECUTION PIPELINE (SEPHIROTH TREE)</span>
+                        <span class="text-gray-500 font-bold">STATE: IDLE</span>
+                    </div>
+
+                    <!-- SEPHIROTH / BRANCHED TREE LAYOUT CONTAINER -->
+                    <div class="flex flex-col gap-1.5 font-mono text-[9px]">
+                        <!-- Crown / Root Node -->
+                        <div id="tree-1" class="sephiroth-node active w-full rounded">
+                            <span class="font-bold">01. INGRESS & PAYLOAD PARSE</span>
+                        </div>
+
+                        <div class="flex justify-center"><div class="w-[1px] h-2 bg-gray-400"></div></div>
+
+                        <!-- Left / Right Binah & Chokhmah Branches -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div id="tree-2" class="sephiroth-node rounded">
+                                <span class="text-gray-600">02. L3 RISK ROUTER</span>
+                            </div>
+                            <div id="tree-3" class="sephiroth-node rounded">
+                                <span class="text-gray-600">03. L5 CONSENSUS</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center"><div class="w-[1px] h-2 bg-gray-400"></div></div>
+
+                        <!-- Mid Pillar: OpenJEV AST Evaluation -->
+                        <div id="tree-4" class="sephiroth-node w-full rounded">
+                            <span class="text-gray-600">04. L4 AST & CONFIDENCE EVAL</span>
+                        </div>
+
+                        <div class="flex justify-center"><div class="w-[1px] h-2 bg-gray-400"></div></div>
+
+                        <!-- Lower Branches: Sandbox & Ledger -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div id="tree-5" class="sephiroth-node rounded">
+                                <span class="text-gray-600">05. SANDBOX VM</span>
+                            </div>
+                            <div id="tree-6" class="sephiroth-node rounded">
+                                <span class="text-gray-600">06. L1 LEDGER SYNC</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TRUE 3D SPHERICAL WIREFRAME WORLD MAP -->
+                <div class="nerv-box p-2 flex-1">
+                    <div class="nerv-header-block px-2 py-0.5 text-[8px] mb-1.5 flex justify-between">
+                        <span>KAJI MESH GLOBAL SPHERE</span>
+                        <span class="text-amber-400 font-bold">WIREGUARD</span>
+                    </div>
+                    <div class="bg-black border border-[#ff6600]/40 h-[150px] relative flex items-center justify-center overflow-hidden cursor-pointer" onclick="cycleNodeMap()">
+                        <canvas id="worldMapCanvas" width="280" height="150" class="w-full h-full"></canvas>
+                        <div class="absolute bottom-1 left-2 text-[7px] text-[#ff6600] font-bold" id="map-status-label">ACTIVE: TOKYO-3 GEOFRONT</div>
+                    </div>
+                </div>
+
+                 <!-- EXTENDED LORE REGISTRIES -->
+                <div class="nerv-box p-2 flex-1 flex flex-col gap-1 text-[8px]">
+                    <div class="nerv-header-block px-2 py-0.5 text-[8px]">CORE ARCHITECTURAL REGISTRIES</div>
+
+                    <div class="p-1 bg-black border border-zinc-800">
+                        <div class="text-[#ff6600] font-bold">🏛️ DOGMA & LILITH[cite: 3]</div>
+                        <div class="text-zinc-400">SQLite inbox ledger + 24 verified Model Context Protocol (MCP) tools[cite: 3].</div>
+                    </div>
+
+                    <div class="p-1 bg-black border border-zinc-800">
+                        <div class="text-amber-400 font-bold">🧬 ADAM & S² ENGINE</div>
+                        <div class="text-zinc-400">Base weights + local Gemma instances for zero-cost edge inference.</div>
+                    </div>
+
+                    <div class="p-1 bg-black border border-zinc-800">
+                        <div class="text-purple-400 font-bold">👁️ SEELE ENFORCEMENT</div>
+                        <div class="text-zinc-400">Deterministic AST parser & JWT capability tokens.</div>
+                    </div>
+
+                    <div class="p-1 bg-black border border-zinc-800">
+                        <div class="text-blue-400 font-bold">🏠 MISATO'S APARTMENT</div>
+                        <div class="text-zinc-400">HITL approval portal for Pattern Red risks.</div>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        function toggleScanlines() {
+            document.body.classList.toggle('scanlines-active');
+        }
+
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('sys-clock').innerText =
+                now.getFullYear() + '.' +
+                String(now.getMonth()+1).padStart(2,'0') + '.' +
+                String(now.getDate()).padStart(2,'0') + ' - ' +
+                now.toTimeString().split(' ')[0];
+        }, 1000);
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('#tab-btn-stream, #tab-btn-codec').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-view-' + tab).style.display = 'flex';
+            document.getElementById('tab-btn-' + tab).classList.add('active');
+        }
+
+        // SYNC EYE DIAGRAM CANVAS (RESTORED)
+        const eyeCanvas = document.getElementById('eyeDiagramCanvas');
+        const eyeCtx = eyeCanvas.getContext('2d');
+        let phase = 0;
+
+        function drawEyeDiagram() {
+            eyeCtx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            eyeCtx.fillRect(0, 0, eyeCanvas.width, eyeCanvas.height);
+            eyeCtx.lineWidth = 1.2;
+
+            for (let i = 0; i < 6; i++) {
+                eyeCtx.beginPath();
+                eyeCtx.strokeStyle = i % 2 === 0 ? `rgba(255, 0, 128, 0.6)` : `rgba(0, 200, 255, 0.6)`;
+
+                for (let x = 0; x < eyeCanvas.width; x += 4) {
+                    const y = (eyeCanvas.height / 2) + Math.sin(x * 0.03 + phase + (i * 0.2)) * 25 * Math.cos((x / eyeCanvas.width) * Math.PI);
+                    if (x === 0) eyeCtx.moveTo(x, y);
+                    else eyeCtx.lineTo(x, y);
+                }
+                eyeCtx.stroke();
+            }
+            phase += 0.05;
+            requestAnimationFrame(drawEyeDiagram);
+        }
+        drawEyeDiagram();
+
+        // TRUE 3D SPHERICAL WIREFRAME WORLD MAP CANVAS
+        const mapCanvas = document.getElementById('worldMapCanvas');
+        const mapCtx = mapCanvas.getContext('2d');
+        let globeAngle = 0;
+        let selectedLocation = 0;
+        const locations = ["TOKYO-3 GEOFRONT", "NERV-01 USA BASE", "NERV-02 GERMANY EDGE"];
+
+        function drawGlobe() {
+            mapCtx.fillStyle = '#000000';
+            mapCtx.fillRect(0, 0, mapCanvas.width, mapCanvas.height);
+
+            const cx = mapCanvas.width / 2;
+            const cy = mapCanvas.height / 2;
+            const radius = 55;
+
+            mapCtx.strokeStyle = '#ff6600';
+            mapCtx.lineWidth = 1.2;
+            mapCtx.beginPath();
+            mapCtx.arc(cx, cy, radius, 0, 2 * Math.PI);
+            mapCtx.stroke();
+
+            for (let lat = -Math.PI / 3; lat <= Math.PI / 3; lat += Math.PI / 6) {
+                let ringRadius = radius * Math.cos(lat);
+                let ringY = cy + radius * Math.sin(lat);
+                mapCtx.beginPath();
+                mapCtx.ellipse(cx, ringY, ringRadius, ringRadius * 0.2, 0, 0, 2 * Math.PI);
+                mapCtx.strokeStyle = 'rgba(255, 102, 0, 0.4)';
+                mapCtx.stroke();
+            }
+
+            for (let i = 0; i < 4; i++) {
+                let angle = globeAngle + (i * Math.PI / 4);
+                mapCtx.beginPath();
+                mapCtx.ellipse(cx, cy, radius * Math.abs(Math.sin(angle)), radius, 0, 0, 2 * Math.PI);
+                mapCtx.strokeStyle = 'rgba(255, 102, 0, 0.4)';
+                mapCtx.stroke();
+            }
+
+            globeAngle += 0.01;
+            requestAnimationFrame(drawGlobe);
+        }
+        drawGlobe();
+
+        function cycleNodeMap() {
+            selectedLocation = (selectedLocation + 1) % locations.length;
+            document.getElementById('map-status-label').innerText = "ACTIVE: " + locations[selectedLocation];
+        }
+
+        // TASK SIMULATION & VERTICAL TREE FLUX STATE MACHINE (STRICT LINE-BY-LINE)
+        function triggerTask(pattern) {
+            const stream = document.getElementById('tab-view-stream');
+            const time = new Date().toTimeString().split(' ')[0];
+
+            for(let i=1; i<=6; i++) document.getElementById(`tree-${i}`).classList.remove('active');
+
+            if (pattern === 'BLUE') {
+                document.getElementById('tree-1').classList.add('active');
+                setTimeout(() => document.getElementById('tree-3').classList.add('active'), 200);
+                setTimeout(() => document.getElementById('tree-5').classList.add('active'), 400);
+                setTimeout(() => document.getElementById('tree-6').classList.add('active'), 600);
+                stream.innerHTML += `<div class="text-blue-400">[${time}] [MISATO] Pattern Blue received. Auto-passed MAGI consensus. Executing in LCL Sandbox.</div>`;
+            } else if (pattern === 'ORANGE') {
+                document.getElementById('tree-1').classList.add('active');
+                setTimeout(() => document.getElementById('tree-2').classList.add('active'), 200);
+                setTimeout(() => document.getElementById('tree-3').classList.add('active'), 400);
+                setTimeout(() => document.getElementById('tree-4').classList.add('active'), 600);
+                stream.innerHTML += `<div class="text-amber-400">[${time}] [GENDO] Pattern Orange received. Polling MAGI 3-node consensus & Ritsuko Lab.</div>`;
+            } else if (pattern === 'RED') {
+                document.getElementById('tree-1').classList.add('active');
+                setTimeout(() => document.getElementById('tree-2').classList.add('active'), 200);
+                setTimeout(() => document.getElementById('tree-3').classList.add('active'), 400);
+                setTimeout(() => document.getElementById('tree-4').classList.add('active'), 600);
+                stream.innerHTML += `<div class="text-red-400">[${time}] [MISATO HITL] Pattern Red intercepted! Routing to Misato's Apartment for manual sign-off.</div>`;
+            }
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function triggerSpear() {
+            const stream = document.getElementById('tab-view-stream');
+            const time = new Date().toTimeString().split(' ')[0];
+            stream.innerHTML += `<div class="text-red-500 font-bold">[${time}] 🗡️ SPEAR OF LONGINUS ACTIVATED! Capability tokens revoked & SQLite rolled back.</div>`;
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function switchGeofrontNode(node) {
+            const stream = document.getElementById('tab-view-stream');
+            const time = new Date().toTimeString().split(' ')[0];
+            stream.innerHTML += `<div class="text-emerald-400">[${time}] [GEOFRONT] Switched tactical node base to: ${node.toUpperCase()}</div>`;
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        let currentPersona = 'naoko';
+        function switchPersona(p) {
+            currentPersona = p;
+            const lbl = document.getElementById('chat-avatar-lbl');
+            const sender = document.getElementById('chat-sender-lbl');
+            if(p === 'naoko') { lbl.innerText = "NA"; sender.innerText = "[NAOKO]:"; sender.className = "text-[#ff6600] font-bold"; }
+            else if(p === 'gendo') { lbl.innerText = "GI"; sender.innerText = "[GENDO]:"; sender.className = "text-red-500 font-bold"; }
+            else if(p === 'misato') { lbl.innerText = "MK"; sender.innerText = "[MISATO]:"; sender.className = "text-blue-400 font-bold"; }
+        }
+
+        function sendPersonaMessage() {
+            const input = document.getElementById('persona-input');
+            const log = document.getElementById('persona-chat-log');
+            if(!input.value.trim()) return;
+
+            log.innerHTML += `<div class="flex gap-2 items-start bg-zinc-900/60 p-1.5 border-l-2 border-l-blue-500">
+                <div class="w-7 h-7 bg-black border border-blue-500 flex items-center justify-center flex-shrink-0"><span class="text-[8px] text-blue-500 font-bold">OP</span></div>
+                <div><span class="text-blue-400 font-bold">[OPERATOR]:</span> <span class="text-zinc-200">${input.value}</span></div></div>`;
+
+            setTimeout(() => {
+                let reply = "Directive processed and logged in Terminal Dogma.";
+                let col = "#ff6600";
+                if(currentPersona === 'naoko') { reply = "System parameters verified against Lilith tool registries."; col = "#ff6600"; }
+                if(currentPersona === 'gendo') { reply = "Task risk classification confirmed. Routing through MAGI matrix."; col = "#ff0033"; }
+                if(currentPersona === 'misato') { reply = "Interlock signature evaluated. Token released."; col = "#0099ff"; }
+
+                log.innerHTML += `<div class="flex gap-2 items-start bg-zinc-900/60 p-1.5 border-l-2" style="border-color:${col}">
+                    <div class="w-7 h-7 bg-black border flex items-center justify-center flex-shrink-0" style="border-color:${col}"><span class="text-[8px] font-bold" style="color:${col}">${currentPersona.substring(0,2).toUpperCase()}</span></div>
+                    <div><span class="font-bold" style="color:${col}">[${currentPersona.toUpperCase()}]:</span> <span class="text-zinc-200">${reply}</span></div></div>`;
+                log.scrollTop = log.scrollHeight;
+            }, 500);
+
+            input.value = "";
+        }
+    </script>
+</body>
+</html>

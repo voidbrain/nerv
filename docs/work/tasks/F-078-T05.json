@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "id": "F-078-T05",
+  "parent": "F-078",
+  "title": "Prepare Tabgha for the campaign: download qwen2.5:3b",
+  "goal": "Tabgha is ready for the remote-endpoint and small-model campaign",
+  "status": "closed",
+  "acceptance": [
+    "The owner allowed the agent to run the campaign on Tabgha over SSH (2026-11-18)",
+    "qwen2.5:3b is downloaded on Tabgha"
+  ],
+  "dependsOn": [
+    "F-078-T02",
+    "F-078-T04"
+  ],
+  "resources": [
+    "evals/**",
+    "docs/evaluations/**",
+    "docs/agents/model-profiles.json",
+    "docs/work/records/**",
+    "generated:backlog-views",
+    "docs/evaluations/2026-11-13-model-inventory.md"
+  ],
+  "capabilities": [
+    "structured-tools",
+    "privacy-review"
+  ],
+  "privacy": "Reports stay private under artifacts/; only metadata (identity, counts, outcomes) enters Git. No prompts, replies or credentials.",
+  "validation": [
+    "node tools/gauntlet.mjs pending",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A model campaign runs only inside the scope and budget the owner approved in F-078-T02",
+    "A model failure that NERV can fix becomes a B- record with a failing test first",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Moved to the agent 2026-11-18 (0.25 h owner → agent).",
+    "reviewed": "2026-11-18",
+    "ownerHours": 0,
+    "agentHours": 0,
+    "estimateAgentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 515,
+      "note": "evidence"
+    }
+  ]
+}

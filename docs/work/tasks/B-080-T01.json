@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "parent": "B-080",
+  "id": "B-080-T01",
+  "title": "Lifecycle commands join PATH with the platform separator",
+  "goal": "Lifecycle commands start their helpers on Windows",
+  "status": "closed",
+  "acceptance": [
+    "Test committed failing first: childPath joins with ; on win32 and : elsewhere",
+    "On Tabgha, lifecycle-inspect writes a plan"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/node-lifecycle-execution.ts",
+    "test/node-lifecycle-execution.test.ts",
+    "docs/work/records/B-080.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-18: a separator, a helper and a test, plus a live check on Tabgha. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 516,
+      "note": "fix"
+    },
+    {
+      "pr": 519,
+      "note": "closure and review should-fix"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "F-049-T02",
+  "parent": "F-049",
+  "title": "EVA class definitions and least-class admission",
+  "goal": "EVA-00…03 as data in src/ with what each may touch, and admission that picks the least class a job needs and refuses a job asking above its grant",
+  "status": "closed",
+  "acceptance": [
+    "EVA-00 no external effects, EVA-01 bounded, EVA-02 full grant, EVA-03 quarantine for untrusted input, defined as data with filesystem, network, credential and resource fields",
+    "Admission uses existing NERV grants and the T01 contract; it never adds an approval authority",
+    "Unit tests for least-class choice and refusal"
+  ],
+  "dependsOn": [
+    "F-049-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Plain TypeScript unit tests; npm test"
+  ],
+  "escalation": [
+    "New upstream API work belongs to its owning repository; NERV supplies adapters"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 hours",
+    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
+    "reviewed": "2026-11-14",
+    "baselineDays": 1,
+    "agentHours": 0,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated",
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 0.75
+  }
+}

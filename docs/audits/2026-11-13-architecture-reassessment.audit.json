@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "scoped",
+  "reviewed": "2026-11-13T18:13:02.000Z",
+  "baseline": "a4081d56b95dcb63e364f8fc10047ea5245c6a44",
+  "report": "docs/audits/2026-11-13-architecture-reassessment.md",
+  "areas": {
+    "logic": {
+      "result": "checked",
+      "evidence": "Serve composition, peer handlers, model endpoints and evaluation source identity compared with the 2026-11-08 decisions; dispatch and abstain paths traced; B-058 confirmed by reproduction.",
+      "limits": "Architecture boundaries only; no full audit, model quality, live host or physical-device acceptance."
+    },
+    "documentation": {
+      "result": "checked",
+      "evidence": "Kaji guide gained the sortie-inspection rule; the 2026-11-08 remote-inference statement is superseded in this report.",
+      "limits": "Only documents tied to the reviewed boundaries."
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "F-051, F-076, F-077, F-078 reconciled; B-059, F-079, F-080 opened for the findings.",
+      "limits": "Only records tied to the reviewed boundaries."
+    }
+  }
+}

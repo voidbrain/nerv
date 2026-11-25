@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-120-T01",
+  "parent": "F-120",
+  "title": "Catch-up Gauntlet coverage review of closed features",
+  "goal": "Every closed NERV feature is classed: NERV-specific case needed, general capability (gauntlet-protocol request), or no model-facing behaviour",
+  "status": "closed",
+  "acceptance": [
+    "docs/reviews/gauntlet-coverage/2026-11-24.md (or the run date) lists each closed feature since F-074 with its class and reason",
+    "Each NERV-specific gap becomes a proposed case in F-120-T02 with expected outcome; general gaps are listed as requests for gauntlet-protocol, not as NERV work",
+    "Starts from the \"Area coverage\" list in docs/test-capability-index.md: every area with 0 mapped cases (coding, code-review, math, logic-planning, cad-3d, backlog-management, estimation, research, audio-video, scheduling-time at 2026-11-24) ends with a decision: NERV system-pack case, gauntlet-protocol request, or a stated reason to skip"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/reviews/gauntlet-coverage/**",
+    "docs/work/records/F-120.md",
+    "docs/work/tasks/F-120-T02.json",
+    "generated:backlog-views",
+    "docs/test-capability-index.md"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Implemented 2026-11-25 in docs/reviews/gauntlet-coverage/2026-11-25.md and F-120-T02; CI and merge remain. Not a measurement. Closed 2026-11-25: PR #752 merged on green CI (run 45622970251, docs-only, full suite skipped); every acceptance item is the review document, checked by npm run check:fast. No actual: the Gemini draft and the Claude review ran in separate sessions with no complete usage record (work-usage coverage unavailable).",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 752
+    }
+  ]
+}

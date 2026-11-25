@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T27",
+  "status": "closed",
+  "title": "Make the placement probe carry role-sized prompts",
+  "goal": "The placement probe carries Casper's and Misato's own system messages unchanged, on P2 and across WorkerLink for P3",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures and the gauntlet packs only; local models on the enrolled NERV-01 and NERV-02 over Tailscale; 0 paid cloud tokens; raw reports stay in ~/.nerv-private on their base; NERV-01's live service (~/.nerv-app, ~/.nerv) is never stopped, updated or edited.",
+  "acceptance": [
+    "The placement probe carries a system message and prompts the size of Misato's (about 18,000 characters), with validated limits and a regression test",
+    "The remote inference contract carries a system message that size between bases, with a test across the HTTP route, the runtime and WorkerLink",
+    "A message whose encoded frame exceeds 64 KiB is refused on its own and leaves the WorkerLink session up (review of PR #714)"
+  ],
+  "dependsOn": [
+    "F-006-T26",
+    "B-119-T01"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "docs/decisions/placement-campaign.md",
+    "docs/acceptance/f006-placement-p2-p4.md",
+    "docs/evaluations/2026-11-23-f006-t12-placement-evidence.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views",
+    "src/placement-campaign.ts",
+    "src/model.ts",
+    "src/server.ts",
+    "tools/placement-live.mjs",
+    "test/placement-campaign.test.ts",
+    "test/orchestration-selection.test.ts",
+    "test/placement-live.test.mjs",
+    "docs/decisions/remote-inference.md",
+    "src/worker-link.ts"
+  ],
+  "validation": [
+    "Recorded evidence for this slice; scoped checks and required CI"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "A stop rule of the placement campaign aborts the run without fallback or retry",
+    "Anything that needs a credential, an unreachable host or the owner goes back to the owner; NERV-02 is left running"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 (F-006-T26): probe field and limit change with tests (1 h), rerun and evidence update (1 h). Split 2026-11-24: the rerun needs both bases updated (owner, F-006-T28) and moved to F-006-T29. Implemented 2026-11-24 in 2 h (with the review fix): probe system field, byte limits, WorkerLink system bound 8 → 24 KiB, join test. Closed 2026-11-24 in the reconciliation: PR #714 merged on green CI; the live role-sized run is F-006-T29 after F-006-T28.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2,
+    "actualAgentHours": 2,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 714,
+      "note": "probe system field, role-sized limits, frame refusal without ending the session; CI pending"
+    }
+  ]
+}

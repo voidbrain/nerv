@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-044-T03",
+  "parent": "F-044",
+  "title": "Typo-tolerant recall",
+  "goal": "Typo-tolerant recall",
+  "status": "closed",
+  "acceptance": [
+    "Recall finds a fact despite a small typo in the request or fact; exact matches rank first"
+  ],
+  "dependsOn": [
+    "F-044-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
+    "reviewed": "2026-11-14",
+    "baselineDays": 1,
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.25,
+    "actualSource": "measured"
+  }
+}

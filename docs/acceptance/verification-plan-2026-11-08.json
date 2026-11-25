@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "full": false,
+  "reasons": [
+    "Current full-run evidence; affected checks selected"
+  ],
+  "groups": [],
+  "files": [
+    "docs/BACKLOG.md",
+    "docs/ROADMAP.md",
+    "docs/acceptance/verification-2026-11-08.md",
+    "docs/agents/backlog-dependencies.md",
+    "docs/agents/backlog-queue.md",
+    "docs/archive/backlog-2026.md",
+    "docs/archive/reconciliation-2026.md"
+  ],
+  "baseline": {
+    "run": 42480170710,
+    "commit": "a2f3496b7ae1fb77033cd758327d8ee46cadbdf7",
+    "completed": "2026-11-08T12:28:30Z",
+    "mergedPRs": 0
+  },
+  "limits": {
+    "days": 7,
+    "prs": 10
+  }
+}

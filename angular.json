@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "cli": {
+    "analytics": false
+  },
+  "projects": {
+    "nerv": {
+      "projectType": "application",
+      "root": "web",
+      "sourceRoot": "web/src",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "web/src/main.ts",
+            "tsConfig": "web/tsconfig.app.json",
+            "index": "web/src/index.html",
+            "styles": [
+              "web/src/styles.css"
+            ],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "web/public",
+                "output": "/"
+              }
+            ],
+            "outputPath": "dist/web",
+            "optimization": {
+              "styles": {
+                "inlineCritical": false
+              }
+            },
+            "serviceWorker": "web/ngsw-config.json"
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "all"
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "nerv:build",
+            "port": 4318
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "id": "F-114-T02",
+  "parent": "F-114",
+  "title": "FPV pack: batteries, fleet, builds and blackbox behind the manifest",
+  "goal": "All FPV tools, tables, phrases, captions and panels come from one pack",
+  "status": "closed",
+  "acceptance": [
+    "No FPV import left in store.ts, runtime-chat.ts, telegram.ts or server.ts outside the pack registration",
+    "Existing FPV tests pass unchanged; a test shows FPV off hides its tools and keeps its data"
+  ],
+  "dependsOn": [
+    "F-114-T01"
+  ],
+  "resources": [
+    "src/batteries.ts",
+    "src/battery-health.ts",
+    "src/battery-storage-reminders.ts",
+    "src/fleet.ts",
+    "src/fpv-builds.ts",
+    "src/store.ts",
+    "src/runtime-chat.ts",
+    "src/telegram.ts",
+    "src/server.ts",
+    "test/**",
+    "docs/work/records/F-114.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-20: move wiring out of four core files into the pack. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 0,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": [
+    {
+      "pr": 628,
+      "note": "FPV pack behind the manifest"
+    }
+  ]
+}

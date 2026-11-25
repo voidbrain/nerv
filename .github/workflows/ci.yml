@@ -1,0 +1,287 @@
+name: CI
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Run the complete deterministic suite
+        type: boolean
+        default: true
+  schedule:
+    - cron: '0 7 * * 1'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      full: ${{ steps.select.outputs.full }}
+      groups: ${{ steps.select.outputs.groups }}
+      paths: ${{ steps.select.outputs.paths }}
+      unit: ${{ steps.select.outputs.unit }}
+      frontend: ${{ steps.select.outputs.frontend }}
+      native: ${{ steps.select.outputs.native }}
+      service: ${{ steps.select.outputs.service }}
+      docs_only: ${{ steps.changes.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - id: select
+        name: Select affected checks and verify full-run freshness
+        run: node tools/plan-verification.mjs --github-output
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NERV_FULL_CHECKS: ${{ github.event_name == 'workflow_dispatch' && inputs.full }}
+      # B-139: a pull request that changes only these paths starts no Windows or macOS runner. Docs-only means every
+      # changed file is under docs/ (records, tasks, generated backlog views, guides, archives), a Markdown file at the
+      # repository root, or LICENSE. Any other path, and every push, merge-queue, manual and scheduled run, is not.
+      - id: changes
+        name: Docs-only pull request (no Windows or macOS runner)
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          docs_only=false
+          if [ "$EVENT" = pull_request ]; then
+            files=$(git diff --no-renames --name-only "$BASE...$HEAD")
+            other=$(printf '%s\n' "$files" | grep -vE '^(docs/.+|[^/]+\.md|LICENSE)$' || true)
+            if [ -n "$files" ] && [ -z "$other" ]; then docs_only=true; fi
+          fi
+          echo "docs_only=$docs_only" >> "$GITHUB_OUTPUT"
+          echo "Docs-only pull request: $docs_only"
+  validate:
+    needs: plan
+    runs-on: ubuntu-latest
+    # A hang fails in minutes instead of holding the PR for hours (the Windows test hang of 2026-11-05).
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # check:backlog compares the built ledger with origin/backlog-views (F-125-T02)
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Install Linux EVA sandbox (bubblewrap)
+        if: needs.plan.outputs.full == 'true' || needs.plan.outputs.unit == 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq bubblewrap
+      - name: Source-owned records, tasks and model profiles (before every step that reads the ledger)
+        run: npm run check:work
+      - name: Backlog prerequisite validation
+        run: npm run check:dependencies
+      - name: Backlog work-queue validation
+        run: npm run check:queue
+
+      - name: Locked dependency SBOM
+        run: npm sbom --package-lock-only --sbom-format cyclonedx > dependencies.cdx.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dependency-sbom
+          path: dependencies.cdx.json
+          if-no-files-found: error
+      - run: npm run check:evals
+      - run: npm run check:gauntlet-index
+      - run: npm run check:gauntlet-runs
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run check:tooling
+      - if: needs.plan.outputs.unit == 'true'
+        run: npm run typecheck
+      # The suite once, with coverage; the table is printed (warnings, coverage.enforce off).
+      - if: needs.plan.outputs.full == 'true'
+        run: npm run test:coverage
+      - name: Test file timings
+        if: always() && needs.plan.outputs.full == 'true'
+        run: node tools/test-timing-reporter.mjs
+      - name: Affected Node regressions
+        if: needs.plan.outputs.full != 'true' && needs.plan.outputs.unit == 'true'
+        run: node tools/selected-tests.mjs
+        env:
+          NERV_VERIFY_GROUPS: ${{ needs.plan.outputs.groups }}
+          NERV_VERIFY_PATHS: ${{ needs.plan.outputs.paths }}
+      - name: Code coverage table (warnings; optional enforcement)
+        if: needs.plan.outputs.full == 'true'
+        run: node tools/coverage-table.mjs --check --github
+      - if: needs.plan.outputs.frontend == 'true' || needs.plan.outputs.service == 'true'
+        run: npm run build
+      - name: Angular bilingual browser acceptance
+        if: needs.plan.outputs.frontend == 'true'
+        run: npm run test:browser
+        env:
+          NERV_BROWSER_ARTIFACTS: ${{ runner.temp }}/nerv-browser
+      - name: Evaluation evidence
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: evaluation-evidence
+          path: artifacts/evaluations/*.json
+          if-no-files-found: ignore
+          retention-days: 14
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: angular-browser
+          path: ${{ runner.temp }}/nerv-browser
+          if-no-files-found: ignore
+      - if: needs.plan.outputs.service == 'true'
+        run: npm run test:headless
+      - run: npm run check:backlog
+      - name: The PR names itself in a record (F-105)
+        if: github.event_name == 'pull_request'
+        run: npm run check:pr-record
+      - name: No merge conflict markers (B-089)
+        run: npm run check:conflicts
+      - run: npm run check:recap
+      # F-125-T02: check:recap has just written this week's recap into the fresh build; later checks rebuild without it.
+      - name: Which backlog views
+        id: views
+        run: echo "built=$(node -p "const w = require('./.harness.json').workItems; Boolean(w?.enabled && w.views === 'built')")" >> "$GITHUB_OUTPUT"
+      - name: Built backlog views, attached to the run (F-096)
+        if: steps.views.outputs.built == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: backlog-views
+          path: docs/BACKLOG.md
+          if-no-files-found: error
+          retention-days: 30
+      - run: npm run check:roadmap
+      - run: npm run check:conventions
+      - run: npm run check:integrations
+      - run: npm run check:rules
+      - name: Rule load budgets (warnings only)
+        run: npm run check:rule-load
+      - run: npm run check:maintenance
+      - run: npm run check:audits
+      - run: git clone --branch v7.1.1 --depth 1 https://github.com/voidbrain/project-harness "$RUNNER_TEMP/project-harness"
+      - run: npm run check:freshness
+        env:
+          HARNESS_HOME: ${{ runner.temp }}/project-harness
+
+  # F-037: Windows bases (Tabgha). The suite, the build, and the real Task Scheduler service install.
+  windows:
+    needs: plan
+    # B-139: skipped (which satisfies a required check) only on a docs-only PR for which the plan selected no Node work.
+    if: needs.plan.outputs.docs_only != 'true' || needs.plan.outputs.unit == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Windows scope
+        shell: bash
+        run: echo "Full=${{ needs.plan.outputs.full }}; selected Node work=${{ needs.plan.outputs.unit }}; service=${{ needs.plan.outputs.service }}"
+      - if: needs.plan.outputs.unit == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - if: needs.plan.outputs.unit == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - if: needs.plan.outputs.unit == 'true'
+        run: npm ci
+      - if: needs.plan.outputs.unit == 'true'
+        run: npm run typecheck
+      - if: needs.plan.outputs.frontend == 'true' || needs.plan.outputs.service == 'true'
+        run: npm run build
+      # B-076: a hung suite stops here, before the job limit, and its report (written as tests finish) is kept, so the
+      # test that hung is the one after the last line of the report.
+      - if: needs.plan.outputs.full == 'true'
+        run: npm test
+        timeout-minutes: 18
+      # B-118: the slowest files, and any file that started but never finished (the one a stopped run hung in).
+      - name: Test file timings
+        if: always() && needs.plan.outputs.full == 'true'
+        run: node tools/test-timing-reporter.mjs
+      - if: always() && needs.plan.outputs.full == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-test-report
+          # Both names start with a dot: without include-hidden-files the upload finds nothing (B-118).
+          path: |
+            .test-report.txt
+            .test-timings.txt
+          include-hidden-files: true
+          if-no-files-found: ignore
+      - name: Affected Node regressions
+        if: needs.plan.outputs.full != 'true' && needs.plan.outputs.unit == 'true'
+        run: node tools/selected-tests.mjs
+        env:
+          NERV_VERIFY_GROUPS: ${{ needs.plan.outputs.groups }}
+          NERV_VERIFY_PATHS: ${{ needs.plan.outputs.paths }}
+      - if: needs.plan.outputs.service == 'true'
+        run: node --test test/windows-service.integration.ts
+
+  native-macos:
+    needs: plan
+    # B-139: skipped (which satisfies the required check) only on a docs-only PR for which the plan selected no native work.
+    if: needs.plan.outputs.docs_only != 'true' || needs.plan.outputs.native == 'true'
+    runs-on: macos-15
+    # B-139: the cancellations of 2026-11-25 at about 15 minutes with no step run were GitHub failing to acquire a macOS
+    # runner ("not acquired by Runner of type hosted even after multiple attempts"), not this limit, which counts only
+    # once a runner has the job; raising it would not have saved them.
+    timeout-minutes: 30
+    steps:
+      - name: macOS scope
+        run: echo "Native work selected=${{ needs.plan.outputs.native }}"
+      - if: needs.plan.outputs.native == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - if: needs.plan.outputs.native == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - if: needs.plan.outputs.native == 'true'
+        run: npm ci
+      - if: needs.plan.outputs.native == 'true'
+        run: swift build --package-path native/NervMenuBar
+      - name: Native pairing and pinned TLS tests
+        if: needs.plan.outputs.native == 'true'
+        shell: bash
+        run: |
+          export NERV_NATIVE_FIXTURE="$RUNNER_TEMP/nerv-native-invitation"
+          node test/native-fixture.ts &
+          fixture_pid=$!
+          trap 'kill "$fixture_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..50}; do
+            test -s "$NERV_NATIVE_FIXTURE" && break
+            sleep 0.1
+          done
+          swift test --package-path native/NervMenuBar
+      - if: needs.plan.outputs.native == 'true'
+        run: sh native/build-app.sh
+      - if: needs.plan.outputs.native == 'true'
+        run: ditto -c -k --sequesterRsrc --keepParent dist/NERV.app dist/NERV-macOS.zip
+      - if: needs.plan.outputs.native == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: NERV-macOS
+          path: dist/NERV-macOS.zip
+
+  full-suite:
+    needs: [plan, validate, windows, native-macos]
+    if: always() && needs.plan.outputs.full == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Establish successful complete deterministic evidence
+        env:
+          PLAN: ${{ needs.plan.result }}
+          VALIDATE: ${{ needs.validate.result }}
+          WINDOWS: ${{ needs.windows.result }}
+          NATIVE: ${{ needs.native-macos.result }}
+        run: |
+          test "$PLAN" = success
+          test "$VALIDATE" = success
+          test "$WINDOWS" = success
+          test "$NATIVE" = success

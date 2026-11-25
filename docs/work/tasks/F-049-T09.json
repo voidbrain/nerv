@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "F-049-T09",
+  "parent": "F-049",
+  "title": "Dashboard shows instances per class",
+  "goal": "Replace the drawn EVA cages with live instances per class, per machine",
+  "status": "implemented",
+  "prs": [
+    {
+      "pr": 580,
+      "note": "implementation"
+    }
+  ],
+  "acceptance": [
+    "Instances per class with pilot, job and state; empty classes say so",
+    "Follows docs/STYLE-GUIDE.md; passes AXE and WCAG AA",
+    "Browser test"
+  ],
+  "dependsOn": [
+    "F-049-T07"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Browser/accessibility test; npm run build"
+  ],
+  "escalation": [
+    "New upstream API work belongs to its owning repository; NERV supplies adapters"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "reviewed": "2026-11-13",
+    "baselineDays": 1,
+    "agentHours": 0.25,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 0.25
+  }
+}

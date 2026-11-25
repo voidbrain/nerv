@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T18",
+  "status": "closed",
+  "title": "Approve the Mac operating-conditions plan and budgets",
+  "goal": "Approve the Mac operating-conditions plan and budgets",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "acceptance": [
+    "Mac operating-conditions plan (heavy, moderate, idle) with budgets"
+  ],
+  "dependsOn": [
+    "F-006-T05"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Owner decision 2026-11-15: approved the Mac operating-conditions plan (heavy, moderate, idle; local Ollama only, 0 paid tokens) with 3 runs per case and gemma4:12b as the constant model (the model the Mac serves in placement P3); F-006-T20 restates the budgets. No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
+    "baselineDays": 0.5,
+    "ownerHours": 0,
+    "agentHours": 0,
+    "ownerKind": "decision"
+  },
+  "ownerLink": "docs/decisions/mac-operating-conditions.md"
+}

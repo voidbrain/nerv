@@ -1,0 +1,43 @@
+{
+ "version": 1,
+ "id": "F-051-T07",
+ "parent": "F-051",
+ "title": "Decide which sorties a peer base may inspect",
+ "goal": "A peer base reads only the sorties the owner chose to share over the Kaji line",
+ "status": "closed",
+ "acceptance": [
+  "Owner decision 2026-11-13: all sorties, for any enrolled base",
+  "Unknown and revoked bases are refused by the signed link (existing tests in test/kaji-link.test.ts and test/one-channel.test.ts)",
+  "The choice is documented in docs/guides/kaji-and-nodes.md"
+ ],
+ "dependsOn": [],
+ "resources": [
+  "src/**",
+  "test/**",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "bounded-edit",
+  "regression-design",
+  "privacy-review"
+ ],
+ "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+ "validation": [
+  "Cross-base regression through the signed Kaji call; final applicable CI"
+ ],
+ "escalation": [
+  "A change to what crosses the Kaji line goes to a fresh-context design review"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "1 h agent + 0.25 h owner",
+  "basis": "Decision 2026-11-13: all sorties; no code change, a guide line. Took about 0.1 h agent.",
+  "reviewed": "2026-11-13",
+  "agentHours": 0,
+  "ownerHours": 0,
+  "baselineAgentHours": 1,
+  "estimateAgentHours": 1,
+  "ownerKind": "decision"
+ }
+}

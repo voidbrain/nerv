@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "id": "F-049-T10",
+  "parent": "F-049",
+  "title": "Linux host enforcement and join tests in CI",
+  "goal": "The same runner contract on the Linux mini PC host, with the T05 join tests",
+  "status": "implemented",
+  "prs": [
+    {
+      "pr": 581,
+      "note": "implementation"
+    }
+  ],
+  "acceptance": [
+    "Enforcement mechanism chosen for Linux against the T01 threat model",
+    "T05 join tests pass on Linux in CI"
+  ],
+  "dependsOn": [
+    "F-049-T05"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/architecture/**",
+    "docs/decisions/**",
+    "docs/work/records/F-049.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Join tests on Linux CI; owner real-device check"
+  ],
+  "escalation": [
+    "Owner check: first job on the real mini PC"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Re-estimated 2026-11-14 from 0.5 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
+    "reviewed": "2026-11-14",
+    "agentHours": 0.75,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 0.75
+  }
+}

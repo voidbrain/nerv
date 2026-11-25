@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-093-T04",
+  "parent": "F-093",
+  "title": "Owner check on the Mac",
+  "goal": "It works on a real app",
+  "status": "closed",
+  "acceptance": [
+    "Owner asks for one click in a visible app and confirms the result"
+  ],
+  "dependsOn": [
+    "F-093-T02",
+    "F-093-T05"
+  ],
+  "resources": [
+    "docs/acceptance/**",
+    "docs/work/records/F-093.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, screenshots of the owner's screen or personal data in Git.",
+  "validation": [
+    "Owner-observed check recorded in docs/acceptance"
+  ],
+  "escalation": [
+    "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement. Closed 2026-11-24: owner live check passed 2026-11-23 on NERV-01 (Calculator sidebar shown and hidden). No actual: owner time not recorded.",
+    "reviewed": "2026-11-24",
+    "ownerHours": 0,
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f093-t04-desktop-click.md"
+}

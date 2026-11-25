@@ -1,0 +1,51 @@
+{
+ "version": 1,
+ "id": "F-078-T03",
+ "parent": "F-078",
+ "title": "Smoke campaign on Neo Tokyo-3",
+ "goal": "Smoke campaign on Neo Tokyo-3",
+ "status": "closed",
+ "prs": [
+  {"pr": 402, "note": "Recorded the approved 144-case Neo Tokyo-3 smoke campaign"},
+  {"pr": 403, "note": "Closed T03 after required CI passed"}
+ ],
+ "acceptance": [
+  "smoke, smoke-schema and general-assistant-expanded run for gemma4:12b, gemma4:26b and qwen2.5-coder:14b on the Mac, recorded with model identity in evals/gauntlet/ledger.json",
+  "The three gemma4:12b smoke failures of 2026-11-09 (change-mind, tool-choice, missing-input: invalid structured output) rerun; whether a format setting fixes them is recorded"
+ ],
+ "dependsOn": [
+  "F-078-T02"
+ ],
+ "resources": [
+  "evals/**",
+  "docs/evaluations/**",
+  "docs/agents/model-profiles.json",
+  "docs/work/records/**",
+  "generated:backlog-views"
+ ],
+ "capabilities": [
+  "structured-tools",
+  "privacy-review"
+ ],
+ "privacy": "Reports stay private under artifacts/; only metadata (identity, counts, outcomes) enters Git. No prompts, replies or credentials.",
+ "validation": [
+  "node tools/gauntlet.mjs pending",
+  "npm run check:fast"
+ ],
+ "escalation": [
+  "A model campaign runs only inside the scope and budget the owner approved in F-078-T02",
+  "A model failure that NERV can fix becomes a B- record with a failing test first"
+ ],
+ "effort": {
+  "size": "small",
+  "estimate": "0 remaining",
+  "basis": "Estimated 2026-11-13 at the harness 8.5.0 initial step size; completed 2026-11-14 in about 0.5 agent hours, with the model campaign inside the approved two-hour host-wall-time budget.",
+  "reviewed": "2026-11-14",
+  "agentHours": 0,
+  "ownerHours": 0,
+  "baselineAgentHours": 0.5,
+  "estimateAgentHours": 0.5,
+  "actualAgentHours": 0.5,
+  "actualSource": "stated"
+ }
+}

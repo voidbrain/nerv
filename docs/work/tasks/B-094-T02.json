@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "parent": "B-094",
+  "id": "B-094-T02",
+  "title": "Revoked is not offline",
+  "goal": "The planner names a revoked base as revoked (registry status)",
+  "status": "closed",
+  "acceptance": [
+    "Test committed failing first (test/kaji-run.test.ts, B-094): kaji.run to a revoked base answers \"NERV-03 (Calvary) is revoked\", never offline"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/B-094.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-18. Not a measurement. Split 2026-11-19: the reply-after-result half moved to B-094-T03. Closed 2026-11-19: PR #535 merged with its committed regression; CI run 44486070427 passed every job.",
+    "reviewed": "2026-11-19",
+    "agentHours": 0,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1,
+    "actualAgentHours": 1,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 535,
+      "note": "the fix; CI green"
+    }
+  ]
+}

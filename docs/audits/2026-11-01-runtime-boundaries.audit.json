@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "scoped",
+  "reviewed": "2026-11-01T08:08:56.046Z",
+  "baseline": "718776fa2f772cb15c96a2fa3643016fde87806b",
+  "report": "docs/audits/2026-11-01-runtime-boundaries.md",
+  "areas": {
+    "code": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-runtime-boundaries.md: inspected scope and named fixtures",
+      "limits": "Scoped local review, not real browser, native macOS, remote overlay, model or failover acceptance."
+    },
+    "logic": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-runtime-boundaries.md: inspected scope and named fixtures",
+      "limits": "Scoped local review, not real browser, native macOS, remote overlay, model or failover acceptance."
+    },
+    "tests": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-runtime-boundaries.md: inspected scope and named fixtures",
+      "limits": "Scoped local review, not real browser, native macOS, remote overlay, model or failover acceptance."
+    },
+    "documentation": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-runtime-boundaries.md: inspected scope and named fixtures",
+      "limits": "Scoped local review, not real browser, native macOS, remote overlay, model or failover acceptance."
+    },
+    "harness": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-runtime-boundaries.md: inspected scope and named fixtures",
+      "limits": "Scoped local review, not real browser, native macOS, remote overlay, model or failover acceptance."
+    },
+    "security": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-runtime-boundaries.md: inspected scope and named fixtures",
+      "limits": "Scoped local review, not real browser, native macOS, remote overlay, model or failover acceptance."
+    },
+    "delivery": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-runtime-boundaries.md: inspected scope and named fixtures",
+      "limits": "Scoped local review, not real browser, native macOS, remote overlay, model or failover acceptance."
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-runtime-boundaries.md: inspected scope and named fixtures",
+      "limits": "Scoped local review, not real browser, native macOS, remote overlay, model or failover acceptance."
+    }
+  }
+}

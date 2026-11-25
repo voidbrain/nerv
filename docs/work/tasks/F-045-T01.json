@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-045-T01",
+  "parent": "F-045",
+  "title": "Pilot definition as data and registry",
+  "goal": "Pilot definition as data and registry",
+  "status": "closed",
+  "acceptance": [
+    "Role, domain, skills, tools, model, memory scope, EVA class, trust stage and parent; registry like Kaji; heartbeat offers pilots"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "0 h agent",
+    "basis": "Implemented pilot data fields (role, skills, tools, memoryScope, evaClass), Kaji-style PilotRegistry, and Kaji heartbeat pilot offers in 0.5 h agent (PR #352).",
+    "reviewed": "2026-11-13",
+    "baselineDays": 2,
+    "agentHours": 0,
+    "baselineAgentHours": 3,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated",
+    "estimateAgentHours": 0.5
+  }
+}

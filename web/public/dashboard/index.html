@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NERV Agency — Tactical Command</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<!-- Prototype: local simulation only, no API calls. Names follow NERV-ARCHITECTURE.md. -->
+<style>
+:root {
+  /* Eva · Dark · Orange, the first paint before the script applies the chosen palette (palette() in dashboard.js, F-047). */
+  --bg:#050508; --panel:#0d0d12; --panel2:#09090d; --border:rgba(255,102,0,.4); --text:#ffaa66; --muted:#a67c52;
+  --accent:#ff6600; --ok:#22c55e; --warn:#ffcc00; --danger:#ff0033; --info:#00aaff;
+  --green:#22c55e; --orange:#ff8800; --blue:#2a7fff;
+  --hdr-bg:#ff6600; --hdr-fg:#000; --brand-bg:#ff6600; --brand-fg:#000; --title:#ffaa66; --kanji:#ff0033;
+  --topo:rgba(255,102,0,.42); --land:#0c0a0a; --sea:#050508; --glow:rgba(255,102,0,.35); --on-danger:#000; --eva00:#2a7fff; --eva01:#9b5cff; --eva02:#ff3b30; --eva03:#8a8a8a;
+  --radius:0; --font:"Share Tech Mono",ui-monospace,monospace;
+  /* F-118-T05: a pairing QR is dark on light in every palette, so any camera reads it. */
+  --qr-ink:#000; --qr-paper:#fff;
+}
+.pair-code { font-size:20px; letter-spacing:.12em; color:var(--accent); margin:6px 0 2px; }
+b.pair-code { font-size:16px; }
+.pair-steps { margin:4px 0 0; padding-left:20px; }
+.pair-qr { width:180px; max-width:100%; height:auto; }
+.pair-qr rect { fill:var(--qr-paper); }
+.pair-qr path { fill:var(--qr-ink); }
+body.theme-simple { --radius:6px; --font:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; }
+* { box-sizing:border-box; }
+html,body { margin:0; }
+body { background:var(--bg); color:var(--text); font:12px/1.4 var(--font); padding:10px; }
+/* CRT is opt-in. Brightness has regular double variants; bands get a fresh eased random pass in JS.
+   Reduced motion keeps only static scanlines and vignette. */
+body.theme-eva.crt-on::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:50; background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.22) 50%); background-size:100% 4px; box-shadow:inset 0 0 70px 22px rgba(0,0,0,.85); }
+.crt-noise, .crt-band { display:none; }
+body.theme-eva.crt-on .crt-noise { display:block; position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:52; }
+body.theme-eva.crt-on .crt-band { display:block; position:fixed; left:0; right:0; top:0; pointer-events:none; z-index:51; transform:translateY(-3vh); }
+.crt-band-a { height:6px; background:linear-gradient(transparent,color-mix(in srgb,var(--bg) 30%,transparent),transparent); }
+.crt-band-b { height:3px; background:linear-gradient(transparent,color-mix(in srgb,var(--bg) 35%,transparent),transparent); }
+body.theme-eva.crt-on .wrap { animation:crt-flicker 31s steps(1,end) infinite; }
+@keyframes crt-flicker { 0%,100% { opacity:1 } 9% { opacity:.93 } 9.45% { opacity:1 } 24% { opacity:.95 } 24.4% { opacity:1 } 25.6% { opacity:.92 } 26% { opacity:1 } 47% { opacity:.96 } 47.35% { opacity:1 } 48.55% { opacity:.94 } 48.95% { opacity:1 } 68% { opacity:.92 } 68.5% { opacity:1 } 87% { opacity:.94 } 87.4% { opacity:1 } 88.65% { opacity:.96 } 89.05% { opacity:1 } }
+@media (prefers-reduced-motion:reduce) { body.theme-eva.crt-on .wrap { animation:none; } body.theme-eva.crt-on .crt-band, body.theme-eva.crt-on .crt-noise { display:none; } }
+body.theme-eva.mode-dark.accent-orange #magi-big .mtitle b { color:var(--eva01); }
+body.theme-eva.mode-dark.accent-orange #magi-big { --glow:color-mix(in srgb,var(--eva01) 35%,transparent); border-color:var(--eva01); background:color-mix(in srgb,var(--eva01) 5%,var(--panel)); box-shadow:inset 0 0 16px color-mix(in srgb,var(--eva01) 12%,transparent); }
+body.theme-eva.crt-on .magi .mtitle { color:var(--text); }
+body.theme-eva.crt-on .magi .mtitle b { color:color-mix(in srgb,var(--accent) 70%,var(--text)); }
+body.theme-eva.mode-dark.accent-orange.crt-on #magi-big .mtitle b { color:color-mix(in srgb,var(--eva01) 70%,var(--text)); }
+button,input,select { font:inherit; }
+.wrap { max-width:1720px; margin:0 auto; display:flex; flex-direction:column; gap:8px; }
+.panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); min-width:0; }
+body.theme-eva .panel { box-shadow:inset 0 0 14px color-mix(in srgb,var(--accent) 7%,transparent); }
+.hdr { font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:10px; color:var(--hdr-fg); background:var(--hdr-bg); border-bottom:1px solid var(--border); padding:5px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.hdr .sub { font-weight:400; letter-spacing:.04em; text-transform:none; background:var(--panel2); color:var(--orange); padding:1px 6px; border-radius:0; }
+.hdr .sub:empty { display:none; }
+.pad { padding:8px; }
+.row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.col { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.muted { color:var(--muted); } .ok { color:var(--ok); } .warn { color:var(--warn); } .danger { color:var(--danger); } .info { color:var(--info); }
+.small { font-size:10px; } .tiny { font-size:9px; } .b { font-weight:700; }
+.btn { border:1px solid var(--border); background:transparent; color:var(--text); padding:4px 8px; border-radius:var(--radius); font-size:11px; cursor:pointer; letter-spacing:.04em; }
+.btn:hover,.btn:focus-visible { border-color:var(--accent); color:var(--accent); outline:none; }
+.btn.primary { background:var(--accent); border-color:var(--accent); color:var(--brand-fg); }
+.btn.danger { border-color:var(--danger); color:var(--danger); } .btn.danger:hover { background:var(--danger); color:var(--on-danger); }
+.btn.sm { padding:2px 6px; font-size:10px; }
+input,select { background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:var(--radius); padding:4px 8px; font-size:11px; max-width:100%; }
+input:focus,select:focus { outline:1px solid var(--accent); }
+.badge { font-size:9px; padding:1px 6px; border-radius:999px; font-weight:700; letter-spacing:.05em; white-space:nowrap; }
+body.theme-eva .badge, body.theme-eva .badge { border-radius:1px; }
+.b-green { background:color-mix(in srgb,var(--green) 18%,transparent); color:var(--green); }
+.b-orange { background:color-mix(in srgb,var(--orange) 18%,transparent); color:var(--orange); }
+.b-blue { background:color-mix(in srgb,var(--blue) 22%,transparent); color:var(--blue); }
+.b-ok { background:color-mix(in srgb,var(--ok) 18%,transparent); color:var(--ok); }
+.b-warn { background:color-mix(in srgb,var(--warn) 18%,transparent); color:var(--warn); }
+.b-danger { background:color-mix(in srgb,var(--danger) 18%,transparent); color:var(--danger); }
+.b-muted { background:color-mix(in srgb,var(--muted) 18%,transparent); color:var(--text); }
+.b-info { background:color-mix(in srgb,var(--info) 18%,transparent); color:var(--info); }
+.meter { height:6px; background:var(--panel2); border:1px solid var(--border); position:relative; overflow:hidden; }
+.meter > i { display:block; height:100%; background:var(--ok); }
+.meter.warn > i { background:var(--warn); } .meter.danger > i { background:var(--danger); }
+.meter > .mark { position:absolute; top:-2px; bottom:-2px; width:1px; background:var(--text); opacity:.7; }
+.list > * + * { margin-top:6px; }
+.card { border:1px dashed var(--border); padding:6px 8px; border-radius:var(--radius); background:var(--panel2); }
+.card.sel { border-style:solid; border-color:var(--accent); }
+.kv { display:grid; grid-template-columns:auto 1fr; gap:1px 10px; font-size:10px; }
+.kv > :nth-child(odd) { color:var(--muted); }
+code,.code { font-family:var(--font); background:var(--panel2); border:1px solid var(--border); padding:4px 6px; display:block; white-space:pre-wrap; word-break:break-word; font-size:10px; border-radius:var(--radius); }
+.banner { border:1px solid var(--border); padding:6px 10px; font-size:11px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; }
+.banner.shadow { border-color:var(--warn); background:color-mix(in srgb,var(--warn) 9%,transparent); }
+.banner.dummy { border-color:var(--danger); background:color-mix(in srgb,var(--danger) 12%,transparent); }
+.hidden { display:none !important; }
+.jp-only { display:none; } body.theme-eva .jp-only, body.theme-eva .jp-only { display:inline; }
+.eva-full-only { display:none; } body.theme-eva .eva-full-only { display:block; }
+body.theme-eva .not-eva-full { display:none !important; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+body.theme-eva .blink { animation:blink 1.1s infinite ease-in-out; }
+
+/* ---------- header (after dashboard.html) ---------- */
+header.top { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; padding:10px 12px; border-left:6px solid var(--brand-bg); }
+.brand { display:flex; align-items:center; gap:14px; }
+.brand-block { background:var(--brand-bg); color:var(--brand-fg); font-weight:900; padding:6px 14px; font-size:20px; letter-spacing:.16em; display:flex; align-items:center; gap:10px; }
+.brand-block .ver { font-size:10px; background:var(--brand-fg); color:var(--brand-bg); padding:1px 5px; letter-spacing:.1em; }
+.brand h1 { margin:0; font-size:17px; letter-spacing:.14em; color:var(--title); font-weight:700; }
+.brand h1 .k { color:var(--kanji); }
+.brand .tag { font-size:10px; color:var(--muted); letter-spacing:.12em; margin-top:2px; }
+.top-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.clock { text-align:right; font-size:11px; line-height:1.2; }
+.clock b { font-size:15px; color:var(--title); letter-spacing:.08em; }
+/* Owner, 2026-11-06: the running version beside the time; its commit on hover, copied on click. */
+.ver-btn { font:inherit; font-size:10px; color:var(--muted); background:transparent; border:1px solid var(--border); border-radius:var(--radius); padding:0 5px; margin-left:4px; cursor:pointer; vertical-align:2px; }
+.ver-btn:hover,.ver-btn:focus-visible { color:var(--accent); border-color:var(--accent); outline:none; }
+
+/* ---------- five questions ---------- */
+.questions { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+.q { padding:8px 10px; cursor:pointer; text-align:left; border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:var(--radius); }
+.q:hover,.q:focus-visible { border-color:var(--accent); outline:none; }
+.q .qt,.q .qv,.q .qd { display:block; }
+.q .qt { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.q .qv { font-size:18px; font-weight:900; margin-top:2px; letter-spacing:.04em; }
+.q .qd { font-size:10px; color:var(--muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.q.alert { border-color:var(--danger); } .q.alert .qv { color:var(--danger); }
+.q.attn { border-color:var(--warn); } .q.attn .qv { color:var(--warn); }
+
+/* ---------- layout ---------- */
+main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) minmax(0,3.6fr); gap:8px; align-items:start; }
+/* wide screens: the whole dashboard fits one page; each column scrolls on its own */
+@media (min-width:1201px) {
+  /* B-014: the body is pinned to the window, so the page itself has nothing to scroll (only the columns do): overflow
+     hidden alone still let scrollIntoView, focus() or a narrow-then-wide window leave it scrolled, header cut off. */
+  html { height:100%; overflow:hidden; } body { position:fixed; inset:0; overflow:clip; }
+  .wrap { height:100%; }
+  main.grid { flex:1; min-height:0; align-items:stretch; }
+  main.grid > .col { min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-gutter:stable; }
+}
+.cage.planned { border-style:dashed; }
+@media (max-width:1200px) { main.grid { grid-template-columns:minmax(0,1fr) minmax(0,1fr); } main.grid > .center { grid-column:1 / -1; order:-1; } .questions { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media (max-width:720px) { main.grid { grid-template-columns:minmax(0,1fr); } .questions { grid-template-columns:repeat(2,minmax(0,1fr)); } body { padding:6px; } .brand h1 { font-size:13px; } .brand-block { font-size:15px; } }
+
+/* ---------- approval card ---------- */
+.apcard { border:1px solid var(--border); border-left:4px solid var(--warn); padding:8px; border-radius:var(--radius); background:var(--panel2); }
+.apcard.blue { border-left-color:var(--blue); } .apcard.orange { border-left-color:var(--orange); }
+.apcard .what { font-size:12px; font-weight:700; color:var(--title); }
+.apcard .why { font-size:10px; margin-top:4px; }
+.apcard .acts { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+.fact-list { display:grid; gap:6px; margin:8px 0; padding:0; list-style:none; }
+.fact-list li { display:flex; align-items:center; justify-content:space-between; gap:8px; border-top:1px solid var(--border); padding-top:6px; }
+.fact-list .acts { flex:0 0 auto; margin-top:0; }
+.verdicts { display:flex; gap:4px; flex-wrap:wrap; margin-top:4px; }
+.vchip { font-size:9px; border:1px solid var(--border); padding:1px 5px; }
+.vchip.approve { border-color:var(--ok); color:var(--ok); } .vchip.reject { border-color:var(--danger); color:var(--danger); }
+.vchip.abstain,.vchip.none { color:var(--muted); } .vchip.pending { border-color:var(--warn); color:var(--warn); }
+.vchip.shadow { border-style:dashed; opacity:.75; }
+
+/* ---------- sorties ---------- */
+.sortie { cursor:pointer; }
+.sortie:focus-visible { outline:1px solid var(--accent); }
+.filters { display:flex; gap:4px; flex-wrap:wrap; }
+.filters .btn.on { border-color:var(--accent); color:var(--accent); }
+.search { width:100%; margin-top:6px; }
+.more { width:100%; margin-top:6px; }
+.whyline { color:var(--text); opacity:.8; margin-top:2px; }
+.apcard.armed { outline:2px solid var(--accent); outline-offset:1px; }
+.keynote { font-size:10px; color:var(--warn); padding:0 8px 6px; } .keynote:empty { display:none; }
+.keyhint kbd { font:inherit; border:1px solid var(--border); padding:0 3px; border-radius:var(--radius); }
+.rem { display:grid; grid-template-columns:1fr auto; gap:2px 6px; align-items:center; padding:4px 0; border-bottom:1px dashed color-mix(in srgb,var(--border) 60%,transparent); }
+.rem .acts { display:flex; gap:4px; }
+.models-form { display:grid; grid-template-columns:auto 1fr; gap:4px 8px; align-items:center; }
+.models-form select { min-width:0; width:100%; }
+.cols-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 8px; align-items:start; }
+@media (max-width:720px) { .cols-2 { grid-template-columns:minmax(0,1fr); } }
+.field-grid { display:grid; grid-template-columns:auto minmax(0,1fr); gap:4px 8px; align-items:center; }
+.field-grid > .field { display:flex; flex-wrap:wrap; align-items:center; gap:4px; min-width:0; }
+.field-grid > .wide { grid-column:1 / -1; }
+.field-grid input { padding:4px; }
+.field-grid input[type=number] { width:4ch; appearance:textfield; }
+.field-grid input[type=number]::-webkit-inner-spin-button { appearance:none; margin:0; }
+.field-grid select { width:100%; }
+.nowrap { white-space:nowrap; }
+.health-row { align-items:baseline; }
+.health-row > .health-label { flex:none; white-space:nowrap; }
+.health-row > .health-value { gap:6px; min-width:0; justify-content:flex-end; text-align:right; }
+.update-status { margin-top:6px; padding:6px 8px; border:1px solid currentColor; border-left-width:3px; border-radius:var(--radius); background:color-mix(in srgb,currentColor 10%,transparent); font-size:11px; font-weight:700; }
+.update-status .muted { font-weight:400; }
+.pilot-model-form button:disabled { opacity:.5; cursor:default; }
+.rem-edit { display:flex; flex-wrap:wrap; gap:4px; padding:4px 0; }
+.rem-edit input[type=text] { flex:1 1 100%; }
+
+/* ---------- flow: shared ---------- */
+.flow-note { padding:4px 8px 8px; font-size:10px; color:var(--muted); min-height:18px; }
+
+/* timeline (non EVA-full themes) */
+.timeline { display:flex; flex-wrap:wrap; gap:4px; align-items:stretch; padding:8px; }
+.tstep { border:1px solid var(--border); padding:4px 6px; font-size:10px; text-align:center; color:var(--muted); min-width:0; border-radius:var(--radius); display:flex; flex-direction:column; justify-content:center; }
+.tstep .n { font-size:8px; opacity:.7; }
+.tstep.on { border-color:var(--accent); color:var(--text); background:color-mix(in srgb,var(--accent) 13%,transparent); font-weight:700; }
+.tstep.done { border-color:var(--ok); color:var(--ok); }
+.tstep.done.owner { border-color:var(--warn); color:var(--warn); }
+.tstep.skip { opacity:.4; border-style:dashed; }
+.tstep.wait { border-color:var(--warn); color:var(--warn); }
+.tarrow { color:var(--muted); align-self:center; font-size:10px; }
+.tmagi { display:flex; gap:3px; margin-top:3px; justify-content:center; }
+.tseat { font-size:8px; border:1px solid var(--border); padding:0 4px; }
+.tseat.approve { border-color:var(--ok); color:var(--ok); } .tseat.reject { border-color:var(--danger); color:var(--danger); }
+.tseat.pending { border-color:var(--warn); color:var(--warn); } .tseat.none,.tseat.abstain { opacity:.5; }
+.loopline { padding:0 8px 6px; font-size:10px; color:var(--muted); }
+
+/* sephirot (EVA full) */
+.sephirot { position:relative; padding:10px 44px 12px 28px; }
+.sephirot svg.edges { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+/* one stroke width for every state (colour and dash tell them apart), so a line never looks as if it moved */
+.sephirot svg.edges > path { fill:none; stroke:color-mix(in srgb,var(--accent) 25%,transparent); stroke-width:1.8; stroke-linejoin:round; }
+.sephirot svg.edges > path.loop { stroke-dasharray:3 4; }
+.sephirot svg.edges > path.passed { stroke:var(--ok); opacity:.9; }
+.sephirot svg.edges > path.passed.owner { stroke:var(--warn); }
+.sephirot svg.edges > path.skip { opacity:.22; }
+/* B-112: with no sortie selected, conditional routes (answer, declined, relay) are on the map, dashed and dimmed. */
+.sephirot svg.edges > path.cond { stroke-dasharray:2 5; opacity:.45; }
+.sgrid { position:relative; display:grid; grid-template-columns:1fr 1.25fr 1fr; grid-auto-rows:auto; gap:10px 18px; align-items:center; }
+.snode { position:relative; z-index:1; border:1px solid var(--border); background:var(--panel2); padding:3px 8px; text-align:center; transition:.15s; }
+.snode .sn { font-size:8px; color:var(--muted); letter-spacing:.12em; text-align:left; padding-right:26px; min-height:12px; }
+.snode .sn .he { font-size:10px; color:var(--kanji); } [lang="he"] { letter-spacing:0; }
+.snode.round .sn { padding-left:14px; }
+/* Owner, 2026-11-05: the crew top right, the Sephirah's number and names top left. */
+.snode .st { font-size:11px; font-weight:900; letter-spacing:.1em; }
+.snode .sd { font-size:9px; color:var(--muted); }
+.snode .sk { font-size:9px; color:var(--kanji); letter-spacing:.2em; }
+.stime { display:inline-block; font-size:9px; font-variant-numeric:tabular-nums; color:var(--accent); margin-left:4px; font-weight:700; }
+.snode.done .stime, #magi-big.done .stime { color:var(--ok); }
+.snode.on { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 14%,var(--panel2)); box-shadow:0 0 14px var(--glow); }
+.snode.on .st { color:var(--title); }
+.snode.on, #magi-big.on { outline:1px solid var(--glow); outline-offset:2px; animation:node-busy 3.2s ease-in-out infinite; }
+@keyframes node-busy { 50% { outline-color:transparent; } }
+@media (prefers-reduced-motion:reduce) { .snode.on, #magi-big.on { animation:none; } }
+.snode.done { border-color:var(--ok); } .snode.done .st { color:var(--ok); }
+.snode.wait { border-color:var(--warn); box-shadow:0 0 12px color-mix(in srgb,var(--warn) 30%,transparent); } .snode.wait .st { color:var(--warn); }
+/* F-051: skipped (this sortie did not need the step) reads differently from not reached: dashed and labelled, not greyed out. */
+.snode.skip { opacity:.7; border-style:dashed; } .snode.skip .st::after { content:" · skipped"; font-weight:400; font-size:8px; color:var(--muted); letter-spacing:.04em; }
+.snode.done.owner { border-color:var(--warn); } .snode.done.owner .st { color:var(--warn); }
+.snode.round { border-radius:999px; padding:6px 10px; }
+.s-detect { grid-column:2; grid-row:1; } .s-intake { grid-column:1; grid-row:2; } .s-route { grid-column:3; grid-row:2; }
+.s-consult { grid-column:1; grid-row:3; } .s-plan { grid-column:3; grid-row:3; }
+.s-magi { grid-column:1 / -1; grid-row:4; } .s-sync { grid-column:1; grid-row:5; } .s-apt { grid-column:3; grid-row:5; }
+.s-plug { grid-column:2; grid-row:6; } .s-eva { grid-column:2; grid-row:7; } .s-debrief { grid-column:1; grid-row:7; }
+
+/* MAGI (big, canon layout: BALTHASAR-2 top, CASPER-3 left, MELCHIOR-1 right) */
+.magi { position:relative; z-index:1; margin:0 auto; width:100%; max-width:360px; padding:2px 0; }
+/* Sephirot: TIFERET (the MAGI) framed apart from the rest of the loop */
+.s-magi .magi { border:1px solid var(--accent); background:color-mix(in srgb,var(--accent) 5%,var(--panel)); padding:8px 10px 6px; box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent); }
+/* the job list scrolls on its own instead of stretching the page */
+#sortie-list { max-height:440px; overflow-y:auto; overscroll-behavior:contain; padding-right:2px; }
+.magi .mtitle { text-align:center; font-size:10px; letter-spacing:.3em; color:var(--muted); margin-bottom:4px; }
+.magi .mtitle b { color:var(--accent); letter-spacing:.3em; }
+.magi-grid { display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto auto; gap:8px 10px; }
+.mseat { position:relative; height:86px; }
+.mseat.top { grid-column:1 / -1; width:56%; margin:0 auto; height:80px; }
+.mseat svg { position:absolute; inset:0; width:100%; height:100%; }
+.mseat svg polygon { stroke-width:2; vector-effect:non-scaling-stroke; fill:var(--panel2); stroke:var(--border); transition:.2s; }
+.mseat .mb { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:4px 16px; gap:0; }
+.mseat .mn { font-size:11px; font-weight:900; letter-spacing:.14em; }
+.mseat .mv { font-size:14px; font-weight:900; letter-spacing:.12em; }
+.mseat .mr { font-size:9px; color:var(--muted); letter-spacing:.06em; }
+.mseat .mk { font-size:15px; color:var(--kanji); letter-spacing:.1em; vertical-align:-2px; }
+.mseat .mm { font-size:9px; color:var(--text); opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+.mseat[data-v="approve"] polygon { stroke:var(--ok); fill:color-mix(in srgb,var(--ok) 10%,var(--panel2)); } .mseat[data-v="approve"] .mv,.mseat[data-v="approve"] .mn { color:var(--ok); }
+.mseat[data-v="reject"] polygon { stroke:var(--danger); fill:color-mix(in srgb,var(--danger) 10%,var(--panel2)); } .mseat[data-v="reject"] .mv,.mseat[data-v="reject"] .mn { color:var(--danger); }
+.mseat[data-v="pending"] polygon { stroke:var(--warn); fill:color-mix(in srgb,var(--warn) 10%,var(--panel2)); } .mseat[data-v="pending"] .mv,.mseat[data-v="pending"] .mn { color:var(--warn); }
+.mseat[data-v="none"] .mv,.mseat[data-v="abstain"] .mv { color:var(--muted); }
+.magi .mres { display:flex; justify-content:space-between; gap:8px; margin-top:6px; font-size:10px; border:1px solid var(--border); padding:3px 8px; }
+.magi .extras { display:flex; gap:4px; flex-wrap:wrap; justify-content:center; margin-top:4px; }
+
+/* plan */
+.plan li { list-style:none; display:grid; grid-template-columns:18px 1fr auto; gap:6px; align-items:start; padding:4px 0; border-bottom:1px dashed color-mix(in srgb,var(--border) 60%,transparent); }
+.plan ol { margin:0; padding:0; }
+.plan .ix { color:var(--muted); font-size:10px; }
+
+/* map */
+.mapwrap { position:relative; min-width:0; }
+#topo { position:absolute; inset:0; width:100%; height:100%; display:block; background:var(--sea); }
+/* Owner, 2026-11-05: a smaller map, its legend on the right. */
+.tabs { display:flex; flex-wrap:wrap; gap:4px; margin:2px 0 6px; } .tabs .btn.sel { border-color:var(--accent); color:var(--accent); }
+.maprow { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; align-items:stretch; }
+mark { background:color-mix(in srgb,var(--accent) 35%,transparent); color:inherit; padding:0 1px; }
+.maplegend { display:flex; flex-direction:column; justify-content:center; gap:3px; flex:0 0 auto; font-size:9px; color:var(--muted); padding:4px 8px 4px 2px; }
+.legend-heading { font-size:10px; color:var(--text); letter-spacing:.06em; }
+[hidden] { display:none !important; }
+.sq { display:inline-block; width:7px; height:7px; margin-right:3px; vertical-align:middle; }
+
+/* EVA cages + live instances per class, per machine */
+.cages { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; }
+@media (max-width:720px) { .cages { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.cage { border:1px solid var(--border); padding:4px; min-width:0; background:var(--panel2); display:flex; flex-direction:column; gap:3px; }
+.cage .ch, .eva-class-hdr { display:flex; flex-direction:column; align-items:flex-start; gap:1px; font-size:10px; font-weight:900; letter-spacing:.06em; }
+.cage canvas { width:100%; height:30px; display:block; background:#000; border:1px solid var(--border); margin-top:2px; }
+.cage .cd { font-size:9px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eva-machines-bar { display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+.eva-machine { border:1px solid var(--border); padding:5px 6px; background:var(--panel2); display:flex; flex-direction:column; gap:3px; }
+.eva-machine-hdr { display:flex; align-items:center; justify-content:space-between; gap:6px; flex-wrap:wrap; }
+.eva-inst { display:flex; align-items:center; justify-content:space-between; gap:4px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:3px; font-size:10px; }
+.eva-inst-meta { display:flex; flex-direction:column; min-width:0; }
+.eva-empty { font-size:10px; color:var(--muted); }
+.pilot-model-form { display:flex; flex-direction:column; gap:4px; margin-top:6px; min-width:0; }
+.pilot-field { display:flex; flex-direction:column; align-items:stretch; gap:2px; min-width:0; }
+.pilot-field input, .pilot-field select { display:block; width:100%; min-width:0; max-width:100%; }
+.pilot-hdr-inputs { display:flex; flex-direction:column; gap:4px; width:100%; min-width:0; }
+.pilot-hdr-inputs input { display:block; width:100%; min-width:0; max-width:100%; padding:3px 6px; font-size:12px; }
+.pilot-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+.pilot-grid .card { min-width:0; overflow:hidden; }
+@media (max-width:600px) { .pilot-grid { grid-template-columns:1fr; } }
+.pilot-actions { display:flex; justify-content:flex-end; margin-top:2px; }
+
+/* log */
+details > summary { cursor:pointer; list-style:none; }
+details > summary::-webkit-details-marker { display:none; }
+.av { width:20px; height:20px; image-rendering:pixelated; border:1px solid var(--border); background:#000; flex-shrink:0; display:none; }
+body.theme-eva .av, body.theme-eva .av { display:inline-block; }
+.snode .avs { display:flex; gap:3px; position:absolute; top:3px; right:4px; }
+.snode .av { width:20px; height:20px; }
+.eva-img { width:100%; height:42px; object-fit:contain; image-rendering:pixelated; background:#000; border:1px solid var(--border); display:none; margin-top:3px; }
+body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
+.msg { display:flex; gap:6px; align-items:flex-start; padding:2px 0; }
+.msg .who { margin-right:4px; letter-spacing:.06em; }
+.msg.you { background:color-mix(in srgb,var(--accent) 7%,transparent); }
+.chat { display:flex; gap:6px; align-items:center; padding:8px; border-top:1px solid var(--border); }
+.chat input { flex:1; min-width:0; }
+.slash-menu { background:var(--panel2); border-top:1px solid var(--border); padding:4px 8px; display:flex; flex-direction:column; gap:2px; max-height:180px; overflow-y:auto; }
+.slash-menu[hidden] { display:none; }
+.slash-item { display:flex; justify-content:space-between; gap:8px; width:100%; text-align:left; background:transparent; border:1px solid transparent; color:var(--text); padding:4px 6px; font:inherit; font-size:11px; cursor:pointer; }
+.slash-item:hover, .slash-item:focus-visible { border-color:var(--accent); outline:none; }
+.slash-item .slash-desc { color:var(--muted); }
+.log { background:var(--panel2); border-top:1px solid var(--border); padding:8px; height:300px; overflow-y:auto; font-size:10px; line-height:1.5; }
+.log .ts { color:var(--muted); margin-right:6px; }
+.timeline-up { position:relative; padding-left:12px; }
+.timeline-up::before { content:""; position:absolute; left:4px; top:4px; bottom:4px; width:1px; background:var(--border); }
+.up { position:relative; }
+.up::before { content:""; position:absolute; left:-11px; top:5px; width:7px; height:7px; background:var(--accent); }
+.up.hyuga::before { background:var(--info); }
+::-webkit-scrollbar { width:5px; height:5px; } ::-webkit-scrollbar-thumb { background:var(--border); }
+.sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+.sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+</style>
+</head>
+<body class="theme-eva mode-dark accent-orange">
+<canvas class="crt-noise" aria-hidden="true"></canvas>
+<div class="crt-band crt-band-a" aria-hidden="true"></div><div class="crt-band crt-band-b" aria-hidden="true"></div>
+<div class="wrap">
+
+  <div class="banner shadow panel" role="note">
+    <div><b>SHADOW UI · SIMULATION</b> <span class="muted">— invented data, no API calls. Patterns, MAGI verdicts and Sync Ratios are computed here with the same rules as <code style="display:inline;padding:0 4px">src/policy.ts</code>.</span></div>
+    <div class="row"><button class="btn sm" id="btn-dummy">Simulate model outage</button><button class="btn sm" id="btn-reset">Reset demo</button></div>
+  </div>
+  <div id="dummy-banner" class="banner dummy panel hidden" role="alert">
+    <div><b data-l="dummy">DUMMY PLUG ACTIVE</b> <span class="muted">— S² and Umbilical unreachable. Reminders and deterministic pilots keep running; model-needing sorties wait.</span></div>
+    <button class="btn sm" id="btn-undummy">Restore routes</button>
+  </div>
+
+  <header class="panel top">
+    <div class="brand">
+      <div class="brand-block"><span><span class="jp-only">特務機関</span>NERV</span><span class="ver">AGENCY</span></div>
+      <div>
+        <h1><span data-l="brandTitle">TACTICAL COMMAND</span> <span class="k jp-only">// 中央作戦司令部</span></h1>
+        <div class="tag" data-l="brandTag">SEELE SCROLLS ENFORCED // CENTRAL DOGMA LEDGER · LILITH MEMORY</div>
+      </div>
+    </div>
+    <div class="top-right">
+      <label class="small muted" for="theme">THEME</label>
+      <select id="theme"><option value="eva" selected>Eva</option><option value="simple">Simple</option></select>
+      <label class="small muted" for="mode">MODE</label>
+      <select id="mode"><option value="dark" selected>Dark</option><option value="light">Light</option></select>
+      <label class="small muted" for="accent">COLOUR</label>
+      <select id="accent"><option value="orange" selected>Orange</option><option value="blue">Blue</option><option value="green">Green</option><option value="violet">Violet</option><option value="ochre">Ochre</option></select>
+      <button class="btn sm eva-full-only" id="btn-crt" aria-pressed="false">CRT</button>
+      <button class="btn danger" id="btn-spear" title="Revoke every grant, stand down approvals, cancel sorties"><span data-l="spear">SPEAR OF LONGINUS</span></button>
+      <div class="clock"><b id="clock">--:--:--</b> <button type="button" class="ver-btn" id="build" hidden></button><div class="muted" id="clock-date"></div></div>
+    </div>
+  </header>
+
+  <section class="questions" aria-label="At a glance">
+    <button class="q" id="q-needs" data-go="p-needs"><span class="qt" data-l="qNeeds">Needs you</span><span class="qv" id="qv-needs">0</span><span class="qd" id="qd-needs"></span></button>
+    <button class="q" id="q-away" data-go="p-away"><span class="qt" data-l="qAway">While you were away</span><span class="qv" id="qv-away">0</span><span class="qd" id="qd-away"></span></button>
+    <button class="q" id="q-next" data-go="p-next"><span class="qt" data-l="qNext">Coming up</span><span class="qv" id="qv-next">—</span><span class="qd" id="qd-next"></span></button>
+    <button class="q" id="q-health" data-go="p-health"><span class="qt" data-l="qHealth">Broken or stuck</span><span class="qv" id="qv-health">OK</span><span class="qd" id="qd-health"></span></button>
+    <button class="q" id="q-budget" data-go="p-budget"><span class="qt" data-l="qBudget">Budget today</span><span class="qv" id="qv-budget">$0</span><span class="qd" id="qd-budget"></span></button>
+  </section>
+
+  <main class="grid">
+    <!-- ============ LEFT ============ -->
+    <div class="col">
+      <section class="panel" id="p-needs" aria-live="polite">
+        <div class="hdr"><span data-l="needs">Misato's apartment · needs you</span><span class="sub" id="needs-count">0</span></div>
+        <div class="pad list" id="needs-list"></div>
+        <div class="keynote" id="key-note" role="status" aria-live="assertive"></div>
+      </section>
+
+      <section class="panel" id="p-sorties">
+        <div class="hdr"><span data-l="sorties">Sorties</span><span class="sub" id="sorties-sub"></span></div>
+        <div class="pad">
+          <div class="filters" role="group" aria-label="Filter sorties">
+            <button class="btn sm on" data-f="all">All</button><button class="btn sm" data-f="active">Active</button>
+            <button class="btn sm" data-f="waiting">Waiting</button><button class="btn sm" data-f="done">Done</button><button class="btn sm" data-f="problem">Problems</button>
+          </div>
+          <label class="sr-only" for="sortie-q">Search sorties, memory and Comms</label>
+          <input id="sortie-q" class="search" type="search" autocomplete="off" placeholder="Search sorties, memory, Comms ( / )" aria-keyshortcuts="/" />
+          <div class="list" id="sortie-list" style="margin-top:6px"></div>
+          <button class="btn sm more" id="sorties-more" hidden>Load older sorties</button>
+        </div>
+      </section>
+
+      <section class="panel" id="p-next">
+        <div class="hdr"><span data-l="next">Coming up · next 24 h</span><span class="sub" id="next-sub">reminders · Hyuga triggers</span></div>
+        <div class="pad"><div class="timeline-up list" id="next-list"></div></div>
+      </section>
+    </div>
+
+    <!-- ============ CENTER ============ -->
+    <div class="col center">
+      <section class="panel" id="p-flow">
+        <div class="hdr"><span data-l="flow">Sephirot · sortie flow</span><span class="sub" id="flow-sub">no sortie selected</span></div>
+
+        <!-- EVA full: Sephirot tree with the MAGI at its heart -->
+        <div class="sephirot eva-full-only" id="sephirot">
+          <svg class="edges" id="edges" aria-hidden="true"></svg>
+          <div class="sgrid">
+            <div class="snode round s-detect" data-n="detect"><div class="avs"><img class="av" data-av="aoba" alt="Aoba"/></div><div class="sn" title="Crown">1 · <span class="jp-only he" lang="he" dir="rtl">כתר</span> KETER</div><div class="st">DETECTION</div><div class="sd">Aoba comms · Hyuga watch</div></div>
+            <div class="snode s-intake" data-n="intake"><div class="avs"><img class="av" data-av="naoko" alt="Naoko"/></div><div class="sn" title="Understanding">2 · <span class="jp-only he" lang="he" dir="rtl">בינה</span> BINAH</div><div class="st">NAOKO DESK</div><div class="sd" id="sd-intake">intake · provenance</div></div>
+            <div class="snode s-route" data-n="route"><div class="avs"><img class="av" data-av="gendo" alt="Gendo"/></div><div class="sn" title="Wisdom">3 · <span class="jp-only he" lang="he" dir="rtl">חכמה</span> CHOKHMAH</div><div class="st">GENDO</div><div class="sd" id="sd-route">route · battery</div></div>
+            <div class="snode s-consult" data-n="consult"><div class="sn" title="Severity">4 · <span class="jp-only he" lang="he" dir="rtl">גבורה</span> GEVURAH</div><div class="st">ADVISE</div><div class="sd" id="sd-consult">no vote · advice into the LCL</div></div>
+            <div class="snode s-plan" data-n="plan"><div class="avs"><img class="av" data-av="misato" alt="Misato"/></div><div class="sn" title="Mercy">5 · <span class="jp-only he" lang="he" dir="rtl">חסד</span> CHESED</div><div class="st">MISATO PLAN</div><div class="sd" id="sd-plan">next action</div></div>
+            <div class="s-magi">
+              <div class="magi" id="magi-big">
+                <div class="mtitle"><img class="av" data-av="magi" alt="" style="vertical-align:middle"/> <span title="Beauty">6 · <span class="jp-only" lang="he" dir="rtl">תפארת</span> TIFERET</span> · <b>MAGI SYSTEM</b> <span class="jp-only" style="white-space:nowrap">· 提訴</span> · <span id="mt-action">no action</span></div>
+                <div class="magi-grid">
+                  <div class="mseat top" data-seat="balthasar" data-v="none">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,0 100,0 100,62 82,100 18,100 0,62"/></svg>
+                    <div class="mb"><div class="mn">BALTHASAR · 1</div><div class="mv">—</div><div class="mr"><span class="mk jp-only">母</span> mother</div><div class="mm" data-m title="reversibility · budget · taint">protection</div></div>
+                  </div>
+                  <div class="mseat" data-seat="casper" data-v="none">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,0 80,0 100,26 100,100 0,100"/></svg>
+                    <div class="mb"><div class="mn">CASPER · 2</div><div class="mv">—</div><div class="mr"><span class="mk jp-only">女</span> woman</div><div class="mm" data-m title="a local model reads the intent of non-Green actions">intent · idle</div></div>
+                  </div>
+                  <div class="mseat" data-seat="melchior" data-v="none">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="20,0 100,0 100,100 0,100 0,26"/></svg>
+                    <div class="mb"><div class="mn">MELCHIOR · 3</div><div class="mv">—</div><div class="mr"><span class="mk jp-only">科学者</span> scientist</div><div class="mm" data-m title="rules · Scrolls · deterministic">rules</div></div>
+                  </div>
+                </div>
+                <div class="extras" id="magi-extras"></div>
+                <div class="mres"><span><span class="jp-only">決議 · </span><b id="mres-out">—</b></span><span id="mres-pattern">—</span><span id="mres-reason" class="muted">—</span></div>
+              </div>
+            </div>
+            <div class="snode s-apt" data-n="apt"><div class="avs"><img class="av" data-av="penpen" alt="Pen Pen"/></div><div class="sn" title="Victory">8 · <span class="jp-only he" lang="he" dir="rtl">נצח</span> NETZACH</div><div class="st">MISATO'S APT</div><div class="sd" id="sd-apt">you · Pen Pen card</div></div>
+            <div class="snode s-sync" data-n="sync"><div class="sn" title="Splendour">7 · <span class="jp-only he" lang="he" dir="rtl">הוד</span> HOD</div><div class="st">SYNC RATIO</div><div class="sd" id="sd-sync">≥ 80 % · not Blue</div></div>
+            <div class="snode s-plug" data-n="plug"><div class="avs"><img class="av" data-av="ritsuko" alt="Ritsuko"/></div><div class="sn" title="Foundation">9 · <span class="jp-only he" lang="he" dir="rtl">יסוד</span> YESOD</div><div class="st">ENTRY PLUG</div><div class="sd" id="sd-plug">Ritsuko signs the A.T. Field</div></div>
+            <div class="snode s-eva" data-n="eva"><div class="avs"><img class="av" id="av-eva-node" data-av="eva-01" alt="EVA unit"/></div><div class="sn" title="Kingdom">10 · <span class="jp-only he" lang="he" dir="rtl">מלכות</span> MALKUTH</div><div class="st">EVA CAGE</div><div class="sd" id="sd-eva">sandbox · field enforced</div></div>
+            <div class="snode round s-debrief" data-n="debrief"><div class="sn" title="Knowledge">11 · <span class="jp-only he" lang="he" dir="rtl">דעת</span> DA'AT</div><div class="st">DEBRIEF</div><div class="sd" id="sd-debrief">Central Dogma · what is now known</div></div>
+          </div>
+        </div>
+
+        <!-- other themes: compact decision timeline, MAGI included -->
+        <div class="not-eva-full">
+          <div class="timeline" id="timeline"></div>
+          <div class="loopline" id="loopline">Loops: review reject → plan (max 3) · approval edit → plan · sandbox result → plan</div>
+        </div>
+        <div class="flow-note" id="flow-note">Select a sortie, or launch one.</div>
+      </section>
+
+      <section class="panel" id="p-detail">
+        <div class="hdr"><span data-l="detail">Misato plan · current action</span><span class="sub" id="detail-sub"></span></div>
+        <div class="pad" id="detail" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px"></div>
+      </section>
+
+      <section class="panel" id="p-comms">
+        <div class="hdr"><span data-l="log">Comms · Misato &amp; Maya trace</span>
+          <span class="filters" role="group" aria-label="Filter messages"><button class="btn sm on" data-lf="all" style="color:inherit;border-color:currentColor">All</button><button class="btn sm" data-lf="sortie" style="color:inherit;border-color:currentColor">This sortie</button><button class="btn sm" data-lf="chat" style="color:inherit;border-color:currentColor">Chat only</button></span></div>
+        <div class="log" id="log" role="log" aria-live="polite"></div>
+        <div id="slash-menu" class="slash-menu" role="listbox" aria-label="Slash commands" hidden></div>
+        <form class="chat" id="chat-form">
+          <img class="av" data-av="you" alt="" />
+          <label class="sr" for="chat-in">Message Misato</label>
+          <input id="chat-in" autocomplete="off" placeholder="Ask Misato: status · why · approve AP-… · reject AP-… · spear · or a new request" />
+          <button class="btn primary" type="submit">Send</button>
+        </form>
+      </section>
+    </div>
+
+    <!-- ============ RIGHT ============ -->
+    <div class="col">
+      <section class="panel" id="p-away">
+        <div class="hdr"><span data-l="away">Debrief · while you were away</span><span class="sub" id="away-since"></span></div>
+        <div class="pad" id="away"></div>
+      </section>
+
+      <section class="panel" id="p-health">
+        <div class="hdr"><span data-l="health">Health</span><button class="btn sm" id="btn-doctor" style="color:inherit;border-color:currentColor">Run doctor</button></div>
+        <div class="pad" id="doctor-result" role="status" aria-live="polite" hidden></div>
+        <div class="pad" id="health"></div>
+      </section>
+
+      <section class="panel" id="p-settings">
+        <div class="hdr"><span data-l="settings">Settings</span><span class="sub" id="settings-sub">this base</span></div>
+        <div class="cols-2" id="settings-cols">
+          <div class="pad" id="settings"></div>
+          <div>
+            <div class="pad" id="settings-devices"></div>
+            <div class="pad" id="settings-push"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="p-models">
+        <div class="hdr"><span>Models &amp; Battery</span></div>
+        <div class="pad">
+          <div class="tabs" role="tablist" aria-label="Models and Battery">
+            <button class="btn sm sel" id="tab-models" role="tab" aria-selected="true" aria-controls="models-tabpanel" tabindex="0" data-resource-tab="models">Models</button>
+            <button class="btn sm" id="tab-battery" role="tab" aria-selected="false" aria-controls="p-budget" tabindex="-1" data-resource-tab="battery">Battery</button>
+          </div>
+          <div id="models-tabpanel" role="tabpanel" aria-labelledby="tab-models" tabindex="0">
+            <div class="tiny muted" id="models-sub"></div><div id="models"></div>
+          </div>
+          <div id="p-budget" role="tabpanel" aria-labelledby="tab-battery" tabindex="0" hidden>
+            <div class="tiny muted" id="budget-sub">Cost tracking planned</div><div id="budget"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="p-bases">
+        <div class="hdr"><span data-l="bases">NERV bases · Kaji line</span><span class="sub" id="bases-sub"></span></div>
+        <div class="pad">
+          <div class="tabs" role="tablist" aria-label="Bases and Chronicle">
+            <button class="btn sm sel" id="tab-bases" role="tab" aria-selected="true" aria-controls="bases-tabpanel" tabindex="0" data-base-tab="bases">Bases</button>
+            <button class="btn sm" id="tab-chronicle" role="tab" aria-selected="false" aria-controls="p-chronicle" tabindex="-1" data-base-tab="chronicle">Chronicle</button>
+          </div>
+          <div id="bases-tabpanel" role="tabpanel" aria-labelledby="tab-bases" tabindex="0">
+            <div class="maprow">
+              <div class="mapwrap"><canvas id="topo" width="540" height="250" aria-label="Map of NERV bases and links"></canvas></div>
+              <div class="maplegend" aria-label="Map key"><b class="legend-heading">■ Bases</b><span><i class="sq" style="background:var(--ok)"></i>online</span><span><i class="sq" style="background:var(--warn)"></i>standby</span><span><i class="sq" style="background:var(--muted)"></i>offline</span><b class="legend-heading">- Kaji line</b><span><i class="sq" style="background:var(--ok)"></i>route to main</span><span title="Heartbeats run between every pair of bases; no message is routed this way">⋯ heartbeat mesh</span><span><i class="sq" style="background:var(--accent)"></i>plug</span><span><i class="sq" style="background:var(--ok)"></i>result</span><span><i class="sq" style="background:var(--info)"></i>sync</span><span style="color:var(--info)">○ Midori</span></div>
+            </div>
+            <div class="list" id="bases"></div>
+          </div>
+          <div id="p-chronicle" role="tabpanel" aria-labelledby="tab-chronicle" tabindex="0" hidden>
+            <div class="tiny muted" id="chronicle-sub">Recorded agency milestones</div>
+            <div class="list" id="chronicle"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="p-eva">
+        <div class="hdr"><span data-l="cages">EVA cages · heartbeat</span><span class="sub" id="cages-sub">by machine</span></div>
+        <div class="pad" id="cages"></div>
+      </section>
+
+
+      <section class="panel">
+        <div class="hdr"><span data-l="melons">Marduk Institute · Pilots</span><span class="sub">proto → test → prod</span></div>
+        <div class="pad list" id="melons"></div>
+      </section>
+      <!-- F-021-T05: tools are actions (pilots are agents above, skills are Kaji's watermelons below). -->
+      <section class="panel">
+        <div class="hdr"><span>Tools</span><span class="sub">actions · versions · grants</span></div>
+        <div class="pad list" id="tools-list"><div class="muted small">Reading tools…</div></div>
+      </section>
+      <!-- Kaji's watermelons: the skills, their own box (owner, 2026-11-05); pilots are the Marduk Institute above. -->
+      <section class="panel">
+        <div class="hdr"><span data-l="skills">Kaji's watermelons · skills</span><span class="sub" data-l="skillStages">seed → sprout → ripe</span></div>
+        <div class="pad list" id="skills"></div>
+      </section>
+
+      <section class="panel" id="p-lilith">
+        <div class="hdr"><span data-l="lilith">Terminal Dogma · Lilith</span><span class="sub" id="lilith-sub"></span></div>
+        <div class="pad list" id="lilith"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script src="dashboard.js"></script>
+<script src="live.js"></script>
+</body>
+</html>

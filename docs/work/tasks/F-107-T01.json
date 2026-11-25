@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "parent": "F-107",
+  "id": "F-107-T01",
+  "title": "Map: green routes, heartbeat mesh lines, names in their case and status colour",
+  "goal": "The map shows routing and the heartbeat mesh honestly",
+  "status": "closed",
+  "acceptance": [
+    "Routes green while both ends are up; mesh lines thin, neutral, still, no pulses",
+    "Names keep their case; list names take their status colour",
+    "Legend and design notes updated; dashboard test covers three bases"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/**",
+    "test/**",
+    "docs/design/dashboard-and-native-ui.md",
+    "docs/work/records/F-107.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-18 from the owner request. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 1.0,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 521,
+      "note": "map"
+    },
+    {
+      "pr": 530,
+      "note": "closed on the owner live check"
+    }
+  ]
+}

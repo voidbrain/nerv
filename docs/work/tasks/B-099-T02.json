@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "id": "B-099-T02",
+  "parent": "B-099",
+  "title": "EVA jobs can run as a dedicated job user; everything it runs ends with the job",
+  "goal": "With eva.jobUser configured, an EVA job runs as that user (sudo, narrow rule), in a shared folder, from a read-only runtime copy; at the end every process of that user is killed and the table is checked",
+  "status": "implemented",
+  "acceptance": [
+    "Tests with a stand-in sudo: the job runs through `sudo -n -u <user> sandbox-exec`, its instance lives under the shared folder, and at the end `kill -KILL -1` runs as that user and `ps -U <user>` is checked; a survivor makes the end uncertain",
+    "run-tools-03 with a job user runs from a read-only runtime copy (node, src, node_modules, package.json) in the shared folder, refreshed when the revision changes",
+    "Without eva.jobUser nothing changes; config validation refuses a user name or folder that is not plain"
+  ],
+  "dependsOn": [
+    "B-099-T01"
+  ],
+  "resources": [
+    "src/eva-runner.ts",
+    "src/eva-job-user.ts",
+    "src/eva-pool.ts",
+    "src/config.ts",
+    "src/cli-commands.ts",
+    "test/eva-job-user.test.ts",
+    "test/fixtures/eva/**",
+    "docs/guides/eva-job-user.md",
+    "docs/decisions/eva-runner.md",
+    "docs/work/records/B-099.md",
+    "docs/work/tasks/B-099-T02.json",
+    "docs/work/tasks/B-099-T03.json",
+    "docs/work/tasks/B-099-T04.json",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design",
+    "typescript",
+    "privacy-review"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "The service user and its permission need the owner's setup on each Mac; a material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "4 h",
+    "basis": "Estimated 2026-11-19 from the review of PR #549; owner setup apart. Not a measurement. Re-planned 2026-11-19 with the owner: split into T02 (code), T03 (owner setup) and T04 (live check on NERV-01).",
+    "reviewed": "2026-11-19",
+    "agentHours": 4,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  },
+  "prs": [
+    {
+      "pr": 570,
+      "note": "job user; CI pending"
+    }
+  ]
+}

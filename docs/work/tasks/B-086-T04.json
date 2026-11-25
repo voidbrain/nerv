@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "B-086-T04",
+  "parent": "B-086",
+  "title": "Tests for the PR #536 review: activating and reloading units, and a running disabled unit that is not NERV’s",
+  "goal": "The B-086-T02 classification is pinned by tests that fail on a narrower or looser implementation",
+  "status": "closed",
+  "acceptance": [
+    "A test with ActiveState=activating (and reloading) and UnitFileState=disabled reads registration owned and runtime unknown, so every action is blocked; it fails if the running check is narrowed to active only",
+    "A test with a disabled, active unit whose ExecStart or WorkingDirectory differs reads foreign, and the stop plan is blocked"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/linux-service-lifecycle.test.ts",
+    "src/node-lifecycle-linux.ts",
+    "docs/work/records/B-086.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-19 from the fresh-context review of PR #536. Not a measurement. Implemented 2026-11-19: tests only; each fails on the implementation the review named (running check narrowed to active; ownership match dropped). Closed 2026-11-19 on green CI; actual stated as the estimate (not measured).",
+    "reviewed": "2026-11-19",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 542,
+      "note": "the tests"
+    }
+  ]
+}

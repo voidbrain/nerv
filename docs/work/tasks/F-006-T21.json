@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T21",
+  "title": "Owner page for placement P2–P4 on the mini PC and across both bases",
+  "goal": "The owner can run P2–P4 by pasting commands, as P1 on the Mac",
+  "status": "closed",
+  "acceptance": [
+    "A page under docs/acceptance gives tested commands for P2 (mini PC, PowerShell), P3 (mini PC worker with Mac remote inference) and P4 (Mac unavailable, then back), each with an expected result",
+    "Every command is dry-run (plan, zero model calls) before the page is published",
+    "Pending cases this task covers (listed for check:gauntlet-runs): multi-step-agent/*, nerv-system-flows/*"
+  ],
+  "dependsOn": [
+    "B-077-T01"
+  ],
+  "resources": [
+    "src/placement-campaign.ts",
+    "src/cli.ts",
+    "src/cli-help.ts",
+    "src/server.ts",
+    "src/runtime-api.ts",
+    "test/placement-campaign.test.ts",
+    "docs/acceptance/**",
+    "docs/decisions/placement-campaign.md",
+    "docs/archive/reconciliation-2026.md",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-18: the plan doc has no commands for P3 and P4 and mixes the mini PC into the Mac block. Not a measurement. Implemented 2026-11-22: added authenticated plan/run probes, join tests and the pasteable PowerShell page; the owner approved the required execution surface in chat. The source change leaves the named Gauntlet cases pending an owner-authorized model run.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 638,
+      "note": "placement probes and owner page; CI pending"
+    }
+  ]
+}

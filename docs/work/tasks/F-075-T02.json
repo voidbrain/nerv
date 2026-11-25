@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-075-T02",
+  "parent": "F-075",
+  "title": "Rerun system flows after the F-021 registry change",
+  "goal": "Every nerv-system-flows case covers the versioned NERV and MCP tool registry source",
+  "status": "closed",
+  "acceptance": [
+    "7/7 deterministic system cases pass and are recorded in evals/gauntlet/ledger.json",
+    "node tools/gauntlet.mjs pending exits 0 on the PR head",
+    "No model call is authorized or made"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "evals/gauntlet/**",
+    "docs/work/records/F-075.md",
+    "docs/work/tasks/F-075-T02.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "structured-tools"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node tools/gauntlet.mjs pending",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A failing case becomes a B- record before anything else"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Added 2026-11-13 because F-021-T02 correctly invalidated the deterministic system source key. Closed the same day after all seven bounded no-model cases passed and pending became empty; actual 0.25 h agent (stated, rounded from the observed campaign and reconciliation time).",
+    "reviewed": "2026-11-13",
+    "agentHours": 0,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  }
+}

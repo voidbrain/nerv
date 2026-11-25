@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-051-T02",
+  "parent": "F-051",
+  "title": "Running sortie selection and phase label",
+  "goal": "Running sortie selection and phase label",
+  "status": "closed",
+  "acceptance": [
+    "A new request or refresh selects the running sortie; the card names its phase"
+  ],
+  "dependsOn": [
+    "F-051-T01"
+  ],
+  "resources": [
+    "web/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Closed 2026-11-13: verified running sortie selection and phase label.",
+    "reviewed": "2026-11-13",
+    "baselineDays": 1,
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  }
+}

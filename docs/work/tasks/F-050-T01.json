@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-050-T01",
+  "parent": "F-050",
+  "title": "Whole-job handoff contract",
+  "goal": "Define capability-first signed handoff after reviewing the F-045 remote capability prerequisite; no runtime delegation is authorized by this contract task",
+  "status": "closed",
+  "acceptance": [
+    "Distinguish bounded worker actions from delegated whole sorties",
+    "Inspect F-045 remote capability prerequisite before implementing delegation",
+    "Unknown outcomes remain held until reconciled"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "contract:whole-job-handoff",
+    "docs/decisions/**",
+    "docs/work/records/F-050.md",
+    "docs/work/tasks/F-050-T01.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "distributed-contracts",
+    "privacy-review",
+    "recovery-design"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "validation": [
+    "Run affected regressions across the changed boundary and applicable fast checks",
+    "Keep human/device acceptance and independent review distinct from fixture results"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 hours",
+    "basis": "Re-estimated 2026-11-14 from 0.5 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
+    "reviewed": "2026-11-14",
+    "baselineDays": 2,
+    "agentHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 0.75
+  }
+}

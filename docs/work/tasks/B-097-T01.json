@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "parent": "B-097",
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-097-T01",
+  "title": "Owner approves fixing merge-when-green in the template",
+  "goal": "Approve or decline the template change",
+  "status": "closed",
+  "acceptance": [
+    "Reply \"approve B-097\" (expected: the agent changes the template's merge-when-green, releases it and reconciles here) or \"keep the workaround\""
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/work/records/B-097.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "validation": [
+    "npm run check:work"
+  ],
+  "ownerLink": "docs/archive/backlog-2026.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-19. Not a measurement. Owner approved in chat 2026-11-22.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
+    "ownerHours": 0,
+    "ownerKind": "decision"
+  }
+}

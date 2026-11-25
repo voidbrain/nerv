@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-062-T01",
+  "parent": "F-062",
+  "title": "Owner-agreed loss window and restore time",
+  "goal": "Owner-agreed loss window and restore time",
+  "status": "closed",
+  "acceptance": [
+    "Bounds agreed and recorded"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's access, choice or observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent + 0.25 hours owner",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
+    "reviewed": "2026-11-13",
+    "baselineDays": 0.5,
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 0.5,
+    "ownerKind": "both",
+    "estimateAgentHours": 0.25
+  }
+}

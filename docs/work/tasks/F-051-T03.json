@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-051-T03",
+  "parent": "F-051",
+  "title": "MAGI and pilot contributors",
+  "goal": "MAGI and pilot contributors",
+  "status": "closed",
+  "acceptance": [
+    "MAGI detail lists every seat's vote, shadow and peer marked; Plan · current action names the advising pilot"
+  ],
+  "dependsOn": [
+    "F-051-T02"
+  ],
+  "resources": [
+    "web/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "src/**"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Closed 2026-11-13: verified MAGI seat votes (shadow/peer marked) and advising pilot.",
+    "reviewed": "2026-11-13",
+    "baselineDays": 1,
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  }
+}

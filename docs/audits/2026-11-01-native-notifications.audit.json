@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "scoped",
+  "reviewed": "2026-11-01T08:56:50.484Z",
+  "baseline": "37398b60b301263e473f4a4ed41d2933436e3d62",
+  "report": "docs/audits/2026-11-01-native-notifications.md",
+  "areas": {
+    "code": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-notifications.md: named inspection and tests",
+      "limits": "Scoped local/backend and native-source review; macOS CI and real GUI/OS acceptance are separate."
+    },
+    "logic": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-notifications.md: named inspection and tests",
+      "limits": "Scoped local/backend and native-source review; macOS CI and real GUI/OS acceptance are separate."
+    },
+    "tests": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-notifications.md: named inspection and tests",
+      "limits": "Scoped local/backend and native-source review; macOS CI and real GUI/OS acceptance are separate."
+    },
+    "documentation": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-notifications.md: named inspection and tests",
+      "limits": "Scoped local/backend and native-source review; macOS CI and real GUI/OS acceptance are separate."
+    },
+    "harness": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-notifications.md: named inspection and tests",
+      "limits": "Scoped local/backend and native-source review; macOS CI and real GUI/OS acceptance are separate."
+    },
+    "security": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-notifications.md: named inspection and tests",
+      "limits": "Scoped local/backend and native-source review; macOS CI and real GUI/OS acceptance are separate."
+    },
+    "delivery": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-notifications.md: named inspection and tests",
+      "limits": "Scoped local/backend and native-source review; macOS CI and real GUI/OS acceptance are separate."
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-01-native-notifications.md: named inspection and tests",
+      "limits": "Scoped local/backend and native-source review; macOS CI and real GUI/OS acceptance are separate."
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-111-T01",
+  "parent": "F-111",
+  "title": "Declare result shapes for read tools and check them at the tool boundary",
+  "goal": "A malformed tool result never reaches the planner",
+  "status": "closed",
+  "acceptance": [
+    "Each built-in read tool has a declared result shape next to its descriptor",
+    "A result that does not match is refused with an error naming the tool and field",
+    "Join test across planner, gate and executor with a valid and a malformed result"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/executors.ts",
+    "test/**",
+    "docs/work/records/F-111.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-20 from the Agentica review. Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 0,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

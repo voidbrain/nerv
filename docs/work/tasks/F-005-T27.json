@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T27",
+  "status": "closed",
+  "title": "T11b — Enrolment, revocation, leases, fencing and cancellation across the device matrix",
+  "goal": "Enrolment, revocation, leases, fencing and cancellation across the device matrix.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Enrolment, revocation, leases, fencing and cancellation across the device matrix"
+  ],
+  "dependsOn": [
+    "F-005-T37"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Moved to the agent 2026-11-18 (1 h owner → agent).",
+    "reviewed": "2026-11-18",
+    "baselineDays": 1.5,
+    "ownerHours": 0,
+    "agentHours": 0,
+    "estimateAgentHours": 1,
+    "baselineAgentHours": 1,
+    "actualAgentHours": 2.0,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 527,
+      "note": "this change"
+    }
+  ]
+}

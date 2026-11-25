@@ -1,0 +1,541 @@
+1. Architectural structure (top → bottom)
+Org / geography (multi-node world)
+textSEELE (policy authority / org rules)
+  └── NERV (the product: Nodo control plane)
+        ├── GEOFRONT / Neo Tokyo-3          ← primary coordinator base (local-mac)
+        │     ├── Command tower UI (this dashboard)
+        │     ├── Gendo’s Office (risk router)
+        │     ├── MAGI 01 trio (resident council)
+        │     ├── Ritsuko lab (enforcement / sync)
+        │     ├── Misato HITL queue
+        │     ├── EVA bay (local workers / sandboxes)
+        │     └── Terminal Dogma (SQLite + Litestream)
+        ├── NERV-01 (e.g. US / mini-pc worker base)
+        ├── NERV-02 (e.g. DE / edge-pi base)
+        └── Optional: shared / remote MAGI seats, JIT experts
+Neo Tokyo-3 in this metaphor = the home coordinator node (your Mac / primary Geofront): owns ingress, routing policy, ledger authority, and usually the resident MAGI set. Other bases are enrolled workers on the mesh (WireGuard-class multi-node, M3 / F-005), not separate “NERV orgs.”
+Runtime layers (from insights.md)
+
+
+Layer,Lore shell,Real system
+L5,MAGI / Naoko,Intent parse + multi-model 2/3 ballot (Melchior / Balthasar / Casper)
+L3,Gendo’s Office,Risk pattern Blue / Orange / Red + dynamic committee selection
+L4,SEELE / Ritsuko / Misato,"AST/policy checks, sync ratio, capability JWT (A.T. Field), HITL"
+L2,EVAs / Pilots / LCL,"Workers, Firecracker (planned), scoped tools, edge inference"
+L1,Terminal Dogma / Kaji,"SQLite ledger, replication, progressive trust for skills/experts"
+
+
+Milestone mapping (docs): M0 harness/router stubs → M1 Dogma → M1a.1 LCL/Firecracker → M2 MAGI + channels → M3 multi-node mesh → later GenUI / distributed agents.
+
+
+2. Flows (ingress → done)
+Happy path (conceptual)
+
+LayerLore shellReal systemL5MAGI / NaokoIntent parse + multi-model 2/3 ballot (Melchior / Balthasar / Casper)L3Gendo’s OfficeRisk pattern Blue / Orange / Red + dynamic committee selectionL4SEELE / Ritsuko / MisatoAST/policy checks, sync ratio, capability JWT (A.T. Field), HITLL2EVAs / Pilots / LCLWorkers, Firecracker (planned), scoped tools, edge inferenceL1Terminal Dogma / KajiSQLite ledger, replication, progressive trust for skills/experts
+Milestone mapping (docs): M0 harness/router stubs → M1 Dogma → M1a.1 LCL/Firecracker → M2 MAGI + channels → M3 multi-node mesh → later GenUI / distributed agents.
+
+2. Flows (ingress → done)
+Happy path (conceptual)
+textUser / channel / schedule
+    → Entry Plug (normalize intent, schema)
+    → Gendo L3: assign Blue | Orange | Red
+         ├─ Blue: skip full MAGI (or thin check) → Ritsuko sync ≥ threshold
+         │         → issue A.T. Field token → EVA worker → Dogma commit
+         ├─ Orange: MAGI (± experts) → majority approve → Ritsuko → token → EVA → Dogma
+         └─ Red: MAGI and/or force HITL → Misato approve/reject
+                   → only then token → EVA → Dogma
+    Failures / low sync / API down → Dummy Plug fallback or HITL
+    Rollback → Spear of Longinus (revoke token + ledger compensate)
+When are consultants / experts evaluated?
+Docs + backlog (not fully productized):
+
+
+Case,Step,Experts?
+Blue (read-only / routine),"After Gendo, often before full MAGI",Usually no — skip council; experts not required
+Orange (bounded transform),Gendo → MAGI active; L3 may select committee,Optional / dynamic: fixed specialists or JIT suggest-only can be pulled into the ballot or as side counsel
+Red (mutation / privileged),MAGI + HITL,Experts may advise; they must not auto-grant Red authority (F-024)
+Low sync / policy split,Ritsuko fails threshold or 2/3 fails,"HITL; experts can brief Misato, not bypass her"
+Skill/expert promotion,"After execution, offline eval",Shadow → bounded → fuller role (Kaji pipeline; experts same discipline as skills)
+
+
+So: experts are not on every job. They enter when Gendo’s dynamic committee selection (or an Orange/Red policy) asks for them—typically alongside or under MAGI, never as a silent Red auto-approve.
+Your example: Tokyo-3 with 3 MAGIs (Claude, local, German base)
+
+Resident MAGI 01 at Tokyo-3 can be heterogeneous: e.g. Melchior = cloud Claude, Balthasar = local Gemma, Casper = model served from NERV-02 (Germany).
+That is configuration of the three seats, not three separate NERV orgs.
+Changing seats = operator/config + trust rules (who may vote, from which node, with which keys).
+Forge additional MAGIs?
+Core trio: tightly controlled; not casually spawned (docs: keep core MAGI membership tight).
+Optional / on-demand pool: yes in the design — “optional MAGI / expert pool”, remote seats, JIT experts.
+Ask USA base to share one? Fits M3 multi-node + M2/M5 model routing: a remote node exposes a model endpoint; Tokyo-3 enrols it as a temporary or fixed voter/specialist under progressive trust—not free federation of Red power.
+
+Resident vs JIT
+Resident: always-on seats (classic Melchior/Balthasar/Casper).
+JIT experts: suggest-only or temporary seat after evaluation (F-024); rollback removes seat/capability.
+
+
+Dashboard today only simulates council votes; it does not provision remote MAGI seats.
+
+3. Entity lexicon (lore → real → meaning → stats to watch)
+
+Lore name,Real-world element,Short description,Monitor
+NERV,Nodo product / control plane,Local-first agent OS with policy and multi-node ambitions,"Version, doctor health, service up"
+SEELE,Org/policy authority,"Hard rules above Gendo (compliance, never-bypass)","Policy pack version, denied actions"
+Neo Tokyo-3 / Geofront,Coordinator node (e.g. local-mac),"Primary base: ingress, router, ledger, usually resident MAGI","Uptime, mesh role, ledger lag"
+NERV-01 / NERV-02,"Worker bases (mini-pc, Pi, remote)",Enrolled executors / optional model hosts,"Online/standby, latency, leases"
+Entry Plug,Ingress adapter,Parses user/channel/schedule into a typed job,"Parse failures, schema rejects"
+Dummy Plug,Degraded fallback,Path when models/APIs fail—deterministic or safe subset,"Fallback rate, error class"
+Gendo’s Office,Risk router (L3),Classifies Blue/Orange/Red; selects committee,"Pattern mix, misroutes, time-to-class"
+MAGI,Multi-model council (L5),2/3 ballot: policy / safety / intent personas,"Vote, dissent, latency, cost/token"
+Melchior ·1,Council seat (often “scientist/policy”),One voting model instance,"Vote, CPU/GPU/RAM, model id, node"
+Balthasar ·2,Council seat (often “mother/safety”),Safety-oriented voter,Same
+Casper ·3,Council seat (often “woman/ethics/intent”),Intent/ethics-oriented voter,Same
+Optional MAGI / experts,Extra models or specialists,Fixed or JIT counsel; not automatic core seats,"Stage (shadow/bounded), seat TTL"
+Ritsuko’s Lab,Enforcement / OpenJEV-style checks (L4),"AST/policy profile, sync ratio, gates token","Sync value, rule hits"
+Sync ratio,Confidence / promote score,Auto-run vs review threshold (e.g. ≥0.80),"Value, trend, false promote"
+A.T. Field,Capability token (JWT-like),Scoped grant for tools/worker actions,"Expiry, scope, revoke count"
+Spear of Longinus,Rollback / revoke,Kill grant + compensate ledger,"Revokes, compensate success"
+Misato,HITL operator surface,Human approve/reject on Red / low sync / split,"Queue depth, time-to-decision"
+EVA,Worker unit / sandbox slot,Isolated execution environment (Firecracker planned),"Ready/standby/off, job load"
+Pilot,Skill / capability identity driving an EVA,Who/what is allowed to act in that unit,"Pairing, trust stage, last job"
+LCL,Isolation medium,Micro-VM / containment boundary,"Escape attempts, boot time"
+Terminal Dogma,SQLite + Litestream (L1),"Durable inbox, jobs, audit","Lag, integrity, disk"
+Kaji’s watermelons,Progressive trust,Shadow → bounded → fuller autonomy for skills and experts,"Stage, eval score, rollbacks"
+Adam,Base weights / foundation models,Raw model assets bound into the system,"Load ok, version"
+Lilith,Promoted / autonomous skill or full-autonomy stage,“Full autonomy” end of trust ladder (naming in older dashboards),Promotion events
+S² Engine,Edge inference,Local cheap inference path,"Latency, OOM"
+Kaji mesh,Secure node mesh,WireGuard-like links between bases,"Link up/down, RTT"
+Pattern Blue/Orange/Red,Risk classes,Auto / council / HITL-heavy,"Counts, outcomes"
+Doctor,Self-checks,"Scheduler, DB, gateway health",Component status
+Inbox,Durable deliveries,Reminders / notifications waiting,Pending count
+Sephiroth / pipeline stages,Execution stages UI,Ingress → router → council → policy → sandbox → ledger,Stage stuck time
+
+EVA vs pilot: EVA = the machine/sandbox; pilot = the authorized actor/skill profile plugged into it. Sync in the bay is pilot↔unit readiness; system sync is job promote confidence—different meters.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CaseStepExperts?Blue (read-only / routine)After Gendo, often before full MAGIUsually no — skip council; experts not requiredOrange (bounded transform)Gendo → MAGI active; L3 may select committeeOptional / dynamic: fixed specialists or JIT suggest-only can be pulled into the ballot or as side counselRed (mutation / privileged)MAGI + HITLExperts may advise; they must not auto-grant Red authority (F-024)Low sync / policy splitRitsuko fails threshold or 2/3 failsHITL; experts can brief Misato, not bypass herSkill/expert promotionAfter execution, offline evalShadow → bounded → fuller role (Kaji pipeline; experts same discipline as skills)
+So: experts are not on every job. They enter when Gendo’s dynamic committee selection (or an Orange/Red policy) asks for them—typically alongside or under MAGI, never as a silent Red auto-approve.
+Your example: Tokyo-3 with 3 MAGIs (Claude, local, German base)
+
+Resident MAGI 01 at Tokyo-3 can be heterogeneous: e.g. Melchior = cloud Claude, Balthasar = local Gemma, Casper = model served from NERV-02 (Germany).
+That is configuration of the three seats, not three separate NERV orgs.
+Changing seats = operator/config + trust rules (who may vote, from which node, with which keys).
+Forge additional MAGIs?
+Core trio: tightly controlled; not casually spawned (docs: keep core MAGI membership tight).
+Optional / on-demand pool: yes in the design — “optional MAGI / expert pool”, remote seats, JIT experts.
+Ask USA base to share one? Fits M3 multi-node + M2/M5 model routing: a remote node exposes a model endpoint; Tokyo-3 enrols it as a temporary or fixed voter/specialist under progressive trust—not free federation of Red power.
+
+Resident vs JIT
+Resident: always-on seats (classic Melchior/Balthasar/Casper).
+JIT experts: suggest-only or temporary seat after evaluation (F-024); rollback removes seat/capability.
+
+
+Dashboard today only simulates council votes; it does not provision remote MAGI seats.
+
+3. Entity lexicon (lore → real → meaning → stats to watch)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lore nameReal-world elementShort descriptionMonitorNERVNodo product / control planeLocal-first agent OS with policy and multi-node ambitionsVersion, doctor health, service upSEELEOrg/policy authorityHard rules above Gendo (compliance, never-bypass)Policy pack version, denied actionsNeo Tokyo-3 / GeofrontCoordinator node (e.g. local-mac)Primary base: ingress, router, ledger, usually resident MAGIUptime, mesh role, ledger lagNERV-01 / NERV-02Worker bases (mini-pc, Pi, remote)Enrolled executors / optional model hostsOnline/standby, latency, leasesEntry PlugIngress adapterParses user/channel/schedule into a typed jobParse failures, schema rejectsDummy PlugDegraded fallbackPath when models/APIs fail—deterministic or safe subsetFallback rate, error classGendo’s OfficeRisk router (L3)Classifies Blue/Orange/Red; selects committeePattern mix, misroutes, time-to-classMAGIMulti-model council (L5)2/3 ballot: policy / safety / intent personasVote, dissent, latency, cost/tokenMelchior ·1Council seat (often “scientist/policy”)One voting model instanceVote, CPU/GPU/RAM, model id, nodeBalthasar ·2Council seat (often “mother/safety”)Safety-oriented voterSameCasper ·3Council seat (often “woman/ethics/intent”)Intent/ethics-oriented voterSameOptional MAGI / expertsExtra models or specialistsFixed or JIT counsel; not automatic core seatsStage (shadow/bounded), seat TTLRitsuko’s LabEnforcement / OpenJEV-style checks (L4)AST/policy profile, sync ratio, gates tokenSync value, rule hitsSync ratioConfidence / promote scoreAuto-run vs review threshold (e.g. ≥0.80)Value, trend, false promoteA.T. FieldCapability token (JWT-like)Scoped grant for tools/worker actionsExpiry, scope, revoke countSpear of LonginusRollback / revokeKill grant + compensate ledgerRevokes, compensate successMisatoHITL operator surfaceHuman approve/reject on Red / low sync / splitQueue depth, time-to-decisionEVAWorker unit / sandbox slotIsolated execution environment (Firecracker planned)Ready/standby/off, job loadPilotSkill / capability identity driving an EVAWho/what is allowed to act in that unitPairing, trust stage, last jobLCLIsolation mediumMicro-VM / containment boundaryEscape attempts, boot timeTerminal DogmaSQLite + Litestream (L1)Durable inbox, jobs, auditLag, integrity, diskKaji’s watermelonsProgressive trustShadow → bounded → fuller autonomy for skills and expertsStage, eval score, rollbacksAdamBase weights / foundation modelsRaw model assets bound into the systemLoad ok, versionLilithPromoted / autonomous skill or full-autonomy stage“Full autonomy” end of trust ladder (naming in older dashboards)Promotion eventsS² EngineEdge inferenceLocal cheap inference pathLatency, OOMKaji meshSecure node meshWireGuard-like links between basesLink up/down, RTTPattern Blue/Orange/RedRisk classesAuto / council / HITL-heavyCounts, outcomesDoctorSelf-checksScheduler, DB, gateway healthComponent statusInboxDurable deliveriesReminders / notifications waitingPending countSephiroth / pipeline stagesExecution stages UIIngress → router → council → policy → sandbox → ledgerStage stuck time
+EVA vs pilot: EVA = the machine/sandbox; pilot = the authorized actor/skill profile plugged into it. Sync in the bay is pilot↔unit readiness; system sync is job promote confidence—different meters.
+
+4. Mapping onto dashboard-agnostic.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Entity / concernWhere on dashboardDepthNERV / brandHeader brand + taglineOKNeo Tokyo-3 / node selectNODE select, globe/listPartial (demo nodes)Mesh / intercommsGlobe arcs + mesh-links + worker list (EVA Full)Good sketchPattern ingress (Gendo)Left Task risk Blue/Orange/RedSimulated onlySpearRollback buttonLog-onlyProgressive trust / watermelonsTrust panel + skill rowsStatic demo rowsActive sortie + system syncActive job + waveform/sliderSimulatedDoctorDoctor panelCosmeticMAGI trio + JP + GPU/CPU/RAM + vote colorsCenter MAGI SVGSimulated votes/metricsPlain safety/policy/intentNon-EVA council cardsOKExpert poolExperts columnStatic / thinPipeline stagesCenter pipelineDriven by demoStream + HITL + Misato/Gendo/MAGI voiceTabs + chatSimulatedEVA bay (3 in a row)Right, EVA FullArt + per-EVA sync waveInbox / approvalsRight panelsLocal stateCRT / themesHeaderCosmetic
+Not really on the dashboard (or only as a label): SEELE policy pack, Dummy Plug events, Entry Plug schema errors, A.T. Field token scopes/expiry, OpenJEV/AST detail, Firecracker/LCL health, Litestream lag, progressive-trust evidence, remote MAGI forge/enrol UI, expert shadow→seat controls, trace IDs (F-025), cost budgets per model seat.
+
+5. Gaps / weaker visualization (don’t omit)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TopicIssueBetter treatmentExperts in the flowBanner/list; unclear when they votedTimeline: Gendo → MAGI → expert inputs → resolutionCommittee selectionInvisibleChip row: “seats this job: Melchior (local), Casper (DE), calendar_expert (JIT)”Resident vs JIT vs remote MAGIOptional pool text onlyRoster: resident / remote / JIT + node + trust stage + revokeA.T. Field tokenAbsentCard: scopes, TTL, revoke (Spear target)Dummy PlugAbsentExplicit degraded-mode banner + last reasonSystem sync vs EVA syncEasy to conflateKeep split; title system meter “promote confidence”DogmaOnly in logsLedger lag / last commit / compensate statusKaji trustStatic stagesPer-skill/expert: shadow days, eval score, promote/rollbackMulti-base MAGIGlobe is nodes, not votersLink each MAGI seat → hosting baseHITLQueue ok; no SLAAge of oldest Red, who is on callSimulation vs liveEasy to trust demo buttonsPersistent SHADOW UI / not armed when not bound to APISEELEMissingRead-only policy summary affecting RedCostToken burn line onlyPer-seat and per-pattern cost
+
+6. Direct answers to your questions
+
+Consultants/experts in evaluating? Yes in the design, mainly Orange/Red and when Gendo’s dynamic committee pulls them; not routine Blue. Same progressive-trust ladder as skills (shadow → bounded → possible temporary seat); never silent Red authority.
+Tokyo-3 with Claude + local + German MAGI? Valid resident trio composition across nodes; changeable by config/trust, not by a toy button today.
+Forge more MAGIs / JIT / ask USA base? Optional pool + JIT + remote seats are in the architecture/backlog spirit; core 3 stay controlled; remote share = enrol model capability under mesh auth + trust—not free vote minting.
+Neo Tokyo-3? Primary Geofront / coordinator base.
+EVA? Worker/sandbox unit.
+Pilot? Capability/skill identity plugged into that unit.
+Stats that matter: per MAGI vote+resources+node; system sync; per-EVA sync/status; mesh link health; Dogma lag; trust stage; token scope/TTL; HITL queue; pattern outcomes.
+
+Bottom line: Gendo should auto-route; Spear should be real revoke/compensate; MAGI/experts should run on Orange/Red with explicit seats. dashboard-agnostic.html visualizes the story and simulates the path; it is not yet the armed control plane.

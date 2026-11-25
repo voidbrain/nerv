@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T09",
+  "status": "planned",
+  "title": "Step 5b — Two-device relocation acceptance",
+  "goal": "Two-device relocation acceptance.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures only in git; real coordinator state, keys and device evidence remain private.",
+  "acceptance": [
+    "Two-device relocation acceptance"
+  ],
+  "dependsOn": [
+    "F-016-T08",
+    "F-016-T20",
+    "B-124-T01"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:coordinator-authority"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h owner",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. 2026-11-25: the owner's turn once B-124-T01 closed; owner page written in the reconciliation.",
+    "reviewed": "2026-11-25",
+    "baselineDays": 1,
+    "ownerHours": 1,
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f016-t09-two-device-relocation.md"
+}

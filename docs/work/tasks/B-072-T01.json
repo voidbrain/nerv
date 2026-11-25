@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "B-072",
+  "id": "B-072-T01",
+  "title": "Native TLS key generation: timeout told apart from missing openssl, no flaky Windows CI",
+  "goal": "The Windows job does not fail on a slow openssl",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails first: a slow key generation is reported as a timeout, not as missing openssl",
+    "The Windows job passes without reruns"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/native-auth.ts",
+    "test/native-auth.test.ts",
+    "test/native-recovery.test.ts",
+    "docs/work/records/B-072.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-18: separate timeout from spawn failure, raise the bound, one test. Not a measurement. 2026-11-18: test committed failing first; openssl and the bound injectable, default 60 s; timeout, missing and failed openssl told apart; partial files removed. Remaining: Windows job green without rerun on the PR and the next runs.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 507
+    }
+  ]
+}

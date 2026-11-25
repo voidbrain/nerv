@@ -1,0 +1,92 @@
+# Architecture
+
+## Implemented boundary
+
+During serve, A owns SQLite/ticker/inbox in an isolated child, B provides model and health operations, and C serves REST/static UI, owns the Misato planning loop and supervises children. C accesses A through schema-validated JSON-RPC IPC; static file reads are asynchronous. Standalone CLI commands still use the Store directly. Reminder and inbox histories use bounded keyset pages; legacy array reads fail explicitly when pagination is required. The live dashboard uses aggregate counts instead of downloading full history. Paired native clients use pinned HTTPS REST with separate read-only credentials; local `/rpc` is a distinct authenticated WebSocket read interface, not a native credential transport; enrolled outbound workers use a separate signed, versioned channel for advertised built-in actions. Local mutation RPC remains unavailable. See [worker protocol](../decisions/worker-protocol.md) for durable receipts, leases, cancellation, reconciliation and rollout limits. See [the runtime decision](../decisions/runtime-boundaries.md) for bounds, failover and security limits.
+
+## Intended distributed boundary
+
+One coordinator initially owns jobs, scheduling, permissions, node registry, notification delivery and authoritative orchestration state. Enrolled workers open outbound authenticated connections. Use one SQLite writer on its local disk, never a database file mounted over the network. Worker-local state may retain bounded execution journals. Coordinator replication and automatic leader failover are deferred.
+
+A role is not a machine and a machine is not a model. A coder on the mini PC may use Gemma on the Mac or Claude remotely, subject to privacy and budgets. A Pi can expose device operations and voice without hosting a useful LLM. Model capabilities are probed, not inferred from names. Route by tool reliability, memory, queue, availability, privacy and task needs. The mini PC can remain on while the Mac sleeps; jobs needing the Mac wait, expire or use an explicitly permitted alternative.
+
+## Protocol requirements before remote execution
+
+Version negotiation, enrolled device identities, key rotation/revocation, heartbeat, capability advertisements, job leases, fencing tokens, deadlines, cancellation, artifact integrity, delivery acknowledgement and bounded retries. Idempotency suppresses known duplicate intents; it cannot create exactly-once physical effects. Reconcile uncertain external results before repeating them. Resource locks prevent two jobs controlling one printer or mutating one checkout concurrently. Do not assume a disconnected worker stopped: fencing must be enforced at the protected resource, or conflicting reassignment must remain blocked.
+
+## Discovery and bootstrap
+
+Selected-inventory discovery, fixed read-only local/SSH inspection and digest-bound manifests with operator-confirmed, journaled fresh-profile bootstrap are implemented through `nodes`. Automatic service/update/uninstall ownership flows and end-to-end device acceptance remain open in F-005; see [the contract](../decisions/node-bootstrap.md). No discovery/inspection creates trust or runs installation commands.
+
+Discover using selected LAN ranges, mDNS/DNS-SD, configured SSH targets, Tailscale inventory and USB adapters where available. Inspect candidates without enrolling them. Produce a concrete installation plan listing target identity, version, permissions, dependencies, service changes and rollback. On authorized hosts, bootstrap through authenticated SSH or a pairing command with pinned checksums. Verify identity, run doctor and a harmless capability test. Support updating, revoking and uninstalling. Discovery is not a trust grant; printers may need only an API adapter.
+
+## GenUI and interfaces
+
+The stable Angular shell owns navigation and device/permission management. A schema-validated Surface now references an allowlisted Web Component; Angular hosts it in the stable shell. The first deterministic status card is implemented; model surface generation is not. Treat remote agent/tool data as untrusted; never evaluate generated JS or bypass backend permissions. Telegram receives text/buttons representing the same operations. Future voice is another input/output adapter. PWA install, push delivery and background constraints require device tests.
+
+## Skills, models and tools
+
+Tools are versioned typed capabilities, with policy enforced outside prompts and skills. Prefer direct APIs; MCP provides interoperability for app and coding clients. Browser and shell workers require bounded execution environments. Secrets stay in host-managed storage, outside model context and logs. Local-only jobs cannot silently fall back to cloud. Self-improvement proposes memory/skill/code changes, evaluates them in isolation, and promotes versioned changes with rollback; it cannot grant itself permissions or rewrite its evaluator.
+
+## Configuration qualification (accepted design; partial integration)
+
+Gauntlet supplies reusable capability evidence through the [delivered evaluation adapter](../evaluations/gauntlet.md). NERV retains scenarios, assignment, trust and production permissions. [Staged qualification](../decisions/configuration-qualification.md) separates individual-role evidence, a separately tested coder/auditor workflow and NERV end-to-end acceptance. Host placement includes Mac inference, mini PC specialist inference and separate tool/test execution. Combination qualification, evidence-aware scheduling and real mini PC acceptance remain planned under F-006/F-045; the F-074 neutral smoke establishes none of them.
+
+## Action governance (implemented core and remaining targets)
+
+Names follow the [NERV vocabulary](vocabulary.md); code uses plain names. The agent (Misato) works in a loop and every proposed action is gated at the executor, not once per plan. Each tool declares an effect class: read, local reversible write, external write, irreversible or physical. The deterministic policy engine derives the Pattern from it: Green (read, local reversible), Orange (external reversible) and Blue (irreversible, physical, or external effect requested from tainted context). Melchior (rules) and Balthasar (reversibility, budget, taint) are deterministic seats; Casper (intent) is one reasoning-blind model seat for Orange and Blue. Extra seats can only reject. The implemented Sync Ratio (0–100) multiplies configured effect/stage factors and an approving Casper verdict's confidence when supplied. Its displayed inputs make this heuristic inspectable; it is not calibrated safety probability or an empirical pilot trust history. Blue or a low ratio requires the owner (Misato's apartment); approvals have a TTL and expiry never approves. A capability grant (A.T. Field) is scoped and short-lived, and the executor checks it on every call. The provenance/egress target is that email, web and third-party content carry taint and cannot cause an external effect without the owner; F-027-T01 records durable context sources/taint through MCP dispatch, recalled facts/summaries, earlier turns and approvals. Tainted external effects remain Blue; tainted local outside code is denied pending F-049 isolation. Enforced Scrolls egress remains F-027-T02. Ballots, grants, approvals and steps are append-only ledger events with one versioned schema (`src/events.ts`) shared by the ledger, the read APIs and the dashboard. Revocation (Spear) revokes unused grants, stands down pending approvals and reports used grants with optional inverse metadata. It does not execute compensation or establish that an in-flight external operation stopped. Implemented so far: the deterministic ballot, the Scrolls file, Casper's local model seat, grants, approval cards, the reminder executors behind the gate (owner actions via `act`), Misato's planning loop (`chat`), Lilith's confirmed facts with recall, the Spear and the versioned event ledger; full provenance/egress acceptance and live native approval delivery acceptance are still open (Misato resumes after approvals; Aoba delivers cards and replies on Telegram) (F-017, F-023, F-024, F-027 in the backlog).
+
+Each approval decision records the client that made it in its ledger event (`source`): `dashboard` (a dashboard session), `api` (the admin token), `cli` or `telegram`; an expiry records `ttl`.
+
+## Domain ownership
+
+The FPV app owns batteries, aircraft damage and maintenance state. NERV Agency invokes its typed API/MCP tools. Distinguish recording a charge from starting a physical charger. Calendar, insurance deadlines and absence dates are structured facts with provenance and correction, not guesses reconstructed from chat history.
+
+## Local lifecycle and native companion
+
+The OS supervisor owns starting/restarting the Node process; Angular is not responsible for keeping reminders alive. launchd is a per-user GUI agent; systemd uses the current user session. Sleep and logout limits must be visible. The planned native macOS companion uses SwiftUI MenuBarExtra, with independent app/service lifecycles and authenticated API access. Electron is not a dependency.
+
+## Nightly snapshots
+
+The running service takes one consistent snapshot of the base database each night at 03:30 in the owner's time zone (`src/snapshots.ts`). SQLite's online backup copies the database while the service keeps writing; the copy becomes one self-contained file, passes `PRAGMA integrity_check`, and only then replaces the partial file as `<data home>/snapshots/nerv-<date>.sqlite` (folder 0700, file 0600 on macOS and Linux). The newest 7 are kept. The files are the checkpoint, so a restart neither repeats nor skips a night. A failure is logged once with its reason only, and retried the next night. Up to 24 hours of data can be lost. Encrypted off-host copies and the restore drill are on the [roadmap](../ROADMAP.md).
+
+## Native pairing implementation
+
+Optional native HTTPS on loopback 4319 is enabled by native-init. The existing web/API remains on 4317. The gateway loads a private localhost TLS key/certificate and a separate bounded native credential database. Reminder SQLite/ticks remain in A; Brain receives neither TLS keys nor master/native credentials. The credential database contains only verifier hashes, metadata and a persistent runtime UUID. Small administrative operations occur in C and do not share A's reminder transaction queue.
+
+An authenticated CLI uses the persisted TLS certificate to request a two-minute single-use invitation. It includes the certificate fingerprint and runtime identity. The companion pins that certificate before presenting its ticket, validates hostname/expiry through Security.framework, claims a 30-day read-only client credential and stores it in Keychain. Each subsequent request is TLS-pinned, checks server-side revocation/expiry and checks the runtime UUID before accepting state. Redirects are denied. Nothing adds the local certificate to global trust. Invitations and native tokens are not URL parameters or provider credentials. Per-client socket authentication remains unimplemented; native preview uses REST. Owner-issued invitation plus current credential can renew through `/api/pairing/renew`: one transaction replaces the token while retaining the runtime and read-only scope. The companion refuses a different identity/pin/ports before sending the old token. Lost replies or failed Keychain saves require inspection and a fresh invitation, never automatic replay. Certificate recovery is an explicit stopped-profile procedure that replaces the native TLS/auth set and requires re-pairing; it never automatically changes a live identity.
+
+## Native notifications and lifecycle controls
+
+The companion polls every 15 seconds while paired/running. A provides bounded inbox pages with sequence plus delivery-UUID checkpoints in a consistent read transaction. The initial notification baseline is the current inbox head, so enabling notifications does not replay history. Atomic private per-runtime checkpoints advance after OS acceptance/reconciliation. A sequence/UUID mismatch after restore triggers a visible reset to the current head, not an automatic history replay. Deterministic OS request identifiers and pending/delivered reconciliation reduce duplicates; cross-system crash/dismissal windows prevent exactly-once banner guarantees.
+
+The native service controller runs only fixed launchctl argv for the current user's io.nerv.agent. Stop is a separate confirmed action; Quit companion does not call it. A paired daemon's authenticated data directory must match the local agent NERV_HOME before these controls are enabled. SMAppService controls companion login registration independently of the daemon and displays the real approval state. These OS actions use local user authority and never broaden the read-only network credential. No CI test registers a login item, requests notification permission or starts/stops a real user service.
+
+## Status versus diagnostics
+
+`GET /api/status` is an authenticated lightweight runtime ping used by companion polling and notification enablement. It explicitly reports integrityCheck=not-run. `GET /api/doctor` remains an explicit diagnostic and may perform SQLite quick_check. Native background refresh must not invoke full diagnostics on a timer; the bounded inbox/pending reads remain separate.
+
+Telegram route telemetry (`src/channel-state.ts`, F-019) is first-hand channel state, shared in both signed Kaji heartbeat directions without credentials, chat identifiers or content. Runtime keeps reports in memory and exposes them through authenticated bases/doctor reads. Check time, receive time and last-send time have separate meanings: a new heartbeat cannot refresh an old route check or establish phone receipt. The existing online window bounds freshness; missing or malformed telemetry clears the previous peer report for compatibility with older bases.
+
+Midori telemetry now includes a sanitized last Bot API result, whether local update polling runs, and the last owner-message receive time. Configuration and a started listener do not establish API reachability; phone receipt is never inferred. The map uses recent API responses for channel status and newly observed accepted sends/owner receives for directional message pulses. Every configured bot keeps polling its own owner chat, even when its outbound inbox delivery uses main; ordinary requests still follow Runtime dispatch.
+
+The initial deterministic read-command slice (`src/chat-command.ts`) handles status/help and unknown slash help before model planning or dispatch. Status reads this base or an enrolled base's last reported state; it does not perform a remote diagnostic or create a sortie. A narrow English “Ask <base> his /status” alias addresses the reported model-guessing failure. Full slash-command/menu/verbosity support remains F-056.
+
+The [2026-11-06 reassessment](../audits/2026-11-06-architecture-reassessment.md) compares these delivered boundaries and remaining targets with the retired brainstorm, including Sync, compensation and backup limits.
+
+The companion now reads up to five complete bounded approval cards through pinned HTTPS, validates the entire page and shows live local expiry. Review in dashboard navigates to the saved paired web port without transferring credentials or decision data. Native credentials remain read-only; existing dashboard/Telegram authority and once-only Store decisions apply. Polling removes decided cards and clears failed reads; durable approval inbox/notification delivery is implemented under F-023-T03; live Mac interaction and banner acceptance remain pending. See [native authority](../decisions/native-approvals.md) and [implementation evidence](../acceptance/native-approvals-2026-11-09.md).
+
+## Native approval delivery
+
+F-023-T03 commits each approval and a generic inbox notice together in Store. An additive approval/delivery identity table backfills pending legacy approvals once without changing old delivery cursors. Native paging includes current pending/expiry metadata; the companion skips settled/expired notices and checkpoints OS submissions through the existing engine. Telegram retains its card path and skips generic notices. This changes neither native read scope nor decision authority. See [authority and delivery limits](../decisions/native-approvals.md) and [dated acceptance](../acceptance/native-approval-delivery-2026-11-09.md); actual menu/VoiceOver/banner use remains unverified.
+
+## Proactive watches
+
+F-026-T01 supplies scheduler-owned validated heartbeat/daily/event admission, durable slot/source/taint identities and immutable stage/action caps. T02 connects explicit owner configuration to the local planner with durable step reservations, permission/model revalidation, approval resumes and interrupted-attempt handling. Definitions are opt-in; no trigger means no proactive model work. Non-Production work is read-only; unsupported outside-code confinement remains refused.
+
+## Isolated EVA runner (contract defined; confinement pending)
+
+`F-049-T01` specifies the deterministic runner/warden contract in [EVA runner](../decisions/eva-runner.md): NERV's existing MAGI gate and single-use grants remain the sole approval authority, jobs run in fresh per-job instances at the least EVA class (`eva-03` < `eva-00` < `eva-01` < `eva-02`) permitted by request, tool grant and pilot stage, and candidate execution stays separated from hidden graders and ledger/promotion state. Unsupported host enforcement fails closed (`blocked: 'isolation'`); `eva-03` and `eva-00` execution remains refused until `F-049-T02`–`F-049-T05` implement and verify host confinement.
+
+
+Proactive outcomes and remote follow-ups use source-tagged Hyuga briefs with distinct notice/delivery identities. Quiet hours defer new watch results and review notifications/cards, including resume/remote paths; existing inbox entries and due reminders stay available. Watch briefs do not advance daily-brief checkpoints or enter owner-stated memory. Remote dispatch revalidates frozen trigger/pilot authority at the transport callback; withdrawn/interrupted authority creates durable cancellation intents and retains uncertainty for prior attempts. No automatic undo or physical receipt is inferred. See [decision and assessment](../decisions/hyuga-watch.md), [configuration](../INSTALL.md#proactive-watches-hyuga) and [acceptance](../acceptance/hyuga-watch-2026-11-09.md).

@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T29",
+  "status": "ready",
+  "title": "T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix",
+  "goal": "Upgrades, prerequisites, update policy and platform lifecycle on the device matrix.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Upgrades, prerequisites, update policy and platform lifecycle on the device matrix"
+  ],
+  "dependsOn": [
+    "F-005-T35",
+    "B-087-T01",
+    "F-005-T38",
+    "B-091-T01"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2.5 h",
+    "basis": "Re-estimated 2026-11-21: 1.5 h for the device runs plus 1 h remaining after Tabgha reproduced B-091 and required safe rollback; the final update waits on B-091-T01.",
+    "reviewed": "2026-11-21",
+    "baselineDays": 1,
+    "ownerHours": 0,
+    "agentHours": 2.5,
+    "estimateAgentHours": 2.5,
+    "baselineAgentHours": 0.5
+  },
+  "prs": [
+    {
+      "pr": 617,
+      "note": "Tabgha update attempt and safe recovery evidence"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "id": "F-118-T02",
+  "parent": "F-118",
+  "title": "Workspace and dashboard pair from their own sign-in box; the installed app signs itself in",
+  "goal": "Typing the short code into an installed app pairs it, and later launches need no sign-in",
+  "status": "closed",
+  "acceptance": [
+    "The sign-in box accepts the short code and pairs only in the installed app, which keeps the device credential in persistent storage",
+    "Browser tabs keep session behaviour and refuse a pairing code before any request (review of #707)",
+    "Browser test of pair → reload → still signed in"
+  ],
+  "dependsOn": [
+    "F-118-T01"
+  ],
+  "resources": [
+    "web/public/dashboard/live.js",
+    "web/src/main.ts",
+    "test/evaluation.browser.mjs",
+    "docs/work/records/F-118.md",
+    "generated:backlog-views",
+    "web/src/device-pairing.ts",
+    "web/src/i18n.ts",
+    "test/device-pairing-client.test.ts",
+    "docs/agents/areas/frontend.md",
+    "docs/guides/channels-and-watches.md",
+    "src/server.ts",
+    "src/device-book.ts",
+    "test/device-pairing.test.ts",
+    "docs/work/tasks/F-118-T05.json"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-23 at agent speed. Not a measurement. Closed 2026-11-24 in the reconciliation: PR #707 merged on green CI; its browser test passes alone and in CI and fails only under local load (B-127); the iPhone check is F-118-T04.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2,
+    "actualAgentHours": 2.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 707
+    }
+  ]
+}

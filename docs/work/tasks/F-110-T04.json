@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-110-T04",
+  "parent": "F-110",
+  "title": "Brief time, time zone, Sync Ratio threshold and Telegram freshness window through the same interface",
+  "goal": "Each of the four is saved, validated and used live",
+  "status": "planned",
+  "acceptance": [
+    "Regression test per setting"
+  ],
+  "dependsOn": [
+    "F-110-T03"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-110.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Re-estimated 2026-11-19 after the owner chose all four (was 1 h). Not a measurement.",
+    "reviewed": "2026-11-19",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1.5
+  }
+}

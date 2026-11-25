@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "parent": "F-107",
+  "id": "F-107-T02",
+  "title": "Heartbeats report reachable peers; the map colours each mesh line from both ends",
+  "goal": "A mesh line shows whether the two peers reach each other, from their own reports",
+  "status": "closed",
+  "acceptance": [
+    "A heartbeat carries the sender's reachable peers (bounded list of enrolled base ids), validated on receipt",
+    "`/api/bases` exposes them; the map colours a mesh line `--ok` when both peers report each other, `--warn` when one does not, neutral when unreported",
+    "A join test across two KajiLinks and the dashboard harness"
+  ],
+  "dependsOn": [
+    "F-107-T01"
+  ],
+  "resources": [
+    "src/**",
+    "web/public/dashboard/**",
+    "test/**",
+    "docs/work/records/F-107.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Closed 2026-11-22: heartbeats report validated reachable peers, /api/bases exposes them, map colours mesh lines (--ok/--warn/--muted), and join tests pass across KajiLinks and dashboard.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

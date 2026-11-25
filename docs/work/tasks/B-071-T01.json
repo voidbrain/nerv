@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "parent": "B-071",
+  "id": "B-071-T01",
+  "title": "Reconcile harness 10.0.0; every open record's Next line from tasks; owner pages linked",
+  "goal": "An owner step is never shown under 💻 or without its procedure page",
+  "status": "closed",
+  "acceptance": [
+    "The template test that fails first is cited; check:work passes with every owner-turn step linked",
+    "Every open record uses Next: from tasks."
+  ],
+  "dependsOn": [],
+  "resources": [
+    "tools/work-items.mjs",
+    "docs/backlog/**",
+    "docs/work/**",
+    "docs/acceptance/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-18: template fix and review, three owner pages, 33 record lines. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5,
+    "actualAgentHours": 1.25,
+    "actualSource": "stated"
+  }
+}

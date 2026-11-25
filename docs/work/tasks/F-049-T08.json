@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "id": "F-049-T08",
+  "parent": "F-049",
+  "title": "Pilot trust stage caps the class",
+  "goal": "A job's class is capped by its pilot's stage (a Prototype pilot never runs in EVA-02)",
+  "status": "implemented",
+  "prs": [
+    {
+      "pr": 572,
+      "note": "implementation"
+    }
+  ],
+  "acceptance": [
+    "Admission reads the pilot and stage from F-045 and F-025; the cap only lowers, never raises, a class",
+    "Tests for each stage and class"
+  ],
+  "dependsOn": [
+    "F-049-T07",
+    "F-045-T01",
+    "F-025-T04"
+  ],
+  "resources": [
+    "src/eva-classes.ts",
+    "src/cli-commands.ts",
+    "test/eva-classes.test.ts",
+    "docs/work/records/F-049.md",
+    "docs/work/tasks/F-049-T08.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "typescript",
+    "privacy-review",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral repository-owned fixtures only; no credentials, model calls or external effects in tests.",
+  "validation": [
+    "Unit and join tests; npm test"
+  ],
+  "escalation": [
+    "Waits on F-045-T01 (pilot registry) and F-025-T04 (trust stages)"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Re-estimated 2026-11-14 from 0.25 h to 0.75 h: feature implementation steps closed since 2026-11-13 took 0.75–1 h (F-066-T01, F-066-T02, F-062-T03, F-044-T01) where the 0.25x pass had set 0.25–1 h; started from this step's estimate, not a ratio.",
+    "reviewed": "2026-11-14",
+    "baselineDays": 1,
+    "agentHours": 0.75,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 0.75
+  }
+}

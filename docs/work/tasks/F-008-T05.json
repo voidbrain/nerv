@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "F-008-T05",
+  "parent": "F-008",
+  "title": "Owner decides thresholds and reminder times",
+  "goal": "The resistance interval, storage reminder times and health limits are confirmed",
+  "status": "closed",
+  "acceptance": [
+    "Proposed defaults in the design note confirmed or changed: resistance interval, first and later storage reminders, cell growth alert, retirement value per pack type"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/design/fpv-and-cooking-plan-2026-11-14.md",
+    "docs/work/records/F-008.md"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "ownerLink": "docs/design/fpv-and-cooking-plan-2026-11-14.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Owner decision 2026-11-15: resistance check every 90 days or 30 cycles, whichever first; storage reminder 21:00 the same day, again 5 days later, then daily until stored; cell growth: warning at >= +50% over its first record or >= +30% over the pack median, strong warning at >= +100% or >= +50%; retirement for packs without a model profile: 6S LiPo any cell >= 12 mOhm, 3S LiHV >= 10 mOhm; a model profile wins over the type default: Tattu R-Line V6 1480 mAh 6S 160C healthy 0.8-3.5, aging warning >= 4.5, strong warning >= 7, retire >= 8 mOhm or spread > 30%, provisional until calibrated with the owner charger readings in F-008-T12. No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0,
+    "ownerKind": "decision"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T22",
+  "status": "closed",
+  "title": "T08e — Demonstration of prerequisites and optional engine management on an owner-selected target",
+  "goal": "Demonstration of prerequisites and optional engine management on an owner-selected target.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Target: Calvary (NERV-03, ClockworkPi DevTerm, Debian 11 arm64, `ssh Calvary`), owner decision 2026-11-18 replacing the Linux VM, which had no outbound internet",
+    "Demonstration of prerequisites and optional engine management on an owner-selected target",
+    "Check supported Node version, executable and non-interactive service environment before install/start/update; report missing or incompatible prerequisites",
+    "Provide explicit supported-platform Node installation/upgrade choices with reviewed ownership, permission and recovery; never silently replace a user-managed runtime",
+    "Support different and multiple engine/provider instances and endpoints together, including local engines and remote endpoints; Ollama is one adapter example, not the contract",
+    "Keep readiness probing separate from management ownership. Optional start-at-login/on-demand local engine management applies only to selected owned instances and configured policy; external services are not stopped or reconfigured",
+    "Bind engine adapters to declared capabilities/version support, endpoint identity, port/resource conflicts, credential privacy and recovery; a remote endpoint does not imply a local installation",
+    "Join prerequisite checks to service bootstrap/update and demonstrate configured optional engine startup on an explicitly selected target"
+  ],
+  "dependsOn": [
+    "B-064-T01",
+    "F-005-T21"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle",
+    "docs/acceptance/f005-t22-prerequisites.md"
+  ],
+  "validation": [
+    "Meaningful cross-boundary regressions and required final CI",
+    "Explicit selected-target acceptance where service, install or real device behavior is required; static/unit passes do not substitute",
+    "2026-11-14: the agent ran the procedure at the owner's request from a worktree at main eca644e; the VM has no outbound TCP of its own, so with the owner's approval its downloads went through a temporary proxy on the Mac over SSH (closed afterwards). Step 1 passed: `nodes inspect --ssh nerv-linux` reported Node.js missing on the non-interactive PATH, nothing installed. Step 2 passed: with Ubuntu's Node 18.19.1 it saved the inspection and failed naming 18.19.1 below >=24.0.0. Step 3: NodeSource Node 24.22.3 is accepted by `nodes inspect`, and `systemd --user` is running (linger off); `nodes lifecycle-inspect --action install` in a fresh clone failed with a raw ENOENT on ~/.nerv (B-064), so no prerequisite plan was shown."
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Moved to the agent 2026-11-18 (0.5 h owner → agent).",
+    "reviewed": "2026-11-18",
+    "baselineDays": 0.5,
+    "ownerHours": 0,
+    "agentHours": 0,
+    "estimateAgentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 517,
+      "note": "this change"
+    }
+  ]
+}

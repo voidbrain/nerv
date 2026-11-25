@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-054-T03",
+  "parent": "F-054",
+  "title": "Chronicle tab and brief line",
+  "goal": "Chronicle tab and brief line",
+  "status": "closed",
+  "acceptance": [
+    "Chronicle tab in the dashboard; optional line in the morning brief; axe passes"
+  ],
+  "dependsOn": [
+    "F-054-T02"
+  ],
+  "resources": [
+    "web/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "Regression or fixture for each acceptance item; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 hours",
+    "basis": "Closed 2026-11-15: added Chronicle tab (#tab-chronicle, #p-chronicle, renderChronicle, selectBaseTab) in web/public/dashboard/index.html and web/public/dashboard/dashboard.js, optional chronicleLine in composeBrief (src/brief.ts), unit test in test/chronicle.test.ts, and browser + axe check in test/angular.browser.mjs in 0.25 h agent (stated).",
+    "reviewed": "2026-11-15",
+    "baselineDays": 1,
+    "agentHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 0.5
+  }
+}

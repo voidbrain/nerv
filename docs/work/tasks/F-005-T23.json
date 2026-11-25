@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T23",
+  "status": "closed",
+  "title": "T09b — Windows update and recovery: backup, rehearsal and checkout",
+  "goal": "Windows update and recovery: backup, rehearsal and checkout.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "Windows update and recovery: backup, rehearsal and checkout"
+  ],
+  "dependsOn": [
+    "F-005-T09"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0",
+    "basis": "Windows update (backup, rehearsal, checkout, cmd.exe npm invocation) and recovery (Win32 uid-0 resource validation, releaseObservedService) verified in test/windows-service-lifecycle.test.ts.",
+    "reviewed": "2026-11-13",
+    "baselineDays": 1,
+    "agentHours": 0,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated",
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1
+  }
+}

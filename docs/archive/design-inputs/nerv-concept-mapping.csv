@@ -1,0 +1,24 @@
+Category,NERV Entity,Nodo Technical Component,Architectural Responsibility
+User / Architect,Dr. Naoko Akagi,System Architect / User,"Defines system invariants, target execution profiles, and declarative task intents."
+Ingress,Entry Plug,Structured Payload Parser,Normalizes user prompts and payloads into structured JSON/gRPC task objects.
+Workload,The Angels,Operational Tasks,"Categorized workloads: Pattern Blue (Low Risk), Pattern Orange (Med Risk), Pattern Red (High Risk)."
+Layer 3 Router,Gendo's Office,Risk Classifier & Switchboard,Classifies incoming task risk levels and determines node routing strategy.
+Fallback Engine,Dummy Plug,Regex / Hardcoded Fallback,Rule-based deterministic execution engine activated during API or LLM failure.
+Layer 5 Consensus,MAGI Supercomputer,Multi-Model Consensus Engine,"3-node democratic voting cluster (Melchior-1, Balthasar-1, Casper-3). Requires 2/3 majority."
+External Branches,NERV-01 / NERV-02,Remote Model Replicas / Experts,"Specialized expert nodes (e.g., Jasper for token accounting, Zara for UX safety) polled asynchronously."
+Layer 4 Validation,Ritsuko's Lab,OpenJEV Framework,"Automated static code analysis, AST parsing, and metric profiling."
+Alignment Metric,Sync Ratio,Confidence Score (0.0−10.0),Scores ≥8.0 auto-pass. Scores <8.0 trigger interception or human review.
+Capability Scope,A.T. Field Boundary,Cryptographic JWT Tokens,"Defines absolute resource boundaries (FS_READ, FS_WRITE, NET_OUT) per execution scope."
+Kill Switch,Spear of Longinus,Emergency Stop & Rollback,Invalidates active capability tokens and triggers SQLite transaction rollbacks upon policy breaches.
+HITL Interlock,Misato's Apartment,Telegram / PWA Portal,Human-in-the-loop interlock required to sign off on Pattern Red tasks or low Sync Ratio scores.
+Execution Nodes,EVA Fleet,Physical Hardware Cluster,"Distributed execution nodes (EVA-01 Mac Mini, EVA-02 Raspberry Pi, EVA-00 Storage NAS)."
+Pilot Tokens,Shinji / Asuka / Rei,Execution Privilege Profiles,"Shinji (Broad root access), Asuka (High performance), Rei (Strict minimal read-only access)."
+Runtime Enclosure,LCL Liquid,Firecracker Micro-VMs,"Ephemeral, lightweight, isolated container runtime environments."
+Cloud Power,Umbilical Cable,External Cloud API Feed,High-tier reasoning pipeline (Claude 3.5 Sonnet / GPT-4o) bounded by rate limits and network dependency.
+Local Power,S² Engine Organ,Local Edge LLM Inference,"Local model execution (Gemma / Llama via Ollama) providing zero-cost, offline operational autonomy."
+Network Layer,Kaji Mesh,Tailscale / WireGuard,Encrypted cross-continent mesh network transport between distributed nodes.
+Layer 1 Storage,Terminal Dogma,SQLite + Litestream Ledger,Append-only transaction inbox ledger for state persistence and off-site replication.
+Base Foundation,Adam & Lilith,Base Models & Tool Libraries,"Raw foundation weights (Adam) and versioned, validated system tool/skill libraries (Lilith)."
+Trust Pipeline,Kaji's Watermelons,Progressive Trust System,Three-stage skill promotion pipeline (Shadow Mode → Bounded Autonomy → Full Autonomy).
+Roadmap Framework,Dead Sea Scrolls,Project Backlog / Milestones,Strategic roadmap detailing system progression from M0 (Harness) through M6 (Evaluated Skills).
+Critical Failure,Third Impact,Critical Security Breach,"Unauthorized privilege escalation, host script escape, or catastrophic data loss event."

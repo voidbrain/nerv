@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures and the gauntlet packs only; local models on the enrolled NERV-01 and NERV-02 over Tailscale; 0 paid cloud tokens; raw reports stay in ~/.nerv-private on their base; NERV-01's live service (~/.nerv-app, ~/.nerv) is never stopped, updated or edited.",
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "A stop rule of the placement campaign aborts the run without fallback or retry",
+    "Anything that needs a credential, an unreachable host or the owner goes back to the owner; NERV-02 is left running"
+  ],
+  "id": "F-006-T31",
+  "status": "implemented",
+  "title": "Rerun the P3 Misato cases with the fixed probe budget and update the report",
+  "goal": "P3 has a live Misato result on the same cases and budget as P1, so the full role half of the P3 comparison is settled",
+  "acceptance": [
+    "The P3 role-run (Casper and Misato, repeat 3, limits-repeat3) is rerun on NERV-02 through its NERV service, with the Mac run under the machine lock, and recorded",
+    "The evidence and report are updated through placementReport on the full neutral-smoke + role-run both case set"
+  ],
+  "dependsOn": [
+    "F-006-T30"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "docs/decisions/placement-campaign.md",
+    "docs/acceptance/f006-placement-p2-p4.md",
+    "docs/evaluations/2026-11-24-f006-t29-placement-evidence.json",
+    "docs/evaluations/2026-11-24-f006-t29-placement-report.md",
+    "tools/placement-live.mjs",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views",
+    "docs/evaluations/2026-11-25-f006-t31-placement-evidence.json",
+    "docs/evaluations/2026-11-25-f006-t31-placement-report.md",
+    "test/placement-report.test.ts"
+  ],
+  "validation": [
+    "Recorded evidence for this slice; scoped checks and required CI"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 (F-006-T29): rerun about 6 min plus evidence and report update. Implemented 2026-11-25 in 0.75 h: Casper 15/15, Misato 8/15 with 0 errors (B-131 live check passed); P3 47/60 vs mac-only 48/60 (keep baseline) and mini-only 30/60 (prefer candidate); evidence and report through placementReport.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.75,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 738
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "id": "F-006-T03",
+  "status": "closed",
+  "title": "T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases",
+  "goal": "Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases.",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures; do not send private inputs to another inference host or enable services/devices without existing authorization.",
+  "acceptance": [
+    "Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases"
+  ],
+  "dependsOn": [
+    "F-006-T06"
+  ],
+  "resources": [
+    "contract:model-routing",
+    "src/model.ts",
+    "docs/decisions/**",
+    "docs/work/tasks/F-006-T01.json",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Stop on unclear ownership, missing prerequisites, privacy changes or uncertain external effects",
+    "Escalate repeated tool failures or inadequate context; no automatic cloud fallback"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 hours",
+    "basis": "Implemented F-006-T03 (T03a) combination case pack (evals/combination-v1.json) with hidden acceptance, deliberately flawed patches, false-rejection, and shared blind-spot cases in 0.25 h agent (stated).",
+    "reviewed": "2026-11-14",
+    "baselineDays": 1.5,
+    "agentHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
+    "baselineAgentHours": 2.25,
+    "estimateAgentHours": 0.25
+  }
+}

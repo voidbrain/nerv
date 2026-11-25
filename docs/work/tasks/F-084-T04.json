@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-084-T04",
+  "parent": "F-084",
+  "title": "Live check on a scratch repository",
+  "goal": "The owner asks for a small refactor and gets a PR",
+  "status": "closed",
+  "acceptance": [
+    "The agent runs it on a scratch repository and reviews the PR"
+  ],
+  "dependsOn": [
+    "F-084-T03"
+  ],
+  "resources": [
+    "docs/acceptance/**",
+    "docs/work/records/F-084.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "Agent-run check recorded in docs/acceptance"
+  ],
+  "escalation": [
+    "A change of gate class, data leaving the base, or a material effort increase goes to the owner",
+    "Anything that needs a human sense, account or device goes back to the owner as its own step"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-14 from the owner jobs case study, before design. Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent).",
+    "reviewed": "2026-11-18",
+    "ownerHours": 0,
+    "agentHours": 0,
+    "estimateAgentHours": 0.25,
+    "baselineAgentHours": 0.25
+  },
+  "prs": [
+    {
+      "pr": 637,
+      "note": "Scratch-repository check recorded in docs/acceptance/f084-scratch-repo-check.md (F-084-T04)"
+    }
+  ]
+}

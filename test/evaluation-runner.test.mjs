@@ -1,0 +1,189 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, readFileSync, rmSync, realpathSync, mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { options, readSuite, writeReport, sourceInputs, runProcess } from '../tools/evaluate.mjs';
+import { corpus } from '../tools/evaluate-model.mjs';
+test('F-029: suite references owned scenarios and records unsupported branches explicitly', () => {
+  const suite = readSuite();
+  assert.equal(suite.schemaVersion, 1);
+  assert.ok(suite.groups.some((g) => g.id === 'stress'));
+  assert.ok(suite.groups.some((g) => g.id === 'browser'));
+  assert.ok(suite.notCovered.every((g) => g.owner && g.reason));
+  const model = corpus();
+  assert.equal(model.cases.length, 8);
+  assert.equal(model.cases.filter((c) => c.split === 'holdout').length, 2);
+  // B-021 (2026-11-12) added two continuation cases and a topic-change holdout: suite misato-planner-v2.
+  const planner = corpus('misato');
+  assert.equal(planner.id, 'misato-planner-v2');
+  assert.equal(planner.cases.length, 8);
+  assert.equal(planner.cases.filter((c) => c.split === 'holdout').length, 2);
+});
+test('F-029: bounded runner options reject unknown, repeated and unbounded controls', () => {
+  assert.deepEqual(options(['--only=policy', '--repeat=2', '--seed=7']), {
+    only: 'policy',
+    repeat: 2,
+    seed: 7,
+    output: null,
+    check: false,
+  });
+  for (const args of [
+    ['--repeat=11'],
+    ['--repeat=0'],
+    ['--seed=-1'],
+    ['--seed=4294967296'],
+    ['--seed=1', '--seed=2'],
+    ['--execute=anything'],
+  ])
+    assert.throws(() => options(args));
+});
+test(
+  'F-029: actual runner writes replay evidence and refuses to overwrite evidence',
+  { skip: process.platform === 'win32' },
+  () => {
+    const temp = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-eval-report-')),
+      output = join(temp, 'run.json');
+    try {
+      const summary = JSON.parse(
+        execFileSync(process.execPath, ['tools/evaluate.mjs', '--only=policy', '--seed=7', '--out=' + output], {
+          encoding: 'utf8',
+        }),
+      );
+      assert.equal(summary.passed, true);
+      assert.equal(summary.complete, false);
+      assert.equal(summary.tests, 90);
+      const report = JSON.parse(readFileSync(output, 'utf8'));
+      assert.equal(report.seed, 7);
+      assert.equal(report.results[0].counts.passed, 90);
+      assert.ok(report.notCovered.length);
+      assert.ok(report.revision.commit);
+      assert.equal(report.mode, 'scripted-control-flow');
+      assert.equal(report.selection.notRunGroups.length, 7);
+      assert.ok(report.revision.inputs['evals/suite.json']);
+      assert.throws(() => writeReport(report, output), /exist/);
+      assert.throws(() => writeReport(report, '.git/evidence.json'), /metadata/);
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  },
+);
+
+test('F-029: source identity includes dirty implementations, browser assets and fixture helpers', () => {
+  const temp = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-eval-inputs-'));
+  try {
+    for (const file of ['src/server.ts', 'web/public/dashboard/live.js', 'test/fixtures/browser.mjs']) {
+      mkdirSync(join(temp, file, '..'), { recursive: true });
+      writeFileSync(join(temp, file), 'initial');
+    }
+    const first = sourceInputs(temp);
+    assert.equal(Object.keys(first).length, 3);
+    writeFileSync(join(temp, 'web/public/dashboard/live.js'), 'changed');
+    const second = sourceInputs(temp);
+    assert.notEqual(first['web/public/dashboard/live.js'], second['web/public/dashboard/live.js']);
+    writeFileSync(join(temp, 'src/untracked.ts'), 'new candidate');
+    assert.ok(sourceInputs(temp)['src/untracked.ts']);
+  } finally {
+    rmSync(temp, { recursive: true, force: true });
+  }
+});
+test('B-058: OS metadata and git-ignored files do not change source identity', () => {
+  const temp = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-eval-ignored-'));
+  try {
+    mkdirSync(join(temp, 'src'), { recursive: true });
+    mkdirSync(join(temp, 'web'), { recursive: true });
+    writeFileSync(join(temp, 'src/server.ts'), 'initial');
+    const first = sourceInputs(temp);
+    writeFileSync(join(temp, 'web/.DS_Store'), 'finder');
+    writeFileSync(join(temp, 'src/Thumbs.db'), 'explorer');
+    assert.deepEqual(sourceInputs(temp), first);
+    execFileSync('git', ['init', '-q'], { cwd: temp });
+    writeFileSync(join(temp, '.gitignore'), '*.log\n');
+    writeFileSync(join(temp, 'src/debug.log'), 'noise');
+    writeFileSync(join(temp, 'src/candidate.ts'), 'untracked but not ignored');
+    const inputs = sourceInputs(temp);
+    assert.equal(inputs['src/debug.log'], undefined);
+    assert.ok(inputs['src/candidate.ts']);
+  } finally {
+    rmSync(temp, { recursive: true, force: true });
+  }
+});
+async function waitUntilAllExited(pids, isAlive, timeoutMs, pollMs = 25) {
+  const until = Date.now() + timeoutMs;
+  let survivors = pids.filter((pid) => isAlive(pid));
+  while (survivors.length > 0 && Date.now() < until) {
+    await new Promise((done) => setTimeout(done, pollMs));
+    survivors = pids.filter((pid) => isAlive(pid));
+  }
+  return survivors;
+}
+
+test(
+  'F-029: a timed-out scenario terminates its owned descendant process',
+  { timeout: 15000, skip: process.platform === 'win32' },
+  async () => {
+    const temp = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-eval-process-')),
+      pids = join(temp, 'pids.json');
+    let owned = [];
+    const script = `const {spawn}=require('node:child_process');const {writeFileSync}=require('node:fs');const child=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'});writeFileSync(${JSON.stringify(pids)},JSON.stringify([process.pid,child.pid]));setInterval(()=>{},1000);`;
+    const alive = (pid) => {
+      try {
+        process.kill(pid, 0);
+        if (
+          process.platform === 'linux' &&
+          readFileSync('/proc/' + pid + '/stat', 'utf8')
+            .split(') ')[1]
+            .startsWith('Z')
+        )
+          return false;
+        return true;
+      } catch (error) {
+        if (error.code === 'ESRCH' || error.code === 'ENOENT') return false;
+        throw error;
+      }
+    };
+    try {
+      const result = await runProcess(['-e', script], { timeoutMs: 5000 });
+      assert.match(result.error, /time budget/);
+      owned = JSON.parse(readFileSync(pids, 'utf8'));
+      const survivors = await waitUntilAllExited(owned, alive, 5000);
+      assert.deepEqual(survivors, [], 'no executing child survives the group timeout');
+    } finally {
+      if (owned.some(alive)) {
+        if (process.platform === 'win32')
+          try {
+            execFileSync('taskkill', ['/PID', String(owned[0]), '/T', '/F']);
+          } catch {}
+        else
+          try {
+            process.kill(-owned[0], 'SIGKILL');
+          } catch {}
+      }
+      rmSync(temp, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
+  'F-029: Windows execution fails closed without process-tree ownership',
+  { skip: process.platform !== 'win32' },
+  async () => {
+    await assert.rejects(runProcess(['-e', 'process.exit(0)'], { timeoutMs: 1000 }), /Windows Job Object/);
+  },
+);
+
+test('B-053: descendant liveness check decides on one observation per process and still fails on real survivors', async () => {
+  let calls = 0;
+  const reusedAfterExit = () => {
+    calls += 1;
+    // First observation sees the process gone; a second read would see a reused PID.
+    return calls > 1;
+  };
+  const noneAlive = await waitUntilAllExited([4242], reusedAfterExit, 200, 5);
+  assert.deepEqual(noneAlive, []);
+  assert.equal(calls, 1, 'must not perform a second liveness read after observing exit');
+
+  const realSurvivor = await waitUntilAllExited([4242], () => true, 30, 5);
+  assert.deepEqual(realSurvivor, [4242]);
+});

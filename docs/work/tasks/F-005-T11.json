@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "parent": "F-005",
+  "id": "F-005-T11",
+  "status": "closed",
+  "title": "Propose the device matrix for final acceptance",
+  "goal": "Agree the device matrix for final acceptance (owner decision).",
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures only in git; actual profiles, backups, credentials and deployment evidence remain private.",
+  "acceptance": [
+    "A proposed device matrix (machines, platforms, which acceptance runs on each) written for the owner, linked from F-005-T37"
+  ],
+  "dependsOn": [
+    "F-005-T06",
+    "F-005-T18",
+    "F-005-T31",
+    "F-005-T32",
+    "F-005-T33",
+    "F-005-T12",
+    "F-005-T13",
+    "F-005-T14"
+  ],
+  "resources": [
+    "src/**",
+    "shared/**",
+    "web/**",
+    "native/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views",
+    "contract:service-lifecycle",
+    "docs/acceptance/f005-device-matrix.md"
+  ],
+  "validation": [
+    "Directed regressions or recorded evidence for this slice; final required CI"
+  ],
+  "escalation": [
+    "Material acceptance/effort expansion or distinct outcome splitting requires owner agreement",
+    "Never change an unowned installation, service, engine or uncertain physical effect without explicit reconciliation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Closed 2026-11-18: matrix written in docs/acceptance/f005-device-matrix.md.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 526,
+      "note": "matrix"
+    }
+  ]
+}

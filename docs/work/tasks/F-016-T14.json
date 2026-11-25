@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T14",
+  "title": "Step 2c — Serial-monotonic registry merge and worker approval settlement",
+  "goal": "Import never rolls back trust state or settles a worker approval twice",
+  "status": "closed",
+  "acceptance": [
+    "`registry`/`registry_roots` merge by serial; a newer local revoke survives an older snapshot (test)",
+    "`worker_approvals.persisted_decision` with the `hasApproval` LEFT JOIN settles once across Store.expire, cancelWorker and releaseWorker (test)"
+  ],
+  "dependsOn": [
+    "F-016-T13"
+  ],
+  "resources": [
+    "src/coordinator-snapshot.ts",
+    "src/worker-jobs.ts",
+    "src/store.ts",
+    "test/coordinator-snapshot.test.ts",
+    "docs/work/tasks/F-016-T13.json",
+    "docs/work/tasks/F-016-T14.json",
+    "docs/work/records/F-016.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Split from F-016-T03 on 2026-11-18 with the owner's approval. Not a measurement. Closed 2026-11-19: PR #550, CI run 44536667759 passed every job on the first attempt; actual stated as the estimate.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 550,
+      "note": "implementation; CI green"
+    }
+  ]
+}

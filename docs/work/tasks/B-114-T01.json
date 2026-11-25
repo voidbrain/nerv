@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "B-114-T01",
+  "parent": "B-114",
+  "title": "Find why the EVA-03 script-plan test fails under load",
+  "goal": "test/script-plan.test.ts passes on a loaded runner as it does alone",
+  "status": "closed",
+  "acceptance": [
+    "Cause named (timing budget, sandbox start, or gate wait) with evidence",
+    "A committed regression that reproduces the load case, then the fix"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/script-plan.test.ts",
+    "src/eva-runner.ts",
+    "docs/work/records/B-114.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "node --test test/script-plan.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Implemented 2026-11-24 in PR #694; verification by green CI runs without the failure. Closed 2026-11-24 in the reconciliation: PR #694 merged on green CI; no EVA-03 script-plan failure in CI since. No actual: the elapsed time was not recorded when the step was done and is not known to this reconciliation.",
+    "reviewed": "2026-11-24",
+    "agentHours": 0,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 0.25
+  },
+  "prs": [
+    {
+      "pr": 694
+    }
+  ]
+}

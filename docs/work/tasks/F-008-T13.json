@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "F-008-T13",
+  "parent": "F-008",
+  "title": "Register a battery by chat, CLI and dashboard",
+  "goal": "A new battery can be added without an export from the old app",
+  "status": "closed",
+  "acceptance": [
+    "Test committed first: \"nuova batteria 9 blu LiPo 6S 1300 mAh\" (and the English form) registers it and asks for per-cell resistance",
+    "`nerv batteries add` does the same from the CLI; the dashboard has an add form",
+    "With no batteries, the dashboard panel shows how to add one instead of hiding"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/batteries.ts",
+    "src/cli-commands.ts",
+    "src/server.ts",
+    "web/src/**",
+    "test/**",
+    "docs/work/records/F-008.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-20: a chat phrase, a CLI subcommand and a small form over the existing register(). Not a measurement.",
+    "reviewed": "2026-11-20",
+    "agentHours": 0,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": 603,
+      "note": "implementation"
+    }
+  ]
+}

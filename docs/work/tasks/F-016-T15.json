@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "parent": "F-016",
+  "id": "F-016-T15",
+  "title": "Step 2d — Quiesce, merge and swap under the serve guard",
+  "goal": "Promoting a standby swaps state safely while base-local tables stay",
+  "status": "closed",
+  "acceptance": [
+    "The 5-step quiesce-merge-swap runs under the serve swap-quiesce guard, keeps nerv.sqlite-resident base-local tables and `PRAGMA user_version`, and a crash at each step leaves a recoverable state (tests)",
+    "No coordinator loop runs during the swap; two coordinators never act"
+  ],
+  "dependsOn": [
+    "F-016-T14"
+  ],
+  "resources": [
+    "src/coordinator-snapshot.ts",
+    "src/store.ts",
+    "test/coordinator-snapshot.test.ts",
+    "docs/work/tasks/F-016-T14.json",
+    "docs/work/tasks/F-016-T15.json",
+    "docs/work/records/F-016.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "architecture-review",
+    "regression-design",
+    "distributed-contracts"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Split from F-016-T03 on 2026-11-18 with the owner's approval. Not a measurement. Closed 2026-11-19: PR #552, CI run 44542964548 passed every job on the first attempt; actual stated as the estimate.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 552,
+      "note": "implementation; CI green"
+    }
+  ]
+}

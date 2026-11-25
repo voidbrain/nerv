@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-122-T01",
+  "parent": "F-122",
+  "title": "Design Grover alert delivery",
+  "goal": "The design names the source (Grover's alerts MCP tool), polling or subscription, deduplication across restarts and the channels used",
+  "status": "closed",
+  "acceptance": [
+    "The design names the source (Grover's alerts MCP tool), polling or subscription, deduplication across restarts and the channels used"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/decisions/**",
+    "docs/work/records/F-122.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures only; no personal data.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 when opened from the coordinator gap review. Not a measurement. Closed 2026-11-25: PR #747 merged on green CI (run 45597956955, docs-only); the acceptance is the design document. No actual: this reconcile session cannot tell when the step started.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 1.0,
+    "estimateAgentHours": 1.0
+  },
+  "prs": [
+    {
+      "pr": 747,
+      "note": "design: docs/decisions/grover-alert-delivery.md"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "parent": "B-097",
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-097-T02",
+  "title": "merge-when-green runs gh outside any checkout, in the template and here",
+  "goal": "Merging never moves a local branch",
+  "status": "closed",
+  "acceptance": [
+    "Test committed failing first: gh is called with --repo and a cwd outside the checkout",
+    "Template released; this project reconciles it"
+  ],
+  "dependsOn": [
+    "B-097-T01"
+  ],
+  "resources": [
+    "tools/merge-when-green.mjs",
+    "test/**",
+    "docs/work/records/B-097.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-19. Not a measurement. Closed 2026-11-22: fixed in project-harness PR #225 (v10.2.0) and reconciled into NERV tools/merge-when-green.mjs in PR #657.",
+    "reviewed": "2026-11-22",
+    "agentHours": 0,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

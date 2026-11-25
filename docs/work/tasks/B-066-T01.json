@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "B-066-T01",
+  "parent": "B-066",
+  "title": "Choose how worker-link heartbeats decouple from nervous SQLite IPC",
+  "goal": "Select Option A (in-memory registry snapshot) or Option B (socket arrival liveness) for B-066",
+  "status": "closed",
+  "acceptance": [
+    "Owner chooses Option A or Option B in docs/decisions/worker-heartbeat-liveness.md"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/decisions/worker-heartbeat-liveness.md",
+    "docs/work/records/B-066.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "architecture-review"
+  ],
+  "privacy": "Neutral fixtures only; no real host names, keys or tokens in Git.",
+  "validation": [
+    "npm run check:work",
+    "npm run check:backlog"
+  ],
+  "escalation": [
+    "Security semantics of base revocation or main-base switching require explicit owner approval before changing Option A vs Option B"
+  ],
+  "ownerLink": "docs/decisions/worker-heartbeat-liveness.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Owner decision 2026-11-15: Option A, an in-memory registry snapshot in WorkerLink (docs/decisions/worker-heartbeat-liveness.md): no nervous IPC per frame, every frame still signature-checked, revocation and main changes refresh the snapshot immediately, with a periodic reconcile. No actual: owner time not measured.",
+    "reviewed": "2026-11-15",
+    "agentHours": 0,
+    "ownerHours": 0,
+    "ownerKind": "decision"
+  }
+}

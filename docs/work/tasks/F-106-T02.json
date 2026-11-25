@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-106-T02",
+  "parent": "F-106",
+  "title": "Prompt prefix stable across turns",
+  "goal": "The system text and tool schemas come first and do not change between turns",
+  "status": "closed",
+  "acceptance": [
+    "A committed test builds two Misato asks a minute apart with the same tools and asserts the prefix (system text and tool schemas) is byte-identical up to the per-turn context",
+    "If the prefix moves, the volatile part (clock, inbox, memory) moves after it"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/misato.ts",
+    "src/model.ts",
+    "test/**",
+    "docs/work/records/F-106.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-16: one test over misatoAsk, a reorder if it fails. Not a measurement.",
+    "reviewed": "2026-11-18",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 509,
+      "note": "stable prefix"
+    }
+  ]
+}

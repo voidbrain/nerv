@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "id": "F-083-T06",
+  "parent": "F-083",
+  "title": "Cooking session: ingredients and steps",
+  "goal": "A saved recipe is walked through one step at a time",
+  "status": "closed",
+  "acceptance": [
+    "Ingredients, then \"vai col primo step\", \"avanti\", \"ripeti\", \"indietro\" in Italian and English",
+    "Only saved steps; Telegram text first"
+  ],
+  "dependsOn": [
+    "F-083-T03"
+  ],
+  "resources": [
+    "src/cooking-session.ts",
+    "src/runtime-chat.ts",
+    "src/rpc.ts",
+    "src/rpc-schemas.ts",
+    "src/nervous-process.ts",
+    "test/cooking-session.test.ts",
+    "docs/work/records/F-083.md",
+    "docs/work/tasks/F-083-T06.json",
+    "evals/gauntlet/ledger.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. Re-estimated 2026-11-15 from 0.75 h to 0.5 h: `node tools/work-items.mjs calibrate` since 2026-11-14 shows F-007-T04, F-050-T02 and F-054-T03 (bounded product steps of the same shape) at 0.08-0.17x their baselines (stated actuals, n=3); security, distributed and isolation steps not revised.",
+    "reviewed": "2026-11-23",
+    "agentHours": 0,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "prs": [
+    {
+      "pr": 561,
+      "note": "cooking session; CI pending"
+    }
+  ]
+}

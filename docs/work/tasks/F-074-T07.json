@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "parent": "F-074",
+  "id": "F-074-T07",
+  "status": "closed",
+  "title": "T07 — Adopt upstream pending-case detection so new or changed packs raise a run",
+  "goal": "Use Gauntlet's consumer-agnostic `pending` command and ledger (gauntlet-protocol F-010) and the harness evaluation-dependency setting (project-harness F-052) so new or changed cases raise a backlog item; NERV owns only its ledger, configuration and rule",
+  "acceptance": [
+    "Pin the Gauntlet release that ships `pending` and `ledger record`; NERV keeps its run ledger (metadata only) in the repository",
+    "`.harness.json` declares Gauntlet as an evaluation dependency whose pending command covers every consumed pack, so check:freshness reports pending cases at session start",
+    "npm run check:gauntlet-runs (the same command) fails CI while a pending case has no open backlog item naming it (owner decision recorded: fail, not only warn)",
+    "An impact row on vendor/gauntlet-protocol.json and evals/gauntlet/** tells the agent to raise or update that item in the PR that bumps the pin",
+    "No comparison logic written in NERV; until both upstream releases exist, this task waits"
+  ],
+  "dependsOn": [
+    "F-074-T06"
+  ],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "evals/**",
+    "docs/evaluations/**",
+    "docs/test-capability-index.md",
+    "contract:gauntlet-adoption",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "evidence-review",
+    "regression-design"
+  ],
+  "privacy": "Neutral synthetic cases and private local reports only; no secrets, downloads or production effects.",
+  "validation": [
+    "A NERV join test: the vendored release, the ledger and the harness setting give the expected pending list for a fixture pin",
+    "Final applicable CI"
+  ],
+  "escalation": [
+    "Upstream dependencies: voidbrain/gauntlet-protocol F-010 and voidbrain/project-harness F-052 releases; reconcile the harness first, then pin Gauntlet",
+    "The run itself is an owner-approved real-model campaign; this task only raises it"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Owner decision 2026-11-11: harness and Gauntlet are reused by future projects, so the comparison moves upstream (Gauntlet F-010, about 1.5 days; harness F-052, about 1 day) and NERV only adopts it. Estimate, not a measurement. Closed 2026-11-11 after PR #272 merged with CI 43023793222 green on all five jobs (plan, validate, windows, native-macos, full-suite).",
+    "reviewed": "2026-11-11"
+  }
+}
