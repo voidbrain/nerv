@@ -108,7 +108,15 @@ export function encryptPayload(payload: string | Buffer, clientPublicKey: Buffer
   return Buffer.concat([salt, rsBuf, Buffer.from([localPublicKey.length]), localPublicKey, ciphertext]);
 }
 
-export function formatReminderPushPayload(reminder: { id: string; title: string; due: string }): {
+/**
+ * The reminder push. `receipt` (F-004-T09) is the one-off value the phone's service worker sends back to
+ * `POST /api/push/opened` when the owner taps the notification: that open, not the push service's 201, is what keeps
+ * the reminder off Telegram.
+ */
+export function formatReminderPushPayload(
+  reminder: { id: string; title: string; due: string },
+  receipt?: string,
+): {
   notification: {
     title: string;
     body: string;
@@ -116,6 +124,7 @@ export function formatReminderPushPayload(reminder: { id: string; title: string;
     data: {
       id: string;
       due: string;
+      receipt?: string;
       onActionClick: {
         default: { operation: string; url: string };
       };
@@ -130,6 +139,7 @@ export function formatReminderPushPayload(reminder: { id: string; title: string;
       data: {
         id: reminder.id,
         due: reminder.due,
+        ...(receipt ? { receipt } : {}),
         onActionClick: {
           default: { operation: 'focusLastFocusedOrOpen', url: '/' },
         },

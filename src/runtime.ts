@@ -1,5 +1,5 @@
 import type { WatchWork } from './watch.ts';
-import type { DeliveryChannel, DeliveryOutcome, DeliveryState } from './delivery-state.ts';
+import type { DeliveryChannel, DeliveryOutcome, DeliveryState, FallbackItem } from './delivery-state.ts';
 import { EvaPool, defaultEvaLimits, type EvaInstancesSnapshot, type EvaMachineInstances } from './eva-pool.ts';
 import type { SeatPool } from './seat-pool.ts';
 import type { WorkerContext, WorkerLease } from './worker-jobs.ts';
@@ -238,6 +238,14 @@ export class Runtime implements StoreApi {
       outcome,
       ...(reason !== undefined ? { reason } : {}),
     })) as boolean;
+  }
+  /** F-004-T09: the reminders queued for the phone that Telegram must now send, each handed out once. */
+  async pushFallback(deadlineMs: number) {
+    return (await this.nervous.call('deliveries.fallback', { deadlineMs })) as FallbackItem[];
+  }
+  /** F-004-T09: the phone's receipt for an opened notification. */
+  async pushOpened(receipt: string) {
+    return (await this.nervous.call('push.opened', { receipt })) as boolean;
   }
   async deliveryState(id: string) {
     return (await this.nervous.call('deliveries.state', { id })) as DeliveryState;
