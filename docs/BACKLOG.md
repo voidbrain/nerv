@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 45 | 41 |
-| **Require Human 🧑** | 14 | 19 |
+| **Require Human 🧑** | 13 | 19 |
 
 ### Require Human 🧑
 
@@ -22,7 +22,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-062](#f-062) | [F-116](#f-116) | [B-139](#b-139) | — |
-| [F-011](#f-011) | [F-122](#f-122) | [B-057](#b-057) |  |
+| [F-011](#f-011) |  | [B-057](#b-057) |  |
 | [F-004](#f-004) |  | [B-068](#b-068) |  |
 | [F-012](#f-012) |  | [B-107](#b-107) |  |
 | [F-016](#f-016) |  | [B-113](#b-113) |  |
@@ -43,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 184 h agent + 16.5 h owner across 168 open steps of 45 features and 41 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 184.5 h agent + 16.5 h owner across 168 open steps of 45 features and 41 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -481,7 +481,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.75 h agent + 1 h owner | [F-124-T01](#f-124-t01) | [F-130-T04](#f-130-t04) | 🤖 | 🧑‍🔧 | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.75 h agent + 1 h owner | [F-124-T01](#f-124-t01) | [F-122-T02](#f-122-t02), [F-130-T04](#f-130-t04) | 🤖 | 🧑‍🔧 | — |
 
 🧑 **→** F-004-T06: install the app on the phone, enable notifications in Settings → Notifications and complete a reminder push ([steps](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal)).
 
@@ -498,7 +498,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | — | [F-004-T07](#f-004-t07), [F-004-T09](#f-004-t09) | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) | — |
 | 🟢 Small | <a id="f-004-t09"></a>F-004-T09 — Delivery order: push first, Telegram as fallback | 2 h | 0 h | 0.5 h | Implemented; verification pending | [F-004-T06](#f-004-t06), [F-124-T01](#f-124-t01) | [F-004-T10](#f-004-t10), [F-130-T04](#f-130-t04) | 🤖 | [PR #760](https://github.com/voidbrain/nerv/pull/760) |
 | 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-004-T06](#f-004-t06) | — | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-004-t10"></a>F-004-T10 — Owner check: push first, Telegram as fallback on the phone | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-004-T09](#f-004-t09) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-004-t10"></a>F-004-T10 — Owner check: push first, Telegram as fallback on the phone | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-004-T09](#f-004-t09) | [F-122-T02](#f-122-t02) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | **Total** | 16 h (8 of 10 steps) | 4.5 h (6 of 10 steps recorded) | 0.75 h agent + 1 h owner | 6 of 10 completed | | | | |
 
 <details><summary>Done steps (6)</summary>
@@ -3284,6 +3284,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-122"></a>[✨ F-122](#top)
+
+**Deliver Grover alerts**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.5 h agent + 0.5 h owner | [F-004-T10](#f-004-t10) | — | ⏳ | — | — |
+
+💻 **→** F-122-T02 builds the delivery from [the design](decisions/grover-alert-delivery.md#owner-decisions) once F-004-T10 is done.
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24 (coordinator gap review): Grover's hub raises and clears alerts (pH, EC, temperature or level out of the phase range, an agent offline, a driver fault) and lists them through an MCP tool, but nothing delivers them to the owner. Grover F-008-T03 waits on this record (grover:F-008-T03). |
+| **Reproduce** | With the hub reachable, `nerv chat "ci sono allarmi Grover?"` has no answer source, and a new Grover alert reaches no channel. |
+| **Check** | A new Grover alert reaches the owner once through NERV's channels (Telegram, phone push, inbox) with its value and range; a cleared alert is reported once; repeats inside the hub's hysteresis are not re-sent; delivery survives a NERV restart without duplicates; between 22:00 and 07:00 only serious alerts (pH or EC out of range, pump or driver faults) are pushed, minor ones arrive at 07:00. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-122-t02"></a>F-122-T02 — Deliver Grover alerts through NERV's channels | 3.5 h | 0 h | 3.5 h | Planned | [F-004-T10](#f-004-t10) | [F-122-T03](#f-122-t03) | ⏳ 🤖 | [PR #775](https://github.com/voidbrain/nerv/pull/775) owner decisions recorded in the design |
+| 🟢 Small | <a id="f-122-t03"></a>F-122-T03 — Owner check: a real Grover alert arrives | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-122-T02](#f-122-t02) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 4.5 h | 0 h (0 of 3 steps recorded) | 3.5 h agent + 0.5 h owner | 1 of 3 completed | | | | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-122-t01"></a>F-122-T01 — Design Grover alert delivery | 1 h | 0 h | Completed | [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-122.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-122-T01: [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md · F-122-T02: [PR #775](https://github.com/voidbrain/nerv/pull/775) owner decisions recorded in the design. Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); design in [#747](https://github.com/voidbrain/nerv/pull/747); [#758](https://github.com/voidbrain/nerv/pull/758); owner decisions in [#775](https://github.com/voidbrain/nerv/pull/775) |
+| Opened | 2026-11-24 |
+| Verification | — |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
 ### <a id="b-072"></a>[🐞 B-072](#top)
 
 **Windows CI: native TLS tests fail when openssl takes over 15 s**
@@ -3677,53 +3724,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-123-T01: [PR #746](https://github.com/voidbrain/nerv/pull/746). Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); F-123-T01 in [PR #746](https://github.com/voidbrain/nerv/pull/746).; [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-24 |
 | Verification | CI 2026-11-25: F-123-T01, Test: `test/mcp-remote.test.ts` green in run 45602256057 (#746). Owner check F-123-T02 pending. |
-| Reviewed | 2026-11-25 |
-
-</details>
-
----
-### <a id="f-122"></a>[✨ F-122](#top)
-
-**Deliver Grover alerts**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h agent + 0.5 h owner | — | — | 🤖 | — | 🤔 |
-
-🧑 **→** Answer the four owner questions in [the Grover alert delivery design](decisions/grover-alert-delivery.md#owner-questions) before F-122-T02 starts.
-
-| | |
-|---|---|
-| **Issue** | Owner 2026-11-24 (coordinator gap review): Grover's hub raises and clears alerts (pH, EC, temperature or level out of the phase range, an agent offline, a driver fault) and lists them through an MCP tool, but nothing delivers them to the owner. Grover F-008-T03 waits on this record (grover:F-008-T03). |
-| **Reproduce** | With the hub reachable, `nerv chat "ci sono allarmi Grover?"` has no answer source, and a new Grover alert reaches no channel. |
-| **Check** | A new Grover alert reaches the owner once through NERV's channels (Telegram, phone push, inbox) with its value and range; a cleared alert is reported once; repeats inside the hub's hysteresis are not re-sent; delivery survives a NERV restart without duplicates. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-122-t02"></a>F-122-T02 — Deliver Grover alerts through NERV's channels | 3 h | 0 h | 3 h | Planned | — | [F-122-T03](#f-122-t03) | 🤖 | — |
-| 🟢 Small | <a id="f-122-t03"></a>F-122-T03 — Owner check: a real Grover alert arrives | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-122-T02](#f-122-t02) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 4 h | 0 h (0 of 3 steps recorded) | 3 h agent + 0.5 h owner | 1 of 3 completed | | | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-122-t01"></a>F-122-T01 — Design Grover alert delivery | 1 h | 0 h | Completed | [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-122.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-122-T01: [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md. Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); design in [#747](https://github.com/voidbrain/nerv/pull/747); [#758](https://github.com/voidbrain/nerv/pull/758) |
-| Opened | 2026-11-24 |
-| Verification | — |
 | Reviewed | 2026-11-25 |
 
 </details>
