@@ -43,7 +43,7 @@ const CATEGORY = String.raw`motori|motore|motors|motor|eliche|elica|propellers|p
 const END = String.raw`[.!]*$`;
 
 const ADD_DRONE = new RegExp(
-  String.raw`^(?:nuovo\s+drone|new\s+drone|aggiungi\s+(?:il\s+)?drone|add\s+(?:a\s+)?(?:new\s+)?drone)\s+(${NAME})\s*(?:[,:;]\s*(.*?))?${END}`,
+  String.raw`^(?:nuovo\s+drone|new\s+drone|aggiungi\s+(?:il\s+)?drone|add\s+(?:a\s+)?(?:new\s+)?drone)\s+(${NAME})\s*(?:(?:[,:;]|\s(?:con|with)\s)\s*(.*?))?${END}`,
   'iu',
 );
 const REPLACE_IT = new RegExp(
