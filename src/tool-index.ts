@@ -28,6 +28,7 @@ export const TOOL_SUBJECT_SUMMARIES: Readonly<Record<string, string>> = {
   fleet: 'the drone fleet: aircraft, parts, flights and maintenance notes',
   fpv: 'FPV builds: blackbox vibration reports, build import, build documents and wiring answers',
   pilots: 'specialist pilots: create, promote, split, merge and change their tools',
+  browser: "the browser page the owner allowed: click a named control, after the owner's approval card",
   agency:
     'the agency itself: sortie records, what waits for the owner, base health and status, schedules, other bases, desktop replay, coding PRs and printing',
 };

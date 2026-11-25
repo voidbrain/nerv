@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 7 | 3 | 23 | 6 |
+| **This week** | 7 | 3 | 24 | 6 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 30 |
+| **Open** | 39 | 31 |
 | **Require Human 🧑** | 9 | 12 |
 
 ### Require Human 🧑
@@ -36,7 +36,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 96 h agent + 12 h owner across 129 open steps of 38 features and 30 other records. 168 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 93.5 h agent + 12 h owner across 130 open steps of 38 features and 31 other records. 173.5 h of actual effort recorded on 156 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1230,6 +1230,56 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-089"></a>[✨ F-089](#top)
+
+**Browser control: act on a named control in an open page**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-089-T03 (owner check on a real page); F-089-T06 implemented in [PR #733](https://github.com/voidbrain/nerv/pull/733) (a `browser.click` chat tool behind an approval card), waiting for its checks.
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
+| **Reproduce** | Ask NERV to click a named button on an open tab. |
+| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
+| 🟢 Small | <a id="f-089-t06"></a>F-089-T06 — A browser.click chat tool for Misato | 2.5 h | 4 h so far (stated) | 0 h | Implemented; verification pending | — | — | 🤖 | [PR #733](https://github.com/voidbrain/nerv/pull/733) implementation |
+| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 6.5 h (5 of 6 steps) | 7.25 h (4 of 6 steps recorded) | 0.25 h owner | 3 of 6 completed | | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
+| — | <a id="f-089-t05"></a>F-089-T05 — Decision: a chat tool for browser clicks | 0 h | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-089.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation · F-089-T06: [PR #733](https://github.com/voidbrain/nerv/pull/733) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md); [#733](https://github.com/voidbrain/nerv/pull/733) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-090"></a>[✨ F-090](#top)
 
 **Resume interrupted coding work without the editor**
@@ -1370,56 +1420,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-094-T02: [PR #688](https://github.com/voidbrain/nerv/pull/688) implementation. [PR #688](https://github.com/voidbrain/nerv/pull/688) (F-094-T02); [App workflows scripted-first decision](decisions/app-workflows-scripted-first.md) (`F-094-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | `F-094-T01`: `npm run check:fast` passed. |
-| Reviewed | 2026-11-24 |
-
-</details>
-
----
-### <a id="f-089"></a>[✨ F-089](#top)
-
-**Browser control: act on a named control in an open page**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-089-T06 (owner chose A on 2026-11-24: a `browser.click` chat tool behind an approval card).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
-| **Reproduce** | Ask NERV to click a named button on an open tab. |
-| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
-| 🟡 Medium | <a id="f-089-t06"></a>F-089-T06 — A browser.click chat tool for Misato | 2.5 h | 0 h | 2.5 h | Planned | — | — | 🤖 | — |
-| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 6.5 h (5 of 6 steps) | 3.25 h (3 of 6 steps recorded) | 2.5 h agent + 0.25 h owner | 3 of 6 completed | | | | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
-| — | <a id="f-089-t05"></a>F-089-T05 — Decision: a chat tool for browser clicks | 0 h | 0 h | Completed | — |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-089.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-24 |
 
 </details>
@@ -1718,6 +1718,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-120-T01: [PR #717](https://github.com/voidbrain/nerv/pull/717) Marker removed before the service starts. [PR #717](https://github.com/voidbrain/nerv/pull/717) (Test: `test/coordinator-partition.test.ts`) |
 | Opened | 2026-11-24 |
 | Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and `test/coordinator-relocation.test.ts` pass locally. Live promotion with the installed service: Pending (F-016-T09). |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-132"></a>[🐞 B-132](#top)
+
+**An executor that answers later reached the ledger and the caller as `{}`, and its failure was never caught**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-132-T01 implemented in [PR #733](https://github.com/voidbrain/nerv/pull/733), waiting for its checks.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 while adding `browser.click` (F-089-T06): the store ran executors synchronously, so a tool whose executor returns a promise (`gmail.*`, `desktop.replay`, `browser.click`) recorded `{}` as its result in the ledger and returned a promise the IPC reply serialised as `{}`; a rejection was an unhandled rejection, a promise that never settled left the sortie open, and a worker job got `{}` as its result. No such executor was wired to the live store yet. |
+| **Reproduce** | In a test, give the store a Gmail client whose `send` rejects, approve a `gmail.send` card: the ledger records `action.done` with `{}` and the rejection is unhandled. |
+| **Check** | The store waits for an executor that answers later: its result or error is recorded when it settles (`action.done` / `action.failed`) and returned to the caller over IPC; one that never answers ends as `action.failed` after its tool's bound; the coordinator's IPC calls for those tools wait that bound, not the 5 s default, and resume waiting sorties even on a timeout; a worker-bound card finishes its job with the settled outcome, and a job released meanwhile is no error. Committed tests fail first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-132-t01"></a>B-132-T01 — Wait for executors that answer later, within a bound | 1.5 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | [PR #733](https://github.com/voidbrain/nerv/pull/733) implementation |
+| 🟢 Small | **Total** | 1.5 h | 1.5 h | 0 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-132.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-132-T01: [PR #733](https://github.com/voidbrain/nerv/pull/733) implementation. [PR #733](https://github.com/voidbrain/nerv/pull/733) |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-24: `test/async-executors.test.ts` committed first: 4/4 fail on origin/main, 4/4 pass with the fix. |
 | Reviewed | 2026-11-24 |
 
 </details>

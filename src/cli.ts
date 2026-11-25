@@ -46,7 +46,7 @@ import { join, resolve } from 'node:path';
 
 import { chmodSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { Store } from './store.ts';
+import { Store, settledOutcome } from './store.ts';
 import type { ActionDetail, SortieSummary } from './ledger.ts';
 import type { SortieEvent } from './events.ts';
 import { makeServer } from './server.ts';
@@ -498,7 +498,7 @@ try {
         break;
       case 'approve':
       case 'reject':
-        console.log(JSON.stringify(local().decide(args[0] ?? '', command, 'cli'), null, 2));
+        console.log(JSON.stringify(await settledOutcome(local().decide(args[0] ?? '', command, 'cli')), null, 2));
         break;
       case 'events':
         console.log(JSON.stringify(local().events(args[0] ?? ''), null, 2));

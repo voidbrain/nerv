@@ -1,5 +1,6 @@
 import type { CodingJobPrOpener } from './coding-job.ts';
 import type { BambuConnectLauncher, SlicerExecFn } from './slicer.ts';
+import type { BrowserAdapterDriver } from './browser-control.ts';
 import { Watch, type WatchWork } from './watch.ts';
 import {
   DEFAULT_HEALTH_THRESHOLDS,
@@ -41,7 +42,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
-import { builtinTools, type AgencySnapshot } from './executors.ts';
+import { bindBrowserClick, builtinTools, type AgencySnapshot } from './executors.ts';
 import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circuits.ts';
 import { createFpvStoreSlice, type FpvStoreSlice, type RegisterBatteryInput } from './packs.ts';
@@ -126,6 +127,25 @@ export interface ActResult {
   approvalIds?: string[];
   result?: unknown;
   error?: string;
+  /** F-089-T06: an executor that answers later; settles once the ledger has recorded its outcome (`settledOutcome`). */
+  pending?: Promise<RunOutcome>;
+}
+/** The owner's decision, and what the approved executor came to (or will: `pending`). */
+export interface DecideResult {
+  decision: string;
+  result?: unknown;
+  error?: string;
+  pending?: Promise<RunOutcome>;
+}
+/** What a granted executor came to. */
+export type RunOutcome = { result: unknown } | { error: string };
+/** Waits for an executor that answers later and folds its result or error into the reply (F-089-T06). */
+export async function settledOutcome<T extends { pending?: Promise<RunOutcome> }>(
+  value: T,
+): Promise<Omit<T, 'pending'> & { result?: unknown; error?: string }> {
+  if (!value.pending) return value;
+  const { pending, ...rest } = value;
+  return { ...rest, ...(await pending) };
 }
 /** Sorties the owner starts directly hold one action and close once it settles. */
 export const OWNER_SOURCE = 'owner';
@@ -152,6 +172,10 @@ export class Store {
   pushFetch: typeof fetch = fetch;
   codingPrOpener?: CodingJobPrOpener;
   bambuLauncher?: BambuConnectLauncher;
+  /** B-132: overrides how long an executor that answers later may take before it ends as action.failed (tests). */
+  executorTimeoutMs?: number;
+  /** F-089-T06: the browser driver for browser.click (tests inject one; the default refuses under the test runner). */
+  browserDriver?: (port: number) => BrowserAdapterDriver;
   /** F-121-T02: the slicer process runner; tests set a fake slicer. */
   slicerExec?: SlicerExecFn;
   /** The data home, when known: the schedule tool writes config.json there. */
@@ -560,17 +584,20 @@ export class Store {
   releaseWorker(id: string, reason: string, confirmedStopped: boolean): void {
     this.sortiesController.releaseWorker(id, reason, confirmedStopped);
   }
-  decide(
-    id: string,
-    decision: Decision,
-    source = 'api',
-    options?: { useSuggestedFix?: boolean },
-  ): { decision: string; result?: unknown; error?: string } {
+  decide(id: string, decision: Decision, source = 'api', options?: { useSuggestedFix?: boolean }): DecideResult {
     if (!this.workerJobs.approval(id)) this.assertActiveCoordinator();
     return this.sortiesController.decide(id, decision, source, options);
   }
   refuseWorkerApproval(id: string, reason: string): { refused: string } {
     return this.sortiesController.refuseWorkerApproval(id, reason);
+  }
+  /**
+   * F-089-T06: what the nervous process does with a proposal before the gate. browser.click is bound to the active
+   * tab (its id, origin and page join the arguments the card shows and the grant binds); a refusal here means no card.
+   */
+  async prepareProposal(proposal: Proposal): Promise<Proposal> {
+    if (proposal.tool !== 'browser.click') return proposal;
+    return { ...proposal, args: { ...(await bindBrowserClick(this, proposal.args)) } };
   }
   /** One owner action through the gate (F-017): ballot, then on a grant the executor runs at once; otherwise it waits for the owner or stops. */
   runAction(sortieId: string, proposal: Proposal, worker?: WorkerLease, agency?: AgencySnapshot): ActResult {
