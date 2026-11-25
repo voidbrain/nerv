@@ -262,7 +262,7 @@ export function makeServer(
     if (
       !options.native &&
       req.method === 'POST' &&
-      (path === '/api/session/exchange' || path === '/api/device/pair') &&
+      (path === '/api/session/exchange' || path === '/api/device/pair' || path === '/api/push/opened') &&
       (req.headers['content-type'] ?? '').split(';')[0]!.trim().toLowerCase() !== 'application/json'
     ) {
       reply(415, { error: 'Send JSON (Content-Type: application/json).' });
@@ -322,6 +322,24 @@ export function makeServer(
           device: { id: device.id, name: device.name },
           idleLimitMs: DEVICE_IDLE_MS,
         });
+      } catch {
+        reply(400, { error: 'Invalid request.' });
+      }
+      return;
+    }
+    // F-004-T09: the phone's service worker reports a tapped reminder notification. It holds no bearer, so the receipt
+    // itself is the credential: a one-off random value that only the push payload (encrypted to that device) carried.
+    // It can mark that one push opened and nothing else.
+    if (!options.native && req.method === 'POST' && path === '/api/push/opened') {
+      try {
+        const value = await body(req, 256);
+        const receipt = value.receipt;
+        if (Object.keys(value).length !== 1 || typeof receipt !== 'string' || receipt.length > 64) {
+          reply(400, { error: 'Send the receipt.' });
+          return;
+        }
+        const opened = store.pushOpened ? await store.pushOpened(receipt) : false;
+        reply(opened ? 200 : 404, opened ? { ok: true } : { error: 'Unknown receipt.' });
       } catch {
         reply(400, { error: 'Invalid request.' });
       }

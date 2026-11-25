@@ -27,3 +27,30 @@ Goal: install the NERV PWA on a phone over HTTPS, subscribe to web push, and com
    ```
    Expected: when due, a push notification arrives on the phone; tapping it opens the app it was enabled in (the dashboard app opens the dashboard), where the reminder can be marked done.
    If nothing arrives, `nerv open dashboard` → Health → **Phone push** shows the subscribed devices and the last result (for example `failed (403 BadJwtToken)`); the service log has the same line. The VAPID subject defaults to the project URL; `push.subject` in `config.json` overrides it (an https URL or a mailto with a real domain).
+
+## Push first, Telegram as fallback (F-004-T10)
+
+Checks F-004-T09 on the phone once it is deployed: a reminder goes to the phone first and reaches Telegram only when the push fails, no device is subscribed, or it is not opened (tapped) on the phone within 10 minutes. Needs the dashboard app with notifications on (step 3 above) and Telegram linked. Approvals, replies and chat stay on Telegram.
+
+1. A reminder tapped in time never reaches Telegram. On the Mac:
+   ```zsh
+   nerv remind "Push first A" "$(date -v+1M +%Y-%m-%dT%H:%M:00%z | sed -E 's/([0-9]{2})([0-9]{2})$/\1:\2/')"
+   ```
+   Expected: the notification arrives on the phone and nothing on Telegram. Tap it within 10 minutes (the dashboard opens). Wait 12 minutes after it was due: still nothing about "Push first A" on Telegram.
+2. A reminder left alone reaches Telegram once, at the deadline:
+   ```zsh
+   nerv remind "Push first B" "$(date -v+1M +%Y-%m-%dT%H:%M:00%z | sed -E 's/([0-9]{2})([0-9]{2})$/\1:\2/')"
+   ```
+   Expected: the notification arrives on the phone; do not tap it. About 10 minutes after it was due, Telegram shows `⏰ … Push first B` once. Tapping the notification afterwards sends nothing more.
+3. Read what both channels recorded (read-only):
+   ```zsh
+   sqlite3 -readonly ~/.nerv/nerv.sqlite "SELECT substr(d.message,1,40), c.channel, c.sent_at, c.failed_at, c.opened_at, c.reason FROM delivery_channels c JOIN deliveries d ON d.id=c.delivery_id WHERE d.message LIKE '%Push first%' ORDER BY d.rowid, c.channel;"
+   ```
+   Expected: `Push first A` has one `push` row with `sent_at` and `opened_at`, and no `telegram` row; `Push first B` has a `push` row with `sent_at` (and `opened_at` if you tapped it later) and a `telegram` row with `sent_at`.
+4. Push off goes straight to Telegram: in the dashboard app, Settings → Notifications → **Turn off**, then:
+   ```zsh
+   nerv remind "Push first C" "$(date -v+1M +%Y-%m-%dT%H:%M:00%z | sed -E 's/([0-9]{2})([0-9]{2})$/\1:\2/')"
+   ```
+   Expected: Telegram shows `Push first C` when it falls due, with no wait; no notification on the phone. Turn notifications back on afterwards (Settings → Notifications → **Enable notifications**).
+
+Record the result (pass, or which step differed and what was seen) in [F-004](../work/records/F-004.md).

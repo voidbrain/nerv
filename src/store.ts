@@ -30,7 +30,13 @@ import {
   type ReplicationBatch,
 } from './coordinator-replication.ts';
 import { transaction } from './sqlite-transaction.ts';
-import { DeliveryChannels, type DeliveryChannel, type DeliveryOutcome, type DeliveryState } from './delivery-state.ts';
+import {
+  DeliveryChannels,
+  type DeliveryChannel,
+  type DeliveryOutcome,
+  type DeliveryState,
+  type FallbackItem,
+} from './delivery-state.ts';
 import type { WorkerLease } from './worker-jobs.ts';
 import { credentialAges, readConfig } from './config.ts';
 import { UPGRADE_CONTRACT } from './upgrade-contract.ts';
@@ -372,6 +378,7 @@ export class Store {
       db: this.db,
       home: this.home,
       dispatchPushReminders: (reminders) => this.dispatchPushReminders(reminders),
+      queuePushFirst: (deliveryId, now) => this.pushController.queuePushFirst(deliveryId, now),
     }));
   }
   reminderDefaults(): { timeZone: string; briefAt: string; language: 'en' | 'it' } {
@@ -479,6 +486,15 @@ export class Store {
   /** F-124-T01: records what a channel did with an inbox item (sent, failed, opened); false when there is no such item. */
   recordDelivery(deliveryId: string, channel: DeliveryChannel, outcome: DeliveryOutcome, reason?: string): boolean {
     return this.deliveryChannels.record(deliveryId, channel, outcome, new Date(), reason);
+  }
+  /** F-004-T09: the phone's receipt for an opened notification; false for an unknown receipt. */
+  pushOpened(receipt: string): boolean {
+    return this.deliveryChannels.openedByReceipt(receipt);
+  }
+  /** F-004-T09: claims, once, the reminders queued for the phone that Telegram must now send. */
+  pushFallback(deadlineMs: number): FallbackItem[] {
+    this.assertActiveCoordinator();
+    return this.deliveryChannels.claimFallback(deadlineMs);
   }
   /** F-124-T01: every channel's state for one inbox item. */
   deliveryState(deliveryId: string): DeliveryState {
