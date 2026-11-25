@@ -166,7 +166,7 @@ export class ProcessClient {
     }
     const exited = this.child.exitCode !== null || this.child.signalCode !== null;
     const state = exited
-      ? `It exited with code ${this.child.exitCode}${this.child.signalCode ? ` (signal ${this.child.signalCode})` : ''} after ${waited} ms`
+      ? `It ${this.child.signalCode ? `was ended by signal ${this.child.signalCode}` : `exited with code ${this.child.exitCode}`} after ${waited} ms`
       : this.child.pid === undefined
         ? `It did not start after ${waited} ms`
         : this.closed
