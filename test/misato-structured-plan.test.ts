@@ -85,3 +85,32 @@ test('every key of the plan schema is a plan parsePlan accepts, and the parser s
   ])
     assert.equal(parsePlan(bad), undefined, bad);
 });
+
+test('the schema fallback adds at most one call, only when the server refuses the schema', async () => {
+  const calls = async (
+    a: Parameters<typeof completeOpenAICompatible>[0],
+    answer: (n: number) => Response,
+  ): Promise<{ n: number; text?: string; error?: string }> => {
+    let n = 0;
+    try {
+      const reply = await completeOpenAICompatible(a, endpoint, {
+        timeoutMs: 5000,
+        fetch: (async () => answer(++n)) as unknown as typeof fetch,
+      });
+      return { n, text: reply.text };
+    } catch (e) {
+      return { n, error: (e as Error).message };
+    }
+  };
+  // An unreadable reply is the planner's to judge: the route never asks again for it.
+  const prose = await calls(ask(), () => stream("I've set the reminder."));
+  assert.equal(prose.n, 1);
+  assert.equal(parsePlan(prose.text!), undefined);
+  // A server that refuses the field twice fails after two calls, never a third.
+  const refused = await calls(ask(), () => new Response('unsupported', { status: 400 }));
+  assert.deepEqual([refused.n, typeof refused.error], [2, 'string']);
+  // Other errors and asks without a schema are not retried.
+  assert.equal((await calls(ask(), () => new Response('down', { status: 500 }))).n, 1);
+  const { schema: _schema, ...plain } = ask();
+  assert.equal((await calls(plain, () => new Response('unsupported', { status: 400 }))).n, 1);
+});
