@@ -32,6 +32,7 @@ export class ProcessClient {
   private readonly startedAt = Date.now();
   private stderrTail = '';
   private stderrDone: Promise<void> = Promise.resolve();
+  private lastStep?: { step: string; atMs: number };
   constructor(
     entry: URL,
     args: string[],
@@ -71,6 +72,11 @@ export class ProcessClient {
     }
     this.child.on('message', (value: unknown) => {
       if (!value || typeof value !== 'object' || Array.isArray(value)) return;
+      const step = (value as { nerv?: unknown; step?: unknown }).step;
+      if ((value as { nerv?: unknown }).nerv === 'starting' && typeof step === 'string') {
+        this.lastStep = { step: step.slice(0, 80), atMs: Date.now() - this.startedAt };
+        return;
+      }
       if ((value as { nerv?: unknown }).nerv === READY.nerv) {
         this.isReady = true;
         settle(true);
@@ -178,7 +184,10 @@ export class ProcessClient {
       .filter((l) => l && !/^(at |\^+$|Node\.js v|node:internal|\{$|\}$)/.test(l))
       .slice(-STDERR_TAIL_LINES);
     const output = lines.length ? lines.join(' | ') : 'none';
-    return `${state}; last error output: ${output}${output.endsWith('.') ? '' : '.'}`;
+    const step = this.lastStep
+      ? `last start-up step: ${this.lastStep.step}, reported ${this.lastStep.atMs} ms after start`
+      : 'no start-up step reported';
+    return `${state}; ${step}; last error output: ${output}${output.endsWith('.') ? '' : '.'}`;
   }
   /** SIGTERM, SIGKILL after 2 s; resolves on exit, or 2 s after SIGKILL at the latest (B-118: never waits forever). */
   async close(): Promise<void> {
