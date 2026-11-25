@@ -13,7 +13,8 @@
   ],
   "resources": [
     "docs/work/records/F-098.md",
-    "docs/design/fpv-and-cooking-plan-2026-11-14.md"
+    "docs/design/fpv-and-cooking-plan-2026-11-14.md",
+    "docs/acceptance/f098-t04-fleet-crash-live.md"
   ],
   "capabilities": [
     "bounded-edit"
@@ -28,12 +29,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h",
-    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent).",
-    "reviewed": "2026-11-18",
-    "agentHours": 0.25,
-    "baselineAgentHours": 0.25,
-    "estimateAgentHours": 0.25,
-    "ownerHours": 0
-  }
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent); back to the owner 2026-11-25. 2026-11-25 owner run: the fleet on NERV-01 was empty, so the drone is registered first (docs/acceptance/f098-t04-fleet-crash-live.md); next action is the owner's.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f098-t04-fleet-crash-live.md"
 }

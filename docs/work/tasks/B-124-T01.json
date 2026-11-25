@@ -4,7 +4,7 @@
   "parent": "B-124",
   "title": "kaji relocate pushes a re-target only after the target's prechecks pass",
   "goal": "A re-target signed while a coordinator runs never fences it before the target's promote has passed its local check and the B-121-T02 probe",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test fails first: B runs epoch 3 through D, the owner relocates to C at 4, C's promote is refused, and B is still acting",
     "kaji relocate no longer fences the running main on its own; the decision doc and the relocation guide say how the records reach the target",
@@ -47,10 +47,10 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "2 h agent",
-    "basis": "Estimated 2026-11-24 from B-121-T02 (1.25 h stated): one command's push removed or gated, docs, a mesh test. Not a measurement.",
-    "reviewed": "2026-11-24",
-    "agentHours": 2,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 from B-121-T02 (1.25 h stated): one command's push removed or gated, docs, a mesh test. Not a measurement. Verified 2026-11-25: PR #734 merged on green CI after its review and re-check. Closed 2026-11-25.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2,
     "actualAgentHours": 2.5,

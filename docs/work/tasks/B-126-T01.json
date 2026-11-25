@@ -4,7 +4,7 @@
   "parent": "B-126",
   "title": "Name why the nervous child is not ready on Windows and fix it",
   "goal": "pilot-model.test.ts and other Runtime tests stop failing with \"nervous process not ready\" on a slow runner",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The cause is named from the three CI logs of 2026-11-24 and a local reproduction under load",
     "A committed test fails first (a slow nervous child start), then the fix; the ready deadline still fails a truly dead child",
@@ -36,10 +36,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-24 in the reconciliation: read three logs, reproduce, failing-first test, fix. Not a measurement. Checked against node tools/work-items.mjs calibrate 2026-11-24 (bug median 1.0x over 12 steps; B-117-T01, a load investigation, took 0.17x, while B-118-T01 to T03 took 2–2.5 h each), so kept.",
-    "reviewed": "2026-11-24",
-    "agentHours": 1.5,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 in the reconciliation: read three logs, reproduce, failing-first test, fix. Not a measurement. Checked against node tools/work-items.mjs calibrate 2026-11-24 (bug median 1.0x over 12 steps; B-117-T01, a load investigation, took 0.17x, while B-118-T01 to T03 took 2–2.5 h each), so kept. Verified 2026-11-25: five Windows npm test runs with the fix, none with \"database is locked\". Closed 2026-11-25.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },
