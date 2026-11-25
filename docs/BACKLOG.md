@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 11 | 5 | 32 | 13 |
+| **This week** | 12 | 5 | 32 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 41 | 32 |
+| **Open** | 42 | 32 |
 | **Require Human 🧑** | 14 | 16 |
 
 ### Require Human 🧑
@@ -40,7 +40,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 111.25 h agent + 13.25 h owner across 130 open steps of 41 features and 32 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 111.75 h agent + 13.25 h owner across 131 open steps of 42 features and 32 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2373,6 +2373,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | Steps: F-125-T01: [PR #748](https://github.com/voidbrain/nerv/pull/748); [PR #753](https://github.com/voidbrain/nerv/pull/753) · F-125-T02: [PR #748](https://github.com/voidbrain/nerv/pull/748). Opened in [PR #748](https://github.com/voidbrain/nerv/pull/748); F-125-T01 reconciled in [PR #753](https://github.com/voidbrain/nerv/pull/753).; [#758](https://github.com/voidbrain/nerv/pull/758) |
+| Opened | 2026-11-25 |
+| Verification | — |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="f-127"></a>[✨ F-127](#top)
+
+**Point check:conventions at the Angular app in web/src**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: merge PR #754 after F-125-T01 (PR #753); then close on green CI.
+
+| | |
+|---|---|
+| **Issue** | Owner approved 2026-11-25. Without `conventions.sourceDirs`, `check:conventions` reads only `src/` (the framework-free backend) and never reads the Angular app in `web/src`, so the Angular rules in [docs/agents/angular.md](agents/angular.md) were never checked on it. The setting arrived with harness 10.11.0 (reconciled in F-125-T01). |
+| **Reproduce** | On `main` before this change, `npm run check:conventions` reports 183 files, all under `src/`; none under `web/src`. |
+| **Check** | `.harness.json` names `web/src` and `src` in `conventions.sourceDirs`; `npm run check:conventions` reads both (192 files) and passes. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-127-t01"></a>F-127-T01 — Set conventions.sourceDirs to web/src and src | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [PR #754](https://github.com/voidbrain/nerv/pull/754) |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-127.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-127-T01: [PR #754](https://github.com/voidbrain/nerv/pull/754). F-127-T01 in [PR #754](https://github.com/voidbrain/nerv/pull/754) |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-25 |
