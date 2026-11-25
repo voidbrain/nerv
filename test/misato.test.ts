@@ -1507,7 +1507,7 @@ test('B-143: "in 2 minutes" is due 2 minutes after the owner asked, not after th
       assert.equal(items[0]!.due, new Date(Date.parse(sortie!.created) + 120_000).toISOString());
       const planner = m.asked.filter((a) => a.who === 'misato');
       assert.ok(planner.length >= 1);
-      for (const a of planner) assert.match(a.system, new RegExp(`Now: ${sortie!.created.replace(/\./g, '\\.')}`));
+      for (const a of planner) assert.ok(a.system.includes(`Now: ${sortie!.created}`), a.system);
     },
   );
 });
