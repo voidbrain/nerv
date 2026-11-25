@@ -46,5 +46,10 @@
     "ownerHours": 0.5,
     "ownerKind": "procedure"
   },
-  "ownerLink": "docs/evaluations/gauntlet.md#domain-packs-0100-and-0110-f-120-t03"
+  "ownerLink": "docs/evaluations/gauntlet.md#domain-packs-0100-and-0110-f-120-t03",
+  "prs": [
+    {
+      "pr": 749
+    }
+  ]
 }

@@ -763,12 +763,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | 1.5 h | Planned | — | [F-120-T02](#f-120-t02) | 🤖 |
-| 🟢 Small | <a id="f-120-t03"></a>F-120-T03 — Adopt the Gauntlet domain packs when released | 0.5 h | 0 h | 0 h agent + 0.5 h owner | Implemented; verification pending | — | — | [🧑‍🔧](evaluations/gauntlet.md#domain-packs-0100-and-0110-f-120-t03) |
-| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | [F-120-T01](#f-120-t01) | — | ⏳ 🤖 |
-| 🔴 Large | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 4.5 h agent + 0.5 h owner | 0 of 3 completed | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | 1.5 h | Planned | — | [F-120-T02](#f-120-t02) | 🤖 | — |
+| 🟢 Small | <a id="f-120-t03"></a>F-120-T03 — Adopt the Gauntlet domain packs when released | 0.5 h | 0 h | 0 h agent + 0.5 h owner | Implemented; verification pending | — | — | [🧑‍🔧](evaluations/gauntlet.md#domain-packs-0100-and-0110-f-120-t03) | [PR #749](https://github.com/voidbrain/nerv/pull/749) |
+| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | [F-120-T01](#f-120-t01) | — | ⏳ 🤖 | — |
+| 🔴 Large | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 4.5 h agent + 0.5 h owner | 0 of 3 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -777,7 +777,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711).; [#749](https://github.com/voidbrain/nerv/pull/749) |
+| PR / evidence | Steps: F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749). Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.0 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749). |
 | Opened | 2026-11-24 |
 | Verification | — |
 | Reviewed | 2026-11-24 |
