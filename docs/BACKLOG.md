@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 15 | 6 | 41 | 16 |
+| **This week** | 16 | 6 | 41 | 16 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 44 | 38 |
+| **Open** | 45 | 38 |
 | **Require Human 🧑** | 13 | 17 |
 
 ### Require Human 🧑
@@ -41,7 +41,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 176.75 h agent + 16.25 h owner across 158 open steps of 44 features and 38 other records. 165 h of actual effort recorded on 149 steps. Generated from the task files.
+**Remaining effort:** 187.25 h agent + 17 h owner across 166 open steps of 45 features and 38 other records. 165 h of actual effort recorded on 149 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -544,7 +544,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.75 h agent + 1 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.75 h agent + 1 h owner | — | [F-132-T08](#f-132-t08) | 🤖 | 🧑‍🔧 | — |
 
 🧑 **→** Move the coordinator to NERV-02 and back (F-016-T09, with B-120's live check): [the two-device relocation page](acceptance/f016-t09-two-device-relocation.md).
 
@@ -560,7 +560,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | — | [F-016-T11](#f-016-t11) | [🧑‍🔧](acceptance/f016-t09-two-device-relocation.md) | — |
+| 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | — | [F-016-T11](#f-016-t11), [F-132-T08](#f-132-t08) | [🧑‍🔧](acceptance/f016-t09-two-device-relocation.md) | — |
 | 🟡 Medium | <a id="f-016-t21"></a>F-016-T21 — Export the seed snapshot off serve's event loop | 1.5 h | 0 h | 1.5 h | Planned | — | — | 🤖 | — |
 | 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-016-T09](#f-016-t09) | — | ⏳ 🤖 | — |
 | 🟡 Medium | **Total** | 22.75 h (20 of 21 steps) | 30.75 h (16 of 21 steps recorded) | 1.75 h agent + 1 h owner | 18 of 21 completed | | | | |
@@ -2593,6 +2593,148 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-098"></a>[✨ F-098](#top)
+
+**FPV fleet diary: crashes, parts, spares and photos**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h owner | — | [F-101-T04](#f-101-t04) | — | 🧑‍🔧 | — |
+
+🧑 **→** Update NERV-01 (it needs #762 and #764), then rerun the crash check: [the F-098-T04 page](acceptance/f098-t04-fleet-crash-live.md).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: "ho crashato Smoke, motore sinistro inferiore rotto. Quale avevo rotto l'ultima volta? Quanti ne sono rimasti di scorta (nuovi/usati)? La batteria 7 blu presenta danni ma sembra ancora buona." NERV has no record of drones, their parts, crashes or spares, and cannot keep photos with them. |
+| **Reproduce** | `nerv chat "ho crashato Smoke, motore sinistro inferiore rotto"` then `nerv chat "quale avevo rotto l'ultima volta?"`. |
+| **Check** | Drones by name with parts by position; a crash entry from chat (drone, part, damage, date); answers to "last time this part broke" and "spares left, new and used"; change spare counts only when the chat phrase explicitly says a new or used spare was used; a battery damage note goes on the battery (F-008); photos from Telegram or the dashboard attach to a crash, a part or a battery and stay local; follow-up planning after fleet.chat remains local-only; invented tests. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | — | [F-101-T04](#f-101-t04) | [🧑‍🔧](acceptance/f098-t04-fleet-crash-live.md) | — |
+| 🟢 Small | **Total** | 4.25 h | 2.75 h (4 of 6 steps recorded) | 0.25 h owner | 5 of 6 completed | | | | |
+
+<details><summary>Done steps (5)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-098-t01"></a>F-098-T01 — Fleet and spares model | 0.75 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-098-t02"></a>F-098-T02 — Crash log and questions by chat | 0.5 h | 0 h | Completed | [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation |
+| — | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.5 h | 0.5 h (stated) | Completed | [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation |
+| — | <a id="f-098-t05"></a>F-098-T05 — Fleet import with spares cues | 0.5 h | 0.5 h (stated) | Completed | [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation |
+| — | <a id="f-098-t06"></a>F-098-T06 — Fleet by chat: add a drone, replace a part, set spare stock | 2 h | 1.5 h (stated) | Completed | [PR #705](https://github.com/voidbrain/nerv/pull/705) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-098.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation · F-098-T03: [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation · F-098-T05: [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation · F-098-T06: [PR #705](https://github.com/voidbrain/nerv/pull/705) implementation. F-098-T04 run evidence in [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #705](https://github.com/voidbrain/nerv/pull/705) (F-098-T06 fleet by chat); [PR #691](https://github.com/voidbrain/nerv/pull/691) (F-098-T05 fleet import); [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408); [#750](https://github.com/voidbrain/nerv/pull/750) |
+| Opened | 2026-11-14 |
+| Verification | Unit/integration 2026-11-24: `node --test test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts` (43 passed) with the containment fix; CI green on PRs #691 and #705. Live on the real fleet 2026-11-25 (F-098-T04, owner on NERV-01): crash recorded; spare count failed (B-138). Pending. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="f-101"></a>[✨ F-101](#top)
+
+**Share the FPV battery manager outside NERV**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 6.5 h | [F-098-T04](#f-098-t04), `fpvbuddy:F-009-T03`, `fpvbuddy:F-009-T04`, `fpvbuddy:F-009-T02` | [F-131-T03](#f-131-t03) | ⏳ | — | — |
+
+💻 **→** Next: F-101-T04 — Create/wire the FPVBuddy core repository and move the core into it (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: friends and FPV pilots should be able to use the battery manager ("look at this FPV battery management tool"), including people who use Claude on the phone, and through Agensi among other channels. Today it would exist only inside NERV. |
+| **Reproduce** | Try to give a pilot without NERV a way to log charge state and resistance. |
+| **Check** | A recommendation compares a Claude skill, a standalone package or repository owning the battery core, and an MCP server: who it reaches, where each pilot's data lives, and the maintenance cost; the core lives once and the shapes wrap it; the owner decides. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-101-t04"></a>F-101-T04 — Create/wire the FPVBuddy core repository and move the core into it | 2 h | 0 h | 2 h | Planned | [F-098-T04](#f-098-t04) | [F-101-T05](#f-101-t05), [F-101-T07](#f-101-t07) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-101-t05"></a>F-101-T05 — NERV FPV pack uses the FPV core package | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T04](#f-101-t04) | [F-101-T07](#f-101-t07) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-101-t07"></a>F-101-T07 — Retire NERV's FPV pack views and connect NERV to FPVBuddy's MCP server | 2 h | 0 h | 2 h | Planned | [F-101-T04](#f-101-t04), [F-101-T05](#f-101-t05), `fpvbuddy:F-009-T02` | [F-101-T06](#f-101-t06), [F-131-T03](#f-131-t03) | ⏳ 🤖 | [PR #773](https://github.com/voidbrain/nerv/pull/773) |
+| 🟢 Small | <a id="f-101-t06"></a>F-101-T06 — NERV shows FPV data through FPVBuddy's MCP tools and surfaces | 1 h | 0 h | 1 h | Planned | [F-101-T07](#f-101-t07), `fpvbuddy:F-009-T03`, `fpvbuddy:F-009-T04` | — | ⏳ 🤖 | [PR #773](https://github.com/voidbrain/nerv/pull/773) |
+| 🔴 Large | **Total** | 7.25 h | 0 h (0 of 7 steps recorded) | 6.5 h | 3 of 7 completed | | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-101-t01"></a>F-101-T01 — Compare ways to share the battery manager | 0.75 h | 0 h | Completed | [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation |
+| — | <a id="f-101-t02"></a>F-101-T02 — Owner decides how to share | 0 h | 0 h | Completed | — |
+| — | <a id="f-101-t03"></a>F-101-T03 — Owner names the FPV core repository and its visibility | 0 h | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-101.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-101-T01: [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation · F-101-T06: [PR #773](https://github.com/voidbrain/nerv/pull/773) · F-101-T07: [PR #773](https://github.com/voidbrain/nerv/pull/773). [PR #773](https://github.com/voidbrain/nerv/pull/773) (screens via FPVBuddy MCP); [PR #647](https://github.com/voidbrain/nerv/pull/647) (F-101-T03 decision); [PR #484](https://github.com/voidbrain/nerv/pull/484) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-101-T01 verified: [PR #484](https://github.com/voidbrain/nerv/pull/484) merged on green CI. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="f-131"></a>[✨ F-131](#top)
+
+**Quick commands: shortcut buttons that show other projects' cards through MCP**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 7.5 h agent + 0.5 h owner | [F-130-T16](#f-130-t16), [F-101-T07](#f-101-t07), `fpvbuddy:F-009-T03`, `hobo:F-011-T01`, `fpvbuddy:F-011-T03`, `fpvbuddy:F-011-T05` | [F-132-T05](#f-132-t05) | 🤖 | — | — |
+
+💻 **→** Next: F-131-T01 — Quick-command list and run API over MCP (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-25: shortcut buttons in NERV, in the simple view and the full dashboard, such as "Show batteries" and "Show warehouse/spares" and "Show drones" (FPVBuddy), "Show trip" (Hobo) and "Grover status", so a common question needs no typing. Each calls the owning project's MCP tool and shows what it returns; NERV keeps no copy of another project's screens (coordinator `docs/DOMAINS.md`, "The rule for screens"). |
+| **Reproduce** | Open the dashboard or the simple view: the only way to see batteries, a trip or Grover's state is to type a chat question. |
+| **Check** | A configurable list of quick commands (label, server, tool, arguments) shows as buttons in both views; a tap calls the project's MCP tool and renders its 🧱 bricks surface card, or opens its MCP Apps page or link; unavailable commands say why; a test across the API and the component; the owner's check on the Mac and the iPhone. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-131-t01"></a>F-131-T01 — Quick-command list and run API over MCP | 3 h | 0 h | 3 h | Planned | — | [F-131-T02](#f-131-t02) | 🤖 | [PR #774](https://github.com/voidbrain/nerv/pull/774) |
+| 🟡 Medium | <a id="f-131-t02"></a>F-131-T02 — Quick-command buttons in the simple view and the full dashboard | 3 h | 0 h | 3 h | Planned | [F-131-T01](#f-131-t01), [F-130-T16](#f-130-t16) | [F-131-T03](#f-131-t03), [F-132-T05](#f-132-t05) | ⏳ 🤖 | [PR #774](https://github.com/voidbrain/nerv/pull/774) |
+| 🟡 Medium | <a id="f-131-t03"></a>F-131-T03 — Default quick commands for FPVBuddy, Hobo and Grover | 1.5 h | 0 h | 1.5 h | Planned | [F-131-T02](#f-131-t02), [F-101-T07](#f-101-t07), `fpvbuddy:F-009-T03`, `hobo:F-011-T01`, `fpvbuddy:F-011-T03`, `fpvbuddy:F-011-T05` | [F-131-T04](#f-131-t04) | ⏳ 🤖 | [PR #774](https://github.com/voidbrain/nerv/pull/774) |
+| 🟢 Small | <a id="f-131-t04"></a>F-131-T04 — Owner: use the quick commands on the Mac and the iPhone | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-131-T03](#f-131-t03) | — | ⏳ 🧑‍🔧 | [PR #774](https://github.com/voidbrain/nerv/pull/774) |
+| 🔴 Large | **Total** | 7.5 h | 0 h (0 of 4 steps recorded) | 7.5 h agent + 0.5 h owner | 0 of 4 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-131.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-131-T01: [PR #774](https://github.com/voidbrain/nerv/pull/774) · F-131-T02: [PR #774](https://github.com/voidbrain/nerv/pull/774) · F-131-T03: [PR #774](https://github.com/voidbrain/nerv/pull/774) · F-131-T04: [PR #774](https://github.com/voidbrain/nerv/pull/774). Owner request 2026-11-25; opened in [#774](https://github.com/voidbrain/nerv/pull/774); fpvbuddy:F-011 dependency in [#779](https://github.com/voidbrain/nerv/pull/779) |
+| Opened | 2026-11-25 |
+| Verification | — |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
 ### <a id="f-109"></a>[✨ F-109](#top)
 
 **Pilots as persona cards with editable names and one Apply**
@@ -2774,148 +2916,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-124-T01: [PR #759](https://github.com/voidbrain/nerv/pull/759) · F-124-T03: [PR #760](https://github.com/voidbrain/nerv/pull/760). F-124-T03 [PR #760](https://github.com/voidbrain/nerv/pull/760) open receipt (test/push-first.test.ts); F-124-T01 [PR #759](https://github.com/voidbrain/nerv/pull/759) shared delivery state (test/delivery-state.test.ts); opened in [PR #737](https://github.com/voidbrain/nerv/pull/737). |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration pending: test/delivery-state.test.ts on CI for [PR #759](https://github.com/voidbrain/nerv/pull/759), test/push-first.test.ts for [PR #760](https://github.com/voidbrain/nerv/pull/760). |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
-### <a id="f-098"></a>[✨ F-098](#top)
-
-**FPV fleet diary: crashes, parts, spares and photos**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h owner | — | [F-101-T04](#f-101-t04) | — | 🧑‍🔧 | — |
-
-🧑 **→** Update NERV-01 (it needs #762 and #764), then rerun the crash check: [the F-098-T04 page](acceptance/f098-t04-fleet-crash-live.md).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-14: "ho crashato Smoke, motore sinistro inferiore rotto. Quale avevo rotto l'ultima volta? Quanti ne sono rimasti di scorta (nuovi/usati)? La batteria 7 blu presenta danni ma sembra ancora buona." NERV has no record of drones, their parts, crashes or spares, and cannot keep photos with them. |
-| **Reproduce** | `nerv chat "ho crashato Smoke, motore sinistro inferiore rotto"` then `nerv chat "quale avevo rotto l'ultima volta?"`. |
-| **Check** | Drones by name with parts by position; a crash entry from chat (drone, part, damage, date); answers to "last time this part broke" and "spares left, new and used"; change spare counts only when the chat phrase explicitly says a new or used spare was used; a battery damage note goes on the battery (F-008); photos from Telegram or the dashboard attach to a crash, a part or a battery and stay local; follow-up planning after fleet.chat remains local-only; invented tests. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | — | [F-101-T04](#f-101-t04) | [🧑‍🔧](acceptance/f098-t04-fleet-crash-live.md) | — |
-| 🟢 Small | **Total** | 4.25 h | 2.75 h (4 of 6 steps recorded) | 0.25 h owner | 5 of 6 completed | | | | |
-
-<details><summary>Done steps (5)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-098-t01"></a>F-098-T01 — Fleet and spares model | 0.75 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-098-t02"></a>F-098-T02 — Crash log and questions by chat | 0.5 h | 0 h | Completed | [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation |
-| — | <a id="f-098-t03"></a>F-098-T03 — Photos on crashes, parts and batteries | 0.5 h | 0.5 h (stated) | Completed | [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation |
-| — | <a id="f-098-t05"></a>F-098-T05 — Fleet import with spares cues | 0.5 h | 0.5 h (stated) | Completed | [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation |
-| — | <a id="f-098-t06"></a>F-098-T06 — Fleet by chat: add a drone, replace a part, set spare stock | 2 h | 1.5 h (stated) | Completed | [PR #705](https://github.com/voidbrain/nerv/pull/705) implementation |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-098.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation · F-098-T03: [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation · F-098-T05: [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation · F-098-T06: [PR #705](https://github.com/voidbrain/nerv/pull/705) implementation. F-098-T04 run evidence in [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #705](https://github.com/voidbrain/nerv/pull/705) (F-098-T06 fleet by chat); [PR #691](https://github.com/voidbrain/nerv/pull/691) (F-098-T05 fleet import); [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408); [#750](https://github.com/voidbrain/nerv/pull/750) |
-| Opened | 2026-11-14 |
-| Verification | Unit/integration 2026-11-24: `node --test test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts` (43 passed) with the containment fix; CI green on PRs #691 and #705. Live on the real fleet 2026-11-25 (F-098-T04, owner on NERV-01): crash recorded; spare count failed (B-138). Pending. |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
-### <a id="f-101"></a>[✨ F-101](#top)
-
-**Share the FPV battery manager outside NERV**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 6.5 h | [F-098-T04](#f-098-t04), `fpvbuddy:F-009-T03`, `fpvbuddy:F-009-T04`, `fpvbuddy:F-009-T02` | [F-131-T03](#f-131-t03) | ⏳ | — | — |
-
-💻 **→** Next: F-101-T04 — Create/wire the FPVBuddy core repository and move the core into it (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-14: friends and FPV pilots should be able to use the battery manager ("look at this FPV battery management tool"), including people who use Claude on the phone, and through Agensi among other channels. Today it would exist only inside NERV. |
-| **Reproduce** | Try to give a pilot without NERV a way to log charge state and resistance. |
-| **Check** | A recommendation compares a Claude skill, a standalone package or repository owning the battery core, and an MCP server: who it reaches, where each pilot's data lives, and the maintenance cost; the core lives once and the shapes wrap it; the owner decides. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-101-t04"></a>F-101-T04 — Create/wire the FPVBuddy core repository and move the core into it | 2 h | 0 h | 2 h | Planned | [F-098-T04](#f-098-t04) | [F-101-T05](#f-101-t05), [F-101-T07](#f-101-t07) | ⏳ 🤖 | — |
-| 🟡 Medium | <a id="f-101-t05"></a>F-101-T05 — NERV FPV pack uses the FPV core package | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T04](#f-101-t04) | [F-101-T07](#f-101-t07) | ⏳ 🤖 | — |
-| 🟡 Medium | <a id="f-101-t07"></a>F-101-T07 — Retire NERV's FPV pack views and connect NERV to FPVBuddy's MCP server | 2 h | 0 h | 2 h | Planned | [F-101-T04](#f-101-t04), [F-101-T05](#f-101-t05), `fpvbuddy:F-009-T02` | [F-101-T06](#f-101-t06), [F-131-T03](#f-131-t03) | ⏳ 🤖 | [PR #773](https://github.com/voidbrain/nerv/pull/773) |
-| 🟢 Small | <a id="f-101-t06"></a>F-101-T06 — NERV shows FPV data through FPVBuddy's MCP tools and surfaces | 1 h | 0 h | 1 h | Planned | [F-101-T07](#f-101-t07), `fpvbuddy:F-009-T03`, `fpvbuddy:F-009-T04` | — | ⏳ 🤖 | [PR #773](https://github.com/voidbrain/nerv/pull/773) |
-| 🔴 Large | **Total** | 7.25 h | 0 h (0 of 7 steps recorded) | 6.5 h | 3 of 7 completed | | | | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-101-t01"></a>F-101-T01 — Compare ways to share the battery manager | 0.75 h | 0 h | Completed | [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation |
-| — | <a id="f-101-t02"></a>F-101-T02 — Owner decides how to share | 0 h | 0 h | Completed | — |
-| — | <a id="f-101-t03"></a>F-101-T03 — Owner names the FPV core repository and its visibility | 0 h | 0 h | Completed | — |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-101.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-101-T01: [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation · F-101-T06: [PR #773](https://github.com/voidbrain/nerv/pull/773) · F-101-T07: [PR #773](https://github.com/voidbrain/nerv/pull/773). [PR #773](https://github.com/voidbrain/nerv/pull/773) (screens via FPVBuddy MCP); [PR #647](https://github.com/voidbrain/nerv/pull/647) (F-101-T03 decision); [PR #484](https://github.com/voidbrain/nerv/pull/484) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-101-T01 verified: [PR #484](https://github.com/voidbrain/nerv/pull/484) merged on green CI. |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
-### <a id="f-131"></a>[✨ F-131](#top)
-
-**Quick commands: shortcut buttons that show other projects' cards through MCP**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 7.5 h agent + 0.5 h owner | [F-130-T16](#f-130-t16), [F-101-T07](#f-101-t07), `fpvbuddy:F-009-T03`, `hobo:F-011-T01`, `fpvbuddy:F-011-T03`, `fpvbuddy:F-011-T05` | — | 🤖 | — | — |
-
-💻 **→** Next: F-131-T01 — Quick-command list and run API over MCP (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-25: shortcut buttons in NERV, in the simple view and the full dashboard, such as "Show batteries" and "Show warehouse/spares" and "Show drones" (FPVBuddy), "Show trip" (Hobo) and "Grover status", so a common question needs no typing. Each calls the owning project's MCP tool and shows what it returns; NERV keeps no copy of another project's screens (coordinator `docs/DOMAINS.md`, "The rule for screens"). |
-| **Reproduce** | Open the dashboard or the simple view: the only way to see batteries, a trip or Grover's state is to type a chat question. |
-| **Check** | A configurable list of quick commands (label, server, tool, arguments) shows as buttons in both views; a tap calls the project's MCP tool and renders its 🧱 bricks surface card, or opens its MCP Apps page or link; unavailable commands say why; a test across the API and the component; the owner's check on the Mac and the iPhone. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-131-t01"></a>F-131-T01 — Quick-command list and run API over MCP | 3 h | 0 h | 3 h | Planned | — | [F-131-T02](#f-131-t02) | 🤖 | [PR #774](https://github.com/voidbrain/nerv/pull/774) |
-| 🟡 Medium | <a id="f-131-t02"></a>F-131-T02 — Quick-command buttons in the simple view and the full dashboard | 3 h | 0 h | 3 h | Planned | [F-131-T01](#f-131-t01), [F-130-T16](#f-130-t16) | [F-131-T03](#f-131-t03) | ⏳ 🤖 | [PR #774](https://github.com/voidbrain/nerv/pull/774) |
-| 🟡 Medium | <a id="f-131-t03"></a>F-131-T03 — Default quick commands for FPVBuddy, Hobo and Grover | 1.5 h | 0 h | 1.5 h | Planned | [F-131-T02](#f-131-t02), [F-101-T07](#f-101-t07), `fpvbuddy:F-009-T03`, `hobo:F-011-T01`, `fpvbuddy:F-011-T03`, `fpvbuddy:F-011-T05` | [F-131-T04](#f-131-t04) | ⏳ 🤖 | [PR #774](https://github.com/voidbrain/nerv/pull/774) |
-| 🟢 Small | <a id="f-131-t04"></a>F-131-T04 — Owner: use the quick commands on the Mac and the iPhone | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-131-T03](#f-131-t03) | — | ⏳ 🧑‍🔧 | [PR #774](https://github.com/voidbrain/nerv/pull/774) |
-| 🔴 Large | **Total** | 7.5 h | 0 h (0 of 4 steps recorded) | 7.5 h agent + 0.5 h owner | 0 of 4 completed | | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-131.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-131-T01: [PR #774](https://github.com/voidbrain/nerv/pull/774) · F-131-T02: [PR #774](https://github.com/voidbrain/nerv/pull/774) · F-131-T03: [PR #774](https://github.com/voidbrain/nerv/pull/774) · F-131-T04: [PR #774](https://github.com/voidbrain/nerv/pull/774). Owner request 2026-11-25; opened in [#774](https://github.com/voidbrain/nerv/pull/774); fpvbuddy:F-011 dependency in [#779](https://github.com/voidbrain/nerv/pull/779) |
-| Opened | 2026-11-25 |
-| Verification | — |
 | Reviewed | 2026-11-26 |
 
 </details>
@@ -3191,6 +3191,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|
 | PR / evidence | Steps: F-122-T01: [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md · F-122-T02: [PR #775](https://github.com/voidbrain/nerv/pull/775) owner decisions recorded in the design. Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); design in [#747](https://github.com/voidbrain/nerv/pull/747); [#758](https://github.com/voidbrain/nerv/pull/758); owner decisions in [#775](https://github.com/voidbrain/nerv/pull/775) |
 | Opened | 2026-11-24 |
+| Verification | — |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="f-132"></a>[✨ F-132](#top)
+
+**A GitHub pilot: trigger and watch GitHub workflows, starting with the coordinator refresh**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟣 Very large | 10.5 h agent + 0.75 h owner | [F-131-T02](#f-131-t02), [F-016-T09](#f-016-t09) | — | 🤖 | — | — |
+
+💻 **→** Next: F-132-T01 — Design: GitHub pilot, workflow tools, grant, schedule and token (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-26: GitHub runs scheduled workflows up to about 10 hours late (seen 2026-11-25 across all voidbrain repositories), so the coordinator's hourly dashboard refresh (voidbrain/coordinator, `refresh-views.yml`) is not on time. NERV should refresh it on demand and on its own schedule, as a competence of a GitHub pilot (pilots roster, F-045) rather than a one-off job. |
+| **Reproduce** | Ask NERV to refresh the coordinator overview: no tool can start or watch a GitHub workflow, and the only refresh is GitHub's own late schedule. |
+| **Check** | A governed `github.workflow.dispatch` tool (write-external, needs a grant, allow-list of repository + workflow pairs, first voidbrain/coordinator `refresh-views.yml`) and a read-only Green `github.runs.status` tool, tested against a fake GitHub API; a GitHub pilot entering at the prototype trust stage (watermelon stages, F-025); "Refresh the overview" from chat and a quick-command button (F-131); an optional hourly job owned by the main base; the token in NERV's secret store only; GitHub's own schedule kept as the backup; the owner's check on NERV-01. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-132-t01"></a>F-132-T01 — Design: GitHub pilot, workflow tools, grant, schedule and token | 1 h | 0 h | 1 h | Planned | — | [F-132-T02](#f-132-t02) | 🤖 | [PR #781](https://github.com/voidbrain/nerv/pull/781) |
+| 🟡 Medium | <a id="f-132-t02"></a>F-132-T02 — Tools: github.workflow.dispatch and github.runs.status, tested against a fake GitHub API | 3 h | 0 h | 3 h | Planned | [F-132-T01](#f-132-t01) | [F-132-T03](#f-132-t03), [F-132-T06](#f-132-t06) | ⏳ 🤖 | [PR #781](https://github.com/voidbrain/nerv/pull/781) |
+| 🟡 Medium | <a id="f-132-t03"></a>F-132-T03 — GitHub pilot at the prototype stage, its grant and "Refresh the overview" from chat | 2.5 h | 0 h | 2.5 h | Planned | [F-132-T02](#f-132-t02) | [F-132-T04](#f-132-t04), [F-132-T05](#f-132-t05) | ⏳ 🤖 | [PR #781](https://github.com/voidbrain/nerv/pull/781) |
+| 🟡 Medium | <a id="f-132-t04"></a>F-132-T04 — Optional hourly coordinator refresh owned by the main base | 2 h | 0 h | 2 h | Planned | [F-132-T03](#f-132-t03) | [F-132-T07](#f-132-t07), [F-132-T08](#f-132-t08) | ⏳ 🤖 | [PR #781](https://github.com/voidbrain/nerv/pull/781) |
+| 🟢 Small | <a id="f-132-t05"></a>F-132-T05 — "Refresh the overview" quick-command button | 0.5 h | 0 h | 0.5 h | Planned | [F-132-T03](#f-132-t03), [F-131-T02](#f-131-t02) | — | ⏳ 🤖 | [PR #781](https://github.com/voidbrain/nerv/pull/781) |
+| 🟢 Small | <a id="f-132-t06"></a>F-132-T06 — Owner: create the fine-grained GitHub token and place it in NERV | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-132-T02](#f-132-t02) | [F-132-T07](#f-132-t07) | ⏳ 🧑‍🔧 | [PR #781](https://github.com/voidbrain/nerv/pull/781) |
+| 🟢 Small | <a id="f-132-t07"></a>F-132-T07 — Owner: refresh the overview from chat and see the hourly job run | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-132-T04](#f-132-t04), [F-132-T06](#f-132-t06) | — | ⏳ 🧑‍🔧 | [PR #781](https://github.com/voidbrain/nerv/pull/781) |
+| 🟡 Medium | <a id="f-132-t08"></a>F-132-T08 — The hourly job and the token follow the main base on relocation | 1.5 h | 0 h | 1.5 h | Planned | [F-132-T04](#f-132-t04), [F-016-T09](#f-016-t09) | — | ⏳ 🤖 | [PR #781](https://github.com/voidbrain/nerv/pull/781) |
+| 🟣 Very large | **Total** | 10.5 h | 0 h (0 of 8 steps recorded) | 10.5 h agent + 0.75 h owner | 0 of 8 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-132.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-132-T01: [PR #781](https://github.com/voidbrain/nerv/pull/781) · F-132-T02: [PR #781](https://github.com/voidbrain/nerv/pull/781) · F-132-T03: [PR #781](https://github.com/voidbrain/nerv/pull/781) · F-132-T04: [PR #781](https://github.com/voidbrain/nerv/pull/781) · F-132-T05: [PR #781](https://github.com/voidbrain/nerv/pull/781) · F-132-T06: [PR #781](https://github.com/voidbrain/nerv/pull/781) · F-132-T07: [PR #781](https://github.com/voidbrain/nerv/pull/781) · F-132-T08: [PR #781](https://github.com/voidbrain/nerv/pull/781). Owner request 2026-11-26; opened in [#781](https://github.com/voidbrain/nerv/pull/781) |
+| Opened | 2026-11-26 |
 | Verification | — |
 | Reviewed | 2026-11-26 |
 

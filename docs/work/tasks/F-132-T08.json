@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-132-T08",
+  "parent": "F-132",
+  "title": "The hourly job and the token follow the main base on relocation",
+  "goal": "After a coordinator relocation (F-016) the refresh job runs on the new main base with the token moved there, and the old base stops dispatching",
+  "status": "planned",
+  "acceptance": [
+    "The job follows the coordinator role: the old main is fenced and dispatches nothing; the new main dispatches once its lease is active",
+    "The token moves with the main base as F-132-T01 decided (not copied to every base upfront); a base without it says the token is missing and dispatches nothing",
+    "A relocation fixture test: exactly one base dispatches per hour across a handover"
+  ],
+  "dependsOn": [
+    "F-132-T04",
+    "F-016-T09"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-132.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "distributed-contracts",
+    "privacy-review",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented repositories, workflows and runs in tests; the GitHub token never in git, config.json, tests, logs, chat or the relocation snapshot.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "Copying the token to every base goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: reuses the F-016 lease and promotion hooks with one fixture test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 781
+    }
+  ]
+}
