@@ -6,8 +6,8 @@
   "goal": "NERV pins the gauntlet-protocol release carrying the domain packs and runs them, so pilot qualification can use the results",
   "status": "implemented",
   "acceptance": [
-    "Starts only after gauntlet-protocol tags a release with the domain packs (tracked in that repository): v0.10.0 and v0.11.0, tagged 2026-11-25",
-    "Pin bumped to 0.11.0; the coding, embedded and cad-3d reference runners registered without CI toolchains; capability index regenerated",
+    "Starts only after gauntlet-protocol tags a release with the domain packs (tracked in that repository): v0.10.0 and v0.11.0, tagged 2026-11-25; v0.11.1 fixes the coding runner's container errors",
+    "Pin bumped to 0.11.1; the coding, embedded and cad-3d reference runners registered without CI toolchains; capability index regenerated",
     "Pending cases until an owner-approved run covers them: coding/*, logic-math/*, embedded/*, italian-quality/*, cad-3d/*, code-review/* (new); multi-step-agent/* and nerv-system-flows/* (source-changed by the pin)",
     "Owner-approved run recorded in the ledger; node tools/gauntlet.mjs pending lists none of these"
   ],

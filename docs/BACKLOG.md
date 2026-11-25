@@ -777,7 +777,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749). Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.0 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749). |
+| PR / evidence | Steps: F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749). Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749). |
 | Opened | 2026-11-24 |
 | Verification | — |
 | Reviewed | 2026-11-24 |
