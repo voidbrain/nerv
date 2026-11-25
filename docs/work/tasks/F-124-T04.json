@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-124-T04",
+  "parent": "F-124",
+  "title": "Chat with Midori in the phone app",
+  "goal": "The app carries the same conversation as Telegram, so replies and approvals can move from Telegram to the app",
+  "status": "planned",
+  "acceptance": [
+    "The app sends and receives chat messages in the same conversation as Telegram",
+    "The conversation shows messages from both channels in order; the plan to retire Telegram-only replies is recorded"
+  ],
+  "dependsOn": [
+    "F-124-T02",
+    "F-124-T03"
+  ],
+  "resources": [
+    "web/public/dashboard/live.js",
+    "src/server.ts",
+    "src/telegram.ts",
+    "test/evaluation.browser.mjs",
+    "docs/work/records/F-124.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, endpoints or personal data in Git.",
+  "validation": [
+    "Targeted chat tests",
+    "Every test reading live.js, dashboard.js or web/src",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "6 h agent",
+    "basis": "Estimated 2026-11-25: a conversation view, send path and shared history. Not a measurement; split when started if larger.",
+    "reviewed": "2026-11-25",
+    "agentHours": 6,
+    "baselineAgentHours": 6,
+    "estimateAgentHours": 6
+  }
+}

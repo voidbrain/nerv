@@ -265,7 +265,8 @@ export class Store {
     // F-004-T05: Web push subscription storage and VAPID keypair
     this.db.exec(
       `CREATE TABLE IF NOT EXISTS push_subscriptions(endpoint TEXT PRIMARY KEY, p256dh TEXT NOT NULL, auth TEXT NOT NULL, created TEXT NOT NULL, user_agent TEXT);
-       CREATE TABLE IF NOT EXISTS push_vapid(id TEXT PRIMARY KEY, public_key TEXT NOT NULL, private_key TEXT NOT NULL, created TEXT NOT NULL);`,
+       CREATE TABLE IF NOT EXISTS push_vapid(id TEXT PRIMARY KEY, public_key TEXT NOT NULL, private_key TEXT NOT NULL, created TEXT NOT NULL);
+       CREATE TABLE IF NOT EXISTS push_last_result(id TEXT PRIMARY KEY, at TEXT NOT NULL, ok INTEGER NOT NULL, status INTEGER NOT NULL, reason TEXT);`,
     );
     this.db.exec(RESUME_INTENT_SCHEMA);
     this.db.exec(SESSION_LIMIT_SCHEMA);
@@ -441,6 +442,7 @@ export class Store {
     return (this._pushController ??= new StorePush({
       db: this.db,
       getPushFetch: () => this.pushFetch,
+      getPushSubject: () => (this.home ? readConfig(this.home).push?.subject : undefined),
     }));
   }
   getOrGenerateVapidKeys(): { publicKey: string; privateKey: string } {
@@ -460,6 +462,10 @@ export class Store {
   }
   getPushSubscription(endpoint: string): PushSubscriptionRecord | null {
     return this.pushController.getPushSubscription(endpoint);
+  }
+  /** B-134: subscribed devices and the last delivery result, for the Health line. */
+  pushHealth() {
+    return this.pushController.status();
   }
   async dispatchPushReminders(reminders: Reminder[]): Promise<void> {
     this.assertActiveCoordinator();
@@ -687,6 +693,7 @@ export class Store {
       instrumentality: this.instrumentality.latest(),
       database: this.db.prepare('PRAGMA quick_check').get(),
       schema: this.db.prepare('PRAGMA user_version').get(),
+      push: this.pushHealth(),
       pending: this.db
         .prepare('SELECT count(*) AS count FROM reminders WHERE delivered IS NULL AND cancelled IS NULL')
         .get(),
