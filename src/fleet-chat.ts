@@ -18,7 +18,7 @@ import {
  * and the import. An ambiguous phrase becomes a question and changes nothing.
  */
 export type FleetEdit =
-  | { kind: 'add-drone'; name: string; frame?: string; parts: FleetImportPart[] }
+  | { kind: 'add-drone'; name: string; frame?: string; model?: string; parts: FleetImportPart[] }
   | { kind: 'replace-part'; droneName: string; category: string; position?: string; model: string }
   | { kind: 'set-stock'; category: string; model: string; newCount?: number; usedCount?: number }
   | { kind: 'add-model'; name: string }
@@ -43,7 +43,7 @@ const CATEGORY = String.raw`motori|motore|motors|motor|eliche|elica|propellers|p
 const END = String.raw`[.!]*$`;
 
 const ADD_DRONE = new RegExp(
-  String.raw`^(?:nuovo\s+drone|new\s+drone|aggiungi\s+(?:il\s+)?drone|add\s+(?:a\s+)?(?:new\s+)?drone)\s+(${NAME})\s*(?:[,:;]\s*(.*?))?${END}`,
+  String.raw`^(?:nuovo\s+drone|new\s+drone|aggiungi\s+(?:il\s+)?drone|add\s+(?:a\s+)?(?:new\s+)?drone)\s+(${NAME})\s*(?:(?:[,:;]|\s(?:con|with)\s)\s*(.*?))?${END}`,
   'iu',
 );
 const REPLACE_IT = new RegExp(
@@ -130,11 +130,61 @@ export function parseFleetEditPhrase(phrase: string): FleetEdit | undefined {
   return undefined;
 }
 
+const VERSION_SEGMENT_RE = /^(?:v\.?\s*|ver\.?\s*|versione\s+|version\s+)(\d[\p{L}\p{N}._-]*)$/iu;
+
+function normalizeTrailingVersion(value: string): string {
+  return value.trim().replace(/\s+(?:v\.?\s*|ver\.?\s*|versione\s+|version\s+)(\d[\p{L}\p{N}._-]*)$/iu, ' v$1');
+}
+
+/**
+ * B-137: joins comma/semicolon-separated version segments ("v. 5.1", "v5.1", "version 2.0") onto the
+ * preceding "<keyword> <model>" segment so they are never misread as standalone part categories.
+ */
+function mergeVersionSegments(rawSegments: readonly string[]): { segments: string[]; orphanVersion?: string } {
+  const segments: string[] = [];
+  for (const raw of rawSegments) {
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    const ver = VERSION_SEGMENT_RE.exec(trimmed);
+    if (ver) {
+      const prev = segments.at(-1);
+      if (!prev) return { segments, orphanVersion: `v${ver[1]!}` };
+      // If the preceding segment is only a bare keyword ("modello", "frame") with no model name yet,
+      // leave it unmerged so the caller asks for the missing model name rather than using the version as the name.
+      if (!/\s/u.test(prev)) continue;
+      segments[segments.length - 1] = `${prev} v${ver[1]!}`;
+      continue;
+    }
+    segments.push(trimmed);
+  }
+  return { segments };
+}
+
 function parseAddDrone(name: string, rest: string): FleetEdit {
+  const { segments, orphanVersion } = mergeVersionSegments(rest.split(/\s*[,;]\s*/).filter(Boolean));
+  if (orphanVersion) {
+    return {
+      kind: 'ask',
+      question: `Which drone model or frame is ${orphanVersion} for ${name}? Say "modello <model>, ${orphanVersion}".`,
+    };
+  }
   const parts: FleetImportPart[] = [];
   let frame: string | undefined;
-  for (const segment of rest.split(/\s*[,;]\s*/).filter(Boolean)) {
-    const [, word = '', model = ''] = /^(\S+)\s*(.*)$/u.exec(segment) ?? [];
+  let droneModel: string | undefined;
+  for (const segment of segments) {
+    const [, rawWord = '', rawModel = ''] = /^(\S+)\s*(.*)$/u.exec(segment) ?? [];
+    const word = rawWord.replace(/:$/, '');
+    const value = normalizeTrailingVersion(rawModel);
+    if (/^(?:modello|model)$/iu.test(word)) {
+      if (!value) {
+        return {
+          kind: 'ask',
+          question: `Which drone model is ${name}? Say "modello <model>" after the drone name.`,
+        };
+      }
+      droneModel = value;
+      continue;
+    }
     const category = normalizePartCategory(word);
     if (!PART_CATEGORIES.includes(category)) {
       return {
@@ -142,21 +192,27 @@ function parseAddDrone(name: string, rest: string): FleetEdit {
         question: `I don't know the part category "${word}" for ${name}. Use one of: ${PART_CATEGORIES.join(', ')}. Which one did you mean?`,
       };
     }
-    if (!model.trim()) {
+    if (!value) {
       return {
         kind: 'ask',
         question: `Which model is the ${category} of ${name}? Say it after the part, e.g. "${category} <model>".`,
       };
     }
-    if (category === 'frame') frame = model.trim();
+    if (category === 'frame') frame = value;
     const positions = defaultPartPositions(category);
     parts.push({
       category,
-      model: model.trim(),
+      model: value,
       ...(positions.length > 1 ? { positions: [...positions] } : {}),
     });
   }
-  return { kind: 'add-drone', name, ...(frame ? { frame } : {}), parts };
+  return {
+    kind: 'add-drone',
+    name,
+    ...(frame ? { frame } : {}),
+    ...(droneModel ? { model: droneModel } : {}),
+    parts,
+  };
 }
 
 /** F-121-T01: "motor foot, file kite-5/foot.stl, 4 pezzi, profilo …": the name first, then keyed segments. */
@@ -273,23 +329,43 @@ export function handleFleetEditChat(
 }
 
 function addDrone(fleet: FleetStore, edit: Extract<FleetEdit, { kind: 'add-drone' }>, now: string): FleetEditReply {
+  const existingModel = edit.model ? fleet.getDroneModel(edit.model) : undefined;
+  const resolvedModel = existingModel?.name ?? edit.model;
+  const frame = edit.frame ?? resolvedModel;
+  const hasFramePart = edit.parts.some((part) => normalizePartCategory(part.category) === 'frame');
+  const parts =
+    resolvedModel && !hasFramePart ? [{ category: 'frame', model: resolvedModel }, ...edit.parts] : edit.parts;
   let file;
   try {
     file = parseFleetImport({
       version: 1,
-      drones: [{ name: edit.name, ...(edit.frame ? { frame: edit.frame } : {}), parts: edit.parts }],
+      ...(resolvedModel && !existingModel ? { models: [{ name: resolvedModel, parts: [] }] } : {}),
+      drones: [
+        {
+          name: edit.name,
+          ...(frame ? { frame } : {}),
+          ...(resolvedModel ? { model: resolvedModel } : {}),
+          parts,
+        },
+      ],
     });
   } catch (error) {
     return ask(`I could not read the parts of ${edit.name}: ${(error as Error).message} Which parts did you mean?`);
   }
-  const report = fleet.importFleet(file, now);
+  let report;
+  try {
+    report = fleet.importFleet(file, now);
+  } catch (error) {
+    return ask(`I could not add ${edit.name}: ${(error as Error).message}`);
+  }
   const spares = report.spares.created.length
     ? ` Spares records at 0 new, 0 used: ${report.spares.created.join(', ')}.`
     : '';
+  const detail = resolvedModel ? ` (model ${resolvedModel})` : frame ? ` (frame ${frame})` : '';
   if (report.drones.created.length) {
     return {
       handled: true,
-      reply: `Added drone ${edit.name}${edit.frame ? ` (frame ${edit.frame})` : ''} with ${report.parts.created} parts.${spares}`,
+      reply: `Added drone ${edit.name}${detail} with ${report.parts.created} parts.${spares}`,
     };
   }
   return {
