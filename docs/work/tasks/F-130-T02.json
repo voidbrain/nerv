@@ -10,7 +10,8 @@
     "A test across the API handler and the component checks the rows; the old Health panel links to the new one"
   ],
   "dependsOn": [
-    "F-130-T01"
+    "F-130-T01",
+    "F-130-T18"
   ],
   "resources": [
     "web/src/**",
@@ -40,7 +41,7 @@
     "size": "medium",
     "estimate": "3 h",
     "basis": "Estimated 2026-11-25: reuses doctor-view; ports healthRowHtml, healthMetricRows, doctorRunHtml and the updater rows. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-26",
     "agentHours": 3,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3

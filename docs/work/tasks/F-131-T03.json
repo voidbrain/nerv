@@ -3,17 +3,19 @@
   "id": "F-131-T03",
   "parent": "F-131",
   "title": "Default quick commands for FPVBuddy, Hobo and Grover",
-  "goal": "The default list offers Show batteries and Show warehouse/spares (FPVBuddy), Show trip (Hobo) and Grover status, each calling that project's MCP tool",
+  "goal": "The default list offers Show batteries and Show warehouse and Show drones (FPVBuddy), Show trip (Hobo) and Grover status, each calling that project's MCP tool",
   "status": "planned",
   "acceptance": [
-    "Each default names the owning project's tool as that project publishes it; an entry whose tool does not exist yet ships disabled with the reason (FPVBuddy's spares tool is not in fpvbuddy:F-009 yet)",
+    "Each default names the owning project's tool as that project publishes it; Show warehouse and Show drones call FPVBuddy's fleet and spares tools and screens (fpvbuddy:F-011-T01 to F-011-T05)",
     "A test lists the defaults against fake servers that offer those tools"
   ],
   "dependsOn": [
     "F-131-T02",
     "F-101-T07",
     "fpvbuddy:F-009-T03",
-    "hobo:F-011-T01"
+    "hobo:F-011-T01",
+    "fpvbuddy:F-011-T03",
+    "fpvbuddy:F-011-T05"
   ],
   "resources": [
     "src/**",
@@ -37,8 +39,8 @@
   "effort": {
     "size": "small",
     "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-25: four configuration entries checked against the other projects' published tool names. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "basis": "Estimated 2026-11-25: four configuration entries checked against the other projects' published tool names. Not a measurement. 2026-11-26: \"Show warehouse\" and \"Show drones\" are backed by fpvbuddy:F-011 (T01-T05: drone and spares tools, surface-typed data, the drones and warehouse screens for NERV), so no entry ships disabled; depends on fpvbuddy:F-011-T03 and fpvbuddy:F-011-T05.",
+    "reviewed": "2026-11-26",
     "agentHours": 1.5,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5

@@ -4,7 +4,7 @@
   "parent": "B-126",
   "title": "Say why the nervous child was not ready: its exit, last start-up step and error output",
   "goal": "A not-ready failure on Windows CI names how the nervous child ended or where it stopped, so the second cause can be named from one run",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The not-ready error names the exit code or signal, or that the child is still running at the deadline (pid), its last start-up step and its last error lines",
     "Committed tests fail first: a child that exits early with error output, one still running at the deadline, one that stalls in a reported step, and the real Runtime with a database it refuses",
@@ -36,10 +36,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2.5 h",
-    "basis": "Estimated 2026-11-25 from B-126-T01 (1.5 h): read the run, reproduce on Windows under load, failing-first diagnostics. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-25 from B-126-T01 (1.5 h): read the run, reproduce on Windows under load, failing-first diagnostics. Not a measurement. Closed 2026-11-26.",
     "reviewed": "2026-11-25",
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 2.5,
     "estimateAgentHours": 2.5
   },

@@ -4,7 +4,7 @@
   "parent": "F-130",
   "title": "Workspace dashboard shell and live data service",
   "goal": "The Angular workspace has a dashboard view with the live session, the stream/poll feed and keyed rendering, ready for sections; the old page links to it",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A dashboard route or view in web/src signs in like live.js (session exchange, kept session, typed pairing code) and reads /api/dashboard/stream with /api/dashboard/history as the fallback poll",
     "Section state lives in signals; lists render with @for track by id, so an unchanged poll leaves the DOM in place (a test renders the same state twice, as B-144)",
@@ -43,8 +43,8 @@
   "effort": {
     "size": "medium",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-25: route, session and feed service, the keyed-render pattern and the first join test. Not a measurement. 2026-11-25: implemented (routes, Session, LiveFeed, theme tokens, thin UI layer, unit, service and browser tests); remaining is CI and the independent review. Actual 4 h stated.",
-    "reviewed": "2026-11-25",
+    "basis": "Estimated 2026-11-25: route, session and feed service, the keyed-render pattern and the first join test. Not a measurement. 2026-11-25: implemented (routes, Session, LiveFeed, theme tokens, thin UI layer, unit, service and browser tests); remaining is CI and the independent review. Actual 4 h stated. Closed 2026-11-26: #777 merged on green CI (run 45717488957, every job including Windows and the full suite).",
+    "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 4,
     "actualAgentHours": 4,

@@ -10,7 +10,8 @@
     "A test across the approval handler and the component; the old panel links to the new one"
   ],
   "dependsOn": [
-    "F-130-T01"
+    "F-130-T01",
+    "F-130-T18"
   ],
   "resources": [
     "web/src/**",
@@ -40,7 +41,7 @@
     "size": "medium",
     "estimate": "4 h",
     "basis": "Estimated 2026-11-25: approval and memory cards, the components a shared UI library would later extract. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-26",
     "agentHours": 4,
     "baselineAgentHours": 4,
     "estimateAgentHours": 4

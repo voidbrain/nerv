@@ -4,7 +4,7 @@
   "parent": "B-139",
   "title": "Skip the Windows and macOS jobs on docs-only PRs; CodeQL advanced setup with Swift only when Swift changed",
   "goal": "A docs-only PR starts no Windows or macOS runner and still passes its required checks; Swift CodeQL runs only when Swift changed",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A changed-paths step in the CI plan job sets docs_only for a PR whose files are all under docs/, a root *.md or LICENSE; windows and native-macos skip at job level only then and only when the plan selected no work for them; the diff uses --no-renames so a rename counts both paths; no workflow-level paths filter",
     "Pushes to main, the merge queue, manual and scheduled runs always run both jobs",
@@ -42,10 +42,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h",
-    "basis": "Estimated 2026-11-25 when opened: read the cancelled jobs, two workflow edits, tests and docs. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-25 when opened: read the cancelled jobs, two workflow edits, tests and docs. Not a measurement. Closed 2026-11-26.",
     "reviewed": "2026-11-25",
-    "agentHours": 2,
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
   },

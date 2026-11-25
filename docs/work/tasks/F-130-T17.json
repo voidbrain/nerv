@@ -11,7 +11,8 @@
     "A test across the API and the component adds, edits and cancels a reminder; the browser check keeps its axe pass"
   ],
   "dependsOn": [
-    "F-130-T01"
+    "F-130-T01",
+    "F-130-T18"
   ],
   "resources": [
     "web/src/**",
@@ -39,7 +40,7 @@
     "size": "small",
     "estimate": "2 h",
     "basis": "Estimated 2026-11-25 (F-130-T15 inventory): the existing reminder and inbox code moves into two components with a keyed-row test. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-26",
     "agentHours": 2,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
