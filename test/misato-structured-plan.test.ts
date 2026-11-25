@@ -41,8 +41,7 @@ test('the planning turn sends its plan schema to the local route as structured o
     }) as typeof fetch,
   });
   const format = bodies[0]?.response_format as
-    | { type: string; json_schema: { name: string; strict: boolean; schema: { anyOf: unknown[] } } }
-    | undefined;
+    { type: string; json_schema: { name: string; strict: boolean; schema: { anyOf: unknown[] } } } | undefined;
   assert.equal(format?.type, 'json_schema');
   assert.equal(format?.json_schema.name, 'misato_plan');
   assert.equal(format?.json_schema.strict, true);
