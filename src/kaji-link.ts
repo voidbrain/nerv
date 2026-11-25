@@ -559,6 +559,7 @@ export class KajiLink {
         body,
         undefined,
         this.trust?.required ? this.trust.root : undefined,
+        typeof req.headers['x-kaji-nonce'] === 'string' ? req.headers['x-kaji-nonce'] : undefined,
       );
       for (const [k, v] of Object.entries(h)) setHeader(k, v);
       writeHead(status, { 'content-type': 'application/json' });
@@ -900,6 +901,19 @@ export class KajiLink {
       reply(403, { error: 'refused' });
     }
   }
+  /** This base's signed request headers; the reply is checked against their nonce (B-125). */
+  private signRequest(method: string, path: string, body: string): Record<string, string> {
+    return signedHeaders(
+      this.baseId,
+      this.key,
+      'req',
+      method,
+      path,
+      body,
+      undefined,
+      this.trust?.required ? this.trust.root : undefined,
+    );
+  }
   /** Signed request to one peer; the reply must be signed by that same peer. */
   private async call(
     peer: BaseEntry,
@@ -913,6 +927,7 @@ export class KajiLink {
     const done = this.linkLoad.trackOutboundStart(peer.baseId, Buffer.byteLength(body));
     let bytesIn = 0;
     try {
+      const signed = this.signRequest(method, path, body);
       const res = await send(
         host,
         port,
@@ -920,16 +935,7 @@ export class KajiLink {
         path,
         {
           'content-type': 'application/json',
-          ...signedHeaders(
-            this.baseId,
-            this.key,
-            'req',
-            method,
-            path,
-            body,
-            undefined,
-            this.trust?.required ? this.trust.root : undefined,
-          ),
+          ...signed,
         },
         method === 'POST' ? body : undefined,
         timeoutMs,
@@ -947,6 +953,7 @@ export class KajiLink {
         this.nonces,
         undefined,
         this.trust,
+        signed['x-kaji-nonce'],
       );
       if (from !== peer.baseId) throw new Error(`${peer.baseId} answered as ${from}`);
       if (!res.ok)
@@ -1122,6 +1129,7 @@ export class KajiLink {
     const peer = (await this.bases()).find((b) => b.baseId === baseId && b.status === 'enrolled');
     if (!peer) throw new Error(`Base ${baseId} is not enrolled.`);
     const { host, port } = endpoint(peer.address);
+    const signed = this.signRequest('POST', path, body);
     const res = await send(
       host,
       port,
@@ -1132,16 +1140,7 @@ export class KajiLink {
         'x-kaji-coordinator-epoch': String(coordinator.epoch),
         ...(coordinator.fence !== undefined ? { 'x-kaji-coordinator-fence': String(coordinator.fence) } : {}),
         'x-kaji-lease-expires-at': String(coordinator.leaseExpiresAt),
-        ...signedHeaders(
-          this.baseId,
-          this.key,
-          'req',
-          'POST',
-          path,
-          body,
-          undefined,
-          this.trust?.required ? this.trust.root : undefined,
-        ),
+        ...signed,
       },
       body,
       timeoutMs,
@@ -1156,6 +1155,7 @@ export class KajiLink {
       this.nonces,
       undefined,
       this.trust,
+      signed['x-kaji-nonce'],
     );
     if (replyFrom !== peer.baseId) throw new Error(`Unexpected base answered ${path}.`);
     return res;
@@ -1213,6 +1213,7 @@ export class KajiLink {
     const body = JSON.stringify({ records });
     const { host, port } = endpoint(peer.address);
     const path = '/kaji/epoch-push';
+    const signed = this.signRequest('POST', path, body);
     const res = await send(
       host,
       port,
@@ -1220,16 +1221,7 @@ export class KajiLink {
       path,
       {
         'content-type': 'application/json',
-        ...signedHeaders(
-          this.baseId,
-          this.key,
-          'req',
-          'POST',
-          path,
-          body,
-          undefined,
-          this.trust?.required ? this.trust.root : undefined,
-        ),
+        ...signed,
       },
       body,
       5000,
@@ -1244,6 +1236,7 @@ export class KajiLink {
       this.nonces,
       undefined,
       this.trust,
+      signed['x-kaji-nonce'],
     );
     if (replyFrom !== peer.baseId) throw new Error('Unexpected base answered the epoch push.');
     if (res.status !== 200) throw new Error(`${peer.baseId} refused (${res.status}): ${res.text}`);
@@ -1272,6 +1265,7 @@ export class KajiLink {
     if (!peer) throw new Error(`Base ${baseId} is not enrolled.`);
     const body = JSON.stringify(req);
     const { host, port } = endpoint(peer.address);
+    const signed = this.signRequest('POST', '/kaji/lease/renew', body);
     const res = await send(
       host,
       port,
@@ -1280,16 +1274,7 @@ export class KajiLink {
       {
         'content-type': 'application/json',
         'x-kaji-coordinator-epoch': String(req.coordinatorEpoch),
-        ...signedHeaders(
-          this.baseId,
-          this.key,
-          'req',
-          'POST',
-          '/kaji/lease/renew',
-          body,
-          undefined,
-          this.trust?.required ? this.trust.root : undefined,
-        ),
+        ...signed,
       },
       body,
       5000,
@@ -1304,6 +1289,7 @@ export class KajiLink {
       this.nonces,
       undefined,
       this.trust,
+      signed['x-kaji-nonce'],
     );
     if (replyFrom !== peer.baseId) throw new Error('Unexpected base answered lease renewal.');
     if (res.status === 200 || res.status === 409) {

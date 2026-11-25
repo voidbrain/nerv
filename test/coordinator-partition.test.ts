@@ -45,6 +45,7 @@ import {
   type RegistryBody,
   type SignedRecord,
 } from '../src/kaji.ts';
+import { KAJI_REPLY_MISMATCH, KAJI_REPLY_UNBOUND } from '../src/kaji-auth.ts';
 import { Store } from '../src/store.ts';
 
 /*
@@ -218,6 +219,10 @@ class Mesh {
   partition: string[][] | undefined;
   /** Bases running an older NERV: their epoch-push reply has no `ranOrAckedEpoch` (B-121-T02). */
   readonly olderPeers = new Set<string>();
+  /** B-125: bases whose signed reply is not bound to the request (an older NERV, as an updated base sees it). */
+  readonly unboundPeers = new Set<string>();
+  /** B-125 review: bases whose answer arrives as a reply signed for another request (replayed on the path). */
+  readonly replayedPeers = new Set<string>();
   /** Every epoch push sent (a probe carries no records). */
   readonly pushes: { from: string; to: string; records: number }[] = [];
   readonly effects: Effect[] = [];
@@ -328,24 +333,39 @@ class Mesh {
 
   /** One round of the heartbeat registry sync between every pair of serving bases that reach each other. */
   syncRegistries(): void {
-    for (const a of this.bases.values())
-      for (const b of this.bases.values()) {
-        if (a === b || !a.awake || !a.service) continue;
-        try {
-          this.answering(a.id, b.id);
-        } catch {
-          continue;
-        }
-        const theirs = this.withRegistry(b, (reg) => reg.records());
-        this.withRegistry(a, (reg) => {
+    // B-118-T04: one connection per base for the whole round (it runs every 5 simulated seconds; a connection per
+    // pair cost thousands of opens per file on Windows). Same order and the same records as before.
+    const open = new Map<string, DatabaseSync>();
+    const registry = (b: Base) => {
+      let db = open.get(b.id);
+      if (!db) {
+        db = new DatabaseSync(b.db);
+        db.exec('PRAGMA busy_timeout = 1000');
+        open.set(b.id, db);
+      }
+      return new Registry(db, this.rootPub);
+    };
+    try {
+      for (const a of this.bases.values())
+        for (const b of this.bases.values()) {
+          if (a === b || !a.awake || !a.service) continue;
+          try {
+            this.answering(a.id, b.id, registry);
+          } catch {
+            continue;
+          }
+          const theirs = registry(b).records();
+          const reg = registry(a);
           for (const r of theirs)
             try {
               reg.add(r);
             } catch {
               // Not signed by the pinned root, or an older main record: dropped, as KajiLink drops it.
             }
-        });
-      }
+        }
+    } finally {
+      for (const db of open.values()) db.close();
+    }
   }
 
   /**
@@ -419,12 +439,11 @@ class Mesh {
   }
 
   /** The receiving KajiLink: it answers only when awake, serving and reachable, and refuses unknown or revoked senders. */
-  private answering(from: string, to: string): Base {
+  private answering(from: string, to: string, registry?: (b: Base) => Registry): Base {
     const target = this.base(to);
     if (!this.reachable(from, to) || !target.awake || !target.service) throw new Error(`${to} unreachable`);
-    const trusted = this.withRegistry(target, (reg) =>
-      reg.bases().some((e) => e.baseId === from && e.status === 'enrolled'),
-    );
+    const enrolled = (reg: Registry) => reg.bases().some((e) => e.baseId === from && e.status === 'enrolled');
+    const trusted = registry ? enrolled(registry(target)) : this.withRegistry(target, enrolled);
     if (!trusted) throw new Error(`${to} refused ${from}: unknown or revoked base`);
     return target;
   }
@@ -473,6 +492,14 @@ class Mesh {
   async pushEpoch(from: string, to: string, records: SignedRecord[]) {
     this.pushes.push({ from, to, records: records.length });
     const target = this.answering(from, to);
+    if (this.replayedPeers.has(to))
+      throw Object.assign(new Error(`${KAJI_REPLY_MISMATCH}: the reply answers another request`), {
+        code: KAJI_REPLY_MISMATCH,
+      });
+    if (this.unboundPeers.has(to))
+      throw Object.assign(new Error(`${KAJI_REPLY_UNBOUND}: ${to} answered without binding the reply`), {
+        code: KAJI_REPLY_UNBOUND,
+      });
     const epoch = this.withRegistry(target, (reg) => {
       for (const r of records) {
         try {
@@ -1110,6 +1137,52 @@ describe('B-124: kaji relocate tells no base the new epoch before the target pas
       [B, C, D].map((id) => m.registryOf(id).epoch),
       [3, 3, 3],
     );
+  });
+});
+
+describe('B-125: a base whose reply is not bound to the request is not trusted to say which epochs ran', () => {
+  it('an older NERV answering unbound keeps a move refused by name until it is updated', async () => {
+    const m = (mesh = new Mesh([X, B, D], [B, D]));
+    await m.advance(30_000);
+    m.unboundPeers.add(D);
+    m.sleep(X);
+    m.importRecords(B, [
+      m.sign({ kind: 'revoke', baseId: X, publicKey: m.base(X).publicKey }),
+      m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }),
+    ]);
+    await assert.rejects(m.promote(B), refused('peer_epoch_unknown', /NERV-04.*reply_unbound/));
+    assert.equal(m.registryOf(D).epoch, 2, 'D was not told epoch 3');
+    m.unboundPeers.delete(D);
+    const res = await m.promote(B);
+    assert.ok(!('resumed' in res) && res.newEpoch === 3);
+  });
+
+  it('a reply replayed from another request is reported by its own code, not as an unreachable base', async () => {
+    const m = (mesh = new Mesh([X, B, D], [B, D]));
+    await m.advance(30_000);
+    m.replayedPeers.add(D);
+    m.sleep(X);
+    m.importRecords(B, [
+      m.sign({ kind: 'revoke', baseId: X, publicKey: m.base(X).publicKey }),
+      m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }),
+    ]);
+    await assert.rejects(
+      m.promote(B),
+      refused('peer_epoch_unknown', /NERV-04.*reply_not_bound_to_this_request.*altered on the way/),
+    );
+    assert.equal(m.registryOf(D).epoch, 2, 'D was not told epoch 3');
+  });
+
+  it('an unbound reply is not blamed on an older NERV alone: the path may have altered it', async () => {
+    const m = (mesh = new Mesh([X, B, D], [B, D]));
+    await m.advance(30_000);
+    m.unboundPeers.add(D);
+    m.sleep(X);
+    m.importRecords(B, [
+      m.sign({ kind: 'revoke', baseId: X, publicKey: m.base(X).publicKey }),
+      m.sign({ kind: 'main', baseId: B, coordinatorEpoch: 3 }),
+    ]);
+    await assert.rejects(m.promote(B), refused('peer_epoch_unknown', /reply_unbound.*altered on the way/));
   });
 });
 
