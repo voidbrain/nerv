@@ -2369,7 +2369,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/health-settings-layout.test.mjs` |
+| PR / evidence | Test: `test/health-settings-layout.test.mjs`; [#766](https://github.com/voidbrain/nerv/pull/766) |
 | Opened | 2026-11-25 |
 | Verification | Unit 2026-11-25: `test/health-settings-layout.test.mjs` passes locally. Visual 2026-11-25: headless Chrome screenshots (desktop 1440 px, phone 390 px) on a test home. Human: Pending. |
 | Reviewed | 2026-11-25 |
@@ -3592,7 +3592,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/health-settings-layout.test.mjs`, `test/updater-status-render.test.mjs` |
+| PR / evidence | Test: `test/health-settings-layout.test.mjs`, `test/updater-status-render.test.mjs`; [#766](https://github.com/voidbrain/nerv/pull/766) |
 | Opened | 2026-11-25 |
 | Verification | Unit 2026-11-25: both tests pass locally. Visual 2026-11-25: headless Chrome screenshots (desktop 1440 px, phone 390 px) on a test home. Human: Pending. |
 | Reviewed | 2026-11-25 |
