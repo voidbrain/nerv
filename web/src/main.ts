@@ -664,6 +664,7 @@ class App {
 }
 registerSurfaces();
 // F-004-T01: the production build registers the service worker (offline shell, update prompt); `ng serve` does not.
+// F-004-T09: workspace-sw.js runs ngsw-worker.js and posts a tapped reminder push's receipt.
 bootstrapApplication(App, {
-  providers: [provideServiceWorker('ngsw-worker.js', { enabled: !isDevMode() })],
+  providers: [provideServiceWorker('workspace-sw.js', { enabled: !isDevMode() })],
 }).catch(console.error);

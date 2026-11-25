@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-004-T10",
+  "parent": "F-004",
+  "title": "Owner check: push first, Telegram as fallback on the phone",
+  "goal": "The owner sees on the phone that a tapped reminder never reaches Telegram, an untapped one reaches it once after 10 minutes, and push off goes straight to Telegram",
+  "status": "planned",
+  "acceptance": [
+    "Procedure steps 1-4 of the push-first section pass on the owner's phone with the deployed service; result recorded in F-004"
+  ],
+  "dependsOn": [
+    "F-004-T09"
+  ],
+  "resources": [
+    "docs/acceptance/f004-t06-phone-push-procedure.md",
+    "docs/work/records/F-004.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, endpoints or personal data in Git.",
+  "validation": [
+    "Owner-observed result recorded in the parent record"
+  ],
+  "escalation": [
+    "Owner action: this step needs the owner's phone and observation"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h owner",
+    "basis": "Estimated 2026-11-25: three reminders and a 12-minute wait on the phone. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "ownerHours": 0.5,
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f004-t06-phone-push-procedure.md#push-first-telegram-as-fallback-f-004-t10"
+}
