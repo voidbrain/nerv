@@ -188,10 +188,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-131-t01"></a>B-131-T01 — Size the placement probe token budget to cover its prompt | 1 h | 0 h | 1 h | Planned | — | [F-006-T30](#f-006-t30) |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-131-t01"></a>B-131-T01 — Size the placement probe token budget to cover its prompt | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-006-T30](#f-006-t30) | [PR #735](https://github.com/voidbrain/nerv/pull/735) |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -200,9 +200,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [#732](https://github.com/voidbrain/nerv/pull/732) (opened; F-006-T29 evidence in the [F-006-T29 report](evaluations/2026-11-24-f006-t29-placement-report.md)) |
+| PR / evidence | Steps: B-131-T01: [PR #735](https://github.com/voidbrain/nerv/pull/735). [#732](https://github.com/voidbrain/nerv/pull/732) (opened), [#735](https://github.com/voidbrain/nerv/pull/735) (fix: failing test 63da1369, then the budget from the input bound plus output; F-006-T29 evidence in the [F-006-T29 report](evaluations/2026-11-24-f006-t29-placement-report.md)) |
 | Opened | 2026-11-24 |
-| Verification | Unit/integration: Pending (B-131-T01). Live Misato P3 probe on NERV-02: Pending (F-006-T31). |
+| Verification | Unit/integration: the B-131 regression across the placement route passes in #735. Live Misato P3 probe on NERV-02: Pending (F-006-T31). |
 | Reviewed | 2026-11-24 |
 
 </details>
