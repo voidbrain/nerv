@@ -56,7 +56,7 @@ jobs:
         run: |
           docs_only=false
           if [ "$EVENT" = pull_request ]; then
-            files=$(git diff --name-only "$BASE...$HEAD")
+            files=$(git diff --no-renames --name-only "$BASE...$HEAD")
             other=$(printf '%s\n' "$files" | grep -vE '^(docs/.+|[^/]+\.md|LICENSE)$' || true)
             if [ -n "$files" ] && [ -z "$other" ]; then docs_only=true; fi
           fi
