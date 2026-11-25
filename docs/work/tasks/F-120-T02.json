@@ -6,7 +6,7 @@
   "goal": "The owner-accepted cases from F-120-T01 exist in NERV's system pack and pass",
   "status": "planned",
   "acceptance": [
-    "Owner accepts the proposed case list (docs/reviews/gauntlet-coverage/2026-11-25.md) before building",
+    "Owner accepts the proposed case list (docs/reviews/gauntlet-coverage/2026-11-25.md) before building: accepted 2026-11-25 as changed in the updated review (seven cases below)",
     "Proposed system-pack cases, each a suite group with the listed files and minimumTests (docs/reviews/gauntlet-coverage/2026-11-25.md, section 3): scheduling-reminders (scheduling-time; F-043 storage, F-046; 13), memory-and-chronicle (conversation-memory; F-020, F-044, F-054; 24), pilot-routing (tools; F-025, F-045; 24), tool-contracts (tools; F-021, F-111, F-114; 22), external-project-intake (research; F-027, F-085; 11), federated-handoff (distributed-coordination; F-050, F-070; 8), coding-jobs (security-permissions; F-084, F-091; 7)",
     "Each case: failing acceptance first, deterministic grader, index entry (npm run gauntlet:index)",
     "Cases show pending until an owner-approved run passes them; the ledger records the run"
