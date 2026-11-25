@@ -6,12 +6,16 @@
   "goal": "A docs-only PR starts no Windows or macOS runner and still passes its required checks; Swift CodeQL runs only when Swift changed",
   "status": "implemented",
   "acceptance": [
-    "A changed-paths step in the CI plan job sets docs_only for a PR whose files are all under docs/, a root *.md or LICENSE; windows and native-macos skip at job level only then and only when the plan selected no work for them; no workflow-level paths filter",
+    "A changed-paths step in the CI plan job sets docs_only for a PR whose files are all under docs/, a root *.md or LICENSE; windows and native-macos skip at job level only then and only when the plan selected no work for them; the diff uses --no-renames so a rename counts both paths; no workflow-level paths filter",
     "Pushes to main, the merge queue, manual and scheduled runs always run both jobs",
     ".github/workflows/codeql.yml analyses actions and javascript-typescript on every PR and push to main with the default suite, and swift only when a .swift file, native/NervMenuBar/** or the workflow changed (always on schedule and manual runs)",
-    "The action pins are in ciActionPins and checked by test/ci-pins.test.mjs"
+    "The action pins are in ciActionPins and checked by test/ci-pins.test.mjs",
+    "The .harness.json change (github/codeql-action in ciActionPins, codeql.yml in the action-pin coupling) is this project only per AGENTS \"Changing a harness file\"",
+    "Merges only after B-139-T02 and a green rerun of this PR's CodeQL jobs; never with a failing check"
   ],
-  "dependsOn": [],
+  "dependsOn": [
+    "B-139-T02"
+  ],
   "resources": [
     ".github/workflows/ci.yml",
     ".github/workflows/codeql.yml",

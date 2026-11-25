@@ -2,15 +2,13 @@
   "version": 1,
   "id": "B-139-T02",
   "parent": "B-139",
-  "title": "Owner: turn off CodeQL's default setup after the advanced workflow is merged",
+  "title": "Owner: turn off CodeQL's default setup before the advanced workflow's PR merges",
   "goal": "Only .github/workflows/codeql.yml analyses the repository, and its uploads are accepted",
   "status": "planned",
   "acceptance": [
-    "After B-139-T01 is merged, the default setup reads not-configured and the next CodeQL run on main passes and uploads"
+    "Before #756 merges, the default setup reads not-configured; the agent then reruns #756's CodeQL jobs until they pass, and #756 merges only after that"
   ],
-  "dependsOn": [
-    "B-139-T01"
-  ],
+  "dependsOn": [],
   "resources": [
     "docs/verification.md",
     "docs/work/records/B-139.md",

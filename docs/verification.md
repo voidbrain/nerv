@@ -25,18 +25,14 @@ A docs-only pull request starts no Windows or macOS runner (B-139). Docs-only me
 
 `.github/workflows/codeql.yml` (B-139) replaces GitHub's default code-scanning setup with the same languages, build modes and default query suite: `actions` and `javascript-typescript` on every pull request, push to `main` and weekly run; `swift` (a macOS runner, about 12 minutes) only when a `.swift` file, anything under `native/NervMenuBar/` or the workflow itself changed, and always on the weekly or a manual run.
 
-<a id="codeql-default-setup-off"></a>**Owner procedure, after the PR that adds the workflow is merged** (B-139-T02). While the default setup is on, GitHub rejects the workflow's uploads, so turn it off once, on any machine with `gh` signed in as a repository admin:
+<a id="codeql-default-setup-off"></a>**Owner procedure, before the PR that adds the workflow merges** (B-139-T02). While the default setup is on, GitHub rejects the workflow's uploads and its jobs fail, and a PR never merges with a failing check. So turn the default setup off first, on any machine with `gh` signed in as a repository admin:
 
 ```bash
 gh api -X PATCH repos/voidbrain/nerv/code-scanning/default-setup -f state=not-configured
 gh api repos/voidbrain/nerv/code-scanning/default-setup -q .state
 ```
 
-Expected: the second command prints `not-configured`. Then rerun the newest CodeQL run on `main` (Actions → CodeQL → Re-run all jobs); expected: its Analyze jobs pass and upload.
-
-Default limits: seven days or ten first-parent integration commits. Each merged/squashed PR counts once; direct commits conservatively consume the budget. A successful full PR run can count after merge without a duplicate main run. Partial success, skipped marker, changed PR head, unmerged branch or unavailable history cannot reset the limit. Bounded lookup may request full work if the prior baseline is beyond its history window.
-
-For a manual full run, select **Actions → CI → Run workflow → full = true**. `npm run verification:plan -- --full` requests the same scope locally but only prints a plan. `npm run test:affected` executes reviewed selection from `NERV_VERIFY_GROUPS` and JSON `NERV_VERIFY_PATHS`; CI supplies these as environment variables, never interpolated shell commands. Existing `npm test`, `test:browser`, `test:headless`, `evals`, `evals:stress` and `evals:model` commands remain available.
+Expected: the second command prints `not-configured`. Then the agent reruns the PR's CodeQL jobs (`gh run rerun <run> --failed -R voidbrain/nerv`) until they pass; only then does the PR merge. Until it merges, the repository has no CodeQL analysis on `main`.
 
 ## Gauntlet adoption
 
