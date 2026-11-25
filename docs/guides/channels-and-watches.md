@@ -17,6 +17,8 @@ A dashboard session can mint pairing codes (Settings → Pair a device), so a de
 - **Sorties & search:** `/` filters loaded sorties; **Load older sorties** pages history in chunks of 50 (`GET /api/sorties`).
 - **Approvals:** `a` approves once and `r` rejects in two presses (`Esc` cancels). **Spear this sortie** stands down cards and revokes unused grants.
 - **Reminders & Memory:** edit/cancel pending reminders (`PATCH`/`DELETE /api/reminders/ID`), manage Lilith facts, and reload `config.json` from the Health panel.
+- **Health → Run doctor:** asks the service (`GET /api/doctor`, the same checks as `nerv doctor`) and shows the answer under the button until the next run, with a pointer line from Maya in Comms. It reports *all checks pass* or each problem: the scheduler (nervous) or brain process down, the brain not answering the model check, SQLite `PRAGMA quick_check` not `ok`, the running service's commit differing from the checkout's HEAD, every degraded reason (a model route down, Instrumentality, remote endpoints) and a fleet file it cannot read. It also lists the revision, the schema version and pending reminders, and the update status. An unreachable service or an ended session (401) is said as such; nothing is shown as passed. The demo page (`?demo`) has no service and says it checked nothing.
+- **Misato's Apt in the flow:** lit (yellow) when the sortie went through your decision; a sortie that never needed you leaves it unlit like the other steps it did not visit. Skipped (dashed) marks only advice that was not asked for and the middle steps of a sortie forwarded to the main base.
 - **Models & Battery:** share one panel with tabs; Battery pages recorded model accounting and estimated cost snapshots.
 
 ## Telegram (Aoba)

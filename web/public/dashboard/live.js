@@ -522,6 +522,63 @@
       "</div>";
   }
   // B-123: updater status (end)
+  // B-129: doctor run (start)
+  /** What GET /api/doctor reports as wrong, in words: processes, database integrity, revision skew, degraded reasons, fleet. */
+  function doctorProblems(d) {
+    const out = []; const p = d.processes;
+    if (p && !p.nervous) out.push("Scheduler (nervous) is not running.");
+    if (p && p.brainAlive === false) out.push("Brain process is not alive.");
+    if (d.models === "brain unavailable") out.push("Brain did not answer the model check.");
+    const qc = (d.database || {}).quick_check;
+    if (qc !== "ok") out.push("Database integrity: " + (qc == null ? "not checked" : String(qc)));
+    const skew = d.revisionSkew;
+    if (skew && skew.skewed) out.push(String(skew.message || "Running service differs from the checkout."));
+    (Array.isArray(d.degraded) ? d.degraded : []).forEach(r => out.push(String(r)));
+    if (d.fleet && d.fleet.error) out.push("Fleet: " + d.fleet.error);
+    return out;
+  }
+  function doctorUpdateText(u) {
+    if (!u || typeof u.status !== "string") return "not checked";
+    const short = rev => typeof rev === "string" && rev.length >= 7 ? rev.slice(0, 7) : "?";
+    const ch = " (" + (u.channel || "main") + ")";
+    if (u.status === "update-available") return "update available · " + short(u.availableRevision) + ch;
+    if (u.restartRequired) return "restart required · installed " + short(u.installedRevision);
+    if (u.status === "up-to-date") return "up to date · " + short(u.runningRevision) + ch;
+    if (u.status === "ahead") return "ahead · " + short(u.runningRevision) + ch;
+    if (u.status === "offline") return "offline · " + short(u.runningRevision);
+    return u.status;
+  }
+  /** The block next to Run doctor: running, the service's answer, or why there is none (unreachable, 401, other). */
+  function doctorRunHtml(run) {
+    if (run.running) return "<div id='doctor-run' class='small muted'>Running doctor…</div>";
+    const time = run.at ? new Date(run.at).toTimeString().slice(0, 8) : "";
+    const head = (cls, title) => "<div id='doctor-run' class='small " + cls + "'><div class='row'><strong>" + esc(title) + "</strong><span class='muted'>" + esc(time) + "</span></div>";
+    if (run.error) {
+      const e = run.error;
+      if (e.status === 401) return head("danger", "Doctor refused (401)") + "<div>The dashboard session ended. Run <code>nerv open dashboard</code> on the Mac to sign in again.</div></div>";
+      if (e.status) return head("danger", "Doctor failed (" + e.status + ")") + "<div>" + esc(e.message) + "</div></div>";
+      return head("danger", "Doctor could not reach the service") + "<div>" + esc(e.message) + "</div><div class='muted'>Is NERV running? Nothing was checked.</div></div>";
+    }
+    const d = run.result || {}; const problems = doctorProblems(d);
+    const b = d.build || {}; const skew = d.revisionSkew || {};
+    const skewText = skew.skewed ? "checkout is at " + (skew.checkoutShortCommit || "?") : skew.checkoutCommit ? "matches the checkout" : "checkout unknown";
+    const db = d.database || {}; const pending = (d.pending || {}).count;
+    const lines = [
+      "Revision " + (b.version || "?") + " · " + (b.shortCommit || "?") + " · " + skewText,
+      "Database: integrity " + (db.quick_check == null ? "not checked" : db.quick_check) + " · schema " + ((d.schema || {}).user_version ?? "?") + (pending != null ? " · " + pending + " pending reminder" + (pending === 1 ? "" : "s") : ""),
+      "Update: " + doctorUpdateText(d.update),
+    ];
+    return head(problems.length ? "danger" : "ok", problems.length ? "Doctor · " + problems.length + " problem" + (problems.length === 1 ? "" : "s") : "Doctor · all checks pass") +
+      (problems.length ? "<ul style='margin:4px 0 0 16px;padding:0'>" + problems.map(p => "<li>" + esc(p) + "</li>").join("") + "</ul>" : "") +
+      lines.map(l => "<div class='muted'>" + esc(l) + "</div>").join("") + "</div>";
+  }
+  /** Maya's line in Comms: only a pointer to the block in Health. */
+  function doctorChatLine(run) {
+    if (run.error) return "Doctor: " + (run.error.status === 401 ? "refused (401)" : run.error.status ? "failed (" + run.error.status + ")" : "service unreachable") + " · details in Health.";
+    const n = doctorProblems(run.result || {}).length;
+    return "Doctor: " + (n ? n + " problem" + (n === 1 ? "" : "s") : "all checks pass") + " · details in Health.";
+  }
+  // B-129: doctor run (end)
   window.renderHealth = function () {
     const d = state.doctor; if (!d) { document.getElementById("health").innerHTML = "<div class='muted small'>Waiting for doctor…</div>"; return; }
     const p = d.processes || {}; const m = d.models || {}; const roles = m.roles || {};
@@ -984,6 +1041,20 @@
   };
   // The panel redraws on every refresh: the brief stays open once the owner opened it.
   document.addEventListener("toggle", e => { if (e.target && e.target.id === "brief-box") state.briefOpen = e.target.open; }, true);
+  // B-129: Run doctor asks the service now and keeps its answer next to the button until the next run.
+  window.liveDoctor = async function () {
+    const box = document.getElementById("doctor-result"); const btn = document.getElementById("btn-doctor");
+    if (!box || (btn && btn.disabled)) return;
+    if (btn) btn.disabled = true;
+    box.hidden = false; box.innerHTML = doctorRunHtml({ running:true });
+    let run;
+    try { const result = await api("doctor"); run = { at:new Date().toISOString(), result }; state.doctor = result; }
+    catch (e) { run = { at:new Date().toISOString(), error:{ status:e.status, message:e.message } }; }
+    if (btn) btn.disabled = false;
+    box.innerHTML = doctorRunHtml(run);
+    log(doctorChatLine(run), run.error || doctorProblems(run.result).length ? "danger" : "ok", null, "maya");
+    if (run.result) renderHealth();
+  };
   window.liveReload = async function () {
     try { const r = await api("models/reload", { method:"POST" }); const roles = (r.models || {}).roles || {}; log("Models reloaded · Misato " + (roles.misato || "—") + " · Casper " + (roles.casper || "—"), "ok", null, "maya"); }
     catch (e) { log("Reload refused: " + e.message + " (the previous settings stay in use)", "danger", null, "maya"); }
@@ -1226,6 +1297,60 @@
     }
     await loadDevices();
   });
+  // F-004-T08: Settings → Notifications. iOS asks for permission only after a tap inside the Home Screen app, and a
+  // Safari tab has no PushManager, so a tab says to open the installed app. Enable asks first (still inside the tap),
+  // then subscribes with the service's VAPID key through this page's own worker (sw.js, scope /dashboard/) and
+  // registers the subscription with POST /api/push/subscribe, as the workspace's push toggle (web/src/main.ts) does;
+  // Turn off removes it from the service, then unsubscribes here. A paired device may do both, like a dashboard session.
+  state.push = { busy:false, on:false, msg:null };
+  const pushSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  let pushReady = null;
+  const pushWorker = () => pushReady || (pushReady = navigator.serviceWorker.register("/dashboard/sw.js", { scope:"/dashboard/" }).then(() => navigator.serviceWorker.ready).catch(e => { pushReady = null; throw e; }));
+  const vapidKey = s => Uint8Array.from(atob((s + "=".repeat((4 - s.length % 4) % 4)).replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+  function pushView() {
+    if (!pushSupported()) return ["muted", !INSTALLED && "standalone" in navigator ? "Notifications need the Home Screen app: in Safari, Share → Add to Home Screen, open NERV from the Home Screen and enable them there." : "This browser cannot receive notifications.", ""];
+    if (Notification.permission === "denied") return ["warn", "Blocked: notifications for NERV are turned off on this device. Allow them in the phone's Settings → Notifications → NERV (or the browser's site settings), then reload.", ""];
+    if (state.push.on) return ["ok", "On: this device is subscribed; reminders that fall due are sent here.", "<button class='btn sm' type='button' id='btn-push-disable'>Turn off</button>"];
+    return ["muted", "Off. Press Enable notifications and allow them when asked.", "<button class='btn sm primary' type='button' id='btn-push-enable'>Enable notifications</button>"];
+  }
+  function renderPush() {
+    const box = document.getElementById("settings-push"); if (!box) return;
+    const p = state.push, [kind, text, button] = pushView();
+    box.innerHTML = "<div class='row small' style='justify-content:space-between;align-items:center'><b>Notifications</b>" + (p.busy ? "<button class='btn sm' type='button' disabled>Working…</button>" : button) + "</div>" +
+      "<div role='status' class='tiny " + kind + "'>" + esc(text) + "</div>" + (p.msg ? "<div role='alert' class='tiny " + p.msg.kind + "'>" + esc(p.msg.text) + "</div>" : "");
+  }
+  async function loadPush() {
+    if (pushSupported()) {
+      try { state.push.on = !!(await (await pushWorker()).pushManager.getSubscription()); }
+      catch (e) { state.push.msg = { kind:"danger", text:"Notifications unavailable: " + e.message }; }
+    }
+    renderPush();
+  }
+  async function pushChange(enable) {
+    const p = state.push; if (p.busy) return; p.busy = true; p.msg = null; renderPush();
+    try {
+      if (enable) {
+        // Asked first, while the tap is still the user's gesture: iOS shows the prompt only then.
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") { if (permission !== "denied") p.msg = { kind:"muted", text:"Not allowed: notifications stay off." }; return; }
+        const [reg, key] = await Promise.all([pushWorker(), api("push/key")]);
+        if (!key.publicKey) throw new Error("the service has no push key");
+        const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:vapidKey(key.publicKey) });
+        await api("push/subscribe", { method:"POST", body:JSON.stringify({ endpoint:sub.endpoint, keys:sub.toJSON().keys, userAgent:navigator.userAgent }) });
+        p.on = true;
+      } else {
+        const sub = await (await pushWorker()).pushManager.getSubscription();
+        if (sub) { await api("push/unsubscribe", { method:"POST", body:JSON.stringify({ endpoint:sub.endpoint }) }); await sub.unsubscribe(); }
+        p.on = false;
+      }
+    } catch (e) { if (e.status !== 401) p.msg = { kind:"danger", text:(enable ? "Notifications not enabled: " : "Notifications not turned off: ") + e.message }; }
+    finally { p.busy = false; renderPush(); }
+  }
+  document.addEventListener("click", e => {
+    if (!e.target || !e.target.closest) return;
+    if (e.target.closest("#btn-push-enable")) void pushChange(true);
+    else if (e.target.closest("#btn-push-disable")) void pushChange(false);
+  });
   // F-102-T02: the switch posts the policy; an empty selection means this base on main (the server fills it in).
   window.liveSetAutoUpdate = async function (enabled) {
     if (state.updatePolicyBusy) return;
@@ -1290,7 +1415,7 @@
   }
   window.addEventListener("pagehide", () => { streamPaused = true; clearTimeout(streamTimer); if (streamController) streamController.abort(); });
   window.addEventListener("pageshow", e => { if (e.persisted) { streamPaused = false; void watchChanges(); queueRefresh(); } });
-  let started = false; const begin = () => { void watchChanges(); void api("commands").then(r => { if (r && Array.isArray(r.commands)) state.commands = r.commands; }).catch(() => {}); void loadDevices(); if (started) { void poll(); return; } started = true; document.getElementById("chat-in").placeholder = LIVE_HINT; poll(); setInterval(poll, 3000); };
+  let started = false; const begin = () => { void watchChanges(); void api("commands").then(r => { if (r && Array.isArray(r.commands)) state.commands = r.commands; }).catch(() => {}); void loadDevices(); void loadPush(); if (started) { void poll(); return; } started = true; document.getElementById("chat-in").placeholder = LIVE_HINT; poll(); setInterval(poll, 3000); };
   // F-039: the login code is swapped for a dashboard session (never the admin token), kept in this tab's sessionStorage so a
   // reload stays signed in; it ends after 12 h, when the service restarts, with `sessions revoke`, or when the tab closes.
   // A token pasted by hand is the admin token: it stays in memory only and is never stored.
