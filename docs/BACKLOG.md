@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 8 | 4 | 27 | 8 |
+| **This week** | 8 | 5 | 27 | 8 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 32 |
+| **Open** | 38 | 32 |
 | **Require Human 🧑** | 10 | 14 |
 
 ### Require Human 🧑
@@ -38,7 +38,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 101 h agent + 12.25 h owner across 125 open steps of 39 features and 32 other records. 169 h of actual effort recorded on 153 steps. Generated from the task files.
+**Remaining effort:** 103.75 h agent + 12.25 h owner across 125 open steps of 38 features and 32 other records. 165.25 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -54,13 +54,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | [F-005-T29](#f-005-t29) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | [F-005-T29](#f-005-t29) | 🤖 | — | — |
 
 💻 **→** Next: B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete (Implemented; verification pending).
 
 | | |
 |---|---|
-| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24), from the desktop session: the fenced stop removed the task and ended NERV-02, then printed "disk I/O error" and left the receipt `uncertain` with `stop:started`. The disk was fine (115 GB free) and the lifecycle journal had been written at 18:43. Likely cause, not confirmed: the stopping `serve` still held the lifecycle journal (`~/.nerv-lifecycle/journal.sqlite`) open when the handler wrote the receipt. A later stop on the same machine completed. |
+| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24), from the desktop session: the fenced stop removed the task and ended NERV-02, then printed "disk I/O error" and left the receipt `uncertain` with `stop:started`. The disk was fine (115 GB free) and the lifecycle journal had been written at 18:43. Cause (named 2026-11-25): the stop's poll read the live database read-only with no busy handler while the killed `serve` left its WAL behind. A later stop on the same machine completed. |
 | **Reproduce** | On Windows, a fenced stop of a running NERV service from the desktop session; intermittent (once in two stops). |
 | **Check** | The failing write is named (journal and statement); a committed test fails first if the cause is in code (for example a retry on SQLITE_IOERR or BUSY while the stopped process releases the file); a fenced stop on Tabgha completes its receipt. |
 
@@ -68,8 +68,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 2 h | 0 h | 2 h | Implemented; verification pending | — | [F-005-T29](#f-005-t29) | [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | | | |
+| 🟡 Medium | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 3 h | 0 h | 3 h | Implemented; verification pending | — | [F-005-T29](#f-005-t29) | [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix; [PR #742](https://github.com/voidbrain/nerv/pull/742) inspect read cause and fix |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 1 steps recorded) | 3 h | 0 of 1 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -78,10 +78,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18 |
+| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix; [PR #742](https://github.com/voidbrain/nerv/pull/742) inspect read cause and fix. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18; [#742](https://github.com/voidbrain/nerv/pull/742) |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-21 Unit/integration: PR #620 merged after CI run 44935993196 attempt 2 passed validate, Windows, native-macos, CodeQL and full-suite; failing-first journal retry and launcher-drift regressions pass. Real-device: live Tabgha stop/update remains pending after the recovery; read-only inspection found the service healthy and the checkout clean at `d8eeba7d`. |
-| Reviewed | 2026-11-21 |
+| Reviewed | 2026-11-25 |
 
 </details>
 
@@ -247,56 +247,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
-### <a id="f-021"></a>[✨ F-021](#top)
-
-**MCP and standardized tool/expert protocol**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-021-T05 — Dashboard tool listing (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Tool and expert integration is currently undefined; custom wrappers will not scale. |
-| **Reproduce** | Register a tool/expert via MCP or OpenAPI descriptor; invoke from a task; confirm schema validation, capability scope and audit. |
-| **Check** | Versioned tool descriptors (from MCP servers and NERV's own tools); deny-by-default capability binding to Misato and to each pilot (a pilot lists the tools it may use, F-045); works for local and remote (other-machine) endpoints; the registered tools are listed in the dashboard; no silent privilege escalation. (Wording corrected 2026-11-05: "expert roster (F-018)" predates F-045; tools are actions, skills are procedures, pilots are agents that use both.) |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-021-t05"></a>F-021-T05 — Dashboard tool listing | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [PR #563](https://github.com/voidbrain/nerv/pull/563) tool listing; CI pending |
-| 🟢 Small | **Total** | 4.75 h (4 of 5 steps) | 3.75 h (3 of 5 steps recorded) | 0.25 h | 4 of 5 completed | |
-
-<details><summary>Done steps (4)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-021-t01"></a>F-021-T01 — MCP stdio client, tools process and deny-by-default grants | — | 0 days | Completed | — |
-| — | <a id="f-021-t02"></a>F-021-T02 — Versioned descriptors for NERV's own tools | 1.5 h | 0.25 h (stated) | Completed | [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors |
-| — | <a id="f-021-t03"></a>F-021-T03 — Per-pilot tool binding | 0.5 h | 1 h (stated) | Completed | [PR #547](https://github.com/voidbrain/nerv/pull/547) the fix; CI green |
-| — | <a id="f-021-t04"></a>F-021-T04 — Remote (other-machine) endpoints | 2.5 h | 2.5 h (stated) | Completed | [PR #556](https://github.com/voidbrain/nerv/pull/556) MCP over Kaji; CI pending; CI green |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-021.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-021-T02: [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors · F-021-T03: [PR #547](https://github.com/voidbrain/nerv/pull/547) the fix; CI green · F-021-T04: [PR #556](https://github.com/voidbrain/nerv/pull/556) MCP over Kaji; CI pending; CI green · F-021-T05: [PR #563](https://github.com/voidbrain/nerv/pull/563) tool listing; CI pending. [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool descriptors; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links. |
-| Opened | 2026-11-02 |
-| Verification | Unit/integration and CI 2026-11-13: every built-in registration has a stable versioned descriptor; MCP fingerprints remain compatible; PR #381 CI 43496658350 passed validate, native-macos, windows, plan and full-suite. Remaining parent acceptance is pending. |
-| Reviewed | 2026-11-13 |
-
-</details>
-
----
-
 ### <a id="b-124"></a>[🐞 B-124](#top)
 
 **A re-target `kaji relocate` signs fences the running main before the target's checks run**
@@ -408,9 +358,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: five full Windows runs within 12 minutes without reruns; the time limit is no longer reached since PR #706, the reruns are test failures tracked in B-066, B-076 and B-126.
+💻 **→** Next: B-118-T04 (PR #741) cut the Windows step to 489 s on its first run; then five full Windows runs within 12 minutes without reruns; the reruns are test failures tracked in B-066, B-076 and B-126.
 
 | | |
 |---|---|
@@ -424,8 +374,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-118-t01"></a>B-118-T01 — Make the Windows test step fit its limit with margin | 4 h | 2.5 h so far (stated) | 0.5 h | Implemented; verification pending | — | — | [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split |
 | 🟢 Small | <a id="b-118-t02"></a>B-118-T02 — Worker-link test files always exit; find why they time out on Windows | 2.5 h | 2 h so far (stated) | 0.5 h | Implemented; verification pending | — | [B-118-T03](#b-118-t03) | [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain |
-| 🟡 Medium | <a id="b-118-t03"></a>B-118-T03 — Other Runtime test files always exit; failing tests named in a stopped run | 2 h | 2.5 h so far (stated) | 2 h | Implemented; verification pending | [B-118-T02](#b-118-t02) | — | [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen |
-| 🟡 Medium | **Total** | 8.5 h | 7 h | 3 h | 0 of 3 completed | | | |
+| 🟡 Medium | <a id="b-118-t03"></a>B-118-T03 — Other Runtime test files always exit; failing tests named in a stopped run | 2 h | 2.5 h so far (stated) | 2 h | Implemented; verification pending | [B-118-T02](#b-118-t02) | [B-118-T04](#b-118-t04) | [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen |
+| 🟡 Medium | <a id="b-118-t04"></a>B-118-T04 — Cut the Windows cost of the coordinator test files | 2 h | 0 h | 2 h | Implemented; verification pending | [B-118-T03](#b-118-t03) | — | [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round |
+| 🔴 Large | **Total** | 10.5 h | 7 h (3 of 4 steps recorded) | 5 h | 0 of 4 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -434,10 +385,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-118-T01: [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split · B-118-T02: [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain · B-118-T03: [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen. [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776) |
+| PR / evidence | Steps: B-118-T01: [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split · B-118-T02: [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain · B-118-T03: [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen · B-118-T04: [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round. B-118-T04: Test: `test/sqlite-no-fsync.test.ts`; timing logs of runs 45506622094 to 45559316942 (Windows) and [run 45548137584](https://github.com/voidbrain/nerv/actions/runs/45548137584) (Linux); [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776); [#741](https://github.com/voidbrain/nerv/pull/741) |
 | Opened | 2026-11-24 |
-| Verification | Unit/integration 2026-11-24: Test: `test/worker-link-exit.test.ts` (B-118-T02) and `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs` (B-118-T03) pass locally. CI 2026-11-24 after PR #706: no Windows step reached the 18-minute limit in 50 attempts (438–796 s), 20 failed on a test. Five Windows runs within 12 min without reruns: not met. |
-| Reviewed | 2026-11-24 |
+| Verification | Unit 2026-11-25: Test: `test/sqlite-no-fsync.test.ts` and `test/coordinator-partition.test.ts` pass locally (B-118-T04). CI 2026-11-25: Windows `npm test` 489 s in run 45566852563 (three preload failures there, fixed in PR #741). Unit/integration 2026-11-24: Test: `test/worker-link-exit.test.ts` (B-118-T02) and `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs` (B-118-T03) pass locally. CI 2026-11-24 after PR #706: no Windows step reached the 18-minute limit in 50 attempts (438–796 s), 20 failed on a test. Five Windows runs within 12 min without reruns: not met. |
+| Reviewed | 2026-11-25 |
 
 </details>
 
@@ -1782,7 +1733,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-125-T01 (design and fix); the owner agrees the change to the signed reply before work starts.
+💻 **→** Next: land [#740](https://github.com/voidbrain/nerv/pull/740) (B-125-T01), then update every base together.
 
 | | |
 |---|---|
@@ -1792,10 +1743,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-125-t01"></a>B-125-T01 — Bind every signed Kaji reply to the request it answers | 2 h | 0 h | 2 h | Planned |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-125-t01"></a>B-125-T01 — Bind every signed Kaji reply to the request it answers | 2 h | 0 h | 2 h | Implemented; verification pending | [PR #740](https://github.com/voidbrain/nerv/pull/740) |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1804,10 +1755,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | None yet (found in [PR #721](https://github.com/voidbrain/nerv/pull/721)) |
+| PR / evidence | Steps: B-125-T01: [PR #740](https://github.com/voidbrain/nerv/pull/740). [#740](https://github.com/voidbrain/nerv/pull/740) (failing test 793d00c0, then the binding; found in [PR #721](https://github.com/voidbrain/nerv/pull/721)) |
 | Opened | 2026-11-24 |
-| Verification | Pending |
-| Reviewed | 2026-11-24 |
+| Verification | Unit/integration: the replayed epoch-push reply is refused across a real requester and responder in #740. Live check on the updated bases: Pending. |
+| Reviewed | 2026-11-25 |
 
 </details>
 
@@ -1830,10 +1781,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-126-t01"></a>B-126-T01 — Name why the nervous child is not ready on Windows and fix it | 1.5 h | 0 h | 1.5 h | Planned |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-126-t01"></a>B-126-T01 — Name why the nervous child is not ready on Windows and fix it | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [PR #739](https://github.com/voidbrain/nerv/pull/739) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1842,9 +1793,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925); [run 45362462549](https://github.com/voidbrain/nerv/actions/runs/45362462549); [run 45387061669](https://github.com/voidbrain/nerv/actions/runs/45387061669); opened in [PR #723](https://github.com/voidbrain/nerv/pull/723); [#736](https://github.com/voidbrain/nerv/pull/736) |
+| PR / evidence | Steps: B-126-T01: [PR #739](https://github.com/voidbrain/nerv/pull/739). [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925); [run 45362462549](https://github.com/voidbrain/nerv/actions/runs/45362462549); [run 45387061669](https://github.com/voidbrain/nerv/actions/runs/45387061669); opened in [PR #723](https://github.com/voidbrain/nerv/pull/723); [#736](https://github.com/voidbrain/nerv/pull/736); fix in [#739](https://github.com/voidbrain/nerv/pull/739) |
 | Opened | 2026-11-24 |
-| Verification | Pending. |
+| Verification | Unit: `test/store-open-busy.test.ts` (failing first, then passing). Five Windows runs without the error: Pending. |
 | Reviewed | 2026-11-25 |
 
 </details>

@@ -17,7 +17,9 @@
     "test/node-lifecycle-execution.test.ts",
     "docs/work/records/B-091.md",
     "docs/work/tasks/B-091-T01.json",
-    "evals/gauntlet/ledger.json"
+    "evals/gauntlet/ledger.json",
+    "src/node-lifecycle-windows.ts",
+    "test/windows-service-lifecycle.test.ts"
   ],
   "capabilities": [
     "bounded-edit",
@@ -33,12 +35,12 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h",
-    "basis": "Re-estimated 2026-11-21: 1 h implemented in PR #557 plus 1 h to capture the live recurrence and startup-authorization failure with failing-first regressions and fix them.",
-    "reviewed": "2026-11-21",
-    "agentHours": 2,
+    "estimate": "3 h",
+    "basis": "Re-estimated 2026-11-25: 2 h in PRs #557 and #620 plus 1 h to reproduce the inspect-read failure on Tabgha and fix it failing-first.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 2
+    "estimateAgentHours": 3
   },
   "prs": [
     {
@@ -52,6 +54,10 @@
     {
       "pr": 620,
       "note": "recurrence fix"
+    },
+    {
+      "pr": 742,
+      "note": "inspect read cause and fix"
     }
   ]
 }
