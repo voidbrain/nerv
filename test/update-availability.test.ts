@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -191,3 +191,47 @@ test('F-005-T16: dashboard, companion and doctor surfaces include update availab
   assert.match(companion, /\/api\/update/);
   assert.match(companion, /updateStatus\.label\(language: model\.language\)/);
 });
+
+/** A stand-in `git` on PATH: `rev-parse` answers B at once, `ls-remote` answers A after `delay` seconds. */
+function slowGit(delay: number): { dir: string; restore: () => void } {
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-slow-git-'));
+  writeFileSync(
+    join(dir, 'git'),
+    [
+      '#!/bin/sh',
+      'shift 2',
+      'case "$1" in',
+      `  rev-parse) echo ${B} ;;`,
+      `  ls-remote) sleep ${delay}; printf '%s\\trefs/heads/main\\n' ${A} ;;`,
+      '  *) exit 1 ;;',
+      'esac',
+      '',
+    ].join('\n'),
+  );
+  chmodSync(join(dir, 'git'), 0o755);
+  const path = process.env.PATH;
+  process.env.PATH = `${dir}:${path}`;
+  return {
+    dir,
+    restore: () => {
+      process.env.PATH = path;
+      rmSync(dir, { recursive: true, force: true });
+    },
+  };
+}
+
+test(
+  'B-140: a network git command slower than 5 s but within its bound is not reported as a timeout',
+  { skip: process.platform === 'win32', timeout: 30_000 },
+  async () => {
+    const git = slowGit(6);
+    try {
+      const result = await checkUpdateAvailability({ source: git.dir, runningRevision: B, now: NOW });
+      assert.equal(result.reason, undefined, `unexpected reason: ${result.reason}`);
+      assert.equal(result.status, 'update-available');
+      assert.equal(result.availableRevision, A);
+    } finally {
+      git.restore();
+    }
+  },
+);
