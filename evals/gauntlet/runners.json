@@ -119,6 +119,51 @@
         "system"
       ],
       "allowModels": false
+    },
+    "coding-reference": {
+      "command": "node",
+      "args": [
+        "node_modules/@voidbrain/gauntlet-protocol/examples/coding-v1/runner.mjs",
+        "{report}",
+        "{configuration}",
+        "{budget}",
+        "{case}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "coding"
+      ],
+      "allowModels": true
+    },
+    "embedded-reference": {
+      "command": "node",
+      "args": [
+        "node_modules/@voidbrain/gauntlet-protocol/examples/embedded-v1/runner.mjs",
+        "{report}",
+        "{configuration}",
+        "{budget}",
+        "{case}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "coding"
+      ],
+      "allowModels": true
+    },
+    "cad-3d-reference": {
+      "command": "node",
+      "args": [
+        "node_modules/@voidbrain/gauntlet-protocol/examples/cad-3d-v1/runner.mjs",
+        "{report}",
+        "{configuration}",
+        "{budget}",
+        "{case}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "coding"
+      ],
+      "allowModels": true
     }
   }
 }

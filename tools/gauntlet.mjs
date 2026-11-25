@@ -127,12 +127,28 @@ export function modelLimits(pack) {
 }
 const isModelPack = (pack) => pack.cases.some((c) => c.layer !== 'system');
 const hasRunner = (pack) => pack.cases.some((c) => !!c.runner);
+// F-120-T03: the release's coding, embedded and cad-3d reference runners ask the selected model (allowModels in the
+// registry), so their cases follow the model like any model case and the pinned release, not NERV's source. NERV's own
+// runners (adapter, scripted agent) are model-free and follow NERV's source.
+const registryFile = 'evals/gauntlet/runners.json';
+const modelRunner = (name) => readJSON(here(registryFile)).runners?.[name]?.allowModels === true;
+const usesModelRunner = (pack) => pack.cases.some((c) => !!c.runner && modelRunner(c.runner));
+const modelFreeRunnerPack = (pack) =>
+  isModelPack(pack) && pack.cases.every((c) => !!c.runner) && !usesModelRunner(pack);
+export function releaseSourceKey() {
+  return hash({
+    dependency: hash(readFileSync(here('vendor/gauntlet-protocol.json'), 'utf8')),
+    registry: hash(readFileSync(here(registryFile), 'utf8')),
+  });
+}
+export const caseSourceKey = (pack, caseId) =>
+  usesModelRunner(pack) ? releaseSourceKey() : systemSourceKey(pack, caseId);
 const pendingByPack = (packs, ledger, options) =>
   packs.flatMap((pack) => {
     const identity = { ...options };
-    // A runner-only contract pack exercises NERV's adapter, not the selected model binary.
+    // A runner-only contract pack on model-free runners exercises NERV's adapter, not the selected model binary.
     // Its profile and NERV source identity remain bound, but model digest changes do not invalidate it.
-    if (isModelPack(pack) && pack.cases.every((c) => !!c.runner)) {
+    if (modelFreeRunnerPack(pack)) {
       delete identity.modelDigest;
       delete identity.runtimeHash;
       delete identity.scenarioHash;
@@ -198,7 +214,7 @@ export function recordSelected(ledger, report, full, selected, sourceKey = null)
       : recordRun(emptyLedger(), report, selected, { sourceKey }).entries;
   for (const e of rawEntries) {
     const entry = { ...e, pack: full.id, packVersion: full.version };
-    if (isModelPack(full) && full.cases.every((c) => !!c.runner)) {
+    if (modelFreeRunnerPack(full)) {
       entry.modelDigest = null;
       entry.runtimeHash = null;
       entry.scenarioHash = null;
@@ -243,7 +259,7 @@ export function unnamedPending(list, text) {
 }
 export function pending({ maxAgeDays, profile, modelDigest, runtimeHash, scenarioHash, sourceKey } = {}) {
   const effectiveSourceKey =
-    sourceKey !== undefined ? sourceKey : (pack, caseId) => systemSourceKey(pack, caseId);
+    sourceKey !== undefined ? sourceKey : (pack, caseId) => caseSourceKey(pack, caseId);
   return pendingByPack(
     allPacks().map((p) => p.pack),
     readLedger(),
@@ -467,7 +483,7 @@ export async function main(args = process.argv.slice(2), services = { execute: e
           ? null
           : options['source-key']
         : hasRunner(full)
-          ? (caseId) => systemSourceKey(full, caseId)
+          ? (caseId) => caseSourceKey(full, caseId)
           : null;
     const next = recordSelected(readLedger(), report, full, selectedPack(full, ids, isModelPack(full)), sourceKey);
     writeLedger(next);
@@ -503,11 +519,11 @@ export async function main(args = process.argv.slice(2), services = { execute: e
       execute: true,
       ...flags,
       scenarioConfirmed: options['confirm-scenario'] === true,
-      registry: validateRegistry(readJSON(here('evals/gauntlet/runners.json')), here('evals/gauntlet')),
+      registry: validateRegistry(readJSON(here(registryFile)), here('evals/gauntlet')),
       output: out,
       cacheDirectory: options['cache-dir'] ?? defaultEvidenceDirectory(),
       forceFresh: options.fresh === true,
-      sourceKey: hasRunner(pack) ? systemSourceKey(pack, pack.cases.length === 1 ? pack.cases[0].id : undefined) : undefined,
+      sourceKey: hasRunner(pack) ? caseSourceKey(pack, pack.cases.length === 1 ? pack.cases[0].id : undefined) : undefined,
       telemetry: model,
       ...extra,
     });
@@ -626,7 +642,7 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays, intended 
     ...(maxAgeDays !== undefined ? { maxAgeMs: maxAgeDays * 86400000 } : {}),
     ...(profile ? { profile } : {}),
     // B-079: the same per-case source key as `pending`, so a result recorded at another source is rerun, not reused.
-    sourceKey: (pack, caseId) => systemSourceKey(pack, caseId),
+    sourceKey: (pack, caseId) => caseSourceKey(pack, caseId),
     ...intended,
   };
   const open = pendingByPack(
@@ -652,11 +668,9 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays, intended 
       const testCase = pack.cases.find((candidate) => candidate.id === pendingCase.case);
       const requirements = unmetRequirements(testCase);
       if (requirements.length) blockedReasons.set(pendingCase.case, requirements.join(', '));
-      else if (model ? !options['allow-models'] || !profile : testCase.expensive && !options['allow-expensive'])
-        blockedReasons.set(
-          pendingCase.case,
-          model ? '--allow-models and --profile (owner-approved budget)' : '--allow-expensive',
-        );
+      else if (model && (!options['allow-models'] || !profile))
+        blockedReasons.set(pendingCase.case, '--allow-models and --profile (owner-approved budget)');
+      else if (testCase.expensive && !options['allow-expensive']) blockedReasons.set(pendingCase.case, '--allow-expensive');
     }
     return { pack, model, run, reuse, blockedReasons };
   });
@@ -703,7 +717,7 @@ async function all(options, { profile, execute, limitsFor, maxAgeDays, intended 
     for (const batch of batches) {
       const selected = selectedPack(pack, batch, model);
       const out = join(outDir, `${pack.id}${model ? '' : '-' + batch[0]}.json`);
-      const sourceKey = hasRunner(pack) ? systemSourceKey(pack, batch.length === 1 ? batch[0] : undefined) : null;
+      const sourceKey = hasRunner(pack) ? caseSourceKey(pack, batch.length === 1 ? batch[0] : undefined) : null;
       const result = await execute(selected, model, model ? profile : null, out, {
         ...(maxAgeDays !== undefined ? { maxAgeMs: maxAgeDays * 86400000 } : {}),
         ...(sourceKey ? { sourceKey } : {}),
