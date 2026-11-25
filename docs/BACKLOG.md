@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 8 | 4 | 27 | 7 |
+| **This week** | 8 | 5 | 27 | 7 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 33 |
+| **Open** | 38 | 33 |
 | **Require Human 🧑** | 10 | 14 |
 
 ### Require Human 🧑
@@ -38,7 +38,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 101.25 h agent + 12.25 h owner across 126 open steps of 39 features and 33 other records. 169.5 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 101 h agent + 12.25 h owner across 125 open steps of 38 features and 33 other records. 165.75 h of actual effort recorded on 151 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -242,56 +242,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | Unit/integration 2026-11-24: `test/placement-report.test.ts` binds the report to the committed evidence; `test/placement-campaign.test.ts` and `test/orchestration-selection.test.ts` (role-sized probe across bases) pass; CI green on PRs #679, #698, #714. Live 2026-11-24: P2/P3 smoke, combination and failure checks on NERV-01 + NERV-02 recorded in the report; P3 Casper cases with role-sized probes 2026-11-24 (F-006-T29): 15/15 in the [F-006-T29 report](evaluations/2026-11-24-f006-t29-placement-report.md); P3 Misato cases 2026-11-25 (F-006-T31): 8/15, 0 errors, in the [F-006-T31 report](evaluations/2026-11-25-f006-t31-placement-report.md). |
 | Reviewed | 2026-11-25 |
-
-</details>
-
----
-
-### <a id="f-021"></a>[✨ F-021](#top)
-
-**MCP and standardized tool/expert protocol**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-021-T05 — Dashboard tool listing (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Tool and expert integration is currently undefined; custom wrappers will not scale. |
-| **Reproduce** | Register a tool/expert via MCP or OpenAPI descriptor; invoke from a task; confirm schema validation, capability scope and audit. |
-| **Check** | Versioned tool descriptors (from MCP servers and NERV's own tools); deny-by-default capability binding to Misato and to each pilot (a pilot lists the tools it may use, F-045); works for local and remote (other-machine) endpoints; the registered tools are listed in the dashboard; no silent privilege escalation. (Wording corrected 2026-11-05: "expert roster (F-018)" predates F-045; tools are actions, skills are procedures, pilots are agents that use both.) |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-021-t05"></a>F-021-T05 — Dashboard tool listing | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [PR #563](https://github.com/voidbrain/nerv/pull/563) tool listing; CI pending |
-| 🟢 Small | **Total** | 4.75 h (4 of 5 steps) | 3.75 h (3 of 5 steps recorded) | 0.25 h | 4 of 5 completed | |
-
-<details><summary>Done steps (4)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-021-t01"></a>F-021-T01 — MCP stdio client, tools process and deny-by-default grants | — | 0 days | Completed | — |
-| — | <a id="f-021-t02"></a>F-021-T02 — Versioned descriptors for NERV's own tools | 1.5 h | 0.25 h (stated) | Completed | [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors |
-| — | <a id="f-021-t03"></a>F-021-T03 — Per-pilot tool binding | 0.5 h | 1 h (stated) | Completed | [PR #547](https://github.com/voidbrain/nerv/pull/547) the fix; CI green |
-| — | <a id="f-021-t04"></a>F-021-T04 — Remote (other-machine) endpoints | 2.5 h | 2.5 h (stated) | Completed | [PR #556](https://github.com/voidbrain/nerv/pull/556) MCP over Kaji; CI pending; CI green |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-021.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-021-T02: [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool registry descriptors · F-021-T03: [PR #547](https://github.com/voidbrain/nerv/pull/547) the fix; CI green · F-021-T04: [PR #556](https://github.com/voidbrain/nerv/pull/556) MCP over Kaji; CI pending; CI green · F-021-T05: [PR #563](https://github.com/voidbrain/nerv/pull/563) tool listing; CI pending. [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool descriptors; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links. |
-| Opened | 2026-11-02 |
-| Verification | Unit/integration and CI 2026-11-13: every built-in registration has a stable versioned descriptor; MCP fingerprints remain compatible; PR #381 CI 43496658350 passed validate, native-macos, windows, plan and full-suite. Remaining parent acceptance is pending. |
-| Reviewed | 2026-11-13 |
 
 </details>
 
