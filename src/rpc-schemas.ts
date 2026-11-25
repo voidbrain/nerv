@@ -848,6 +848,7 @@ export const methodSchemas = {
       },
       clarification: { type: 'boolean' },
       request: { type: 'string', minLength: 1, maxLength: 4000 },
+      requestedAt: { type: 'string', minLength: 1, maxLength: 40 },
       history: { type: 'array', maxItems: 12, items: { type: 'object' } },
       context: { type: 'array', maxItems: 3, items: { type: 'object' } },
       memory: { type: 'array', maxItems: 10, items: { type: 'object' } },
