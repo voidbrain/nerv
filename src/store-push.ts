@@ -1,9 +1,11 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { formatReminderPushPayload, generateVapidKeys, sendWebPush, type PushSubscriptionRecord } from './push.ts';
 import type { Reminder } from './store.ts';
+import type { DeliveryChannels } from './delivery-state.ts';
 
 export interface StorePushHost {
   readonly db: DatabaseSync;
+  readonly deliveries: DeliveryChannels;
   getPushFetch(): typeof fetch;
   getPushSubject(): string | undefined;
 }
@@ -74,9 +76,31 @@ export class StorePush {
     );
   }
 
+  /** F-004-T09: with a subscribed device the new reminder delivery goes to the phone first; without one, to Telegram. */
+  queuePushFirst(deliveryId: string, now: Date): void {
+    const devices = (this.host.db.prepare('SELECT count(*) AS n FROM push_subscriptions').get() as { n: number }).n;
+    if (devices > 0) this.host.deliveries.queuePush(deliveryId, now);
+  }
+
   async dispatchPushReminders(reminders: Reminder[]): Promise<void> {
+    if (reminders.length === 0) return;
     const subs = this.listPushSubscriptions();
-    if (subs.length === 0 || reminders.length === 0) return;
+    const deliveryOf = (reminder: Reminder) =>
+      (
+        this.host.db
+          .prepare(
+            "SELECT d.id FROM deliveries d JOIN delivery_channels p ON p.delivery_id=d.id AND p.channel='push' WHERE d.reminder_id=?",
+          )
+          .get(reminder.id) as { id: string } | undefined
+      )?.id;
+    if (subs.length === 0) {
+      // Queued for the phone, but the last device went away before the send: Telegram sends it at once.
+      for (const reminder of reminders) {
+        const id = deliveryOf(reminder);
+        if (id) this.host.deliveries.record(id, 'push', 'failed', new Date(), 'no subscribed device');
+      }
+      return;
+    }
     const vapid = this.getOrGenerateVapidKeys();
     const pushFetch = this.host.getPushFetch();
     let subject: string | undefined;
@@ -88,14 +112,23 @@ export class StorePush {
       );
     }
     for (const reminder of reminders) {
-      const payload = formatReminderPushPayload(reminder);
+      // Only deliveries queued for the phone are pushed: one Telegram already sends (no device at the tick) is not.
+      const deliveryId = deliveryOf(reminder);
+      if (!deliveryId) continue;
+      const payload = formatReminderPushPayload(reminder, this.host.deliveries.pushReceipt(deliveryId));
+      // F-124-T01: the push service accepted it for at least one device (sent), or for none (failed, last reason).
+      let accepted = false;
+      let lastReason = 'send failed';
       for (const sub of subs) {
         const host = endpointHost(sub.endpoint);
         try {
           const res = await sendWebPush(sub, payload, { ...vapid, subject }, pushFetch);
           this.recordResult(res.ok, res.status, res.reason);
-          if (!res.ok)
-            console.error(`push: delivery to ${host} failed: HTTP ${res.status}${res.reason ? ` ${res.reason}` : ''}`);
+          if (res.ok) accepted = true;
+          else {
+            lastReason = `HTTP ${res.status}${res.reason ? ` ${res.reason}` : ''}`;
+            console.error(`push: delivery to ${host} failed: ${lastReason}`);
+          }
           if (res.expired) {
             this.deletePushSubscription(sub.endpoint);
           }
@@ -103,9 +136,17 @@ export class StorePush {
           // Push dispatch error does not break local delivery, but it is no longer silent.
           const reason = error instanceof Error ? error.message.slice(0, 120) : 'send failed';
           this.recordResult(false, 0, reason);
+          lastReason = reason;
           console.error(`push: delivery to ${host} failed: ${reason}`);
         }
       }
+      this.host.deliveries.record(
+        deliveryId,
+        'push',
+        accepted ? 'sent' : 'failed',
+        new Date(),
+        accepted ? undefined : lastReason,
+      );
     }
   }
 
