@@ -6752,7 +6752,7 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #563](https://github.com/voidbrain/nerv/pull/563) dashboard Tools panel; [PR #556](https://github.com/voidbrain/nerv/pull/556) MCP over Kaji; [PR #547](https://github.com/voidbrain/nerv/pull/547) per-pilot binding; [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool descriptors; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links. |
+| PR / evidence | [PR #743](https://github.com/voidbrain/nerv/pull/743) closure; [PR #563](https://github.com/voidbrain/nerv/pull/563) dashboard Tools panel; [PR #556](https://github.com/voidbrain/nerv/pull/556) MCP over Kaji; [PR #547](https://github.com/voidbrain/nerv/pull/547) per-pilot binding; [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool descriptors; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links. |
 | Opened | 2026-11-02 |
 | Verification | 2026-11-25: every Check item closed by its step (T02 #381, T03 #547, T04 #556, T05 #563, each on green CI); `test/tool-listing.test.ts` 3/3 on main. Earlier: unit/integration and CI 2026-11-13: every built-in registration has a stable versioned descriptor; MCP fingerprints remain compatible; PR #381 CI 43496658350 passed validate, native-macos, windows, plan and full-suite. |
 | Reviewed | 2026-11-25 |

@@ -61,6 +61,10 @@
     {
       "pr": 563,
       "note": "tool listing; CI green, merged"
+    },
+    {
+      "pr": 743,
+      "note": "closure"
     }
   ]
 }
