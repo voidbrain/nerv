@@ -10,7 +10,8 @@
   ],
   "dependsOn": [
     "F-098-T03",
-    "B-138-T01"
+    "B-138-T01",
+    "B-137-T01"
   ],
   "resources": [
     "docs/work/records/F-098.md",
@@ -31,8 +32,8 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent); back to the owner 2026-11-25. 2026-11-25 owner run: the fleet on NERV-01 was empty, so the drone is registered first (docs/acceptance/f098-t04-fleet-crash-live.md); next action is the owner's.",
-    "reviewed": "2026-11-25",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent); back to the owner 2026-11-25. 2026-11-25 owner run: the fleet on NERV-01 was empty, so the drone is registered first (docs/acceptance/f098-t04-fleet-crash-live.md); next action is the owner's. 2026-11-26: waits on B-137-T01 (#764) and B-138-T01 (#762), both merged; the owner reruns after updating NERV-01 to a main with both.",
+    "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,

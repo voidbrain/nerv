@@ -10,7 +10,8 @@
     "A test across the bases handler and the component"
   ],
   "dependsOn": [
-    "F-130-T01"
+    "F-130-T01",
+    "F-130-T18"
   ],
   "resources": [
     "web/src/**",
@@ -41,7 +42,7 @@
     "size": "medium",
     "estimate": "4 h",
     "basis": "Estimated 2026-11-25: the topology map is SVG with layout. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-26",
     "agentHours": 4,
     "baselineAgentHours": 4,
     "estimateAgentHours": 4

@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 5 | 13 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 6 | 16 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -6945,6 +6945,144 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | Opened | 2026-11-24 |
 | Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` 20 pass; full `npm test` 1441 pass, 0 fail (2 skipped). Gauntlet 2026-11-24 (owner-approved pattern, under the machine lock, after build): the 7 `nerv-system-flows` cases (no models) and the 4 `multi-step-agent` cases (local `gemma4-12b` profile) passed; `gauntlet:pending` lists none (ledger committed here). CI 2026-11-25: PR #734 merged on green CI. Review: #734 independent review (one blocker, two should-fix, minors) and re-check (one should-fix), each fixed in the PR with a failing-first test. |
 | Reviewed | 2026-11-24 |
+
+</details>
+
+---
+
+## Closed 2026-11-26
+
+### B-125
+
+**A signed Kaji reply is not bound to its request, so an old epoch-push reply can be replayed**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: #740 merged on green CI; every base on the bound-reply format: NERV-03 updated 2026-11-25 ~17:30 CET from 9613f0df to eff68a3a (manual path, doctor skew false, kaji list on NERV-01 and NERV-03 shows all three enrolled), NERV-02 on 1c407fb8, NERV-01 on 2627d483 or later; reconciled in #779.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 in the review of [PR #721](https://github.com/voidbrain/nerv/pull/721) (B-121-T02). Replies on the Kaji line are signed over method, path, time, nonce and body digest, but the nonce is the reply's own, not the request's, so a reply is not bound to the request it answers. Each client refuses a reply nonce it has seen, so a replay must be one this client never received (withheld from it, or captured on the way to another base's request): an attacker on the path could answer a `/kaji/epoch-push` probe with a genuine reply that base signed up to 120 s earlier (the clock-skew window), hiding a newer `ranOrAckedEpoch` or `maxSeenCoordinatorEpoch`, and so let a re-targeted move pass the probe. The same holds for other signed replies (lease renewals included). |
+| **Reproduce** | Capture a signed epoch-push reply D sent to base A; within 120 s, after D acks a lease at a later epoch, answer base C's probe to D with it: C accepts it. |
+| **Check** | A committed test fails first: a reply signed for another request is refused. Proposed fix: the reply's signature covers the request's nonce (or its digest), and the client checks it, with a mixed-version rule for older peers stated in the decision. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: #740 merged on green CI; every base on the bound-reply format: NERV-03 updated 2026-11-25 ~17:30 CET from 9613f0df to eff68a3a (manual path, doctor skew false, kaji list on NERV-01 and NERV-03 shows all three enrolled), NERV-02 on 1c407fb8, NERV-01 on 2627d483 or later; reconciled in #779. 2026-11-26 reconciliation ([PR #779](https://github.com/voidbrain/nerv/pull/779)): NERV-03 (Calvary) updated on 2026-11-25 at about 17:30 CET from `9613f0df` to `eff68a3a`. That revision predates `nerv update` (F-117-T02, #693), so it was updated by hand: service stop, database backup to `~/.nerv-private/nerv-before-b125.sqlite`, a detached checkout of `origin/main`, `npm ci`, build, start. `nerv doctor` shows `eff68a3a` with skew false; `nerv kaji list` on NERV-01 and NERV-03 shows all three bases enrolled. NERV-02 is on `1c407fb8` and NERV-01 on `2627d483` or later, so every base signs bound replies. The [NERV-03 page](../acceptance/b125-nerv03-update.md) now documents the manual path for a base without `nerv update`. 2026-11-25 reconciliation: [#740](https://github.com/voidbrain/nerv/pull/740) merged on green CI (main `1c407fb8`). Bases on the bound-reply format: NERV-02 (Tabgha) updated to `1c407fb8` at about 10:00; NERV-01 updated through the PWA to `2627d483` (updater status completed 09:12:33Z). NERV-03 (Calvary) has been offline for 3 days and is not updated: it must update when it is back; then B-125 closes. Opened 2026-11-24 from the #721 re-check. 2026-11-25: the owner chose option A (the reply signature covers the request nonce) because the three owner-run bases update together, so the mixed-version window lasts only during an update: an older base refuses an updated base's reply (`bad signature`) and an updated base refuses an older one's (`reply_unbound`, named by `kaji promote`). Failing test 793d00c0, then the fix in #740; decision in [coordinator relocation](../decisions/coordinator-relocation.md), section 5.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [#740](https://github.com/voidbrain/nerv/pull/740) (Test: `test/kaji-reply-binding.test.ts`; failing test 793d00c0, then the binding; found in [PR #721](https://github.com/voidbrain/nerv/pull/721)); [#750](https://github.com/voidbrain/nerv/pull/750); NERV-03 update 2026-11-25 (owner, manual path); [PR #779](https://github.com/voidbrain/nerv/pull/779) |
+| Opened | 2026-11-24 |
+| Verification | Unit/integration: the replayed epoch-push reply is refused across a real requester and responder in #740. Real-device 2026-11-25: NERV-01 (`2627d483`) and NERV-02 (`1c407fb8`) run the bound-reply format; NERV-03 (`eff68a3a`, 2026-11-25 ~17:30 CET, doctor skew false, `kaji list` on NERV-01 and NERV-03 shows all three enrolled). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-126
+
+**Windows CI: Runtime tests fail with "nervous process not ready; nothing was sent."**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: fix #767 merged on green CI; eight Windows npm test runs since, first attempt, no nervous process not ready (45681378218, 45682980735, 45686303100, 45686394447, 45687648864, 45688663403, 45690967252, 45694149387); reconciled in #779.
+
+| | |
+|---|---|
+| **Issue** | Reopened 2026-11-25. The first cause (the Store's first reads without a busy timeout, "database is locked") was fixed in #739 and closed; history in the [2026 archive](#b-126). On 2026-11-25 Windows CI [run 45632224825](https://github.com/voidbrain/nerv/actions/runs/45632224825) attempt 1 (PR #754, config and records only) failed 11 tests at `Runtime.ready` with `nervous process not ready; nothing was sent.`, with no "database is locked" and no error output from the child: `memory.test.ts:126`, `mcp.test.ts:126`, `mcp-remote.test.ts:288`, `telegram.test.ts:165`, `:331`, `:383` (and `:497` timed out at 20 s), `tool-index.test.ts:167`, `:203`, `:222`, `watch-runtime.test.ts:5`, `:48`. The error did not say whether the child had exited or why. |
+| **Reproduce** | Windows CI `npm test`: run 45632224825 attempts 1 (job 139268338287) and 3 (job 139284899678). Locally on Windows: `npm test` (not reproduced on a 4-core Windows host, idle or under CPU load). |
+| **Check** | The not-ready error names the child's exit code or signal, or that it is still running at the deadline, its last start-up step and its last error output (B-126-T02); the second cause is named from that output and fixed test-first, the ready deadline raised only if measurements show the cause is a start slower than 30 s (B-126-T03); no "nervous process not ready" in the next five Windows runs. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: fix #767 merged on green CI; eight Windows npm test runs since, first attempt, no nervous process not ready (45681378218, 45682980735, 45686303100, 45686394447, 45687648864, 45688663403, 45690967252, 45694149387); reconciled in #779. 2026-11-26 reconciliation ([PR #779](https://github.com/voidbrain/nerv/pull/779)): [#757](https://github.com/voidbrain/nerv/pull/757) and [#767](https://github.com/voidbrain/nerv/pull/767) merged on green CI. Since #767 merged (18:39Z), eight Windows `npm test` runs on PR merge heads that include it passed on their first attempt with no "nervous process not ready" and no failed test, five of them the full suite (1518–1543 tests, 347–435 s: 45681378218, 45682980735, 45688663403, 45690967252, 45694149387) and three a selected set (125–129 tests): [45681378218](https://github.com/voidbrain/nerv/actions/runs/45681378218) (#764), [45682980735](https://github.com/voidbrain/nerv/actions/runs/45682980735) (#765), [45686303100](https://github.com/voidbrain/nerv/actions/runs/45686303100) (#769), [45686394447](https://github.com/voidbrain/nerv/actions/runs/45686394447) (#766), [45687648864](https://github.com/voidbrain/nerv/actions/runs/45687648864) (#769), [45688663403](https://github.com/voidbrain/nerv/actions/runs/45688663403) (#768), [45690967252](https://github.com/voidbrain/nerv/actions/runs/45690967252) (#763), [45694149387](https://github.com/voidbrain/nerv/actions/runs/45694149387) (#771). A ninth, [run 45715497349](https://github.com/voidbrain/nerv/actions/runs/45715497349) (open PR #777), failed one worker-link heartbeat test (B-066) and no Runtime start. None of the eight logs has a start-up watch line (`still in start-up step`, a step over 10 s). Before the fix the same step still stalled: run 45677154639 attempt 2 (#764, merge ref from 18:38Z) failed three tests with "nervous process not ready" in `"database: journal mode and core schema"`, and runs 45660215244, 45661798517 and 45664200978 logged that watch line without a not-ready failure. Main pushes skip the Windows suite. B-126-T03 and the record close. 2026-11-25, likely cause (B-126-T03, [PR #767](https://github.com/voidbrain/nerv/pull/767)): #757's watch named the step on Windows [run 45670901865](https://github.com/voidbrain/nerv/actions/runs/45670901865) (PR #761, `orchestration-selection.test.ts:506`): `still in start-up step "database: journal mode and core schema" after 10200 ms`, no error. That test gives each of its three Runtimes a fresh folder, so the nervous child was the file's only opener and no lock was involved. The likely cause, plausible but not proven, is flush time: every start-up statement of the Store commits on its own (423 WAL frames for 194 pages), and at `synchronous=FULL` each commit waits for the disk. A loaded Windows runner pays a lot for each flush; B-118-T04 already turned flushes off for the test processes' own connections, but not for a Runtime's children. Measured on Tabgha (Windows, Node 24.22.2) with three processes writing and flushing 1 MiB in a loop: opening a fresh Store took 1.07–1.17 s, far short of the 30 s seen in CI; what stretches it there is unexplained (core schema 173–241 ms, migrations 357–487 ms; 156–183 ms idle; macOS 17 ms). Fix: the Store runs its start-up at `synchronous=NORMAL` (in WAL mode commits then do not wait for the disk and never corrupt; every start-up statement is idempotent or its own transaction, so a lost one reruns at the next start) and returns the connection's own setting once open, so the running coordinator keeps FULL. It lowers durability only once the switch to WAL has taken, since NORMAL outside WAL can corrupt on power loss (#767 review; test: "a fresh database is in WAL mode before…"). Residual risk: a power loss during start-up can lose the last start-up commits, including pending-approval delivery rows written then, so such a card may be delivered a second time after the restart. With it, the same load: 0.13–0.15 s; idle 45 ms. One outer transaction was rejected: the fleet migration refuses to run inside one. Test: `test/startup-watch.test.ts` ("starts up without a flush per statement"; the test commit failed before the fix). The ready deadline is unchanged. 2026-11-25 (B-126-T03, [PR #757](https://github.com/voidbrain/nerv/pull/757)): the B-126-T02 message caught it on Windows [run 45647383080](https://github.com/voidbrain/nerv/actions/runs/45647383080) (PR #754): 3 tests (`telegram.test.ts:331`, `tool-index.test.ts:222`, `watch-runtime.test.ts:5`), each `It sent no READY after 30000 ms; still running (pid …); last start-up step: opening the database, reported 779–1073 ms after start; last error output: none.` So the child sat over 29 s inside the step that runs `readScrolls` and the whole `Store` constructor, without any statement failing. Refuted from the code: two openers serialising the schema statements. The parent Runtime never constructs a Store (it opens the file only for prompt and health samples, after start), the brain and tools children never open it, and `tool-index.test.ts` gives each Runtime a fresh folder, so the nervous child was the file's only opener; a single holder would also make a statement fail after its 5 s busy timeout, which would have shown in the error output. The blocked step holds the child's main thread, so no IPC report can leave it: a start-up watch on its own thread (`src/startup-watch.ts`) now hears each step, including the Store's own (`database: open the file`, `first reads`, `journal mode and core schema`, `schema migrations`, `feature stores`, `worker jobs`, `pending approvals`), and after 10 s in one step writes `nervous: still in start-up step "…" after N ms` to the error output, which the not-ready error quotes. Test: `test/startup-watch.test.ts` (eb42e3e9 failed before the change). Cause not yet named; the ready deadline is unchanged. Earlier evidence (B-126-T02, #755, and the #758 reconciliation): [archive](evidence-2026.md#b-126-moved-2026-11-26).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [run 45632224825](https://github.com/voidbrain/nerv/actions/runs/45632224825) attempt 1 (PR #754); diagnostics in [#755](https://github.com/voidbrain/nerv/pull/755); [run 45647383080](https://github.com/voidbrain/nerv/actions/runs/45647383080) (PR #754); start-up watch in [#757](https://github.com/voidbrain/nerv/pull/757); [run 45670901865](https://github.com/voidbrain/nerv/actions/runs/45670901865) (PR #761); fix in [#767](https://github.com/voidbrain/nerv/pull/767); eight clean Windows runs after it; [#779](https://github.com/voidbrain/nerv/pull/779); first cause: [#739](https://github.com/voidbrain/nerv/pull/739), [archived record](#b-126); [#758](https://github.com/voidbrain/nerv/pull/758) |
+| Opened | 2026-11-24 |
+| Verification | Unit: Test: `test/process-client.test.ts` and `test/startup-watch.test.ts` (B-126 tests, failing first, passing on macOS and on Windows). CI 2026-11-26: eight Windows `npm test` runs with #767 (five full-suite), first attempt, no "nervous process not ready" (runs 45681378218 to 45694149387). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-139
+
+**CI: macOS runners not acquired cancel required jobs; docs-only PRs and every PR's Swift CodeQL wait on Windows and macOS runners**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: #756 merged on green CI; CodeQL default setup not-configured (B-139-T02); docs-only PRs #770 and #772-#776 skipped windows and native-macos and merged, code PRs ran both; reconciled in #779.
+
+| | |
+|---|---|
+| **Issue** | On 2026-11-25 three macOS jobs ended at about 15 minutes with no step run: CI `native-macos` (run 45626156780, a required check) and CodeQL default setup `Analyze (swift)` (runs 45640205435, 45644029795). Each says "The job was not acquired by Runner of type hosted even after multiple attempts" (GitHub macOS arm64 capacity); `timeout-minutes` (30 on `native-macos`) does not govern acquisition. Every PR, records and docs included, still starts a Windows and a macOS runner, and the default setup analyses Swift on every PR (about 12 minutes on macOS) because it cannot filter by path. |
+| **Reproduce** | Open a PR that changes only `docs/work/records/*.md`: CI starts `windows` and `native-macos` runners that only print their scope, and CodeQL starts `Analyze (swift)`. |
+| **Check** | On a docs-only PR (a rename counts both its old and new path) (every changed file under `docs/`, a root `*.md` or `LICENSE`) `windows` and `native-macos` report skipped and the PR can merge; any other path, and every push to `main`, runs them; CodeQL runs `actions` and `javascript-typescript` on every PR and push and `Analyze (swift)` only when Swift changed, after the default setup is off. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: #756 merged on green CI; CodeQL default setup not-configured (B-139-T02); docs-only PRs #770 and #772-#776 skipped windows and native-macos and merged, code PRs ran both; reconciled in #779. 2026-11-26 reconciliation ([PR #779](https://github.com/voidbrain/nerv/pull/779)): B-139-T02 done: the CodeQL default setup reads `not-configured`; [#756](https://github.com/voidbrain/nerv/pull/756) merged on green CI with the advanced CodeQL jobs passing. Every docs-only PR since shows `windows` and `native-macos` skipped and merged on green CI (#770, #772, #773, #774, #775, #776; e.g. [run 45715615726](https://github.com/voidbrain/nerv/actions/runs/45715615726), #776: `Analyze (swift)` skipped, `actions` and `javascript-typescript` passed); code PRs ran both (#771, #763, #768). Every Check item is met: closed. 2026-11-25 (B-139-T01): the `plan` job's changed-paths step sets `docs_only`; `windows` and `native-macos` skip at job level only on a docs-only PR whose plan selected no work for them (a full plan still runs both); a workflow-level `paths:` filter was not used because it would leave the required checks pending. `native-macos` keeps `timeout-minutes: 30` (unchanged: raising it would not have saved the three cancellations above). `.github/workflows/codeql.yml` adds the advanced setup (same languages, build modes and default suite; Swift gated on `*.swift`, `native/NervMenuBar/**` or the workflow). Its uploads fail while the default setup is on, and a PR never merges with a failing check, so the order is: the owner turns off the default setup (B-139-T02, [procedure](../verification.md#codeql-default-setup-off)); the agent reruns #756's CodeQL jobs until they pass; then #756 merges on green CI and independent review. The changed-paths diffs use `--no-renames`, so moving a file from `src/` into `docs/` lists both paths and is not docs-only (review of #756). The `.harness.json` change (the `github/codeql-action` entry in `ciActionPins` and the CodeQL workflow in the action-pin coupling) is for this project only, per AGENTS "Changing a harness file": a project setting, not a template change. Next: after the merge, a docs-only PR shows both OS jobs skipped and mergeable.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/verification-policy.test.mjs` (B-139 test), `test/ci-pins.test.mjs`; runs 45626156780, 45640205435, 45644029795 (runner not acquired); [#756](https://github.com/voidbrain/nerv/pull/756); docs-only run 45715615726 (#776); [#779](https://github.com/voidbrain/nerv/pull/779) |
+| Opened | 2026-11-25 |
+| Verification | Unit 2026-11-25: Test: `test/verification-policy.test.mjs` and `test/ci-pins.test.mjs` pass locally. CI 2026-11-26: docs-only PRs #770 and #772–#776 skipped both OS jobs and merged; CodeQL advanced setup green on #756 and after (default setup not-configured). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### F-127
+
+**Point check:conventions at the Angular app in web/src**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: #754 merged on green CI; check:conventions reads web/src and src and passes (194 files); reconciled in #779.
+
+| | |
+|---|---|
+| **Issue** | Owner approved 2026-11-25. Without `conventions.sourceDirs`, `check:conventions` reads only `src/` (the framework-free backend) and never reads the Angular app in `web/src`, so the Angular rules in [docs/agents/angular.md](../agents/angular.md) were never checked on it. The setting arrived with harness 10.11.0 (reconciled in F-125-T01). |
+| **Reproduce** | On `main` before this change, `npm run check:conventions` reports 183 files, all under `src/`; none under `web/src`. |
+| **Check** | `.harness.json` names `web/src` and `src` in `conventions.sourceDirs`; `npm run check:conventions` reads both (192 files) and passes. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: #754 merged on green CI; check:conventions reads web/src and src and passes (194 files); reconciled in #779. 2026-11-26 reconciliation ([PR #779](https://github.com/voidbrain/nerv/pull/779)): [#754](https://github.com/voidbrain/nerv/pull/754) merged on green CI (its Windows reruns were B-126 and B-076 flakes, not this change); `.harness.json` names `web/src` and `src` in `conventions.sourceDirs`, and `npm run check:conventions` at main `6b49177c` reads both and passes (194 files). 2026-11-25: opened and implemented at the owner's approval, on top of F-125-T01 (PR #753). `sourceDirs` is `["web/src", "src"]`: `web/src` brings the Angular app under the check; `src` keeps the unused-export check on the backend that the default already ran, so no check is lost. The check found no convention problem in the 9 `web/src` files, so nothing in the app changed. Related: [F-125](../work/records/F-127.md#f-125).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | F-127-T01 in [PR #754](https://github.com/voidbrain/nerv/pull/754) |
+| Opened | 2026-11-25 |
+| Verification | Unit 2026-11-26: `npm run check:conventions` passes at `6b49177c` (194 files); CI of #754 green. |
+| Reviewed | 2026-11-26 |
 
 </details>
 

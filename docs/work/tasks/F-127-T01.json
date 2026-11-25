@@ -4,7 +4,7 @@
   "parent": "F-127",
   "title": "Set conventions.sourceDirs to web/src and src",
   "goal": "check:conventions reads the Angular app in web/src by configuration instead of guessing src/",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     ".harness.json conventions.sourceDirs names web/src and src",
     "npm run check:conventions reads web/src and passes; every real failure in web/src is fixed per docs/agents/angular.md"
@@ -31,9 +31,9 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h agent",
-    "basis": "Estimated 2026-11-25: one setting plus fixing whatever the check then reports in nine app files. Not a measurement.",
-    "agentHours": 0.5,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-25: one setting plus fixing whatever the check then reports in nine app files. Not a measurement. Closed 2026-11-26.",
+    "agentHours": 0,
     "reviewed": "2026-11-25",
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5

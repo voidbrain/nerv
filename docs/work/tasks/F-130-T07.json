@@ -10,7 +10,8 @@
     "A test from a recorded sortie fixture to the rendered stages"
   ],
   "dependsOn": [
-    "F-130-T06"
+    "F-130-T06",
+    "F-130-T18"
   ],
   "resources": [
     "web/src/**",
@@ -41,7 +42,7 @@
     "size": "medium",
     "estimate": "4 h",
     "basis": "Estimated 2026-11-25: SVG diagram with edges, the least mechanical port. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-26",
     "agentHours": 4,
     "baselineAgentHours": 4,
     "estimateAgentHours": 4

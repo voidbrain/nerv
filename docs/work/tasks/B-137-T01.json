@@ -4,7 +4,7 @@
   "parent": "B-137",
   "title": "Add a drone by chat with its model and version",
   "goal": "Adding a drone with \"modello <model>, v. <version>\" records the model or asks once whether to create it, never asks for a part category",
-  "status": "implemented",
+  "status": "verified",
   "acceptance": [
     "A committed test fails first: \"aggiungi il drone X, modello M, v. 5.1\" and its English form record the drone with model \"M v5.1\" (frame or drone_models link) or ask once whether to create the model",
     "Answering the follow-up never loops back to the category question"
@@ -32,10 +32,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h agent",
-    "basis": "Implemented 2026-11-25 in src/fleet-chat.ts with failing-first tests in test/fleet-chat.test.ts; CI and merge remain. Not a measurement.",
-    "reviewed": "2026-11-25",
-    "agentHours": 0.25,
+    "estimate": "0 remaining",
+    "basis": "Implemented 2026-11-25 in src/fleet-chat.ts with failing-first tests in test/fleet-chat.test.ts; CI and merge remain. Not a measurement. Verified 2026-11-26: #764 merged on green CI (run 45681378218; earlier run 45677154639 failed on B-066 and B-126 flakes); the live check is the F-098-T04 rerun on NERV-01 once it runs a main with #764.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },

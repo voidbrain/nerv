@@ -4,7 +4,7 @@
   "parent": "B-126",
   "title": "Name and fix the Store start-up step where the Windows nervous child stalls",
   "goal": "Runtime tests stop failing with \"nervous process not ready\" on Windows CI",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The stalled step is named from a Windows failure whose error quotes the start-up watch (\"still in start-up step …\"); two openers serialising the schema is ruled out (the nervous child is the file's only opener)",
     "A committed test fails first, then the fix; the ready deadline is raised only if measurements show a start slower than 30 s is the cause, and still fails a dead child",
@@ -39,10 +39,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-25 from B-126-T01 (1.5 h). Start-up watch in #757; cause named and fixed 2026-11-25 (flushes per start-up statement on a loaded Windows disk). Remaining: five Windows runs. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-25 from B-126-T01 (1.5 h). Start-up watch in #757; cause named and fixed 2026-11-25 (flushes per start-up statement on a loaded Windows disk). Remaining: five Windows runs. Not a measurement. Closed 2026-11-26.",
     "reviewed": "2026-11-25",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },
