@@ -2248,7 +2248,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: from tasks; F-125-T01 starts only once the project-harness template backlog is empty.
+💻 **→** Next: from tasks; F-125-T01 implemented (harness 10.9.0 → 10.21.0, PR below); F-125-T02 (built views) is next, in its own PR.
 
 | | |
 |---|---|
@@ -2260,7 +2260,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-125-t01"></a>F-125-T01 — Reconcile to the latest harness release | 2 h | 0 h | 2 h | Planned | — | [F-125-T02](#f-125-t02) | [PR #748](https://github.com/voidbrain/nerv/pull/748) |
+| 🟡 Medium | <a id="f-125-t01"></a>F-125-T01 — Reconcile to the latest harness release | 2 h | 0 h | 2 h | Implemented; verification pending | — | [F-125-T02](#f-125-t02) | [PR #748](https://github.com/voidbrain/nerv/pull/748) |
 | 🟢 Small | <a id="f-125-t02"></a>F-125-T02 — Enable built backlog views and log view incidents over about 10 merged PRs | 1 h | 0 h | 1 h | Planned | [F-125-T01](#f-125-t01) | — | [PR #748](https://github.com/voidbrain/nerv/pull/748) |
 | 🟡 Medium | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 3 h | 0 of 2 completed | | | |
 

@@ -34,9 +34,12 @@ const stamp = JSON.parse(read('.harness.json') || '{}');
 const branch =
   stamp.defaultBranch ?? git('symbolic-ref', '--short', 'refs/remotes/origin/HEAD')?.replace(/^origin\//, '') ?? 'main';
 const tip = git('rev-parse', '--verify', '--quiet', `origin/${branch}`) ? `origin/${branch}` : branch;
-const header = read('docs/BACKLOG.md')
-  .split('\n')
-  .find((l) => l.startsWith('Current work ledger'));
+// F-096-T04: with workItems.views "built" the header comes from a fresh build, in memory (this tool never writes).
+const ledger =
+  stamp.workItems?.enabled && stamp.workItems.views === 'built'
+    ? (await import('./work-items.mjs')).builtLedger(root)
+    : read('docs/BACKLOG.md');
+const header = ledger.split('\n').find((l) => l.startsWith('Current work ledger'));
 const sha = header?.match(/against [^\s`]+ `([0-9a-f]{7,40})`/)?.[1];
 if (!sha || git('cat-file', '-e', `${sha}^{commit}`) === null) {
   console.error(`The backlog header names no ${branch} commit in this checkout ("against ${branch} \`<sha>\`").`);

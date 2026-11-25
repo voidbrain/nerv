@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { resolve, join } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { settings, taskCatalog, resource, overlaps, TASK } from './work-items.mjs';
+import { settings, taskCatalog, resource, overlaps, TASK, waitsOn } from './work-items.mjs';
 const REF = 'refs/heads/harness/claims-v1';
 const HASH = /^[a-f0-9]{40}(?:[a-f0-9]{24})?$/;
 function git(root, args, input) {
@@ -241,7 +241,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       if (
         !task ||
         task.status !== 'ready' ||
-        task.dependsOn.some((d) => !['verified', 'closed'].includes(catalog.tasks.find((t) => t.id === d)?.status))
+        waitsOn(task).some((d) => !['verified', 'closed'].includes(catalog.tasks.find((t) => t.id === d)?.status))
       )
         throw Error('Task is not ready or prerequisites remain');
       const parent = readFileSync(join(root, config.records, task.parent + '.md'), 'utf8');

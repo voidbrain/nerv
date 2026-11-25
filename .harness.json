@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "10.9.0",
+  "version": "10.21.0",
   "stacks": [
     "core",
     "angular"
@@ -66,7 +66,9 @@
     "docs/agents/audit-findings.md": "core/docs/agents/audit-findings.md",
     "docs/agents/work-usage-sources.md": "core/docs/agents/work-usage-sources.md",
     "docs/agents/work-usage-effectiveness.md": "core/docs/agents/work-usage-effectiveness.md",
-    "docs/agents/work-usage-launch.md": "core/docs/agents/work-usage-launch.md"
+    "docs/agents/work-usage-launch.md": "core/docs/agents/work-usage-launch.md",
+    "docs/agents/solution-dashboard.md": "core/docs/agents/solution-dashboard.md",
+    "docs/agents/solution-gaps.md": "core/docs/agents/solution-gaps.md"
   },
   "forked": {},
   "freshness": {

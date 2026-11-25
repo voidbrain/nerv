@@ -46,6 +46,16 @@ if (tip === branch) warn(`No origin/${branch}: comparing with the local ${branch
 
 // 1. the backlog header names the default-branch commit it was last reconciled against
 const backlog = new URL('../docs/BACKLOG.md', import.meta.url);
+// F-096-T04: with workItems.views "built" the header is read from a fresh build, never from an earlier one on disk.
+// Session start never stops on it: a source or git-ignore problem is reported and the other findings still follow.
+if (stamp.workItems?.enabled && stamp.workItems.views === 'built')
+  try {
+    (await import('./work-items.mjs')).buildView(fileURLToPath(new URL('..', import.meta.url)));
+  } catch (e) {
+    warn(
+      `Could not build the backlog view (workItems.views "built"): ${e.message}. The header below is read from what is on disk.`,
+    );
+  }
 const header = existsSync(backlog)
   ? readFileSync(backlog, 'utf8')
       .split('\n')

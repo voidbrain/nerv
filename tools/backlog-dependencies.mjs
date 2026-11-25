@@ -137,6 +137,15 @@ export function graph(sources) {
 // The page this tool used to write (until 5.4.0). Depends on and Unlocks now appear in each record of the generated
 // ledger (work-items.mjs), so a leftover page would go stale: the check asks for its removal.
 const RETIRED = 'docs/agents/backlog-dependencies.md';
+// F-096-T04: with workItems.views "built" the ledger is a build output: build it from the sources before reading it.
+const builtViews = (dir) => {
+  try {
+    const items = JSON.parse(readFileSync(join(dir, '.harness.json'), 'utf8')).workItems;
+    return Boolean(items?.enabled && items.views === 'built');
+  } catch {
+    return false;
+  }
+};
 export function run(root, args) {
   assert(args.length <= 1 && args.every((a) => a === '--check'), 'Use backlog-dependencies.mjs [--check]');
   root = realpathSync(root);
@@ -166,12 +175,15 @@ export function run(root, args) {
   );
   return all;
 }
+// No top-level await: work-items.mjs loads this module with a synchronous require.
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  try {
+  (async () => {
+    // F-096-T04: with workItems.views "built", check a fresh build of the ledger, not what is on disk.
+    if (builtViews(process.cwd())) (await import('./work-items.mjs')).buildView(process.cwd());
     run(process.cwd(), process.argv.slice(2));
     console.log('Backlog dependencies: valid.');
-  } catch (error) {
+  })().catch((error) => {
     console.error(error.message);
     process.exitCode = 1;
-  }
+  });
 }

@@ -155,6 +155,12 @@ export function maintenance(root, args) {
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
+    // F-096-T04: with workItems.views "built", outcomes are checked against a fresh build of the ledger.
+    const home = fileURLToPath(new URL('..', import.meta.url));
+    const items = existsSync(resolve(home, '.harness.json'))
+      ? JSON.parse(readFileSync(resolve(home, '.harness.json'), 'utf8')).workItems
+      : undefined;
+    if (items?.enabled && items.views === 'built') (await import('./work-items.mjs')).buildView(home);
     console.log(
       JSON.stringify(maintenance(fileURLToPath(new URL('..', import.meta.url)), process.argv.slice(2)), null, 2),
     );

@@ -39,8 +39,23 @@ A component can point to available coordination context without adopting the sol
 
 Portable repository/ref references are versioned; machine-specific checkout arrangements and credentials may use local workspace configuration or an explicit `--manifest=PATH` at invocation. Do not store an absolute personal path or secret as shared project content. The helper does not clone, fetch, change branches or repair repositories automatically.
 
+## Solution order
+
+An optional `order` in `.solution.json` names a coordinator file (for example `docs/SOLUTION-ORDER.md`) holding the owner's order across the solution: a numbered list of `repo:ID` references between `<!-- order:start -->` and `<!-- order:end -->` (one such list per file), each a record (`api:F-101`) or a step (`web:F-012-T03`) with an optional note after ` — `. The rules:
+
+- Take the first ready item in the order. Work not listed follows each repository's own priority.
+- The order changes only by an owner instruction, landed as a PR in the coordinator. One exception (B-058): an item the dashboard shows ✅ Done (a record that closed, or a step completed in its repository) leaves the order in the next refresh PR (`node tools/solution.mjs dashboard --write --prune-order`).
+- The order never skips a prerequisite or an owner decision: an item whose step waits on either is not ready, whatever its place.
+- The list holds references only, never status: the state comes from the owning backlogs at the dashboard's resolved commits.
+
+`node tools/solution.mjs check` validates the list offline, without reading any component: the syntax, known manifest IDs (`solution` included), duplicates and numbering from 1.
+
 ## Backlogs and links
 
-The coordinator uses the same compact B-/F- record format and validator as any project. Its own records describe integration outcomes, shared-contract decisions or coordination. Add `| Components | client:F-012, api:B-004 |` in a record's details metadata. IDs are repository-qualified using exact manifest IDs; `solution` is reserved for the coordinator. Components may use a `Solution` field to link back; that does not copy acceptance ownership. No foreign implementation action belongs in the coordinator record.
+The coordinator uses the same compact B-/F- record format and validator as any project. Its own records describe integration outcomes, shared-contract decisions or coordination. Add `| Components | client:F-012, api:B-004 |` in a record's details metadata. IDs are repository-qualified using exact manifest IDs; `solution` is reserved for the coordinator. Components may use a `Solution` field to link back; that does not copy acceptance ownership. No foreign implementation action belongs in the coordinator record. A component step that waits on a step of another component names it in its task file's `dependsOn` as `<repo>:<STEP-ID>` with the same manifest ID ([ordering](../backlog/ordering.md)); the component never reads the other repository.
 
-Dashboard readers support current four-column summaries, historical five-column signal summaries and the preceding five-column ID/Item summaries. Historical completion percentages are not displayed or used for ordering. Unsupported or malformed sources are reported as unknown, not silently treated as completed/empty. Configure archive files when records close: linked archived records remain readable; active records take precedence when an ID reopens. Unlinked archived records are omitted from component tables. Older archive tables without record headings require explicit migration or a different reader; the tool reports them rather than guessing.
+How the dashboard reads each backlog (layouts, built views, remaining hours) is in [solution dashboard](solution-dashboard.md), moved from here unchanged (F-095-T04). Its gap review, proposals for missing cross-repository work, is in [solution gaps](solution-gaps.md).
+
+## Dashboard sections
+
+Since 10.20.0 (F-095, F-097) the dashboard holds, in order: the sources and their revisions; the owner view (a summary per project with harness and next audit, the solution order with live state, hours and open prerequisites, blocked with the block reached, nothing to do, waiting for the owner; since 10.21.0 in the layout of a coordinator's own overview, F-099); the agent runway; audits, reviews and harness release per project; the gap review; each project's open steps, collapsed; remaining effort; integration outcomes; component work; source and link problems. [Solution dashboard](solution-dashboard.md) says how each is read, [solution gaps](solution-gaps.md) what the gap review proposes, and [solution refresh](solution-refresh.md), "Moving from project tools", how a coordinator with its own order or overview tools moves to them.

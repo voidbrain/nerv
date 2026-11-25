@@ -2,9 +2,9 @@
 // Heuristic: the rules are text patterns and the unused-export count is a word count, not type analysis, so a match in a
 // string, an alias or a same-named identifier can mislead it. ESLint owns what it can check; a false result here is
 // fixed in this script (a release), never silenced in the code.
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { join, relative } from 'node:path';
+import { isAbsolute, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -12,9 +12,33 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 // (conventions.pureDirs), e.g. [["src/app/core/", ["signal", "computed", "untracked"]]]. Signal primitives run without
 // the framework, so a folder may allow them and stay unit-testable. None: no framework-free layer.
 const stamp = join(root, '.harness.json');
-const PURE_DIRS =
-  (existsSync(stamp) ? JSON.parse(readFileSync(stamp, 'utf8')).conventions?.pureDirs : undefined) ??
-  [];
+const conventions = existsSync(stamp)
+  ? JSON.parse(readFileSync(stamp, 'utf8')).conventions
+  : undefined;
+const PURE_DIRS = conventions?.pureDirs ?? [];
+// F-098: the app's source folders (relative to the repo root) from .harness.json (conventions.sourceDirs), e.g.
+// ["apps/client/src"] for an app outside src/. Without the setting, src/ as before.
+const configured = conventions?.sourceDirs !== undefined;
+const SOURCE_DIRS = configured ? conventions.sourceDirs : ['src'];
+const badSource = (dir) =>
+  typeof dir !== 'string' ||
+  !dir ||
+  isAbsolute(dir) ||
+  dir.includes('\\') ||
+  dir.split('/').some((part) => part === '..' || part === '.') ||
+  !existsSync(join(root, dir)) ||
+  !statSync(join(root, dir)).isDirectory() ||
+  relative(realpathSync(root), realpathSync(join(root, dir))).split(sep)[0] === '..';
+if (
+  configured &&
+  (!Array.isArray(SOURCE_DIRS) || !SOURCE_DIRS.length || SOURCE_DIRS.some(badSource))
+) {
+  console.error(
+    `conventions.sourceDirs in .harness.json must list existing folders inside the repository: ${JSON.stringify(SOURCE_DIRS)}`,
+  );
+  process.exit(1);
+}
+const sourceRoots = SOURCE_DIRS.map((dir) => join(root, dir) + sep);
 // Version-specific defaults must not reject explicit settings on older supported projects.
 const packageFile = join(root, 'package.json');
 const pkg = existsSync(packageFile) ? JSON.parse(readFileSync(packageFile, 'utf8')) : {};
@@ -42,14 +66,30 @@ const walk = (dir, out = []) => {
   return out;
 };
 const files = [
-  ...walk(join(root, 'src')),
-  ...walk(join(root, 'tools')),
-  ...walk(join(root, 'e2e')),
+  ...new Set([
+    ...SOURCE_DIRS.flatMap((dir) => walk(join(root, dir))),
+    ...walk(join(root, 'tools')),
+    ...walk(join(root, 'e2e')),
+  ]),
 ];
 const text = Object.fromEntries(files.map((f) => [f, readFileSync(f, 'utf8')]));
+// B-052: folder tests read the path from the repository root, so a parent folder's name never hides or reclassifies.
+const fromRoot = (f) => `/${relative(root, f).split(sep).join('/')}`;
+// F-098-T04: with sourceDirs set, only files inside a named folder are app code; the /src/ path heuristic (which a
+// parent folder named src or a stray src/ under tools/ or e2e/ also matches) applies only without the setting.
 const app = files.filter(
-  (f) => f.includes('/src/') && !f.endsWith('.spec.ts') && !f.includes('/testing/'),
+  (f) =>
+    (configured ? sourceRoots.some((dir) => f.startsWith(dir)) : f.includes('/src/')) &&
+    !f.endsWith('.spec.ts') &&
+    !fromRoot(f).includes('/testing/'),
 );
+// A configured folder with no app files checks nothing: say so (a misspelt or moved folder), without failing.
+if (configured)
+  for (const dir of SOURCE_DIRS)
+    if (!app.some((f) => f.startsWith(join(root, dir) + sep)))
+      console.warn(
+        `conventions.sourceDirs: ${dir} holds no app files (.ts, .html, .mjs); nothing is checked there.`,
+      );
 const problems = [];
 const report = (file, index, message) => {
   const line = text[file].slice(0, index).split('\n').length;
@@ -80,7 +120,7 @@ for (const file of app) {
   for (const [pattern, message] of RULES)
     for (const m of text[file].matchAll(pattern)) report(file, m.index, message);
   for (const [dir, allowed] of PURE_DIRS)
-    if (file.includes(`/${dir}`))
+    if (fromRoot(file).includes(`/${dir}`))
       for (const m of text[file].matchAll(/import\s+([^;]*?)\s+from '@angular\/([^']+)'/g))
         if (
           m[2] !== 'core' ||

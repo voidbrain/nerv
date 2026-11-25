@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-24T20:50:21.077Z",
+  "reviewed": "2026-11-25T13:25:29.439Z",
   "policy": "d0120e3ce7a10b9a8fc016edea454bfabf9eb87922d54f5f421333852e7f0477",
   "inputs": {
     "AGENTS.md": "5d186e4e46681da311ff0990d5b77d071c4342436079b688d48fa84f5d47f6bd",
@@ -13,13 +13,13 @@
     "docs/agents/maintenance.md": "69f77d944551e4a442de20a0e46badf19a91e42f870bf8048f428c8a64f343a9",
     "docs/agents/mcp.md": "06efbb58a50f9236506ca0afa9a79bb1d42c12ca380a29ed0254bf0a537f860d",
     "docs/agents/parallel-work-plans.md": "d171d89ec5431668ff770e5fcb0098ad518da6289a0d12a56aafdae60930d567",
-    "docs/agents/parallel-work.md": "e460a7ef54aa1ce270e9c8d87a8da85680182d2adec3cafbbf7ad0af5b75439c",
-    "docs/agents/procedures.md": "60d1502790439ed68796d632456cd5bd8ad2634abfaa9d12e4fe88aa65c376e3",
+    "docs/agents/parallel-work.md": "be8887601fefe6eb9f52f8a549abebc36a875f354570d5291900ddfc5f708d0d",
+    "docs/agents/procedures.md": "9b95bf5f3707453ce76392524feea05e754e005a6e96d21a0fe8b7dd95059b2d",
     "docs/agents/prompt-caching.md": "3b8962bd4f2f713d5730e999e65338ebdd90347ee09dffbd9c8da98e2405a21e",
-    "docs/agents/rule-review.md": "1a6cb030a1cd2b802312d02a974f76e4df04b47865aedb99fb7c5f78d5d15f10",
+    "docs/agents/rule-review.md": "b27cfb4e8e42489b5f234ec42ae4d0cc9dcd4ea8be01fff9754a85b5ff8c86d0",
     "docs/agents/skills-discovery.md": "ad322a2b93f2dc1b8f27d0b052248d57c050ca852077589ba889447577357057",
     "docs/agents/skills.md": "7da9fc43bd0886b06580cc15b9a45e47d097c6fa7fca627bf7ed0f0202a409a1",
-    "docs/agents/solution-profile.md": "685d55612f55d157bf124e23115f95bd16fe4d4f8834a4e0e152a191e3cd45f8",
+    "docs/agents/solution-profile.md": "4248b79a44fd9849a8fd6b563c8a76e3d82078eb4d567075f8118b4bc4cfc6e9",
     "docs/agents/task-context.md": "c689f02b9571ff747a4866d71690bb01afd7e6654dea640a1ce1c66e7c0fa204",
     "docs/agents/work-usage-launch.md": "3225858b8b840322d2bb073f30659c376826eea3d1f772df8582fb37eef74465",
     "docs/agents/work-usage.md": "9a4c574e6cd2b0af3ddd1cb5a70560dc84c962c991d42567b7829b9a25cae3be",
@@ -30,16 +30,16 @@
     "docs/backlog/feature-plans.md": "f2377140ce4f2f38b449516498dd5ff6ba58ca04287aa92381a1029f7416f85b",
     "docs/backlog/human-action.md": "8c1e2e47da82dae9b6b533988d73d10bbeaa06e0c613fbd4e6d0e58e939c66ae",
     "docs/backlog/ledger-header.md": "933a71e153faf8ab36f52f416de956b38338dc5f1dfe0851244136ede3b61c4c",
-    "docs/backlog/ordering.md": "614ce772b88273461656232ab51e4cebaff47b36fcf6008367124b779fb1b03e",
+    "docs/backlog/ordering.md": "d8ce4bc274180852634c5cc33517346653c35c60aac4db669525358c74c43db2",
     "docs/backlog/outcomes.md": "c6f1d8e4ac3afd85e6d90ac7cef8ae39fba765b13c821522fb005edd2b5b88e4",
     "docs/backlog/ownership.md": "d2d39a4e2a56fb7a18c5cce2fe5490282a9c89c947574746bacd71f1040c457f",
     "docs/backlog/records.md": "d7b02554622b29436241c941b42fcefb7b0ec1a104fb5eceb2ad9dadfc14b814",
-    "docs/backlog/review.md": "ce8a531284b1985fe894d5c18c70c5e3d1ad1f96dbb3d6039e75b7aede7fe50c",
+    "docs/backlog/review.md": "ef87c07f91c8bf43b56d200dc3ab5d32326fcc35d13733e99a0da2cf5c094d2a",
     "docs/backlog/steps.md": "98705e1e90b5a908a6a6cc666bf64fbdae82020a2a80cf8d11906ebb19108c8c",
-    "tools/task-claims.mjs": "ef755fe7951544e5c05b20de7c64a7b53778b6d039a11a2abeb079e7d42b6fd2",
+    "tools/task-claims.mjs": "f22fa98ed34d2914b3c5572353f8352a2a84a77b81e30316575f4b7d7aa17272",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "e33cd1d21a381f7127aaccf9a8ba189c6d0414ba7af4af5bb121c29c4f79aa93",
-    "tools/work-usage.mjs": "09569f9b56bd6e403d4c235f980ba5fb03b2aff8fe56a28878cc298fe8a4b2af"
+    "tools/work-items.mjs": "981448222990533069fa7d09e587da9b5955354a3f5e5ad5371823f6685ef5ec",
+    "tools/work-usage.mjs": "780c9ca35d2057e6ac86ca1f6168a8e315622919215dc317ae6238e875bcf023"
   },
   "measurements": {
     "samples": 23,
@@ -95,10 +95,16 @@
   },
   "outcomes": [
     {
-      "kind": "rule",
+      "kind": "tool",
       "disposition": "implemented",
-      "target": "docs/BACKLOG-RULES.md",
-      "evidence": "Harness v10.9.0 reconciled from v10.7.0 (template backlog empty): F-093 base/child split carried in (docs/backlog/human-action.md, ledger-header.md added; records.md, estimates.md, review.md, BACKLOG-RULES.md from the template diff, every sentence kept, NERV project lines unchanged); copied skills.md, skills-discovery.md, procedures.md, work-usage.md, work-usage-launch.md, work-items.mjs (B-050, F-094 work:pr); AGENTS job-usage row names the launch child; pull-requests.md and review step 7 name work:pr. check:rules and rule-load pass; no behaviour runner configured."
+      "target": "tools/work-items.mjs",
+      "evidence": "Harness v10.21.0 reconciled from v10.9.0 (F-125-T01; template backlog empty): copied tools and guides byte for byte from the tag (work-items, task-claims, check-backlog, check-freshness, check-conventions, maintenance, reconcile-draft, backlog-dependencies, backlog-queue, solution, work-usage; parallel-work, procedures, session-start, rule-review, solution-profile, solution-refresh, solution-dashboard, solution-gaps); adapted ordering.md, review.md step 1, pull-requests.md and angular.md carry the template sentences with NERV project lines unchanged; CI runs check:work before the ledger readers. workItems.views stays unset (F-125-T02)."
+    },
+    {
+      "kind": "none",
+      "disposition": "no-change",
+      "target": "none",
+      "evidence": "Repeated-load candidate reassessed at this reconcile: the procedure index and code:map already index the loads; no new helper is justified by this release. No behaviour runner is configured; the rule-review.md change (10.15.x graders) applies to the owner's runner only."
     }
   ]
 }
