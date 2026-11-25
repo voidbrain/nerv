@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync, globSync } from 'node:fs';
+import { readFileSync, existsSync, globSync, mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { plan } from '../tools/verification.mjs';
 import { selectedTests } from '../tools/selected-tests.mjs';
 const config = JSON.parse(readFileSync('.harness.json', 'utf8')),
@@ -95,6 +98,35 @@ test('B-139: a docs-only PR skips the Windows and macOS jobs at job level; any o
     'docs',
   ])
     assert.ok(!docsOnly.test(file), file + ' runs the OS jobs');
+});
+
+test('B-139: the changed-paths diffs list both sides of a rename, so moving code into docs/ is not docs-only', () => {
+  const codeql = readFileSync('.github/workflows/codeql.yml', 'utf8');
+  assert.match(workflow, /files=\$\(git diff --no-renames --name-only "\$BASE\.\.\.\$HEAD"\)/);
+  assert.match(codeql, /git diff --no-renames --name-only "\$range"/);
+  const dir = mkdtempSync(join(tmpdir(), 'b139-'));
+  try {
+    const git = (...args) =>
+      execFileSync('git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', ...args], {
+        cwd: dir,
+        encoding: 'utf8',
+      });
+    git('init', '-q');
+    mkdirSync(join(dir, 'src'));
+    writeFileSync(join(dir, 'src/a.ts'), 'export const a = 1;\n');
+    git('add', '.');
+    git('commit', '-qm', 'base');
+    mkdirSync(join(dir, 'docs'));
+    git('mv', 'src/a.ts', 'docs/a.ts');
+    git('commit', '-qm', 'move');
+    assert.deepEqual(git('diff', '--name-only', 'HEAD~1...HEAD').trim().split('\n'), ['docs/a.ts'], 'without the flag');
+    assert.deepEqual(git('diff', '--no-renames', '--name-only', 'HEAD~1...HEAD').trim().split('\n').sort(), [
+      'docs/a.ts',
+      'src/a.ts',
+    ]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('shared event persistence/privacy requires full verification and route recovery selects its integration case', () => {
