@@ -521,6 +521,25 @@ describe('B-137: adding a drone with its model and version never misreads them a
     });
   });
 
+  it('"con frame <model> v5.1" and "with model <model>" join the name without a comma (the owner\'s second phrase)', () => {
+    withStore((store) => {
+      const run = (phrase: string) =>
+        execute(store as unknown as Parameters<typeof execute>[0], 'fleet.chat', { phrase }) as {
+          handled: boolean;
+          needsAnswer?: boolean;
+        };
+      const withFrame = run('aggiungi il drone Testsmoke con frame Testframe 5 v5.1');
+      assert.equal(withFrame.handled, true);
+      assert.equal(withFrame.needsAnswer, undefined);
+      assert.equal(store.fleet.getDroneByName('Testsmoke')?.frame, 'Testframe 5 v5.1');
+
+      const withModel = run('add drone Testhaze with model Testframe 6, v. 2.0');
+      assert.equal(withModel.handled, true);
+      assert.equal(withModel.needsAnswer, undefined);
+      assert.equal(store.fleet.droneModel('Testhaze')?.name, 'Testframe 6 v2.0');
+    });
+  });
+
   it('answering a follow-up with a version segment joins the version and never loops back to the category question', () => {
     withStore((store) => {
       // Missing model name asks once for the model (not a part category), then the answered phrase succeeds.
