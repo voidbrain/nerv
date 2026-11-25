@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "B-147-T03",
+  "parent": "B-147",
+  "title": "Owner: see a short EVA action light the flow on the iPhone",
+  "goal": "The owner sees the EVA cage to Misato arrow light for a short action on the installed phone app",
+  "status": "planned",
+  "acceptance": [
+    "On NERV-01 after the update, ask \"remind me to drink water in 2 minutes\" from the iPhone app; the flow lights the EVA cage, then the arrow back to Misato, each visibly, before the reply"
+  ],
+  "dependsOn": [
+    "B-147-T02"
+  ],
+  "resources": [
+    "docs/work/records/B-147.md"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "Owner device check, recorded in B-147 Verification"
+  ],
+  "escalation": [
+    "The owner decides whether the replay reads clearly; the agent records the result"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-25: one chat request watched on the phone. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

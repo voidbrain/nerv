@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "F-131-T04",
+  "parent": "F-131",
+  "title": "Owner: use the quick commands on the Mac and the iPhone",
+  "goal": "The owner taps each quick command in both views and sees the other project's card or page",
+  "status": "planned",
+  "acceptance": [
+    "On NERV-01 after the update, in the simple view and the full dashboard on the Mac and the iPhone app, tap Show batteries, Show trip and Grover status; each shows that project's card or page, and the disabled ones say why"
+  ],
+  "dependsOn": [
+    "F-131-T03"
+  ],
+  "resources": [
+    "docs/work/records/F-131.md"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented commands, servers and results only; no tokens in configuration examples, tests or logs.",
+  "validation": [
+    "Owner check, recorded in F-131 Verification"
+  ],
+  "escalation": [
+    "The owner decides which commands stay in the list; the agent records the result"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h owner",
+    "basis": "Estimated 2026-11-25: a few taps in two views on two devices. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.5,
+    "ownerKind": "procedure"
+  }
+}

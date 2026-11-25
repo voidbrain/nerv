@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-131-T01",
+  "parent": "F-131",
+  "title": "Quick-command list and run API over MCP",
+  "goal": "A validated, configurable list of quick commands (label, MCP server, tool, fixed arguments) and an endpoint that runs one and returns the tool's surface-typed result or its MCP Apps page or link",
+  "status": "planned",
+  "acceptance": [
+    "The list lives in NERV's settings with a schema: label, server, tool, arguments; unknown servers or tools are rejected when saved and shown as unavailable, never guessed",
+    "Running a command calls the owning project's MCP tool through NERV's MCP client and returns its result unchanged: a surface-typed payload, an MCP Apps page or a link; NERV builds no view of its own (coordinator docs/DOMAINS.md, \"The rule for screens\")",
+    "A test across the join: a fake MCP server returns a surface-typed result and the endpoint returns it; a failing or slow server gives a bounded error"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-131.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "api-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented commands, servers and results only; no tokens in configuration examples, tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A new permission or a write tool in the list goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-25: a settings schema, one run endpoint on the existing MCP client and a fake-server test. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  }
+}

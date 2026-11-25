@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "B-147-T02",
+  "parent": "B-147",
+  "title": "Replay the sortie's events in the flow with a minimum visible time per step",
+  "goal": "The flow animates from the sortie's ordered event sequence, each step shown for a minimum visible time and replayed in order, instead of from state sampled at each poll",
+  "status": "planned",
+  "acceptance": [
+    "The flow keeps a queue of the sortie's events since the last one shown and plays them in order; each step and arrow stays lit for at least a minimum visible time (a named constant, about 1 s), long steps for their real duration while live",
+    "B-147-T01 passes unchanged; a sortie that ended between polls still plays its missed steps once, then rests on its final state",
+    "A finished sortie opened later shows its final state without replaying, unless asked to; no simulated steps (area notes, Frontend)",
+    "Uses the per-round order and durations of F-129-T01 when they exist, the ledger events otherwise; an unchanged poll leaves the DOM in place"
+  ],
+  "dependsOn": [
+    "B-147-T01"
+  ],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "docs/work/records/B-147.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "regression-design",
+    "svg"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "B-147-T01 passes",
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how the flow looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-25: an event queue with a minimum display time in the flow component, plus catch-up and finished-sortie cases. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  }
+}

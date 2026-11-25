@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-131-T02",
+  "parent": "F-131",
+  "title": "Quick-command buttons in the simple view and the full dashboard",
+  "goal": "Both layouts show the configured quick commands as buttons; a tap renders the returned surface card with the bricks surface renderer, or opens the MCP Apps page or link",
+  "status": "planned",
+  "acceptance": [
+    "One quick-commands component, used by the simple view (F-130-T16) and the full dashboard, reads the list from F-131-T01",
+    "A surface result renders with the web/src surface renderer (bricks surface components) in NERV's theme tokens; an MCP Apps page or link opens as such; an unavailable command says so",
+    "A test across the API and the component with a fake MCP result; checked at desktop and phone width, light and dark"
+  ],
+  "dependsOn": [
+    "F-131-T01",
+    "F-130-T16"
+  ],
+  "resources": [
+    "web/src/**",
+    "test/**",
+    "docs/STYLE-GUIDE.md",
+    "docs/work/records/F-131.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "accessibility",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented commands, servers and results only; no tokens in configuration examples, tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-25: one component over the existing surface renderer in both layouts, with a join test. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  }
+}
