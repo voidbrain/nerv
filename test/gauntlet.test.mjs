@@ -1230,10 +1230,16 @@ writeFileSync(out, JSON.stringify({ schemaVersion: 1, layer: 'coding', caseHash:
     const coding = commonPacks().find((p) => p.pack.id === 'coding').pack;
     const one = { ...coding, id: 'coding:selected', cases: [coding.cases[0]] };
     const report = await run(one, profile, modelLimits(one), { execute: true, allowModels: true, registry });
-    assert.equal(report.passed, true);
-    const recorded = recordSelected(emptyLedger(), report, coding, one, releaseSourceKey()).entries;
-    assert.equal(recorded.length, 1);
-    assert.equal(recorded[0].modelDigest, digest, 'a coding run keeps the model it graded');
+    // Gauntlet refuses external runners on win32 (no POSIX process groups, as for multi-step-agent above): the case is an
+    // error, which records nothing, so the recorded-digest check runs on Linux and macOS only.
+    if (process.platform === 'win32') {
+      assert.equal(report.results[0].status, 'error');
+    } else {
+      assert.equal(report.passed, true);
+      const recorded = recordSelected(emptyLedger(), report, coding, one, releaseSourceKey()).entries;
+      assert.equal(recorded.length, 1);
+      assert.equal(recorded[0].modelDigest, digest, 'a coding run keeps the model it graded');
+    }
 
     // Pending: a covering coding/embedded run under another model digest is model-changed.
     const ledger = join(dir, 'ledger.json');
