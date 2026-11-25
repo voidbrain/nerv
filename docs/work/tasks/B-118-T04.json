@@ -47,5 +47,10 @@
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 741,
+      "note": "test preload without SQLite flush; partition sync opens each store once per round"
+    }
+  ]
 }
