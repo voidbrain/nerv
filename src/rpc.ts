@@ -108,6 +108,7 @@ export const communicationGraph = [
       'sorties.list',
       'sorties.get',
       'actions.finished',
+      'actions.authorizeApproved',
       'worker.refuseApproval',
       'pilots.unmatched',
       'actions.shadowVote',

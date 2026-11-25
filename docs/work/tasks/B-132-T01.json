@@ -4,7 +4,7 @@
   "parent": "B-132",
   "title": "Wait for executors that answer later, within a bound",
   "goal": "An executor that returns a promise is recorded and returned when it settles, ends as action.failed when it never does, and the coordinator waits for it over IPC",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test fails first: a rejection is recorded as action.failed and returned; a granted promise through the gate records and returns its real result; a never-settling executor ends as action.failed after its bound; a worker-bound card finishes its job with the settled outcome",
     "actions.act and approvals.decide wait for such executors within the tool's bound, not the 5 s IPC default, and Runtime.decide resumes waiting sorties even on a timeout"
@@ -38,8 +38,8 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 at 1.5 h agent from the review's findings; implemented the same day in about 1.5 h agent (stated, not measured).",
-    "reviewed": "2026-11-24",
+    "basis": "Estimated 2026-11-24 at 1.5 h agent from the review's findings; implemented the same day in about 1.5 h agent (stated, not measured). Verified 2026-11-25: PR #733 merged on green CI; every acceptance item is automated. Closed 2026-11-25.",
+    "reviewed": "2026-11-25",
     "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5,

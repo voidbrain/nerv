@@ -13,7 +13,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { execFile as execFileCb, execFileSync } from 'node:child_process';
+import { execFile as execFileCb, execFileSync, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import {
   SERVICE_READER_SCHEMA,
@@ -497,3 +497,58 @@ try {
     }
   },
 );
+
+// B-091: the stop step polls inspect() while the stopped `serve` releases the live WAL database. Its read-only open
+// had no busy handler, so the poll threw (on Windows a "disk I/O error" after taskkill /F, elsewhere "database is
+// locked") and the stop ended `uncertain` at `stop:started`. The reader now waits as a held lock is released.
+test('B-091: Windows inspect waits for a live database lock held by an exiting service', async () => {
+  const { root, context } = makeFixture(1);
+  // A stand-in for the stopping service: on request it holds the live database exclusively, then exits without closing it.
+  const holder = spawn(
+    process.execPath,
+    [
+      '-e',
+      `const { DatabaseSync } = require('node:sqlite');
+       process.stdin.once('data', () => {
+         const db = new DatabaseSync(process.argv[1]);
+         db.exec("PRAGMA journal_mode=WAL; PRAGMA locking_mode=EXCLUSIVE; BEGIN EXCLUSIVE; INSERT INTO worker_jobs VALUES('h','completed'); COMMIT;");
+         process.stdout.write('held\\n');
+         setTimeout(() => process.exit(0), 700);
+       });`,
+      databasePath(context.home),
+    ],
+    { stdio: ['pipe', 'pipe', 'inherit'] },
+  );
+  const exited = new Promise<number | null>((resolve) => holder.on('exit', (code) => resolve(code)));
+  const held = new Promise<void>((resolve, reject) => {
+    holder.stdout.on('data', (b: Buffer) => b.toString().includes('held') && resolve());
+    holder.on('exit', () => reject(Error('The lock holder exited before holding the database.')));
+  });
+  held.catch(() => {});
+  const run = async (program: string, args: string[]) => {
+    if (program === 'git') {
+      if (args.includes('rev-parse')) return { status: 0, out: `${SHA_A}\n`, err: '' };
+      if (args.includes('get-url')) return { status: 0, out: 'https://github.com/voidbrain/nerv.git\n', err: '' };
+      return { status: 0, out: '', err: '' };
+    }
+    if (program === 'schtasks') return { status: 1, out: '', err: 'ERROR: The system cannot find the file specified.' };
+    if (program === 'powershell') {
+      // The process query runs just before inspect reads the live database: the service is exiting right then.
+      holder.stdin.write('lock\n');
+      await held;
+      return { status: 0, out: '', err: '' };
+    }
+    if (program === context.node) return { status: 0, out: 'v24.0.0\n', err: '' };
+    return { status: 1, out: '', err: `unexpected ${program}` };
+  };
+  try {
+    const inspected = await windowsServiceAdapter(context, run).inspect();
+    assert.equal(inspected.schema, SERVICE_READER_SCHEMA);
+    assert.equal(inspected.pending, false);
+    assert.equal(await exited, 0);
+  } finally {
+    holder.kill();
+    await exited;
+    rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
+  }
+});

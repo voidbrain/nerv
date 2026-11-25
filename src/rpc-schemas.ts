@@ -381,6 +381,15 @@ export const methodSchemas = {
     },
     additionalProperties: false,
   },
+  'actions.authorizeApproved': {
+    type: 'object',
+    required: ['sortieId', 'actionId'],
+    properties: {
+      sortieId: { type: 'string', minLength: 1, maxLength: 100 },
+      actionId: { type: 'string', minLength: 1, maxLength: 100 },
+    },
+    additionalProperties: false,
+  },
   'actions.finished': {
     type: 'object',
     required: ['sortieId', 'actionId', 'tool'],

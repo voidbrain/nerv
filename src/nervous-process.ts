@@ -464,6 +464,8 @@ process.on('message', (value: unknown) => {
         return store.ledger.claimResume(params.sortieId as string);
       case 'worker.refuseApproval':
         return store.refuseWorkerApproval(params.id as string, params.reason as string);
+      case 'actions.authorizeApproved':
+        return store.authorizeApproved(params.sortieId as string, params.actionId as string);
       case 'actions.finished':
         return store.finishedExternal(
           params.sortieId as string,

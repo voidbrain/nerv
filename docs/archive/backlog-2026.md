@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 4 | 7 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 5 | 13 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -6722,6 +6722,229 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | Opened | 2026-11-20 |
 | Verification | Unit/integration 2026-11-25: `test/cli-help.test.ts` 4/4 at main `774a08f`; CI green on PR #595 and every main run since. |
 | Reviewed | 2026-11-25 |
+
+</details>
+
+---
+
+### B-082
+
+**Windows: a service installed from an SSH session cannot register its logon task**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-25: PR #517 and PR #601 merged on green CI; live read-only SSH probe on Tabgha 2026-11-25: the rule's account maps to the registered task's SID.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24): the fenced install over SSH ended `uncertain` at the register step; `schtasks /Create` with NERV's task XML answered "ERROR: No mapping between account names and security IDs" because the XML named `WORKGROUP\\<user>`: `renderService` used `USERDOMAIN\\USERNAME`, and an SSH session on a workgroup machine reports `USERDOMAIN=WORKGROUP`, which names no account (the account is `KITCHEN\\<user>`). |
+| **Reproduce** | On a workgroup Windows machine, over SSH: `nodes lifecycle-inspect --action install`, then `lifecycle-apply`. |
+| **Check** | Test committed failing first: `windowsServiceUser` gives `COMPUTERNAME\\user` for a local account (also when USERDOMAIN is WORKGROUP) and `USERDOMAIN\\user` when USERDNSDOMAIN is set; on Tabgha an SSH install registers the task. |
+### F-021
+
+**MCP and standardized tool/expert protocol**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🔴 Large |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-25: PR #563 merged on green CI run 44618006632; every step closed (T02 #381, T03 #547, T04 #556, T05 #563).
+
+| | |
+|---|---|
+| **Issue** | Tool and expert integration is currently undefined; custom wrappers will not scale. |
+| **Reproduce** | Register a tool/expert via MCP or OpenAPI descriptor; invoke from a task; confirm schema validation, capability scope and audit. |
+| **Check** | Versioned tool descriptors (from MCP servers and NERV's own tools); deny-by-default capability binding to Misato and to each pilot (a pilot lists the tools it may use, F-045); works for local and remote (other-machine) endpoints; the registered tools are listed in the dashboard; no silent privilege escalation. (Wording corrected 2026-11-05: "expert roster (F-018)" predates F-045; tools are actions, skills are procedures, pilots are agents that use both.) |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-25: PR #517 and PR #601 merged on green CI; live read-only SSH probe on Tabgha 2026-11-25: the rule's account maps to the registered task's SID. 2026-11-25: B-082-T01 closed and the record closes. Its last clause ("on Tabgha an SSH install registers the task") was deliberately superseded by B-087 (PR #612, closed by #613): Windows now refuses install, start and update applied from an SSH session before any Task Scheduler change, so no SSH install can register a task by design. Live read-only probe on Tabgha over SSH (`SSH_CONNECTION` set, `USERDOMAIN=WORKGROUP`, `COMPUTERNAME=KITCHEN`), from a temporary clone of main fa9ab0b under `%TEMP%` (deleted afterwards; the NERV service, task and data untouched): `windowsServiceUser(process.env)` gives `KITCHEN\\<user>`, which maps to a SID; the old `USERDOMAIN\\USERNAME` form (`WORKGROUP\\<user>`) still fails to translate ("Some or all identity references could not be translated", the original error); the registered `NERV Agency` task's principal is that same SID, `KITCHEN\\<user>`. No owner action remains: the task installed from Tabgha's desktop already runs as the account the rule names. No review: records-only closure; the code merged in #517 and #601 (T02 had a fresh-context review). 2026-11-21: B-082-T02 closed by [PR #601](https://github.com/voidbrain/nerv/pull/601), CI run 44815656209 (plan, validate, Windows and native-macos passed; full-suite correctly skipped by scoped selection; CodeQL analyses passed). `windowsServiceUser` keeps every non-empty `USERDOMAIN` except `WORKGROUP`, so Entra ID (`AzureAD\\user`) and domain accounts survive SSH sessions without `USERDNSDOMAIN`; empty and workgroup domains still use `COMPUTERNAME\\user`. B-087 now makes the SSH limitation an up-front refusal; the remaining live install check runs from Tabgha's desktop after B-087 merges.
+**Next action / closure evidence:** Closed 2026-11-25: PR #563 merged on green CI run 44618006632; every step closed (T02 #381, T03 #547, T04 #556, T05 #563). 2026-11-25: F-021-T05 closed and the record closes: PR #563 merged 2026-11-19 on CI run 44618006632 (plan, validate, windows, native-macos, full-suite and CodeQL passed on the first attempt; an earlier head's failed run 44609450749 was superseded by fixes in the PR). Live wiring checked on main: the dashboard's Tools panel (`web/public/dashboard/index.html` `#tools-list`) is filled by `loadTools` in `live.js` from `GET /api/tools` in `src/server.ts`; `test/tool-listing.test.ts` passes 3/3 on main. Every Check item has its step closed: versioned descriptors (T02, #381), deny-by-default per-pilot binding with no escalation without a grant (T03, #547), remote endpoints over Kaji with the same grant checks (T04, #556), dashboard listing with axe (T05, #563). No review: records-only closure; the code it cites merged through its own PRs (T04's had a fresh-context design review). 2026-11-19: F-021-T05 implemented: `GET /api/tools` (`src/tool-listing.ts`) lists NERV's own tools and the MCP tools granted now, with descriptor versions, grant and EVA class, and the suspended grants with why; the static dashboard has its own Tools panel (owner's choice, separate from the Marduk Institute pilots and Kaji's watermelons skills): granted MCP tools and suspended grants first, NERV's own in a collapsed list. Tests: `test/tool-listing.test.ts` (listing, the route through the server with and without a runtime, the panel's HTML and escaping) and axe on the panel in `test/evaluation.browser.mjs`. Awaiting CI on [PR #563](https://github.com/voidbrain/nerv/pull/563). 2026-11-19: F-021-T04 closed: PR #556, CI run 44573406969 green on attempt 2 (no macOS runner on attempt 1). 2026-11-19: Review of PR #556 (design-reviewer, fresh context): two blockers, fixed in the PR: (1) the approval refusal never rejected the card (its source failed the RPC schema, silently) and left the worker job open: now one store transaction rejects the card (source `kaji-mcp`) and finishes the job with the refusal the main base hears; (2) the MCP output reached the main base's sortie as trusted: it is now marked tainted when the result arrives, even after the sortie closed (`Ledger.taintLate`). Should-fix done: the job's sortie on the other base closes with the call's outcome and records its duration; `kaji offer` lists only MCP names the name rule accepts; the guide says what the refusal does. Tests added for the refusal path, a stale fingerprint, an EVA-03 grant, and the taint and closing on both bases. 2026-11-19: F-021-T04 implemented (owner approved the scope, 0.75 h → 2.5 h): a base can offer its granted MCP tools over Kaji (`nerv kaji offer notes.read_note`); the base that runs one re-checks that it is granted now (a changed or removed tool is suspended), refuses EVA-03 grants, and makes the call through its tools process after its own gate. One that its gate sends to the owner there is refused and its card rejected, since nothing would make the call after an approval. Tool names everywhere offers and jobs pass (offers, config, worker link and jobs, RPC schema, verdict request, kaji.run) share one rule, `OFFER_NAME` in `src/mcp.ts`. Join test across two bases (`test/kaji-run.test.ts`): the MCP fixture answers on Tabgha through kaji.run, an offered but ungranted tool is refused there; plus the `kaji offer` CLI and the name rule. Awaiting CI on [PR #556](https://github.com/voidbrain/nerv/pull/556). Earlier evidence: [moved 2026-11-22](evidence-2026.md#f-021-moved-2026-11-22).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #744](https://github.com/voidbrain/nerv/pull/744) closure; [PR #601](https://github.com/voidbrain/nerv/pull/601) (B-082-T02); Test: `test/node-inspection.test.ts` "B-082: the Windows task user keeps Entra and domain accounts but repairs workgroup users" (committed failing first in B-082-T02); Review: fresh-context P1 review found no blocking code, security, privacy or compliance issue and confirmed the later test edit is formatting-only; prior T01 test committed failing first |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-21: B-082-T02 CI run 44815656209 and required fresh-context review passed. Local: targeted regression 2/2, full tests 1,041 pass / 2 platform skips, build, `check:fast`, headless 5 pass / 1 Windows skip. 2026-11-25: live read-only SSH probe on Tabgha: the rule's account maps to the SID of the registered task; the legacy form does not. |
+| PR / evidence | [PR #743](https://github.com/voidbrain/nerv/pull/743) closure; [PR #563](https://github.com/voidbrain/nerv/pull/563) dashboard Tools panel; [PR #556](https://github.com/voidbrain/nerv/pull/556) MCP over Kaji; [PR #547](https://github.com/voidbrain/nerv/pull/547) per-pilot binding; [PR #381](https://github.com/voidbrain/nerv/pull/381) versioned NERV and MCP tool descriptors; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #187](https://github.com/voidbrain/nerv/pull/187) reviewed prerequisite links. |
+| Opened | 2026-11-02 |
+| Verification | 2026-11-25: every Check item closed by its step (T02 #381, T03 #547, T04 #556, T05 #563, each on green CI); `test/tool-listing.test.ts` 3/3 on main. Earlier: unit/integration and CI 2026-11-13: every built-in registration has a stable versioned descriptor; MCP fingerprints remain compatible; PR #381 CI 43496658350 passed validate, native-macos, windows, plan and full-suite. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+
+### B-131
+
+**Role-sized placement probes fail their own token budget: it counts the prompt but is sized from the output limit**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-25: PR #735 and PR #738 merged on green CI (run 45553326990 attempt 4); Test: test/placement-campaign.test.ts (B-131 case); live F-006-T31 check passed on NERV-02.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 in F-006-T29 on NERV-02: `placementProbe` (`src/placement-campaign.ts`) sets `maxTotalTokens` to 2 × `maxOutputTokens`, and the orchestrated runtime counts input and output tokens against it after the remote reply. A role-sized probe (Misato's own system message, about 4,500 input tokens) with `maxOutputTokens` 2048 therefore ends with `Orchestrated token budget exhausted (4781–5206 > 4096).` after the Mac has already generated the answer: all 15 Misato P3 cases failed this way, so role-sized probes (F-006-T27) still cannot carry Misato. |
+| **Reproduce** | On NERV-02, `node tools/placement-live.mjs roles --transport=nerv,P3 --execute`: every `misato:*` case errors with `Orchestrated token budget exhausted`; the Casper cases (about 350 input tokens) pass. |
+| **Check** | A committed test that fails first: a P3 placement run whose prompt and system message take more input tokens than 2 × `maxOutputTokens` (within the probe's byte limits) returns its result; the total budget still bounds the run. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-25: PR #735 and PR #738 merged on green CI (run 45553326990 attempt 4); Test: test/placement-campaign.test.ts (B-131 case); live F-006-T31 check passed on NERV-02. 2026-11-25 reconciliation: [#738](https://github.com/voidbrain/nerv/pull/738) merged on green CI (run 45553326990, attempt 4); verified and closed. 2026-11-25: live check passed in F-006-T31 ([#738](https://github.com/voidbrain/nerv/pull/738)), so B-131-T01 is verified; close B-131 after [#738](https://github.com/voidbrain/nerv/pull/738) merges. 2026-11-24: opened from F-006-T29 (private report `p3-roles-t29.json` on NERV-02: 15 Misato errors, 14 with the budget message at 4,781–5,206 tokens, the first a `Worker result unknown after timeout.` at 30 s). Only the executing base (NERV-02) applies the budget, so the Misato P3 rerun needs NERV-02 on the fixed revision (F-006-T30) before F-006-T31.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [#732](https://github.com/voidbrain/nerv/pull/732) (opened), [#735](https://github.com/voidbrain/nerv/pull/735) (fix; Test: `test/placement-campaign.test.ts`, B-131 case, failing first in 63da1369, then the budget from the input bound plus output; F-006-T29 evidence in the [F-006-T29 report](../evaluations/2026-11-24-f006-t29-placement-report.md)) |
+| Opened | 2026-11-24 |
+| Verification | Unit/integration: the B-131 regression across the placement route passes in #735. Live 2026-11-25 (F-006-T31, [#738](https://github.com/voidbrain/nerv/pull/738)): passed: on NERV-02 at `e05aae22` all 15 Misato P3 probes returned a graded answer (8 passed, 3 failed, 4 invalid), none with `Orchestrated token budget exhausted` or any other error; longest 28.1 s ([F-006-T31 report](../evaluations/2026-11-25-f006-t31-placement-report.md)). |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+
+### B-119
+
+**Placement probes longer than 15 s are cut off by the HTTP server**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-25: PR #708 and PR #732 merged on green CI; Test: test/placement-campaign.test.ts (B-119 case); live P3 probes over 15 s completed on NERV-02 (F-006-T29).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 in F-006-T23 on NERV-02: `POST /api/placement/run` accepts `timeoutMs` up to 120,000 ms, but the server's `requestTimeout`/`timeout` of 15,000 ms (`src/server.ts`) closes the socket at 15 s because this route, unlike `/api/chat` and the other model routes, never calls `req.setTimeout`. Eleven P3 Casper probes ended at 15.0 s with `fetch failed` (`other side closed`), so any cross-node probe longer than 15 s cannot complete. |
+| **Reproduce** | On a base with a P3 endpoint, run `nerv placement run` with a probe whose inference takes more than 15 s (for example a long prompt with `timeoutMs: 60000`); the client sees the connection closed at 15 s instead of a result or a timeout error. |
+| **Check** | A committed test that fails first: a placement run whose inference takes longer than 15 s but less than its `timeoutMs` returns its result; the route's socket timeout follows the probe's budget like the chat routes. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-25: PR #708 and PR #732 merged on green CI; Test: test/placement-campaign.test.ts (B-119 case); live P3 probes over 15 s completed on NERV-02 (F-006-T29). 2026-11-25 reconciliation: [#732](https://github.com/voidbrain/nerv/pull/732) merged on green CI; every Check item passed (failing-first test, live P3 probes over 15 s); closed. 2026-11-24 (F-006-T29, [#732](https://github.com/voidbrain/nerv/pull/732)): live check passed on NERV-02 at `d9d9aed4` with NERV-01 at `c43bbb57`: P3 probes over 15 s returned through `/api/placement/run` (a Casper case at 20.9 s; Misato errors at 20.7 s and 22.4 s were NERV's own budget messages, B-131, not a closed socket); no case ended at 15 s (F-006-T23: 11). Close in the next reconciliation. Earlier: 2026-11-24 (B-119-T01, [PR #708](https://github.com/voidbrain/nerv/pull/708)): cause: `/api/placement/run` never set its socket timeout, so the server's 15 s idle `timeout` closed the connection. Fix: `placementProbe` returns `requestBudgetMs` (2 × `timeoutMs` for the concurrency lease and the inference, + `waitBudgetMs` + 5 s) and the route holds the socket for it, restoring 15 s on finish, as the chat routes do. Test first: `test/placement-campaign.test.ts` (B-119 case: HTTP client → server → a 15.5 s run with `timeoutMs: 30000`) failed on main at 15.09 s with `fetch failed` / `other side closed`, the live error; passes with the fix. Live P3 rerun: F-006-T29. 2026-11-24: opened from F-006-T23 (P3 role run on NERV-02, private report `p3-roles.json`: 11 errors at 15,007–15,021 ms) and F-006-T25 (a probe queued behind a cancelled generation was cut at 15,021 ms). It blocks the P3 role comparison rerun (F-006-T27).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [#732](https://github.com/voidbrain/nerv/pull/732) (F-006-T29 live check); [PR #708](https://github.com/voidbrain/nerv/pull/708) (socket budget; Test: `test/placement-campaign.test.ts`); [PR #698](https://github.com/voidbrain/nerv/pull/698) (opened); F-006-T23 evidence in the [F-006-T26 report](../evaluations/2026-11-24-f006-t26-placement-report.md) |
+| Opened | 2026-11-24 |
+| Verification | Unit/integration 2026-11-24: `test/placement-campaign.test.ts` passes; CI green on PR #708. Real-device 2026-11-24: live P3 probes over 15 s on NERV-02 completed (F-006-T29, [report](../evaluations/2026-11-24-f006-t29-placement-report.md#b-119-live-check)). |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+
+### B-126
+
+**Windows CI: `pilot-model.test.ts` fails with "nervous process not ready; nothing was sent."**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-25: PR #739 merged on green CI; Test: test/store-open-busy.test.ts; five Windows npm test runs with the fix without database is locked (45572380286, 45573197048, 45577116814, 45580660697, 45589471622).
+
+| | |
+|---|---|
+| **Issue** | On 2026-11-24 the Windows `npm test` step failed three times on the same test, "pilot model API changes one specialist, validates discovery and preserves the other pilots and roles" (`test/pilot-model.test.ts:11`), at `await r.ready()` (line 74) with `nervous process not ready; nothing was sent.` (`src/process-client.ts`), once also after its 30 s timeout. Each time a rerun passed, so each PR needed a rerun. B-076-T01 saw the same test time out on 2026-11-19 (run 44345717840) and named it runner slowness. |
+| **Reproduce** | Windows CI `npm test`: [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) attempt 2 (PR #688), [run 45362462549](https://github.com/voidbrain/nerv/actions/runs/45362462549) attempt 1 (PR #707), [run 45387061669](https://github.com/voidbrain/nerv/actions/runs/45387061669) attempt 1 (PR #715). Locally: `node --test test/pilot-model.test.ts` while the machine is loaded (e.g. many test files at once). |
+| **Check** | A committed test fails first: a Runtime whose nervous child starts slowly (as on a loaded Windows runner) is still ready, or fails with a named cause and bound, not "nothing was sent"; the fix keeps the ready deadline meaningful; no `pilot-model.test.ts` failure in the next five Windows runs. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-25: PR #739 merged on green CI; Test: test/store-open-busy.test.ts; five Windows npm test runs with the fix without database is locked (45572380286, 45573197048, 45577116814, 45580660697, 45589471622). 2026-11-25 reconciliation: verified and closed. [#739](https://github.com/voidbrain/nerv/pull/739) merged at 07:53Z on green CI. Five Windows `npm test` runs since then on heads that contain the fix, all on their first attempt with 0 failures and no "database is locked" or "nervous process not ready": runs 45572380286 (#741), 45573197048 (#745), 45577116814 (#740), 45580660697 (#742), 45589471622 (#745); the Windows jobs of the main pushes skip `npm test`. 2026-11-25, cause named (B-126-T01): the nervous child opens the database at start with `new Store` (`src/nervous-process.ts:18`), and `Store` ran `PRAGMA user_version` and its other first reads before it set `PRAGMA busy_timeout=5000`, so a write lock held for a moment by the runtime opening the same file made the child exit with `database is locked` (run 45511684500, PR #732, at `src/store.ts:167`; run 45553326990 attempt 3, PR #738, `gate.test.ts:108`) and the parent then reported `nervous process not ready`. Fix: open with `new DatabaseSync(path, { timeout: 5000 })`; `test/store-open-busy.test.ts` failed first (a lock held 0.7 s by another process) and a lock never released still fails. Windows CI on #739 then showed the Store kept its file handle when its first read failed (`EPERM` removing the test folder); the constructor now closes it before rethrowing. Next: watch five Windows runs. Not this cause: `runtime-load.test.ts:11` (20 s timeout, PR #732) and `print-transfer.test.ts:476` (PR #738) failed the same nights; B-076 tracks them. Earlier, 2026-11-25 reconciliation: the same error in two other tests that start a Runtime, so the cause is shared: "F-003: owner Italian then English messages keep their language…" (`telegram.test.ts:596`) and "F-026: nonproduction writes remain denied through the planner/gate join…" (`watch-runtime.test.ts:264`), both `nervous process not ready; nothing was sent.` on Windows in [run 45461777302](https://github.com/voidbrain/nerv/actions/runs/45461777302) attempt 1 (PR #721, job 138686221613); passed on rerun. 2026-11-24: opened in the backlog reconciliation from the CI logs of 2026-11-24 (jobs 138160312350, 138336053714, 138421034711, each `Error: nervous process not ready; nothing was sent.` at `test/pilot-model.test.ts:74`). The same error at `Runtime.ready` hit `resume.test.ts` and `seat-pool.test.ts` on 2026-11-19 (B-076-T01, run 44489977085), so the cause may be shared by every test that starts a Runtime on a slow runner; B-126-T01 names it. Related: B-076 (scattered CI failures), B-118 (Windows step time).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925); [run 45362462549](https://github.com/voidbrain/nerv/actions/runs/45362462549); [run 45387061669](https://github.com/voidbrain/nerv/actions/runs/45387061669); opened in [PR #723](https://github.com/voidbrain/nerv/pull/723); [#736](https://github.com/voidbrain/nerv/pull/736); fix in [#739](https://github.com/voidbrain/nerv/pull/739) |
+| Opened | 2026-11-24 |
+| Verification | Unit: Test: `test/store-open-busy.test.ts` (failing first, then passing). CI 2026-11-25: five Windows runs without the error (runs 45572380286, 45573197048, 45577116814, 45580660697, 45589471622). |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+
+### B-132
+
+**An executor that answers later reached the ledger and the caller as `{}`, and its failure was never caught**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-25: PR #733 merged on green CI; Test: test/async-executors.test.ts (4/4 failed first, pass with the fix).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 while adding `browser.click` (F-089-T06): the store ran executors synchronously, so a tool whose executor returns a promise (`gmail.*`, `desktop.replay`, `browser.click`) recorded `{}` as its result in the ledger and returned a promise the IPC reply serialised as `{}`; a rejection was an unhandled rejection, a promise that never settled left the sortie open, and a worker job got `{}` as its result. No such executor was wired to the live store yet. |
+| **Reproduce** | In a test, give the store a Gmail client whose `send` rejects, approve a `gmail.send` card: the ledger records `action.done` with `{}` and the rejection is unhandled. |
+| **Check** | The store waits for an executor that answers later: its result or error is recorded when it settles (`action.done` / `action.failed`) and returned to the caller over IPC; one that never answers ends as `action.failed` after its tool's bound; the coordinator's IPC calls for those tools wait that bound, not the 5 s default, and resume waiting sorties even on a timeout; a worker-bound card finishes its job with the settled outcome, and a job released meanwhile is no error. Committed tests fail first. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-25: PR #733 merged on green CI; Test: test/async-executors.test.ts (4/4 failed first, pass with the fix). 2026-11-25 reconciliation: [PR #733](https://github.com/voidbrain/nerv/pull/733) merged on green CI; every Check item is automated (`test/async-executors.test.ts`); verified and closed. 2026-11-24: opened from the independent security review of [PR #733](https://github.com/voidbrain/nerv/pull/733). B-132-T01 implemented there: `StoreSorties.run` waits for a promise within `lateExecutorMs(tool)` (browser 30 s, desktop replay 150 s, Gmail 60 s) and records it when it settles; `settledOutcome` folds it into the `actions.act` and `approvals.decide` replies and `nerv approve`; `gateCallTimeoutMs(tool)` sets those IPC calls' timeouts in `Runtime.decide` and the gate, and `Runtime.decide` sweeps resumable sorties in `finally`; a timed-out executor is reported as "outcome unknown — it may still finish; check before retrying" (a send may still go out); the worker path finishes the job when the executor settles, ignores a job released meanwhile and logs any other failure to record it. `test/async-executors.test.ts` (rejection → `action.failed`; a granted promise through the gate returns and records its real result; a never-settling executor ends as `action.failed`; the worker-bound card) failed on origin/main and passes with the fix.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #733](https://github.com/voidbrain/nerv/pull/733) (Test: `test/async-executors.test.ts`) |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-24: `test/async-executors.test.ts` committed first: 4/4 fail on origin/main, 4/4 pass with the fix. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+
+### B-124
+
+**A re-target `kaji relocate` signs fences the running main before the target's checks run**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-25: PR #734 merged on green CI; Test: test/coordinator-partition.test.ts (B-124), test/coordinator-relocation.test.ts; Review: #734 independent review and re-check, findings fixed in the PR.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 in the review of [PR #721](https://github.com/voidbrain/nerv/pull/721) (B-121-T02). `kaji relocate` (src/cli-kaji.ts, `relocate`) pushes the main record it signs to every reachable base at once. When the owner re-targets while a coordinator runs (B at epoch 3, main C signed at 4), B's renewals then meet epoch 4 and B fences, before `kaji promote` on C has checked anything. If C's promote is then refused (`standby_behind`: B ran epoch 3 after C's standby state), no base acts. No way out exists today: nothing re-seeds C's standby from B, a new main record naming B (epoch 5) makes B's promote refuse `context_only` (B's store is no standby store), and `kaji lease-rearm` re-arms only at the epoch the store holds. Safety holds (no two coordinators); availability is lost until the owner restores by hand. |
+| **Reproduce** | Mesh as in `test/coordinator-partition.test.ts` (B-121-T02): B runs epoch 3 through D; the owner runs `kaji relocate` for C (epoch 4) on a base that reaches B or D; `kaji promote` on C is refused; nobody holds authority. |
+| **Check** | A re-target signed while a coordinator runs leaves that coordinator acting until the target's prechecks (local and the B-121-T02 probe) pass. Proposed fix: `kaji relocate` pushes nothing (only signs and stores the records, for `kaji export`/`import` to the target), and `kaji promote` on the target pushes them after its prechecks, as it already does; or relocate probes first and refuses a target whose standby is behind. A committed test fails first. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-25: PR #734 merged on green CI; Test: test/coordinator-partition.test.ts (B-124), test/coordinator-relocation.test.ts; Review: #734 independent review and re-check, findings fixed in the PR. 2026-11-25 reconciliation: verified and closed. [PR #734](https://github.com/voidbrain/nerv/pull/734) merged on green CI; every Check item is automated (Test: `test/coordinator-partition.test.ts`, B-124); Review: the #734 review and re-check below, all findings fixed in the PR. 2026-11-25 (#734 re-check: one should-fix): `kaji main` could still name the running main again (B at 3 stored at 4, fencing it); it now refuses whenever the main record or this base's coordinator state is at epoch 2 or later, whichever base it names (a revoked newest main included); first setup (all at epoch 1) keeps it. Test first: 7205b00b failed ("Missing expected rejection"); fix 654aa387. 2026-11-25 (#734 review: one blocker, two should-fix, minors): the way out took back an older state after a later epoch ran (X at 2 drained to B at 3, B ran through D, B and D revoked, X named again at 4: X reinstated from epoch 2 with no wait); reinstatement is now refused (`standby_behind`) when a main named between its state and the new epoch is revoked (it cannot be asked: verified standby or owner-approved cold restore only) or its own stores ran or acked a later epoch; unrevoked ones must answer the probe as before. Staging the bundle took the store's write lock (`database is locked` while the service writes): it now fills TEMP tables in a deferred transaction with a busy timeout. `kaji main BASE-ID` refuses a re-target once the main epoch or this base's coordinator state is 2 or later, pointing to `kaji relocate` (first setup keeps it). Minors: help shows FILE as optional (stdout without it); the decision doc says an unreplicated drain refusal leaves the main `draining`; a test shows a failed drain stores no relocation record. Coordinator suites, full `npm test` (1444 pass, 0 fail, 2 skipped), `check:fast` and the gauntlet (pending system and multi-step cases, under the machine lock, ledger committed; none pending) pass. Test first: ebea3e71 failed (reinstated; `database is locked`; `kaji main` stored epoch 3); fix 5cac682a. 2026-11-24 (B-124-T01, [PR #734](https://github.com/voidbrain/nerv/pull/734)): storing the records anywhere live is itself a push (KajiLink's heartbeat registry sync carries any newer record to every base), so `kaji relocate BASE-ID FILE [--revoke ID]` now signs into a relocation bundle and stores and pushes nothing; `kaji import` refuses a bundle. `kaji promote --relocation FILE` reads the records as if held (connection-private TEMP copies of the registry tables) for the local check and the B-121-T02 probe, and only then stores and pushes them. Planned: `kaji drain RECEIPT --relocation FILE` stores them in the transaction that fences the old main (a failed drain stores nothing). Two refusals readiness made after the push now come before it (planned final batch not on the standby: `standby_behind`; unplanned standby with no ack history for an unrevoked old main: `old_host_unconfirmed`). Way out when the epoch already reached the bases (a drain, a hand import, an older NERV): `kaji relocate OLD-ID FILE` and `kaji promote --relocation FILE` on the old main take its own state back at the new epoch, fenced until its standby acks, once every other unrevoked base answers with no later ran-or-acked epoch. Test first: 7e721d68 failed on main (the mesh now models the heartbeat registry sync and runs the real `kaji relocate`: relocate pushed to B, C and D; the way out was refused `context_only`); fix 992de467. The relocate CLI test changed deliberately (requirement B-124: relocate stores nothing; the drain stores the bundle). Residual risk: after a reinstatement the standby store holds the old epoch's state until the shipper re-seeds it.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #734](https://github.com/voidbrain/nerv/pull/734) (Test: `test/coordinator-partition.test.ts`, B-124; `test/coordinator-relocation.test.ts`, kaji relocate bundle) |
+| Opened | 2026-11-24 |
+| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` 20 pass; full `npm test` 1441 pass, 0 fail (2 skipped). Gauntlet 2026-11-24 (owner-approved pattern, under the machine lock, after build): the 7 `nerv-system-flows` cases (no models) and the 4 `multi-step-agent` cases (local `gemma4-12b` profile) passed; `gauntlet:pending` lists none (ledger committed here). CI 2026-11-25: PR #734 merged on green CI. Review: #734 independent review (one blocker, two should-fix, minors) and re-check (one should-fix), each fixed in the PR with a failing-first test. |
+| Reviewed | 2026-11-24 |
 
 </details>
 

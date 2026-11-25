@@ -47,6 +47,7 @@ import {
   type ServiceHost,
   type ServicePlan,
   type ServiceReceipt,
+  liveDatabase,
 } from './node-lifecycle-execution.ts';
 
 const inspectHint = (p: ServicePlan): string =>
@@ -476,7 +477,7 @@ export function releaseService(host: ServiceHost, snapshot: unknown, evidence: u
               'Live database is missing after an uncertain update; use nodes lifecycle-recover to restore the operation backup.',
             );
           safe(liveDbPath, host.context.uid);
-          const liveDb = new DatabaseSync(liveDbPath, { readOnly: true });
+          const liveDb = liveDatabase(liveDbPath);
           let liveSchema: number;
           try {
             liveSchema = Number(liveDb.prepare('PRAGMA user_version').get()!.user_version);
@@ -578,7 +579,7 @@ function restoreVerifiedUpdateBackup(
       if (present(staged)) rmSync(staged, { force: true });
     }
   }
-  const check = new DatabaseSync(liveDbPath, { readOnly: true });
+  const check = liveDatabase(liveDbPath);
   try {
     const schema = Number(check.prepare('PRAGMA user_version').get()!.user_version);
     const quick = check.prepare('PRAGMA quick_check').get() as { quick_check?: string } | undefined;
