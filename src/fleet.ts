@@ -1292,7 +1292,8 @@ export function handleFleetChat(
   }
 
   if (
-    /\b(scorta|scorte|ricambi|spares?)\b|(?:quanti|quante|rimast[ioea]|restano)\b.*\b(motori|motore|eliche|elica|bracci|braccio|frame|telaio|fc|esc|vtx|telecamera|camera|ricevitore|rx|antenna|gps)\b|(?:how\s+many|any|remaining|left)\b.*\b(motors?|props?|propellers?|arms?|frame|fc|esc|vtx|camera|receiver|rx|antenna|gps)\b/iu.test(
+    // A spares word, or "left/remaining" with a part category: "how many …" or "any …" alone asks about drones.
+    /\b(scorta|scorte|ricambi|spares?)\b|\b(?:rimast[ioea]|restano)\b.*\b(motori|motore|eliche|elica|bracci|braccio|frame|telaio|fc|esc|vtx|telecamera|camera|ricevitore|rx|antenna|gps)\b|\b(motors?|props?|propellers?|arms?|frame|fc|esc|vtx|camera|receiver|rx|antenna|gps)\b.*\b(?:remaining|left)\b/iu.test(
       trimmed,
     )
   ) {

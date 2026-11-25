@@ -505,6 +505,12 @@ describe('B-138: fleet.chat answers category-scoped spares queries with none-reg
         assert.doesNotMatch(res.reply ?? '', /Testframe 5/, phrase);
       }
 
+      // A question about the drones, not the spares shelf, is not read as a spares query.
+      for (const phrase of ['quanti droni hanno il gps?', 'does any drone have a camera?']) {
+        assert.equal(run(phrase).handled, false, phrase);
+      }
+      assert.match(run('motors left?').reply ?? '', /Testmot 2207 1850KV/);
+
       const all = run('quali ricambi di scorta mi restano?');
       assert.equal(all.handled, true);
       assert.match(all.reply ?? '', /Testframe 5/);
