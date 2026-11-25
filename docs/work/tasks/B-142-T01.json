@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "id": "B-140-T01",
-  "parent": "B-140",
+  "id": "B-142-T01",
+  "parent": "B-142",
   "title": "Render the Health service sample and link rows as table rows",
   "goal": "Every Health row, sample and links included, has one shape: nowrap label, marker and value right",
   "status": "implemented",
@@ -15,7 +15,7 @@
     "web/public/dashboard/live.js",
     "web/public/dashboard/index.html",
     "test/health-settings-layout.test.mjs",
-    "docs/work/records/B-140.md",
+    "docs/work/records/B-142.md",
     "generated:backlog-views"
   ],
   "capabilities": [

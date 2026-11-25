@@ -32,7 +32,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-098](#f-098) |  | [B-129](#b-129) |  |
 | [F-060](#f-060) |  | [B-134](#b-134) |  |
 | [F-007](#f-007) |  | [B-135](#b-135) |  |
-| [F-123](#f-123) |  | [B-140](#b-140) |  |
+| [F-123](#f-123) |  | [B-142](#b-142) |  |
 |  |  | [B-125](#b-125) |  |
 |  |  | [B-056](#b-056) |  |
 |  |  | [B-096](#b-096) |  |
@@ -2339,7 +2339,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-140"></a>[🐞 B-140](#top)
+### <a id="b-142"></a>[🐞 B-142](#top)
 
 **Dashboard Health: the service sample and link rows are built outside the table and look malformed**
 
@@ -2359,13 +2359,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-140-t01"></a>B-140-T01 — Render the Health service sample and link rows as table rows | 1 h | 0 h | 1 h | Implemented; verification pending |
+| 🟢 Small | <a id="b-142-t01"></a>B-142-T01 — Render the Health service sample and link rows as table rows | 1 h | 0 h | 1 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-[Full notes & evidence](work/records/B-140.md)
+[Full notes & evidence](work/records/B-142.md)
 
 | Field | Value |
 |---|---|

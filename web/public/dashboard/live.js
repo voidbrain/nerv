@@ -588,7 +588,7 @@
     const when = new Date(last.at).toLocaleString();
     return ["Phone push", last.ok ? "ok" : "danger", devices + " · " + (last.ok ? "last ok (" + last.status + ")" : "last failed (" + last.status + (last.reason ? " " + last.reason : "") + ")") + " · " + when];
   }
-  // B-140: health rows (start)
+  // B-142: health rows (start)
   /** One Health row: a label that never wraps, then the value (marker, text, optional action); c[4] follows the row, c[5] adds attributes. */
   function healthRowHtml(c) {
     const mark = c[1] === "ok" ? "✓ " : c[1] === "muted" ? "· " : "✗ ";
@@ -608,7 +608,7 @@
       : [["Link load", "muted", "No peer link traffic recorded.", "", "", " id='health-links-empty'"]];
     return [sample, ...linkRows];
   }
-  // B-140: health rows (end)
+  // B-142: health rows (end)
   window.renderHealth = function () {
     const d = state.doctor; if (!d) { document.getElementById("health").innerHTML = "<div class='muted small'>Waiting for doctor…</div>"; return; }
     const p = d.processes || {}; const m = d.models || {}; const roles = m.roles || {};
@@ -667,7 +667,7 @@
     const warningsHtml = warnings.length
       ? "<div id='health-warnings' style='margin-top:4px'>" + warnings.map(w => "<div class='small warn' data-health-warning='" + esc(w.key) + "'>▲ " + esc(w.message) + "</div>").join("") + "</div>"
       : "";
-    // B-140: the service sample and link rows belong to the table; Update availability (with the updater status) ends it.
+    // B-142: the service sample and link rows belong to the table; Update availability (with the updater status) ends it.
     const table = rows.filter(r => r !== availabilityRow).concat(healthMetricRows(hm), availabilityRow ? [availabilityRow] : []);
     document.getElementById("health").innerHTML = degraded + "<div class='health-table'>" + table.map(healthRowHtml).join("") + "</div>" +
       warningsHtml +

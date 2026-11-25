@@ -1,4 +1,4 @@
-// B-140 (owner 2026-11-25): the Health rows "Service sample" and "Link · <peer>" were built apart from the table: a
+// B-142 (owner 2026-11-25): the Health rows "Service sample" and "Link · <peer>" were built apart from the table: a
 // plain value with no ✓/✗ marker, a label that wrapped ("Service / sample", "Link · NERV- / 02") and the rows placed
 // after the updater status, so the table looked broken. B-141: the updater status stands out (state tone, bold, a
 // bordered box) and Settings is two columns (update schedule | pair, notifications, revoke) that stack on a phone.
@@ -18,7 +18,7 @@ const block = (name) => {
 };
 const { healthRowHtml, healthMetricRows } = new Function(
   'esc',
-  block('B-140: health rows') + ';return { healthRowHtml, healthMetricRows };',
+  block('B-142: health rows') + ';return { healthRowHtml, healthMetricRows };',
 )(esc);
 const { updaterStatusHtml } = new Function('esc', block('B-123: updater status') + ';return { updaterStatusHtml };')(
   esc,
@@ -33,7 +33,7 @@ const css = (selector) => {
 const ROW =
   /^<div class='row small health-row'(?: [^>]*)?><span class='health-label'>[^<]*<\/span><span class='row health-value'><span class='(ok|warn|danger|muted)'>([✓✗·]) [^<]*<\/span>(?:<button[^>]*>[^<]*<\/button>)?<\/span><\/div>$/;
 
-test('B-140: service sample and link rows render with the same two-cell structure as every Health row', () => {
+test('B-142: service sample and link rows render with the same two-cell structure as every Health row', () => {
   const hm = {
     latestSample: { rssBytes: 600 * 1048576, heapUsedBytes: 120 * 1048576, eventLoopDelayMs: 12, pollCount: 9 },
     links: [{ peerId: 'NERV-02', bytesSent: 512, bytesReceived: 1024, lastLatencyMs: 38, inFlight: 1, reconnects: 2 }],
@@ -58,7 +58,7 @@ test('B-140: service sample and link rows render with the same two-cell structur
   assert.doesNotMatch(hostile, /<b /, 'a peer id is escaped in the label and the attribute');
 });
 
-test('B-140: the rows sit in one Health table, the labels never wrap, and the availability row ends it', () => {
+test('B-142: the rows sit in one Health table, the labels never wrap, and the availability row ends it', () => {
   const render = live.slice(live.indexOf('window.renderHealth ='), live.indexOf('// Kaji bases (F-036)'));
   assert.match(render, /<div class='health-table'>" \+ table\.map\(healthRowHtml\)\.join\(""\) \+ "<\/div>"/);
   assert.match(render, /concat\(healthMetricRows\(hm\), availabilityRow \? \[availabilityRow\] : \[\]\)/);
