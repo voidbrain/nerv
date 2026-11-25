@@ -27,6 +27,7 @@ import {
   type HeardHealth,
   type RegistryPort,
 } from '../src/kaji-link.ts';
+import { KAJI_REPLY_MISMATCH, KAJI_REPLY_UNBOUND } from '../src/kaji-auth.ts';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -186,6 +187,64 @@ test('requests and replies are signed by enrolled base keys; unknown, revoked, s
   );
   assert.deepEqual(endpoint('100.64.0.2'), { host: '100.64.0.2', port: 4320 });
   assert.deepEqual(endpoint('127.0.0.1:4555'), { host: '127.0.0.1', port: 4555 });
+});
+test('B-125: a reply binds the request nonce; an unbound (older) reply and a stripped binding are refused by name', () => {
+  const d = keys();
+  const bases: BaseEntry[] = [
+    {
+      baseId: 'NERV-04',
+      name: 'D',
+      publicKey: d.publicKey,
+      address: '127.0.0.1',
+      fingerprint: '',
+      status: 'enrolled',
+      serial: 1,
+    },
+  ];
+  const body = '{"ok":true}';
+  const request = 'a'.repeat(32);
+  const bound = signedHeaders(
+    'NERV-04',
+    d.privateKey,
+    'res',
+    'POST',
+    '/kaji/epoch-push',
+    body,
+    undefined,
+    undefined,
+    request,
+  );
+  assert.equal(bound['x-kaji-reply-to'], request);
+  const check = (h: Record<string, string | undefined>, nonce?: string) =>
+    verifySigned(h, 'res', 'POST', '/kaji/epoch-push', body, bases, new Nonces(), undefined, undefined, nonce);
+  assert.equal(check(bound, request), 'NERV-04');
+  assert.throws(
+    () => check(bound, 'b'.repeat(32)),
+    (e: Error & { code?: string }) => e.code === KAJI_REPLY_MISMATCH,
+  );
+  // An older NERV signs its reply without the binding: an updated base refuses it, naming why.
+  const older = signedHeaders('NERV-04', d.privateKey, 'res', 'POST', '/kaji/epoch-push', body);
+  assert.throws(
+    () => check(older, request),
+    (e: Error & { code?: string }) => e.code === KAJI_REPLY_UNBOUND && /update that base/.test(e.message),
+  );
+  // The binding is under the signature: stripped or swapped, the reply no longer verifies.
+  const { 'x-kaji-reply-to': _stripped, ...stripped } = bound;
+  assert.throws(() => check(stripped), /bad signature/);
+  assert.throws(() => check({ ...bound, 'x-kaji-reply-to': 'b'.repeat(32) }, 'b'.repeat(32)), /bad signature/);
+  // A request never carries a reply binding.
+  const req = signedHeaders(
+    'NERV-04',
+    d.privateKey,
+    'req',
+    'POST',
+    '/kaji/epoch-push',
+    body,
+    undefined,
+    undefined,
+    request,
+  );
+  assert.equal(req['x-kaji-reply-to'], undefined);
 });
 test('two bases over the link: heartbeats mark each other online, last-seen merges, a base behind on the registry catches up, an impostor and a revoked base are refused', async () => {
   const A = keys(),
