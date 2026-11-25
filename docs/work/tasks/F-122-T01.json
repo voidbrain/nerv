@@ -4,7 +4,7 @@
   "parent": "F-122",
   "title": "Design Grover alert delivery",
   "goal": "The design names the source (Grover's alerts MCP tool), polling or subscription, deduplication across restarts and the channels used",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "The design names the source (Grover's alerts MCP tool), polling or subscription, deduplication across restarts and the channels used"
   ],
@@ -34,5 +34,11 @@
     "agentHours": 1.0,
     "baselineAgentHours": 1.0,
     "estimateAgentHours": 1.0
-  }
+  },
+  "prs": [
+    {
+      "pr": 747,
+      "note": "design: docs/decisions/grover-alert-delivery.md"
+    }
+  ]
 }

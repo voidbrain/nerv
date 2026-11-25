@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-126-T02",
+  "parent": "F-126",
+  "title": "Rerun the gemma4:12b quality evidence with gemma4:26b",
+  "goal": "gemma4:26b's quality on the evidence that placed gemma4:12b, side by side",
+  "status": "planned",
+  "acceptance": [
+    "The F-006 placement probes (neutral-smoke, Casper, Misato, repeat 3, as in the F-006-T31 report) run with gemma4:26b, local models only, holding the shared machine lock",
+    "The relevant gauntlet cases (Casper and Misato role bundle) run with gemma4:26b within the owner-approved budget of docs/evaluations/gauntlet.md",
+    "A report in docs/evaluations/ compares both models: pass counts, invalid replies, latency, memory"
+  ],
+  "dependsOn": [
+    "F-126-T01"
+  ],
+  "resources": [
+    "tools/placement-live.mjs",
+    "docs/evaluations/gauntlet.md",
+    "docs/evaluations/2026-11-25-f006-t31-placement-report.md",
+    "docs/work/records/F-126.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "evaluation-design"
+  ],
+  "privacy": "Local models only; no paid route, prompts are neutral fixtures, raw reports stay private on their base.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-25: two existing campaigns rerun with another model and one comparison report. Not a measurement.",
+    "agentHours": 2,
+    "reviewed": "2026-11-25",
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": [
+    {
+      "pr": 751
+    }
+  ]
+}

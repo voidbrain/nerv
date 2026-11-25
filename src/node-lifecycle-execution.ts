@@ -48,6 +48,13 @@ export interface ServicePrerequisites {
   nonInteractiveOk: boolean;
   issues: string[];
 }
+export interface DoctorUnanswered {
+  outcome: 'timeout' | 'http' | 'error';
+  status?: number;
+  ms: number;
+  attempts: number;
+  timeoutMs: number;
+}
 export interface ServiceObservation {
   revision: string;
   schema: number;
@@ -55,6 +62,8 @@ export interface ServiceObservation {
   definition: 'absent' | 'owned' | 'foreign';
   registration: 'absent' | 'owned' | 'foreign';
   runtime: 'stopped' | 'owned' | 'unknown';
+  /** B-135: set when processes run but the doctor did not answer OK; the runtime then stays `unknown`. */
+  doctor?: DoctorUnanswered;
   pids: number[];
   session: boolean;
   clean: boolean;
@@ -311,6 +320,55 @@ const OWNERSHIP_UNKNOWN = 'Service or runtime ownership is unknown or belongs el
  */
 export const foregroundRuntime = (pids: number[]): string =>
   `NERV is running in the foreground (\`nerv launch\` or \`nerv serve\`, pid ${pids.join(', ')}), not as the installed service, and an update never stops a process the service manager did not start. Stop it (Ctrl-C in its terminal), then run \`nerv update\`: it updates the install folder and starts the service.`;
+/** How long the observation waits for NERV's own doctor, and how often it asks (B-135). */
+export interface DoctorProbeOptions {
+  timeoutMs: number;
+  attempts: number;
+}
+/** B-135: 1.5 s once was refused as an ownership problem on a busy Mac (load 25–40); 5 s, asked twice. */
+export const DOCTOR_PROBE: DoctorProbeOptions = { timeoutMs: 5000, attempts: 2 };
+export type DoctorAnswer = { base?: { id: string }; build?: { commit: string } };
+/**
+ * Ask the running NERV for its doctor at most `attempts` times. Returns the answer, or what happened instead: a
+ * timeout, an HTTP status or a connection error, with the time measured over all attempts.
+ */
+export async function probeDoctor(
+  port: number,
+  token: string,
+  options: DoctorProbeOptions = DOCTOR_PROBE,
+): Promise<{ ok: true; body: DoctorAnswer } | { ok: false; unanswered: DoctorUnanswered }> {
+  const started = Date.now();
+  let last: Omit<DoctorUnanswered, 'ms' | 'attempts' | 'timeoutMs'> = { outcome: 'error' };
+  for (let i = 0; i < options.attempts; i++) {
+    try {
+      const r = await fetch('http://127.0.0.1:' + port + '/api/doctor', {
+        headers: { authorization: 'Bearer ' + token },
+        signal: AbortSignal.timeout(options.timeoutMs),
+      });
+      if (r.ok) return { ok: true, body: (await r.json()) as DoctorAnswer };
+      await r.body?.cancel();
+      last = { outcome: 'http', status: r.status };
+    } catch (e) {
+      last = { outcome: e instanceof Error && e.name === 'TimeoutError' ? 'timeout' : 'error' };
+    }
+  }
+  return {
+    ok: false,
+    unanswered: { ...last, ms: Date.now() - started, attempts: options.attempts, timeoutMs: options.timeoutMs },
+  };
+}
+const seconds = (ms: number) => (ms / 1000).toFixed(1) + ' s';
+/**
+ * B-135: NERV's processes are there but its doctor did not answer. That is not an ownership finding: the owner is told
+ * what happened, the time it took, and that nothing was stopped.
+ */
+export const doctorUnanswered = (d: DoctorUnanswered): string =>
+  (d.outcome === 'http'
+    ? `NERV answered its health check with HTTP ${d.status} (${d.attempts} attempts, ${seconds(d.ms)} in all)`
+    : d.outcome === 'timeout'
+      ? `NERV did not answer its health check within ${seconds(d.timeoutMs)} (${d.attempts} attempts, ${seconds(d.ms)} in all; the machine may be busy)`
+      : `NERV's health check could not be reached (${d.attempts} attempts, ${seconds(d.ms)} in all)`) +
+  ', so the running service could not be confirmed as this install. Nothing was stopped; try again in a minute.';
 export function blockers(action: Action, o: ServiceObservation, next?: string): string[] {
   const out: string[] = [];
   if (o.schema < UPGRADE_CONTRACT.minimumServiceSchema || o.schema > SERVICE_READER_SCHEMA)
@@ -322,7 +380,13 @@ export function blockers(action: Action, o: ServiceObservation, next?: string): 
   if (!o.built && action !== 'uninstall') out.push('Build the selected source first.');
   if (o.definition === 'foreign' || o.registration === 'foreign') out.push(OWNERSHIP_UNKNOWN);
   else if (o.runtime === 'unknown')
-    out.push(o.registration === 'absent' && o.pids.length ? foregroundRuntime(o.pids) : OWNERSHIP_UNKNOWN);
+    out.push(
+      o.registration === 'absent' && o.pids.length
+        ? foregroundRuntime(o.pids)
+        : o.doctor
+          ? doctorUnanswered(o.doctor)
+          : OWNERSHIP_UNKNOWN,
+    );
   if (action === 'install' && (o.definition !== 'absent' || o.registration !== 'absent' || o.runtime !== 'stopped'))
     out.push('Install requires absent definition/registration and stopped runtime.');
   if (action !== 'install' && o.definition !== 'owned')

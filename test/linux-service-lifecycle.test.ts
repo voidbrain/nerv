@@ -24,13 +24,14 @@ import {
   planService,
   releaseObservedService,
   serviceReceipt,
+  type DoctorProbeOptions,
   type ServiceContext,
 } from '../src/node-lifecycle-execution.ts';
 import { renderService } from '../src/service.ts';
 
 const supported = { skip: process.platform === 'win32' || process.getuid?.() === 0 };
 
-async function makeLinuxEnv() {
+async function makeLinuxEnv(doctor?: DoctorProbeOptions) {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'nerv-linux-service-')));
   const userHome = root;
   const home = join(root, '.nerv');
@@ -72,7 +73,9 @@ async function makeLinuxEnv() {
   let activeStateOverride: string | undefined;
   let execStartOverride: string | undefined;
   let serviceProc: ChildProcess | null = null;
+  let doctorHangs = false;
   const server = createServer((req, res) => {
+    if (active && doctorHangs) return; // B-135: a busy NERV that does not answer in time
     if (!active) {
       req.socket.destroy();
       return;
@@ -211,7 +214,7 @@ async function makeLinuxEnv() {
     return { status: 1, out: '', err: 'unexpected command' };
   };
 
-  const host = linuxServiceAdapter(context, run, unitPath);
+  const host = linuxServiceAdapter(context, run, unitPath, doctor);
   return {
     root,
     context,
@@ -219,6 +222,10 @@ async function makeLinuxEnv() {
     host,
     systemctlCalls,
     loginctlCalls,
+    /** B-135: the running service's doctor stops answering. */
+    setDoctorHangs: (hangs: boolean) => {
+      doctorHangs = hangs;
+    },
     setSession: (ok: boolean) => {
       sessionAvailable = ok;
     },
@@ -239,6 +246,7 @@ async function makeLinuxEnv() {
     },
     close: async () => {
       if (serviceProc && !serviceProc.killed) serviceProc.kill('SIGKILL');
+      server.closeAllConnections();
       await new Promise<void>((resolve) => server.close(() => resolve()));
       rmSync(root, { recursive: true, force: true });
     },
@@ -474,6 +482,28 @@ test(
         !env.systemctlCalls.some((a) => a.includes('disable') && a.includes('--now')),
         'only the install touched systemd; nothing was disabled',
       );
+    } finally {
+      await env.close();
+    }
+  },
+);
+
+test(
+  'B-135: a running Linux service whose doctor does not answer is named as such, not as ownership',
+  supported,
+  async () => {
+    const env = await makeLinuxEnv({ timeoutMs: 300, attempts: 2 });
+    try {
+      const installPlan = await planService(env.host, 'install');
+      assert.equal((await applyService(env.host, installPlan, installPlan.digest)).state, 'completed');
+      env.setDoctorHangs(true);
+      const stopPlan = await planService(env.host, 'stop');
+      assert.equal(stopPlan.before.runtime, 'unknown', 'an unanswered runtime is never treated as owned');
+      const why = stopPlan.blockers.join(' ');
+      assert.match(why, /did not answer its health check within 0\.3 s \(2 attempts/);
+      assert.doesNotMatch(why, /ownership is unknown/);
+      env.setDoctorHangs(false);
+      assert.deepEqual((await planService(env.host, 'stop')).blockers, []);
     } finally {
       await env.close();
     }

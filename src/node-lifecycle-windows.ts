@@ -10,6 +10,9 @@ import {
   command,
   processIdentity,
   definition,
+  DOCTOR_PROBE,
+  type DoctorProbeOptions,
+  probeDoctor,
   expectedDefinition,
   hash,
   present,
@@ -65,6 +68,7 @@ export function windowsServiceAdapter(
   context: ServiceContext,
   run: typeof command = command,
   environment: Record<string, string | undefined> = process.env,
+  doctor: DoctorProbeOptions = DOCTOR_PROBE,
 ): ServiceHost {
   const expectedTask = expectedDefinition(context, 'windows-service');
   const expectedVbs = windowsLauncher(context.home, context.source, context.node);
@@ -168,24 +172,21 @@ export function windowsServiceAdapter(
           : 'foreign';
       const pids = await queryProcesses();
       let runtime: ServiceObservation['runtime'] = pids.length ? 'unknown' : 'stopped';
-      try {
-        const r = await fetch('http://127.0.0.1:' + config.port + '/api/doctor', {
-          headers: { authorization: 'Bearer ' + token },
-          signal: AbortSignal.timeout(1500),
-        });
-        if (r.ok) {
-          const body = (await r.json()) as { base?: { id: string }; build?: { commit: string } };
-          runtime =
-            body.base?.id === config.base.id &&
-            body.build?.commit === revision &&
-            registered === 'owned' &&
-            pids.length > 0
-              ? 'owned'
-              : 'unknown';
-        } else {
-          runtime = 'unknown';
-        }
-      } catch {}
+      let unanswered: ServiceObservation['doctor'];
+      const answer = await probeDoctor(config.port, token, doctor);
+      if (answer.ok)
+        runtime =
+          answer.body.base?.id === config.base.id &&
+          answer.body.build?.commit === revision &&
+          registered === 'owned' &&
+          pids.length > 0
+            ? 'owned'
+            : 'unknown';
+      else {
+        // Something answered the port without OK: never stopped, as before (B-135 only names it).
+        if (answer.unanswered.outcome === 'http') runtime = 'unknown';
+        if (runtime === 'unknown') unanswered = answer.unanswered;
+      }
 
       safe(databasePath(context.home), context.uid);
       const db = liveDatabase(databasePath(context.home));
@@ -210,6 +211,7 @@ export function windowsServiceAdapter(
         definition: defKind,
         registration: registered,
         runtime,
+        ...(unanswered ? { doctor: unanswered } : {}),
         pids,
         session: true,
         clean: (await git(['status', '--porcelain'])) === '',
