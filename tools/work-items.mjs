@@ -7,6 +7,7 @@ import {
   writeFileSync,
   lstatSync,
   realpathSync,
+  statSync,
   unlinkSync,
 } from 'node:fs';
 import { resolve, join, relative, isAbsolute, dirname } from 'node:path';
@@ -48,6 +49,26 @@ function local(root, path) {
   if (existsSync(full) && lstatSync(full).isSymbolicLink()) throw Error('Symlink source refused');
   return full;
 }
+// F-100: workItems.publishHooks names project build steps run after the views are built and before they are published,
+// e.g. "node tools/backlog-recap.mjs". Each entry is `node <repository script> [arguments]`, single-spaced, from a
+// character set with no shell meaning; it runs as argv (process.execPath, no shell), never with write access.
+const HOOK_WORD = /^[A-Za-z0-9_@%+=:,./-]+$/;
+function hookArgv(entry) {
+  const words = typeof entry === 'string' ? entry.split(' ') : [];
+  const [program, script = '', ...args] = words;
+  if (
+    program !== 'node' ||
+    !words.slice(1).every((word) => HOOK_WORD.test(word)) ||
+    script.startsWith('-') ||
+    !/\.(mjs|cjs|js)$/.test(script) ||
+    script.split('/').some((part) => ['', '.', '..'].includes(part))
+  )
+    throw Error(
+      `Invalid workItems.publishHooks entry ${JSON.stringify(entry)}: use "node <repository script>.mjs [arguments]", single spaces, letters, digits and _@%+=:,./- only (run as argv, never through a shell)`,
+    );
+  return [script, ...args];
+}
+export const publishHooks = (config) => (config?.publishHooks ?? []).map(hookArgv);
 // F-066: workItems.repository is "owner/name" on GitHub, used to link the PRs a task file records; without it they
 // are plain text.
 const repositorySetting = (config) => {
@@ -79,6 +100,13 @@ export function settings(root = process.cwd()) {
     throw Error('Invalid featurePlans setting');
   if (config.views !== undefined && !['committed', 'built'].includes(config.views))
     throw Error('Invalid workItems.views: use "committed" (the default) or "built"');
+  if (config.publishHooks !== undefined) {
+    if (!Array.isArray(config.publishHooks) || !config.publishHooks.length || config.publishHooks.length > 10)
+      throw Error('Invalid workItems.publishHooks: a list of 1 to 10 entries');
+    config.publishHooks.forEach(hookArgv);
+    if (config.views !== 'built')
+      throw Error('workItems.publishHooks needs workItems.views "built": hooks run only when the views are published');
+  }
   repositorySetting(config);
   for (const name of ['layout', 'records', 'tasks', 'profiles']) local(root, config[name]);
   // Queue order reads the roadmap the work queue uses, so the ledger and the queue page agree.
@@ -1602,14 +1630,25 @@ const run = (root, cmd, args) => {
 // publication is the checked-out commit's tree plus the built ledger, so the ledger's relative links resolve there, and
 // a child of the previous publication: the push is a fast-forward of refs/heads/backlog-views and nothing else.
 export const VIEWS_BRANCH = 'backlog-views';
-export function publishViews(root, config, { remote = 'origin', git = (args, env) => runEnv(root, args, env) } = {}) {
+// F-100: with publishHooks, `ledger` is the file `publish --prepare` wrote in the read-only job; publishing never runs
+// a hook, so without a prepared ledger it refuses rather than publish what the hooks would have added.
+export function publishViews(
+  root,
+  config,
+  { remote = 'origin', git = (args, env) => runEnv(root, args, env), ledger } = {},
+) {
   if (!builtViews(config)) throw Error('Publish only when workItems.views is "built"');
+  if (ledger === undefined && publishHooks(config).length)
+    throw Error(
+      'workItems.publishHooks is set: run publish --prepare in a read-only job, then publish --ledger=<the prepared file>; publish never runs a hook',
+    );
+  if (ledger !== undefined && (typeof ledger !== 'string' || !ledger.trim()))
+    throw Error('The prepared ledger is empty');
   assertViewUncommitted(root);
   if (git(['status', '--porcelain']))
     throw Error('Publish from a clean checkout: uncommitted changes would be left out');
   const source = git(['rev-parse', 'HEAD']);
-  const ledger = renderLedger(root, config);
-  writeFileSync(join(root, 'docs/BACKLOG.md'), ledger);
+  writeFileSync(join(root, 'docs/BACKLOG.md'), ledger ?? renderLedger(root, config));
   const ref = `refs/remotes/${remote}/${VIEWS_BRANCH}`;
   const listed = git(['ls-remote', remote, `refs/heads/${VIEWS_BRANCH}`]); // the exact ref, not a name suffix
   if (listed) git(['fetch', '--quiet', remote, `+refs/heads/${VIEWS_BRANCH}:${ref}`]);
@@ -1638,6 +1677,48 @@ export function publishViews(root, config, { remote = 'origin', git = (args, env
   ]);
   git(['push', '--quiet', remote, `${commit}:refs/heads/${VIEWS_BRANCH}`]);
   return { published: true, commit, source };
+}
+// F-100: the read-only half of publishing. It writes the built ledger, runs each publish hook on it in order, and
+// refuses a hook that fails, runs over ten minutes, commits, or adds or changes a tracked, unignored or new ignored
+// path (a change inside an already ignored directory is not seen; only the ledger leaves the job), or that turns the
+// ledger into a symlink.
+export function prepareViews(root, config, { git = (args) => runEnv(root, args) } = {}) {
+  if (!builtViews(config)) throw Error('Prepare only when workItems.views is "built"');
+  assertViewUncommitted(root);
+  if (git(['status', '--porcelain']))
+    throw Error('Prepare from a clean checkout: uncommitted changes would be left out');
+  const file = join(root, 'docs/BACKLOG.md');
+  writeFileSync(file, renderLedger(root, config));
+  const hooks = publishHooks(config);
+  const state = () => [git(['rev-parse', 'HEAD']), git(['status', '--porcelain', '--ignored'])].join('\n');
+  const before = state();
+  let output = '';
+  for (const argv of hooks) {
+    const name = `node ${argv.join(' ')}`;
+    const script = local(root, argv[0]);
+    if (!existsSync(script) || !statSync(script).isFile())
+      throw Error(`Publish hook ${name}: ${argv[0]} is not a file`);
+    const r = spawnSync(process.execPath, argv, {
+      cwd: root,
+      encoding: 'utf8',
+      shell: false,
+      timeout: 10 * 60 * 1000,
+      maxBuffer: 16 * 1024 * 1024,
+    });
+    output += (r.stdout ?? '') + (r.stderr ?? '');
+    if (r.status !== 0)
+      throw Error(
+        `Publish hook ${name} failed (${r.error?.message ?? `exit ${r.status ?? r.signal}`}): ${output.trim()}`,
+      );
+  }
+  const changed = git(['status', '--porcelain']);
+  if (changed || state() !== before)
+    throw Error(
+      `A publish hook committed or changed a path other than docs/BACKLOG.md, which is all a hook may write:\n${changed || git(['status', '--porcelain', '--ignored'])}`,
+    );
+  if (lstatSync(file).isSymbolicLink()) throw Error('A publish hook made docs/BACKLOG.md a symlink');
+  assertViewUncommitted(root);
+  return { ledger: readFileSync(file, 'utf8'), hooks: hooks.length, output };
 }
 const runEnv = (root, args, env = {}) => {
   const r = spawnSync('git', args, { cwd: root, encoding: 'utf8', env: { ...process.env, ...env } });
@@ -1762,15 +1843,31 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       const root = process.cwd(),
         config = settings(root);
       if (!config) throw Error('Work items not adopted');
-      if (extra.length) throw Error('Use work-items.mjs publish');
-      const done = publishViews(root, config);
-      console.log(
-        done.published
-          ? `Published the views of ${done.source} on ${VIEWS_BRANCH} (${done.commit}).`
-          : done.reason
-            ? `Not published: ${done.reason}.`
-            : `The views of ${done.source} are already on ${VIEWS_BRANCH}: nothing to publish.`,
-      );
+      const prepare = extra.length === 1 && extra[0] === '--prepare';
+      const from = extra.length === 1 ? /^--ledger=(.+)$/s.exec(extra[0])?.[1] : undefined;
+      if (extra.length && !prepare && !from) throw Error('Use work-items.mjs publish [--prepare | --ledger=<file>]');
+      if (prepare) {
+        const done = prepareViews(root, config);
+        if (done.output) process.stdout.write(done.output);
+        console.log(
+          `Built docs/BACKLOG.md${done.hooks ? ` and ran ${done.hooks} publish hook(s) on it` : ''}: publish it with publish --ledger=<file>.`,
+        );
+      } else {
+        let ledger;
+        if (from) {
+          if (!statSync(from).isFile() || statSync(from).size > 16 * 1024 * 1024)
+            throw Error('--ledger names a file of at most 16 MiB');
+          ledger = readFileSync(from, 'utf8');
+        }
+        const done = publishViews(root, config, { ledger });
+        console.log(
+          done.published
+            ? `Published the views of ${done.source} on ${VIEWS_BRANCH} (${done.commit}).`
+            : done.reason
+              ? `Not published: ${done.reason}.`
+              : `The views of ${done.source} are already on ${VIEWS_BRANCH}: nothing to publish.`,
+        );
+      }
     } else if (command === 'close') {
       const root = process.cwd(),
         config = settings(root);
@@ -1794,7 +1891,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         !['migrate', 'build', 'check', 'tasks', 'calibrate', 'next'].includes(command)
       )
         throw Error(
-          'Use work-items.mjs migrate|build|check|tasks|calibrate|next [--limit=N] | close <ID> --evidence=… [--release=vX.Y.Z] | pr <ID>[,<ID>] [--trailer="Key: value"] -- <gh pr create options> | publish',
+          'Use work-items.mjs migrate|build|check|tasks|calibrate|next [--limit=N] | close <ID> --evidence=… [--release=vX.Y.Z] | pr <ID>[,<ID>] [--trailer="Key: value"] -- <gh pr create options> | publish [--prepare | --ledger=<file>]',
         );
       const root = process.cwd(),
         config = settings(root);

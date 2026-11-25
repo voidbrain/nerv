@@ -23,3 +23,6 @@ artifacts/evaluations/
 .test-report.txt
 # Per-file start and finish times of the last npm test (tools/test-timing-reporter.mjs). <!-- project -->
 .test-timings.txt
+
+# The backlog ledger is built, never committed (workItems.views "built"; npm run work:build writes it, F-125-T02). <!-- project -->
+docs/BACKLOG.md

@@ -424,7 +424,11 @@ function ownerView(results) {
         const st = itemState(found, trail);
         if (st.state === 'Done') continue;
         if (st.state === 'Owner')
-          blocked ??= { state: 'Blocked', cause: { what: 'owner step', ref: dep, where: where(repo, dep) } };
+          // a record whose next step is the owner's names that step (B-060 review)
+          blocked ??= {
+            state: 'Blocked',
+            cause: { what: 'owner step', ref: st.at ?? dep, where: where(repo, st.at ?? dep) },
+          };
         else if (st.state === 'Blocked') blocked ??= st;
         else {
           waiting ??= { state: 'Waiting', on: dep };
@@ -488,7 +492,15 @@ function ownerView(results) {
       return record.steps.length || record.status === 'Verified' ? { state: 'Ready', close: true } : { state: 'Ready' };
     }
     const states = open.map((x) => stepState(repo, x, trail, record));
+    // B-060: the next open step (the first in the ledger's work order) decides first: when it is the owner's, or waits
+    // behind an owner step, the record is the owner's turn, never Ready, whatever agent work sits beside it.
+    const [head] = states;
+    const ownerFirst =
+      head.state === 'Owner' ||
+      (head.state === 'Blocked' && head.cause.what === 'owner step') ||
+      (head.state === 'Waiting' && head.stop?.what === 'owner step');
     const shown =
+      (ownerFirst ? (head.state === 'Owner' ? { ...head, at: `${repo}:${open[0].id}` } : head) : null) ??
       states.find((x) => x.state === 'Ready' && !x.verify) ??
       states.find((x) => x.state === 'Ready') ??
       states.find((x) => x.state === 'Owner') ??
@@ -612,6 +624,8 @@ async function projectHealth(io) {
     }
     if (reports.length) {
       reports.sort((a, b) => a.time - b.time);
+      // B-060: the newest audit of any kind (scoped to some areas or a part of the project) is shown too
+      const newest = reports.at(-1);
       let lastFull = null;
       const areas = {};
       for (const row of reports) {
@@ -621,9 +635,14 @@ async function projectHealth(io) {
       }
       const due = AUDIT_AREAS.filter((a) => typeof areas[a] !== 'number');
       const fresh = AUDIT_AREAS.map((a) => areas[a]).filter((t) => typeof t === 'number');
+      const blockedArea = Object.values(newest.areas).some((a) => a?.result === 'blocked');
       audit = {
         last: lastFull === null ? null : isoDay(lastFull),
         kind: 'full',
+        latest:
+          newest.time === lastFull
+            ? null
+            : { day: isoDay(newest.time), kind: `${newest.kind ?? 'audit'}${blockedArea ? ', an area blocked' : ''}` },
         due,
         next: due.length ? null : isoDay(Math.min(...fresh) + days * DAY),
       };
@@ -854,7 +873,7 @@ function gapReview(results, view, order, latest) {
         kind: 'Order item not in its backlog',
         where: 'solution order',
         evidence: `${o.ref} is not in ${o.repo}'s backlog or its configured archives`,
-        proposal: `solution: remove ${o.ref} from the order, or ${o.repo}: create the record the owner meant`,
+        proposal: `${results[0].label ?? 'solution'}: remove ${o.ref} from the order, or ${o.repo}: create the record the owner meant`,
       });
   }
   // 6. a project behind the harness: a reconcile record there
@@ -932,8 +951,9 @@ try {
       path: '.',
       backlog: s.backlog ?? 'docs/BACKLOG.md',
       ref: 'working checkout',
-      // F-099: the coordinator's own emoji, from the manifest's top level
+      // F-099: the coordinator's own emoji, from the manifest's top level; B-060: its label too
       ...(s.emoji === undefined ? {} : { emoji: s.emoji }),
+      ...(s.label === undefined ? {} : { label: s.label }),
     },
     ...s.repositories,
   ];
@@ -948,6 +968,15 @@ try {
     if (typeof repo.ref !== 'string' || !repo.ref.trim()) fail(`${repo.id}: explicit branch/tag/commit ref required`);
     if (repo.emoji !== undefined && (typeof repo.emoji !== 'string' || !repo.emoji.trim() || repo.emoji.length > 16))
       fail(`${repo.id}: emoji must be a short string`);
+    // B-060: the name shown for a repository's rows; its references keep the ID
+    if (
+      repo.label !== undefined &&
+      (typeof repo.label !== 'string' ||
+        !repo.label.trim() ||
+        repo.label.length > 40 ||
+        /[\r\n|[\]()*`\\<>]/.test(repo.label))
+    )
+      fail(`${repo.id}: label must be a short string`);
     if (
       repo.archives !== undefined &&
       (!Array.isArray(repo.archives) || repo.archives.some((p) => typeof p !== 'string'))
@@ -1230,12 +1259,12 @@ try {
   ];
   for (const r of results)
     output.push(
-      `| ${text(r.id)} | ${r.available ? `[${r.revision.slice(0, 12)}](https://github.com/${r.repository}/commit/${r.revision})` : 'Unknown'} | ${r.available ? `${r.dirty ? 'Local changes — not a committed snapshot' : 'Committed snapshot'}; requested ${text(r.ref)}; ${remote && r.id !== 'solution' ? 'GitHub' : 'local checkout, not fetched'}${r.view ? `; ${r.view}` : ''}` : 'Unavailable — status unknown'} |`,
+      `| ${text(r.label ?? r.id)} | ${r.available ? `[${r.revision.slice(0, 12)}](https://github.com/${r.repository}/commit/${r.revision})` : 'Unknown'} | ${r.available ? `${r.dirty ? 'Local changes — not a committed snapshot' : 'Committed snapshot'}; requested ${text(r.ref)}; ${remote && r.id !== 'solution' ? 'GitHub' : 'local checkout, not fetched'}${r.view ? `; ${r.view}` : ''}` : 'Unavailable — status unknown'} |`,
     );
   // F-095-T05: the owner view, ahead of the detail. F-099: in the layout of a coordinator's own overview, so it can
   // retire its tool: emoji and links per row, agent and owner hours apart, open prerequisites, harness and next audit.
   const view = ownerView(results);
-  const label = (r) => `${r.emoji ? `${text(r.emoji)} ` : ''}${text(r.id)}`;
+  const label = (r) => `${r.emoji ? `${text(r.emoji)} ` : ''}${text(r.label ?? r.id)}`;
   const short = (value, n) => (value.length > n ? `${value.slice(0, n - 1)}…` : value);
   const num = (n) => String(Number(n.toFixed(2)));
   // Owner hours a Remaining cell states: "x h owner", or none at all ("0 h"); a cell with agent hours only says nothing
@@ -1525,7 +1554,7 @@ try {
   const auditText = (h) =>
     !h.audit
       ? 'none found (unknown)'
-      : `${h.audit.last ? `${h.audit.last} (${h.audit.kind})` : 'no complete full audit'}; ${
+      : `${h.audit.latest ? `${h.audit.latest.day} (${h.audit.latest.kind}), ` : ''}${h.audit.last ? `${h.audit.last} (${h.audit.kind})` : 'no complete full audit'}; ${
           h.audit.due.length ? `**due: ${h.audit.due.join(', ')}**` : `next ${h.audit.next}`
         }`;
   const reviewText = (h) =>
@@ -1562,30 +1591,60 @@ try {
     '',
     ...(gaps.length
       ? [
-          '| Kind | Where | Evidence | Proposal |',
-          '|---|---|---|---|',
-          ...gaps.map((g) => `| ${text(g.kind)} | ${text(g.where)} | ${text(g.evidence)} | ${text(g.proposal)} |`),
+          // B-060: numbered, so the owner can answer "accept 2, drop 3"
+          '| # | Kind | Where | Evidence | Proposal |',
+          '|---:|---|---|---|---|',
+          ...gaps.map(
+            (g, i) => `| ${i + 1} | ${text(g.kind)} | ${text(g.where)} | ${text(g.evidence)} | ${text(g.proposal)} |`,
+          ),
         ]
       : ['No gaps found. This does not prove that every cross-repository need is recorded.']),
   );
+  // B-060: the open work per record, as a coordinator's retired overview had it: each open record in its backlog's order
+  // with its open steps, agent and owner hours and state, then its open steps with theirs, collapsed.
+  output.push(
+    '',
+    '## Open work by repository',
+    '',
+    "Each open record in its backlog's order. State: Ready = an agent can start its next open step now; the owner's turn, waiting and blocked work as in the solution order. Owner h reads unknown where the record owes owner work its Remaining cell does not state.",
+  );
   for (const r of results.filter((x) => x.available)) {
-    const open = [...r.records.values()]
-      .filter((b) => !b.archived && b.status !== 'Closed')
-      .flatMap((b) => b.steps.filter((x) => !DONE_STEPS.has(x.status)));
-    if (!open.length) continue;
+    const recs = [...r.records.values()].filter((b) => !b.archived && b.status !== 'Closed');
+    if (!recs.length) continue;
+    const openOf = (b) => b.steps.filter((x) => !DONE_STEPS.has(x.status));
+    const ownerHours = (b) => {
+      const owner = ownerHoursIn(b.remaining);
+      if (owner !== null) return num(owner);
+      if (!hoursIn(b.remaining)) return '—';
+      return OWNER_HUMAN.has(b.human) || openOf(b).some((x) => ownerKind(x.who)) ? 'unknown' : '0';
+    };
+    const steps = recs.flatMap((b) => openOf(b).map((x) => [b, x]));
     output.push(
       '',
-      `<details><summary>${label(r)}: ${open.length} open step${open.length === 1 ? '' : 's'}</summary>`,
+      `### ${label(r)}`,
       '',
-      '| Step | Title | Status | Remaining | Who | Depends on |',
-      '|---|---|---|---|---|---|',
-      ...open.map(
-        (x) =>
-          `| ${text(`${r.id}:${x.id}`)} | ${text(x.title)} | ${text(x.status)} | ${text(x.remaining)} | ${text(x.who.replace(/\]\([^)]*\)/g, ']').replace(/[[\]]/g, ''))} | ${text(x.dependsOn.join(', ') || '—')} |`,
-      ),
-      '',
-      '</details>',
+      '| Item | Title | Status | Priority | Open steps | Agent h | Owner h | State |',
+      '|---|---|---|---|---:|---:|---:|---|',
+      ...recs.map((b) => {
+        const h = hoursIn(b.remaining);
+        const st = view.itemState({ repo: r.id, kind: 'record', item: b, parent: b });
+        return `| ${refLink(`${r.id}:${b.id}`)} | ${text(short(b.title, 80))} | ${text(b.status)} | ${text(b.priority)} | ${openOf(b).length} | ${h ? num(h.agent) : '—'} | ${ownerHours(b)} | ${text(stateText(st, false))} |`;
+      }),
     );
+    if (steps.length)
+      output.push(
+        '',
+        `<details><summary>${label(r)}: ${steps.length} open step${steps.length === 1 ? '' : 's'}</summary>`,
+        '',
+        '| Step | Title | Status | Remaining | Who | Depends on | State |',
+        '|---|---|---|---|---|---|---|',
+        ...steps.map(
+          ([b, x]) =>
+            `| ${text(`${r.id}:${x.id}`)} | ${text(x.title)} | ${text(x.status)} | ${text(x.remaining)} | ${text(x.who.replace(/\]\([^)]*\)/g, ']').replace(/[[\]]/g, ''))} | ${text(x.dependsOn.join(', ') || '—')} | ${text(stateText(view.itemState({ repo: r.id, kind: 'step', item: x, parent: b }), false))} |`,
+        ),
+        '',
+        '</details>',
+      );
   }
   // F-095-T04: remaining hours per backlog and a solution total that never hides an unknown backlog.
   const hours = (n) => (n === null ? 'Unknown' : `${Number(n.toFixed(2))} h`);

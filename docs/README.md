@@ -7,7 +7,7 @@ Start here for document ownership. This is the NERV-specific map; the [procedure
 | [Architecture](ARCHITECTURE.md), `architecture/` | Current boundaries, vocabulary and status-labelled target | Maintained; planned behavior is labelled |
 | [Decisions](decisions/README.md) | Design choices, alternatives and reasons | Retained until explicitly superseded, not obsolete because old |
 | [Roadmap](ROADMAP.md) | Milestones and acceptance | Authored placement plus generated status |
-| [Backlog](BACKLOG.md) | Current outcome ledger | Generated from `work/records/` and `work/layout.json` |
+| [Backlog](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md) | Current outcome ledger | Built from `work/records/` and `work/layout.json`, never committed: published on the `backlog-views` branch on each push to `main`; `npm run work:build` then `node tools/backlog-recap.mjs` writes `docs/BACKLOG.md` locally |
 | [Work sources/tasks](work/README.md) | Authored records, bounded tasks, required capabilities and model evidence links | Edit sources; task completion never closes its parent automatically |
 | [Agent procedures](agents/procedures.md), [area rules](agents/areas.md) | Repository workflow authorities and project-specific constraints | Maintained; copied harness files retain release ownership |
 | [Verification mapping](verification.md) | NERV commands and selected test groups | Complements the [shared selection procedure](agents/verification.md); these are distinct roles |

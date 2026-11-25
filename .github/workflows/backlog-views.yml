@@ -1,0 +1,68 @@
+name: Backlog views
+
+# F-096-T03 (owner decision 2026-11-25, option A): with workItems.views "built", publish the built backlog views of each
+# push to main on the backlog-views branch. Never on a pull request: no PR code runs with write access. The only job with
+# contents: write is `publish`; it fast-forwards refs/heads/backlog-views and nothing else, never with --force. Copy this
+# workflow only when the project sets workItems.views to "built"; PRs get the views as a CI artifact instead.
+# F-100: the views are built, and the project's workItems.publishHooks run, in `build`, which has contents: read and no
+# stored credentials. `publish` only pushes the ledger `build` prepared; it never runs a hook.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backlog-views
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # the reconcile log's same-day entries are ordered by ancestry
+          persist-credentials: false # hooks run here: leave them no token
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Build the views and run the publish hooks
+        run: node tools/work-items.mjs publish --prepare
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: backlog-views-prepared
+          path: docs/BACKLOG.md
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # the previous publication and the ancestry of a rerun
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: backlog-views-prepared
+          path: ${{ runner.temp }}/backlog-views
+
+      - name: Publish the prepared views on backlog-views
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: node tools/work-items.mjs publish --ledger="$RUNNER_TEMP/backlog-views/BACKLOG.md"

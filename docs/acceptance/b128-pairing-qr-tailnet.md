@@ -1,6 +1,6 @@
 # B-128: the Settings pairing QR opens on the phone
 
-Owner steps for [B-128](../BACKLOG.md#b-128) (step B-128-T02). Run the commands in a Terminal on the owner's Mac (NERV-01); scan with the iPhone on the same tailnet.
+Owner steps for [B-128](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md#b-128) (step B-128-T02). Run the commands in a Terminal on the owner's Mac (NERV-01); scan with the iPhone on the same tailnet.
 
 ## 1. The installed service has the fix
 

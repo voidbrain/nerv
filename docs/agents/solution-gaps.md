@@ -2,7 +2,7 @@
 
 Read before you act on the dashboard's "Gap review" or change how it finds gaps. Part of the [solution profile](solution-profile.md).
 
-The gap review lists proposals, never records. Each names the repository that would own the fix. The coordinator never creates or edits a record in a component: the owner accepts a proposal, and a session of the owning repository creates the record there, under that repository's own backlog rules ([backlog rules](../BACKLOG-RULES.md), "One repository, one backlog").
+The gap review lists proposals, never records, numbered so the owner can answer by number ("accept 2, drop 3", B-060). Each names the repository that would own the fix. The coordinator never creates or edits a record in a component: the owner accepts a proposal, and a session of the owning repository creates the record there, under that repository's own backlog rules ([backlog rules](../BACKLOG-RULES.md), "One repository, one backlog").
 
 | Kind | Found when | Proposal |
 |---|---|---|

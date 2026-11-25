@@ -1,6 +1,6 @@
 # Design decisions
 
-Decisions preserve rationale and alternatives. A date alone does not make them superseded. Current behavior is summarized by [Architecture](../ARCHITECTURE.md); current acceptance/status stays in the [backlog](../BACKLOG.md).
+Decisions preserve rationale and alternatives. A date alone does not make them superseded. Current behavior is summarized by [Architecture](../ARCHITECTURE.md); current acceptance/status stays in the [backlog](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md).
 
 | Decision | Scope | Reconsider when |
 |---|---|---|
