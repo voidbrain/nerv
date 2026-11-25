@@ -60,6 +60,11 @@ export interface Ask {
   system?: string;
   privacy: Privacy;
   route?: RouteName;
+  /**
+   * B-136: a JSON schema the reply must follow. An OpenAI-compatible route (Ollama) sends it as `response_format`, so
+   * the model decodes only JSON of that shape; other routes ignore it, and the reply is still parsed strictly.
+   */
+  schema?: { name: string; schema: Record<string, unknown> };
 }
 export interface Reply {
   text: string;
