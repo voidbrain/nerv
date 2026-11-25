@@ -18,6 +18,8 @@ export class RpcFault extends Error {
     this.code = code;
   }
 }
+/** F-089-T06: the nervous process refused an action before its gate (a browser click it cannot bind); the message is for Misato. */
+export const REFUSED_BEFORE_GATE = -32011;
 const ajv = new Ajv({ allErrors: false, strict: true });
 const validators = new Map(Object.entries(methodSchemas).map(([name, schema]) => [name, ajv.compile(schema)]));
 export function validateParams(method: string, params: unknown): asserts method is Method {

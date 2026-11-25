@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 7 | 4 | 22 | 7 |
+| **This week** | 7 | 4 | 25 | 7 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 38 | 28 |
-| **Require Human 🧑** | 10 | 11 |
+| **Open** | 38 | 31 |
+| **Require Human 🧑** | 10 | 13 |
 
 ### Require Human 🧑
 
@@ -28,14 +28,16 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-086](#f-086) |  | [B-122](#b-122) |  |
 | [F-087](#f-087) |  | [B-123](#b-123) |  |
 | [F-092](#f-092) |  | [B-128](#b-128) |  |
-| [F-060](#f-060) |  | [B-056](#b-056) |  |
-| [F-007](#f-007) |  | [B-096](#b-096) |  |
+| [F-060](#f-060) |  | [B-129](#b-129) |  |
+| [F-007](#f-007) |  | [B-056](#b-056) |  |
+|  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
 |  |  | [B-112](#b-112) |  |
+|  |  | [B-130](#b-130) |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 91 h agent + 12.5 h owner across 116 open steps of 38 features and 28 other records. 160 h of actual effort recorded on 149 steps. Generated from the task files.
+**Remaining effort:** 89.75 h agent + 12.5 h owner across 119 open steps of 38 features and 31 other records. 168 h of actual effort recorded on 152 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -336,9 +338,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h | — | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) | 🤖 | — | — |
+| 🟡 Implemented | 🔺 P1 | 🟡 Medium | 2 h | — | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) | 🤖 | — | — |
 
-💻 **→** Next: B-124-T01 after F-016-T20. Owner 2026-11-24: P1, and the change to `kaji relocate` (push nothing until the target's prechecks pass) is agreed; F-016-T09 waits for it ([PR #724](https://github.com/voidbrain/nerv/pull/724)).
+💻 **→** Next: independent review of [PR #734](https://github.com/voidbrain/nerv/pull/734) (P1), then green CI and merge; verification follows on main. Owner 2026-11-24: P1, and the change to `kaji relocate` (push nothing until the target's prechecks pass) is agreed; F-016-T09 waits for it ([PR #724](https://github.com/voidbrain/nerv/pull/724)).
 
 | | |
 |---|---|
@@ -348,10 +350,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-124-t01"></a>B-124-T01 — kaji relocate pushes a re-target only after the target's prechecks pass | 2 h | 0 h | 2 h | Planned | — | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-124-t01"></a>B-124-T01 — kaji relocate pushes a re-target only after the target's prechecks pass | 2 h | 2.5 h so far (stated) | 2 h | Implemented; verification pending | — | [F-016-T09](#f-016-t09), [F-016-T21](#f-016-t21) | [PR #734](https://github.com/voidbrain/nerv/pull/734) relocate writes a bundle; promote/drain --relocation store and push after the checks; reinstatement way out |
+| 🟡 Medium | **Total** | 2 h | 2.5 h | 2 h | 0 of 1 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -360,9 +362,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | None yet |
+| PR / evidence | Steps: B-124-T01: [PR #734](https://github.com/voidbrain/nerv/pull/734) relocate writes a bundle; promote/drain --relocation store and push after the checks; reinstatement way out. [PR #734](https://github.com/voidbrain/nerv/pull/734) (Test: `test/coordinator-partition.test.ts`, B-124; `test/coordinator-relocation.test.ts`, kaji relocate bundle) |
 | Opened | 2026-11-24 |
-| Verification | Pending |
+| Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` 20 pass; full `npm test` 1441 pass, 0 fail (2 skipped). Gauntlet 2026-11-24 (owner-approved pattern, under the machine lock, after build): the 7 `nerv-system-flows` cases (no models) and the 4 `multi-step-agent` cases (local `gemma4-12b` profile) passed; `gauntlet:pending` lists none (ledger committed here). On main: Pending. |
 | Reviewed | 2026-11-24 |
 
 </details>
@@ -1190,6 +1192,56 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-089"></a>[✨ F-089](#top)
+
+**Browser control: act on a named control in an open page**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-089-T03 (owner check on a real page); F-089-T06 implemented in [PR #733](https://github.com/voidbrain/nerv/pull/733) (a `browser.click` chat tool behind an approval card), waiting for its checks.
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
+| **Reproduce** | Ask NERV to click a named button on an open tab. |
+| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
+| 🟢 Small | <a id="f-089-t06"></a>F-089-T06 — A browser.click chat tool for Misato | 2.5 h | 4 h so far (stated) | 0 h | Implemented; verification pending | — | — | 🤖 | [PR #733](https://github.com/voidbrain/nerv/pull/733) implementation |
+| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 6.5 h (5 of 6 steps) | 7.25 h (4 of 6 steps recorded) | 0.25 h owner | 3 of 6 completed | | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
+| — | <a id="f-089-t05"></a>F-089-T05 — Decision: a chat tool for browser clicks | 0 h | 0 h | Completed | — |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-089.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation · F-089-T06: [PR #733](https://github.com/voidbrain/nerv/pull/733) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md); [#733](https://github.com/voidbrain/nerv/pull/733) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="f-090"></a>[✨ F-090](#top)
 
 **Resume interrupted coding work without the editor**
@@ -1330,56 +1382,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: F-094-T02: [PR #688](https://github.com/voidbrain/nerv/pull/688) implementation. [PR #688](https://github.com/voidbrain/nerv/pull/688) (F-094-T02); [App workflows scripted-first decision](decisions/app-workflows-scripted-first.md) (`F-094-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
 | Opened | 2026-11-14 |
 | Verification | `F-094-T01`: `npm run check:fast` passed. |
-| Reviewed | 2026-11-24 |
-
-</details>
-
----
-### <a id="f-089"></a>[✨ F-089](#top)
-
-**Browser control: act on a named control in an open page**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-089-T06 (owner chose A on 2026-11-24: a `browser.click` chat tool behind an approval card).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "click the skip button" on a page open in the browser. NERV has no browser adapter; F-012 needs one for web-chat jobs too. |
-| **Reproduce** | Ask NERV to click a named button on an open tab. |
-| **Check** | A narrow adapter acts only in a browser profile the owner allowed; it finds the control by its accessible name and clicks it as an Orange action; it reports what changed on the page; it never enters credentials, approves dialogs or acts on another tab; page text never becomes an instruction. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-089-t04"></a>F-089-T04 — Bind a live browser driver to the click adapter | 2 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-089-T03](#f-089-t03) | 🤖 | [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation |
-| 🟡 Medium | <a id="f-089-t06"></a>F-089-T06 — A browser.click chat tool for Misato | 2.5 h | 0 h | 2.5 h | Planned | — | — | 🤖 | — |
-| 🟢 Small | <a id="f-089-t03"></a>F-089-T03 — Owner check on a real page | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-089-T04](#f-089-t04) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 6.5 h (5 of 6 steps) | 3.25 h (3 of 6 steps recorded) | 2.5 h agent + 0.25 h owner | 3 of 6 completed | | | | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-089-t01"></a>F-089-T01 — Decision: browser adapter | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-089-t02"></a>F-089-T02 — Find and click a named control | 1.5 h | 1.5 h (stated) | Completed | [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation |
-| — | <a id="f-089-t05"></a>F-089-T05 — Decision: a chat tool for browser clicks | 0 h | 0 h | Completed | — |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-089.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-089-T02: [PR #495](https://github.com/voidbrain/nerv/pull/495) implementation · F-089-T04: [PR #686](https://github.com/voidbrain/nerv/pull/686) implementation. [PR #692](https://github.com/voidbrain/nerv/pull/692) (F-089-T05 added); [PR #686](https://github.com/voidbrain/nerv/pull/686) (F-089-T04); [PR #495](https://github.com/voidbrain/nerv/pull/495) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-089-T02 not closed: the adapter logic passed on green CI, but `nerv browser-click` runs the adapter with a stub driver ("No live browser driver attached") and no allowed origins, so the owner check F-089-T03 cannot pass yet; the missing live binding waits on the owner's decision (no step exists for it).com/voidbrain/nerv/pull/495) merged on green CI. `F-089-T01` decision written in [browser-adapter.md](decisions/browser-adapter.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-24 |
 
 </details>
@@ -1678,6 +1680,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-120-T01: [PR #717](https://github.com/voidbrain/nerv/pull/717) Marker removed before the service starts. [PR #717](https://github.com/voidbrain/nerv/pull/717) (Test: `test/coordinator-partition.test.ts`) |
 | Opened | 2026-11-24 |
 | Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and `test/coordinator-relocation.test.ts` pass locally. Live promotion with the installed service: Pending (F-016-T09). |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-132"></a>[🐞 B-132](#top)
+
+**An executor that answers later reached the ledger and the caller as `{}`, and its failure was never caught**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-132-T01 implemented in [PR #733](https://github.com/voidbrain/nerv/pull/733), waiting for its checks.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 while adding `browser.click` (F-089-T06): the store ran executors synchronously, so a tool whose executor returns a promise (`gmail.*`, `desktop.replay`, `browser.click`) recorded `{}` as its result in the ledger and returned a promise the IPC reply serialised as `{}`; a rejection was an unhandled rejection, a promise that never settled left the sortie open, and a worker job got `{}` as its result. No such executor was wired to the live store yet. |
+| **Reproduce** | In a test, give the store a Gmail client whose `send` rejects, approve a `gmail.send` card: the ledger records `action.done` with `{}` and the rejection is unhandled. |
+| **Check** | The store waits for an executor that answers later: its result or error is recorded when it settles (`action.done` / `action.failed`) and returned to the caller over IPC; one that never answers ends as `action.failed` after its tool's bound; the coordinator's IPC calls for those tools wait that bound, not the 5 s default, and resume waiting sorties even on a timeout; a worker-bound card finishes its job with the settled outcome, and a job released meanwhile is no error. Committed tests fail first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-132-t01"></a>B-132-T01 — Wait for executors that answer later, within a bound | 1.5 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | [PR #733](https://github.com/voidbrain/nerv/pull/733) implementation |
+| 🟢 Small | **Total** | 1.5 h | 1.5 h | 0 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-132.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-132-T01: [PR #733](https://github.com/voidbrain/nerv/pull/733) implementation. [PR #733](https://github.com/voidbrain/nerv/pull/733) |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-24: `test/async-executors.test.ts` committed first: 4/4 fail on origin/main, 4/4 pass with the fix. |
 | Reviewed | 2026-11-24 |
 
 </details>
@@ -2206,6 +2246,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-24 |
 | Verification | 2026-11-24: committed first and failing on main: `test/pairing-qr.test.ts` "B-128 join" (session mints from 127.0.0.1, localhost and [::1] pages → link at the injected tailnet address; with no address → loopback link and hint) and `test/evaluation.browser.mjs` "B-128" (production dashboard at 127.0.0.1, Settings → Pair a device → QR of the tailnet link, no loopback warning) plus the F-118-T05 browser test's hint assertion; the join test then spends each code (at most three pending), unchanged in what it asserts. With the fix: `test/pairing-qr.test.ts` 13/13 (new unit tests for the serve port, resolver cache and config); every test reading live.js or web/src plus config-reading and touched tests 509/511 (2 skipped); `npm test` first caught the EVA runner reading `config.ts` without the vendored encoder (`test/eva-runner.test.ts`), so the address checks moved to the import-free `src/pairing-address.ts`, then `npm test` passes; `test:headless` and `check:evals` pass; gauntlet system cases all pass; the four multi-step-agent model cases stay pending (they need an owner-approved model budget). Tests never run tailscale (resolver injected). CI 2026-11-24: [run 45487580334](https://github.com/voidbrain/nerv/actions/runs/45487580334) green. Human (a real phone scan, B-128-T02): Pending. |
 | Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="b-129"></a>[🐞 B-129](#top)
+
+**Health → Run doctor logs a canned "all ok" line and never asks the service**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update reaches the service, on the Mac run `nerv open dashboard`, Health → **Run doctor**: under the button a block reads "Doctor · all checks pass" (or lists the problems) with "Revision …", "Database: integrity ok · schema N · M pending reminders" and "Update: …"; Comms shows Maya's line "Doctor: … · details in Health.".
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-24: Health → Run doctor (`web/public/dashboard/dashboard.js`) logged a hard-coded "Doctor: scheduler ok · brain ok · routes ok · SQLite integrity ok", a leftover of the demo; it never called `GET /api/doctor`, so it showed a pass whatever the service's state. |
+| **Reproduce** | `nerv open dashboard`, Health → Run doctor: the same line appears with the service stopped, and no request reaches `/api/doctor`. |
+| **Check** | A click calls `GET /api/doctor` and shows the answer next to the button until the next run (ok or each problem, revision and skew, database checks, update status), escaped, style-guide tokens only; an unreachable service and a 401 are said as such; Maya's line only points to it; the demo says it checked nothing. A committed test fails first (render and a browser test on the production build against the real server). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-129-t01"></a>B-129-T01 — Run doctor calls GET /api/doctor and shows the answer next to the button | 1 h | 0 h | 1 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-129.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [#731](https://github.com/voidbrain/nerv/pull/731) (Test: `test/doctor-run.test.mjs`, `test/doctor-run.browser.mjs`) |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-24: committed first and failing on main: `test/doctor-run.test.mjs` (the helper did not exist) and `test/doctor-run.browser.mjs` (no `#doctor-result` next to the button); the browser test's sign-in wait then changed from the Health text, which the demo also renders, to the live banner, its assertions unchanged. With the fix both pass (5/5, 1/1 on the production build against `makeServer`). Before the PR: `npm test` 1,443 pass (2 skipped); the browser tests reading live.js, dashboard.js or web/src (`test/angular.browser.mjs`, `test/evaluation.browser.mjs`, `test/pwa.browser.mjs`, `test/updater-status.browser.mjs`, `test/doctor-run.browser.mjs`) 11/11 on the production build; `npm run gauntlet:all` (owner-approved, gemma4-12b profile) passed, none pending. A real Run doctor on the owner's base is not yet observed. |
+| Reviewed | 2026-11-24 |
 
 </details>
 
@@ -3138,6 +3216,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-23 |
 | Verification | 2026-11-23: `node --test test/dashboard.test.ts` 51/51. |
 | Reviewed | 2026-11-23 |
+
+</details>
+
+---
+### <a id="b-130"></a>[🐞 B-130](#top)
+
+**A finished sortie that never needed approval shows Misato's Apt faded as skipped, unlike the other unvisited steps**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.25 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update reaches the service, on the Mac run `nerv open dashboard` and select a finished sortie the MAGI granted without asking you (S-6AD9 or a new one): Misato's Apt looks like MAGI, Sync, Plug and EVA when unvisited (no dashed border, no "· skipped"), and the line from Sync goes straight to the plug.
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-24 on S-6AD9: `stepState` in `web/public/dashboard/dashboard.js` returned `skip` for Misato's Apt when a finished sortie never needed approval, so it was faded and dashed while the other steps the sortie did not visit stayed normal. Owner decision (option c): drop that special case. |
+| **Reproduce** | Select a finished sortie whose actions were all granted by the MAGI: the Apt node reads "MISATO'S APT · skipped" with a dashed border; the Sync → Apt and Apt → Plug routes are faded. |
+| **Check** | An unused Apt has no state class, like other unvisited steps; the forwarded-sortie skip and the consult rule are unchanged; the bypass route (Sync → Plug) stays the one lit and the Apt routes stay unlit. A committed test fails first. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-130-t01"></a>B-130-T01 — An unused Misato's Apt keeps its normal look in a finished sortie's flow | 0.25 h | 0 h | 0.25 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.25 h | 0 h (0 of 1 steps recorded) | 0.25 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-130.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [#731](https://github.com/voidbrain/nerv/pull/731) (Test: `test/dashboard.test.ts` "B-130") |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-24: `test/dashboard.test.ts` "B-130" committed first and failing on main (`skip` for the Apt); with the fix it passes with the B-044 and B-112 flow tests unchanged. Before the PR: `npm test` 1,443 pass (2 skipped); the browser tests reading live.js, dashboard.js or web/src (`test/angular.browser.mjs`, `test/evaluation.browser.mjs`, `test/pwa.browser.mjs`, `test/updater-status.browser.mjs`, `test/doctor-run.browser.mjs`) 11/11 on the production build; `npm run gauntlet:all` (owner-approved, gemma4-12b profile) passed, none pending. Browser look on a real sortie not yet observed. |
+| Reviewed | 2026-11-24 |
 
 </details>
 

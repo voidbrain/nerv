@@ -69,9 +69,10 @@ export function coordinatorLeaseService(input: {
     });
   });
   /**
-   * #725 review: `kaji relocate` pushes the new main record to every reachable base, the standby included, before
-   * the old main drains. While this base is still a standby (not promoting) it keeps taking batches from the base
-   * named main at the epoch its store holds, for that epoch only, and only if it acked no later lease.
+   * #725 review: a newer main record can reach the standby before the old main's last batch (B-124: the drain
+   * stores it with the fence and the heartbeat sync carries it on; an older NERV's relocate pushed it at once).
+   * While this base is still a standby (not promoting) it keeps taking batches from the base named main at the
+   * epoch its store holds, for that epoch only, and only if it acked no later lease.
    */
   const standbyFeedFrom = (from: string, coordinatorEpoch: number): boolean => {
     if (!existsSync(standbyPath) || existsSync(join(input.home, PROMOTION_MARKER_FILE))) return false;

@@ -1,14 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
 import { readConfig } from './config.ts';
-import { execute, hasExecutor, type AgencyBaseSnapshot, type AgencySnapshot } from './executors.ts';
+import { execute, hasExecutor, lateExecutorMs, type AgencyBaseSnapshot, type AgencySnapshot } from './executors.ts';
 import type { InstrumentalityRuns } from './instrumentality-runs.ts';
 import { Registry } from './kaji.ts';
 import type { Decision, Ledger, Proposal } from './ledger.ts';
 import { suggestSpellingFix } from './memory.ts';
 import { finishPrintPart, isPendingRemotePrint } from './print-job.ts';
 import { transaction } from './sqlite-transaction.ts';
-import { OWNER_SOURCE, type ActResult, type Store } from './store.ts';
+import { OWNER_SOURCE, type ActResult, type DecideResult, type RunOutcome, type Store } from './store.ts';
 import type { Watch } from './watch.ts';
 import type { WorkerJobs, WorkerLease } from './worker-jobs.ts';
 
@@ -164,12 +164,7 @@ export class StoreSorties {
     this.host.workerJobs.assertLease(lease);
   }
 
-  decide(
-    id: string,
-    decision: Decision,
-    source = 'api',
-    options?: { useSuggestedFix?: boolean },
-  ): { decision: string; result?: unknown; error?: string } {
+  decide(id: string, decision: Decision, source = 'api', options?: { useSuggestedFix?: boolean }): DecideResult {
     const lease = this.host.workerJobs.approval(id);
     if (!lease) return this.decideCore(id, decision, source, options);
     return transaction(this.host.db, () => {
@@ -188,10 +183,31 @@ export class StoreSorties {
           return { ...rejected, error: 'Worker lease or authority changed; nothing ran.' };
         }
       const result = this.decideCore(id, decision, source, options);
-      this.host.workerJobs.finish(lease, {
-        outcome: result.decision === 'approve' && !result.error ? 'grant' : 'reject',
-        ...result,
-      });
+      const finish = (done: Omit<DecideResult, 'pending'>) =>
+        this.host.workerJobs.finish(lease, {
+          outcome: done.decision === 'approve' && !done.error ? 'grant' : 'reject',
+          ...done,
+        });
+      // F-089-T06: an executor that answers later finishes the worker job when it settles.
+      if (result.pending) {
+        const { pending, ...rest } = result;
+        return {
+          ...rest,
+          pending: pending.then((o) => {
+            // The job may have been released or cancelled while the executor ran: the action's own outcome stands.
+            try {
+              finish({ ...rest, ...o });
+            } catch (e) {
+              // A released or re-leased job no longer takes a result; any other failure is logged, never hidden.
+              const message = e instanceof Error ? e.message : String(e);
+              if (!/^Worker lease (was released|does not own this request)\./.test(message))
+                console.error(`Worker job ${lease.id}: its result was not recorded: ${message}`);
+            }
+            return o;
+          }),
+        };
+      }
+      finish(result);
       return result;
     });
   }
@@ -210,12 +226,7 @@ export class StoreSorties {
     });
   }
 
-  decideCore(
-    id: string,
-    decision: Decision,
-    source = 'api',
-    options?: { useSuggestedFix?: boolean },
-  ): { decision: string; result?: unknown; error?: string } {
+  decideCore(id: string, decision: Decision, source = 'api', options?: { useSuggestedFix?: boolean }): DecideResult {
     const proactive = this.host.db
       .prepare(
         'SELECT x.sortie_id AS id FROM approvals a JOIN actions x ON x.id=a.action_id JOIN watch_runs w ON w.sortie_id=x.sortie_id WHERE a.id=?',
@@ -244,7 +255,18 @@ export class StoreSorties {
     const applied = this.host.ledger.decide(id, decision, source);
     const action = applied.grantId ? this.host.ledger.grantAction(applied.grantId) : undefined;
     if (applied.grantId && action && !action.used && hasExecutor(action.tool)) {
-      const outcome = this.run(action.sortieId, action.actionId, applied.grantId, action.tool, action.args);
+      const outcome = this.run(action.sortieId, action.actionId, applied.grantId, action.tool, action.args, {
+        ownerApproved: applied.decision === 'approve',
+      });
+      if (outcome instanceof Promise) {
+        return {
+          decision: applied.decision,
+          pending: outcome.then((o) => {
+            this.settle(action.sortieId, 'error' in o ? 'failed' : 'done');
+            return o;
+          }),
+        };
+      }
       this.settle(action.sortieId, 'error' in outcome ? 'failed' : 'done');
       return { decision: applied.decision, ...outcome };
     }
@@ -346,7 +368,19 @@ export class StoreSorties {
       ...(p.approvalId ? { approvalId: p.approvalId } : {}),
     };
     if (p.grantId && hasExecutor(proposal.tool)) {
-      const outcome = this.run(sortieId, p.actionId, p.grantId, proposal.tool, proposal.args, agency, true);
+      const outcome = this.run(sortieId, p.actionId, p.grantId, proposal.tool, proposal.args, {
+        agency,
+        deferRemote: true,
+      });
+      if (outcome instanceof Promise) {
+        return {
+          ...base,
+          pending: outcome.then((o) => {
+            this.settle(sortieId, 'error' in o ? 'failed' : 'done');
+            return o;
+          }),
+        };
+      }
       // F-121-T04: a part sent to the slicing base finishes in the coordinator (actions.finished), like an MCP call.
       if (proposal.tool === 'fleet.print' && 'result' in outcome && isPendingRemotePrint(outcome.result)) {
         return { ...base, ...outcome };
@@ -370,25 +404,66 @@ export class StoreSorties {
     grantId: string,
     tool: string,
     args: Record<string, unknown>,
-    agency?: AgencySnapshot,
-    /** Only the gate's own call (actions.act) leaves a remote slice for the coordinator to send. */
-    deferRemote = false,
-  ): { result: unknown } | { error: string } {
+    /**
+     * `deferRemote`: only the gate's own call (actions.act) leaves a remote slice for the coordinator to send.
+     * `ownerApproved`: the grant comes from the owner approving this action's card.
+     */
+    options: { agency?: AgencySnapshot; deferRemote?: boolean; ownerApproved?: boolean } = {},
+  ): RunOutcome | Promise<RunOutcome> {
+    const { agency, deferRemote = false, ownerApproved = false } = options;
     this.host.ledger.authorize(grantId, tool, args);
-    let outcome: { result: unknown } | { error: string };
     const execT0 = performance.now();
+    const failed = (e: unknown): RunOutcome => ({ error: e instanceof Error ? e.message : 'Executor failed.' });
+    let raw: unknown;
     try {
-      outcome = {
-        result: execute(this.host.store, tool, args, {
-          sortieId,
-          tainted: this.host.ledger.trust(sortieId) === 'tainted',
-          ...(agency ? { agency } : {}),
-        }),
-      };
+      raw = execute(this.host.store, tool, args, {
+        sortieId,
+        tainted: this.host.ledger.trust(sortieId) === 'tainted',
+        ...(agency ? { agency } : {}),
+        ...(ownerApproved ? { ownerApproved } : {}),
+      });
     } catch (e) {
-      outcome = { error: e instanceof Error ? e.message : 'Executor failed.' };
+      return this.ran(sortieId, actionId, tool, failed(e), execT0, deferRemote);
     }
+    // F-089-T06: an executor that answers later (the browser driver) is recorded in the ledger when it settles.
+    // B-132: one that never answers ends as action.failed after its bound, so no sortie hangs on it.
+    if (raw instanceof Promise) {
+      const bound = this.host.store.executorTimeoutMs ?? lateExecutorMs(tool);
+      let timer: NodeJS.Timeout | undefined;
+      const late = new Promise<never>((_, fail) => {
+        timer = setTimeout(
+          () =>
+            fail(
+              new Error(
+                `${tool} did not answer within ${Math.round(bound / 1000)} s: outcome unknown — it may still finish; check before retrying.`,
+              ),
+            ),
+          bound,
+        );
+      });
+      return Promise.race([raw, late])
+        .then(
+          (result: unknown) => this.ran(sortieId, actionId, tool, { result }, execT0, deferRemote),
+          (e: unknown) => this.ran(sortieId, actionId, tool, failed(e), execT0, deferRemote),
+        )
+        .finally(() => clearTimeout(timer));
+    }
+    return this.ran(sortieId, actionId, tool, { result: raw }, execT0, deferRemote);
+  }
+
+  /** Records what an executor came to: trust intake for what it read, then the ledger's finished event. */
+  private ran(
+    sortieId: string,
+    actionId: string,
+    tool: string,
+    ranOutcome: RunOutcome,
+    execT0: number,
+    deferRemote: boolean,
+  ): RunOutcome {
+    let outcome = ranOutcome;
     const durationMs = Math.max(0, Math.round(performance.now() - execT0));
+    // F-089-T06: page text is data from outside: the sortie is tainted from here on.
+    if ('result' in outcome && tool === 'browser.click') this.host.ledger.intake(sortieId, 'tool:' + tool, 'tainted');
     if ('result' in outcome && tool === 'memory.recall') {
       const facts = outcome.result as { tainted: boolean }[];
       this.host.ledger.intake(sortieId, 'tool:' + tool, facts.some((f) => f.tainted) ? 'tainted' : 'trusted');

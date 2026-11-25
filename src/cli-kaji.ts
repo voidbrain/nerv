@@ -27,7 +27,8 @@ import {
   ranOrAckedCoordinatorEpoch,
   signDrainReceipt,
 } from './coordinator-relocation.ts';
-import { pushCoordinatorEpoch, registryPort } from './coordinator-epoch.ts';
+import { registryPort } from './coordinator-epoch.ts';
+import { addRegistryRecords, readRelocationBundle, type RelocationBundle } from './coordinator-relocation-bundle.ts';
 import { KajiLink, type EpochPushReply } from './kaji-link.ts';
 import {
   installedPromotionService,
@@ -65,10 +66,14 @@ export async function runKajiPromoteCommand(
   if (args.includes('--confirm-old-host-down'))
     throw new RelocationRefusedError(
       'old_host_unconfirmed',
-      "The owner's word does not bound the old main: revoke it with the root key (the Key of Nebuchadnezzar from its offline backup: kaji relocate BASE-ID --revoke OLD-ID, then kaji import here) and run kaji promote again.",
+      "The owner's word does not bound the old main: revoke it with the root key (the Key of Nebuchadnezzar from its offline backup: kaji relocate BASE-ID FILE --revoke OLD-ID) and run kaji promote --relocation FILE here.",
     );
   const receipt = ctx.flag('--drain-receipt');
+  // B-124: the records `kaji relocate` wrote; stored and pushed only after this promote's checks pass.
+  const relocationFile = ctx.flag('--relocation');
+  const relocation = relocationFile ? readRelocationBundle(relocationFile, config.kaji?.root).records : undefined;
   const res = await promoteCoordinator({
+    ...(relocation ? { relocation } : {}),
     home,
     rootPublicKey: config.kaji?.root,
     ownPublicKey: baseKey(home).publicKey,
@@ -99,9 +104,14 @@ export async function runKajiPromoteCommand(
       }),
   });
   console.log(
-    'resumed' in res
-      ? `Promotion at coordinator epoch ${res.newEpoch} finished; the service is running again.`
-      : `Promoted to coordinator epoch ${res.newEpoch} (from ${res.previousEpoch}, ${res.source}); ${res.quarantined} uncertain outbox row(s) parked for review. ` +
+    'reinstated' in res
+      ? `Took back this base's coordinator state at epoch ${res.newEpoch} (from ${res.previousEpoch}): no base ran or acked a later epoch. ` +
+          (res.leaseExpiresAt
+            ? 'Sole coordinator: lease armed.'
+            : 'Effects resume when the standby acks the new epoch (within a lease renewal, 15 s).')
+      : 'resumed' in res
+        ? `Promotion at coordinator epoch ${res.newEpoch} finished; the service is running again.`
+        : `Promoted to coordinator epoch ${res.newEpoch} (from ${res.previousEpoch}, ${res.source}); ${res.quarantined} uncertain outbox row(s) parked for review. ` +
           (res.leaseExpiresAt
             ? 'Sole coordinator: lease armed.'
             : 'Effects wait for the first standby-acked lease (name a standby: kaji standby BASE-ID).'),
@@ -264,6 +274,13 @@ export async function runKajiCommand(
     }
     if (!registry.bases().some((b) => b.baseId === id && b.status === 'enrolled'))
       throw new Error('No enrolled base with that id (see kaji list).');
+    // #734 review (B-124): once a coordinator has moved, or runs here, a stored main record stops it unchecked.
+    const held = store.coordinatorFencingState();
+    // #734 re-check: the running main named again, or a revoked newest main, is refused the same way.
+    if (registry.mainEpoch() >= 2 || (held?.coordinatorEpoch ?? 0) >= 2)
+      throw new Error(
+        `The main record is at coordinator epoch ${registry.mainEpoch()}${registry.main() ? ` (${registry.main()})` : ''}: move it with kaji relocate ${id} FILE (then kaji promote --relocation FILE on ${id}). kaji main names the first main only.`,
+      );
     const root = await unlock();
     new Registry(store.db, root.publicKey).add(
       signRecord(root.privateKey, {
@@ -279,48 +296,63 @@ export async function runKajiCommand(
     );
   } else if (sub === 'relocate') {
     // F-016-T07: the owner moves the coordinator; never automatic. --revoke names a lost base to revoke first.
+    // B-124: the signed records go to a file, never into a registry or over the line: any registry holding them
+    // hands them to every base (heartbeat sync), which stops the running main before the target is checked.
     const id = (args[1] ?? '').toUpperCase();
+    const file = args[2];
     const lost = ctx.flag('--revoke')?.toUpperCase();
     const enrolled = registry.bases().filter((b) => b.status === 'enrolled');
-    if (!id) throw new Error('Usage: kaji relocate BASE-ID [--revoke LOST-BASE-ID]');
+    if (!id) throw new Error('Usage: kaji relocate BASE-ID [FILE] [--revoke LOST-BASE-ID]');
     if (!enrolled.some((b) => b.baseId === id)) throw new Error('No enrolled base with that id (see kaji list).');
     if (registry.main() === id) throw new Error(`${id} is already the main base.`);
     const lostEntry = lost ? enrolled.find((b) => b.baseId === lost) : undefined;
     if (lost && (!lostEntry || lost === id)) throw new Error('--revoke needs another enrolled base id.');
+    if (!config.kaji?.root) throw new Error('No root pinned on this base.');
     const root = await unlock();
-    const signed = new Registry(store.db, root.publicKey);
+    let serial = registry.nextSerial();
+    const added: SignedRecord[] = [];
     if (lostEntry)
-      signed.add(
+      added.push(
         signRecord(root.privateKey, {
           kind: 'revoke',
-          serial: signed.nextSerial(),
+          serial: serial++,
           baseId: lostEntry.baseId,
           publicKey: lostEntry.publicKey,
           issued: new Date().toISOString(),
         }),
       );
-    const epoch = signed.nextMainEpoch();
-    signed.add(
+    const epoch = registry.nextMainEpoch();
+    added.push(
       signRecord(root.privateKey, {
         kind: 'main',
-        serial: signed.nextSerial(),
+        serial,
         coordinatorEpoch: epoch,
         baseId: id,
         issued: new Date().toISOString(),
       }),
     );
-    // F-016-T18: push the new records to every reachable base now; kaji promote pushes again and counts the acks.
-    const pushed = await pushCoordinatorEpoch({
-      db: store.db,
-      rootPublicKey: root.publicKey,
-      ownPublicKey: me,
-      push: ctx.promotion?.pushEpoch ?? ((base, records) => kajiClient().pushEpoch(base, records)),
-    });
-    console.log(
-      `Signed main ${id} at coordinator epoch ${epoch}${lostEntry ? ` and revoked ${lostEntry.baseId}` : ''}. ` +
-        `Pushed to ${pushed.acked.join(', ') || 'no base'}${pushed.missing.length ? `; unreachable: ${pushed.missing.join(', ')} (kaji export, then kaji import there)` : ''}. ` +
-        'On the old main, if reachable, run kaji drain and hand its receipt to the new main (kaji promote --drain-receipt FILE).',
-    );
+    const bundle: RelocationBundle = {
+      root: config.kaji.root,
+      ...(config.kaji.rootBinding ? { rootBinding: 1 as const } : {}),
+      relocation: { baseId: id, coordinatorEpoch: epoch, ...(lostEntry ? { revoked: lostEntry.baseId } : {}) },
+      records: [...registry.records(), ...added],
+    };
+    const out = JSON.stringify(bundle, null, 2) + '\n';
+    const next =
+      `Nothing was stored or pushed: copy the file to ${id} and run kaji promote --relocation FILE there` +
+      (lostEntry
+        ? ''
+        : ' (planned: first kaji drain RECEIPT --relocation FILE on the old main, then add --drain-receipt RECEIPT)') +
+      '. Promote asks every base first and only then tells them the new epoch.';
+    if (file) {
+      writeFileSync(file, out, { mode: 0o600 });
+      console.log(
+        `Signed main ${id} at coordinator epoch ${epoch}${lostEntry ? ` and revoked ${lostEntry.baseId}` : ''} into ${file}. ${next}`,
+      );
+    } else {
+      process.stdout.write(out);
+      console.error(`Signed main ${id} at coordinator epoch ${epoch}. ${next}`);
+    }
   } else if (sub === 'drain') {
     // F-016-T07: planned relocation, old main side. Only after the owner signed a newer main record.
     const state = store.coordinatorFencingState();
@@ -345,11 +377,16 @@ export async function runKajiCommand(
     }
     const self = registry.bases().find((b) => b.publicKey === me && b.status === 'enrolled');
     if (!state || !self) throw new Error('This base holds no coordinator state to drain.');
-    if (registry.mainEpoch() <= state.coordinatorEpoch)
+    // B-124: with --relocation the bundle's records are read as held, and stored only with the fence.
+    const relocationFile = ctx.flag('--relocation');
+    const relocation = relocationFile ? readRelocationBundle(relocationFile, config.kaji?.root) : undefined;
+    const mainRecords = [...registry.records(), ...(relocation?.records ?? [])].filter((r) => r.body.kind === 'main');
+    const newEpoch = Math.max(registry.mainEpoch(), relocation?.coordinatorEpoch ?? 0);
+    if (newEpoch <= state.coordinatorEpoch)
       throw new Error(
-        'Sign the relocation first (kaji relocate BASE-ID) and import it here: draining now would leave no coordinator.',
+        'Sign the relocation first (kaji relocate BASE-ID FILE) and pass it here (kaji drain RECEIPT --relocation FILE): draining now would leave no coordinator.',
       );
-    const newMainBaseId = registry.main();
+    const newMainBaseId = relocation && relocation.coordinatorEpoch === newEpoch ? relocation.baseId : registry.main();
     if (!newMainBaseId || newMainBaseId === self.baseId)
       throw new Error(
         'The newest main record names no other enrolled base: sign the relocation (kaji relocate BASE-ID).',
@@ -363,12 +400,13 @@ export async function runKajiCommand(
         baseId: self.baseId,
         coordinatorEpoch: state.coordinatorEpoch,
         newMainBaseId,
-        newEpoch: registry.mainEpoch(),
-        registryMains: registry
-          .records()
-          .filter((r) => r.body.kind === 'main')
-          .map((r) => ({ baseId: r.body.baseId, coordinatorEpoch: r.body.coordinatorEpoch ?? 0 })),
+        newEpoch,
+        registryMains: mainRecords.map((r) => ({
+          baseId: r.body.baseId,
+          coordinatorEpoch: r.body.coordinatorEpoch ?? 0,
+        })),
         ranOrAckedEpoch: ranOrAckedCoordinatorEpoch(store.db, join(home, STANDBY_DB_FILE)),
+        ...(relocation ? { commit: (db) => void addRegistryRecords(db, config.kaji?.root, relocation.records) } : {}),
       });
     const flushing =
       (state.replicationMode === 'active' || state.replicationMode === 'draining') && !!config.kaji?.root;
@@ -529,7 +567,13 @@ export async function runKajiCommand(
       root: string;
       rootBinding?: number;
       records: SignedRecord[];
+      relocation?: { baseId?: string };
     };
+    // B-124: a relocation bundle held in a registry spreads to every base and stops the running main unchecked.
+    if (bundle.relocation)
+      throw new Error(
+        `This is a relocation bundle: run kaji promote --relocation FILE on ${bundle.relocation.baseId ?? 'the new main'} (planned: kaji drain RECEIPT --relocation FILE on the old main first). It is never imported.`,
+      );
     if (bundle.rootBinding !== undefined && bundle.rootBinding !== 1)
       throw new Error('Unsupported root-binding version.');
     if (!config.kaji?.root) {
@@ -558,7 +602,7 @@ export async function runKajiCommand(
     );
   } else
     throw new Error(
-      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [--revoke LOST-ID] | drain [FILE] | standby [BASE-ID] | promote [--drain-receipt FILE] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
+      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [FILE] [--revoke LOST-ID] | drain [FILE] [--relocation BUNDLE] [--cancel] | standby [BASE-ID] | promote [--drain-receipt FILE] [--relocation BUNDLE] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
     );
   return;
 }
