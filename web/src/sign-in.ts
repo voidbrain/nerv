@@ -1,19 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { Language } from './language.ts';
 import { Session, type SignInFailure } from './session.ts';
-
-const FAILURE: Record<SignInFailure, string> = {
-  'installed-only':
-    'A pairing code works only in the installed app: open NERV from the Home Screen and type it there. In a browser tab, run nerv open dashboard.',
-  limit: 'Too many pairing attempts. Wait a minute and try again.',
-  full: 'Too many paired devices. Revoke one in Settings, then try again.',
-  offline: 'The service was not reached. Check that NERV is running.',
-  pair: 'That pairing code was not accepted. Run nerv open --phone for a new one.',
-  code: 'The login code was not accepted. Run nerv open dashboard again.',
-};
-const ENDED = {
-  session: 'Your session ended (after 12 h, a service restart or sessions revoke). Sign in again.',
-  device: "This device's pairing ended (revoked, 90 days unused or a changed token). Pair it again.",
-} as const;
 
 /** F-130-T01: the dashboard's sign-in box over the shared Session (same rules as the simple page and live.js). */
 @Component({
@@ -21,15 +8,12 @@ const ENDED = {
   host: { class: 'nerv-sign-in' },
   template: `
     <section aria-labelledby="signin-title">
-      <h2 id="signin-title">Sign in</h2>
-      <p>
-        Run <code>nerv open dashboard</code>, or type the pairing code from <code>nerv open --phone</code> in the
-        installed app, or paste the access token (kept in memory only).
-      </p>
+      <h2 id="signin-title">{{ t().signInTitle }}</h2>
+      <p>{{ t().signInHint }}</p>
       <form (submit)="$event.preventDefault(); submit(value.value); value.value = ''">
-        <label for="signin-value">Pairing code or access token</label>
+        <label for="signin-value">{{ t().signInLabel }}</label>
         <input id="signin-value" #value type="password" autocomplete="off" placeholder="XXXX-XXXX" />
-        <button type="submit">Sign in</button>
+        <button type="submit">{{ t().signInButton }}</button>
       </form>
       @if (message()) {
         <p role="alert" class="error">{{ message() }}</p>
@@ -91,12 +75,23 @@ const ENDED = {
 })
 export class SignIn {
   private readonly session = inject(Session);
+  protected readonly t = inject(Language).t;
   private readonly failure = signal<SignInFailure | null>(null);
+  /** Same words as the simple page for the same failures (i18n.ts). */
   protected readonly message = computed(() => {
+    const t = this.t();
     const failure = this.failure() ?? this.session.startFailure();
     const ended = this.session.ended();
-    if (failure) return FAILURE[failure];
-    return ended ? ENDED[ended] : '';
+    if (failure)
+      return {
+        'installed-only': t.pairInstalledOnly,
+        limit: t.pairLimit,
+        full: t.pairFull,
+        offline: t.connectionError,
+        pair: t.pairError,
+        code: t.codeError,
+      }[failure];
+    return ended === 'device' ? t.deviceEnded : ended === 'session' ? t.sessionEnded : '';
   });
 
   protected async submit(value: string) {

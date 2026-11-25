@@ -34,7 +34,7 @@ export class App {
   }
 }
 
-function browserStorage(kind: 'sessionStorage' | 'localStorage'): Storage | undefined {
+function browserStorage(kind: 'localStorage'): Storage | undefined {
   try {
     return window[kind];
   } catch {
@@ -55,7 +55,6 @@ export function appConfig(code: string | null): ApplicationConfig {
         useFactory: () =>
           new Session({
             fetch: (input, init) => fetch(input, init),
-            tabStorage: () => browserStorage('sessionStorage'),
             appStorage: () => browserStorage('localStorage'),
             installed: isInstalled(window),
             userAgent: navigator.userAgent,

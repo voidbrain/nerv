@@ -6,6 +6,7 @@ import { UpdatePrompt } from './update-prompt';
 import { DoctorView } from './doctor-view';
 import { SurfaceRenderer } from './surface-renderer';
 import { BatteryCards, type BatteryCardItem } from './battery-cards';
+import { Language } from './language.ts';
 import { Session, SW_BYPASS, type SignInFailure } from './session.ts';
 interface Page<T> {
   items: T[];
@@ -55,13 +56,11 @@ export class Nodo {
       },
   );
   runtimeState = signal<'ok' | 'waiting' | 'error'>('waiting');
-  language = signal<'it' | 'en'>('en');
+  private readonly lang = inject(Language);
+  language = this.lang.lang;
   t = computed(() => messages[this.language()]);
   changeLanguage(value: string) {
-    if (value === 'it' || value === 'en') {
-      this.language.set(value);
-      document.documentElement.lang = value;
-    }
+    this.lang.set(value);
   }
 
   paging = signal(false);
@@ -423,10 +422,11 @@ export class Nodo {
       }
       this.connected.set(true);
     } catch (e) {
-      if (revision === this.revision && (e as { status?: number }).status === 401) {
-        // The Session forgot the credential; a paired device says its pairing ended.
+      if (revision === this.revision && this.session.paired() && (e as { status?: number }).status === 401) {
+        // The pairing ended (revoked, 90 days unused or a rotated admin token): forget it and show the sign-in box.
+        this.session.end();
         this.connected.set(false);
-        this.error.set(this.session.ended() === 'device' ? this.t().deviceEnded : this.t().connectionError);
+        this.error.set(this.t().deviceEnded);
       } else if (revision === this.revision) {
         this.runtimeState.set('error');
         this.error.set(this.t().connectionError);

@@ -1,5 +1,6 @@
 import { Component, computed, DestroyRef, effect, inject, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Language } from '../language.ts';
 import { LiveFeed } from '../live-feed.ts';
 import { Session } from '../session.ts';
 import { SignIn } from '../sign-in.ts';
@@ -9,19 +10,25 @@ import { ACCENTS, type Accent, type Mode, type Theme } from '../../../src/dashbo
 
 /** Sections still on the old page, with the step that moves each (F-130 record, F-130-T15 inventory). */
 const MOVING = [
-  ['Health', 'F-130-T02'],
-  ['Settings, devices and pairing', 'F-130-T03'],
-  ['Push', 'F-130-T04'],
-  ["At a glance and Misato's apartment", 'F-130-T05'],
-  ['Sorties and plan detail', 'F-130-T06'],
-  ['Sephirot flow', 'F-130-T07'],
-  ['Comms and the debrief', 'F-130-T08'],
-  ['Coming up, models and budget', 'F-130-T09'],
-  ['EVA cages, pilots, tools and skills', 'F-130-T10'],
-  ['Bases, chronicle and Lilith', 'F-130-T11'],
+  ['moveHealth', 'F-130-T02'],
+  ['moveSettings', 'F-130-T03'],
+  ['movePush', 'F-130-T04'],
+  ['moveApartment', 'F-130-T05'],
+  ['moveSorties', 'F-130-T06'],
+  ['moveFlow', 'F-130-T07'],
+  ['moveComms', 'F-130-T08'],
+  ['moveNext', 'F-130-T09'],
+  ['moveEva', 'F-130-T10'],
+  ['moveBases', 'F-130-T11'],
 ] as const;
 
-const HEALTH = { ok: 'OK', degraded: 'Degraded', issue: 'Issue', unknown: '—' } as const;
+const ACCENT_KEY = {
+  orange: 'accentOrange',
+  blue: 'accentBlue',
+  green: 'accentGreen',
+  violet: 'accentViolet',
+  ochre: 'accentOchre',
+} as const;
 
 /**
  * F-130-T01: the full dashboard's shell in the workspace, the second layout beside the simple page (Nodo, route `/`).
@@ -34,50 +41,60 @@ const HEALTH = { ok: 'OK', degraded: 'Degraded', issue: 'Issue', unknown: '—' 
   host: { class: 'dash', '[style]': 'theme.tokens()', '[attr.data-theme]': 'theme.choice().theme' },
   template: `
     <header class="dash-head">
-      <a class="dash-brand" routerLink="/">NERV <span>Dashboard</span></a>
+      <a class="dash-brand" routerLink="/">NERV <span>{{ t().dashBrand }}</span></a>
       <p class="feed" role="status">{{ feedLabel() }}</p>
-      <nav aria-label="Views">
-        <a routerLink="/">Simple view</a>
-        <a href="/dashboard/">Old dashboard</a>
+      <nav [attr.aria-label]="t().dashViews">
+        <a routerLink="/">{{ t().simpleView }}</a>
+        <a href="/dashboard/">{{ t().oldDashboard }}</a>
       </nav>
-      <div class="theme" role="group" aria-label="Theme">
+      <div class="theme" role="group" [attr.aria-label]="t().themeLabel">
         <label
-          >Theme
+          >Lingua / Language
+          <select #langSel [value]="lang.lang()" (change)="lang.set(langSel.value)">
+            <option value="it">Italiano</option>
+            <option value="en">English</option>
+          </select></label
+        >
+        <label
+          >{{ t().themeLabel }}
           <select #themeSel [value]="theme.choice().theme" (change)="setTheme(themeSel.value)">
-            <option value="simple">Simple</option>
-            <option value="eva">EVA</option>
+            <option value="simple">{{ t().themeSimple }}</option>
+            <option value="eva">{{ t().themeEva }}</option>
           </select></label
         >
         <label
-          >Mode
+          >{{ t().modeLabel }}
           <select #modeSel [value]="theme.choice().mode" (change)="setMode(modeSel.value)">
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
+            <option value="dark">{{ t().modeDark }}</option>
+            <option value="light">{{ t().modeLight }}</option>
           </select></label
         >
         <label
-          >Colour
+          >{{ t().colourLabel }}
           <select #accentSel [value]="theme.choice().accent" (change)="setAccent(accentSel.value)">
             @for (a of accents; track a) {
-              <option [value]="a">{{ a }}</option>
+              <option [value]="a">{{ t()[accentKey[a]] }}</option>
             }
           </select></label
         >
       </div>
     </header>
     <main>
-      <h1 class="sr-only">NERV dashboard</h1>
+      <h1 class="sr-only">{{ t().dashTitle }}</h1>
       @if (!session.token()) {
         <nerv-sign-in />
       } @else {
-        <section class="glance" aria-label="At a glance">
-          <nerv-stat label="Needs you" [value]="'' + feed.approvals().length" detail="waiting approvals" />
-          <nerv-stat label="Health" [value]="health()" detail="processes and checks" />
-          <nerv-stat label="Reminders" [value]="pending()" detail="scheduled" />
+        @if (problemText(); as text) {
+          <p role="alert" class="problem">{{ text }}</p>
+        }
+        <section class="glance" [attr.aria-label]="t().glance">
+          <nerv-stat [label]="t().needsYou" [value]="'' + feed.approvals().length" [detail]="t().needsYouDetail" />
+          <nerv-stat [label]="t().healthLabel" [value]="health()" [detail]="t().healthDetail" />
+          <nerv-stat [label]="t().reminders" [value]="pending()" [detail]="t().remindersDetail" />
         </section>
         <div class="cols">
-          <nerv-panel heading="Sorties" headingId="dash-sorties">
-            <span panel-meta class="meta">{{ feed.sorties().length }} latest</span>
+          <nerv-panel [heading]="t().sortiesTitle" headingId="dash-sorties">
+            <span panel-meta class="meta">{{ feed.sorties().length }} {{ t().sortiesLatest }}</span>
             <ul class="rows">
               @for (s of feed.sorties(); track s.realId) {
                 <li [attr.data-key]="s.realId">
@@ -85,11 +102,11 @@ const HEALTH = { ok: 'OK', degraded: 'Degraded', issue: 'Issue', unknown: '—' 
                   ><span class="state" [attr.data-state]="s.status">{{ s.status }}</span>
                 </li>
               } @empty {
-                <li class="empty">No sorties yet.</li>
+                <li class="empty">{{ t().noSorties }}</li>
               }
             </ul>
           </nerv-panel>
-          <nerv-panel heading="Waiting for you" headingId="dash-approvals">
+          <nerv-panel [heading]="t().waitingForYou" headingId="dash-approvals">
             <ul class="rows">
               @for (a of feed.approvals(); track a.id) {
                 <li [attr.data-key]="a.id">
@@ -97,18 +114,18 @@ const HEALTH = { ok: 'OK', degraded: 'Degraded', issue: 'Issue', unknown: '—' 
                   ><span class="state">{{ a.effect }}</span>
                 </li>
               } @empty {
-                <li class="empty">Nothing waits for you.</li>
+                <li class="empty">{{ t().nothingWaits }}</li>
               }
             </ul>
           </nerv-panel>
         </div>
-        <nerv-panel heading="Moving here" headingId="dash-moving">
+        <nerv-panel [heading]="t().movingHere" headingId="dash-moving">
           <p class="meta">
-            These sections still run on the <a href="/dashboard/">old dashboard</a>; each moves here in its own step.
+            {{ t().movingBefore }} <a href="/dashboard/">{{ t().oldDashboard }}</a>{{ t().movingAfter }}
           </p>
           <ul class="moving">
             @for (m of moving; track m[1]) {
-              <li>{{ m[0] }} <span class="meta">{{ m[1] }}</span></li>
+              <li>{{ t()[m[0]] }} <span class="meta">{{ m[1] }}</span></li>
             }
           </ul>
         </nerv-panel>
@@ -235,6 +252,10 @@ const HEALTH = { ok: 'OK', degraded: 'Degraded', issue: 'Issue', unknown: '—' 
     p.meta a {
       color: var(--accent);
     }
+    .problem {
+      margin: 0;
+      color: var(--danger);
+    }
     .sr-only {
       position: absolute;
       width: 1px;
@@ -248,18 +269,41 @@ export class DashboardShell {
   protected readonly session = inject(Session);
   protected readonly feed = inject(LiveFeed);
   protected readonly theme = inject(ThemeService);
+  protected readonly lang = inject(Language);
+  protected readonly t = this.lang.t;
   protected readonly accents = Object.keys(ACCENTS) as Accent[];
+  protected readonly accentKey = ACCENT_KEY;
   protected readonly moving = MOVING;
-  protected readonly health = computed(() => HEALTH[this.feed.health()]);
+  protected readonly health = computed(() => {
+    const t = this.t();
+    return { ok: t.healthOk, degraded: t.healthDegraded, issue: t.healthIssue, unknown: '—' }[this.feed.health()];
+  });
   protected readonly pending = computed(() => {
     const h = this.feed.history();
     return h ? String(h.pending) : '—';
   });
   protected readonly feedLabel = computed(() => {
-    if (!this.session.token()) return 'Not signed in';
+    const t = this.t();
+    if (!this.session.token()) return t.notSignedIn;
     const mode = this.feed.mode();
-    const how = mode === 'stream' ? 'live' : mode === 'poll' ? 'polling' : 'connecting';
-    return this.feed.stale() ? `Service not reached · ${how}` : `Connected · ${how}`;
+    const how =
+      mode === 'stream'
+        ? t.feedLive
+        : mode === 'poll'
+          ? t.feedPolling
+          : mode === 'paused'
+            ? t.feedPaused
+            : t.feedConnecting;
+    return `${this.feed.problem() ? t.feedOffline : t.feedConnected} · ${how}`;
+  });
+  /** 403 and 5xx show the server's own message; an unreachable service says so. */
+  protected readonly problemText = computed(() => {
+    const problem = this.feed.problem(),
+      t = this.t();
+    if (!problem) return '';
+    return problem.kind === 'offline'
+      ? t.feedOffline + '.'
+      : `${t.feedServerError} (${problem.status}): ${problem.message}`;
   });
 
   constructor() {
@@ -267,7 +311,19 @@ export class DashboardShell {
       const signedIn = !!this.session.token();
       untracked(() => (signedIn ? this.feed.start() : this.feed.stop()));
     });
-    inject(DestroyRef).onDestroy(() => this.feed.stop());
+    effect(() => {
+      const language = this.feed.language();
+      untracked(() => this.lang.adopt(language));
+    });
+    // A hidden page reads nothing; it reads and reconnects when it is visible again.
+    const visibility = () => (document.hidden ? this.feed.pause() : this.feed.resume());
+    document.addEventListener('visibilitychange', visibility);
+    visibility();
+    inject(DestroyRef).onDestroy(() => {
+      document.removeEventListener('visibilitychange', visibility);
+      this.feed.stop();
+      this.feed.resume();
+    });
   }
 
   protected setTheme(value: string) {
