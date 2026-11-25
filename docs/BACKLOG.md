@@ -1868,10 +1868,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-145-t01"></a>B-145-T01 — Update only changed values in the sections that rewrote the most DOM | 3 h | 0 h | 3 h | Implemented; verification pending |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 1 steps recorded) | 3 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-145-t01"></a>B-145-T01 — Update only changed values in the sections that rewrote the most DOM | 3 h | 0 h | 3 h | Implemented; verification pending | [PR #771](https://github.com/voidbrain/nerv/pull/771) |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 1 steps recorded) | 3 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1880,7 +1880,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/dashboard-live-views.test.mjs` with helper `test/fixtures/live-view.mjs` (committed failing first); owner report 2026-11-25; relates to B-144 ([#769](https://github.com/voidbrain/nerv/pull/769)) |
+| PR / evidence | Steps: B-145-T01: [PR #771](https://github.com/voidbrain/nerv/pull/771). Test: `test/dashboard-live-views.test.mjs` with helper `test/fixtures/live-view.mjs` (committed failing first); owner report 2026-11-25; relates to B-144 ([#769](https://github.com/voidbrain/nerv/pull/769)); [#771](https://github.com/voidbrain/nerv/pull/771) |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration: 2026-11-25 passed locally (`test/dashboard-live-views.test.mjs`). Browser: 2026-11-25 headless Chrome mutation count on an in-memory store (no NERV home), 1961 → 81 over two polls. Owner: Pending (expand nodes in Web Inspector in the questions strip, flow and EVA headers; they stay open through several polls). |
 | Reviewed | 2026-11-25 |
@@ -1906,10 +1906,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-146-t01"></a>B-146-T01 — Two-column Settings on a phone; Enable notifications spaced and only when possible | 1.5 h | 0 h | 1.5 h | Implemented; verification pending |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-146-t01"></a>B-146-T01 — Two-column Settings on a phone; Enable notifications spaced and only when possible | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [PR #771](https://github.com/voidbrain/nerv/pull/771) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1918,7 +1918,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/dashboard-settings.test.mjs` (committed failing first); owner feedback 2026-11-25 |
+| PR / evidence | Steps: B-146-T01: [PR #771](https://github.com/voidbrain/nerv/pull/771). Test: `test/dashboard-settings.test.mjs` (committed failing first); owner feedback 2026-11-25; [#771](https://github.com/voidbrain/nerv/pull/771) |
 | Opened | 2026-11-25 |
 | Verification | Unit: 2026-11-25 passed locally. Browser: 2026-11-25 headless Chrome on an in-memory store (no NERV home), 1440 and 390 px: two columns, `scrollWidth` equals the viewport, no Settings element past the panel's right edge; notification permission granted to see the Enable button. Device: Pending (the owner's iPhone Home Screen app: two columns, Enable only when possible). |
 | Reviewed | 2026-11-25 |
