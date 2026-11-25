@@ -41,7 +41,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 111 h agent + 14 h owner across 134 open steps of 42 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 109.75 h agent + 14 h owner across 134 open steps of 42 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1693,9 +1693,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟠 Investigate | 🔶 P2 | 🟡 Medium | 2 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-126-T03, read the Store step the next Windows failure names ("still in start-up step …") and fix that step test-first.
+💻 **→** Next: watch five Windows `npm test` runs with #767 for any "nervous process not ready" (B-126-T03).
 
 | | |
 |---|---|
@@ -1708,8 +1708,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-126-t02"></a>B-126-T02 — Say why the nervous child was not ready: its exit, last start-up step and error output | 2.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [B-126-T03](#b-126-t03) | [PR #755](https://github.com/voidbrain/nerv/pull/755) |
-| 🟡 Medium | <a id="b-126-t03"></a>B-126-T03 — Name the Store start-up step where the Windows nervous child stalls, and fix it | 1.5 h | 0 h | 1.5 h | Planned | [B-126-T02](#b-126-t02) | — | [PR #757](https://github.com/voidbrain/nerv/pull/757) |
-| 🟡 Medium | **Total** | 5.5 h | 0 h (0 of 3 steps recorded) | 2 h | 1 of 3 completed | | | |
+| 🟢 Small | <a id="b-126-t03"></a>B-126-T03 — Name and fix the Store start-up step where the Windows nervous child stalls | 1.5 h | 0 h | 0.25 h | Implemented; verification pending | [B-126-T02](#b-126-t02) | — | [PR #757](https://github.com/voidbrain/nerv/pull/757) start-up watch; [PR #767](https://github.com/voidbrain/nerv/pull/767) fix |
+| 🟢 Small | **Total** | 5.5 h | 0 h (0 of 3 steps recorded) | 0.75 h | 1 of 3 completed | | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -1726,7 +1726,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-126-T01: [PR #739](https://github.com/voidbrain/nerv/pull/739) · B-126-T02: [PR #755](https://github.com/voidbrain/nerv/pull/755) · B-126-T03: [PR #757](https://github.com/voidbrain/nerv/pull/757). [run 45632224825](https://github.com/voidbrain/nerv/actions/runs/45632224825) attempt 1 (PR #754); diagnostics in [#755](https://github.com/voidbrain/nerv/pull/755); [run 45647383080](https://github.com/voidbrain/nerv/actions/runs/45647383080) (PR #754); start-up watch in [#757](https://github.com/voidbrain/nerv/pull/757); first cause: [#739](https://github.com/voidbrain/nerv/pull/739), [archived record](archive/backlog-2026.md#b-126); [#758](https://github.com/voidbrain/nerv/pull/758) |
+| PR / evidence | Steps: B-126-T01: [PR #739](https://github.com/voidbrain/nerv/pull/739) · B-126-T02: [PR #755](https://github.com/voidbrain/nerv/pull/755) · B-126-T03: [PR #757](https://github.com/voidbrain/nerv/pull/757) start-up watch; [PR #767](https://github.com/voidbrain/nerv/pull/767) fix. [run 45632224825](https://github.com/voidbrain/nerv/actions/runs/45632224825) attempt 1 (PR #754); diagnostics in [#755](https://github.com/voidbrain/nerv/pull/755); [run 45647383080](https://github.com/voidbrain/nerv/actions/runs/45647383080) (PR #754); start-up watch in [#757](https://github.com/voidbrain/nerv/pull/757); [run 45670901865](https://github.com/voidbrain/nerv/actions/runs/45670901865) (PR #761); fix in [#767](https://github.com/voidbrain/nerv/pull/767); first cause: [#739](https://github.com/voidbrain/nerv/pull/739), [archived record](archive/backlog-2026.md#b-126); [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-24 |
 | Verification | Unit: Test: `test/process-client.test.ts` and `test/startup-watch.test.ts` (B-126 tests, failing first, passing on macOS and on Windows). CI: Pending (five Windows runs without "nervous process not ready"). |
 | Reviewed | 2026-11-25 |
