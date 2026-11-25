@@ -98,7 +98,8 @@ test('B-141: the updater status stands out with its state tone, bold and a borde
   );
 });
 
-test('B-141: Settings is two columns (schedule | pair, notifications, revoke) that stack on a phone', () => {
+// B-146 (owner, 2026-11-25): the columns no longer stack on a phone; they stay two, with tighter gaps.
+test('B-141: Settings is two columns (schedule | pair, notifications, revoke), on a phone too (B-146)', () => {
   const panel = html.slice(html.indexOf('<section class="panel" id="p-settings">'));
   const cols = panel.slice(0, panel.indexOf('</section>'));
   assert.match(
@@ -106,7 +107,7 @@ test('B-141: Settings is two columns (schedule | pair, notifications, revoke) th
     /<div class="cols-2" id="settings-cols">\s*<div class="pad" id="settings"><\/div>\s*<div>\s*<div class="pad" id="settings-devices"><\/div>\s*<div class="pad" id="settings-push"><\/div>\s*<\/div>\s*<\/div>/,
   );
   assert.match(css('.cols-2'), /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
-  assert.match(html, /@media \(max-width:720px\) \{ \.cols-2 \{ grid-template-columns:minmax\(0,1fr\); \} \}/);
+  assert.doesNotMatch(html, /\.cols-2 \{ grid-template-columns:minmax\(0,1fr\); \}/);
   assert.match(css('.field-grid'), /grid-template-columns:auto minmax\(0,1fr\)/);
 
   const settings = live.slice(live.indexOf('window.renderSettings ='), live.indexOf('function readSettingsDraft()'));

@@ -154,6 +154,70 @@ function placeholder(key) {
   x.strokeStyle = a.color; x.lineWidth = 1; x.strokeRect(0.5, 0.5, W - 1, H - 1);
   return (placeholders[key] = c.toDataURL());
 }
+/* B-145, live views: render once, then update only the values that changed. setText and setAttr write only a changed
+   value; patchHTML compares new markup with the DOM and changes only what differs (a text node's data, a changed
+   attribute, a row added, removed or moved; rows matched by data-key or id, other nodes by position). Unchanged nodes stay
+   the same objects, so focus, scroll, an open <details> and the nodes expanded in Web Inspector survive a poll. Attributes
+   are compared with the markup last rendered, so one a script set later (an avatar's src) is left alone. A polled section
+   never gets innerHTML after its first render. New UI goes in the Angular workspace, not here. */
+/** One attribute of a live element, written only when its value changes. */
+function setAttr(el, name, value) { if (el && el.getAttribute(name) !== value) el.setAttribute(name, value); }
+function setText(el, text) {
+  if (!el) return false;
+  text = text == null ? "" : String(text);
+  const only = el.childNodes.length === 1 && el.firstChild.nodeType === 3 ? el.firstChild : null;
+  if (only) { if (only.data === text) return false; only.data = text; return true; }
+  if (!el.firstChild && !text) return false;
+  el.textContent = text; return true;
+}
+function patchHTML(el, html) {
+  if (!el) return false;
+  html = String(html);
+  if (el._nervHtml === html) return false;
+  const first = el._nervHtml === undefined; el._nervHtml = html;
+  if (first) { el.innerHTML = html; patchHTML.remember(el); return true; }
+  const doc = el.ownerDocument, tpl = doc.createElement("template");
+  const svg = el.namespaceURI === "http://www.w3.org/2000/svg";
+  tpl.innerHTML = svg ? "<svg>" + html + "</svg>" : html;
+  patchHTML.children(el, svg ? tpl.content.firstChild : tpl.content);
+  return true;
+}
+patchHTML.attrs = n => { const o = {}; for (const a of n.attributes) o[a.name] = a.value; return o; };
+patchHTML.remember = root => { if (root.nodeType !== 1 && root.nodeType !== 11) return; if (root.nodeType === 1) root._nervAttrs = patchHTML.attrs(root); for (const c of root.children) patchHTML.remember(c); };
+patchHTML.key = n => { if (n.nodeType !== 1) return null; const k = n.getAttribute("data-key") || n.getAttribute("id"); return k ? n.nodeName + "|" + k : null; };
+patchHTML.children = (parent, from) => {
+  const keyed = new Map();
+  for (let c = parent.firstChild; c; c = c.nextSibling) { const k = patchHTML.key(c); if (k && !keyed.has(k)) keyed.set(k, c); }
+  let cur = parent.firstChild;
+  for (let n = from.firstChild; n; n = n.nextSibling) {
+    const k = patchHTML.key(n);
+    let match = null;
+    if (k) { match = keyed.get(k) || null; keyed.delete(k); }
+    else if (cur && !patchHTML.key(cur) && cur.nodeType === n.nodeType && cur.nodeName === n.nodeName) match = cur;
+    if (match) {
+      if (match === cur) cur = cur.nextSibling; else parent.insertBefore(match, cur);
+      patchHTML.node(match, n);
+    } else {
+      const fresh = parent.ownerDocument.importNode(n, true); patchHTML.remember(fresh); parent.insertBefore(fresh, cur);
+    }
+  }
+  while (cur) { const next = cur.nextSibling; parent.removeChild(cur); cur = next; }
+};
+patchHTML.node = (a, b) => {
+  if (a.nodeType !== 1) { if (a.data !== b.data) a.data = b.data; return; }
+  const prev = a._nervAttrs || patchHTML.attrs(a), next = patchHTML.attrs(b);
+  const live = (k, v) => {
+    // A form control's live state follows its markup only where the markup changed, and never under the owner's cursor.
+    if (k === "value" && "value" in a && a !== a.ownerDocument.activeElement) a.value = v == null ? "" : v;
+    else if (k === "checked" && "checked" in a) a.checked = v != null;
+    else if (k === "selected" && "selected" in a) a.selected = v != null;
+  };
+  for (const k in prev) if (!(k in next) && a.hasAttribute(k)) { a.removeAttribute(k); live(k, null); }
+  for (const k in next) if (prev[k] !== next[k]) { a.setAttribute(k, next[k]); live(k, next[k]); }
+  a._nervAttrs = next;
+  if (a.nodeName === "TEXTAREA") { if (b.value !== a.defaultValue) { a.defaultValue = b.value; if (a !== a.ownerDocument.activeElement) a.value = b.value; } return; }
+  patchHTML.children(a, b);
+};
 function fillAvatars(root) {
   (root || document).querySelectorAll("img[data-av]").forEach(img => {
     const a = ASSETS[img.dataset.av]; if (!a || img.dataset.done === img.dataset.av) return;
@@ -346,24 +410,24 @@ function seed() {
 function renderQuestions() {
   const n = state.approvals.length;
   const qn = document.getElementById("q-needs");
-  document.getElementById("qv-needs").textContent = n;
-  document.getElementById("qd-needs").textContent = n ? state.approvals.map(a => a.action.tool).join(" · ") : "nothing waits for you";
+  setText(document.getElementById("qv-needs"), n);
+  setText(document.getElementById("qd-needs"), n ? state.approvals.map(a => a.action.tool).join(" · ") : "nothing waits for you");
   qn.classList.toggle("alert", n > 0);
   const away = awaySummary();
-  document.getElementById("qv-away").textContent = away.done + " done";
-  document.getElementById("qd-away").textContent = away.expired + " expired · " + away.failed + " failed · " + away.delivered + " reminders";
+  setText(document.getElementById("qv-away"), away.done + " done");
+  setText(document.getElementById("qd-away"), away.expired + " expired · " + away.failed + " failed · " + away.delivered + " reminders");
   document.getElementById("q-away").classList.toggle("attn", away.expired + away.failed > 0);
   const next = state.upcoming.filter(u => u.at > Date.now()).sort((a, b) => a.at - b.at)[0];
-  document.getElementById("qv-next").textContent = next ? hhmm(next.at) : "—";
-  document.getElementById("qd-next").textContent = next ? next.title + " · in " + ago(Date.now() - (next.at - Date.now())) : "nothing scheduled";
+  setText(document.getElementById("qv-next"), next ? hhmm(next.at) : "—");
+  setText(document.getElementById("qd-next"), next ? next.title + " · in " + ago(Date.now() - (next.at - Date.now())) : "nothing scheduled");
   const h = healthIssues();
-  document.getElementById("qv-health").textContent = h.length ? h.length + " issue" + (h.length > 1 ? "s" : "") : "OK";
-  document.getElementById("qd-health").textContent = h.length ? h.map(x => x.short).join(" · ") : "all checks pass";
+  setText(document.getElementById("qv-health"), h.length ? h.length + " issue" + (h.length > 1 ? "s" : "") : "OK");
+  setText(document.getElementById("qd-health"), h.length ? h.map(x => x.short).join(" · ") : "all checks pass");
   document.getElementById("q-health").classList.toggle("alert", h.some(x => x.sev === "danger"));
   document.getElementById("q-health").classList.toggle("attn", h.length > 0 && !h.some(x => x.sev === "danger"));
   const fc = forecast();
-  document.getElementById("qv-budget").textContent = "$" + state.spentToday.toFixed(2);
-  document.getElementById("qd-budget").textContent = "of $" + SCROLLS.dailyBudget.toFixed(2) + " · forecast $" + fc.toFixed(2);
+  setText(document.getElementById("qv-budget"), "$" + state.spentToday.toFixed(2));
+  setText(document.getElementById("qd-budget"), "of $" + SCROLLS.dailyBudget.toFixed(2) + " · forecast $" + fc.toFixed(2));
   document.getElementById("q-budget").classList.toggle("attn", fc > SCROLLS.dailyBudget * 0.8);
 }
 function awaySummary() {
@@ -388,8 +452,8 @@ function healthIssues() {
 /* ================= RENDER: needs you ================= */
 function renderNeeds() {
   const box = document.getElementById("needs-list");
-  document.getElementById("needs-count").textContent = state.approvals.length;
-  if (!state.approvals.length) { box.innerHTML = "<div class='muted small'>Nothing needs you. When an action needs your yes, its card appears here with the exact action, why it stopped and when it expires: answer here, with the keys a and r, or on Telegram.</div>"; return; }
+  setText(document.getElementById("needs-count"), state.approvals.length);
+  if (!state.approvals.length) { patchHTML(box, "<div class='muted small'>Nothing needs you. When an action needs your yes, its card appears here with the exact action, why it stopped and when it expires: answer here, with the keys a and r, or on Telegram.</div>"); return; }
   if (armed && !state.approvals.some(ap => ap.id === armed.id)) armed = null;
   const grouped = []; const memoryBySortie = new Map();
   state.approvals.forEach(ap => {
@@ -397,7 +461,7 @@ function renderNeeds() {
     const existing = memoryBySortie.get(ap.sortie);
     if (existing) existing.push(ap); else { const group = [ap]; memoryBySortie.set(ap.sortie, group); grouped.push(group); }
   });
-  box.innerHTML = grouped.map(group => {
+  patchHTML(box, grouped.map(group => {
     if (group.length > 1) return renderMemoryCard(group);
     const ap = group[0];
     const a = ap.action, b = ap.ballot, s = state.sorties.find(x => x.id === ap.sortie);
@@ -415,7 +479,7 @@ function renderNeeds() {
       "<div class='row small' style='margin-top:4px'><span class='muted'>asked " + ago(ap.created) + " ago</span><span class='" + (left < 15 * MIN ? "warn b" : "muted") + "'>expires in " + mm + ":" + String(ss).padStart(2, "0") + " · expiry never approves</span></div>" +
       "<div class='acts'><button class='btn primary' data-ap='" + ap.id + "' data-d='approve' aria-keyshortcuts='a'>Approve once</button><button class='btn' data-ap='" + ap.id + "' data-d='edit'>Edit → Misato</button><button class='btn danger' data-ap='" + ap.id + "' data-d='reject' aria-keyshortcuts='r'>Reject</button></div>" +
       "</article>";
-  }).join("") + "<div class='tiny muted keyhint'>Keys: <kbd>a</kbd> approve · <kbd>r</kbd> reject (press twice to confirm; the focused card, else the first) · <kbd>/</kbd> search sorties</div>";
+  }).join("") + "<div class='tiny muted keyhint'>Keys: <kbd>a</kbd> approve · <kbd>r</kbd> reject (press twice to confirm; the focused card, else the first) · <kbd>/</kbd> search sorties</div>");
 }
 function spellingFixHtml(ap) {
   const args = ap.action && ap.action.args;
@@ -521,7 +585,7 @@ function setNodeTime(id, text) {
     const host = id === "magi" ? el.querySelector(".mtitle") : el.querySelector(".st");
     if (host) host.appendChild(tag);
   }
-  tag.textContent = text || "";
+  setText(tag, text || "");
 }
 function updateActiveNodeTime() {
   const s = state.sorties.find(x => x.id === state.selected);
@@ -582,14 +646,15 @@ function sephirotEvaLabel(s, a, b) {
 function renderFlow() {
   const real = state.sorties.find(x => x.id === state.selected);
   const s = real && state.replay && state.replay.id === real.id && state.replay.k < replayOrder(real).length ? replayFrame(real, state.replay.k) : real;
-  document.getElementById("flow-sub").textContent = s ? s.id : "no sortie selected";
-  document.getElementById("flow-note").textContent = s ? (s.note || s.outcome || "") : "Select a sortie, or launch one.";
+  setText(document.getElementById("flow-sub"), s ? s.id : "no sortie selected");
+  setText(document.getElementById("flow-note"), s ? (s.note || s.outcome || "") : "Select a sortie, or launch one.");
   // sephirot nodes
   // Misato's apartment passed means the owner decided: it takes the decision colour, like its lines (owner, 2026-11-05).
-  { const sd = document.querySelector(".snode[data-n='detect'] .sd"); if (sd) sd.textContent = s && s.forwarded ? "forwarded to " + s.forwarded : s && s.origin ? "from " + s.origin : "Aoba comms · Hyuga watch"; }
-  { const sd = document.getElementById("sd-debrief"); if (sd) sd.textContent = s && s.forwarded ? (s.status === "active" ? "awaiting " + s.forwarded : "returned from " + s.forwarded) : s && s.origin ? "reply to " + s.origin : "Central Dogma · what is now known"; }
-  { const sd = document.getElementById("sd-consult"); if (sd) sd.textContent = !s ? "no vote · advice into the LCL" : s.advisor ? "advised by " + s.advisor : s.phase === "consult" && s.status === "active" ? "advising · no vote" : "no advice"; }
-  document.querySelectorAll(".snode[data-n]").forEach(el => { el.classList.remove("on", "done", "wait", "skip", "owner"); const st = stepState(s, el.dataset.n); if (st) el.classList.add(st); if (st === "done" && el.dataset.n === "apt") el.classList.add("owner"); });
+  { const sd = document.querySelector(".snode[data-n='detect'] .sd"); if (sd) setText(sd, s && s.forwarded ? "forwarded to " + s.forwarded : s && s.origin ? "from " + s.origin : "Aoba comms · Hyuga watch"); }
+  { const sd = document.getElementById("sd-debrief"); if (sd) setText(sd, s && s.forwarded ? (s.status === "active" ? "awaiting " + s.forwarded : "returned from " + s.forwarded) : s && s.origin ? "reply to " + s.origin : "Central Dogma · what is now known"); }
+  { const sd = document.getElementById("sd-consult"); if (sd) setText(sd, !s ? "no vote · advice into the LCL" : s.advisor ? "advised by " + s.advisor : s.phase === "consult" && s.status === "active" ? "advising · no vote" : "no advice"); }
+  // B-145: each state class is toggled to its value, never removed and added back, so an unchanged node is not touched.
+  document.querySelectorAll(".snode[data-n]").forEach(el => { const st = stepState(s, el.dataset.n); for (const c of ["on", "done", "wait", "skip"]) el.classList.toggle(c, st === c); el.classList.toggle("owner", st === "done" && el.dataset.n === "apt"); });
   // F-052-T04: live elapsed time on the active node, finished time on completed nodes (B-040).
   STEP_IDS.forEach(id => {
     const st = stepState(s, id);
@@ -606,35 +671,35 @@ function renderFlow() {
   if (s && s.status === "active" && !state.replay) liveFlowTimer = setInterval(updateActiveNodeTime, 1000);
   // timeline
   const steps = L().steps; const b = s && s.ballot;
-  document.getElementById("timeline").innerHTML = STEP_IDS.map((id, i) => {
+  patchHTML(document.getElementById("timeline"), STEP_IDS.map((id, i) => {
     let inner = "<span class='n'>" + (i + 1) + "</span>" + esc(steps[id]);
     if (id === "magi") inner += "<div class='tmagi'>" + ["melchior", "balthasar", "casper"].map(seat => { const v = b ? (b.verdicts.find(x => x.seat === seat) || { vote:"none" }).vote : (s && s.phase === "magi" ? "pending" : "none"); return "<span class='tseat " + v + "' title='" + seat + "'>" + L().short[seat] + "</span>"; }).join("") + "</div>";
     if (id === "sync" && b) inner += "<div class='tiny'>" + b.sync.value + "%</div>";
     return (i ? "<span class='tarrow'>→</span>" : "") + "<div class='tstep " + stepState(s, id) + (id === "apt" && stepState(s, id) === "done" ? " owner" : "") + "'>" + inner + "</div>";
-  }).join("");
+  }).join(""));
   // magi big
   document.getElementById("magi-big").classList.toggle("on", stepState(s, "magi") === "on");
   const a = s && s.actions[Math.min(s.current, s.actions.length - 1)];
-  document.getElementById("mt-action").textContent = a ? a.tool : "no action";
+  setText(document.getElementById("mt-action"), a ? a.tool : "no action");
   ["melchior", "balthasar", "casper"].forEach(seat => {
     const el = document.querySelector(".mseat[data-seat='" + seat + "']");
     let v = "none", label = "—", metric = seatMetric(seat, s, a);
     if (b) { const vv = b.verdicts.find(x => x.seat === seat); if (vv) { v = vv.vote; label = vv.vote === "approve" ? "承認 APPROVE" : vv.vote === "reject" ? "否決 REJECT" : "ABSTAIN"; } else { v = "none"; label = seat === "casper" ? "NOT NEEDED" : "—"; } }
     else if (s && s.phase === "magi") { v = "pending"; label = "審議中 VOTING"; }
     if (state.theme !== "eva") label = label.replace(/^[^\x00-\x7F]+ /, "");
-    el.dataset.v = v; el.querySelector(".mv").textContent = label; el.querySelector("[data-m]").textContent = metric;
+    setAttr(el, "data-v", v); setText(el.querySelector(".mv"), label); setText(el.querySelector("[data-m]"), metric);
   });
-  document.getElementById("magi-extras").innerHTML = b ? b.verdicts.filter(v => v.seat.startsWith("extra:")).map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>+ " + esc(baseName(v.seat.slice(6))) + (v.shadow ? " · shadow, not counted" : " · veto-only") + (v.durationMs != null ? " · " + formatDurationMs(v.durationMs) : "") + "</span>").join("") : "";
-  document.getElementById("mres-out").textContent = b ? b.outcome.toUpperCase() : "—";
-  document.getElementById("mres-out").className = b ? (b.outcome === "grant" ? "ok" : b.outcome === "reject" ? "danger" : "warn") : "";
-  document.getElementById("mres-pattern").innerHTML = b ? "<span class='badge b-" + b.pattern + "'>PATTERN " + b.pattern.toUpperCase() + "</span>" : "—";
-  document.getElementById("mres-reason").textContent = b ? b.reason : "—";
-  document.getElementById("sd-sync").textContent = b ? b.sync.value + "% · " + (b.outcome === "grant" ? "field signed" : "to owner") : "≥ 80 % · not Blue";
-  document.getElementById("sd-plan").textContent = s ? "action " + Math.min(s.current + 1, s.actions.length) + "/" + s.actions.length : "next action";
-  document.getElementById("sd-route").textContent = s ? (s.status === "waiting-route" ? "no route · waits" : "S² local · $" + s.battery.toFixed(2) + " battery") : "route · battery";
-  document.getElementById("sd-intake").textContent = s ? "provenance: " + s.trust : "intake · provenance";
+  patchHTML(document.getElementById("magi-extras"), b ? b.verdicts.filter(v => v.seat.startsWith("extra:")).map(v => "<span class='vchip " + v.vote + (v.shadow ? " shadow" : "") + "'>+ " + esc(baseName(v.seat.slice(6))) + (v.shadow ? " · shadow, not counted" : " · veto-only") + (v.durationMs != null ? " · " + formatDurationMs(v.durationMs) : "") + "</span>").join("") : "");
+  setText(document.getElementById("mres-out"), b ? b.outcome.toUpperCase() : "—");
+  setAttr(document.getElementById("mres-out"), "class", b ? (b.outcome === "grant" ? "ok" : b.outcome === "reject" ? "danger" : "warn") : "");
+  patchHTML(document.getElementById("mres-pattern"), b ? "<span class='badge b-" + b.pattern + "'>PATTERN " + b.pattern.toUpperCase() + "</span>" : "—");
+  setText(document.getElementById("mres-reason"), b ? b.reason : "—");
+  setText(document.getElementById("sd-sync"), b ? b.sync.value + "% · " + (b.outcome === "grant" ? "field signed" : "to owner") : "≥ 80 % · not Blue");
+  setText(document.getElementById("sd-plan"), s ? "action " + Math.min(s.current + 1, s.actions.length) + "/" + s.actions.length : "next action");
+  setText(document.getElementById("sd-route"), s ? (s.status === "waiting-route" ? "no route · waits" : "S² local · $" + s.battery.toFixed(2) + " battery") : "route · battery");
+  setText(document.getElementById("sd-intake"), s ? "provenance: " + s.trust : "intake · provenance");
   const evaInfo = sephirotEvaLabel(s, a, b);
-  document.getElementById("sd-eva").textContent = evaInfo.text;
+  setText(document.getElementById("sd-eva"), evaInfo.text);
   { const img = document.getElementById("av-eva-node"); const k = evaInfo.avatar || (b ? b.executor.toLowerCase() : "eva-01"); if (img.dataset.av !== k) { img.dataset.av = k; fillAvatars(img.parentNode); } }
   drawEdges(s);
   renderDetail(s);
@@ -677,7 +742,7 @@ function drawEdges(s) {
   const svg = document.getElementById("edges"); const host = document.getElementById("sephirot").getBoundingClientRect();
   if (!host.width) return;
   const c = el => { const r = el.getBoundingClientRect(); return { x:r.left - host.left + r.width / 2, y:r.top - host.top + r.height / 2, w:r.width, h:r.height, l:r.left - host.left, r:r.right - host.left, t:r.top - host.top, b:r.bottom - host.top }; };
-  svg.setAttribute("viewBox", "0 0 " + host.width + " " + host.height);
+  setAttr(svg, "viewBox", "0 0 " + host.width + " " + host.height);
   // Orthogonal routing: every line leaves and enters a node only at the middle of its N, S, E or W side, with 90° turns
   // in the gaps between nodes; the loops back to Misato run in their own lanes in the right padding, never behind a node.
   // One shared turning height per fan-out (edges leaving the same node downwards) and per merge (edges entering the
@@ -712,12 +777,12 @@ function drawEdges(s) {
           : "edge-arrow";
     return "<path d='" + d + "' class='" + cls + "' marker-end='url(#" + markerId + ")'/>";
   }).join("");
-  svg.innerHTML = "<defs>" +
+  patchHTML(svg, "<defs>" +
     "<marker id='edge-arrow' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='var(--accent)' fill-opacity='0.45'/></marker>" +
     "<marker id='edge-arrow-passed' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='var(--ok)'/></marker>" +
     "<marker id='edge-arrow-owner' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='var(--warn)'/></marker>" +
     "<marker id='edge-arrow-skip' viewBox='0 0 6 6' refX='5' refY='3' markerWidth='8' markerHeight='8' markerUnits='userSpaceOnUse' orient='auto-start-reverse'><path d='M0,0 L6,3 L0,6 z' fill='var(--accent)' fill-opacity='0.22'/></marker>" +
-    "</defs>" + paths;
+    "</defs>" + paths);
 }
 /** The route already taken: green when the step passed on its own, yellow when it went through the owner's decision
     (Misato's apartment), faded into a skipped step. Step activity is shown on nodes; route history never claims an ongoing communication. */
@@ -1198,8 +1263,8 @@ function drawHeartbeats(now) {
     const off = !anyOnline;
     const st = document.getElementById("cs-" + c.name);
     if (st) {
-      st.textContent = off ? "OFFLINE" : busy ? items.length + " ACTIVE" : "IDLE";
-      st.className = "tiny " + (off ? "muted" : busy ? "ok" : "muted");
+      setText(st, off ? "OFFLINE" : busy ? items.length + " ACTIVE" : "IDLE");
+      setAttr(st, "class", "tiny " + (off ? "muted" : busy ? "ok" : "muted"));
     }
     const dpr = window.devicePixelRatio || 1; const w = cv.clientWidth || 120, h = 30;
     if (cv.width !== Math.floor(w * dpr)) { cv.width = Math.floor(w * dpr); cv.height = Math.floor(h * dpr); }

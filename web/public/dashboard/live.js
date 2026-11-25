@@ -1256,7 +1256,7 @@
   function renderDevices() {
     const box = document.getElementById("settings-devices"); if (!box) return;
     const list = state.devices, msg = state.devicesMsg;
-    box.innerHTML = "<div class='row small' style='justify-content:space-between;align-items:center'><b>Paired devices</b><span class='row' style='gap:4px'><button class='btn sm' type='button' id='btn-pair-device'>Pair a device</button><button class='btn sm' type='button' id='btn-devices-refresh'>Refresh</button></span></div>" + pairingHtml() +
+    box.innerHTML = "<div class='row small settings-head'><b>Paired devices</b><span class='row' style='gap:4px'><button class='btn sm' type='button' id='btn-pair-device'>Pair a device</button><button class='btn sm' type='button' id='btn-devices-refresh'>Refresh</button></span></div>" + pairingHtml() +
       (list === null ? "<div class='tiny muted'>Loading…</div>" : !list.length ? "<div class='tiny muted'>No paired devices. Pair a phone with Pair a device or nerv open --phone --qr.</div>" :
         "<div class='list'>" + list.map(d => "<div class='row small' data-device='" + esc(d.id) + "' style='justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap'>" +
           "<span><b>" + esc(d.name) + "</b>" + (d.current ? " <span class='ok'>· this device</span>" : "") +
@@ -1325,27 +1325,31 @@
   // then subscribes with the service's VAPID key through this page's own worker (sw.js, scope /dashboard/) and
   // registers the subscription with POST /api/push/subscribe, as the workspace's push toggle (web/src/main.ts) does;
   // Turn off removes it from the service, then unsubscribes here. A paired device may do both, like a dashboard session.
-  state.push = { busy:false, on:false, msg:null };
+  state.push = { busy:false, on:false, checked:false, broken:false, msg:null };
   const pushSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
   let pushReady = null;
   const pushWorker = () => pushReady || (pushReady = navigator.serviceWorker.register("/dashboard/sw.js", { scope:"/dashboard/" }).then(() => navigator.serviceWorker.ready).catch(e => { pushReady = null; throw e; }));
   const vapidKey = s => Uint8Array.from(atob((s + "=".repeat((4 - s.length % 4) % 4)).replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
   function pushView() {
     if (!pushSupported()) return ["muted", !INSTALLED && "standalone" in navigator ? "Notifications need the Home Screen app: in Safari, Share → Add to Home Screen, open NERV from the Home Screen and enable them there." : "This browser cannot receive notifications.", ""];
-    if (Notification.permission === "denied") return ["warn", "Blocked: notifications for NERV are turned off on this device. Allow them in the phone's Settings → Notifications → NERV (or the browser's site settings), then reload.", ""];
+    // B-146: Enable shows only when enabling can work: push supported, permission not denied, this device not subscribed.
+    if (Notification.permission === "denied") return ["muted", "Blocked on this device: allow notifications for NERV in its settings, then reload.", ""];
+    if (!state.push.checked) return ["muted", "Checking this device…", ""];
     if (state.push.on) return ["ok", "On: this device is subscribed; reminders that fall due are sent here.", "<button class='btn sm' type='button' id='btn-push-disable'>Turn off</button>"];
+    if (state.push.broken) return ["muted", "Notifications cannot be set up on this device now.", ""];
     return ["muted", "Off. Press Enable notifications and allow them when asked.", "<button class='btn sm primary' type='button' id='btn-push-enable'>Enable notifications</button>"];
   }
   function renderPush() {
     const box = document.getElementById("settings-push"); if (!box) return;
     const p = state.push, [kind, text, button] = pushView();
-    box.innerHTML = "<div class='row small' style='justify-content:space-between;align-items:center'><b>Notifications</b>" + (p.busy ? "<button class='btn sm' type='button' disabled>Working…</button>" : button) + "</div>" +
+    box.innerHTML = "<div class='row small settings-head'><b>Notifications</b>" + (p.busy ? "<button class='btn sm' type='button' disabled>Working…</button>" : button) + "</div>" +
       "<div role='status' class='tiny " + kind + "'>" + esc(text) + "</div>" + (p.msg ? "<div role='alert' class='tiny " + p.msg.kind + "'>" + esc(p.msg.text) + "</div>" : "");
   }
   async function loadPush() {
     if (pushSupported()) {
-      try { state.push.on = !!(await (await pushWorker()).pushManager.getSubscription()); }
-      catch (e) { state.push.msg = { kind:"danger", text:"Notifications unavailable: " + e.message }; }
+      try { state.push.on = !!(await (await pushWorker()).pushManager.getSubscription()); state.push.broken = false; }
+      catch (e) { state.push.broken = true; state.push.msg = { kind:"danger", text:"Notifications unavailable: " + e.message }; }
+      state.push.checked = true;
     }
     renderPush();
   }
@@ -1406,17 +1410,17 @@
     poll();
   };
   window.renderQuestions = function () {
-    const n = state.approvals.length; document.getElementById("qv-needs").textContent = n;
-    document.getElementById("qd-needs").textContent = n ? state.approvals.map(a => a.action.tool).join(" · ") : "nothing waits for you"; document.getElementById("q-needs").classList.toggle("alert", n > 0);
+    const n = state.approvals.length; setText(document.getElementById("qv-needs"), n);
+    setText(document.getElementById("qd-needs"), n ? state.approvals.map(a => a.action.tool).join(" · ") : "nothing waits for you"); document.getElementById("q-needs").classList.toggle("alert", n > 0);
     { const ended = state.sorties.filter(s => s.ended && s.ended > state.lastVisit); const c = st => ended.filter(s => s.status === st).length; const delivered = state.deliveredSince === state.lastVisit ? state.deliveredCount || 0 : 0;
-      document.getElementById("qv-away").textContent = c("done") + " done"; document.getElementById("qd-away").textContent = c("failed") + " failed · " + c("stood-down") + " stopped · " + delivered + " reminders";
+      setText(document.getElementById("qv-away"), c("done") + " done"); setText(document.getElementById("qd-away"), c("failed") + " failed · " + c("stood-down") + " stopped · " + delivered + " reminders");
       document.getElementById("q-away").classList.toggle("attn", c("failed") + c("stood-down") > 0); }
     const next = state.upcoming.filter(u => u.at > Date.now()).sort((a, b) => a.at - b.at)[0];
-    document.getElementById("qv-next").textContent = next ? (next.label || hhmm(next.at)) : "—"; document.getElementById("qd-next").textContent = next ? next.title : "nothing scheduled";
+    setText(document.getElementById("qv-next"), next ? (next.label || hhmm(next.at)) : "—"); setText(document.getElementById("qd-next"), next ? next.title : "nothing scheduled");
     const p = (state.doctor || {}).processes || {}; const bad = !p.nervous || p.brainAlive === false; const degraded = ((state.doctor || {}).degraded || []).length > 0;
-    document.getElementById("qv-health").textContent = bad ? "issue" : degraded ? "degraded" : "OK"; document.getElementById("qd-health").textContent = bad ? "a process is down" : degraded ? degradedSummary(state.doctor.degraded) : "all checks pass";
+    setText(document.getElementById("qv-health"), bad ? "issue" : degraded ? "degraded" : "OK"); setText(document.getElementById("qd-health"), bad ? "a process is down" : degraded ? degradedSummary(state.doctor.degraded) : "all checks pass");
     document.getElementById("q-health").classList.toggle("alert", bad); document.getElementById("q-health").classList.toggle("attn", !bad && degraded);
-    const usage = usageView(usagePage); document.querySelector('[data-l="qBudget"]').textContent = "Model usage"; document.getElementById("qv-budget").textContent = usagePage ? usagePage.items.length + " calls" : "—"; document.getElementById("qd-budget").textContent = usageError ? "Accounting refresh unavailable" : "Loaded page · " + usage.heading;
+    const usage = usageView(usagePage); setText(document.querySelector('[data-l="qBudget"]'), "Model usage"); setText(document.getElementById("qv-budget"), usagePage ? usagePage.items.length + " calls" : "—"); setText(document.getElementById("qd-budget"), usageError ? "Accounting refresh unavailable" : "Loaded page · " + usage.heading);
   };
   state.upcoming = []; state.selected = null; renderAll();
   /* B-005: live mode suggests only what a live base answers (the simulation's status · approve AP-… commands are demo-only). */
