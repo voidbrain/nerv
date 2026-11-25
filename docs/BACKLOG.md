@@ -2287,7 +2287,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.5 h | [F-125-T01](#f-125-t01) | — | 🤖 | — | — |
 
-💻 **→** Next: merge the PR below after F-125-T01 (PR #753); then close on green CI.
+💻 **→** Next: merge PR #754 after F-125-T01 (PR #753); then close on green CI.
 
 | | |
 |---|---|
@@ -2297,10 +2297,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-127-t01"></a>F-127-T01 — Set conventions.sourceDirs to web/src and src | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [F-125-T01](#f-125-t01) | — |
-| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-127-t01"></a>F-127-T01 — Set conventions.sourceDirs to web/src and src | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [F-125-T01](#f-125-t01) | — | [PR #754](https://github.com/voidbrain/nerv/pull/754) |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2309,7 +2309,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | F-127-T01 in PR_PLACEHOLDER |
+| PR / evidence | Steps: F-127-T01: [PR #754](https://github.com/voidbrain/nerv/pull/754). F-127-T01 in [PR #754](https://github.com/voidbrain/nerv/pull/754) |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-25 |
