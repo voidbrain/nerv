@@ -471,6 +471,102 @@ describe('F-098-T06: fleet.chat executor joins the edit phrases to the real stor
   });
 });
 
+describe('B-137: adding a drone with its model and version never misreads them as part categories', () => {
+  it('records "modello M, v. 5.1" and English "model M, v. 5.1" with joined version as frame and drone_models link', () => {
+    withStore((store) => {
+      const run = (phrase: string) =>
+        execute(store as unknown as Parameters<typeof execute>[0], 'fleet.chat', { phrase }) as {
+          handled: boolean;
+          reply?: string;
+          needsAnswer?: boolean;
+        };
+
+      const itReply = run('aggiungi il drone Testdrone, modello Testframe 5, v. 5.1');
+      assert.equal(itReply.handled, true);
+      assert.equal(itReply.needsAnswer, undefined);
+      assert.equal(store.fleet.getDroneByName('Testdrone')?.frame, 'Testframe 5 v5.1');
+      assert.equal(store.fleet.droneModel('Testdrone')?.name, 'Testframe 5 v5.1');
+
+      const enReply = run('add drone Testwing, model Testwing 4, v. 5.1');
+      assert.equal(enReply.handled, true);
+      assert.equal(enReply.needsAnswer, undefined);
+      assert.equal(store.fleet.getDroneByName('Testwing')?.frame, 'Testwing 4 v5.1');
+      assert.equal(store.fleet.droneModel('Testwing')?.name, 'Testwing 4 v5.1');
+
+      const withParts = run('aggiungi il drone Testmicro, modello Testmicro 3, v3.2, motori Testmot 1404');
+      assert.equal(withParts.handled, true);
+      assert.equal(withParts.needsAnswer, undefined);
+      assert.equal(store.fleet.getDroneByName('Testmicro')?.frame, 'Testmicro 3 v3.2');
+      assert.equal(store.fleet.droneModel('Testmicro')?.name, 'Testmicro 3 v3.2');
+      assert.equal(store.fleet.listParts('Testmicro').filter((p) => p.category === 'motor').length, 4);
+
+      const enVersionWord = run('add new drone Testcine, model Testcine 35, version 2.0');
+      assert.equal(enVersionWord.handled, true);
+      assert.equal(enVersionWord.needsAnswer, undefined);
+      assert.equal(store.fleet.getDroneByName('Testcine')?.frame, 'Testcine 35 v2.0');
+      assert.equal(store.fleet.droneModel('Testcine')?.name, 'Testcine 35 v2.0');
+
+      // Links to an existing drone_models row and inherits its printed parts when already present.
+      store.fleet.addDroneModel({ name: 'Prebuilt 5 v5.1' });
+      store.fleet.addPrintedPart(
+        'Prebuilt 5 v5.1',
+        { name: 'motor foot', file: 'prebuilt-5/foot.stl', count: 4, profile: 'Test TPU' },
+        ['Test TPU'],
+      );
+      const linked = run('aggiungi il drone Testlinked, modello Prebuilt 5, v. 5.1');
+      assert.equal(linked.handled, true);
+      assert.equal(linked.needsAnswer, undefined);
+      assert.equal(store.fleet.droneModel('Testlinked')?.name, 'Prebuilt 5 v5.1');
+      assert.equal(store.fleet.printedPartsForDrone('Testlinked').length, 1);
+    });
+  });
+
+  it('"con frame <model> v5.1" and "with model <model>" join the name without a comma (the owner\'s second phrase)', () => {
+    withStore((store) => {
+      const run = (phrase: string) =>
+        execute(store as unknown as Parameters<typeof execute>[0], 'fleet.chat', { phrase }) as {
+          handled: boolean;
+          needsAnswer?: boolean;
+        };
+      const withFrame = run('aggiungi il drone Testsmoke con frame Testframe 5 v5.1');
+      assert.equal(withFrame.handled, true);
+      assert.equal(withFrame.needsAnswer, undefined);
+      assert.equal(store.fleet.getDroneByName('Testsmoke')?.frame, 'Testframe 5 v5.1');
+
+      const withModel = run('add drone Testhaze with model Testframe 6, v. 2.0');
+      assert.equal(withModel.handled, true);
+      assert.equal(withModel.needsAnswer, undefined);
+      assert.equal(store.fleet.droneModel('Testhaze')?.name, 'Testframe 6 v2.0');
+    });
+  });
+
+  it('answering a follow-up with a version segment joins the version and never loops back to the category question', () => {
+    withStore((store) => {
+      // Missing model name asks once for the model (not a part category), then the answered phrase succeeds.
+      const missingModel = handleFleetEditChat(store.fleet, 'aggiungi il drone Testask, modello, v. 5.1');
+      assert.equal(missingModel.handled, true);
+      assert.equal(missingModel.needsAnswer, true);
+      assert.doesNotMatch(missingModel.reply ?? '', /part category/i);
+
+      const answeredModel = handleFleetEditChat(store.fleet, 'aggiungi il drone Testask, modello Testframe 7, v. 5.1');
+      assert.equal(answeredModel.handled, true);
+      assert.equal(answeredModel.needsAnswer, undefined);
+      assert.equal(store.fleet.getDroneByName('Testask')?.frame, 'Testframe 7 v5.1');
+
+      // Unknown category word before ", v. 5.1": clarifying to "frame" joins v5.1 onto the frame instead of rejecting "v. 5.1".
+      const unknownCat = handleFleetEditChat(store.fleet, 'aggiungi il drone Testloop, scocca Testframe 6, v. 5.1');
+      assert.equal(unknownCat.handled, true);
+      assert.equal(unknownCat.needsAnswer, true);
+      assert.match(unknownCat.reply ?? '', /scocca/);
+
+      const clarifiedFrame = handleFleetEditChat(store.fleet, 'aggiungi il drone Testloop, frame Testframe 6, v. 5.1');
+      assert.equal(clarifiedFrame.handled, true);
+      assert.equal(clarifiedFrame.needsAnswer, undefined);
+      assert.equal(store.fleet.getDroneByName('Testloop')?.frame, 'Testframe 6 v5.1');
+    });
+  });
+});
+
 describe('B-138: fleet.chat answers category-scoped spares queries with none-registered or new/used counts', () => {
   it('reports when no spares exist for the asked category instead of listing another category, and gives new/used counts when present', () => {
     withStore((store) => {
