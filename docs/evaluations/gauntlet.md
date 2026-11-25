@@ -4,7 +4,9 @@
 
 The development dependency is a versioned, source-included npm artifact in `vendor/`, with SHA256 and source provenance in [the manifest](../../vendor/gauntlet-protocol.json). It needs no private GitHub token at installation. Update the independent project first, then replace the pinned artifact, lockfile and provenance together; do not edit extracted copies or vendor a fork silently.
 
-Pinned release: **0.9.0** (tag `v0.9.0`, 2026-11-14; release PR #71 / CI 43649289630). It retains 0.7.0's identity-bound ledger coverage, adds 0.8.0 pending-only runs, checkpoints/resume and observable partial-ledger merges, and ships six new focused packs: structured output, tool use, Italian/English, multi-step agents, refusal/permission and long context. The new packs become pending on this pin; their approved real-model campaign remains F-078-T08. NERV records schema 2 runs with `systemSourceKey`; `pending`, `all` and `check:gauntlet-runs` pass the intended model/runtime/scenario/source identity. Runner-backed packs use the reviewed registry and are bound to NERV's source identity. The multi-step pack uses NERV's bounded `scripted-agent` contract adapter: its pass proves only that the runner is registered, the required scripted/step-limit tags are present and a valid budget reaches the adapter; it does not establish autonomous model capability or a real plan/act/observe execution. Existing reports remain readable, while changed engine or pack identities prevent unsupported reuse.
+Pinned release: **0.11.0** (tag `v0.11.0`, 2026-11-25; release PR #105 / CI 45590518964), adopted by F-120-T03. 0.10.0 and 0.11.0 add six domain packs (`coding`, `logic-math`, `embedded`, `italian-quality`, `cad-3d`, `code-review`; see [Domain packs](#domain-packs-0100-and-0110-f-120-t03)). Both releases change the engine hash, so Gauntlet's evidence cache reuses only reports produced by 0.11.0; ledger coverage does not depend on the engine, and existing pack definitions are unchanged.
+
+Earlier pin, 0.9.0/0.9.1: it retains 0.7.0's identity-bound ledger coverage, adds 0.8.0 pending-only runs, checkpoints/resume and observable partial-ledger merges, and ships six new focused packs: structured output, tool use, Italian/English, multi-step agents, refusal/permission and long context. The new packs become pending on this pin; their approved real-model campaign remains F-078-T08. NERV records schema 2 runs with `systemSourceKey`; `pending`, `all` and `check:gauntlet-runs` pass the intended model/runtime/scenario/source identity. Runner-backed packs use the reviewed registry and are bound to NERV's source identity. The multi-step pack uses NERV's bounded `scripted-agent` contract adapter: its pass proves only that the runner is registered, the required scripted/step-limit tags are present and a valid budget reaches the adapter; it does not establish autonomous model capability or a real plan/act/observe execution. Existing reports remain readable, while changed engine or pack identities prevent unsupported reuse.
 
 Earlier pin, 0.6.0: It adds the run ledger and `pending`. The engine hash changed, so the cache reused only evidence produced by 0.6.0.
 
@@ -29,6 +31,35 @@ npm run gauntlet:ledger -- --report=/private/report.json --pack=neutral-smoke   
 `gauntlet:all` runs only the cases the ledger does not cover, or every case with `--fresh`, and records each report in the ledger; `--max-age-days=N` also reruns cases whose last run is older and passes the same age to Gauntlet's cache (which caps it at 30 days), so an older cached report is not reused (no default age, owner decision 2026-11-11: a run stays valid until its identity changes; ledger schema 2 binds model digest, runtime, scenario and NERV's system source key, and schema 1 entries are treated as unknown identity when those fields are checked). `gauntlet:all` exits 1 when any executed case fails. NERV system cases need no model and run one per report; `stress` and `browser` need `--allow-expensive`. Model cases need `--allow-models` and `--profile`, and remain an owner-approved campaign. Session start reports pending cases through the harness setting `evaluations` (`.harness.json`, harness 5.2.0), and the `gauntlet-runs` impact row tells the agent to raise or update the backlog item in the PR that bumps the pin.
 
 Ledger state at adoption (2026-11-11): the five ordinary system cases ran and passed locally with this branch; `stress`, `browser` and all 48 common model cases are pending and listed by F-074-T09 (`pack/*` or `pack/case`; a pending case counts as raised only when an unfinished task lists it). The 2026-11-09 Gemma smoke predates the ledger; its report is not in the repository.
+
+## Domain packs (0.10.0 and 0.11.0, F-120-T03)
+
+The six domain packs are consumed like every common pack (no exclusion in `evals/gauntlet/consumption.json`) and add 42 model cases:
+
+| Pack | Cases | How it runs | Needs on the Mac |
+|---|---|---|---|
+| `logic-math@1.0.0` | 8 | exact answers through the profile's runtime | loopback Ollama |
+| `italian-quality@1.0.0` | 6 | Italian free text, `rubric-v1` | loopback Ollama |
+| `code-review@1.0.0` | 6 | seeded defects, `defects-v1` | loopback Ollama |
+| `coding@1.0.0` | 4 | `coding-reference` runner: candidate runs in a throwaway container | Ollama, Docker Desktop or colima |
+| `cad-3d@1.0.0` | 10 | 6 exact answers; 4 OpenSCAD tasks on `cad-3d-reference`, rendered in the pinned `openscad/openscad:2021.01` container | Ollama, Docker Desktop or colima |
+| `embedded@1.0.0` | 8 | `embedded-reference` runner: 4 Raspberry Pi Python cases (byte-compile and AST checks); 4 Arduino/ESP32 sketches compiled with `arduino-cli` against `arduino:avr` 1.8.6 and `esp32:esp32` 3.0.7, marked expensive | Ollama, `python3`; `arduino-cli` with both cores for the sketches |
+
+`evals/gauntlet/runners.json` registers the three reference runners shipped in the pinned package (`node_modules/@voidbrain/gauntlet-protocol/examples/<pack>-v1/runner.mjs`, layer `coding`, `allowModels: true`). They ask the profile's model from their own process, so their cases follow the model digest, runtime and scenario like any model case, and their source key is `releaseSourceKey()` (the pin manifest and the registry), not NERV's source: a NERV change does not make them pending, a pin or registry change does. NERV's own runners (`scripted-agent`, the system adapter) are model-free and keep `systemSourceKey`.
+
+CI never downloads a toolchain or runs these packs (owner decision 2026-11-25): it runs no model pack, and NERV's tests exclude the three runner packs and use the fixture runtime for the others; the release's own contract tests use stand-in graders. A missing container engine, image, `arduino-cli` or core gives an `error` result naming the fix, which covers nothing, so the case stays pending. `gauntlet:all` blocks every domain case without `--allow-models --profile`, and the four sketch cases also without `--allow-expensive`.
+
+Owner-approved campaign (paste in a development checkout, not `~/.nerv-app`; the out directory must not exist yet):
+
+```sh
+docker version --format '{{.Server.Version}}'          # expect a version; start Docker Desktop or colima first
+arduino-cli core list                                  # expect arduino:avr 1.8.6 and esp32:esp32 3.0.7
+npm run gauntlet:all -- --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json --allow-models --execute --out-dir=/private/tmp/nerv-domain-new
+# add --allow-expensive to include the four Arduino/ESP32 compiles
+npm run gauntlet:pending                               # expect no coding/, logic-math/, embedded/, italian-quality/, cad-3d/ or code-review/ line
+```
+
+Commit the updated `evals/gauntlet/ledger.json`; failed cases are graded and cover their case, errors do not.
 
 ## Commands and costs
 
