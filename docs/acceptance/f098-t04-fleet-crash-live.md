@@ -1,6 +1,6 @@
 # F-098-T04: live check with a real crash
 
-Owner steps for [F-098](../BACKLOG.md#f-098) (step F-098-T04). Run every command in a Terminal on the owner's Mac (NERV-01). The run of 2026-11-25 found the fleet empty (0 drones in every snapshot since 2026-11-19), so the drone is registered first. Replace the motor model with the one on the drone.
+Owner steps for [F-098](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md#f-098) (step F-098-T04). Run every command in a Terminal on the owner's Mac (NERV-01). The run of 2026-11-25 found the fleet empty (0 drones in every snapshot since 2026-11-19), so the drone is registered first. Replace the motor model with the one on the drone.
 
 ## 1. The fleet holds the drone
 

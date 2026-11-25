@@ -1,6 +1,6 @@
 # B-123: Update now shows the updater's status
 
-Owner steps for [B-123](../BACKLOG.md#b-123) (step B-123-T02). Run every command in a Terminal on the owner's Mac (NERV-01); the dashboard steps are in the browser on the same Mac. The check needs an update to install, so run it when the dashboard's Health card shows **Update now**.
+Owner steps for [B-123](https://github.com/voidbrain/nerv/blob/backlog-views/docs/BACKLOG.md#b-123) (step B-123-T02). Run every command in a Terminal on the owner's Mac (NERV-01); the dashboard steps are in the browser on the same Mac. The check needs an update to install, so run it when the dashboard's Health card shows **Update now**.
 
 ## 1. The installed service has the fix and is the one serving
 

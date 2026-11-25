@@ -69,6 +69,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # check:backlog compares the built ledger with origin/backlog-views (F-125-T02)
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
@@ -144,6 +146,18 @@ jobs:
       - name: No merge conflict markers (B-089)
         run: npm run check:conflicts
       - run: npm run check:recap
+      # F-125-T02: check:recap has just written this week's recap into the fresh build; later checks rebuild without it.
+      - name: Which backlog views
+        id: views
+        run: echo "built=$(node -p "const w = require('./.harness.json').workItems; Boolean(w?.enabled && w.views === 'built')")" >> "$GITHUB_OUTPUT"
+      - name: Built backlog views, attached to the run (F-096)
+        if: steps.views.outputs.built == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: backlog-views
+          path: docs/BACKLOG.md
+          if-no-files-found: error
+          retention-days: 30
       - run: npm run check:roadmap
       - run: npm run check:conventions
       - run: npm run check:integrations
