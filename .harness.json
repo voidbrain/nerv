@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "10.21.1",
+  "version": "10.21.3",
   "stacks": [
     "core",
     "angular"
@@ -68,15 +68,10 @@
     "docs/agents/work-usage-effectiveness.md": "core/docs/agents/work-usage-effectiveness.md",
     "docs/agents/work-usage-launch.md": "core/docs/agents/work-usage-launch.md",
     "docs/agents/solution-dashboard.md": "core/docs/agents/solution-dashboard.md",
-    "docs/agents/solution-gaps.md": "core/docs/agents/solution-gaps.md"
+    "docs/agents/solution-gaps.md": "core/docs/agents/solution-gaps.md",
+    ".github/workflows/backlog-views.yml": "core/.github/workflows/backlog-views.yml"
   },
-  "forked": {
-    ".github/workflows/backlog-views.yml": {
-      "from": "core/.github/workflows/backlog-views.yml",
-      "base": "10.21.1",
-      "why": "publishes with tools/publish-views.mjs so the published ledger carries NERV's recap (tools/backlog-recap.mjs), which work-items publish leaves empty"
-    }
-  },
+  "forked": {},
   "freshness": {
     "auditDays": 7
   },
@@ -1023,6 +1018,7 @@
     "featurePlans": true,
     "order": "queue",
     "views": "built",
+    "publishHooks": ["node tools/backlog-recap.mjs"],
     "estimation": {
       "since": "2026-11-24"
     },

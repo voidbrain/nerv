@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-25T13:25:29.439Z",
+  "reviewed": "2026-11-25T19:15:54.773Z",
   "policy": "d0120e3ce7a10b9a8fc016edea454bfabf9eb87922d54f5f421333852e7f0477",
   "inputs": {
     "AGENTS.md": "5d186e4e46681da311ff0990d5b77d071c4342436079b688d48fa84f5d47f6bd",
@@ -38,7 +38,7 @@
     "docs/backlog/steps.md": "98705e1e90b5a908a6a6cc666bf64fbdae82020a2a80cf8d11906ebb19108c8c",
     "tools/task-claims.mjs": "f22fa98ed34d2914b3c5572353f8352a2a84a77b81e30316575f4b7d7aa17272",
     "tools/usage-launch.mjs": "51dea30282a89f7efa8fa0291679447d8f25a1b4b2aeb805173db603d093d6f5",
-    "tools/work-items.mjs": "981448222990533069fa7d09e587da9b5955354a3f5e5ad5371823f6685ef5ec",
+    "tools/work-items.mjs": "e5c668687039afd52e1e9ce533c2755304909855ef05de5d971e06a0c7339bc0",
     "tools/work-usage.mjs": "780c9ca35d2057e6ac86ca1f6168a8e315622919215dc317ae6238e875bcf023"
   },
   "measurements": {
@@ -98,13 +98,7 @@
       "kind": "tool",
       "disposition": "implemented",
       "target": "tools/work-items.mjs",
-      "evidence": "Harness v10.21.0 reconciled from v10.9.0 (F-125-T01; template backlog empty): copied tools and guides byte for byte from the tag (work-items, task-claims, check-backlog, check-freshness, check-conventions, maintenance, reconcile-draft, backlog-dependencies, backlog-queue, solution, work-usage; parallel-work, procedures, session-start, rule-review, solution-profile, solution-refresh, solution-dashboard, solution-gaps); adapted ordering.md, review.md step 1, pull-requests.md and angular.md carry the template sentences with NERV project lines unchanged; CI runs check:work before the ledger readers. workItems.views stays unset (F-125-T02)."
-    },
-    {
-      "kind": "none",
-      "disposition": "no-change",
-      "target": "none",
-      "evidence": "Repeated-load candidate reassessed at this reconcile: the procedure index and code:map already index the loads; no new helper is justified by this release. No behaviour runner is configured; the rule-review.md change (10.15.x graders) applies to the owner's runner only."
+      "evidence": "Harness 10.21.3 reconcile (F-125-T02): publish hooks replace NERV's forked backlog-views workflow and tools/publish-views.mjs; workItems.publishHooks runs tools/backlog-recap.mjs in the read-only build job; test/publish-views.test.mjs confirms the published ledger carries the recap. Copied tools match the tag (check-harness --strict)."
     }
   ]
 }
