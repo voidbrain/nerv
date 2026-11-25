@@ -1752,10 +1752,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-144-t01"></a>B-144-T01 — Leave the EVA cages in place when a poll changes nothing | 1 h | 0 h | 1 h | Implemented; verification pending |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-144-t01"></a>B-144-T01 — Leave the EVA cages in place when a poll changes nothing | 1 h | 0 h | 1 h | Implemented; verification pending | [PR #769](https://github.com/voidbrain/nerv/pull/769) |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1764,7 +1764,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Test: `test/dashboard-cages.test.ts` (committed failing first); owner report 2026-11-25 |
+| PR / evidence | Steps: B-144-T01: [PR #769](https://github.com/voidbrain/nerv/pull/769). Test: `test/dashboard-cages.test.ts` (committed failing first); owner report 2026-11-25; [#769](https://github.com/voidbrain/nerv/pull/769) |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration: 2026-11-25 passed locally (`test/dashboard-cages.test.ts`). Browser: Pending (the owner watches the EVA cages through several polls with no change: no flicker). |
 | Reviewed | 2026-11-25 |
@@ -2577,7 +2577,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner request 2026-11-25, NERV-01 sortie `148eef28` |
+| PR / evidence | Owner request 2026-11-25, NERV-01 sortie `148eef28`; opened in [#769](https://github.com/voidbrain/nerv/pull/769) |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-25 |
