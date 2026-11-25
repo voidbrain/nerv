@@ -4,7 +4,7 @@
   "parent": "F-123",
   "title": "Register a remote MCP server on the tailnet",
   "goal": "A documented and tested way to add an HTTPS MCP server (Grover's `/mcp`) to NERV's governed tool registry, with effect classes and an unreachable-server report",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A documented and tested way to add an HTTPS MCP server (Grover's `/mcp`) to NERV's governed tool registry, with effect classes and an unreachable-server report"
   ],
@@ -14,6 +14,8 @@
     "test/**",
     "docs/guides/**",
     "docs/work/records/F-123.md",
+    "docs/INSTALL.md",
+    "docs/work/tasks/F-123-T01.json",
     "generated:backlog-views"
   ],
   "capabilities": [

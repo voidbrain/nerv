@@ -586,6 +586,24 @@ export class StoreSorties {
   }
 
   /** F-021: what an external tool returned, recorded on its action like a built-in tool's result. */
+  /**
+   * F-123: an MCP action the owner approved on a card. Nothing ran when the card was decided (the tools process is the
+   * coordinator's): the coordinator asks here, uses the single-use grant the approval issued, and then makes the call.
+   * Any other state (rejected, already used, expired, a NERV tool) refuses, so an approval runs a call at most once.
+   */
+  authorizeApproved(sortieId: string, actionId: string): { tool: string; args: Record<string, unknown> } {
+    const row = this.host.db
+      .prepare(
+        "SELECT g.id AS grant_id,x.tool,x.args FROM actions x JOIN approvals a ON a.action_id=x.id JOIN grants g ON g.action_id=x.id WHERE x.id=? AND x.sortie_id=? AND a.decision='approve'",
+      )
+      .get(actionId, sortieId) as { grant_id: string; tool: string; args: string } | undefined;
+    if (!row || hasExecutor(row.tool)) throw new Error('No approved MCP action with that ID.');
+    const args = JSON.parse(row.args) as Record<string, unknown>;
+    this.host.ledger.authorize(row.grant_id, row.tool, args);
+    this.host.ledger.intake(sortieId, 'mcp:' + row.tool, 'tainted');
+    return { tool: row.tool, args };
+  }
+
   finishedExternal(
     sortieId: string,
     actionId: string,

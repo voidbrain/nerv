@@ -1,12 +1,15 @@
 /**
- * MCP tools (F-021, slice 1). A minimal client for MCP servers over stdio (newline-delimited JSON-RPC 2.0: initialize,
- * tools/list, tools/call), the fingerprint a grant is pinned to, and the `tools` section of config.json.
+ * MCP tools (F-021). Minimal clients for MCP servers over stdio (newline-delimited JSON-RPC 2.0: initialize,
+ * tools/list, tools/call) and over streamable HTTP (F-123: a server at an HTTPS URL, such as a hub on the tailnet),
+ * the fingerprint a grant is pinned to, and the `tools` section of config.json.
  * Deny by default: a server's tool is offered to Misato only after the owner grants it, with an effect class (it sets
- * the Pattern) and an EVA class; a grant holds only while the tool's description keeps the fingerprint it was granted
- * with (a changed tool is suspended, never silently widened). Slice 1 grants reads only; EVA-03 needs F-049.
+ * the Pattern: a read is Green, a change goes through the gate and, when it is Blue, the owner's card) and an EVA class;
+ * a grant holds only while the tool's description keeps the fingerprint it was granted with (a changed tool is
+ * suspended, never silently widened). EVA-03 needs F-049.
  */
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { effects, type Effect } from './policy.ts';
 
 export interface McpTool {
   name: string;
@@ -22,16 +25,26 @@ export interface ToolDescriptor {
   description: string;
   inputSchema: unknown;
 }
-export interface McpServer {
+/** A server NERV starts and talks to over stdio. */
+export interface McpStdioServer {
   id: string;
   command: string;
   args: string[];
 }
+/** F-123: a server already running elsewhere, reached at its MCP endpoint over streamable HTTP. */
+export interface McpHttpServer {
+  id: string;
+  url: string;
+}
+export type McpServer = McpStdioServer | McpHttpServer;
+export const isHttpServer = (s: McpServer): s is McpHttpServer => 'url' in s;
+/** How `nerv tools` names a server: its URL, or its command line. */
+export const serverLabel = (s: McpServer) => (isHttpServer(s) ? s.url : `${s.command} ${s.args.join(' ')}`.trim());
 export type Eva = '00' | '01' | '02' | '03';
 export interface ToolGrant {
   server: string;
   tool: string;
-  effect: 'read';
+  effect: Effect;
   eva: Eva;
   fingerprint: string;
 }
@@ -97,13 +110,21 @@ export function validateTools(value: unknown): ToolsConfig {
   const mcp: McpServer[] = [];
   for (const raw of (v.mcp ?? []) as unknown[]) {
     const s = raw as Record<string, unknown>;
-    if (!s || typeof s !== 'object' || Object.keys(s).some((k) => !['id', 'command', 'args'].includes(k)))
-      throw new Error('Invalid MCP server: id, command, args.');
+    if (!s || typeof s !== 'object' || Object.keys(s).some((k) => !['id', 'command', 'args', 'url'].includes(k)))
+      throw new Error('Invalid MCP server: id with command and args, or id with url.');
     if (typeof s.id !== 'string' || !/^[a-z][a-z0-9]{1,15}$/.test(s.id) || RESERVED.includes(s.id))
       throw new Error(
         `Invalid MCP server id ${JSON.stringify(s.id)}: lower-case letters and digits, not one of NERV's own (${RESERVED.join(', ')}).`,
       );
     if (mcp.some((x) => x.id === s.id)) throw new Error(`MCP server ${s.id} is listed twice.`);
+    if (s.url !== undefined) {
+      if (s.command !== undefined || s.args !== undefined)
+        throw new Error(`MCP server ${s.id}: a url or a command, not both.`);
+      const why = urlRefusal(s.url);
+      if (why) throw new Error(`MCP server ${s.id}: ${why}.`);
+      mcp.push({ id: s.id, url: s.url as string });
+      continue;
+    }
     if (typeof s.command !== 'string' || !s.command.trim() || s.command.length > 300)
       throw new Error(`MCP server ${s.id}: a command.`);
     if (
@@ -126,23 +147,54 @@ export function validateTools(value: unknown): ToolsConfig {
       throw new Error(`Tool grant for an unknown server ${JSON.stringify(g.server)}.`);
     if (typeof g.tool !== 'string' || !/^[A-Za-z0-9_-]{1,64}$/.test(g.tool))
       throw new Error('Tool grant: a tool name.');
-    if (g.effect !== 'read')
-      throw new Error(`Tool grant ${g.server}.${g.tool}: only "read" for now (writes come with the approval path).`);
+    if (!effects.includes(g.effect as Effect))
+      throw new Error(`Tool grant ${g.server}.${g.tool}: effect is one of ${effects.join(', ')}.`);
+    if (g.effect === 'write-local' && isHttpServer(mcp.find((x) => x.id === g.server)!))
+      throw new Error(`Tool grant ${g.server}.${g.tool}: ${REMOTE_WRITE}.`);
     if (!['00', '01', '02', '03'].includes(g.eva as string))
       throw new Error(`Tool grant ${g.server}.${g.tool}: eva is 00, 01, 02 or 03.`);
     if (typeof g.fingerprint !== 'string' || !/^[0-9a-f]{16}$/.test(g.fingerprint))
       throw new Error(`Tool grant ${g.server}.${g.tool}: a fingerprint.`);
     if (grants.some((x) => x.server === g.server && x.tool === g.tool))
       throw new Error(`Tool ${g.server}.${g.tool} is granted twice.`);
-    grants.push({ server: g.server, tool: g.tool, effect: 'read', eva: g.eva as Eva, fingerprint: g.fingerprint });
+    grants.push({
+      server: g.server,
+      tool: g.tool,
+      effect: g.effect as Effect,
+      eva: g.eva as Eva,
+      fingerprint: g.fingerprint,
+    });
   }
   return { mcp, grants };
 }
-/** Why a tool may not be granted as a read, or undefined when it may. */
-export function grantRefusal(t: McpTool, effect: string, eva: string): string | undefined {
-  if (effect !== 'read') return 'only "read" can be granted for now (writes come with the approval path)';
-  if (t.annotations?.destructiveHint === true || t.annotations?.readOnlyHint === false)
+const REMOTE_WRITE = 'a tool on another machine changes things outside this base: grant it as write-external or above';
+/**
+ * F-123: why a URL may not be an MCP server, or undefined when it may. HTTPS anywhere (a tailnet name serves HTTPS);
+ * plain HTTP only on this machine's loopback, so nothing travels the network in clear. No credentials in the URL:
+ * config.json is not a secret store.
+ */
+export function urlRefusal(value: unknown): string | undefined {
+  if (typeof value !== 'string' || value.length > 500) return 'a url of at most 500 characters';
+  let u: URL;
+  try {
+    u = new URL(value);
+  } catch {
+    return `${JSON.stringify(value.slice(0, 80))} is not a URL`;
+  }
+  if (u.username || u.password) return 'no user name or password in the url';
+  if (u.protocol === 'https:') return undefined;
+  if (u.protocol === 'http:' && ['127.0.0.1', '[::1]', 'localhost'].includes(u.hostname)) return undefined;
+  return 'an https:// url (plain http only on 127.0.0.1 or localhost)';
+}
+/** Why a tool may not be granted with this effect class, or undefined when it may. */
+export function grantRefusal(t: McpTool, effect: string, eva: string, remote = false): string | undefined {
+  if (!effects.includes(effect as Effect)) return `effect is one of ${effects.join(', ')}`;
+  if (effect === 'read' && (t.annotations?.destructiveHint === true || t.annotations?.readOnlyHint === false))
     return 'the server says this tool changes or removes things: it cannot be granted as a read';
+  // The server's own word that a call may destroy something: every call is the owner's (Pattern Blue).
+  if (t.annotations?.destructiveHint === true && effect !== 'irreversible' && effect !== 'physical')
+    return 'the server says this tool may destroy or change things for good: grant it as irreversible or physical, so the owner approves each call';
+  if (remote && effect === 'write-local') return REMOTE_WRITE;
   if (!['00', '01', '02', '03'].includes(eva)) return 'eva is 00, 01, 02 or 03';
   return undefined;
 }
@@ -156,7 +208,7 @@ export function resultText(result: unknown, max = 8000): string {
 }
 
 /** One MCP server over stdio. Requests time out; the process is ended on close. Environment: PATH, HOME, LANG only. */
-export class McpClient {
+export class McpClient implements McpConnection {
   private child: ChildProcess;
   private buffer = '';
   private next = 1;
@@ -168,7 +220,7 @@ export class McpClient {
   private closed = false;
   private readonly timeoutMs: number;
   private stderr = '';
-  constructor(server: McpServer, timeoutMs = 20_000) {
+  constructor(server: McpStdioServer, timeoutMs = 20_000) {
     this.timeoutMs = timeoutMs;
     this.child = spawn(server.command, server.args, {
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -277,5 +329,166 @@ export class McpClient {
     for (const p of this.pending.values()) clearTimeout(p.timer);
     this.pending.clear();
     this.child.kill();
+  }
+}
+
+/** What NERV needs from any MCP server, whatever carries it. */
+export interface McpConnection {
+  listTools(): Promise<McpTool[]>;
+  callTool(name: string, args: Record<string, unknown>): Promise<{ text: string; isError: boolean }>;
+  close(): void;
+}
+/** The client for a configured server: stdio for a command, streamable HTTP for a URL (F-123). */
+export function connect(server: McpServer, timeoutMs?: number): McpConnection {
+  return isHttpServer(server) ? new McpHttpClient(server, timeoutMs) : new McpClient(server, timeoutMs);
+}
+
+const PROTOCOL = '2025-06-18';
+const MAX_BODY = 4 * 1024 * 1024;
+/**
+ * F-123: why a request to a remote server failed, in the owner's words: which kind of failure, so an unreachable
+ * machine is told apart from a wrong path or a server that is not MCP.
+ */
+export function httpFailure(host: string, e: unknown): string {
+  const err = e as { name?: string; message?: string; cause?: { code?: string; message?: string } };
+  if (err?.name === 'TimeoutError' || err?.name === 'AbortError') return `${host} did not answer in time`;
+  const code = err?.cause?.code ?? '';
+  if (
+    ['ECONNREFUSED', 'ENOTFOUND', 'EAI_AGAIN', 'EHOSTUNREACH', 'ENETUNREACH', 'ETIMEDOUT', 'ECONNRESET'].includes(code)
+  )
+    return `${host} is unreachable (${code}): is that machine on, and is this one on the same tailnet?`;
+  if (/CERT|SSL|TLS/i.test(code)) return `${host} has a certificate this base does not trust (${code})`;
+  if (code) return `${host} could not be reached (${code})`;
+  return `${host} could not be reached: ${(err?.cause?.message ?? err?.message ?? 'unknown error').slice(0, 200)}`;
+}
+const sentence = (text: string) => (/[.?!]$/.test(text) ? text : `${text}.`);
+/** One JSON-RPC answer out of a streamable HTTP reply: a JSON body, or the event of an SSE stream that carries it. */
+function answerIn(body: string, contentType: string, id: number): Record<string, unknown> | undefined {
+  const messages: unknown[] = [];
+  if (contentType.includes('text/event-stream')) {
+    for (const event of body.split(/\r?\n\r?\n/)) {
+      const data = event
+        .split(/\r?\n/)
+        .filter((l) => l.startsWith('data:'))
+        .map((l) => l.slice(5).trimStart())
+        .join('\n');
+      if (!data) continue;
+      try {
+        messages.push(JSON.parse(data));
+      } catch {
+        /* Not a JSON-RPC event: skipped. */
+      }
+    }
+  } else {
+    try {
+      const parsed = JSON.parse(body) as unknown;
+      messages.push(...(Array.isArray(parsed) ? parsed : [parsed]));
+    } catch {
+      return undefined;
+    }
+  }
+  return messages.find((m) => (m as { id?: unknown })?.id === id) as Record<string, unknown> | undefined;
+}
+
+/**
+ * F-123: one MCP server at a URL, over streamable HTTP (JSON-RPC by POST; the answer as JSON or as an SSE stream).
+ * Redirects are refused, so a call never goes anywhere but the URL the owner registered; nothing is sent until NERV
+ * lists or calls a tool. Requests time out; an unreachable server is an error that says so.
+ */
+export class McpHttpClient implements McpConnection {
+  private next = 1;
+  private session?: string;
+  private ready?: Promise<void>;
+  private closed = false;
+  private readonly host: string;
+  private readonly server: McpHttpServer;
+  private readonly timeoutMs: number;
+  /** A tool call may run hardware for longer than a listing takes. */
+  private readonly callTimeoutMs: number;
+  constructor(server: McpHttpServer, timeoutMs = 10_000, callTimeoutMs = 110_000) {
+    this.server = server;
+    this.timeoutMs = timeoutMs;
+    this.callTimeoutMs = callTimeoutMs;
+    this.host = new URL(server.url).host;
+  }
+  private async post(message: object, timeoutMs: number): Promise<Response> {
+    if (this.closed) throw new Error('MCP server is not connected.');
+    let res: Response;
+    try {
+      res = await fetch(this.server.url, {
+        method: 'POST',
+        redirect: 'error',
+        signal: AbortSignal.timeout(timeoutMs),
+        headers: {
+          'content-type': 'application/json',
+          'accept': 'application/json, text/event-stream',
+          ...(this.ready ? { 'mcp-protocol-version': PROTOCOL } : {}),
+          ...(this.session ? { 'mcp-session-id': this.session } : {}),
+        },
+        body: JSON.stringify(message),
+      });
+    } catch (e) {
+      throw new Error(sentence(`MCP server ${httpFailure(this.host, e)}`));
+    }
+    const session = res.headers.get('mcp-session-id');
+    if (session && /^[\x21-\x7e]{1,200}$/.test(session)) this.session = session;
+    return res;
+  }
+  private async request(method: string, params: object, timeoutMs = this.timeoutMs): Promise<unknown> {
+    const id = this.next++;
+    const res = await this.post({ jsonrpc: '2.0', id, method, params }, timeoutMs);
+    if (!res.ok) {
+      await res.body?.cancel().catch(() => undefined);
+      throw new Error(
+        `MCP server ${this.host} answered ${method} with HTTP ${res.status}${res.status === 404 ? ': is the path right (…/mcp)?' : ''}.`,
+      );
+    }
+    let body: string;
+    try {
+      body = await res.text();
+    } catch (e) {
+      throw new Error(sentence(`MCP server ${httpFailure(this.host, e)}`));
+    }
+    if (body.length > MAX_BODY) throw new Error(`MCP server ${this.host} sent an answer too large to read.`);
+    const m = answerIn(body, res.headers.get('content-type') ?? '', id);
+    if (!m) throw new Error(`${this.host} did not answer ${method} as an MCP server.`);
+    if (m.error) throw new Error((m.error as { message?: string }).message ?? 'MCP error.');
+    return m.result;
+  }
+  private init(): Promise<void> {
+    this.ready ??= this.request('initialize', {
+      protocolVersion: PROTOCOL,
+      capabilities: {},
+      clientInfo: { name: 'nerv-agency', version: '1' },
+    }).then(async () => {
+      const res = await this.post({ jsonrpc: '2.0', method: 'notifications/initialized' }, this.timeoutMs);
+      await res.body?.cancel().catch(() => undefined);
+    });
+    return this.ready;
+  }
+  async listTools(): Promise<McpTool[]> {
+    await this.init();
+    const tools: McpTool[] = [];
+    let cursor: string | undefined;
+    for (let page = 0; page < 20; page++) {
+      const r = (await this.request('tools/list', cursor ? { cursor } : {})) as {
+        tools?: McpTool[];
+        nextCursor?: string;
+      };
+      tools.push(...(r?.tools ?? []));
+      if (!r?.nextCursor) break;
+      cursor = r.nextCursor;
+    }
+    return tools.filter((t) => t && typeof t.name === 'string');
+  }
+  async callTool(name: string, args: Record<string, unknown>): Promise<{ text: string; isError: boolean }> {
+    await this.init();
+    const r = (await this.request('tools/call', { name, arguments: args }, this.callTimeoutMs)) as {
+      isError?: boolean;
+    };
+    return { text: resultText(r), isError: r?.isError === true };
+  }
+  close() {
+    this.closed = true;
   }
 }

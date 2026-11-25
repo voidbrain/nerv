@@ -1,11 +1,11 @@
 import { dispatchRpc, MAX_FRAME_BYTES, READY } from './rpc.ts';
 import { readConfig } from './config.ts';
-import { McpClient, fingerprint, type McpServer, type McpTool } from './mcp.ts';
+import { connect, fingerprint, type McpConnection, type McpServer, type McpTool } from './mcp.ts';
 // Tools boundary (F-021): the only process that runs MCP servers (outside code). The coordinator asks it to list a
 // server's tools or call one already granted and gated; it never decides whether a call is allowed, and it holds no
 // ledger. When EVAs exist (F-049) this is the process that moves into a sandbox.
 const home = process.argv[2];
-const clients = new Map<string, McpClient>();
+const clients = new Map<string, McpConnection>();
 const specs = new Map<string, string>();
 const servers = (): McpServer[] => {
   try {
@@ -14,15 +14,15 @@ const servers = (): McpServer[] => {
     return [];
   }
 };
-const client = (id: string): McpClient => {
+const client = (id: string): McpConnection => {
   const s = servers().find((x) => x.id === id);
   if (!s) throw new Error(`No MCP server ${id} in config.json.`);
-  // A server whose command or arguments changed in config.json is restarted, never kept on its old definition.
-  const spec = JSON.stringify([s.command, s.args]);
+  // A server whose command, arguments or URL changed in config.json is restarted, never kept on its old definition.
+  const spec = JSON.stringify(s);
   if (specs.get(id) !== spec) forget(id);
   let c = clients.get(id);
   if (!c) {
-    c = new McpClient(s);
+    c = connect(s);
     clients.set(id, c);
     specs.set(id, spec);
   }

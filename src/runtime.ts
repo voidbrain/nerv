@@ -364,6 +364,8 @@ export class Runtime implements StoreApi {
       record: (sortieId, steps, step, actionId) => this.record(sortieId, steps, step, actionId),
       clarificationHistory: (sortieId) => this.clarificationHistory(sortieId),
       loop: (sortieId, request, steps, context, opts) => this.loop(sortieId, request, steps, context, opts),
+      externalTools: (force) => this.externalTools(force),
+      toolsProcess: () => this.toolsProcess(),
     }));
   }
   useExtraSeat(spec: ExtraSeatSpec): () => void {

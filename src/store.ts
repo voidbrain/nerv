@@ -594,6 +594,9 @@ export class Store {
     if (!this.workerJobs.approval(id)) this.assertActiveCoordinator();
     return this.sortiesController.decide(id, decision, source, options);
   }
+  authorizeApproved(sortieId: string, actionId: string): { tool: string; args: Record<string, unknown> } {
+    return this.sortiesController.authorizeApproved(sortieId, actionId);
+  }
   refuseWorkerApproval(id: string, reason: string): { refused: string } {
     return this.sortiesController.refuseWorkerApproval(id, reason);
   }

@@ -2626,7 +2626,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 2.5 h agent + 0.5 h owner | — | [F-122-T02](#f-122-t02) | 🤖 | — | — |
 
-💻 **→** Next: F-123-T01 — Register a remote MCP server on the tailnet (Planned).
+💻 **→** Next: F-123-T01 — Register a remote MCP server on the tailnet (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2638,7 +2638,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
 |---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-123-t01"></a>F-123-T01 — Register a remote MCP server on the tailnet | 2.5 h | 0 h | 2.5 h | Planned | — | [F-122-T02](#f-122-t02), [F-123-T02](#f-123-t02) | 🤖 |
+| 🟡 Medium | <a id="f-123-t01"></a>F-123-T01 — Register a remote MCP server on the tailnet | 2.5 h | 0 h | 2.5 h | Implemented; verification pending | — | [F-122-T02](#f-122-t02), [F-123-T02](#f-123-t02) | 🤖 |
 | 🟢 Small | <a id="f-123-t02"></a>F-123-T02 — Owner check: NERV lists the Grover tools | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-123-T01](#f-123-t01) | — | ⏳ 🧑‍🔧 |
 | 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 2 steps recorded) | 2.5 h agent + 0.5 h owner | 0 of 2 completed | | | |
 
