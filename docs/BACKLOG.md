@@ -38,7 +38,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 103.25 h agent + 12.25 h owner across 127 open steps of 39 features and 33 other records. 169.5 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 104.25 h agent + 12.25 h owner across 127 open steps of 39 features and 33 other records. 169.5 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -54,13 +54,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | [F-005-T29](#f-005-t29) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | [F-005-T29](#f-005-t29) | 🤖 | — | — |
 
 💻 **→** Next: B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete (Implemented; verification pending).
 
 | | |
 |---|---|
-| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24), from the desktop session: the fenced stop removed the task and ended NERV-02, then printed "disk I/O error" and left the receipt `uncertain` with `stop:started`. The disk was fine (115 GB free) and the lifecycle journal had been written at 18:43. Likely cause, not confirmed: the stopping `serve` still held the lifecycle journal (`~/.nerv-lifecycle/journal.sqlite`) open when the handler wrote the receipt. A later stop on the same machine completed. |
+| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24), from the desktop session: the fenced stop removed the task and ended NERV-02, then printed "disk I/O error" and left the receipt `uncertain` with `stop:started`. The disk was fine (115 GB free) and the lifecycle journal had been written at 18:43. Cause (named 2026-11-25): the stop's poll read the live database read-only with no busy handler while the killed `serve` left its WAL behind. A later stop on the same machine completed. |
 | **Reproduce** | On Windows, a fenced stop of a running NERV service from the desktop session; intermittent (once in two stops). |
 | **Check** | The failing write is named (journal and statement); a committed test fails first if the cause is in code (for example a retry on SQLITE_IOERR or BUSY while the stopped process releases the file); a fenced stop on Tabgha completes its receipt. |
 
@@ -68,8 +68,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 2 h | 0 h | 2 h | Implemented; verification pending | — | [F-005-T29](#f-005-t29) | [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | | | |
+| 🟡 Medium | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 3 h | 0 h | 3 h | Implemented; verification pending | — | [F-005-T29](#f-005-t29) | [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix; [PR #742](https://github.com/voidbrain/nerv/pull/742) inspect read cause and fix |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 1 steps recorded) | 3 h | 0 of 1 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -78,10 +78,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18 |
+| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix; [PR #742](https://github.com/voidbrain/nerv/pull/742) inspect read cause and fix. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18; [#742](https://github.com/voidbrain/nerv/pull/742) |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-21 Unit/integration: PR #620 merged after CI run 44935993196 attempt 2 passed validate, Windows, native-macos, CodeQL and full-suite; failing-first journal retry and launcher-drift regressions pass. Real-device: live Tabgha stop/update remains pending after the recovery; read-only inspection found the service healthy and the checkout clean at `d8eeba7d`. |
-| Reviewed | 2026-11-21 |
+| Reviewed | 2026-11-25 |
 
 </details>
 

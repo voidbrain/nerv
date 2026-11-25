@@ -48,6 +48,7 @@ import {
   type ServiceContext,
   type ServiceHost,
   type ServiceObservation,
+  liveDatabase,
 } from './node-lifecycle-execution.ts';
 import { serviceSource } from './install-source.ts';
 
@@ -182,7 +183,7 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
         } else runtime = 'unknown';
       } catch {}
       safe(databasePath(context.home), context.uid);
-      const db = new DatabaseSync(databasePath(context.home), { readOnly: true });
+      const db = liveDatabase(databasePath(context.home));
       let pending: boolean, schema: number;
       try {
         schema = Number(db.prepare('PRAGMA user_version').get()!.user_version);
@@ -396,7 +397,7 @@ export function macServiceAdapter(context: ServiceContext, run: typeof command =
     backup: async (path) => {
       safe(databasePath(context.home), context.uid);
       const file = join(path, 'database.sqlite'),
-        db = new DatabaseSync(databasePath(context.home));
+        db = liveDatabase(databasePath(context.home), false);
       try {
         db.prepare('VACUUM INTO ?').run(file);
       } finally {

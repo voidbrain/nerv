@@ -1,7 +1,6 @@
 import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { homedir } from 'node:os';
-import { DatabaseSync } from 'node:sqlite';
 import { databasePath, readConfig, readToken } from './config.ts';
 import { WINDOWS_TASK, windowsLauncher } from './service.ts';
 import { assertRootMigrationReady } from './root-migration.ts';
@@ -22,6 +21,7 @@ import {
   type ServiceContext,
   type ServiceHost,
   type ServiceObservation,
+  liveDatabase,
 } from './node-lifecycle-execution.ts';
 import { macServiceAdapter } from './node-lifecycle-mac.ts';
 import { serviceSource } from './install-source.ts';
@@ -188,7 +188,7 @@ export function windowsServiceAdapter(
       } catch {}
 
       safe(databasePath(context.home), context.uid);
-      const db = new DatabaseSync(databasePath(context.home), { readOnly: true });
+      const db = liveDatabase(databasePath(context.home));
       let pending: boolean;
       let schema: number;
       try {
