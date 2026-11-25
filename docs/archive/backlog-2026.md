@@ -6752,7 +6752,7 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #601](https://github.com/voidbrain/nerv/pull/601) (B-082-T02); Test: `test/node-inspection.test.ts` "B-082: the Windows task user keeps Entra and domain accounts but repairs workgroup users" (committed failing first in B-082-T02); Review: fresh-context P1 review found no blocking code, security, privacy or compliance issue and confirmed the later test edit is formatting-only; prior T01 test committed failing first |
+| PR / evidence | [PR #744](https://github.com/voidbrain/nerv/pull/744) closure; [PR #601](https://github.com/voidbrain/nerv/pull/601) (B-082-T02); Test: `test/node-inspection.test.ts` "B-082: the Windows task user keeps Entra and domain accounts but repairs workgroup users" (committed failing first in B-082-T02); Review: fresh-context P1 review found no blocking code, security, privacy or compliance issue and confirmed the later test edit is formatting-only; prior T01 test committed failing first |
 | Opened | 2026-11-18 |
 | Verification | 2026-11-21: B-082-T02 CI run 44815656209 and required fresh-context review passed. Local: targeted regression 2/2, full tests 1,041 pass / 2 platform skips, build, `check:fast`, headless 5 pass / 1 Windows skip. 2026-11-25: live read-only SSH probe on Tabgha: the rule's account maps to the SID of the registered task; the legacy form does not. |
 | Reviewed | 2026-11-25 |
