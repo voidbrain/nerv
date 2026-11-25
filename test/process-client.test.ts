@@ -87,6 +87,43 @@ test('B-126: a child still running at the ready deadline: the error says so, wit
     rmSync(dir, { recursive: true, force: true });
   }
 });
+test('B-126: a child that stalls in a start-up step: the not-ready error names the last step it reported', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-pc-'));
+  const f = join(dir, 'stalls.mjs');
+  writeFileSync(
+    f,
+    `process.send({nerv:'starting',step:'opening the database'});setInterval(()=>{},1000);process.on('disconnect',()=>process.exit(0));process.on('SIGTERM',()=>process.exit(0));`,
+  );
+  const c = new ProcessClient(pathToFileURL(f), [], 'nervous', 200, 1500);
+  try {
+    await assert.rejects(
+      c.call('runtime.ping'),
+      /last start-up step: opening the database, reported \d+ ms after start/,
+    );
+  } finally {
+    await c.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+test('B-126: the real nervous child reports its start-up steps before READY', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'nerv-pc-'));
+  const c = new ProcessClient(
+    new URL('../src/nervous-process.ts', import.meta.url),
+    [join(dir, 'nerv.sqlite')],
+    'nervous',
+  );
+  const steps: string[] = [];
+  c.child.on('message', (m: { nerv?: string; step?: string }) => {
+    if (m?.nerv === 'starting' && m.step) steps.push(m.step);
+  });
+  try {
+    await c.call('runtime.ping');
+    assert.deepEqual(steps, ['modules loaded', 'opening the database', 'first scheduler tick']);
+  } finally {
+    await c.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
 test('B-126 join: Runtime.ready names why the real nervous child stopped (a database newer than this version)', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'nerv-pc-'));
   const database = join(dir, 'nerv.sqlite');
