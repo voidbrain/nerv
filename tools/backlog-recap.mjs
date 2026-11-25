@@ -86,6 +86,10 @@ export function place(text,block){
  if(BLOCK.test(text))return text.replace(BLOCK,()=>block);
  const first=text.indexOf('\n## ');return text.slice(0,first)+'\n'+block+'\n'+text.slice(first);
 }
+/** Writes the recap for the week containing asOf (default today, UTC) into docs/BACKLOG.md as it is on disk. */
+export function fillRecap(asOf=iso(new Date())){
+ writeFileSync(BACKLOG,place(readFileSync(BACKLOG,'utf8'),recap(allRecords(),asOf)));return weekOf(asOf);
+}
 /** True when the ledger is a build output (workItems.views "built"): never committed, rebuilt before it is read. */
 export function builtViews(root=ROOT){
  try{const w=JSON.parse(readFileSync(join(root,'.harness.json'),'utf8')).workItems;return Boolean(w?.enabled&&w.views==='built');}catch{return false;}

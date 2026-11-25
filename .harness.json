@@ -68,10 +68,15 @@
     "docs/agents/work-usage-effectiveness.md": "core/docs/agents/work-usage-effectiveness.md",
     "docs/agents/work-usage-launch.md": "core/docs/agents/work-usage-launch.md",
     "docs/agents/solution-dashboard.md": "core/docs/agents/solution-dashboard.md",
-    "docs/agents/solution-gaps.md": "core/docs/agents/solution-gaps.md",
-    ".github/workflows/backlog-views.yml": "core/.github/workflows/backlog-views.yml"
+    "docs/agents/solution-gaps.md": "core/docs/agents/solution-gaps.md"
   },
-  "forked": {},
+  "forked": {
+    ".github/workflows/backlog-views.yml": {
+      "from": "core/.github/workflows/backlog-views.yml",
+      "base": "10.21.1",
+      "why": "publishes with tools/publish-views.mjs so the published ledger carries NERV's recap (tools/backlog-recap.mjs), which work-items publish leaves empty"
+    }
+  },
   "freshness": {
     "auditDays": 7
   },
