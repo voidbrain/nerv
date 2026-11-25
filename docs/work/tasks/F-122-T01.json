@@ -34,5 +34,11 @@
     "agentHours": 1.0,
     "baselineAgentHours": 1.0,
     "estimateAgentHours": 1.0
-  }
+  },
+  "prs": [
+    {
+      "pr": 747,
+      "note": "design: docs/decisions/grover-alert-delivery.md"
+    }
+  ]
 }

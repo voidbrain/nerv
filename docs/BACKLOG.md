@@ -3174,12 +3174,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-122-t01"></a>F-122-T01 — Design Grover alert delivery | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-122-T02](#f-122-t02) | 🤖 |
-| 🟡 Medium | <a id="f-122-t02"></a>F-122-T02 — Deliver Grover alerts through NERV's channels | 3 h | 0 h | 3 h | Planned | [F-122-T01](#f-122-t01), [F-123-T01](#f-123-t01) | [F-122-T03](#f-122-t03) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-122-t03"></a>F-122-T03 — Owner check: a real Grover alert arrives | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-122-T02](#f-122-t02) | — | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 4 h | 0 h (0 of 3 steps recorded) | 4 h agent + 0.5 h owner | 0 of 3 completed | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-122-t01"></a>F-122-T01 — Design Grover alert delivery | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-122-T02](#f-122-t02) | 🤖 | [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md |
+| 🟡 Medium | <a id="f-122-t02"></a>F-122-T02 — Deliver Grover alerts through NERV's channels | 3 h | 0 h | 3 h | Planned | [F-122-T01](#f-122-t01), [F-123-T01](#f-123-t01) | [F-122-T03](#f-122-t03) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-122-t03"></a>F-122-T03 — Owner check: a real Grover alert arrives | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-122-T02](#f-122-t02) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 4 h | 0 h (0 of 3 steps recorded) | 4 h agent + 0.5 h owner | 0 of 3 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -3188,7 +3188,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730).; [#747](https://github.com/voidbrain/nerv/pull/747) |
+| PR / evidence | Steps: F-122-T01: [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md. Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); design in [#747](https://github.com/voidbrain/nerv/pull/747) |
 | Opened | 2026-11-24 |
 | Verification | — |
 | Reviewed | 2026-11-24 |
