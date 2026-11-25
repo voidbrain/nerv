@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "B-131-T01",
+  "parent": "B-131",
+  "title": "Size the placement probe token budget to cover its prompt",
+  "goal": "A role-sized placement probe returns its result instead of exhausting a total budget sized from the output limit alone",
+  "status": "planned",
+  "acceptance": [
+    "A committed test fails first: a P3 placement run whose input tokens exceed 2 × maxOutputTokens returns its result",
+    "placementProbe bounds maxTotalTokens from the probe's input bound plus maxOutputTokens, still within the orchestration limit of 65,536"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/placement-campaign.ts",
+    "src/runtime-dispatch.ts",
+    "test/placement-campaign.test.ts",
+    "docs/work/records/B-131.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "A committed regression fails before the fix (test/placement-campaign.test.ts, B-131 case)",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-24: failing test and a budget sized from the probe input, like B-119-T01 (0.75 h actual). Not a measurement.",
+    "reviewed": "2026-11-24",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

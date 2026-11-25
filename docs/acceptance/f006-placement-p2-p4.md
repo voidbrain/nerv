@@ -1,13 +1,13 @@
 # F-006 placement P2–P4: owner procedure
 
-Run these blocks from the NERV checkout on Tabgha (`NERV-02`) in PowerShell. They use the running NERV service and invented text only. `placement plan` selects the route without calling a model; `placement run` calls a model only with the explicit `--execute` flag. No command enables cloud inference or executes a tool.
+Run these blocks from the NERV install on Tabgha (`NERV-02`, `C:\Projects\nerv`) in PowerShell. They use the running NERV service and invented text only. `placement plan` selects the route without calling a model; `placement run` calls a model only with the explicit `--execute` flag. No command enables cloud inference or executes a tool.
 
 Paste one block at a time and stop at the first unexpected result. Keep the JSON results outside Git under `$HOME\.nerv-private\placement`.
 
 ## 1. Prepare the three bounded probes
 
 ```powershell
-Set-Location $HOME\Projects\NERV\NERV
+Set-Location C:\Projects\nerv
 New-Item -ItemType Directory -Force "$HOME\.nerv-private\placement" | Out-Null
 $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
 [System.IO.File]::WriteAllText("$HOME\.nerv-private\placement\p2.json", '{"placement":"P2","prompt":"Reply with exactly READY.","maxOutputTokens":512}', $utf8NoBom)
@@ -78,7 +78,7 @@ A probe may carry `system` (at most 24,576 bytes) beside `prompt` (at most 32,76
 
 Update both bases before any role-sized probe: a base on earlier code that receives a body over its old bound closes the WorkerLink session ("Invalid worker envelope"), failing every request in flight on it until it reconnects.
 
-On Neo Tokyo-3 (`NERV-01`): its install (`~/.nerv-app`, `9ab9139f`) has the dashboard's **Update now** (B-108, B-110), which hands the update to its own job outside the service (backup, rehearsal, build, start, verify). Open the dashboard, go to **Health**, and once the availability line shows a newer `main` revision that includes PR #714, press **Update now**.
+On Neo Tokyo-3 (`NERV-01`): its install (`~/.nerv-app`) has the dashboard's **Update now** (B-108, B-110), which hands the update to its own job outside the service (backup, rehearsal, build, start, verify). Open the dashboard, go to **Health**, and once the availability line shows a newer `main` revision that includes PR #714, press **Update now**.
 
 Expected: the button reads "Updating…", the dashboard reconnects after the restart, and the inbox and Health report the update `completed` with the new revision. If it reports `refused` or `uncertain`, stop and paste the message and its recovery lines. To check by hand afterwards:
 
@@ -89,13 +89,14 @@ launchctl print gui/$(id -u)/io.nerv.agent | grep -E '^\s*(state|pid) ='
 
 Expected: the new revision and `state = running`.
 
-On Tabgha (`NERV-02`), in PowerShell. Its checkout predates `nerv update`, so it takes the documented manual update (as on 2026-11-12):
+On Tabgha (`NERV-02`), in PowerShell. Its install is `C:\Projects\nerv`, a checkout on a detached `HEAD` that predates `nerv update`, so it takes this manual update; `git pull` does not apply to a detached `HEAD`:
 
 ```powershell
-Set-Location $HOME\Projects\NERV\NERV
+Set-Location C:\Projects\nerv
 node src/cli.ts service stop
 Copy-Item $HOME\.nerv\nerv.sqlite "$HOME\.nerv-private\nerv-before-f006-t28.sqlite"
-git pull --ff-only
+git fetch origin
+git checkout --detach origin/main
 npm ci --ignore-scripts
 npm run build
 node src/cli.ts service start
