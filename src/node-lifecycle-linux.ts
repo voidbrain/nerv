@@ -10,6 +10,9 @@ import {
   checkServicePrerequisites,
   command,
   definition,
+  DOCTOR_PROBE,
+  type DoctorProbeOptions,
+  probeDoctor,
   FOREGROUND_ENTRY,
   hash,
   present,
@@ -68,6 +71,7 @@ export function linuxServiceAdapter(
   context: ServiceContext,
   run: typeof command = command,
   unitPath = definition(context, 'linux-service'),
+  doctor: DoctorProbeOptions = DOCTOR_PROBE,
 ): ServiceHost {
   const expected = renderService('linux', context.home, context.source, context.node);
   const macShared = macServiceAdapter(context, run);
@@ -157,23 +161,22 @@ export function linuxServiceAdapter(
       }
       const pids = [...ids].sort((a, b) => a - b);
       let runtime: ServiceObservation['runtime'] = pids.length ? 'unknown' : 'stopped';
-      try {
-        const r = await fetch('http://127.0.0.1:' + config.port + '/api/doctor', {
-          headers: { authorization: 'Bearer ' + token },
-          signal: AbortSignal.timeout(1500),
-        });
-        if (r.ok) {
-          const body = (await r.json()) as { base?: { id: string }; build?: { commit: string } };
-          runtime =
-            body.base?.id === config.base.id &&
-            body.build?.commit === revision &&
-            registered === 'owned' &&
-            systemdField(manager?.out ?? '', 'ActiveState') === 'active' &&
-            pids.includes(managerPid)
-              ? 'owned'
-              : 'unknown';
-        } else runtime = 'unknown';
-      } catch {}
+      let unanswered: ServiceObservation['doctor'];
+      const answer = await probeDoctor(config.port, token, doctor);
+      if (answer.ok)
+        runtime =
+          answer.body.base?.id === config.base.id &&
+          answer.body.build?.commit === revision &&
+          registered === 'owned' &&
+          systemdField(manager?.out ?? '', 'ActiveState') === 'active' &&
+          pids.includes(managerPid)
+            ? 'owned'
+            : 'unknown';
+      else {
+        // Something answered the port without OK: never stopped, as before (B-135 only names it).
+        if (answer.unanswered.outcome === 'http') runtime = 'unknown';
+        if (runtime === 'unknown') unanswered = answer.unanswered;
+      }
       safe(databasePath(context.home), context.uid);
       const db = new DatabaseSync(databasePath(context.home), { readOnly: true });
       let pending: boolean;
@@ -196,6 +199,7 @@ export function linuxServiceAdapter(
         definition: currentKind,
         registration: registered,
         runtime,
+        ...(unanswered ? { doctor: unanswered } : {}),
         pids,
         session,
         clean: (await git(['status', '--porcelain'])) === '',

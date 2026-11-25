@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "id": "B-135-T01",
+  "parent": "B-135",
+  "title": "A slow or failing doctor probe is named as such, not as an ownership refusal",
+  "goal": "Update now on a busy machine either proceeds or says NERV did not answer its health check in time, with nothing stopped",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails first across the macOS observation and blockers with a fake slow doctor",
+    "The doctor probe waits 5 s and asks twice; an answer within that is owned when it matches",
+    "A timeout or non-OK answer names the measured time or status and that nothing was stopped, never OWNERSHIP_UNKNOWN; the runtime stays unknown",
+    "Linux and Windows observations use the same probe"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/node-lifecycle-execution.ts",
+    "src/node-lifecycle-mac.ts",
+    "src/node-lifecycle-linux.ts",
+    "src/node-lifecycle-windows.ts",
+    "test/update-doctor-slow.test.ts",
+    "test/moved-service-fixture.ts",
+    "test/update-foreground-runtime.test.ts",
+    "test/linux-service-lifecycle.test.ts",
+    "docs/work/records/B-135.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/update-doctor-slow.test.ts test/update-foreground-runtime.test.ts test/linux-service-lifecycle.test.ts test/windows-service-lifecycle.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Never treat an unanswered runtime as owned"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-25: one shared probe, three observations, one blocker message and a join test. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 745
+    }
+  ]
+}
