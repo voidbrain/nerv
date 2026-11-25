@@ -4,7 +4,7 @@
   "parent": "F-004",
   "title": "Delivery order: push first, Telegram as fallback",
   "goal": "A reminder goes to the phone app first and reaches Telegram only when push fails, there is no device, or the reminder is not opened within about 10 minutes (owner decision 2026-11-25)",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Reminders try Web Push first; Telegram is sent when the push fails, no device is subscribed, or the reminder is not opened on the phone within about 10 minutes",
     "Replies, approvals and chat stay on Telegram until the app has two-way chat (F-124-T04)",
@@ -39,10 +39,15 @@
   "effort": {
     "size": "small",
     "estimate": "2 h agent",
-    "basis": "Estimated 2026-11-25: ordering rule on the existing deliveries plus the not-opened timer. Not a measurement.",
+    "basis": "Estimated 2026-11-25: ordering rule on the existing deliveries plus the not-opened timer. Not a measurement. 2026-11-25: implemented in PR #760 with the phone's open receipt (F-124-T03); the 10-minute deadline is the owner's (decision 2026-11-25). Remaining: CI and merge; the phone check is F-004-T10. Owner decision 2026-11-25: delivered means tapped; a reminder read only on the lock screen still reaches Telegram at the deadline. Review fixes in the same PR: workspace taps post the receipt, read or cancelled items never fall back. Owner decision 2026-11-25 (B, at least once): a claim cut off by a crash is re-offered once after a 2-minute lease.",
     "reviewed": "2026-11-25",
-    "agentHours": 2,
+    "agentHours": 0.5,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
-  }
+  },
+  "prs": [
+    {
+      "pr": 760
+    }
+  ]
 }

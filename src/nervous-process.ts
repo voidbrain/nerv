@@ -207,6 +207,10 @@ process.on('message', (value: unknown) => {
           params.outcome as DeliveryOutcome,
           params.reason as string | undefined,
         );
+      case 'deliveries.fallback':
+        return store.pushFallback(params.deadlineMs as number);
+      case 'push.opened':
+        return store.pushOpened(params.receipt as string);
       case 'deliveries.state':
         return store.deliveryState(params.id as string);
       case 'push.status': {
