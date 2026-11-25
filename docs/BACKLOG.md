@@ -2442,11 +2442,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-125-t01"></a>F-125-T01 — Reconcile to the latest harness release | 2 h | 0 h | 2 h | Planned | — | [F-125-T02](#f-125-t02) |
-| 🟢 Small | <a id="f-125-t02"></a>F-125-T02 — Enable built backlog views and log view incidents over about 10 merged PRs | 1 h | 0 h | 1 h | Planned | [F-125-T01](#f-125-t01) | — |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 3 h | 0 of 2 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-125-t01"></a>F-125-T01 — Reconcile to the latest harness release | 2 h | 0 h | 2 h | Planned | — | [F-125-T02](#f-125-t02) | [PR #748](https://github.com/voidbrain/nerv/pull/748) |
+| 🟢 Small | <a id="f-125-t02"></a>F-125-T02 — Enable built backlog views and log view incidents over about 10 merged PRs | 1 h | 0 h | 1 h | Planned | [F-125-T01](#f-125-t01) | — | [PR #748](https://github.com/voidbrain/nerv/pull/748) |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 3 h | 0 of 2 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2455,7 +2455,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Opened in PR (pending). |
+| PR / evidence | Steps: F-125-T01: [PR #748](https://github.com/voidbrain/nerv/pull/748) · F-125-T02: [PR #748](https://github.com/voidbrain/nerv/pull/748). Opened in [PR #748](https://github.com/voidbrain/nerv/pull/748). |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-25 |
