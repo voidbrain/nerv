@@ -24,7 +24,7 @@ test('B-123: the refusal the owner never saw is shown with its reason and recove
   });
   assert.match(html, /id='update-status'/);
   assert.match(html, /Update refused · fd0f2a0/);
-  assert.match(html, /class='small warn'/);
+  assert.match(html, /class='update-status small warn'/);
   assert.match(html, /<li>Service or runtime ownership is unknown or belongs elsewhere\.<\/li>/);
   assert.match(html, /Recovery:[\s\S]*<li>Nothing was stopped; NERV keeps running the current revision\.<\/li>/);
   assert.match(html, /id='btn-dismiss-update-status'/);
@@ -38,15 +38,15 @@ test('B-123: in progress names the step and cannot be dismissed; each outcome ha
   assert.match(updaterStatusHtml({ ...base, state: 'running' }), /Update in progress · fd0f2a0 · started/);
   assert.match(
     updaterStatusHtml({ ...base, state: 'completed' }),
-    /class='small ok'[\s\S]*Update completed · now on fd0f2a0/,
+    /class='update-status small ok'[\s\S]*Update completed · now on fd0f2a0/,
   );
   assert.match(
     updaterStatusHtml({ ...base, state: 'failed', reasons: ['boom'] }),
-    /class='small danger'[\s\S]*Update failed · fd0f2a0/,
+    /class='update-status small danger'[\s\S]*Update failed · fd0f2a0/,
   );
   assert.match(
     updaterStatusHtml({ ...base, state: 'uncertain' }),
-    /class='small danger'[\s\S]*Update outcome uncertain/,
+    /class='update-status small danger'[\s\S]*Update outcome uncertain/,
   );
   assert.equal(updaterStatusHtml(null), '');
 });

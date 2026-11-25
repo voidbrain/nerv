@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "F-129-T03",
+  "parent": "F-129",
+  "title": "Owner: check model thinking rows on a live sortie",
+  "goal": "The owner sees the model rounds of a real slow sortie in the dashboard",
+  "status": "planned",
+  "acceptance": [
+    "On NERV-01 after the update, ask \"remind me to drink water in 2 minutes\"; the sortie view shows the consultant and Misato rows with their model and seconds, adding up to about the sortie's duration"
+  ],
+  "dependsOn": [
+    "F-129-T02"
+  ],
+  "resources": [
+    "docs/work/records/F-129.md"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented sorties and model names only.",
+  "validation": [
+    "Owner visual check, recorded in F-129 Verification"
+  ],
+  "escalation": [
+    "The owner decides whether the rows read clearly; the agent records the result"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-25: one chat request and a look at its sortie. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

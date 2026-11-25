@@ -8,12 +8,14 @@ import {
   MAX_STEPS,
   doneReply,
   filterConsultantInput,
+  formatFleetChatReply,
   matchExistingReminders,
   ownerDeclined,
   declinedReply,
   parseAdvice,
   requestLanguage,
   waitingReply,
+  validateFleetChatReply,
   validateReminderTitle,
   type Plan,
   type Recalled,
@@ -96,6 +98,15 @@ export class RuntimePlanning {
   ): Promise<ChatReply> {
     const waiting: ChatReply['waiting'] = [];
     const proactive = followup?.watch;
+    // B-143: relative times ("in 2 minutes") count from when the owner asked: the sortie opens with the request
+    // (an answer to Misato's question arrives now), never from the model step that writes the call minutes later.
+    const requestedAt = followup?.answering
+      ? new Date().toISOString()
+      : await this.host.nervous
+          .call('sorties.get', { id: sortieId })
+          .then((s) => (s as { created?: unknown } | null)?.created)
+          .then((c) => (typeof c === 'string' && Number.isFinite(Date.parse(c)) ? c : new Date().toISOString()))
+          .catch(() => new Date().toISOString());
     const queryText = [message, ...context.map((t) => t.request)].join(' ').slice(0, 8000);
     // LCL fill: Lilith's facts and matching pending reminders for this request and its recent conversation.
     const memory = (await this.host.nervous.call('memory.recall', { text: queryText }).catch(() => [])) as Recalled[];
@@ -331,6 +342,7 @@ export class RuntimePlanning {
               : {}),
             ...(followup?.answering && turn === 0 ? { clarification: true } : {}),
             request: message,
+            requestedAt,
             history: steps.slice(-12),
             ...(named.length ? { bases: named } : {}),
             ...(remote.length ? { remote } : {}),
@@ -397,7 +409,30 @@ export class RuntimePlanning {
         })) as { text: string; expires: string };
         return { sortieId, reply: question.text, question, steps, waiting };
       }
-      if ('reply' in out.plan) return finish('done', out.plan.reply, undefined, stepDurationMs);
+      if ('reply' in out.plan) {
+        const ungroundedFleet = !proactive ? validateFleetChatReply(out.plan.reply, steps) : undefined;
+        if (ungroundedFleet) {
+          const alreadyRejected = steps.some(
+            (s) =>
+              s.outcome === 'invalid' &&
+              typeof s.error === 'string' &&
+              s.error.startsWith('Your reply ignored the granted fleet.chat result'),
+          );
+          await this.host.record(
+            sortieId,
+            steps,
+            { outcome: 'invalid', error: ungroundedFleet.error },
+            undefined,
+            stepDurationMs,
+          );
+          if (alreadyRejected) {
+            const fallback = formatFleetChatReply(lang(), ungroundedFleet.result);
+            if (fallback) return finish('done', fallback, undefined, stepDurationMs);
+          }
+          continue;
+        }
+        return finish('done', out.plan.reply, undefined, stepDurationMs);
+      }
       if ('script' in out.plan) {
         try {
           const pendingGateReplies = new Map<string, ActReply>();
@@ -508,6 +543,7 @@ export class RuntimePlanning {
       const cfg = shouldReconcile && this.host.home ? readConfig(this.host.home) : undefined;
       let args = shouldReconcile
         ? reconcileReminderArgs(message, out.plan.action.args, {
+            now: new Date(requestedAt),
             timeZone: cfg?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
             briefAt: cfg?.brief?.at ?? '08:00',
           })

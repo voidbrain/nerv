@@ -61,7 +61,7 @@ export interface ReminderBackend {
   cancel(id: string): boolean;
   restore(id: string): boolean;
   rescheduleAllDayReminders?(briefAt?: string, timeZone?: string): void;
-  sortie?(id: string): { title: string } | null | undefined;
+  sortie?(id: string): { title: string; created?: string } | null | undefined;
   sorties?(limit?: number, before?: string, q?: string): SortieSummary[];
   explain?(
     ref: string,
@@ -175,6 +175,11 @@ const text = (args: Record<string, unknown>, key: string) => {
   if (typeof v !== 'string') throw new Error(`Argument ${key} must be a string.`);
   return v;
 };
+/** B-143: reminder defaults with `now` at the sortie's request time, when the ledger has it. */
+const requestDefaults = <T extends object>(defaults: T, sortie: { created?: string } | null | undefined) =>
+  sortie?.created && Number.isFinite(Date.parse(sortie.created))
+    ? { ...defaults, now: new Date(sortie.created) }
+    : defaults;
 const only = (args: Record<string, unknown>, keys: string[]) => {
   if (Object.keys(args).some((k) => !keys.includes(k)))
     throw new Error(`Arguments allowed: ${keys.join(', ') || 'none'}.`);
@@ -888,8 +893,12 @@ function executeRaw(
       const defaults = backend.reminderDefaults
         ? backend.reminderDefaults()
         : { timeZone: 'Europe/Rome', briefAt: '08:00' };
-      const sortieTitle = context.sortieId && backend.sortie ? backend.sortie(context.sortieId)?.title : undefined;
-      const effective = sortieTitle ? reconcileReminderArgs(sortieTitle, args, defaults) : args;
+      const sortie = context.sortieId && backend.sortie ? backend.sortie(context.sortieId) : undefined;
+      const sortieTitle = sortie?.title;
+      // B-143: the sortie title is the owner's request; its relative times count from when it was asked.
+      const effective = sortieTitle
+        ? reconcileReminderArgs(sortieTitle, args, requestDefaults(defaults, sortie))
+        : args;
       const r = backend.add(text(effective, 'title'), text(effective, 'due'), new Date(), {
         ...(effective.kind !== undefined && effective.kind !== null ? { kind: text(effective, 'kind') } : {}),
         ...(effective.end !== undefined && effective.end !== null ? { end: text(effective, 'end') } : {}),
@@ -909,9 +918,12 @@ function executeRaw(
       const defaults = backend.reminderDefaults
         ? backend.reminderDefaults()
         : { timeZone: 'Europe/Rome', briefAt: '08:00' };
-      const sortieTitle = context.sortieId && backend.sortie ? backend.sortie(context.sortieId)?.title : undefined;
+      const sortie = context.sortieId && backend.sortie ? backend.sortie(context.sortieId) : undefined;
+      const sortieTitle = sortie?.title;
       const effective =
-        sortieTitle && typeof args.due === 'string' ? reconcileReminderArgs(sortieTitle, args, defaults) : args;
+        sortieTitle && typeof args.due === 'string'
+          ? reconcileReminderArgs(sortieTitle, args, requestDefaults(defaults, sortie))
+          : args;
       const patch: { title?: string; due?: string; kind?: string; end?: string | null } = {};
       if (effective.title !== undefined && effective.title !== null) patch.title = text(effective, 'title');
       if (effective.due !== undefined && effective.due !== null) patch.due = text(effective, 'due');

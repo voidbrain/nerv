@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "B-144-T01",
+  "parent": "B-144",
+  "title": "Leave the EVA cages in place when a poll changes nothing",
+  "goal": "The dashboard updates the EVA cages only when their state changes, so the images never reload for nothing",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails first: rendering the cages twice with the same state writes the DOM once",
+    "A changed state still updates the cages"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/dashboard.js",
+    "web/public/dashboard/live.js",
+    "test/dashboard-cages.test.ts",
+    "docs/work/records/B-144.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented machine and job names only.",
+  "validation": [
+    "node --test test/dashboard-cages.test.ts",
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A change to how the cages look goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-25: find the poll re-render, a no-change guard and a failing-first render test. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": 769
+    }
+  ]
+}

@@ -127,7 +127,7 @@ async function models(
   misato: Scripted[],
   casper: string | ((prompt: string) => string) = '{"vote":"approve","reason":"Matches.","confidence":0.9}',
 ) {
-  const asked: { who: string; model: string; prompt: string }[] = [];
+  const asked: { who: string; model: string; prompt: string; system: string }[] = [];
   const server = createServer((req, res) => {
     let body = '';
     req
@@ -135,7 +135,7 @@ async function models(
       .on('end', () => {
         const r = JSON.parse(body) as { model: string; messages: { role: string; content: string }[] };
         const who = r.messages[0]!.content.startsWith('You are Casper') ? 'casper' : 'misato';
-        asked.push({ who, model: r.model, prompt: r.messages.at(-1)!.content });
+        asked.push({ who, model: r.model, prompt: r.messages.at(-1)!.content, system: r.messages[0]!.content });
         res.setHeader('content-type', 'application/json');
         res.end(
           JSON.stringify({
@@ -1383,4 +1383,131 @@ test('F-121-T04: "stampa i piedini di Wisp" with NERV-02 as the slicing base: th
     sb.close();
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('B-138: after a granted fleet.chat spares step, chat answers with the spare outcome instead of a generic greeting', async () => {
+  const setup = (home: string) => {
+    const store = new Store(join(home, 'nerv.sqlite'));
+    store.fleet.importFleet({
+      version: 1,
+      drones: [{ name: 'Testquad', frame: 'Testframe 5', parts: [{ category: 'frame', model: 'Testframe 5' }] }],
+    });
+    store.close();
+  };
+
+  await agent(
+    [
+      // 1) No motor spares registered: planner proposes fleet.chat, then twice tries a generic Misato greeting.
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"quanti motori di scorta mi restano?"}}}',
+      '{"reply":"Ciao! Sono pronta ad aiutarti, dimmi pure."}',
+      '{"reply":"Ciao! Di cosa hai bisogno oggi?"}',
+      // 2) Motor spares registered: planner proposes fleet.chat, greets once (rejected), then answers from steps.
+      '{"action":{"tool":"fleet.chat","args":{"phrase":"quanti motori di scorta mi restano?"}}}',
+      '{"reply":"Ciao! Come posso aiutarti?"}',
+      '{"reply":"Per Testmot 2207 hai 3 nuovi e 2 usati di scorta."}',
+    ],
+    async (runtime) => {
+      const chatNone = await runtime.chat('quanti motori di scorta mi restano?');
+      assert.equal(chatNone.steps[0]?.tool, 'fleet.chat');
+      assert.equal(chatNone.steps[0]?.outcome, 'grant');
+      const noneResult = chatNone.steps[0]?.result as { handled?: boolean; reply?: string };
+      assert.equal(noneResult?.handled, true);
+      assert.match(noneResult?.reply ?? '', /no motor spares registered/i);
+      assert.doesNotMatch(chatNone.reply ?? '', /Ciao|aiutarti|bisogno/i);
+      assert.match(
+        chatNone.reply ?? '',
+        /non risultano motori di scorta registrati|nessun motore di scorta registrato/i,
+      );
+
+      await runtime.act({
+        request: 'sostituito motore anteriore sinistro di Testquad con Testmot 2207',
+        tool: 'fleet.chat',
+        args: { phrase: 'sostituito motore anteriore sinistro di Testquad con Testmot 2207' },
+      });
+      await runtime.act({
+        request: 'ho 3 motori Testmot 2207 nuovi e 2 usati',
+        tool: 'fleet.chat',
+        args: { phrase: 'ho 3 motori Testmot 2207 nuovi e 2 usati' },
+      });
+
+      const chatSome = await runtime.chat('quanti motori di scorta mi restano?');
+      assert.equal(chatSome.steps[0]?.tool, 'fleet.chat');
+      assert.equal(chatSome.steps[0]?.outcome, 'grant');
+      const someResult = chatSome.steps[0]?.result as { handled?: boolean; reply?: string };
+      assert.match(someResult?.reply ?? '', /Testmot 2207.*3 new, 2 used/);
+      assert.doesNotMatch(chatSome.reply ?? '', /Ciao|posso aiutarti/i);
+      assert.match(chatSome.reply ?? '', /Testmot 2207/);
+      assert.match(chatSome.reply ?? '', /3\s+nuov/i);
+      assert.match(chatSome.reply ?? '', /2\s+usat/i);
+    },
+    undefined,
+    undefined,
+    setup,
+  );
+
+  const ask = misatoAsk(
+    {
+      request: 'quanti motori di scorta mi restano?',
+      history: [
+        {
+          tool: 'fleet.chat',
+          args: { phrase: 'quanti motori di scorta mi restano?' },
+          outcome: 'grant',
+          result: { handled: true, reply: 'No motor spares registered.' },
+        },
+      ],
+      tools: toolDocs,
+      now: '2030-01-01T08:00:00.000Z',
+      timeZone: 'Europe/Rome',
+      language: 'it',
+    },
+    'local',
+  );
+  assert.match(ask.system!, /"steps" holds/);
+});
+
+test('B-143: "in 2 minutes" is due 2 minutes after the owner asked, not after the step that wrote reminders.add', async () => {
+  const { reconcileReminderArgs } = await import('../src/misato.ts');
+  const asked = new Date('2030-01-15T18:16:25.765Z');
+  const opts = { now: asked, timeZone: 'Europe/Rome', briefAt: '08:00' };
+  // The model wrote the call two minutes later and anchored "in 2 minutes" to its own step time.
+  for (const [text, late, want] of [
+    ['Remind me to drink water in 2 minutes', '2030-01-15T18:20:28.000Z', '2030-01-15T18:18:25.765Z'],
+    ['remind me to stretch in 1 hour', '2030-01-15T19:18:00.000Z', '2030-01-15T19:16:25.765Z'],
+    ['ricordami di bere acqua tra 2 minuti', '2030-01-15T18:20:28.000Z', '2030-01-15T18:18:25.765Z'],
+    ['ricordami di uscire fra 3 ore', '2030-01-15T21:20:00.000Z', '2030-01-15T21:16:25.765Z'],
+  ] as const) {
+    const out = reconcileReminderArgs(text, { title: 'Water', due: late, kind: 'at' }, opts);
+    assert.equal(out.due, want, text);
+    assert.equal(out.kind, 'at', text);
+  }
+  // A clock time is not relative: the model's due stays.
+  assert.equal(
+    reconcileReminderArgs(
+      'remind me to call Ada at 20:30',
+      { title: 'Call Ada', due: '2030-01-15T19:30:00.000Z' },
+      opts,
+    ).due,
+    '2030-01-15T19:30:00.000Z',
+  );
+
+  // Through every process: Misato's "Now" is the request time, and the stored due is anchored to it.
+  const late = new Date(Date.now() + 10 * 60_000).toISOString();
+  await agent(
+    [
+      JSON.stringify({ action: { tool: 'reminders.add', args: { title: 'Drink water', due: late, kind: 'at' } } }),
+      '{"reply":"Done."}',
+    ],
+    async (runtime, m) => {
+      const chat = await runtime.chat('Remind me to drink water in 2 minutes');
+      assert.equal(chat.steps.at(-1)?.outcome, 'grant');
+      const sortie = await runtime.sortie(chat.sortieId);
+      const items = await runtime.list();
+      assert.equal(items.length, 1);
+      assert.equal(items[0]!.due, new Date(Date.parse(sortie!.created) + 120_000).toISOString());
+      const planner = m.asked.filter((a) => a.who === 'misato');
+      assert.ok(planner.length >= 1);
+      for (const a of planner) assert.ok(a.system.includes(`Now: ${sortie!.created}`), a.system);
+    },
+  );
 });

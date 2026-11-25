@@ -216,7 +216,11 @@ process.on('message', (value: unknown) => {
             history: params.history as Step[],
             tools,
             ...(subjects.length ? { subjects } : {}),
-            now: new Date().toISOString(),
+            // B-143: "now" is when the owner asked, so "in 2 minutes" never drifts with the time each step takes.
+            now:
+              typeof params.requestedAt === 'string' && Number.isFinite(Date.parse(params.requestedAt))
+                ? new Date(params.requestedAt).toISOString()
+                : new Date().toISOString(),
             timeZone,
             ...(params.context ? { context: params.context as Turn[] } : {}),
             ...(params.memory ? { memory: params.memory as Recalled[] } : {}),

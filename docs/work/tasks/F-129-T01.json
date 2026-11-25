@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-129-T01",
+  "parent": "F-129",
+  "title": "List a sortie's model rounds with role, model and duration",
+  "goal": "The sortie read returns each consultant and Misato round in order with its model and duration",
+  "status": "planned",
+  "acceptance": [
+    "A test: a sortie with a consult, three steps and a reply returns four or five rounds in event order with role, model (when recorded) and durationMs",
+    "misato.step and misato.reply events record the model that answered, when they do not yet",
+    "Event schema and payload caps unchanged or versioned as src/events.ts requires"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/ledger-queries.ts",
+    "src/runtime-planning.ts",
+    "src/events.ts",
+    "src/timing.ts",
+    "test/**",
+    "docs/work/records/F-129.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design",
+    "typescript"
+  ],
+  "privacy": "Neutral invented sorties and model names only.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "An event schema version change goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-25: one ledger query over existing events, the model on step events and tests. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}
