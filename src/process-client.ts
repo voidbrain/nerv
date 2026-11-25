@@ -1,4 +1,5 @@
 import { fork, type ChildProcess } from 'node:child_process';
+import { once } from 'node:events';
 /**
  * Node flags for every NERV process: trust the operating system's certificates as well as Node's own, so HTTPS works
  * behind TLS-inspecting networks (company laptops). Kept equal to package.json "start" and the service units by test.
@@ -7,6 +8,9 @@ export const NODE_FLAGS = ['--use-system-ca'] as const;
 /** How long a caller waits for a child's READY before giving up (nothing is sent before it). */
 export const STARTUP_MS = 30_000;
 export const MAX_CHILD_REQUESTS = 32;
+/** B-126-T02: how much of a child's error output a not-ready error quotes. */
+const STDERR_TAIL_CHARS = 4000;
+const STDERR_TAIL_LINES = 8;
 import { randomUUID } from 'node:crypto';
 import { MAX_FRAME_BYTES, READY, validateParams, authorize, type Method, RpcFault } from './rpc.ts';
 export class ProcessClient {
@@ -24,6 +28,10 @@ export class ProcessClient {
   private readonly ready: Promise<boolean>;
   private isReady = false;
   private readonly startupMs: number;
+  /** B-126-T02: when the child was started, and the last of its error output, to say why it never became ready. */
+  private readonly startedAt = Date.now();
+  private stderrTail = '';
+  private stderrDone: Promise<void> = Promise.resolve();
   constructor(
     entry: URL,
     args: string[],
@@ -40,7 +48,8 @@ export class ProcessClient {
     });
     // Explicit small environment: no provider/API/root token passed to children. Same-user process isolation is NOT a sandbox.
     this.child = fork(entry, args, {
-      stdio: ['ignore', 'ignore', 'inherit', 'ipc'],
+      // B-126-T02: error output is piped (and passed on to ours unchanged) so a failed start can quote its last lines.
+      stdio: ['ignore', 'ignore', 'pipe', 'ipc'],
       env: {
         PATH: process.env.PATH ?? '',
         LANG: process.env.LANG ?? 'C.UTF-8',
@@ -49,6 +58,17 @@ export class ProcessClient {
       },
       execArgv: [...NODE_FLAGS],
     });
+    const stderr = this.child.stderr;
+    if (stderr) {
+      this.stderrDone = new Promise<void>((done) => {
+        stderr.once('close', done);
+        stderr.once('error', () => done());
+      });
+      stderr.on('data', (chunk: Buffer) => {
+        process.stderr.write(chunk);
+        this.stderrTail = (this.stderrTail + chunk.toString('utf8')).slice(-STDERR_TAIL_CHARS);
+      });
+    }
     this.child.on('message', (value: unknown) => {
       if (!value || typeof value !== 'object' || Array.isArray(value)) return;
       if ((value as { nerv?: unknown }).nerv === READY.nerv) {
@@ -102,7 +122,8 @@ export class ProcessClient {
           }),
         ]);
         clearTimeout(timer);
-        if (!ok) throw new RpcFault(-32006, `${this.role} process not ready; nothing was sent.`);
+        if (!ok)
+          throw new RpcFault(-32006, `${this.role} process not ready; nothing was sent. ${await this.whyNotReady()}`);
         if (this.closed || !this.child.connected) throw new Error(`${this.role} process unavailable.`);
       }
       const id = randomUUID(),
@@ -131,6 +152,33 @@ export class ProcessClient {
     } finally {
       if (!sent) this.waiting--;
     }
+  }
+  /** B-126-T02: how the child stands when it did not become ready: its exit code and signal, or that it is still
+     running at the deadline, with the last lines of its error output. */
+  private async whyNotReady(): Promise<string> {
+    const waited = Date.now() - this.startedAt;
+    const brief = (ms: number) => new Promise<void>((done) => setTimeout(done, ms).unref());
+    // A child that ended says so on 'disconnect' before 'exit' sets its code; its last output may still be in the pipe.
+    if (this.closed) {
+      if (this.child.exitCode === null && this.child.signalCode === null)
+        await Promise.race([once(this.child, 'exit'), brief(1000)]);
+      await Promise.race([this.stderrDone, brief(500)]);
+    }
+    const exited = this.child.exitCode !== null || this.child.signalCode !== null;
+    const state = exited
+      ? `It exited with code ${this.child.exitCode}${this.child.signalCode ? ` (signal ${this.child.signalCode})` : ''} after ${waited} ms`
+      : this.child.pid === undefined
+        ? `It did not start after ${waited} ms`
+        : this.closed
+          ? `It closed its channel after ${waited} ms; still running (pid ${this.child.pid})`
+          : `It sent no READY after ${this.startupMs} ms; still running (pid ${this.child.pid})`;
+    const lines = this.stderrTail
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter((l) => l && !/^(at |\^+$|Node\.js v|node:internal|\{$|\}$)/.test(l))
+      .slice(-STDERR_TAIL_LINES);
+    const output = lines.length ? lines.join(' | ') : 'none';
+    return `${state}; last error output: ${output}${output.endsWith('.') ? '' : '.'}`;
   }
   /** SIGTERM, SIGKILL after 2 s; resolves on exit, or 2 s after SIGKILL at the latest (B-118: never waits forever). */
   async close(): Promise<void> {
