@@ -19,6 +19,21 @@ Full deterministic CI consists of all Node tests with Linux coverage, typecheck,
 
 CI runs once per PR head, with concurrency cancellation for superseded heads, plus a manual trigger and a weekly main-branch freshness check. Existing `validate`, `windows` and `native-macos` job names remain. Unselected platform jobs report scoped skips without installing dependencies. The `full-suite` marker runs only for a full plan and rejects failed/cancelled/skipped dependencies. Only its successful, merged exact-head evidence resets freshness.
 
+A docs-only pull request starts no Windows or macOS runner (B-139). Docs-only means every changed file is under `docs/` (records, tasks, the generated backlog views, guides, archives), a Markdown file at the repository root, or `LICENSE`; `native/README.md` or any other path is not. The `plan` job's changed-paths step decides it, and `windows` and `native-macos` skip at job level only when it is docs-only and the plan selected no work for them, so a full plan still runs both. A job-level skip reports the required `native-macos` check as skipped, which passes; a workflow-level `paths:` filter would leave it pending. Pushes to `main`, the merge queue, manual and scheduled runs always run both jobs. The `native-macos` limit stays 30 minutes: the 2026-11-25 cancellations at about 15 minutes with no step run were GitHub failing to acquire a macOS runner, which `timeout-minutes` does not govern.
+
+## CodeQL
+
+`.github/workflows/codeql.yml` (B-139) replaces GitHub's default code-scanning setup with the same languages, build modes and default query suite: `actions` and `javascript-typescript` on every pull request, push to `main` and weekly run; `swift` (a macOS runner, about 12 minutes) only when a `.swift` file, anything under `native/NervMenuBar/` or the workflow itself changed, and always on the weekly or a manual run.
+
+<a id="codeql-default-setup-off"></a>**Owner procedure, after the PR that adds the workflow is merged** (B-139-T02). While the default setup is on, GitHub rejects the workflow's uploads, so turn it off once, on any machine with `gh` signed in as a repository admin:
+
+```bash
+gh api -X PATCH repos/voidbrain/nerv/code-scanning/default-setup -f state=not-configured
+gh api repos/voidbrain/nerv/code-scanning/default-setup -q .state
+```
+
+Expected: the second command prints `not-configured`. Then rerun the newest CodeQL run on `main` (Actions → CodeQL → Re-run all jobs); expected: its Analyze jobs pass and upload.
+
 Default limits: seven days or ten first-parent integration commits. Each merged/squashed PR counts once; direct commits conservatively consume the budget. A successful full PR run can count after merge without a duplicate main run. Partial success, skipped marker, changed PR head, unmerged branch or unavailable history cannot reset the limit. Bounded lookup may request full work if the prior baseline is beyond its history window.
 
 For a manual full run, select **Actions → CI → Run workflow → full = true**. `npm run verification:plan -- --full` requests the same scope locally but only prints a plan. `npm run test:affected` executes reviewed selection from `NERV_VERIFY_GROUPS` and JSON `NERV_VERIFY_PATHS`; CI supplies these as environment variables, never interpolated shell commands. Existing `npm test`, `test:browser`, `test:headless`, `evals`, `evals:stress` and `evals:model` commands remain available.
