@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-126-T04",
+  "parent": "F-126",
+  "title": "Switch the configured chat model to gemma4:26b",
+  "goal": "If the owner decides to switch, NERV's configured chat model is gemma4:26b",
+  "status": "planned",
+  "acceptance": [
+    "Only if F-126-T03 decides to switch; otherwise this step closes as not needed",
+    "The defaults, setup hints and documentation name gemma4:26b; the owner gets the copy-paste commands for the live base (pull and models set) with the expected result"
+  ],
+  "dependsOn": [
+    "F-126-T03"
+  ],
+  "resources": [
+    "src/model-setup.ts",
+    "src/engine-provider.ts",
+    "docs/model-usage.md",
+    "docs/work/records/F-126.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript"
+  ],
+  "privacy": "Local models only; no paid route, prompts are neutral fixtures, raw reports stay private on their base.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-25: default and documentation change plus the owner's commands. Not a measurement.",
+    "agentHours": 0.75,
+    "reviewed": "2026-11-25",
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}

@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 8 | 5 | 28 | 8 |
+| **This week** | 9 | 5 | 29 | 8 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 38 | 33 |
+| **Open** | 39 | 34 |
 | **Require Human 🧑** | 11 | 15 |
 
 ### Require Human 🧑
@@ -39,7 +39,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 103.75 h agent + 12.25 h owner across 126 open steps of 38 features and 33 other records. 165.25 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 109.5 h agent + 12.5 h owner across 131 open steps of 39 features and 34 other records. 165.25 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1513,6 +1513,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-138"></a>[🐞 B-138](#top)
+
+**`nerv chat` answers a fleet question with a generic greeting, ignoring the `fleet.chat` result**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | [F-098-T04](#f-098-t04) | 🤖 | — | — |
+
+💻 **→** Next: B-138-T01, name why the reply after a granted `fleet.chat` step drops its result, and fix it with a failing-first test.
+
+| | |
+|---|---|
+| **Issue** | Seen by the owner on NERV-01 at `2627d483` on 2026-11-25. `nerv chat "quanti motori di scorta mi restano?"` twice answered with a generic Misato greeting, although `fleet.chat` was granted and ran (sorties `e8a4444a-16c1-4d4f-984a-1bf118d78ccf` and `e7849127-dbdd-47ad-b712-8f848f181815`): the tool result was ignored. Expected: no spare motors are registered (the spares table held only one frame row, quantity 0). Likely places: the planner's follow-up turn after a tool step (`misatoAsk` in `src/misato.ts`, history and `steps`) and the spares answer of `handleFleetChat` (`src/fleet-chat.ts`, called from `src/executors.ts`). |
+| **Reproduce** | With an invented fleet that has no motor spares: `nerv chat "quanti motori di scorta mi restano?"`; today: a greeting with no spare count. `nerv events e8a4444a-16c1-4d4f-984a-1bf118d78ccf` on NERV-01 shows the granted `fleet.chat` step and the reply. |
+| **Check** | The cause is named from the two sorties (the `fleet.chat` result and the next planner reply); a committed test across the tool step and the final reply fails first and passes with the fix; asked with no motor spares, the answer says none are registered; asked with spares, it gives the counts (new and used). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-138-t01"></a>B-138-T01 — Answer a spares question from the fleet.chat result | 1.5 h | 0 h | 1.5 h | Planned | — | [F-098-T04](#f-098-t04) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-138.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | — (owner report 2026-11-25, NERV-01 at `2627d483`); opened in [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) |
+| Opened | 2026-11-25 |
+| Verification | Pending. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
 ### <a id="b-066"></a>[🐞 B-066](#top)
 
 **Worker-link heartbeat verification awaits nervous SQLite IPC on every frame**
@@ -2512,13 +2550,54 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-126"></a>[✨ F-126](#top)
+
+**Evaluate gemma4:26b as the local chat model instead of gemma4:12b**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 4.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-126-T01 — Repeatable local model speed benchmark (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner approved 2026-11-25. On the owner's Mac (M3 Pro, 36 GB, load average 8–15), with a 3,900-token prompt and uncached prompt reading, gemma4:26b read the prompt about twice as fast as gemma4:12b and generated faster: gemma4:12b 200 tok/s reading, 37 tok/s generation; gemma4:26b 441 / 45; qwen3-coder:30b 565 / 35; qwen2.5-coder:14b 168 / 13; devstral-small-2:24b 99 / 7; gemma4:e2b about 3,000 / 50. The cost is memory: about 16 GB against 8 GB for gemma4:12b. Prompt reading matters because every "(invalid reply)" retry (B-136) re-reads the whole prompt. Speed alone does not justify a switch: the quality evidence that placed gemma4:12b has to be rerun. |
+| **Reproduce** | The owner's figures were measured by hand; F-126-T01 makes the measurement repeatable. |
+| **Check** | A repeatable speed benchmark per model under evals (uncached prompt reading and generation); gemma4:26b's results on the F-006 placement probes and the relevant gauntlet cases next to gemma4:12b's, local models only; the owner's recorded decision; if the owner switches, the configured chat model and its documentation name gemma4:26b. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | 1.5 h | Planned | — | [F-126-T02](#f-126-t02) | 🤖 |
+| 🟡 Medium | <a id="f-126-t02"></a>F-126-T02 — Rerun the gemma4:12b quality evidence with gemma4:26b | 2 h | 0 h | 2 h | Planned | [F-126-T01](#f-126-t01) | [F-126-T03](#f-126-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-126-t03"></a>F-126-T03 — Owner decides whether to switch the chat model to gemma4:26b | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-126-T02](#f-126-t02) | [F-126-T04](#f-126-t04) | ⏳ 🤔 |
+| 🟢 Small | <a id="f-126-t04"></a>F-126-T04 — Switch the configured chat model to gemma4:26b | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T03](#f-126-t03) | — | ⏳ 🤖 |
+| 🔴 Large | **Total** | 4.25 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 4.25 h agent + 0.25 h owner | 0 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-126.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner benchmark 2026-11-25 (by hand); opened in [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) |
+| Opened | 2026-11-25 |
+| Verification | — |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
 ### <a id="f-098"></a>[✨ F-098](#top)
 
 **FPV fleet diary: crashes, parts, spares and photos**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | — | [F-101-T04](#f-101-t04) | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.25 h | [B-138-T01](#b-138-t01) | [F-101-T04](#f-101-t04) | ⏳ | — | — |
 
 💻 **→** Next: F-098-T04 — Live check with a real crash (Planned).
 
@@ -2532,7 +2611,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0.25 h | 0 h | 0.25 h | Planned | — | [F-101-T04](#f-101-t04) | — |
+| 🟢 Small | <a id="f-098-t04"></a>F-098-T04 — Live check with a real crash | 0.25 h | 0 h | 0.25 h | Planned | [B-138-T01](#b-138-t01) | [F-101-T04](#f-101-t04) | — |
 | 🟢 Small | **Total** | 4.5 h | 2.75 h (4 of 6 steps recorded) | 0.25 h | 5 of 6 completed | | | |
 
 <details><summary>Done steps (5)</summary>
@@ -2554,10 +2633,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation · F-098-T03: [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation · F-098-T05: [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation · F-098-T06: [PR #705](https://github.com/voidbrain/nerv/pull/705) implementation. [PR #705](https://github.com/voidbrain/nerv/pull/705) (F-098-T06 fleet by chat); [PR #691](https://github.com/voidbrain/nerv/pull/691) (F-098-T05 fleet import); [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation · F-098-T03: [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation · F-098-T05: [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation · F-098-T06: [PR #705](https://github.com/voidbrain/nerv/pull/705) implementation. F-098-T04 run evidence in [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM); [PR #705](https://github.com/voidbrain/nerv/pull/705) (F-098-T06 fleet by chat); [PR #691](https://github.com/voidbrain/nerv/pull/691) (F-098-T05 fleet import); [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
-| Verification | Unit/integration 2026-11-24: `node --test test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts` (43 passed) with the containment fix; CI green on PRs #691 and #705. Live on the real fleet: Pending (F-098-T04). |
-| Reviewed | 2026-11-24 |
+| Verification | Unit/integration 2026-11-24: `node --test test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts` (43 passed) with the containment fix; CI green on PRs #691 and #705. Live on the real fleet 2026-11-25 (F-098-T04, owner on NERV-01): crash recorded; spare count failed (B-138). Pending. |
+| Reviewed | 2026-11-25 |
 
 </details>
 

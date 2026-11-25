@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "F-126-T03",
+  "parent": "F-126",
+  "title": "Owner decides whether to switch the chat model to gemma4:26b",
+  "goal": "The owner chooses gemma4:26b or keeps gemma4:12b from the speed and quality evidence",
+  "status": "planned",
+  "acceptance": [
+    "The owner's decision (switch or keep, and why) is recorded with the date"
+  ],
+  "dependsOn": [
+    "F-126-T02"
+  ],
+  "resources": [
+    "docs/work/records/F-126.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "architecture-review"
+  ],
+  "privacy": "Local models only; no paid route, prompts are neutral fixtures, raw reports stay private on their base.",
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-25: reading the comparison report and choosing. Not a measurement.",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "decision",
+    "reviewed": "2026-11-25"
+  }
+}
