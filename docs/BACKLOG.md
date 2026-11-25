@@ -40,7 +40,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 111.75 h agent + 13.25 h owner across 130 open steps of 41 features and 31 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 110.5 h agent + 13.25 h owner across 130 open steps of 41 features and 31 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -715,9 +715,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.25 h agent + 0.5 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-120-T01 — Catch-up Gauntlet coverage review of closed features (Planned).
+💻 **→** Next: F-120-T01 — Catch-up Gauntlet coverage review of closed features (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -729,10 +729,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | 1.5 h | Planned | — | [F-120-T02](#f-120-t02) | 🤖 | — |
+| 🟢 Small | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | 0.25 h | Implemented; verification pending | — | [F-120-T02](#f-120-t02) | 🤖 | [PR #752](https://github.com/voidbrain/nerv/pull/752) |
 | 🟢 Small | <a id="f-120-t03"></a>F-120-T03 — Adopt the Gauntlet domain packs when released | 0.5 h | 0 h | 0 h agent + 0.5 h owner | Implemented; verification pending | — | — | [🧑‍🔧](evaluations/gauntlet.md#domain-packs-0100-and-0110-f-120-t03) | [PR #749](https://github.com/voidbrain/nerv/pull/749) |
 | 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | [F-120-T01](#f-120-t01) | — | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 4.5 h agent + 0.5 h owner | 0 of 3 completed | | | | |
+| 🟡 Medium | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 3.25 h agent + 0.5 h owner | 0 of 3 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -741,10 +741,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749). Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749). |
+| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749). Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review). |
 | Opened | 2026-11-24 |
-| Verification | — |
-| Reviewed | 2026-11-24 |
+| Verification | Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
+| Reviewed | 2026-11-25 |
 
 </details>
 
@@ -2248,7 +2248,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | [F-127-T01](#f-127-t01) | 🤖 | — | — |
 
-💻 **→** Next: from tasks; F-125-T01 implemented (harness 10.9.0 → 10.21.0, PR below); F-125-T02 (built views) is next, in its own PR.
+💻 **→** Next: from tasks; F-125-T01 implemented (harness 10.9.0 → 10.21.1, PR below); F-125-T02 (built views) is next, in its own PR.
 
 | | |
 |---|---|

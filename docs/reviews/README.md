@@ -2,6 +2,8 @@
 
 NERV evidence snapshot reviewed 8 November 2026 against main `2943aad`. Times below use Europe/Rome; dates come from recorded review/run metadata, not file modification time. This register links evidence and existing rerun conditions; it does not install a schedule, run checks or certify an assessment. Refresh the affected rows when new evidence or policy changes.
 
+[Catch-up Gauntlet coverage review, 2026-11-25](gauntlet-coverage/2026-11-25.md): F-120-T01 classification of every feature closed since F-074 (46) and every zero-case area in `docs/test-capability-index.md`, checked against the gauntlet-protocol 0.11.1 catalog; proposes seven NERV system-pack cases for F-120-T02 and maps coding, code-review, math, logic-planning and cad-3d to the domain packs adopted in F-120-T03.
+
 [Agentica Python SDK, 2026-11-20](2026-11-20-agentica.md): read-only assessment of a Python code-mode agent framework; not adopted, three ideas kept as F-111 (typed results), F-112 (script plans over read tools) and F-113 (compact tool index).
 
 [Isolated enrollment preparation, 2026-11-10](../acceptance/node-enrollment-2026-11-10.md): F-005 receipt/public-key/source/registry checks and private terminal handoff reviewed. Next: owner terminal signing, then verify isolated import; no enrollment, service or worker acceptance claimed.
