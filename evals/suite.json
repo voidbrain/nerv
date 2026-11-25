@@ -134,7 +134,8 @@
         "test/browser-click.browser.mjs",
         "test/diyfpv-read.browser.mjs",
         "test/updater-status.browser.mjs",
-        "test/doctor-run.browser.mjs"
+        "test/doctor-run.browser.mjs",
+        "test/dashboard-shell.browser.mjs"
       ],
       "families": [
         "dashboard-operator",

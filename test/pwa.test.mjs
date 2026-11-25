@@ -36,7 +36,8 @@ test('index.html links the manifest and the build registers the service worker',
   const build = JSON.parse(read('angular.json')).projects.nerv.architect.build.options;
   assert.equal(build.serviceWorker, 'web/ngsw-config.json');
   // F-004-T09 review: the registered worker wraps ngsw-worker.js so a tap on a reminder push posts its receipt.
-  assert.match(read('web/src/main.ts'), /provideServiceWorker\('workspace-sw\.js', \{ enabled: !isDevMode\(\) \}\)/);
+  // F-130-T01: the providers moved from main.ts to app.ts (appConfig) with the routes.
+  assert.match(read('web/src/app.ts'), /provideServiceWorker\('workspace-sw\.js', \{ enabled: !isDevMode\(\) \}\)/);
   assert.match(read('web/public/workspace-sw.js'), /importScripts\("ngsw-worker\.js"\)/);
 });
 
@@ -58,11 +59,18 @@ test('every API call of the workspace and the dashboard bypasses the service wor
   // F-118-T02 added POST /api/device/pair to the dashboard (4 calls) and, through pairDevice, to the workspace.
   assert.equal(calls.length, 4, 'live.js API calls');
   for (const call of calls) assert.match(call, /"ngsw-bypass":"1"/, call);
-  const main = read('web/src/main.ts');
-  assert.match(main, /const SW_BYPASS = \{ 'ngsw-bypass': '1' \};/);
-  const fetches = [...main.matchAll(/await fetch\('\/api\/[\s\S]*?\}\);/g)].map((m) => m[0]);
-  assert.equal(fetches.length, 3, 'main.ts API calls');
+  // F-130-T01: the workspace calls moved from main.ts into the shared Session (exchange, every authenticated call),
+  // the live feed (the stream) and the simple page (the checklist toggle); every one still bypasses the worker.
+  assert.match(read('web/src/session.ts'), /export const SW_BYPASS = \{ 'ngsw-bypass': '1' \};/);
+  const fetches = ['session.ts', 'live-feed.ts', 'nodo.ts'].flatMap((file) =>
+    [...read('web/src/' + file).matchAll(/fetch(?:er)?\('\/api\/[\s\S]*?\}\);/g)].map((m) => m[0]),
+  );
+  assert.equal(fetches.length, 4, 'workspace API calls');
   for (const call of fetches) assert.match(call, /\.\.\.SW_BYPASS/, call);
-  assert.match(main, /pairDevice\([\s\S]*?SW_BYPASS,?\s*\)/, 'workspace pairing bypasses the service worker');
+  assert.match(
+    read('web/src/session.ts'),
+    /pairDevice\([\s\S]*?SW_BYPASS,?\s*\)/,
+    'workspace pairing bypasses the service worker',
+  );
   assert.match(read('web/src/device-pairing.ts'), /headers: \{ 'Content-Type': 'application\/json', \.\.\.headers \}/);
 });
