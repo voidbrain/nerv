@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "id": "F-125-T01",
+  "parent": "F-125",
+  "title": "Reconcile to the latest harness release",
+  "goal": "NERV runs the latest project-harness release, reconciled once the template backlog is empty",
+  "status": "planned",
+  "acceptance": [
+    "Started only once the project-harness template backlog is empty (external prerequisite; harness 10.9.0 has no cross-repository dependsOn)",
+    ".harness.json names the latest release and every copied, forked and adapted file is reconciled",
+    "Every NERV check passes on the reconcile PR"
+  ],
+  "dependsOn": [],
+  "resources": [
+    ".harness.json",
+    "tools/**",
+    "docs/agents/**",
+    "docs/backlog/**",
+    "docs/BACKLOG-RULES.md",
+    "AGENTS.md",
+    ".github/workflows/**",
+    "docs/work/records/F-125.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, endpoints or personal data in Git.",
+  "validation": [
+    "npm run check:freshness",
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A harness rule that conflicts with a project override goes to the owner",
+    "Do not start while the template backlog still has open work"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h agent",
+    "basis": "Estimated 2026-11-25: reconcile from 10.9.0 through the releases published since, mostly copied tools and procedure text. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": [
+    {
+      "pr": 748
+    }
+  ]
+}
