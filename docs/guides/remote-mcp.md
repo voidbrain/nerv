@@ -47,7 +47,7 @@ For a hub that drives hardware, a sensible start: its read tools as `read`, its 
 
 An unreachable server is reported, not hidden:
 
-- `nerv tools` prints `could not list its tools:` with the reason: unreachable (the machine is off or this base is not on the tailnet), a certificate this base does not trust, `HTTP 404` (check the path ends in `/mcp`), no answer in time, or not an MCP server.
+- `nerv tools` prints `could not list its tools:` with the reason: `<host> is unreachable (<code>): is that machine on, and is this one on the same tailnet?` for any failure to connect (refused, reset, closed, no route or name, a connect timeout; `<code>` is the one the system gave), a certificate this base does not trust, `HTTP 404` (check the path ends in `/mcp`), no answer in time, or not an MCP server.
 - Its granted tools leave Misato's list and appear as suspended, with the same reason, in the dashboard's Tools panel (`GET /api/tools`). They come back by themselves once the server answers again.
 - An action you approved while the server was unreachable does not run. Misato is told it was approved but did not run, and why.
 - An approval issues a single-use grant that lasts 60 seconds. NERV normally makes the call within a few seconds of your approval. If it gets to it later (for example, the service was stopped), the call does not run and Misato says why: ask again. An approval never runs a call twice.

@@ -9,6 +9,9 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { McpHttpClient, grantRefusal, httpFailure, urlRefusal, validateTools } from '../src/mcp.ts';
+
+/** The one wording for a server that cannot be reached, whatever the code. */
+const UNREACHABLE = /is unreachable \([A-Z_]+\): is that machine on, and is this one on the same tailnet\?/;
 import { toolListing } from '../src/tool-listing.ts';
 import { Store } from '../src/store.ts';
 import type { ChatReply } from '../src/runtime-api.ts';
@@ -164,7 +167,19 @@ test('a remote MCP server: HTTPS, or plain HTTP on loopback only; effect classes
   // The kinds of failure are told apart: an unreachable machine is not a wrong path or a bad certificate.
   const cause = (code: string) => Object.assign(new TypeError('fetch failed'), { cause: { code } });
   assert.match(httpFailure('hub.example', cause('ECONNREFUSED')), /unreachable \(ECONNREFUSED\).*tailnet/);
-  assert.match(httpFailure('hub.example', cause('ENOTFOUND')), /unreachable/);
+  // Every connection-level failure reads the same, whichever code the OS or undici gives (CI saw UND_ERR_SOCKET from a
+  // kept-alive socket the server had closed).
+  for (const code of [
+    'ECONNREFUSED',
+    'ECONNRESET',
+    'ECONNABORTED',
+    'ENOTFOUND',
+    'EPIPE',
+    'UND_ERR_SOCKET',
+    'UND_ERR_CONNECT_TIMEOUT',
+    'UND_ERR_CLOSED',
+  ])
+    assert.match(httpFailure('hub.example', cause(code)), UNREACHABLE, code);
   assert.match(httpFailure('hub.example', cause('DEPTH_ZERO_SELF_SIGNED_CERT')), /certificate/);
   assert.match(httpFailure('hub.example', Object.assign(new Error('x'), { name: 'TimeoutError' })), /in time/);
 });
@@ -186,7 +201,7 @@ test('the HTTP client: a session kept, an SSE answer read, a wrong path and a de
   } finally {
     await hub.close();
   }
-  await assert.rejects(new McpHttpClient({ id: 'hub', url: hub.url }).listTools(), /unreachable \(ECONN[A-Z]+\)/);
+  await assert.rejects(new McpHttpClient({ id: 'hub', url: hub.url }).listTools(), UNREACHABLE);
 });
 
 test('an answer larger than 4 MiB is cut off while it streams, for a listing and a call (F-123)', async () => {
@@ -400,7 +415,7 @@ test(
       await r.decide(ask2.waiting[0]!.approvalId, 'approve');
       const notRun = (await resumed2).steps.find((s) => s.tool === 'hub.hub_run_pump' && s.outcome === 'grant')!;
       assert.equal(notRun.reason, 'The owner approved it, but it did not run.');
-      assert.match(notRun.error ?? '', /Approved, but it did not run: .*unreachable/);
+      assert.match(notRun.error ?? '', new RegExp(`Approved, but it did not run: .*${UNREACHABLE.source}`));
       assert.ok(!hub.calls.some((c) => c.args.pumpId === 'p2'));
       const gone = toolListing(await r.externalTools(true));
       assert.equal(gone.tools.filter((t) => t.source === 'mcp:hub').length, 0);
@@ -408,10 +423,10 @@ test(
         gone.suspended.map((x) => x.name),
         ['hub.hub_overview', 'hub.hub_run_pump'],
       );
-      assert.match(gone.suspended[0]!.why, /unreachable \(ECONN[A-Z]+\)/);
+      assert.match(gone.suspended[0]!.why, UNREACHABLE);
       assert.match(
         (await cli('tools')).stdout,
-        /hub · http:\/\/127\.0\.0\.1:\d+\/mcp\n\s+could not list its tools: .*unreachable/,
+        new RegExp(`hub · http://127\\.0\\.0\\.1:\\d+/mcp\\n\\s+could not list its tools: .*${UNREACHABLE.source}`),
       );
     } finally {
       await r?.close();

@@ -353,11 +353,15 @@ export function httpFailure(host: string, e: unknown): string {
   const err = e as { name?: string; message?: string; cause?: { code?: string; message?: string } };
   if (err?.name === 'TimeoutError' || err?.name === 'AbortError') return `${host} did not answer in time`;
   const code = err?.cause?.code ?? '';
+  if (/CERT|SSL|TLS/i.test(code)) return `${host} has a certificate this base does not trust (${code})`;
+  // Every connection-level failure, whichever code the OS or undici gives: refused, reset or closed (a kept-alive socket
+  // the server closed is UND_ERR_SOCKET), no route, no name, a connect timeout.
   if (
-    ['ECONNREFUSED', 'ENOTFOUND', 'EAI_AGAIN', 'EHOSTUNREACH', 'ENETUNREACH', 'ETIMEDOUT', 'ECONNRESET'].includes(code)
+    /^(ECONN[A-Z]+|EPIPE|ENOTFOUND|EAI_AGAIN|EHOSTUNREACH|EHOSTDOWN|ENETUNREACH|ENETDOWN|ETIMEDOUT|UND_ERR_[A-Z_]+)$/.test(
+      code,
+    )
   )
     return `${host} is unreachable (${code}): is that machine on, and is this one on the same tailnet?`;
-  if (/CERT|SSL|TLS/i.test(code)) return `${host} has a certificate this base does not trust (${code})`;
   if (code) return `${host} could not be reached (${code})`;
   return `${host} could not be reached: ${(err?.cause?.message ?? err?.message ?? 'unknown error').slice(0, 200)}`;
 }
