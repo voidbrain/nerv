@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 4 | 7 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 4 | 8 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -6721,6 +6721,40 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | PR / evidence | [PR #595](https://github.com/voidbrain/nerv/pull/595) (CI green); [PR #630](https://github.com/voidbrain/nerv/pull/630) (F-115-T02 gauntlet reruns, CI green); `test/cli-help.test.ts` |
 | Opened | 2026-11-20 |
 | Verification | Unit/integration 2026-11-25: `test/cli-help.test.ts` 4/4 at main `774a08f`; CI green on PR #595 and every main run since. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+
+### B-082
+
+**Windows: a service installed from an SSH session cannot register its logon task**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-25: PR #517 and PR #601 merged on green CI; live read-only SSH probe on Tabgha 2026-11-25: the rule's account maps to the registered task's SID.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24): the fenced install over SSH ended `uncertain` at the register step; `schtasks /Create` with NERV's task XML answered "ERROR: No mapping between account names and security IDs" because the XML named `WORKGROUP\\<user>`: `renderService` used `USERDOMAIN\\USERNAME`, and an SSH session on a workgroup machine reports `USERDOMAIN=WORKGROUP`, which names no account (the account is `KITCHEN\\<user>`). |
+| **Reproduce** | On a workgroup Windows machine, over SSH: `nodes lifecycle-inspect --action install`, then `lifecycle-apply`. |
+| **Check** | Test committed failing first: `windowsServiceUser` gives `COMPUTERNAME\\user` for a local account (also when USERDOMAIN is WORKGROUP) and `USERDOMAIN\\user` when USERDNSDOMAIN is set; on Tabgha an SSH install registers the task. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-25: PR #517 and PR #601 merged on green CI; live read-only SSH probe on Tabgha 2026-11-25: the rule's account maps to the registered task's SID. 2026-11-25: B-082-T01 closed and the record closes. Its last clause ("on Tabgha an SSH install registers the task") was deliberately superseded by B-087 (PR #612, closed by #613): Windows now refuses install, start and update applied from an SSH session before any Task Scheduler change, so no SSH install can register a task by design. Live read-only probe on Tabgha over SSH (`SSH_CONNECTION` set, `USERDOMAIN=WORKGROUP`, `COMPUTERNAME=KITCHEN`), from a temporary clone of main fa9ab0b under `%TEMP%` (deleted afterwards; the NERV service, task and data untouched): `windowsServiceUser(process.env)` gives `KITCHEN\\<user>`, which maps to a SID; the old `USERDOMAIN\\USERNAME` form (`WORKGROUP\\<user>`) still fails to translate ("Some or all identity references could not be translated", the original error); the registered `NERV Agency` task's principal is that same SID, `KITCHEN\\<user>`. No owner action remains: the task installed from Tabgha's desktop already runs as the account the rule names. No review: records-only closure; the code merged in #517 and #601 (T02 had a fresh-context review). 2026-11-21: B-082-T02 closed by [PR #601](https://github.com/voidbrain/nerv/pull/601), CI run 44815656209 (plan, validate, Windows and native-macos passed; full-suite correctly skipped by scoped selection; CodeQL analyses passed). `windowsServiceUser` keeps every non-empty `USERDOMAIN` except `WORKGROUP`, so Entra ID (`AzureAD\\user`) and domain accounts survive SSH sessions without `USERDNSDOMAIN`; empty and workgroup domains still use `COMPUTERNAME\\user`. B-087 now makes the SSH limitation an up-front refusal; the remaining live install check runs from Tabgha's desktop after B-087 merges.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #601](https://github.com/voidbrain/nerv/pull/601) (B-082-T02); Test: `test/node-inspection.test.ts` "B-082: the Windows task user keeps Entra and domain accounts but repairs workgroup users" (committed failing first in B-082-T02); Review: fresh-context P1 review found no blocking code, security, privacy or compliance issue and confirmed the later test edit is formatting-only; prior T01 test committed failing first |
+| Opened | 2026-11-18 |
+| Verification | 2026-11-21: B-082-T02 CI run 44815656209 and required fresh-context review passed. Local: targeted regression 2/2, full tests 1,041 pass / 2 platform skips, build, `check:fast`, headless 5 pass / 1 Windows skip. 2026-11-25: live read-only SSH probe on Tabgha: the rule's account maps to the SID of the registered task; the legacy form does not. |
 | Reviewed | 2026-11-25 |
 
 </details>

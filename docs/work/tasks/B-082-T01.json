@@ -4,9 +4,10 @@
   "id": "B-082-T01",
   "title": "Windows: a service installed from an SSH session cannot register its logon task",
   "goal": "Windows: a service installed from an SSH session cannot register its logon task",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
-    "Test committed failing first: `windowsServiceUser` gives `COMPUTERNAME\\\\user` for a local account (also when USERDOMAIN is WORKGROUP) and `USERDOMAIN\\\\user` when USERDNSDOMAIN is set; on Tabgha an SSH install registers the task."
+    "Test committed failing first: `windowsServiceUser` gives `COMPUTERNAME\\\\user` for a local account (also when USERDOMAIN is WORKGROUP) and `USERDOMAIN\\\\user` when USERDNSDOMAIN is set; on Tabgha an SSH install registers the task.",
+    "Amended 2026-11-25 (requirement deliberately changed by B-087, closed by PR #612/#613): Windows refuses install, start and update applied from an SSH session, so the live part is now: on Tabgha, in an SSH session (USERDOMAIN=WORKGROUP), windowsServiceUser names an account that maps to a SID, and it is the account of the registered NERV Agency task."
   ],
   "dependsOn": [
     "B-087-T01"
@@ -24,7 +25,8 @@
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
   "validation": [
     "npm test",
-    "npm run check:fast"
+    "npm run check:fast",
+    "2026-11-25 read-only probe on Tabgha over SSH from a temporary clone of main fa9ab0b (deleted afterwards)"
   ],
   "escalation": [
     "A material scope or effort increase goes to the owner"
@@ -32,12 +34,12 @@
   "effort": {
     "size": "small",
     "estimate": "0.75 h",
-    "basis": "Estimated 2026-11-18: one account rule and a test. Not a measurement.",
+    "basis": "Estimated 2026-11-18: one account rule and a test. Not a measurement. Closed 2026-11-25 after a read-only live probe on Tabgha (about 0.25 h, stated).",
     "reviewed": "2026-11-20",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75,
-    "actualAgentHours": 0.5,
+    "actualAgentHours": 0.75,
     "actualSource": "stated"
   },
   "prs": [
