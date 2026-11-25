@@ -100,7 +100,19 @@ if (process.argv[1] && realpathSync(fileURLToPath(import.meta.url)) === realpath
     md +=
       '**More detail:** ' +
       pages
-        .map((p) => `[${p.title}](${relative(from, p.path).split('\\').join('/')})${p.about ? ` (${p.about})` : ''}`)
+        // B-059: the label escapes the backslash before the brackets and keeps to one line; every path segment is
+        // percent-encoded, parentheses included, so nothing in a name ends or changes the link
+        .map(
+          (p) =>
+            `[${String(p.title ?? '')
+              .replace(/[\\[\]]/g, '\\$&')
+              .replace(/[\r\n]+/g, ' ')}](${relative(from, p.path)
+              .split(/[\\/]/)
+              .map((s) =>
+                encodeURIComponent(s).replace(/[()]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`),
+              )
+              .join('/')})${p.about ? ` (${p.about})` : ''}`,
+        )
         .join(' · ') +
       '\n\n';
   }

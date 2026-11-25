@@ -21,6 +21,14 @@ const text = (value) =>
     .replace(/[\r\n]+/g, ' ')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;');
+// B-059: a repository path as a Markdown link destination: every segment percent-encoded, parentheses included
+// (encodeURIComponent keeps them), so a space, `#`, `%`, `&`, `|`, `\` or a parenthesis in a file name cannot end or
+// change the link.
+const urlPath = (path) =>
+  String(path)
+    .split('/')
+    .map((s) => encodeURIComponent(s).replace(/[()]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`))
+    .join('/');
 const cells = (line) =>
   line
     .split(/(?<!\\)\|/)
@@ -1196,22 +1204,20 @@ try {
   const linked = new Set([...coordinator.records.values()].flatMap((r) => r.refs));
   const fileLink = (r, path, anchor) =>
     (r.dirty
-      ? relative(dirname(resolve(home, s.dashboard ?? 'docs/SOLUTION-DASHBOARD.md')), resolve(home, r.path, path))
-          .split('/')
-          .map(encodeURIComponent)
-          .join('/')
-      : `https://github.com/${r.repository}/blob/${r.revision}/${path}`) + (anchor ? `#${anchor}` : '');
+      ? urlPath(
+          relative(dirname(resolve(home, s.dashboard ?? 'docs/SOLUTION-DASHBOARD.md')), resolve(home, r.path, path)),
+        )
+      : `https://github.com/${r.repository}/blob/${r.revision}/${urlPath(path)}`) + (anchor ? `#${anchor}` : '');
   const recordLink = (r, b) =>
     r.dirty
-      ? relative(dirname(resolve(home, s.dashboard ?? 'docs/SOLUTION-DASHBOARD.md')), resolve(home, r.path, b.file))
-          .split('/')
-          .map(encodeURIComponent)
-          .join('/') + `#${b.id.toLowerCase()}`
+      ? urlPath(
+          relative(dirname(resolve(home, s.dashboard ?? 'docs/SOLUTION-DASHBOARD.md')), resolve(home, r.path, b.file)),
+        ) + `#${b.id.toLowerCase()}`
       : r.built && !b.archived
         ? r.viewCommit
-          ? `https://github.com/${r.repository}/blob/${r.viewCommit}/${b.file}#${b.id.toLowerCase()}`
-          : `https://github.com/${r.repository}/blob/${r.revision}/${r.built.records}/${b.id}.md`
-        : `https://github.com/${r.repository}/blob/${r.revision}/${b.file}#${b.id.toLowerCase()}`;
+          ? `https://github.com/${r.repository}/blob/${r.viewCommit}/${urlPath(b.file)}#${b.id.toLowerCase()}`
+          : `https://github.com/${r.repository}/blob/${r.revision}/${urlPath(r.built.records)}/${b.id}.md`
+        : `https://github.com/${r.repository}/blob/${r.revision}/${urlPath(b.file)}#${b.id.toLowerCase()}`;
   const snapshot = new Date().toISOString();
   const output = [
     '<!-- generated: project-harness solution dashboard; edit owning backlogs, not this file -->',
@@ -1360,8 +1366,10 @@ try {
       '|---:|---|---|---|---|---:|---:|---|---|',
     );
     // B-058: a Done item says where it closed, linked; `dashboard --write --prune-order` drops it from the order.
+    // B-059: the label escapes the backslash before the brackets, so a trailing `\` cannot escape the closing one;
+    // fileLink percent-encodes the URL (urlPath).
     const closedText = (where, date, href) =>
-      `✅ Done: closed${date ? ` ${date}` : ''} in [${text(where).replace(/[[\]]/g, '\\$&')}](${href.replace(/[()| ]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)})`;
+      `✅ Done: closed${date ? ` ${date}` : ''} in [${text(String(where).replace(/[\\[\]]/g, '\\$&'))}](${href})`;
     order.forEach((o, i) => {
       const found = view.lookup(o.ref);
       const r = results.find((x) => x.id === o.repo);

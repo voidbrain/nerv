@@ -2248,7 +2248,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: from tasks; F-125-T01 implemented (harness 10.9.0 → 10.21.0, PR below); F-125-T02 (built views) is next, in its own PR.
+💻 **→** Next: from tasks; F-125-T01 implemented (harness 10.9.0 → 10.21.1, PR below); F-125-T02 (built views) is next, in its own PR.
 
 | | |
 |---|---|
