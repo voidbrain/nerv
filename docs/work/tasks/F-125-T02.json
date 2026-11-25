@@ -39,7 +39,7 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 h agent observation remaining",
-    "basis": "Estimated 2026-11-25: the switch is a setting, ignore line and copied workflow; observation spans about 10 merged PRs. Not a measurement. 2026-11-25: the switch is in PR #PRNUM; remaining is confirming the first publication and logging about 10 merged PRs in F-125's view incident log. Actual stated, not measured.",
+    "basis": "Estimated 2026-11-25: the switch is a setting, ignore line and copied workflow; observation spans about 10 merged PRs. Not a measurement. 2026-11-25: the switch is in PR #763; remaining is confirming the first publication and logging about 10 merged PRs in F-125's view incident log. Actual stated, not measured.",
     "reviewed": "2026-11-25",
     "agentHours": 0.5,
     "baselineAgentHours": 1,
@@ -50,7 +50,7 @@
       "pr": 748
     },
     {
-      "pr": "PRNUM"
+      "pr": 763
     }
   ]
 }
