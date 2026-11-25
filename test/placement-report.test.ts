@@ -14,6 +14,7 @@ import {
 const COMMITTED = join(import.meta.dirname, '..', 'docs', 'evaluations', '2026-11-23-f006-t12-placement-evidence.json');
 const T26 = join(import.meta.dirname, '..', 'docs', 'evaluations', '2026-11-24-f006-t26-placement-evidence.json');
 const T29 = join(import.meta.dirname, '..', 'docs', 'evaluations', '2026-11-24-f006-t29-placement-evidence.json');
+const T31 = join(import.meta.dirname, '..', 'docs', 'evaluations', '2026-11-25-f006-t31-placement-evidence.json');
 
 const NONE = { unavailableMac: null, disconnectedAuditor: null, cancellation: null, uncertainOutcome: null };
 
@@ -197,6 +198,27 @@ test('committed F-006-T29 evidence compares P3 on the smoke and Casper cases', (
   );
   assert.deepEqual(report.comparisons[3].reasons, [
     'mini-tools-mac-inference passes 39/45 vs 27/45 on the same cases and budget',
+  ]);
+  assert.deepEqual(report.comparisons[2].reasons, [
+    'mini-tools-mac-inference does not raise the pass rate on the same cases and budget',
+  ]);
+  assert.equal(report.recommendation.option, 'mac-only');
+  assert.equal(report.recommendation.status, 'provisional');
+});
+
+test('committed F-006-T31 evidence compares P3 on the smoke and both role cases', () => {
+  const report = placementReport(placementEvidence(JSON.parse(readFileSync(T31, 'utf8'))));
+  assert.deepEqual(
+    report.comparisons.map((c) => `${c.baseline}->${c.candidate}:${c.verdict}`),
+    [
+      'mac-only->mini-only:keep-baseline',
+      'mac-only->mac-coder-mini-auditor:insufficient-evidence',
+      'mac-only->mini-tools-mac-inference:keep-baseline',
+      'mini-only->mini-tools-mac-inference:prefer-candidate',
+    ],
+  );
+  assert.deepEqual(report.comparisons[3].reasons, [
+    'mini-tools-mac-inference passes 47/60 vs 30/60 on the same cases and budget',
   ]);
   assert.deepEqual(report.comparisons[2].reasons, [
     'mini-tools-mac-inference does not raise the pass rate on the same cases and budget',
