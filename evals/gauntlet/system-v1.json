@@ -234,6 +234,7 @@
         "test/diyfpv-read.browser.mjs",
         "test/updater-status.browser.mjs",
         "test/doctor-run.browser.mjs",
+        "test/dashboard-shell.browser.mjs",
         "test/fixtures/browser.mjs"
       ]
     },
