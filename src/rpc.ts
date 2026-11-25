@@ -195,6 +195,8 @@ const error = (id: string | number | null, code: number, message: string): RpcRe
 });
 /** Sent by a child process once it handles requests; the coordinator sends nothing before it (B-007). */
 export const READY = { nerv: 'ready' } as const;
+/** B-126-T02: sent by a child before each start-up step, so a coordinator that waited in vain can say where it stopped. */
+export const startupStep = (step: string) => ({ nerv: 'starting', step }) as const;
 export async function dispatchRpc(value: unknown, handler: RpcHandler): Promise<RpcResponse | undefined> {
   if (
     !object(value) ||
