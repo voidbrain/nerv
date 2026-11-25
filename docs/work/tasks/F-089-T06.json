@@ -4,7 +4,7 @@
   "parent": "F-089",
   "title": "A browser.click chat tool for Misato",
   "goal": "Misato can ask to click a named control on the allowed page through the CDP driver; each click is an Orange action behind an approval card",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A browser.click tool reaches the F-089-T04 live driver from chat; each click is Orange behind an approval card",
     "The CLI's allowlist, refusals and tainted page text apply unchanged; a page or control outside the allowlist is refused without a click",
@@ -40,8 +40,8 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 from the decision's 2–3 h. Implemented 2026-11-24 in about 4 h agent with the review fixes (stated, not measured).",
-    "reviewed": "2026-11-24",
+    "basis": "Estimated 2026-11-24 from the decision's 2–3 h. Implemented 2026-11-24 in about 4 h agent with the review fixes (stated, not measured). Closed 2026-11-25: PR #733 merged on green CI; every acceptance item is automated or was the #733 security review.",
+    "reviewed": "2026-11-25",
     "agentHours": 0,
     "baselineAgentHours": 2.5,
     "estimateAgentHours": 2.5,
