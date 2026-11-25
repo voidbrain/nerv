@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 8 | 4 | 27 | 7 |
+| **This week** | 9 | 4 | 27 | 7 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 39 | 33 |
+| **Open** | 40 | 33 |
 | **Require Human 🧑** | 10 | 14 |
 
 ### Require Human 🧑
@@ -38,7 +38,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 103.25 h agent + 12.25 h owner across 127 open steps of 39 features and 33 other records. 169.5 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 106.25 h agent + 12.25 h owner across 129 open steps of 40 features and 33 other records. 169.5 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2419,6 +2419,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #737](https://github.com/voidbrain/nerv/pull/737) (Tests: `test/push-subject.test.ts`, `test/push-health-row.test.mjs`) |
 | Opened | 2026-11-25 |
 | Verification | 2026-11-25: tests committed first and failing on main; with the fix they pass with `test/push.test.ts` unchanged. A real push to the owner's iPhone with the new subject was verified by hand on 2026-11-25; the shipped service is not yet observed. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="f-125"></a>[✨ F-125](#top)
+
+**Reconcile to the latest harness and enable built backlog views**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: from tasks; F-125-T01 starts only once the project-harness template backlog is empty.
+
+| | |
+|---|---|
+| **Issue** | Owner decision 2026-11-25: the project-harness major release that stops committing backlog views (harness F-096-T06) ships only when (1) the template backlog is empty and every project has reconciled to the latest release, and (2) NERV has run with `workItems.views: "built"` for about 10 merged PRs with no view incident. NERV is on harness 10.9.0 and commits `docs/BACKLOG.md`. |
+| **Reproduce** | `.harness.json` names version 10.9.0 and has no `workItems.views`; git tracks `docs/BACKLOG.md`. |
+| **Check** | NERV is reconciled to the latest harness release; `workItems.views` is `"built"`, the ledger is untracked and the `backlog-views` branch publishes it; about 10 merged PRs after the switch are logged with any view incident (a missing or stale view, a broken link, a check failure, a coordinator misreading). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-125-t01"></a>F-125-T01 — Reconcile to the latest harness release | 2 h | 0 h | 2 h | Planned | — | [F-125-T02](#f-125-t02) |
+| 🟢 Small | <a id="f-125-t02"></a>F-125-T02 — Enable built backlog views and log view incidents over about 10 merged PRs | 1 h | 0 h | 1 h | Planned | [F-125-T01](#f-125-t01) | — |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 3 h | 0 of 2 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-125.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in PR (pending). |
+| Opened | 2026-11-25 |
+| Verification | — |
 | Reviewed | 2026-11-25 |
 
 </details>
