@@ -41,7 +41,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 111 h agent + 14 h owner across 134 open steps of 42 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 109.75 h agent + 14 h owner across 134 open steps of 42 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2610,9 +2610,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 4.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-126-T01 — Repeatable local model speed benchmark (Planned).
+💻 **→** Next: F-126-T01 — Repeatable local model speed benchmark (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -2624,11 +2624,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | 1.5 h | Planned | — | [F-126-T02](#f-126-t02) | 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟢 Small | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | 0.25 h | Implemented; verification pending | — | [F-126-T02](#f-126-t02) | 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run |
 | 🟡 Medium | <a id="f-126-t02"></a>F-126-T02 — Rerun the gemma4:12b quality evidence with gemma4:26b | 2 h | 0 h | 2 h | Planned | [F-126-T01](#f-126-t01) | [F-126-T03](#f-126-t03) | ⏳ 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
 | 🟢 Small | <a id="f-126-t03"></a>F-126-T03 — Owner decides whether to switch the chat model to gemma4:26b | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-126-T02](#f-126-t02) | [F-126-T04](#f-126-t04) | ⏳ 🤔 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
 | 🟢 Small | <a id="f-126-t04"></a>F-126-T04 — Switch the configured chat model to gemma4:26b | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T03](#f-126-t03) | — | ⏳ 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
-| 🔴 Large | **Total** | 4.25 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 4.25 h agent + 0.25 h owner | 0 of 4 completed | | | | |
+| 🟡 Medium | **Total** | 4.25 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3 h agent + 0.25 h owner | 0 of 4 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2637,9 +2637,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); F-126-T01 speed benchmark in [2026-11-25-f126-t01-speed-benchmark.md](evaluations/2026-11-25-f126-t01-speed-benchmark.md); [#761](https://github.com/voidbrain/nerv/pull/761) |
 | Opened | 2026-11-25 |
-| Verification | — |
+| Verification | Unit/integration: 2026-11-25 `test/speed-benchmark.test.mjs` passed (2/2); local benchmark run recorded in `docs/evaluations/2026-11-25-f126-t01-speed-benchmark.md`; quality evaluation pending F-126-T02. |
 | Reviewed | 2026-11-25 |
 
 </details>
