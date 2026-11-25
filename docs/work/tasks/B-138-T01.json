@@ -4,7 +4,7 @@
   "parent": "B-138",
   "title": "Answer a spares question from the fleet.chat result",
   "goal": "After a granted fleet.chat step, the chat reply carries the tool's answer, never a generic greeting",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "The cause is named from sorties e8a4444a and e7849127 on NERV-01 (the fleet.chat result and the next planner reply)",
     "A committed test across the fleet.chat step and the final reply fails first (invented fleet) and passes with the fix",
@@ -35,16 +35,20 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-25 when opened: read both sorties, find the cause, failing-first test across tool and reply, fix. Not a measurement.",
+    "estimate": "0.25 h agent",
+    "basis": "Implemented 2026-11-25 in src/fleet.ts, src/misato.ts, and src/runtime-planning.ts with failing-first tests; CI and merge remain. Not a measurement.",
     "reviewed": "2026-11-25",
-    "agentHours": 1.5,
+    "agentHours": 0.25,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },
   "prs": [
     {
       "pr": 751
+    },
+    {
+      "pr": 762,
+      "note": "category-scoped spares reply and planner grounding"
     }
   ]
 }

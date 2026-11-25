@@ -8,12 +8,14 @@ import {
   MAX_STEPS,
   doneReply,
   filterConsultantInput,
+  formatFleetChatReply,
   matchExistingReminders,
   ownerDeclined,
   declinedReply,
   parseAdvice,
   requestLanguage,
   waitingReply,
+  validateFleetChatReply,
   validateReminderTitle,
   type Plan,
   type Recalled,
@@ -397,7 +399,30 @@ export class RuntimePlanning {
         })) as { text: string; expires: string };
         return { sortieId, reply: question.text, question, steps, waiting };
       }
-      if ('reply' in out.plan) return finish('done', out.plan.reply, undefined, stepDurationMs);
+      if ('reply' in out.plan) {
+        const ungroundedFleet = !proactive ? validateFleetChatReply(out.plan.reply, steps) : undefined;
+        if (ungroundedFleet) {
+          const alreadyRejected = steps.some(
+            (s) =>
+              s.outcome === 'invalid' &&
+              typeof s.error === 'string' &&
+              s.error.startsWith('Your reply ignored the granted fleet.chat result'),
+          );
+          await this.host.record(
+            sortieId,
+            steps,
+            { outcome: 'invalid', error: ungroundedFleet.error },
+            undefined,
+            stepDurationMs,
+          );
+          if (alreadyRejected) {
+            const fallback = formatFleetChatReply(lang(), ungroundedFleet.result);
+            if (fallback) return finish('done', fallback, undefined, stepDurationMs);
+          }
+          continue;
+        }
+        return finish('done', out.plan.reply, undefined, stepDurationMs);
+      }
       if ('script' in out.plan) {
         try {
           const pendingGateReplies = new Map<string, ActReply>();

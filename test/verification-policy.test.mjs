@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync, globSync } from 'node:fs';
+import { readFileSync, existsSync, globSync, mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { plan } from '../tools/verification.mjs';
 import { selectedTests } from '../tools/selected-tests.mjs';
 const config = JSON.parse(readFileSync('.harness.json', 'utf8')),
@@ -58,6 +61,72 @@ test('CI has PR and push-to-main triggers, manual/periodic selection and a full 
   assert.match(workflow, /GH_TOKEN: \$\{\{ github.token \}\}/);
   assert.match(workflow, /actions: read/);
   assert.doesNotMatch(workflow, /pull_request_target|secrets\./);
+});
+
+test('B-139: a docs-only PR skips the Windows and macOS jobs at job level; any other path or event runs them', () => {
+  const job = (name) =>
+    workflow.slice(
+      workflow.indexOf('\n  ' + name + ':\n'),
+      workflow.indexOf('runs-on:', workflow.indexOf('\n  ' + name + ':\n')),
+    );
+  // A job-level if leaves a required check "skipped" (passing); workflow-level paths would leave it pending.
+  assert.doesNotMatch(workflow.slice(0, workflow.indexOf('jobs:')), /paths(-ignore)?:/);
+  assert.match(job('windows'), /if: needs.plan.outputs.docs_only != 'true' \|\| needs.plan.outputs.unit == 'true'/);
+  assert.match(
+    job('native-macos'),
+    /if: needs.plan.outputs.docs_only != 'true' \|\| needs.plan.outputs.native == 'true'/,
+  );
+  assert.match(workflow, /docs_only: \$\{\{ steps.changes.outputs.docs_only \}\}/);
+  const step = workflow.slice(workflow.indexOf('- id: changes'));
+  assert.match(step, /if \[ "\$EVENT" = pull_request \]/, 'only a pull request can be docs-only');
+  const docsOnly = new RegExp(/grep -vE '([^']+)'/.exec(step)[1]);
+  for (const file of [
+    'docs/work/records/B-139.md',
+    'docs/work/tasks/B-139-T01.json',
+    'docs/BACKLOG.md',
+    'README.md',
+    'LICENSE',
+  ])
+    assert.ok(docsOnly.test(file), file + ' is docs-only');
+  for (const file of [
+    'native/README.md',
+    'web/src/app/x.md',
+    'src/store.ts',
+    'test/a.test.ts',
+    '.github/workflows/ci.yml',
+    'package.json',
+    'docs',
+  ])
+    assert.ok(!docsOnly.test(file), file + ' runs the OS jobs');
+});
+
+test('B-139: the changed-paths diffs list both sides of a rename, so moving code into docs/ is not docs-only', () => {
+  const codeql = readFileSync('.github/workflows/codeql.yml', 'utf8');
+  assert.match(workflow, /files=\$\(git diff --no-renames --name-only "\$BASE\.\.\.\$HEAD"\)/);
+  assert.match(codeql, /git diff --no-renames --name-only "\$range"/);
+  const dir = mkdtempSync(join(tmpdir(), 'b139-'));
+  try {
+    const git = (...args) =>
+      execFileSync('git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', ...args], {
+        cwd: dir,
+        encoding: 'utf8',
+      });
+    git('init', '-q');
+    mkdirSync(join(dir, 'src'));
+    writeFileSync(join(dir, 'src/a.ts'), 'export const a = 1;\n');
+    git('add', '.');
+    git('commit', '-qm', 'base');
+    mkdirSync(join(dir, 'docs'));
+    git('mv', 'src/a.ts', 'docs/a.ts');
+    git('commit', '-qm', 'move');
+    assert.deepEqual(git('diff', '--name-only', 'HEAD~1...HEAD').trim().split('\n'), ['docs/a.ts'], 'without the flag');
+    assert.deepEqual(git('diff', '--no-renames', '--name-only', 'HEAD~1...HEAD').trim().split('\n').sort(), [
+      'docs/a.ts',
+      'src/a.ts',
+    ]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('shared event persistence/privacy requires full verification and route recovery selects its integration case', () => {
