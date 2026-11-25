@@ -183,13 +183,17 @@ export class Store {
   constructor(
     path: string,
     scrolls: { policy: Policy; source: string } = { policy: defaultPolicy, source: 'default' },
-    options: { home?: string } = {},
+    /** B-126-T03: `onStep` hears each start-up step before it runs (the nervous child's start-up watch). */
+    options: { home?: string; onStep?: (step: string) => void } = {},
   ) {
+    const step = (name: string) => options.onStep?.(`database: ${name}`);
     if (options.home) this.home = options.home;
+    step('open the file');
     if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
     // B-126: wait for a briefly held lock from the first statement; busy_timeout below came too late for the reads.
     this.db = new DatabaseSync(path, { timeout: 5000 });
     let version: { user_version: number };
+    step('first reads');
     try {
       version = this.db.prepare('PRAGMA user_version').get() as { user_version: number };
     } catch (e) {
@@ -214,6 +218,7 @@ export class Store {
     }
     this.usage = new UsageStore(this.db);
     this.instrumentality = new InstrumentalityRuns(this.db);
+    step('journal mode and core schema');
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS reminders(id TEXT PRIMARY KEY, title TEXT NOT NULL, due TEXT NOT NULL, created TEXT NOT NULL, delivered TEXT, cancelled TEXT);
       CREATE TABLE IF NOT EXISTS reminder_times(reminder_id TEXT PRIMARY KEY REFERENCES reminders(id) ON DELETE CASCADE, kind TEXT NOT NULL DEFAULT 'at', "end" TEXT);
@@ -224,6 +229,7 @@ export class Store {
     this.db.exec(
       'INSERT OR IGNORE INTO reminder_times(reminder_id, kind, "end") SELECT id, \'at\', NULL FROM reminders',
     );
+    step('schema migrations');
     // Schema 3: events record the event schema version they were written under (F-024); earlier rows read as version 1.
     if (!(this.db.prepare('PRAGMA table_info(events)').all() as { name: string }[]).some((c) => c.name === 'v'))
       this.db.exec('ALTER TABLE events ADD COLUMN v INTEGER NOT NULL DEFAULT 1');
@@ -279,6 +285,7 @@ export class Store {
     this.db.exec(RESUME_INTENT_SCHEMA);
     this.db.exec(SESSION_LIMIT_SCHEMA);
     this.db.exec(LISTS_SCHEMA);
+    step('feature stores');
     this.ledger = new Ledger(this.db, { policy: scrolls.policy, tools: builtinTools });
     this.memory = new Memory(this.db);
     this.circuits = new IncidentCircuitStore(this.db, this.ledger);
@@ -299,6 +306,7 @@ export class Store {
     this.db.exec(
       'CREATE TABLE IF NOT EXISTS worker_legacy_outbox(id TEXT PRIMARY KEY,state TEXT NOT NULL,reason TEXT NOT NULL,created TEXT NOT NULL); CREATE TABLE IF NOT EXISTS worker_outbox_cancels(id TEXT PRIMARY KEY,reason TEXT NOT NULL,created TEXT NOT NULL); CREATE TABLE IF NOT EXISTS worker_outbox_attempts(id TEXT PRIMARY KEY,attempted TEXT NOT NULL); CREATE TABLE IF NOT EXISTS worker_outbox_reconciliations(id TEXT NOT NULL,action TEXT NOT NULL,reason TEXT NOT NULL,source TEXT NOT NULL,created TEXT NOT NULL)',
     );
+    step('worker jobs');
     try {
       this.workerJobs = transaction(this.db, () => {
         const legacy = !!this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='kaji_runs'").get();
@@ -316,6 +324,7 @@ export class Store {
       this.db.close();
       throw error;
     }
+    step('pending approvals');
     // Upgrade existing pending cards once; settled/expired cards never become new notifications.
     transaction(this.db, () => {
       const pending = this.db
