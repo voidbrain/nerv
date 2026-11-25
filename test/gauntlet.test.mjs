@@ -1190,6 +1190,94 @@ test('F-120-T03: the domain packs run on the release runners, follow the model a
   }
 });
 
+test('F-120-T03: coding and embedded results keep and follow the model digest (model-calling runners)', async () => {
+  const { run, validateRegistry, emptyLedger, caseHash, evidenceProfile, hash } =
+    await import('@voidbrain/gauntlet-protocol');
+  const { commonPacks, recordSelected, modelLimits, releaseSourceKey } = await import('../tools/gauntlet.mjs');
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-model-runner-'));
+  const profilePath = 'node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json';
+  const profile = JSON.parse(readFileSync(profilePath, 'utf8'));
+  const digest = 'd'.repeat(64);
+  try {
+    // A stand-in for the release's coding runner: no Ollama, no container, a fixed model digest.
+    writeFileSync(
+      join(dir, 'runner.mjs'),
+      `import { readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+const [out, configuration, , caseFile] = process.argv.slice(2);
+const c = JSON.parse(readFileSync(caseFile, 'utf8'));
+const h = (v) => createHash('sha256').update(JSON.stringify(v)).digest('hex');
+writeFileSync(out, JSON.stringify({ schemaVersion: 1, layer: 'coding', caseHash: h(c), fixtureHash: '${'a'.repeat(64)}',
+  configurationHash: h(JSON.parse(readFileSync(configuration, 'utf8'))), modelDigest: '${digest}',
+  runtimeIdentity: 'stand-in', sourceStable: true, complete: true, outputTokens: 1,
+  results: [{ id: c.id, status: 'passed', checks: 1 }] }));\n`,
+    );
+    const registry = validateRegistry(
+      {
+        schemaVersion: 1,
+        runners: {
+          'coding-reference': {
+            command: 'node',
+            args: ['runner.mjs', '{report}', '{configuration}', '{budget}', '{case}'],
+            cwd: '.',
+            layers: ['coding'],
+            allowModels: true,
+          },
+        },
+      },
+      dir,
+    );
+    const coding = commonPacks().find((p) => p.pack.id === 'coding').pack;
+    const one = { ...coding, id: 'coding:selected', cases: [coding.cases[0]] };
+    const report = await run(one, profile, modelLimits(one), { execute: true, allowModels: true, registry });
+    assert.equal(report.passed, true);
+    const recorded = recordSelected(emptyLedger(), report, coding, one, releaseSourceKey()).entries;
+    assert.equal(recorded.length, 1);
+    assert.equal(recorded[0].modelDigest, digest, 'a coding run keeps the model it graded');
+
+    // Pending: a covering coding/embedded run under another model digest is model-changed.
+    const ledger = join(dir, 'ledger.json');
+    const profileHash = hash(evidenceProfile(profile));
+    const packs = commonPacks()
+      .map((p) => p.pack)
+      .filter((p) => ['coding', 'embedded'].includes(p.id));
+    writeFileSync(
+      ledger,
+      JSON.stringify({
+        schemaVersion: 2,
+        entries: packs.flatMap((p) =>
+          p.cases.map((c) => ({
+            pack: p.id,
+            packVersion: p.version,
+            case: c.id,
+            caseHash: caseHash(c),
+            profileHash,
+            status: 'passed',
+            reportHash: '2'.repeat(64),
+            finished: '2026-11-25T00:00:00.000Z',
+            modelDigest: digest,
+            runtimeHash: null,
+            scenarioHash: null,
+            sourceKey: releaseSourceKey(),
+          })),
+        ),
+      }),
+    );
+    process.env.NERV_GAUNTLET_LEDGER = ledger;
+    const lines = (pack, list) => list.filter((l) => l.startsWith(pack + '/'));
+    const same = (await main(['pending', '--profile=' + profilePath, '--model-digest=' + digest])).pendingLines;
+    assert.deepEqual([...lines('coding', same), ...lines('embedded', same)], []);
+    const other = (await main(['pending', '--profile=' + profilePath, '--model-digest=' + '9'.repeat(64)]))
+      .pendingLines;
+    assert.equal(lines('coding', other).length, 4);
+    assert.equal(lines('embedded', other).length, 8);
+    assert.ok([...lines('coding', other), ...lines('embedded', other)].every((l) => l.endsWith('(model-changed)')));
+  } finally {
+    delete process.env.NERV_GAUNTLET_LEDGER;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('check:gauntlet-runs fails for a pending case that no unfinished task lists', async () => {
   const { unnamedPending } = await import('../tools/gauntlet.mjs');
   const changed = { pack: 'nerv-system-flows', case: 'policy', reason: 'changed' };
