@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-130-T11",
+  "parent": "F-130",
+  "title": "Bases map, chronicle and Lilith",
+  "goal": "The Kaji-line bases map and list, the base chronicle and Terminal Dogma (memory facts) work in the workspace",
+  "status": "planned",
+  "acceptance": [
+    "/api/bases and the topology map match live.js; chronicle and memory facts show real data, or say planned where live.js has none (no simulated numbers)",
+    "A test across the bases handler and the component"
+  ],
+  "dependsOn": [
+    "F-130-T01"
+  ],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "web/public/dashboard/**",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "api-contracts",
+    "regression-design",
+    "svg"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "4 h",
+    "basis": "Estimated 2026-11-25: the topology map is SVG with layout. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 4,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  }
+}

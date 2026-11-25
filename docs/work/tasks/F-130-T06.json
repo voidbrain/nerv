@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-130-T06",
+  "parent": "F-130",
+  "title": "Sorties list, filter and Misato plan detail",
+  "goal": "The sorties list with filter and paging, and the current-action detail, work in the workspace",
+  "status": "planned",
+  "acceptance": [
+    "/api/sorties list, filter and 'more' paging match live.js; the detail shows the plan and current action",
+    "A test across the sorties query and the component"
+  ],
+  "dependsOn": [
+    "F-130-T01"
+  ],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "web/public/dashboard/**",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "api-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-25: list and detail without the flow diagram. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  }
+}

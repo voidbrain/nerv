@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-130-T08",
+  "parent": "F-130",
+  "title": "Comms chat, slash commands and the away debrief",
+  "goal": "Chat with Misato and Maya's trace, the slash menu and the 'while you were away' debrief work in the workspace",
+  "status": "planned",
+  "acceptance": [
+    "/api/chat, /api/commands and the log filter behave as live.js; the debrief shows the same items",
+    "A test across the chat handler and the component; the old panels link to the new ones"
+  ],
+  "dependsOn": [
+    "F-130-T01"
+  ],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "web/public/dashboard/**",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "api-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "4 h",
+    "basis": "Estimated 2026-11-25: chat form, slash menu keyboard handling and the log. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 4,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  }
+}

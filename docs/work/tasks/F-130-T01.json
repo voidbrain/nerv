@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-130-T01",
+  "parent": "F-130",
+  "title": "Workspace dashboard shell and live data service",
+  "goal": "The Angular workspace has a dashboard view with the live session, the stream/poll feed and keyed rendering, ready for sections; the old page links to it",
+  "status": "planned",
+  "acceptance": [
+    "A dashboard route or view in web/src signs in like live.js (session exchange, kept session, typed pairing code) and reads /api/dashboard/stream with /api/dashboard/history as the fallback poll",
+    "Section state lives in signals; lists render with @for track by id, so an unchanged poll leaves the DOM in place (a test renders the same state twice, as B-144)",
+    "Feed parsing (toSortie, toApproval, mapStatus and similar) moves to framework-free src/ helpers with unit tests; live.js keeps its copy until its section moves",
+    "The old dashboard header links to the new view; the workspace build and CSP checks pass"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "web/public/dashboard/**",
+    "web/public/dashboard/index.html",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "api-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "4 h",
+    "basis": "Estimated 2026-11-25: route, session and feed service, the keyed-render pattern and the first join test. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 4,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  }
+}

@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 13 | 5 | 37 | 13 |
+| **This week** | 14 | 5 | 37 | 13 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 43 | 37 |
+| **Open** | 44 | 37 |
 | **Require Human 🧑** | 14 | 19 |
 
 ### Require Human 🧑
@@ -43,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 115 h agent + 14.25 h owner across 141 open steps of 43 features and 37 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 162 h agent + 15.25 h owner across 155 open steps of 44 features and 37 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -443,7 +443,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.75 h agent + 1 h owner | [F-124-T01](#f-124-t01) | — | 🤖 | 🧑‍🔧 | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.75 h agent + 1 h owner | [F-124-T01](#f-124-t01) | [F-130-T04](#f-130-t04) | 🤖 | 🧑‍🔧 | — |
 
 🧑 **→** F-004-T06: install the app on the phone, enable notifications in Settings → Notifications and complete a reminder push ([steps](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal)).
 
@@ -458,7 +458,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | — | [F-004-T07](#f-004-t07), [F-004-T09](#f-004-t09) | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) | — |
-| 🟢 Small | <a id="f-004-t09"></a>F-004-T09 — Delivery order: push first, Telegram as fallback | 2 h | 0 h | 0.5 h | Implemented; verification pending | [F-004-T06](#f-004-t06), [F-124-T01](#f-124-t01) | [F-004-T10](#f-004-t10) | 🤖 | [PR #760](https://github.com/voidbrain/nerv/pull/760) |
+| 🟢 Small | <a id="f-004-t09"></a>F-004-T09 — Delivery order: push first, Telegram as fallback | 2 h | 0 h | 0.5 h | Implemented; verification pending | [F-004-T06](#f-004-t06), [F-124-T01](#f-124-t01) | [F-004-T10](#f-004-t10), [F-130-T04](#f-130-t04) | 🤖 | [PR #760](https://github.com/voidbrain/nerv/pull/760) |
 | 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-004-T06](#f-004-t06) | — | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-004-t10"></a>F-004-T10 — Owner check: push first, Telegram as fallback on the phone | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-004-T09](#f-004-t09) | — | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | **Total** | 16 h (8 of 10 steps) | 4.5 h (6 of 10 steps recorded) | 0.75 h agent + 1 h owner | 6 of 10 completed | | | | |
@@ -1114,6 +1114,57 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-23 |
 | Verification | Unit/integration and browser 2026-11-24: `test/device-pairing.test.ts` 16/16, `test/pairing-qr.test.ts` 9/9 and `test/evaluation.browser.mjs` F-118-T02, T03 and T05 (each committed failing first) pass; CI green on PRs #700, #707, #713, #716; gauntlet: none pending. Real-device (iPhone Home Screen): Pending (F-118-T04). |
 | Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="f-130"></a>[✨ F-130](#top)
+
+**Migrate the dashboard into the Angular workspace**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 47 h agent + 1 h owner | [F-004-T09](#f-004-t09) | — | 🤖 | — | — |
+
+💻 **→** Next: F-130-T01 — Workspace dashboard shell and live data service (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-25, after [B-144](work/records/F-130.md#b-144). The dashboard in `web/public/dashboard/` is hand-written JavaScript (`index.html` about 48 KB, `live.js` about 135 KB, `dashboard.js` about 126 KB) that rebuilds each section with `innerHTML` on every poll, so unchanged state is redrawn (B-144: EVA images reloaded for nothing). Health and Settings exist only there; the Angular workspace (`web/src`, Angular 22) holds the overview, reminders, doctor and battery cards. Two front ends repeat the same session, pairing and push rules. |
+| **Reproduce** | Open `/dashboard/` and `/` on the same service: Health, Settings, sorties, approvals, EVA cages, pilots, comms, the debrief, bases and push exist only in the first, rendered by string building in `live.js` and `dashboard.js`. |
+| **Check** | Every dashboard section (at-a-glance strip, Misato's apartment approvals and memory, sorties and plan detail, Sephirot flow, comms and slash commands, debrief, coming up, Health, Settings with devices and pairing, push, models, budget, battery, bases map, chronicle, EVA cages, pilots, tools, skills, Lilith, header chrome) runs in the workspace with the same behaviour, each with a test across the API and the component; an unchanged poll leaves the DOM in place; push taps still post the receipt (F-004-T09); `/dashboard/` and the installed app lead to the workspace and the old files are gone; the owner's check on the Mac and the phone. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-130-t01"></a>F-130-T01 — Workspace dashboard shell and live data service | 4 h | 0 h | 4 h | Planned | — | [F-130-T02](#f-130-t02), [F-130-T03](#f-130-t03), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T06](#f-130-t06), [F-130-T08](#f-130-t08), [F-130-T09](#f-130-t09), [F-130-T10](#f-130-t10), [F-130-T11](#f-130-t11), [F-130-T12](#f-130-t12) | 🤖 |
+| 🟡 Medium | <a id="f-130-t02"></a>F-130-T02 — Health section in Angular | 3 h | 0 h | 3 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t03"></a>F-130-T03 — Settings section in Angular: schedule, update policy, models reload, devices and pairing | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t04"></a>F-130-T04 — Push and the service worker move to the workspace | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01), [F-004-T09](#f-004-t09) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t05"></a>F-130-T05 — At-a-glance strip and Misato's apartment (approvals, questions, memory) | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t06"></a>F-130-T06 — Sorties list, filter and Misato plan detail | 3 h | 0 h | 3 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T07](#f-130-t07), [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t07"></a>F-130-T07 — Sephirot sortie flow, MAGI and timeline | 4 h | 0 h | 4 h | Planned | [F-130-T06](#f-130-t06) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t08"></a>F-130-T08 — Comms chat, slash commands and the away debrief | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t09"></a>F-130-T09 — Coming up, models, budget and battery tabs | 3 h | 0 h | 3 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t10"></a>F-130-T10 — EVA cages, pilots, tools and skills | 3 h | 0 h | 3 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t11"></a>F-130-T11 — Bases map, chronicle and Lilith | 4 h | 0 h | 4 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t12"></a>F-130-T12 — Header chrome and demo mode | 3 h | 0 h | 3 h | Planned | [F-130-T01](#f-130-t01) | [F-130-T13](#f-130-t13) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-130-t13"></a>F-130-T13 — Retire the old dashboard | 4 h | 0 h | 4 h | Planned | [F-130-T02](#f-130-t02), [F-130-T03](#f-130-t03), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T06](#f-130-t06), [F-130-T07](#f-130-t07), [F-130-T08](#f-130-t08), [F-130-T09](#f-130-t09), [F-130-T10](#f-130-t10), [F-130-T11](#f-130-t11), [F-130-T12](#f-130-t12) | [F-130-T14](#f-130-t14) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-130-t14"></a>F-130-T14 — Owner: check the Angular dashboard on the Mac and the installed phone app | 0 h | 0 h | 0 h agent + 1 h owner | Planned | [F-130-T13](#f-130-t13) | — | ⏳ 🧑‍🔧 |
+| 🟣 Very large | **Total** | 47 h | 0 h (0 of 14 steps recorded) | 47 h agent + 1 h owner | 0 of 14 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-130.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner request 2026-11-25; prompted by [B-144](work/records/F-130.md#b-144) |
+| Opened | 2026-11-25 |
+| Verification | — |
+| Reviewed | 2026-11-25 |
 
 </details>
 
