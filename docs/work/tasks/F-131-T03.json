@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "F-131-T03",
+  "parent": "F-131",
+  "title": "Default quick commands for FPVBuddy, Hobo and Grover",
+  "goal": "The default list offers Show batteries and Show warehouse/spares (FPVBuddy), Show trip (Hobo) and Grover status, each calling that project's MCP tool",
+  "status": "planned",
+  "acceptance": [
+    "Each default names the owning project's tool as that project publishes it; an entry whose tool does not exist yet ships disabled with the reason (FPVBuddy's spares tool is not in fpvbuddy:F-009 yet)",
+    "A test lists the defaults against fake servers that offer those tools"
+  ],
+  "dependsOn": [
+    "F-131-T02",
+    "F-101-T07",
+    "fpvbuddy:F-009-T03",
+    "hobo:F-011-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-131.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "api-contracts"
+  ],
+  "privacy": "Neutral invented commands, servers and results only; no tokens in configuration examples, tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A command that needs a tool another project has not planned goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-25: four configuration entries checked against the other projects' published tool names. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 774
+    }
+  ]
+}
