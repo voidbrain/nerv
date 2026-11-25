@@ -34,5 +34,10 @@
     "estimateAgentHours": 0,
     "ownerHours": 0.25,
     "ownerKind": "procedure"
-  }
+  },
+  "prs": [
+    {
+      "pr": 774
+    }
+  ]
 }
