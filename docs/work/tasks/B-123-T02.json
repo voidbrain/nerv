@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-123-T02",
+  "parent": "B-123",
+  "title": "Owner: Update now shows the updater's status in Health",
+  "goal": "A real Update now on NERV-01 shows the updater's progress and outcome beside the button, after a reload too, until dismissed",
+  "status": "planned",
+  "acceptance": [
+    "Update now on NERV-01 shows \"Update in progress\" with its step, then \"Update completed · now on <sha>\" (or refused/failed with reasons and recovery) under the Update availability row",
+    "A reload keeps the status; Dismiss hides it and it stays hidden after a reload",
+    "~/.nerv/updater-status.json names the same state; the inbox reports the outcome once"
+  ],
+  "dependsOn": [
+    "B-123-T01"
+  ],
+  "resources": [
+    "docs/acceptance/b123-update-status.md",
+    "docs/work/records/B-123.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "privacy-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "Owner-observed check on NERV-01: the Health row and ~/.nerv/updater-status.json"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-25 in the reconciliation: one Update now, a reload and Dismiss. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "ownerHours": 0.25,
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/b123-update-status.md"
+}

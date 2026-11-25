@@ -47,11 +47,11 @@
   "effort": {
     "size": "medium",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 at agent speed (3 h agent). Actual includes moving the send into the coordinator (the nervous process has no Kaji line and a 64 KB IPC frame) and the cross-process join test with a real Kaji line. Not a measurement.",
-    "reviewed": "2026-11-24",
+    "basis": "Estimated 2026-11-24 at agent speed (3 h agent). Actual includes moving the send into the coordinator (the nervous process has no Kaji line and a 64 KB IPC frame) and the cross-process join test with a real Kaji line. Not a measurement. 2026-11-25: estimate set to the stated actual (3.5 h); stays Implemented until B-133 names the cache-probe failure.",
+    "reviewed": "2026-11-25",
     "agentHours": 0,
-    "baselineAgentHours": 3.0,
-    "estimateAgentHours": 3.0,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3.5,
     "actualAgentHours": 3.5,
     "actualSource": "stated"
   },
