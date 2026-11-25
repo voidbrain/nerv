@@ -2,7 +2,11 @@
   "version": 1,
   "parent": "B-148",
   "privacy": "Neutral invented commands and folders only; no config contents, tokens or personal paths in tests or logs.",
-  "prs": [],
+  "prs": [
+    {
+      "pr": 782
+    }
+  ],
   "id": "B-148-T03",
   "title": "Owner: the files tool is no longer suspended on NERV-01 after the update",
   "goal": "After the lifecycle update NERV-01 starts the files MCP server and files.read_text_file is granted, not suspended",

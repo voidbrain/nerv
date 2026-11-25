@@ -2,7 +2,11 @@
   "version": 1,
   "parent": "B-148",
   "privacy": "Neutral invented commands and folders only; no config contents, tokens or personal paths in tests or logs.",
-  "prs": [],
+  "prs": [
+    {
+      "pr": 782
+    }
+  ],
   "id": "B-148-T02",
   "title": "Resolve bare MCP commands from the node folder, then PATH; doctor reports servers that cannot start",
   "goal": "A bare node, npx or npm resolves from the running node's folder, any bare command then from the service PATH, and nerv doctor names each MCP server that cannot start with the reason",
