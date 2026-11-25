@@ -4,7 +4,7 @@
   "parent": "F-121",
   "title": "Printed parts on drone models",
   "goal": "Drone models carry printed parts (name, aliases, count, side/variant, file, material, profile, spool); drones inherit them",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Store migration: drone model, printed part (count, variant such as left/right, file path, material, slicer profile, external spool flag); a drone links to its model",
     "Fleet import (F-098-T05) and chat (F-098-T06) can add a model, its parts and link a drone; unknown profiles are refused against the F-087 allowlist",
@@ -43,12 +43,12 @@
   "effort": {
     "size": "medium",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 at agent speed (3 h agent). Actual includes the print library resolver, the home slicer-profiles.json allowlist reader and the fleet models/prints CLI listings. Not a measurement. Review round 2026-11-24 (Unicode path key, link phrase shadowing, name-only update scope, Windows path hazards) added 0.5 h.",
-    "reviewed": "2026-11-24",
+    "basis": "Estimated 2026-11-24 at agent speed (3 h agent). Actual includes the print library resolver, the home slicer-profiles.json allowlist reader and the fleet models/prints CLI listings. Not a measurement. Review round 2026-11-24 (Unicode path key, link phrase shadowing, name-only update scope, Windows path hazards) added 0.5 h. 2026-11-25: closed in the reconciliation: PR #715 merged on green CI.",
+    "reviewed": "2026-11-25",
     "agentHours": 0,
-    "baselineAgentHours": 3.0,
-    "estimateAgentHours": 3.0,
-    "actualAgentHours": 3.0,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3,
+    "actualAgentHours": 3,
     "actualSource": "stated"
   },
   "prs": [

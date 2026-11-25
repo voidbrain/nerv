@@ -4,7 +4,7 @@
   "parent": "B-123",
   "title": "Show the updater's status beside Update now",
   "goal": "The Health row shows the outside updater's progress and result, with reasons and recovery, across restarts and reloads, until dismissed",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test fails first across the join: updater result -> GET /api/update/status -> Health row",
     "The inbox report of the result still happens exactly once",
@@ -42,13 +42,19 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "3 h",
-    "basis": "Estimated 2026-11-24: status file and route, Health row, unit, render and browser tests. Not a measurement.",
-    "reviewed": "2026-11-24",
-    "agentHours": 3,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24: status file and route, Health row, unit, render and browser tests. Not a measurement. 2026-11-25: closed in the reconciliation: PR #720 merged on green CI (run 45458207007, one attempt; the earlier run 45454015948 failed only a worker-link test, B-066).",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3,
     "actualAgentHours": 2.5,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 720,
+      "note": "implementation"
+    }
+  ]
 }

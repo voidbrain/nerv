@@ -1,4 +1,4 @@
-import type { AgencySnapshot } from './executors.ts';
+import { gateCallTimeoutMs, type AgencySnapshot } from './executors.ts';
 import { ItemLockManager, itemKeysForTool } from './item-locks.ts';
 import type { Verdict } from './policy.ts';
 import type { ProcessClient } from './process-client.ts';
@@ -320,16 +320,20 @@ export class RuntimeApprovals {
     const acted = (await this.host.itemLocks.withLock(
       itemKeys,
       () =>
-        this.host.nervous.call('actions.act', {
-          ...(worker ? { worker } : {}),
-          sortieId,
-          tool: action.tool,
-          args: action.args,
-          stage: action.stage ?? 'production',
-          ...(casper ? { casper } : {}),
-          ...(extras.length ? { extras } : {}),
-          ...(agency ? { agency } : {}),
-        }),
+        this.host.nervous.call(
+          'actions.act',
+          {
+            ...(worker ? { worker } : {}),
+            sortieId,
+            tool: action.tool,
+            args: action.args,
+            stage: action.stage ?? 'production',
+            ...(casper ? { casper } : {}),
+            ...(extras.length ? { extras } : {}),
+            ...(agency ? { agency } : {}),
+          },
+          gateCallTimeoutMs(action.tool),
+        ),
       { owner: sortieId },
     )) as ActResult;
     const result = await this.completeRemotePrint(sortieId, action.tool, acted);

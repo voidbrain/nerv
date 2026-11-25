@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "B-134-T01",
+  "parent": "B-134",
+  "title": "Default VAPID subject Apple accepts, push failures logged, Phone push line in Health",
+  "goal": "Web Push reaches Apple devices, and a failed send is visible instead of swallowed",
+  "status": "implemented",
+  "acceptance": [
+    "A committed test fails first: the VAPID header's sub is a valid https or mailto with a real domain by default; a failed dispatch is logged and stored",
+    "Default subject https://github.com/voidbrain/nerv, configurable with config push.subject (https URL or mailto with a dotted domain, not .local or localhost)",
+    "A failed send logs the endpoint host, status and the push service's reason, never the full endpoint or keys; 404/410 still delete the subscription",
+    "Health shows a read-only Phone push line: subscribed devices, last delivery result (ok or failed with reason) and time",
+    "docs/acceptance/f004-t06-phone-push-procedure.md uses a working nerv remind command"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/push.ts",
+    "src/store-push.ts",
+    "src/store.ts",
+    "src/config.ts",
+    "web/public/dashboard/live.js",
+    "test/push-subject.test.ts",
+    "test/push-health-row.test.mjs",
+    "docs/acceptance/f004-t06-phone-push-procedure.md",
+    "docs/work/records/B-134.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, endpoints or personal data in Git.",
+  "validation": [
+    "node --test test/push-subject.test.ts test/push.test.ts test/push-health-row.test.mjs",
+    "Every test reading live.js, dashboard.js or web/src",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Never log a full push endpoint or key"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-25: subject default and validation, failure logging and stored result, one Health line. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

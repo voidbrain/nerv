@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "B-133-T01",
+  "parent": "B-133",
+  "title": "Name why the cache probe answered in 698 ms on Windows CI and fix or bound it",
+  "goal": "The F-121-T04 cache probe never waits behind the slicer, and its test holds on a loaded Windows runner",
+  "status": "planned",
+  "acceptance": [
+    "Whether the probe waited behind the 600 ms fake slicer (a code cause) or the runner was slow is named from the run output and a local reproduction under load",
+    "A code cause gets a failing-first regression and a fix; a runner cause gets a bound stated in the test that still fails when the probe queues behind the slicer",
+    "test/print-transfer.test.ts passes in the next five Windows CI runs without a rerun"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/print-transfer.ts",
+    "test/print-transfer.test.ts",
+    "docs/work/records/B-133.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/print-transfer.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-25 in the reconciliation from B-127-T01 (a load investigation, 1 h): read the log, reproduce under load, fix or bound. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

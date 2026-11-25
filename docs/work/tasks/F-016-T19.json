@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T19",
-  "status": "implemented",
+  "status": "closed",
   "title": "Telegram polling handed over on activation",
   "goal": "After relocation only the new main polls and answers Telegram; the old main stops",
   "capabilities": [
@@ -42,8 +42,8 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Split from F-016-T07 on 2026-11-23 by owner decision (option a) after the PR #677 review; estimated from F-016-T06 and F-016-T07 (1.5 h each actual). Not a measurement. 2026-11-24: implemented in PR #704 (stacked on #703); actual stated 1 h. 2026-11-24: review fixes on the #701-#704 stack added time; actual restated.",
-    "reviewed": "2026-11-23",
+    "basis": "Split from F-016-T07 on 2026-11-23 by owner decision (option a) after the PR #677 review; estimated from F-016-T06 and F-016-T07 (1.5 h each actual). Not a measurement. 2026-11-24: implemented in PR #704 (stacked on #703); actual stated 1 h. 2026-11-24: review fixes on the #701-#704 stack added time; actual restated. 2026-11-25: closed in the reconciliation: PR #704 merged on green CI (run 45404067112) after its design reviews; no coordinator test failed in a CI run since (reruns were worker-link, B-066). Live proof is the two-device acceptance, F-016-T09.",
+    "reviewed": "2026-11-25",
     "agentHours": 0,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1,

@@ -1,4 +1,5 @@
 import type { AccessibleControl, BrowserAdapterDriver, BrowserTabSnapshot } from './browser-control.ts';
+import { underTestRunner } from './slicer.ts';
 
 /** One DevTools-protocol connection to a page target. */
 export interface CdpSession {
@@ -201,6 +202,17 @@ function toSnapshot(target: CdpTarget, page: PageSnapshot): BrowserTabSnapshot {
     controls,
     textSummary: page.textSummary,
   };
+}
+
+/**
+ * F-089-T06: the chat tool's default driver, the live CDP driver on the configured port. Under the test runner it
+ * refuses, so no test clicks in a browser on the developer's desktop: a test injects its own driver.
+ */
+export function liveBrowserDriver(port: number): BrowserAdapterDriver {
+  if (underTestRunner()) {
+    throw new Error('A test must inject a browserDriver: the default driver clicks in the browser on this desktop.');
+  }
+  return createCdpBrowserDriver({ port });
 }
 
 /**

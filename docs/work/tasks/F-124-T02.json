@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-124-T02",
+  "parent": "F-124",
+  "title": "An approval answered in Telegram or the app clears the other",
+  "goal": "Answering an approval in either place withdraws or marks it answered in the other",
+  "status": "planned",
+  "acceptance": [
+    "An approval answered in Telegram shows answered in the app and the reverse",
+    "A late answer in the other channel is refused as already answered, not applied twice"
+  ],
+  "dependsOn": [
+    "F-124-T01"
+  ],
+  "resources": [
+    "src/approvals.ts",
+    "src/telegram.ts",
+    "src/server.ts",
+    "web/public/dashboard/live.js",
+    "test/approvals.test.ts",
+    "test/telegram.test.ts",
+    "docs/work/records/F-124.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, endpoints or personal data in Git.",
+  "validation": [
+    "Targeted approval and telegram tests",
+    "Every test reading live.js, dashboard.js or web/src",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h agent",
+    "basis": "Estimated 2026-11-25: answered state read in both channels plus a double-answer guard. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

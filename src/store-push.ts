@@ -5,6 +5,7 @@ import type { Reminder } from './store.ts';
 export interface StorePushHost {
   readonly db: DatabaseSync;
   getPushFetch(): typeof fetch;
+  getPushSubject(): string | undefined;
 }
 
 /**
@@ -78,18 +79,56 @@ export class StorePush {
     if (subs.length === 0 || reminders.length === 0) return;
     const vapid = this.getOrGenerateVapidKeys();
     const pushFetch = this.host.getPushFetch();
+    let subject: string | undefined;
+    try {
+      subject = this.host.getPushSubject();
+    } catch (error) {
+      console.error(
+        `push: ${error instanceof Error ? error.message : 'invalid push config'}; using the default subject`,
+      );
+    }
     for (const reminder of reminders) {
       const payload = formatReminderPushPayload(reminder);
       for (const sub of subs) {
+        const host = endpointHost(sub.endpoint);
         try {
-          const res = await sendWebPush(sub, payload, vapid, pushFetch);
+          const res = await sendWebPush(sub, payload, { ...vapid, subject }, pushFetch);
+          this.recordResult(res.ok, res.status, res.reason);
+          if (!res.ok)
+            console.error(`push: delivery to ${host} failed: HTTP ${res.status}${res.reason ? ` ${res.reason}` : ''}`);
           if (res.expired) {
             this.deletePushSubscription(sub.endpoint);
           }
-        } catch {
-          // Push dispatch error does not break local delivery
+        } catch (error) {
+          // Push dispatch error does not break local delivery, but it is no longer silent.
+          const reason = error instanceof Error ? error.message.slice(0, 120) : 'send failed';
+          this.recordResult(false, 0, reason);
+          console.error(`push: delivery to ${host} failed: ${reason}`);
         }
       }
     }
+  }
+
+  private recordResult(ok: boolean, status: number, reason?: string): void {
+    this.host.db
+      .prepare(
+        'INSERT INTO push_last_result(id, at, ok, status, reason) VALUES(?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET at=excluded.at, ok=excluded.ok, status=excluded.status, reason=excluded.reason',
+      )
+      .run('last', new Date().toISOString(), ok ? 1 : 0, status, reason ?? null);
+  }
+
+  status(): { devices: number; last: { at: string; ok: boolean; status: number; reason: string | null } | null } {
+    const devices = (this.host.db.prepare('SELECT count(*) AS n FROM push_subscriptions').get() as { n: number }).n;
+    const row = this.host.db.prepare('SELECT at, ok, status, reason FROM push_last_result WHERE id=?').get('last') as
+      { at: string; ok: number; status: number; reason: string | null } | undefined;
+    return { devices, last: row ? { at: row.at, ok: row.ok === 1, status: row.status, reason: row.reason } : null };
+  }
+}
+
+function endpointHost(endpoint: string): string {
+  try {
+    return new URL(endpoint).host;
+  } catch {
+    return 'unknown host';
   }
 }
