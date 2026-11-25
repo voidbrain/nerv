@@ -36,5 +36,10 @@
     "reviewed": "2026-11-25",
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 751
+    }
+  ]
 }

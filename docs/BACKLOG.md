@@ -1531,10 +1531,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-138-t01"></a>B-138-T01 — Answer a spares question from the fleet.chat result | 1.5 h | 0 h | 1.5 h | Planned | — | [F-098-T04](#f-098-t04) |
-| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-138-t01"></a>B-138-T01 — Answer a spares question from the fleet.chat result | 1.5 h | 0 h | 1.5 h | Planned | — | [F-098-T04](#f-098-t04) | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 1.5 h | 0 of 1 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1543,7 +1543,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | — (owner report 2026-11-25, NERV-01 at `2627d483`); opened in [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) |
+| PR / evidence | Steps: B-138-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751). — (owner report 2026-11-25, NERV-01 at `2627d483`); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751) |
 | Opened | 2026-11-25 |
 | Verification | Pending. |
 | Reviewed | 2026-11-25 |
@@ -2568,13 +2568,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | 1.5 h | Planned | — | [F-126-T02](#f-126-t02) | 🤖 |
-| 🟡 Medium | <a id="f-126-t02"></a>F-126-T02 — Rerun the gemma4:12b quality evidence with gemma4:26b | 2 h | 0 h | 2 h | Planned | [F-126-T01](#f-126-t01) | [F-126-T03](#f-126-t03) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-126-t03"></a>F-126-T03 — Owner decides whether to switch the chat model to gemma4:26b | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-126-T02](#f-126-t02) | [F-126-T04](#f-126-t04) | ⏳ 🤔 |
-| 🟢 Small | <a id="f-126-t04"></a>F-126-T04 — Switch the configured chat model to gemma4:26b | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T03](#f-126-t03) | — | ⏳ 🤖 |
-| 🔴 Large | **Total** | 4.25 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 4.25 h agent + 0.25 h owner | 0 of 4 completed | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | 1.5 h | Planned | — | [F-126-T02](#f-126-t02) | 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟡 Medium | <a id="f-126-t02"></a>F-126-T02 — Rerun the gemma4:12b quality evidence with gemma4:26b | 2 h | 0 h | 2 h | Planned | [F-126-T01](#f-126-t01) | [F-126-T03](#f-126-t03) | ⏳ 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟢 Small | <a id="f-126-t03"></a>F-126-T03 — Owner decides whether to switch the chat model to gemma4:26b | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-126-T02](#f-126-t02) | [F-126-T04](#f-126-t04) | ⏳ 🤔 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟢 Small | <a id="f-126-t04"></a>F-126-T04 — Switch the configured chat model to gemma4:26b | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T03](#f-126-t03) | — | ⏳ 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🔴 Large | **Total** | 4.25 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 4.25 h agent + 0.25 h owner | 0 of 4 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -2583,7 +2583,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Owner benchmark 2026-11-25 (by hand); opened in [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM) |
+| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751) |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-25 |
@@ -2633,7 +2633,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation · F-098-T03: [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation · F-098-T05: [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation · F-098-T06: [PR #705](https://github.com/voidbrain/nerv/pull/705) implementation. F-098-T04 run evidence in [PR #PRNUM](https://github.com/voidbrain/nerv/pull/PRNUM); [PR #705](https://github.com/voidbrain/nerv/pull/705) (F-098-T06 fleet by chat); [PR #691](https://github.com/voidbrain/nerv/pull/691) (F-098-T05 fleet import); [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| PR / evidence | Steps: F-098-T02: [PR #500](https://github.com/voidbrain/nerv/pull/500) implementation · F-098-T03: [PR #588](https://github.com/voidbrain/nerv/pull/588) implementation · F-098-T05: [PR #691](https://github.com/voidbrain/nerv/pull/691) implementation · F-098-T06: [PR #705](https://github.com/voidbrain/nerv/pull/705) implementation. F-098-T04 run evidence in [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #705](https://github.com/voidbrain/nerv/pull/705) (F-098-T06 fleet by chat); [PR #691](https://github.com/voidbrain/nerv/pull/691) (F-098-T05 fleet import); [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
 | Opened | 2026-11-14 |
 | Verification | Unit/integration 2026-11-24: `node --test test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts` (43 passed) with the containment fix; CI green on PRs #691 and #705. Live on the real fleet 2026-11-25 (F-098-T04, owner on NERV-01): crash recorded; spare count failed (B-138). Pending. |
 | Reviewed | 2026-11-25 |
