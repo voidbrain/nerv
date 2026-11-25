@@ -2,25 +2,33 @@
   "version": 1,
   "id": "F-101-T06",
   "parent": "F-101",
-  "title": "Dashboard uses the FPV core's web components",
-  "goal": "The dashboard shows batteries, fleet, spares and crashes with the core's web components, styled by NERV tokens",
+  "title": "NERV shows FPV data through FPVBuddy's MCP tools and surfaces",
+  "goal": "Battery data reaches NERV as FPVBuddy's surface-typed MCP results, rendered as bricks surface cards in chat, with FPVBuddy's MCP Apps page or link for the full screen; NERV hosts no FPV components of its own",
   "status": "planned",
   "acceptance": [
-    "`battery-cards.ts` is replaced by the core's components and removed",
-    "Fleet, spares and crash views appear in the FPV panel when the pack is on",
-    "Checked in a browser at desktop and phone width, light and dark"
+    "A chat question about batteries calls FPVBuddy's battery tools over MCP and the reply shows the result as a surface card rendered by the bricks surface components (web/src surface renderer), with invented data in tests",
+    "The full battery screen opens as FPVBuddy's MCP Apps page or link from the card; NERV keeps no copy of it",
+    "A test across the join: a fake FPVBuddy MCP server returns surface-typed battery data and the chat reply renders the card",
+    "Checked in a browser at desktop and phone width, light and dark",
+    "Replaces the 2026-11-20 plan to host the FPV core's web components in NERV's dashboard. Owner decision 2026-11-25 (coordinator docs/DOMAINS.md; FPVBuddy F-008-T07, FPVBuddy#13): each project owns its screens, built with bricks; NERV keeps no copies and shows other projects' data through MCP (genUI surface cards in chat; MCP Apps pages or links for full screens)."
   ],
   "dependsOn": [
-    "F-101-T05"
+    "F-101-T07",
+    "fpvbuddy:F-009-T03",
+    "fpvbuddy:F-009-T04"
   ],
   "resources": [
     "web/src/**",
+    "src/**",
+    "test/**",
     "docs/STYLE-GUIDE.md",
     "docs/work/records/F-101.md",
     "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",
+    "typescript",
+    "api-contracts",
     "regression-design"
   ],
   "privacy": "Owner fleet and kitchen data stay local-only; tests use invented batteries, drones and recipes.",
@@ -33,12 +41,12 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-20: host custom elements in Angular, map NERV tokens, remove the old cards. Depends on the core repository's web components. Not a measurement.",
-    "reviewed": "2026-11-20",
-    "agentHours": 1.5,
+    "estimate": "1 h",
+    "basis": "Re-estimated 2026-11-25 after the owner decision on screens: render FPVBuddy's surface-typed results with the existing surface renderer and link the MCP Apps page; no components to host. Was 1.5 h (host the core's web components). Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 1,
     "baselineAgentHours": 1.5,
-    "estimateAgentHours": 1.5
+    "estimateAgentHours": 1
   },
   "prs": []
 }

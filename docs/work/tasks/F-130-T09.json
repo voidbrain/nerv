@@ -2,12 +2,13 @@
   "version": 1,
   "id": "F-130-T09",
   "parent": "F-130",
-  "title": "Coming up, models, budget and battery tabs",
-  "goal": "The next-24-h queue, models and routes, model usage and budget, and the battery tab work in the workspace",
+  "title": "Coming up, models and budget tabs",
+  "goal": "The next-24-h queue, models and routes, and model usage and budget work in the workspace",
   "status": "planned",
   "acceptance": [
-    "/api/queue, /api/models, /api/model-usage and usage paging match live.js; the battery tab reuses battery-cards",
-    "A test across the queue and model-usage handlers and the components"
+    "/api/queue, /api/models, /api/model-usage and usage paging match live.js",
+    "A test across the queue and model-usage handlers and the components",
+    "The battery and fleet views are not migrated: by the owner decision of 2026-11-25 they come from FPVBuddy through MCP (F-101-T06, F-101-T07); the old battery tab goes with web/public/dashboard in F-130-T13"
   ],
   "dependsOn": [
     "F-130-T01"
@@ -38,11 +39,11 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "3 h",
-    "basis": "Estimated 2026-11-25: mostly read-only tables; battery cards already exist. Not a measurement.",
+    "estimate": "2.5 h",
+    "basis": "Re-estimated 2026-11-25: battery tab dropped (FPVBuddy owns its screens, shown through MCP); mostly read-only tables remain. Was 3 h. Not a measurement.",
     "reviewed": "2026-11-25",
-    "agentHours": 3,
+    "agentHours": 2.5,
     "baselineAgentHours": 3,
-    "estimateAgentHours": 3
+    "estimateAgentHours": 2.5
   }
 }

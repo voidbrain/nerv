@@ -6,7 +6,7 @@
   "goal": "The record lists what the current web/src page holds and which part each F-130 step reuses, keeps or retires, so the simple view and the full dashboard start from the same components",
   "status": "planned",
   "acceptance": [
-    "F-130's record lists each part of the web/src page (nerv-app shell and Nodo sidebar, sign-in, status card, device pairing, doctor view, update prompt, push toggle, reminders and inbox, push to talk, battery cards, surface renderer, roadmap cards) with its API calls and the step that reuses, keeps or retires it",
+    "F-130's record lists each part of the web/src page (nerv-app shell and Nodo sidebar, sign-in, status card, device pairing, doctor view, update prompt, push toggle, reminders and inbox, push to talk, battery cards (retired by F-101-T07, not migrated), surface renderer, roadmap cards) with its API calls and the step that reuses, keeps or retires it",
     "It names which parts the simple view (F-130-T16) keeps: chat, pending approvals, health at a glance, push on/off, the link to the full dashboard; and which shared theme tokens both layouts read (docs/STYLE-GUIDE.md)",
     "Records only; any gap found becomes a step or a B- record in the same PR"
   ],
