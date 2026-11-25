@@ -1821,7 +1821,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔶 P2 | 🟡 Medium | 2 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-125-T01 (design and fix); the owner agrees the change to the signed reply before work starts.
+💻 **→** Next: land [#740](https://github.com/voidbrain/nerv/pull/740) (B-125-T01), then update every base together.
 
 | | |
 |---|---|
@@ -1831,10 +1831,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status |
-|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-125-t01"></a>B-125-T01 — Bind every signed Kaji reply to the request it answers | 2 h | 0 h | 2 h | Planned |
-| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed |
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-125-t01"></a>B-125-T01 — Bind every signed Kaji reply to the request it answers | 2 h | 0 h | 2 h | Implemented; verification pending | [PR #740](https://github.com/voidbrain/nerv/pull/740) |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1843,10 +1843,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | None yet (found in [PR #721](https://github.com/voidbrain/nerv/pull/721)) |
+| PR / evidence | Steps: B-125-T01: [PR #740](https://github.com/voidbrain/nerv/pull/740). [#740](https://github.com/voidbrain/nerv/pull/740) (failing test 793d00c0, then the binding; found in [PR #721](https://github.com/voidbrain/nerv/pull/721)) |
 | Opened | 2026-11-24 |
-| Verification | Pending |
-| Reviewed | 2026-11-24 |
+| Verification | Unit/integration: the replayed epoch-push reply is refused across a real requester and responder in #740. Live check on the updated bases: Pending. |
+| Reviewed | 2026-11-25 |
 
 </details>
 
