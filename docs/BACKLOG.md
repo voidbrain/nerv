@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 8 | 5 | 27 | 8 |
+| **This week** | 8 | 5 | 28 | 8 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 38 | 32 |
-| **Require Human 🧑** | 10 | 14 |
+| **Open** | 38 | 33 |
+| **Require Human 🧑** | 10 | 15 |
 
 ### Require Human 🧑
 
@@ -30,6 +30,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-092](#f-092) |  | [B-128](#b-128) |  |
 | [F-060](#f-060) |  | [B-129](#b-129) |  |
 | [F-007](#f-007) |  | [B-134](#b-134) |  |
+|  |  | [B-135](#b-135) |  |
 |  |  | [B-056](#b-056) |  |
 |  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
@@ -38,7 +39,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 103.75 h agent + 12.25 h owner across 125 open steps of 38 features and 32 other records. 165.25 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 103.75 h agent + 12.25 h owner across 126 open steps of 38 features and 33 other records. 165.25 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2323,6 +2324,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | [PR #737](https://github.com/voidbrain/nerv/pull/737) (Tests: `test/push-subject.test.ts`, `test/push-health-row.test.mjs`) |
 | Opened | 2026-11-25 |
 | Verification | 2026-11-25: tests committed first and failing on main; with the fix they pass with `test/push.test.ts` unchanged. A real push to the owner's iPhone with the new subject was verified by hand on 2026-11-25; the shipped service is not yet observed. |
+| Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="b-135"></a>[🐞 B-135](#top)
+
+**Update now on a busy Mac is refused as an ownership problem when NERV's health check is slow**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the update reaches the service, press Update now in the dashboard while the Mac is busy (for example during a full `npm test` in another checkout): the update either goes through, or, if NERV is slower than 2 × 5 s, the refusal reads "NERV did not answer its health check within 5.0 s (2 attempts, … s in all; the machine may be busy) … Nothing was stopped; try again in a minute." and never "Service or runtime ownership is unknown or belongs elsewhere.".
+
+| | |
+|---|---|
+| **Issue** | Owner-reported 2026-11-25 on NERV-01: Update now (03316fbd → fa9ab0b3) was refused at 07:49:50Z with "Service or runtime ownership is unknown or belongs elsewhere." while the load average was about 25–40; the same checks passed on 2026-11-24 23:44Z. The running commit, the checkout and the launchd job all matched (the live `launchctl print` and plist were checked read-only against `macRegistrationMatches` and the rendered definition: both owned). The observation (`src/node-lifecycle-mac.ts`, also Linux and Windows) gave `/api/doctor` 1.5 s once; a timeout or non-OK answer left `runtime = 'unknown'`, which `blockers()` reported as the generic ownership refusal. |
+| **Reproduce** | A registered, owned service whose doctor answers after 2 s (or not at all): `planService(host, 'update', next)` lists the ownership refusal. |
+| **Check** | A committed test fails first across the observation and the blockers: a doctor answering within 5 s, or on its second attempt, is owned; one that does not answer, or answers non-OK, is named with its measured time or status and "Nothing was stopped", never as ownership, and the runtime stays `unknown` (never owned); a doctor answering for another revision is still the ownership refusal. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
+|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-135-t01"></a>B-135-T01 — A slow or failing doctor probe is named as such, not as an ownership refusal | 1.5 h | 0 h | 0 h | Implemented; verification pending | [PR #745](https://github.com/voidbrain/nerv/pull/745) |
+| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 0 h | 0 of 1 completed | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-135.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-135-T01: [PR #745](https://github.com/voidbrain/nerv/pull/745). [#745](https://github.com/voidbrain/nerv/pull/745) (Tests: `test/update-doctor-slow.test.ts`, B-135 case in `test/linux-service-lifecycle.test.ts`; shared fixture `test/moved-service-fixture.ts`) |
+| Opened | 2026-11-25 |
+| Verification | 2026-11-25: the regression committed first (650ad815) fails 4 of 5 cases on main; with the fix it passes, and the B-122, Linux, Windows and upgrade lifecycle tests pass unchanged. Windows shares the probe and the blockers but has no dedicated slow-doctor test. The shipped service is not yet observed. |
 | Reviewed | 2026-11-25 |
 
 </details>
