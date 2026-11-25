@@ -35,7 +35,9 @@ test('index.html links the manifest and the build registers the service worker',
   assert.match(index, /<link rel="apple-touch-icon" href="icons\/apple-touch-icon.png">/);
   const build = JSON.parse(read('angular.json')).projects.nerv.architect.build.options;
   assert.equal(build.serviceWorker, 'web/ngsw-config.json');
-  assert.match(read('web/src/main.ts'), /provideServiceWorker\('ngsw-worker\.js', \{ enabled: !isDevMode\(\) \}\)/);
+  // F-004-T09 review: the registered worker wraps ngsw-worker.js so a tap on a reminder push posts its receipt.
+  assert.match(read('web/src/main.ts'), /provideServiceWorker\('workspace-sw\.js', \{ enabled: !isDevMode\(\) \}\)/);
+  assert.match(read('web/public/workspace-sw.js'), /importScripts\("ngsw-worker\.js"\)/);
 });
 
 test('the service worker caches only the shell: never the API, never the dashboard', () => {

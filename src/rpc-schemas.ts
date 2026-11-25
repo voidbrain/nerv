@@ -243,6 +243,18 @@ export const methodSchemas = {
     },
     additionalProperties: false,
   },
+  'deliveries.fallback': {
+    type: 'object',
+    required: ['deadlineMs'],
+    properties: { deadlineMs: { type: 'integer', minimum: 0, maximum: 86_400_000 } },
+    additionalProperties: false,
+  },
+  'push.opened': {
+    type: 'object',
+    required: ['receipt'],
+    properties: { receipt: { type: 'string', minLength: 1, maxLength: 64 } },
+    additionalProperties: false,
+  },
   'deliveries.state': {
     type: 'object',
     required: ['id'],

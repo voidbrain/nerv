@@ -41,7 +41,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 113.75 h agent + 13.5 h owner across 133 open steps of 42 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 111 h agent + 14 h owner across 134 open steps of 42 features and 33 other records. 160.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -400,7 +400,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟣 Very large | 10 h | — | [F-004-T09](#f-004-t09) | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟣 Very large | 8.75 h | — | [F-004-T09](#f-004-t09) | 🤖 | — | — |
 
 💻 **→** Next: F-124-T01 — Shared delivery state across Telegram and the phone app (Implemented; verification pending).
 
@@ -415,10 +415,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="f-124-t01"></a>F-124-T01 — Shared delivery state across Telegram and the phone app | 2 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-004-T09](#f-004-t09), [F-124-T02](#f-124-t02), [F-124-T03](#f-124-t03) | [PR #759](https://github.com/voidbrain/nerv/pull/759) |
+| 🟢 Small | <a id="f-124-t03"></a>F-124-T03 — A reminder opened on the phone is not re-sent on Telegram | 1.5 h | 0 h | 0.25 h | Implemented; verification pending | [F-124-T01](#f-124-t01) | [F-124-T04](#f-124-t04) | [PR #760](https://github.com/voidbrain/nerv/pull/760) |
 | 🟡 Medium | <a id="f-124-t02"></a>F-124-T02 — An approval answered in Telegram or the app clears the other | 2 h | 0 h | 2 h | Planned | [F-124-T01](#f-124-t01) | [F-124-T04](#f-124-t04) | — |
-| 🟡 Medium | <a id="f-124-t03"></a>F-124-T03 — A reminder opened on the phone is not re-sent on Telegram | 1.5 h | 0 h | 1.5 h | Planned | [F-124-T01](#f-124-t01) | [F-124-T04](#f-124-t04) | — |
 | 🔴 Large | <a id="f-124-t04"></a>F-124-T04 — Chat with Midori in the phone app | 6 h | 0 h | 6 h | Planned | [F-124-T02](#f-124-t02), [F-124-T03](#f-124-t03) | — | — |
-| 🟣 Very large | **Total** | 11.5 h | 0 h (0 of 4 steps recorded) | 10 h | 0 of 4 completed | | | |
+| 🟣 Very large | **Total** | 11.5 h | 0 h (0 of 4 steps recorded) | 8.75 h | 0 of 4 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -427,9 +427,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-124-T01: [PR #759](https://github.com/voidbrain/nerv/pull/759). F-124-T01 [PR #759](https://github.com/voidbrain/nerv/pull/759) shared delivery state (test/delivery-state.test.ts); opened in [PR #737](https://github.com/voidbrain/nerv/pull/737). |
+| PR / evidence | Steps: F-124-T01: [PR #759](https://github.com/voidbrain/nerv/pull/759) · F-124-T03: [PR #760](https://github.com/voidbrain/nerv/pull/760). F-124-T03 [PR #760](https://github.com/voidbrain/nerv/pull/760) open receipt (test/push-first.test.ts); F-124-T01 [PR #759](https://github.com/voidbrain/nerv/pull/759) shared delivery state (test/delivery-state.test.ts); opened in [PR #737](https://github.com/voidbrain/nerv/pull/737). |
 | Opened | 2026-11-25 |
-| Verification | Unit/integration pending: test/delivery-state.test.ts on CI for [PR #759](https://github.com/voidbrain/nerv/pull/759). |
+| Verification | Unit/integration pending: test/delivery-state.test.ts on CI for [PR #759](https://github.com/voidbrain/nerv/pull/759), test/push-first.test.ts for [PR #760](https://github.com/voidbrain/nerv/pull/760). |
 | Reviewed | 2026-11-25 |
 
 </details>
@@ -441,7 +441,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 2.25 h agent + 0.5 h owner | [F-124-T01](#f-124-t01) | — | ⏳ | 🧑‍🔧 | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.75 h agent + 1 h owner | [F-124-T01](#f-124-t01) | — | 🤖 | 🧑‍🔧 | — |
 
 🧑 **→** F-004-T06: install the app on the phone, enable notifications in Settings → Notifications and complete a reminder push ([steps](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal)).
 
@@ -456,9 +456,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | — | [F-004-T07](#f-004-t07), [F-004-T09](#f-004-t09) | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) | — |
+| 🟢 Small | <a id="f-004-t09"></a>F-004-T09 — Delivery order: push first, Telegram as fallback | 2 h | 0 h | 0.5 h | Implemented; verification pending | [F-004-T06](#f-004-t06), [F-124-T01](#f-124-t01) | [F-004-T10](#f-004-t10) | 🤖 | [PR #760](https://github.com/voidbrain/nerv/pull/760) |
 | 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-004-T06](#f-004-t06) | — | ⏳ 🤖 | — |
-| 🟡 Medium | <a id="f-004-t09"></a>F-004-T09 — Delivery order: push first, Telegram as fallback | 2 h | 0 h | 2 h | Planned | [F-004-T06](#f-004-t06), [F-124-T01](#f-124-t01) | — | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 16 h (8 of 9 steps) | 4.5 h (6 of 9 steps recorded) | 2.25 h agent + 0.5 h owner | 6 of 9 completed | | | | |
+| 🟢 Small | <a id="f-004-t10"></a>F-004-T10 — Owner check: push first, Telegram as fallback on the phone | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-004-T09](#f-004-t09) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 16 h (8 of 10 steps) | 4.5 h (6 of 10 steps recorded) | 0.75 h agent + 1 h owner | 6 of 10 completed | | | | |
 
 <details><summary>Done steps (6)</summary>
 
@@ -480,9 +481,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-004-T08: [PR #729](https://github.com/voidbrain/nerv/pull/729). F-004-T08 [PR #729](https://github.com/voidbrain/nerv/pull/729) dashboard push (test/evaluation.browser.mjs); Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks; [#736](https://github.com/voidbrain/nerv/pull/736) |
+| PR / evidence | Steps: F-004-T08: [PR #729](https://github.com/voidbrain/nerv/pull/729) · F-004-T09: [PR #760](https://github.com/voidbrain/nerv/pull/760). F-004-T09 [PR #760](https://github.com/voidbrain/nerv/pull/760) push first, Telegram as fallback (test/push-first.test.ts); F-004-T08 [PR #729](https://github.com/voidbrain/nerv/pull/729) dashboard push (test/evaluation.browser.mjs); Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks; [#736](https://github.com/voidbrain/nerv/pull/736) |
 | Opened | 2026-11-01 |
-| Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Browser/accessibility 2026-11-24 (F-004-T08): `test/evaluation.browser.mjs` dashboard push join on the production build, CI [run 45502275722](https://github.com/voidbrain/nerv/actions/runs/45502275722) (PR #729). Phone install/push acceptance pending (F-004-T06). |
+| Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Browser/accessibility 2026-11-24 (F-004-T08): `test/evaluation.browser.mjs` dashboard push join on the production build, CI [run 45502275722](https://github.com/voidbrain/nerv/actions/runs/45502275722) (PR #729). Phone install/push acceptance pending (F-004-T06). Unit/integration pending: test/push-first.test.ts on CI for [PR #760](https://github.com/voidbrain/nerv/pull/760) (F-004-T09); phone check pending (F-004-T10). |
 | Reviewed | 2026-11-25 |
 
 </details>

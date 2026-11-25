@@ -25,6 +25,8 @@ test('F-124-T01: one reminder delivered by push and by Telegram shows both chann
       chatId: OWNER,
       statePath: join(home, 'telegram-state.json'),
       log: () => {},
+      // F-004-T09 changed the order: Telegram sends a pushed reminder only after the fallback deadline.
+      pushFallbackMs: 300,
     });
   let channel = aoba();
   try {

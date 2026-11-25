@@ -1,4 +1,5 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { PUSH_FALLBACK_MS } from './delivery-state.ts';
 import type { StoreApi } from './runtime.ts';
 import type { DocumentStore } from './documents.ts';
 import { builtinPackRegistry } from './packs.ts';
@@ -544,7 +545,10 @@ export class TelegramChannel {
      * 5 s by default). Default: twice `standbyCheckMs`.
      */
     handoverGraceMs?: number;
+    /** F-004-T09: how long a reminder pushed to the phone waits to be opened before Telegram sends it. */
+    pushFallbackMs?: number;
   }) {
+    this.pushFallbackMs = options.pushFallbackMs ?? PUSH_FALLBACK_MS;
     this.one = options.oneChannel;
     this.remote = options.remote;
     this.authority = options.authority;
@@ -569,6 +573,7 @@ export class TelegramChannel {
   private readonly continuity: TelegramContinuity | undefined;
   private readonly standbyCheckMs: number;
   private readonly handoverGraceMs: number;
+  private readonly pushFallbackMs: number;
   private authorized(): boolean {
     try {
       return !this.authority || this.authority();
@@ -987,7 +992,12 @@ export class TelegramChannel {
         const page = await this.store.inboxPage(at.sequence, 5, at.id);
         // Checkpoint after every message: a stop or crash resends at most the one in flight.
         for (const item of page.items) {
-          if (item.kind !== 'approval') {
+          // F-004-T09: a reminder queued for the phone first is Telegram's only as the fallback, below.
+          const pushFirst =
+            item.kind === 'reminder' &&
+            !!this.store.pushFallback &&
+            !!(await this.store.deliveryState?.(item.id))?.push;
+          if (item.kind !== 'approval' && !pushFirst) {
             try {
               await this.out(item.kind === 'brief' ? item.message : `⏰ ${item.message}`);
             } catch (e) {
@@ -1009,8 +1019,32 @@ export class TelegramChannel {
         this.state.inbox = page.next;
         this.save();
       }
+      await this.pushFallback();
     } catch (e) {
       this.log(`Telegram delivery: ${e instanceof Error ? e.message : 'failed'}.`);
+    }
+  }
+  /**
+   * F-004-T09 (owner decision 2026-11-25): push first, Telegram as fallback. The store hands out each reminder whose
+   * push failed or was not opened on the phone within the deadline once, already claimed, so a later receipt, a second
+   * pass or a restart never sends it twice. A failed send is recorded and handed out again on a later pass.
+   */
+  private async pushFallback(): Promise<void> {
+    if (!this.store.pushFallback) return;
+    for (;;) {
+      const due = await this.store.pushFallback(this.pushFallbackMs);
+      if (!due.length) return;
+      let failed = false;
+      for (const item of due) {
+        try {
+          await this.out(`⏰ ${item.message}`);
+          await this.recordDelivery(item.id, 'sent');
+        } catch (e) {
+          failed = true;
+          await this.recordDelivery(item.id, 'failed', e instanceof Error ? e.message : 'send failed');
+        }
+      }
+      if (failed || this.stopping.signal.aborted) return;
     }
   }
 
