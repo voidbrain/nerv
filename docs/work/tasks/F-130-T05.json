@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-130-T05",
+  "parent": "F-130",
+  "title": "At-a-glance strip and Misato's apartment (approvals, questions, memory)",
+  "goal": "The quick strip (needs, away, next, health, budget) and the needs panel with approvals, questions and memory cards work in the workspace",
+  "status": "planned",
+  "acceptance": [
+    "Approvals list and decisions (/api/approvals) and memory approvals (/api/memory) behave as live.js, keeping the Scrolls gate",
+    "A test across the approval handler and the component; the old panel links to the new one"
+  ],
+  "dependsOn": [
+    "F-130-T01"
+  ],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "web/public/dashboard/**",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "api-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "4 h",
+    "basis": "Estimated 2026-11-25: approval and memory cards, the components a shared UI library would later extract. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 4,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  }
+}

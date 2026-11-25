@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-130-T04",
+  "parent": "F-130",
+  "title": "Push and the service worker move to the workspace",
+  "goal": "Settings, Notifications subscribes through the workspace's worker, and a tap still posts the push receipt (F-004-T09), so reminders do not also go to Telegram",
+  "status": "planned",
+  "acceptance": [
+    "Push key, subscribe and unsubscribe (/api/push/*) work from the workspace, asking permission only on a tap; a Safari tab without PushManager says so",
+    "The workspace worker (ngsw plus a small push script, or an equivalent) posts /api/push/opened with the receipt on notificationclick and opens the workspace; a test covers the receipt",
+    "An existing /dashboard/ subscription keeps working until F-130-T13 retires it; the plan for moving the installed Home Screen app is written in the record"
+  ],
+  "dependsOn": [
+    "F-130-T01",
+    "F-004-T09"
+  ],
+  "resources": [
+    "web/src/**",
+    "src/**",
+    "test/**",
+    "web/public/dashboard/**",
+    "web/ngsw-config.json",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "api-contracts",
+    "regression-design",
+    "pwa"
+  ],
+  "privacy": "Neutral invented sorties, devices and names only; tokens and pairing codes never in tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "4 h",
+    "basis": "Estimated 2026-11-25: ngsw shows pushes but does not post the receipt, so it needs a worker script beside it; iOS limits uncertain. Not a measurement.",
+    "reviewed": "2026-11-25",
+    "agentHours": 4,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  }
+}
