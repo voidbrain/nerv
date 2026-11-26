@@ -14,7 +14,7 @@
       "records": "all"
     },
     {
-      "text": "\n## Other changes\n\nEarlier reconciliations and assessments (2026-11-08 – 2026-11-12) are archived in [Reconciliation log](archive/reconciliation-2026.md#archived-other-changes-moved-from-backlogmd-on-2026-11-13).\n\n**Harness v10.1.0 reconciliation, 2026-11-20.** Template F-085, asked from NERV on 2026-11-19: `tools/work-items.mjs` copied from v10.1.0; `docs/backlog/steps.md` and `docs/backlog/ordering.md` carried from the template diff v10.0.0..v10.1.0. Each open step now shows its Depends on and Unlocks steps in the steps table, and `check:work` warns on a blocker named only in prose. Its first run flagged B-068 → F-011 and F-012 → F-006; both are false positives (B-068's text says F-011 waits on B-068, and F-012's match is in 2026-11-13 history whose date format the warning does not split on; F-012-T03's prerequisite, F-006-T07, is closed), so nothing changed. [PR #575](https://github.com/voidbrain/nerv/pull/575)."
+      "text": "\n## Other changes\n\nEarlier reconciliations and assessments (2026-11-08 – 2026-11-20) are archived in [Reconciliation log](archive/reconciliation-2026.md#archived-other-changes-moved-from-backlogmd-on-2026-11-13).\n\n**Harness v10.21.4 reconciliation, 2026-11-26.** Template F-101 (solution dashboard: a Total row, unbroken dates, short lists and optional top-aligned HTML tables): `tools/solution.mjs` and `docs/agents/solution-dashboard.md` copied byte for byte from v10.21.4 and `version` set to 10.21.4; no forked or adapted file changed in the release. `node tools/check-harness.mjs --strict` matches v10.21.4."
     }
   ]
 }

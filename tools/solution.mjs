@@ -29,6 +29,76 @@ const urlPath = (path) =>
     .split('/')
     .map((s) => encodeURIComponent(s).replace(/[()]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`))
     .join('/');
+// F-101: a multi-value cell. Up to five items, one per line; above that, a collapsed count that opens to the items,
+// grouped by their shared "<kind> <repo>:" prefix, written once ("owner step nerv:F-062-T07" → "nerv: F-062-T07, …").
+// Items are cell text already (escaped or linked).
+const LIST_MAX = 5;
+const plural = (word, n) => (n === 1 || word.endsWith('s') ? word : `${word}s`);
+const cellList = (items) => {
+  const list = items.filter((x) => x !== '' && x !== undefined && x !== null).map(String);
+  if (!list.length) return '—';
+  if (list.length <= LIST_MAX) return list.join('<br>');
+  const groups = new Map();
+  for (const item of list) {
+    const m = /^([a-z][a-z ]*?) ([a-z][a-z0-9-]*:)?([BF]-\d{3}(?:-T\d{2})?)$/.exec(item);
+    const key = m ? `${m[1]}\n${m[2] ?? ''}` : '';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(m ? m[3] : item);
+  }
+  const kinds = new Set([...groups.keys()].map((k) => k.split('\n')[0]));
+  const summary = kinds.size === 1 && !kinds.has('') ? plural([...kinds][0], list.length) : 'items';
+  const body = [...groups].map(([key, values]) => {
+    if (!key) return values.join('<br>');
+    const [kind, repo] = key.split('\n');
+    const where = repo ? `${repo} ` : '';
+    return kinds.size === 1
+      ? `${where}${values.join(', ')}`
+      : `${plural(kind, values.length)} ${where}${values.join(', ')}`;
+  });
+  return `<details><summary>${list.length} ${summary}</summary>${body.join('<br>')}</details>`;
+};
+// F-101: a date never wraps at its hyphens on GitHub: U+2011 (non-breaking hyphen) outside link targets.
+const nowrapDates = (markdown) =>
+  markdown.replace(
+    /(\]\([^)\s]*\)|href="[^"]*")|(?<![\w/#.%:-])(\d{4})-(\d{2})-(\d{2})(?![\d-])/g,
+    (m, link, y, mo, d) => (link ? link : `${y}‑${mo}‑${d}`),
+  );
+// F-101: `htmlTables`: every Markdown table becomes an HTML table whose rows align to the top (GitHub's sanitizer keeps
+// valign and align, and drops style). The few inline forms the dashboard writes become their HTML.
+const escapeHtml = (v) => v.replaceAll('&', '&amp;').replaceAll('"', '&quot;');
+// Links and code spans are set aside first, so bold never applies inside an href or a code span.
+const inlineHtml = (cell) => {
+  const held = [];
+  const hold = (html) => `\u0000${held.push(html) - 1}\u0000`;
+  const unescape = (v) => v.replace(/\\([!-/:-@[-`{-~])/g, '$1');
+  return unescape(
+    cell
+      .replace(/`([^`]+)`/g, (_, code) => hold(`<code>${code}</code>`))
+      .replace(/\[((?:\\.|[^\]\\])*)\]\(([^)\s]*)\)/g, (_, label, href) =>
+        hold(`<a href="${escapeHtml(href)}">${unescape(label)}</a>`),
+      )
+      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>'),
+  ).replace(/\u0000(\d+)\u0000/g, (_, n) => held[n]);
+};
+const htmlTables = (lines) => {
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (!(lines[i].startsWith('|') && /^\|(?:\s*:?-+:?\s*\|)+$/.test(lines[i + 1] ?? ''))) {
+      out.push(lines[i]);
+      continue;
+    }
+    const align = cells(lines[i + 1]).map((c) => (c.endsWith(':') ? ' align="right"' : ''));
+    const row = (line, tag, open) =>
+      `${open}${cells(line)
+        .map((c, n) => `<${tag}${align[n] ?? ''}>${inlineHtml(c)}</${tag}>`)
+        .join('')}</tr>`;
+    out.push('<table>', row(lines[i], 'th', '<tr>'));
+    for (i += 2; i < lines.length && lines[i].startsWith('|'); i++) out.push(row(lines[i], 'td', '<tr valign="top">'));
+    out.push('</table>');
+    i--;
+  }
+  return out;
+};
 const cells = (line) =>
   line
     .split(/(?<!\\)\|/)
@@ -943,6 +1013,7 @@ try {
   if (s.schemaVersion !== 1 || typeof s.name !== 'string' || !s.name.trim())
     fail('Solution needs schemaVersion 1 and a name');
   if (!Array.isArray(s.repositories)) fail('Solution repositories must be an array');
+  if (s.htmlTables !== undefined && typeof s.htmlTables !== 'boolean') fail('htmlTables must be true or false');
   safeFile(home, s.dashboard ?? 'docs/SOLUTION-DASHBOARD.md');
   const all = [
     {
@@ -1259,7 +1330,7 @@ try {
   ];
   for (const r of results)
     output.push(
-      `| ${text(r.label ?? r.id)} | ${r.available ? `[${r.revision.slice(0, 12)}](https://github.com/${r.repository}/commit/${r.revision})` : 'Unknown'} | ${r.available ? `${r.dirty ? 'Local changes — not a committed snapshot' : 'Committed snapshot'}; requested ${text(r.ref)}; ${remote && r.id !== 'solution' ? 'GitHub' : 'local checkout, not fetched'}${r.view ? `; ${r.view}` : ''}` : 'Unavailable — status unknown'} |`,
+      `| ${text(r.label ?? r.id)} | ${r.available ? `[${r.revision.slice(0, 12)}](https://github.com/${r.repository}/commit/${r.revision})` : 'Unknown'} | ${r.available ? cellList([r.dirty ? 'Local changes — not a committed snapshot' : 'Committed snapshot', `requested ${text(r.ref)}`, remote && r.id !== 'solution' ? 'GitHub' : 'local checkout, not fetched', r.view && text(r.view)]) : 'Unavailable — status unknown'} |`,
     );
   // F-095-T05: the owner view, ahead of the detail. F-099: in the layout of a coordinator's own overview, so it can
   // retire its tool: emoji and links per row, agent and owner hours apart, open prerequisites, harness and next audit.
@@ -1303,9 +1374,7 @@ try {
         .filter((d) => !isDone(d))
         .map((d) => `${refLink(`${repo}:${x.id}`)} waits on ${refLink(d)}`),
     );
-    return pairs.length
-      ? pairs.slice(0, 3).join('; ') + (pairs.length > 3 ? `; and ${pairs.length - 3} more` : '')
-      : '—';
+    return cellList(pairs);
   };
   const stateText = (st, first) =>
     st.state === 'Ready'
@@ -1366,7 +1435,8 @@ try {
       const w = view.runway.get(r.id);
       return `| ${label(r)} | ${openRecords(r)} | ${num(w.agent)}${w.unestimated.length ? ` + ${w.unestimated.length} without hours` : ''} | ${r.effort.owner === null ? 'Unknown' : num(r.effort.owner)} | ${blockedOf(r)} | ${text(harnessText(r.health).replaceAll('**', ''))} | ${text(nextAudit(r.health))} |`;
     }),
-    `| **Solution** | ${results.reduce((n, r) => n + (r.available ? openRecords(r) : 0), 0)} | **${runwayPartial ? 'at least ' : ''}${num(runwayTotal)}** | **${effortTotal('owner').replace(/ h$/, '')}** | ${results.reduce((n, r) => n + (r.available ? blockedOf(r) : 0), 0)} | ${latest.version ? `latest v${text(latest.version)}` : 'latest unknown'} | |`,
+    // F-101: the total row reads Total; each project's Harness cell already names the latest release.
+    `| **Total** | ${results.reduce((n, r) => n + (r.available ? openRecords(r) : 0), 0)} | **${runwayPartial ? 'at least ' : ''}${num(runwayTotal)}** | **${effortTotal('owner').replace(/ h$/, '')}** | ${results.reduce((n, r) => n + (r.available ? blockedOf(r) : 0), 0)} | | |`,
     '',
     `Remaining in all backlogs: ${effortTotal('agent')} agent + ${effortTotal('owner')} owner.`,
   );
@@ -1465,9 +1535,9 @@ try {
     const owner = ownerHoursIn(b.remaining);
     const steps = units.filter((u) => u.ref !== `${r.id}:${b.id}`);
     const next = steps.length
-      ? steps.map((u) => `${u.ref.split(':')[1]}: ${u.title}`).join('; ')
-      : actionText(b) || '—';
-    return `| ${refLink(`${r.id}:${b.id}`)} | ${text(short(b.title, 80))} | ${text(kind)} | ${text(b.priority)} | ${owner === null ? '—' : `${num(owner)} h`} | ${text(short(next, 140))} |`;
+      ? cellList(steps.map((u) => text(short(`${u.ref.split(':')[1]}: ${u.title}`, 80))))
+      : text(short(actionText(b) || '—', 140));
+    return `| ${refLink(`${r.id}:${b.id}`)} | ${text(short(b.title, 80))} | ${text(kind)} | ${text(b.priority)} | ${owner === null ? '—' : `${num(owner)} h`} | ${next} |`;
   };
   // F-099: a project is idle when its agent runway is empty, with the reason.
   const why = (r) => {
@@ -1545,28 +1615,29 @@ try {
     '|---|---|---|---|',
     ...runwayRows.map(([r, w]) =>
       r.available
-        ? `| ${label(r)} | ${text(fixed(w.agent) + notes(w.unestimated))} | ${text([...w.blocks].join('; ') || '—')} | ${text(fixed(w.owner) + notes(w.ownerUnestimated))} |`
+        ? `| ${label(r)} | ${text(fixed(w.agent) + notes(w.unestimated))} | ${cellList([...w.blocks].map(text))} | ${text(fixed(w.owner) + notes(w.ownerUnestimated))} |`
         : `| ${label(r)} | Unknown | source unavailable | Unknown |`,
     ),
-    `| **Solution** | ${unreadable || runwayRows.some(([, w]) => w.unestimated.length) ? 'at least ' : ''}${fixed(sum('agent'))} | ${new Set(runwayRows.flatMap(([, w]) => [...w.blocks])).size} | ${unreadable || runwayRows.some(([, w]) => w.ownerUnestimated.length) ? 'at least ' : ''}${fixed(sum('owner'))} |`,
+    `| **Total** | ${unreadable || runwayRows.some(([, w]) => w.unestimated.length) ? 'at least ' : ''}${fixed(sum('agent'))} | ${new Set(runwayRows.flatMap(([, w]) => [...w.blocks])).size} | ${unreadable || runwayRows.some(([, w]) => w.ownerUnestimated.length) ? 'at least ' : ''}${fixed(sum('owner'))} |`,
   );
   // F-097-T02: audits, reviews and harness release per project.
+  // F-101: cell text, one item per line
   const auditText = (h) =>
     !h.audit
       ? 'none found (unknown)'
-      : `${h.audit.latest ? `${h.audit.latest.day} (${h.audit.latest.kind}), ` : ''}${h.audit.last ? `${h.audit.last} (${h.audit.kind})` : 'no complete full audit'}; ${
-          h.audit.due.length ? `**due: ${h.audit.due.join(', ')}**` : `next ${h.audit.next}`
-        }`;
+      : cellList([
+          h.audit.latest && text(`${h.audit.latest.day} (${h.audit.latest.kind})`),
+          text(h.audit.last ? `${h.audit.last} (${h.audit.kind})` : 'no complete full audit'),
+          h.audit.due.length ? `**${text(`due: ${h.audit.due.join(', ')}`)}**` : text(`next ${h.audit.next}`),
+        ]);
   const reviewText = (h) =>
-    h.reviews.length
-      ? h.reviews
-          .map((v) =>
-            v.overdue
-              ? `**${v.name}: ${v.last ? `due since ${v.next ?? 'unknown'}` : 'none found'}**`
-              : `${v.name}: next ${v.next}`,
-          )
-          .join('; ')
-      : '—';
+    cellList(
+      h.reviews.map((v) =>
+        v.overdue
+          ? `**${text(`${v.name}: ${v.last ? `due since ${v.next ?? 'unknown'}` : 'none found'}`)}**`
+          : text(`${v.name}: next ${v.next}`),
+      ),
+    );
   output.push(
     '',
     '## Audits, reviews and harness',
@@ -1577,7 +1648,7 @@ try {
     '|---|---|---|---|---|',
     ...results.map((r) =>
       r.available
-        ? `| ${label(r)} | ${text(harnessText(r.health))} | ${text(auditText(r.health))} | ${text(reviewText(r.health))} | ${text(r.health.notes.join('; ') || '—')} |`
+        ? `| ${label(r)} | ${text(harnessText(r.health))} | ${auditText(r.health)} | ${reviewText(r.health)} | ${cellList(r.health.notes.map(text))} |`
         : `| ${label(r)} | Unknown | Unknown | Unknown | source unavailable |`,
     ),
   );
@@ -1655,7 +1726,7 @@ try {
     '',
     '## Remaining effort',
     '',
-    "Hours each backlog still holds, as each project's own, uncalibrated estimate. The solution line adds them; it is no completion measure.",
+    "Hours each backlog still holds, as each project's own, uncalibrated estimate. The Total line adds them; it is no completion measure.",
     '',
     '| Source | Agent | Owner | From | Open records by priority | Open records by size |',
     '|---|---|---|---|---|---|',
@@ -1664,7 +1735,7 @@ try {
         ? `| ${label(r)} | ${hours(r.effort.agent)} | ${hours(r.effort.owner)} | ${text(r.effort.basis)} | ${text(r.effort.priorities)} | ${text(r.effort.sizes)} |`
         : `| ${label(r)} | Unknown | Unknown | source unavailable | Unknown | Unknown |`,
     ),
-    `| **Solution** | ${total('agent')} | ${total('owner')} | ${known.length} of ${results.length} backlogs | | |`,
+    `| **Total** | ${total('agent')} | ${total('owner')} | ${known.length} of ${results.length} backlogs | | |`,
   );
   output.push(
     '',
@@ -1675,7 +1746,7 @@ try {
   );
   for (const b of coordinator.records.values())
     output.push(
-      `| [solution:${b.id}](${recordLink(coordinator, b)}) | ${text(b.title)} | ${text(b.status)} | ${text(b.human)} | ${text(b.effort)} | ${text(b.refs.join(', ') || '—')} |`,
+      `| [solution:${b.id}](${recordLink(coordinator, b)}) | ${text(b.title)} | ${text(b.status)} | ${text(b.human)} | ${text(b.effort)} | ${cellList(b.refs.map(text))} |`,
     );
   output.push(
     '',
@@ -1702,7 +1773,7 @@ try {
     '',
   );
   if (mode === 'dashboard') {
-    const content = output.join('\n');
+    const content = nowrapDates((s.htmlTables ? htmlTables(output) : output).join('\n'));
     if (write) {
       if (setting?.role === 'component' || resolve(root) !== resolve(home))
         fail('Only the coordinator may write its generated dashboard');
