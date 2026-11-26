@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "parent": "B-176",
+  "dependsOn": [
+    "B-176-T03"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-176-T04",
+  "title": "Owner check: nerv chat \"quali genetiche ho?\" lists the strains",
+  "goal": "The copy-paste step in the record answers with the strains in Italian on NERV-01",
+  "status": "planned",
+  "acceptance": [
+    "The copy-paste step in the record answers with the strains in Italian on NERV-01"
+  ],
+  "resources": [
+    "docs/work/records/B-176.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "owner-check"
+  ],
+  "validation": [
+    "owner runs the step in the record"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.0,
+    "estimateAgentHours": 0.0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}
