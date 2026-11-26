@@ -699,7 +699,9 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
       // Warm steady-state lease renewal and Kaji heartbeat once so Windows NTFS SQLite/socket initialisation does not
       // skew the steady-state concurrency check during canonicalisation/signing.
       const keeper = x.lease.keeper((id, req) => x.link.renewLease(id, req));
+      const baselineAt = performance.now();
       assert.equal(await keeper.renewOnce(), 'renewed');
+      const baselineRenewMs = performance.now() - baselineAt;
       await b.link.heartbeat();
 
       // Populate X with 25,000 committed deliveries rows (~60 MB JSON) and clear pending capture so the seed
@@ -767,6 +769,15 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
       }
 
       const serialiseMs = firstChunkAt - readCommittedAt;
+      const metrics = JSON.stringify({
+        serialiseMs: Math.round(serialiseMs),
+        baselineRenewMs: Math.round(baselineRenewMs),
+        renewMs: Math.round(renewDoneAt - readCommittedAt),
+        kajiMs: Math.round(kajiDoneAt - readCommittedAt),
+        ticksDuringSerialise,
+        maxGapMs: Math.round(maxGapMs),
+      });
+      console.log(`F-016-T21 metrics ${metrics}`);
       assert.ok(readCommittedAt > 0, 'worker reported read-committed before canonicalising');
       assert.equal(renewOutcome, 'renewed');
       assert.ok(
