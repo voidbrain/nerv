@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { builtinTools, builtinToolDescriptors, execute, type ReminderBackend } from '../src/executors.ts';
-import { GmailClient } from '../src/gmail.ts';
+import { GMAIL_SCOPE_COMPOSE, GMAIL_SCOPE_READONLY, GmailClient } from '../src/gmail.ts';
 import { filterConsultantInput } from '../src/misato.ts';
 
 test('F-086-T02: gmail.search and gmail.read are Green tools returning tainted mail data', async () => {
@@ -173,7 +173,12 @@ test('F-086-T03: draft is Orange, send is Blue, expiry never sends, and approved
   const baseUrl = `http://127.0.0.1:${addr.port}`;
 
   try {
-    const gmail = new GmailClient({ accessToken: 'test-token', baseUrl });
+    // F-086-T05: drafting and sending need the owner's gmail.compose opt-in (decision, phase 2).
+    const gmail = new GmailClient({
+      accessToken: 'test-token',
+      baseUrl,
+      scopes: [GMAIL_SCOPE_READONLY, GMAIL_SCOPE_COMPOSE],
+    });
     const backend: import('../src/executors.ts').ReminderBackend = {
       pendingReminders: () => [],
       add: () => {
