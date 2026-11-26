@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "parent": "B-172",
+  "dependsOn": [],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "id": "B-172-T01",
+  "title": "Failing test: a main from before F-016 cannot become the first coordinator",
+  "goal": "Tests fail on main: no kaji adopt; kaji standby refuses the legacy main",
+  "status": "implemented",
+  "acceptance": [
+    "Tests fail on main: no kaji adopt; kaji standby refuses the legacy main"
+  ],
+  "resources": [
+    "test/**",
+    "docs/work/records/B-172.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "distributed-contracts"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: one two-base fixture. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": [
+    {
+      "pr": 841,
+      "note": "failing two-base test"
+    }
+  ]
+}
