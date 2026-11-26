@@ -96,6 +96,46 @@ export async function loadExternalTools(options: {
   return { value, cache: { at: Date.now(), value } };
 }
 
+/** B-148: one configured MCP server as doctor reports it: how many tools it lists, or why it cannot start. */
+export type McpHealth = { server: string; tools: number } | { server: string; error: string };
+/**
+ * B-148: every configured MCP server, as the tools process lists it, for doctor. Bounded so doctor stays quick: a
+ * server still starting (npx fetching a package) is reported as such; no servers configured starts nothing.
+ */
+export async function mcpServerHealth(options: {
+  home?: string;
+  toolsProcess: () => ProcessClient;
+  timeoutMs?: number;
+}): Promise<McpHealth[]> {
+  let ids: string[];
+  try {
+    ids = options.home ? (readConfig(options.home).tools?.mcp ?? []).map((s) => s.id) : [];
+  } catch (e) {
+    return [{ server: 'config.json', error: e instanceof Error ? e.message : 'The tools section cannot be read.' }];
+  }
+  if (!ids.length) return [];
+  const limit = options.timeoutMs ?? 1500;
+  let timer: NodeJS.Timeout | undefined;
+  const late = new Promise<'late'>((done) => (timer = setTimeout(() => done('late'), limit)));
+  const listed = await Promise.race([
+    options
+      .toolsProcess()
+      .call('tools.list', {}, limit + 500)
+      .then(
+        (r) => r as { server: string; tools?: unknown[]; error?: string }[],
+        (e: unknown) => (e instanceof Error ? e.message : 'The tools process did not answer.'),
+      ),
+    late,
+  ]).finally(() => clearTimeout(timer));
+  return ids.map((server): McpHealth => {
+    if (listed === 'late') return { server, error: 'still starting: run doctor again in a minute' };
+    if (typeof listed === 'string') return { server, error: listed };
+    const found = listed.find((l) => l.server === server);
+    if (!found) return { server, error: 'not listed by the tools process' };
+    return found.error !== undefined ? { server, error: found.error } : { server, tools: found.tools?.length ?? 0 };
+  });
+}
+
 /**
  * F-021: a granted, gated MCP call: the tools process makes it and the action is finished with its outcome in the
  * ledger. Shared by Misato's plans, script plans, offers from another base and, F-123, a call the owner approved.
