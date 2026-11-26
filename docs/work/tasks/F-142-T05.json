@@ -6,6 +6,7 @@
   "goal": "The owner can send a photo from the phone PWA",
   "status": "planned",
   "acceptance": [
+    "Parked 2026-11-26 (owner decision in chat): this step does not start until the owner picks a use for F-142 (see the candidate uses in the record).",
     "Owner decisions 2026-11-26 in chat: fpvbuddy:F-023 \"A\" (retire the on-device assistant and the vision demo), with \"vision capabilities ideally on nerv too\"; Italian is required for every model-facing feature (the owner uses all modules in Italian).",
     "The PWA chat input gains an attach/take-photo control (accept image/*, capture), a preview with remove, a size message before upload; bricks tokens and the style guide, Italian and English labels",
     "Keyboard and screen-reader accessible (labelled button, preview alt text); browser check on a phone recorded in F-142 Verification"

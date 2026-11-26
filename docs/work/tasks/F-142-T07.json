@@ -6,9 +6,11 @@
   "goal": "gemma4:12b (or another local model) is qualified for image turns with evidence",
   "status": "planned",
   "acceptance": [
+    "Parked 2026-11-26 (owner decision in chat): this step does not start until the owner picks a use for F-142 (see the candidate uses in the record).",
     "Owner decisions 2026-11-26 in chat: fpvbuddy:F-023 \"A\" (retire the on-device assistant and the vision demo), with \"vision capabilities ideally on nerv too\"; Italian is required for every model-facing feature (the owner uses all modules in Italian).",
     "Waits on a gauntlet-protocol vision-understanding pack (Italian and English) that is not yet recorded there: gauntlet-protocol work, opened in that repository",
-    "Run the released pack and NERV's cases against gemma4:12b on Ollama; record the result in docs/agents/model-profiles.json; an unqualified model keeps the refusal reply"
+    "Run the released pack and NERV's cases against gemma4:12b on Ollama; record the result in docs/agents/model-profiles.json; an unqualified model keeps the refusal reply",
+    "The vision pack is gauntlet-protocol's F- record \"image-understanding pack (vision-v1)\" (gauntlet-protocol, opened 2026-11-26)."
   ],
   "dependsOn": [
     "F-142-T06"
