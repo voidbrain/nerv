@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "F-152-T04",
+  "parent": "F-152",
+  "title": "Apply the decision on Reload models",
+  "goal": "The button and line follow the owner's choice from F-152-T03",
+  "status": "planned",
+  "acceptance": [
+    "Test first for the chosen place (or absence) in test/dashboard-live-views.test.mjs; when removed, liveReload, its route handler and unused strings go too (no dead code), when moved the id stays and the click still posts once",
+    "Wording in both voices, no backlog IDs in text"
+  ],
+  "dependsOn": [
+    "F-152-T03"
+  ],
+  "resources": [
+    "web/public/dashboard/**",
+    "src/store-push.ts",
+    "test/**",
+    "docs/work/records/F-152.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "javascript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-26 from the existing code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": [
+    {
+      "pr": 859,
+      "note": "plan"
+    }
+  ]
+}

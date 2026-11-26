@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "F-149-T02",
+  "parent": "F-149",
+  "title": "Owner: look at the charts on the live index card",
+  "goal": "The owner confirms the charts read right",
+  "status": "planned",
+  "acceptance": [
+    "F-149-T01 writes the page with the chat text to send and what each chart should show, and sets it as ownerLink",
+    "The owner's result is recorded in F-149"
+  ],
+  "dependsOn": [
+    "F-149-T01"
+  ],
+  "resources": [
+    "docs/acceptance/**",
+    "docs/work/records/F-149.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "documentation"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 h agent, 0.25 h owner",
+    "basis": "One chat request and a look. Estimated 2026-11-26. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  },
+  "prs": [
+    {
+      "pr": 857,
+      "note": "plan"
+    }
+  ]
+}
