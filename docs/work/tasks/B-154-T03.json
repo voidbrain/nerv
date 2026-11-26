@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "B-154-T03",
+  "parent": "B-154",
+  "title": "The whole old dashboard passes axe in every combination",
+  "goal": "A page-wide axe of /dashboard/ in all 20 combinations, with violations and undecided contrast empty or named",
+  "status": "planned",
+  "acceptance": [
+    "Eva · Light · Orange .shadow .muted reaches AA",
+    "The region rule is fixed or named with its reason",
+    "The check runs in test:browser"
+  ],
+  "dependsOn": [
+    "B-154-T02"
+  ],
+  "resources": [
+    "web/public/dashboard/index.html",
+    "test/angular.browser.mjs",
+    "docs/work/records/B-154.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "css",
+    "browser-testing"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run test:browser"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h agent",
+    "basis": "Estimated 2026-11-26: 2 h agent. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}
