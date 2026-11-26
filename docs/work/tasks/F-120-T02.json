@@ -37,7 +37,7 @@
   "effort": {
     "size": "medium",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-25 at 3 h agent. Implemented 2026-11-26: 7 system-pack cases added (failing test first), index regenerated, and all 13 non-expensive system cases passed and recorded in ledger.json; remaining: CI.",
+    "basis": "Estimated 2026-11-25 at 3 h agent. Implemented 2026-11-26: 7 system-pack cases added (failing test first), index regenerated, and all 13 non-expensive system cases passed and recorded in ledger.json (rerun in the 2026-11-26 takeover, the first run was not committed); remaining: CI. Model-pack cases it made pending: F-120-T15.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "actualAgentHours": 0.25,
