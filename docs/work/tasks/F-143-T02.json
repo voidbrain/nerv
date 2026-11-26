@@ -2,41 +2,48 @@
   "version": 1,
   "id": "F-143-T02",
   "parent": "F-143",
-  "title": "Owner decides the web image search provider",
-  "goal": "The provider, and any cost or key, is the owner's choice",
+  "title": "Openverse client: search, licence filter, attribution, rate-limit handling, download only after acceptance",
+  "goal": "NERV can search Openverse for images and fetch an accepted one, with its licence and attribution",
   "status": "planned",
   "acceptance": [
     "Owner idea 2026-11-26 in chat: \"in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted.\" Italian is required for every model-facing feature.",
-    "The owner picks a provider (or none: only \"usa questa\" ships) from docs/decisions/item-image-attach.md; the answer and its date are recorded in F-143; a paid provider names its monthly cap"
+    "Owner decision 2026-11-26 in chat (relayed by the coordinator): \"start with Openverse, stay free\". Web image candidates come from the Openverse API (openly licensed; includes Wikimedia Commons, Flickr, Smithsonian; each result carries license, license_url and attribution). No paid provider: Brave and others are out of scope unless the owner revisits; Google Custom Search shuts down 2027-01-01 and Bing image search is retired, so neither is an option.",
+    "A failing test comes first, against a fake Openverse server (invented results): search by query returns up to 8 candidates with id, thumbnail, source URL, license, license_url, creator and attribution text; results without a licence or attribution are dropped",
+    "Licence filter: only licences that allow reuse (Openverse license_type commercial/modification as decided in F-143-T01); rate-limit handling: 429 and Retry-After respected, anonymous quota by default, an optional Openverse client key only in private configuration, never in Git",
+    "All requests go through the egress proxy; thumbnails go to a short-lived cache served same-origin; the full image is downloaded only by an explicit call after acceptance (5 MiB, magic-byte type), never during search; results and captions are tainted data"
   ],
   "dependsOn": [
     "F-143-T01"
   ],
   "resources": [
-    "docs/decisions/item-image-attach.md",
+    "src/**",
+    "test/**",
+    "docs/INSTALL.md",
     "docs/work/records/F-143.md",
     "generated:backlog-views"
   ],
   "capabilities": [
-    "evidence-review"
+    "typescript",
+    "privacy-review",
+    "regression-design"
   ],
   "privacy": "Invented recipes, places and images only; web images are fetched only through NERV's egress proxy, the full image only after the owner accepts it; no secrets or API keys in Git.",
   "validation": [
-    "Owner decision, recorded in F-143"
+    "npm test",
+    "npm run check:fast; final applicable CI"
   ],
   "escalation": [
-    "The decision is the owner's; the agent does not pick"
+    "Material scope growth or effort increase goes to the owner before adoption",
+    "A paid provider or a key with a cost goes back to the owner"
   ],
   "effort": {
-    "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-26: one choice from a prepared page. Not a measurement.",
+    "size": "medium",
+    "estimate": "2 h agent",
+    "basis": "Estimated 2026-11-26 (coordinator relay of the owner decision: about 2 h): one HTTP client with a fake server, licence filter, 429 handling and a thumbnail cache. Not a measurement.",
     "reviewed": "2026-11-26",
-    "agentHours": 0,
-    "baselineAgentHours": 0,
-    "estimateAgentHours": 0,
-    "ownerHours": 0.25,
-    "ownerKind": "decision"
+    "agentHours": 2.0,
+    "baselineAgentHours": 2.0,
+    "estimateAgentHours": 2.0
   },
   "prs": [
     {

@@ -7,7 +7,7 @@
   "status": "planned",
   "acceptance": [
     "Owner idea 2026-11-26 in chat: \"in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted.\" Italian is required for every model-facing feature.",
-    "On the live service: \"la ricetta X non ha foto, trovane qualcuna\" → pick one → approve → the recipe shows it with its credit line; send a photo and \"usala per Rocca Calascio\" → approve → Hobo shows it; the copy-paste page is written by F-143-T08"
+    "On the live service: \"la ricetta X non ha foto, trovane qualcuna\" → pick one → approve → the recipe shows it with its Openverse attribution; send a photo and \"usala per Rocca Calascio\" → approve → Hobo shows it; the copy-paste page is written by F-143-T08"
   ],
   "dependsOn": [
     "F-143-T08",
