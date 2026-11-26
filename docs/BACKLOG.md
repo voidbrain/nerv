@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 18 | 8 | 48 | 23 |
+| **This week** | 18 | 8 | 49 | 23 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 45 | 39 |
+| **Open** | 45 | 40 |
 | **Require Human 🧑** | 12 | 21 |
 
 ### Require Human 🧑
@@ -45,7 +45,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 192.25 h agent + 17 h owner across 179 open steps of 45 features and 39 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 192.25 h agent + 17 h owner across 181 open steps of 45 features and 40 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -3501,6 +3501,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (W2); run 45243110680; `.github/workflows/ci.yml` `concurrency`; [#805](https://github.com/voidbrain/nerv/pull/805) |
 | Opened | 2026-11-26 |
 | Verification | Unit: 2026-11-26, local: the B-156 test fails on main and passes with the fix. CI: Pending (the next scheduled run). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-158"></a>[🐞 B-158](#top)
+
+**The dashboard shell showed the owner backlog step IDs, unseen by the B-102 test**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Agent work: CI on the PR, then close.
+
+| | |
+|---|---|
+| **Issue** | The B-102 rule says no string the code can show, send or prompt with names a backlog ID, but `test/user-text-ids.test.ts` scanned only the top-level `src/*.ts` and `web/public/dashboard/dashboard.js`. The Angular workspace (`web/src`) was outside it, and the full dashboard's "Moving here" panel showed `F-130-T02` … `F-130-T11` next to each section name (`web/src/dashboard/shell.ts:12-23`, rendered at `:128`). Coordinator dormant-checks sweep of 2026-11-26, finding C1, proposal 2. |
+| **Reproduce** | On main, open `/full` signed in: each line of "Moving here" ends with a step ID such as `F-130-T02`. `node --test test/user-text-ids.test.ts` passes because `web/src` is not scanned. |
+| **Check** | `test/user-text-ids.test.ts` (B-158-T01, committed failing first and not edited) scans `src/*.ts`, every `web/src/**/*.ts` (inline Angular templates included) and every `web/public/**/*.js`, asserts the shell and the old dashboard are among them, and lists the ten shell IDs on main; after B-158-T02 it passes and the panel shows section names only. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-158-t01"></a>B-158-T01 — Failing test: the B-102 scan covers web/src and every browser script | 0.25 h | 0 h | 0 h | Implemented; verification pending | — | [B-158-T02](#b-158-t02) |
+| 🟢 Small | <a id="b-158-t02"></a>B-158-T02 — The dashboard shell stops showing step IDs | 0.25 h | 0 h | 0 h | Implemented; verification pending | [B-158-T01](#b-158-t01) | — |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0 h | 0 of 2 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-158.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (C1); `test/user-text-ids.test.ts`; `web/src/dashboard/shell.ts`; [#809](https://github.com/voidbrain/nerv/pull/809) |
+| Opened | 2026-11-26 |
+| Verification | Unit: 2026-11-26, local: `test/user-text-ids.test.ts` failed on main with the ten shell IDs and passes after the fix. Browser: Pending (CI `test:browser`, the shell's axe and layout checks). |
 | Reviewed | 2026-11-26 |
 
 </details>

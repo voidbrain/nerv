@@ -8,18 +8,21 @@ import { ThemeService } from '../theme.ts';
 import { Panel, Stat } from '../ui.ts';
 import { ACCENTS, type Accent, type Mode, type Theme } from '../../../src/dashboard-theme.ts';
 
-/** Sections still on the old page, with the step that moves each (F-130 record, F-130-T15 inventory). */
+/**
+ * Sections still on the old page, in the order the F-130 steps move them (F-130-T02 Health to F-130-T11 Bases; F-130-T15
+ * inventory). B-158: the owner sees the section names only; step IDs stay here, in a comment (B-102).
+ */
 const MOVING = [
-  ['moveHealth', 'F-130-T02'],
-  ['moveSettings', 'F-130-T03'],
-  ['movePush', 'F-130-T04'],
-  ['moveApartment', 'F-130-T05'],
-  ['moveSorties', 'F-130-T06'],
-  ['moveFlow', 'F-130-T07'],
-  ['moveComms', 'F-130-T08'],
-  ['moveNext', 'F-130-T09'],
-  ['moveEva', 'F-130-T10'],
-  ['moveBases', 'F-130-T11'],
+  'moveHealth',
+  'moveSettings',
+  'movePush',
+  'moveApartment',
+  'moveSorties',
+  'moveFlow',
+  'moveComms',
+  'moveNext',
+  'moveEva',
+  'moveBases',
 ] as const;
 
 const ACCENT_KEY = {
@@ -124,8 +127,8 @@ const ACCENT_KEY = {
             {{ t().movingBefore }} <a href="/dashboard/">{{ t().oldDashboard }}</a>{{ t().movingAfter }}
           </p>
           <ul class="moving">
-            @for (m of moving; track m[1]) {
-              <li>{{ t()[m[0]] }} <span class="meta">{{ m[1] }}</span></li>
+            @for (m of moving; track m) {
+              <li>{{ t()[m] }}</li>
             }
           </ul>
         </nerv-panel>
