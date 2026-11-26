@@ -36,5 +36,10 @@
     "estimateAgentHours": 0,
     "ownerKind": "procedure"
   },
-  "ownerLink": "docs/verification.md#codeql-alert-triage"
+  "ownerLink": "docs/verification.md#codeql-alert-triage",
+  "prs": [
+    {
+      "pr": 814
+    }
+  ]
 }
