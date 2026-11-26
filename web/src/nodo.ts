@@ -1,4 +1,14 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, computed, effect, inject, signal, untracked } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  computed,
+  effect,
+  inject,
+  Injector,
+  signal,
+  untracked,
+} from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { messages } from './i18n';
 import { RouterLink } from '@angular/router';
@@ -42,7 +52,7 @@ interface Reminder {
 @if(!connected()){<section class="connect panel"><h2>{{t().connectTitle}}</h2><p>{{t().connectHint}}</p><form (submit)="$event.preventDefault();signIn(token.value);token.value=''"><label>{{t().token}}<input #token name="signin" type="password" autocomplete="off" placeholder="XXXX-XXXX"></label><button type="submit">{{t().connect}}</button></form></section>}
 @if(error()){<p role="alert" class="error">{{error()}}</p>}
 @if(connected()){<nerv-surface-renderer [surface]="statusSurface()" [t]="t()" (checklistToggle)="onChecklistToggle($event)"></nerv-surface-renderer>
-@if(view()!=='doctor'){<div class="section-heading"><h2>{{view()==='home'?t().horizon:t().reminders}}</h2><span>{{reminders().length}} {{t().recorded}}</span></div><div class="grid"><section class="panel"><h3>{{t().keep}}</h3><label>{{t().what}}<input #title [placeholder]="t().example" maxlength="500"></label><label>{{t().when}} <small>{{t().browserTime}}</small><input #due type="datetime-local"></label><button (click)="add(title.value,due.value,title,due)">{{t().tie}}</button><p class="hint">{{t().delivery}}</p></section><section class="panel"><h3>{{t().horizon}}</h3>@for(r of reminders();track r.id){@if(editingId()!==r.id){<article class="reminder" [attr.data-reminder-id]="r.id"><div><strong>{{r.title}}</strong><p>{{formatReminder(r)}}</p><small>{{r.cancelled?t().cancelled:r.delivered?t().delivered:t().scheduled}}</small></div>@if(!r.cancelled&&!r.delivered){<div class="reminder-actions"><button class="quiet cancel-btn" (click)="cancel(r.id)" [attr.aria-label]="t().cancel+' '+r.title">×</button><button class="quiet edit-btn" (click)="startEdit(r)" [attr.aria-label]="t().edit+' '+r.title">{{t().edit}}</button></div>}</article>}@if(editingId()===r.id){<article class="reminder editing" [attr.data-reminder-id]="r.id"><form class="rem-edit" (submit)="saveEdit($event,r.id)" novalidate><label [attr.for]="'rem-edit-title-'+r.id">{{t().what}}</label><input [id]="'rem-edit-title-'+r.id" type="text" [value]="editTitle()" (input)="editTitle.set($any($event.target).value)" maxlength="500"><label [attr.for]="'rem-edit-due-'+r.id">{{t().when}} <small>{{t().browserTime}}</small></label><input [id]="'rem-edit-due-'+r.id" type="datetime-local" [value]="editDue()" (input)="editDue.set($any($event.target).value)"><div class="edit-actions"><button type="submit" class="save-btn">{{t().save}}</button><button type="button" class="quiet keep-btn" (click)="cancelEdit(r.id)">{{t().keepAsIs}}</button></div></form></article>}}@empty{<p class="empty">{{t().empty}}</p>}<div role="group" data-history="reminders" [attr.aria-label]="t().reminderPages"><button class="quiet" (click)="pageReminders(false)" [disabled]="reminderBefore().length===1" [attr.aria-disabled]="paging()||reminderBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageReminders(true)" [disabled]="reminderNext()===null" [attr.aria-disabled]="paging()||reminderNext()===null">{{t().next}}</button></div></section></div><section class="panel inbox"><h3>{{t().inbox}}</h3>@for(message of inbox();track $index){<p>{{message}}</p>}@empty{<p class="hint">{{t().inboxHint}}</p>}<div role="group" data-history="inbox" [attr.aria-label]="t().inboxPages"><button class="quiet" (click)="pageInbox(false)" [disabled]="inboxBefore().length===1" [attr.aria-disabled]="paging()||inboxBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageInbox(true)" [disabled]="inboxNext()===null" [attr.aria-disabled]="paging()||inboxNext()===null">{{t().next}}</button></div><div role="status">{{paging()?t().loading:t().pageReady}}</div></section>}
+@if(view()!=='doctor'){<div class="section-heading"><h2>{{view()==='home'?t().horizon:t().reminders}}</h2><span>{{reminders().length}} {{t().recorded}}</span></div><div class="grid"><section class="panel"><h3>{{t().keep}}</h3><label>{{t().what}}<input #title [placeholder]="t().example" maxlength="500"></label><label>{{t().when}} <small>{{t().browserTime}}</small><input #due type="datetime-local"></label><button (click)="add(title.value,due.value,title,due)">{{t().tie}}</button><p class="hint">{{t().delivery}}</p></section><section class="panel"><h3>{{t().horizon}}</h3>@for(r of reminders();track r.id){@if(editingId()!==r.id){<article class="reminder" [attr.data-reminder-id]="r.id"><div><strong>{{r.title}}</strong><p>{{formatReminder(r)}}</p><small>{{r.cancelled?t().cancelled:r.delivered?t().delivered:t().scheduled}}</small></div>@if(!r.cancelled&&!r.delivered){<div class="reminder-actions"><button class="quiet cancel-btn" (click)="cancel(r.id)" [attr.aria-label]="t().cancel+' '+r.title">×</button><button class="quiet edit-btn" (click)="startEdit(r)" [attr.aria-label]="t().edit+' '+r.title">{{t().edit}}</button></div>}</article>}@if(editingId()===r.id){<article class="reminder editing" [attr.data-reminder-id]="r.id"><form class="rem-edit" (submit)="saveEdit($event,r.id)" novalidate><label [attr.for]="'rem-edit-title-'+r.id">{{t().what}}</label><input [id]="'rem-edit-title-'+r.id" type="text" [value]="editTitle()" (input)="editTitle.set($any($event.target).value)" maxlength="500"><label [attr.for]="'rem-edit-due-'+r.id">{{t().when}} <small>{{t().browserTime}}</small></label><input [id]="'rem-edit-due-'+r.id" type="datetime-local" [value]="editDue()" (input)="editDue.set($any($event.target).value)"><div class="edit-actions"><button type="submit" class="save-btn">{{t().save}}</button><button type="button" class="quiet keep-btn" (click)="cancelEdit(r.id)">{{t().keepAsIs}}</button></div></form></article>}}@empty{<p class="empty">{{t().empty}}</p>}<div role="group" data-history="reminders" [attr.aria-label]="t().reminderPages"><button class="quiet" (click)="pageReminders(false)" [disabled]="reminderBefore().length===1" [attr.aria-disabled]="paging()||reminderBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageReminders(true)" [disabled]="reminderNext()===null" [attr.aria-disabled]="paging()||reminderNext()===null">{{t().next}}</button></div></section></div><section class="panel inbox"><h3>{{t().inbox}}</h3>@for(item of inbox();track item.id){<p [attr.data-inbox-id]="item.id">{{item.message}}</p>}@empty{<p class="hint">{{t().inboxHint}}</p>}<div role="group" data-history="inbox" [attr.aria-label]="t().inboxPages"><button class="quiet" (click)="pageInbox(false)" [disabled]="inboxBefore().length===1" [attr.aria-disabled]="paging()||inboxBefore().length===1">{{t().previous}}</button><button class="quiet" (click)="pageInbox(true)" [disabled]="inboxNext()===null" [attr.aria-disabled]="paging()||inboxNext()===null">{{t().next}}</button></div><div role="status">{{paging()?t().loading:t().pageReady}}</div></section>}
 @if(view()==='doctor'){<nerv-doctor-view [t]="t()" [raw]="doctorRaw()"></nerv-doctor-view>}
 <nerv-battery-cards [cards]="batteries()" [t]="t()" [language]="language()" (addBattery)="onAddBattery($event)" />
 <section class="panel ptt" aria-label="Push to talk"><h3>{{t().pttTitle}}</h3><div class="ptt-controls"><button type="button" class="quiet ptt-btn" (click)="startPushToTalk()">{{pttListening()?t().pttListening:t().pttHold}}</button><input type="text" class="ptt-input" [value]="pttTranscript()" (input)="pttTranscript.set($any($event.target).value)" [placeholder]="t().pttPlaceholder" maxlength="4000"><button type="button" class="quiet" (click)="preparePttDraft()" [disabled]="!pttTranscript().trim()">{{t().pttReview}}</button><label class="tts-toggle"><input type="checkbox" [checked]="spokenReplies()" (change)="toggleSpokenReplies()"> {{t().ttsToggle}}</label>@if(ttsSpeaking()){<button type="button" class="quiet" (click)="stopSpeaking()">{{t().ttsStop}}</button>}</div>@if(pttDraft(); as d){<div class="ptt-confirm" role="region" aria-live="polite"><p><strong>{{d.intent}}</strong> ({{d.language}}) — {{d.reason}}</p><div class="ptt-actions"><button type="button" class="ptt-confirm-btn" [disabled]="d.refused" (click)="confirmPttDraft()">{{t().pttConfirm}}</button><button type="button" class="quiet" (click)="cancelPttDraft()">{{t().pttCancel}}</button></div></div>}</section>
@@ -84,10 +94,14 @@ export class Nodo {
   editingId = signal<string | null>(null);
   editTitle = signal('');
   editDue = signal('');
-  inbox = signal<string[]>([]);
+  inbox = signal<InboxItem[]>([]);
   /** B-149: the inbox items on the page and the ones already reported read, so each is reported once. */
   private inboxShown: InboxItem[] = [];
   private readReported = new Set<string>();
+  /** B-149 review: the ids of inbox items at least half on screen, from an IntersectionObserver. */
+  private onScreen = new Set<string>();
+  private inboxObserver?: IntersectionObserver;
+  private readonly injector = inject(Injector);
   batteries = signal<BatteryCardItem[]>([]);
   doctor = signal('');
   doctorRaw = signal<unknown>({});
@@ -323,7 +337,7 @@ export class Nodo {
     if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => this.reportRead());
     effect(() => {
       this.view();
-      untracked(() => this.reportRead());
+      untracked(() => afterNextRender(() => this.observeInbox(), { injector: this.injector }));
     });
     // F-130-T01: the shared Session signs in (login code, kept session or device, sign-in box); read when it does.
     effect(() => {
@@ -449,18 +463,37 @@ export class Nodo {
     }
   }
   private showInbox(items: InboxItem[]) {
-    this.inbox.set(items.map((x) => x.message));
+    this.inbox.set(items);
     this.inboxShown = items;
-    this.reportRead();
+    afterNextRender(() => this.observeInbox(), { injector: this.injector });
+  }
+  /** B-149 review: watch the inbox rows now in the page; the observer reports each one's first on-screen state. */
+  private observeInbox() {
+    if (typeof IntersectionObserver === 'undefined') return;
+    this.inboxObserver ??= new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const id = (entry.target as HTMLElement).dataset['inboxId'];
+          if (!id) continue;
+          if (entry.isIntersecting) this.onScreen.add(id);
+          else this.onScreen.delete(id);
+        }
+        this.reportRead();
+      },
+      { threshold: 0.5 },
+    );
+    this.inboxObserver.disconnect();
+    this.onScreen.clear();
+    for (const row of document.querySelectorAll<HTMLElement>('.inbox [data-inbox-id]')) this.inboxObserver.observe(row);
   }
   /**
-   * B-149: an inbox item the owner sees in this page counts as read, so its Telegram fallback is skipped. Only while
-   * the page is visible and the inbox panel is on screen; a hidden tab reports when it becomes visible again.
+   * B-149: an inbox item the owner sees counts as read, so its Telegram fallback is skipped. Only rows at least half
+   * on screen (IntersectionObserver) in a visible page; a hidden tab reports them when it becomes visible again.
    */
   private reportRead() {
-    if (typeof document === 'undefined' || document.visibilityState !== 'visible' || this.view() === 'doctor') return;
+    if (typeof document === 'undefined' || document.visibilityState !== 'visible') return;
     for (const item of this.inboxShown) {
-      if (item.read_at || this.readReported.has(item.id)) continue;
+      if (item.read_at || !this.onScreen.has(item.id) || this.readReported.has(item.id)) continue;
       this.readReported.add(item.id);
       this.request('inbox/' + encodeURIComponent(item.id) + '/read', { method: 'POST' }).catch(() =>
         this.readReported.delete(item.id),

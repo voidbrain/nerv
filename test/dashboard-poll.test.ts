@@ -248,3 +248,33 @@ test('B-149-T02: the dashboard reports the brief the owner opened in a visible p
   window.renderAway();
   assert.deepEqual(posted, ['inbox/brief-1/read'], 'an item already read is not reported again');
 });
+
+test('B-149 review: a newer brief polled into an open box arrives closed and is not read until opened', async () => {
+  let brief = { id: 'brief-A', message: 'Primo', created: '2030-01-01T07:00:00Z', read_at: null };
+  const h = harness(async (path) =>
+    path.startsWith('dashboard/history?') ? { delivered: 0, pending: 0, reminders: [], brief } : ok(path),
+  );
+  const state = h.state as { brief: { id: string } | null; briefOpen: boolean };
+  await h.poll();
+  const hook = src.slice(src.indexOf('  // B-149: the brief'), src.indexOf('  // B-129: Run doctor'));
+  const posted: string[] = [];
+  const window = { renderAway: () => {} };
+  new Function('state', 'document', 'window', 'api', hook)(
+    state,
+    { visibilityState: 'visible', addEventListener: () => {} },
+    window,
+    async (path: string) => void posted.push(path),
+  );
+  state.briefOpen = true; // the owner opens brief A
+  window.renderAway();
+  assert.deepEqual(posted, ['inbox/brief-A/read']);
+  brief = { id: 'brief-B', message: 'Secondo', created: '2030-01-02T07:00:00Z', read_at: null };
+  await h.poll();
+  assert.equal(state.brief?.id, 'brief-B');
+  assert.equal(state.briefOpen, false, 'the new brief arrives closed');
+  window.renderAway();
+  assert.deepEqual(posted, ['inbox/brief-A/read'], 'brief B is not read unseen');
+  state.briefOpen = true; // the owner opens brief B
+  window.renderAway();
+  assert.deepEqual(posted, ['inbox/brief-A/read', 'inbox/brief-B/read']);
+});

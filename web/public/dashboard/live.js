@@ -100,6 +100,8 @@
       state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
       // Reminders delivered (briefs live in the inbox too since F-028, and are shown on their own in Debrief).
       state.deliveredCount = history.delivered;state.deliveredSince = historySince;state.pendingCount = history.pending;
+      // B-149 review: an open box belongs to the brief the owner opened; a newer brief arrives closed and unread.
+      if ((state.brief && state.brief.id) !== (history.brief && history.brief.id)) state.briefOpen = false;
       state.brief = history.brief;
       const selected = state.sorties.find(x => x.id === state.selected);
       const want = list.filter(s => (selected && s.id === selected.realId) || s.waiting || !detailCache[s.id] || s.status === "open").slice(0, 8);
