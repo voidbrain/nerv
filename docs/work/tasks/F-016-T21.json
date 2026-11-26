@@ -50,6 +50,10 @@
     {
       "pr": 838,
       "note": "seed export on a worker thread; merged on green CI"
+    },
+    {
+      "pr": 852,
+      "note": "closed on green CI"
     }
   ]
 }

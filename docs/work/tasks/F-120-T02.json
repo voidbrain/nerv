@@ -40,13 +40,17 @@
     "basis": "Estimated 2026-11-25 at 3 h agent. Implemented 2026-11-26: 7 system-pack cases added (failing test first), index regenerated, and all 13 non-expensive system cases passed and recorded in ledger.json (rerun in the 2026-11-26 takeover, the first run was not committed). Model-pack cases it made pending: F-120-T15. Closed 2026-11-26: #843 merged on green CI (run 45896906034). No actual: started by Gemini and finished by Claude, the elapsed time of the first session is not known.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
-    "baselineAgentHours": 3.0,
-    "estimateAgentHours": 3.0
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
   },
   "prs": [
     {
       "pr": 843,
       "note": "seven system-pack cases and the 13-case run"
+    },
+    {
+      "pr": 852,
+      "note": "closed on green CI"
     }
   ]
 }
