@@ -100,6 +100,7 @@ export const communicationGraph = [
       'deliveries.state',
       'deliveries.fallback',
       'push.opened',
+      'inbox.read',
       'inbox.list',
       'inbox.brief',
       'inbox.lastBrief',

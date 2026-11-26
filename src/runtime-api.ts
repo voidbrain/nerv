@@ -229,6 +229,8 @@ export interface StoreApi {
     deadlineMs: number,
   ): import('./delivery-state.ts').FallbackItem[] | Promise<import('./delivery-state.ts').FallbackItem[]>;
   pushOpened?(receipt: string): boolean | Promise<boolean>;
+  /** B-149: the owner read an inbox item in the app, so the Telegram fallback skips it. False for an unknown item. */
+  inboxRead?(id: string): boolean | Promise<boolean>;
   deliveryState?(
     id: string,
   ): import('./delivery-state.ts').DeliveryState | Promise<import('./delivery-state.ts').DeliveryState>;

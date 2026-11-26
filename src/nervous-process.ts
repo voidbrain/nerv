@@ -211,6 +211,8 @@ process.on('message', (value: unknown) => {
         return store.pushFallback(params.deadlineMs as number);
       case 'push.opened':
         return store.pushOpened(params.receipt as string);
+      case 'inbox.read':
+        return store.inboxRead(params.id as string);
       case 'deliveries.state':
         return store.deliveryState(params.id as string);
       case 'push.status': {

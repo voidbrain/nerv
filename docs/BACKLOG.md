@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 46 | 40 |
-| **Require Human 🧑** | 13 | 17 |
+| **Require Human 🧑** | 13 | 18 |
 
 ### Require Human 🧑
 
@@ -32,7 +32,8 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-098](#f-098) |  | [B-134](#b-134) |  |
 | [F-060](#f-060) |  | [B-135](#b-135) |  |
 | [F-007](#f-007) |  | [B-142](#b-142) |  |
-| [F-123](#f-123) |  | [B-056](#b-056) |  |
+| [F-123](#f-123) |  | [B-149](#b-149) |  |
+|  |  | [B-056](#b-056) |  |
 |  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
 |  |  | [B-112](#b-112) |  |
@@ -41,7 +42,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 195.75 h agent + 16.75 h owner across 176 open steps of 46 features and 40 other records. 165.5 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 192.75 h agent + 16.75 h owner across 176 open steps of 46 features and 40 other records. 165.5 h of actual effort recorded on 151 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2026,46 +2027,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-149"></a>[🐞 B-149](#top)
-
-**Reading a reminder in the app does not stop its Telegram fallback**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-149-T01 — Failing test: a reminder read in the app still reaches Telegram (Planned).
-
-| | |
-|---|---|
-| **Issue** | F-004-T09's fallback skips an item already read in the app (`claimFallback` in `src/delivery-state.ts` requires `d.read_at IS NULL`), but nothing ever sets `deliveries.read_at`: every insert writes NULL and no code updates it (`grep read_at src web` at main `5c306f5a`). So only a tap on the notification stops the Telegram copy; a reminder the owner opened and read in the app still reaches Telegram 10 minutes later. |
-| **Reproduce** | With push on, create a reminder due in a minute, do not tap the notification, open the app and look at the reminder; about 10 minutes after it was due Telegram sends it anyway. |
-| **Check** | Opening an inbox item in the dashboard or workspace app sets `read_at` once; a read item never reaches Telegram; a committed test fails first (B-149-T01) and is not edited; the owner sees no Telegram copy on the phone (B-149-T03). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="b-149-t01"></a>B-149-T01 — Failing test: a reminder read in the app still reaches Telegram | 1 h | 0 h | 1 h | Planned | — | [B-149-T02](#b-149-t02) | 🤖 |
-| 🟡 Medium | <a id="b-149-t02"></a>B-149-T02 — The app marks an inbox item read when the owner opens it | 2 h | 0 h | 2 h | Planned | [B-149-T01](#b-149-t01) | [B-149-T03](#b-149-t03) | ⏳ 🤖 |
-| 🟢 Small | <a id="b-149-t03"></a>B-149-T03 — Owner: a reminder read in the app does not reach Telegram | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-149-T02](#b-149-t02) | — | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 3 steps recorded) | 3 h agent + 0.25 h owner | 0 of 3 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-149.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Code reading at main `5c306f5a`: `src/delivery-state.ts` `claimFallback`, inserts in `src/store-reminders.ts`, `src/store-inbox.ts`, `src/batteries.ts`; F-004-T09 [PR #760](https://github.com/voidbrain/nerv/pull/760); [#783](https://github.com/voidbrain/nerv/pull/783) |
-| Opened | 2026-11-26 |
-| Verification | Unit: Pending (B-149-T01, B-149-T02). Device: Pending (B-149-T03). |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
 ### <a id="f-086"></a>[✨ F-086](#top)
 
 **Gmail: search and read, then draft and send behind approval**
@@ -2666,6 +2627,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-142-T01: [PR #766](https://github.com/voidbrain/nerv/pull/766). Test: `test/health-settings-layout.test.mjs`; [#766](https://github.com/voidbrain/nerv/pull/766) |
 | Opened | 2026-11-25 |
 | Verification | Unit 2026-11-25: `test/health-settings-layout.test.mjs` passes locally. Visual 2026-11-25: headless Chrome screenshots (desktop 1440 px, phone 390 px) on a test home. Human: Pending. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-149"></a>[🐞 B-149](#top)
+
+**Reading a reminder in the app does not stop its Telegram fallback**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** B-149-T03, after the merge and update: read a pushed reminder in the app without tapping it; Telegram stays silent ([steps](acceptance/f004-t06-phone-push-procedure.md#read-in-the-app-not-tapped-b-149-t03)).
+
+| | |
+|---|---|
+| **Issue** | F-004-T09's fallback skips an item already read in the app (`claimFallback` in `src/delivery-state.ts` requires `d.read_at IS NULL`), but nothing ever sets `deliveries.read_at`: every insert writes NULL and no code updates it (`grep read_at src web` at main `5c306f5a`). So only a tap on the notification stops the Telegram copy; a reminder the owner opened and read in the app still reaches Telegram 10 minutes later. |
+| **Reproduce** | With push on, create a reminder due in a minute, do not tap the notification, open the app and look at the reminder; about 10 minutes after it was due Telegram sends it anyway. |
+| **Check** | Opening an inbox item in the dashboard or workspace app sets `read_at` once; a read item never reaches Telegram; a committed test fails first (B-149-T01) and is not edited; the owner sees no Telegram copy on the phone (B-149-T03). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="b-149-t01"></a>B-149-T01 — Failing test: a reminder read in the app still reaches Telegram | 1 h | 0 h | 0 h | Implemented; verification pending | — | [B-149-T02](#b-149-t02) | 🤖 | [PR #785](https://github.com/voidbrain/nerv/pull/785) |
+| 🟢 Small | <a id="b-149-t02"></a>B-149-T02 — The app marks an inbox item read when the owner opens it | 2 h | 0 h | 0 h | Implemented; verification pending | [B-149-T01](#b-149-t01) | [B-149-T03](#b-149-t03) | 🤖 | [PR #785](https://github.com/voidbrain/nerv/pull/785) |
+| 🟢 Small | <a id="b-149-t03"></a>B-149-T03 — Owner: a reminder read in the app does not reach Telegram | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-149-T02](#b-149-t02) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 3 h | 0 h (0 of 3 steps recorded) | 0.25 h owner | 0 of 3 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-149.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-149-T01: [PR #785](https://github.com/voidbrain/nerv/pull/785) · B-149-T02: [PR #785](https://github.com/voidbrain/nerv/pull/785). Code reading at main `5c306f5a`: `src/delivery-state.ts` `claimFallback`, inserts in `src/store-reminders.ts`, `src/store-inbox.ts`, `src/batteries.ts`; F-004-T09 [PR #760](https://github.com/voidbrain/nerv/pull/760); [#783](https://github.com/voidbrain/nerv/pull/783); [#785](https://github.com/voidbrain/nerv/pull/785) |
+| Opened | 2026-11-26 |
+| Verification | Unit: implemented, pending CI: `test/push-first.test.ts` "B-149: a pushed reminder read in the app before the deadline never reaches Telegram" (failed on main before the fix), `test/dashboard-poll.test.ts` "B-149-T02: …" and "B-149 review: a newer brief polled into an open box …", `test/push-first.test.ts` "B-149 review: marking an inbox item read needs sign-in", the native-peer 403 in `test/native-auth.test.ts`, browser case in `test/angular.browser.mjs` (off screen not read, scrolled on screen read). Device: Pending (B-149-T03). |
 | Reviewed | 2026-11-26 |
 
 </details>

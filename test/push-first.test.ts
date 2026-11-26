@@ -328,3 +328,58 @@ test('F-004-T09: the receipt endpoint takes JSON only, needs no bearer and refus
     store.close();
   }
 });
+
+// B-149-T01: nothing set deliveries.read_at, so a reminder the owner read in the app (without tapping the
+// notification) still reached Telegram at the deadline. Across the join: the read call the dashboard and the workspace
+// make → the shared inbox state → the Telegram fallback pass.
+test('B-149: a pushed reminder read in the app before the deadline never reaches Telegram', async () => {
+  const t = await setup({ fallbackMs: 1500 });
+  const origin = `http://127.0.0.1:${(t.server.address() as { port: number }).port}`;
+  const read = (id: string) =>
+    fetch(`${origin}/api/inbox/${encodeURIComponent(id)}/read`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + 's'.repeat(32) },
+    });
+  const readAt = (id: string) =>
+    (t.store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(id) as { read_at: string | null }).read_at;
+  try {
+    const seen = await t.due('Letto nella app');
+    const unseen = await t.due('Mai aperto');
+    await until(() => t.push.received.length === 2);
+    assert.equal((await read(seen)).status, 200, 'the app reports the item it showed');
+    const first = readAt(seen);
+    assert.ok(first, 'read_at is set');
+    await wait(20);
+    assert.equal((await read(seen)).status, 200, 'a repeat is accepted');
+    assert.equal(readAt(seen), first, 'the first read is kept');
+    assert.equal((await read('00000000-0000-4000-8000-000000000000')).status, 404, 'an unknown item is refused');
+    // The unread one proves the fallback pass ran past the deadline; the read one stays off Telegram.
+    await until(() => t.telegrams('Mai aperto') === 1);
+    await wait(400);
+    assert.equal(t.telegrams('Letto nella app'), 0, 'read in the app: never on Telegram');
+    assert.equal(t.store.deliveryState(seen).telegram, undefined);
+    assert.equal(readAt(unseen), null, 'only the item the app showed is read');
+  } finally {
+    await t.close();
+  }
+});
+
+test('B-149 review: marking an inbox item read needs sign-in', async () => {
+  const store = new Store(':memory:');
+  const server = makeServer(store, 's'.repeat(32));
+  await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
+  try {
+    const { id } = store.addBrief('Buongiorno.');
+    const url = `http://127.0.0.1:${(server.address() as { port: number }).port}/api/inbox/${id}/read`;
+    assert.equal((await fetch(url, { method: 'POST' })).status, 401);
+    assert.equal(
+      (await fetch(url, { method: 'POST', headers: { Authorization: 'Bearer ' + 'x'.repeat(32) } })).status,
+      401,
+    );
+    const row = store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(id) as { read_at: string | null };
+    assert.equal(row.read_at, null, 'nothing marked');
+  } finally {
+    await new Promise<void>((done) => server.close(() => done()));
+    store.close();
+  }
+});

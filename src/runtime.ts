@@ -247,6 +247,10 @@ export class Runtime implements StoreApi {
   async pushOpened(receipt: string) {
     return (await this.nervous.call('push.opened', { receipt })) as boolean;
   }
+  /** B-149: the owner read an inbox item in the app. */
+  async inboxRead(id: string) {
+    return (await this.nervous.call('inbox.read', { id })) as boolean;
+  }
   async deliveryState(id: string) {
     return (await this.nervous.call('deliveries.state', { id })) as DeliveryState;
   }
