@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "B-151-T02",
+  "parent": "B-151",
+  "title": "Eva · Light: white text on the deep accent",
+  "goal": "Every pair the dashboard AA test checks passes in all 20 combinations, Eva · Dark · Orange unchanged",
+  "status": "planned",
+  "acceptance": [
+    "Eva · Light brand-bg is the deep accent and brand-fg white, in dashboard.js and src/dashboard-theme.ts alike",
+    "test/dashboard.test.ts and test/dashboard-theme.test.ts pass unedited",
+    "docs/STYLE-GUIDE.md names the light-mode brand pair",
+    "Screenshots of Eva · Light and Eva · Dark show the primary button and brand block"
+  ],
+  "dependsOn": [
+    "B-151-T01"
+  ],
+  "resources": [
+    "web/public/dashboard/dashboard.js",
+    "src/dashboard-theme.ts",
+    "docs/STYLE-GUIDE.md",
+    "docs/work/records/B-151.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "frontend"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/dashboard.test.ts test/dashboard-theme.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h remaining",
+    "basis": "Estimated 2026-11-26: two palette lines, the style guide line and two screenshots. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}
