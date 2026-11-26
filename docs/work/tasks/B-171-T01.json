@@ -9,7 +9,7 @@
   "id": "B-171-T01",
   "title": "Failing test: a launcher from an earlier release, differing only in its comment, reads foreign",
   "goal": "The Windows lifecycle test fails on main: inspect() calls an earlier release's launcher foreign",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Test committed before the fix and failing on main"
   ],
