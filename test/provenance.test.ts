@@ -122,6 +122,27 @@ test('F-027: repeated quarantine denials never become owner approvals at the rej
   }
 });
 
+// B-175: known failing until the owner picks the policy (B-175-T02). Every option in the record passes it:
+// the read runs (allowed in a tainted conversation, by grant opt-in, or in EVA-03 isolation), or the refusal
+// tells the owner in plain words to start a new conversation. Remove `todo` with the fix (B-175-T03).
+test(
+  'B-175: a granted MCP read in a conversation that saw a tool result runs, or the refusal tells the owner what to do',
+  { todo: 'B-175: owner policy decision pending (B-175-T02)' },
+  () => {
+    const store = new Store(':memory:');
+    try {
+      const id = store.ledger.openSortie('misato', 'Fixture question', 'tainted');
+      store.ledger.setExternal([{ name: 'fixture.read', effect: 'read', eva: 'eva-00' }]);
+      const r = store.runAction(id, { tool: 'fixture.read', args: {}, stage: 'production' });
+      const runs = r.outcome !== 'reject';
+      const explained = /new conversation|nuova conversazione/i.test(r.reason);
+      assert.ok(runs || explained, `refused without telling the owner what to do: ${r.reason}`);
+    } finally {
+      store.close();
+    }
+  },
+);
+
 test('F-027: an actual legacy schema migrates planner context, facts and summaries once without losing evidence', () => {
   const home = mkdtempSync(join(tmpdir(), 'nerv-provenance-old-'));
   const path = join(home, 'nerv.sqlite');
