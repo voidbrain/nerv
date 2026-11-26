@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "B-165-T01",
+  "parent": "B-165",
+  "title": "Failing test: running the Gauntlet tests leaves the tracked ledger byte-identical",
+  "goal": "A committed test fails on main: it hashes evals/gauntlet/ledger.json, runs test/gauntlet.test.mjs (or the full suite) as a child process, and asserts the file is byte-identical afterwards",
+  "status": "ready",
+  "acceptance": [
+    "Test committed before the fix and failing on main (under load if needed: run the Gauntlet tests with the concurrency the full suite uses), or the record names why it cannot fail on demand and the manual check that replaces it",
+    "It restores the tracked file if the run changed it, so the failing test itself never leaves a rewritten ledger behind",
+    "A second, narrower test: a Gauntlet command whose NERV_GAUNTLET_LEDGER changes between read and write still writes only the file it read"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "docs/work/records/B-165.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: a child-process run of the Gauntlet tests with a before/after hash, plus one narrow env-switch test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

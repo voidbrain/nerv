@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-139-T02",
+  "parent": "F-139",
+  "title": "Owner tries each runbook once",
+  "goal": "The owner follows each runbook once on a test profile or base and pastes the results",
+  "status": "planned",
+  "acceptance": [
+    "Pasted back per runbook: the expected results seen, or where a step failed"
+  ],
+  "dependsOn": [
+    "F-139-T01"
+  ],
+  "resources": [
+    "docs/work/records/F-139.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h owner",
+    "basis": "Estimated 2026-11-26: five short trials on a test profile. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "ownerHours": 1.5,
+    "ownerKind": "procedure"
+  },
+  "prs": []
+}

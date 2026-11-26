@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-140-T02",
+  "parent": "F-140",
+  "title": "Owner chooses the spend limits",
+  "goal": "The owner picks daily and monthly limits per route",
+  "status": "planned",
+  "acceptance": [
+    "The decision is recorded with its date and words"
+  ],
+  "dependsOn": [
+    "F-140-T01"
+  ],
+  "resources": [
+    "docs/work/records/F-140.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: read one page and choose. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "decision"
+  },
+  "prs": []
+}

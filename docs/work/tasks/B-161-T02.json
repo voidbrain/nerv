@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "B-161-T02",
+  "parent": "B-161",
+  "title": "Repeat-failure tracker: snapshot and off-host copy failures become one owner notice",
+  "goal": "The second consecutive failure of a class sends one owner notice; the next success sends one recovery notice",
+  "status": "planned",
+  "acceptance": [
+    "B-161-T01 passes unchanged",
+    "The tracker is durable across restarts (a restart between two failed nights still counts two)",
+    "Notices carry the reason only, never paths with personal data or secrets"
+  ],
+  "dependsOn": [
+    "B-161-T01"
+  ],
+  "resources": [
+    "src/snapshots.ts",
+    "test/**",
+    "docs/work/records/B-161.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2.5 h",
+    "basis": "Estimated 2026-11-26: small durable counter, notice wiring, restart test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2.5,
+    "baselineAgentHours": 2.5,
+    "estimateAgentHours": 2.5
+  },
+  "prs": []
+}

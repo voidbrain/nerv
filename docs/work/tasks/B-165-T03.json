@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "B-165-T03",
+  "parent": "B-165",
+  "title": "Check: a branch that drops ledger entries present on main fails",
+  "goal": "check:gauntlet-runs (or a sibling) compares the branch ledger with origin/main and fails when an entry disappears without a superseding entry",
+  "status": "planned",
+  "acceptance": [
+    "A failing-first test with a fixture ledger missing an entry",
+    "A newer entry for the same pack, case and profile is not a drop"
+  ],
+  "dependsOn": [
+    "B-165-T02"
+  ],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    ".github/workflows/ci.yml",
+    "docs/work/records/B-165.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: one comparison over two parsed ledgers and CI wiring. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

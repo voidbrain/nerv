@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-140-T03",
+  "parent": "F-140",
+  "title": "Spend window, 80 % notice and stop at 100 %",
+  "goal": "Each cloud route keeps a rolling spend total, notifies the owner at 80 % and refuses new calls at 100 %",
+  "status": "planned",
+  "acceptance": [
+    "Failing-first tests: 80 % notice once, 100 % stop, window reset, unknown usage counted as unknown and treated as possibly over",
+    "Reminders and local routes keep working when a cloud route stops"
+  ],
+  "dependsOn": [
+    "F-140-T02"
+  ],
+  "resources": [
+    "src/model-budget.ts",
+    "src/policy.ts",
+    "test/**",
+    "docs/work/records/F-140.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2.5 h",
+    "basis": "Estimated 2026-11-26: the report sizes it at 3 h. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2.5,
+    "baselineAgentHours": 2.5,
+    "estimateAgentHours": 2.5
+  },
+  "prs": []
+}
