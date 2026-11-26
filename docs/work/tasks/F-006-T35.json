@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "status": "planned",
+  "resources": [
+    "contract:model-routing",
+    "docs/decisions/placement-campaign.md",
+    "docs/acceptance/f006-placement-p2-p4.md",
+    "docs/evaluations/2026-11-25-f006-t31-placement-evidence.json",
+    "docs/evaluations/2026-11-25-f006-t31-placement-report.md",
+    "tools/placement-live.mjs",
+    "src/placement-report.ts",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "privacy-review"
+  ],
+  "privacy": "An owner procedure on the live service; no model call by the owner, no personal data.",
+  "escalation": [
+    "A stop rule of the placement campaign aborts the run without fallback or retry",
+    "Anything that needs a credential, an unreachable host or the owner goes back to the owner; NERV-02 is left running",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "validation": [
+    "Recorded evidence for this slice; scoped checks and required CI"
+  ],
+  "id": "F-006-T35",
+  "title": "Owner: make NERV-01 unavailable for the auditor-route check, then restore it",
+  "goal": "The Mac is really unavailable while F-006-T36 runs, without the agent stopping the live service",
+  "acceptance": [
+    "The owner stops the NERV Agency service on NERV-01 (or its Ollama) at the agent's signal, and starts it again once F-006-T36 says so",
+    "kaji list on NERV-02 shows NERV-01 online again and doctor reports no revision skew"
+  ],
+  "dependsOn": [
+    "F-006-T33",
+    "F-006-T34"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26 from the P4 procedure (docs/acceptance/f006-placement-p2-p4.md, section 5): one stop and one start of the NERV-01 service; the agent never stops the live service. The procedure page is written by F-006-T34 when it makes this step runnable. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure",
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0
+  }
+}
