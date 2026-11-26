@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "parent": "B-170",
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, endpoints or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "dependsOn": [
+    "B-170-T01"
+  ],
+  "id": "B-170-T02",
+  "title": "The opened page reports the tap: ?opened=, kept receipts, tag, via and a log line",
+  "goal": "B-170-T01 opened tests pass unchanged; each /api/push/opened outcome is logged with its route",
+  "status": "implemented",
+  "acceptance": [
+    "B-170-T01 opened tests pass unchanged; each /api/push/opened outcome is logged with its route"
+  ],
+  "resources": [
+    "web/public/dashboard/sw.js",
+    "web/public/dashboard/live.js",
+    "src/server.ts",
+    "docs/work/records/B-170.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}
