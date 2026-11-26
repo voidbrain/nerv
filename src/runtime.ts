@@ -16,7 +16,7 @@ import { ItemLockManager, itemKeysForTool } from './item-locks.ts';
 import type { Reminder, ReminderInput, InboxEntry, InboxPage } from './store.ts';
 import type { RouteHealth } from './route-health.ts';
 import type { ModelChange, ModelSetup } from './model-setup.ts';
-import { readConfig, setHealthThresholds as persistHealthThresholds, setSchedule } from './config.ts';
+import { ownerLanguage, readConfig, setHealthThresholds as persistHealthThresholds, setSchedule } from './config.ts';
 import type { ActionDetail, Approval, Decision, SortieSummary } from './ledger.ts';
 import type { SortieEvent } from './events.ts';
 import type { WorkerLink } from './worker-link.ts';
@@ -377,6 +377,7 @@ export class Runtime implements StoreApi {
   private get approvalsController(): RuntimeApprovals {
     return (this._approvalsController ??= new RuntimeApprovals({
       nervous: this.nervous,
+      home: this.home,
       itemLocks: this.itemLocks,
       resumeListeners: this.resumeListeners,
       startedAt: this.startedAt,
@@ -478,6 +479,9 @@ export class Runtime implements StoreApi {
       resolveOperator: (query, opts) => this.resolveOperator(query, opts),
       loop: (sortieId, request, steps, context, opts) => this.loop(sortieId, request, steps, context, opts),
     }));
+  }
+  language(): 'it' | 'en' {
+    return ownerLanguage(this.home);
   }
   chat(
     message: string,

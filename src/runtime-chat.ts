@@ -1,7 +1,7 @@
 import { channelIsFresh, type ChannelState } from './channel-state.ts';
 import { helpText, readCommand, statusText, type StatusBase } from './chat-command.ts';
 import { builtinPackRegistry, type PackRegistry } from './packs.ts';
-import { readConfig } from './config.ts';
+import { ownerLanguage, readConfig } from './config.ts';
 import type { SortieEvent } from './events.ts';
 import { ONLINE_MS, type BaseHealth, type RegistryPort } from './kaji-link.ts';
 import { requestLanguage, type Step, type Turn } from './misato.ts';
@@ -98,7 +98,7 @@ export class RuntimeChat {
       return { command: true, sortieId: '', reply: postponed.reply, steps: [], waiting: [] };
     const command = readCommand(message);
     if (command) {
-      const it = requestLanguage(message) === 'it';
+      const it = requestLanguage(message, [], ownerLanguage(this.host.home)) === 'it';
       const lang: 'en' | 'it' = it ? 'it' : 'en';
       let reply: string;
       if (command.name === 'status') {
@@ -245,7 +245,7 @@ export class RuntimeChat {
     const packsConfig = this.host.home ? readConfig(this.host.home).packs : undefined;
     const phraseMatch = (this.host.packRegistry ?? builtinPackRegistry).resolveChatPhrase(message, packsConfig);
     if (phraseMatch && 'ambiguous' in phraseMatch) {
-      const it = requestLanguage(message) === 'it';
+      const it = requestLanguage(message, [], ownerLanguage(this.host.home)) === 'it';
       const names = phraseMatch.ambiguous.join(', ');
       const reply = it
         ? `Più pacchetti corrispondono a questo messaggio (${names}). Quale vuoi usare?`
@@ -401,6 +401,7 @@ export class RuntimeChat {
         requestLanguage(
           message,
           context.map((t) => t.request),
+          ownerLanguage(this.host.home),
         ),
         Intl.DateTimeFormat().resolvedOptions().timeZone,
       );

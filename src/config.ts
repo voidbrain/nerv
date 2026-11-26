@@ -127,6 +127,10 @@ export function databasePath(home: string): string {
     previous = join(home, 'nodo.sqlite');
   return !existsSync(current) && existsSync(previous) ? previous : current;
 }
+/** B-168: the owner's language, the fallback when a request and its earlier exchanges do not tell it (no home: the default). */
+export function ownerLanguage(home?: string): 'it' | 'en' {
+  return home ? readConfig(home).language : defaults.language;
+}
 export function readConfig(home: string): Config {
   const path = join(home, 'config.json');
   const value: unknown = existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : {};

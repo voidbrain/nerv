@@ -11,7 +11,7 @@
   "id": "B-167-T02",
   "title": "Read the three requests right and rebuild nerv-planner",
   "goal": "requestLanguage and detectToolDomains read the B-167 requests correctly",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "B-167-T01's test passes unchanged, with the other language and domain tests",
     "evals/gauntlet/nerv-planner-v1.json rebuilt with node tools/gauntlet-planner-pack.mjs (version bumped) so the changed cases are pending"
@@ -32,10 +32,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-26: word lists, one pattern and the pack rebuild. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: word lists, one pattern and the pack rebuild. Not a measurement. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
-    "agentHours": 0.5,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   },
