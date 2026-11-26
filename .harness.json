@@ -1019,9 +1019,7 @@
     "featurePlans": true,
     "order": "queue",
     "views": "built",
-    "publishHooks": [
-      "node tools/backlog-recap.mjs"
-    ],
+    "publishHooks": ["node tools/backlog-recap.mjs"],
     "estimation": {
       "since": "2026-11-24"
     },
