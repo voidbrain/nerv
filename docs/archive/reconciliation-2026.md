@@ -652,10 +652,10 @@ Reconciled in [PR #779](https://github.com/voidbrain/nerv/pull/779). `npm run ci
 PRs #778–#798 (21) merged on green CI; #791 passed on a rerun (two B-076 flakes). Reconciled in PR #799: B-127, B-133 and B-150 closed; B-136, B-148, B-149 and F-133 merged and waiting on their owner or live checks. Harness on v10.21.4 (#797).
 
 Reconciled in [PR #799](https://github.com/voidbrain/nerv/pull/799). `npm run ci:status` for all 21: every merged run green; docs-only PRs (#779–#781, #783, #784, #787, #789, #790, #792, #794) skipped Windows, macOS and the full suite. Only #791 needed a second attempt ([run 45776271597](https://github.com/voidbrain/nerv/actions/runs/45776271597)): Windows `process-client.test.ts:172` and Linux `headless.integration.ts:32`, both added to B-076. Closed: B-127 (#793; the cause was `test/gauntlet.test.mjs` moving the shared `dist/web/browser`, not load), B-133 (five first-attempt Windows runs after #788: #793, #795, #796, #797, #798), B-150 (#796; Windows passes on #796, #797 and #798). Updated: B-136 (#778 merged; the NERV-01 check remains), B-148 (#782 merged; owner step B-148-T03 now carries the Procedure cue), B-149 (#785) and F-133 (#786) wait on the owner's phone checks. #780 (F-120 docs) is named in no record; F-120, F-006 and B-118 (#791, #794, #795, #798) were recorded by their own PRs and are left as they are.
-
-## 2026-11-26 — main `4a0df33`
-
-PRs #799–#802 (4) merged on green CI. Reconciled in the full-audit PR (F-134-T02): B-151 closed (#801), F-134-T01 closed (#802); F-120 (#800) is left to its own open PR #803. #799 was the previous reconciliation.
-
-`npm run ci:status` for all four: every merged run green; #799, #800 and #802 are docs-only (Windows, macOS and the full suite skipped, B-139); #801 passed all five jobs. The same PR records the 2026-11-26 full audit and opens B-152.
 Closed B-137 and B-138 in [PR #804](https://github.com/voidbrain/nerv/pull/804) on their CI evidence ([#764](https://github.com/voidbrain/nerv/pull/764), [#762](https://github.com/voidbrain/nerv/pull/762)) by owner decision in chat 2026-11-26; their only live check, the F-098-T04 rerun, was cancelled in [#802](https://github.com/voidbrain/nerv/pull/802).
+
+## 2026-11-26 — main `60bd396`
+
+PRs #799–#802 (4) merged on green CI; #804 recorded its own closures (B-137, B-138). Reconciled in the full-audit PR (F-134-T02): B-151 closed (#801), F-134-T01 closed (#802); F-120 (#800) is left to its own open PR #803. #799 was the previous reconciliation.
+
+`npm run ci:status` for all four: every merged run green; #799, #800 and #802 are docs-only (Windows, macOS and the full suite skipped, B-139); #801 passed all five jobs. The same PR records the 2026-11-26 full audit and opens B-152 and B-153.
