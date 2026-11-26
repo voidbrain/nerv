@@ -12,6 +12,7 @@
   "title": "Windows inspect() ignores the launcher's comment line, as authorizedStart does",
   "goal": "A launcher NERV wrote with an earlier release, differing only in its comment line, is owned; any other difference stays foreign",
   "status": "implemented",
+  "prs": [{ "pr": 842, "note": "B-171" }],
   "acceptance": [
     "B-171-T01's test passes unchanged, with the other lifecycle tests",
     "A design-reviewer review before landing"
