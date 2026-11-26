@@ -1219,6 +1219,40 @@ test(
   },
 );
 
+test('F-120-T16: a model case source key binds only the runners its pack uses, not every registry entry', async () => {
+  const { releaseSourceKey, caseSourceKey, commonPacks } = await import('../tools/gauntlet.mjs');
+  const registry = JSON.parse(readFileSync('evals/gauntlet/runners.json', 'utf8'));
+  const packs = commonPacks()
+    .map((p) => p.pack)
+    .filter((p) => ['coding', 'embedded', 'cad-3d'].includes(p.id));
+  assert.equal(packs.length, 3);
+  const withSystemRunner = {
+    ...registry,
+    runners: {
+      ...registry.runners,
+      'new-system-flow': { ...registry.runners.policy, args: ['tools/gauntlet-adapter.mjs', '--group=new'] },
+    },
+  };
+  for (const pack of packs) {
+    const key = releaseSourceKey(pack, registry);
+    assert.equal(caseSourceKey(pack, pack.cases[0].id), key, pack.id + ': the committed registry gives the same key');
+    // Adding or changing a system (no-model) runner leaves a model case's key unchanged.
+    assert.equal(releaseSourceKey(pack, withSystemRunner), key, pack.id + ': a new system runner');
+    const changedSystem = {
+      ...registry,
+      runners: { ...registry.runners, policy: { ...registry.runners.policy, args: ['x'] } },
+    };
+    assert.equal(releaseSourceKey(pack, changedSystem), key, pack.id + ': a changed system runner');
+    // Changing the runner the pack runs changes its key.
+    const used = pack.cases.find((c) => c.runner).runner;
+    const changedUsed = {
+      ...registry,
+      runners: { ...registry.runners, [used]: { ...registry.runners[used], args: ['y'] } },
+    };
+    assert.notEqual(releaseSourceKey(pack, changedUsed), key, pack.id + ': its own runner changed');
+  }
+});
+
 test('F-120-T03: coding and embedded results keep and follow the model digest (model-calling runners)', async () => {
   const { run, validateRegistry, emptyLedger, caseHash, evidenceProfile, hash } =
     await import('@voidbrain/gauntlet-protocol');
