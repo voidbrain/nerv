@@ -772,6 +772,18 @@ test("B-168: a request with no language signal and no earlier exchange follows t
       },
     );
 });
+test('B-167 review: a request with no listed word follows the earlier exchanges; Italian "me" never votes English', async () => {
+  const { requestLanguage } = await import('../src/misato.ts');
+  // nerv#831 review: half votes alone (a lower-case word ending in a, i or o) overrode an English conversation.
+  const english = ['turn on the light in the kitchen'];
+  for (const request of ['radio', 'hello', 'any extra batteries?', 'pizza tonight', 'New photo'])
+    assert.equal(requestLanguage(request, english), 'en', request);
+  assert.equal(requestLanguage('I want pizza'), 'en');
+  assert.equal(requestLanguage('ottimo', ['spegni la luce']), 'it');
+  // Italian "me" ("per me va bene") is not an English word.
+  assert.equal(requestLanguage('per me va bene'), 'it');
+  assert.equal(requestLanguage('remind me to stretch'), 'en');
+});
 test('B-167: English plurals and synonyms reach their topic', async () => {
   const { detectToolDomains } = await import('../src/misato.ts');
   for (const [domain, request] of [
