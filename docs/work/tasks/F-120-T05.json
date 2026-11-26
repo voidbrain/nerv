@@ -2,9 +2,9 @@
   "version": 1,
   "id": "F-120-T05",
   "parent": "F-120",
-  "title": "Decide: a 180 s case limit for the reference-runner packs, and arduino-cli on the Mac",
+  "title": "Run the reference-runner packs under a 180 s case limit (owner decision 2026-11-26)",
   "goal": "The coding, embedded and cad-3d OpenSCAD cases can finish: their runners get a case budget that leaves the model time to answer",
-  "status": "planned",
+  "status": "ready",
   "acceptance": [
     "The owner's decision is recorded in F-120 with its date",
     "If approved: gauntlet:all runs the coding-reference, embedded-reference and cad-3d-reference cases under the release's limits-slow-host.json (180 s a case) or an owner-set limit, the other packs keep the day limits, with a regression test",
@@ -23,23 +23,28 @@
   "capabilities": [
     "architecture-review"
   ],
-  "privacy": "A decision only; no model call, device or service change.",
+  "privacy": "Code and tests only; no model call, device or service change.",
   "validation": [
-    "The decision and date are in the record"
+    "The decision and date are in the record",
+    "node --test test/gauntlet.test.mjs (the regression test fails without the change)"
   ],
   "escalation": [
     "A material scope or effort increase goes to the owner"
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Opened 2026-11-26 from the F-120-T04 run: the case budget is a campaign budget, which the owner approves (docs/evaluations/gauntlet.md).",
+    "estimate": "1 h agent",
+    "basis": "Opened 2026-11-26 from the F-120-T04 run: the case budget is a campaign budget, which the owner approves (docs/evaluations/gauntlet.md). Decided 2026-11-26: owner \"yes to 180 s\"; arduino-cli not asked for, so the four sketch cases are excluded from F-120-T04. Implementation estimated 2026-11-26: 1 h agent (limit selection by pack, failing-first test, docs).",
     "reviewed": "2026-11-26",
-    "agentHours": 0,
-    "ownerHours": 0.25,
-    "ownerKind": "decision",
+    "agentHours": 1,
+    "ownerHours": 0,
     "baselineAgentHours": 0,
-    "estimateAgentHours": 0
+    "estimateAgentHours": 1
   },
-  "ownerLink": "docs/evaluations/gauntlet.md#domain-packs-0100-and-0110-f-120-t03"
+  "prs": [
+    {
+      "pr": 794,
+      "note": "owner decision 2026-11-26 recorded"
+    }
+  ]
 }

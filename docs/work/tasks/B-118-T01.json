@@ -4,7 +4,7 @@
   "parent": "B-118",
   "title": "Make the Windows test step fit its limit with margin",
   "goal": "The Windows npm test step finishes well inside its 18-minute limit without reruns",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The test reports of run 45259024776 attempts 1 and 2 are read and the cause named (hanging test or slow files measured)",
     "A hang gets a failing-first test and a fix; slowness gets a split, parallelism or test change",
@@ -35,10 +35,10 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "4 h",
-    "basis": "Estimated 2026-11-24: read both stopped reports, name the cause, fix, watch five runs. Not a measurement.",
-    "reviewed": "2026-11-24",
-    "agentHours": 0.5,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24: read both stopped reports, name the cause, fix, watch five runs. Not a measurement. Closed 2026-11-26.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
     "baselineAgentHours": 4,
     "estimateAgentHours": 4,
     "actualAgentHours": 2.5,
@@ -48,6 +48,10 @@
     {
       "pr": 695,
       "note": "timing reporter, report upload, worker-link split"
+    },
+    {
+      "pr": 794,
+      "note": "closed on the owner decision 2026-11-26"
     }
   ]
 }
