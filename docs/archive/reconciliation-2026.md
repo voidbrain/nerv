@@ -674,4 +674,4 @@ PRs #803, #805 and #807–#819 (15) merged on green CI. Closed B-157, B-158 and 
 
 ## 2026-11-26 — main `661ebdd8`
 
-PR #824 reconciles the harness to v10.24.1 (from 10.21.4); the owner authorised it in chat on 2026-11-26 ("ok to all") although the template backlog is not empty (F-125-T03, #823). CI pending at this entry.
+PR #824 reconciles the harness to v10.24.1 (from 10.24.0); the owner authorised it in chat on 2026-11-26 ("ok to all") although the template backlog is not empty (F-125-T03, #823). CI pending at this entry.
