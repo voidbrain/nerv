@@ -7,10 +7,11 @@
   "status": "planned",
   "acceptance": [
     "A fine-grained token: resource owner voidbrain, only voidbrain/coordinator, repository permission Actions: Read and write (Metadata read-only is added by GitHub), an expiry date",
-    "Placed on NERV-01 with the command from F-132-T02 as a private file; never pasted in chat, git or a ticket; `nerv doctor` shows its age only"
+    "Placed on NERV-01 with the command from F-132-T02 as a private file; never pasted in chat, git or a ticket; `nerv doctor` shows its age only",
+    "Owner decision 2026-11-26 (chat): \"Promote the GitHub pilot early\", so the hourly coordinator refresh (F-132-T04) runs unattended: placed after F-132-T04 so the hourly job starts with the token; order F-132-T01, F-132-T02, F-132-T04, F-132-T06."
   ],
   "dependsOn": [
-    "F-132-T02"
+    "F-132-T04"
   ],
   "resources": [
     "docs/work/records/F-132.md"
@@ -39,6 +40,10 @@
   "prs": [
     {
       "pr": 781
+    },
+    {
+      "pr": 802,
+      "note": "order"
     }
   ]
 }

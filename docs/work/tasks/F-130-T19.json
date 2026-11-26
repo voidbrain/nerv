@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "id": "F-130-T19",
+  "parent": "F-130",
+  "title": "Chat surface cards from bricks' bx-surface; retire NERV's surface catalogue and renderer",
+  "goal": "The four surface cards in chat render with @voidbrain/bricks' bx-surface, and NERV keeps no copy of the surface catalogue or renderer",
+  "status": "planned",
+  "acceptance": [
+    "Chat surfaces (the four surface cards: lists, documents, cooking, photos producers) render through bricks' bx-surface in the workspace; web/src/surface-renderer.ts and the surface catalogue in shared/surface.ts are removed with their state, helpers and tests (no dead code)",
+    "Backend producers (src/lists.ts, src/documents.ts, src/cooking-pack.ts, src/cooking-session.ts) emit data that validates against bricks' surface schemas; a join test sends each surface kind from the producer through the API into bx-surface; POST /api/lists/toggle keeps working",
+    "A surface type bricks lacks is raised as a bricks proposal, not kept as a NERV copy",
+    "Owner decision 2026-11-26 (chat): \"accept all 17 proposals\" of the cross-project audit (coordinator docs/audits/2026-11-26-cross-project.md), proposal 13; for it the owner accepted the recommendation \"use bricks' surface cards in F-130\" (bricks:F-002-T02 ships the four surfaces with their schemas)."
+  ],
+  "dependsOn": [
+    "F-130-T18",
+    "F-130-T08"
+  ],
+  "resources": [
+    "shared/surface.ts",
+    "web/src/surface-renderer.ts",
+    "web/src/**",
+    "src/lists.ts",
+    "src/documents.ts",
+    "src/cooking-pack.ts",
+    "src/cooking-session.ts",
+    "test/**",
+    "docs/work/records/F-130.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "api-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast",
+    "npm run build"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A surface bricks cannot render goes to the owner before NERV keeps any copy"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-26 from the audit proposal: swap the renderer for bx-surface, validate four producers against the bricks schemas, delete the copies and their tests, one join test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  },
+  "prs": [
+    {
+      "pr": 802,
+      "note": "planning"
+    }
+  ]
+}
