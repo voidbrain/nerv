@@ -1187,7 +1187,7 @@ test(
     const coding = commonPacks().find((p) => p.pack.id === 'coding').pack;
     const scripted = commonPacks().find((p) => p.pack.id === 'multi-step-agent').pack;
     const system = readSystemPackWithInputs().pack;
-    assert.equal(caseSourceKey(coding, coding.cases[0].id), releaseSourceKey());
+    assert.equal(caseSourceKey(coding, coding.cases[0].id), releaseSourceKey(coding));
     assert.equal(caseSourceKey(scripted, scripted.cases[0].id), systemSourceKey(scripted, scripted.cases[0].id));
     assert.equal(caseSourceKey(system, 'policy'), systemSourceKey(system, 'policy'));
     // Their cases follow the model digest too: see the F-074-T10 model-changed count.
@@ -1300,7 +1300,7 @@ writeFileSync(out, JSON.stringify({ schemaVersion: 1, layer: 'coding', caseHash:
       assert.equal(report.results[0].status, 'error');
     } else {
       assert.equal(report.passed, true);
-      const recorded = recordSelected(emptyLedger(), report, coding, one, releaseSourceKey()).entries;
+      const recorded = recordSelected(emptyLedger(), report, coding, one, releaseSourceKey(coding)).entries;
       assert.equal(recorded.length, 1);
       assert.equal(recorded[0].modelDigest, digest, 'a coding run keeps the model it graded');
     }
@@ -1329,7 +1329,7 @@ writeFileSync(out, JSON.stringify({ schemaVersion: 1, layer: 'coding', caseHash:
             modelDigest: digest,
             runtimeHash: null,
             scenarioHash: null,
-            sourceKey: releaseSourceKey(),
+            sourceKey: releaseSourceKey(p),
           })),
         ),
       }),

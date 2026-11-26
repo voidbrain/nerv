@@ -4,11 +4,11 @@
   "parent": "F-120",
   "title": "Owner decides on the model-pack cases that F-120-T02's runner entries made pending",
   "goal": "The owner says whether the agent reruns cad-3d/*, coding/* and embedded/* on gemma4:12b, or whether NERV first stops system-runner changes from invalidating model packs",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Cause: F-120-T02 adds seven system runners to evals/gauntlet/runners.json; releaseSourceKey (tools/gauntlet.mjs) hashes the whole registry, so every model-runner case recorded with a source key shows source-changed: cad-3d/* (4), coding/* (4) and embedded/* (4) in npm run check:gauntlet-runs",
     "The owner chooses, recorded with its date in docs/work/records/F-120.md: (a) the agent reruns those 12 cases once on gemma4:12b on the Mac (a model campaign), or (b) a new step first makes releaseSourceKey hash only the runners model packs use (that changes the key once, so the same cases still need one rerun, but later system cases no longer invalidate them), or (c) not now, with a reason",
-    "Until then this step names cad-3d/*, coding/* and embedded/* so check:gauntlet-runs passes"
+    "Until then this step names cad-3d/*, coding/* and embedded/* so check:gauntlet-runs passes; after the decision F-120-T17 names them"
   ],
   "dependsOn": [
     "F-120-T02"
@@ -30,12 +30,12 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Opened 2026-11-26 in the F-120-T02 takeover: the runner entries made 12 model-pack cases source-changed. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Owner answered \"b\" (fix the key first) in chat on 2026-11-26: F-120-T16 fixes the key, F-120-T17 reruns the 12 cases once.",
     "reviewed": "2026-11-26",
     "ownerKind": "decision",
     "agentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0
   },

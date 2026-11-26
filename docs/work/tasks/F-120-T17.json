@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-120-T17",
+  "parent": "F-120",
+  "title": "Rerun the 12 cad-3d, coding and embedded cases once on gemma4:12b after the key fix",
+  "goal": "cad-3d/*, coding/* and embedded/* have ledger entries under the F-120-T16 source key, so later system runners no longer make them pending",
+  "status": "planned",
+  "acceptance": [
+    "Approved by the owner's F-120-T15 decision (2026-11-26, \"b\"); runs in a night model plan (gauntlet:F-036), never while the owner uses the local model, in a development worktree created from origin/main after F-120-T16 merged, never ~/.nerv-app",
+    "Commands, from that worktree: node tools/gauntlet.mjs model-run --pack=coding --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json --allow-models --execute --out=/private/tmp/f120-t17-coding.json && node tools/gauntlet.mjs ledger --pack=coding --report=/private/tmp/f120-t17-coding.json",
+    "node tools/gauntlet.mjs model-run --pack=embedded --only=led-blink-gpiozero-regression,pwm-servo-rpigpio-regression,button-toggle-gpiozero-holdout,edge-counter-rpigpio-holdout --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json --allow-models --execute --out=/private/tmp/f120-t17-embedded.json && node tools/gauntlet.mjs ledger --pack=embedded --report=/private/tmp/f120-t17-embedded.json",
+    "node tools/gauntlet.mjs model-run --pack=cad-3d --only=spacer-cylinder-regression,l-bracket-regression,open-tray-holdout,flanged-bushing-holdout --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json --allow-models --execute --out=/private/tmp/f120-t17-cad-3d.json && node tools/gauntlet.mjs ledger --pack=cad-3d --report=/private/tmp/f120-t17-cad-3d.json",
+    "Then node tools/gauntlet.mjs pending | grep -E '^(cad-3d|coding|embedded)/' prints nothing, and the ledger change goes into a PR (check:gauntlet-ledger passes). Coding cases take up to 180 s each: at most about 36 min for the 12",
+    "Until then this step names cad-3d/*, coding/* and embedded/* so check:gauntlet-runs passes"
+  ],
+  "dependsOn": [
+    "F-120-T16"
+  ],
+  "resources": [
+    "evals/gauntlet/**",
+    "docs/work/records/F-120.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented data only; captured replies stay private evidence, never committed.",
+  "validation": [
+    "node tools/gauntlet.mjs pending",
+    "npm run check:gauntlet-runs",
+    "npm run check:gauntlet-ledger"
+  ],
+  "escalation": [
+    "A second run or a different model needs the owner again"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "One run of the 12 cases (at most 36 min at 180 s a case) plus the ledger PR. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  },
+  "prs": []
+}
