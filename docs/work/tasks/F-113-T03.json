@@ -29,12 +29,12 @@
     "Running real models needs the owner's approval (BACKLOG-RULES, Evaluation dependencies)"
   ],
   "effort": {
-    "size": "small",
-    "estimate": "1 h",
-    "basis": "Estimated 2026-11-20 from the Agentica review. Not a measurement.",
-    "reviewed": "2026-11-20",
-    "agentHours": 1,
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Re-estimated 2026-11-26 from 1 h → 1.5 h via node tools/work-items.mjs calibrate (F-120-T04 live-model campaign 4.5x outlier vs 1.0x overall median over 25 steps). Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1.5
   }
 }

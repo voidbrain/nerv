@@ -4,7 +4,7 @@
   "parent": "F-086",
   "title": "Wire the Gmail credential flow into the service",
   "goal": "The owner connects Gmail himself and the running service uses it",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "nerv gmail connect runs Google's installed-app OAuth flow (loopback redirect on 127.0.0.1, PKCE, state) and stores the client and refresh token in a mode-0600 file in the data home, never config.json, Git or a log; read-only scope unless --compose",
     "The service constructs a GmailClient from that file when connected and every gmail tool answers \"Gmail not connected\" with the connect command when not; drafting and sending also need gmail.compose and keep their Orange and Blue cards",
@@ -37,10 +37,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2.5 h",
-    "basis": "Estimated 2026-11-26 after the owner approved this step in chat (\"A. Approve an agent step that wires it up\"): auth module, service wiring, CLI command, tests with a fake Google. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26 after the owner approved this step in chat (\"A. Approve an agent step that wires it up\"): auth module, service wiring, CLI command, tests with a fake Google. Closed 2026-11-26: PR #808 CI run 45804293106 passed all five jobs. No actual: started in an earlier session.",
     "reviewed": "2026-11-26",
-    "agentHours": 2.5,
+    "agentHours": 0,
     "baselineAgentHours": 2.5,
     "estimateAgentHours": 2.5
   },

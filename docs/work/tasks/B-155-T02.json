@@ -4,7 +4,7 @@
   "parent": "B-155",
   "title": "Type-check 30 JavaScript tests in npm run typecheck",
   "goal": "tsconfig.test-js.json in typecheck; 30 files checked clean, 15 deferred by name",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "npm run typecheck runs tsc -p tsconfig.test-js.json and passes",
     "No assertion changes; casts only",
@@ -36,10 +36,15 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 1.5 h agent. Implemented the same day: 30 files clean with JSDoc casts. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 1.5 h agent. Implemented the same day: 30 files clean with JSDoc casts. Closed 2026-11-26: PR #812 CI run 45806056526. No actual: started in an earlier session.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 812
+    }
+  ]
 }

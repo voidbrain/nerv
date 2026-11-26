@@ -78,6 +78,12 @@
     "work:usage": "node tools/work-usage.mjs",
     "work:launch": "node tools/usage-launch.mjs",
     "behaviour": "node tools/behaviour.mjs",
+    "guard:install": "node tools/guard.mjs install",
+    "coverage:browser": "node tools/browser-coverage.mjs",
+    "mcp:recommend": "node tools/mcp.mjs recommend",
+    "reconcile:preview": "node tools/reconcile-preview.mjs",
+    "friction": "node tools/friction.mjs",
+    "impact-map": "node tools/impact-map.mjs",
     "rule-load": "node tools/rule-load.mjs",
     "check:rule-load": "node tools/rule-load.mjs --check"
   },

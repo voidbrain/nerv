@@ -4,7 +4,7 @@
   "parent": "B-158",
   "title": "Failing test: the B-102 scan covers web/src and every browser script",
   "goal": "test/user-text-ids.test.ts fails on main with the shell's step IDs",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "src/*.ts, web/src/**/*.ts and web/public/**/*.js are scanned",
     "On main it lists the ten F-130 step IDs in web/src/dashboard/shell.ts",
@@ -30,10 +30,15 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day; fails on main. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day; fails on main. No actual: started in an earlier session. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 809
+    }
+  ]
 }

@@ -16,6 +16,7 @@ This index links authoritative procedures; it does not duplicate or replace them
 | Select local/CI verification | [Verification selection](verification.md) | Affected checks and actual evidence; full checks when required |
 | Change tests/coverage | [Coverage guide](coverage-guide.md) | Meaningful assertion/coverage scope, separate browser/device limits |
 | Reconcile/review governing rules | [Maintenance guidance](maintenance.md), [rule review](rule-review.md) | Requirement-preserving review, measurements and tested outcomes |
+| Run the agent-behaviour checks or measure a rule change | [Behaviour checks](behaviour-checks.md) | Per-scenario before/after counts; held-out drops and new failures as records |
 | Set up/change stack or use MCP | [MCP guidance](mcp.md) | Useful capabilities, actual connection state and authorized setup |
 | Coordinate repositories | [Solution profile](solution-profile.md) | One-way ownership/dependencies and source-revision-qualified evidence |
 | Change how the dashboard reads a backlog | [Solution dashboard](solution-dashboard.md) | Layouts read or reported, built views, remaining hours without percentages |

@@ -4,7 +4,7 @@
   "parent": "B-157",
   "title": "Run the macOS-only Node tests in the native-macos job",
   "goal": "tools/macos-node-tests.mjs runs the list on macOS and fails on any skip; ci.yml runs it",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The native-macos job runs the step when Node work or a full run is selected",
     "0 skipped on the macOS runner",
@@ -35,10 +35,15 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 0.5 h agent. Implemented the same day: 64 tests, 15 s locally. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 0.5 h agent. Implemented the same day: 64 tests, 15 s locally. No actual: started in an earlier session. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 805
+    }
+  ]
 }

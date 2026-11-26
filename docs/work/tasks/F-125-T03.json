@@ -4,9 +4,9 @@
   "parent": "F-125",
   "title": "Reconcile to the current harness release and check the tools AGENTS.md names arrive",
   "goal": "NERV runs the current project-harness release and every template tool or script that AGENTS.md or a procedure tells agents to run exists here, guard.mjs first",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
-    "Started only once the project-harness template backlog is empty, as F-125-T01",
+    "Started once the project-harness template backlog is empty, as F-125-T01, or when the owner asks (2026-11-26: reconcile to v10.24.0 now, open template records notwithstanding); later template releases reconcile at session start",
     ".harness.json names the current release (10.23.2 or later) and every copied, forked and adapted file is reconciled",
     "tools/guard.mjs exists and `node tools/guard.mjs install` runs, as AGENTS.md tells agents; the scripts the report lists as missing (guard:install, behaviour, coverage:browser, mcp:recommend, reconcile:preview, friction, impact-map) exist or the record names why not",
     "A test or check fails when AGENTS.md names a tools/*.mjs file that does not exist",
@@ -16,11 +16,13 @@
     "F-125-T01"
   ],
   "resources": [
+    ".gitignore",
     ".harness.json",
     "tools/**",
     "AGENTS.md",
     "docs/agents/**",
     "package.json",
+    "test/agents-tools.test.mjs",
     "docs/work/records/F-125.md",
     "generated:backlog-views"
   ],
@@ -37,13 +39,19 @@
     "A harness change that is not a byte copy follows AGENTS.md, Changing a harness file"
   ],
   "effort": {
-    "size": "medium",
-    "estimate": "3 h",
-    "basis": "Estimated 2026-11-26 from F-125-T01 (2 h for one reconcile) plus 1 h for the tool-presence check; from report N1 and proposal 22. Not a measurement.",
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26 from F-125-T01 (2 h) plus 1 h for the tool-presence check. Implemented 2026-11-26: reconciled to v10.24.0, copied guard.mjs, browser-coverage.mjs and behaviour-checks.md, added missing scripts and test/agents-tools.test.mjs; remaining: CI.",
     "reviewed": "2026-11-26",
-    "agentHours": 3,
+    "agentHours": 0,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated",
     "baselineAgentHours": 3,
     "estimateAgentHours": 3
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 820
+    }
+  ]
 }

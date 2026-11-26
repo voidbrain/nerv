@@ -1,6 +1,6 @@
 # Rule review
 
-Read before you measure friction, rerun the agent-behaviour checks or consolidate rules. Moved from [maintenance](maintenance.md) unchanged (F-076).
+Read before you measure friction or consolidate rules; the agent-behaviour checks have their own page, [behaviour checks](behaviour-checks.md). Moved from [maintenance](maintenance.md) unchanged (F-076).
 
 ## Measure actual friction
 
@@ -25,11 +25,7 @@ Age, rare use and no recent incident do not justify deleting ownership, evidence
 
 ## Agent-behaviour checks
 
-Tools check records and files; `tools/behaviour.mjs` checks whether an agent following this project's AGENTS.md and BACKLOG-RULES behaves as they say. Each scenario builds a fixture repository from the project's own rule files (`behaviour.rules` maps fixture paths to sources), gives the agent one task and grades the result without a model: files, records, commits, the remote and the transcript. `node tools/behaviour.mjs list` names the scenarios and the rule each one tests.
-
-The runner is the project's choice, set in `.harness.json` `behaviour.runner`: a shell command run in the fixture repository with the task in `$HARNESS_TASK_FILE`, whose output is the transcript, so it should print the agent's final reply rather than tool logs (for example `claude -p --permission-mode acceptEdits --allowedTools "Bash(git:*)" "Bash(npm:*)" "Bash(node:*)" -- "$(cat "$HARNESS_TASK_FILE")"`: in non-interactive mode the agent needs these permissions to edit files and run git, npm and node in the throwaway fixture, or it only describes what it would do). The fixture lives in a temporary folder with a local bare remote; give the runner no credentials or network access it does not need. `npm run behaviour -- run` runs each scenario `behaviour.times` times (3 by default) and reports passes per scenario, never only a total; `--scenarios=a,b` narrows it and `--keep` leaves the fixtures for inspection. A runner that fails to start, exits non-zero or times out (`behaviour.timeoutMs`, 20 minutes by default; its whole process group is stopped) counts as a failed run, never as a graded one. A run that changed nothing (files, refs, worktrees or the remote) where a correct run must act, or whose transcript asks for permissions instead of acting, is reported as `error (runner lacks permissions?)`: counted apart, never as a pass or a rule failure; give the runner the permissions above and run again. The graders read the agent's work wherever it put it, as AGENTS.md asks: the primary checkout, each other worktree (one nested in the checkout, such as `.claude/worktrees/<name>`, is its own view, not a change to the checkout), and each new or moved local or pushed branch; when several of them changed, each is graded and every one must pass.
-
-Run it on demand and when the rule files it copies change (AGENTS.md, CLAUDE.md, BACKLOG-RULES: an impact-map row), never on every PR by default: each run costs agent time. Compare each scenario with its last run. A scenario that starts failing is a backlog record, with the report as evidence. A mistake seen in real work or an audit finding becomes a new scenario: a fixture, a task and a grader that reads the result. A pass shows the agent followed the rule in that fixture, not in every situation.
+Moved to [behaviour checks](behaviour-checks.md) unchanged, with two rules added (F-102: an edited held-out scenario leaves the set; a one-run drop is rerun first): read it before you run them or measure a rule change.
 
 ## Periodic token review
 
