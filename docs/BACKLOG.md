@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 31 | 8 | 61 | 30 |
+| **This week** | 31 | 8 | 62 | 30 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 58 | 45 |
+| **Open** | 58 | 46 |
 | **Require Human 🧑** | 13 | 20 |
 
 ### Require Human 🧑
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 271.75 h agent + 21.5 h owner across 260 open steps of 58 features and 45 other records. 162.5 h of actual effort recorded on 149 steps. Generated from the task files.
+**Remaining effort:** 271.75 h agent + 21.75 h owner across 265 open steps of 58 features and 46 other records. 162.5 h of actual effort recorded on 149 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -476,6 +476,49 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
 | Impact | The owner, who writes in Italian, gets English replies to "ok", numbers, emojis and bare commands at the start of a conversation. |
+
+</details>
+
+---
+### <a id="b-169"></a>[🐞 B-169](#top)
+
+**The `nerv` command is missing from PATH, or runs the development checkout instead of the installed copy the service runs**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-169-T01 (failing launcher tests); B-169-T05 is the owner check after T02–T04 land.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-26 on the owner's Mac: `nerv` is not found. The only link was `~/.nvm/versions/node/v26.12.0/bin/nerv` → `../lib/node_modules/nerv-agency` → the development checkout `~/Projects/NERV/NERV` (an old `npm link`), while the shell now resolves `node` to Homebrew v26.13.1, so the link is off PATH; and where present it runs the development checkout, not the installed copy `~/.nerv-app` that the launchd service (`io.nerv.agent`: nvm v26.12.0 node `--use-system-ca` `~/.nerv-app/src/cli.ts serve`) runs. `nerv service install`, `service move` and the lifecycle update never create or refresh a `nerv` command, `doctor` does not notice, and INSTALL.md points only at `npm link`. The Linux base (Calvary, systemd user unit `/usr/local/bin/node /home/db/nerv/src/cli.ts`) had no `nerv` on PATH either. Workaround given to the owner: a `~/.zshrc` alias to the service's node and `~/.nerv-app/src/cli.ts`. |
+| **Reproduce** | On a base installed with `nerv service install` or `service move` and no `npm link` for the current Node: `command -v nerv` prints nothing; with the old link, `nerv --version` reports the development checkout's revision, not `~/.nerv-app`'s. |
+| **Check** | After the fix, `command -v nerv` resolves to the launcher, and the launcher runs the same Node binary, flags and `src/cli.ts` as the service unit, with the service's `NERV_HOME`; `service install`, `service move` and the lifecycle update rewrite it when the node path or install folder changes; `doctor` warns when `nerv` is missing, or resolves to anything but the launcher or the installed copy. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-169-t01"></a>B-169-T01 — Failing tests: launcher content, target and not overwriting a foreign nerv | 0.75 h | 0 h | 0 h | Planned | — | [B-169-T02](#b-169-t02) | 🤖 |
+| 🟢 Small | <a id="b-169-t02"></a>B-169-T02 — renderLauncher and its wiring in service install, move, update and uninstall | 1.5 h | 0 h | 0 h | Planned | [B-169-T01](#b-169-t01) | [B-169-T03](#b-169-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="b-169-t03"></a>B-169-T03 — doctor warns when nerv is missing or not the installed copy | 1 h | 0 h | 0 h | Planned | [B-169-T02](#b-169-t02) | [B-169-T04](#b-169-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="b-169-t04"></a>B-169-T04 — INSTALL.md and area note: the installed base uses the launcher; npm link is development only | 0.5 h | 0 h | 0 h | Planned | [B-169-T03](#b-169-t03) | [B-169-T05](#b-169-t05) | ⏳ 🤖 |
+| 🟢 Small | <a id="b-169-t05"></a>B-169-T05 — Owner check: nerv resolves to the launcher and reports ~/.nerv-app's revision | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-169-T04](#b-169-t04) | — | ⏳ 🧑‍🔧 |
+| 🟢 Small | **Total** | 3.75 h | 0 h (0 of 5 steps recorded) | 0.25 h owner | 0 of 5 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-169.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found by the owner 2026-11-26; code: `src/service.ts`, `src/engine-lifecycle.ts`, `src/install-move-cli.ts`, `src/cli.ts` (`doctor`). Plan: [#836](https://github.com/voidbrain/nerv/pull/836) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | The owner cannot run `nerv` from a shell; where an old link exists it runs the development checkout, so a command can behave differently from the running service. |
 
 </details>
 
