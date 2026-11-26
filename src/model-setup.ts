@@ -53,6 +53,8 @@ export interface ModelChange {
   consultant?: { model: string } | null;
   cloud?: { enabled: boolean; model?: string };
   localUrl?: string;
+  /** F-144: how long the local model stays loaded after a call, or always (keep_alive -1). */
+  warm?: { keepAlive?: string; alwaysLoaded?: boolean };
 }
 /** The models settings after a change, validated; a role on a local model that Ollama does not have is refused. */
 export function planModels(current: Models, change: ModelChange, installed?: string[]): Models {
@@ -77,6 +79,7 @@ export function planModels(current: Models, change: ModelChange, installed?: str
         (change.localUrl ?? (next.local ? next.local.baseUrl.replace(/\/v1$/, '') : OLLAMA_URL)).replace(/\/$/, '') +
         '/v1',
       model: next.local?.model ?? localModel(model),
+      ...(next.local?.keepAlive ? { keepAlive: next.local.keepAlive } : {}),
     };
   }
   const roles = { ...(next.roles ?? {}) };
@@ -103,6 +106,12 @@ export function planModels(current: Models, change: ModelChange, installed?: str
       enabled: change.cloud.enabled,
       model: change.cloud.model ?? next.cloud?.model ?? 'claude-opus-5-5',
     };
+  if (change.warm) {
+    if (!next.local) throw new Error('Keeping a model loaded needs the local route: set a local model first.');
+    if (change.warm.keepAlive !== undefined) next.local.keepAlive = change.warm.keepAlive;
+    if (change.warm.alwaysLoaded === true) next.local.alwaysLoaded = true;
+    else if (change.warm.alwaysLoaded === false) delete next.local.alwaysLoaded;
+  }
   if (next.roles?.misato?.route === 'cloud' && !next.cloud?.enabled)
     throw new Error('Misato is on the cloud route: move Misato to a local model before turning the cloud route off.');
   return validateModels(next);
