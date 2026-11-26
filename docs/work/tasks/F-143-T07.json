@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "id": "F-143-T07",
+  "parent": "F-143",
+  "title": "Save the accepted image after approval",
+  "goal": "Only the accepted image is saved, to the project that owns the item",
+  "status": "planned",
+  "acceptance": [
+    "Owner idea 2026-11-26 in chat: \"in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted.\" Italian is required for every model-facing feature.",
+    "After approval, a web image is downloaded through the F-143-T02 client (5 MiB, magic-byte type, EXIF stripped); a recipe image goes to NERV's photos (ownerKind recipe) with source, license, license_url, creator and attribution columns (from Openverse) (saved_photos migration); a place image goes to Hobo through hobo:F-018's set-image tool with the same attribution and a request id, behind NERV's approval",
+    "Never auto-saved: a test proves no write without an approval; a repeated approval does not save twice (request id); a failed download or a Hobo refusal is told to the owner"
+  ],
+  "dependsOn": [
+    "F-143-T06"
+  ],
+  "resources": [
+    "src/photos.ts",
+    "src/mcp.ts",
+    "src/runtime-approvals.ts",
+    "test/**",
+    "docs/work/records/F-143.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "distributed-contracts",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Invented recipes, places and images only; web images are fetched only through NERV's egress proxy, the full image only after the owner accepts it; no secrets or API keys in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-26: a photos migration, a download step and one MCP write call behind the existing approval path; waits on hobo:F-018 for places. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 822,
+      "note": "plan"
+    }
+  ]
+}

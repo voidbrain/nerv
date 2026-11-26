@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-143-T03",
+  "parent": "F-143",
+  "title": "Find the item by chat: a recipe in NERV or a place in Hobo",
+  "goal": "NERV finds the recipe or place the owner means and says whether it has an image",
+  "status": "planned",
+  "acceptance": [
+    "Owner idea 2026-11-26 in chat: \"in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted.\" Italian is required for every model-facing feature.",
+    "Italian and English requests (\"la ricetta del ragù non ha foto\", \"recupera il posto Rocca Calascio\") resolve to a NERV recipe or a Hobo place through Hobo's read-only MCP tools (hobo:F-011); more than one match is asked back, none is said, never invented",
+    "Test across the join with a fake Hobo MCP server and invented recipes"
+  ],
+  "dependsOn": [
+    "F-143-T01"
+  ],
+  "resources": [
+    "src/cooking-pack.ts",
+    "src/mcp.ts",
+    "src/runtime-chat.ts",
+    "test/**",
+    "docs/work/records/F-143.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Invented recipes, places and images only; web images are fetched only through NERV's egress proxy, the full image only after the owner accepts it; no secrets or API keys in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-26: recipe lookup exists; the Hobo side uses hobo:F-011 list_places. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.0,
+    "baselineAgentHours": 1.0,
+    "estimateAgentHours": 1.0
+  },
+  "prs": [
+    {
+      "pr": 822,
+      "note": "plan"
+    }
+  ]
+}

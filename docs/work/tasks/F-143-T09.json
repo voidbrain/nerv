@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-143-T09",
+  "parent": "F-143",
+  "title": "Owner: attach an image to a recipe and a Hobo place by chat",
+  "goal": "The owner sees the whole flow work in Italian",
+  "status": "planned",
+  "acceptance": [
+    "Owner idea 2026-11-26 in chat: \"in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted.\" Italian is required for every model-facing feature.",
+    "On the live service: \"la ricetta X non ha foto, trovane qualcuna\" → pick one → approve → the recipe shows it with its Openverse attribution; send a photo and \"usala per Rocca Calascio\" → approve → Hobo shows it; the copy-paste page is written by F-143-T08"
+  ],
+  "dependsOn": [
+    "F-143-T08",
+    "F-142-T08"
+  ],
+  "resources": [
+    "docs/work/records/F-143.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Invented recipes, places and images only; web images are fetched only through NERV's egress proxy, the full image only after the owner accepts it; no secrets or API keys in Git.",
+  "validation": [
+    "Owner check, recorded in F-143 Verification"
+  ],
+  "escalation": [
+    "The owner decides whether the flow is good enough; the agent records the result"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h owner",
+    "basis": "Estimated 2026-11-26: two flows on the phone. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.5,
+    "ownerKind": "procedure"
+  },
+  "prs": [
+    {
+      "pr": 822,
+      "note": "plan"
+    }
+  ]
+}

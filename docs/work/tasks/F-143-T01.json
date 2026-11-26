@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-143-T01",
+  "parent": "F-143",
+  "title": "Design: the flow, storage and the Openverse source",
+  "goal": "One page fixes the flow, who stores what, and how Openverse results are handled",
+  "status": "planned",
+  "acceptance": [
+    "Owner idea 2026-11-26 in chat: \"in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted.\" Italian is required for every model-facing feature.",
+    "Owner decision 2026-11-26 in chat (relayed by the coordinator): \"start with Openverse, stay free\". Web image candidates come from the Openverse API (openly licensed; includes Wikimedia Commons, Flickr, Smithsonian; each result carries license, license_url and attribution). No paid provider: Brave and others are out of scope unless the owner revisits; Google Custom Search shuts down 2027-01-01 and Bing image search is retired, so neither is an option.",
+    "docs/decisions/item-image-attach.md: the flow (find the item, \"usa questa\" or \"trovane qualcuna\", propose in an image-choice surface, owner picks, NERV saves after approval), who stores what (recipes: NERV photos with ownerKind recipe; Hobo places: hobo:F-018's set-image tool), never auto-saved",
+    "The page records the owner decision above (Openverse, free) with its words and date; NERV had no web search before (egress-proxy.ts only filters outbound requests)",
+    "Web images: source URL, licence, author and attribution recorded; preview thumbnails fetched transiently through the egress proxy and served same-origin (no third-party URL in the surface); the full image downloaded only after acceptance; 5 MiB and JPEG/PNG/WebP limits; search results and their captions are tainted data"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/decisions/item-image-attach.md",
+    "docs/work/records/F-143.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "architecture-review",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Invented recipes, places and images only; web images are fetched only through NERV's egress proxy, the full image only after the owner accepts it; no secrets or API keys in Git.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Re-estimated 2026-11-26 after the owner chose Openverse: one design page, no provider comparison left. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": [
+    {
+      "pr": 822,
+      "note": "plan"
+    }
+  ]
+}

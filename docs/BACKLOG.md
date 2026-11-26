@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 25 | 8 | 59 | 29 |
+| **This week** | 27 | 8 | 59 | 29 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 52 | 44 |
+| **Open** | 54 | 44 |
 | **Require Human 🧑** | 12 | 20 |
 
 ### Require Human 🧑
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 238 h agent + 19.75 h owner across 220 open steps of 52 features and 44 other records. 160 h of actual effort recorded on 148 steps. Generated from the task files.
+**Remaining effort:** 255 h agent + 20.5 h owner across 237 open steps of 54 features and 44 other records. 160 h of actual effort recorded on 148 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -3117,6 +3117,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-142"></a>[✨ F-142](#top)
+
+**Vision in chat: the owner sends an image and a local model understands it**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 7.75 h agent + 0.25 h owner | — | [F-143-T04](#f-143-t04), [F-143-T09](#f-143-t09) | 🤖 | — | — |
+
+💻 **→** Next: F-142-T01 — Design: image intake, local vision route, privacy and taint (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner decision 2026-11-26 in chat on fpvbuddy:F-023: "A" (retire the on-device assistant and the vision demo), with "vision capabilities ideally on nerv too". Today a photo sent to NERV is only attached to a recipe, crash, part or battery by caption (`src/telegram.ts`); NERV cannot say what an image shows. `gemma4:12b` (local, Ollama) accepts images. The owner uses NERV in Italian. |
+| **Reproduce** | Send a photo without an attach caption on Telegram: NERV replies with the caption help. The PWA chat has no way to send an image; `POST /api/chat` takes text only. |
+| **Check** | A photo sent on Telegram, the PWA or `/api/chat` is answered in the owner's language (Italian by default) by a local vision model only (F-142-T02, T03, T05); images stay local, EXIF/GPS stripped, size and type limits, a retention sweep (T03); text read from an image is tainted, never an instruction, and cannot alone propose or approve a tool (T04); NERV Gauntlet cases in Italian and English (T06) and the model qualified on a Gauntlet vision pack (T07, needs gauntlet-protocol work); the owner checks it on Telegram and the PWA (T08). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-142-t01"></a>F-142-T01 — Design: image intake, local vision route, privacy and taint | 0.75 h | 0 h | 0.75 h | Planned | — | [F-142-T02](#f-142-t02) | 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟡 Medium | <a id="f-142-t02"></a>F-142-T02 — Local vision route: send images to the local model only | 1.5 h | 0 h | 1.5 h | Planned | [F-142-T01](#f-142-t01) | [F-142-T03](#f-142-t03) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟡 Medium | <a id="f-142-t03"></a>F-142-T03 — Image intake in chat: API, Telegram, storage and retention | 1.5 h | 0 h | 1.5 h | Planned | [F-142-T02](#f-142-t02) | [F-142-T04](#f-142-t04), [F-142-T05](#f-142-t05), [F-143-T04](#f-143-t04) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟢 Small | <a id="f-142-t04"></a>F-142-T04 — Taint rules for text read from an image | 1 h | 0 h | 1 h | Planned | [F-142-T03](#f-142-t03) | [F-142-T06](#f-142-t06) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟡 Medium | <a id="f-142-t05"></a>F-142-T05 — PWA chat: attach or take a photo | 1.5 h | 0 h | 1.5 h | Planned | [F-142-T03](#f-142-t03) | [F-142-T08](#f-142-t08) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟢 Small | <a id="f-142-t06"></a>F-142-T06 — NERV Gauntlet cases for image turns, Italian and English | 1 h | 0 h | 1 h | Planned | [F-142-T04](#f-142-t04) | [F-142-T07](#f-142-t07) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟢 Small | <a id="f-142-t07"></a>F-142-T07 — Qualify the local vision model on the Gauntlet vision pack | 0.5 h | 0 h | 0.5 h | Planned | [F-142-T06](#f-142-t06) | [F-142-T08](#f-142-t08) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟢 Small | <a id="f-142-t08"></a>F-142-T08 — Owner: send a photo in Italian on Telegram and the PWA | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-142-T05](#f-142-t05), [F-142-T07](#f-142-t07) | [F-143-T09](#f-143-t09) | ⏳ 🧑‍🔧 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🔴 Large | **Total** | 7.75 h | 0 h (0 of 8 steps recorded) | 7.75 h agent + 0.25 h owner | 0 of 8 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-142.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-142-T01: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-142-T02: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-142-T03: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-142-T04: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-142-T05: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-142-T06: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-142-T07: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-142-T08: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan. Plan: [#822](https://github.com/voidbrain/nerv/pull/822); fpvbuddy:F-023 decision A ([fpvbuddy#33](https://github.com/voidbrain/FPVBuddy/pull/33)) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
 ### <a id="f-122"></a>[✨ F-122](#top)
 
 **Deliver Grover alerts**
@@ -3481,6 +3526,52 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="f-143"></a>[✨ F-143](#top)
+
+**Attach an image to a recipe or a Hobo place by chat**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟣 Very large | 9.25 h agent + 0.5 h owner | [F-142-T03](#f-142-t03), [F-142-T08](#f-142-t08) | — | 🤖 | — | — |
+
+💻 **→** Next: F-143-T01 — Design: the flow, storage and the Openverse source (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner idea 2026-11-26 in chat: "in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted." Recipes live in NERV (cooking pack; `src/photos.ts` attaches photos with ownerKind `recipe`); Hobo places live in Hobo, whose MCP tools are read-only today (hobo:F-011). NERV has no web search. Every model-facing part works in Italian. Owner decision 2026-11-26 in chat: "start with Openverse, stay free" (Openverse API; no paid provider). |
+| **Reproduce** | Ask NERV "la ricetta del ragù non ha foto, trovane qualcuna": no search, no proposal. Hobo cannot receive an image from NERV. |
+| **Check** | NERV finds the recipe or place (F-143-T03); the owner sends an image ("usa questa", T04) or asks for web images ("trovane qualcuna", T05) found through an Openverse client with licence filter, attribution and rate-limit handling (T02); candidates appear in an image-choice surface (bricks:F-013, T06); only the accepted one is saved after approval, to NERV's photos for a recipe and through hobo:F-018's set-image tool for a place, with source, licence and attribution recorded, downloaded only after acceptance, size limits, never auto-saved (T07); Italian and English Gauntlet cases (T08); owner check (T09). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-143-t01"></a>F-143-T01 — Design: the flow, storage and the Openverse source | 0.5 h | 0 h | 0.5 h | Planned | — | [F-143-T02](#f-143-t02), [F-143-T03](#f-143-t03) | 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟡 Medium | <a id="f-143-t02"></a>F-143-T02 — Openverse client: search, licence filter, attribution, rate-limit handling, download only after acceptance | 2 h | 0 h | 2 h | Planned | [F-143-T01](#f-143-t01) | [F-143-T05](#f-143-t05) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟢 Small | <a id="f-143-t03"></a>F-143-T03 — Find the item by chat: a recipe in NERV or a place in Hobo | 1 h | 0 h | 1 h | Planned | [F-143-T01](#f-143-t01) | [F-143-T04](#f-143-t04), [F-143-T05](#f-143-t05) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟢 Small | <a id="f-143-t04"></a>F-143-T04 — "Usa questa": an image sent in chat becomes the candidate | 1 h | 0 h | 1 h | Planned | [F-143-T03](#f-143-t03), [F-142-T03](#f-142-t03) | [F-143-T06](#f-143-t06) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟢 Small | <a id="f-143-t05"></a>F-143-T05 — "Trovane qualcuna": search Openverse from chat | 0.75 h | 0 h | 0.75 h | Planned | [F-143-T02](#f-143-t02), [F-143-T03](#f-143-t03) | [F-143-T06](#f-143-t06) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟡 Medium | <a id="f-143-t06"></a>F-143-T06 — Propose candidates in the image-choice surface | 1.5 h | 0 h | 1.5 h | Planned | [F-143-T04](#f-143-t04), [F-143-T05](#f-143-t05) | [F-143-T07](#f-143-t07) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟡 Medium | <a id="f-143-t07"></a>F-143-T07 — Save the accepted image after approval | 1.5 h | 0 h | 1.5 h | Planned | [F-143-T06](#f-143-t06) | [F-143-T08](#f-143-t08) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟢 Small | <a id="f-143-t08"></a>F-143-T08 — Gauntlet cases, Italian and English | 1 h | 0 h | 1 h | Planned | [F-143-T07](#f-143-t07) | [F-143-T09](#f-143-t09) | ⏳ 🤖 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟢 Small | <a id="f-143-t09"></a>F-143-T09 — Owner: attach an image to a recipe and a Hobo place by chat | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-143-T08](#f-143-t08), [F-142-T08](#f-142-t08) | — | ⏳ 🧑‍🔧 | [PR #822](https://github.com/voidbrain/nerv/pull/822) plan |
+| 🟣 Very large | **Total** | 9.25 h | 0 h (0 of 9 steps recorded) | 9.25 h agent + 0.5 h owner | 0 of 9 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-143.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-143-T01: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-143-T02: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-143-T03: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-143-T04: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-143-T05: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-143-T06: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-143-T07: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-143-T08: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan · F-143-T09: [PR #822](https://github.com/voidbrain/nerv/pull/822) plan. Plan: [#822](https://github.com/voidbrain/nerv/pull/822) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
 
 </details>
 

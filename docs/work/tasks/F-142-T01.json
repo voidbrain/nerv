@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-142-T01",
+  "parent": "F-142",
+  "title": "Design: image intake, local vision route, privacy and taint",
+  "goal": "One page fixes how an image enters chat, which model reads it, where it is kept and how its text is treated",
+  "status": "planned",
+  "acceptance": [
+    "Owner decisions 2026-11-26 in chat: fpvbuddy:F-023 \"A\" (retire the on-device assistant and the vision demo), with \"vision capabilities ideally on nerv too\"; Italian is required for every model-facing feature (the owner uses all modules in Italian).",
+    "docs/decisions/vision-in-chat.md covers: intake per channel (Telegram photo without an attach caption, PWA chat, POST /api/chat), limits (reuse photos.ts: 5 MiB, JPEG/PNG/WebP by magic bytes), EXIF/GPS stripped before storage, local store and retention (default: chat images deleted after 7 days unless attached to an item; stated as a default the owner can change)",
+    "Route: only a local vision-capable model (gemma4:12b on Ollama, which accepts images) reads images; no cloud or remote-provider route ever receives one; with no local vision model the reply says so in the owner's language (Italian by default) and nothing is sent elsewhere",
+    "Taint: text read from an image (a sign, a receipt, a screenshot) is untrusted data with tainted provenance: never an instruction, never enough on its own to propose or approve a tool call, and any memory fact derived from it is stored tainted (src/memory.ts)",
+    "Gauntlet: no image-understanding pack exists in gauntlet-protocol (only image-generation-v1, which uses gemma4:12b as a judge); the page names the pack NERV needs (vision-understanding, Italian and English) as gauntlet-protocol work to be opened there"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/decisions/vision-in-chat.md",
+    "docs/work/records/F-142.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "architecture-review",
+    "privacy-review"
+  ],
+  "privacy": "Images stay on the owner's machines: no cloud route receives an image; tests use invented images generated in the test (no personal photos, no EXIF from real devices) and no secrets.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Estimated 2026-11-26 at agent speed: one decision page from existing photos.ts limits, Telegram photo handling and memory taint. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  },
+  "prs": [
+    {
+      "pr": 822,
+      "note": "plan"
+    }
+  ]
+}

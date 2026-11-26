@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-143-T05",
+  "parent": "F-143",
+  "title": "\"Trovane qualcuna\": search Openverse from chat",
+  "goal": "A chat request for web images returns Openverse candidates for the item, nothing saved",
+  "status": "planned",
+  "acceptance": [
+    "Owner idea 2026-11-26 in chat: \"in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted.\" Italian is required for every model-facing feature.",
+    "Owner decision 2026-11-26 in chat (relayed by the coordinator): \"start with Openverse, stay free\". Web image candidates come from the Openverse API (openly licensed; includes Wikimedia Commons, Flickr, Smithsonian; each result carries license, license_url and attribution). No paid provider: Brave and others are out of scope unless the owner revisits; Google Custom Search shuts down 2027-01-01 and Bing image search is retired, so neither is an option.",
+    "\"trovane qualcuna\" / \"find some\" after F-143-T03 builds a query from the item (recipe title, place name and town) and calls the F-143-T02 client; no results or a rate limit is told to the owner in Italian or English; nothing is downloaded beyond thumbnails",
+    "Test across the join: chat request → client (fake Openverse server) → candidates ready for the image-choice surface with attribution"
+  ],
+  "dependsOn": [
+    "F-143-T02",
+    "F-143-T03"
+  ],
+  "resources": [
+    "src/runtime-chat.ts",
+    "test/**",
+    "docs/work/records/F-143.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "privacy-review",
+    "regression-design"
+  ],
+  "privacy": "Invented recipes, places and images only; web images are fetched only through NERV's egress proxy, the full image only after the owner accepts it; no secrets or API keys in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Estimated 2026-11-26: wiring the T02 client into chat with one join test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  },
+  "prs": [
+    {
+      "pr": 822,
+      "note": "plan"
+    }
+  ]
+}
