@@ -327,18 +327,26 @@ export function makeServer(
       }
       return;
     }
-    // F-004-T09: the phone's service worker reports a tapped reminder notification. It holds no bearer, so the receipt
+    // F-004-T09: the phone's service worker (B-170: or the page the tap opened) reports a tapped notification. It holds no bearer, so the receipt
     // itself is the credential: a one-off random value that only the push payload (encrypted to that device) carried.
     // It can mark that one push opened and nothing else.
     if (!options.native && req.method === 'POST' && path === '/api/push/opened') {
       try {
         const value = await body(req, 256);
-        const receipt = value.receipt;
-        if (Object.keys(value).length !== 1 || typeof receipt !== 'string' || receipt.length > 64) {
+        const { receipt, via = 'worker' } = value;
+        // B-170: `via` says which route reported the tap (the worker, or the page it opened); the log shows it at a
+        // phone check, without the receipt.
+        if (
+          Object.keys(value).some((k) => k !== 'receipt' && k !== 'via') ||
+          typeof receipt !== 'string' ||
+          receipt.length > 64 ||
+          (via !== 'worker' && via !== 'page')
+        ) {
           reply(400, { error: 'Send the receipt.' });
           return;
         }
         const opened = store.pushOpened ? await store.pushOpened(receipt) : false;
+        console.log(`push: opened via ${via}: ${opened ? 'recorded' : 'unknown receipt'}`);
         reply(opened ? 200 : 404, opened ? { ok: true } : { error: 'Unknown receipt.' });
       } catch {
         reply(400, { error: 'Invalid request.' });

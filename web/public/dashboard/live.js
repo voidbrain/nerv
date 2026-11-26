@@ -11,6 +11,30 @@
   if (pairFragment) history.replaceState(null, "", location.pathname + location.search);
   // A scan while the dashboard is already open in that tab only changes the fragment: load the page again to read it.
   addEventListener("hashchange", () => { if (/^#pair=/.test(location.hash)) location.reload(); });
+  // B-170: a tap on a push reaches the service from the page it opened too, because iOS may drop the worker's request,
+  // its notification data or the click event itself (sw.js). This page reports ?opened=<receipt>, and, on load and
+  // whenever it becomes visible, every receipt the worker kept whose notification is no longer shown: tapped, or
+  // removed by the owner; one still in Notification Centre is never reported. No sign-in needed: the receipt is the
+  // credential, and a repeat keeps the first time.
+  const reportOpened = receipt => fetch("/api/push/opened", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ receipt, via:"page" }) })
+    .then(r => r.ok || r.status === 404, () => false);
+  const openedParam = /^\?opened=([A-Za-z0-9_-]{24})$/.exec(location.search);
+  if (openedParam) { history.replaceState(null, "", location.pathname + location.hash); void reportOpened(openedParam[1]); }
+  const reportKept = async () => {
+    try {
+      if (!self.caches || !navigator.serviceWorker) return;
+      const cache = await self.caches.open("nerv-push-pending"), kept = await cache.keys();
+      if (!kept.length) return;
+      const reg = await navigator.serviceWorker.getRegistration("/dashboard/");
+      const shown = new Set((await reg.getNotifications()).map(n => n.tag));
+      for (const entry of kept) {
+        const receipt = entry.url.split("/").pop();
+        if (!shown.has("nerv-push-" + receipt) && await reportOpened(receipt)) await cache.delete(entry);
+      }
+    } catch { /* no worker or no notification list here: the worker's own report and the Telegram fallback remain */ }
+  };
+  void reportKept();
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") void reportKept(); });
   const consulted = new Set();
   let older = [], matches = [], shown = [], searchSeq = 0, searchTimer = null; let editing = null;
   let usageBefore = null, usageBack = [], usageBusy = false, usageNext = null, usagePage = null, usageError = false;
