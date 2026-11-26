@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 31 | 9 | 63 | 31 |
+| **This week** | 31 | 9 | 64 | 31 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 57 | 46 |
+| **Open** | 57 | 47 |
 | **Require Human 🧑** | 13 | 19 |
 
 ### Require Human 🧑
@@ -43,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 268.5 h agent + 21 h owner across 264 open steps of 57 features and 46 other records. 163 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 268.5 h agent + 21 h owner across 265 open steps of 57 features and 47 other records. 163 h of actual effort recorded on 151 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -4273,6 +4273,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
 | Impact | Report proposal 22 (A5): the script contradicts the guarded install (B-098) and the worktree rule. |
+
+</details>
+
+---
+### <a id="b-173"></a>[🐞 B-173](#top)
+
+**`npm run work:pr` was killed with exit 137 (SIGKILL) during an agent's PR run on the owner's Mac**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟠 Investigate | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-173-T01 reproduces it, or closes the record as not reproducible, the next time an agent run sees exit 137.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-26 about 19:00Z on the owner's Mac (36 GB, heavy local model load at the time), an agent opening a planning PR in a worktree ran `npm run -s work:pr -- F-147 …` (no output, no PR) and then `node tools/work-items.mjs pr F-147 …` directly: exit 137 about 0.4 s after the command was sent, before anything was committed. The same session's `work:pr` in two other repositories opened their PRs (coordinator#115, project-harness#317); the agent opened this one by hand with `gh pr create`. |
+| **Reproduce** | Not reproduced. In a clean worktree under load, run `/usr/bin/time -l npm run work:pr -- <ID> -- --title t --body b` and note the exit status, the elapsed time and the peak memory; if it is 137, run `log show --last 10m --predicate 'eventMessage CONTAINS[c] "memorystatus"'` at once. |
+| **Check** | Either a reproduced kill with its cause found and a failing test before the fix, or the record closed as not reproducible with the measurements below. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-173-t01"></a>B-173-T01 — Reproduce the exit 137 of work:pr under load, or close as not reproducible | 0.5 h | 0 h | 0 h | Planned |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-173.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | No test: the kill was not reproduced; the measurements above stand in until it is. Agent report 2026-11-26 (the F-147 planning PR, opened by hand as [#835](https://github.com/voidbrain/nerv/pull/835)); [#844](https://github.com/voidbrain/nerv/pull/844) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | An agent's PR helper stops without output; the agent falls back to naming the PR in the records by hand. |
 
 </details>
 
