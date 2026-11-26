@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "B-151-T01",
+  "parent": "B-151",
+  "title": "Failing test: the dashboard AA check reads #000 and #fff",
+  "goal": "test/dashboard.test.ts checks every pair with a black or white text and fails on main with the real list",
+  "status": "implemented",
+  "acceptance": [
+    "Three-digit hex is expanded before the luminance; a colour that is not hex fails the test",
+    "A ratio that is not a number fails the pair",
+    "On main the test lists brand-fg on accent for Eva · Light in all five colours",
+    "It is not edited to pass in B-151-T02"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/dashboard.test.ts",
+    "docs/work/records/B-151.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/dashboard.test.ts fails on main",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 0.5 h agent. Implemented the same day: fails on main with the five Eva · Light pairs. Remaining: CI.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

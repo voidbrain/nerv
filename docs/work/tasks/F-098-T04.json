@@ -4,7 +4,7 @@
   "parent": "F-098",
   "title": "Live check with a real crash",
   "goal": "The owner logs a crash and asks the questions",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Copy and paste: `nerv chat \"ho crashato Smoke, motore sinistro inferiore rotto\"` then `nerv chat \"quanti motori di scorta mi restano?\"`; expected: the crash listed and the spare count decreased"
   ],
@@ -31,14 +31,20 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent); back to the owner 2026-11-25. 2026-11-25 owner run: the fleet on NERV-01 was empty, so the drone is registered first (docs/acceptance/f098-t04-fleet-crash-live.md); next action is the owner's. 2026-11-26: waits on B-137-T01 (#764) and B-138-T01 (#762), both merged; the owner reruns after updating NERV-01 to a main with both.",
+    "estimate": "0 remaining (cancelled)",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent); back to the owner 2026-11-25. 2026-11-25 owner run: the fleet on NERV-01 was empty, so the drone is registered first (docs/acceptance/f098-t04-fleet-crash-live.md); next action is the owner's. 2026-11-26: waits on B-137-T01 (#764) and B-138-T01 (#762), both merged; the owner reruns after updating NERV-01 to a main with both. Cancelled 2026-11-26: Owner decision 2026-11-26 (chat): \"accept all 17 proposals\" of the cross-project audit (coordinator docs/audits/2026-11-26-cross-project.md); for proposal 1 the owner accepted the recommendation to cancel the live checks of NERV FPV code due for removal, reason: the code moves to FPVBuddy (F-101). No actual: cancelled before the owner ran it.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "procedure"
   },
-  "ownerLink": "docs/acceptance/f098-t04-fleet-crash-live.md"
+  "ownerLink": "docs/acceptance/f098-t04-fleet-crash-live.md",
+  "prs": [
+    {
+      "pr": 802,
+      "note": "cancellation"
+    }
+  ]
 }

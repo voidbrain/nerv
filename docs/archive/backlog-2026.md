@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 6 | 20 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 7 | 20 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7218,6 +7218,40 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | PR / evidence | [CI run 45717358062](https://github.com/voidbrain/nerv/actions/runs/45717358062) (Windows, PR #778); fix `aa5e7052` in [PR #778](https://github.com/voidbrain/nerv/pull/778); [#796](https://github.com/voidbrain/nerv/pull/796) |
 | Opened | 2026-11-26 |
 | Verification | 2026-11-26: Windows passes without reruns on #796, #797 and #798; closed in the #778–#798 reconciliation. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### F-098
+
+**FPV fleet diary: crashes, parts, spares and photos**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: Closed 2026-11-26: F-098-T01 to T03, T05 and T06 delivered on green CI (#588, #663, #691, #705); F-098-T04 (live crash check) cancelled by owner decision 2026-11-26 (chat, "accept all 17 proposals" of the cross-project audit): the FPV code moves to FPVBuddy (F-101). #802.
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-14: "ho crashato Smoke, motore sinistro inferiore rotto. Quale avevo rotto l'ultima volta? Quanti ne sono rimasti di scorta (nuovi/usati)? La batteria 7 blu presenta danni ma sembra ancora buona." NERV has no record of drones, their parts, crashes or spares, and cannot keep photos with them. |
+| **Reproduce** | `nerv chat "ho crashato Smoke, motore sinistro inferiore rotto"` then `nerv chat "quale avevo rotto l'ultima volta?"`. |
+| **Check** | Drones by name with parts by position; a crash entry from chat (drone, part, damage, date); answers to "last time this part broke" and "spares left, new and used"; change spare counts only when the chat phrase explicitly says a new or used spare was used; a battery damage note goes on the battery (F-008); photos from Telegram or the dashboard attach to a crash, a part or a battery and stay local; follow-up planning after fleet.chat remains local-only; invented tests. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: Closed 2026-11-26: F-098-T01 to T03, T05 and T06 delivered on green CI (#588, #663, #691, #705); F-098-T04 (live crash check) cancelled by owner decision 2026-11-26 (chat, "accept all 17 proposals" of the cross-project audit): the FPV code moves to FPVBuddy (F-101). #802. Owner decision 2026-11-26 (chat): "accept all 17 proposals" of the cross-project audit (coordinator `docs/audits/2026-11-26-cross-project.md`), proposal 1 ([#802](https://github.com/voidbrain/nerv/pull/802)): F-098-T04 cancelled; the owner accepted the recommendation to cancel the live checks of NERV FPV code due for removal, reason: the code moves to FPVBuddy ([F-101](../work/records/F-098.md#f-101)). Every other step is closed, so F-098 closes as delivered with its live check withdrawn; the fleet chat moves with [F-101](../work/records/F-098.md#f-101)-T10. 2026-11-26 reconciliation ([PR #779](https://github.com/voidbrain/nerv/pull/779)): F-098-T04 stays open. Its fixes are merged on green CI: B-137-T01 ([#764](https://github.com/voidbrain/nerv/pull/764), drone model and version) and B-138-T01 ([#762](https://github.com/voidbrain/nerv/pull/762), the spares answer), both verified; F-098-T04 depends on both. The owner can rerun once NERV-01 is updated to a main with them (step 0 of the page); that rerun is also B-137's and B-138's live check. 2026-11-25, F-098-T04 owner run on NERV-01 (`2627d483`): the drone was added by chat (`aggiungi il drone Smoke con frame AOS 5 v5.1`, sortie `bd8bd965-b64f-47c1-a4ac-8c8c94dae9d1`, which also added a spares row "AOS 5 v5.1 / frame / qty 0"); the crash chat recorded the crash correctly, motor, rear-left (sortie `59ef2bc2-4179-4f4a-a90e-a2212213f99d`); an earlier crash chat hit "Local route (S²) reply too long: still being written at the 115 s limit" (sortie `4126574b-c238-4716-ae1d-2fabe9f82e4b`) while landing gauntlet runs shared the local model. The spare count failed: `quanti motori di scorta mi restano?` answered twice with a generic greeting ([B-138](../work/records/F-098.md#b-138)). F-098-T04 stays open, waiting on B-138 and B-137 (drone model and version read as part categories, opened in PR #750). Earlier evidence (2026-11-24 reconciliation, the first 2026-11-25 owner run): [archive](evidence-2026.md#f-098-moved-2026-11-26).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [#802](https://github.com/voidbrain/nerv/pull/802) (F-098-T04 cancelled); F-098-T04 run evidence in [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #705](https://github.com/voidbrain/nerv/pull/705) (F-098-T06 fleet by chat); [PR #691](https://github.com/voidbrain/nerv/pull/691) (F-098-T05 fleet import); [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](../design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408); [#750](https://github.com/voidbrain/nerv/pull/750) |
+| Opened | 2026-11-14 |
+| Verification | Unit/integration 2026-11-24: `node --test test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts` (43 passed) with the containment fix; CI green on PRs #691 and #705. Live on the real fleet 2026-11-25 (F-098-T04, owner on NERV-01): crash recorded; spare count failed (B-138). The rerun was cancelled 2026-11-26 (F-098-T04, owner decision). |
 | Reviewed | 2026-11-26 |
 
 </details>

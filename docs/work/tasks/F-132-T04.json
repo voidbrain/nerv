@@ -2,16 +2,20 @@
   "version": 1,
   "id": "F-132-T04",
   "parent": "F-132",
-  "title": "Optional hourly coordinator refresh owned by the main base",
-  "goal": "An opt-in hourly job that dispatches the coordinator refresh from the main base (NERV-01 until F-016 is done) and skips when a run is already queued or running",
+  "title": "Hourly coordinator refresh from the main base, on by default",
+  "goal": "An hourly job on the main base (NERV-01 until F-016 is done) that dispatches the coordinator refresh unattended, skipping when a recent or running refresh makes it unnecessary",
   "status": "planned",
   "acceptance": [
-    "Off by default; the owner turns it on in settings; it runs only on the base that holds the coordinator role and only when the pilot's stage and grant admit an unattended write-external call, otherwise it records why it skipped",
-    "Skips when github.runs.status shows a queued or in-progress run; a failed dispatch is retried at the next hour, never in a loop",
-    "Tests with a fake clock and the fake GitHub API: one dispatch per hour, none on a non-main base, none while a run is in progress, none when not admitted"
+    "Runs only on the main/coordinator base; on by default, with the config off switch github.coordinatorRefresh.enabled (false turns it off); a non-main base never dispatches",
+    "Each hour it sends POST /repos/voidbrain/coordinator/actions/workflows/429602416/dispatches with ref main through github.workflow.dispatch, unattended under the early promotion recorded in F-132-T01; nothing else is dispatched by the job",
+    "Skips when the latest run (github.runs.status) was created less than 50 minutes ago or is queued or in progress; a failed dispatch is retried at the next hour, never in a loop",
+    "One inbox entry per failure streak: the first failure after a success writes one entry, later failures in the same streak write none, and the next success ends the streak",
+    "The token comes from the private token file of F-132-T02, placed by the owner in F-132-T06; a missing token skips with a reason and never logs or echoes it",
+    "Tests with a fake clock and a fake GitHub API, committed failing first: one dispatch per hour, none on a non-main base, none when switched off, none when the latest run is under 50 minutes old or queued or in progress, one inbox entry per failure streak",
+    "Owner decision 2026-11-26 (chat): \"Promote the GitHub pilot early\", so the hourly coordinator refresh (F-132-T04) runs unattended. Order: F-132-T01, F-132-T02, F-132-T04, F-132-T06."
   ],
   "dependsOn": [
-    "F-132-T03"
+    "F-132-T02"
   ],
   "resources": [
     "src/**",
@@ -31,20 +35,24 @@
     "npm test"
   ],
   "escalation": [
-    "A schedule more often than hourly goes to the owner"
+    "A schedule more often than hourly, another workflow or repository, or a material effort increase goes to the owner"
   ],
   "effort": {
     "size": "medium",
-    "estimate": "2 h",
-    "basis": "Estimated 2026-11-26: one scheduled job on the existing scheduler with main-base and admission checks. Not a measurement.",
+    "estimate": "2.5 h",
+    "basis": "Estimated 2026-11-26: one scheduled job on the existing scheduler with main-base and admission checks. Not a measurement. Re-estimated 2026-11-26 after the early promotion: on by default with an off switch, the 50-minute skip and the failure-streak inbox entry (+0.5 h); waits on F-132-T02 instead of F-132-T03.",
     "reviewed": "2026-11-26",
-    "agentHours": 2,
+    "agentHours": 2.5,
     "baselineAgentHours": 2,
-    "estimateAgentHours": 2
+    "estimateAgentHours": 2.5
   },
   "prs": [
     {
       "pr": 781
+    },
+    {
+      "pr": 802,
+      "note": "rewrite"
     }
   ]
 }
