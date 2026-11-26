@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 32 | 9 | 65 | 31 |
+| **This week** | 32 | 9 | 66 | 31 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 58 | 48 |
+| **Open** | 58 | 49 |
 | **Require Human 🧑** | 14 | 20 |
 
 ### Require Human 🧑
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 271.25 h agent + 22 h owner across 278 open steps of 58 features and 48 other records. 163.25 h of actual effort recorded on 152 steps. Generated from the task files.
+**Remaining effort:** 271.25 h agent + 22 h owner across 280 open steps of 58 features and 49 other records. 163.25 h of actual effort recorded on 152 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -4401,6 +4401,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
 | Impact | An agent's PR helper stops without output; the agent falls back to naming the PR in the records by hand. |
+
+</details>
+
+---
+### <a id="b-174"></a>[🐞 B-174](#top)
+
+**Behaviour scenario `name-the-pr` fails 0 of 3: the agent opens the PR but never writes its number into the record**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟠 Investigate | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-174-T01 reruns `name-the-pr` and `ambiguous-request` 10 times each before any rule is touched.
+
+| | |
+|---|---|
+| **Issue** | 2026-11-26, the coherence review's friction measurement (coordinator F-020-T03, [coordinator#117](https://github.com/voidbrain/coordinator/pull/117)) ran nerv's 12 behaviour scenarios 3 times each. `name-the-pr` failed 3 of 3: the agent opened the PR (`#12` in the fixture) and did not write that number into the backlog record, as AGENTS.md ("open PRs against `main`, then name the PR by its number in the records it touches") and BACKLOG-RULES ("Review procedure" 7) require. It is the only rule that failed every run; project-harness's last run of the scenario passed 2 of 3. `ambiguous-request` passed 2 of 3 in the same run: one run changed nothing and did not name the two readings. Owner decision 2026-11-26, chat "F-020-T05 suggestions ok": open this record; `ambiguous-request` joins the rerun and gets its own record only if it keeps missing. |
+| **Reproduce** | `node tools/behaviour.mjs` for the scenario `name-the-pr`, 3 runs, in a clean worktree (the exact flags are in `docs/agents/behaviour-checks.md`); compare the run log with the table in `docs/reviews/2026-11-coherence/friction.md` in the coordinator repository. |
+| **Check** | 10 runs of `name-the-pr` and 10 of `ambiguous-request` with the pass counts recorded here. If `name-the-pr` still fails, the reason the rule is not followed is found (the scenario's grader, the wording the agent reads, or the agent) and a fix is planned with its own failing check first. If both pass, the record closes as noise with the counts. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-174-t01"></a>B-174-T01 — Rerun name-the-pr and ambiguous-request 10 times each and record the counts | 1 h | 0 h | 0 h | Planned | — | [B-174-T02](#b-174-t02) |
+| 🟢 Small | <a id="b-174-t02"></a>B-174-T02 — Act on the rerun: find why name-the-pr fails, or close as noise | 1 h | 0 h | 0 h | Planned | [B-174-T01](#b-174-t01) | — |
+| 🟢 Small | **Total** | 2 h | 0 h (0 of 2 steps recorded) | 0 h | 0 of 2 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-174.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Friction measurement: [coordinator#117](https://github.com/voidbrain/coordinator/pull/117). No test: this is a behaviour-scenario result, not a code defect; T01 supplies the reruns.; [#848](https://github.com/voidbrain/nerv/pull/848) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | An agent's PR can merge with the records not naming it, so the record cannot be traced to its PR. |
 
 </details>
 
