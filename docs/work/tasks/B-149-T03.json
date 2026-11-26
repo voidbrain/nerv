@@ -34,5 +34,6 @@
     "estimateAgentHours": 0,
     "ownerHours": 0.25,
     "ownerKind": "procedure"
-  }
+  },
+  "ownerLink": "docs/acceptance/f004-t06-phone-push-procedure.md#read-in-the-app-not-tapped-b-149-t03"
 }

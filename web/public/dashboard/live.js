@@ -100,6 +100,8 @@
       state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
       // Reminders delivered (briefs live in the inbox too since F-028, and are shown on their own in Debrief).
       state.deliveredCount = history.delivered;state.deliveredSince = historySince;state.pendingCount = history.pending;
+      // B-149 review: an open box belongs to the brief the owner opened; a newer brief arrives closed and unread.
+      if ((state.brief && state.brief.id) !== (history.brief && history.brief.id)) state.briefOpen = false;
       state.brief = history.brief;
       const selected = state.sorties.find(x => x.id === state.selected);
       const want = list.filter(s => (selected && s.id === selected.realId) || s.waiting || !detailCache[s.id] || s.status === "open").slice(0, 8);
@@ -1064,7 +1066,18 @@
       (state.brief ? "<details class='brief' id='brief-box' style='margin-top:6px'" + (state.briefOpen ? " open" : "") + "><summary class='small'>Hyuga's brief · " + esc(new Date(state.brief.created).toLocaleString(undefined, { weekday:"short", hour:"2-digit", minute:"2-digit" })) + "</summary><pre class='tiny' style='white-space:pre-wrap;margin:4px 0 0'>" + esc(state.brief.message) + "</pre></details>" : "");
   };
   // The panel redraws on every refresh: the brief stays open once the owner opened it.
-  document.addEventListener("toggle", e => { if (e.target && e.target.id === "brief-box") state.briefOpen = e.target.open; }, true);
+  document.addEventListener("toggle", e => { if (e.target && e.target.id === "brief-box") { state.briefOpen = e.target.open; readBrief(); } }, true);
+  // B-149: the brief the owner opened in a visible page counts as read, so its Telegram fallback is skipped (once each).
+  const briefsRead = new Set();
+  function readBrief() {
+    const b = state.brief;
+    if (!b || !b.id || b.read_at || !state.briefOpen || document.visibilityState !== "visible" || briefsRead.has(b.id)) return;
+    briefsRead.add(b.id);
+    api("inbox/" + encodeURIComponent(b.id) + "/read", { method:"POST" }).catch(() => briefsRead.delete(b.id));
+  }
+  document.addEventListener("visibilitychange", readBrief);
+  const renderAwayPanel = window.renderAway;
+  window.renderAway = function () { renderAwayPanel(); readBrief(); };
   // B-129: Run doctor asks the service now and keeps its answer next to the button until the next run.
   window.liveDoctor = async function () {
     const box = document.getElementById("doctor-result"); const btn = document.getElementById("btn-doctor");

@@ -58,3 +58,25 @@ Checks F-004-T09 on the phone once it is deployed: a reminder goes to the phone 
    Expected: Telegram shows `Push first C` when it falls due, with no wait; no notification on the phone. Turn notifications back on afterwards on each device (Settings → Notifications → **Enable notifications**).
 
 Record the result (pass, or which step differed and what was seen) in [F-004](../work/records/F-004.md).
+
+## Read in the app, not tapped (B-149-T03)
+
+Checks B-149 on the phone once it is deployed, in the same sitting as the steps above: a reminder the owner reads in the app, without tapping the notification, never reaches Telegram. The workspace app (NERV at `/`, not `/dashboard/`) shows delivered reminders in its **Inbox** panel; the dashboard shows only the latest brief, which counts as read once its box is opened.
+
+1. On the Mac:
+   ```zsh
+   nerv remind "Read in app D" "$(date -v+1M +%Y-%m-%dT%H:%M:00%z | sed -E 's/([0-9]{2})([0-9]{2})$/\1:\2/')"
+   ```
+   Expected: the notification arrives on the phone. Do not tap it. Within 10 minutes, open the workspace app from the Home Screen, stay on **Overview** (tap **Refresh** if needed) and scroll down until "Read in app D" is on screen in the **Inbox** panel (a row counts as read only once it is on screen).
+2. Check it was recorded as read (read-only):
+   ```zsh
+   sqlite3 -readonly ~/.nerv/nerv.sqlite "SELECT substr(message,1,40), read_at FROM deliveries WHERE message LIKE '%Read in app D%';"
+   ```
+   Expected: one row with a `read_at` time a little after you opened the app.
+3. Wait until 12 minutes after it was due. Expected: nothing about "Read in app D" on Telegram. Then:
+   ```zsh
+   sqlite3 -readonly ~/.nerv/nerv.sqlite "SELECT c.channel, c.sent_at, c.opened_at FROM delivery_channels c JOIN deliveries d ON d.id=c.delivery_id WHERE d.message LIKE '%Read in app D%' ORDER BY c.channel;"
+   ```
+   Expected: one `push` row with `sent_at` and an empty `opened_at`, and no `telegram` row.
+
+Record the result (pass, or which step differed and what was seen) in [B-149](../work/records/B-149.md).

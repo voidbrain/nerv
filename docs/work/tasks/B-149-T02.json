@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "planned",
+  "status": "implemented",
   "privacy": "Neutral invented messages, devices and receipts only; no tokens, push endpoints, chat IDs or personal data in Git.",
   "escalation": [
     "A material scope or effort increase goes to the owner"
@@ -40,11 +40,16 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h agent",
-    "basis": "Estimated 2026-11-26: one endpoint, one store write, two call sites and a browser case. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: one endpoint, one store write, two call sites and a browser case. Not a measurement. 2026-11-26: implemented: POST /api/inbox/<id>/read (store markRead, inbox.read over the coordinator→nervous edge); the workspace reports the inbox items it shows in a visible page, the dashboard the brief opened in a visible page; browser case in test/angular.browser.mjs, dashboard hook in test/dashboard-poll.test.ts. Remaining: CI. Review fixes 2026-11-26: a workspace row counts only once at least half on screen (IntersectionObserver); a newer dashboard brief arrives closed; tests for 401 without sign-in and 403 for a native peer.",
     "reviewed": "2026-11-26",
-    "agentHours": 2,
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
-  }
+  },
+  "prs": [
+    {
+      "pr": 785
+    }
+  ]
 }

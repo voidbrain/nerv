@@ -32,6 +32,20 @@ export class StoreInbox {
     return this.host.db.prepare('SELECT * FROM deliveries ORDER BY created DESC').all();
   }
 
+  /**
+   * B-149: the owner saw this inbox item in the app (dashboard or workspace). The first read is kept; the Telegram
+   * fallback skips a read item (`claimFallback`). False when no such item exists.
+   */
+  markRead(id: string, now = new Date()): boolean {
+    if (typeof id !== 'string' || !/^[A-Za-z0-9_-]{1,64}$/.test(id)) return false;
+    return (
+      Number(
+        this.host.db.prepare('UPDATE deliveries SET read_at=COALESCE(read_at, ?) WHERE id=?').run(now.toISOString(), id)
+          .changes,
+      ) > 0
+    );
+  }
+
   inboxHistory(before = 0, limit = 20): HistoryPage<InboxEntry> {
     checkHistory(before, limit);
     return historyPage(
@@ -53,7 +67,7 @@ export class StoreInbox {
     const brief =
       this.host.db
         .prepare(
-          "SELECT message,created FROM deliveries WHERE kind='brief' AND id NOT IN (SELECT delivery_id FROM watch_notices WHERE delivery_id IS NOT NULL) AND id NOT IN (SELECT notice_id FROM session_limit_targets WHERE notice_id IS NOT NULL) ORDER BY rowid DESC LIMIT 1",
+          "SELECT id,message,created,read_at FROM deliveries WHERE kind='brief' AND id NOT IN (SELECT delivery_id FROM watch_notices WHERE delivery_id IS NOT NULL) AND id NOT IN (SELECT notice_id FROM session_limit_targets WHERE notice_id IS NOT NULL) ORDER BY rowid DESC LIMIT 1",
         )
         .get() ?? null;
     const pending = (
