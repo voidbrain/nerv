@@ -4,15 +4,14 @@
   "parent": "B-091",
   "title": "Owner: a fenced stop on Tabgha from its desktop session completes its receipt",
   "goal": "B-091's last Check item runs on NERV-02 with the fix of #742",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "NERV-02 contains 2627d483",
     "A fenced stop from Tabgha's desktop session ends with a complete receipt and no disk I/O error",
     "NERV-02 is started again and online in kaji list"
   ],
   "dependsOn": [
-    "B-091-T01",
-    "B-171-T02"
+    "B-091-T01"
   ],
   "resources": [
     "docs/acceptance/b091-tabgha-fenced-stop.md",
@@ -31,11 +30,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Opened 2026-11-26: the remaining Check item needs Tabgha's desktop session (B-087); one update sitting plus one fenced stop and start.",
+    "estimate": "0 remaining",
+    "basis": "Opened 2026-11-26: the remaining Check item needs Tabgha's desktop session (B-087); one update sitting plus one fenced stop and start. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "procedure",
     "baselineAgentHours": 0,
     "estimateAgentHours": 0
