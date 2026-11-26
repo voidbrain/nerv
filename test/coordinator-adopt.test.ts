@@ -284,7 +284,10 @@ describe('B-170: a main from before F-016 adopts its store as the first coordina
       const { x, b } = t;
       // The store may be a restored copy: B already holds main NERV-02 at epoch 2.
       new Registry(b.store.db, t.rootPublicKey).add(t.sign({ kind: 'main', baseId: B, coordinatorEpoch: 2 }));
-      await assert.rejects(kaji(x.home, x.store, ['adopt']), /NERV-02 \(epoch 2\) holds a main record after epoch 1/);
+      await assert.rejects(
+        kaji(x.home, x.store, ['adopt']),
+        /NERV-02 \(epoch 2\) holds a main record later than epoch 0/,
+      );
       assert.equal(readCoordinatorFencingState(x.store.db), undefined);
       assert.equal(backups(x.home).length, 0);
     } finally {
@@ -328,6 +331,22 @@ describe('B-170: a main from before F-016 adopts its store as the first coordina
       assert.match(out, /Adopted this base's store as coordinator epoch 1/);
       assert.doesNotMatch(out, /signed main/);
       assert.equal(new Registry(x.store.db, t.rootPublicKey).nextSerial(), serial);
+    } finally {
+      await t.close();
+    }
+  });
+
+  it('review: with no earlier adopt, a base holding an epoch 1 main record for another base refuses adoption', async () => {
+    const t = await legacyBases();
+    try {
+      const { x, b } = t;
+      new Registry(b.store.db, t.rootPublicKey).add(t.sign({ kind: 'main', baseId: B, coordinatorEpoch: 1 }));
+      await assert.rejects(
+        kaji(x.home, x.store, ['adopt']),
+        /NERV-02 \(epoch 1\) holds a main record later than epoch 0/,
+      );
+      assert.equal(readCoordinatorFencingState(x.store.db), undefined);
+      assert.equal(backups(x.home).length, 0);
     } finally {
       await t.close();
     }

@@ -114,20 +114,21 @@ export async function adoptLegacyCoordinator(input: {
     throw new Error(
       `${peersRan.map(([id, e]) => `${id} (epoch ${e})`).join(', ')} ran or acked a coordinator lease: another main ran, so this store is not the coordinator. Nothing was changed.`,
     );
-  // B-170 review: a base holding a main record after epoch 1 means a later coordinator may run (this store may be a
-  // restored copy from before it). Epoch 1 is the one this adoption writes: a store restored from its own backup
-  // finds the other bases already holding it.
-  const later = [...probe.maxSeen].filter(([, e]) => e > Math.max(epoch, 1)).sort(([a], [b]) => a.localeCompare(b));
-  if (later.length)
-    throw new Error(
-      `${later.map(([id, e]) => `${id} (epoch ${e})`).join(', ')} holds a main record after epoch 1: a later coordinator was named, so this store is not the coordinator. Nothing was changed.`,
-    );
   // A store restored from an earlier adopt's backup may trail a coordinator on a base that does not answer now.
   const dir = join(home, 'backups');
   const adoptedBefore = existsSync(dir) && readdirSync(dir).some((f) => f.startsWith('nerv-before-adopt-'));
   if (adoptedBefore && probe.unreachable.length)
     throw new Error(
       `This base adopted its store before (a nerv-before-adopt backup exists) and ${probe.unreachable.join(', ')} did not answer: it may hold a later coordinator. Reach it and run kaji adopt again. Nothing was changed.`,
+    );
+  // B-170 review: a base holding a later main record than this registry means another coordinator was named (this
+  // store may be a restored copy from before it). Only a store restored from its own adopt backup may find the other
+  // bases already at epoch 1, the epoch that adoption wrote.
+  const limit = adoptedBefore ? Math.max(epoch, 1) : epoch;
+  const later = [...probe.maxSeen].filter(([, e]) => e > limit).sort(([a], [b]) => a.localeCompare(b));
+  if (later.length)
+    throw new Error(
+      `${later.map(([id, e]) => `${id} (epoch ${e})`).join(', ')} holds a main record later than epoch ${limit}: another coordinator was named, so this store is not the coordinator. Let the registry sync (or import it) and ask before adopting. Nothing was changed.`,
     );
 
   const now = input.now ?? new Date();
