@@ -362,6 +362,65 @@ test("B-025: a granted tool runs under the stricter of its grant's EVA and the s
 });
 
 test(
+  'B-175: a read refused for isolation after an earlier read in the same request: the reply answers from the earlier result and says what could not be read',
+  { timeout: 60000 },
+  async () => {
+    const { Runtime } = await import('../src/runtime.ts');
+    const probe = new McpClient(server());
+    const fp = fingerprint((await probe.listTools())[0]!);
+    probe.close();
+    const first = '{"action":{"tool":"notes.read_note","args":{"name":"first"}}}';
+    const m = await model([
+      // Owner evidence 2026-11-26: the first read ran, the second was refused, the reply ignored the first result.
+      first,
+      '{"action":{"tool":"notes.read_note","args":{"name":"second"}}}',
+      '{"reply":"Your first note says milk and bread."}',
+      // Again, and this time Misato insists on the refused read: the service answers from the result itself.
+      '{"action":{"tool":"notes.read_note","args":{"name":"third"}}}',
+      '{"action":{"tool":"notes.read_note","args":{"name":"fourth"}}}',
+      '{"action":{"tool":"notes.read_note","args":{"name":"fourth"}}}',
+    ]);
+    const home = mkdtempSync(join(tmpdir(), 'nerv-mcp-same-'));
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({
+        models: {
+          local: { baseUrl: m.url, model: 'm' },
+          roles: { misato: { route: 'local' }, consultant: { model: 'c' } },
+        },
+        tools: {
+          mcp: [server()],
+          grants: [{ server: 'notes', tool: 'read_note', effect: 'read', eva: '00', fingerprint: fp }],
+        },
+      }),
+    );
+    const r = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+    try {
+      await r.ready();
+      const one = await r.chat('Read my notes', 'cli');
+      assert.deepEqual(
+        one.steps.filter((s) => s.tool).map((s) => s.outcome),
+        ['grant', 'reject'],
+      );
+      assert.match(one.reply ?? '', /^Your first note says milk and bread\./);
+      assert.match(one.reply ?? '', /notes\.read_note/);
+      assert.match(one.reply ?? '', /this same request/);
+      const two = await r.chat('Read my other notes', 'dashboard');
+      assert.deepEqual(
+        two.steps.filter((s) => s.tool).map((s) => s.outcome),
+        ['grant', 'reject'],
+        'the second refused read is never sent to the gate again',
+      );
+      assert.match(two.reply ?? '', /Note third: buy milk and bread\./);
+      assert.match(two.reply ?? '', /this same request/);
+    } finally {
+      await r.close();
+      await m.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);
+test(
   'F-027: MCP result taints the durable sortie, approved memory, resume and the next conversation turn',
   { timeout: 60000 },
   async () => {

@@ -18,6 +18,14 @@ test('B-175: the isolation refusal reply names the tool and the way out, in Ital
   assert.match(en, /fixture\.read/);
   assert.match(en, /new conversation/);
   assert.match(en, /30 minutes/);
+  // Tainted by a result in the same request: the way out is to ask for that tool on its own.
+  const sameIt = isolationRefusalReply('it', 'fixture.read', true);
+  assert.match(sameIt, /fixture\.read/);
+  assert.match(sameIt, /questa stessa richiesta/);
+  assert.match(sameIt, /nuova conversazione/);
+  const sameEn = isolationRefusalReply('en', 'fixture.read', true);
+  assert.match(sameEn, /this same request/);
+  assert.match(sameEn, /on its own/);
 });
 
 test('B-175: only a tainted conversation gets the start-a-new-conversation refusal; an EVA-03 grant does not', () => {
