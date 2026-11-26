@@ -692,6 +692,6 @@ PR [#830](https://github.com/voidbrain/nerv/pull/830) renames `solution:ID` refe
 
 PRs #825, #824, #826, #827, #828, #829, #830, #832, #831, #833 merged on green CI. #825: F-142, F-143; #826: F-144; #829: B-167, F-120; #832: F-145, F-146; #831, #833: B-167 (closed); #824, #827, #828, #830: no record.
 
-## 2026-11-26 — main `33bbc9d`
+## 2026-11-26 — main `40615c4`
 
-PRs #835 and #834 merged on green CI (#835 docs-only, F-147; #834 all five jobs after one Windows B-076 rerun, B-168 closed after fresh-context review). Closed F-125 (#820–#828 green) and reconciled harness v10.24.3.
+PRs #835, #834, #836 and #837 merged on green CI (#835, #836, #837 docs-only: F-147, B-169, F-123 closed; #834 all five jobs after one Windows B-076 rerun, B-168 closed after fresh-context review). Closed F-125 (#820–#828 green) and reconciled harness v10.24.3.

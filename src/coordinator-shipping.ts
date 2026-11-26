@@ -321,20 +321,39 @@ export function replicationBatchAt(
  */
 export function exportSeedSnapshot(
   db: DatabaseSync,
-  input: Source & { readonly privateKey: KeyObject; readonly maxBodyBytes?: number; readonly omitTables?: boolean },
+  input: Source & {
+    readonly privateKey: KeyObject;
+    readonly maxBodyBytes?: number;
+    readonly omitTables?: boolean;
+    readonly onReadCommitted?: () => void;
+  },
 ): ExportedCoordinatorSnapshot {
   installReplicationCapture(db);
-  const flush = () =>
-    inWriteTransaction(db, () => {
-      if (readCoordinatorFencingState(db)?.replicationMode !== 'active')
-        throw new Error('This base is not the active main: only the active main seeds a standby.');
-      while (captureInTransaction(db, input));
-      const digest = (
-        db.prepare('SELECT state_digest FROM coordinator_state WHERE id = 1').get() as { state_digest: string | null }
-      ).state_digest;
-      // A chain starts with a batch: a main that never appended one gives the standby a digest to chain onto.
-      if (!digest) appendReplicationBatchInTransaction(db, { ...input, changes: [] });
-    });
+  const flush = () => {
+    if (readCoordinatorFencingState(db)?.replicationMode !== 'active')
+      throw new Error('This base is not the active main: only the active main seeds a standby.');
+    while (db.prepare('SELECT 1 FROM coordinator_replication_pending LIMIT 1').get()) {
+      const captured = inWriteTransaction(db, () => {
+        if (readCoordinatorFencingState(db)?.replicationMode !== 'active')
+          throw new Error('This base is not the active main: only the active main seeds a standby.');
+        return captureInTransaction(db, input);
+      });
+      if (!captured) break;
+    }
+    const digest = (
+      db.prepare('SELECT state_digest FROM coordinator_state WHERE id = 1').get() as { state_digest: string | null } | undefined
+    )?.state_digest;
+    // A chain starts with a batch: a main that never appended one gives the standby a digest to chain onto.
+    if (!digest)
+      inWriteTransaction(db, () => {
+        if (readCoordinatorFencingState(db)?.replicationMode !== 'active')
+          throw new Error('This base is not the active main: only the active main seeds a standby.');
+        const nowDigest = (
+          db.prepare('SELECT state_digest FROM coordinator_state WHERE id = 1').get() as { state_digest: string | null }
+        ).state_digest;
+        if (!nowDigest) appendReplicationBatchInTransaction(db, { ...input, changes: [] });
+      });
+  };
   for (let attempt = 0; attempt < 5; attempt += 1) {
     flush();
     db.exec('BEGIN');
@@ -386,6 +405,7 @@ export function exportSeedSnapshot(
       inTransaction: true,
       commitAfterRead: true,
       ...(input.omitTables ? { omitTables: true } : {}),
+      ...(input.onReadCommitted ? { onReadCommitted: input.onReadCommitted } : {}),
     });
   }
   throw new Error('The main kept writing while the seed was read; it is tried again.');
@@ -398,8 +418,10 @@ interface SeedWorkerInput extends Source {
   readonly maxBodyBytes: number;
 }
 
-type SeedWorkerReply =
+type SeedWorkerMessage =
+  | { readonly kind: 'read-committed' }
   | {
+      readonly kind: 'done';
       readonly ok: true;
       readonly manifest: ExportedCoordinatorSnapshot['manifest'];
       readonly signature: string;
@@ -407,7 +429,7 @@ type SeedWorkerReply =
       readonly totalBytes: number;
       readonly chunkBuffers: ArrayBuffer[];
     }
-  | { readonly ok: false; readonly error: string };
+  | { readonly kind: 'done'; readonly ok: false; readonly error: string };
 
 /**
  * F-016-T21: exports, serialises and signs a seed snapshot on a worker thread so serve's event loop keeps
@@ -416,12 +438,16 @@ type SeedWorkerReply =
 export async function exportSeedSnapshotAsync(
   db: DatabaseSync,
   input: Source & { readonly privateKey: KeyObject; readonly maxBodyBytes?: number },
-  onWorker?: (worker: Worker) => void,
+  hooks?: { onWorker?: (worker: Worker) => void; onReadCommitted?: () => void },
 ): Promise<ExportedCoordinatorSnapshot> {
   const file = (db.prepare('PRAGMA database_list').all() as { name: string; file: string }[]).find(
     (r) => r.name === 'main',
   )?.file;
-  if (!file) return exportSeedSnapshot(db, input);
+  if (!file)
+    return exportSeedSnapshot(db, {
+      ...input,
+      ...(hooks?.onReadCommitted ? { onReadCommitted: hooks.onReadCommitted } : {}),
+    });
   const data: SeedWorkerInput = {
     nervSeedWorker: true,
     databasePath: file,
@@ -435,9 +461,14 @@ export async function exportSeedSnapshotAsync(
       execArgv: [],
       workerData: data,
     });
-    onWorker?.(worker);
+    hooks?.onWorker?.(worker);
     let settled = false;
-    worker.once('message', (reply: SeedWorkerReply) => {
+    worker.on('message', (reply: SeedWorkerMessage) => {
+      if (reply.kind === 'read-committed') {
+        hooks?.onReadCommitted?.();
+        return;
+      }
+      if (settled) return;
       settled = true;
       if (!reply.ok) {
         rejectExport(new Error(reply.error));
@@ -470,7 +501,7 @@ export async function exportSeedSnapshotAsync(
 if (!isMainThread && (workerData as Partial<SeedWorkerInput> | null)?.nervSeedWorker === true) {
   const data = workerData as SeedWorkerInput;
   const workerDb = new DatabaseSync(data.databasePath);
-  let reply: SeedWorkerReply;
+  let reply: SeedWorkerMessage;
   let transfer: ArrayBuffer[] = [];
   try {
     workerDb.exec('PRAGMA busy_timeout = 5000');
@@ -480,6 +511,7 @@ if (!isMainThread && (workerData as Partial<SeedWorkerInput> | null)?.nervSeedWo
       privateKey: data.privateKey,
       maxBodyBytes: data.maxBodyBytes,
       omitTables: true,
+      onReadCommitted: () => parentPort!.postMessage({ kind: 'read-committed' } satisfies SeedWorkerMessage),
     });
     transfer = exported.chunks.map((chunk) => {
       const ab = new ArrayBuffer(chunk.byteLength);
@@ -487,6 +519,7 @@ if (!isMainThread && (workerData as Partial<SeedWorkerInput> | null)?.nervSeedWo
       return ab;
     });
     reply = {
+      kind: 'done',
       ok: true,
       manifest: exported.manifest,
       signature: exported.signature,
@@ -495,7 +528,7 @@ if (!isMainThread && (workerData as Partial<SeedWorkerInput> | null)?.nervSeedWo
       chunkBuffers: transfer,
     };
   } catch (err) {
-    reply = { ok: false, error: err instanceof Error ? err.message : String(err) };
+    reply = { kind: 'done', ok: false, error: err instanceof Error ? err.message : String(err) };
   } finally {
     workerDb.close();
   }
@@ -763,6 +796,8 @@ export interface ReplicationShipperOptions {
   readonly now?: () => number;
   /** How `flush()` waits between rounds (tests inject one). */
   readonly sleep?: (ms: number) => Promise<void>;
+  /** F-016-T21: called when a seed worker has committed its read snapshot and begins serialising/signing. */
+  readonly onReadCommitted?: () => void;
 }
 
 /**
@@ -774,6 +809,8 @@ export class ReplicationShipper {
   private timer: ReturnType<typeof setInterval> | undefined;
   private running: Promise<ShipOutcome> | undefined;
   private readonly workers = new Set<Worker>();
+  private closing: Promise<unknown> | undefined;
+  private stopped = false;
   private installed = false;
   private seedRetryAt = 0;
   private seedFailures = 0;
@@ -832,6 +869,7 @@ export class ReplicationShipper {
 
   /** Seeds `standby` from a signed snapshot of this main; throws when it cannot (the caller reports it). */
   async seed(standby: string): Promise<{ headSeq: number }> {
+    if (this.stopped) throw new Error('Replication shipper is stopped.');
     if (standby === this.o.baseId) throw new Error('A coordinator never names or seeds its own base.');
     const state = this.state();
     if (state?.replicationMode !== 'active')
@@ -840,14 +878,18 @@ export class ReplicationShipper {
     const exported = await exportSeedSnapshotAsync(
       this.o.db,
       { ...this.source(), privateKey: this.o.privateKey() },
-      (worker) => {
-        this.workers.add(worker);
-        worker.once('exit', () => this.workers.delete(worker));
+      {
+        onWorker: (worker) => {
+          this.workers.add(worker);
+          worker.once('exit', () => this.workers.delete(worker));
+        },
+        ...(this.o.onReadCommitted ? { onReadCommitted: this.o.onReadCommitted } : {}),
       },
     );
     const { coordinatorEpoch, headSeq } = exported.manifest;
     let reply: SeedReply = { ok: true, complete: false };
     for (const frame of exported.chunks) {
+      if (this.stopped) throw new Error('Replication shipper is stopped.');
       const current = this.state();
       if (current?.replicationMode !== 'active' || current.coordinatorEpoch !== coordinatorEpoch)
         throw new Error('This base is no longer the active main: only the active main seeds a standby.');
@@ -855,6 +897,7 @@ export class ReplicationShipper {
       if (!reply.ok) throw new Error(`${standby} refused the seed (${reply.reason}): ${reply.error}`);
     }
     if (!reply.ok || !reply.complete) throw new Error(`${standby} did not complete the seed.`);
+    if (this.stopped) throw new Error('Replication shipper is stopped.');
     const after = this.state();
     if (after?.replicationMode !== 'active' || after.coordinatorEpoch !== coordinatorEpoch)
       throw new Error('This base is no longer the active main: only the active main seeds a standby.');
@@ -868,6 +911,7 @@ export class ReplicationShipper {
   }
 
   private async reseed(standby: string): Promise<ShipOutcome> {
+    if (this.stopped) return 'inactive';
     if (this.clock() < this.seedRetryAt) return 'behind';
     try {
       await this.seed(standby);
@@ -875,6 +919,7 @@ export class ReplicationShipper {
       this.seedFailures = 0;
       return 'seeded';
     } catch (err) {
+      if (this.stopped) return 'inactive';
       const message = err instanceof Error ? err.message : 'seed failed';
       const refused = /refused/.test(message);
       const base = refused ? SEED_REFUSED_BACKOFF_MS : SEED_UNREACHABLE_BACKOFF_MS;
@@ -905,6 +950,7 @@ export class ReplicationShipper {
   }
 
   private async ship(): Promise<ShipOutcome> {
+    if (this.stopped) return 'inactive';
     const state = this.state();
     if (!state || (state.replicationMode !== 'active' && state.replicationMode !== 'draining')) return 'inactive';
     this.ensureCapture();
@@ -1016,9 +1062,19 @@ export class ReplicationShipper {
   }
 
   stop(): void {
+    this.stopped = true;
     if (this.timer) clearInterval(this.timer);
     this.timer = undefined;
-    for (const worker of this.workers) void worker.terminate();
-    this.workers.clear();
+    if (this.workers.size) {
+      const active = [...this.workers];
+      this.workers.clear();
+      this.closing = Promise.allSettled(active.map((w) => w.terminate()));
+    }
+  }
+
+  async stopAsync(): Promise<void> {
+    this.stop();
+    await this.closing;
+    await this.running;
   }
 }

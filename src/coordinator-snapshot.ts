@@ -112,6 +112,8 @@ export interface ExportCoordinatorSnapshotInput {
   commitAfterRead?: boolean;
   /** F-016-T21: omit `tables` from the returned value once `chunks` are built (worker-thread seed export). */
   omitTables?: boolean;
+  /** F-016-T21: called immediately after the read transaction commits, before canonicalising and signing. */
+  onReadCommitted?: () => void;
 }
 
 export interface ExportedCoordinatorSnapshot {
@@ -208,6 +210,7 @@ export function exportCoordinatorSnapshot(input: ExportCoordinatorSnapshotInput)
     }
     throw err;
   }
+  input.onReadCommitted?.();
 
   const sha256 = sha256Hex(canonical(tables));
   const manifest: CoordinatorSnapshotManifest = {

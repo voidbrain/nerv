@@ -22,6 +22,7 @@
     "B-124-T01"
   ],
   "resources": [
+    "src/coordinator-serve.ts",
     "src/coordinator-shipping.ts",
     "src/coordinator-snapshot.ts",
     "test/coordinator-shipping.test.ts",

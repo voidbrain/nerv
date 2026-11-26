@@ -196,7 +196,7 @@ async function twoBases() {
     async close() {
       for (const s of Object.values(sides)) {
         await s.link.stop();
-        s.lease.stop();
+        await s.lease.stopAsync();
         s.store.close();
       }
       rmSync(dir, { recursive: true, force: true });
@@ -689,62 +689,70 @@ describe('F-016-T20 re-check (#725): every standby-feed refusal', () => {
 });
 
 describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
-  it('serves lease renewals and Kaji requests with bounded event-loop delay during a large seed, and aborts if fenced mid-export', async () => {
+  it('serves lease renewals and Kaji requests during snapshot serialisation/signing with bounded event-loop delay, and aborts if fenced mid-export', async () => {
     const t = await twoBases();
     try {
       const { x, b } = t;
       await x.link.start(600_000);
       await kaji(x.home, x.store, ['standby', B]);
 
-      // Populate X with 12,000 deliveries rows (~24 MB JSON) before capture, simulating a large coordinator store.
+      // Populate X with 12,000 committed deliveries rows (~24 MB JSON) and clear pending capture so the seed
+      // measures reading, canonicalising and signing the snapshot itself.
       const body = 'neutral-delivery-payload-'.repeat(70);
       x.store.db.exec('BEGIN IMMEDIATE');
       const ins = x.store.db.prepare(
         "INSERT INTO deliveries(rowid, id, reminder_id, kind, message, created, read_at) VALUES (?, ?, NULL, 'brief', ?, ?, NULL)",
       );
       for (let i = 1; i <= 12_000; i += 1) ins.run(i, `del-${i}`, `${i}:${body}`, ISSUED);
+      x.store.db.exec('DELETE FROM coordinator_replication_pending');
       x.store.db.exec('COMMIT');
 
+      let readCommittedAt = 0;
       let firstChunkAt = 0;
-      const shipper = x.lease.shipper({
-        replicate: (id, batch, lease) => x.link.replicate(id, batch, lease),
-        seedStandby: (id, frame, epoch, lease) => {
-          if (!firstChunkAt) firstChunkAt = performance.now();
-          return x.link.seedStandby(id, frame, epoch, lease);
-        },
-      });
+      let renewOutcome: string | undefined;
+      let renewDoneAt = 0;
+      let kajiDoneAt = 0;
+      let concurrentWork: Promise<void> | undefined;
       const keeper = x.lease.keeper((id, req) => x.link.renewLease(id, req));
+
+      const shipper = x.lease.shipper(
+        {
+          replicate: (id, batch, lease) => x.link.replicate(id, batch, lease),
+          seedStandby: (id, frame, epoch, lease) => {
+            if (!firstChunkAt) firstChunkAt = performance.now();
+            return x.link.seedStandby(id, frame, epoch, lease);
+          },
+        },
+        {
+          // Fires right after the worker's SQLite read transaction commits, while it canonicalises and signs.
+          onReadCommitted: () => {
+            readCommittedAt = performance.now();
+            concurrentWork = Promise.all([
+              keeper.renewOnce().then((out) => {
+                renewOutcome = out;
+                renewDoneAt = performance.now();
+              }),
+              b.link.heartbeat().then(() => {
+                kajiDoneAt = performance.now();
+              }),
+            ]).then(() => undefined);
+          },
+        },
+      );
 
       const startedAt = performance.now();
       let lastTick = startedAt;
       let maxGapMs = 0;
-      let ticksBeforeFirstChunk = 0;
+      let ticksDuringSerialise = 0;
       const ticker = setInterval(() => {
         const now = performance.now();
         const gap = now - lastTick;
         if (!firstChunkAt) {
-          ticksBeforeFirstChunk += 1;
+          if (readCommittedAt > 0) ticksDuringSerialise += 1;
           if (gap > maxGapMs) maxGapMs = gap;
         }
         lastTick = now;
       }, 5);
-
-      let renewOutcome: string | undefined;
-      let renewDoneAt = 0;
-      let kajiDoneAt = 0;
-      const concurrentWork = new Promise<void>((resolveWork, rejectWork) => {
-        setTimeout(() => {
-          Promise.all([
-            keeper.renewOnce().then((out) => {
-              renewOutcome = out;
-              renewDoneAt = performance.now();
-            }),
-            b.link.heartbeat().then(() => {
-              kajiDoneAt = performance.now();
-            }),
-          ]).then(() => resolveWork(), rejectWork);
-        }, 5);
-      });
 
       try {
         await shipper.seed(B);
@@ -753,43 +761,48 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
         clearInterval(ticker);
       }
 
-      const exportMs = firstChunkAt - startedAt;
+      const serialiseMs = firstChunkAt - readCommittedAt;
+      assert.ok(readCommittedAt > 0, 'worker reported read-committed before canonicalising');
       assert.equal(renewOutcome, 'renewed');
       assert.ok(
-        ticksBeforeFirstChunk >= 2,
-        `expected event-loop ticks during ${Math.round(exportMs)} ms export, got ${ticksBeforeFirstChunk}`,
+        ticksDuringSerialise >= 1,
+        `expected event-loop ticks during ${Math.round(serialiseMs)} ms serialise/sign, got ${ticksDuringSerialise}`,
       );
       assert.ok(
-        renewDoneAt > 0 && renewDoneAt < firstChunkAt,
-        `lease renewal finished after export (${Math.round(renewDoneAt - startedAt)} ms vs ${Math.round(exportMs)} ms)`,
+        renewDoneAt >= readCommittedAt && renewDoneAt < firstChunkAt,
+        `lease renewal did not complete during serialise/sign (${Math.round(renewDoneAt - readCommittedAt)} ms vs ${Math.round(serialiseMs)} ms)`,
       );
       assert.ok(
-        kajiDoneAt > 0 && kajiDoneAt < firstChunkAt,
-        `Kaji request finished after export (${Math.round(kajiDoneAt - startedAt)} ms vs ${Math.round(exportMs)} ms)`,
+        kajiDoneAt >= readCommittedAt && kajiDoneAt < firstChunkAt,
+        `Kaji request did not complete during serialise/sign (${Math.round(kajiDoneAt - readCommittedAt)} ms vs ${Math.round(serialiseMs)} ms)`,
       );
       assert.ok(
-        maxGapMs < Math.max(150, exportMs * 0.5),
-        `event-loop delay ${Math.round(maxGapMs)} ms blocked export (${Math.round(exportMs)} ms)`,
+        maxGapMs < Math.max(150, serialiseMs * 0.5),
+        `event-loop delay ${Math.round(maxGapMs)} ms blocked serialise/sign (${Math.round(serialiseMs)} ms)`,
       );
       assert.equal(
         readStandby(b.home, (db) => (db.prepare('SELECT COUNT(*) AS n FROM deliveries').get() as { n: number }).n),
         12_000,
       );
 
-      // Authority invariant: if X fences while the worker exports, zero seed frames leave X.
+      // Authority invariant: if X fences after the worker read active state (while serialising/signing), the
+      // main-thread post-worker fence check aborts and zero seed frames leave X.
       let sentAfterFence = 0;
-      const fencedShipper = x.lease.shipper({
-        replicate: (id, batch, lease) => x.link.replicate(id, batch, lease),
-        seedStandby: async () => {
-          sentAfterFence += 1;
-          return { ok: true as const, complete: true };
+      const fencedShipper = x.lease.shipper(
+        {
+          replicate: (id, batch, lease) => x.link.replicate(id, batch, lease),
+          seedStandby: async () => {
+            sentAfterFence += 1;
+            return { ok: true as const, complete: true };
+          },
         },
-      });
-      const pendingFencedSeed = fencedShipper.seed(B);
-      setTimeout(() => {
-        x.store.db.prepare("UPDATE coordinator_state SET replication_mode = 'fenced' WHERE id = 1").run();
-      }, 5);
-      await assert.rejects(pendingFencedSeed, /not the active main|no longer the active main/);
+        {
+          onReadCommitted: () => {
+            x.store.db.prepare("UPDATE coordinator_state SET replication_mode = 'fenced' WHERE id = 1").run();
+          },
+        },
+      );
+      await assert.rejects(fencedShipper.seed(B), /no longer the active main/);
       assert.equal(sentAfterFence, 0, 'fenced main never sends a seed frame');
     } finally {
       await t.close();
