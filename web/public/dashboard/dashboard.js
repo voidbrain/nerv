@@ -889,9 +889,21 @@ function stageTabs(section, tabs, counts) {
   return "<div class='tabs' role='group' aria-label='" + section + " by stage'>" + tabs.map(([k, label]) => "<button class='btn sm" + (k === cur ? " sel" : "") + "' aria-pressed='" + (k === cur) + "' data-stagetab='" + section + ":" + k + "'>" + label + " " + (counts[k] || 0) + "</button>").join("") + "</div>";
 }
 function currentTab(section, first) { return state.tabs && state.tabs[section] || first; }
+/* F-145: the real skills store (GET /api/skills, loaded by live.js into state.skills): one row per version on its
+   stage tab, with its latest evaluation against the baseline. Read-only: promotion and rollback stay on the CLI. */
 function renderSkills() {
   const eva = state.theme === "eva"; const tabs = eva ? [["seed","Seed"],["sprout","Sprout"],["ripe","Ripe"],["dropped","Dropped"]] : [["seed","Create"],["sprout","Try"],["ripe","Use"],["dropped","Dropped"]];
-  document.getElementById("skills").innerHTML = stageTabs("skills", tabs, {}) + "<div class='muted small'>Planned · not connected yet. Skills are the procedures a pilot uses: each is versioned, approved by you and grows through its own stages.</div>";
+  const box = document.getElementById("skills"); const skills = state.skills;
+  if (!Array.isArray(skills)) {
+    box.innerHTML = stageTabs("skills", tabs, {}) + "<div class='small " + (skills && skills.error ? "danger'>" + esc(skills.error) : "muted'>" + (LIVE ? "Reading the skills…" : "Skills come from the live service.")) + "</div>";
+    return;
+  }
+  const rows = skills.flatMap(sk => sk.versions.map(v => ({ id:sk.id, title:sk.title, v })));
+  const counts = {}; rows.forEach(r => { counts[r.v.stage] = (counts[r.v.stage] || 0) + 1; }); const tab = currentTab("skills", "seed");
+  const evaluation = e => e ? "with the skill " + e.withSkillPassed + "/" + e.totalCases + " · without " + e.baselinePassed + "/" + e.totalCases + " · held out " + e.holdoutPassed + "/" + e.holdoutCases + (e.regressions ? " · " + e.regressions + " regressed" : "") + (e.eligibleForPromotion ? " · ready to promote" : "") : "not evaluated yet";
+  box.innerHTML = stageTabs("skills", tabs, counts) + (!rows.length ? "<div class='muted small'>No skills yet. Create one with <code>nerv skills stage &lt;package.json&gt;</code></div>" :
+    rows.filter(r => r.v.stage === tab).map(r => "<div class='card' data-key='" + esc(r.id + "@" + r.v.version) + "'><div class='row'><span class='b'>" + esc(r.id) + " · " + esc(r.v.version) + "</span><span class='tiny muted'>" + esc(r.v.status) + "</span></div>" +
+      "<div class='tiny muted'>" + esc(r.title) + "</div><div class='tiny'>" + esc(evaluation(r.v.evaluation)) + "</div></div>").join("") || "<div class='muted small'>No skill at this stage.</div>");
 }
 function renderMelons() {
   const m = { prototype:"b-info", test:"b-orange", production:"b-ok" };
