@@ -14,26 +14,27 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 46 | 40 |
-| **Require Human 🧑** | 15 | 19 |
+| **Require Human 🧑** | 15 | 20 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-006](#f-006) | [B-057](#b-057) | [B-118](#b-118) |
-| [F-011](#f-011) | [F-116](#f-116) | [B-068](#b-068) |  |
-| [F-004](#f-004) |  | [B-107](#b-107) |  |
-| [F-012](#f-012) |  | [B-113](#b-113) |  |
-| [F-016](#f-016) |  | [B-122](#b-122) |  |
-| [F-086](#f-086) |  | [B-123](#b-123) |  |
-| [F-087](#f-087) |  | [B-128](#b-128) |  |
-| [F-133](#f-133) |  | [B-129](#b-129) |  |
-| [F-092](#f-092) |  | [B-134](#b-134) |  |
-| [F-098](#f-098) |  | [B-135](#b-135) |  |
-| [F-060](#f-060) |  | [B-142](#b-142) |  |
-| [F-007](#f-007) |  | [B-149](#b-149) |  |
-| [F-123](#f-123) |  | [B-056](#b-056) |  |
+| [F-062](#f-062) | [F-006](#f-006) | [B-091](#b-091) | [B-118](#b-118) |
+| [F-011](#f-011) | [F-116](#f-116) | [B-057](#b-057) |  |
+| [F-004](#f-004) |  | [B-068](#b-068) |  |
+| [F-012](#f-012) |  | [B-107](#b-107) |  |
+| [F-016](#f-016) |  | [B-113](#b-113) |  |
+| [F-086](#f-086) |  | [B-122](#b-122) |  |
+| [F-087](#f-087) |  | [B-123](#b-123) |  |
+| [F-133](#f-133) |  | [B-128](#b-128) |  |
+| [F-092](#f-092) |  | [B-129](#b-129) |  |
+| [F-098](#f-098) |  | [B-134](#b-134) |  |
+| [F-060](#f-060) |  | [B-135](#b-135) |  |
+| [F-007](#f-007) |  | [B-142](#b-142) |  |
+| [F-123](#f-123) |  | [B-149](#b-149) |  |
+|  |  | [B-056](#b-056) |  |
 |  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
 |  |  | [B-112](#b-112) |  |
@@ -42,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 188.25 h agent + 17 h owner across 175 open steps of 46 features and 40 other records. 165.5 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 188.25 h agent + 17.25 h owner across 176 open steps of 46 features and 40 other records. 165.5 h of actual effort recorded on 151 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -58,9 +59,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h | — | [F-005-T29](#f-005-t29) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | [F-005-T29](#f-005-t29) | 🤖 | 🧑‍🔧 | — |
 
-💻 **→** Next: B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete (Implemented; verification pending).
+🧑 **→** B-091-T02: on Tabgha's desktop session, update NERV-02 and run one fenced stop ([page](acceptance/b091-tabgha-fenced-stop.md)).
 
 | | |
 |---|---|
@@ -70,10 +71,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 3 h | 0 h | 3 h | Implemented; verification pending | — | [F-005-T29](#f-005-t29) | [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix; [PR #742](https://github.com/voidbrain/nerv/pull/742) inspect read cause and fix |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 1 steps recorded) | 3 h | 0 of 1 completed | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 3 h | 0 h | 3 h | Implemented; verification pending | — | [B-091-T02](#b-091-t02), [F-005-T29](#f-005-t29) | 🤖 | [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix; [PR #742](https://github.com/voidbrain/nerv/pull/742) inspect read cause and fix |
+| 🟢 Small | <a id="b-091-t02"></a>B-091-T02 — Owner: a fenced stop on Tabgha from its desktop session completes its receipt | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-091-T01](#b-091-t01) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 3 h agent + 0.25 h owner | 0 of 2 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -82,10 +84,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix; [PR #742](https://github.com/voidbrain/nerv/pull/742) inspect read cause and fix. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18; [#742](https://github.com/voidbrain/nerv/pull/742); [#750](https://github.com/voidbrain/nerv/pull/750) |
+| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix; [PR #742](https://github.com/voidbrain/nerv/pull/742) inspect read cause and fix. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18; [#742](https://github.com/voidbrain/nerv/pull/742); [#750](https://github.com/voidbrain/nerv/pull/750); [#790](https://github.com/voidbrain/nerv/pull/790) |
 | Opened | 2026-11-18 |
 | Verification | Unit/integration 2026-11-25: Test: `test/windows-service-lifecycle.test.ts` (live database held during `inspect()`, failed first with `database is locked`); PR #742 merged on green CI. Real-device: a fenced stop on Tabgha at `2627d483` or later: Pending. |
-| Reviewed | 2026-11-25 |
+| Reviewed | 2026-11-26 |
 
 </details>
 
