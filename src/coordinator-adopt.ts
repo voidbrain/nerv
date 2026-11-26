@@ -114,12 +114,13 @@ export async function adoptLegacyCoordinator(input: {
     throw new Error(
       `${peersRan.map(([id, e]) => `${id} (epoch ${e})`).join(', ')} ran or acked a coordinator lease: another main ran, so this store is not the coordinator. Nothing was changed.`,
     );
-  // #review: a base holding a later main record than this registry means a later coordinator may run (this store
-  // may be a restored copy from before it).
-  const later = [...probe.maxSeen].filter(([, e]) => e > epoch).sort(([a], [b]) => a.localeCompare(b));
+  // B-170 review: a base holding a main record after epoch 1 means a later coordinator may run (this store may be a
+  // restored copy from before it). Epoch 1 is the one this adoption writes: a store restored from its own backup
+  // finds the other bases already holding it.
+  const later = [...probe.maxSeen].filter(([, e]) => e > Math.max(epoch, 1)).sort(([a], [b]) => a.localeCompare(b));
   if (later.length)
     throw new Error(
-      `${later.map(([id, e]) => `${id} (epoch ${e})`).join(', ')} holds a main record later than this base's epoch ${epoch}: a later coordinator was named, so this store is not the coordinator. Nothing was changed.`,
+      `${later.map(([id, e]) => `${id} (epoch ${e})`).join(', ')} holds a main record after epoch 1: a later coordinator was named, so this store is not the coordinator. Nothing was changed.`,
     );
   // A store restored from an earlier adopt's backup may trail a coordinator on a base that does not answer now.
   const dir = join(home, 'backups');

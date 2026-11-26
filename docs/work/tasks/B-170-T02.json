@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "parent": "B-170",
+  "dependsOn": [
+    "B-170-T01"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "id": "B-170-T02",
+  "title": "kaji adopt: backup, sign main at epoch 1, activate the legacy store, refuse wherever another coordinator could have run",
+  "goal": "B-170-T01's tests pass unchanged; review findings fixed with tests",
+  "status": "implemented",
+  "acceptance": [
+    "B-170-T01's tests pass unchanged, with the coordinator suites",
+    "Fresh-context design review findings fixed or answered"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "docs/work/records/B-170.md",
+    "generated:backlog-views",
+    "contract:coordinator-authority"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "distributed-contracts",
+    "architecture-review"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26: one command reusing the epoch probe and push, review fixes and docs. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": [
+    {
+      "pr": 840,
+      "note": "kaji adopt, review fixes, docs"
+    }
+  ]
+}
