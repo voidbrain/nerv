@@ -274,6 +274,7 @@ export const methodSchemas = {
     properties: {
       message: { type: 'string', minLength: 1, maxLength: 4000 },
       day: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$' },
+      beforeStop: { type: 'boolean' },
     },
     additionalProperties: false,
   },

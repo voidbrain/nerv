@@ -690,7 +690,7 @@ try {
               readPolicy: () => control.readPolicy(),
               check: (channel) => control.check(channel),
               evaluate: (input) => control.evaluate(input),
-              notify: (message) => runtime.notice(message),
+              notify: (message, options) => runtime.notice(message, options),
               settings: () => {
                 const live = readConfig(home);
                 return { timeZone: live.timeZone, language: live.language, target: live.base.id };

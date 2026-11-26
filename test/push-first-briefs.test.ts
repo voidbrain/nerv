@@ -142,3 +142,39 @@ test('F-133-T02: a long brief is cut for the push (short title, short body); the
   const short = formatBriefPushPayload({ id: 'brief-2', message: 'Update 1a2b3c4 applied.' }).notification;
   assert.deepEqual([short.title, short.body], ['Update 1a2b3c4 applied.', 'NERV Agency · Brief']);
 });
+
+test('F-133 review: a notice written just before NERV stops goes to Telegram at once, never push first', async () => {
+  const t = await setup({ fallbackMs: 60_000 });
+  try {
+    const notice = t.store.addBrief('🔄 Update 9a8b7c6 started: NERV stops.', new Date(), undefined, {
+      beforeStop: true,
+    });
+    await until(() => t.telegrams('Update 9a8b7c6 started') === 1);
+    await wait(200);
+    assert.equal(t.push.received.length, 0, 'not pushed: the service may be gone before the push leaves');
+    assert.deepEqual(Object.keys(t.store.deliveryState(notice.id)), ['telegram']);
+  } finally {
+    await t.close();
+  }
+});
+
+test('F-133 review: a brief push dispatch that throws is recorded as failed, logged, and sent to Telegram at once', async () => {
+  const t = await setup({ fallbackMs: 60_000 });
+  const logged: string[] = [];
+  const error = console.error;
+  console.error = (...args: unknown[]) => void logged.push(args.join(' '));
+  t.store.dispatchPushBriefs = async () => {
+    throw new Error('dispatch broke');
+  };
+  try {
+    const brief = t.store.addBrief('Buonasera: nessuna novità.');
+    await until(() => t.telegrams('Buonasera: nessuna novità.') === 1);
+    const push = t.store.deliveryState(brief.id).push;
+    assert.equal(push?.state, 'failed');
+    assert.equal(push?.reason, 'dispatch broke');
+    assert.ok(logged.some((line) => /brief not pushed \(dispatch broke\)/.test(line)));
+  } finally {
+    console.error = error;
+    await t.close();
+  }
+});

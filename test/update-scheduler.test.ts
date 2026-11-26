@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Runtime } from '../src/runtime.ts';
+import { fakePushService, until } from './fixtures/delivery-fakes.ts';
 import { makeServer } from '../src/server.ts';
 import type { UpdateControl } from '../src/server-update.ts';
 import type { UpdateAvailability } from '../src/update-availability.ts';
@@ -50,6 +51,7 @@ function harness(
   } = {},
 ) {
   const notices: string[] = [];
+  const beforeStop: string[] = [];
   const checks: string[] = [];
   const evaluations: { target: string; channel: string; revision?: string }[] = [];
   const scheduler = new AutoUpdateScheduler({
@@ -62,12 +64,13 @@ function harness(
       evaluations.push(input);
       return options.evaluate ? options.evaluate(input) : completed(input);
     },
-    notify: (message) => {
+    notify: (message, options) => {
       notices.push(message);
+      if (options?.beforeStop) beforeStop.push(message);
     },
     settings: () => ({ timeZone: TZ, language: 'en', target: 'NERV-01' }),
   });
-  return { scheduler, notices, checks, evaluations };
+  return { scheduler, notices, checks, evaluations, beforeStop };
 }
 const enabled: AutoUpdatePolicy = { enabled: true, channels: ['main'], targets: ['NERV-01'] };
 
@@ -166,6 +169,7 @@ test('a refusal is reported with the next try; a window missed during the day wa
 
 test('through the server: the switch, the scheduled check, the inbox notice, "aspetta" by chat and the 03:00 evaluation share one state', async () => {
   const runtime = new Runtime(':memory:');
+  const cleanups: (() => Promise<void>)[] = [];
   const token = 'c'.repeat(32);
   let control: UpdateControl | undefined;
   let saved: AutoUpdatePolicy = { enabled: false, channels: [], targets: [] };
@@ -195,11 +199,24 @@ test('through the server: the switch, the scheduled check, the inbox notice, "as
         headers: { authorization: 'Bearer ' + token, 'content-type': 'application/json' },
       });
     assert.ok(control, 'the server hands out its update control');
+    // F-133 review: a subscribed phone, so notices go push first unless written just before NERV stops.
+    const push = await fakePushService(201);
+    cleanups.push(() => push.close());
+    const { endpoint, p256dh, auth } = push.subscription;
+    assert.equal(
+      (
+        await call('/api/push/subscribe', {
+          method: 'POST',
+          body: JSON.stringify({ endpoint, keys: { p256dh, auth } }),
+        })
+      ).status,
+      201,
+    );
     const scheduler = new AutoUpdateScheduler({
       readPolicy: () => control!.readPolicy(),
       check: (channel) => control!.check(channel),
       evaluate: (input) => control!.evaluate(input),
-      notify: (message) => runtime.notice(message),
+      notify: (message, options) => runtime.notice(message, options),
       settings: () => ({ timeZone: TZ, language: 'it', target: 'NERV-01' }),
     });
     runtime.setUpdatePostpone((text) => scheduler.postpone(text, at('2026-11-16T19:05:00Z')));
@@ -240,6 +257,12 @@ test('through the server: the switch, the scheduled check, the inbox notice, "as
     const policy = (await (await call('/api/update/policy')).json()) as { lastAttempt?: AutoUpdateEvaluation };
     assert.equal(policy.lastAttempt?.revision, B);
     assert.match(await inbox(), /Applico l'aggiornamento bbbbbbb/);
+    // F-133 review, across scheduler → runtime → nervous process → store: the announcement is pushed first, the
+    // notice written just before the update stops NERV is not (Telegram sends it at once).
+    const items = (await (await call('/api/inbox')).json()) as { id: string; message: string }[];
+    const idOf = (pattern: RegExp) => items.find((i) => pattern.test(i.message))!.id;
+    await until(async () => !!(await runtime.deliveryState(idOf(/disponibile/))).push?.sentAt);
+    assert.deepEqual(Object.keys(await runtime.deliveryState(idOf(/Applico l'aggiornamento/))), []);
     // Switching off from the dashboard stops the schedule.
     await call('/api/update/policy', {
       method: 'POST',
@@ -251,6 +274,7 @@ test('through the server: the switch, the scheduled check, the inbox notice, "as
   } finally {
     await new Promise<void>((done) => server.close(() => done()));
     await runtime.close();
+    for (const cleanup of cleanups) await cleanup();
   }
 });
 
@@ -377,7 +401,7 @@ test('F-110-T02: through the server, the dashboard switch keeps the saved schedu
       readPolicy: () => control!.readPolicy(),
       check: (channel) => control!.check(channel),
       evaluate: (input) => control!.evaluate(input),
-      notify: (message) => runtime.notice(message),
+      notify: (message, options) => runtime.notice(message, options),
       settings: () => ({ timeZone: TZ, language: 'en', target: 'NERV-01' }),
     });
     assert.deepEqual(await scheduler.tick(at('2026-11-16T17:00:00Z')), {
@@ -493,4 +517,13 @@ test('F-102-T03: resultText reports applied (with restart & after-start health c
   assert.match(enFailed, /After-start health check failed: brain down\./);
   assert.match(enFailed, /Restored backup aaaaaaa\./);
   assert.match(enFailed, /Recovery: Inspect nerv nodes lifecycle-status\./);
+});
+
+test('F-133 review: the notices written just before an update stops NERV are marked beforeStop (Telegram at once)', async () => {
+  const h = harness(() => enabled, { evaluate: (input) => ({ ...completed(input), outcome: 'started' }) });
+  assert.equal((await h.scheduler.tick(at('2026-11-16T19:00:00Z'))).action, 'announced');
+  assert.equal((await h.scheduler.tick(at('2026-11-17T02:00:00Z'))).action, 'evaluated');
+  assert.equal(h.notices.length, 3, 'announce, applying, started');
+  assert.deepEqual(h.beforeStop, h.notices.slice(1), 'applying and started skip push first; the announcement does not');
+  assert.match(h.beforeStop[1]!, /started: NERV stops/);
 });
