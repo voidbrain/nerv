@@ -29,7 +29,7 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h",
-    "basis": "Estimated 2026-11-26: one setting. Not a measurement. Implemented 2026-11-26 in #801.",
+    "basis": "Estimated 2026-11-26: one setting. Not a measurement. Implemented 2026-11-26 in #802.",
     "reviewed": "2026-11-26",
     "agentHours": 0.25,
     "baselineAgentHours": 0.25,
@@ -37,7 +37,7 @@
   },
   "prs": [
     {
-      "pr": 801
+      "pr": 802
     }
   ]
 }
