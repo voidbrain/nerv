@@ -1,4 +1,7 @@
 export const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1';
+/** F-086-T01: read-only first; drafting and sending need the owner's opt-in to gmail.compose (never mail.google.com). */
+export const GMAIL_SCOPE_READONLY = 'https://www.googleapis.com/auth/gmail.readonly';
+export const GMAIL_SCOPE_COMPOSE = 'https://www.googleapis.com/auth/gmail.compose';
 
 const SAFE_MESSAGE_ID = /^[A-Za-z0-9_-]{1,128}$/;
 
@@ -59,6 +62,8 @@ export interface GmailClientOptions {
   readonly accessToken: string | (() => Promise<string> | string);
   readonly baseUrl?: string;
   readonly fetchFn?: typeof fetch;
+  /** The scopes the stored credential was granted (F-086-T05); read-only when omitted. */
+  readonly scopes?: readonly string[];
 }
 
 function headerValue(headers: readonly GmailHeader[] | undefined, name: string): string {
@@ -92,9 +97,11 @@ export class GmailClient {
   private readonly accessToken: string | (() => Promise<string> | string);
   private readonly baseUrl: string;
   private readonly fetchFn: typeof fetch;
+  private readonly scopes: readonly string[];
 
   constructor(options: GmailClientOptions) {
     this.accessToken = options.accessToken;
+    this.scopes = options.scopes ?? [GMAIL_SCOPE_READONLY];
     this.baseUrl = (options.baseUrl ?? GMAIL_API_BASE).replace(/\/$/, '');
     this.fetchFn = options.fetchFn ?? fetch;
   }
@@ -170,12 +177,21 @@ export class GmailClient {
     };
   }
 
+  /** Drafting and sending run only with the owner's gmail.compose opt-in; the Orange and Blue cards still apply. */
+  private requireCompose(): void {
+    if (!this.scopes.includes(GMAIL_SCOPE_COMPOSE))
+      throw new Error(
+        'Gmail is connected read-only: drafting and sending need the owner to run nerv gmail connect --compose.',
+      );
+  }
+
   async createDraft(input: { to: string; subject: string; body: string }): Promise<{
     id: string;
     messageId?: string;
     to: string;
     subject: string;
   }> {
+    this.requireCompose();
     const raw = encodeRfc2822Raw(input);
     const created = await this.requestJson<{ id: string; message?: { id?: string } }>('/users/me/drafts', {
       method: 'POST',
@@ -194,6 +210,7 @@ export class GmailClient {
     threadId?: string;
     readBack: TaintedGmailMessage;
   }> {
+    this.requireCompose();
     let sent: { id: string; threadId?: string };
     if (input.draftId !== undefined) {
       const draftId = input.draftId.trim();

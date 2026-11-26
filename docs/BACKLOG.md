@@ -14,24 +14,24 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 45 | 42 |
-| **Require Human 🧑** | 12 | 21 |
+| **Require Human 🧑** | 11 | 21 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-116](#f-116) | [B-091](#b-091) | — |
-| [F-011](#f-011) |  | [B-057](#b-057) |  |
+| [F-062](#f-062) | [F-092](#f-092) | [B-091](#b-091) | — |
+| [F-011](#f-011) | [F-116](#f-116) | [B-057](#b-057) |  |
 | [F-004](#f-004) |  | [B-068](#b-068) |  |
 | [F-012](#f-012) |  | [B-107](#b-107) |  |
 | [F-016](#f-016) |  | [B-113](#b-113) |  |
-| [F-086](#f-086) |  | [B-122](#b-122) |  |
-| [F-087](#f-087) |  | [B-123](#b-123) |  |
-| [F-133](#f-133) |  | [B-128](#b-128) |  |
-| [F-092](#f-092) |  | [B-129](#b-129) |  |
-| [F-060](#f-060) |  | [B-134](#b-134) |  |
-| [F-007](#f-007) |  | [B-135](#b-135) |  |
+| [F-087](#f-087) |  | [B-122](#b-122) |  |
+| [F-133](#f-133) |  | [B-123](#b-123) |  |
+| [F-092](#f-092) |  | [B-128](#b-128) |  |
+| [F-060](#f-060) |  | [B-129](#b-129) |  |
+| [F-007](#f-007) |  | [B-134](#b-134) |  |
+|  |  | [B-135](#b-135) |  |
 |  |  | [B-142](#b-142) |  |
 |  |  | [B-148](#b-148) |  |
 |  |  | [B-149](#b-149) |  |
@@ -45,7 +45,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 192.25 h agent + 17 h owner across 184 open steps of 45 features and 42 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 194.75 h agent + 17 h owner across 185 open steps of 45 features and 42 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -674,6 +674,55 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-22: F-083-T04 saved-recipe live check recorded in [f083-t04-saved-recipe.md](acceptance/f083-t04-saved-recipe.md). 2026-11-20: `node --test test/photos.test.ts test/documents.test.ts test/cooking-session.test.ts test/telegram.test.ts` (26/26 passed), `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-083-T05 verified: [PR #481](https://github.com/voidbrain/nerv/pull/481) merged on green CI (test/pantry.test.ts). `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history). `F-083-T02` added `computeFromSavedDocument` / `DocumentStore.compute` in `src/documents.ts` and read-only tool `docs.compute` in `src/executors.ts` (cites saved values & arithmetic, asks instead of guessing on missing ratio/setting/unit mismatch); verified with `node --test test/documents.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-086"></a>[✨ F-086](#top)
+
+**Gmail: search and read, then draft and send behind approval**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-086-T05 (the Gmail connect command and service wiring) closes on green CI; then the owner runs the [Gmail connector owner check](acceptance/f086-gmail.md).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: Gmail integration. F-021 registers MCP tools and plans writes behind approval cards; no record owns a mail connector, its credentials or its limits. |
+| **Reproduce** | Follow the [Gmail connector owner check](acceptance/f086-gmail.md) with the owner's account. |
+| **Check** | Read-only first: search and read with the narrowest scope the provider allows; mail content is tainted and never becomes an instruction; a draft is an Orange action and sending is Blue; credentials are stored and rotated under F-066, never in Git or logs; works through a pinned MCP server or the provider API, chosen in T01. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-086-t05"></a>F-086-T05 — Wire the Gmail credential flow into the service | 2.5 h | 0 h | 2.5 h | Implemented; verification pending | — | [F-086-T04](#f-086-t04) | 🤖 | [PR #808](https://github.com/voidbrain/nerv/pull/808) Gmail connect command and service wiring |
+| 🟢 Small | <a id="f-086-t04"></a>F-086-T04 — Owner check with the owner's account | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-086-T05](#f-086-t05) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 5 h (4 of 5 steps) | 0.25 h (1 of 5 steps recorded) | 2.5 h agent + 0.5 h owner | 3 of 5 completed | | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-086-t01"></a>F-086-T01 — Decision: connector, scopes and credentials | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-086-t02"></a>F-086-T02 — Search and read as Green tools | 1 h | 0 h | Completed | [PR #480](https://github.com/voidbrain/nerv/pull/480) implementation |
+| — | <a id="f-086-t03"></a>F-086-T03 — Draft and send behind approval | 1 h | 0 h | Completed | [PR #609](https://github.com/voidbrain/nerv/pull/609) Gmail draft and send behind approval |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-086.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-086-T02: [PR #480](https://github.com/voidbrain/nerv/pull/480) implementation · F-086-T03: [PR #609](https://github.com/voidbrain/nerv/pull/609) Gmail draft and send behind approval · F-086-T05: [PR #808](https://github.com/voidbrain/nerv/pull/808) Gmail connect command and service wiring. [PR #609](https://github.com/voidbrain/nerv/pull/609) (F-086-T03); [PR #480](https://github.com/voidbrain/nerv/pull/480) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md); [#783](https://github.com/voidbrain/nerv/pull/783); [#808](https://github.com/voidbrain/nerv/pull/808) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-086-T02 verified: [PR #480](https://github.com/voidbrain/nerv/pull/480) merged on green CI. `F-086-T01` decision written in [gmail-connector.md](decisions/gmail-connector.md); verified with `npm run check:fast`. |
+| Reviewed | 2026-11-21 |
 
 </details>
 
@@ -1952,54 +2001,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-086"></a>[✨ F-086](#top)
-
-**Gmail: search and read, then draft and send behind approval**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.5 h owner | — | — | — | 🧑‍🔧 | — |
-
-🧑 **→** Run the [Gmail connector owner check](acceptance/f086-gmail.md).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: Gmail integration. F-021 registers MCP tools and plans writes behind approval cards; no record owns a mail connector, its credentials or its limits. |
-| **Reproduce** | Follow the [Gmail connector owner check](acceptance/f086-gmail.md) with the owner's account. |
-| **Check** | Read-only first: search and read with the narrowest scope the provider allows; mail content is tainted and never becomes an instruction; a draft is an Orange action and sending is Blue; credentials are stored and rotated under F-066, never in Git or logs; works through a pinned MCP server or the provider API, chosen in T01. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-086-t04"></a>F-086-T04 — Owner check with the owner's account | — | 0 h | 0 h agent + 0.5 h owner | Planned | [🧑‍🔧](acceptance/f086-gmail.md) | — |
-| 🟢 Small | **Total** | 2.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 0.5 h owner | 3 of 4 completed | | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-086-t01"></a>F-086-T01 — Decision: connector, scopes and credentials | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-086-t02"></a>F-086-T02 — Search and read as Green tools | 1 h | 0 h | Completed | [PR #480](https://github.com/voidbrain/nerv/pull/480) implementation |
-| — | <a id="f-086-t03"></a>F-086-T03 — Draft and send behind approval | 1 h | 0 h | Completed | [PR #609](https://github.com/voidbrain/nerv/pull/609) Gmail draft and send behind approval |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-086.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-086-T02: [PR #480](https://github.com/voidbrain/nerv/pull/480) implementation · F-086-T03: [PR #609](https://github.com/voidbrain/nerv/pull/609) Gmail draft and send behind approval. [PR #609](https://github.com/voidbrain/nerv/pull/609) (F-086-T03); [PR #480](https://github.com/voidbrain/nerv/pull/480) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md); [#783](https://github.com/voidbrain/nerv/pull/783) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-086-T02 verified: [PR #480](https://github.com/voidbrain/nerv/pull/480) merged on green CI. `F-086-T01` decision written in [gmail-connector.md](decisions/gmail-connector.md); verified with `npm run check:fast`. |
-| Reviewed | 2026-11-21 |
-
-</details>
-
----
 ### <a id="f-087"></a>[✨ F-087](#top)
 
 **3D printing: slice a model with a material profile and send it to the printer**
@@ -2095,9 +2096,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | 🤔 |
 
-🧑 **→** Run the [desktop replay owner check](acceptance/f092-desktop-replay.md).
+🧑 **→** Approve a live-binding agent step or not: the [owner-step triage](acceptance/owner-steps-2026-11-26.md#decisions) sets out the options (the owner check cannot pass while nothing supplies the replay driver).
 
 | | |
 |---|---|
@@ -2129,7 +2130,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-092-T02: [PR #496](https://github.com/voidbrain/nerv/pull/496) implementation · F-092-T03: [PR #607](https://github.com/voidbrain/nerv/pull/607) Desktop replay as Blue action with preconditions. [PR #607](https://github.com/voidbrain/nerv/pull/607) (F-092-T03); [PR #496](https://github.com/voidbrain/nerv/pull/496) (merged; CI green); [Desktop input recording feasibility](decisions/desktop-input-recording.md) (`F-092-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md); [#783](https://github.com/voidbrain/nerv/pull/783) |
+| PR / evidence | Steps: F-092-T02: [PR #496](https://github.com/voidbrain/nerv/pull/496) implementation · F-092-T03: [PR #607](https://github.com/voidbrain/nerv/pull/607) Desktop replay as Blue action with preconditions. [PR #607](https://github.com/voidbrain/nerv/pull/607) (F-092-T03); [PR #496](https://github.com/voidbrain/nerv/pull/496) (merged; CI green); [Desktop input recording feasibility](decisions/desktop-input-recording.md) (`F-092-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md); [#783](https://github.com/voidbrain/nerv/pull/783); [#808](https://github.com/voidbrain/nerv/pull/808) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-092-T02 verified: [PR #496](https://github.com/voidbrain/nerv/pull/496) merged on green CI. `F-092-T01`: `npm run check:fast` passed. |
 | Reviewed | 2026-11-21 |

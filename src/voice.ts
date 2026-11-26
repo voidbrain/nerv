@@ -43,7 +43,8 @@ export interface VoiceCorpusReport {
   failures: Array<{ id: string; reason: string }>;
 }
 
-const ESCALATION_RE = /\b(sudo|scrolls\.json|anthropic-key|seat-keys|gpio\.relay|senza chiedere|without asking)\b/i;
+const ESCALATION_RE =
+  /\b(sudo|scrolls\.json|anthropic-key|seat-keys|gmail-credentials|gpio\.relay|senza chiedere|without asking)\b/i;
 const BASE_TARGET_RE = /\b(NERV-[A-Z0-9-]+|BASE-[A-Z0-9-]+)\b/i;
 
 export function detectVoiceLanguage(transcript: string): VoiceLanguage {
