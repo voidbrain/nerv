@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 34 | 10 | 68 | 32 |
+| **This week** | 35 | 10 | 68 | 32 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 59 | 51 |
-| **Require Human 🧑** | 14 | 23 |
+| **Open** | 60 | 51 |
+| **Require Human 🧑** | 15 | 23 |
 
 ### Require Human 🧑
 
@@ -23,8 +23,8 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-062](#f-062) | [F-120](#f-120) | [B-170](#b-170) | [B-175](#b-175) |
 | [F-011](#f-011) | [F-116](#f-116) | [B-172](#b-172) |  |
-| [F-004](#f-004) | [F-142](#f-142) | [B-176](#b-176) |  |
-| [F-012](#f-012) |  | [B-057](#b-057) |  |
+| [F-004](#f-004) | [F-151](#f-151) | [B-176](#b-176) |  |
+| [F-012](#f-012) | [F-142](#f-142) | [B-057](#b-057) |  |
 | [F-016](#f-016) |  | [B-068](#b-068) |  |
 | [F-086](#f-086) |  | [B-107](#b-107) |  |
 | [F-087](#f-087) |  | [B-113](#b-113) |  |
@@ -46,7 +46,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 276.25 h agent + 23.25 h owner across 289 open steps of 59 features and 51 other records. 162.5 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 283.5 h agent + 23.75 h owner across 297 open steps of 60 features and 51 other records. 162.5 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -4752,6 +4752,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-151"></a>[✨ F-151](#top)
+
+**Eva chronicle written by Fuyutsuki with the local model: pathos in the lore version**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 7.25 h agent + 0.5 h owner | — | — | 🤖 | — | 🤔 |
+
+🧑 **→** Approve or change Fuyutsuki's voice and sample entries: [voice and samples](work/design/chronicle-eva-voice.md) (F-151-T02).
+
+| | |
+|---|---|
+| **Issue** | Follow-up of closed [F-054](work/archive/backlog-2026.md#f-054). Owner, 2026-11-26: "I'd like to see more pathos in the lore version." Refinement: "just not cold technical. we are in evangelion lore, I want it more immersive, even funny if you want, but he still names only that day's real facts." Today `composeEvaChronicle` in `src/chronicle.ts` is a deterministic template: no model writes the Eva version, although the Chronicler pilot (`CHRONICLER_PILOT`, Fuyutsuki, writer-only Proto), `verifyChronicleMentionsOnlyDayFacts` and an unused `retellChronicleDayWithPilot` exist. Scope: Fuyutsuki writes the Eva entry with the local model (gemma4:26b, fallback 12b), once per day in the night window (never in owner hours, never alongside another night model run such as Instrumentality), in Italian and English, in an immersive in-world voice (the agency as the organisation, bases as installations; warmth and humour welcome, never a cold technical log), naming only the day's recorded facts. The verifier gates the text; on failure or no model the current template is the fallback and says so quietly. The Simple version stays plain and model-free; the two versions stay separate so the lore never taints the plain record. Owner note: facts are thin and noisy while NERV is mostly tests, and the owner will probably wipe and restart once stable, so this record adds no fact kinds and no noise grouping (possible later work: more fact kinds, grouping of repeated test-driven events). |
+| **Reproduce** | Run `nerv chronicle` in Eva lore for a day with facts: the entry is a fixed template line per fact, with no model and no voice. Steps for the final check: [owner check](work/design/chronicle-eva-voice.md#owner-check-f-149-t08-on-nerv-01-after-the-update). |
+| **Check** | One Eva entry per day with facts, written once in the night window by the local model in Fuyutsuki's immersive voice (approved by the owner in T02), in Italian and English; every recorded source of that day appears and nothing unrecorded is named (verifier); on a failed check, a model error or no model the template entry is stored and labelled as the template; the Simple version is byte-identical to today's; nothing runs in owner hours or alongside another night model run; the dashboard Chronicle tab shows the writer of each Eva entry; failing test first for the generation and the fallback; Gauntlet cases in Italian and English for grounding; owner check done. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-151-t01"></a>F-151-T01 — Draft Fuyutsuki's voice and sample entries | 1 h | 0 h | 1 h | Planned | — | [F-151-T02](#f-151-t02) | 🤖 | [PR #858](https://github.com/voidbrain/nerv/pull/858) |
+| 🟢 Small | <a id="f-151-t02"></a>F-151-T02 — Owner: approve or change Fuyutsuki's voice | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-151-T01](#f-151-t01) | [F-151-T03](#f-151-t03) | ⏳ 🤔 | [PR #858](https://github.com/voidbrain/nerv/pull/858) |
+| 🟡 Medium | <a id="f-151-t03"></a>F-151-T03 — Failing test, then Fuyutsuki writes the Eva entry with the model, gated and with fallback | 1.75 h | 0 h | 1.75 h | Planned | [F-151-T02](#f-151-t02) | [F-151-T04](#f-151-t04), [F-151-T06](#f-151-t06) | ⏳ 🤖 | [PR #858](https://github.com/voidbrain/nerv/pull/858) |
+| 🟡 Medium | <a id="f-151-t04"></a>F-151-T04 — Store each Eva entry once per day with its writer | 1.25 h | 0 h | 1.25 h | Planned | [F-151-T03](#f-151-t03) | [F-151-T05](#f-151-t05), [F-151-T07](#f-151-t07) | ⏳ 🤖 | [PR #858](https://github.com/voidbrain/nerv/pull/858) |
+| 🟡 Medium | <a id="f-151-t05"></a>F-151-T05 — Schedule the writing in the night window, never beside another model run | 1.5 h | 0 h | 1.5 h | Planned | [F-151-T04](#f-151-t04) | [F-151-T08](#f-151-t08) | ⏳ 🤖 | [PR #858](https://github.com/voidbrain/nerv/pull/858) |
+| 🟢 Small | <a id="f-151-t06"></a>F-151-T06 — Gauntlet cases for grounding, Italian and English | 1 h | 0 h | 1 h | Planned | [F-151-T03](#f-151-t03) | [F-151-T08](#f-151-t08) | ⏳ 🤖 | [PR #858](https://github.com/voidbrain/nerv/pull/858) |
+| 🟢 Small | <a id="f-151-t07"></a>F-151-T07 — Dashboard Chronicle tab shows which writer produced each Eva entry | 0.75 h | 0 h | 0.75 h | Planned | [F-151-T04](#f-151-t04) | [F-151-T08](#f-151-t08) | ⏳ 🤖 | [PR #858](https://github.com/voidbrain/nerv/pull/858) |
+| 🟢 Small | <a id="f-151-t08"></a>F-151-T08 — Owner: read the new lore entries and the fallback | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-151-T05](#f-151-t05), [F-151-T06](#f-151-t06), [F-151-T07](#f-151-t07) | — | ⏳ 🧑‍🔧 | [PR #858](https://github.com/voidbrain/nerv/pull/858) |
+| 🔴 Large | **Total** | 7.25 h | 0 h (0 of 8 steps recorded) | 7.25 h agent + 0.5 h owner | 0 of 8 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-151.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-151-T01: [PR #858](https://github.com/voidbrain/nerv/pull/858) · F-151-T02: [PR #858](https://github.com/voidbrain/nerv/pull/858) · F-151-T03: [PR #858](https://github.com/voidbrain/nerv/pull/858) · F-151-T04: [PR #858](https://github.com/voidbrain/nerv/pull/858) · F-151-T05: [PR #858](https://github.com/voidbrain/nerv/pull/858) · F-151-T06: [PR #858](https://github.com/voidbrain/nerv/pull/858) · F-151-T07: [PR #858](https://github.com/voidbrain/nerv/pull/858) · F-151-T08: [PR #858](https://github.com/voidbrain/nerv/pull/858). Plan: [#858](https://github.com/voidbrain/nerv/pull/858) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
 ### <a id="b-056"></a>[🐞 B-056](#top)
 
 **A renewal the companion refuses on the Mac says it was not confirmed**
