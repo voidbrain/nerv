@@ -36,6 +36,7 @@
     "F-006-T33",
     "F-006-T34"
   ],
+  "ownerLink": "docs/acceptance/f006-t35-auditor-unavailable-mac.md",
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
