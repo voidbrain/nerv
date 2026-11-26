@@ -1,3 +1,4 @@
+// @ts-check
 // F-120-T09: nerv-planner, NERV's own model-layer Gauntlet pack. Each case is a real Misato planning turn (the planner
 // prompt NERV builds over its real tool index) for an Italian or an English request, graded as exact JSON on the
 // decision: the tool and its required arguments, a clarification question, or a reply without an action. These tests
@@ -8,13 +9,20 @@ import { mkdtempSync, realpathSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { validatePack, executeWithEvidence, readEvidence } from '@voidbrain/gauntlet-protocol';
-import { main } from '../tools/gauntlet.mjs';
+import { main as gauntletMain } from '../tools/gauntlet.mjs';
 import { buildPlannerPack, readPlannerSource, plannerPackFile } from '../tools/gauntlet-planner-pack.mjs';
 import { builtinTools, toolDocs } from '../src/executors.ts';
-import { patternOf } from '../src/policy.ts';
+import { patternOf, defaultPolicy } from '../src/policy.ts';
 
 const SLOW_HOST = { timeout: 120_000 };
 const profile = '--profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json';
+/**
+ * The CLI's result, untyped like its JSON output.
+ * @param {string[]} args
+ * @param {any} [services]
+ * @returns {Promise<any>}
+ */
+const main = (args, services) => gauntletMain(args, services);
 const committed = () => JSON.parse(readFileSync(plannerPackFile, 'utf8'));
 
 test('F-120-T09: the committed nerv-planner pack is the one built from its cases and the current tool index', () => {
@@ -77,7 +85,7 @@ test('F-120-T09: approval cases expect a tool the gate always sends to the owner
   for (const c of approvals) {
     const tool = builtinTools.find((t) => t.name === c.expected.tool);
     assert.ok(tool, c.id);
-    const pattern = patternOf(tool.effect, 'trusted', tool.name, { blue: [] }, tool.owner === true);
+    const pattern = patternOf(tool.effect, 'trusted', tool.name, { ...defaultPolicy, blue: [] }, tool.owner === true);
     assert.ok(pattern === 'blue' || tool.card === true, `${c.id}: ${tool.name} would run without the owner's card`);
   }
   const reads = source.cases.filter((c) => c.type === 'mcp-read');
