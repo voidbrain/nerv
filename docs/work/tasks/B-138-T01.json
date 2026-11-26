@@ -4,7 +4,7 @@
   "parent": "B-138",
   "title": "Answer a spares question from the fleet.chat result",
   "goal": "After a granted fleet.chat step, the chat reply carries the tool's answer, never a generic greeting",
-  "status": "verified",
+  "status": "closed",
   "acceptance": [
     "The cause is named from sorties e8a4444a and e7849127 on NERV-01 (the fleet.chat result and the next planner reply)",
     "A committed test across the fleet.chat step and the final reply fails first (invented fleet) and passes with the fix",
@@ -36,7 +36,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Implemented 2026-11-25 in src/fleet.ts, src/misato.ts, and src/runtime-planning.ts with failing-first tests; CI and merge remain. Not a measurement. Verified 2026-11-26: #762 merged on green CI (run 45674896663); the live check is the F-098-T04 rerun on NERV-01 once it runs a main with #762.",
+    "basis": "Implemented 2026-11-25 in src/fleet.ts, src/misato.ts, and src/runtime-planning.ts with failing-first tests; CI and merge remain. Not a measurement. Verified 2026-11-26: #762 merged on green CI (run 45674896663); the live check is the F-098-T04 rerun on NERV-01 once it runs a main with #762. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 1.5,
