@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 18 | 8 | 46 | 23 |
+| **This week** | 18 | 8 | 48 | 23 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 45 | 37 |
+| **Open** | 45 | 39 |
 | **Require Human 🧑** | 12 | 20 |
 
 ### Require Human 🧑
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 194.75 h agent + 17 h owner across 175 open steps of 45 features and 37 other records. 156.25 h of actual effort recorded on 145 steps. Generated from the task files.
+**Remaining effort:** 194.75 h agent + 17 h owner across 179 open steps of 45 features and 39 other records. 156.25 h of actual effort recorded on 145 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1430,10 +1430,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-099-T01: [PR #549](https://github.com/voidbrain/nerv/pull/549) the fix; CI green · B-099-T02: [PR #570](https://github.com/voidbrain/nerv/pull/570) job user; CI pending. Found in F-049-T05; [PR #549](https://github.com/voidbrain/nerv/pull/549) B-099-T01 (`test/eva-gate.test.ts`) |
+| PR / evidence | Steps: B-099-T01: [PR #549](https://github.com/voidbrain/nerv/pull/549) the fix; CI green · B-099-T02: [PR #570](https://github.com/voidbrain/nerv/pull/570) job user; CI pending. Found in F-049-T05; [PR #549](https://github.com/voidbrain/nerv/pull/549) B-099-T01 (`test/eva-gate.test.ts`); [PR #805](https://github.com/voidbrain/nerv/pull/805) macOS 15 staging fix (found by B-157) |
 | Opened | 2026-11-19 |
 | Verification | 2026-11-19: B-099-T01 by CI run 44532892249 (PR #549); B-099-T02 pending. Review: design-reviewer, 2026-11-19, PR #549 (one blocker answered by owner decision; three should-fix fixed). |
-| Reviewed | 2026-11-19 |
+| Reviewed | 2026-11-26 |
 
 </details>
 
@@ -1674,6 +1674,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-144-T01: [PR #769](https://github.com/voidbrain/nerv/pull/769). Test: `test/dashboard-cages.test.ts` (committed failing first); owner report 2026-11-25; [#769](https://github.com/voidbrain/nerv/pull/769) |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration: 2026-11-25 passed locally (`test/dashboard-cages.test.ts`). Browser: Pending (the owner watches the EVA cages through several polls with no change: no flicker). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-157"></a>[🐞 B-157](#top)
+
+**The macOS-only Node tests (EVA sandbox, egress proxy, job user, desktop driver) never ran in CI**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Agent work: CI on the PR (the native-macos job runs the list and passes), then close.
+
+| | |
+|---|---|
+| **Issue** | Ten Node test files skip on every runner but macOS: the EVA `sandbox-exec` confinement (network and writes outside the workspace refused or let through), the egress proxy, the EVA job user, EVA jobs and pool, the EVA-03 gate's macOS profile, the macOS desktop driver, and the moved-service joins (`test/update-doctor-slow.test.ts`, `test/update-foreground-runtime.test.ts`). CI runs the Node suite on Ubuntu and Windows; the `native-macos` job ran only the Swift tests. The live service runs on macOS, so its confinement was tested only when someone ran `npm test` on a Mac. Found by the coordinator's dormant-checks sweep of 2026-11-26 (finding T1, proposal 1), which listed 14 sites in 7 files; the two moved-service files and `eva-gate` were found here. |
+| **Reproduce** | On main, `.github/workflows/ci.yml` `native-macos` has no `node --test` step; `test/eva-runner.test.ts:32` and the other sites carry `skip: !isDarwinWithSandbox` or `platform !== 'darwin'`, so every Linux and Windows run reports them skipped. |
+| **Check** | `test/macos-node-tests.test.mjs` (B-157-T01, committed failing first and not edited): every test file with a macOS-only skip is in `MACOS_NODE_TESTS`; a run with a skipped, failed or no test fails; the `native-macos` job runs `node tools/macos-node-tests.mjs` whenever Node work or a full run is selected. The job passes in CI with 0 skipped and adds about a minute. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-157-t01"></a>B-157-T01 — Failing test: the macOS-only Node tests run on the macOS runner | 0.5 h | 0 h | 0 h | Implemented; verification pending | — | [B-157-T02](#b-157-t02) |
+| 🟢 Small | <a id="b-157-t02"></a>B-157-T02 — Run the macOS-only Node tests in the native-macos job | 0.5 h | 0 h | 0 h | Implemented; verification pending | [B-157-T01](#b-157-t01) | — |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 0 h | 0 of 2 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-157.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (T1); `.github/workflows/ci.yml` `native-macos`; `tools/macos-node-tests.mjs`; `test/macos-node-tests.test.mjs`; [#805](https://github.com/voidbrain/nerv/pull/805) |
+| Opened | 2026-11-26 |
+| Verification | Unit: 2026-11-26, local: `test/macos-node-tests.test.mjs` fails on main (no list, no step) and passes with the fix; `node tools/macos-node-tests.mjs` on macOS: 64 passed, 0 skipped. CI: 2026-11-26, PR #805 run 45798962499: `native-macos` "macOS-only Node tests" 64 passed, 0 skipped (the whole job 1 min 46 s). |
 | Reviewed | 2026-11-26 |
 
 </details>
@@ -3412,6 +3451,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound · B-076-T03: [PR #695](https://github.com/voidbrain/nerv/pull/695). [PR #540](https://github.com/voidbrain/nerv/pull/540) B-076-T01; [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2; [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-156"></a>[🐞 B-156](#top)
+
+**A push to main cancelled the weekly scheduled full CI run**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Agent work: CI on the PR, then close; the next scheduled run (Monday 07:00 UTC) shows it is no longer cancelled.
+
+| | |
+|---|---|
+| **Issue** | `.github/workflows/ci.yml` put every run on `main` in one concurrency group (`CI-refs/heads/main`) with `cancel-in-progress`, so a push to `main` cancelled the weekly scheduled full run: run 45243110680 of 2026-11-23 had `full-suite` and `native-macos` cancelled (last scheduled success 2026-11-16). The full-run freshness rule still forced a full run on 2026-11-26, so nothing went unchecked. Coordinator dormant-checks sweep of 2026-11-26, finding W2, proposal 13. |
+| **Reproduce** | On main, the concurrency group (the workflow name, then the PR number or else the ref) gives the same value for a push and a scheduled run on `main`. |
+| **Check** | `test/verification-policy.test.mjs` "B-156: …" (B-156-T01, committed failing first and not edited) evaluates the group for a push and a schedule on `main` and requires them to differ; `cancel-in-progress` stays for superseded PR heads. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-156-t01"></a>B-156-T01 — Failing test: a scheduled run and a push to main share a concurrency group | 0.25 h | 0 h | 0 h | Implemented; verification pending | — | [B-156-T02](#b-156-t02) |
+| 🟢 Small | <a id="b-156-t02"></a>B-156-T02 — Scheduled runs in their own concurrency group | 0.25 h | 0 h | 0 h | Implemented; verification pending | [B-156-T01](#b-156-t01) | — |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0 h | 0 of 2 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-156.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (W2); run 45243110680; `.github/workflows/ci.yml` `concurrency`; [#805](https://github.com/voidbrain/nerv/pull/805) |
+| Opened | 2026-11-26 |
+| Verification | Unit: 2026-11-26, local: the B-156 test fails on main and passes with the fix. CI: Pending (the next scheduled run). |
 | Reviewed | 2026-11-26 |
 
 </details>
