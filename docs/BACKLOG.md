@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 31 | 8 | 62 | 30 |
+| **This week** | 31 | 9 | 62 | 30 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 58 | 46 |
+| **Open** | 57 | 46 |
 | **Require Human 🧑** | 13 | 20 |
 
 ### Require Human 🧑
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 271.75 h agent + 21.75 h owner across 265 open steps of 58 features and 46 other records. 162.5 h of actual effort recorded on 149 steps. Generated from the task files.
+**Remaining effort:** 271.75 h agent + 21.25 h owner across 264 open steps of 57 features and 46 other records. 162.5 h of actual effort recorded on 149 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1048,7 +1048,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-144-T01: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T02: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T03: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T04: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T05: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T06: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T07: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T08: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan. Plan: [#826](https://github.com/voidbrain/nerv/pull/826) |
+| PR / evidence | Steps: F-144-T01: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T02: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T03: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T04: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T05: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T06: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T07: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T08: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan. Plan: [#826](https://github.com/voidbrain/nerv/pull/826); cold-start baseline: [#837](https://github.com/voidbrain/nerv/pull/837) |
 | Opened | 2026-11-26 |
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
@@ -3971,52 +3971,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-24 |
 | Verification | 2026-11-24: F-121-T04 `node --test test/print-transfer.test.ts` (failing first: module missing) and the cross-process join test in `test/misato.test.ts` (failed with the coordinator step removed); affected suites (82 passed); full `npm test` 1393 (1391 passed, 2 skipped); `npm run build` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed. CI 2026-11-24: [run 45475646483](https://github.com/voidbrain/nerv/actions/runs/45475646483) green (PR #722); on the PR head the cache-probe test failed once on Windows (run 45472575103 attempt 1, [B-133](work/records/F-121.md#b-133)). Earlier: F-121-T04 pre-review runs and F-121-T01, F-121-T02: [moved 2026-11-25](archive/evidence-2026.md#f-121-moved-2026-11-25). |
 | Reviewed | 2026-11-25 |
-
-</details>
-
----
-### <a id="f-123"></a>[✨ F-123](#top)
-
-**Connect NERV to Grover's hub over MCP**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h owner | `grover:F-005-T01` | — | — | — | — |
-
-💻 **→** Next: F-123-T02 — Owner check: NERV lists the Grover tools (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner 2026-11-24 (coordinator gap review): Grover's hub exposes its tools at `/mcp` on the Pi behind Tailscale, and Grover F-005's last check expects NERV to list them. NERV has governed MCP tool registration (F-021) but no record for connecting to a remote MCP server on the tailnet. Grover F-005-T02 waits on this record (grover:F-005-T02). |
-| **Reproduce** | There is no documented, tested way to register `https://<pi>.<tailnet>.ts.net/mcp` as an MCP source in NERV. |
-| **Check** | The owner registers the hub's `/mcp` URL in NERV; NERV lists the Grover tools with their effect classes; read tools run as Green, actions go through the gate and approval as usual; an unreachable hub is reported, not hidden. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-123-t02"></a>F-123-T02 — Owner check: NERV lists the Grover tools | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | `grover:F-005-T01` | — | ⏳ 🧑‍🔧 | [PR #802](https://github.com/voidbrain/nerv/pull/802) prerequisite |
-| 🟢 Small | **Total** | 2.5 h | 0 h (0 of 2 steps recorded) | 0.5 h owner | 1 of 2 completed | | | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-123-t01"></a>F-123-T01 — Register a remote MCP server on the tailnet | 2.5 h | 0 h | Completed | [PR #746](https://github.com/voidbrain/nerv/pull/746) |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-123.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-123-T01: [PR #746](https://github.com/voidbrain/nerv/pull/746) · F-123-T02: [PR #802](https://github.com/voidbrain/nerv/pull/802) prerequisite. [#802](https://github.com/voidbrain/nerv/pull/802) (prerequisite grover:F-005-T01); Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); F-123-T01 in [PR #746](https://github.com/voidbrain/nerv/pull/746).; [#758](https://github.com/voidbrain/nerv/pull/758) |
-| Opened | 2026-11-24 |
-| Verification | CI 2026-11-25: F-123-T01, Test: `test/mcp-remote.test.ts` green in run 45602256057 (#746). Owner check F-123-T02 pending. |
-| Reviewed | 2026-11-26 |
 
 </details>
 
