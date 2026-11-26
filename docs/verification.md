@@ -34,6 +34,15 @@ gh api repos/voidbrain/nerv/code-scanning/default-setup -q .state
 
 Expected: the second command prints `not-configured`. Then the agent reruns the PR's CodeQL jobs (`gh run rerun <run> --failed -R voidbrain/nerv`) until they pass; only then does the PR merge. Until it merges, the repository has no CodeQL analysis on `main`.
 
+<a id="codeql-alert-triage"></a>**Alert triage** (B-152). B-152-T01 lists here each open alert it judges a false positive: number, rule, location and reason. Dismissing one is the owner's (B-152-T02): for each listed alert run
+
+```bash
+gh api -X PATCH repos/voidbrain/nerv/code-scanning/alerts/<number> -f state=dismissed -f dismissed_reason="false positive" -f dismissed_comment="<reason from the list>"
+gh api --paginate 'repos/voidbrain/nerv/code-scanning/alerts?state=open&per_page=100' --jq length
+```
+
+Expected: the second command prints the number of alerts B-152 still names with an owner (0 when every alert was fixed or dismissed). No list yet: B-152-T01 adds it.
+
 ## Gauntlet adoption
 
 Protocol/pack/adapter changes run `node --test test/gauntlet.test.mjs` plus manifest/index drift validation and `gauntlet:plan`; actual native joins are selected explicitly. The pinned package/lockfile is a dependency risk and therefore requests complete deterministic CI. No check above launches real-model qualification, downloads or repeated stress campaigns. See [commands and costs](evaluations/gauntlet.md).

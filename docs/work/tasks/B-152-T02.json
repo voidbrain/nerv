@@ -2,6 +2,7 @@
   "version": 1,
   "id": "B-152-T02",
   "parent": "B-152",
+<<<<<<< HEAD
   "title": "Run the macOS-only Node tests in the native-macos job",
   "goal": "tools/macos-node-tests.mjs runs the list on macOS and fails on any skip; ci.yml runs it",
   "status": "implemented",
@@ -9,18 +10,29 @@
     "The native-macos job runs the step when Node work or a full run is selected",
     "0 skipped on the macOS runner",
     "docs/verification.md describes the step"
+=======
+  "title": "Owner: dismiss the CodeQL false positives B-152-T01 listed",
+  "goal": "Only real, owned alerts stay open",
+  "status": "planned",
+  "acceptance": [
+    "Each alert listed in docs/verification.md#codeql-alert-triage is dismissed with the listed reason, or sent back to B-152-T01"
+>>>>>>> origin/main
   ],
   "dependsOn": [
     "B-152-T01"
   ],
   "resources": [
+<<<<<<< HEAD
     "tools/macos-node-tests.mjs",
     ".github/workflows/ci.yml",
     "docs/verification.md",
+=======
+>>>>>>> origin/main
     "docs/work/records/B-152.md",
     "generated:backlog-views"
   ],
   "capabilities": [
+<<<<<<< HEAD
     "bounded-edit",
     "regression-design"
   ],
@@ -41,4 +53,27 @@
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   }
+=======
+    "structured-tools"
+  ],
+  "privacy": "No credential or token in the evidence.",
+  "validation": [
+    "gh api --paginate 'repos/voidbrain/nerv/code-scanning/alerts?state=open&per_page=100' --jq length prints the number the record expects"
+  ],
+  "escalation": [
+    "An alert the owner judges real reopens B-152-T01"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26 in the full audit: run the listed commands. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/verification.md#codeql-alert-triage"
+>>>>>>> origin/main
 }
