@@ -1,7 +1,7 @@
 {
   "caseMs": 180000,
-  "suiteMs": 900000,
-  "maxCases": 7,
+  "suiteMs": 1800000,
+  "maxCases": 15,
   "repeat": 1,
   "outputTokens": 16384,
   "maxBytes": 2097152
