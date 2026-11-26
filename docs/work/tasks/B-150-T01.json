@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-150-T01",
+  "parent": "B-150",
+  "title": "Name why the Instrumentality daily-run test saw 4 digest calls on Windows and cover it",
+  "goal": "The cause of CI run 45717358062's failure is named and a deterministic test drives it",
+  "status": "implemented",
+  "acceptance": [
+    "The cause is named from the run log and the scheduler code",
+    "A test drives a failed daily run across local midnight and expects exactly two attempts per local day",
+    "The daily-run test does not read the real clock"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/instrumentality.test.ts",
+    "docs/work/records/B-150.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/instrumentality.test.ts",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 0.5 h agent; read the run, B-104 and the scheduler, add the crossing test. Implemented the same day in about 0.5 h. Remaining: CI.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
