@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 7 | 20 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 7 | 23 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7252,6 +7252,93 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | PR / evidence | [#802](https://github.com/voidbrain/nerv/pull/802) (F-098-T04 cancelled); F-098-T04 run evidence in [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #705](https://github.com/voidbrain/nerv/pull/705) (F-098-T06 fleet by chat); [PR #691](https://github.com/voidbrain/nerv/pull/691) (F-098-T05 fleet import); [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](../design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408); [#750](https://github.com/voidbrain/nerv/pull/750) |
 | Opened | 2026-11-14 |
 | Verification | Unit/integration 2026-11-24: `node --test test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts` (43 passed) with the containment fix; CI green on PRs #691 and #705. Live on the real fleet 2026-11-25 (F-098-T04, owner on NERV-01): crash recorded; spare count failed (B-138). The rerun was cancelled 2026-11-26 (F-098-T04, owner decision). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-151
+
+**The dashboard's AA test skipped every black or white text: Eva · Light primary buttons fail AA**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: #801 merged 2026-11-26 on green CI (validate, windows, native-macos, full-suite); test/dashboard.test.ts AA check committed failing first and unedited.
+
+| | |
+|---|---|
+| **Issue** | `test/dashboard.test.ts` "every theme, mode and colour reaches WCAG AA …" (F-047) computes luminance by reading six hex digits, but `palette()` gives black and white as `#000` and `#fff`: the luminance is NaN, `NaN < 4.5` is false, so every pair with `hdr-fg`, `brand-fg` or `on-danger` in black or white passed unchecked. With the colours read correctly, Eva · Light fails `brand-fg` on `accent` (black on the deep accent, the `.btn.primary` text) in all five colours: orange #000 on #b34700 3.82, blue on #1d5fd1 3.61, green on #166534 2.95, violet on #7e3fc4 3.40, ochre on #7a5d00 3.39 (need 4.5). No other pair fails in the 20 combinations. |
+| **Reproduce** | In `test/dashboard.test.ts`, `lum('#000')` returns NaN (`parseInt('', 16)`); on main the test passes although Eva · Light · Orange's primary button is black on #b34700 (3.82:1). |
+| **Check** | The test reads three-digit hex and fails any ratio that is not a number (B-151-T01, committed failing first and not edited); every pair passes AA in all 20 combinations; Eva · Dark · Orange (the `:root` default) is unchanged; `src/dashboard-theme.ts` stays equal to `dashboard.js`. |
+### B-137
+
+**Fleet chat reads a new drone's model and version as part categories**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: #764 merged on green CI (run 45681378218); owner decision in chat 2026-11-26 ("close B-137 and B-138 on their CI evidence? yes i guess"): the live F-098-T04 rerun was cancelled (#802), no live check planned.
+
+| | |
+|---|---|
+| **Issue** | Seen by the owner on NERV-01 at `2627d483` on 2026-11-25 at about 12:00. `nerv chat "aggiungi il drone Smoke, modello AOS 5, v. 5.1"` answered (after two "(invalid reply)" lines, [B-136](../work/records/B-137.md#b-136)) "Quale categoria intendevi per 'modello'? Devo scegliere tra: frame, motor, prop, arm, fc, esc, vtx, camera, rx, antenna, gps.": the drone's model was taken for a part category. Answering `nerv chat "frame"` (again two "(invalid reply)" lines) gave "Non riesco a registrare 'v. 5.1' perché non corrisponde a una delle categorie di componenti valide…": the version became another category. The conversation loops instead of adding the drone with frame "AOS 5 v5.1". Likely place: `parseAddDrone` in `src/fleet-chat.ts` splits the text after the name on commas and reads each segment's first word as a part category; drone models live in `drone_models` (F-121-T01). |
+| **Reproduce** | With an invented drone: `nerv chat "aggiungi il drone Testdrone, modello Testframe 5, v. 5.1"`; today: a question about the category "modello"; answering `nerv chat "frame"`: a refusal of "v. 5.1" as a category. |
+| **Check** | A committed test fails first: adding a drone with "modello <model>" (Italian and English) and a version records the drone with that model (frame or `drone_models` link, as F-121 defines), or asks once whether to create the model; a version segment ("v. 5.1", "v5.1") joins the model; answering the follow-up never loops back to the same question. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: #801 merged 2026-11-26 on green CI (validate, windows, native-macos, full-suite); test/dashboard.test.ts AA check committed failing first and unedited. 2026-11-26: found while building the 🧱 bricks themes. The first report blamed a wrong-arity call (`palette(theme, mode, accent)` against `palette({ theme, mode, accent })` in `src/dashboard-theme.ts`); that is not the cause: `test/dashboard.test.ts` loads the positional `palette()` from `web/public/dashboard/dashboard.js`, and `tsconfig.json` already includes `test/**/*.ts`, so `npm run typecheck` covers the tests and no typecheck step is needed. The cause is the NaN luminance of short hex. B-151-T01 fixes the test; B-151-T02 makes Eva · Light's brand colour the deep accent with white text, as Simple · Light already does and as 🧱 bricks#20 chose for light modes. 2026-11-26: B-151-T01 and B-151-T02 implemented: the test fails on main with the five Eva · Light pairs and passes unedited after the fix; Eva · Light's brand block and primary buttons are now white on the deep accent (`.hdr` panel headers keep black on the bright accent, 4.5:1 or more); Eva · Dark · Orange and `:root` unchanged. Remaining: CI.
+**Next action / closure evidence:** Closed 2026-11-26: #764 merged on green CI (run 45681378218); owner decision in chat 2026-11-26 ("close B-137 and B-138 on their CI evidence? yes i guess"): the live F-098-T04 rerun was cancelled (#802), no live check planned. 2026-11-26 ([#802](https://github.com/voidbrain/nerv/pull/802)): the live check named below, the F-098-T04 rerun, was cancelled by owner decision ("accept all 17 proposals" of the cross-project audit; the FPV code moves to FPVBuddy, F-101). The fix stays verified on CI; no live check of it is planned. 2026-11-26 reconciliation ([PR #779](https://github.com/voidbrain/nerv/pull/779)): B-137-T01 verified: [#764](https://github.com/voidbrain/nerv/pull/764) merged on green CI (run 45681378218). Remaining: the live check on NERV-01, done by the F-098-T04 rerun once NERV-01 runs a main with #764. 2026-11-25: B-137-T01 implemented in `src/fleet-chat.ts` with failing-first tests committed in `test/fleet-chat.test.ts` (`2fc02d29`). `parseAddDrone` merges comma/semicolon version segments (`v. 5.1`, `v5.1`, `version 2.0`, `versione ...`) onto the preceding model or part segment before category checking, accepts `modello <model>` / `model <model>`, records the drone's `frame` and `drone_models` link (creating the model in `drone_models` when not yet present or inheriting printed parts when already registered), and asks once without category looping when a model name is omitted or a part keyword is clarified. Review fix (Claude, same PR): the owner's second phrase `aggiungi il drone Smoke con frame AOS 5 v5.1` (no comma) did not parse; `con` / `with` after the name now separates it (test committed failing first). The `frame` spares row at 0 new, 0 used that adding a drone creates is intended: the fleet import records a spares row for every named part model so counts can be set later, and the reply names it; since [B-138](../work/records/B-137.md#b-138) a spares question filters by category, so that row no longer answers a question about motors. Next: CI and merge, then verify on live NERV-01 during F-098-T04. Related: [F-098](../work/records/B-137.md#f-098), [F-121](../work/records/B-137.md#f-121) (drone models).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Code reading at main `bce6cd76`: `test/dashboard.test.ts` (lum, need), `web/public/dashboard/dashboard.js` `palette()`, `.btn.primary` and `.brand-block` in `web/public/dashboard/index.html`, `.brand` in `web/src/sign-in.ts`. Test: `test/dashboard.test.ts` "every theme, mode and colour reaches WCAG AA …"; [#801](https://github.com/voidbrain/nerv/pull/801) |
+| Opened | 2026-11-26 |
+| Verification | Unit: 2026-11-26, CI of #801: dashboard AA check passes all 20 combinations. Browser: 2026-11-26, headless screenshots of Eva · Light and Eva · Dark · Orange (not in the repository). |
+| PR / evidence | Test: `test/fleet-chat.test.ts` (committed failing first in `2fc02d29`); owner report 2026-11-25, NERV-01 at `2627d483`; [#750](https://github.com/voidbrain/nerv/pull/750); [#764](https://github.com/voidbrain/nerv/pull/764) |
+| Opened | 2026-11-25 |
+| Verification | Unit/integration: 2026-11-25 passed locally (`test/fleet-chat.test.ts`, `test/fleet-prints.test.ts`, `test/fleet.test.ts`); live NERV-01 check pending. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-138
+
+**`nerv chat` answers a fleet question with a generic greeting, ignoring the `fleet.chat` result**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: #762 merged on green CI (run 45674896663); owner decision in chat 2026-11-26 ("close B-137 and B-138 on their CI evidence? yes i guess"): the live F-098-T04 rerun was cancelled (#802), no live check planned.
+
+| | |
+|---|---|
+| **Issue** | Seen by the owner on NERV-01 at `2627d483` on 2026-11-25. `nerv chat "quanti motori di scorta mi restano?"` twice answered with a generic Misato greeting, although `fleet.chat` was granted and ran (sorties `e8a4444a-16c1-4d4f-984a-1bf118d78ccf` and `e7849127-dbdd-47ad-b712-8f848f181815`): the tool result was ignored. Expected: no spare motors are registered (the spares table held only one frame row, quantity 0). Likely places: the planner's follow-up turn after a tool step (`misatoAsk` in `src/misato.ts`, history and `steps`) and the spares answer of `handleFleetChat` (`src/fleet-chat.ts`, called from `src/executors.ts`). |
+| **Reproduce** | With an invented fleet that has no motor spares: `nerv chat "quanti motori di scorta mi restano?"`; today: a greeting with no spare count. `nerv events e8a4444a-16c1-4d4f-984a-1bf118d78ccf` on NERV-01 shows the granted `fleet.chat` step and the reply. |
+| **Check** | The cause is named from the two sorties (the `fleet.chat` result and the next planner reply); a committed test across the tool step and the final reply fails first and passes with the fix; asked with no motor spares, the answer says none are registered; asked with spares, it gives the counts (new and used). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: #762 merged on green CI (run 45674896663); owner decision in chat 2026-11-26 ("close B-137 and B-138 on their CI evidence? yes i guess"): the live F-098-T04 rerun was cancelled (#802), no live check planned. 2026-11-26 ([#802](https://github.com/voidbrain/nerv/pull/802)): the live check named below, the F-098-T04 rerun, was cancelled by owner decision ("accept all 17 proposals" of the cross-project audit; the FPV code moves to FPVBuddy, F-101). The fix stays verified on CI; no live check of it is planned. 2026-11-26 reconciliation ([PR #779](https://github.com/voidbrain/nerv/pull/779)): B-138-T01 verified: [#762](https://github.com/voidbrain/nerv/pull/762) merged on green CI (run 45674896663). Remaining: the live check on NERV-01, done by the F-098-T04 rerun once NERV-01 runs a main with #762. 2026-11-25: diagnosed from the `2627d483` code paths without reading `~/.nerv` or the live service (session rule). Two defects met across `fleet.chat` and the planner follow-up turn for sorties `e8a4444a` and `e7849127`: (1) `handleFleetChat` (`src/fleet.ts`) listed `fleet.listSpares()` unfiltered (ignoring the requested `motor` category) and matched English spares phrases only with `"left"` / `"remaining spares"`, so with one `frame` row at `0/0` and no `motor` rows it returned either the unrelated `frame` spare or `{ handled: false }`; (2) `misatoAsk` (`src/misato.ts`) never defined `"steps"` in `system()`, and `RuntimePlanning.loop` (`src/runtime-planning.ts`) accepted an ungrounded generic greeting after a granted `fleet.chat` step. Fixed in B-138-T01 with failing-first tests committed before the fix (`2b25814f`). Review fix (Claude, same PR): the widened spares match also took drone questions ("quanti droni hanno il gps?", "does any drone have a camera?") for spares queries; it now needs a spares word, or "rimasti/restano/left/remaining" with a part category (negative cases in `test/fleet-chat.test.ts`). Next: CI and merge, then verify on live NERV-01 during F-098-T04. Related: [F-098](../work/records/B-138.md#f-098).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/fleet-chat.test.ts`, `test/misato.test.ts` (committed failing first in `2b25814f`); owner report 2026-11-25, NERV-01 at `2627d483`; opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); [#762](https://github.com/voidbrain/nerv/pull/762) |
+| Opened | 2026-11-25 |
+| Verification | Unit/integration: 2026-11-25 passed locally (`test/fleet-chat.test.ts`, `test/misato.test.ts`); live NERV-01 check pending. |
 | Reviewed | 2026-11-26 |
 
 </details>
