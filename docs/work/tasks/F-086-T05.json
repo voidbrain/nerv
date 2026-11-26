@@ -43,5 +43,11 @@
     "agentHours": 2.5,
     "baselineAgentHours": 2.5,
     "estimateAgentHours": 2.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 808,
+      "note": "Gmail connect command and service wiring"
+    }
+  ]
 }
