@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "B-157-T02",
+  "parent": "B-157",
+  "title": "Run the macOS-only Node tests in the native-macos job",
+  "goal": "tools/macos-node-tests.mjs runs the list on macOS and fails on any skip; ci.yml runs it",
+  "status": "implemented",
+  "acceptance": [
+    "The native-macos job runs the step when Node work or a full run is selected",
+    "0 skipped on the macOS runner",
+    "docs/verification.md describes the step"
+  ],
+  "dependsOn": [
+    "B-157-T01"
+  ],
+  "resources": [
+    "tools/macos-node-tests.mjs",
+    ".github/workflows/ci.yml",
+    "docs/verification.md",
+    "docs/work/records/B-157.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node tools/macos-node-tests.mjs on macOS",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 0.5 h agent. Implemented the same day: 64 tests, 15 s locally. Remaining: CI.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

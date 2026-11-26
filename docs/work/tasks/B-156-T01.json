@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "B-156-T01",
+  "parent": "B-156",
+  "title": "Failing test: a scheduled run and a push to main share a concurrency group",
+  "goal": "The B-156 test in test/verification-policy.test.mjs fails on main",
+  "status": "implemented",
+  "acceptance": [
+    "The group is evaluated for a push and a schedule on main",
+    "They must differ",
+    "It is not edited to pass in B-156-T02"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/verification-policy.test.mjs",
+    "docs/work/records/B-156.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/verification-policy.test.mjs fails on main"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day; fails on main. Remaining: CI.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}
