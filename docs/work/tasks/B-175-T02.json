@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "parent": "B-175",
+  "dependsOn": [],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "Security semantics of tainted context need explicit owner approval"
+  ],
+  "id": "B-175-T02",
+  "title": "Owner decision: how granted MCP reads behave in a tainted conversation",
+  "goal": "The owner picks an option on docs/decisions/tainted-mcp-reads.md",
+  "status": "planned",
+  "acceptance": [
+    "The owner picks an option on docs/decisions/tainted-mcp-reads.md"
+  ],
+  "resources": [
+    "test/provenance.test.ts",
+    "src/policy.ts",
+    "docs/work/records/B-175.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "owner-check"
+  ],
+  "validation": [
+    "owner, per the decision page"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.0,
+    "estimateAgentHours": 0.0,
+    "ownerHours": 0.25,
+    "ownerKind": "decision"
+  },
+  "ownerLink": "docs/decisions/tainted-mcp-reads.md"
+}
