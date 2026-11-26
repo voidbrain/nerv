@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-148-T01",
+  "parent": "F-148",
+  "title": "Failing join test and the in-memory thinking registry",
+  "goal": "A committed failing test expects a model call to show as a live thinking entry and to vanish when the call ends",
+  "status": "planned",
+  "acceptance": [
+    "A failing test (committed first) starts a planner call, a consultant call and a Casper check against a fake model in a temporary home and expects the service's thinking snapshot to list each while it runs and to be empty after it ends, on success, on a model error and on a timeout; today no such state exists",
+    "Each entry carries pilot name (the same name the sortie line shows, e.g. Maya), role (planner, consultant, Casper), model, sortie ID and the start time; no prompt text, no answer text",
+    "A plain TypeScript module in src/ (no framework imports) holds the registry: begin returns a handle, end is idempotent, a stuck entry expires after a ceiling so a crashed call never shows thinking forever; unit tests for begin, end, double end, expiry and invalid input"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-148.md"
+  ],
+  "capabilities": [
+    "typescript",
+    "regression-design",
+    "concurrency-control"
+  ],
+  "privacy": "Neutral invented pilots, sorties and models only; no owner data or tokens in Git, tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: one small registry module, its unit tests and the failing join test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": 847
+    }
+  ]
+}

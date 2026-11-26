@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 31 | 9 | 65 | 31 |
+| **This week** | 32 | 9 | 65 | 31 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 57 | 48 |
+| **Open** | 58 | 48 |
 | **Require Human 🧑** | 14 | 20 |
 
 ### Require Human 🧑
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 265.5 h agent + 21.75 h owner across 272 open steps of 57 features and 48 other records. 163.25 h of actual effort recorded on 152 steps. Generated from the task files.
+**Remaining effort:** 271.25 h agent + 22 h owner across 278 open steps of 58 features and 48 other records. 163.25 h of actual effort recorded on 152 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1604,6 +1604,49 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-23 |
 | Verification | Unit/integration and browser 2026-11-24: `test/device-pairing.test.ts` 16/16, `test/pairing-qr.test.ts` 9/9 and `test/evaluation.browser.mjs` F-118-T02, T03 and T05 (each committed failing first) pass; CI green on PRs #700, #707, #713, #716; gauntlet: none pending. Real-device (iPhone Home Screen): Pending (F-118-T04). |
 | Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="f-148"></a>[✨ F-148](#top)
+
+**Live "thinking" state: show which pilot is thinking, in which role, with which model**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5.75 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-148-T01 — Failing join test and the in-memory thinking registry (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-26 in chat: while Misato plans or a consultant advises, the dashboard shows nothing working. The EVA cage says "0 active" because EVA instances are only worker tool jobs (`web/public/dashboard/dashboard.js` `renderCages`, `live.js`), and a model call is not a job. Owner: "active pilot thinking, yes". Wanted: a live thinking state in the Pilots panel (Marduk Institute) and on the sortie, naming the pilot (e.g. Maya, the name the sortie line already shows in "Maya S-19EE · Consultant (gemma4:26b)"), its role (Misato planning, Consultant, Casper), its model, the sortie and how long it has been thinking, cleared when the call ends. The EVA cage stays for EVA jobs only. |
+| **Reproduce** | Ask NERV for a plan in chat and watch the dashboard: the Pilots panel and the sortie show no activity until the answer arrives, and the cages read "0 active". |
+| **Check** | A model call (planner, consultant, Casper) shows as a live entry with pilot name, role, model, sortie and elapsed time, and disappears when the call ends or fails, also after a timeout or a service restart; it travels through the existing live state and server-sent events with no new polling; EVA cage counts are unchanged; no prompt or answer text and no backlog IDs in the display; the join test across service, feed, endpoint and panel failed first (F-148-T01 … F-148-T04); the owner's check on the dashboard (F-148-T06). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-148-t01"></a>F-148-T01 — Failing join test and the in-memory thinking registry | 1 h | 0 h | 1 h | Planned | — | [F-148-T02](#f-148-t02) | 🤖 | [PR #847](https://github.com/voidbrain/nerv/pull/847) |
+| 🟡 Medium | <a id="f-148-t02"></a>F-148-T02 — Mark the start and end of each model call in the brain seam | 1.5 h | 0 h | 1.5 h | Planned | [F-148-T01](#f-148-t01) | [F-148-T03](#f-148-t03) | ⏳ 🤖 | [PR #847](https://github.com/voidbrain/nerv/pull/847) |
+| 🟢 Small | <a id="f-148-t03"></a>F-148-T03 — Carry the live state to the dashboard through the existing feed | 1 h | 0 h | 1 h | Planned | [F-148-T02](#f-148-t02) | [F-148-T04](#f-148-t04) | ⏳ 🤖 | [PR #847](https://github.com/voidbrain/nerv/pull/847) |
+| 🟡 Medium | <a id="f-148-t04"></a>F-148-T04 — Show the thinking pilot in the Pilots panel and on the sortie | 1.75 h | 0 h | 1.75 h | Planned | [F-148-T03](#f-148-t03) | [F-148-T05](#f-148-t05), [F-148-T06](#f-148-t06) | ⏳ 🤖 | [PR #847](https://github.com/voidbrain/nerv/pull/847) |
+| 🟢 Small | <a id="f-148-t05"></a>F-148-T05 — Document the live state and reconcile the records | 0.5 h | 0 h | 0.5 h | Planned | [F-148-T04](#f-148-t04) | — | ⏳ 🤖 | [PR #847](https://github.com/voidbrain/nerv/pull/847) |
+| 🟢 Small | <a id="f-148-t06"></a>F-148-T06 — Owner: watch Misato and a consultant think on the dashboard | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-148-T04](#f-148-t04) | — | ⏳ 🧑‍🔧 | [PR #847](https://github.com/voidbrain/nerv/pull/847) |
+| 🔴 Large | **Total** | 5.75 h | 0 h (0 of 6 steps recorded) | 5.75 h agent + 0.25 h owner | 0 of 6 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-148.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-148-T01: [PR #847](https://github.com/voidbrain/nerv/pull/847) · F-148-T02: [PR #847](https://github.com/voidbrain/nerv/pull/847) · F-148-T03: [PR #847](https://github.com/voidbrain/nerv/pull/847) · F-148-T04: [PR #847](https://github.com/voidbrain/nerv/pull/847) · F-148-T05: [PR #847](https://github.com/voidbrain/nerv/pull/847) · F-148-T06: [PR #847](https://github.com/voidbrain/nerv/pull/847). Plan: pending |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
 
 </details>
 
