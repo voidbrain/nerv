@@ -3195,9 +3195,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | [F-121-T03](#f-121-t03) | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 1 h | — | [F-121-T03](#f-121-t03) | 🤖 | — | — |
 
-💻 **→** Next: B-133-T01, name whether the cache probe waited behind the slicer or the runner was slow, and fix or bound it.
+💻 **→** Next: `test/print-transfer.test.ts` passes in the next five Windows CI runs without a rerun, then close.
 
 | | |
 |---|---|
@@ -3209,7 +3209,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-133-t01"></a>B-133-T01 — Name why the cache probe answered in 698 ms on Windows CI and fix or bound it | 1 h | 0 h | 1 h | Planned | — | [F-121-T03](#f-121-t03) |
+| 🟢 Small | <a id="b-133-t01"></a>B-133-T01 — Name why the cache probe answered in 698 ms on Windows CI and fix or bound it | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-121-T03](#f-121-t03) |
 | 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed | | |
 
 <details>
@@ -3219,10 +3219,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [run 45472575103](https://github.com/voidbrain/nerv/actions/runs/45472575103) attempt 1 (PR #722); [run 45553326990](https://github.com/voidbrain/nerv/actions/runs/45553326990) attempt 2 (PR #738); opened in [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750) |
+| PR / evidence | Test: `test/print-transfer.test.ts` (B-133 reproduction; F-121-T04 order bound); [run 45472575103](https://github.com/voidbrain/nerv/actions/runs/45472575103) attempt 1 (PR #722); [run 45553326990](https://github.com/voidbrain/nerv/actions/runs/45553326990) attempt 2 (PR #738); opened in [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750); [#788](https://github.com/voidbrain/nerv/pull/788) |
 | Opened | 2026-11-25 |
-| Verification | Pending. |
-| Reviewed | 2026-11-25 |
+| Verification | Unit 2026-11-26: `node --test test/print-transfer.test.ts` passes locally; the F-121-T04 case fails with the probe made to await the slicer lane. Windows CI: five runs pending. |
+| Reviewed | 2026-11-26 |
 
 </details>
 
