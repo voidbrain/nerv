@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "id": "F-152-T07",
+  "parent": "F-152",
+  "title": "Owner visual check on the live dashboard",
+  "goal": "The owner confirms the four changes on the phone and the desktop, in Eva and Simple",
+  "status": "planned",
+  "acceptance": [
+    "Copy-paste: after the update, open https://<your NERV-01 address>/dashboard/ on the phone and the Mac; scroll to Midori: expect Telegram lines plus a phone push line with devices and last delivered / opened",
+    "Health: no 'Automatic updates' line; the diagnostics are a table with the columns of T05, readable at phone width; the model-reload control is where T03 decided",
+    "Switch Theme to Eva and Simple (Settings, Theme): same content in both voices; reply 'ok' or what looks wrong"
+  ],
+  "dependsOn": [
+    "F-152-T01",
+    "F-152-T02",
+    "F-152-T04",
+    "F-152-T06"
+  ],
+  "resources": [
+    "web/public/dashboard/**",
+    "src/store-push.ts",
+    "test/**",
+    "docs/work/records/F-152.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "javascript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 h agent, 0.5 h owner",
+    "basis": "Estimated 2026-11-26 from the existing code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.5,
+    "ownerKind": "procedure"
+  },
+  "prs": [
+    {
+      "pr": 859,
+      "note": "plan"
+    }
+  ]
+}
