@@ -14,6 +14,10 @@ Owner question, 2026-11-26, on the dashboard line "Edited config.json? Apply it 
 2. **Move to an Advanced section** in settings, collapsed, with the text "Re-read the model settings from config.json" (recommended: the button stays for hand edits, the Health card is shorter).
 3. **Remove**: owners then use `nerv reload` or restart after a hand edit.
 
-## Reply
+## Decision
+
+2026-11-27 ~00:10 CET, owner, in chat ("ok" to the recommendation): **option 2, move to an Advanced section**: collapsed, with the text "Re-read the model settings from config.json". Recorded in F-152-T03; F-152-T04 applies it.
+
+## Reply (answered)
 
 Send "reload: keep", "reload: advanced" or "reload: remove" in chat. The answer is recorded in F-152-T03.

@@ -4,11 +4,11 @@
   "parent": "F-152",
   "title": "Owner decision: keep, move or remove 'Reload models' and the config.json line",
   "goal": "The owner decides in plain words what happens to the Edited config.json line and the Reload models button",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Findings in the record: the button posts /api/models/reload, which makes the brain re-read config.json models and keeps the old settings if the file is invalid; nothing watches the file, so a hand edit applies only by this button, `nerv reload` or a restart; the model picker in settings already writes config and reloads by itself, so it does not need the button",
     "Recommendation: move it into a collapsed Advanced section of the settings panel (hand edits and `ollama pull` are rare, but without it the only way is a CLI command or restart); plain text 'Re-read the model settings from config.json', result shown next to the button",
-    "Owner picks keep, move or remove; the decision is written in the record"
+    "Owner picked move: the decision is written in the record and on the decision page"
   ],
   "dependsOn": [],
   "resources": [
@@ -34,19 +34,23 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0 h agent, 0.25 h owner",
-    "basis": "Estimated 2026-11-26 from the existing code paths read for this plan. Not a measurement.",
-    "reviewed": "2026-11-26",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26 from the existing code paths read for this plan. Not a measurement. Closed 2026-11-27: the owner answered \"ok\" in chat at about 00:10 CET to the recommendation, so the choice is: move. No actual: owner time not measured.",
+    "reviewed": "2026-11-27",
     "agentHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision"
   },
   "prs": [
     {
       "pr": 859,
       "note": "plan"
+    },
+    {
+      "pr": 860,
+      "note": "owner decision"
     }
   ],
   "ownerLink": "docs/design/dashboard-reload-models.md"
