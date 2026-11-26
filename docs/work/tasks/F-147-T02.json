@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-147-T02",
+  "parent": "F-147",
+  "title": "Owner: ask NERV for the live index in chat",
+  "goal": "The owner sees the index's card in NERV's chat on the Mac",
+  "status": "planned",
+  "acceptance": [
+    "On NERV-01 after the update, with the index running (coordinator:F-024-T07), type in chat: `cosa aspetta me?` Expected: a card titled in Italian listing the owner steps waiting on you, each with a link to its source file and the index's snapshot time, and a link that opens the index screen. Then type `cosa blocca coordinator:F-024?` Expected: a card listing the steps whose dependsOn names it, or a line saying there are none"
+  ],
+  "dependsOn": [
+    "F-147-T01",
+    "coordinator:F-024-T07"
+  ],
+  "resources": [
+    "docs/work/records/F-147.md"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented records, repositories and results only; no tokens in configuration examples, tests or logs.",
+  "validation": [
+    "Owner check, recorded in F-147 Verification"
+  ],
+  "escalation": [
+    "The owner decides whether the card is enough; the agent records the result"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: two chat messages on the Mac. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  },
+  "prs": [
+    {
+      "pr": 835
+    }
+  ]
+}
