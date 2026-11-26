@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "B-159-T01",
+  "parent": "B-159",
+  "title": "Coverage baseline as measured today",
+  "goal": "docs/agents/coverage.json and coverage.md hold today's figures",
+  "status": "implemented",
+  "acceptance": [
+    "Written by coverage-table --write after a full coverage run",
+    "The drop since 2026-11-11 is recorded in B-160"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/agents/coverage.json",
+    "docs/agents/coverage.md",
+    "docs/work/records/B-159.md",
+    "docs/work/records/B-160.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run coverage"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day. Remaining: CI.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}

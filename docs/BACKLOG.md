@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 18 | 8 | 49 | 23 |
+| **This week** | 18 | 8 | 51 | 23 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 45 | 40 |
+| **Open** | 45 | 42 |
 | **Require Human 🧑** | 12 | 21 |
 
 ### Require Human 🧑
@@ -45,7 +45,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 192.25 h agent + 17 h owner across 181 open steps of 45 features and 40 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 192.25 h agent + 17 h owner across 184 open steps of 45 features and 42 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -3540,6 +3540,83 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (C1); `test/user-text-ids.test.ts`; `web/src/dashboard/shell.ts`; [#809](https://github.com/voidbrain/nerv/pull/809) |
 | Opened | 2026-11-26 |
 | Verification | Unit: 2026-11-26, local: `test/user-text-ids.test.ts` failed on main with the ten shell IDs and passes after the fix. Browser: Pending (CI `test:browser`, the shell's axe and layout checks). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-159"></a>[🐞 B-159](#top)
+
+**Coverage regressions never failed CI and the agent-behaviour checks had no runner**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Agent work: B-159-T02 after this baseline lands.
+
+| | |
+|---|---|
+| **Issue** | Two procedures were configured but dormant. `coverage.enforce` was `false`, so `node tools/coverage-table.mjs --check` in CI only warned and the `drop: 2` tolerance never failed a run; the committed baseline (`docs/agents/coverage.json`) dated from 2026-11-11 and the branch figure had since fallen past it (B-160). No `behaviour` setting, script or tool existed, so the agent-behaviour checks (`docs/agents/rule-review.md`) could not run. Coordinator dormant-checks sweep of 2026-11-26, findings S3 and S1 (proposals 8 and 4). |
+| **Reproduce** | On main, `.harness.json` `coverage.enforce` is `false` and has no `behaviour`; CI run 45798962499 shows `::warning` "src/: branches 86.0 % → 82.9 %" and the job passes; `npm run behaviour` does not exist. |
+| **Check** | B-159-T01: the baseline is today's measured coverage. B-159-T02: `coverage.enforce` is `true` and a later full CI run fails on a drop of more than 2 points against main's baseline; `behaviour.runner` is Claude Code (`claude -p`, the command `docs/agents/rule-review.md` gives), `tools/behaviour.mjs` is the template's v10.21.4 copy, `npm run behaviour -- list` names the scenarios; no paid run is part of enabling it. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-159-t01"></a>B-159-T01 — Coverage baseline as measured today | 0.25 h | 0 h | 0 h | Implemented; verification pending | — | [B-159-T02](#b-159-t02) |
+| 🟢 Small | <a id="b-159-t02"></a>B-159-T02 — Enforce coverage; Claude Code as the behaviour runner | 0.5 h | 0 h | 0 h | Planned | [B-159-T01](#b-159-t01) | — |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0 h | 0 of 2 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-159.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (S1, S3); CI run 45798962499 (coverage warning); `docs/agents/coverage.json`; [#811](https://github.com/voidbrain/nerv/pull/811) |
+| Opened | 2026-11-26 |
+| Verification | Documentation: 2026-11-26, `node tools/coverage-table.mjs --write` after `npm run test:coverage` (1595 pass, 0 fail). CI: Pending (B-159-T02). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-160"></a>[🐞 B-160](#top)
+
+**Branch coverage of src/ fell from 86.0 % to 82.9 % without a failing check**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Agent work: B-160-T01 finds the files whose branches went untested and adds tests.
+
+| | |
+|---|---|
+| **Issue** | Unit branch coverage of `src/` was 86.0 % at the 2026-11-11 baseline and is 82.9 % in CI (run 45798962499, Linux) and 83.2 % on macOS on 2026-11-26: 2.8–3.1 points down, past the 2-point tolerance, reported only as a warning because `coverage.enforce` was off (B-159). Lines and statements went from 93.4 % to 92.8 %; functions rose from 88.6 % to 89.4 %. Found while enabling enforcement (owner: "coverage enforcement all", 2026-11-26: "fix any coverage drop it then reports, or raise it as a record"). |
+| **Reproduce** | `npm run test:coverage && node tools/coverage-table.mjs --check` against the 2026-11-11 baseline prints "src/: branches 86.0 % → 83.2 % (more than 2 points down)". |
+| **Check** | `src/` branch coverage back to 86 % or more (the files with the most uncovered branches in `docs/agents/coverage.md` get tests for their untested behaviour, not for the number), and the baseline raised in the same PR. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-160-t01"></a>B-160-T01 — Test the untested branches behind the drop | 4 h | 0 h | 0 h | Planned |
+| 🟢 Small | **Total** | 4 h | 0 h (0 of 1 steps recorded) | 0 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-160.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | CI run 45798962499 `validate` coverage warning; `docs/agents/coverage.md` (2026-11-26); [#811](https://github.com/voidbrain/nerv/pull/811) |
+| Opened | 2026-11-26 |
+| Verification | Unit: Pending. |
 | Reviewed | 2026-11-26 |
 
 </details>
