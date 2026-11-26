@@ -12,6 +12,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
 | [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 9 | 31 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 9 | 30 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7634,11 +7635,27 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | **Issue** | The owner uses NERV in Italian (owner instruction 2026-11-26: "nerv and all modules will need to work with Italian"). `requestLanguage` (`src/misato.ts`) falls back to its `fallback` argument when neither the request ("ok", "sì" alone is Italian, but "ok", a number, an emoji or a bare command such as "/cards" are not) nor an earlier exchange tells the language. Chat, PWA, voice and Telegram callers (`src/runtime-planning.ts`, `src/runtime-chat.ts`, `src/runtime-approvals.ts`, `src/telegram.ts`) passed no fallback, so it was always English, whatever `config.language` says. Found by the nerv#831 review (B-167). |
 | **Reproduce** | With `{"language":"it"}` in the data home's `config.json` and no earlier exchange, send "ok" in chat: Misato's system prompt says "Write the reply in English"; send `/cards` on Telegram with nothing waiting: the reply is "No pending approval cards." |
 | **Check** | Both reply in Italian with `config.language` "it" and stay English with "en" or no setting (`defaults.language` is "en"); tests committed failing first (B-168-T01) pass unchanged after B-168-T02. |
+### F-123
+
+**Connect NERV to Grover's hub over MCP**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: F-123-T01 merged in #746 on green CI; F-123-T02 owner check passed 2026-11-26 on NERV-01 against the hub on Calvary (19 tools listed, read grant answered in chat, unreachable hub reported); evidence on the record.
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24 (coordinator gap review): Grover's hub exposes its tools at `/mcp` on the Pi behind Tailscale, and Grover F-005's last check expects NERV to list them. NERV has governed MCP tool registration (F-021) but no record for connecting to a remote MCP server on the tailnet. Grover F-005-T02 waits on this record (grover:F-005-T02). |
+| **Reproduce** | There is no documented, tested way to register `https://<pi>.<tailnet>.ts.net/mcp` as an MCP source in NERV. |
+| **Check** | The owner registers the hub's `/mcp` URL in NERV; NERV lists the Grover tools with their effect classes; read tools run as Green, actions go through the gate and approval as usual; an unreachable hub is reported, not hidden. |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
 **Next action / closure evidence:** Closed 2026-11-26: PR #834 merged on green CI (run 45881568262, all five jobs); Review: fresh-context research reviewer (Gemini 4 Carbon Medium, 2026-11-26), zero blocking or should-fix findings. 2026-11-26: `B-168-T01` (failing first): `test/misato.test.ts` "B-168" (chat "ok" through the runtime and planner to Misato's prompt, for `config.language` "it" and "en") and `test/telegram.test.ts` "B-168" (Telegram `/cards` through the Runtime to `config.json`). `B-168-T02`: `ownerLanguage(home)` in `src/config.ts` reads `config.language` (default "en"); every `requestLanguage` caller in the planner, chat commands, pack prompts, `/why`, interrupted-sortie notices and Telegram passes it as the fallback; Telegram reads it through the Runtime (`language()`). Voice push-to-talk confirms into the same chat path; its own command matcher (`detectVoiceLanguage`) is separate and unchanged. No real model ran.
+**Next action / closure evidence:** Closed 2026-11-26: F-123-T01 merged in #746 on green CI; F-123-T02 owner check passed 2026-11-26 on NERV-01 against the hub on Calvary (19 tools listed, read grant answered in chat, unreachable hub reported); evidence on the record. 2026-11-26 (about 20:37-20:45Z), F-123-T02 passed on NERV-01 (grover:F-005-T01 done, hub on Calvary behind Tailscale): step 3, `nerv tools add grover https://<calvary>.ts.net/mcp` then `nerv tools` listed `grover · https://<calvary>.ts.net/mcp · 19 tool(s)`, each read-only or not, `grover_run_pump` marked destructive, none granted. Step 4, `nerv tools grant grover/grover_alerts` then `nerv chat "ci sono allarmi Grover?"`: the Consultant (gemma4:26b) advised calling grover.grover_alerts, MAGI "Pattern GREEN · grant", EVA-02 "grover.grover_alerts done", Misato "Al momento non ci sono allarmi attivi per Grover.", no approval card. Step 5 (agent, owner's OK), hub stopped on Calvary: `nerv tools` showed `could not list its tools: MCP server <calvary>.ts.net answered initialize with HTTP 502.`; hub started: 19 tools again. Actions through the gate and approval are covered by the F-123-T01 join test. The slow first answer (79 s) is baseline evidence on F-144. Owner decision 2026-11-26 (chat): "accept all 17 proposals" of the cross-project audit (coordinator `docs/audits/2026-11-26-cross-project.md`), proposal 12 ([#802](https://github.com/voidbrain/nerv/pull/802)): F-123-T02 waits on grover:F-005-T01, since its check registers the hub running on the Pi. 2026-11-25 reconciliation ([#758](https://github.com/voidbrain/nerv/pull/758)): F-123-T01 closed, [#746](https://github.com/voidbrain/nerv/pull/746) merged on green CI (run 45602256057; Windows attempt 1 failed on B-126 and B-076 flakes, attempt 2 green). Next: F-123-T02, the owner registers the hub URL. 2026-11-25: F-123-T01 implemented: `nerv tools add ID https://…/mcp` registers an MCP server at a URL (streamable HTTP; HTTPS, plain HTTP on loopback only, no credentials in the URL, redirects refused). Grants now name any effect class: a read is Green; `write-external` Orange; `irreversible`/`physical` Blue, and an MCP call the owner approves on its card now runs once under the approval's grant (before, nothing ran after an approval); a tool the server marks destructive must be `irreversible` or `physical`; `write-local` is refused for a remote server. An unreachable server is reported in `nerv tools` and as suspended grants with why. Join test `test/mcp-remote.test.ts` (fake HTTP MCP server: CLI registration, listing, a Green read, a physical action through the card, the server gone); guide [remote MCP](../guides/remote-mcp.md). Review of #746 (fresh context, no blockers) fixed in the PR: an HTTP answer is read as it streams and cut off past 4 MiB; tests for a replayed approval (no second call) and an expired grant (no call); the guide names the `read` default, the 60 s grant and `localhost`. CI was pending on [PR #746](https://github.com/voidbrain/nerv/pull/746) at that time. Opened 2026-11-24 at the owner's request from the coordinator's gap review.
 
 **Estimates:** No remaining effort.
 
@@ -7698,6 +7715,9 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | PR / evidence | Opened in [PR #748](https://github.com/voidbrain/nerv/pull/748); F-125-T01 in [PR #753](https://github.com/voidbrain/nerv/pull/753); F-125-T02 in [PR #763](https://github.com/voidbrain/nerv/pull/763); [#758](https://github.com/voidbrain/nerv/pull/758); [#779](https://github.com/voidbrain/nerv/pull/779); [#815](https://github.com/voidbrain/nerv/pull/815); [#820](https://github.com/voidbrain/nerv/pull/820) |
 | Opened | 2026-11-25 |
 | Verification | Unit 2026-11-26: check-harness --strict (v10.24.3), test/agents-tools.test.mjs, CI green on #820–#828. |
+| PR / evidence | [#837](https://github.com/voidbrain/nerv/pull/837) (F-123-T02 owner check passed); [#802](https://github.com/voidbrain/nerv/pull/802) (prerequisite grover:F-005-T01); Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); F-123-T01 in [PR #746](https://github.com/voidbrain/nerv/pull/746).; [#758](https://github.com/voidbrain/nerv/pull/758) |
+| Opened | 2026-11-24 |
+| Verification | CI 2026-11-25: F-123-T01, Test: `test/mcp-remote.test.ts` green in run 45602256057 (#746). Owner check F-123-T02 pending. |
 | Reviewed | 2026-11-26 |
 
 </details>

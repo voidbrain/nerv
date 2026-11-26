@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "parent": "B-169",
+  "dependsOn": [
+    "B-169-T04"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-169-T05",
+  "title": "Owner check: nerv resolves to the launcher and reports ~/.nerv-app's revision",
+  "goal": "Copy-paste steps in the record pass on the Mac",
+  "status": "planned",
+  "acceptance": [
+    "Copy-paste steps in the record pass on the Mac"
+  ],
+  "resources": [
+    "docs/work/records/B-169.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "owner-check"
+  ],
+  "validation": [
+    "owner runs the steps in the record"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}
