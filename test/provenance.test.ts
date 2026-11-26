@@ -101,6 +101,36 @@ test('F-027: tainted local outside code selects EVA-03 and fails closed even wit
   assert.match(result.reason, /requires isolation; it does not run/);
 });
 
+test('B-175 stage 2: a read grant opted in to tainted conversations runs at its EVA; nothing else does', () => {
+  const tainted = { tool: 'fixture.read', args: {}, trust: 'tainted' as const, stage: 'production' as const, cost: 0 };
+  const opted = ballot(
+    tainted,
+    { name: 'fixture.read', effect: 'read', eva: 'eva-00', allowTainted: true },
+    defaultPolicy,
+    0,
+  );
+  assert.equal(opted.executor, 'eva-00');
+  assert.equal(opted.outcome, 'grant');
+  assert.equal(opted.blocked, undefined);
+  // Without the opt-in, and for anything but a read, the F-027 rule holds.
+  for (const tool of [
+    { name: 'fixture.read', effect: 'read' as const, eva: 'eva-00' as const },
+    { name: 'fixture.read', effect: 'write-local' as const, eva: 'eva-00' as const, allowTainted: true as const },
+  ]) {
+    const r = ballot(tainted, tool, defaultPolicy, 0);
+    assert.equal(r.executor, 'eva-03');
+    assert.equal(r.outcome, 'reject');
+  }
+  // The opt-in never lifts the grant's own class: granted for EVA-03, it still does not run.
+  const own = ballot(
+    tainted,
+    { name: 'fixture.read', effect: 'read', eva: 'eva-03', allowTainted: true },
+    defaultPolicy,
+    0,
+  );
+  assert.equal(own.outcome, 'reject');
+});
+
 test('F-027: repeated quarantine denials never become owner approvals at the reject limit', () => {
   const store = new Store(':memory:');
   try {

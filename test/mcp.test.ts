@@ -46,6 +46,16 @@ test('the tools config: reserved server ids refused, grants only for known serve
     }).grants.length,
     1,
   );
+  // B-175 stage 2: the opt-in to tainted conversations exists only on a read grant, and only as true.
+  const optIn = (effect: string, allowTainted: unknown) =>
+    validateTools({
+      mcp: [{ id: 'notes', command: 'x' }],
+      grants: [{ server: 'notes', tool: 't', effect, eva: '00', fingerprint: '0123456789abcdef', allowTainted }],
+    });
+  assert.equal(optIn('read', true).grants[0]!.allowTainted, true);
+  assert.throws(() => optIn('write-local', true), /allowTainted is only for a read grant/);
+  assert.throws(() => optIn('read', 'yes'), /allowTainted is true or absent/);
+  assert.throws(() => optIn('read', false), /allowTainted is true or absent/);
   assert.match(
     grantRefusal({ name: 'd', annotations: { destructiveHint: true } }, 'read', '00')!,
     /cannot be granted as a read/,
@@ -361,6 +371,55 @@ test("B-025: a granted tool runs under the stricter of its grant's EVA and the s
   assert.equal(stricter('eva-02', undefined), 'eva-02', "NERV's own tools: the stage decides");
 });
 
+test(
+  'B-175 stage 2: through every process, an opted-in read grant runs again in a tainted conversation',
+  { timeout: 60000 },
+  async () => {
+    const { Runtime } = await import('../src/runtime.ts');
+    const probe = new McpClient(server());
+    const fp = fingerprint((await probe.listTools())[0]!);
+    probe.close();
+    const m = await model([
+      '{"action":{"tool":"notes.read_note","args":{"name":"first"}}}',
+      '{"reply":"First read."}',
+      '{"action":{"tool":"notes.read_note","args":{"name":"second"}}}',
+      '{"reply":"Second read."}',
+    ]);
+    const home = mkdtempSync(join(tmpdir(), 'nerv-mcp-optin-'));
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({
+        models: {
+          local: { baseUrl: m.url, model: 'm' },
+          roles: { misato: { route: 'local' }, consultant: { model: 'c' } },
+        },
+        tools: {
+          mcp: [server()],
+          grants: [
+            { server: 'notes', tool: 'read_note', effect: 'read', eva: '00', fingerprint: fp, allowTainted: true },
+          ],
+        },
+      }),
+    );
+    const r = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+    try {
+      await r.ready();
+      const first = await r.chat('Read my first note', 'cli');
+      assert.equal(first.steps[0]?.outcome, 'grant');
+      const next = await r.chat('Now read my second note', 'cli');
+      assert.equal((await r.sortie(next.sortieId))?.trust, 'tainted', 'the conversation is still tainted');
+      assert.equal(next.steps[0]?.outcome, 'grant');
+      assert.deepEqual(next.steps[0]?.result, { text: 'Note second: buy milk and bread.' });
+      assert.equal(next.reply, 'Second read.');
+      const ballots = (await r.events(next.sortieId)).filter((e) => e.kind === 'ballot');
+      assert.equal((ballots[0]!.payload as { executor: string }).executor, 'eva-00');
+    } finally {
+      await r.close();
+      await m.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);
 test(
   'F-027: MCP result taints the durable sortie, approved memory, resume and the next conversation turn',
   { timeout: 60000 },
