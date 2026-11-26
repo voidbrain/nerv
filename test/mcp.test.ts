@@ -413,11 +413,14 @@ test(
       assert.equal((await r.lilith.list())[0]?.tainted, true, 'approval does not cleanse third-party content');
       const next = await r.chat('Read another fixture note', 'cli');
       assert.equal((await r.sortie(next.sortieId))?.trust, 'tainted', 'earlier context retains its provenance');
-      assert.equal(next.steps.length, 5);
-      assert.ok(next.steps.every((s) => s.outcome === 'reject'));
+      // B-175 (owner decision 2026-11-26): Misato stops at the first isolation refusal instead of retrying it, and
+      // the reply tells the owner what happened and to start a new conversation. Before, she retried 5 times.
+      assert.equal(next.steps.length, 1);
       assert.equal(next.waiting.length, 0);
       assert.equal(next.steps[0]?.outcome, 'reject');
       assert.match(next.steps[0]?.reason ?? '', /EVA-03/);
+      assert.match(next.reply ?? '', /notes\.read_note/);
+      assert.match(next.reply ?? '', /new conversation/);
       assert.equal(
         (await r.events(next.sortieId)).some((e) => e.kind === 'grant.used'),
         false,
