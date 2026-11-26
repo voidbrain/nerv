@@ -2,7 +2,7 @@
   "version": 1,
   "parent": "F-016",
   "id": "F-016-T21",
-  "status": "implemented",
+  "status": "closed",
   "title": "Export the seed snapshot off serve's event loop",
   "goal": "A large seed no longer blocks the active main's event loop while it serialises and signs the snapshot",
   "capabilities": [
@@ -40,12 +40,16 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 from F-016-T20 (1.5 h). Implemented 2026-11-26 in exportSeedSnapshotAsync (worker thread) with 25,000-row event-loop delay, concurrent lease/Kaji and mid-export fencing regression; remaining: CI.",
+    "basis": "Estimated 2026-11-24 from F-016-T20 (1.5 h). Implemented 2026-11-26 in exportSeedSnapshotAsync (worker thread) with 25,000-row event-loop delay, concurrent lease/Kaji and mid-export fencing regression. Closed 2026-11-26: #838 merged on green CI (run 45902092060). No actual: started by Gemini and finished by Claude, the elapsed time of the first session is not known.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
-    "actualAgentHours": 0.25,
-    "actualSource": "stated",
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 838,
+      "note": "seed export on a worker thread; merged on green CI"
+    }
+  ]
 }
