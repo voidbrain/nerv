@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-148-T03",
+  "parent": "F-148",
+  "title": "Carry the live state to the dashboard through the existing feed",
+  "goal": "The thinking snapshot reaches the dashboard through the existing live state and server-sent events, with no new polling",
+  "status": "planned",
+  "acceptance": [
+    "GET /api/thinking is read-only and answers admin and read-only clients like GET /api/pilots; it returns the entries of T01 (pilot, role, model, sortie, startedAt) and an empty list when nothing thinks",
+    "A change of the registry changes dashboardRevision (src/runtime.ts, src/store.ts: the revision stays two numbers separated by a colon, so the feed's format check in src/dashboard-feed.ts still passes), so the connected dashboard re-reads once per change; no timer or interval is added on the client or the server for this; elapsed time is not pushed",
+    "A test across the registry, the revision, the feed and the endpoint: a begin is announced to a connected client, an end is announced, a client with no right gets nothing; the failing join test of T01 now passes up to the endpoint"
+  ],
+  "dependsOn": [
+    "F-148-T02"
+  ],
+  "resources": [
+    "src/server.ts",
+    "src/runtime.ts",
+    "src/store.ts",
+    "src/dashboard-feed.ts",
+    "test/**",
+    "docs/work/records/F-148.md"
+  ],
+  "capabilities": [
+    "typescript",
+    "api-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented pilots, sorties and models only; no owner data or tokens in Git, tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: one read route and a revision input over the existing feed, with the feed test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

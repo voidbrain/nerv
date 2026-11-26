@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-148-T04",
+  "parent": "F-148",
+  "title": "Show the thinking pilot in the Pilots panel and on the sortie",
+  "goal": "While a pilot thinks, the dashboard names it, its role, model, sortie and how long, and clears when the call ends",
+  "status": "planned",
+  "acceptance": [
+    "Before the change read docs/STYLE-GUIDE.md (voice, tokens, type, spacing: var(--...) tokens only, no new literal colour; a new token or shared component updates the guide in the same change) and, if web/src is touched, docs/agents/angular.md; the dashboard files are web/public/dashboard/dashboard.js and live.js (renderMelons, renderSorties); the Angular migration (F-130-T10) keeps this requirement",
+    "The Pilots panel (Marduk Institute, melons) marks the thinking pilot's card with a live state naming pilot, role, model and sortie ID (e.g. Maya, Consultant, gemma4:26b, S-19EE) and the time it has been thinking; the sortie shows the same state in the same wording as its line (Maya S-19EE · Consultant (gemma4:26b)); a pilot not in the roster still shows, as Generic pilot, so no thinking is hidden",
+    "The elapsed time is counted on the client from startedAt, with one timer that runs only while something thinks and stops when the list is empty (no request per tick); a call that ends clears the mark on the next feed notification",
+    "EVA cages stay for EVA jobs only: the cage count and its subtitle do not change; a thinking pilot is never counted as an active EVA",
+    "Both voices are written (NERV theme and plain), the plain one without codenames; no backlog IDs (F-, B-, T-) in user-facing text; the state is readable without colour alone and announced to screen readers politely (aria-live), checked on a narrow viewport",
+    "A test across the endpoint, the feed and the rendered panel (test/dashboard-live-views.test.mjs style): a begin shows the entry with the elapsed time, an end removes it, an empty state shows nothing extra, and the cage count is unchanged; failing first"
+  ],
+  "dependsOn": [
+    "F-148-T03"
+  ],
+  "resources": [
+    "web/public/dashboard/dashboard.js",
+    "web/public/dashboard/live.js",
+    "docs/STYLE-GUIDE.md",
+    "test/**",
+    "docs/work/records/F-148.md"
+  ],
+  "capabilities": [
+    "javascript",
+    "accessibility",
+    "regression-design",
+    "style-guide"
+  ],
+  "privacy": "Neutral invented pilots, sorties and models only; no owner data or tokens in Git, tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "npm run check:integrations"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.75 h",
+    "basis": "Estimated 2026-11-26: one marker in two renderers, one client timer, both voices and the join test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.75,
+    "baselineAgentHours": 1.75,
+    "estimateAgentHours": 1.75
+  }
+}

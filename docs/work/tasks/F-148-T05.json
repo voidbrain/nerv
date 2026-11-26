@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-148-T05",
+  "parent": "F-148",
+  "title": "Document the live state and reconcile the records",
+  "goal": "The dashboard guide, the style guide and the records say what the thinking state is and is not",
+  "status": "planned",
+  "acceptance": [
+    "The dashboard documentation names the thinking state: what it shows, that it comes from the existing feed, that it is not an EVA job and not an activity log, and that it carries no prompt or answer text; STYLE-GUIDE.md lists any new token or component",
+    "F-148 evidence names the PRs; the ROADMAP row and the generated views are rebuilt (npm run work:build, node tools/backlog-recap.mjs) and the checks pass"
+  ],
+  "dependsOn": [
+    "F-148-T04"
+  ],
+  "resources": [
+    "docs/**",
+    "docs/work/records/F-148.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "documentation"
+  ],
+  "privacy": "Neutral invented pilots, sorties and models only; no owner data or tokens in Git, tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm run check:backlog",
+    "npm run check:work"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: two documentation edits and a views rebuild. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
