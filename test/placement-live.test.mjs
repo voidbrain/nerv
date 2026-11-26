@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   PROBE_PROMPT_BYTES,
   PROBE_SYSTEM_BYTES,
+  combinationCase,
   gradeSmoke,
   parseVote,
   probeBody,
@@ -118,4 +119,86 @@ test('runCombination: the auditor decides in coder-reviewer and an invalid audit
     budget,
   );
   assert.equal(rejectAll.summary.falseRejections, 2);
+});
+
+test('F-006-T33/T34: cancelled or budget-expired coder/auditor calls never grade or fall back to the coder vote', async () => {
+  const sample = {
+    id: 'flawed-patch-silent-fallback',
+    task: 'Keep remote inference fail-closed',
+    visibleCriteria: ['Never fall back silently'],
+    candidatePatch: '+ return runLocalFallback();',
+  };
+  let auditorCalls = 0;
+  const coderAbort = new AbortController();
+  const slowCoder = (_ask, { signal }) =>
+    new Promise((_res, rej) => {
+      if (signal?.aborted) {
+        rej(new Error('coder cancelled'));
+        return;
+      }
+      signal?.addEventListener('abort', () => rej(new Error('coder cancelled')), { once: true });
+    });
+  setTimeout(() => coderAbort.abort(), 5);
+  await assert.rejects(
+    combinationCase(
+      sample,
+      'coder-reviewer',
+      slowCoder,
+      async () => {
+        auditorCalls++;
+        return { text: '{"vote":"approve","reason":"ok"}', outputTokens: 5 };
+      },
+      { maxTokens: 256, timeoutMs: 5000, coderSignal: coderAbort.signal },
+    ),
+    /coder cancelled/,
+  );
+  assert.equal(auditorCalls, 0, 'cancelled coder never invokes auditor');
+
+  const auditorAbort = new AbortController();
+  setTimeout(() => auditorAbort.abort(), 5);
+  await assert.rejects(
+    combinationCase(
+      sample,
+      'coder-reviewer',
+      async () => ({ text: '{"vote":"approve","reason":"coder approved flawed patch"}', outputTokens: 10 }),
+      (_ask, { signal }) =>
+        new Promise((_res, rej) => {
+          if (signal?.aborted) {
+            rej(new Error('auditor cancelled'));
+            return;
+          }
+          signal?.addEventListener('abort', () => rej(new Error('auditor cancelled')), { once: true });
+        }),
+      { maxTokens: 256, timeoutMs: 5000, reviewerSignal: auditorAbort.signal },
+    ),
+    /auditor cancelled/,
+  );
+
+  // Uncertain auditor outcome (budget expired mid-generation): coder's approve vote never stands in; recorded as error.
+  let seenReviewerTimeout = 0;
+  await assert.rejects(
+    combinationCase(
+      sample,
+      'coder-reviewer',
+      async () => ({ text: '{"vote":"approve","reason":"coder approved flawed patch"}', outputTokens: 10 }),
+      async (_ask, { timeoutMs }) => {
+        seenReviewerTimeout = timeoutMs;
+        throw new Error('Orchestrated execution timed out');
+      },
+      { maxTokens: 256, timeoutMs: 30000, reviewerTimeoutMs: 1000 },
+    ),
+    /timed out/,
+  );
+  assert.equal(seenReviewerTimeout, 1000);
+
+  const expiredRun = await runCombination(
+    'coder-reviewer',
+    async () => ({ text: '{"vote":"approve","reason":"coder approved flawed patch"}', outputTokens: 10 }),
+    async () => {
+      throw new Error('Worker result unknown after timeout.');
+    },
+    { outputTokens: 6144, suiteMs: 360000, caseMs: 30000, repeat: 1 },
+  );
+  assert.equal(expiredRun.summary.passed, 0);
+  assert.equal(expiredRun.results[0].status, 'error');
 });

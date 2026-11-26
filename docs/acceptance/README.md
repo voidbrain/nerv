@@ -6,7 +6,7 @@ The [review register](../reviews/README.md#acceptance-evidence) links every repo
 
 **Owner procedures to run now:** grouped by sitting in the [owner steps triage, 26 November 2026](owner-steps-2026-11-26.md). [F-005-T13 Mac service update](f005-t13-mac-update-procedure.md) ran on 2026-11-12.
 
-[F-006 placement P2–P4](f006-placement-p2-p4.md): pasteable PowerShell plans and explicitly confirmed probes for mini-PC local inference, mini-PC execution with Mac remote inference, and unavailable/recovered Mac behavior.
+[F-006 placement P2–P4](f006-placement-p2-p4.md): pasteable PowerShell plans and explicitly confirmed probes for mini-PC local inference, mini-PC execution with Mac remote inference, and unavailable/recovered Mac behavior. [F-006-T35 auditor unavailable-Mac window](f006-t35-auditor-unavailable-mac.md): stop and restore NERV-01 around the F-006-T36 auditor-route check.
 
 [First lifecycle update of the Mac service, 12 November 2026](node-update-2026-11-12.md): 2a3448d → f8b8116 through inspect/apply, all steps and after-checks passed; agent-run with owner approval, so hand usability of the procedure is not shown.
 
