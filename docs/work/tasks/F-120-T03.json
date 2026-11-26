@@ -4,7 +4,7 @@
   "parent": "F-120",
   "title": "Owner approves the first Gauntlet run of the domain-pack cases",
   "goal": "NERV pins the gauntlet-protocol release carrying the domain packs and runs them, so pilot qualification can use the results",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Starts only after gauntlet-protocol tags a release with the domain packs (tracked in that repository): v0.10.0 and v0.11.0, tagged 2026-11-25; v0.11.1 fixes the coding runner's container errors",
     "Pin bumped to 0.11.1; the coding, embedded and cad-3d reference runners registered without CI toolchains; capability index regenerated",
@@ -37,13 +37,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-24 at agent speed; owner campaign 0.5 h added 2026-11-25 (42 model cases, Docker and arduino-cli on the Mac). Not a measurement. 2026-11-26: split (owner-step triage): the owner's part is the approval; the campaign (Docker and arduino-cli on the Mac, local models) is agent work, F-120-T04.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 at agent speed; owner campaign 0.5 h added 2026-11-25 (42 model cases, Docker and arduino-cli on the Mac). Not a measurement. 2026-11-26: split (owner-step triage): the owner's part is the approval; the campaign (Docker and arduino-cli on the Mac, local models) is agent work, F-120-T04. 2026-11-26: the owner approved the run in chat (\"ok\" to running the Gauntlet campaign), relayed by the coordinator; the run is F-120-T04.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision"
   },
   "ownerLink": "docs/evaluations/gauntlet.md#domain-packs-0100-and-0110-f-120-t03",

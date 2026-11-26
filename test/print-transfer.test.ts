@@ -477,9 +477,11 @@ test('F-121-T04: asking whether a part is cached never waits behind the slicer o
   const home = mkdtempSync(join(tmpdir(), 'nerv-print-probe-'));
   try {
     writeFileSync(join(home, 'slicer-profiles.json'), JSON.stringify(PROFILES));
+    let finished = 0;
     const slow: SlicerExecAsyncFn = async (_bin, args) => {
       await new Promise((r) => setTimeout(r, 600));
       writeFileSync(args[args.indexOf('--export-3mf') + 1]!, 'PK-sliced');
+      finished += 1;
       return 'estimated printing time: 1m\n';
     };
     const request = {
@@ -491,13 +493,56 @@ test('F-121-T04: asking whether a part is cached never waits behind the slicer o
     const full = { version: 1, request, content: Buffer.from(FOOT).toString('base64') };
     const busy = [1, 2].map(() => receivePartTransfer(home, ['NERV-01'], 'NERV-01', full, { exec: slow }));
     const other = 'solid other\nendsolid other\n';
-    const asked = Date.now();
     const probe = await receivePartTransfer(home, ['NERV-01'], 'NERV-01', {
       version: 1,
       request: { ...request, part: { file: 'kite-5/other.stl', sha256: sha(other), bytes: other.length } },
     });
     assert.deepEqual(probe, { status: 200, value: { need: 'content' } });
-    assert.ok(Date.now() - asked < 300, `answered in ${Date.now() - asked} ms`);
+    // The bound is the order, not a wall clock (B-133): the answer comes before any slice ends. A probe that queued
+    // behind the slicer would see a finished slice; a slow runner only stretches the staging that runs before it.
+    assert.equal(finished, 0, 'answered while the slicer was still busy');
+    await Promise.all(busy);
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+// B-133: on Windows CI the probe above "answered in 698 ms" (and once 331 ms) against its 300 ms bound. The probe path
+// has no await, so it cannot queue behind the slicer; its answer still waits for every microtask queued before it, and
+// the first transfer's lane microtask stages the part (profiles read, two mkdirs, a write and a rename) and starts the
+// slicer synchronously. A slow disk or a loaded runner stretches that work. Reproduction: a slicer start that blocks the
+// event loop for 400 ms delays the probe past the old 300 ms bound, while the probe still answers before any slice ends.
+test('B-133: the synchronous staging of a concurrent transfer, not the slicer, delays the cache probe', async () => {
+  const home = mkdtempSync(join(tmpdir(), 'nerv-print-probe-sync-'));
+  try {
+    writeFileSync(join(home, 'slicer-profiles.json'), JSON.stringify(PROFILES));
+    let finished = 0;
+    const blocking: SlicerExecAsyncFn = async (_bin, args) => {
+      const until = Date.now() + 400;
+      while (Date.now() < until); // the synchronous part of a slow staging and process start
+      await new Promise((r) => setTimeout(r, 600));
+      writeFileSync(args[args.indexOf('--export-3mf') + 1]!, 'PK-sliced');
+      finished += 1;
+      return 'estimated printing time: 1m\n';
+    };
+    const request = {
+      version: 1,
+      part: { file: 'kite-5/foot.stl', sha256: sha(FOOT), bytes: FOOT.length },
+      profileName: 'Test TPU 0.4',
+      prints: 1,
+    };
+    const full = { version: 1, request, content: Buffer.from(FOOT).toString('base64') };
+    const busy = [1, 2].map(() => receivePartTransfer(home, ['NERV-01'], 'NERV-01', full, { exec: blocking }));
+    const other = 'solid other\nendsolid other\n';
+    const asked = Date.now();
+    const probe = await receivePartTransfer(home, ['NERV-01'], 'NERV-01', {
+      version: 1,
+      request: { ...request, part: { file: 'kite-5/other.stl', sha256: sha(other), bytes: other.length } },
+    });
+    const waited = Date.now() - asked;
+    assert.deepEqual(probe, { status: 200, value: { need: 'content' } });
+    assert.ok(waited >= 300, `the blocked staging delays the probe past the old bound (answered in ${waited} ms)`);
+    assert.equal(finished, 0, 'yet the probe answered before any slice finished');
     await Promise.all(busy);
   } finally {
     rmSync(home, { recursive: true, force: true });
