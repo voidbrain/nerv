@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "B-163-T03",
+  "parent": "B-163",
+  "title": "Failing test: every tool that reads outside data returns a tainted result",
+  "goal": "A committed test iterates the tool registry and fails on main for at least one outside-data reader without a mark or without taint",
+  "status": "ready",
+  "acceptance": [
+    "Test committed before the fix; it fails on main because the registry has no external-reader mark"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/executors.ts",
+    "src/store-sorties.ts",
+    "test/**",
+    "docs/work/records/B-163.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: the report sizes the catalogue test at 3 h with the registry change. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": []
+}

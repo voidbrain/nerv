@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-166-T01",
+  "parent": "B-166",
+  "title": "Failing test: no npm script symlinks node_modules",
+  "goal": "A committed test fails on main because worktree:link creates a node_modules symlink",
+  "status": "ready",
+  "acceptance": [
+    "Test committed before the fix and failing on main"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "package.json",
+    "test/**",
+    "docs/work/records/B-166.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-26: read package.json scripts in a test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  },
+  "prs": []
+}

@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-161-T01",
+  "parent": "B-161",
+  "title": "Failing test: two failed nightly snapshots produce no owner notice",
+  "goal": "A committed test fails on main: snapshot and off-host copy failures on two consecutive nights leave no owner notice",
+  "status": "ready",
+  "acceptance": [
+    "Test committed before the fix and failing on main for both the snapshot and the off-host copy"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/snapshots.ts",
+    "test/**",
+    "docs/work/records/B-161.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: fake clock, failing snapshot folder, inbox assertion. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": []
+}

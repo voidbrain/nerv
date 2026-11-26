@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "F-136-T04",
+  "parent": "F-136",
+  "title": "Record the drill evidence",
+  "goal": "F-136 cites the owner's drill",
+  "status": "planned",
+  "acceptance": [
+    "Verification cites the pasted result"
+  ],
+  "dependsOn": [
+    "F-136-T03"
+  ],
+  "resources": [
+    "docs/work/records/F-136.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review",
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-26: record evidence. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  },
+  "prs": []
+}

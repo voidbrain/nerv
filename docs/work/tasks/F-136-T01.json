@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-136-T01",
+  "parent": "F-136",
+  "title": "Newest good snapshot and off-host copy age, with a warning past the loss window",
+  "goal": "The dashboard and nerv doctor show backup ages and warn when one is older than 24 h",
+  "status": "planned",
+  "acceptance": [
+    "A test with a fake clock shows the ages and the warning at 24 h + 1 min",
+    "A failed snapshot does not reset the age (only a good one does)"
+  ],
+  "dependsOn": [
+    "F-062-T07"
+  ],
+  "resources": [
+    "src/snapshots.ts",
+    "web/src/**",
+    "test/**",
+    "docs/work/records/F-136.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26: the report sizes the age signal at 2 h. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": []
+}

@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-135-T02",
+  "parent": "F-135",
+  "title": "Failing join test, then the standby base tells the owner the main is silent",
+  "goal": "A standby base that misses the main base's heartbeats for N minutes sends one owner notice and one recovery notice",
+  "status": "planned",
+  "acceptance": [
+    "A join test across two bases (Kaji link, heartbeat tracking, delivery) is committed failing first",
+    "After N minutes without heartbeats the standby sends one notice naming the base and the last heartbeat time; nothing repeats while the outage lasts",
+    "When heartbeats return it sends one recovery notice; a planned update restart inside the limit sends nothing"
+  ],
+  "dependsOn": [
+    "F-135-T01"
+  ],
+  "resources": [
+    "src/kaji-link.ts",
+    "src/telegram.ts",
+    "test/**",
+    "docs/work/records/F-135.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-26: a join test over two in-process bases plus the notice state; the report sized the whole at 6 h. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  },
+  "prs": []
+}

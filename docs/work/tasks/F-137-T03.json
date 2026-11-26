@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-137-T03",
+  "parent": "F-137",
+  "title": "Prune each table to its agreed limit",
+  "goal": "A daily prune keeps each table within its limit, with a test per table",
+  "status": "planned",
+  "acceptance": [
+    "A failing-first test per table with a fake clock",
+    "The prune runs before the nightly snapshot so the snapshot holds no expired rows",
+    "Rows a running job still needs are kept until the job ends"
+  ],
+  "dependsOn": [
+    "F-137-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/F-137.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2.5 h",
+    "basis": "Estimated 2026-11-26: the report sizes prune and forget at 5 h together. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2.5,
+    "baselineAgentHours": 2.5,
+    "estimateAgentHours": 2.5
+  },
+  "prs": []
+}

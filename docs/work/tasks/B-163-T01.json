@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-163-T01",
+  "parent": "B-163",
+  "title": "Failing test: the threat-map checker accepts a gap that cites a closed record",
+  "goal": "A committed test fails on main: a fixture map whose gap row cites a closed record passes the checker",
+  "status": "ready",
+  "acceptance": [
+    "Test committed before the fix and failing on main"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "tools/check-threat-map.mjs",
+    "test/**",
+    "docs/work/records/B-163.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: one fixture map and one closed record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": []
+}

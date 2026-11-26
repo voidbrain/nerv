@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "B-163-T02",
+  "parent": "B-163",
+  "title": "Checker reads record status; refresh the stale rows",
+  "goal": "The checker fails on a gap citing a closed or archived record, and every current row passes",
+  "status": "planned",
+  "acceptance": [
+    "B-163-T01 passes unchanged",
+    "ASI08, LLM06, LLM08 and LLM10 cite the tests F-063, F-064 and F-065 delivered, or an open record for what is still missing"
+  ],
+  "dependsOn": [
+    "B-163-T01"
+  ],
+  "resources": [
+    "tools/check-threat-map.mjs",
+    "docs/security/agentic-threats.md",
+    "test/**",
+    "docs/work/records/B-163.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: read status from the records, re-read four rows. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": []
+}

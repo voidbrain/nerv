@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-138-T02",
+  "parent": "F-138",
+  "title": "Record auth failures per credential and notify the owner once",
+  "goal": "A rejected credential is recorded with its time and the owner gets one notice naming it and the rotate command",
+  "status": "planned",
+  "acceptance": [
+    "One failing-first test per kind: Telegram 401, cloud 401, APNs rejected JWT, Gmail invalid_grant",
+    "One notice per failure streak; a later success clears it"
+  ],
+  "dependsOn": [
+    "F-138-T01"
+  ],
+  "resources": [
+    "src/telegram.ts",
+    "src/push.ts",
+    "src/gmail.ts",
+    "src/**",
+    "test/**",
+    "docs/work/records/F-138.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26: four call sites into one recorder. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": []
+}

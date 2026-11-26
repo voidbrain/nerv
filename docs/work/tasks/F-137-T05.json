@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "F-137-T05",
+  "parent": "F-137",
+  "title": "Privacy guide: what is kept, for how long, and what forget means",
+  "goal": "The guide states the limits and the backup lag in plain words",
+  "status": "planned",
+  "acceptance": [
+    "docs/guides/ names each limit and the forget command with an example"
+  ],
+  "dependsOn": [
+    "F-137-T04"
+  ],
+  "resources": [
+    "docs/work/records/F-137.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: one guide section. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": []
+}

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-135-T03",
+  "parent": "F-135",
+  "title": "A hung main base stops its heartbeat too",
+  "goal": "A main base whose process lives but whose event loop or scheduler is stuck stops sending heartbeats, so the watcher sees it",
+  "status": "planned",
+  "acceptance": [
+    "A test blocks the main base's scheduler or brain and shows heartbeats stop within the limit (failing first if they keep going)",
+    "The heartbeat reports liveness of the part that delivers reminders, not only of the socket"
+  ],
+  "dependsOn": [
+    "F-135-T02"
+  ],
+  "resources": [
+    "src/kaji-link.ts",
+    "src/watch.ts",
+    "test/**",
+    "docs/work/records/F-135.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: one liveness source and one blocked-loop test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

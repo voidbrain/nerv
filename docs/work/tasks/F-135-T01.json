@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-135-T01",
+  "parent": "F-135",
+  "title": "Decide the watcher, the silence limit and the single-base case",
+  "goal": "A short design note says which base watches, after how many minutes of missed heartbeats it speaks, on which channel, and what a single-base install gets",
+  "status": "ready",
+  "acceptance": [
+    "docs/design/ names the watcher (a standby base over the Kaji line; the phone PWA only if it can run in the background) with the code it reuses (src/kaji-link.ts heartbeat tracking)",
+    "The silence limit N and the recovery rule are proposed with their reasons (sleep, update restarts and Kaji reconnects must not page the owner)",
+    "The single-base case is stated: what is covered, what is not"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/kaji-link.ts",
+    "src/telegram.ts",
+    "docs/design/**",
+    "docs/work/records/F-135.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review",
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: read the Kaji heartbeat and one-channel code, write one page. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": []
+}

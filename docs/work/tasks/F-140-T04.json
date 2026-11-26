@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-140-T04",
+  "parent": "F-140",
+  "title": "Threat map LLM10 cites the spend-window tests",
+  "goal": "LLM10 no longer lists cost as a gap",
+  "status": "planned",
+  "acceptance": [
+    "The row cites the F-140-T03 tests and the checker passes"
+  ],
+  "dependsOn": [
+    "F-140-T03",
+    "B-163-T02"
+  ],
+  "resources": [
+    "docs/security/agentic-threats.md",
+    "docs/work/records/F-140.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: one row. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": []
+}
