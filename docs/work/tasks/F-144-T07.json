@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "F-144-T07",
+  "parent": "F-144",
+  "title": "Dashboard Settings: keep-warm duration and the \"always loaded\" toggle with a memory warning",
+  "goal": "Dashboard Settings: keep-warm duration and the \"always loaded\" toggle with a memory warning",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"ollama a+b, c as option in dashboard\".",
+    "Read docs/STYLE-GUIDE.md first. A Settings block in web/public/dashboard/index.html (.settings-head, .field-grid, var(--...) tokens only, no new colour) shows keep-warm duration (select), the keep loaded always toggle (off by default) with a warning that it pins the model in memory (about 16 GB for gemma4:26b) and conflicts with VMs and image runs, and the cold/warm first-token figures",
+    "Strings: the dashboard is English only today (html lang=\"en\", no locale mechanism), so the strings are English; if a locale mechanism exists by then they get Italian forms in the same change. Keyboard and label checks; a browser check of phone width"
+  ],
+  "dependsOn": [
+    "F-144-T04",
+    "F-144-T05"
+  ],
+  "resources": [
+    "web/public/dashboard/index.html",
+    "docs/STYLE-GUIDE.md",
+    "test/dashboard.test.ts",
+    "docs/work/records/F-144.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "accessibility",
+    "style-guide"
+  ],
+  "privacy": "Local Ollama only; test data is neutral and invented; no secrets; warm-up calls carry no user text.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; bounded edit plus tests. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": 826,
+      "note": "plan"
+    }
+  ]
+}

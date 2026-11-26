@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 27 | 8 | 59 | 29 |
+| **This week** | 28 | 8 | 59 | 29 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 54 | 44 |
+| **Open** | 55 | 44 |
 | **Require Human 🧑** | 13 | 20 |
 
 ### Require Human 🧑
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 255 h agent + 20.5 h owner across 237 open steps of 54 features and 44 other records. 160 h of actual effort recorded on 148 steps. Generated from the task files.
+**Remaining effort:** 261.25 h agent + 20.75 h owner across 245 open steps of 55 features and 44 other records. 160 h of actual effort recorded on 148 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -924,6 +924,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-22: F-083-T04 saved-recipe live check recorded in [f083-t04-saved-recipe.md](acceptance/f083-t04-saved-recipe.md). 2026-11-20: `node --test test/photos.test.ts test/documents.test.ts test/cooking-session.test.ts test/telegram.test.ts` (26/26 passed), `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-083-T05 verified: [PR #481](https://github.com/voidbrain/nerv/pull/481) merged on green CI (test/pantry.test.ts). `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history). `F-083-T02` added `computeFromSavedDocument` / `DocumentStore.compute` in `src/documents.ts` and read-only tool `docs.compute` in `src/executors.ts` (cites saved values & arithmetic, asks instead of guessing on missing ratio/setting/unit mismatch); verified with `node --test test/documents.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-144"></a>[✨ F-144](#top)
+
+**Keep the local model warm: longer keep-alive, warm-up at known moments, an optional always-loaded setting**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 6.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-144-T01 — Failing test and probe: how keep&#95;alive reaches Ollama (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner decision 2026-11-26 in chat: "ollama a+b, c as option in dashboard". The first reply after an idle period is slow because Ollama unloads a model about 5 minutes after its last use and the next request reloads it (gemma4:26b is about 16 GB, gemma4:12b about 8 GB). Three parts: **A** NERV asks Ollama to keep its role models loaded longer after the last use (default 30 minutes, configurable); **B** NERV warms the model at known moments (service start, after an update, about 1 minute before a scheduled brief or reminder that needs it); **C** "keep loaded always" (keep_alive -1) as an owner option in the dashboard Settings, off by default, with a memory warning (a pinned model conflicts with VMs and with ComfyUI image runs, which unload models; the image runner's `--unload-ollama` interplay is [F-144-T06](work/records/F-144.md#f-144)). Plus time to first token, cold against warm, shown in `nerv doctor` and the dashboard so the gain is visible. How NERV calls Ollama today: `src/engine-provider.ts` sends OpenAI-compatible `/v1/chat/completions` (streamed) and no `keep_alive`; Ollama's `/v1` endpoint may ignore `keep_alive`, so [F-144-T01](work/records/F-144.md#f-144) decides between native `/api/chat` and a prompt-less `/api/generate` with `keep_alive` after each reply. |
+| **Reproduce** | Leave NERV idle for more than 5 minutes (`ollama ps` shows the model gone), then send a chat message: the first reply waits for the model to load. |
+| **Check** | A request carries the configured `keep_alive` on local Ollama role calls only (T01, T02); the models are loaded after a service start, an update and shortly before a scheduled brief, never blocking a reminder when Ollama is down (T03); "keep loaded always" is off by default, validated, and does not fight an image run (T04, T06); cold and warm time to first token shown in doctor and the dashboard (T05, T07); the owner sees the faster first reply (T08). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-144-t01"></a>F-144-T01 — Failing test and probe: how keep&#95;alive reaches Ollama | 0.75 h | 0 h | 0.75 h | Planned | — | [F-144-T02](#f-144-t02), [F-144-T05](#f-144-t05) | 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
+| 🟢 Small | <a id="f-144-t02"></a>F-144-T02 — A: keep role models loaded longer after the last use | 1 h | 0 h | 1 h | Planned | [F-144-T01](#f-144-t01) | [F-144-T03](#f-144-t03), [F-144-T04](#f-144-t04) | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
+| 🟢 Small | <a id="f-144-t03"></a>F-144-T03 — B: warm the model at service start, after an update and before scheduled briefs | 1 h | 0 h | 1 h | Planned | [F-144-T02](#f-144-t02) | [F-144-T06](#f-144-t06), [F-144-T08](#f-144-t08) | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
+| 🟢 Small | <a id="f-144-t04"></a>F-144-T04 — C: "keep loaded always" option (keep&#95;alive -1), off by default | 0.75 h | 0 h | 0.75 h | Planned | [F-144-T02](#f-144-t02) | [F-144-T06](#f-144-t06), [F-144-T07](#f-144-t07) | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
+| 🟢 Small | <a id="f-144-t05"></a>F-144-T05 — Time to first token, cold vs warm, in doctor and the dashboard | 1 h | 0 h | 1 h | Planned | [F-144-T01](#f-144-t01) | [F-144-T07](#f-144-t07) | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
+| 🟢 Small | <a id="f-144-t06"></a>F-144-T06 — Image runner and memory interplay: contract and documentation | 0.75 h | 0 h | 0.75 h | Planned | [F-144-T03](#f-144-t03), [F-144-T04](#f-144-t04) | — | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
+| 🟢 Small | <a id="f-144-t07"></a>F-144-T07 — Dashboard Settings: keep-warm duration and the "always loaded" toggle with a memory warning | 1 h | 0 h | 1 h | Planned | [F-144-T04](#f-144-t04), [F-144-T05](#f-144-t05) | [F-144-T08](#f-144-t08) | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
+| 🟢 Small | <a id="f-144-t08"></a>F-144-T08 — Owner: see the first reply come faster after idle, and the memory warning | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-144-T03](#f-144-t03), [F-144-T07](#f-144-t07) | — | ⏳ 🧑‍🔧 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
+| 🔴 Large | **Total** | 6.25 h | 0 h (0 of 8 steps recorded) | 6.25 h agent + 0.25 h owner | 0 of 8 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-144.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-144-T01: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T02: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T03: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T04: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T05: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T06: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T07: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T08: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan. Plan: [#826](https://github.com/voidbrain/nerv/pull/826) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
 
 </details>
 

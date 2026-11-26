@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-144-T08",
+  "parent": "F-144",
+  "title": "Owner: see the first reply come faster after idle, and the memory warning",
+  "goal": "Owner: see the first reply come faster after idle, and the memory warning",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"ollama a+b, c as option in dashboard\".",
+    "On the live service after the update the owner follows the copy-paste page written by F-144-T07 (docs/acceptance/owner-steps-<date>.md): (1) `ollama stop gemma4:12b` (or the configured chat model), then send \"ciao\" in the chat and note the first-reply time; (2) send \"ciao\" again and note it; (3) `nerv doctor` shows time to first token cold and warm; (4) `ollama ps` shows the model with a long UNTIL time (about 30 minutes; Forever when \"keep loaded always\" is on); (5) after a restart `ollama ps` shows the model loaded without any chat",
+    "The owner decides whether the gain is enough and whether to turn \"keep loaded always\" on; the agent records the result"
+  ],
+  "dependsOn": [
+    "F-144-T03",
+    "F-144-T07"
+  ],
+  "resources": [
+    "docs/work/records/F-144.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Local Ollama only; test data is neutral and invented; no secrets; warm-up calls carry no user text.",
+  "validation": [
+    "Owner check, recorded in F-144 Verification"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; one short procedure. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  },
+  "prs": [
+    {
+      "pr": 826,
+      "note": "plan"
+    }
+  ]
+}
