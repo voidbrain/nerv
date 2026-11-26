@@ -11,7 +11,7 @@
   "id": "B-167-T02",
   "title": "Read the three requests right and rebuild nerv-planner",
   "goal": "requestLanguage and detectToolDomains read the B-167 requests correctly",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "B-167-T01's test passes unchanged, with the other language and domain tests",
     "evals/gauntlet/nerv-planner-v1.json rebuilt with node tools/gauntlet-planner-pack.mjs (version bumped) so the changed cases are pending"
@@ -39,5 +39,10 @@
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 831,
+      "note": "detector fix and nerv-planner 1.1.0"
+    }
+  ]
 }

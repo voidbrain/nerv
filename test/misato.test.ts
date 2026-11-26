@@ -715,6 +715,60 @@ test("the waiting reply speaks the request's language, falls back to the convers
   );
   assert.doesNotMatch(waitingReply('en', 'reminders.cancel', { ids: ['a', 'b'] }), /done|confirmed|approved/i);
 });
+test('B-167: short Italian requests read as Italian, English ones stay English, with no earlier exchanges', async () => {
+  const { requestLanguage } = await import('../src/misato.ts');
+  // The owner uses NERV in Italian: short imperatives and questions, often with a name or a word English shares ("i", "a", "in").
+  for (const request of [
+    'quante batterie devo caricare?',
+    'stampa i piedini di Smoke',
+    'accendi la luce',
+    'accendi luce cucina',
+    'spegni il ventilatore per 2 ore',
+    'spegni tutto',
+    'aggiungi Rocca Calascio al trip di agosto',
+    'ricordami di bere acqua tra 5 minuti',
+    'controlla la mail di oggi',
+    'elenca i promemoria',
+    'mostra i droni',
+    'quanto latte ho in frigo?',
+    'a che ora parto?',
+    'carica Smoke',
+  ])
+    assert.equal(requestLanguage(request), 'it', request);
+  for (const request of [
+    'how many batteries do I need to charge?',
+    'print the AOS feet',
+    "print Smoke's feet",
+    'turn on the light',
+    'turn off the fan for 2 hours',
+    'add Rocca Calascio to the August trip',
+    'remind me to drink water in 5 minutes',
+    "check today's mail",
+    'list my drones',
+    'I have 3 new Testmot motors',
+    'how much milk is in the fridge?',
+    'add pasta and pizza to the pantry',
+    'turn on the radio',
+  ])
+    assert.equal(requestLanguage(request), 'en', request);
+});
+test('B-167: English plurals and synonyms reach their topic', async () => {
+  const { detectToolDomains } = await import('../src/misato.ts');
+  for (const [domain, request] of [
+    ['batteries', 'how many batteries do I need to charge?'],
+    ['batteries', 'which lipos are discharged?'],
+    ['fpv', 'tune the PIDs on my quads'],
+    ['fpv', 'which propellers fit my drones?'],
+    ['pantry', 'what expires soon?'],
+    ['pantry', 'list my recipes'],
+    ['pantry', 'which groceries do I need?'],
+    ['gmail', "check today's emails"],
+    ['gmail', 'any new mails?'],
+    ['gmail', 'search my invoices'],
+    ['fleet', 'list my drones'],
+  ] as const)
+    assert.equal(detectToolDomains({ request }).has(domain), true, `${domain}: ${request}`);
+});
 test("an action that already ran is never run again: a repeat ends the turn with the service's Done; at the step limit what ran is reported done", async () => {
   // Owner report 2026-11-05: a small model re-proposed an approved action until the step limit ("could not finish").
   const ADD = '{"action":{"tool":"reminders.add","args":{"title":"Stretch","due":"2031-01-01T09:00:00Z"}}}';
