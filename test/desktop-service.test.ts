@@ -139,7 +139,7 @@ describe('F-092-T05: the service binds the macOS desktop driver for recording an
       assert.deepEqual(state.sleeps, [DESKTOP_START_DELAY_MS]);
       assert.deepEqual(state.sampled, [5000]);
       const path = desktopRecordingPath(home, 'wiggle');
-      assert.equal(statSync(path).mode & 0o777, 0o600);
+      if (process.platform !== 'win32') assert.equal(statSync(path).mode & 0o777, 0o600);
       const file = JSON.parse(readFileSync(path, 'utf8')) as DesktopRecordingFile;
       assert.equal(file.events.length, 5);
       assert.ok(file.events.every((e) => e.kind.startsWith('mouse')));
