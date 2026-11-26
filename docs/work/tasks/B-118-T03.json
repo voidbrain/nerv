@@ -4,7 +4,7 @@
   "parent": "B-118",
   "title": "Other Runtime test files always exit; failing tests named in a stopped run",
   "goal": "No test file that starts Runtimes can hold the Windows test step past its limit, and a stopped run names each failed test",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "test/watch-runtime.test.ts (run 45314998906: 'F-026: stopping a watch while it waits for approval…' cancelled at 30 s, file never finished) closes its Runtime in a hook that runs after a cancelled test, with a failing-first test as in B-118-T02",
     "The other test files that start Runtimes get the same teardown, or a shared helper does it for all of them",
@@ -38,10 +38,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h",
-    "basis": "Estimated 2026-11-24 from B-118-T02 (same mechanism, one more file plus the reporter). Not a measurement.",
-    "reviewed": "2026-11-24",
-    "agentHours": 2,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 from B-118-T02 (same mechanism, one more file plus the reporter). Not a measurement. Closed 2026-11-26.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2,
     "actualAgentHours": 2.5,
@@ -51,6 +51,10 @@
     {
       "pr": 706,
       "note": "shared teardown scope, exit guard preload, failed tests logged as they happen"
+    },
+    {
+      "pr": 794,
+      "note": "closed on the owner decision 2026-11-26"
     }
   ]
 }

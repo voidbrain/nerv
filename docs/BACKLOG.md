@@ -9,21 +9,21 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 17 | 6 | 43 | 16 |
+| **This week** | 17 | 6 | 43 | 17 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 46 | 40 |
-| **Require Human 🧑** | 16 | 20 |
+| **Open** | 46 | 39 |
+| **Require Human 🧑** | 14 | 19 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-006](#f-006) | [B-091](#b-091) | [B-118](#b-118) |
-| [F-011](#f-011) | [F-120](#f-120) | [B-057](#b-057) |  |
-| [F-004](#f-004) | [F-116](#f-116) | [B-068](#b-068) |  |
+| [F-062](#f-062) | [F-116](#f-116) | [B-091](#b-091) | — |
+| [F-011](#f-011) |  | [B-057](#b-057) |  |
+| [F-004](#f-004) |  | [B-068](#b-068) |  |
 | [F-012](#f-012) |  | [B-107](#b-107) |  |
 | [F-016](#f-016) |  | [B-113](#b-113) |  |
 | [F-086](#f-086) |  | [B-122](#b-122) |  |
@@ -43,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 193.75 h agent + 17.25 h owner across 179 open steps of 46 features and 40 other records. 165.5 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 191.75 h agent + 17 h owner across 179 open steps of 46 features and 39 other records. 158.5 h of actual effort recorded on 148 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -176,6 +176,89 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-006"></a>[✨ F-006](#top)
+
+**Orchestrate agents and models across nodes**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 2 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Owner chose 2026-11-26 to allow the auditor-route checks: F-006-T33 (cancellation) and F-006-T34 (uncertain outcome) are agent runs on local models (0 paid); then the owner stops and restarts NERV-01 (F-006-T35) for the unavailable-Mac run (F-006-T36), and F-006-T37 records the report.
+
+| | |
+|---|---|
+| **Issue** | Local planning, model adapters and bounded worker transport exist; independent cross-node inference/execution selection, capability scheduling and budgets remain incomplete. |
+| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
+| **Check** | Mini PC coder uses Mac inference; policy-approved Claude path; Pi capability route; unavailable Mac waits or expires; bounded budgets and delegation. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-006-t33"></a>F-006-T33 — Check a cancellation on the mac-coder-mini-auditor route live | 0.5 h | 0 h | 0.5 h | Planned | — | [F-006-T35](#f-006-t35), [F-006-T37](#f-006-t37) | 🤖 | — |
+| 🟢 Small | <a id="f-006-t34"></a>F-006-T34 — Check an uncertain outcome on the mac-coder-mini-auditor route live | 0.5 h | 0 h | 0.5 h | Planned | — | [F-006-T35](#f-006-t35), [F-006-T37](#f-006-t37) | 🤖 | — |
+| 🟢 Small | <a id="f-006-t35"></a>F-006-T35 — Owner: make NERV-01 unavailable for the auditor-route check, then restore it | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-006-T33](#f-006-t33), [F-006-T34](#f-006-t34) | [F-006-T36](#f-006-t36) | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | <a id="f-006-t36"></a>F-006-T36 — Check an unavailable Mac on the mac-coder-mini-auditor route live | 0.5 h | 0 h | 0.5 h | Planned | [F-006-T35](#f-006-t35) | [F-006-T37](#f-006-t37) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-006-t37"></a>F-006-T37 — Record the auditor-route checks in the evidence and report, and restate the recommendation | 0.5 h | 0 h | 0.5 h | Planned | [F-006-T33](#f-006-t33), [F-006-T34](#f-006-t34), [F-006-T36](#f-006-t36) | — | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 21.5 h (34 of 37 steps) | 14 h (21 of 37 steps recorded) | 2 h agent + 0.25 h owner | 32 of 37 completed | | | | |
+
+<details><summary>Done steps (32)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-006-t01"></a>F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-006-t02"></a>F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-006-t03"></a>F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-006-t04"></a>F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-006-t06"></a>F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-006-t07"></a>F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t09"></a>F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t10"></a>F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.75 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 1.5 h | 0 h | Completed | — |
+| — | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0.75 h (stated) | Completed | [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending |
+| — | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | Completed | [PR #528](https://github.com/voidbrain/nerv/pull/528) results |
+| — | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0.25 h (stated) | Completed | [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure |
+| — | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-006-t17"></a>F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | Completed | — |
+| — | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | Completed | — |
+| — | <a id="f-006-t19"></a>F-006-T19 — Revise the placement campaign for 3 runs per case | 0.5 h | 0 h | Completed | [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation |
+| — | <a id="f-006-t20"></a>F-006-T20 — Revise the Mac operating-conditions plan for 3 runs and gemma4:12b | 0.5 h | 0 h | Completed | [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation |
+| — | <a id="f-006-t21"></a>F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases | 1.5 h | 0 h | Completed | [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending |
+| — | <a id="f-006-t22"></a>F-006-T22 — Decide: accept the provisional Mac-only placement or run the equivalent placement campaign | 0 h | 0 h | Completed | [PR #697](https://github.com/voidbrain/nerv/pull/697) owner decision recorded; T23–T26 planned |
+| — | <a id="f-006-t23"></a>F-006-T23 — Run P2 and P3 role-run and neutral-smoke under limits-repeat3 | 1.5 h | 1.5 h (stated) | Completed | [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending |
+| — | <a id="f-006-t24"></a>F-006-T24 — Run combination-v1 coder-alone vs coder-reviewer for mac-only and mac-coder-mini-auditor | 1.5 h | 1 h (stated) | Completed | [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending |
+| — | <a id="f-006-t25"></a>F-006-T25 — Check a disconnected auditor, a cancellation and an uncertain outcome live | 1.5 h | 0.5 h (stated) | Completed | [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending |
+| — | <a id="f-006-t26"></a>F-006-T26 — Update the placement report and recommendation with the new evidence | 0.75 h | 0.75 h (stated) | Completed | [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending |
+| — | <a id="f-006-t27"></a>F-006-T27 — Make the placement probe carry role-sized prompts | 2 h | 2 h (stated) | Completed | [PR #714](https://github.com/voidbrain/nerv/pull/714) probe system field, role-sized limits, frame refusal without ending the session; CI pending |
+| — | <a id="f-006-t28"></a>F-006-T28 — Owner: put NERV-01 and NERV-02 on the revision with role-sized probes | 0 h | 0 h | Completed | — |
+| — | <a id="f-006-t29"></a>F-006-T29 — Rerun the P3 role cases with role-sized probes and update the report | 1 h | 0.75 h (stated) | Completed | — |
+| — | <a id="f-006-t30"></a>F-006-T30 — Owner: put NERV-02 on the revision with the B-131 probe budget | 0 h | 0 h | Completed | [PR #738](https://github.com/voidbrain/nerv/pull/738) |
+| — | <a id="f-006-t31"></a>F-006-T31 — Rerun the P3 Misato cases with the fixed probe budget and update the report | 1 h | 0.75 h (stated) | Completed | [PR #738](https://github.com/voidbrain/nerv/pull/738) |
+| — | <a id="f-006-t32"></a>F-006-T32 — Decide: close F-006 on the provisional Mac-only placement or authorize the auditor-route checks | 0 h | 0 h | Completed | [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-006.md)
+
+| Field | Value |
+|---|---|
+| Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
+| PR / evidence | Steps: F-006-T12: [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending · F-006-T13: [PR #528](https://github.com/voidbrain/nerv/pull/528) results · F-006-T14: [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure · F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation · F-006-T21: [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending · F-006-T22: [PR #697](https://github.com/voidbrain/nerv/pull/697) owner decision recorded; T23–T26 planned · F-006-T23: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T24: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T25: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T26: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T27: [PR #714](https://github.com/voidbrain/nerv/pull/714) probe system field, role-sized limits, frame refusal without ending the session; CI pending · F-006-T30: [PR #738](https://github.com/voidbrain/nerv/pull/738) · F-006-T31: [PR #738](https://github.com/voidbrain/nerv/pull/738) · F-006-T32: [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded. [#738](https://github.com/voidbrain/nerv/pull/738) F-006-T30/T31 P3 Casper and Misato rerun and report; [#732](https://github.com/voidbrain/nerv/pull/732) F-006-T28/T29 P3 role rerun and report; [PR #714](https://github.com/voidbrain/nerv/pull/714) F-006-T27 role-sized placement probes; [PR #698](https://github.com/voidbrain/nerv/pull/698) F-006-T23–T26 equivalent placement runs and updated report; [PR #697](https://github.com/voidbrain/nerv/pull/697) F-006-T22 owner decision; [PR #679](https://github.com/voidbrain/nerv/pull/679) F-006-T12 placement report; older entries in the [evidence archive](archive/evidence-2026.md#f-006-moved-2026-11-24); [#789](https://github.com/voidbrain/nerv/pull/789); [#794](https://github.com/voidbrain/nerv/pull/794) |
+| Opened | 2026-11-01 |
+| Verification | Unit/integration 2026-11-24: `test/placement-report.test.ts` binds the report to the committed evidence; `test/placement-campaign.test.ts` and `test/orchestration-selection.test.ts` (role-sized probe across bases) pass; CI green on PRs #679, #698, #714. Live 2026-11-24: P2/P3 smoke, combination and failure checks on NERV-01 + NERV-02 recorded in the report; P3 Casper cases with role-sized probes 2026-11-24 (F-006-T29): 15/15 in the [F-006-T29 report](evaluations/2026-11-24-f006-t29-placement-report.md); P3 Misato cases 2026-11-25 (F-006-T31): 8/15, 0 errors, in the [F-006-T31 report](evaluations/2026-11-25-f006-t31-placement-report.md). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
 ### <a id="b-143"></a>[🐞 B-143](#top)
 
 **A relative reminder time counts from the model step that writes the call, not from when the owner asked**
@@ -214,84 +297,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-006"></a>[✨ F-006](#top)
-
-**Orchestrate agents and models across nodes**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h owner | — | — | — | — | 🤔 |
-
-🧑 **→** F-006-T32: close F-006 on the provisional Mac-only placement, or authorize the auditor-route checks.
-
-| | |
-|---|---|
-| **Issue** | Local planning, model adapters and bounded worker transport exist; independent cross-node inference/execution selection, capability scheduling and budgets remain incomplete. |
-| **Reproduce** | Follow README commands and the owning milestone in ROADMAP. |
-| **Check** | Mini PC coder uses Mac inference; policy-approved Claude path; Pi capability route; unavailable Mac waits or expires; bounded budgets and delegation. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-006-t32"></a>F-006-T32 — Decide: close F-006 on the provisional Mac-only placement or authorize the auditor-route checks | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🤔](evaluations/2026-11-25-f006-t31-placement-report.md#verdicts) | — |
-| 🟢 Small | **Total** | 19.5 h (29 of 32 steps) | 14 h (21 of 32 steps recorded) | 0.25 h owner | 31 of 32 completed | | |
-
-<details><summary>Done steps (31)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-006-t01"></a>F-006-T01 — T01a — Decision: remote inference endpoint identity, permitted data and behaviour when unavailable | 0.5 h | 0.5 h (stated) | Completed | — |
-| — | <a id="f-006-t02"></a>F-006-T02 — T02a — Selection contract: model endpoint and execution worker chosen independently; no silent fallback | 0.5 h | 0.5 h (stated) | Completed | — |
-| — | <a id="f-006-t03"></a>F-006-T03 — T03a — Combination case pack: hidden acceptance, deliberately flawed patches, false-rejection and shared blind-spot cases | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-006-t04"></a>F-006-T04 — Draft the placement campaign plan with exact cases, repeats and budgets | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-006-t05"></a>F-006-T05 — Draft the Mac operating-conditions plan (heavy, moderate, idle) with budgets | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-006-t06"></a>F-006-T06 — T01b — Configuration validation for remote endpoints; the loopback-only local route stays guaranteed; regressions | 0.5 h | 0.5 h (stated) | Completed | — |
-| — | <a id="f-006-t07"></a>F-006-T07 — T02b — Scheduler join: a job runs on worker X with inference at endpoint Y over the worker protocol | 0.75 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t08"></a>F-006-T08 — T02c — Unavailable endpoint waits or expires within budgets; policy-approved cloud path; Pi capability route | 0.75 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t09"></a>F-006-T09 — T03b — Evidence adapter binding both configurations, handoffs, budgets and hosts | 0.75 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t10"></a>F-006-T10 — T03c — Grader tamper protection; stale or mismatched evidence rejected; authority rechecked | 0.75 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t11"></a>F-006-T11 — T04b — Run the placement campaign on the enrolled Mac and mini PC | 1.5 h | 0 h | Completed | — |
-| — | <a id="f-006-t12"></a>F-006-T12 — T04c — Placement report and recommendation | 0.25 h | 0.75 h (stated) | Completed | [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending |
-| — | <a id="f-006-t13"></a>F-006-T13 — T05b — Three Mac operating-condition runs | — | 0 h | Completed | [PR #528](https://github.com/voidbrain/nerv/pull/528) results |
-| — | <a id="f-006-t14"></a>F-006-T14 — T05c — Mac operating-conditions report | 0.25 h | 0.25 h (stated) | Completed | [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure |
-| — | <a id="f-006-t15"></a>F-006-T15 — Record the evidence of F-006-T11 and close it | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-006-t16"></a>F-006-T16 — Record the evidence of F-006-T13 and close it | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-006-t17"></a>F-006-T17 — Approve the placement campaign plan and budgets | — | 0 h | Completed | — |
-| — | <a id="f-006-t18"></a>F-006-T18 — Approve the Mac operating-conditions plan and budgets | — | 0 h | Completed | — |
-| — | <a id="f-006-t19"></a>F-006-T19 — Revise the placement campaign for 3 runs per case | 0.5 h | 0 h | Completed | [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation |
-| — | <a id="f-006-t20"></a>F-006-T20 — Revise the Mac operating-conditions plan for 3 runs and gemma4:12b | 0.5 h | 0 h | Completed | [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation |
-| — | <a id="f-006-t21"></a>F-006-T21 — Owner page for placement P2–P4 on the mini PC and across both bases | 1.5 h | 0 h | Completed | [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending |
-| — | <a id="f-006-t22"></a>F-006-T22 — Decide: accept the provisional Mac-only placement or run the equivalent placement campaign | 0 h | 0 h | Completed | [PR #697](https://github.com/voidbrain/nerv/pull/697) owner decision recorded; T23–T26 planned |
-| — | <a id="f-006-t23"></a>F-006-T23 — Run P2 and P3 role-run and neutral-smoke under limits-repeat3 | 1.5 h | 1.5 h (stated) | Completed | [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending |
-| — | <a id="f-006-t24"></a>F-006-T24 — Run combination-v1 coder-alone vs coder-reviewer for mac-only and mac-coder-mini-auditor | 1.5 h | 1 h (stated) | Completed | [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending |
-| — | <a id="f-006-t25"></a>F-006-T25 — Check a disconnected auditor, a cancellation and an uncertain outcome live | 1.5 h | 0.5 h (stated) | Completed | [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending |
-| — | <a id="f-006-t26"></a>F-006-T26 — Update the placement report and recommendation with the new evidence | 0.75 h | 0.75 h (stated) | Completed | [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending |
-| — | <a id="f-006-t27"></a>F-006-T27 — Make the placement probe carry role-sized prompts | 2 h | 2 h (stated) | Completed | [PR #714](https://github.com/voidbrain/nerv/pull/714) probe system field, role-sized limits, frame refusal without ending the session; CI pending |
-| — | <a id="f-006-t28"></a>F-006-T28 — Owner: put NERV-01 and NERV-02 on the revision with role-sized probes | 0 h | 0 h | Completed | — |
-| — | <a id="f-006-t29"></a>F-006-T29 — Rerun the P3 role cases with role-sized probes and update the report | 1 h | 0.75 h (stated) | Completed | — |
-| — | <a id="f-006-t30"></a>F-006-T30 — Owner: put NERV-02 on the revision with the B-131 probe budget | 0 h | 0 h | Completed | [PR #738](https://github.com/voidbrain/nerv/pull/738) |
-| — | <a id="f-006-t31"></a>F-006-T31 — Rerun the P3 Misato cases with the fixed probe budget and update the report | 1 h | 0.75 h (stated) | Completed | [PR #738](https://github.com/voidbrain/nerv/pull/738) |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-006.md)
-
-| Field | Value |
-|---|---|
-| Queue order | 2 — Owner-selected subsequent NERV work, 2026-11-10; intervening upstream work is tracked in its own repository |
-| PR / evidence | Steps: F-006-T12: [PR #679](https://github.com/voidbrain/nerv/pull/679) placement report, recommendation and offline report command; CI pending · F-006-T13: [PR #528](https://github.com/voidbrain/nerv/pull/528) results · F-006-T14: [PR #631](https://github.com/voidbrain/nerv/pull/631) report and closure · F-006-T19: [PR #466](https://github.com/voidbrain/nerv/pull/466) implementation · F-006-T20: [PR #468](https://github.com/voidbrain/nerv/pull/468) implementation · F-006-T21: [PR #638](https://github.com/voidbrain/nerv/pull/638) placement probes and owner page; CI pending · F-006-T22: [PR #697](https://github.com/voidbrain/nerv/pull/697) owner decision recorded; T23–T26 planned · F-006-T23: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T24: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T25: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T26: [PR #698](https://github.com/voidbrain/nerv/pull/698) equivalent placement runs and updated report; CI pending · F-006-T27: [PR #714](https://github.com/voidbrain/nerv/pull/714) probe system field, role-sized limits, frame refusal without ending the session; CI pending · F-006-T30: [PR #738](https://github.com/voidbrain/nerv/pull/738) · F-006-T31: [PR #738](https://github.com/voidbrain/nerv/pull/738). [#738](https://github.com/voidbrain/nerv/pull/738) F-006-T30/T31 P3 Casper and Misato rerun and report; [#732](https://github.com/voidbrain/nerv/pull/732) F-006-T28/T29 P3 role rerun and report; [PR #714](https://github.com/voidbrain/nerv/pull/714) F-006-T27 role-sized placement probes; [PR #698](https://github.com/voidbrain/nerv/pull/698) F-006-T23–T26 equivalent placement runs and updated report; [PR #697](https://github.com/voidbrain/nerv/pull/697) F-006-T22 owner decision; [PR #679](https://github.com/voidbrain/nerv/pull/679) F-006-T12 placement report; older entries in the [evidence archive](archive/evidence-2026.md#f-006-moved-2026-11-24); [#789](https://github.com/voidbrain/nerv/pull/789) |
-| Opened | 2026-11-01 |
-| Verification | Unit/integration 2026-11-24: `test/placement-report.test.ts` binds the report to the committed evidence; `test/placement-campaign.test.ts` and `test/orchestration-selection.test.ts` (role-sized probe across bases) pass; CI green on PRs #679, #698, #714. Live 2026-11-24: P2/P3 smoke, combination and failure checks on NERV-01 + NERV-02 recorded in the report; P3 Casper cases with role-sized probes 2026-11-24 (F-006-T29): 15/15 in the [F-006-T29 report](evaluations/2026-11-24-f006-t29-placement-report.md); P3 Misato cases 2026-11-25 (F-006-T31): 8/15, 0 errors, in the [F-006-T31 report](evaluations/2026-11-25-f006-t31-placement-report.md). |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
-
 ### <a id="f-062"></a>[✨ F-062](#top)
 
 **Backup and restore: agreed loss bounds, off-host snapshots and a restore drill**
@@ -568,47 +573,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-118"></a>[🐞 B-118](#top)
-
-**Windows CI: the test step runs into its 18-minute limit**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 5 h | — | — | 🤖 | — | 🤔 |
-
-🧑 **→** Close on 13 clean first-attempt Windows runs within 12 minutes, none over the limit, or wait for five consecutive green runs (the literal Check).
-
-| | |
-|---|---|
-| **Issue** | The `windows` job's `npm test` step (limit `timeout-minutes: 18`, set by B-076) ran out twice on PR #679: run 45259024776, attempts 1 (20:31:12–20:49:13 UTC) and 2 (21:20:20–21:38:20 UTC), 2026-11-23. Passing attempts that day took about 9–10 minutes (attempt 3 of the same run 9 m 48 s), so the suite either slows sharply on some runners or a test hangs; either way a PR waits on reruns. |
-| **Reproduce** | Rerun the `windows` job of a full-suite PR several times; compare the step duration and the `windows-test-report` artifact (the last line before the stop names the test after which it hung). |
-| **Check** | The two stopped attempts are read from their test reports and the cause named (a hanging test, or a slow runner with the slowest files measured); a hang gets a failing-first test and a fix, slowness a split, parallelism or test change; the next five full Windows runs finish within 12 minutes (a third of margin under the limit) without reruns. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-118-t01"></a>B-118-T01 — Make the Windows test step fit its limit with margin | 4 h | 2.5 h so far (stated) | 0.5 h | Implemented; verification pending | — | — | [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split |
-| 🟢 Small | <a id="b-118-t02"></a>B-118-T02 — Worker-link test files always exit; find why they time out on Windows | 2.5 h | 2 h so far (stated) | 0.5 h | Implemented; verification pending | — | [B-118-T03](#b-118-t03) | [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain |
-| 🟡 Medium | <a id="b-118-t03"></a>B-118-T03 — Other Runtime test files always exit; failing tests named in a stopped run | 2 h | 2.5 h so far (stated) | 2 h | Implemented; verification pending | [B-118-T02](#b-118-t02) | [B-118-T04](#b-118-t04) | [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen |
-| 🟡 Medium | <a id="b-118-t04"></a>B-118-T04 — Cut the Windows cost of the coordinator test files | 2 h | 0 h | 2 h | Implemented; verification pending | [B-118-T03](#b-118-t03) | — | [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round |
-| 🔴 Large | **Total** | 10.5 h | 7 h (3 of 4 steps recorded) | 5 h | 0 of 4 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-118.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-118-T01: [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split · B-118-T02: [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain · B-118-T03: [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen · B-118-T04: [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round. B-118-T04: Test: `test/sqlite-no-fsync.test.ts`; timing logs of runs 45506622094 to 45559316942 (Windows) and [run 45548137584](https://github.com/voidbrain/nerv/actions/runs/45548137584) (Linux); [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776); [#741](https://github.com/voidbrain/nerv/pull/741); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758); [#787](https://github.com/voidbrain/nerv/pull/787) |
-| Opened | 2026-11-24 |
-| Verification | CI 2026-11-25 (later): 573, 545, 440 and 359 s (runs 45602256057, 45618960815, 45629193344, 45640302693); the first two needed a test rerun; two clean runs since. Unit 2026-11-25: Test: `test/sqlite-no-fsync.test.ts` and `test/coordinator-partition.test.ts` pass locally (B-118-T04). CI 2026-11-25: after PR #741 four Windows `npm test` runs took 352–506 s on the first attempt (runs 45572380286, 45577116814, 45580660697, 45589471622); five needed. Unit/integration 2026-11-24: Test: `test/worker-link-exit.test.ts` (B-118-T02) and `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs` (B-118-T03) pass locally. |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
 ### <a id="f-082"></a>[✨ F-082](#top)
 
 **Lists: add items by chat or Telegram, recall them as a checklist card**
@@ -708,6 +672,55 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-22: F-083-T04 saved-recipe live check recorded in [f083-t04-saved-recipe.md](acceptance/f083-t04-saved-recipe.md). 2026-11-20: `node --test test/photos.test.ts test/documents.test.ts test/cooking-session.test.ts test/telegram.test.ts` (26/26 passed), `npm run check:fast`, `npm run check:conventions`, and `npm run build` passed. 2026-11-18: F-083-T05 verified: [PR #481](https://github.com/voidbrain/nerv/pull/481) merged on green CI (test/pantry.test.ts). `F-083-T01` verified via `test/documents.test.ts` (`docs.save` approval gate, category listing, verbatim `docs.show`, `docs.edit`, `docs.forget`, append-only history). `F-083-T02` added `computeFromSavedDocument` / `DocumentStore.compute` in `src/documents.ts` and read-only tool `docs.compute` in `src/executors.ts` (cites saved values & arithmetic, asks instead of guessing on missing ratio/setting/unit mismatch); verified with `node --test test/documents.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-120"></a>[✨ F-120](#top)
+
+**Gauntlet coverage of NERV capabilities**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Owner approved 180 s a case for the three reference-runner packs on 2026-11-26 (F-120-T05); the agent implements it, excludes the four sketch cases and reruns F-120-T04.
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24: the Gauntlet exists to qualify models for NERV's general and specific capabilities, but no rule ties a finished NERV feature to a Gauntlet case. NERV's own pack (`evals/gauntlet/system-v1.json`) has 8 broad flows; pairing, relocation, update, fleet, placement and watches have no case. General domain packs (coding, embedded, logic, Italian quality, 3D printing, image generation) came from gauntlet-protocol 0.10.0 and 0.11.0; NERV adopted them in F-120-T03 (pin 0.11.1). |
+| **Reproduce** | `jq '.cases[].id' evals/gauntlet/system-v1.json` lists 8 flows; `docs/test-capability-index.md` has no row for the features closed since F-074. |
+| **Check** | Every closed NERV feature with model-facing behaviour has a system-pack case or a recorded reason; the cases run and pass in an owner-approved campaign. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-120-t05"></a>F-120-T05 — Run the reference-runner packs under a 180 s case limit (owner decision 2026-11-26) | 1 h | 0 h | 1 h | Ready | — | [F-120-T04](#f-120-t04) | 🤖 | [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded |
+| 🟢 Small | <a id="f-120-t04"></a>F-120-T04 — Agent: run the approved Gauntlet campaign for the pending cases | 0.5 h | 0 h | 0.5 h | Planned | [F-120-T05](#f-120-t05) | — | ⏳ 🤖 | — |
+| 🔴 Large | **Total** | 6.5 h | 0 h (0 of 5 steps recorded) | 4.5 h | 2 of 5 completed | | | | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | Completed | [PR #752](https://github.com/voidbrain/nerv/pull/752) |
+| — | <a id="f-120-t03"></a>F-120-T03 — Owner approves the first Gauntlet run of the domain-pack cases | 0.5 h | 0 h | Completed | [PR #749](https://github.com/voidbrain/nerv/pull/749) |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-120.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749) · F-120-T05: [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded. Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review).; [#758](https://github.com/voidbrain/nerv/pull/758); [#783](https://github.com/voidbrain/nerv/pull/783); [#791](https://github.com/voidbrain/nerv/pull/791); [#794](https://github.com/voidbrain/nerv/pull/794) |
+| Opened | 2026-11-24 |
+| Verification | Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
+| Reviewed | 2026-11-25 |
 
 </details>
 
@@ -2033,55 +2046,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-087-T02 verified: [PR #491](https://github.com/voidbrain/nerv/pull/491) merged on green CI. `F-087-T01` decision written in [bambu-print-handoff.md](decisions/bambu-print-handoff.md); verified with `npm run check:fast`. 2026-11-22: F-087-T03 verified (`bambu.handoff` Orange gate + `handOffToBambuConnect` + owner checklist); `node --test test/slicer.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
-
-</details>
-
----
-### <a id="f-120"></a>[✨ F-120](#top)
-
-**Gauntlet coverage of NERV capabilities**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.25 h owner | — | — | 🤖 | — | 🤔 |
-
-🧑 **→** F-120-T05: approve a 180 s case limit for the three reference-runner packs and arduino-cli on the Mac, so F-120-T04 can finish.
-
-| | |
-|---|---|
-| **Issue** | Owner 2026-11-24: the Gauntlet exists to qualify models for NERV's general and specific capabilities, but no rule ties a finished NERV feature to a Gauntlet case. NERV's own pack (`evals/gauntlet/system-v1.json`) has 8 broad flows; pairing, relocation, update, fleet, placement and watches have no case. General domain packs (coding, embedded, logic, Italian quality, 3D printing, image generation) came from gauntlet-protocol 0.10.0 and 0.11.0; NERV adopted them in F-120-T03 (pin 0.11.1). |
-| **Reproduce** | `jq '.cases[].id' evals/gauntlet/system-v1.json` lists 8 flows; `docs/test-capability-index.md` has no row for the features closed since F-074. |
-| **Check** | Every closed NERV feature with model-facing behaviour has a system-pack case or a recorded reason; the cases run and pass in an owner-approved campaign. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | — | — | 🤖 | — |
-| 🟢 Small | <a id="f-120-t05"></a>F-120-T05 — Decide: a 180 s case limit for the reference-runner packs, and arduino-cli on the Mac | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | — | [F-120-T04](#f-120-t04) | [🤔](evaluations/gauntlet.md#domain-packs-0100-and-0110-f-120-t03) | — |
-| 🟢 Small | <a id="f-120-t04"></a>F-120-T04 — Agent: run the approved Gauntlet campaign for the pending cases | 0.5 h | 0 h | 0.5 h | Planned | [F-120-T05](#f-120-t05) | — | ⏳ 🤖 | — |
-| 🟡 Medium | **Total** | 5.5 h | 0 h (0 of 5 steps recorded) | 3.5 h agent + 0.25 h owner | 2 of 5 completed | | | | |
-
-<details><summary>Done steps (2)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | Completed | [PR #752](https://github.com/voidbrain/nerv/pull/752) |
-| — | <a id="f-120-t03"></a>F-120-T03 — Owner approves the first Gauntlet run of the domain-pack cases | 0.5 h | 0 h | Completed | [PR #749](https://github.com/voidbrain/nerv/pull/749) |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-120.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749). Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review).; [#758](https://github.com/voidbrain/nerv/pull/758); [#783](https://github.com/voidbrain/nerv/pull/783); [#791](https://github.com/voidbrain/nerv/pull/791) |
-| Opened | 2026-11-24 |
-| Verification | Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
-| Reviewed | 2026-11-25 |
 
 </details>
 
