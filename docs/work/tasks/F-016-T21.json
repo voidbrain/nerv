@@ -40,7 +40,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 from F-016-T20 (1.5 h). Implemented 2026-11-26 in exportSeedSnapshotAsync (worker thread) with 12,000-row event-loop delay, concurrent lease/Kaji and mid-export fencing regression; remaining: CI.",
+    "basis": "Estimated 2026-11-24 from F-016-T20 (1.5 h). Implemented 2026-11-26 in exportSeedSnapshotAsync (worker thread) with 25,000-row event-loop delay, concurrent lease/Kaji and mid-export fencing regression; remaining: CI.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "actualAgentHours": 0.25,
