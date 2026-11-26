@@ -7,7 +7,7 @@
   "status": "planned",
   "acceptance": [
     "Names the two tools: github.workflow.dispatch (write-external, needs a grant, allowed only for listed repository + workflow + ref triples, first voidbrain/coordinator refresh-views.yml on main) and github.runs.status (read, Green), with their inputs, outputs and bounded errors",
-    "States how the pilot climbs the watermelon stages (F-025): at prototype (eva-00) every dispatch is an owner-approved card and the unattended hourly job stays off; the job runs unattended only once the pilot is promoted to a stage whose EVA class admits write-external, and the owner decides that promotion",
+    "States the early promotion: the GitHub pilot enters at the test stage (eva-01, which admits write-external) instead of prototype. Unattended it may only dispatch the allow-listed workflow voidbrain/coordinator 429602416 (refresh-views.yml) on ref main from the hourly job (F-132-T04) and read runs with github.runs.status; a dispatch requested in chat or from the quick command (F-132-T03, F-132-T05) still shows an owner approval card as planned, as do every other dispatch (another repository, workflow or ref), any allow-list change, a wider token scope and any promotion to production. Owner decision 2026-11-26 (chat): \"Promote the GitHub pilot early\", so the hourly coordinator refresh (F-132-T04) runs unattended.",
     "States where the token lives (a private chmod 600 file in the data home, read like the other credentials in src/config.ts, never config.json, logs or the relocation snapshot), the command or steps that place it, and how it moves with the main base on relocation instead of being copied to every base",
     "Keeps GitHub's own cron in refresh-views.yml as the backup and says how a NERV dispatch and a late GitHub run avoid duplicate harm (the workflow is idempotent; NERV skips when a run is queued or in progress)"
   ],
@@ -34,7 +34,7 @@
   "effort": {
     "size": "small",
     "estimate": "1 h",
-    "basis": "Estimated 2026-11-26: one decision page over existing pilots, grants and credential files. Not a measurement.",
+    "basis": "Estimated 2026-11-26: one decision page over existing pilots, grants and credential files. Not a measurement. 2026-11-26: the early promotion replaces the prototype-only plan in the design; estimate unchanged.",
     "reviewed": "2026-11-26",
     "agentHours": 1,
     "baselineAgentHours": 1,
@@ -43,6 +43,10 @@
   "prs": [
     {
       "pr": 781
+    },
+    {
+      "pr": 801,
+      "note": "early promotion"
     }
   ]
 }

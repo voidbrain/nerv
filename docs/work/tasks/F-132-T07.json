@@ -7,7 +7,7 @@
   "status": "planned",
   "acceptance": [
     "On NERV-01 after the update: \"Refresh the overview\" in chat shows an approval card; after approval the coordinator refresh-views run starts and NERV reports its result and link",
-    "With the hourly job turned on and the pilot promoted, runs appear about hourly in voidbrain/coordinator Actions; GitHub's own schedule still runs as the backup"
+    "With the hourly job on (the default) under the early promotion, runs appear about hourly in voidbrain/coordinator Actions; GitHub's own schedule still runs as the backup"
   ],
   "dependsOn": [
     "F-132-T04",
@@ -40,6 +40,10 @@
   "prs": [
     {
       "pr": 781
+    },
+    {
+      "pr": 801,
+      "note": "early promotion"
     }
   ]
 }

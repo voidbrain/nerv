@@ -10,12 +10,15 @@
     "Photos attached to batteries, crashes and parts (src/photos.ts ownerKind battery, crash, part) stay linked: moved with the data or referenced by FPVBuddy IDs, with an ID map kept outside Git",
     "Durability: FPVBuddy's data has a backup or replication story at least as good as NERV's store (NERV-01/NERV-02 replication), named in this record, or the owner accepts a recorded gap before the import",
     "The migration is a script with a dry run and a test on invented data; it refuses to run twice over the same data",
-    "Owner decision 2026-11-26 (chat): \"Drop F-101-T05, and add a step to move your battery data to FPVBuddy, behind its MCP server.\" NERV never imports the FPV core; it reaches FPVBuddy over MCP only (coordinator docs/DOMAINS.md; coordinator:F-016 shared-assets rule). F-101-T09 (storage reminders), F-101-T10 (every FPV tool keeps a path, unreachable FPVBuddy) and F-101-T11 (removal) complete the move."
+    "Owner decision 2026-11-26 (chat): \"Drop F-101-T05, and add a step to move your battery data to FPVBuddy, behind its MCP server.\" NERV never imports the FPV core; it reaches FPVBuddy over MCP only (coordinator docs/DOMAINS.md; coordinator:F-016 shared-assets rule). F-101-T09 (storage reminders), F-101-T10 (every FPV tool keeps a path, unreachable FPVBuddy) and F-101-T11 (removal) complete the move.",
+    "Owner decision 2026-11-26 (chat): \"accept all 17 proposals\" of the cross-project audit (coordinator docs/audits/2026-11-26-cross-project.md), proposals 1 and 11: waits on fpvbuddy:F-005-T02 (met: FPVBuddy#17) instead of F-101-T04, on fpvbuddy:F-017-T03 (the import report) and on fpvbuddy:F-016-T03 (backup, the durability acceptance above)."
   ],
   "dependsOn": [
-    "F-101-T04",
+    "fpvbuddy:F-005-T02",
     "fpvbuddy:F-009-T02",
-    "fpvbuddy:F-010-T04"
+    "fpvbuddy:F-010-T04",
+    "fpvbuddy:F-017-T03",
+    "fpvbuddy:F-016-T03"
   ],
   "resources": [
     "src/batteries.ts",
@@ -46,7 +49,7 @@
   "effort": {
     "size": "small",
     "estimate": "2 h",
-    "basis": "Estimated 2026-11-26 after the owner decision (export and import script with a dry run, count and sample check, photo ID map). Not a measurement.",
+    "basis": "Estimated 2026-11-26 after the owner decision (export and import script with a dry run, count and sample check, photo ID map). Not a measurement. 2026-11-26 audit proposals: prerequisites changed, estimate unchanged.",
     "reviewed": "2026-11-26",
     "agentHours": 2,
     "baselineAgentHours": 2,
@@ -56,6 +59,13 @@
     {
       "pr": 792,
       "note": "planning"
+    },
+    {
+      "pr": 801,
+      "note": "prerequisites"
     }
+  ],
+  "externalMet": [
+    "fpvbuddy:F-005-T02"
   ]
 }

@@ -6,10 +6,12 @@
   "goal": "The owner registers the hub URL; `nerv` lists the Grover tools and a read tool answers in chat",
   "status": "planned",
   "acceptance": [
-    "The owner registers the hub URL; `nerv` lists the Grover tools and a read tool answers in chat"
+    "The owner registers the hub URL; `nerv` lists the Grover tools and a read tool answers in chat",
+    "Owner decision 2026-11-26 (chat): \"accept all 17 proposals\" of the cross-project audit (coordinator docs/audits/2026-11-26-cross-project.md), proposal 12: waits on grover:F-005-T01 (the hub deployed on the Pi): its check registers the hub running on the Pi."
   ],
   "dependsOn": [
-    "F-123-T01"
+    "F-123-T01",
+    "grover:F-005-T01"
   ],
   "resources": [
     "docs/acceptance/f123-t02-grover-tools.md",
@@ -30,13 +32,19 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 h owner",
-    "basis": "Estimated 2026-11-24 when opened from the coordinator gap review. Not a measurement.",
-    "reviewed": "2026-11-24",
+    "basis": "Estimated 2026-11-24 when opened from the coordinator gap review. Not a measurement. 2026-11-26 audit proposals: prerequisite added, estimate unchanged.",
+    "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,
     "ownerHours": 0.5,
     "ownerKind": "procedure"
   },
-  "ownerLink": "docs/acceptance/f123-t02-grover-tools.md"
+  "ownerLink": "docs/acceptance/f123-t02-grover-tools.md",
+  "prs": [
+    {
+      "pr": 801,
+      "note": "prerequisite"
+    }
+  ]
 }

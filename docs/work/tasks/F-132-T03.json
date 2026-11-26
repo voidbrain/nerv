@@ -6,8 +6,8 @@
   "goal": "A GitHub pilot on the roster that owns the two tools, enters at prototype, and answers \"Refresh the overview\" by dispatching the coordinator refresh and reporting the run",
   "status": "planned",
   "acceptance": [
-    "The roster has a GitHub pilot (domain GitHub workflows, tools github.workflow.dispatch and github.runs.status, stage prototype) chosen for GitHub requests like other pilots (F-045)",
-    "At prototype a dispatch is shown as an owner-approved card; after approval the pilot watches the run with github.runs.status and replies with its result and link",
+    "The roster has a GitHub pilot (domain GitHub workflows, tools github.workflow.dispatch and github.runs.status, stage test by the early promotion in F-132-T01) chosen for GitHub requests like other pilots (F-045)",
+    "A dispatch requested in chat is shown as an owner-approved card; after approval the pilot watches the run with github.runs.status and replies with its result and link",
     "Demotion signals (F-025-T04) apply to the pilot like any other",
     "A test across chat routing, the approval gate and the fake GitHub API: \"Refresh the overview\" ends with one dispatch after approval and none without it"
   ],
@@ -46,6 +46,10 @@
   "prs": [
     {
       "pr": 781
+    },
+    {
+      "pr": 801,
+      "note": "early promotion"
     }
   ]
 }

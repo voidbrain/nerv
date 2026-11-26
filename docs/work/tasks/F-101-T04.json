@@ -4,7 +4,7 @@
   "parent": "F-101",
   "title": "Create/wire the FPVBuddy core repository and move the core into it",
   "goal": "Batteries, fleet, spares and crash rules live once, in voidbrain/FPVBuddy, behind a storage interface",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "The repository has the core (batteries, fleet, spares, crashes, crash to battery-damage link) with no NERV imports, its own tests, formatter, linter and CI",
     "Its backlog is seeded with: web components for batteries, fleet, spares and crashes; a Claude skill (pilot data file, artifact page); an MCP server with an MCP Apps page, to start when a pilot asks",
@@ -37,12 +37,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h",
-    "basis": "Estimated 2026-11-20: move pure rules out, add a storage interface and repository tooling. Not a measurement.",
-    "reviewed": "2026-11-20",
-    "agentHours": 2,
+    "estimate": "0 remaining (met in FPVBuddy)",
+    "basis": "Estimated 2026-11-20: move pure rules out, add a storage interface and repository tooling. Not a measurement. Closed 2026-11-26 as met by fpvbuddy:F-005-T02 (FPVBuddy#17, the battery core in voidbrain/FPVBuddy, implemented); fleet, spares and crashes are fpvbuddy:F-010 (F-101-T08 waits on fpvbuddy:F-010-T04). Owner decision 2026-11-26 (chat): \"accept all 17 proposals\" of the cross-project audit (coordinator docs/audits/2026-11-26-cross-project.md), proposal 1. No actual: the work was done in FPVBuddy.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 801,
+      "note": "closed as met by fpvbuddy:F-005-T02"
+    }
+  ]
 }

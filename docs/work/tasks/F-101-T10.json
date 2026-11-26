@@ -7,17 +7,25 @@
   "status": "planned",
   "acceptance": [
     "batteries.list, batteries.chat, batteries.due, batteries.resistance and fleet.chat call FPVBuddy's MCP tools; writes (charge state, resistance, crashes) go through FPVBuddy write tools gated as actions needing approval",
+    "Writes pass a request id so a retried call applies once (FPVBuddy's writes take one, fpvbuddy:F-012-T01); a test retries a write through the fake server and sees one change",
     "fleet.print stays in NERV (printing, F-121) and reads the fleet over MCP; printed-part and print-job data stay with F-121 keyed by FPVBuddy drone IDs",
     "fpv.blackbox_report moves to FPVBuddy as a stateless analyzer tool; fpv.import_build, fpv.add_doc and fpv.wiring_answer move to FPVBuddy with the builds and manufacturer docs (src/blackbox.ts, src/fpv-builds.ts, src/diyfpv-build.ts); FPVBuddy's backlog owns those tools, and this step starts only when they exist",
     "Unreachable FPVBuddy: NERV says so clearly in chat and Telegram (which tool, that the data is in FPVBuddy, retry later), never a silent failure or an empty list; a test covers it with a stopped fake server",
-    "A join test runs a chat phrase per tool through a fake FPVBuddy MCP server and back"
+    "A join test runs a chat phrase per tool through a fake FPVBuddy MCP server and back",
+    "Owner decision 2026-11-26 (chat): \"accept all 17 proposals\" of the cross-project audit (coordinator docs/audits/2026-11-26-cross-project.md), proposal 11: the FPVBuddy tools this step needs are named prerequisites (fpvbuddy:F-009-T02, F-012-T01 to F-012-T03, F-014-T02, F-015-T05)."
   ],
   "dependsOn": [
     "F-101-T07",
     "F-101-T08",
     "fpvbuddy:F-011-T01",
     "fpvbuddy:F-011-T02",
-    "fpvbuddy:F-011-T06"
+    "fpvbuddy:F-011-T06",
+    "fpvbuddy:F-009-T02",
+    "fpvbuddy:F-012-T01",
+    "fpvbuddy:F-012-T02",
+    "fpvbuddy:F-012-T03",
+    "fpvbuddy:F-014-T02",
+    "fpvbuddy:F-015-T05"
   ],
   "resources": [
     "src/executors.ts",
@@ -47,7 +55,7 @@
   "effort": {
     "size": "small",
     "estimate": "2 h",
-    "basis": "Estimated 2026-11-26 after the owner decision (reroute ten tools to MCP calls, the unreachable message and per-tool join tests). Not a measurement.",
+    "basis": "Estimated 2026-11-26 after the owner decision (reroute ten tools to MCP calls, the unreachable message and per-tool join tests). Not a measurement. 2026-11-26 audit proposals: prerequisites and the request-id acceptance added; estimate unchanged (the id is one field per write call).",
     "reviewed": "2026-11-26",
     "agentHours": 2,
     "baselineAgentHours": 2,
@@ -57,6 +65,10 @@
     {
       "pr": 792,
       "note": "planning"
+    },
+    {
+      "pr": 801,
+      "note": "prerequisites"
     }
   ]
 }
