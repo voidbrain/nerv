@@ -38,5 +38,10 @@
     "ownerHours": 0.5,
     "ownerKind": "procedure"
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 822,
+      "note": "plan"
+    }
+  ]
 }
