@@ -4,7 +4,7 @@ Dated observations for specific revisions, test methods and devices. Reports pre
 
 The [review register](../reviews/README.md#acceptance-evidence) links every report, its observation date and the next acceptance condition. Earlier evidence is retained when later reports narrow or supersede its applicability.
 
-**Owner procedures to run now:** none. [F-005-T13 Mac service update](f005-t13-mac-update-procedure.md) ran on 2026-11-12.
+**Owner procedures to run now:** grouped by sitting in the [owner steps triage, 26 November 2026](owner-steps-2026-11-26.md). [F-005-T13 Mac service update](f005-t13-mac-update-procedure.md) ran on 2026-11-12.
 
 [F-006 placement P2–P4](f006-placement-p2-p4.md): pasteable PowerShell plans and explicitly confirmed probes for mini-PC local inference, mini-PC execution with Mac remote inference, and unavailable/recovered Mac behavior.
 

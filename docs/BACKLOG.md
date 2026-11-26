@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 16 | 6 | 42 | 16 |
+| **This week** | 17 | 6 | 43 | 16 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 45 | 39 |
+| **Open** | 46 | 40 |
 | **Require Human 🧑** | 13 | 17 |
 
 ### Require Human 🧑
@@ -21,11 +21,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
-| [F-011](#f-011) |  | [B-068](#b-068) |  |
-| [F-004](#f-004) |  | [B-107](#b-107) |  |
-| [F-012](#f-012) |  | [B-113](#b-113) |  |
-| [F-016](#f-016) |  | [B-122](#b-122) |  |
+| [F-062](#f-062) | [F-116](#f-116) | [B-122](#b-122) | — |
+| [F-011](#f-011) |  | [B-057](#b-057) |  |
+| [F-004](#f-004) |  | [B-068](#b-068) |  |
+| [F-012](#f-012) |  | [B-107](#b-107) |  |
+| [F-016](#f-016) |  | [B-113](#b-113) |  |
 | [F-086](#f-086) |  | [B-123](#b-123) |  |
 | [F-087](#f-087) |  | [B-128](#b-128) |  |
 | [F-092](#f-092) |  | [B-129](#b-129) |  |
@@ -41,7 +41,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 187.5 h agent + 17.25 h owner across 169 open steps of 45 features and 39 other records. 165 h of actual effort recorded on 149 steps. Generated from the task files.
+**Remaining effort:** 196.25 h agent + 16.75 h owner across 178 open steps of 46 features and 40 other records. 165 h of actual effort recorded on 149 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -438,9 +438,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h agent + 1 h owner | — | [F-122-T02](#f-122-t02) | ⏳ | 🧑‍🔧 | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h agent + 0.75 h owner | — | [F-122-T02](#f-122-t02) | 🤖 | 🧑‍🔧 | — |
 
-🧑 **→** F-004-T06: install the app on the phone, enable notifications in Settings → Notifications and complete a reminder push ([steps](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal)); F-004-T10: push first, Telegram as fallback ([steps](acceptance/f004-t06-phone-push-procedure.md#push-first-telegram-as-fallback-f-004-t10)).
+🧑 **→** F-004-T10: push first, Telegram as fallback, and mark the tapped reminder done in the app ([steps](acceptance/f004-t06-phone-push-procedure.md#push-first-telegram-as-fallback-f-004-t10)).
 
 | | |
 |---|---|
@@ -452,12 +452,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | 0 h agent + 0.5 h owner | Ready | — | [F-004-T07](#f-004-t07) | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#steps-phone--mac-terminal) | — |
-| 🟢 Small | <a id="f-004-t10"></a>F-004-T10 — Owner check: push first, Telegram as fallback on the phone | — | 0 h | 0 h agent + 0.5 h owner | Planned | — | [F-122-T02](#f-122-t02) | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#push-first-telegram-as-fallback-f-004-t10) | — |
-| 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-004-T06](#f-004-t06) | — | ⏳ 🤖 | — |
-| 🟢 Small | **Total** | 16 h (8 of 10 steps) | 4.5 h (6 of 10 steps recorded) | 0.25 h agent + 1 h owner | 7 of 10 completed | | | | |
+| 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-004-t10"></a>F-004-T10 — Owner check: push first, Telegram as fallback on the phone | — | 0 h | 0 h agent + 0.75 h owner | Planned | — | [F-122-T02](#f-122-t02) | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#push-first-telegram-as-fallback-f-004-t10) | — |
+| 🟢 Small | **Total** | 16 h (8 of 10 steps) | 4.5 h (6 of 10 steps recorded) | 0.25 h agent + 0.75 h owner | 8 of 10 completed | | | | |
 
-<details><summary>Done steps (7)</summary>
+<details><summary>Done steps (8)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -466,6 +465,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-004-t03"></a>F-004-T03 — Doctor view | 1.5 h | 0.5 h (stated) | Completed | — |
 | — | <a id="f-004-t04"></a>F-004-T04 — Schema-validated registered component renderer (GenUI) | 3 h | 0.75 h (stated) | Completed | — |
 | — | <a id="f-004-t05"></a>F-004-T05 — Web push subscription and delivery | 3 h | 0.5 h (stated) | Completed | — |
+| — | <a id="f-004-t06"></a>F-004-T06 — Phone install and push acceptance | — | 0 h | Completed | — |
 | — | <a id="f-004-t08"></a>F-004-T08 — Dashboard Settings → Notifications: enable push on the installed app | 1.75 h | 1.5 h (stated) | Completed | [PR #729](https://github.com/voidbrain/nerv/pull/729) |
 | — | <a id="f-004-t09"></a>F-004-T09 — Delivery order: push first, Telegram as fallback | 2 h | 0 h | Completed | [PR #760](https://github.com/voidbrain/nerv/pull/760) |
 
@@ -478,9 +478,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-004-T08: [PR #729](https://github.com/voidbrain/nerv/pull/729) · F-004-T09: [PR #760](https://github.com/voidbrain/nerv/pull/760). F-004-T09 [PR #760](https://github.com/voidbrain/nerv/pull/760) push first, Telegram as fallback (test/push-first.test.ts); F-004-T08 [PR #729](https://github.com/voidbrain/nerv/pull/729) dashboard push (test/evaluation.browser.mjs); Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks; [#736](https://github.com/voidbrain/nerv/pull/736) |
+| PR / evidence | Steps: F-004-T08: [PR #729](https://github.com/voidbrain/nerv/pull/729) · F-004-T09: [PR #760](https://github.com/voidbrain/nerv/pull/760). F-004-T09 [PR #760](https://github.com/voidbrain/nerv/pull/760) push first, Telegram as fallback (test/push-first.test.ts); F-004-T08 [PR #729](https://github.com/voidbrain/nerv/pull/729) dashboard push (test/evaluation.browser.mjs); Reconcile: [PR #304](https://github.com/voidbrain/nerv/pull/304). [PR #303](https://github.com/voidbrain/nerv/pull/303) F-004-T05 web push (test/push.test.ts, test/angular.browser.mjs); [PR #300](https://github.com/voidbrain/nerv/pull/300) F-004-T04 GenUI renderer (test/protocol.test.ts, test/surface-dom.test.mjs, test/angular.browser.mjs); [PR #299](https://github.com/voidbrain/nerv/pull/299) F-004-T03 doctor view (test/angular.browser.mjs); [PR #298](https://github.com/voidbrain/nerv/pull/298) F-004-T02 reminder CRUD (test/angular.browser.mjs); Reconcile: [PR #288](https://github.com/voidbrain/nerv/pull/288). [PR #286](https://github.com/voidbrain/nerv/pull/286) F-004-T01 PWA shell, CI [43168006619](https://github.com/voidbrain/nerv/actions/runs/43168006619) (attempt 1 validate failed on B-050, attempt 2 green) (test/pwa.browser.mjs, test/pwa.test.mjs); [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #157](https://github.com/voidbrain/nerv/pull/157) scoped browser acceptance and fixes; Foundation CI #1 green; PR #1 merged; CI run 41254646946 green; scoped audit and local checks; [#736](https://github.com/voidbrain/nerv/pull/736); [#783](https://github.com/voidbrain/nerv/pull/783) |
 | Opened | 2026-11-01 |
-| Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Browser/accessibility 2026-11-24 (F-004-T08): `test/evaluation.browser.mjs` dashboard push join on the production build, CI [run 45502275722](https://github.com/voidbrain/nerv/actions/runs/45502275722) (PR #729). Phone install/push acceptance pending (F-004-T06). Unit/integration pending: test/push-first.test.ts on CI for [PR #760](https://github.com/voidbrain/nerv/pull/760) (F-004-T09); phone check pending (F-004-T10). |
+| Verification | Browser/accessibility 2026-11-12 (F-004-T01, F-004-T02, F-004-T03, F-004-T04, F-004-T05): test/pwa.browser.mjs, test/pwa.test.mjs, test/push.test.ts, and test/angular.browser.mjs passed with AXE checks; GenUI registered component renderer and Web Push subscription/delivery verified in PR #303 CI (run 43226982598). Browser/accessibility 2026-11-24 (F-004-T08): `test/evaluation.browser.mjs` dashboard push join on the production build, CI [run 45502275722](https://github.com/voidbrain/nerv/actions/runs/45502275722) (PR #729). Phone install and a received push: Real-device 2026-11-25, the owner's iPhone showed a push once Apple returned 201 ([B-134](work/records/F-004.md#b-134)); completing a reminder from the app pending (F-004-T10). Unit/integration pending: test/push-first.test.ts on CI for [PR #760](https://github.com/voidbrain/nerv/pull/760) (F-004-T09); phone check pending (F-004-T10). |
 | Reviewed | 2026-11-26 |
 
 </details>
@@ -714,7 +714,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-120-T02 — First system-pack cases for recent features (Planned).
 
@@ -726,11 +726,12 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-120-t03"></a>F-120-T03 — Adopt the Gauntlet domain packs when released | 0.5 h | 0 h | 0 h agent + 0.5 h owner | Implemented; verification pending | [🧑‍🔧](evaluations/gauntlet.md#domain-packs-0100-and-0110-f-120-t03) | [PR #749](https://github.com/voidbrain/nerv/pull/749) |
-| 🟡 Medium | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 3 h agent + 0.5 h owner | 1 of 3 completed | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-120-t03"></a>F-120-T03 — Owner approves the first Gauntlet run of the domain-pack cases | 0.5 h | 0 h | 0 h agent + 0.25 h owner | Implemented; verification pending | — | [F-120-T04](#f-120-t04) | [🤔](evaluations/gauntlet.md#domain-packs-0100-and-0110-f-120-t03) | [PR #749](https://github.com/voidbrain/nerv/pull/749) |
+| 🟢 Small | <a id="f-120-t04"></a>F-120-T04 — Agent: run the approved Gauntlet campaign for the pending cases | 0.5 h | 0 h | 0.5 h | Planned | [F-120-T03](#f-120-t03) | — | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 5.5 h | 0 h (0 of 4 steps recorded) | 3.5 h agent + 0.25 h owner | 1 of 4 completed | | | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -747,7 +748,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749). Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review).; [#758](https://github.com/voidbrain/nerv/pull/758) |
+| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749). Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review).; [#758](https://github.com/voidbrain/nerv/pull/758); [#783](https://github.com/voidbrain/nerv/pull/783) |
 | Opened | 2026-11-24 |
 | Verification | Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
 | Reviewed | 2026-11-25 |
@@ -1031,7 +1032,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟣 Very large | 50 h agent + 1.5 h owner | — | [B-147-T01](#b-147-t01), [F-131-T02](#f-131-t02) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 50 h agent + 1.25 h owner | — | [B-147-T01](#b-147-t01), [F-131-T02](#f-131-t02) | 🤖 | — | — |
 
 💻 **→** Next: F-130-T18 — Upgrade NERV's Angular 22.2.6 → 22.3+ and consume @voidbrain/bricks (Planned).
 
@@ -1060,8 +1061,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟡 Medium | <a id="f-130-t16"></a>F-130-T16 — Simple view: chat, essentials and a link to the full dashboard | 3 h | 0 h | 3 h | Planned | [F-130-T02](#f-130-t02), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T08](#f-130-t08), [F-130-T12](#f-130-t12), [F-130-T18](#f-130-t18) | [F-130-T13](#f-130-t13), [F-131-T02](#f-131-t02) | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-130-t17"></a>F-130-T17 — Reminders and inbox as workspace components | 2 h | 0 h | 2 h | Planned | [F-130-T18](#f-130-t18) | [F-130-T13](#f-130-t13) | ⏳ 🤖 | [PR #776](https://github.com/voidbrain/nerv/pull/776) |
 | 🟡 Medium | <a id="f-130-t13"></a>F-130-T13 — Retire the old dashboard | 4 h | 0 h | 4 h | Planned | [F-130-T02](#f-130-t02), [F-130-T03](#f-130-t03), [F-130-T04](#f-130-t04), [F-130-T05](#f-130-t05), [F-130-T06](#f-130-t06), [F-130-T07](#f-130-t07), [F-130-T08](#f-130-t08), [F-130-T09](#f-130-t09), [F-130-T10](#f-130-t10), [F-130-T11](#f-130-t11), [F-130-T12](#f-130-t12), [F-130-T16](#f-130-t16), [F-130-T17](#f-130-t17) | [F-130-T14](#f-130-t14) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-130-t14"></a>F-130-T14 — Owner: check the full dashboard and the simple view on the Mac and the installed phone app | 0 h | 0 h | 0 h agent + 1.5 h owner | Planned | [F-130-T13](#f-130-t13) | — | ⏳ 🧑‍🔧 | — |
-| 🟣 Very large | **Total** | 54.5 h | 4.5 h (2 of 18 steps recorded) | 50 h agent + 1.5 h owner | 2 of 18 completed | | | | |
+| 🟢 Small | <a id="f-130-t14"></a>F-130-T14 — Owner: check the full dashboard and the simple view on the Mac and the installed phone app | 0 h | 0 h | 0 h agent + 1.25 h owner | Planned | [F-130-T13](#f-130-t13) | — | ⏳ 🧑‍🔧 | — |
+| 🟣 Very large | **Total** | 54.5 h | 4.5 h (2 of 18 steps recorded) | 50 h agent + 1.25 h owner | 2 of 18 completed | | | | |
 
 <details><summary>Done steps (2)</summary>
 
@@ -1079,7 +1080,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-130-T01: [PR #777](https://github.com/voidbrain/nerv/pull/777) · F-130-T09: [PR #773](https://github.com/voidbrain/nerv/pull/773) · F-130-T15: [PR #773](https://github.com/voidbrain/nerv/pull/773); [PR #776](https://github.com/voidbrain/nerv/pull/776) · F-130-T17: [PR #776](https://github.com/voidbrain/nerv/pull/776) · F-130-T18: [PR #779](https://github.com/voidbrain/nerv/pull/779) planned in the reconciliation. Owner request 2026-11-25; simple view kept by owner decision 2026-11-25 ([#772](https://github.com/voidbrain/nerv/pull/772)); FPV screens from FPVBuddy through MCP ([#773](https://github.com/voidbrain/nerv/pull/773)); prompted by [B-144](work/records/F-130.md#b-144); opened in [#770](https://github.com/voidbrain/nerv/pull/770); [#776](https://github.com/voidbrain/nerv/pull/776); [#777](https://github.com/voidbrain/nerv/pull/777); F-130-T18 in [#779](https://github.com/voidbrain/nerv/pull/779) |
+| PR / evidence | Steps: F-130-T01: [PR #777](https://github.com/voidbrain/nerv/pull/777) · F-130-T09: [PR #773](https://github.com/voidbrain/nerv/pull/773) · F-130-T15: [PR #773](https://github.com/voidbrain/nerv/pull/773); [PR #776](https://github.com/voidbrain/nerv/pull/776) · F-130-T17: [PR #776](https://github.com/voidbrain/nerv/pull/776) · F-130-T18: [PR #779](https://github.com/voidbrain/nerv/pull/779) planned in the reconciliation. Owner request 2026-11-25; simple view kept by owner decision 2026-11-25 ([#772](https://github.com/voidbrain/nerv/pull/772)); FPV screens from FPVBuddy through MCP ([#773](https://github.com/voidbrain/nerv/pull/773)); prompted by [B-144](work/records/F-130.md#b-144); opened in [#770](https://github.com/voidbrain/nerv/pull/770); [#776](https://github.com/voidbrain/nerv/pull/776); [#777](https://github.com/voidbrain/nerv/pull/777); F-130-T18 in [#779](https://github.com/voidbrain/nerv/pull/779); [#783](https://github.com/voidbrain/nerv/pull/783) |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-26 |
@@ -1132,6 +1133,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-23 |
 | Verification | Unit/integration and browser 2026-11-24: `test/device-pairing.test.ts` 16/16, `test/pairing-qr.test.ts` 9/9 and `test/evaluation.browser.mjs` F-118-T02, T03 and T05 (each committed failing first) pass; CI green on PRs #700, #707, #713, #716; gauntlet: none pending. Real-device (iPhone Home Screen): Pending (F-118-T04). |
 | Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="f-133"></a>[✨ F-133](#top)
+
+**Push first for briefs and update notices**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-133-T01 — Failing join test: a brief or update notice goes to the phone first (Planned).
+
+| | |
+|---|---|
+| **Issue** | F-004-T09 sends reminders to the phone first (a tap counts as delivered, Telegram fallback after 10 minutes), but brief-kind inbox items (the morning brief, update notices, and the watch and session-limit notices that share the kind) still go to Telegram only: `src/telegram.ts` applies push-first to `kind === 'reminder'` alone. Seen 2026-11-25 23:49Z on NERV-01: the "Update 67550c4 applied" brief went to Telegram only. |
+| **Reproduce** | With the phone app subscribed to push on NERV-01, wait for the morning brief or an applied update: it arrives on Telegram at once and never as a push. |
+| **Check** | A brief or update notice reaches a subscribed phone as a push first; a tap stops the fallback; an untapped one reaches Telegram once after 10 minutes; no device or a failed push sends to Telegram at once; approvals, replies and chat stay on Telegram; a committed join test fails first (F-133-T01); the owner sees it on the phone (F-133-T04). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-133-t01"></a>F-133-T01 — Failing join test: a brief or update notice goes to the phone first | 1 h | 0 h | 1 h | Planned | — | [F-133-T02](#f-133-t02) | 🤖 |
+| 🟡 Medium | <a id="f-133-t02"></a>F-133-T02 — Push first for briefs and update notices | 3 h | 0 h | 3 h | Planned | [F-133-T01](#f-133-t01) | [F-133-T03](#f-133-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-133-t03"></a>F-133-T03 — Guide and owner page for push-first briefs | 0.5 h | 0 h | 0.5 h | Planned | [F-133-T02](#f-133-t02) | [F-133-T04](#f-133-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-133-t04"></a>F-133-T04 — Owner: a brief arrives on the phone first | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-133-T03](#f-133-t03) | — | ⏳ 🧑‍🔧 |
+| 🔴 Large | **Total** | 4.5 h | 0 h (0 of 4 steps recorded) | 4.5 h agent + 0.25 h owner | 0 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-133.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | NERV-01 Telegram brief "Update 67550c4 applied", 2026-11-25 23:49Z (coordinator report); `src/telegram.ts` push-first guard limited to reminders; related [F-004](work/records/F-133.md#f-004), [F-124](work/records/F-133.md#f-124), [B-149](work/records/F-133.md#b-149); [#783](https://github.com/voidbrain/nerv/pull/783) |
+| Opened | 2026-11-26 |
+| Verification | Unit: Pending (F-133-T01, F-133-T02). Device: Pending (F-133-T04). |
+| Reviewed | 2026-11-26 |
 
 </details>
 
@@ -1669,6 +1711,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-122"></a>[🐞 B-122](#top)
+
+**Update now is refused with "ownership is unknown" while NERV runs as a foreground `nerv launch`**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h agent + 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+
+💻 **→** Next: B-122-T03 — Agent: confirm read-only that an update completed on NERV-01 with the service running (Planned).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 on NERV-01: the dashboard's Update now (B-108 updater job, B-110 button) was refused twice, at revision `fd0f2a0`, with "Service or runtime ownership is unknown or belongs elsewhere." and nothing stopped. The launchd service `io.nerv.agent` was not registered (stopped with `nerv service stop`); port 4317 was served by a foreground `nerv launch` from a terminal, through the global `nerv` link into the development checkout. The update refuses to stop a process the service manager did not start, which is right, but the reason did not say so, and process discovery did not even find that process (it matched only `…/src/cli.ts serve` or `launch`, not `…/bin/nerv launch`). |
+| **Reproduce** | On a base whose service was moved to the install folder: `nerv service stop`, then `nerv launch` in a terminal, then press Update now. Steps for the owner: [update from a foreground launch](acceptance/b122-update-from-foreground-2026-11-24.md). |
+| **Check** | A committed test fails first: after a service move, with the service not registered and a foreground `nerv launch` serving the base, the outside updater's refusal names the foreground process and what to do, not the generic ownership reason, and stops nothing; once it is stopped the same update plan has no blockers; a moved, registered service is observed owned. On NERV-01 the owner updates through the service and, after the fix is installed, sees the new reason (B-122-T02). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="b-122-t02"></a>B-122-T02 — Owner: Update now during a foreground nerv launch is refused with the foreground reason | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/b122-update-from-foreground-2026-11-24.md) | — |
+| 🟢 Small | <a id="b-122-t03"></a>B-122-T03 — Agent: confirm read-only that an update completed on NERV-01 with the service running | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
+| 🟢 Small | **Total** | 1.75 h (2 of 3 steps) | 1.5 h (1 of 3 steps recorded) | 0.25 h agent + 0.25 h owner | 1 of 3 completed | | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-122-t01"></a>B-122-T01 — Name a foreground NERV when an update is refused | 1.5 h | 1.5 h (stated) | Completed | [PR #719](https://github.com/voidbrain/nerv/pull/719) |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-122.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-122-T01: [PR #719](https://github.com/voidbrain/nerv/pull/719). [PR #719](https://github.com/voidbrain/nerv/pull/719) (Test: `test/update-foreground-runtime.test.ts`); [#783](https://github.com/voidbrain/nerv/pull/783) |
+| Opened | 2026-11-24 |
+| Verification | Unit/integration 2026-11-24: `test/update-foreground-runtime.test.ts` (2 of 2) and the lifecycle suites pass locally; `npm test` 1358 pass, 0 fail; gauntlet `nerv-system-flows` (incl. stress, browser) passed. Owner check on NERV-01: Pending (B-122-T02). |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="b-138"></a>[🐞 B-138](#top)
 
 **`nerv chat` answers a fleet question with a generic greeting, ignoring the `fleet.chat` result**
@@ -1984,6 +2073,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-149"></a>[🐞 B-149](#top)
+
+**Reading a reminder in the app does not stop its Telegram fallback**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-149-T01 — Failing test: a reminder read in the app still reaches Telegram (Planned).
+
+| | |
+|---|---|
+| **Issue** | F-004-T09's fallback skips an item already read in the app (`claimFallback` in `src/delivery-state.ts` requires `d.read_at IS NULL`), but nothing ever sets `deliveries.read_at`: every insert writes NULL and no code updates it (`grep read_at src web` at main `5c306f5a`). So only a tap on the notification stops the Telegram copy; a reminder the owner opened and read in the app still reaches Telegram 10 minutes later. |
+| **Reproduce** | With push on, create a reminder due in a minute, do not tap the notification, open the app and look at the reminder; about 10 minutes after it was due Telegram sends it anyway. |
+| **Check** | Opening an inbox item in the dashboard or workspace app sets `read_at` once; a read item never reaches Telegram; a committed test fails first (B-149-T01) and is not edited; the owner sees no Telegram copy on the phone (B-149-T03). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-149-t01"></a>B-149-T01 — Failing test: a reminder read in the app still reaches Telegram | 1 h | 0 h | 1 h | Planned | — | [B-149-T02](#b-149-t02) | 🤖 |
+| 🟡 Medium | <a id="b-149-t02"></a>B-149-T02 — The app marks an inbox item read when the owner opens it | 2 h | 0 h | 2 h | Planned | [B-149-T01](#b-149-t01) | [B-149-T03](#b-149-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="b-149-t03"></a>B-149-T03 — Owner: a reminder read in the app does not reach Telegram | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-149-T02](#b-149-t02) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 3 h | 0 h (0 of 3 steps recorded) | 3 h agent + 0.25 h owner | 0 of 3 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-149.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Code reading at main `5c306f5a`: `src/delivery-state.ts` `claimFallback`, inserts in `src/store-reminders.ts`, `src/store-inbox.ts`, `src/batteries.ts`; F-004-T09 [PR #760](https://github.com/voidbrain/nerv/pull/760); [#783](https://github.com/voidbrain/nerv/pull/783) |
+| Opened | 2026-11-26 |
+| Verification | Unit: Pending (B-149-T01, B-149-T02). Device: Pending (B-149-T03). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
 ### <a id="f-086"></a>[✨ F-086](#top)
 
 **Gmail: search and read, then draft and send behind approval**
@@ -2024,7 +2153,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-086-T02: [PR #480](https://github.com/voidbrain/nerv/pull/480) implementation · F-086-T03: [PR #609](https://github.com/voidbrain/nerv/pull/609) Gmail draft and send behind approval. [PR #609](https://github.com/voidbrain/nerv/pull/609) (F-086-T03); [PR #480](https://github.com/voidbrain/nerv/pull/480) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-086-T02: [PR #480](https://github.com/voidbrain/nerv/pull/480) implementation · F-086-T03: [PR #609](https://github.com/voidbrain/nerv/pull/609) Gmail draft and send behind approval. [PR #609](https://github.com/voidbrain/nerv/pull/609) (F-086-T03); [PR #480](https://github.com/voidbrain/nerv/pull/480) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md); [#783](https://github.com/voidbrain/nerv/pull/783) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-086-T02 verified: [PR #480](https://github.com/voidbrain/nerv/pull/480) merged on green CI. `F-086-T01` decision written in [gmail-connector.md](decisions/gmail-connector.md); verified with `npm run check:fast`. |
 | Reviewed | 2026-11-21 |
@@ -2120,7 +2249,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-092-T02: [PR #496](https://github.com/voidbrain/nerv/pull/496) implementation · F-092-T03: [PR #607](https://github.com/voidbrain/nerv/pull/607) Desktop replay as Blue action with preconditions. [PR #607](https://github.com/voidbrain/nerv/pull/607) (F-092-T03); [PR #496](https://github.com/voidbrain/nerv/pull/496) (merged; CI green); [Desktop input recording feasibility](decisions/desktop-input-recording.md) (`F-092-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md) |
+| PR / evidence | Steps: F-092-T02: [PR #496](https://github.com/voidbrain/nerv/pull/496) implementation · F-092-T03: [PR #607](https://github.com/voidbrain/nerv/pull/607) Desktop replay as Blue action with preconditions. [PR #607](https://github.com/voidbrain/nerv/pull/607) (F-092-T03); [PR #496](https://github.com/voidbrain/nerv/pull/496) (merged; CI green); [Desktop input recording feasibility](decisions/desktop-input-recording.md) (`F-092-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md); [#783](https://github.com/voidbrain/nerv/pull/783) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-092-T02 verified: [PR #496](https://github.com/voidbrain/nerv/pull/496) merged on green CI. `F-092-T01`: `npm run check:fast` passed. |
 | Reviewed | 2026-11-21 |
@@ -2297,59 +2426,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-122"></a>[🐞 B-122](#top)
-
-**Update now is refused with "ownership is unknown" while NERV runs as a foreground `nerv launch`**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](acceptance/b122-update-from-foreground-2026-11-24.md) B-122-T02 — Owner updates NERV-01 and sees the foreground reason (Planned).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-24 on NERV-01: the dashboard's Update now (B-108 updater job, B-110 button) was refused twice, at revision `fd0f2a0`, with "Service or runtime ownership is unknown or belongs elsewhere." and nothing stopped. The launchd service `io.nerv.agent` was not registered (stopped with `nerv service stop`); port 4317 was served by a foreground `nerv launch` from a terminal, through the global `nerv` link into the development checkout. The update refuses to stop a process the service manager did not start, which is right, but the reason did not say so, and process discovery did not even find that process (it matched only `…/src/cli.ts serve` or `launch`, not `…/bin/nerv launch`). |
-| **Reproduce** | On a base whose service was moved to the install folder: `nerv service stop`, then `nerv launch` in a terminal, then press Update now. Steps for the owner: [update from a foreground launch](acceptance/b122-update-from-foreground-2026-11-24.md). |
-| **Check** | A committed test fails first: after a service move, with the service not registered and a foreground `nerv launch` serving the base, the outside updater's refusal names the foreground process and what to do, not the generic ownership reason, and stops nothing; once it is stopped the same update plan has no blockers; a moved, registered service is observed owned. On NERV-01 the owner updates through the service and, after the fix is installed, sees the new reason (B-122-T02). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="b-122-t02"></a>B-122-T02 — Owner updates NERV-01 and sees the foreground reason | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/b122-update-from-foreground-2026-11-24.md) | — |
-| 🟢 Small | **Total** | 1.5 h (1 of 2 steps) | 1.5 h (1 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="b-122-t01"></a>B-122-T01 — Name a foreground NERV when an update is refused | 1.5 h | 1.5 h (stated) | Completed | [PR #719](https://github.com/voidbrain/nerv/pull/719) |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-122.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-122-T01: [PR #719](https://github.com/voidbrain/nerv/pull/719). [PR #719](https://github.com/voidbrain/nerv/pull/719) (Test: `test/update-foreground-runtime.test.ts`) |
-| Opened | 2026-11-24 |
-| Verification | Unit/integration 2026-11-24: `test/update-foreground-runtime.test.ts` (2 of 2) and the lifecycle suites pass locally; `npm test` 1358 pass, 0 fail; gauntlet `nerv-system-flows` (incl. stress, browser) passed. Owner check on NERV-01: Pending (B-122-T02). |
-| Reviewed | 2026-11-24 |
-
-</details>
-
----
 ### <a id="b-123"></a>[🐞 B-123](#top)
 
 **After Update now the dashboard never shows the updater's result**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h agent + 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
 
 🧑 **→** B-123-T02: press Update now on NERV-01 and check the Health row, a reload and Dismiss ([steps](acceptance/b123-update-status.md)).
 
@@ -2364,7 +2447,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="b-123-t02"></a>B-123-T02 — Owner: Update now shows the updater's status in Health | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/b123-update-status.md) | — |
-| 🟢 Small | **Total** | 3 h (1 of 2 steps) | 2.5 h (1 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | | |
+| 🟢 Small | <a id="b-123-t03"></a>B-123-T03 — Agent: updater-status.json and the inbox agree with the last update (read-only) | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
+| 🟢 Small | **Total** | 3.25 h (2 of 3 steps) | 2.5 h (1 of 3 steps recorded) | 0.25 h agent + 0.25 h owner | 1 of 3 completed | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -2381,7 +2465,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-123-T01: [PR #720](https://github.com/voidbrain/nerv/pull/720) implementation. [PR #720](https://github.com/voidbrain/nerv/pull/720) (status file, route, Health row; Test: `test/updater-status.test.ts`, `test/updater-status-render.test.mjs`, `test/updater-status.browser.mjs`); [#736](https://github.com/voidbrain/nerv/pull/736) |
+| PR / evidence | Steps: B-123-T01: [PR #720](https://github.com/voidbrain/nerv/pull/720) implementation. [PR #720](https://github.com/voidbrain/nerv/pull/720) (status file, route, Health row; Test: `test/updater-status.test.ts`, `test/updater-status-render.test.mjs`, `test/updater-status.browser.mjs`); [#736](https://github.com/voidbrain/nerv/pull/736); [#783](https://github.com/voidbrain/nerv/pull/783) |
 | Opened | 2026-11-24 |
 | Verification | Unit/integration 2026-11-24: CI [run 45458207007](https://github.com/voidbrain/nerv/actions/runs/45458207007) (PR #720) green: `test/updater-status.test.ts`, `test/updater-status-render.test.mjs`. Browser/accessibility 2026-11-24: `test/updater-status.browser.mjs` passes on the production build (CI run 45458207007). Human (a real Update now on NERV-01, B-123-T02): Pending. |
 | Reviewed | 2026-11-25 |
@@ -2823,46 +2907,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-129"></a>[✨ F-129](#top)
-
-**The sortie view shows model thinking time next to EVA activity**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 4 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-129-T01 — List a sortie's model rounds with role, model and duration (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner request 2026-11-25, from sortie `148eef28` on NERV-01 ([B-143](work/records/F-129.md#b-143)): EVA activity covered milliseconds (`tools.read` 4 ms, `reminders.add` 22 ms) while the consultant took 69 s and four Misato rounds 16–50 s each, so the sortie view hides where the time went. The ledger already records `durationMs` (and the model on `misato.consult`) for model rounds; the sortie view does not show them as activity. |
-| **Reproduce** | Open a finished chat sortie in the dashboard: its activity lists the EVA actions and their milliseconds, with no row for the consultant's or Misato's model time. |
-| **Check** | Each model round of a sortie (consultant, each Misato step and the reply) shows in order as a row such as "Misato thinking (gemma4:12b) · 69 s", next to the EVA rows; a round without a recorded model says the role only; a test across the ledger query and the dashboard rendering; the owner's visual check on a live sortie. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="f-129-t01"></a>F-129-T01 — List a sortie's model rounds with role, model and duration | 2 h | 0 h | 2 h | Planned | — | [F-129-T02](#f-129-t02) | 🤖 |
-| 🟡 Medium | <a id="f-129-t02"></a>F-129-T02 — Show model thinking rows in the dashboard sortie view | 2 h | 0 h | 2 h | Planned | [F-129-T01](#f-129-t01) | [F-129-T03](#f-129-t03) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-129-t03"></a>F-129-T03 — Owner: check model thinking rows on a live sortie | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-129-T02](#f-129-t02) | — | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 4 h | 0 h (0 of 3 steps recorded) | 4 h agent + 0.25 h owner | 0 of 3 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-129.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Owner request 2026-11-25, NERV-01 sortie `148eef28`; opened in [#769](https://github.com/voidbrain/nerv/pull/769) |
-| Opened | 2026-11-25 |
-| Verification | — |
-| Reviewed | 2026-11-25 |
-
-</details>
-
----
 ### <a id="f-110"></a>[✨ F-110](#top)
 
 **Owner settings in the dashboard for values that are fixed today**
@@ -2957,6 +3001,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-25 |
 | Verification | Unit/integration pending: test/delivery-state.test.ts on CI for [PR #759](https://github.com/voidbrain/nerv/pull/759), test/push-first.test.ts for [PR #760](https://github.com/voidbrain/nerv/pull/760). |
 | Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="f-129"></a>[✨ F-129](#top)
+
+**The sortie view shows model thinking time next to EVA activity**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 4.25 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-129-T01 — List a sortie's model rounds with role, model and duration (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-25, from sortie `148eef28` on NERV-01 ([B-143](work/records/F-129.md#b-143)): EVA activity covered milliseconds (`tools.read` 4 ms, `reminders.add` 22 ms) while the consultant took 69 s and four Misato rounds 16–50 s each, so the sortie view hides where the time went. The ledger already records `durationMs` (and the model on `misato.consult`) for model rounds; the sortie view does not show them as activity. |
+| **Reproduce** | Open a finished chat sortie in the dashboard: its activity lists the EVA actions and their milliseconds, with no row for the consultant's or Misato's model time. |
+| **Check** | Each model round of a sortie (consultant, each Misato step and the reply) shows in order as a row such as "Misato thinking (gemma4:12b) · 69 s", next to the EVA rows; a round without a recorded model says the role only; a test across the ledger query and the dashboard rendering; the owner's visual check on a live sortie. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-129-t01"></a>F-129-T01 — List a sortie's model rounds with role, model and duration | 2 h | 0 h | 2 h | Planned | — | [F-129-T02](#f-129-t02) |
+| 🟡 Medium | <a id="f-129-t02"></a>F-129-T02 — Show model thinking rows in the dashboard sortie view | 2 h | 0 h | 2 h | Planned | [F-129-T01](#f-129-t01) | [F-129-T03](#f-129-t03) |
+| 🟢 Small | <a id="f-129-t03"></a>F-129-T03 — Agent: read a live sortie's model thinking rows on NERV-01 (read-only) | 0.25 h | 0 h | 0.25 h | Planned | [F-129-T02](#f-129-t02) | — |
+| 🔴 Large | **Total** | 4.25 h | 0 h (0 of 3 steps recorded) | 4.25 h | 0 of 3 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-129.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner request 2026-11-25, NERV-01 sortie `148eef28`; opened in [#769](https://github.com/voidbrain/nerv/pull/769); [#783](https://github.com/voidbrain/nerv/pull/783) |
+| Opened | 2026-11-25 |
+| Verification | — |
+| Reviewed | 2026-11-25 |
 
 </details>
 

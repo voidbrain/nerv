@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "status": "planned",
+  "privacy": "Neutral invented messages, devices and receipts only; no tokens, push endpoints, chat IDs or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-149-T03",
+  "parent": "B-149",
+  "title": "Owner: a reminder read in the app does not reach Telegram",
+  "goal": "The owner opens a pushed reminder in the app without tapping the notification and Telegram stays silent",
+  "acceptance": [
+    "On NERV-01 after the fix: a reminder due in a minute arrives as a push; the owner does not tap it but opens the app and sees it; 12 minutes after it was due Telegram has not sent it"
+  ],
+  "dependsOn": [
+    "B-149-T02"
+  ],
+  "resources": [
+    "docs/work/records/B-149.md"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "validation": [
+    "Owner device check, recorded in B-149 Verification"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: one reminder and a 12-minute wait, in the same phone sitting as F-004-T10. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

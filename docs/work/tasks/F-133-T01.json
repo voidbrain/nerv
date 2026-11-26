@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "status": "planned",
+  "privacy": "Neutral invented messages, devices and receipts only; no tokens, push endpoints, chat IDs or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "F-133-T01",
+  "parent": "F-133",
+  "title": "Failing join test: a brief or update notice goes to the phone first",
+  "goal": "A committed test fails on main: with a subscribed device, a brief-kind inbox item (the morning brief, an \"Update <sha> applied\" notice) is sent to Telegram at once and never pushed",
+  "acceptance": [
+    "Fixture: a subscribed device and two brief-kind items, a morning brief and an invented update notice",
+    "Across the join (inbox write, push dispatch with a fake push service, the Telegram loop with a fake Bot API): each is pushed first, Telegram stays silent until the 10-minute deadline, a tap receipt (POST /api/push/opened) stops the fallback, an untapped one reaches Telegram once",
+    "It fails on main before F-133-T02 and is not edited to pass"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/**",
+    "docs/work/records/F-133.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "validation": [
+    "The new test fails on main",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-26: extends test/push-first.test.ts's fakes to brief-kind items. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

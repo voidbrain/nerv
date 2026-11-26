@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "status": "planned",
+  "privacy": "Neutral invented messages, devices and receipts only; no tokens, push endpoints, chat IDs or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "F-133-T03",
+  "parent": "F-133",
+  "title": "Guide and owner page for push-first briefs",
+  "goal": "The channels guide and a copy-paste owner page describe the new order for briefs and update notices",
+  "acceptance": [
+    "docs/guides/channels-and-watches.md states which items go push first and which stay on Telegram",
+    "A section of docs/acceptance/f004-t06-phone-push-procedure.md (or its own page) gives F-133-T04 copy-paste commands with the expected result after each, and is F-133-T04's ownerLink"
+  ],
+  "dependsOn": [
+    "F-133-T02"
+  ],
+  "resources": [
+    "docs/guides/**",
+    "docs/acceptance/**",
+    "docs/work/records/F-133.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "validation": [
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-26: one guide paragraph and one procedure section. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

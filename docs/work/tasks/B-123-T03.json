@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "B-123-T03",
+  "parent": "B-123",
+  "status": "planned",
+  "privacy": "Neutral invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "title": "Agent: updater-status.json and the inbox agree with the last update (read-only)",
+  "goal": "Show from NERV-01, read-only, that the updater status file and the inbox report the last update's outcome once",
+  "acceptance": [
+    "Read-only on NERV-01: ~/.nerv/updater-status.json names the state and revision of the last updater run (the owner's Update now of B-123-T02 when done, else the latest run), equal to git -C ~/.nerv-app rev-parse --short HEAD for a completed run",
+    "nerv inbox (read-only) lists that outcome exactly once",
+    "Nothing is written to ~/.nerv, ~/.nerv-app or the service; the agent records state, revision and time in B-123"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/work/records/B-123.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review",
+    "privacy-review"
+  ],
+  "validation": [
+    "Agent-run read-only commands on NERV-01, quoted in B-123"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h agent",
+    "basis": "Split from B-123-T02 2026-11-26 (owner-step triage): the file and inbox check is a read. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}
