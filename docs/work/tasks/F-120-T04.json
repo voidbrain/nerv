@@ -45,6 +45,10 @@
     {
       "pr": 798,
       "note": "rerun after F-120-T05; 8 Docker cases pending"
+    },
+    {
+      "pr": 800,
+      "note": "Docker rerun; only the excluded sketch cases pending"
     }
   ]
 }
