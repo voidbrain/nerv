@@ -10,7 +10,9 @@
     "Packs on the coding-reference runner raise the profile's reply cap and the suite budget (3,072 tokens a case, chosen to fit the 180 s case), every other pack keeps the profile and limits, with a regression test (failing first)",
     "The four coding cases rerun on gemma4:12b without --allow-expensive and recorded in the ledger and F-120; if still cut off at the new cap, that is recorded and the cap is not raised again"
   ],
-  "dependsOn": ["F-120-T05"],
+  "dependsOn": [
+    "F-120-T05"
+  ],
   "resources": [
     "docs/evaluations/gauntlet.md",
     "docs/work/records/F-120.md",
@@ -19,13 +21,18 @@
     "test/gauntlet.test.mjs",
     "tools/gauntlet.mjs"
   ],
-  "capabilities": ["bounded-edit", "evidence-review"],
+  "capabilities": [
+    "bounded-edit",
+    "evidence-review"
+  ],
   "privacy": "Code, tests and neutral Gauntlet evidence only; no secrets or personal data.",
   "validation": [
     "node --test test/gauntlet.test.mjs (F-120-T07 fails without the change)",
     "node tools/gauntlet.mjs pending"
   ],
-  "escalation": ["A further raise of the cap is the owner's call"],
+  "escalation": [
+    "A further raise of the cap is the owner's call"
+  ],
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
@@ -37,5 +44,11 @@
     "estimateAgentHours": 1,
     "actualAgentHours": 1,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 803,
+      "note": "3,072-token coding reply cap and rerun"
+    }
+  ]
 }

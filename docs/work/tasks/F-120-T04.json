@@ -51,6 +51,10 @@
     {
       "pr": 800,
       "note": "Docker rerun; only the excluded sketch cases pending"
+    },
+    {
+      "pr": 803,
+      "note": "closed; coding rerun after F-120-T07"
     }
   ]
 }

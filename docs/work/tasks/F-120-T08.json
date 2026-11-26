@@ -38,5 +38,11 @@
     "agentHours": 0.25,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 803,
+      "note": "opened: stress and browser rerun"
+    }
+  ]
 }
