@@ -129,7 +129,9 @@ function drawPanel(skills: unknown, tab?: string, theme = 'eva') {
     js.slice(js.indexOf(`function ${name}(`), js.indexOf('\n}\n', js.indexOf(`function ${name}(`)) + 3);
   const { document } = parseHTML('<html><body><div id="skills"></div></body></html>');
   const state = { theme, tabs: tab ? { skills: tab } : {}, skills };
-  const esc = js.slice(js.indexOf('function esc('), js.indexOf('\n', js.indexOf('function esc(')) + 1);
+  const line = (name: string) =>
+    js.slice(js.indexOf(`function ${name}(`), js.indexOf('\n', js.indexOf(`function ${name}(`)) + 1);
+  const esc = line('esc') + line('currentTab') + 'const LIVE = true;\n';
   new Function('document', 'state', `${esc}${from('stageTabs')}${from('renderSkills')}renderSkills();`)(
     document,
     state,

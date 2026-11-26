@@ -54,3 +54,10 @@ Specialists advise Misato when a request matches their keywords (advice only, re
 - Priority: pinned pilot → most matched keywords → later stage → generic fallback.
 - When no specialist fits, the generic pilot tags the request field; after three matching requests in 30 days, Marduk proposes a new specialist card (or ask Misato: *"make me a pilot for photo editing"*).
 - The dashboard **Pilots** panel updates each pilot's local Ollama model independently. Only local Ollama models are supported for pilots today; see [the roadmap](../ROADMAP.md) for planned routing work.
+
+## Skills (Kaji's watermelons)
+
+A skill is a versioned procedure package a pilot uses. `nerv skills stage <package.json>` stores a version, `nerv skills evaluate` measures it against the same cases without the skill, and `nerv skills promote` makes it active only with your approval; `nerv skills list` and `nerv skills inspect` read the store.
+
+- The dashboard **Kaji's watermelons** panel shows the real store, read-only, through `GET /api/skills` (names, versions and evaluation numbers, never instructions or scripts): one row per version on its tab. **Seed** is staged and not evaluated yet, **Sprout** staged and evaluated, **Ripe** active, **Dropped** retired or rolled back (in the Simple theme: Create, Try, Use, Dropped).
+- With no skills the panel says: "No skills yet. Create one with nerv skills stage <package.json>".
