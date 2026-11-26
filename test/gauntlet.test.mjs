@@ -1822,3 +1822,33 @@ test('F-079-T02: committed system-v1.json declarations catch a seeded change ins
   });
   assert.notEqual(channelsSeeded, channelsBefore, 'seeded change inside declared test must invalidate channels');
 });
+
+test('F-120-T05: gauntlet all gives the reference-runner packs the slow-host case limit, other packs the day limits', async () => {
+  const { modelLimits, commonPacks } = await import('../tools/gauntlet.mjs');
+  const examples = 'node_modules/@voidbrain/gauntlet-protocol/examples/';
+  const slow = JSON.parse(readFileSync(examples + 'limits-slow-host.json', 'utf8'));
+  const day = JSON.parse(readFileSync(examples + 'limits-day.json', 'utf8'));
+  assert.equal(slow.caseMs, 180000);
+  const pack = (id) => commonPacks().find((p) => p.pack.id === id).pack;
+  // Owner decision 2026-11-26: the coding-reference, embedded-reference and cad-3d-reference runners get 180 s a case.
+  for (const id of ['coding', 'embedded', 'cad-3d']) {
+    const limits = modelLimits(pack(id));
+    assert.equal(limits.caseMs, slow.caseMs, id);
+    assert.equal(limits.suiteMs, Math.round((slow.suiteMs / slow.maxCases) * pack(id).cases.length), id);
+  }
+  for (const id of ['logic-math', 'italian-quality', 'code-review', 'multi-step-agent'])
+    assert.equal(modelLimits(pack(id)).caseMs, day.caseMs, id);
+  // The join: the plan `gauntlet all` builds (the budget it executes with) carries the same per-pack case limits.
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-slow-host-'));
+  process.env.NERV_GAUNTLET_LEDGER = join(dir, 'ledger.json');
+  try {
+    const plan = (await main(['all', '--profile=' + examples + 'profiles/gemma4-12b.json', '--allow-models'])).plan;
+    for (const id of ['coding', 'embedded', 'cad-3d'])
+      assert.equal(plan.find((p) => p.pack === id).budget.caseMs, slow.caseMs, id);
+    for (const id of ['logic-math', 'italian-quality', 'code-review'])
+      assert.equal(plan.find((p) => p.pack === id).budget.caseMs, day.caseMs, id);
+  } finally {
+    delete process.env.NERV_GAUNTLET_LEDGER;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
