@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "parent": "B-172",
+  "dependsOn": [
+    "B-172-T02"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "Never let two coordinators act, or copy context as authority, to make progress"
+  ],
+  "id": "B-172-T03",
+  "title": "Owner check: kaji adopt on NERV-01, then kaji standby NERV-02 seeds and names the standby",
+  "goal": "Step 0b of the relocation page passes on NERV-01",
+  "status": "planned",
+  "acceptance": [
+    "Step 0b of the relocation page passes on NERV-01"
+  ],
+  "resources": [
+    "docs/work/records/B-172.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "owner-check"
+  ],
+  "validation": [
+    "owner runs step 0b of docs/acceptance/f016-t09-two-device-relocation.md"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: copy-paste steps. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f016-t09-two-device-relocation.md"
+}

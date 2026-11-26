@@ -16,6 +16,57 @@ nerv kaji standby
 
 Expected: `NERV-01 … enrolled  (this base)  (main)` and `NERV-02 … enrolled`; then `Standby: NERV-02` and a replication status. If it reads `No standby named.`, run `nerv kaji standby NERV-02` and expect `Standby: NERV-02. The lease renews through it from the next renewal (every 15 s).` (or a line that it seeded NERV-02's standby store first).
 
+## 0b. Once only: adopt NERV-01's store as the first coordinator (B-172)
+
+Do this only if step 0 answered `This base holds no coordinator state to name a standby for.` (`nerv kaji standby NERV-02`) or `No standby named.` with no replication status (`nerv kaji standby`): NERV-01 was named main before relocation existed, so its store has no coordinator state (2026-11-26). Needs NERV-01 on `main` with B-172 merged, updated by `nerv update`.
+
+Backup outside Git first (on NERV-01, Terminal; the service may keep running):
+
+```bash
+mkdir -p ~/.nerv-private/relocation
+sqlite3 ~/.nerv/nerv.sqlite ".backup '$HOME/.nerv-private/relocation/nerv-before-adopt.sqlite'"
+sqlite3 -readonly ~/.nerv-private/relocation/nerv-before-adopt.sqlite "PRAGMA quick_check"
+```
+
+Expected: `ok`.
+
+Adopt (it asks for the passphrase of the Key of Nebuchadnezzar):
+
+```bash
+nerv kaji adopt
+```
+
+Expected, two lines:
+
+```
+Backup: /Users/<you>/.nerv/backups/nerv-before-adopt-<time>.sqlite
+Adopted this base's store as coordinator epoch 1 (active, no lease yet); signed main NERV-01 at coordinator epoch 1. Told NERV-02, NERV-03 the epoch. Next: name a standby with kaji standby NERV-02.
+```
+
+If a base was offline the line says `Not reached now: …`; that is fine for NERV-03, but NERV-02 must have been told before the next command (run `nerv kaji adopt` again once it is on: it only pushes again and says `This base already holds coordinator state at epoch 1 (active): nothing to adopt.`). Any other answer is a refusal: nothing was changed; stop and note its text in F-016.
+
+Verify:
+
+```bash
+nerv kaji list
+nerv kaji standby NERV-02
+nerv kaji standby
+```
+
+Expected: `NERV-01 … (this base)  (main)`; then `Seeded NERV-02's standby store from this main at seq S.` and `Standby: NERV-02. The lease renews through it from the next renewal (every 15 s).`; then `Standby: NERV-02` and a replication status. From now on NERV-01 renews its lease through NERV-02: if NERV-02 is off or asleep for more than a minute, NERV-01 stops coordinator work until NERV-02 answers again.
+
+Undo (only if something above went wrong; restores the store as it was before 0b):
+
+```bash
+nerv service stop
+cp ~/.nerv-private/relocation/nerv-before-adopt.sqlite ~/.nerv/nerv.sqlite
+rm -f ~/.nerv/nerv.sqlite-wal ~/.nerv/nerv.sqlite-shm
+nerv service start
+nerv kaji standby
+```
+
+Expected: `No standby named.` and NERV-01 works as before. The other bases keep the epoch 1 record naming NERV-01; that is harmless. A later `nerv kaji adopt` works again once every base answers, unless `kaji standby NERV-02` had already succeeded (NERV-02 then acked a lease, and adopt refuses): note that in F-016 and stop.
+
 ## 1. Sign the move (NERV-01)
 
 ```bash

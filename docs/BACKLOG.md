@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 32 | 10 | 67 | 32 |
+| **This week** | 32 | 10 | 68 | 32 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 57 | 50 |
-| **Require Human 🧑** | 14 | 22 |
+| **Open** | 57 | 51 |
+| **Require Human 🧑** | 14 | 23 |
 
 ### Require Human 🧑
 
@@ -22,16 +22,17 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-062](#f-062) | [F-120](#f-120) | [B-170](#b-170) | [B-175](#b-175) |
-| [F-011](#f-011) | [F-116](#f-116) | [B-176](#b-176) |  |
-| [F-004](#f-004) | [F-142](#f-142) | [B-057](#b-057) |  |
-| [F-012](#f-012) |  | [B-068](#b-068) |  |
-| [F-016](#f-016) |  | [B-107](#b-107) |  |
-| [F-086](#f-086) |  | [B-113](#b-113) |  |
-| [F-087](#f-087) |  | [B-122](#b-122) |  |
-| [F-133](#f-133) |  | [B-123](#b-123) |  |
-| [F-092](#f-092) |  | [B-128](#b-128) |  |
-| [F-060](#f-060) |  | [B-129](#b-129) |  |
-| [F-007](#f-007) |  | [B-134](#b-134) |  |
+| [F-011](#f-011) | [F-116](#f-116) | [B-172](#b-172) |  |
+| [F-004](#f-004) | [F-142](#f-142) | [B-176](#b-176) |  |
+| [F-012](#f-012) |  | [B-057](#b-057) |  |
+| [F-016](#f-016) |  | [B-068](#b-068) |  |
+| [F-086](#f-086) |  | [B-107](#b-107) |  |
+| [F-087](#f-087) |  | [B-113](#b-113) |  |
+| [F-133](#f-133) |  | [B-122](#b-122) |  |
+| [F-092](#f-092) |  | [B-123](#b-123) |  |
+| [F-060](#f-060) |  | [B-128](#b-128) |  |
+| [F-007](#f-007) |  | [B-129](#b-129) |  |
+|  |  | [B-134](#b-134) |  |
 |  |  | [B-135](#b-135) |  |
 |  |  | [B-142](#b-142) |  |
 |  |  | [B-148](#b-148) |  |
@@ -45,7 +46,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 269.75 h agent + 22.75 h owner across 283 open steps of 57 features and 50 other records. 162.5 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 272.25 h agent + 23 h owner across 286 open steps of 57 features and 51 other records. 162.5 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -766,15 +767,56 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="b-172"></a>[🐞 B-172](#top)
+
+**A main named before coordinator relocation holds no coordinator state, so it cannot name a standby and the relocation cannot start**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟡 Medium | 2.5 h agent + 0.25 h owner | — | [F-016-T09](#f-016-t09) | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** B-172-T03: on NERV-01, step 0b of the [two-device relocation page](acceptance/f016-t09-two-device-relocation.md) (`nerv kaji adopt`, then `nerv kaji standby NERV-02`), once the fix is merged and NERV-01 updated.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-26 ~21:30 CET by the owner at step 0 of F-016-T09: on NERV-01 (both bases at `40615c4`) `nerv kaji standby NERV-02` answered "This base holds no coordinator state to name a standby for." and `nerv kaji standby` "No standby named."; a read-only query showed no `coordinator_state` table in NERV-01's `nerv.sqlite`, and its main records (serials 3 and 4) have no `coordinatorEpoch` (read as 0). NERV-01 was named main before F-016, and no code creates coordinator state except a promotion (`src/coordinator-snapshot.ts`), which needs a standby store seeded from an active coordinator: a main from before F-016 could never start a relocation. Lease renewals also need epoch 1 or later, equal to the standby's registry epoch. |
+| **Reproduce** | A main record without `coordinatorEpoch` naming this base and no `coordinator_state`: `kaji standby BASE-ID` and `kaji drain` refuse; there is no command that creates the state. |
+| **Check** | `nerv kaji adopt` on such a main backs up the store, signs main at epoch 1 when the record is at epoch 0, writes active state at epoch 1 with no lease and pushes the registry; a re-run changes nothing; it refuses, with nothing written, wherever another coordinator could have run (not the registry's main, a main record at epoch 2 or later here or on another base, a standby store, an acked lease here or on another base, a promotion in progress, state in another mode, an untrusted probe reply, and any unanswering base once an earlier adopt backup exists); `kaji main` is refused once state exists. Then `kaji standby NERV-02` seeds and names the standby (test committed failing first, B-172-T01), and on NERV-01 the owner's step 0b passes (B-172-T03). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="b-172-t01"></a>B-172-T01 — Failing test: a main from before F-016 cannot become the first coordinator | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [B-172-T02](#b-172-t02) | 🤖 | [PR #841](https://github.com/voidbrain/nerv/pull/841) failing two-base test |
+| 🟡 Medium | <a id="b-172-t02"></a>B-172-T02 — kaji adopt: backup, sign main at epoch 1, activate the legacy store, refuse wherever another coordinator could have run | 2 h | 0 h | 2 h | Implemented; verification pending | [B-172-T01](#b-172-t01) | [B-172-T03](#b-172-t03) | 🤖 | [PR #841](https://github.com/voidbrain/nerv/pull/841) kaji adopt, review fixes, docs |
+| 🟢 Small | <a id="b-172-t03"></a>B-172-T03 — Owner check: kaji adopt on NERV-01, then kaji standby NERV-02 seeds and names the standby | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-172-T02](#b-172-t02) | [F-016-T09](#f-016-t09) | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 3 steps recorded) | 2.5 h agent + 0.25 h owner | 0 of 3 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-172.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-172-T01: [PR #841](https://github.com/voidbrain/nerv/pull/841) failing two-base test · B-172-T02: [PR #841](https://github.com/voidbrain/nerv/pull/841) kaji adopt, review fixes, docs. [PR #841](https://github.com/voidbrain/nerv/pull/841). Code: `src/coordinator-adopt.ts`, `src/cli-kaji.ts` (`adopt`, `main` guard), `src/coordinator-epoch.ts` (`maxSeen`). Test: `test/coordinator-adopt.test.ts` |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | F-016-T09 cannot start on the owner's bases: the main they use was named before F-016. |
+
+</details>
+
+---
 ### <a id="f-016"></a>[✨ F-016](#top)
 
 **Relocate the logical coordinator without split brain**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h agent + 1 h owner | — | [F-132-T08](#f-132-t08) | ⏳ | 🧑‍🔧 | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h agent + 1 h owner | [B-172-T03](#b-172-t03) | [F-132-T08](#f-132-t08) | ⏳ | 🧑‍🔧 | — |
 
-🧑 **→** Move the coordinator to NERV-02 and back (F-016-T09, with B-120's live check): [the two-device relocation page](acceptance/f016-t09-two-device-relocation.md).
+🧑 **→** After B-172 lands and NERV-01 is updated: step 0b (`nerv kaji adopt`), then move the coordinator to NERV-02 and back (F-016-T09, with B-120's live check): [the two-device relocation page](acceptance/f016-t09-two-device-relocation.md).
 
 | | |
 |---|---|
@@ -788,7 +830,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | — | [F-016-T11](#f-016-t11), [F-132-T08](#f-132-t08) | [🧑‍🔧](acceptance/f016-t09-two-device-relocation.md) | — |
+| 🟢 Small | <a id="f-016-t09"></a>F-016-T09 — Step 5b — Two-device relocation acceptance | — | 0 h | 0 h agent + 1 h owner | Planned | [B-172-T03](#b-172-t03) | [F-016-T11](#f-016-t11), [F-132-T08](#f-132-t08) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | <a id="f-016-t11"></a>F-016-T11 — Record the evidence of F-016-T09 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-016-T09](#f-016-t09) | — | ⏳ 🤖 | — |
 | 🟢 Small | **Total** | 22.75 h (20 of 21 steps) | 30.75 h (16 of 21 steps recorded) | 0.25 h agent + 1 h owner | 19 of 21 completed | | | | |
 
@@ -825,7 +867,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-016-T03: [PR #546](https://github.com/voidbrain/nerv/pull/546) implementation; CI green · F-016-T04: [PR #555](https://github.com/voidbrain/nerv/pull/555) implementation; CI green · F-016-T05: [PR #564](https://github.com/voidbrain/nerv/pull/564) implementation · F-016-T06: [PR #567](https://github.com/voidbrain/nerv/pull/567) implementation · F-016-T07: [PR #677](https://github.com/voidbrain/nerv/pull/677) implementation and review fixes · F-016-T08: [PR #717](https://github.com/voidbrain/nerv/pull/717) Partition, sleep and reconnect fixtures; B-120 and B-121 fixes · F-016-T10: [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review · F-016-T13: [PR #548](https://github.com/voidbrain/nerv/pull/548) implementation; CI green · F-016-T14: [PR #550](https://github.com/voidbrain/nerv/pull/550) implementation; CI green · F-016-T15: [PR #552](https://github.com/voidbrain/nerv/pull/552) implementation; CI green · F-016-T16: [PR #701](https://github.com/voidbrain/nerv/pull/701) lease renewal, self-fencing, lease 0 rule, registry inputs, monotonic wait · F-016-T17: [PR #702](https://github.com/voidbrain/nerv/pull/702) kaji promote, serve swap guard, verified inputs, crash resume · F-016-T18: [PR #703](https://github.com/voidbrain/nerv/pull/703) /kaji/epoch-push, recorded acks, measured promotion horizon · F-016-T19: [PR #704](https://github.com/voidbrain/nerv/pull/704) Telegram hand-over: authority gate, hydration, no 409 race · F-016-T20: [PR #725](https://github.com/voidbrain/nerv/pull/725) Live standby seeding and replication while serve runs · F-016-T21: [PR #838](https://github.com/voidbrain/nerv/pull/838) seed export on a worker thread; merged on green CI; [PR #852](https://github.com/voidbrain/nerv/pull/852) closed on green CI. [PR #725](https://github.com/voidbrain/nerv/pull/725) F-016-T20 (`src/coordinator-shipping.ts`, `test/coordinator-shipping.test.ts`); [PR #717](https://github.com/voidbrain/nerv/pull/717) F-016-T08 (`test/coordinator-partition.test.ts`; B-120, B-121 fixes); earlier PRs (#3 to #704): [moved 2026-11-25](archive/evidence-2026.md#f-016-moved-2026-11-25); [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750); [#838](https://github.com/voidbrain/nerv/pull/838) |
+| PR / evidence | Steps: F-016-T03: [PR #546](https://github.com/voidbrain/nerv/pull/546) implementation; CI green · F-016-T04: [PR #555](https://github.com/voidbrain/nerv/pull/555) implementation; CI green · F-016-T05: [PR #564](https://github.com/voidbrain/nerv/pull/564) implementation · F-016-T06: [PR #567](https://github.com/voidbrain/nerv/pull/567) implementation · F-016-T07: [PR #677](https://github.com/voidbrain/nerv/pull/677) implementation and review fixes · F-016-T08: [PR #717](https://github.com/voidbrain/nerv/pull/717) Partition, sleep and reconnect fixtures; B-120 and B-121 fixes · F-016-T10: [PR #417](https://github.com/voidbrain/nerv/pull/417) revised relocation decision and clean second review · F-016-T13: [PR #548](https://github.com/voidbrain/nerv/pull/548) implementation; CI green · F-016-T14: [PR #550](https://github.com/voidbrain/nerv/pull/550) implementation; CI green · F-016-T15: [PR #552](https://github.com/voidbrain/nerv/pull/552) implementation; CI green · F-016-T16: [PR #701](https://github.com/voidbrain/nerv/pull/701) lease renewal, self-fencing, lease 0 rule, registry inputs, monotonic wait · F-016-T17: [PR #702](https://github.com/voidbrain/nerv/pull/702) kaji promote, serve swap guard, verified inputs, crash resume · F-016-T18: [PR #703](https://github.com/voidbrain/nerv/pull/703) /kaji/epoch-push, recorded acks, measured promotion horizon · F-016-T19: [PR #704](https://github.com/voidbrain/nerv/pull/704) Telegram hand-over: authority gate, hydration, no 409 race · F-016-T20: [PR #725](https://github.com/voidbrain/nerv/pull/725) Live standby seeding and replication while serve runs · F-016-T21: [PR #838](https://github.com/voidbrain/nerv/pull/838) seed export on a worker thread; merged on green CI; [PR #852](https://github.com/voidbrain/nerv/pull/852) closed on green CI. [PR #725](https://github.com/voidbrain/nerv/pull/725) F-016-T20 (`src/coordinator-shipping.ts`, `test/coordinator-shipping.test.ts`); [PR #717](https://github.com/voidbrain/nerv/pull/717) F-016-T08 (`test/coordinator-partition.test.ts`; B-120, B-121 fixes); earlier PRs (#3 to #704): [moved 2026-11-25](archive/evidence-2026.md#f-016-moved-2026-11-25); [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750); [#838](https://github.com/voidbrain/nerv/pull/838); [#841](https://github.com/voidbrain/nerv/pull/841) B-172 kaji adopt |
 | Opened | 2026-11-01 |
 | Verification | 2026-11-26: Unit/integration: `test/coordinator-shipping.test.ts` and `test/coordinator-snapshot.test.ts` (24/24, incl. F-016-T21 25,000-row off-loop seed regression). 2026-11-18: F-016-T10 verified: [PR #417](https://github.com/voidbrain/nerv/pull/417) merged on green CI (second fresh-context review found no blocker). F-016-T12 closed with the accepted decision revision and zero-blocking review in PR #470; scoped CI passed. Remaining distributed relocation acceptance is open. |
 | Reviewed | 2026-11-26 |
