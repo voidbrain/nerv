@@ -35,9 +35,9 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 h agent",
-    "basis": "Estimated 2026-11-26: the owner campaign of F-120-T03 (0.5 h, 2026-11-25) moved to the agent, owner-step triage. Not a measurement. 2026-11-26: first run 0.75 h (agent): 14 of 34 pending cases covered; the three reference-runner packs stopped on the 30 s case limit (F-120-T05). Remaining 0.5 h after T05. 2026-11-26 rerun after F-120-T05 (0.5 h agent): embedded Pi cases 3/4, cad-3d tolerance 2/2, multi-step-agent and six system flows passed again; the 4 coding and 4 cad-3d OpenSCAD cases errored before the model call because Docker Desktop was not running. Remaining 0.5 h: rerun those 8 with Docker running, plus the stress and browser runs.",
+    "basis": "Estimated 2026-11-26: the owner campaign of F-120-T03 (0.5 h, 2026-11-25) moved to the agent, owner-step triage. Not a measurement. 2026-11-26: first run 0.75 h (agent): 14 of 34 pending cases covered; the three reference-runner packs stopped on the 30 s case limit (F-120-T05). Remaining 0.5 h after T05. 2026-11-26 rerun after F-120-T05 (0.5 h agent): embedded Pi cases 3/4, cad-3d tolerance 2/2, multi-step-agent and six system flows passed again; the 4 coding and 4 cad-3d OpenSCAD cases errored before the model call because Docker Desktop was not running. Remaining 0.5 h: rerun those 8 with Docker running, plus the stress and browser runs. 2026-11-26 Docker rerun (0.5 h agent): cad-3d OpenSCAD 4/4 passed, coding 4/4 failed graded (output-token cap 2,048 reached), stress and browser passed, multi-step-agent and six system flows passed again; only the four excluded sketch cases remain pending. Remaining: closure once the sketch cases have their own home.",
     "reviewed": "2026-11-26",
-    "agentHours": 0.5,
+    "agentHours": 0.25,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   },
