@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-147-T01",
+  "parent": "F-147",
+  "title": "Read-only MCP connection to the live index and its surface card",
+  "goal": "The index's answers show in NERV as a bricks surface card, read-only, with Italian labels in chat",
+  "status": "planned",
+  "acceptance": [
+    "Failing test first, across the API and the component, on an invented fake index server: a \"waiting on me\" answer renders the bricks surface card with each row's source link, the snapshot time and a link to the index screen; a tool that writes is refused at registration; an unreachable index is reported, not shown as no work",
+    "The index registers through the remote MCP path of F-123-T01 with every tool Green; the tool names and shapes follow the contract row coordinator:F-024-T04 writes in the coordinator's docs/SOLUTION.md; NERV stores none of the index's data",
+    "Chat labels in Italian (for example \"In attesa di te\", \"Bloccato da\", \"Indice live\"); an Italian Gauntlet case for the chat request, or a recorded skip with its reason"
+  ],
+  "dependsOn": [
+    "coordinator:F-024-T04"
+  ],
+  "resources": [
+    "src/**",
+    "web/src/**",
+    "test/**",
+    "docs/guides/**",
+    "docs/work/records/F-147.md",
+    "docs/work/tasks/F-147-T01.json",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented records, repositories and results only; no tokens in configuration examples, tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-26 from the coordinator proposal's 1 h (live index decision page, row S6), at agent speed, failing test first; the remote MCP path (F-123-T01) and bricks surface cards (F-130-T19) already exist. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}
