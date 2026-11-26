@@ -23,7 +23,8 @@
     "F-130-T11",
     "F-130-T12",
     "F-130-T16",
-    "F-130-T17"
+    "F-130-T17",
+    "F-130-T19"
   ],
   "resources": [
     "web/public/dashboard/**",
@@ -53,7 +54,7 @@
     "size": "medium",
     "estimate": "4 h",
     "basis": "Estimated 2026-11-25: redirect, worker hand-over, deletions and doc updates. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-26",
     "agentHours": 4,
     "baselineAgentHours": 4,
     "estimateAgentHours": 4

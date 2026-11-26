@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-134-T01",
+  "parent": "F-134",
+  "title": "Turn on audit.enforce in .harness.json",
+  "goal": "check:audits and check:freshness fail when an audit area is due, so the weekly audit cannot lapse silently",
+  "status": "implemented",
+  "acceptance": [
+    ".harness.json audit.enforce is true (project setting); npm run check:audits passes today on the 2026-11-20 full audit",
+    "Owner decision 2026-11-26 (chat): \"accept all 17 proposals\" of the cross-project audit (coordinator docs/audits/2026-11-26-cross-project.md), proposal 17."
+  ],
+  "dependsOn": [],
+  "resources": [
+    ".harness.json",
+    "docs/work/records/F-134.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "No personal data; audit reports cite repository evidence only.",
+  "validation": [
+    "npm run check:audits",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Turning enforcement off again goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-26: one setting. Not a measurement. Implemented 2026-11-26 in #802.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  },
+  "prs": [
+    {
+      "pr": 802
+    }
+  ]
+}

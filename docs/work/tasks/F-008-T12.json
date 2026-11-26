@@ -4,7 +4,7 @@
   "parent": "F-008",
   "title": "Live check with real batteries",
   "goal": "The owner registers two packs and uses the chat commands",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Copy and paste: `nerv chat \"registra la batteria 7 blu LiPo 6S 1300 mAh, resistenze 3, 3.4, 4.1, 3.2, 3.3, 3.1\"` then `nerv chat \"carica le batterie 7 blu\"`; expected: battery 7 blue shown charged, a storage reminder scheduled for the evening",
     "The Tattu R-Line V6 6S band (aging 4.5, strong 7, retire 8 mOhm) is confirmed or adjusted from the agent charger readings on new packs"
@@ -31,12 +31,18 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h",
-    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent).",
-    "reviewed": "2026-11-18",
-    "agentHours": 0.25,
+    "estimate": "0 remaining (cancelled)",
+    "basis": "Estimated 2026-11-14 from the owner request at agent speed (harness 8.14.3: implementation steps 0.75 h). Not a measurement. Moved to the agent 2026-11-18 (0.25 h owner → agent). Cancelled 2026-11-26: Owner decision 2026-11-26 (chat): \"accept all 17 proposals\" of the cross-project audit (coordinator docs/audits/2026-11-26-cross-project.md); for proposal 1 the owner accepted the recommendation to cancel the live checks of NERV FPV code due for removal, reason: the code moves to FPVBuddy (F-101). No actual: cancelled before the owner ran it.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25,
     "ownerHours": 0
-  }
+  },
+  "prs": [
+    {
+      "pr": 802,
+      "note": "cancellation"
+    }
+  ]
 }
