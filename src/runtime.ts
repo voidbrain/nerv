@@ -210,6 +210,10 @@ export class Runtime implements StoreApi {
       this.nervous.call('reminders.cancel', { id }),
     ) as Promise<boolean>;
   }
+  /** B-170: the owner marked a delivered reminder done. */
+  async reminderDone(id: string) {
+    return (await this.nervous.call('reminders.done', { id })) as boolean;
+  }
   async showList(name: string) {
     return (await this.nervous.call('lists.show', { list: name })) as ReturnType<
       import('./lists.ts').ListStore['show']

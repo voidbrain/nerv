@@ -197,6 +197,8 @@ export interface StoreApi {
     patch: { title?: string; due?: string; kind?: string; end?: string | null },
   ): Reminder | undefined | null | Promise<Reminder | undefined | null>;
   cancel(id: string): boolean | Promise<boolean>;
+  /** B-170: the owner marked a delivered reminder done; false when it is not delivered, cancelled or unknown. */
+  reminderDone?(id: string): boolean | Promise<boolean>;
   showList?(name: string): ListView | null | Promise<ListView | null>;
   toggleListItem?(
     itemId: string,

@@ -500,6 +500,10 @@ export class Store {
   cancel(id: string): boolean {
     return this.remindersController.cancel(id);
   }
+  /** B-170: the owner marked a delivered reminder done; false when it is not delivered, cancelled or unknown. */
+  reminderDone(id: string): boolean {
+    return this.remindersController.done(id);
+  }
   get batteries() {
     return this.fpv.batteries;
   }

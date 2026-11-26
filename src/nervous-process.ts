@@ -192,6 +192,8 @@ process.on('message', (value: unknown) => {
       }
       case 'reminders.cancel':
         return store.cancel(params.id as string);
+      case 'reminders.done':
+        return store.reminderDone(params.id as string);
       case 'push.key':
         return store.pushPublicKey();
       case 'push.subscribe':

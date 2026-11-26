@@ -211,6 +211,12 @@ export const methodSchemas = {
     properties: { id: { type: 'string', minLength: 1, maxLength: 100 } },
     additionalProperties: false,
   },
+  'reminders.done': {
+    type: 'object',
+    required: ['id'],
+    properties: { id: { type: 'string', minLength: 1, maxLength: 100 } },
+    additionalProperties: false,
+  },
   'push.key': empty,
   'push.subscribe': {
     type: 'object',

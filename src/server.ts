@@ -1131,6 +1131,10 @@ export function makeServer(
         });
         if (r) reply(200, r);
         else reply(404, { error: 'No pending reminder with that ID.' });
+      } else if (req.method === 'POST' && /^\/api\/reminders\/[a-f0-9-]+\/done$/.test(path)) {
+        // B-170: the owner marked a delivered reminder done (Coming up); it also counts as read, so no Telegram fallback.
+        const done = store.reminderDone ? await store.reminderDone(path.split('/')[3]!) : false;
+        reply(done ? 200 : 404, done ? { ok: true } : { error: 'No delivered reminder with that ID.' });
       } else if (req.method === 'DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) {
         reply((await store.cancel(path.split('/').at(-1)!)) ? 200 : 404, { message: 'Cancellation processed.' });
       } else if (req.method === 'GET' && path === '/api/push/key') {

@@ -88,6 +88,7 @@ export const communicationGraph = [
       'reminders.add',
       'reminders.update',
       'reminders.cancel',
+      'reminders.done',
       'lists.show',
       'lists.toggle',
       'batteries.cards',
