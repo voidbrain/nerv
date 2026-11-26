@@ -102,7 +102,7 @@ jobs:
       - run: npm run check:tooling
       - if: needs.plan.outputs.unit == 'true'
         run: npm run typecheck
-      # The suite once, with coverage; the table is printed (warnings, coverage.enforce off).
+      # The suite once, with coverage; the table is printed and a drop of more than coverage.drop points fails (B-159).
       - if: needs.plan.outputs.full == 'true'
         run: npm run test:coverage
       - name: Test file timings
@@ -114,7 +114,7 @@ jobs:
         env:
           NERV_VERIFY_GROUPS: ${{ needs.plan.outputs.groups }}
           NERV_VERIFY_PATHS: ${{ needs.plan.outputs.paths }}
-      - name: Code coverage table (warnings; optional enforcement)
+      - name: Code coverage table (fails a drop against main's baseline, B-159)
         if: needs.plan.outputs.full == 'true'
         run: node tools/coverage-table.mjs --check --github
       - if: needs.plan.outputs.frontend == 'true' || needs.plan.outputs.service == 'true'
