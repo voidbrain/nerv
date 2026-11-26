@@ -1193,7 +1193,8 @@ test('F-120-T03: the domain packs run on the release runners, follow the model a
 test('F-120-T03: coding and embedded results keep and follow the model digest (model-calling runners)', async () => {
   const { run, validateRegistry, emptyLedger, caseHash, evidenceProfile, hash } =
     await import('@voidbrain/gauntlet-protocol');
-  const { commonPacks, recordSelected, modelLimits, releaseSourceKey } = await import('../tools/gauntlet.mjs');
+  const { commonPacks, recordSelected, modelLimits, modelProfile, releaseSourceKey } =
+    await import('../tools/gauntlet.mjs');
   const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-model-runner-'));
   const profilePath = 'node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json';
   const profile = JSON.parse(readFileSync(profilePath, 'utf8'));
@@ -1243,7 +1244,8 @@ writeFileSync(out, JSON.stringify({ schemaVersion: 1, layer: 'coding', caseHash:
 
     // Pending: a covering coding/embedded run under another model digest is model-changed.
     const ledger = join(dir, 'ledger.json');
-    const profileHash = hash(evidenceProfile(profile));
+    // F-120-T07: coding results are recorded under the profile with the raised coding reply cap.
+    const profileHash = (p) => hash(evidenceProfile(modelProfile(p, profile)));
     const packs = commonPacks()
       .map((p) => p.pack)
       .filter((p) => ['coding', 'embedded'].includes(p.id));
@@ -1257,7 +1259,7 @@ writeFileSync(out, JSON.stringify({ schemaVersion: 1, layer: 'coding', caseHash:
             packVersion: p.version,
             case: c.id,
             caseHash: caseHash(c),
-            profileHash,
+            profileHash: profileHash(p),
             status: 'passed',
             reportHash: '2'.repeat(64),
             finished: '2026-11-25T00:00:00.000Z',
@@ -1297,7 +1299,7 @@ test('check:gauntlet-runs fails for a pending case that no unfinished task lists
 
 test('F-074-T10: identity-bound ledger coverage detects source, model, runtime and scenario changes', async () => {
   const { caseHash, evidenceProfile, hash } = await import('@voidbrain/gauntlet-protocol');
-  const { commonPacks, systemSourceKey, caseSourceKey } = await import('../tools/gauntlet.mjs');
+  const { commonPacks, systemSourceKey, caseSourceKey, modelProfile } = await import('../tools/gauntlet.mjs');
   const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-identity-'));
   const ledger = join(dir, 'ledger.json');
   process.env.NERV_GAUNTLET_LEDGER = ledger;
@@ -1306,7 +1308,8 @@ test('F-074-T10: identity-bound ledger coverage detects source, model, runtime a
     const system = readSystemPackWithInputs().pack;
     const profilePath = 'node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json';
     const profile = JSON.parse(readFileSync(profilePath, 'utf8'));
-    const profileHash = hash(evidenceProfile(profile));
+    // F-120-T07: coding results are recorded under the profile with the raised coding reply cap.
+    const profileHash = (p) => hash(evidenceProfile(modelProfile(p, profile)));
     const modelDigest = 'd'.repeat(64);
     const runtimeHash = 'e'.repeat(64);
     const scenarioHash = 'f'.repeat(64);
@@ -1336,7 +1339,7 @@ test('F-074-T10: identity-bound ledger coverage detects source, model, runtime a
               packVersion: p.version,
               case: c.id,
               caseHash: caseHash(c),
-              profileHash,
+              profileHash: profileHash(p),
               status: 'passed',
               reportHash: '2'.repeat(64),
               finished: '2020-01-01T00:00:00.000Z',
@@ -1879,7 +1882,14 @@ test('F-120-T07: coding-reference packs get a 3,072-token output budget a case; 
     for (const id of ['coding', 'embedded'])
       await assert.rejects(
         main(
-          ['model-run', '--pack=' + id, '--profile=' + examples + 'profiles/gemma4-12b.json', '--execute', '--allow-models', '--out=' + join(dir, id + '.json')],
+          [
+            'model-run',
+            '--pack=' + id,
+            '--profile=' + examples + 'profiles/gemma4-12b.json',
+            '--execute',
+            '--allow-models',
+            '--out=' + join(dir, id + '.json'),
+          ],
           services,
         ),
         /stop before any model call/,
