@@ -752,6 +752,26 @@ test('B-167: short Italian requests read as Italian, English ones stay English, 
   ])
     assert.equal(requestLanguage(request), 'en', request);
 });
+test("B-168: a request with no language signal and no earlier exchange follows the owner's config.language (chat → planner → Misato)", async () => {
+  for (const [language, expected] of [
+    ['it', /Write the reply in Italian/],
+    ['en', /Write the reply in English/],
+  ] as const)
+    await agent(
+      ['{"reply":"Ok."}'],
+      async (runtime, m) => {
+        await runtime.chat('ok');
+        const system = m.asked.find((a) => /Write the reply in/.test(a.system))?.system ?? '';
+        assert.match(system, expected, language);
+      },
+      undefined,
+      undefined,
+      (home) => {
+        const path = join(home, 'config.json');
+        writeFileSync(path, JSON.stringify({ ...JSON.parse(readFileSync(path, 'utf8')), language }));
+      },
+    );
+});
 test('B-167: English plurals and synonyms reach their topic', async () => {
   const { detectToolDomains } = await import('../src/misato.ts');
   for (const [domain, request] of [
