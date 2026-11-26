@@ -199,7 +199,14 @@ export function summarize(results) {
 /** One combination case: the coder checks its patch; in coder-reviewer the auditor's vote decides. */
 export async function combinationCase(c, mode, coder, reviewer, budget) {
   const t0 = Date.now();
-  const first = await coder({ prompt: coderPrompt(c) }, budget);
+  const first = await coder(
+    { prompt: coderPrompt(c) },
+    {
+      maxTokens: budget.maxTokens,
+      timeoutMs: budget.timeoutMs,
+      ...(budget.coderSignal ? { signal: budget.coderSignal } : {}),
+    },
+  );
   const coderVote = parseVote(first.text);
   let tokens = first.outputTokens ?? 0,
     rounds = 1,
@@ -208,10 +215,14 @@ export async function combinationCase(c, mode, coder, reviewer, budget) {
   if (mode === 'coder-reviewer') {
     if (!coderVote)
       return { submission: null, tokens, rounds, ms: Date.now() - t0, invalid: 'coder', coderText: String(first.text).slice(0, 300) };
-    const second = await reviewer({ prompt: reviewerPrompt(c, coderVote) }, {
-      ...budget,
-      timeoutMs: Math.max(1000, budget.timeoutMs - (Date.now() - t0)),
-    });
+    const second = await reviewer(
+      { prompt: reviewerPrompt(c, coderVote) },
+      {
+        maxTokens: budget.maxTokens,
+        timeoutMs: budget.reviewerTimeoutMs ?? Math.max(1000, budget.timeoutMs - (Date.now() - t0)),
+        ...(budget.reviewerSignal ? { signal: budget.reviewerSignal } : {}),
+      },
+    );
     tokens += second.outputTokens ?? 0;
     rounds = 2;
     auditor = second;
@@ -228,6 +239,8 @@ export async function combinationCase(c, mode, coder, reviewer, budget) {
     ms,
     coderServerMs: first.serverMs ?? null,
     auditorServerMs: auditor?.serverMs ?? null,
+    ...(first.provenance ? { coderProvenance: first.provenance } : {}),
+    ...(auditor?.provenance ? { auditorProvenance: auditor.provenance } : {}),
     ...texts,
   };
 }
@@ -325,7 +338,7 @@ export async function runCombination(mode, coder, reviewer, totalBudget, perCall
 export function ollamaTransport(model, endpoint = 'http://127.0.0.1:11434') {
   const url = new URL('/api/chat', endpoint);
   if (!['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname)) throw Error('Ollama endpoint must be loopback');
-  return async (ask, { maxTokens, timeoutMs }) => {
+  return async (ask, { maxTokens, timeoutMs, signal }) => {
     const messages = [...(ask.system ? [{ role: 'system', content: ask.system }] : []), { role: 'user', content: ask.prompt }];
     const res = await fetch(url, {
       method: 'POST',
@@ -338,7 +351,7 @@ export function ollamaTransport(model, endpoint = 'http://127.0.0.1:11434') {
         keep_alive: '5m',
         options: { temperature: 0, seed: 42, num_ctx: 8192, num_predict: maxTokens },
       }),
-      signal: AbortSignal.timeout(timeoutMs),
+      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)]) : AbortSignal.timeout(timeoutMs),
       redirect: 'error',
     });
     if (!res.ok) throw Error(`HTTP ${res.status}`);
@@ -382,30 +395,53 @@ export function nervTransport(placement, home = process.env.NERV_HOME || join(ho
 
 /** Runs the `nerv` transport on another host over SSH, one probe per call. */
 export function sshTransport(host, nodePath, driverPath, placement) {
-  return (ask, { maxTokens, timeoutMs }) =>
+  return (ask, { maxTokens, timeoutMs, signal, cancelAfterMs }) =>
     new Promise((resolvePromise, reject) => {
+      if (signal?.aborted) {
+        reject(signal.reason instanceof Error ? signal.reason : Error(String(signal.reason ?? 'aborted')));
+        return;
+      }
       const child = spawn('ssh', ['-o', 'BatchMode=yes', host, `"${nodePath}" "${driverPath}" probe ${placement}`], {
         stdio: ['pipe', 'pipe', 'pipe'],
       });
       let out = '',
-        err = '';
+        err = '',
+        settled = false;
+      const done = (fn, val) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        signal?.removeEventListener('abort', onAbort);
+        fn(val);
+      };
+      const onAbort = () => {
+        child.kill();
+        done(reject, signal.reason instanceof Error ? signal.reason : Error(String(signal.reason ?? 'aborted')));
+      };
+      signal?.addEventListener('abort', onAbort, { once: true });
       const timer = setTimeout(() => {
         child.kill();
-        reject(new TimeoutError('ssh probe timed out'));
+        done(reject, new TimeoutError('ssh probe timed out'));
       }, timeoutMs + 5000);
       child.stdout.on('data', (d) => (out += d));
       child.stderr.on('data', (d) => (err += d));
       child.on('close', (code) => {
-        clearTimeout(timer);
         try {
           const value = JSON.parse(out);
-          if (value.error) reject(Error(value.error));
-          else resolvePromise(value);
+          if (value.error) done(reject, Error(value.error));
+          else done(resolvePromise, value);
         } catch {
-          reject(Error(`ssh probe failed (${code}): ${err.replace(/\*\*.*\n?/g, '').trim().slice(0, 200)}`));
+          done(reject, Error(`ssh probe failed (${code}): ${err.replace(/\*\*.*\n?/g, '').trim().slice(0, 200)}`));
         }
       });
-      child.stdin.end(JSON.stringify({ ask, maxTokens, timeoutMs }));
+      child.stdin.end(
+        JSON.stringify({
+          ask,
+          maxTokens,
+          timeoutMs,
+          ...(Number.isInteger(cancelAfterMs) && cancelAfterMs > 0 ? { cancelAfterMs } : {}),
+        }),
+      );
     });
 }
 
@@ -423,10 +459,14 @@ async function main(args) {
       }),
   );
   if (command === 'probe') {
-    // stdin {ask, maxTokens, timeoutMs} -> stdout one JSON reply (used by the ssh transport).
+    // stdin {ask, maxTokens, timeoutMs, cancelAfterMs?} -> stdout one JSON reply (used by the ssh transport).
     const input = JSON.parse(readFileSync(0, 'utf8'));
     try {
-      console.log(JSON.stringify(await nervTransport(rest[0])(input.ask, input)));
+      const signal =
+        Number.isInteger(input.cancelAfterMs) && input.cancelAfterMs > 0
+          ? AbortSignal.timeout(input.cancelAfterMs)
+          : undefined;
+      console.log(JSON.stringify(await nervTransport(rest[0])(input.ask, { ...input, ...(signal ? { signal } : {}) })));
     } catch (error) {
       console.log(JSON.stringify({ error: String(error?.message ?? error) }));
     }
