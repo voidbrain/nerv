@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "planned",
+  "status": "implemented",
   "privacy": "Neutral invented messages, devices and receipts only; no tokens, push endpoints, chat IDs or personal data in Git.",
   "escalation": [
     "A material scope or effort increase goes to the owner"
@@ -31,10 +31,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Estimated 2026-11-26: reuses test/push-first.test.ts's fake push service and Bot API. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: reuses test/push-first.test.ts's fake push service and Bot API. Not a measurement. 2026-11-26: implemented: test/push-first.test.ts 'B-149: a pushed reminder read in the app before the deadline never reaches Telegram' fails on main (POST /api/inbox/:id/read answers 404). Remaining: CI.",
     "reviewed": "2026-11-26",
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   }
