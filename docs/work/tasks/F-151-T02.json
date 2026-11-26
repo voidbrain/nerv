@@ -6,7 +6,7 @@
   "goal": "The owner approves the voice and sample entries, or says what to change",
   "status": "planned",
   "acceptance": [
-    "Read the sample entries in docs/design/chronicle-eva-voice.md. Pick a register (straight A/C, humour B/D, or a mix) and reply 'approved', or say what to change (funnier, warmer, shorter, another closing line). The agent revises until approved, then records the decision in F-151"
+    "Read the sample entries in docs/design/chronicle-eva-voice.md. Owner's provisional pick, 2026-11-26: 'maybe C' (warm immersive narration with one dry line; reference tone in the page), final at the owner check in F-151-T08. Pick a register (straight A/C, humour B/D, or a mix) and reply 'approved', or say what to change (funnier, warmer, shorter, another closing line). The agent revises until approved, then records the decision in F-151"
   ],
   "dependsOn": [
     "F-151-T01"
@@ -37,5 +37,10 @@
     "ownerHours": 0.25,
     "ownerKind": "decision"
   },
-  "ownerLink": "docs/design/chronicle-eva-voice.md"
+  "ownerLink": "docs/design/chronicle-eva-voice.md",
+  "prs": [
+    {
+      "pr": 858
+    }
+  ]
 }

@@ -31,6 +31,14 @@ D. Light humour, Italian, a thin day:
 
 > 2026-03-07. Una sola cosa da registrare: la base Tabgha è stata nominata principale [registry:9f8e7d6c5b4a]. Per il resto una giornata così tranquilla che il personale ha sospettato un guasto nei registri. Non c'era.
 
+## Owner's provisional pick and reference tone
+
+Owner lean, 2026-11-26: "maybe C" (warm, immersive in-world narration with one dry line; the alternatives were straight immersive and light humour). Provisional: the final choice is made at the owner check (F-151-T08). The reference tone, Italian, as the owner's lean described it (each recorded source is appended in square brackets in a real entry, as the verifier requires):
+
+> Registro di Comando, 26 novembre. Giornata di andirivieni. Calvary è tornata alle 19:40 dopo un lungo silenzio, e per un'ora ha esitato sulla soglia: dentro, fuori, dentro. Tabgha è caduta e risorta tre volte; alle 21:37 ha scelto di restare a terra. Chi tiene questo registro ha imparato che le installazioni, come le persone, tornano quando sono pronte. Annotato. Archiviato. Si attende l'alba.
+
+The prompt in F-151-T03 is built from this tone; samples A to D above show the other registers.
+
 Taste check: pick A/C (straight), B/D (humour) or a mix, and reply "approved" or say what to change (warmer, funnier, shorter, a different closing line). The agent then turns the approved text into the prompt and keeps these samples as test and Gauntlet fixtures.
 
 ## Owner check (F-151-T08), on NERV-01 after the update

@@ -41,5 +41,10 @@
     "ownerHours": 0.25,
     "ownerKind": "procedure"
   },
-  "ownerLink": "docs/design/chronicle-eva-voice.md#owner-check-f-149-t08-on-nerv-01-after-the-update"
+  "ownerLink": "docs/design/chronicle-eva-voice.md#owner-check-f-149-t08-on-nerv-01-after-the-update",
+  "prs": [
+    {
+      "pr": 858
+    }
+  ]
 }
