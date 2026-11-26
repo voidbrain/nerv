@@ -47,6 +47,10 @@
     {
       "pr": 859,
       "note": "plan"
+    },
+    {
+      "pr": 860,
+      "note": "owner decision"
     }
   ],
   "ownerLink": "docs/design/dashboard-reload-models.md"
