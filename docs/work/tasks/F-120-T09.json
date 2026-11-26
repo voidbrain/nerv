@@ -4,13 +4,13 @@
   "parent": "F-120",
   "title": "nerv-planner-v1: model-layer cases on Misato's own tool index, Italian and English",
   "goal": "A model is given nerv's real tool index and its decision is checked, so a model change or a tool-index change is measured",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Owner decision 2026-11-26 in chat: \"ok to all\" (accepts proposal from solution:F-016, docs/reviews/2026-11-shared-assets/gauntlet-nerv.md); same message: \"nerv and all modules will need to work with Italian\".",
-    "evals/gauntlet/nerv-planner-v1.json exists: model layer, regression and holdout splits, invented data, exact-json on the action and its arguments (json-match once gauntlet-protocol releases it)",
-    "Cases cover reminders (relative times counted from when the owner asked, as in B-143), memory facts, a write tool proposed for approval, a switched-off pack's tool never chosen, and an unknown request answered with reply or ask; each as an Italian and an English request over the real tool list (src/misato.ts:123-129), e.g. \"ricordami tra due ore di chiamare Marco\", \"ricordami domani alle 9 di pagare la bolletta\", \"stampa i piedi di Smoke\", \"controlla la mail di oggi\"",
-    "A test fails when a case names a tool the index does not register",
-    "First owner-approved run recorded in evals/gauntlet/ledger.json (human action; never commit ledger changes from local test runs)",
+    "evals/gauntlet/nerv-planner-v1.json (pack nerv-planner) exists: model layer, regression and holdout splits, invented data, exact-json on the decision and its required arguments (json-match once gauntlet-protocol releases it); built from evals/gauntlet/nerv-planner-v1.cases.json by tools/gauntlet-planner-pack.mjs over the real planner prompt (misatoAsk) and tool index; consumed through evals/gauntlet/consumption.json nervModelPacks",
+    "Cases cover reminders (relative times counted from when the owner asked, as in B-143), memory facts, write tools proposed for the owner's approval card, a switched-off pack's tool never chosen, Grover's read-only MCP tools, and requests no granted tool can do answered with a reply or an ask; each as an Italian and an English request over the real tool list",
+    "A test fails when a case names a tool the index does not register or does not offer (test/gauntlet-planner.test.mjs)",
+    "The first owner-approved run moved to F-120-T13 (owner decision) and F-120-T14 (agent run and ledger entry), one actor per step",
     "Feeds F-126, F-106, F-113 (before and after), B-143, F-082, F-083, F-121 and F-132"
   ],
   "dependsOn": [
@@ -18,8 +18,13 @@
   ],
   "resources": [
     "evals/gauntlet/**",
+    "tools/gauntlet.mjs",
+    "tools/gauntlet-planner-pack.mjs",
+    "tools/check-gauntlet-ledger.mjs",
     "test/gauntlet.test.mjs",
+    "test/gauntlet-planner.test.mjs",
     "docs/test-capability-index.md",
+    "docs/evaluations/gauntlet.md",
     "docs/work/records/F-120.md",
     "generated:backlog-views"
   ],
@@ -29,18 +34,23 @@
   ],
   "privacy": "Neutral invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
   "validation": [
+    "node --test test/gauntlet-planner.test.mjs test/gauntlet.test.mjs",
+    "node tools/gauntlet-planner-pack.mjs --check",
     "npm run check:fast"
   ],
   "escalation": [
-    "The first model run and any --allow-models run need the owner (human action); a material scope or effort increase goes to the owner"
+    "Any --allow-models run of nerv-planner needs the owner (F-120-T13); a material scope or effort increase goes to the owner"
   ],
   "effort": {
     "size": "medium",
-    "estimate": "2.5 h agent",
-    "basis": "From solution:F-016-T03 proposal 1; Italian phrasings are part of every case set (owner 2026-11-26): each capability has Italian and English requests. 0.25 h owner for the first run. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "From solution:F-016-T03 proposal 1; Italian and English requests for every scenario (owner 2026-11-26). Done 2026-11-26: pack builder, 36 cases, wiring and failing-first tests; the owner's first-run part moved to F-120-T13.",
     "reviewed": "2026-11-26",
-    "agentHours": 2.5,
+    "agentHours": 0,
     "baselineAgentHours": 2.5,
-    "estimateAgentHours": 2.5
-  }
+    "estimateAgentHours": 2.5,
+    "actualAgentHours": 2.5,
+    "actualSource": "stated"
+  },
+  "prs": []
 }

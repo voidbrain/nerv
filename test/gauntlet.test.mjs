@@ -1151,7 +1151,8 @@ test(
       });
     const listed = cli(['pending']);
     assert.equal(listed.status, 1);
-    assert.equal(listed.stdout.trim().split('\n').length, 126);
+    // F-120-T09: 126 cases plus nerv-planner's 36.
+    assert.equal(listed.stdout.trim().split('\n').length, 162);
     assert.match(listed.stdout, /^nerv-system-flows\/policy \(new\)$/m);
     assert.equal(cli(['pending', '--max-age-days=x']).status, 2);
     writeFileSync(join(dir, 'bad.json'), '{"schemaVersion":1,"entries":[{"x":1}]}');
@@ -1330,7 +1331,8 @@ test(
   SLOW_HOST,
   async () => {
     const { caseHash, evidenceProfile, hash } = await import('@voidbrain/gauntlet-protocol');
-    const { commonPacks, systemSourceKey, caseSourceKey, modelProfile } = await import('../tools/gauntlet.mjs');
+    const { commonPacks, nervModelPacks, systemSourceKey, caseSourceKey, modelProfile } =
+      await import('../tools/gauntlet.mjs');
     const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-identity-'));
     const ledger = join(dir, 'ledger.json');
     process.env.NERV_GAUNTLET_LEDGER = ledger;
@@ -1344,7 +1346,8 @@ test(
       const modelDigest = 'd'.repeat(64);
       const runtimeHash = 'e'.repeat(64);
       const scenarioHash = 'f'.repeat(64);
-      const packs = commonPacks().map((p) => p.pack);
+      // F-120-T09: NERV's own model packs are model cases like the common ones.
+      const packs = [...commonPacks(), ...nervModelPacks()].map((p) => p.pack);
       writeFileSync(
         ledger,
         JSON.stringify({
@@ -1414,14 +1417,14 @@ test(
       // Different model digest / runtime / scenario make affected cases pending with the exact reason.
       const modelChanged = await main(['pending', '--profile=' + profilePath, '--model-digest=' + '9'.repeat(64)]);
       // F-120-T03: the coding, embedded and cad-3d runners ask the model, so their cases follow it too (114 = every
-      // common case but multi-step-agent's scripted runner).
-      assert.equal(modelChanged.pendingLines.length, 114);
+      // common case but multi-step-agent's scripted runner); F-120-T09 adds nerv-planner's 36 model cases (150).
+      assert.equal(modelChanged.pendingLines.length, 150);
       assert.ok(modelChanged.pendingLines.every((l) => l.endsWith('(model-changed)')));
       const runtimeChanged = await main(['pending', '--profile=' + profilePath, '--runtime-hash=' + '8'.repeat(64)]);
-      assert.equal(runtimeChanged.pendingLines.length, 114);
+      assert.equal(runtimeChanged.pendingLines.length, 150);
       assert.ok(runtimeChanged.pendingLines.every((l) => l.endsWith('(runtime-changed)')));
       const scenarioChanged = await main(['pending', '--profile=' + profilePath, '--scenario-hash=' + '7'.repeat(64)]);
-      assert.equal(scenarioChanged.pendingLines.length, 122);
+      assert.equal(scenarioChanged.pendingLines.length, 158);
       assert.ok(scenarioChanged.pendingLines.every((l) => l.endsWith('(scenario-changed)')));
       // Recording a system report via `ledger` binds NERV's systemSourceKey automatically.
       const reportPath = join(dir, 'sys-report.json');

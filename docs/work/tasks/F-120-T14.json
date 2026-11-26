@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-120-T14",
+  "parent": "F-120",
+  "title": "Run nerv-planner once and record it in the Gauntlet ledger",
+  "goal": "The first real-model result of every nerv-planner case is in evals/gauntlet/ledger.json, with what failed and why",
+  "status": "planned",
+  "acceptance": [
+    "After F-120-T13's ok: nerv-planner/* runs once (--allow-models --execute, profile gemma4-12b.json, in a development worktree, never ~/.nerv-app, not while the owner uses the local model) and is recorded in evals/gauntlet/ledger.json",
+    "Failed cases are read with --capture-failures and each is recorded as a model answer, a case problem (fixed in a new pack version) or a NERV defect (a B- record)"
+  ],
+  "dependsOn": [
+    "F-120-T13"
+  ],
+  "resources": [
+    "evals/gauntlet/**",
+    "docs/work/records/F-120.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented data only; captured replies stay private evidence, never committed.",
+  "validation": [
+    "node tools/gauntlet.mjs pending",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A second run or a different model needs the owner again"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Split from F-120-T09: one run of about 18 minutes at most, the ledger entry and the failure notes. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": []
+}
