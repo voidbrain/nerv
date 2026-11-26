@@ -149,6 +149,8 @@ describe('B-170: a main from before F-016 adopts its store as the first coordina
       assert.match(out, /Backup: .*adopt.*\.sqlite/);
       assert.match(out, /Adopted this base's store as coordinator epoch 1/);
       assert.match(out, /kaji standby NERV-02/, 'the output names the next step');
+      assert.match(out, /Told NERV-02 the epoch/);
+      assert.equal(new Registry(b.store.db, t.rootPublicKey).mainEpoch(), 1, 'the standby-to-be holds epoch 1');
       assert.equal(backups(x.home).length, 1, 'one backup before any write');
       const backup = new DatabaseSync(join(x.home, 'backups', backups(x.home)[0]!), { readOnly: true });
       try {
@@ -249,6 +251,16 @@ describe('B-170: a main from before F-016 adopts its store as the first coordina
         .run();
       await assert.rejects(kaji(x.home, x.store, ['adopt']), /acked a coordinator lease/);
       x.store.db.exec('DELETE FROM standby_lease_state');
+      // Another base answers the epoch probe: it acked a coordinator lease, so another main ran.
+      t.b.store.db.exec(STANDBY_LEASE_SCHEMA);
+      t.b.store.db
+        .prepare(
+          "INSERT INTO standby_lease_state(id, standby_coordinator_epoch, last_ack_seq, last_ack_wall_ms, process_boot_id) VALUES (1, 1, 1, 1, 'boot')",
+        )
+        .run();
+      await assert.rejects(kaji(x.home, x.store, ['adopt']), /NERV-02 \(epoch 1\) ran or acked a coordinator lease/);
+      assert.equal(readCoordinatorFencingState(x.store.db), undefined);
+      assert.equal(new Registry(x.store.db, t.rootPublicKey).mainEpoch(), 0, 'nothing signed or stored');
       // Coordinator state in another mode (a drained or fenced main, a standby): adopt is not the way.
       x.store.db.exec(COORDINATOR_STATE_SCHEMA);
       x.store.db

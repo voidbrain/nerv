@@ -27,6 +27,7 @@ import {
   ranOrAckedCoordinatorEpoch,
   signDrainReceipt,
 } from './coordinator-relocation.ts';
+import { adoptLegacyCoordinator } from './coordinator-adopt.ts';
 import { registryPort } from './coordinator-epoch.ts';
 import { addRegistryRecords, readRelocationBundle, type RelocationBundle } from './coordinator-relocation-bundle.ts';
 import { KajiLink, type EpochPushReply } from './kaji-link.ts';
@@ -430,6 +431,31 @@ export async function runKajiCommand(
         `Drained epoch ${receipt.coordinatorEpoch} at seq ${receipt.finalSeq} for ${newMainBaseId} at epoch ${receipt.newEpoch}; receipt written to ${args[1]}.`,
       );
     } else process.stdout.write(out);
+  } else if (sub === 'adopt') {
+    // B-170: a main from before F-016 takes its own store as the first coordinator (epoch 1).
+    const res = await adoptLegacyCoordinator({
+      db: store.db,
+      home,
+      rootPublicKey: config.kaji?.root,
+      ownPublicKey: me,
+      sign: async (body) => signRecord((await unlock()).privateKey, body),
+      push: (id, records) => kajiClient().pushEpoch(id, records),
+    });
+    const others = [...res.told, ...res.notTold].sort();
+    const told =
+      (res.told.length ? ` Told ${res.told.join(', ')} the epoch.` : '') +
+      (res.notTold.length
+        ? ` Not reached now: ${res.notTold.join(', ')} (the next registry sync carries it, or run kaji adopt again).`
+        : '');
+    const next = others.length
+      ? ` Next: name a standby with kaji standby ${res.told[0] ?? others[0]}.`
+      : ' No other base is enrolled: it runs as the sole coordinator.';
+    console.log(
+      'already' in res
+        ? `This base already holds coordinator state at epoch ${res.epoch} (active): nothing to adopt.${told}${next}`
+        : `Backup: ${res.backup}\n` +
+            `Adopted this base's store as coordinator epoch 1 (active, no lease yet)${res.signed ? `; signed main ${config.base.id} at coordinator epoch 1` : ''}.${told}${next}`,
+    );
   } else if (sub === 'promote') {
     await runKajiPromoteCommand(args, home, config, ctx);
   } else if (sub === 'standby') {
@@ -602,7 +628,7 @@ export async function runKajiCommand(
     );
   } else
     throw new Error(
-      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [FILE] [--revoke LOST-ID] | drain [FILE] [--relocation BUNDLE] [--cancel] | standby [BASE-ID] | promote [--drain-receipt FILE] [--relocation BUNDLE] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
+      'Usage: kaji enrol | revoke | main [BASE-ID] | relocate BASE-ID [FILE] [--revoke LOST-ID] | drain [FILE] [--relocation BUNDLE] [--cancel] | standby [BASE-ID] | adopt | promote [--drain-receipt FILE] [--relocation BUNDLE] | offer [ACTION…|none] | seat [BASE-ID shadow|veto|off] | list | export [FILE] | import FILE --root FINGERPRINT',
     );
   return;
 }
