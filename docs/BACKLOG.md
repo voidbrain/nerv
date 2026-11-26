@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 17 | 6 | 44 | 20 |
+| **This week** | 17 | 6 | 45 | 20 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 46 | 37 |
+| **Open** | 46 | 38 |
 | **Require Human 🧑** | 14 | 20 |
 
 ### Require Human 🧑
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 188.5 h agent + 17 h owner across 176 open steps of 46 features and 37 other records. 159 h of actual effort recorded on 149 steps. Generated from the task files.
+**Remaining effort:** 188.5 h agent + 17 h owner across 178 open steps of 46 features and 38 other records. 159 h of actual effort recorded on 149 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1718,6 +1718,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-144-T01: [PR #769](https://github.com/voidbrain/nerv/pull/769). Test: `test/dashboard-cages.test.ts` (committed failing first); owner report 2026-11-25; [#769](https://github.com/voidbrain/nerv/pull/769) |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration: 2026-11-25 passed locally (`test/dashboard-cages.test.ts`). Browser: Pending (the owner watches the EVA cages through several polls with no change: no flicker). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-151"></a>[🐞 B-151](#top)
+
+**The dashboard's AA test skipped every black or white text: Eva · Light primary buttons fail AA**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Agent work: CI on the PR, then close.
+
+| | |
+|---|---|
+| **Issue** | `test/dashboard.test.ts` "every theme, mode and colour reaches WCAG AA …" (F-047) computes luminance by reading six hex digits, but `palette()` gives black and white as `#000` and `#fff`: the luminance is NaN, `NaN < 4.5` is false, so every pair with `hdr-fg`, `brand-fg` or `on-danger` in black or white passed unchecked. With the colours read correctly, Eva · Light fails `brand-fg` on `accent` (black on the deep accent, the `.btn.primary` text) in all five colours: orange #000 on #b34700 3.82, blue on #1d5fd1 3.61, green on #166534 2.95, violet on #7e3fc4 3.40, ochre on #7a5d00 3.39 (need 4.5). No other pair fails in the 20 combinations. |
+| **Reproduce** | In `test/dashboard.test.ts`, `lum('#000')` returns NaN (`parseInt('', 16)`); on main the test passes although Eva · Light · Orange's primary button is black on #b34700 (3.82:1). |
+| **Check** | The test reads three-digit hex and fails any ratio that is not a number (B-151-T01, committed failing first and not edited); every pair passes AA in all 20 combinations; Eva · Dark · Orange (the `:root` default) is unchanged; `src/dashboard-theme.ts` stays equal to `dashboard.js`. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-151-t01"></a>B-151-T01 — Failing test: the dashboard AA check reads #000 and #fff | 0.5 h | 0 h | 0 h | Implemented; verification pending | — | [B-151-T02](#b-151-t02) |
+| 🟢 Small | <a id="b-151-t02"></a>B-151-T02 — Eva · Light: white text on the deep accent | 1 h | 0 h | 0 h | Implemented; verification pending | [B-151-T01](#b-151-t01) | — |
+| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 0 h | 0 of 2 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-151.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Code reading at main `bce6cd76`: `test/dashboard.test.ts` (lum, need), `web/public/dashboard/dashboard.js` `palette()`, `.btn.primary` and `.brand-block` in `web/public/dashboard/index.html`, `.brand` in `web/src/sign-in.ts`. Test: `test/dashboard.test.ts` "every theme, mode and colour reaches WCAG AA …"; [#801](https://github.com/voidbrain/nerv/pull/801) |
+| Opened | 2026-11-26 |
+| Verification | Unit: 2026-11-26, local: `test/dashboard.test.ts` "every theme, mode and colour reaches WCAG AA …" failed on main with the five pairs, passes with the fix; `test/dashboard-theme.test.ts` keeps `src/dashboard-theme.ts` equal. Browser: 2026-11-26, headless Chrome screenshots of the demo dashboard in Eva · Light orange and green (brand block and Send button white on the deep accent) and Eva · Dark · Orange (unchanged); not in the repository. |
 | Reviewed | 2026-11-26 |
 
 </details>
