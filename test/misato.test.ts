@@ -1634,3 +1634,30 @@ test(
     assert.match(JSON.stringify(steps[0]?.result), /Fixture Strain 0/);
   },
 );
+// B-176-T03: known failing until the fix. A repeated read ended with doneReply ("Fatto: <tool>."), which throws away
+// what the owner asked for. Remove `todo` with the fix.
+test(
+  'B-176: a repeated read gets one last turn to answer from its result; a second repeat answers with the result, never a bare Done',
+  { todo: 'B-176: fix pending (B-176-T03)' },
+  async () => {
+    const LIST = '{"action":{"tool":"reminders.list","args":{}}}';
+    await agent([LIST, LIST, '{"reply":"Hai un promemoria: Stretch."}'], async (runtime, m) => {
+      await runtime.add('Stretch', '2031-01-01T09:00:00Z');
+      const chat = await runtime.chat('quali promemoria ho?');
+      assert.equal(chat.reply, 'Hai un promemoria: Stretch.');
+      assert.equal(m.asked.filter((a) => a.who === 'misato').length, 3, 'one last turn after the repeat');
+      assert.match(chat.steps.at(-1)?.error ?? '', /already ran reminders\.list/);
+      assert.equal(chat.steps.filter((s) => s.outcome === 'grant').length, 1, 'the read ran once');
+    });
+    for (const [request, head] of [
+      ['quali promemoria ho?', /^Ecco il risultato di reminders\.list:/],
+      ['what reminders do I have?', /^Here is the result of reminders\.list:/],
+    ] as const)
+      await agent([LIST, LIST, LIST], async (runtime) => {
+        await runtime.add('Stretch', '2031-01-01T09:00:00Z');
+        const chat = await runtime.chat(request);
+        assert.match(chat.reply ?? '', head, request);
+        assert.match(chat.reply ?? '', /Stretch/, 'the owner gets the result');
+      });
+  },
+);
