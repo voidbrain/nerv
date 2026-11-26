@@ -1,3 +1,4 @@
+// @ts-check
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
@@ -114,9 +115,9 @@ test('F-126-T01: speed benchmark measures uncached prompt and generation tok/s, 
     });
   });
 
-  await new Promise((done) => server.listen(0, '127.0.0.1', done));
+  await new Promise((done) => server.listen(0, '127.0.0.1', () => done(undefined)));
   const temp = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-speed-bench-'));
-  const endpoint = `http://127.0.0.1:${server.address().port}`;
+  const endpoint = `http://127.0.0.1:${/** @type {import('node:net').AddressInfo} */ (server.address()).port}`;
 
   try {
     const out = join(temp, 'bench.json');

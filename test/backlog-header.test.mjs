@@ -1,3 +1,4 @@
+// @ts-check
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { headerProblems, HEADER_CHARS } from '../tools/backlog-recap.mjs';

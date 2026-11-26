@@ -1,3 +1,4 @@
+// @ts-check
 // B-157: the Node tests that only run on macOS (the EVA sandbox-exec confinement, the egress proxy, the EVA job user,
 // the desktop driver, the moved-service joins) run on the macOS CI runner, and that run fails when one of them skips.
 import { test } from 'node:test';

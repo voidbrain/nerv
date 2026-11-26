@@ -1,3 +1,4 @@
+// @ts-check
 // B-142 (owner 2026-11-25): the Health rows "Service sample" and "Link · <peer>" were built apart from the table: a
 // plain value with no ✓/✗ marker, a label that wrapped ("Service / sample", "Link · NERV- / 02") and the rows placed
 // after the updater status, so the table looked broken. B-141: the updater status stands out (state tone, bold, a

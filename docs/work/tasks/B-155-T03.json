@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "B-155-T03",
+  "parent": "B-155",
+  "title": "Type the 15 deferred JavaScript tests",
+  "goal": "tsconfig.test-js.json deferred is empty",
+  "status": "planned",
+  "acceptance": [
+    "JSDoc on the tool signatures the deferred tests call (gauntlet, verification, evaluate, install-deps, native release, backlog recap)",
+    "Each deferred file gets // @ts-check and leaves the list",
+    "No assertion weakened"
+  ],
+  "dependsOn": [
+    "B-155-T02"
+  ],
+  "resources": [
+    "tsconfig.test-js.json",
+    "tools/gauntlet.mjs",
+    "tools/verification.mjs",
+    "tools/evaluate.mjs",
+    "test/gauntlet.test.mjs",
+    "docs/work/records/B-155.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run typecheck",
+    "npm test"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "4 h agent",
+    "basis": "Estimated 2026-11-26: 4 h agent (about 270 diagnostics, most from six tool signatures). Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  }
+}

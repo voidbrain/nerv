@@ -1,3 +1,4 @@
+// @ts-check
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
@@ -37,8 +38,8 @@ test(
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
       res.end(FIXTURE);
     });
-    await new Promise((done) => server.listen(0, '127.0.0.1', done));
-    const origin = `http://127.0.0.1:${server.address().port}`;
+    await new Promise((done) => server.listen(0, '127.0.0.1', () => done(undefined)));
+    const origin = `http://127.0.0.1:${/** @type {import('node:net').AddressInfo} */ (server.address()).port}`;
     const profile = mkdtempSync(join(tmpdir(), 'nerv-diyfpv-read-'));
     const child = spawn(
       chrome,

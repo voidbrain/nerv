@@ -1,3 +1,4 @@
+// @ts-check
 // B-118: the timing reporter names the test file a stopped run hung in, and the npm scripts and CI use it.
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
@@ -46,6 +47,7 @@ const args = (...paths) => [
   ...paths,
 ];
 const env = (log) => {
+  /** @type {NodeJS.ProcessEnv} */
   const next = { ...process.env, NERV_TEST_TIMINGS: log };
   delete next.NODE_TEST_CONTEXT;
   return next;

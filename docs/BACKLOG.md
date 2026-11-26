@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 18 | 8 | 51 | 24 |
+| **This week** | 18 | 8 | 52 | 24 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 45 | 41 |
+| **Open** | 45 | 42 |
 | **Require Human 🧑** | 11 | 20 |
 
 ### Require Human 🧑
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 194.75 h agent + 16.75 h owner across 184 open steps of 45 features and 41 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 194.75 h agent + 16.75 h owner across 187 open steps of 45 features and 42 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -3416,6 +3416,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound · B-076-T03: [PR #695](https://github.com/voidbrain/nerv/pull/695). [PR #540](https://github.com/voidbrain/nerv/pull/540) B-076-T01; [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2; [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-155"></a>[🐞 B-155](#top)
+
+**The JavaScript tests were never type-checked**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Agent work: CI on the PR; then B-155-T03 types the 15 deferred files.
+
+| | |
+|---|---|
+| **Issue** | `npm run typecheck` read `tsconfig.json`, which includes `src/**/*.ts` and `test/**/*.ts` only, and Node strips types without checking them, so the 45 JavaScript test files (46 with B-157) (`test/*.test.mjs`, `test/*.browser.mjs`, `test/fixtures/*.mjs`) ran unchecked: a wrong call in one of them would pass until it ran. Coordinator dormant-checks sweep of 2026-11-26, finding T6, proposal 10 (it counted 42; the three fixtures make 45). |
+| **Reproduce** | On main, add a call with a wrong argument type to any `test/*.test.mjs`: `npm run typecheck` passes. |
+| **Check** | `test/typecheck-scope.test.ts` (B-155-T01, committed failing first and not edited): every JavaScript test starts with `// @ts-check` unless `tsconfig.test-js.json` lists it in `deferred`, a deferred file that is already checked fails, and `npm run typecheck` runs `tsc -p tsconfig.test-js.json`. B-155-T03: the `deferred` list is empty. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-155-t01"></a>B-155-T01 — Failing test: every JavaScript test is type-checked, or deferred by name | 0.25 h | 0 h | 0 h | Implemented; verification pending | — | [B-155-T02](#b-155-t02) |
+| 🟢 Small | <a id="b-155-t02"></a>B-155-T02 — Type-check 30 JavaScript tests in npm run typecheck | 1.5 h | 0 h | 0 h | Implemented; verification pending | [B-155-T01](#b-155-t01) | [B-155-T03](#b-155-t03) |
+| 🟢 Small | <a id="b-155-t03"></a>B-155-T03 — Type the 15 deferred JavaScript tests | 4 h | 0 h | 0 h | Planned | [B-155-T02](#b-155-t02) | — |
+| 🟢 Small | **Total** | 5.75 h | 0 h (0 of 3 steps recorded) | 0 h | 0 of 3 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-155.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (T6); `tsconfig.test-js.json`; `test/typecheck-scope.test.ts`; `package.json` `typecheck`; [#812](https://github.com/voidbrain/nerv/pull/812) |
+| Opened | 2026-11-26 |
+| Verification | Unit: 2026-11-26, local: `test/typecheck-scope.test.ts` fails on main and passes here; `npm run typecheck` clean (11 s); the changed Node tests pass unchanged (28/28). Browser: Pending (CI `test:browser`, the shared `test/fixtures/browser.mjs` changed). |
 | Reviewed | 2026-11-26 |
 
 </details>
