@@ -11,7 +11,7 @@
   "id": "B-170-T04",
   "title": "Done for delivered reminders in the dashboard and API",
   "goal": "B-170-T01 done tests pass unchanged; Coming up lists delivered reminders with Done",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "B-170-T01 done tests pass unchanged; Coming up lists delivered reminders with Done"
   ],

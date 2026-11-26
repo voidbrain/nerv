@@ -11,7 +11,7 @@
   "id": "B-170-T03",
   "title": "A paired device keeps one push subscription; revoking it removes it",
   "goal": "B-170-T01 subscription tests pass unchanged",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "B-170-T01 subscription tests pass unchanged"
   ],

@@ -11,7 +11,7 @@
   "id": "B-170-T02",
   "title": "The opened page reports the tap: ?opened=, kept receipts, tag, via and a log line",
   "goal": "B-170-T01 opened tests pass unchanged; each /api/push/opened outcome is logged with its route",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "B-170-T01 opened tests pass unchanged; each /api/push/opened outcome is logged with its route"
   ],

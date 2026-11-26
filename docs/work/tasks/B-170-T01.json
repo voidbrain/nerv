@@ -9,7 +9,7 @@
   "id": "B-170-T01",
   "title": "Failing tests: lost worker request, lost notification data, no click event, device-bound subscriptions, done action",
   "goal": "Tests fail on main: no page report, no tag, no device binding, no done endpoint",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Tests fail on main: no page report, no tag, no device binding, no done endpoint"
   ],

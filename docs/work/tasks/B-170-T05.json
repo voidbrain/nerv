@@ -11,7 +11,7 @@
   "id": "B-170-T05",
   "title": "Procedure retest steps and area notes",
   "goal": "The F-004-T10 procedure has copy-paste retest steps; area notes name the page report and device-bound subscriptions",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "The F-004-T10 procedure has copy-paste retest steps; area notes name the page report and device-bound subscriptions"
   ],
