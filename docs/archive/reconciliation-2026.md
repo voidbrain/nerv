@@ -683,3 +683,7 @@ Owner decision in chat 2026-11-26 on the hidden-code sweep (coordinator `docs/re
 ## 2026-11-26 — harness v10.24.2
 
 PR #828 reconciles the harness to v10.24.2 (from 10.24.1; project-harness B-129). The owner approved on 2026-11-26 ("yep") that coordinator-only harness files are not copied into ordinary projects: `docs/agents/solution-dashboard.md`, `docs/agents/solution-refresh.md`, `docs/agents/solution-gaps.md` and `tools/solution.mjs` (no npm script ran it) are deleted and dropped from `.harness.json` `copied`; the procedures table and `solution-profile.md` name them as coordinator paths; AGENTS.md's solution-profile row no longer says "(refresh inside)". CI pending at this entry.
+
+## 2026-11-26 — coordinator references
+
+PR [#830](https://github.com/voidbrain/nerv/pull/830) renames `solution:ID` references to `coordinator:ID` in records and tasks (owner decision 2026-11-26, coordinator:F-020). References only.

@@ -7,7 +7,7 @@
   "status": "planned",
   "acceptance": [
     "The owner triggers a real out-of-range value on the rig and receives exactly one alert, then one clear",
-    "Owner decision 2026-11-26 (chat): \"accept all 17 proposals\" of the cross-project audit (coordinator docs/audits/2026-11-26-cross-project.md), proposal 12: waits on grover:F-005-T01 (the hub deployed on the Pi): a real alert on the rig needs the deployed hub. The same observation also closes grover:F-008-T03 and solution:F-006-T02; do them together."
+    "Owner decision 2026-11-26 (chat): \"accept all 17 proposals\" of the cross-project audit (coordinator docs/audits/2026-11-26-cross-project.md), proposal 12: waits on grover:F-005-T01 (the hub deployed on the Pi): a real alert on the rig needs the deployed hub. The same observation also closes grover:F-008-T03 and coordinator:F-006-T02; do them together."
   ],
   "dependsOn": [
     "F-122-T02",
