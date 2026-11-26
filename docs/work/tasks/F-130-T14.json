@@ -8,7 +8,7 @@
   "acceptance": [
     "On the Mac, open the full dashboard after the update: each section shows live data and an idle poll reloads nothing; switching the theme between plain and EVA changes both layouts",
     "On the Mac and the phone, open the simple view: it shows the chat, pending approvals, health at a glance, push on/off and a link to the full dashboard, and nothing else; the link opens the full dashboard and back",
-    "On the phone, the installed app opens the workspace; a test reminder's push tap marks it delivered with no Telegram fallback"
+    "On the phone, the installed app opens the workspace"
   ],
   "dependsOn": [
     "F-130-T13"
@@ -28,13 +28,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h owner",
-    "basis": "Estimated 2026-11-25: a walk through every section and one push tap. Re-estimated 2026-11-25 (+0.5 h): the simple view and the theme switch too. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "estimate": "1.25 h owner",
+    "basis": "Estimated 2026-11-25: a walk through every section and one push tap. Re-estimated 2026-11-25 (+0.5 h): the simple view and the theme switch too. Not a measurement. 2026-11-26: the push-tap check moved out, it is F-004-T10's (owner-step triage); -0.25 h.",
+    "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,
-    "ownerHours": 1.5,
+    "ownerHours": 1.25,
     "ownerKind": "procedure"
   }
 }

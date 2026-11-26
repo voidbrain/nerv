@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "status": "planned",
+  "privacy": "Neutral invented messages, devices and receipts only; no tokens, push endpoints, chat IDs or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "F-133-T02",
+  "parent": "F-133",
+  "title": "Push first for briefs and update notices",
+  "goal": "Brief-kind inbox items follow F-004-T09: push first, a tap counts as delivered, Telegram fallback after 10 minutes",
+  "acceptance": [
+    "dispatchPushReminders (src/store-push.ts) or its successor pushes brief-kind items with a short title and a body cut to the push payload limit; the full text stays in the app",
+    "The Telegram loop (src/telegram.ts) treats a pushed brief like a pushed reminder: Telegram only through claimFallback; no device, or every push failed, sends at once as today",
+    "Approvals, replies and chat stay on Telegram (owner decision 2026-11-25); watch and session-limit notices share the brief kind and follow the same order (stated in the guide)",
+    "F-133-T01 passes unedited; test/push-first.test.ts still passes"
+  ],
+  "dependsOn": [
+    "F-133-T01"
+  ],
+  "resources": [
+    "src/store-push.ts",
+    "src/telegram.ts",
+    "src/delivery-state.ts",
+    "src/push.ts",
+    "test/**",
+    "docs/work/records/F-133.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design",
+    "privacy-review"
+  ],
+  "validation": [
+    "Targeted push and Telegram tests",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "3 h agent",
+    "basis": "Estimated 2026-11-26: the fallback claim and receipt exist (F-004-T09, F-124-T01); the work is the dispatch for brief kinds, the payload cut and the Telegram loop guard. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  }
+}

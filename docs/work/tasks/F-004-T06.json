@@ -4,7 +4,7 @@
   "parent": "F-004",
   "title": "Phone install and push acceptance",
   "goal": "Phone install and push acceptance",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Owner installs on a phone, receives a reminder push and completes it from the PWA; result recorded"
   ],
@@ -31,11 +31,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h owner",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
+    "estimate": "0 remaining",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Closed 2026-11-26 as a duplicate, merged into F-004-T10 (owner-step triage, docs/acceptance/owner-steps-2026-11-26.md): the install and a received push are shown by B-134 (2026-11-25, the owner's iPhone showed the notification once Apple returned 201); completing a reminder from the app moved to F-004-T10's acceptance, run in the same phone sitting.",
+    "reviewed": "2026-11-26",
     "baselineDays": 0.5,
-    "ownerHours": 0.5,
+    "ownerHours": 0,
     "agentHours": 0,
     "ownerKind": "procedure"
   },

@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "B-122-T03",
+  "parent": "B-122",
+  "status": "planned",
+  "privacy": "Neutral invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "title": "Agent: confirm read-only that an update completed on NERV-01 with the service running",
+  "goal": "Show from NERV-01's own records, read-only, that an update after #719 completed with the installed service running",
+  "acceptance": [
+    "Read-only on NERV-01: git -C ~/.nerv-app rev-parse --short HEAD is a main revision at or after #719, launchctl print gui/$(id -u)/io.nerv.agent shows state = running, and the lifecycle journal or ~/.nerv/updater.log has a completed outcome for that revision (the 2026-11-25 23:49Z \"Update 67550c4 applied\" brief is a candidate)",
+    "Nothing is written to ~/.nerv, ~/.nerv-app or the service; the agent records revision, time and outcome (no paths or tokens) in B-122"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/work/records/B-122.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review",
+    "privacy-review"
+  ],
+  "validation": [
+    "Agent-run read-only commands on NERV-01, quoted in B-122"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h agent",
+    "basis": "Split from B-122-T02 2026-11-26 (owner-step triage): the completed-update half is a read of NERV-01's records. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}

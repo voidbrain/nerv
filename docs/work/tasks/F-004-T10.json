@@ -6,7 +6,8 @@
   "goal": "The owner sees on the phone that a tapped reminder never reaches Telegram, an untapped one reaches it once after 10 minutes, and push off goes straight to Telegram",
   "status": "planned",
   "acceptance": [
-    "Procedure steps 1-4 of the push-first section pass on the owner's phone with the deployed service; result recorded in F-004"
+    "Procedure steps 1-4 of the push-first section pass on the owner's phone with the deployed service; result recorded in F-004",
+    "The tapped reminder of step 1 is marked done in the app it opened (moved from F-004-T06, closed 2026-11-26)"
   ],
   "dependsOn": [
     "F-004-T09"
@@ -28,10 +29,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h owner",
-    "basis": "Estimated 2026-11-25: three reminders and a 12-minute wait on the phone. Not a measurement.",
-    "reviewed": "2026-11-25",
-    "ownerHours": 0.5,
+    "estimate": "0.75 h owner",
+    "basis": "Estimated 2026-11-25: three reminders and a 12-minute wait on the phone. Not a measurement. 2026-11-26: +0.25 h owner, F-004-T06's remaining check (complete a reminder from the app) merged in.",
+    "reviewed": "2026-11-26",
+    "ownerHours": 0.75,
     "agentHours": 0,
     "ownerKind": "procedure"
   },
