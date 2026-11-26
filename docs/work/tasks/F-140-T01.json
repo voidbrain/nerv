@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "F-140-T01",
+  "parent": "F-140",
+  "title": "Current cloud spend and limit options",
+  "goal": "A short page shows measured spend per route from the usage ledger and proposes daily and monthly limits",
+  "status": "ready",
+  "acceptance": [
+    "Options for the owner with the measured month so far; unknown usage shown as unknown"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/model-budget.ts",
+    "docs/model-usage.md",
+    "docs/design/**",
+    "docs/work/records/F-140.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review",
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: one query over the usage ledger and one page. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": []
+}

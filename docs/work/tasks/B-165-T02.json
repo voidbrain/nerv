@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "B-165-T02",
+  "parent": "B-165",
+  "title": "Resolve the ledger path once per command; tests pass it explicitly",
+  "goal": "A command reads and writes the same ledger file, and the Gauntlet tests no longer mutate process-wide env around async work",
+  "status": "planned",
+  "acceptance": [
+    "B-165-T01 passes unchanged",
+    "npm test twice on a loaded host leaves git status clean under evals/",
+    "B-153 is told whether this also removes its five failures"
+  ],
+  "dependsOn": [
+    "B-165-T01"
+  ],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "docs/work/records/B-165.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: capture the path in the command options, replace the env mutation in about ten tests. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

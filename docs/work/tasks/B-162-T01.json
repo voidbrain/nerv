@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "B-162-T01",
+  "parent": "B-162",
+  "title": "Failing tests: logs never rotate; a low disk gives no notice",
+  "goal": "Committed tests fail on main for log growth past the limit and for a snapshot attempted below the free-space threshold",
+  "status": "ready",
+  "acceptance": [
+    "Both tests committed before the fix and failing on main"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/service.ts",
+    "src/snapshots.ts",
+    "test/**",
+    "docs/work/records/B-162.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: two tests with an injected free-space reader. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": []
+}

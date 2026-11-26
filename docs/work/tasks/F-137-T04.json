@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-137-T04",
+  "parent": "F-137",
+  "title": "\"nerv forget\" removes matching rows and names the backup lag",
+  "goal": "The owner can forget a subject or a date range and is told when the last copy holding it ages out",
+  "status": "planned",
+  "acceptance": [
+    "A test shows rows removed from the live database and the printed date equals the oldest kept snapshot or off-host copy plus its retention",
+    "The command asks for confirmation and never touches the off-host copies itself"
+  ],
+  "dependsOn": [
+    "F-137-T03"
+  ],
+  "resources": [
+    "src/cli-commands.ts",
+    "src/snapshots.ts",
+    "test/**",
+    "docs/work/records/F-137.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26: one command over the T03 per-table rules. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": []
+}

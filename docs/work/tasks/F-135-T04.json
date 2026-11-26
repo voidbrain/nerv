@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-135-T04",
+  "parent": "F-135",
+  "title": "Owner stops the main base and sees the notice on the phone",
+  "goal": "The owner sees the silence notice and the recovery notice on the phone, live",
+  "status": "planned",
+  "acceptance": [
+    "Pasted back: the notice arrived within N+1 minutes of stopping the service, and the recovery notice after restarting it"
+  ],
+  "dependsOn": [
+    "F-135-T03"
+  ],
+  "resources": [
+    "docs/work/records/F-135.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h owner",
+    "basis": "Estimated 2026-11-26: stop the service, wait N minutes, restart. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "ownerHours": 0.5,
+    "ownerKind": "procedure"
+  },
+  "prs": []
+}

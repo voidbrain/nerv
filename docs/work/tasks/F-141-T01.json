@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-141-T01",
+  "parent": "F-141",
+  "title": "Measure the bundle and set warning and error budgets",
+  "goal": "angular.json carries budgets from measured sizes; CI fails a build over the error budget",
+  "status": "ready",
+  "acceptance": [
+    "Measured sizes and the margin are recorded in F-141",
+    "npm run build passes at today's size"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "angular.json",
+    "docs/work/records/F-141.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run build",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: the report sizes it at 0.5 h. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": []
+}

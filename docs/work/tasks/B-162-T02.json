@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "B-162-T02",
+  "parent": "B-162",
+  "title": "Rotate service.log and service-error.log",
+  "goal": "Each log is rotated at a size limit, keeping a few files, without losing lines launchd still writes",
+  "status": "planned",
+  "acceptance": [
+    "B-162-T01 log test passes unchanged",
+    "Works with launchd holding the file open (copy and truncate, or reopen)"
+  ],
+  "dependsOn": [
+    "B-162-T01"
+  ],
+  "resources": [
+    "src/service.ts",
+    "test/**",
+    "docs/work/records/B-162.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: size check at start and periodically, copy-truncate. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}
