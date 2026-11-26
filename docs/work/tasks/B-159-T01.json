@@ -4,7 +4,7 @@
   "parent": "B-159",
   "title": "Coverage baseline as measured today",
   "goal": "docs/agents/coverage.json and coverage.md hold today's figures",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Written by coverage-table --write after a full coverage run",
     "The drop since 2026-11-11 is recorded in B-160"
@@ -31,10 +31,15 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day. No actual: started in an earlier session. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 811
+    }
+  ]
 }

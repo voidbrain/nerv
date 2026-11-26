@@ -4,7 +4,7 @@
   "parent": "F-092",
   "title": "Wire the macOS desktop driver into the service",
   "goal": "The running service records and replays through the live desktop driver, behind approval cards",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The service builds the macOS desktop driver when Accessibility is granted to its node binary, and doctor and every desktop tool say \"desktop control not available: grant Accessibility to <binary> ...\" when it is not; NERV never requests or changes the grant",
     "desktop.record (Blue, owner tool) records the mouse only, never keys, for 1 to 60 seconds into a mode-0600 file in the data home, after its approval card",
@@ -39,10 +39,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2.5 h",
-    "basis": "Estimated 2026-11-26 after the owner approved this step in chat (\"A. Approve an agent step that wires up the driver\"): helper input commands, service binding, card binding, tests with a fake driver. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26 after the owner approved this step in chat (\"A. Approve an agent step that wires up the driver\"): helper input commands, service binding, card binding, tests with a fake driver. Closed 2026-11-26: PR #817 CI run 45814589972 passed all five jobs. No actual: started in an earlier session.",
     "reviewed": "2026-11-26",
-    "agentHours": 2.5,
+    "agentHours": 0,
     "baselineAgentHours": 2.5,
     "estimateAgentHours": 2.5
   },

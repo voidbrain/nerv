@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "10.21.4",
+  "version": "10.24.0",
   "stacks": [
     "core",
     "angular"
@@ -36,9 +36,11 @@
     "docs/agents/audit.md": "core/docs/agents/audit.md",
     "tools/check-conventions.mjs": "angular/tools/check-conventions.mjs",
     "tools/archive-recap.mjs": "core/tools/archive-recap.mjs",
+    "tools/guard.mjs": "core/tools/guard.mjs",
     "tools/check-rules.mjs": "core/tools/check-rules.mjs",
     "docs/agents/change-impact.md": "core/docs/agents/change-impact.md",
     "docs/agents/coverage-guide.md": "core/docs/agents/coverage-guide.md",
+    "tools/browser-coverage.mjs": "core/tools/browser-coverage.mjs",
     "tools/backlog-dependencies.mjs": "core/tools/backlog-dependencies.mjs",
     "tools/backlog-queue.mjs": "core/tools/backlog-queue.mjs",
     "tools/solution.mjs": "core/tools/solution.mjs",
@@ -62,6 +64,7 @@
     "tools/rule-load.mjs": "core/tools/rule-load.mjs",
     "docs/agents/claims.md": "core/docs/agents/claims.md",
     "docs/agents/rule-review.md": "core/docs/agents/rule-review.md",
+    "docs/agents/behaviour-checks.md": "core/docs/agents/behaviour-checks.md",
     "docs/agents/mcp-commands.md": "core/docs/agents/mcp-commands.md",
     "docs/agents/solution-refresh.md": "core/docs/agents/solution-refresh.md",
     "docs/agents/audit-findings.md": "core/docs/agents/audit-findings.md",
@@ -765,6 +768,7 @@
       "docs/backlog/feature-plans.md",
       "docs/backlog/outcomes.md",
       "docs/agents/rule-review.md",
+      "docs/agents/behaviour-checks.md",
       "docs/agents/parallel-work-plans.md",
       "docs/agents/prompt-caching.md"
     ]
@@ -1021,7 +1025,7 @@
     "views": "built",
     "publishHooks": ["node tools/backlog-recap.mjs"],
     "estimation": {
-      "since": "2026-11-24"
+      "since": "2026-11-26"
     },
     "repository": "voidbrain/nerv"
   },

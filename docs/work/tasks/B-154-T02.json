@@ -4,7 +4,7 @@
   "parent": "B-154",
   "title": "MAGI, the timeline and the flow reach AA in every theme",
   "goal": "The B-154 browser checks pass unedited",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Light-mode CRT without dips, lighter scanlines, softer vignette",
     "Seat tint 6 % dark, none light",
@@ -37,10 +37,15 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 1.5 h agent. Implemented the same day. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 1.5 h agent. Implemented the same day. Closed 2026-11-26: PR #816 CI run 45808453265. No actual: started in an earlier session.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 816
+    }
+  ]
 }

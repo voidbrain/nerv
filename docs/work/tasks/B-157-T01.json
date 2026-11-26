@@ -4,7 +4,7 @@
   "parent": "B-157",
   "title": "Failing test: the macOS-only Node tests run on the macOS runner",
   "goal": "test/macos-node-tests.test.mjs fails on main: no list of macOS-only tests and no native-macos step",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Every test file whose skip only macOS satisfies must be listed",
     "A run with a skipped, failed or no test fails",
@@ -32,10 +32,15 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 0.5 h agent. Implemented the same day; fails on main. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 0.5 h agent. Implemented the same day; fails on main. No actual: started in an earlier session. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 805
+    }
+  ]
 }

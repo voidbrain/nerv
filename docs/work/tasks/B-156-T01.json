@@ -4,7 +4,7 @@
   "parent": "B-156",
   "title": "Failing test: a scheduled run and a push to main share a concurrency group",
   "goal": "The B-156 test in test/verification-policy.test.mjs fails on main",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The group is evaluated for a push and a schedule on main",
     "They must differ",
@@ -30,10 +30,15 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day; fails on main. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day; fails on main. Closed 2026-11-26: PR #805 CI run 45801615629. No actual: started in an earlier session.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 805
+    }
+  ]
 }

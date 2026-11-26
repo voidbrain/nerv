@@ -6,11 +6,15 @@
 //   node tools/merge-when-green.mjs 12 13 [--every 60]
 //
 // Exit 0: every PR merged (or was already closed). 1: GitHub did not answer ten times in a row. 2: one conflicts with
-// the default branch. 3: a check failed. 4: a PR left the merge queue without merging.
+// the default branch. 3: a check failed. 4: a PR left the merge queue without merging. 5: GitHub refused to update a
+// PR that is behind its base (a fork that does not allow edits by maintainers, say).
 // With a merge queue on the base branch (8.7.0) a green PR is queued, without a merge strategy, and counts as merged
 // only when GitHub says so; the queue tests it with whatever is ahead of it. Branch deletion is then the
 // repository's "Automatically delete head branches" setting.
 // Every check counts, not only the required ones: a failing optional check (code scanning, say) still stops it.
+// Without a merge queue, a green PR whose head lacks commits of its base branch (GitHub's compare) is not merged: its
+// checks ran against an older base, whatever the branch protection says (B-125). The tool updates the branch from the
+// base (GitHub's "update branch": a merge commit, never a force-push) and merges only once the new head's checks pass.
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
@@ -70,8 +74,11 @@ const outcome = (c) => {
 };
 
 // GitHub can time out for a while: a failed `gh` call waits for the next round; ten in a row give up (exit 1)
-let failures = 0;
-const failedAt = new Map();
+// counted per kind of call, so a call that keeps failing is not reset by another that answers
+const failures = { view: 0, compare: 0, update: 0 };
+const failedAt = new Map(),
+  updatedFrom = new Map(),
+  waitedOn = new Map();
 const queued = new Set(),
   leftQueue = new Set();
 const queueQuery =
@@ -95,19 +102,30 @@ const queueOf = (pr) => {
   if (typeof q?.isMergeQueueEnabled !== 'boolean') throw Error('no merge queue answer');
   return q;
 };
+/** How many commits of the base branch the inspected head lacks; throws when GitHub does not answer. */
+const behindBy = (base, head) => {
+  const n = JSON.parse(gh('api', `repos/${repoOwner}/${repoName}/compare/${base}...${head}`))?.behind_by;
+  if (!Number.isInteger(n)) throw Error('no compare answer');
+  return n;
+};
+/** A failed `gh` call: waits for the next round; the tenth of a kind in a row gives up (exit 1). */
+const ghFailed = (pr, e, kind) => {
+  if (++failures[kind] < 10) return;
+  console.error(`#${pr}: gh failed ${failures[kind]} times in a row: ${String(e.stderr || e.message).trim()}`);
+  process.exit(1);
+};
 for (;;) {
   const left = [];
   for (const pr of prs) {
     let p, q;
     try {
-      p = JSON.parse(gh('pr', 'view', pr, '--json', 'state,mergeable,isDraft,headRefOid,statusCheckRollup'));
+      p = JSON.parse(
+        gh('pr', 'view', pr, '--json', 'state,mergeable,isDraft,headRefOid,baseRefName,statusCheckRollup'),
+      );
       if (p.state === 'OPEN') q = queueOf(pr);
-      failures = 0;
+      failures.view = 0;
     } catch (e) {
-      if (++failures >= 10) {
-        console.error(`#${pr}: gh failed ${failures} times in a row: ${String(e.stderr || e.message).trim()}`);
-        process.exit(1);
-      }
+      ghFailed(pr, e, 'view');
       left.push(pr);
       continue;
     }
@@ -145,6 +163,59 @@ for (;;) {
       process.exit(2);
     }
     if (!p.isDraft && p.mergeable === 'MERGEABLE' && checks.length && checks.every((c) => outcome(c) === 'pass')) {
+      // a merge queue tests the PR with what is ahead of it; otherwise green checks count only on an up-to-date head
+      if (!q.isMergeQueueEnabled) {
+        // just after an update GitHub can still report the old head: wait for the new one
+        if (updatedFrom.get(pr) === p.headRefOid) {
+          const n = (waitedOn.get(pr) ?? 0) + 1;
+          waitedOn.set(pr, n);
+          // ten rounds without a new head: the update did not happen; ask again (a refusal then stops the run)
+          if (n >= 10) {
+            console.log(`#${pr}: the head has not moved after the update; updating again`);
+            updatedFrom.delete(pr);
+            waitedOn.delete(pr);
+          }
+          left.push(pr);
+          continue;
+        }
+        updatedFrom.delete(pr);
+        waitedOn.delete(pr);
+        let behind;
+        try {
+          behind = behindBy(p.baseRefName, p.headRefOid);
+          failures.compare = 0;
+        } catch (e) {
+          ghFailed(pr, e, 'compare');
+          left.push(pr);
+          continue;
+        }
+        if (behind > 0) {
+          try {
+            gh(
+              'api',
+              '-X',
+              'PUT',
+              `repos/${repoOwner}/${repoName}/pulls/${pr}/update-branch`,
+              '-f',
+              `expected_head_sha=${p.headRefOid}`,
+            );
+            updatedFrom.set(pr, p.headRefOid);
+            failures.update = 0;
+            console.log(
+              `#${pr}: ${behind} commit${behind === 1 ? '' : 's'} behind ${p.baseRefName}; updated the branch, waiting for its checks`,
+            );
+          } catch (e) {
+            const why = String(e.stderr || e.message).trim();
+            if (/HTTP 4(0[0-9]|2[0-9])\b/.test(why) && !/HTTP 429\b/.test(why)) {
+              console.log(`#${pr}: behind ${p.baseRefName} and GitHub refused to update it: ${why}`);
+              process.exit(5);
+            }
+            ghFailed(pr, e, 'update');
+          }
+          left.push(pr);
+          continue;
+        }
+      }
       try {
         if (q.isMergeQueueEnabled) {
           gh('pr', 'merge', pr, '--match-head-commit', p.headRefOid);
