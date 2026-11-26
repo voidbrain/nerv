@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "parent": "B-175",
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "Security semantics of tainted context need explicit owner approval"
+  ],
+  "id": "B-175-T07",
+  "dependsOn": [
+    "B-175-T06"
+  ],
+  "title": "Owner check: an opted-in Grover read answers twice in one dashboard conversation",
+  "goal": "With the opt-in on a Grover read grant, two Grover questions within 30 minutes both answer",
+  "status": "planned",
+  "acceptance": [
+    "With the opt-in on, two Grover questions in one dashboard conversation both answer; with it off, the second gets the stage 1 message"
+  ],
+  "resources": [
+    "docs/work/records/B-175.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "owner-check"
+  ],
+  "validation": [
+    "owner, per the record"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.0,
+    "estimateAgentHours": 0.0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

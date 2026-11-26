@@ -1,6 +1,6 @@
 # Granted MCP reads after a tool result
 
-**Status: proposed, 26 November 2026; waits for the owner (B-175-T02).** Security-relevant: it changes what runs after untrusted text has entered a conversation (F-027 quarantine, [EVA runner](eva-runner.md)).
+**Status: decided 26 November 2026 (B-175-T02): the owner, in chat, "B-175 ok": the recommendation below, option 2 now, then option 4.** Security-relevant: it changes what runs after untrusted text has entered a conversation (F-027 quarantine, [EVA runner](eva-runner.md)).
 
 ## Problem, in plain words
 
@@ -21,3 +21,16 @@ How long the taint lasts today: Misato's context takes the last 3 exchanges of t
 ## Recommendation
 
 Option 2 now (small, safe, fixes "refused without telling me" and gives the dashboard a way out), then option 4 as the policy: default stays fail-closed, and the owner opts in only for read tools on servers they run. Option 3 only if a tool that reads third-party content (mail, web) needs to work in tainted conversations. Options 1 and 5 are simplest but turn the protection off for every granted read at once.
+
+## Decision
+
+Accepted as recommended. Stage 1 (option 2, B-175-T03): the refusal says to start a new conversation, Misato stops at the first isolation refusal and the service replies in the owner's language, and the dashboard chat has a **New conversation** button. Stage 2 (option 4, B-175-T05 to T07): a per-grant opt-in for read-only tools; without it the stage 1 refusal stays.
+
+## Owner check
+
+Stage 1, after NERV-01 runs the release that has it (B-175-T04). In the dashboard chat (a new browser tab starts in the usual `dashboard` conversation):
+
+1. Send: `quali genetiche ho?` — expected: Misato answers from Grover (the first Grover read runs). Known limit: if she calls a second Grover tool in the same answer, you get the step 2 message already.
+2. Within 30 minutes, send: `e quali piante sto coltivando?` — expected: a reply that starts `Non ho usato grover.` and says to press «New conversation» or to wait 30 minutes; Misato does not try the call again (the sortie shows one refused step, not five).
+3. Press **New conversation** next to Send — expected: the trace shows `New conversation: Misato no longer sees the earlier messages.`
+4. Send again: `e quali piante sto coltivando?` — expected: the Grover read runs and Misato answers.
