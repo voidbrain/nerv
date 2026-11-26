@@ -39,7 +39,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-25: switch in PR #763 plus observation over ~10 merged PRs. Closed 2026-11-26: rows 8–10+ logged in F-125 across 28 merged PRs (#777–#819) with zero view incidents. No actual: observation spanned multiple sessions.",
+    "basis": "Estimated 2026-11-25: switch in PR #763 plus observation over ~10 merged PRs. Closed 2026-11-26: rows 8–10 logged in F-125; all 43 merges after #776 (#777–#819) published with zero view incidents. No actual: observation spanned multiple sessions.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 1,
