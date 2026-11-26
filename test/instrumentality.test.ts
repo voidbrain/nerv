@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { digestAsk, factLimit, parseDigest } from '../src/instrumentality.ts';
 import { OWNER_SOURCE } from '../src/store.ts';
+import { localClock } from '../src/brief.ts';
 import { Runtime } from '../src/runtime.ts';
 import { Store } from '../src/store.ts';
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
@@ -190,6 +191,34 @@ test('Instrumentality runs once a local day at its time, and a failed digest is 
     } finally {
       store.close();
     }
+  } finally {
+    await t.close();
+  }
+});
+// B-150: the cause of the 4 digest calls on the Windows runner of PR #778 (run 45717358062, 23:58–00:05 Rome). With the
+// real clock a run crossing Rome midnight is a new local day and rightly tries again, so the daily-run test above pins
+// its clock. This drives that crossing on purpose: two attempts on each day, never more.
+test('B-150: a failed daily run that crosses local midnight tries once more on the new day, not in a loop', async () => {
+  const t = await setup(['{"reply":"ok"}'], 'not json');
+  try {
+    await t.runtime.chat('hello', 'cli');
+    // The next Rome midnight after the exchange (consolidation reads exchanges up to its clock), one second before it.
+    let midnight = Math.ceil((Date.now() + 60_000) / 3_600_000) * 3_600_000;
+    while (localClock(new Date(midnight), 'Europe/Rome').minutes !== 0) midnight += 3_600_000;
+    let now = new Date(midnight - 1000);
+    t.runtime.startInstrumentality(
+      () => ({ mode: { at: '00:00' }, timeZone: 'Europe/Rome' }),
+      50,
+      () => now,
+    );
+    const digests = () => t.asked.filter((a) => a === 'digest').length;
+    for (let i = 0; i < 200 && digests() < 2; i++) await wait(50);
+    await wait(400);
+    assert.equal(digests(), 2, 'the first local day: one attempt with one retry');
+    now = new Date(midnight + 1000);
+    for (let i = 0; i < 200 && digests() < 4; i++) await wait(50);
+    await wait(400);
+    assert.equal(digests(), 4, 'the new local day: one more attempt with one retry, then nothing');
   } finally {
     await t.close();
   }
