@@ -75,8 +75,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   );
   const result = verdict(tap);
   if (!result.ok || run.status !== 0) {
-    if (!result.ok) console.error('macos-node-tests: ' + result.why);
-    else console.error(tap);
+    // The whole stream on a failure: the YAML block under each `not ok` says what failed and where.
+    console.error(tap);
+    console.error('macos-node-tests: ' + (result.ok ? 'node --test exited ' + run.status : result.why));
     process.exit(1);
   }
   console.log('macos-node-tests: ' + result.why);
