@@ -1,3 +1,4 @@
+// @ts-check
 // B-101: the dashboard names why the base is degraded, and says a model is down only when one is.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

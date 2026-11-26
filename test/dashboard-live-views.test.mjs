@@ -1,3 +1,4 @@
+// @ts-check
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -87,17 +88,21 @@ test('B-145: patchHTML keeps unchanged and keyed rows as the same nodes', async 
     ['5'],
     'only the changed value',
   );
-  assert.equal(box.querySelector('[data-key=b] span').textContent, '5');
+  assert.equal(/** @type {Element} */ (box.querySelector('[data-key=b] span')).textContent, '5');
   run('patchHTML').call(null, box, rows([{ id: 'a', v: 1 }]));
   assert.deepEqual([...box.children], [a], 'removed rows go, kept rows stay');
   box.textContent = '';
   run('patchHTML').call(null, box, "<img data-av='x' alt=''/><details><summary>s</summary>t</details>");
-  box.querySelector('img').setAttribute('src', 'filled-by-script.png');
-  box.querySelector('details').setAttribute('open', '');
+  /** @type {Element} */ (box.querySelector('img')).setAttribute('src', 'filled-by-script.png');
+  /** @type {Element} */ (box.querySelector('details')).setAttribute('open', '');
   run('patchHTML').call(null, box, "<img data-av='x' alt='y'/><details><summary>s</summary>t2</details>");
-  assert.equal(box.querySelector('img').getAttribute('src'), 'filled-by-script.png', 'a script-set attribute stays');
-  assert.ok(box.querySelector('details').hasAttribute('open'), 'an open <details> stays open');
-  assert.equal(box.querySelector('img').getAttribute('alt'), 'y');
+  assert.equal(
+    /** @type {Element} */ (box.querySelector('img')).getAttribute('src'),
+    'filled-by-script.png',
+    'a script-set attribute stays',
+  );
+  assert.ok(/** @type {Element} */ (box.querySelector('details')).hasAttribute('open'), 'an open <details> stays open');
+  assert.equal(/** @type {Element} */ (box.querySelector('img')).getAttribute('alt'), 'y');
 });
 
 test('B-145: setText and setAttr write only a changed value', async () => {

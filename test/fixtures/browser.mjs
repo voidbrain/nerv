@@ -1,3 +1,4 @@
+// @ts-check
 import {spawn} from 'node:child_process';
 import {existsSync,mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -11,7 +12,7 @@ export async function browser(work){
  try{
   const endpoint=await new Promise((done,fail)=>{let log='';const timer=setTimeout(()=>fail(Error('Chrome startup timeout: '+log)),45000);child.once('error',e=>{clearTimeout(timer);fail(e);});child.once('exit',code=>{clearTimeout(timer);fail(Error('Chrome exited: '+code));});child.stderr.on('data',part=>{log=(log+part).slice(-2000);const match=/DevTools listening on (ws:\/\/\S+)/.exec(log);if(match){clearTimeout(timer);done(match[1]);}});});
   ws=new WebSocket(endpoint);await new Promise((done,fail)=>{ws.once('open',done);ws.once('error',fail);});
-  ws.on('message',raw=>{const message=JSON.parse(raw);if(message.id){const call=pending.get(message.id);if(call){pending.delete(message.id);clearTimeout(call.timer);message.error?call.fail(Error(JSON.stringify(message.error))):call.done(message.result);}}if(message.method==='Runtime.exceptionThrown')errors.push(message.params.exceptionDetails);if(message.method==='Network.responseReceived')network.push(message.params.response);});
+  ws.on('message',raw=>{const message=JSON.parse(String(raw));if(message.id){const call=pending.get(message.id);if(call){pending.delete(message.id);clearTimeout(call.timer);message.error?call.fail(Error(JSON.stringify(message.error))):call.done(message.result);}}if(message.method==='Runtime.exceptionThrown')errors.push(message.params.exceptionDetails);if(message.method==='Network.responseReceived')network.push(message.params.response);});
   const call=(method,params={},sessionId)=>new Promise((done,fail)=>{const id=++serial,timer=setTimeout(()=>{pending.delete(id);fail(Error('Browser call timed out: '+method));},20000);pending.set(id,{done,fail,timer});ws.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})}));});
   const {targetId}=await call('Target.createTarget',{url:'about:blank'}),{sessionId}=await call('Target.attachToTarget',{targetId,flatten:true});
   const page=(method,params={})=>call(method,params,sessionId);
@@ -21,7 +22,7 @@ export async function browser(work){
   await work({page,evaluate,until,errors,network});
  }finally{
   for(const p of pending.values()){clearTimeout(p.timer);p.fail(Error('Browser closed'));}pending.clear();ws?.terminate();
-  if(child.exitCode===null)await new Promise(done=>{const timer=setTimeout(()=>child.kill('SIGKILL'),2000);child.once('exit',()=>{clearTimeout(timer);done();});child.kill();});
+  if(child.exitCode===null)await new Promise(done=>{const timer=setTimeout(()=>child.kill('SIGKILL'),2000);child.once('exit',()=>{clearTimeout(timer);done(undefined);});child.kill();});
   rmSync(profile,{recursive:true,force:true,maxRetries:10,retryDelay:100});
  }
 }

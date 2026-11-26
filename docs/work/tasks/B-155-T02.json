@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "B-155-T02",
+  "parent": "B-155",
+  "title": "Type-check 30 JavaScript tests in npm run typecheck",
+  "goal": "tsconfig.test-js.json in typecheck; 30 files checked clean, 15 deferred by name",
+  "status": "implemented",
+  "acceptance": [
+    "npm run typecheck runs tsc -p tsconfig.test-js.json and passes",
+    "No assertion changes; casts only",
+    "Deferred files listed with their diagnostic counts in the record"
+  ],
+  "dependsOn": [
+    "B-155-T01"
+  ],
+  "resources": [
+    "tsconfig.test-js.json",
+    "package.json",
+    "test/fixtures/browser.mjs",
+    "docs/work/records/B-155.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run typecheck",
+    "npm run check:fast",
+    "npm test"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 1.5 h agent. Implemented the same day: 30 files clean with JSDoc casts. Remaining: CI.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

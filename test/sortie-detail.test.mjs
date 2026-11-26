@@ -1,3 +1,4 @@
+// @ts-check
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -50,7 +51,7 @@ test('ledger relay events reach the live detail with the destination reference, 
     f.render({ ...mapped, status: 'failed', remoteSortie: null });
     assert.match(f.document.getElementById('detail').textContent, /No answer received/);
     // The main base never received this request: the same sortie continues locally.
-    store.ledger.note(id, 'misato.step', { step: { type: 'reply', text: 'Here' } });
+    store.ledger.note(id, 'misato.step', { step: /** @type {any} */ ({ type: 'reply', text: 'Here' }) });
     const local = fixture(store.ledger.events(id));
     await local.loadEvents(id);
     const continued = local.toSortie({ ...raw, status: 'open' });
@@ -72,6 +73,6 @@ test('empty local sorties distinguish planning, failure, stop and a completed to
     ['done', /answered without using a tool/],
   ]) {
     f.render({ ...base, status });
-    assert.match(f.document.getElementById('detail').textContent, expected);
+    assert.match(f.document.getElementById('detail').textContent, /** @type {RegExp} */ (expected));
   }
 });

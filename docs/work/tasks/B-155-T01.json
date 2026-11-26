@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-155-T01",
+  "parent": "B-155",
+  "title": "Failing test: every JavaScript test is type-checked, or deferred by name",
+  "goal": "test/typecheck-scope.test.ts fails on main",
+  "status": "implemented",
+  "acceptance": [
+    "Every test/*.mjs and test/fixtures/*.mjs starts with // @ts-check unless deferred by name",
+    "A deferred file that is already checked fails",
+    "npm run typecheck runs tsconfig.test-js.json",
+    "It is not edited to pass in B-155-T02"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/typecheck-scope.test.ts",
+    "docs/work/records/B-155.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/typecheck-scope.test.ts fails on main"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day; fails on main. Remaining: CI.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}
