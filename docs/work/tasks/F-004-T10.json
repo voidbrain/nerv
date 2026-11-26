@@ -10,7 +10,8 @@
     "The tapped reminder of step 1 is marked done in the app it opened (moved from F-004-T06, closed 2026-11-26)"
   ],
   "dependsOn": [
-    "F-004-T09"
+    "F-004-T09",
+    "B-170-T06"
   ],
   "resources": [
     "docs/acceptance/f004-t06-phone-push-procedure.md",
