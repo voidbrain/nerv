@@ -10,8 +10,7 @@
     "On the live service: \"la ricetta X non ha foto, trovane qualcuna\" → pick one → approve → the recipe shows it with its Openverse attribution; send a photo and \"usala per Rocca Calascio\" → approve → Hobo shows it; the copy-paste page is written by F-143-T08"
   ],
   "dependsOn": [
-    "F-143-T08",
-    "F-142-T08"
+    "F-143-T08"
   ],
   "resources": [
     "docs/work/records/F-143.md",

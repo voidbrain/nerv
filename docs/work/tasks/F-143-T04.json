@@ -7,12 +7,11 @@
   "status": "planned",
   "acceptance": [
     "Owner idea 2026-11-26 in chat: \"in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted.\" Italian is required for every model-facing feature.",
-    "After F-143-T03 finds the item, an image from the same conversation (F-142 intake) becomes the single candidate in the image-choice surface; \"usa questa\" / \"use this one\" works in Italian and English",
-    "Understanding the image (e.g. checking it shows a dish or a place) uses F-142's local vision route and is optional; without F-142-T02 the image is still offered, not described"
+    "After F-143-T03 finds the item, an image the owner sends in the same Telegram conversation (the existing photo intake in src/telegram.ts and src/photos.ts limits) becomes the single candidate in the image-choice surface; \"usa questa\" / \"use this one\" works in Italian and English",
+    "No vision: NERV does not read or describe the image, it stores the sent image with the item (a recipe's photos; a place through hobo:F-018) after the owner's approval; owner decision 2026-11-26 in chat: \"undo the F-143 dependency\" on F-142"
   ],
   "dependsOn": [
-    "F-143-T03",
-    "F-142-T03"
+    "F-143-T03"
   ],
   "resources": [
     "src/runtime-chat.ts",
@@ -35,7 +34,7 @@
   "effort": {
     "size": "small",
     "estimate": "1 h agent",
-    "basis": "Estimated 2026-11-26: reuses F-142's stored chat image. Not a measurement.",
+    "basis": "Estimated 2026-11-26: reuses the existing photo intake and storage, no vision (unchanged, F-142 dependency removed). Not a measurement.",
     "reviewed": "2026-11-26",
     "agentHours": 1.0,
     "baselineAgentHours": 1.0,
