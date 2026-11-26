@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nerv-system-flows",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "cases": [
     {
       "id": "policy",
@@ -260,6 +260,235 @@
         "src/runtime-planning.ts",
         "src/prompt-samples.ts",
         "test/script-plan.test.ts"
+      ]
+    },
+    {
+      "id": "scheduling-reminders",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "reminder-time-kinds",
+        "existing-reminder-fact-check"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "scheduling-reminders",
+      "area": "scheduling-time",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/store.ts",
+        "src/store-reminders.ts",
+        "src/reminder-time.ts",
+        "src/executors.ts",
+        "src/ledger.ts",
+        "src/misato.ts",
+        "src/runtime.ts",
+        "src/runtime-planning.ts",
+        "src/server.ts",
+        "src/telegram.ts",
+        "test/core.test.ts",
+        "test/f046-existing-check.test.ts"
+      ]
+    },
+    {
+      "id": "memory-and-chronicle",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "subject-memory",
+        "typo-tolerant-recall",
+        "grounded-persona",
+        "recorded-chronicle"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "memory-and-chronicle",
+      "area": "conversation-memory",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/memory.ts",
+        "src/persona.ts",
+        "src/chronicle.ts",
+        "src/milestones.ts",
+        "src/brief.ts",
+        "src/config.ts",
+        "src/executors.ts",
+        "src/kaji.ts",
+        "src/kaji-link.ts",
+        "src/misato.ts",
+        "src/runtime.ts",
+        "src/store.ts",
+        "test/memory.test.ts",
+        "test/persona.test.ts",
+        "test/chronicle.test.ts",
+        "test/milestones.test.ts"
+      ]
+    },
+    {
+      "id": "pilot-routing",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "pilot-selection",
+        "pilot-trust-stages",
+        "consultant-advice"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "pilot-routing",
+      "area": "tools",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/pilots.ts",
+        "src/pilots-qualification.ts",
+        "src/runtime-pilots.ts",
+        "src/config.ts",
+        "src/executors.ts",
+        "src/kaji.ts",
+        "src/misato.ts",
+        "src/policy.ts",
+        "src/runtime.ts",
+        "src/server.ts",
+        "src/store.ts",
+        "test/pilots.test.ts",
+        "test/consultant.test.ts",
+        "test/pilot-model.test.ts"
+      ]
+    },
+    {
+      "id": "tool-contracts",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "mcp-grant-fingerprints",
+        "typed-read-results",
+        "domain-pack-toggles"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "tool-contracts",
+      "area": "tools",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/mcp.ts",
+        "src/tools-process.ts",
+        "src/tool-listing.ts",
+        "src/tool-index.ts",
+        "src/packs.ts",
+        "src/fpv-pack.ts",
+        "src/cooking-pack.ts",
+        "src/prompt-samples.ts",
+        "src/runtime-tools.ts",
+        "src/runtime-chat.ts",
+        "src/runtime-api.ts",
+        "src/config.ts",
+        "src/executors.ts",
+        "src/misato.ts",
+        "src/runtime.ts",
+        "src/server.ts",
+        "src/store.ts",
+        "test/mcp.test.ts",
+        "test/tool-listing.test.ts",
+        "test/read-tool-shapes.test.ts",
+        "test/packs.test.ts"
+      ]
+    },
+    {
+      "id": "external-project-intake",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "quarantine-intake",
+        "ireul-taint-propagation"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "external-project-intake",
+      "area": "research",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/quarantine.ts",
+        "src/policy.ts",
+        "src/ledger.ts",
+        "src/memory.ts",
+        "src/misato.ts",
+        "src/store.ts",
+        "test/quarantine.test.ts",
+        "test/provenance.test.ts"
+      ]
+    },
+    {
+      "id": "federated-handoff",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "whole-job-forwarding",
+        "operator-directory"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "federated-handoff",
+      "area": "distributed-coordination",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/whole-job-handoff.ts",
+        "src/operator-directory.ts",
+        "src/chat-command.ts",
+        "src/config.ts",
+        "src/kaji.ts",
+        "src/kaji-link.ts",
+        "src/runtime.ts",
+        "src/runtime-peers.ts",
+        "src/server.ts",
+        "test/whole-job-handoff.test.ts",
+        "test/operator-directory.test.ts"
+      ]
+    },
+    {
+      "id": "coding-jobs",
+      "layer": "system",
+      "split": "regression",
+      "capabilities": [
+        "worktree-coding-job",
+        "pinned-harness-apply"
+      ],
+      "critical": true,
+      "expensive": false,
+      "runner": "coding-jobs",
+      "area": "security-permissions",
+      "requirements": [
+        "posix-process-groups"
+      ],
+      "inputs": [
+        "evals/suite.json",
+        "evals/gauntlet/system-v1.json",
+        "src/coding-job.ts",
+        "src/store.ts",
+        "test/coding-job.test.ts"
       ]
     }
   ]

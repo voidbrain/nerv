@@ -159,14 +159,21 @@ Mapped cases are implemented coverage, not model qualification. Evidence retains
 | [nerv-planner@1.1.0 / batteries-to-charge-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-action, english | model / holdout | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
 | [nerv-planner@1.1.0 / mail-routing-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-routing, italian | model / holdout | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
 | [nerv-planner@1.1.0 / mail-routing-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-routing, english | model / regression | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
-| [nerv-system-flows@1.2.0 / policy](../evals/gauntlet/system-v1.json) | security-permissions | effects, taint, vote-permutations, shadow-veto, budget, confinement | system / regression | true / false | registered:policy / posix-process-groups | Unmeasured |
-| [nerv-system-flows@1.2.0 / ledger](../evals/gauntlet/system-v1.json) | security-permissions | expiry, single-use-grants, restart, executor-effects, approval-idempotency, brief-source-recovery, daily-delivery-idempotency, proactive-admission, slot-idempotency, immutable-stage-action-limits | system / regression | true / false | registered:ledger / posix-process-groups | Unmeasured |
-| [nerv-system-flows@1.2.0 / conversation](../evals/gauntlet/system-v1.json) | conversation-memory | ambiguity, mind-change, conversation-isolation, bounded-replanning, language, explanations, proactive-local-planning, durable-step-reservations, quiet-hours, interruption-recovery | system / regression | true / false | registered:conversation / posix-process-groups | Unmeasured |
-| [nerv-system-flows@1.2.0 / channels](../evals/gauntlet/system-v1.json) | distributed-coordination | delivery-retry, cross-channel, relay, owner-authorization, approval-card-reconciliation, proactive-quiet-delivery | system / regression | true / false | registered:channels / posix-process-groups | Unmeasured |
-| [nerv-system-flows@1.2.0 / bases](../evals/gauntlet/system-v1.json) | distributed-coordination | signed-bases, remote-idempotency, seat-delay, shadow-after-decision, lease-fencing, outbound-reconnect, approval-locks, signed-cancellation, legacy-quarantine, hostile-frames, connection-admission, proactive-dispatch-revalidation, quiet-remote-followups | system / regression | true / false | registered:bases / posix-process-groups | Unmeasured |
-| [nerv-system-flows@1.2.0 / stress](../evals/gauntlet/system-v1.json) | ci-operations | bounded-queues, brain-stall, crash, parallel-writes, latency | system / regression | true / true | registered:stress / posix-process-groups | Unmeasured |
-| [nerv-system-flows@1.2.0 / browser](../evals/gauntlet/system-v1.json) | ui-visual | dashboard-operator, waiting-state, approval, topic-change, accessibility | system / regression | true / true | registered:browser / posix-process-groups, built-browser-assets | Unmeasured |
-| [nerv-system-flows@1.2.0 / script-plans](../evals/gauntlet/system-v1.json) | security-permissions | script-plan-comparison, eva03-per-call-gate | system / regression | true / false | registered:script-plans / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / policy](../evals/gauntlet/system-v1.json) | security-permissions | effects, taint, vote-permutations, shadow-veto, budget, confinement | system / regression | true / false | registered:policy / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / ledger](../evals/gauntlet/system-v1.json) | security-permissions | expiry, single-use-grants, restart, executor-effects, approval-idempotency, brief-source-recovery, daily-delivery-idempotency, proactive-admission, slot-idempotency, immutable-stage-action-limits | system / regression | true / false | registered:ledger / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / conversation](../evals/gauntlet/system-v1.json) | conversation-memory | ambiguity, mind-change, conversation-isolation, bounded-replanning, language, explanations, proactive-local-planning, durable-step-reservations, quiet-hours, interruption-recovery | system / regression | true / false | registered:conversation / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / channels](../evals/gauntlet/system-v1.json) | distributed-coordination | delivery-retry, cross-channel, relay, owner-authorization, approval-card-reconciliation, proactive-quiet-delivery | system / regression | true / false | registered:channels / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / bases](../evals/gauntlet/system-v1.json) | distributed-coordination | signed-bases, remote-idempotency, seat-delay, shadow-after-decision, lease-fencing, outbound-reconnect, approval-locks, signed-cancellation, legacy-quarantine, hostile-frames, connection-admission, proactive-dispatch-revalidation, quiet-remote-followups | system / regression | true / false | registered:bases / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / stress](../evals/gauntlet/system-v1.json) | ci-operations | bounded-queues, brain-stall, crash, parallel-writes, latency | system / regression | true / true | registered:stress / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / browser](../evals/gauntlet/system-v1.json) | ui-visual | dashboard-operator, waiting-state, approval, topic-change, accessibility | system / regression | true / true | registered:browser / posix-process-groups, built-browser-assets | Unmeasured |
+| [nerv-system-flows@1.3.0 / script-plans](../evals/gauntlet/system-v1.json) | security-permissions | script-plan-comparison, eva03-per-call-gate | system / regression | true / false | registered:script-plans / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / scheduling-reminders](../evals/gauntlet/system-v1.json) | scheduling-time | reminder-time-kinds, existing-reminder-fact-check | system / regression | true / false | registered:scheduling-reminders / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / memory-and-chronicle](../evals/gauntlet/system-v1.json) | conversation-memory | subject-memory, typo-tolerant-recall, grounded-persona, recorded-chronicle | system / regression | true / false | registered:memory-and-chronicle / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / pilot-routing](../evals/gauntlet/system-v1.json) | tools | pilot-selection, pilot-trust-stages, consultant-advice | system / regression | true / false | registered:pilot-routing / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / tool-contracts](../evals/gauntlet/system-v1.json) | tools | mcp-grant-fingerprints, typed-read-results, domain-pack-toggles | system / regression | true / false | registered:tool-contracts / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / external-project-intake](../evals/gauntlet/system-v1.json) | research | quarantine-intake, ireul-taint-propagation | system / regression | true / false | registered:external-project-intake / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / federated-handoff](../evals/gauntlet/system-v1.json) | distributed-coordination | whole-job-forwarding, operator-directory | system / regression | true / false | registered:federated-handoff / posix-process-groups | Unmeasured |
+| [nerv-system-flows@1.3.0 / coding-jobs](../evals/gauntlet/system-v1.json) | security-permissions | worktree-coding-job, pinned-harness-apply | system / regression | true / false | registered:coding-jobs / posix-process-groups | Unmeasured |
 
 ## Area coverage
 
@@ -181,13 +188,13 @@ Mapped cases are implemented coverage, not model qualification. Evidence retains
 - backlog-management: 0 mapped cases
 - estimation: 0 mapped cases
 - ci-operations: 1 mapped cases
-- research: 0 mapped cases
-- tools: 48 mapped cases
-- conversation-memory: 1 mapped cases
-- distributed-coordination: 2 mapped cases
+- research: 1 mapped cases
+- tools: 50 mapped cases
+- conversation-memory: 2 mapped cases
+- distributed-coordination: 3 mapped cases
 - ui-visual: 1 mapped cases
-- security-permissions: 7 mapped cases
+- security-permissions: 8 mapped cases
 - documents-data: 4 mapped cases
 - language-translation: 10 mapped cases
 - audio-video: 0 mapped cases
-- scheduling-time: 0 mapped cases
+- scheduling-time: 1 mapped cases
