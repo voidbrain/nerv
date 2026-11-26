@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-120-T13",
+  "parent": "F-120",
+  "title": "Owner approves the first nerv-planner run on the local model",
+  "goal": "The owner says whether the agent may run the 36 nerv-planner cases once on gemma4:12b on the Mac",
+  "status": "planned",
+  "acceptance": [
+    "The owner answers the question on docs/acceptance/f120-t09-planner-first-run.md (ok, or not now with a reason), recorded with its date in docs/work/records/F-120.md"
+  ],
+  "dependsOn": [
+    "F-120-T09"
+  ],
+  "resources": [
+    "docs/work/records/F-120.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "npm run check:work"
+  ],
+  "escalation": [
+    "Only the owner gives this approval"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Split from F-120-T09 (one actor per step): read the plan and answer. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "ownerKind": "decision",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0
+  },
+  "ownerLink": "docs/acceptance/f120-t09-planner-first-run.md",
+  "prs": []
+}

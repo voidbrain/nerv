@@ -8,7 +8,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-import { commonPacks, systemPacks } from './gauntlet.mjs';
+import { commonPacks, nervModelPacks, systemPacks } from './gauntlet.mjs';
 
 const ledgerFile = 'evals/gauntlet/ledger.json';
 const key = (e) => `${e.pack}/${e.case} (profile ${e.profileHash ?? 'none'})`;
@@ -42,7 +42,7 @@ function main(args) {
     return 0;
   }
   const now = JSON.parse(readFileSync(ledgerFile, 'utf8'));
-  const catalogue = new Set([...commonPacks(), ...systemPacks()].flatMap(({ pack }) => pack.cases.map((c) => `${pack.id}/${c.id}`)));
+  const catalogue = new Set([...commonPacks(), ...nervModelPacks(), ...systemPacks()].flatMap(({ pack }) => pack.cases.map((c) => `${pack.id}/${c.id}`)));
   const dropped = droppedEntries(before, now, catalogue);
   if (dropped.length) {
     console.error(

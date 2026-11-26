@@ -1,0 +1,390 @@
+{
+  "schemaVersion": 1,
+  "id": "nerv-planner",
+  "version": "1.0.0",
+  "about": "F-120-T09: Misato's first planning turn over NERV's real tool index, for Italian and English requests. Each case names the subjects already read with tools.read (read), the switched-off packs (packs), and invented reminders or facts. Built into nerv-planner-v1.json by tools/gauntlet-planner-pack.mjs.",
+  "now": "2026-08-03T08:00:00.000Z",
+  "timeZone": "Europe/Rome",
+  "mcp": [
+    {
+      "server": "grover",
+      "tool": "grover_overview",
+      "effect": "read",
+      "description": "Rooms, their mode, agent status, grow phase and the latest reading of every probe. Start here.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "server": "grover",
+      "tool": "grover_alerts",
+      "effect": "read",
+      "description": "What needs the owner now: low supply tanks, refused or stopped feeds, offline agents. Each stays until its condition clears.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "server": "grover",
+      "tool": "grover_readings",
+      "effect": "read",
+      "description": "Readings of one probe over the last N hours (default 24).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "probeId": { "type": "string" },
+          "hours": { "type": "number", "exclusiveMinimum": 0, "maximum": 2160 }
+        },
+        "required": ["probeId"]
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "reminder-in-minutes-it",
+      "scenario": "reminder-in-minutes",
+      "language": "it",
+      "split": "regression",
+      "type": "action",
+      "read": ["reminders"],
+      "request": "ricordami di bere acqua tra 5 minuti",
+      "expected": { "decision": "action", "tool": "reminders.add", "args": { "due": "2026-08-03T10:05:00+02:00" } }
+    },
+    {
+      "id": "reminder-in-minutes-en",
+      "scenario": "reminder-in-minutes",
+      "language": "en",
+      "split": "holdout",
+      "type": "action",
+      "read": ["reminders"],
+      "request": "remind me to drink water in 5 minutes",
+      "expected": { "decision": "action", "tool": "reminders.add", "args": { "due": "2026-08-03T10:05:00+02:00" } }
+    },
+    {
+      "id": "reminder-tomorrow-at-it",
+      "scenario": "reminder-tomorrow-at",
+      "language": "it",
+      "split": "holdout",
+      "type": "action",
+      "read": ["reminders"],
+      "request": "ricordami domani alle 9 di pagare la bolletta della luce",
+      "expected": { "decision": "action", "tool": "reminders.add", "args": { "due": "2026-08-04T09:00:00+02:00" } }
+    },
+    {
+      "id": "reminder-tomorrow-at-en",
+      "scenario": "reminder-tomorrow-at",
+      "language": "en",
+      "split": "regression",
+      "type": "action",
+      "read": ["reminders"],
+      "request": "remind me tomorrow at 9 to pay the electricity bill",
+      "expected": { "decision": "action", "tool": "reminders.add", "args": { "due": "2026-08-04T09:00:00+02:00" } }
+    },
+    {
+      "id": "reminder-routing-it",
+      "scenario": "reminder-routing",
+      "language": "it",
+      "split": "regression",
+      "type": "routing",
+      "request": "ricordami tra due ore di chiamare Marco",
+      "expected": { "decision": "action", "tool": "tools.read", "args": { "subject": "reminders" } }
+    },
+    {
+      "id": "reminder-routing-en",
+      "scenario": "reminder-routing",
+      "language": "en",
+      "split": "holdout",
+      "type": "routing",
+      "request": "remind me in two hours to call Marco",
+      "expected": { "decision": "action", "tool": "tools.read", "args": { "subject": "reminders" } }
+    },
+    {
+      "id": "reminder-no-subject-it",
+      "scenario": "reminder-no-subject",
+      "language": "it",
+      "split": "holdout",
+      "type": "clarify",
+      "read": ["reminders"],
+      "request": "imposta un promemoria per domani",
+      "expected": { "decision": "ask" }
+    },
+    {
+      "id": "reminder-no-subject-en",
+      "scenario": "reminder-no-subject",
+      "language": "en",
+      "split": "regression",
+      "type": "clarify",
+      "read": ["reminders"],
+      "request": "set a reminder for tomorrow",
+      "expected": { "decision": "ask" }
+    },
+    {
+      "id": "reminder-exists-it",
+      "scenario": "reminder-exists",
+      "language": "it",
+      "split": "regression",
+      "type": "already-done",
+      "read": ["reminders"],
+      "reminders": [{ "id": "r-41", "title": "Chiamare Marco", "due": "2026-08-03T10:00:00.000Z", "kind": "at" }],
+      "request": "ricordami alle 12 di chiamare Marco",
+      "expected": { "decision": "reply" }
+    },
+    {
+      "id": "reminder-exists-en",
+      "scenario": "reminder-exists",
+      "language": "en",
+      "split": "holdout",
+      "type": "already-done",
+      "read": ["reminders"],
+      "reminders": [{ "id": "r-41", "title": "Call Marco", "due": "2026-08-03T10:00:00.000Z", "kind": "at" }],
+      "request": "remind me at 12 to call Marco",
+      "expected": { "decision": "reply" }
+    },
+    {
+      "id": "memory-fact-it",
+      "scenario": "memory-fact",
+      "language": "it",
+      "split": "holdout",
+      "type": "approval",
+      "read": ["memory"],
+      "memory": [{ "id": "m-3", "text": "Preferisce il tè verde al caffè", "shareable": false, "tainted": false }],
+      "request": "ricorda che sono allergico alle noci",
+      "expected": { "decision": "action", "tool": "memory.remember", "args": {} }
+    },
+    {
+      "id": "memory-fact-en",
+      "scenario": "memory-fact",
+      "language": "en",
+      "split": "regression",
+      "type": "approval",
+      "read": ["memory"],
+      "memory": [{ "id": "m-3", "text": "Prefers green tea to coffee", "shareable": false, "tainted": false }],
+      "request": "remember that I am allergic to walnuts",
+      "expected": { "decision": "action", "tool": "memory.remember", "args": {} }
+    },
+    {
+      "id": "browser-click-it",
+      "scenario": "browser-click",
+      "language": "it",
+      "split": "regression",
+      "type": "approval",
+      "read": ["browser"],
+      "request": "clicca il pulsante Iscriviti sulla pagina aperta",
+      "expected": { "decision": "action", "tool": "browser.click", "args": { "control": "Iscriviti" } }
+    },
+    {
+      "id": "browser-click-en",
+      "scenario": "browser-click",
+      "language": "en",
+      "split": "holdout",
+      "type": "approval",
+      "read": ["browser"],
+      "request": "click the Subscribe button on the open page",
+      "expected": { "decision": "action", "tool": "browser.click", "args": { "control": "Subscribe" } }
+    },
+    {
+      "id": "desktop-replay-it",
+      "scenario": "desktop-replay",
+      "language": "it",
+      "split": "holdout",
+      "type": "approval",
+      "read": ["agency"],
+      "request": "riproduci la registrazione apri-posta",
+      "expected": { "decision": "action", "tool": "desktop.replay", "args": { "id": "apri-posta" } }
+    },
+    {
+      "id": "desktop-replay-en",
+      "scenario": "desktop-replay",
+      "language": "en",
+      "split": "regression",
+      "type": "approval",
+      "read": ["agency"],
+      "request": "replay the recording open-mail",
+      "expected": { "decision": "action", "tool": "desktop.replay", "args": { "id": "open-mail" } }
+    },
+    {
+      "id": "pilot-promote-it",
+      "scenario": "pilot-promote",
+      "language": "it",
+      "split": "regression",
+      "type": "approval",
+      "read": ["pilots"],
+      "request": "promuovi il pilota meteo allo stadio test",
+      "expected": { "decision": "action", "tool": "pilots.promote", "args": { "id": "meteo", "stage": "test" } }
+    },
+    {
+      "id": "pilot-promote-en",
+      "scenario": "pilot-promote",
+      "language": "en",
+      "split": "holdout",
+      "type": "approval",
+      "read": ["pilots"],
+      "request": "promote the meteo pilot to the test stage",
+      "expected": { "decision": "action", "tool": "pilots.promote", "args": { "id": "meteo", "stage": "test" } }
+    },
+    {
+      "id": "grover-alerts-it",
+      "scenario": "grover-alerts",
+      "language": "it",
+      "split": "holdout",
+      "type": "mcp-read",
+      "request": "ci sono allarmi nella tenda di Grover?",
+      "expected": { "decision": "action", "tool": "grover.grover_alerts", "args": {} }
+    },
+    {
+      "id": "grover-alerts-en",
+      "scenario": "grover-alerts",
+      "language": "en",
+      "split": "regression",
+      "type": "mcp-read",
+      "request": "are there any alerts in the Grover tent?",
+      "expected": { "decision": "action", "tool": "grover.grover_alerts", "args": {} }
+    },
+    {
+      "id": "grover-overview-it",
+      "scenario": "grover-overview",
+      "language": "it",
+      "split": "regression",
+      "type": "mcp-read",
+      "request": "come sta la tenda di Grover? dammi un riepilogo delle stanze e delle sonde",
+      "expected": { "decision": "action", "tool": "grover.grover_overview", "args": {} }
+    },
+    {
+      "id": "grover-overview-en",
+      "scenario": "grover-overview",
+      "language": "en",
+      "split": "holdout",
+      "type": "mcp-read",
+      "request": "how is the Grover tent doing? give me an overview of the rooms and probes",
+      "expected": { "decision": "action", "tool": "grover.grover_overview", "args": {} }
+    },
+    {
+      "id": "tent-light-it",
+      "scenario": "tent-light",
+      "language": "it",
+      "split": "holdout",
+      "type": "decline",
+      "request": "accendi la luce della tenda",
+      "expected": { "decision": "reply" }
+    },
+    {
+      "id": "tent-light-en",
+      "scenario": "tent-light",
+      "language": "en",
+      "split": "regression",
+      "type": "decline",
+      "request": "turn on the tent light",
+      "expected": { "decision": "reply" }
+    },
+    {
+      "id": "trip-place-it",
+      "scenario": "trip-place",
+      "language": "it",
+      "split": "regression",
+      "type": "decline",
+      "request": "aggiungi Rocca Calascio al trip di agosto",
+      "expected": { "decision": "reply" }
+    },
+    {
+      "id": "trip-place-en",
+      "scenario": "trip-place",
+      "language": "en",
+      "split": "holdout",
+      "type": "decline",
+      "request": "add Rocca Calascio to the August trip",
+      "expected": { "decision": "reply" }
+    },
+    {
+      "id": "table-booking-it",
+      "scenario": "table-booking",
+      "language": "it",
+      "split": "holdout",
+      "type": "decline",
+      "request": "prenotami un tavolo per due stasera al ristorante sotto casa",
+      "expected": { "decision": "reply" }
+    },
+    {
+      "id": "table-booking-en",
+      "scenario": "table-booking",
+      "language": "en",
+      "split": "regression",
+      "type": "decline",
+      "request": "book me a table for two tonight at the restaurant downstairs",
+      "expected": { "decision": "reply" }
+    },
+    {
+      "id": "print-feet-it",
+      "scenario": "print-feet",
+      "language": "it",
+      "split": "regression",
+      "type": "action",
+      "read": ["fleet"],
+      "request": "stampa i piedini di Smoke",
+      "expected": { "decision": "action", "tool": "fleet.print", "args": {} }
+    },
+    {
+      "id": "print-feet-en",
+      "scenario": "print-feet",
+      "language": "en",
+      "split": "holdout",
+      "type": "action",
+      "read": ["fleet"],
+      "request": "print the feet for Smoke",
+      "expected": { "decision": "action", "tool": "fleet.print", "args": {} }
+    },
+    {
+      "id": "print-feet-switched-off-it",
+      "scenario": "print-feet-switched-off",
+      "language": "it",
+      "split": "holdout",
+      "type": "switched-off",
+      "packs": { "fpv": false },
+      "request": "stampa i piedini di Smoke",
+      "expected": { "decision": "reply" }
+    },
+    {
+      "id": "print-feet-switched-off-en",
+      "scenario": "print-feet-switched-off",
+      "language": "en",
+      "split": "regression",
+      "type": "switched-off",
+      "packs": { "fpv": false },
+      "request": "print the feet for Smoke",
+      "expected": { "decision": "reply" }
+    },
+    {
+      "id": "batteries-to-charge-it",
+      "scenario": "batteries-to-charge",
+      "language": "it",
+      "split": "regression",
+      "type": "action",
+      "read": ["batteries"],
+      "request": "quante batterie devo caricare?",
+      "expected": { "decision": "action", "tool": "batteries.list", "args": {} }
+    },
+    {
+      "id": "batteries-to-charge-en",
+      "scenario": "batteries-to-charge",
+      "language": "en",
+      "split": "holdout",
+      "type": "action",
+      "read": ["batteries"],
+      "request": "how many battery packs do I need to charge?",
+      "expected": { "decision": "action", "tool": "batteries.list", "args": {} }
+    },
+    {
+      "id": "mail-routing-it",
+      "scenario": "mail-routing",
+      "language": "it",
+      "split": "holdout",
+      "type": "routing",
+      "request": "controlla la mail di oggi",
+      "expected": { "decision": "action", "tool": "tools.read", "args": { "subject": "gmail" } }
+    },
+    {
+      "id": "mail-routing-en",
+      "scenario": "mail-routing",
+      "language": "en",
+      "split": "regression",
+      "type": "routing",
+      "request": "check today's mail",
+      "expected": { "decision": "action", "tool": "tools.read", "args": { "subject": "gmail" } }
+    }
+  ]
+}
