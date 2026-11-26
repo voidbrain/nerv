@@ -5,16 +5,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { Store } from '../src/store.ts';
 import { makeServer } from '../src/server.ts';
 import { browser } from './fixtures/browser.mjs';
+import { AXE_SOURCE, axeRun } from './fixtures/axe.mjs';
 
-const require = createRequire(import.meta.url);
-const axe = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
-const AXE = `axe.run(document.querySelector('nerv-dashboard')).then(r=>r.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target),why:v.nodes.map(n=>n.any.map(a=>a.message).join(' '))})))`;
+const axe = AXE_SOURCE;
+/** B-154: violations and colour contrast axe could not decide, both empty. */
+const AXE = axeRun('nerv-dashboard');
+const NO_FINDINGS = { violations: [], undecided: [] };
 
 /** The header selects, in order: language, theme, mode, colour. */
 const SELECT = { lang: 0, theme: 1, mode: 2, accent: 3 };
@@ -48,13 +49,13 @@ test(
         await until(`!!document.querySelector('nerv-sign-in input#signin-value')`, 30000);
         await evaluate(axe);
         await choose(evaluate, SELECT.theme, 'simple');
-        assert.deepEqual(await evaluate(AXE), [], 'axe sign-in · simple');
+        assert.deepEqual(await evaluate(AXE), NO_FINDINGS, 'axe sign-in · simple');
         await choose(evaluate, SELECT.theme, 'eva');
-        assert.deepEqual(await evaluate(AXE), [], 'axe sign-in · eva');
+        assert.deepEqual(await evaluate(AXE), NO_FINDINGS, 'axe sign-in · eva');
         await choose(evaluate, SELECT.lang, 'it');
         await until(`document.querySelector('nerv-sign-in h2').textContent.trim() === 'Accedi'`);
         assert.equal(await evaluate(`document.documentElement.lang`), 'it');
-        assert.deepEqual(await evaluate(AXE), [], 'axe sign-in · Italian');
+        assert.deepEqual(await evaluate(AXE), NO_FINDINGS, 'axe sign-in · Italian');
         await choose(evaluate, SELECT.lang, 'en');
         await choose(evaluate, SELECT.theme, 'simple');
 
@@ -97,14 +98,14 @@ test(
             await choose(evaluate, SELECT.theme, theme);
             await choose(evaluate, SELECT.mode, mode);
             await until(`document.querySelector('nerv-dashboard').dataset.theme === '${theme}'`);
-            assert.deepEqual(await evaluate(AXE), [], `axe ${theme} · ${mode}`);
+            assert.deepEqual(await evaluate(AXE), NO_FINDINGS, `axe ${theme} · ${mode}`);
           }
         // Every EVA colour, dark and light (the accent tints text and borders).
         for (const mode of ['dark', 'light'])
           for (const accent of ['orange', 'blue', 'green', 'violet', 'ochre']) {
             await choose(evaluate, SELECT.mode, mode);
             await choose(evaluate, SELECT.accent, accent);
-            assert.deepEqual(await evaluate(AXE), [], `axe eva · ${mode} · ${accent}`);
+            assert.deepEqual(await evaluate(AXE), NO_FINDINGS, `axe eva · ${mode} · ${accent}`);
           }
 
         // A hidden page pauses the feed; visible again, it reconnects.
@@ -134,7 +135,7 @@ test(
           true,
           'no horizontal scroll at 320 px',
         );
-        assert.deepEqual(await evaluate(AXE), [], 'axe at phone width');
+        assert.deepEqual(await evaluate(AXE), NO_FINDINGS, 'axe at phone width');
         await page('Emulation.setDeviceMetricsOverride', {
           width: 1440,
           height: 1000,
