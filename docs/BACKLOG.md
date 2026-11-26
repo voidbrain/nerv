@@ -14,14 +14,14 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 46 | 40 |
-| **Require Human 🧑** | 14 | 18 |
+| **Require Human 🧑** | 14 | 19 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
+| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | [B-118](#b-118) |
 | [F-011](#f-011) |  | [B-068](#b-068) |  |
 | [F-004](#f-004) |  | [B-107](#b-107) |  |
 | [F-012](#f-012) |  | [B-113](#b-113) |  |
@@ -284,47 +284,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-143-T01: [PR #768](https://github.com/voidbrain/nerv/pull/768). Test: `test/misato.test.ts` (B-143 test, committed failing first); owner report 2026-11-25, NERV-01, sortie `148eef28` (events 1482–1498); [#768](https://github.com/voidbrain/nerv/pull/768) |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration: 2026-11-25 passed locally (`test/misato.test.ts`). Human: Pending (a live "in 2 minutes" reminder on NERV-01 is due 2 minutes after the request). |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
-### <a id="b-118"></a>[🐞 B-118](#top)
-
-**Windows CI: the test step runs into its 18-minute limit**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: seven clean full Windows runs within 12 minutes since #741 (not consecutive); an independent review of that evidence, then verify and close.
-
-| | |
-|---|---|
-| **Issue** | The `windows` job's `npm test` step (limit `timeout-minutes: 18`, set by B-076) ran out twice on PR #679: run 45259024776, attempts 1 (20:31:12–20:49:13 UTC) and 2 (21:20:20–21:38:20 UTC), 2026-11-23. Passing attempts that day took about 9–10 minutes (attempt 3 of the same run 9 m 48 s), so the suite either slows sharply on some runners or a test hangs; either way a PR waits on reruns. |
-| **Reproduce** | Rerun the `windows` job of a full-suite PR several times; compare the step duration and the `windows-test-report` artifact (the last line before the stop names the test after which it hung). |
-| **Check** | The two stopped attempts are read from their test reports and the cause named (a hanging test, or a slow runner with the slowest files measured); a hang gets a failing-first test and a fix, slowness a split, parallelism or test change; the next five full Windows runs finish within 12 minutes (a third of margin under the limit) without reruns. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
-|---|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-118-t01"></a>B-118-T01 — Make the Windows test step fit its limit with margin | 4 h | 2.5 h so far (stated) | 0.5 h | Implemented; verification pending | — | — | [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split |
-| 🟢 Small | <a id="b-118-t02"></a>B-118-T02 — Worker-link test files always exit; find why they time out on Windows | 2.5 h | 2 h so far (stated) | 0.5 h | Implemented; verification pending | — | [B-118-T03](#b-118-t03) | [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain |
-| 🟡 Medium | <a id="b-118-t03"></a>B-118-T03 — Other Runtime test files always exit; failing tests named in a stopped run | 2 h | 2.5 h so far (stated) | 2 h | Implemented; verification pending | [B-118-T02](#b-118-t02) | [B-118-T04](#b-118-t04) | [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen |
-| 🟡 Medium | <a id="b-118-t04"></a>B-118-T04 — Cut the Windows cost of the coordinator test files | 2 h | 0 h | 2 h | Implemented; verification pending | [B-118-T03](#b-118-t03) | — | [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round |
-| 🔴 Large | **Total** | 10.5 h | 7 h (3 of 4 steps recorded) | 5 h | 0 of 4 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-118.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-118-T01: [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split · B-118-T02: [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain · B-118-T03: [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen · B-118-T04: [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round. B-118-T04: Test: `test/sqlite-no-fsync.test.ts`; timing logs of runs 45506622094 to 45559316942 (Windows) and [run 45548137584](https://github.com/voidbrain/nerv/actions/runs/45548137584) (Linux); [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776); [#741](https://github.com/voidbrain/nerv/pull/741); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758) |
-| Opened | 2026-11-24 |
-| Verification | CI 2026-11-25 (later): 573, 545, 440 and 359 s (runs 45602256057, 45618960815, 45629193344, 45640302693); the first two needed a test rerun; two clean runs since. Unit 2026-11-25: Test: `test/sqlite-no-fsync.test.ts` and `test/coordinator-partition.test.ts` pass locally (B-118-T04). CI 2026-11-25: after PR #741 four Windows `npm test` runs took 352–506 s on the first attempt (runs 45572380286, 45577116814, 45580660697, 45589471622); five needed. Unit/integration 2026-11-24: Test: `test/worker-link-exit.test.ts` (B-118-T02) and `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs` (B-118-T03) pass locally. |
 | Reviewed | 2026-11-26 |
 
 </details>
@@ -602,6 +561,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-016-T10 verified: [PR #417](https://github.com/voidbrain/nerv/pull/417) merged on green CI (second fresh-context review found no blocker). F-016-T12 closed with the accepted decision revision and zero-blocking review in PR #470; scoped CI passed. Remaining distributed relocation acceptance is open. |
 | Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="b-118"></a>[🐞 B-118](#top)
+
+**Windows CI: the test step runs into its 18-minute limit**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🔴 Large | 5 h | — | — | 🤖 | — | 🤔 |
+
+🧑 **→** Close on 13 clean first-attempt Windows runs within 12 minutes, none over the limit, or wait for five consecutive green runs (the literal Check).
+
+| | |
+|---|---|
+| **Issue** | The `windows` job's `npm test` step (limit `timeout-minutes: 18`, set by B-076) ran out twice on PR #679: run 45259024776, attempts 1 (20:31:12–20:49:13 UTC) and 2 (21:20:20–21:38:20 UTC), 2026-11-23. Passing attempts that day took about 9–10 minutes (attempt 3 of the same run 9 m 48 s), so the suite either slows sharply on some runners or a test hangs; either way a PR waits on reruns. |
+| **Reproduce** | Rerun the `windows` job of a full-suite PR several times; compare the step duration and the `windows-test-report` artifact (the last line before the stop names the test after which it hung). |
+| **Check** | The two stopped attempts are read from their test reports and the cause named (a hanging test, or a slow runner with the slowest files measured); a hang gets a failing-first test and a fix, slowness a split, parallelism or test change; the next five full Windows runs finish within 12 minutes (a third of margin under the limit) without reruns. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-118-t01"></a>B-118-T01 — Make the Windows test step fit its limit with margin | 4 h | 2.5 h so far (stated) | 0.5 h | Implemented; verification pending | — | — | [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split |
+| 🟢 Small | <a id="b-118-t02"></a>B-118-T02 — Worker-link test files always exit; find why they time out on Windows | 2.5 h | 2 h so far (stated) | 0.5 h | Implemented; verification pending | — | [B-118-T03](#b-118-t03) | [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain |
+| 🟡 Medium | <a id="b-118-t03"></a>B-118-T03 — Other Runtime test files always exit; failing tests named in a stopped run | 2 h | 2.5 h so far (stated) | 2 h | Implemented; verification pending | [B-118-T02](#b-118-t02) | [B-118-T04](#b-118-t04) | [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen |
+| 🟡 Medium | <a id="b-118-t04"></a>B-118-T04 — Cut the Windows cost of the coordinator test files | 2 h | 0 h | 2 h | Implemented; verification pending | [B-118-T03](#b-118-t03) | — | [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round |
+| 🔴 Large | **Total** | 10.5 h | 7 h (3 of 4 steps recorded) | 5 h | 0 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-118.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-118-T01: [PR #695](https://github.com/voidbrain/nerv/pull/695) timing reporter, report upload, worker-link split · B-118-T02: [PR #699](https://github.com/voidbrain/nerv/pull/699) teardown hooks, bounded stop/close, idle brain · B-118-T03: [PR #706](https://github.com/voidbrain/nerv/pull/706) shared teardown scope, exit guard preload, failed tests logged as they happen · B-118-T04: [PR #741](https://github.com/voidbrain/nerv/pull/741) test preload without SQLite flush; partition sync opens each store once per round. B-118-T04: Test: `test/sqlite-no-fsync.test.ts`; timing logs of runs 45506622094 to 45559316942 (Windows) and [run 45548137584](https://github.com/voidbrain/nerv/actions/runs/45548137584) (Linux); [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776); [#741](https://github.com/voidbrain/nerv/pull/741); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758); [#787](https://github.com/voidbrain/nerv/pull/787) |
+| Opened | 2026-11-24 |
+| Verification | CI 2026-11-25 (later): 573, 545, 440 and 359 s (runs 45602256057, 45618960815, 45629193344, 45640302693); the first two needed a test rerun; two clean runs since. Unit 2026-11-25: Test: `test/sqlite-no-fsync.test.ts` and `test/coordinator-partition.test.ts` pass locally (B-118-T04). CI 2026-11-25: after PR #741 four Windows `npm test` runs took 352–506 s on the first attempt (runs 45572380286, 45577116814, 45580660697, 45589471622); five needed. Unit/integration 2026-11-24: Test: `test/worker-link-exit.test.ts` (B-118-T02) and `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs` (B-118-T03) pass locally. |
+| Reviewed | 2026-11-26 |
 
 </details>
 
