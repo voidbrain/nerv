@@ -225,7 +225,9 @@ process.on('message', (value: unknown) => {
         return p.items;
       }
       case 'inbox.brief':
-        return store.addBrief(params.message as string, new Date(), params.day as string | undefined);
+        return store.addBrief(params.message as string, new Date(), params.day as string | undefined, {
+          beforeStop: params.beforeStop === true,
+        });
       case 'inbox.lastBrief':
         return store.lastBrief();
       case 'approvals.expired':
