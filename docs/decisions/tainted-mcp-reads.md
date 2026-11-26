@@ -24,7 +24,7 @@ Option 2 now (small, safe, fixes "refused without telling me" and gives the dash
 
 ## Decision
 
-Accepted as recommended. Stage 1 (option 2, B-175-T03): the refusal says to start a new conversation, Misato stops at the first isolation refusal and the service replies in the owner's language, and the dashboard chat has a **New conversation** button. Stage 2 (option 4, B-175-T05 to T07): a per-grant opt-in for read-only tools; without it the stage 1 refusal stays.
+Accepted as recommended. Stage 1 (option 2, B-175-T03): the refusal says to start a new conversation, Misato stops at the first isolation refusal and the service replies in the owner's language, and the dashboard chat has a **New conversation** button. Stage 2 (option 4, B-175-T05 to T07): `"allowTainted": true` on a read grant for a server on this machine; that read runs at its grant's EVA class (not always EVA-00, and never less confined) in a tainted conversation, including when another base asks for it through the same gate; without it the stage 1 refusal stays. Granting the tool again drops the opt-in (fresh consent after a description change). `nerv eva` admission diagnostics (`src/eva-classes.ts`) do not know the opt-in and still report EVA-03 for such a read.
 
 ## Owner check
 

@@ -53,7 +53,18 @@ test('the tools config: reserved server ids refused, grants only for known serve
       grants: [{ server: 'notes', tool: 't', effect, eva: '00', fingerprint: '0123456789abcdef', allowTainted }],
     });
   assert.equal(optIn('read', true).grants[0]!.allowTainted, true);
-  assert.throws(() => optIn('write-local', true), /allowTainted is only for a read grant/);
+  for (const effect of ['write-local', 'write-external', 'irreversible'])
+    assert.throws(() => optIn(effect, true), /allowTainted is only for a read grant/);
+  assert.throws(
+    () =>
+      validateTools({
+        mcp: [{ id: 'hub', url: 'https://hub.example.test/mcp' }],
+        grants: [
+          { server: 'hub', tool: 't', effect: 'read', eva: '00', fingerprint: '0123456789abcdef', allowTainted: true },
+        ],
+      }),
+    /only for a server on this machine/,
+  );
   assert.throws(() => optIn('read', 'yes'), /allowTainted is true or absent/);
   assert.throws(() => optIn('read', false), /allowTainted is true or absent/);
   assert.match(
