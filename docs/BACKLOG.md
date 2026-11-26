@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 45 | 39 |
-| **Require Human 🧑** | 12 | 20 |
+| **Require Human 🧑** | 12 | 21 |
 
 ### Require Human 🧑
 
@@ -35,6 +35,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |  |  | [B-142](#b-142) |  |
 |  |  | [B-148](#b-148) |  |
 |  |  | [B-149](#b-149) |  |
+|  |  | [B-152](#b-152) |  |
 |  |  | [B-056](#b-056) |  |
 |  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
@@ -44,7 +45,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 195.25 h agent + 17 h owner across 180 open steps of 45 features and 39 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 192.25 h agent + 17 h owner across 179 open steps of 45 features and 39 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1913,45 +1914,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-152"></a>[🐞 B-152](#top)
-
-**50 CodeQL alerts open on main, never triaged**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-152-T01 triages each alert; the owner then dismisses the false positives (B-152-T02).
-
-| | |
-|---|---|
-| **Issue** | The CodeQL workflow's analysis of main `4a0df337` reports 50 open alerts, opened 2026-11-13 to 2026-11-23, and no record owns them. By rule: 9 `js/xss-through-dom` (high) and 2 `js/functionality-from-untrusted-source` in the retired prototypes under `remove/docs/NERV/`; 2 `js/incomplete-sanitization` (high) in `src/chronicle.ts:100,119`; 1 `js/insufficient-password-hash` (high) in `src/kaji.ts:51`; 1 `js/regex-injection` (high) in the harness-copied `tools/work-usage.mjs:975`; 30 `js/bad-code-sanitization` (29 in tests, 1 in `src/browser-cdp-driver.ts:101`); 5 `js/shell-command-injection-from-environment` (3 in tests, `src/node-inspection.ts:35`, `src/node-lifecycle-execution.ts:615`). |
-| **Reproduce** | `gh api --paginate 'repos/voidbrain/nerv/code-scanning/alerts?state=open&per_page=100' --jq length` prints 50. |
-| **Check** | Every alert is fixed (a true positive gets a failing test first) or listed with its reason in `docs/verification.md#codeql-alert-triage` (B-152-T01); the owner dismissed the listed ones (B-152-T02); the same query prints 0, or only alerts the record names with an owner. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟡 Medium | <a id="b-152-t01"></a>B-152-T01 — Triage the 50 open CodeQL alerts | 3 h | 0 h | 3 h | Ready | — | [B-152-T02](#b-152-t02) | 🤖 |
-| 🟢 Small | <a id="b-152-t02"></a>B-152-T02 — Owner: dismiss the CodeQL false positives B-152-T01 listed | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-152-T01](#b-152-t01) | — | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 3 h agent + 0.25 h owner | 0 of 2 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-152.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | GitHub code-scanning API at main `4a0df337`, analysis of 2026-11-26 09:48 UTC (50 results); `docs/audits/2026-11-26-full.md`; [#806](https://github.com/voidbrain/nerv/pull/806) |
-| Opened | 2026-11-26 |
-| Verification | Pending |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
 ### <a id="b-153"></a>[🐞 B-153](#top)
 
 **Five Gauntlet tests fail in the full local suite but pass alone**
@@ -2711,6 +2673,52 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-149-T01: [PR #785](https://github.com/voidbrain/nerv/pull/785) · B-149-T02: [PR #785](https://github.com/voidbrain/nerv/pull/785). Code reading at main `5c306f5a`: `src/delivery-state.ts` `claimFallback`, inserts in `src/store-reminders.ts`, `src/store-inbox.ts`, `src/batteries.ts`; F-004-T09 [PR #760](https://github.com/voidbrain/nerv/pull/760); [#783](https://github.com/voidbrain/nerv/pull/783); [#785](https://github.com/voidbrain/nerv/pull/785) |
 | Opened | 2026-11-26 |
 | Verification | Unit: CI green on #785 (2026-11-26): `test/push-first.test.ts` "B-149: a pushed reminder read in the app before the deadline never reaches Telegram" (failed on main before the fix), `test/dashboard-poll.test.ts` "B-149-T02: …" and "B-149 review: a newer brief polled into an open box …", `test/push-first.test.ts` "B-149 review: marking an inbox item read needs sign-in", the native-peer 403 in `test/native-auth.test.ts`, browser case in `test/angular.browser.mjs` (off screen not read, scrolled on screen read). Device: Pending (B-149-T03). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-152"></a>[🐞 B-152](#top)
+
+**50 CodeQL alerts open on main, never triaged**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
+
+🧑 **→** Dismiss the 50 triaged alerts with the [CodeQL alert triage](verification.md#codeql-alert-triage) commands (B-152-T02).
+
+| | |
+|---|---|
+| **Issue** | The CodeQL workflow's analysis of main `4a0df337` reports 50 open alerts, opened 2026-11-13 to 2026-11-23, and no record owns them. By rule: 9 `js/xss-through-dom` (high) and 2 `js/functionality-from-untrusted-source` in the retired prototypes under `remove/docs/NERV/`; 2 `js/incomplete-sanitization` (high) in `src/chronicle.ts:100,119`; 1 `js/insufficient-password-hash` (high) in `src/kaji.ts:51`; 1 `js/regex-injection` (high) in the harness-copied `tools/work-usage.mjs:975`; 30 `js/bad-code-sanitization` (29 in tests, 1 in `src/browser-cdp-driver.ts:101`); 5 `js/shell-command-injection-from-environment` (3 in tests, `src/node-inspection.ts:35`, `src/node-lifecycle-execution.ts:615`). |
+| **Reproduce** | [CodeQL alert triage](verification.md#codeql-alert-triage); `gh api --paginate 'repos/voidbrain/nerv/code-scanning/alerts?state=open&per_page=100' --jq length` prints 50. |
+| **Check** | Every alert is fixed (a true positive gets a failing test first) or listed with its reason in `docs/verification.md#codeql-alert-triage` (B-152-T01); the owner dismissed the listed ones (B-152-T02); the same query prints 0, or only alerts the record names with an owner. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who |
+|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-152-t02"></a>B-152-T02 — Owner: dismiss the CodeQL false positives B-152-T01 listed | 0 h | 0 h | 0 h agent + 0.25 h owner | Ready | [🧑‍🔧](verification.md#codeql-alert-triage) |
+| 🟢 Small | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 0.25 h owner | 1 of 2 completed | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="b-152-t01"></a>B-152-T01 — Triage the 50 open CodeQL alerts | 3 h | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-152.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | GitHub code-scanning API at main `4a0df337`, analysis of 2026-11-26 09:48 UTC (50 results); `docs/audits/2026-11-26-full.md`; [#806](https://github.com/voidbrain/nerv/pull/806); [#810](https://github.com/voidbrain/nerv/pull/810) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
 | Reviewed | 2026-11-26 |
 
 </details>
