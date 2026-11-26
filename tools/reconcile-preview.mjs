@@ -91,6 +91,32 @@ export function preview(root, template, to) {
             : 'Review local differences before any replacement.',
       });
     }
+  // B-128: a file the release adds to a template copied list (core, and each stack's fragment) that the stamp does
+  // not map yet. Compared with the same list at the stamp's release, so a file a project left out is not listed again.
+  const mapped = new Set(rows.flatMap((r) => [r.path, ...r.comparisons.map((c) => c.source)]));
+  const lists = [
+    'core/.harness.json',
+    ...(stamp.stacks ?? []).filter((s) => s !== 'core').map((s) => `${s}/.harness.fragment.json`),
+  ];
+  const copiedAt = (ref, list) => {
+    try {
+      return JSON.parse(at(ref, list) ?? '{}').copied ?? {};
+    } catch {
+      return {};
+    }
+  };
+  for (const list of lists) {
+    const before = copiedAt(`v${stamp.version}`, list);
+    for (const [path, source] of Object.entries(copiedAt(tag, list)))
+      if (typeof source === 'string' && !(path in before) && !mapped.has(path) && !mapped.has(source))
+        rows.push({
+          path,
+          kind: 'copied',
+          comparisons: [{ source, action: 'new-in-template-review' }],
+          protectedRules: [],
+          preservation: `Added to ${list} since ${stamp.version}: copy it and add it to \`copied\`, or record why the project leaves it out.`,
+        });
+  }
   return {
     schemaVersion: 1,
     templateRelease: tag,
@@ -100,7 +126,7 @@ export function preview(root, template, to) {
     rows,
     checks: [
       'Verify remote tag/source online under APPLY before applying; this preview never fetches.',
-      'Resolve every manual/conflict/base-unknown/source-missing review; no automatic semantic rule verification.',
+      'Resolve every manual/conflict/base-unknown/source-missing/new-in-template review; no automatic semantic rule verification.',
       'Run owning project checks, copied-file parity, links and backlog/archive preservation.',
       'Record evidence and actual friction; no project is modified by this preview.',
     ],
