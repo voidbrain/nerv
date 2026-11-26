@@ -9,30 +9,29 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 31 | 9 | 62 | 30 |
+| **This week** | 31 | 9 | 63 | 31 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 57 | 46 |
-| **Require Human 🧑** | 13 | 20 |
+| **Require Human 🧑** | 13 | 19 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-116](#f-116) | [B-091](#b-091) | — |
-| [F-011](#f-011) | [F-142](#f-142) | [B-057](#b-057) |  |
-| [F-004](#f-004) |  | [B-068](#b-068) |  |
-| [F-012](#f-012) |  | [B-107](#b-107) |  |
-| [F-016](#f-016) |  | [B-113](#b-113) |  |
-| [F-086](#f-086) |  | [B-122](#b-122) |  |
-| [F-087](#f-087) |  | [B-123](#b-123) |  |
-| [F-133](#f-133) |  | [B-128](#b-128) |  |
-| [F-092](#f-092) |  | [B-129](#b-129) |  |
-| [F-060](#f-060) |  | [B-134](#b-134) |  |
-| [F-007](#f-007) |  | [B-135](#b-135) |  |
-|  |  | [B-142](#b-142) |  |
+| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
+| [F-011](#f-011) | [F-142](#f-142) | [B-068](#b-068) |  |
+| [F-004](#f-004) |  | [B-107](#b-107) |  |
+| [F-012](#f-012) |  | [B-113](#b-113) |  |
+| [F-016](#f-016) |  | [B-122](#b-122) |  |
+| [F-086](#f-086) |  | [B-123](#b-123) |  |
+| [F-087](#f-087) |  | [B-128](#b-128) |  |
+| [F-133](#f-133) |  | [B-129](#b-129) |  |
+| [F-092](#f-092) |  | [B-134](#b-134) |  |
+| [F-060](#f-060) |  | [B-135](#b-135) |  |
+| [F-007](#f-007) |  | [B-142](#b-142) |  |
 |  |  | [B-148](#b-148) |  |
 |  |  | [B-149](#b-149) |  |
 |  |  | [B-056](#b-056) |  |
@@ -44,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 270.75 h agent + 21.25 h owner across 264 open steps of 57 features and 46 other records. 163 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 268.5 h agent + 21 h owner across 264 open steps of 57 features and 46 other records. 163 h of actual effort recorded on 151 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -54,52 +53,13 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 - **Status:** 🔴 Open · 🟠 Investigate · 🟡 Implemented · 🟢 Verified · 🟣 Blocked · 🔵 Closed
 - **Steps:** `effort` = remaining agent time (🟢 up to 1 h · 🟡 4 h · 🔴 8 h · 🟣 more); `estimate` = latest whole-step estimate; `actual` = effort spent so far; `h` = agent hours (owner time apart); step status is not parent acceptance.
 
-### <a id="b-091"></a>[🐞 B-091](#top)
-
-**Windows: a fenced stop ends uncertain after a SQLite "disk I/O error" while recording it**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3 h agent + 0.25 h owner | — | [F-005-T29](#f-005-t29) | 🤖 | 🧑‍🔧 | — |
-
-🧑 **→** B-091-T02: on Tabgha's desktop session, update NERV-02 and run one fenced stop ([page](acceptance/b091-tabgha-fenced-stop.md)).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24), from the desktop session: the fenced stop removed the task and ended NERV-02, then printed "disk I/O error" and left the receipt `uncertain` with `stop:started`. The disk was fine (115 GB free) and the lifecycle journal had been written at 18:43. Cause (named 2026-11-25): the stop's poll read the live database read-only with no busy handler while the killed `serve` left its WAL behind. A later stop on the same machine completed. |
-| **Reproduce** | On Windows, a fenced stop of a running NERV service from the desktop session; intermittent (once in two stops). |
-| **Check** | The failing write is named (journal and statement); a committed test fails first if the cause is in code (for example a retry on SQLITE_IOERR or BUSY while the stopped process releases the file); a fenced stop on Tabgha completes its receipt. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="b-091-t01"></a>B-091-T01 — Name the failing journal write in a Windows stop and make the receipt complete | 3 h | 0 h | 3 h | Implemented; verification pending | — | [B-091-T02](#b-091-t02), [F-005-T29](#f-005-t29) | 🤖 | [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix; [PR #742](https://github.com/voidbrain/nerv/pull/742) inspect read cause and fix |
-| 🟢 Small | <a id="b-091-t02"></a>B-091-T02 — Owner: a fenced stop on Tabgha from its desktop session completes its receipt | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-091-T01](#b-091-t01) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 3 h agent + 0.25 h owner | 0 of 2 completed | | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-091.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-091-T01: [PR #557](https://github.com/voidbrain/nerv/pull/557) implementation; [PR #617](https://github.com/voidbrain/nerv/pull/617) live recurrence and recovery evidence; [PR #620](https://github.com/voidbrain/nerv/pull/620) recurrence fix; [PR #742](https://github.com/voidbrain/nerv/pull/742) inspect read cause and fix. [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18; [#742](https://github.com/voidbrain/nerv/pull/742); [#750](https://github.com/voidbrain/nerv/pull/750); [#790](https://github.com/voidbrain/nerv/pull/790) |
-| Opened | 2026-11-18 |
-| Verification | Unit/integration 2026-11-25: Test: `test/windows-service-lifecycle.test.ts` (live database held during `inspect()`, failed first with `database is locked`); PR #742 merged on green CI. Real-device: a fenced stop on Tabgha at `2627d483` or later: Pending. |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
 ### <a id="f-005"></a>[✨ F-005](#top)
 
 **Discover, install and operate enrolled remote workers**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟡 Medium | 3.5 h | [B-091-T01](#b-091-t01) | — | 🤖 | — | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 3.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: F-005-T15 — T06h — Upgrades that raise the schema version (Implemented; verification pending).
 
@@ -114,7 +74,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-005-t15"></a>F-005-T15 — T06h — Upgrades that raise the schema version | 1.25 h | 0.75 h so far (stated) | 0.5 h | Implemented; verification pending | — | — | 🤖 | — |
-| 🟡 Medium | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 2.5 h | 0 h | 2.5 h | Ready | [B-091-T01](#b-091-t01) | [F-005-T36](#f-005-t36) | ⏳ 🤖 | [PR #617](https://github.com/voidbrain/nerv/pull/617) Tabgha update attempt and safe recovery evidence |
+| 🟡 Medium | <a id="f-005-t29"></a>F-005-T29 — T11d — Upgrades, prerequisites, update policy and platform lifecycle on the device matrix | 2.5 h | 0 h | 2.5 h | Ready | — | [F-005-T36](#f-005-t36) | 🤖 | [PR #617](https://github.com/voidbrain/nerv/pull/617) Tabgha update attempt and safe recovery evidence |
 | 🟢 Small | <a id="f-005-t36"></a>F-005-T36 — Record the evidence of F-005-T29 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-005-T29](#f-005-t29) | [F-005-T30](#f-005-t30) | ⏳ 🤖 | — |
 | 🟢 Small | <a id="f-005-t30"></a>F-005-T30 — T11e — Parent acceptance and closure reconciliation | 0.25 h | 0 h | 0.25 h | Planned | [F-005-T36](#f-005-t36) | — | ⏳ 🤖 | — |
 | 🟡 Medium | **Total** | 26.25 h (30 of 38 steps) | 19.75 h (23 of 38 steps recorded) | 3.5 h | 34 of 38 completed | | | | |
@@ -2421,6 +2381,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-26 |
 | Verification | Browser: 2026-11-26, local headless Chrome: the three browser files fail on main with the cases above and pass with the fix (angular 1/1, evaluation 8/8, dashboard shell 2/2, each run alone); screenshot of MAGI in Eva · Light · Orange with the CRT checked by eye (not in the repository). Unit: the 66 Node tests that read the old dashboard pass. CI: 2026-11-26, PR #816 run 45808453265 passed all five jobs (B-154-T01 and B-154-T02 closed; B-154-T03 open). |
 | Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-171"></a>[🐞 B-171](#top)
+
+**Windows: a service installed before B-102-T01 is "foreign" because only the launcher's comment line changed**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-171-T01 and B-171-T02 in nerv#842; close on green CI.
+
+| | |
+|---|---|
+| **Issue** | Seen 2026-11-26 on NERV-02 (Tabgha, Windows): `nerv update` and `lifecycle-apply stop` are refused with "Service or runtime ownership is unknown or belongs elsewhere." and "The definition must exactly match this profile, source and Node." The data home's `nerv-service.vbs` (written 2026-11-18, Node path and source correct) differs from what the current release renders only in its first comment line: B-102-T01 (`932ade4c`) dropped "(F-037)" from it. The Windows `inspect()` (`src/node-lifecycle-windows.ts`) compared the launcher byte for byte, so the definition read `foreign` and no lifecycle action could follow (install needs it absent, the others owned). `authorizedStart` already ignored the comment line (`windowsLauncherMatches`, B-091); `inspect()` did not. It blocked [B-091-T02](archive/backlog-2026.md#b-091) until the owner's workaround: `service uninstall`, then `service install` run with the nvm Node, which rewrites both files (done on Tabgha 2026-11-26; B-091-T02 then passed). |
+| **Reproduce** | Install the Windows service, replace the launcher's first comment line with the earlier release's text, run `lifecycle-plan stop`: the plan is blocked with the ownership blocker. |
+| **Check** | A launcher that differs only in its first comment line is `owned`, and a fenced stop and uninstall run with it in place; a launcher whose command differs stays `foreign`; the test committed failing first (B-171-T01) passes unchanged after B-171-T02. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-171-t01"></a>B-171-T01 — Failing test: a launcher from an earlier release, differing only in its comment, reads foreign | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | — | [B-171-T02](#b-171-t02) | [PR #842](https://github.com/voidbrain/nerv/pull/842) B-171 |
+| 🟢 Small | <a id="b-171-t02"></a>B-171-T02 — Windows inspect() ignores the launcher's comment line, as authorizedStart does | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [B-171-T01](#b-171-t01) | — | [PR #842](https://github.com/voidbrain/nerv/pull/842) B-171 |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h | 0 of 2 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-171.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-171-T01: [PR #842](https://github.com/voidbrain/nerv/pull/842) B-171 · B-171-T02: [PR #842](https://github.com/voidbrain/nerv/pull/842) B-171. `src/node-lifecycle-windows.ts` (`inspect`, `windowsLauncherMatches`); cause `932ade4c` (B-102-T01); [#842](https://github.com/voidbrain/nerv/pull/842). Test: `test/windows-service-lifecycle.test.ts` "B-171" |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Every Windows service installed before B-102-T01 cannot be updated or stopped through the lifecycle; NERV-02 on Tabgha is the known case. |
 
 </details>
 
