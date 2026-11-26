@@ -661,3 +661,7 @@ PRs #799–#802 merged on green CI; reconciled in #806 (F-134-T02, full audit): 
 #804 recorded its own closures (B-137, B-138); F-120 (#800) is left to its open PR #803; #799 was the previous reconciliation.
 
 `npm run ci:status` for all four: every merged run green; #799, #800 and #802 are docs-only (Windows, macOS and the full suite skipped, B-139); #801 passed all five jobs. The same PR records the 2026-11-26 full audit and opens B-152 and B-153.
+
+## 2026-11-26 — main `6847226`
+
+PR #806 (full audit) merged on green CI, all five jobs; F-134 closed in [#807](https://github.com/voidbrain/nerv/pull/807) (F-134-T01 #802, F-134-T02 #806). B-152 and B-153 stay open.
