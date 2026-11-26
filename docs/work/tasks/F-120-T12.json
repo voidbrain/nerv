@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-120-T12",
+  "parent": "F-120",
+  "title": "Adopt scheduling-time, estimation and research packs on release",
+  "goal": "New general packs reach NERV's campaign when gauntlet-protocol tags them",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"ok to all\" (accepts proposal from solution:F-016, docs/reviews/2026-11-shared-assets/gauntlet-nerv.md); same message: \"nerv and all modules will need to work with Italian\".",
+    "When gauntlet-protocol tags scheduling-time-v1, estimation-v1 or research-v1 (F-023-T02, F-024-T02, F-025-T02) the pin moves and the pack runs in the next owner-approved campaign",
+    "Each pack run includes its Italian cases (owner 2026-11-26); if a release has none, a gauntlet-protocol record is opened for them",
+    "Covers B-143, F-083, F-085 (external-project-intake)"
+  ],
+  "dependsOn": [
+    "F-120-T03"
+  ],
+  "resources": [
+    "package.json",
+    "evals/gauntlet/**",
+    "docs/work/records/F-120.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "The first model run and any --allow-models run need the owner (human action); a material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "From solution:F-016-T03 proposal 4; 0.5 h agent per release; Italian phrasings are part of every case set (owner 2026-11-26): each capability has Italian and English requests. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
