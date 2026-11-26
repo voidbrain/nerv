@@ -37,6 +37,9 @@
     "estimateAgentHours": 0.25
   },
   "prs": [
-    "PRNUM"
+    {
+      "pr": 831,
+      "note": "failing tests for Italian requests and English plurals"
+    }
   ]
 }

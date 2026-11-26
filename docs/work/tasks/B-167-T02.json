@@ -40,6 +40,9 @@
     "estimateAgentHours": 0.5
   },
   "prs": [
-    "PRNUM"
+    {
+      "pr": 831,
+      "note": "detector fix and nerv-planner 1.1.0"
+    }
   ]
 }

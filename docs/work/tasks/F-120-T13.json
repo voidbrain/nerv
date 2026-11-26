@@ -38,6 +38,9 @@
   },
   "ownerLink": "docs/acceptance/f120-t09-planner-first-run.md",
   "prs": [
-    "PRNUM"
+    {
+      "pr": 831,
+      "note": "owner ok of 2026-11-26 recorded"
+    }
   ]
 }
