@@ -1,8 +1,9 @@
 // NERV's adapter to the pinned Gauntlet release: system (NERV) packs and every common pack the release ships, the
 // generated capability index, and the run ledger that says which cases still need a run (F-074-T06..T08).
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readFileSync, writeFileSync, existsSync, readdirSync, renameSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, renameSync, mkdirSync, realpathSync } from 'node:fs';
 import {
   readJSON,
   readEvidence,
@@ -38,12 +39,26 @@ const systemFile = 'evals/gauntlet/system-v1.json';
 const ledgerFile = 'evals/gauntlet/ledger.json';
 const consumptionFile = 'evals/gauntlet/consumption.json';
 // Tests point these at temporary copies; production uses the committed files.
-const ledgerPath = () => resolve(process.env.NERV_GAUNTLET_LEDGER ?? here(ledgerFile));
-const consumptionPath = () => resolve(process.env.NERV_GAUNTLET_CONSUMPTION ?? here(consumptionFile));
-const tasksPath = () => resolve(process.env.NERV_GAUNTLET_TASKS ?? here('docs/work/tasks'));
-const systemPath = () => resolve(process.env.NERV_GAUNTLET_SYSTEM ?? here(systemFile));
+// B-165: a command reads these settings once, when it starts, and keeps them for its whole run: a test that changes
+// the process environment while another test's command is in flight (a test the runner timed out keeps running)
+// can no longer send that command's ledger write to the tracked ledger.
+const SETTINGS = [
+  'NERV_GAUNTLET_LEDGER',
+  'NERV_GAUNTLET_CONSUMPTION',
+  'NERV_GAUNTLET_TASKS',
+  'NERV_GAUNTLET_SYSTEM',
+  'NERV_GAUNTLET_BROWSER_BUILD',
+];
+const commandSettings = new AsyncLocalStorage();
+const setting = (name) => (commandSettings.getStore() ?? process.env)[name];
+// Runs `body` with these settings instead of the process environment's, for every command it starts (tests).
+export const withGauntletSettings = (settings, body) => commandSettings.run({ ...settings }, body);
+const ledgerPath = () => resolve(setting('NERV_GAUNTLET_LEDGER') ?? here(ledgerFile));
+const consumptionPath = () => resolve(setting('NERV_GAUNTLET_CONSUMPTION') ?? here(consumptionFile));
+const tasksPath = () => resolve(setting('NERV_GAUNTLET_TASKS') ?? here('docs/work/tasks'));
+const systemPath = () => resolve(setting('NERV_GAUNTLET_SYSTEM') ?? here(systemFile));
 // B-127: tests point this at a temporary folder instead of moving the shared build that browser tests serve.
-const browserBuildPath = () => resolve(process.env.NERV_GAUNTLET_BROWSER_BUILD ?? here('dist/web/browser'));
+const browserBuildPath = () => resolve(setting('NERV_GAUNTLET_BROWSER_BUILD') ?? here('dist/web/browser'));
 const releaseTag = () => readJSON(here('vendor/gauntlet-protocol.json')).releaseTag;
 
 export function readSystemPackWithInputs() {
@@ -216,9 +231,17 @@ export function testIndex(reports = []) {
 // -------------------------------------------------------------------------------------------------- run ledger
 const readLedger = () => (existsSync(ledgerPath()) ? validateLedger(readJSON(ledgerPath())) : emptyLedger());
 function writeLedger(ledger) {
-  const temporary = ledgerPath() + '.' + process.pid + '.tmp';
+  const path = ledgerPath();
+  // B-165: a test records only to a ledger it owns; the tracked one changes through an owner-approved run. The test
+  // runner marks its file processes (NODE_TEST_CONTEXT) or runs in this one (--test-isolation=none); `node file.mjs`
+  // is not recognisable. Real paths, so a symlinked or differently cased path to the same file is caught too.
+  const underTest = Boolean(process.env.NODE_TEST_CONTEXT) || process.execArgv.some((a) => /^--test(=|$|-)/.test(a));
+  const same = (a, b) => existsSync(a) && existsSync(b) && realpathSync(a) === realpathSync(b);
+  if (underTest && (path === here(ledgerFile) || same(path, here(ledgerFile))))
+    throw Error('Refusing to write the tracked Gauntlet ledger ' + ledgerFile + ' under the test runner (B-165)');
+  const temporary = path + '.' + process.pid + '.tmp';
   writeFileSync(temporary, JSON.stringify(validateLedger(ledger), null, 2) + '\n', { flag: 'wx' });
-  renameSync(temporary, ledgerPath());
+  renameSync(temporary, path);
 }
 const entryKey = (e) => JSON.stringify([e.pack, e.case, e.profileHash]);
 // A selected run (one system case, or a model pack's pending cases) ran the same case definitions as the full pack:
@@ -296,7 +319,12 @@ export function pending({ maxAgeDays, profile, modelDigest, runtimeHash, scenari
 }
 
 // -------------------------------------------------------------------------------------------------- commands
-export async function main(args = process.argv.slice(2), services = { execute: executeWithEvidence }) {
+export function main(args = process.argv.slice(2), services = { execute: executeWithEvidence }) {
+  if (commandSettings.getStore()) return command(args, services);
+  const settings = Object.fromEntries(SETTINGS.map((name) => [name, process.env[name]]));
+  return commandSettings.run(settings, () => command(args, services));
+}
+async function command(args, services) {
   const [command = 'plan', ...rest] = args,
     options = {};
   const allowed = {

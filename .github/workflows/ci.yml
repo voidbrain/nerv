@@ -97,6 +97,8 @@ jobs:
       - run: npm run check:evals
       - run: npm run check:gauntlet-index
       - run: npm run check:gauntlet-runs
+      # B-165: a branch never drops ledger entries main has (a local test run once rewrote the ledger).
+      - run: npm run check:gauntlet-ledger
       - run: npm run format:check
       - run: npm run lint
       - run: npm run check:tooling

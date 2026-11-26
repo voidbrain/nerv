@@ -4,7 +4,7 @@
   "parent": "B-165",
   "title": "Resolve the ledger path once per command; tests pass it explicitly",
   "goal": "A command reads and writes the same ledger file, and the Gauntlet tests no longer mutate process-wide env around async work",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "B-165-T01 passes unchanged",
     "npm test twice on a loaded host leaves git status clean under evals/",
@@ -34,10 +34,10 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-26: capture the path in the command options, replace the env mutation in about ten tests. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 1.5 h agent. Implemented the same day: Settings captured per command (AsyncLocalStorage) plus a test-runner guard on the tracked ledger. Remaining: CI.",
     "reviewed": "2026-11-26",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },
