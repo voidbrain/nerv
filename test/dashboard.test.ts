@@ -305,7 +305,13 @@ test('every theme, mode and colour reaches WCAG AA where text sits; Eva · Dark 
     migrateTheme: (n: string) => string[] | undefined;
     ACCENTS: Record<string, unknown>;
   };
-  const lum = (hex: string) => {
+  // B-151: #000 and #fff are three-digit hex; read as six digits they gave NaN, and NaN < 4.5 is false, so every
+  // pair with a black or white text passed unchecked. Expand them, and fail any ratio that is not a number.
+  const full = (hex: string) =>
+    /^#[0-9a-f]{3}$/i.test(hex) ? '#' + [...hex.slice(1)].map((d) => d + d).join('') : hex;
+  const lum = (short: string) => {
+    const hex = full(short);
+    assert.match(hex, /^#[0-9a-f]{6}$/i, `${short} is a hex colour`);
     const c = [1, 3, 5]
       .map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
       .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
@@ -323,7 +329,7 @@ test('every theme, mode and colour reaches WCAG AA where text sits; Eva · Dark 
         const at = `${theme}·${mode}·${accent}`;
         const need = (fg: string, bg: string, min = 4.5) => {
           const r = ratio(p[fg]!, p[bg]!);
-          if (r < min) fails.push(`${at}: ${fg} on ${bg} ${r.toFixed(2)}`);
+          if (!(r >= min)) fails.push(`${at}: ${fg} on ${bg} ${r.toFixed(2)}`);
         };
         for (const fg of [
           'text',
