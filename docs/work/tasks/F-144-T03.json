@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "F-144-T03",
+  "parent": "F-144",
+  "title": "B: warm the model at service start, after an update and before scheduled briefs",
+  "goal": "B: warm the model at service start, after an update and before scheduled briefs",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"ollama a+b, c as option in dashboard\".",
+    "A warm-up helper loads the role models with no prompt text (POST /api/generate with keep_alive) at service start, after a lifecycle update restart, and about 1 minute before a scheduled brief or reminder that needs the model (reminder engine, src/battery-storage-reminders.ts and the update scheduler path name the moments)",
+    "Warm-ups are deduplicated, never overlap a live request, are skipped when the model is already resident (/api/ps) or Ollama is unreachable, and a failure never blocks start or a reminder (model outage does not stop reminders); tests across the scheduler and the helper (a join test, not one per side)"
+  ],
+  "dependsOn": [
+    "F-144-T02"
+  ],
+  "resources": [
+    "src/warm-up.ts",
+    "src/update-scheduler.ts",
+    "src/reminder-time.ts",
+    "test/warm-up.test.ts",
+    "docs/work/records/F-144.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "concurrency-control",
+    "regression-design"
+  ],
+  "privacy": "Local Ollama only; test data is neutral and invented; no secrets; warm-up calls carry no user text.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; bounded edit plus tests. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": "PRNUM",
+      "note": "plan"
+    }
+  ]
+}

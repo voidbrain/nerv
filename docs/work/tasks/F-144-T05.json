@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "F-144-T05",
+  "parent": "F-144",
+  "title": "Time to first token, cold vs warm, in doctor and the dashboard",
+  "goal": "Time to first token, cold vs warm, in doctor and the dashboard",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"ollama a+b, c as option in dashboard\".",
+    "Each local model call records time to first token and whether the model was resident before it (/api/ps before the call, or Ollama load_duration if the native route is used), kept as a small bounded in-memory series per model with no prompt text",
+    "/api/doctor and nerv doctor report median time to first token cold and warm and the sample counts, so the gain is visible; \"no data yet\" when empty; tests with a fake streaming server"
+  ],
+  "dependsOn": [
+    "F-144-T01"
+  ],
+  "resources": [
+    "src/engine-provider.ts",
+    "src/server.ts",
+    "src/cli.ts",
+    "test/doctor.test.ts",
+    "docs/work/records/F-144.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Local Ollama only; test data is neutral and invented; no secrets; warm-up calls carry no user text.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; bounded edit plus tests. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": "PRNUM",
+      "note": "plan"
+    }
+  ]
+}

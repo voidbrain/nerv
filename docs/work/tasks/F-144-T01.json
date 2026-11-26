@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-144-T01",
+  "parent": "F-144",
+  "title": "Failing test and probe: how keep_alive reaches Ollama",
+  "goal": "Failing test and probe: how keep_alive reaches Ollama",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"ollama a+b, c as option in dashboard\".",
+    "A failing test (committed first) shows that a local Ollama role call (src/engine-provider.ts, completeOpenAICompatible via /v1/chat/completions) sends no keep_alive today and that, after the change, the request or its follow-up carries keep_alive with the configured value",
+    "The step records what Ollama accepts, checked on the owner Mac or against Ollama docs and noted as such: the OpenAI-compatible /v1 endpoint may ignore keep_alive, so the mechanism is chosen here: (1) a native /api/chat for local Ollama role calls, or (2) a cheap POST /api/generate {model, keep_alive} with no prompt after each reply, which resets the unload timer without generating; the page names the choice and why in docs/decisions/keep-model-warm.md",
+    "No other behaviour changes; remote and non-Ollama routes never receive keep_alive"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/engine-provider.ts",
+    "test/engine-provider.test.ts",
+    "docs/decisions/keep-model-warm.md",
+    "docs/work/records/F-144.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Local Ollama only; test data is neutral and invented; no secrets; warm-up calls carry no user text.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; bounded edit plus tests. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  },
+  "prs": [
+    {
+      "pr": "PRNUM",
+      "note": "plan"
+    }
+  ]
+}

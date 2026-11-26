@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-144-T02",
+  "parent": "F-144",
+  "title": "A: keep role models loaded longer after the last use",
+  "goal": "A: keep role models loaded longer after the last use",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"ollama a+b, c as option in dashboard\".",
+    "A setting keepAlive (default \"30m\", validated: a duration up to 24h, never a free string passed to Ollama) is applied by the mechanism T01 chose to every local Ollama role call (chat, Misato, Casper), with unit tests for default, override, invalid value and non-Ollama routes",
+    "Config is read through the existing validated config path (src/config.ts); the value is documented"
+  ],
+  "dependsOn": [
+    "F-144-T01"
+  ],
+  "resources": [
+    "src/config.ts",
+    "src/engine-provider.ts",
+    "test/engine-provider.test.ts",
+    "docs/work/records/F-144.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Local Ollama only; test data is neutral and invented; no secrets; warm-up calls carry no user text.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; bounded edit plus tests. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": "PRNUM",
+      "note": "plan"
+    }
+  ]
+}
