@@ -675,3 +675,7 @@ PRs #803, #805 and #807–#819 (15) merged on green CI. Closed B-157, B-158 and 
 ## 2026-11-26 — main `661ebdd8`
 
 PR #824 reconciles the harness to v10.24.1 (from 10.24.0); the owner authorised it in chat on 2026-11-26 ("ok to all") although the template backlog is not empty (F-125-T03, #823). CI pending at this entry.
+
+## 2026-11-26 — hidden-code sweep, NERV follow-up
+
+Owner decision in chat 2026-11-26 on the hidden-code sweep (coordinator `docs/reviews/2026-11-26-hidden-code.md`): "3 ok". The sweep's nerv findings (undocumented `NERV_TELEGRAM_API`, `NERV_PORT`/`NODO_PORT`, the verification-tool variables and the test-only `ajv-formats` packages) are documented in `docs/INSTALL.md`, "Environment variables" ([PR #827](https://github.com/voidbrain/nerv/pull/827)).
