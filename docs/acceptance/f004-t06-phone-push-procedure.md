@@ -67,7 +67,7 @@ Checks B-149 on the phone once it is deployed, in the same sitting as the steps 
    ```zsh
    nerv remind "Read in app D" "$(date -v+1M +%Y-%m-%dT%H:%M:00%z | sed -E 's/([0-9]{2})([0-9]{2})$/\1:\2/')"
    ```
-   Expected: the notification arrives on the phone. Do not tap it. Within 10 minutes, open the workspace app from the Home Screen, stay on **Overview** (tap **Refresh** if needed) and check that "Read in app D" is in the **Inbox** panel.
+   Expected: the notification arrives on the phone. Do not tap it. Within 10 minutes, open the workspace app from the Home Screen, stay on **Overview** (tap **Refresh** if needed) and scroll down until "Read in app D" is on screen in the **Inbox** panel (a row counts as read only once it is on screen).
 2. Check it was recorded as read (read-only):
    ```zsh
    sqlite3 -readonly ~/.nerv/nerv.sqlite "SELECT substr(message,1,40), read_at FROM deliveries WHERE message LIKE '%Read in app D%';"

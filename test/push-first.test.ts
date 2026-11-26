@@ -363,3 +363,23 @@ test('B-149: a pushed reminder read in the app before the deadline never reaches
     await t.close();
   }
 });
+
+test('B-149 review: marking an inbox item read needs sign-in', async () => {
+  const store = new Store(':memory:');
+  const server = makeServer(store, 's'.repeat(32));
+  await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
+  try {
+    const { id } = store.addBrief('Buongiorno.');
+    const url = `http://127.0.0.1:${(server.address() as { port: number }).port}/api/inbox/${id}/read`;
+    assert.equal((await fetch(url, { method: 'POST' })).status, 401);
+    assert.equal(
+      (await fetch(url, { method: 'POST', headers: { Authorization: 'Bearer ' + 'x'.repeat(32) } })).status,
+      401,
+    );
+    const row = store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(id) as { read_at: string | null };
+    assert.equal(row.read_at, null, 'nothing marked');
+  } finally {
+    await new Promise<void>((done) => server.close(() => done()));
+    store.close();
+  }
+});

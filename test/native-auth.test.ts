@@ -105,6 +105,14 @@ test('native TLS pairing enforces trust, read-only scope, revocation and browser
     assert.equal(notice.kind, 'approval');
     assert.equal(notice.approval.id, approval.approvalId);
     assert.equal(notice.approval.pending, true);
+    // B-149 review: marking an inbox item read is a write: refused without sign-in and for a read-only native peer.
+    const readPath = '/api/inbox/' + (notice as unknown as { id: string }).id + '/read';
+    assert.equal((await call(readPath, 'POST')).status, 401);
+    assert.equal((await call(readPath, 'POST', token)).status, 403);
+    assert.equal(
+      store.inbox().every((d) => (d as { read_at: unknown }).read_at === null),
+      true,
+    );
     const path = '/api/approvals/' + approval.approvalId;
     const preview = await call('/api/approvals?limit=5', 'GET', token);
     assert.equal(preview.status, 200);
