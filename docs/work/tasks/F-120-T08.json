@@ -2,11 +2,12 @@
   "version": 1,
   "id": "F-120-T08",
   "parent": "F-120",
-  "title": "Rerun nerv-system-flows/stress and browser after the F-120-T07 wrapper change",
+  "title": "Rerun nerv-system-flows/stress and browser, and any system or multi-step case a later source change makes pending",
   "goal": "The two expensive system cases, source-changed by the tools/gauntlet.mjs change in F-120-T07, run again and are recorded",
   "status": "planned",
   "acceptance": [
     "nerv-system-flows/stress and nerv-system-flows/browser run with --allow-expensive --execute (no model; local fixtures and the worktree's npm run build) and are recorded in evals/gauntlet/ledger.json",
+    "Any other nerv-system-flows/* or multi-step-agent/* case that a later NERV source change makes pending is rerun in the same campaign (the cheap ones need no --allow-expensive)",
     "node tools/gauntlet.mjs pending no longer lists them",
     "Run in the development checkout, never ~/.nerv-app"
   ],
