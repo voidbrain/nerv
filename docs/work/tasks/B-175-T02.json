@@ -10,7 +10,7 @@
   "id": "B-175-T02",
   "title": "Owner decision: how granted MCP reads behave in a tainted conversation",
   "goal": "The owner picks an option on docs/decisions/tainted-mcp-reads.md",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "The owner picks an option on docs/decisions/tainted-mcp-reads.md"
   ],
@@ -29,12 +29,12 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "basis": "Owner decision 2026-11-26 in chat: \"B-175 ok\", accepting the recommendation on docs/decisions/tainted-mcp-reads.md: option 2 now (plain refusal, stop at the first isolation refusal, dashboard \"new conversation\"), then option 4 (default stays blocked; per-grant opt-in for read-only tools). No actual: owner time not measured.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0.0,
     "estimateAgentHours": 0.0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision"
   },
   "ownerLink": "docs/decisions/tainted-mcp-reads.md"

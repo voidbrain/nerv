@@ -14,14 +14,14 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 61 | 51 |
-| **Require Human 🧑** | 15 | 23 |
+| **Require Human 🧑** | 15 | 22 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-120](#f-120) | [B-170](#b-170) | [B-175](#b-175) |
+| [F-062](#f-062) | [F-120](#f-120) | [B-170](#b-170) | — |
 | [F-011](#f-011) | [F-116](#f-116) | [B-172](#b-172) |  |
 | [F-004](#f-004) | [F-151](#f-151) | [B-176](#b-176) |  |
 | [F-012](#f-012) | [F-142](#f-142) | [B-057](#b-057) |  |
@@ -46,7 +46,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 287.5 h agent + 24.25 h owner across 303 open steps of 61 features and 51 other records. 162.5 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 288.5 h agent + 24.25 h owner across 305 open steps of 61 features and 51 other records. 162.5 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -525,6 +525,58 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-175"></a>[🐞 B-175](#top)
+
+**After one MCP answer, every later granted MCP read in the same conversation is refused (tainted context sends it to EVA-03, which cannot run MCP tools)**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 1.5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Stage 1 (plain refusal, stop at the first one, dashboard New conversation) is in review; the owner check follows its release ([decision page](decisions/tainted-mcp-reads.md), "Owner check").
+
+| | |
+|---|---|
+| **Issue** | Found by the owner 2026-11-26 on NERV-01. In the dashboard chat, "quali genetiche ho?": `grover.grover_strains` ran (granted, Pattern Green, EVA-00), its result made the sortie and then the conversation `tainted`, and from then on every `grover.grover_plants` call was refused, ballot executor `eva-03`, `balthasar: EVA-03 outside code requires isolation; it does not run.` Cause: `executorOf` in `src/policy.ts` (and `minimumClassForJob` in `src/eva-classes.ts`) send a tainted read or local write to EVA-03, and `isolationDenied` refuses any MCP tool there because EVA-03 isolation exists only for code. The reply only says "un errore tecnico (legato all'isolamento EVA-03)", with nothing the owner can do. The dashboard always posts conversation `dashboard` and has no new-conversation control; the taint passes from question to question while each comes within 30 minutes of the last. See [the decision page](decisions/tainted-mcp-reads.md). |
+| **Reproduce** | [Decision page](decisions/tainted-mcp-reads.md), "Problem". In the dashboard chat ask a question that makes Misato call a granted MCP read (e.g. "quali genetiche ho?"), then ask again within 30 minutes: the second call's ballot is `executor: eva-03`, outcome reject. Test: `test/provenance.test.ts`, "B-175: a granted MCP read in a conversation that saw a tool result runs, or the refusal tells the owner what to do" (committed as `todo`, fails today). |
+| **Check** | Owner chose 2026-11-26 (B-175-T02): option 2 now, option 4 next. The B-175 test passes without `todo`; in the dashboard a granted read after an earlier MCP answer gets a plain reply naming the New conversation button, and after pressing it the read runs ([decision page](decisions/tainted-mcp-reads.md), "Owner check"). Stage 2: an opted-in read grant runs in a tainted conversation. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-175-t01"></a>B-175-T01 — Failing test: a granted MCP read after a tool result runs or tells the owner what to do | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | — | 🤖 |
+| 🟢 Small | <a id="b-175-t03"></a>B-175-T03 — Stage 1 (option 2): the isolation refusal says what to do, Misato stops at the first one, dashboard New conversation | 1.5 h | 0 h | 1 h | Implemented; verification pending | — | [B-175-T04](#b-175-t04), [B-175-T05](#b-175-t05) | 🤖 |
+| 🟢 Small | <a id="b-175-t04"></a>B-175-T04 — Owner check in the dashboard: a second granted Grover read in one conversation | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-175-T03](#b-175-t03) | — | ⏳ 🧑‍🔧 |
+| 🟢 Small | <a id="b-175-t05"></a>B-175-T05 — Stage 2 (option 4): a read grant can opt in to run in a tainted conversation | 1.5 h | 0 h | 0 h | Planned | [B-175-T03](#b-175-t03) | [B-175-T06](#b-175-t06) | ⏳ 🤖 |
+| 🟢 Small | <a id="b-175-t06"></a>B-175-T06 — Stage 2: the owner sets the opt-in (nerv tools grant, Tools panel shows it) and the guide explains the risk | 1.5 h | 0 h | 0 h | Planned | [B-175-T05](#b-175-t05) | [B-175-T07](#b-175-t07) | ⏳ 🤖 |
+| 🟢 Small | <a id="b-175-t07"></a>B-175-T07 — Owner check: an opted-in Grover read answers twice in one dashboard conversation | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-175-T06](#b-175-t06) | — | ⏳ 🧑‍🔧 |
+| 🟡 Medium | **Total** | 5 h | 0 h (0 of 7 steps recorded) | 1.5 h agent + 0.5 h owner | 1 of 7 completed | | | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status |
+|---|---|---|---|---|
+| — | <a id="b-175-t02"></a>B-175-T02 — Owner decision: how granted MCP reads behave in a tainted conversation | 0 h | 0 h | Completed |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-175.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found by the owner 2026-11-26; Test: `test/provenance.test.ts` (B-175, `todo` until T03). Code: `src/policy.ts`, `src/eva-classes.ts`, `src/ledger.ts`, `web/public/dashboard/live.js`.; [#849](https://github.com/voidbrain/nerv/pull/849); [#853](https://github.com/voidbrain/nerv/pull/853) (stage 1). Review: design-reviewer (Opus, fresh context) 2026-11-26 on #853: no blockers; two should-fix (EVA-03 grant reply, dashboard context test) fixed in the PR; a second review of the same-request answer: no blockers, three should-fix (script or question on the extra turn, only outside results count, nothing lost on a bad turn) fixed. |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | After the first MCP answer in a conversation, the owner's granted reads stop working there for at least 30 minutes, with no way out in the dashboard and no clear explanation. |
+
+</details>
+
+---
 ### <a id="b-161"></a>[🐞 B-161](#top)
 
 **Nightly backup and off-host copy failures repeat silently; no owner notice**
@@ -871,48 +923,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | 2026-11-26: Unit/integration: `test/coordinator-shipping.test.ts` and `test/coordinator-snapshot.test.ts` (24/24, incl. F-016-T21 25,000-row off-loop seed regression). 2026-11-18: F-016-T10 verified: [PR #417](https://github.com/voidbrain/nerv/pull/417) merged on green CI (second fresh-context review found no blocker). F-016-T12 closed with the accepted decision revision and zero-blocking review in PR #470; scoped CI passed. Remaining distributed relocation acceptance is open. |
 | Reviewed | 2026-11-26 |
-
-</details>
-
----
-### <a id="b-175"></a>[🐞 B-175](#top)
-
-**After one MCP answer, every later granted MCP read in the same conversation is refused (tainted context sends it to EVA-03, which cannot run MCP tools)**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.5 h owner | — | — | 🤖 | — | 🤔 |
-
-🧑 **→** Choose how granted MCP reads behave after a tool result: [options and recommendation](decisions/tainted-mcp-reads.md) (B-175-T02).
-
-| | |
-|---|---|
-| **Issue** | Found by the owner 2026-11-26 on NERV-01. In the dashboard chat, "quali genetiche ho?": `grover.grover_strains` ran (granted, Pattern Green, EVA-00), its result made the sortie and then the conversation `tainted`, and from then on every `grover.grover_plants` call was refused, ballot executor `eva-03`, `balthasar: EVA-03 outside code requires isolation; it does not run.` Cause: `executorOf` in `src/policy.ts` (and `minimumClassForJob` in `src/eva-classes.ts`) send a tainted read or local write to EVA-03, and `isolationDenied` refuses any MCP tool there because EVA-03 isolation exists only for code. The reply only says "un errore tecnico (legato all'isolamento EVA-03)", with nothing the owner can do. The dashboard always posts conversation `dashboard` and has no new-conversation control; the taint passes from question to question while each comes within 30 minutes of the last. See [the decision page](decisions/tainted-mcp-reads.md). |
-| **Reproduce** | [Decision page](decisions/tainted-mcp-reads.md), "Problem". In the dashboard chat ask a question that makes Misato call a granted MCP read (e.g. "quali genetiche ho?"), then ask again within 30 minutes: the second call's ballot is `executor: eva-03`, outcome reject. Test: `test/provenance.test.ts`, "B-175: a granted MCP read in a conversation that saw a tool result runs, or the refusal tells the owner what to do" (committed as `todo`, fails today). |
-| **Check** | The owner has chosen an option (B-175-T02); after the fix the B-175 test passes without `todo`, and in the dashboard a granted read after an earlier MCP answer either runs or the reply says in plain words why it did not and how to start clean. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="b-175-t01"></a>B-175-T01 — Failing test: a granted MCP read after a tool result runs or tells the owner what to do | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | — | 🤖 |
-| 🟢 Small | <a id="b-175-t02"></a>B-175-T02 — Owner decision: how granted MCP reads behave in a tainted conversation | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | — | [B-175-T03](#b-175-t03) | [🤔](decisions/tainted-mcp-reads.md) |
-| 🟢 Small | <a id="b-175-t03"></a>B-175-T03 — Fix per the owner's decision; remove todo from the B-175 test | 3 h | 0 h | 0 h | Planned | [B-175-T02](#b-175-t02) | [B-175-T04](#b-175-t04) | ⏳ 🤖 |
-| 🟢 Small | <a id="b-175-t04"></a>B-175-T04 — Owner check in the dashboard: a second granted Grover read in one conversation | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-175-T03](#b-175-t03) | — | ⏳ 🧑‍🔧 |
-| 🟢 Small | **Total** | 3.5 h | 0 h (0 of 4 steps recorded) | 0.5 h agent + 0.5 h owner | 0 of 4 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-175.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Found by the owner 2026-11-26; Test: `test/provenance.test.ts` (B-175, `todo` until T03). Code: `src/policy.ts`, `src/eva-classes.ts`, `src/ledger.ts`, `web/public/dashboard/live.js`.; [#849](https://github.com/voidbrain/nerv/pull/849) |
-| Opened | 2026-11-26 |
-| Verification | Pending |
-| Reviewed | 2026-11-26 |
-| Impact | After the first MCP answer in a conversation, the owner's granted reads stop working there for at least 30 minutes, with no way out in the dashboard and no clear explanation. |
 
 </details>
 

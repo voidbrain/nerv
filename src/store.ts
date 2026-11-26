@@ -134,6 +134,8 @@ export interface ActResult {
   pattern: Ballot['pattern'];
   reason: string;
   sync: Ballot['sync'];
+  /** B-175: why a refusal does not depend on the arguments (isolation), so the planner stops instead of retrying. */
+  blocked?: Ballot['blocked'];
   approvalId?: string;
   /** Every card created by one proposal; `approvalId` remains the first card for compatibility. */
   approvalIds?: string[];
