@@ -2,7 +2,7 @@
   "version": 1,
   "id": "F-120-T04",
   "parent": "F-120",
-  "status": "planned",
+  "status": "closed",
   "privacy": "Neutral invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
   "escalation": [
     "A material scope or effort increase goes to the owner"
@@ -11,7 +11,7 @@
   "goal": "Run the cases node tools/gauntlet.mjs pending lists, once the owner approved it in F-120-T03, and record the run",
   "acceptance": [
     "The run covers coding/*, logic-math/*, embedded/* except the four sketch cases, italian-quality/*, cad-3d/*, code-review/*, multi-step-agent/* and nerv-system-flows/*, recorded in the ledger",
-    "node tools/gauntlet.mjs pending lists none of these; the four embedded sketch cases (blink-millis-esp32-regression, debounce-toggle-uno-regression, pwm-fade-esp32-holdout, serial-command-uno-holdout) are excluded: arduino-cli not installed; owner did not opt in 2026-11-26; can be added later",
+    "node tools/gauntlet.mjs pending lists none of these; the four embedded sketch cases (blink-millis-esp32-regression, debounce-toggle-uno-regression, pwm-fade-esp32-holdout, serial-command-uno-holdout) are excluded: arduino-cli not installed; owner did not opt in 2026-11-26; moved to F-120-T06 on 2026-11-26 (owner: \"Close nerv:F-120-T04 ok\")",
     "Run in the development checkout, never ~/.nerv-app; not while the owner uses the local model (it shares Ollama with the service)"
   ],
   "dependsOn": [
@@ -34,12 +34,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h agent",
-    "basis": "Estimated 2026-11-26: the owner campaign of F-120-T03 (0.5 h, 2026-11-25) moved to the agent, owner-step triage. Not a measurement. 2026-11-26: first run 0.75 h (agent): 14 of 34 pending cases covered; the three reference-runner packs stopped on the 30 s case limit (F-120-T05). Remaining 0.5 h after T05. 2026-11-26 rerun after F-120-T05 (0.5 h agent): embedded Pi cases 3/4, cad-3d tolerance 2/2, multi-step-agent and six system flows passed again; the 4 coding and 4 cad-3d OpenSCAD cases errored before the model call because Docker Desktop was not running. Remaining 0.5 h: rerun those 8 with Docker running, plus the stress and browser runs. 2026-11-26 Docker rerun (0.5 h agent): cad-3d OpenSCAD 4/4 passed, coding 4/4 failed graded (output-token cap 2,048 reached), stress and browser passed, multi-step-agent and six system flows passed again; only the four excluded sketch cases remain pending. Remaining: closure once the sketch cases have their own home.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: the owner campaign of F-120-T03 (0.5 h, 2026-11-25) moved to the agent, owner-step triage. Not a measurement. 2026-11-26: first run 0.75 h (agent): 14 of 34 pending cases covered; the three reference-runner packs stopped on the 30 s case limit (F-120-T05). Remaining 0.5 h after T05. 2026-11-26 rerun after F-120-T05 (0.5 h agent): embedded Pi cases 3/4, cad-3d tolerance 2/2, multi-step-agent and six system flows passed again; the 4 coding and 4 cad-3d OpenSCAD cases errored before the model call because Docker Desktop was not running. Remaining 0.5 h: rerun those 8 with Docker running, plus the stress and browser runs. 2026-11-26 Docker rerun (0.5 h agent): cad-3d OpenSCAD 4/4 passed, coding 4/4 failed graded (output-token cap 2,048 reached), stress and browser passed, multi-step-agent and six system flows passed again; only the four excluded sketch cases remain pending. Remaining: closure once the sketch cases have their own home. Closed 2026-11-26 (owner: \"Close nerv:F-120-T04 ok\"): the sketch cases moved to F-120-T06; evidence nerv#800 and the coding rerun after F-120-T07.",
     "reviewed": "2026-11-26",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 2.25,
+    "actualSource": "stated"
   },
   "prs": [
     {
@@ -49,6 +51,10 @@
     {
       "pr": 800,
       "note": "Docker rerun; only the excluded sketch cases pending"
+    },
+    {
+      "pr": 803,
+      "note": "closed; coding rerun after F-120-T07"
     }
   ]
 }
