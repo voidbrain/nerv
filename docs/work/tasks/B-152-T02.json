@@ -4,7 +4,7 @@
   "parent": "B-152",
   "title": "Owner: dismiss the CodeQL false positives B-152-T01 listed",
   "goal": "Only real, owned alerts stay open",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Each alert listed in docs/verification.md#codeql-alert-triage is dismissed with the listed reason, or sent back to B-152-T01"
   ],
@@ -27,14 +27,19 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-26 in the full audit: run the listed commands. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26 in the full audit: run the listed commands. Not a measurement. Closed 2026-11-26: the owner ran the 50 dismiss commands from docs/verification.md#codeql-alert-triage; `gh api repos/voidbrain/nerv/code-scanning/alerts?state=open --paginate -q length` printed 0. No actual recorded: owner time not measured.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,
     "ownerKind": "procedure"
   },
-  "ownerLink": "docs/verification.md#codeql-alert-triage"
+  "ownerLink": "docs/verification.md#codeql-alert-triage",
+  "prs": [
+    {
+      "pr": 814
+    }
+  ]
 }
