@@ -15,9 +15,9 @@
     "F-144-T04"
   ],
   "resources": [
-    "docs/decisions/keep-model-warm.md",
+    "docs/**",
     "docs/INSTALL.md",
-    "src/warm-up.ts",
+    "src/**",
     "docs/work/records/F-144.md",
     "generated:backlog-views"
   ],
@@ -43,7 +43,7 @@
   },
   "prs": [
     {
-      "pr": "PRNUM",
+      "pr": 826,
       "note": "plan"
     }
   ]

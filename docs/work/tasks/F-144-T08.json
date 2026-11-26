@@ -16,7 +16,6 @@
   ],
   "resources": [
     "docs/work/records/F-144.md",
-    "docs/work/records/F-144.md",
     "generated:backlog-views"
   ],
   "capabilities": [
@@ -42,7 +41,7 @@
   },
   "prs": [
     {
-      "pr": "PRNUM",
+      "pr": 826,
       "note": "plan"
     }
   ]

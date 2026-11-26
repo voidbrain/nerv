@@ -16,7 +16,7 @@
   "resources": [
     "src/config.ts",
     "src/server.ts",
-    "test/config.test.ts",
+    "test/**",
     "docs/work/records/F-144.md",
     "generated:backlog-views"
   ],
@@ -42,7 +42,7 @@
   },
   "prs": [
     {
-      "pr": "PRNUM",
+      "pr": 826,
       "note": "plan"
     }
   ]

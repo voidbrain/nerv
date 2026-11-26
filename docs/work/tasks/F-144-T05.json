@@ -17,7 +17,7 @@
     "src/engine-provider.ts",
     "src/server.ts",
     "src/cli.ts",
-    "test/doctor.test.ts",
+    "test/**",
     "docs/work/records/F-144.md",
     "generated:backlog-views"
   ],
@@ -43,7 +43,7 @@
   },
   "prs": [
     {
-      "pr": "PRNUM",
+      "pr": 826,
       "note": "plan"
     }
   ]

@@ -14,10 +14,10 @@
     "F-144-T02"
   ],
   "resources": [
-    "src/warm-up.ts",
+    "src/**",
     "src/update-scheduler.ts",
     "src/reminder-time.ts",
-    "test/warm-up.test.ts",
+    "test/**",
     "docs/work/records/F-144.md",
     "generated:backlog-views"
   ],
@@ -44,7 +44,7 @@
   },
   "prs": [
     {
-      "pr": "PRNUM",
+      "pr": 826,
       "note": "plan"
     }
   ]

@@ -15,7 +15,7 @@
   "resources": [
     "src/engine-provider.ts",
     "test/engine-provider.test.ts",
-    "docs/decisions/keep-model-warm.md",
+    "docs/**",
     "docs/work/records/F-144.md",
     "generated:backlog-views"
   ],
@@ -42,7 +42,7 @@
   },
   "prs": [
     {
-      "pr": "PRNUM",
+      "pr": 826,
       "note": "plan"
     }
   ]
