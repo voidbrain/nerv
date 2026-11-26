@@ -76,6 +76,7 @@
     "deps:install": "node tools/install-deps.mjs",
     "work:usage": "node tools/work-usage.mjs",
     "work:launch": "node tools/usage-launch.mjs",
+    "behaviour": "node tools/behaviour.mjs",
     "rule-load": "node tools/rule-load.mjs",
     "check:rule-load": "node tools/rule-load.mjs --check"
   },

@@ -3545,9 +3545,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
-💻 **→** Agent work: B-159-T02 after this baseline lands.
+💻 **→** Agent work: CI on the PR, then close.
 
 | | |
 |---|---|
@@ -3560,7 +3560,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-159-t01"></a>B-159-T01 — Coverage baseline as measured today | 0.25 h | 0 h | 0 h | Implemented; verification pending | — | [B-159-T02](#b-159-t02) |
-| 🟢 Small | <a id="b-159-t02"></a>B-159-T02 — Enforce coverage; Claude Code as the behaviour runner | 0.5 h | 0 h | 0 h | Planned | [B-159-T01](#b-159-t01) | — |
+| 🟢 Small | <a id="b-159-t02"></a>B-159-T02 — Enforce coverage; Claude Code as the behaviour runner | 0.5 h | 0 h | 0 h | Implemented; verification pending | [B-159-T01](#b-159-t01) | — |
 | 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0 h | 0 of 2 completed | | |
 
 <details>
@@ -3570,7 +3570,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (S1, S3); CI run 45798962499 (coverage warning); `docs/agents/coverage.json`; [#811](https://github.com/voidbrain/nerv/pull/811) |
+| PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (S1, S3); CI run 45798962499 (coverage warning); `docs/agents/coverage.json`; [#811](https://github.com/voidbrain/nerv/pull/811); [#813](https://github.com/voidbrain/nerv/pull/813) |
 | Opened | 2026-11-26 |
 | Verification | Documentation: 2026-11-26, `node tools/coverage-table.mjs --write` after `npm run test:coverage` (1595 pass, 0 fail). CI: Pending (B-159-T02). |
 | Reviewed | 2026-11-26 |

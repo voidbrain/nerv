@@ -20,6 +20,7 @@
     "tools/ci-status.mjs": "core/tools/ci-status.mjs",
     "tools/merge-backlog.mjs": "core/tools/merge-backlog.mjs",
     "tools/merge-when-green.mjs": "core/tools/merge-when-green.mjs",
+    "tools/behaviour.mjs": "core/tools/behaviour.mjs",
     "tools/mcp.mjs": "core/tools/mcp.mjs",
     "tools/mcp-catalog.json": "core/tools/mcp-catalog.json",
     "docs/agents/mcp.md": "core/docs/agents/mcp.md",
@@ -785,7 +786,7 @@
       "src/"
     ],
     "drop": 2,
-    "enforce": false
+    "enforce": true
   },
   "rules": {
     "agents": "AGENTS.md",
@@ -1038,5 +1039,9 @@
     "skills": {
       "days": 30
     }
+  },
+  "behaviour": {
+    "times": 3,
+    "runner": "claude -p --permission-mode acceptEdits --allowedTools \"Bash(git:*)\" \"Bash(npm:*)\" \"Bash(node:*)\" -- \"$(cat \"$HARNESS_TASK_FILE\")\""
   }
 }
