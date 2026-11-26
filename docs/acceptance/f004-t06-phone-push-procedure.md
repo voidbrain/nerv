@@ -72,7 +72,7 @@ B-170: on 2026-11-26 no tap was ever recorded (`opened_at` empty on every push),
    ```zsh
    sqlite3 -readonly ~/.nerv/nerv.sqlite "SELECT created, device_id IS NOT NULL AS this_phone FROM push_subscriptions ORDER BY created;"
    ```
-   Expected: one row with `this_phone` = `1`, plus one older row with `0` from the app you deleted. Remove every row with `0` (only if no other app on any device has notifications on; the workspace app's own subscription also shows `0`):
+   Expected: one row with `this_phone` = `1`, plus one older row with `0` from the app you deleted. **If no row shows `1`, stop here** (the app is signed in with a login code, not paired: pair it again from Settings → Devices, then repeat this step); the next command would remove this phone's subscription too. Otherwise remove every row with `0` (only if no other app on any device has notifications on; the workspace app's own subscription also shows `0`):
    ```zsh
    for e in $(sqlite3 -readonly ~/.nerv/nerv.sqlite "SELECT endpoint FROM push_subscriptions WHERE device_id IS NULL;"); do curl -s -X POST http://127.0.0.1:4317/api/push/unsubscribe -H "Authorization: Bearer $(cat ~/.nerv/token)" -H 'Content-Type: application/json' -d "{\"endpoint\":\"$e\"}"; echo; done
    ```
@@ -87,7 +87,16 @@ B-170: on 2026-11-26 no tap was ever recorded (`opened_at` empty on every push),
    grep 'push: opened' ~/.nerv/service.log | tail -3
    ```
    Expected: `opened_at` has a time; the log shows `push: opened via worker: recorded` or `push: opened via page: recorded` (which one tells which route works on iOS: note it in the result).
-4. Done: in the dashboard, **Coming up** shows "Tap test E" under "Delivered · not done yet"; press **Done**. Expected: it leaves the list. Wait until 12 minutes after it was due: nothing about "Tap test E" on Telegram.
+4. An untapped one is not confirmed by opening the app:
+   ```zsh
+   nerv remind "Untapped F" "$(date -v+1M +%Y-%m-%dT%H:%M:00%z | sed -E 's/([0-9]{2})([0-9]{2})$/\1:\2/')"
+   ```
+   Expected: the notification arrives; do not tap it. Open the dashboard app from the Home Screen icon, leave the notification in Notification Centre, then:
+   ```zsh
+   sqlite3 -readonly ~/.nerv/nerv.sqlite "SELECT c.opened_at FROM delivery_channels c JOIN deliveries d ON d.id=c.delivery_id WHERE d.message LIKE '%Untapped F%' AND c.channel='push';"
+   ```
+   Expected: an empty `opened_at`; about 10 minutes after it was due Telegram shows "Untapped F" once.
+5. Done: in the dashboard, **Coming up** shows "Tap test E" under "Delivered · not done yet"; press **Done**. Expected: it leaves the list. Wait until 12 minutes after it was due: nothing about "Tap test E" on Telegram.
 
 Record the result (pass, or which step differed and what was seen, with the `via` from step 3) in [B-170](../work/records/B-170.md).
 

@@ -14,9 +14,9 @@
   // B-170: a tap on a push reaches the service from the page it opened too, because iOS may drop the worker's request,
   // its notification data or the click event itself (sw.js). This page reports ?opened=<receipt>, and, on load and
   // whenever it becomes visible, every receipt the worker kept whose notification is no longer shown: tapped, or
-  // removed by the owner; one still in Notification Centre is never reported. No sign-in needed: the receipt is the
+  // removed by the owner; one still in Notification Centre, or one the phone never listed, is never reported. No sign-in needed: the receipt is the
   // credential, and a repeat keeps the first time.
-  const reportOpened = receipt => fetch("/api/push/opened", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ receipt, via:"page" }) })
+  const reportOpened = receipt => fetch("/api/push/opened", { method:"POST", headers:{ "Content-Type":"application/json", "ngsw-bypass":"1" }, body:JSON.stringify({ receipt, via:"page" }) })
     .then(r => r.ok || r.status === 404, () => false);
   const openedParam = /^\?opened=([A-Za-z0-9_-]{24})$/.exec(location.search);
   if (openedParam) { history.replaceState(null, "", location.pathname + location.hash); void reportOpened(openedParam[1]); }
@@ -29,7 +29,10 @@
       const shown = new Set((await reg.getNotifications()).map(n => n.tag));
       for (const entry of kept) {
         const receipt = entry.url.split("/").pop();
-        if (!shown.has("nerv-push-" + receipt) && await reportOpened(receipt)) await cache.delete(entry);
+        // Only a receipt the worker saw listed right after showing it: an empty or tagless list on this phone never
+        // counts as a tap (B-170 review).
+        if (shown.has("nerv-push-" + receipt) || await (await cache.match(entry)).text() !== "listed") continue;
+        if (await reportOpened(receipt)) await cache.delete(entry);
       }
     } catch { /* no worker or no notification list here: the worker's own report and the Telegram fallback remain */ }
   };

@@ -26,6 +26,7 @@ function cacheStorage() {
       return {
         put: async (k: string, v: Response) => void m.set(key(k), v),
         keys: async () => [...m.keys()].map((url) => ({ url })),
+        match: async (k: string | { url: string }) => m.get(key(k))?.clone(),
         delete: async (k: string | { url: string }) => m.delete(key(k)),
       };
     },
@@ -33,7 +34,7 @@ function cacheStorage() {
 }
 
 /** The dashboard's real worker (web/public/dashboard/sw.js) on a phone whose notification centre the test controls. */
-function worker(origin: string, caches: ReturnType<typeof cacheStorage>) {
+function worker(origin: string, caches: ReturnType<typeof cacheStorage>, opts: { lists?: boolean } = {}) {
   const listeners = new Map<string, (e: unknown) => void>();
   const shown: Shown[] = [];
   const windows: string[] = [];
@@ -45,6 +46,9 @@ function worker(origin: string, caches: ReturnType<typeof cacheStorage>) {
     registration: {
       showNotification: async (title: string, options: { data: Record<string, unknown> | null; tag?: string }) =>
         void shown.push({ title, data: options.data, ...(options.tag ? { tag: options.tag } : {}) }),
+      // B-170 review: a phone that lists its notifications by tag, or (lists: false) one whose list comes back empty.
+      getNotifications: async ({ tag }: { tag: string }) =>
+        opts.lists === false ? [] : shown.filter((n) => n.tag === tag).map((n) => ({ tag: n.tag })),
     },
     clients: {
       claim: async () => {},
@@ -192,6 +196,21 @@ test('B-170: no click event at all: the opened app reports a kept receipt once i
     app.visible();
     await until(() => t.state(second.id) === 'opened');
     assert.equal([...t.caches.stores.get('nerv-push-pending')!.keys()].length, 0, 'reported receipts are dropped');
+  } finally {
+    await t.close();
+  }
+});
+
+test('B-170 review: a phone that cannot list its notifications never confirms one by its absence', async () => {
+  const t = await setup();
+  try {
+    const { id, payload } = await t.due('Bere acqua');
+    const phone = worker(t.origin, t.caches, { lists: false });
+    await phone.receive(payload);
+    // getNotifications comes back empty: the owner opens the app with the notification still in Notification Centre.
+    page(t.origin, t.caches, () => []);
+    await wait(300);
+    assert.equal(t.state(id), 'sent', 'not seen: Telegram still sends it at the deadline');
   } finally {
     await t.close();
   }

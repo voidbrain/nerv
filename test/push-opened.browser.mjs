@@ -79,7 +79,7 @@ test(
         await evaluate(`(async () => {
         const reg = await navigator.serviceWorker.getRegistration('/dashboard/');
         await reg.showNotification('Bere latte', { tag: 'nerv-push-${receipt}' });
-        await (await caches.open('nerv-push-pending')).put('/dashboard/push-pending/${receipt}', new Response(''));
+        await (await caches.open('nerv-push-pending')).put('/dashboard/push-pending/${receipt}', new Response('listed'));
         return true;
       })()`);
         await page('Page.reload');
