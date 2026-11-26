@@ -42,5 +42,10 @@
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 855,
+      "note": "key fix and failing-first test"
+    }
+  ]
 }

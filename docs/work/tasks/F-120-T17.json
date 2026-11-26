@@ -42,5 +42,10 @@
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 855,
+      "note": "planned with the rerun commands"
+    }
+  ]
 }
