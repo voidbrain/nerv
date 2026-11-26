@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-146-T02",
+  "parent": "F-146",
+  "title": "Weather read tool with a cached forecast",
+  "goal": "NERV can read tomorrow's or Saturday's forecast for a spot, read-only",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
+    "A failing test (committed first) calls the tool through the tool index with an injected fetch returning an invented forecast and expects wind, gusts, rain chance and temperature for the day, in the F-146-T01 wording; no real network call in any test",
+    "The tool is registered with effect read, is hidden while the owner has not enabled it (F-146-T01), refuses non-finite or out-of-range coordinates and a date more than the source's forecast range ahead, answers from a short cache for the same spot and day, and returns a clear \"meteo non disponibile\" result when the source is down, never a guess",
+    "The tool index and the planner's offered tools list it (test/tool-index.test.ts pattern); docs list its network use"
+  ],
+  "dependsOn": [
+    "F-146-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-146.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "api-contracts",
+    "privacy-review",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented skills, fleets, spots and weather only; no owner data, tokens or coordinates of a real place in Git or tests.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: one tool with an injected fetch, a cache and refusal tests on the existing tool-index pattern. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}
