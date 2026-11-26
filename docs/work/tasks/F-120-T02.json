@@ -44,5 +44,11 @@
     "actualSource": "stated",
     "baselineAgentHours": 3.0,
     "estimateAgentHours": 3.0
-  }
+  },
+  "prs": [
+    {
+      "pr": 843,
+      "note": "seven system-pack cases and the 13-case run"
+    }
+  ]
 }

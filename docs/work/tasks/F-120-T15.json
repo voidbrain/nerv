@@ -38,5 +38,11 @@
     "ownerHours": 0.25,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0
-  }
+  },
+  "prs": [
+    {
+      "pr": 843,
+      "note": "opened with the pending model-pack cases"
+    }
+  ]
 }
