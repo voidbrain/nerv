@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 17 | 6 | 43 | 17 |
+| **This week** | 17 | 6 | 44 | 17 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 46 | 39 |
+| **Open** | 46 | 40 |
 | **Require Human 🧑** | 14 | 19 |
 
 ### Require Human 🧑
@@ -43,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 190.75 h agent + 17 h owner across 179 open steps of 46 features and 39 other records. 158.5 h of actual effort recorded on 148 steps. Generated from the task files.
+**Remaining effort:** 190.75 h agent + 17 h owner across 180 open steps of 46 features and 40 other records. 158.5 h of actual effort recorded on 148 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -3503,6 +3503,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-137-T01: [PR #764](https://github.com/voidbrain/nerv/pull/764) parse drone model and version segments on add-drone. Test: `test/fleet-chat.test.ts` (committed failing first in `2fc02d29`); owner report 2026-11-25, NERV-01 at `2627d483`; [#750](https://github.com/voidbrain/nerv/pull/750); [#764](https://github.com/voidbrain/nerv/pull/764) |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration: 2026-11-25 passed locally (`test/fleet-chat.test.ts`, `test/fleet-prints.test.ts`, `test/fleet.test.ts`); live NERV-01 check pending. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-150"></a>[🐞 B-150](#top)
+
+**The Instrumentality daily-run test failed again on Windows after B-104 closed: the run crossed Rome midnight**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: CI and merge of B-150-T01, then close when the next Windows runs pass the test without reruns.
+
+| | |
+|---|---|
+| **Issue** | Windows `npm test` of [CI run 45717358062](https://github.com/voidbrain/nerv/actions/runs/45717358062) (PR #778 head `a6dffe64`, 2026-11-25 22:58–23:06 UTC) failed "Instrumentality runs once a local day at its time, and a failed digest is not retried in a loop" (`test/instrumentality.test.ts`) with 4 digest calls where it expects 2. B-104 (closed 2026-11-22, [archive](archive/backlog-2026.md#b-104)) fixed the same test's fixed 400 ms wait (0 calls); this was a different cause and no record owned it. |
+| **Reproduce** | Run the old test (real clock) so that its scheduler ticks before and after midnight in Europe/Rome: the first tick claims today's slot and asks twice (one retry of an unreadable reply), a tick after midnight is a new local day and asks twice more. `B-150: a failed daily run that crosses local midnight…` in `test/instrumentality.test.ts` drives that crossing with a set clock. |
+| **Check** | The cause is named; the daily-run test does not read the real clock; a test drives the midnight crossing and expects exactly two attempts per local day; the Windows job passes the test without reruns. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-150-t01"></a>B-150-T01 — Name why the Instrumentality daily-run test saw 4 digest calls on Windows and cover it | 0.5 h | 0 h | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-150.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [CI run 45717358062](https://github.com/voidbrain/nerv/actions/runs/45717358062) (Windows, PR #778); fix `aa5e7052` in [PR #778](https://github.com/voidbrain/nerv/pull/778); [#796](https://github.com/voidbrain/nerv/pull/796) |
+| Opened | 2026-11-26 |
+| Verification | Pending: CI, then Windows runs without reruns. |
 | Reviewed | 2026-11-26 |
 
 </details>
