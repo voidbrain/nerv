@@ -4,7 +4,7 @@
   "parent": "B-133",
   "title": "Name why the cache probe answered in 698 ms on Windows CI and fix or bound it",
   "goal": "The F-121-T04 cache probe never waits behind the slicer, and its test holds on a loaded Windows runner",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Whether the probe waited behind the 600 ms fake slicer (a code cause) or the runner was slow is named from the run output and a local reproduction under load",
     "A code cause gets a failing-first regression and a fix; a runner cause gets a bound stated in the test that still fails when the probe queues behind the slicer",
