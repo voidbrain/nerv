@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-26T14:13:42.463Z",
+  "reviewed": "2026-11-26T15:57:40.072Z",
   "policy": "af85c38c81546d4af6d1b980dbb55a5b88738b208135324af5ccde5b852c1ee8",
   "inputs": {
     "AGENTS.md": "7f46f3aed7814ac82a7740be72629843f5e6170c60c740dde7cc88cb239d4ecc",
@@ -11,7 +11,7 @@
     "docs/agents/behaviour-checks.md": "2ec3364eef6de16a31516a9c11740872caf9ccce5267fb373be6b59d96f1119b",
     "docs/agents/change-impact.md": "dc1c473e274f76bd70a87ff57bbc53fc75dc75a35d121cf67baf163a2fd2e975",
     "docs/agents/coverage-guide.md": "3d539eb8beedfa101a5e47d9973cdf85dce197436fab2ab096f760e12d208106",
-    "docs/agents/maintenance.md": "01ea2b644cb539d47d4bdc1f56f7e7283e918859d47fddf5dc7c9c62c915105f",
+    "docs/agents/maintenance.md": "b1da148c92f0f882f14804e16f60b11051a4a620d37764b6710e7839123da08b",
     "docs/agents/mcp.md": "06efbb58a50f9236506ca0afa9a79bb1d42c12ca380a29ed0254bf0a537f860d",
     "docs/agents/parallel-work-plans.md": "d171d89ec5431668ff770e5fcb0098ad518da6289a0d12a56aafdae60930d567",
     "docs/agents/parallel-work.md": "96360fce39201c947b0c829f33b9178aba7aafd36e2551604b83e0e8d227ed3f",
@@ -105,6 +105,12 @@
       "kind": "none",
       "disposition": "no-change",
       "evidence": "Historical repeated-context-loads median (0.5 across 7 samples; 0 in today's reconciliation) already reviewed in the 2026-11-24 skills review; next periodic skills review due 2026-12-24."
+    },
+    {
+      "kind": "tool",
+      "disposition": "implemented",
+      "target": "tools/reconcile-preview.mjs",
+      "evidence": "2026-11-26: reconcile from 10.24.0 to project-harness v10.24.1: tools/reconcile-preview.mjs and docs/agents/maintenance.md copied byte-identical from the tag; owner authorised reconciling now in chat 2026-11-26 ('ok to all', F-125-T03) although the template backlog is not empty."
     }
   ]
 }
