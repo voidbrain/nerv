@@ -211,6 +211,10 @@ export class Runtime implements StoreApi {
       this.nervous.call('reminders.cancel', { id }),
     ) as Promise<boolean>;
   }
+  /** B-170: the owner marked a delivered reminder done. */
+  async reminderDone(id: string) {
+    return (await this.nervous.call('reminders.done', { id })) as boolean;
+  }
   async showList(name: string) {
     return (await this.nervous.call('lists.show', { list: name })) as ReturnType<
       import('./lists.ts').ListStore['show']
@@ -224,8 +228,18 @@ export class Runtime implements StoreApi {
   async pushPublicKey() {
     return (await this.nervous.call('push.key')) as string;
   }
-  async savePushSubscription(sub: { endpoint: string; p256dh: string; auth: string; userAgent?: string }) {
+  async savePushSubscription(sub: {
+    endpoint: string;
+    p256dh: string;
+    auth: string;
+    userAgent?: string;
+    deviceId?: string;
+  }) {
     await this.nervous.call('push.subscribe', sub);
+  }
+  /** B-170: a revoked device gets no more pushes. */
+  async forgetPushDevice(deviceId: string) {
+    return (await this.nervous.call('push.forgetDevice', { deviceId })) as number;
   }
   async deletePushSubscription(endpoint: string) {
     const res = (await this.nervous.call('push.unsubscribe', { endpoint })) as { ok: boolean };

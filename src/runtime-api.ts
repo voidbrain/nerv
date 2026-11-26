@@ -198,6 +198,8 @@ export interface StoreApi {
     patch: { title?: string; due?: string; kind?: string; end?: string | null },
   ): Reminder | undefined | null | Promise<Reminder | undefined | null>;
   cancel(id: string): boolean | Promise<boolean>;
+  /** B-170: the owner marked a delivered reminder done; false when it is not delivered, cancelled or unknown. */
+  reminderDone?(id: string): boolean | Promise<boolean>;
   showList?(name: string): ListView | null | Promise<ListView | null>;
   toggleListItem?(
     itemId: string,
@@ -242,8 +244,11 @@ export interface StoreApi {
     p256dh: string;
     auth: string;
     userAgent?: string;
+    deviceId?: string;
   }): Promise<void> | void;
   deletePushSubscription?(endpoint: string): Promise<boolean> | boolean;
+  /** B-170: removes a revoked paired device's subscriptions. */
+  forgetPushDevice?(deviceId: string): Promise<number> | number;
   listPushSubscriptions?(): Promise<PushSubscriptionRecord[]> | PushSubscriptionRecord[];
   pushStatus?(): Promise<{ subscribed: boolean; count: number }> | { subscribed: boolean; count: number };
   inbox(): unknown | Promise<unknown>;

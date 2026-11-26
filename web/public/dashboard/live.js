@@ -11,6 +11,33 @@
   if (pairFragment) history.replaceState(null, "", location.pathname + location.search);
   // A scan while the dashboard is already open in that tab only changes the fragment: load the page again to read it.
   addEventListener("hashchange", () => { if (/^#pair=/.test(location.hash)) location.reload(); });
+  // B-170: a tap on a push reaches the service from the page it opened too, because iOS may drop the worker's request,
+  // its notification data or the click event itself (sw.js). This page reports ?opened=<receipt>, and, on load and
+  // whenever it becomes visible, every receipt the worker kept whose notification is no longer shown: tapped, or
+  // removed by the owner; one still in Notification Centre, or one the phone never listed, is never reported. No sign-in needed: the receipt is the
+  // credential, and a repeat keeps the first time.
+  const reportOpened = receipt => fetch("/api/push/opened", { method:"POST", headers:{ "Content-Type":"application/json", "ngsw-bypass":"1" }, body:JSON.stringify({ receipt, via:"page" }) })
+    .then(r => r.ok || r.status === 404, () => false);
+  const openedParam = /^\?opened=([A-Za-z0-9_-]{24})$/.exec(location.search);
+  if (openedParam) { history.replaceState(null, "", location.pathname + location.hash); void reportOpened(openedParam[1]); }
+  const reportKept = async () => {
+    try {
+      if (!self.caches || !navigator.serviceWorker) return;
+      const cache = await self.caches.open("nerv-push-pending"), kept = await cache.keys();
+      if (!kept.length) return;
+      const reg = await navigator.serviceWorker.getRegistration("/dashboard/");
+      const shown = new Set((await reg.getNotifications()).map(n => n.tag));
+      for (const entry of kept) {
+        const receipt = entry.url.split("/").pop();
+        // Only a receipt the worker saw listed right after showing it: an empty or tagless list on this phone never
+        // counts as a tap (B-170 review).
+        if (shown.has("nerv-push-" + receipt) || await (await cache.match(entry)).text() !== "listed") continue;
+        if (await reportOpened(receipt)) await cache.delete(entry);
+      }
+    } catch { /* no worker or no notification list here: the worker's own report and the Telegram fallback remain */ }
+  };
+  void reportKept();
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") void reportKept(); });
   const consulted = new Set();
   let older = [], matches = [], shown = [], searchSeq = 0, searchTimer = null; let editing = null;
   let usageBefore = null, usageBack = [], usageBusy = false, usageNext = null, usagePage = null, usageError = false;
@@ -150,6 +177,7 @@
       state.sorties = [...queuedSorties, ...list.map(toSortie)];
       state.approvals = cards.map(toApproval).filter(ap => state.sorties.some(s => s.id === ap.sortie));
       state.reminders = history.reminders.filter(r => !r.delivered && !r.cancelled && Date.parse(r.due) > Date.now()).sort((a, b) => a.due.localeCompare(b.due));
+      state.recent = history.recent || [];
       state.upcoming = state.reminders.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder", label:when(r) }));
       state.doctor = doctor; showBuild(doctor.build);
       if (!kajiBases.length && doctor.base) observeTelegram([{baseId:doctor.base.id,status:"enrolled",online:true,channel:doctor.channel,channelFresh:doctor.channelFresh}]);
@@ -328,6 +356,10 @@
   };
 
   window.renderNext = function () {
+    // B-170: reminders delivered in the last 24 hours and not done yet, each with Done (which also stops the Telegram copy).
+    const recent = state.recent || [];
+    patchHTML(document.getElementById("next-done"), recent.length ? "<div class='tiny muted'>Delivered · not done yet</div>" + recent.map(r =>
+      "<div class='rem' data-key='done-" + esc(r.id) + "'><span class='small'><b>" + when(r) + "</b> " + esc(r.title) + "</span><span class='acts'><button class='btn sm primary' type='button' data-rem-done='" + esc(r.id) + "' aria-label='Done: " + esc(r.title) + "'>Done</button></span></div>").join("") : "");
     const box = document.getElementById("next-list"); const list = state.reminders || [];
     document.getElementById("next-sub").textContent = "Next " + list.length + " of " + (state.pendingCount ?? list.length) + " reminders";
     // While a reminder is being edited the list stays as it is, so a refresh never wipes what you are typing.
@@ -345,7 +377,8 @@
   };
   const reminderAction = async (path, init, done) => { try { await api(path, init); log(done, "ok", null, "penpen"); } catch (e) { log("Reminder: " + e.message, "danger", null, "penpen"); } poll(); };
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-rem-edit],[data-rem-cancel],[data-rem-keep]"); if (!t) return; e.preventDefault();
+    const t = e.target.closest("[data-rem-edit],[data-rem-cancel],[data-rem-keep],[data-rem-done]"); if (!t) return; e.preventDefault();
+    if (t.dataset.remDone) { const r = (state.recent || []).find(x => x.id === t.dataset.remDone); if (r) reminderAction("reminders/" + r.id + "/done", { method:"POST" }, "Reminder done: " + r.title); return; }
     if (t.dataset.remEdit) { editing = t.dataset.remEdit; renderNext(); return; }
     if (t.hasAttribute("data-rem-keep")) { const id = editing; editing = null; renderNext(); const b = document.querySelector("[data-rem-edit='" + id + "']"); if (b) b.focus(); return; }
     const r = (state.reminders || []).find(x => x.id === t.dataset.remCancel);

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "parent": "B-170",
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, endpoints or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "dependsOn": [
+    "B-170-T05"
+  ],
+  "id": "B-170-T06",
+  "title": "Owner check: a tapped push is recorded as opened and never reaches Telegram; Done works",
+  "goal": "The retest steps in the procedure pass on the phone",
+  "status": "planned",
+  "acceptance": [
+    "The B-170 retest steps in docs/acceptance/f004-t06-phone-push-procedure.md pass on the owner phone; result recorded in B-170"
+  ],
+  "resources": [
+    "docs/acceptance/f004-t06-phone-push-procedure.md",
+    "docs/work/records/B-170.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "owner-check"
+  ],
+  "validation": [
+    "owner runs the steps"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h owner",
+    "basis": "Estimated 2026-11-26: two reminders and a 12-minute wait. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "ownerHours": 0.5,
+    "agentHours": 0,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/acceptance/f004-t06-phone-push-procedure.md#tap-recorded-retest-b-170-t06"
+}

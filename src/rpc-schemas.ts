@@ -211,6 +211,12 @@ export const methodSchemas = {
     properties: { id: { type: 'string', minLength: 1, maxLength: 100 } },
     additionalProperties: false,
   },
+  'reminders.done': {
+    type: 'object',
+    required: ['id'],
+    properties: { id: { type: 'string', minLength: 1, maxLength: 100 } },
+    additionalProperties: false,
+  },
   'push.key': empty,
   'push.subscribe': {
     type: 'object',
@@ -220,7 +226,14 @@ export const methodSchemas = {
       p256dh: { type: 'string', minLength: 1, maxLength: 256 },
       auth: { type: 'string', minLength: 1, maxLength: 256 },
       userAgent: { type: 'string', maxLength: 512 },
+      deviceId: { type: 'string', pattern: '^[a-f0-9]{16}$' },
     },
+    additionalProperties: false,
+  },
+  'push.forgetDevice': {
+    type: 'object',
+    required: ['deviceId'],
+    properties: { deviceId: { type: 'string', pattern: '^[a-f0-9]{16}$' } },
     additionalProperties: false,
   },
   'push.unsubscribe': {
