@@ -43,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 191.75 h agent + 17 h owner across 179 open steps of 46 features and 39 other records. 158.5 h of actual effort recorded on 148 steps. Generated from the task files.
+**Remaining effort:** 190.75 h agent + 17 h owner across 179 open steps of 46 features and 39 other records. 158.5 h of actual effort recorded on 148 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -3431,9 +3431,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-127-T01, name what the F-118-T02 browser test waits on under load and fix it or bound it.
+💻 **→** Next: CI and merge of B-127-T01, then close.
 
 | | |
 |---|---|
@@ -3445,8 +3445,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-127-t01"></a>B-127-T01 — Name what the F-118-T02 browser test waits on under load and fix or bound it | 1 h | 0 h | 1 h | Planned |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 1 h | 0 of 1 completed |
+| 🟢 Small | <a id="b-127-t01"></a>B-127-T01 — Name what the F-118-T02 browser test waits on under load and fix or bound it | 1 h | 0 h | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 0 h | 0 of 1 completed |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -3455,9 +3455,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | [PR #716](https://github.com/voidbrain/nerv/pull/716) (where it was seen); opened in [PR #723](https://github.com/voidbrain/nerv/pull/723) |
+| PR / evidence | [PR #716](https://github.com/voidbrain/nerv/pull/716) (where it was seen); opened in [PR #723](https://github.com/voidbrain/nerv/pull/723); [#793](https://github.com/voidbrain/nerv/pull/793) |
 | Opened | 2026-11-24 |
-| Verification | Pending. |
+| Verification | Pending: CI. |
 | Reviewed | 2026-11-24 |
 
 </details>
