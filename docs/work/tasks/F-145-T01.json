@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-145-T01",
+  "parent": "F-145",
+  "title": "Failing test and read-only endpoint: the real skills store as JSON",
+  "goal": "GET /api/skills returns what nerv skills list returns, plus each skill's stage and latest evaluation",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
+    "A failing test (committed first) stages a skill in a temporary home with src/skills.ts and expects GET /api/skills to list it; today the route does not exist and the dashboard shows only a placeholder",
+    "GET /api/skills is read-only and answers admin and read-only clients like GET /api/pilots (it sits with the other read endpoints, before the admin-only block); it returns, per skill, id, title, domain, versions (version, status, stagedAt, promotedAt), the active version, and the latest evaluation report of each version against its baseline (pass counts for with-skill and baseline, regression and holdout, eligibleForPromotion), read from the store (listSkillPackages and the version records), never invented",
+    "The stage is derived once, here, and written in the endpoint's text: seed = staged and not yet evaluated, sprout = staged with an evaluation, ripe = active, dropped = retired or rolled back (the F-051 tabs: Seed, Sprout, Ripe, Dropped); an empty store returns {\"skills\":[]}, a corrupt registry returns an error the panel can show, not an empty list",
+    "No skill instructions or scripts are returned (names, versions and numbers only)"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/server.ts",
+    "src/skills.ts",
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-145.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "api-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented skills, fleets, spots and weather only; no owner data, tokens or coordinates of a real place in Git or tests.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.25 h",
+    "basis": "Estimated 2026-11-26: one read route over the existing registry and report types, plus the stage rule and tests. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.25,
+    "baselineAgentHours": 1.25,
+    "estimateAgentHours": 1.25
+  }
+}

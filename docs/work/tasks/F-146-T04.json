@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "F-146-T04",
+  "parent": "F-146",
+  "title": "The preflight skill package: Italian and English checklist",
+  "goal": "The first real skill exists as a staged package",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
+    "A skill package preflight-volo (manifest with domain fpv, trigger phrases in Italian and English such as \"prepara il volo di sabato\" and \"prepare Saturday's flight\", requiredCapabilities only the read tools fpv_preflight, weather.forecast and the reminders list) is validated by validateSkillPackage and staged with nerv skills stage; the package file lives in the repository as a source example with invented data only",
+    "Its instructions say: call fpvbuddy's fpv_preflight, the weather for the spot and day, and the reminders due that day, then write one checklist (batteries to charge or store, drones to check, spares low, weather verdict with wind and rain, reminders), in Italian unless the request was in English (language follows B-167's detection), short lines, no invented figures: a missing source is said (\"meteo non disponibile\"), never filled in; read-only, no approvals",
+    "A test loads the package and fails when the manifest asks for a write capability"
+  ],
+  "dependsOn": [
+    "F-146-T02",
+    "F-146-T03",
+    "fpvbuddy:F-024-T03",
+    "F-101-T10"
+  ],
+  "resources": [
+    "skills/**",
+    "evals/**",
+    "test/**",
+    "docs/work/records/F-146.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "privacy-review"
+  ],
+  "privacy": "Neutral invented skills, fleets, spots and weather only; no owner data, tokens or coordinates of a real place in Git or tests.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.25 h",
+    "basis": "Estimated 2026-11-26: one package and its validation test, instructions in two languages. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.25,
+    "baselineAgentHours": 1.25,
+    "estimateAgentHours": 1.25
+  }
+}

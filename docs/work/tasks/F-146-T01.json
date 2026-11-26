@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-146-T01",
+  "parent": "F-146",
+  "title": "Weather source decision: what NERV has, a free source, where it is called",
+  "goal": "One free, keyless forecast source is chosen and its limits are written down before any code",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
+    "Found on 2026-11-26 while planning: NERV has no weather source (no weather code in src; only test strings), and Grover and Hobo expose none. The step checks and records: which free source (candidates: Open-Meteo, no key, free for non-commercial use; MET Norway; both read at the time of the step, with their terms, rate limits and attribution rules) gives wind, gusts, rain probability and temperature for a point and a day; where the call lives (a NERV read tool such as weather.forecast, or an MCP server) and why",
+    "The privacy cost is named: the call sends the spot's coordinates (rounded) to a third party, so it is a tool of effect read that needs the network and says so, off by default until the owner turns it on, never run for local-only requests; where the spot comes from (the owner's saved flying spots in FPVBuddy or Hobo over MCP, or the coordinates given in the request) is decided and written; the Italian wording of the forecast lines (\"vento\", \"raffiche\", \"pioggia\") is fixed",
+    "The page docs/decisions/weather-source.md records the choice, the alternatives and the free-tier limits; if no free source meets the need, the step says so and F-146-T02 is cancelled with the reason (the checklist then says \"meteo non disponibile\")"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/decisions/**",
+    "docs/work/records/F-146.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "architecture-review",
+    "privacy-review"
+  ],
+  "privacy": "Neutral invented skills, fleets, spots and weather only; no owner data, tokens or coordinates of a real place in Git or tests.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-26: reading two providers' terms and writing one page. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}
