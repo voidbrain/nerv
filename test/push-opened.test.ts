@@ -293,7 +293,7 @@ test('B-170: a delivered reminder can be marked done; it leaves the dashboard li
     const pending = t.store.add('Più tardi', new Date(Date.now() + 3_600_000).toISOString());
     const done = (rid: string, bearer: string | undefined = TOKEN) =>
       call(t.origin, `/api/reminders/${rid}/done`, bearer, 'POST');
-    assert.equal((await done(reminder.reminder_id, undefined)).status, 401, 'needs sign-in');
+    assert.equal((await done(reminder.reminder_id, '')).status, 401, 'needs sign-in');
     assert.equal((await done(pending.id)).status, 404, 'a reminder not delivered yet cannot be done');
     assert.equal((await done(reminder.reminder_id)).status, 200);
     assert.equal((await done(reminder.reminder_id)).status, 200, 'done twice is harmless');
