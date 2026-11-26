@@ -53,6 +53,10 @@
     {
       "pr": 699,
       "note": "teardown hooks, bounded stop/close, idle brain"
+    },
+    {
+      "pr": 794,
+      "note": "closed on the owner decision 2026-11-26"
     }
   ]
 }

@@ -51,6 +51,10 @@
     {
       "pr": 706,
       "note": "shared teardown scope, exit guard preload, failed tests logged as they happen"
+    },
+    {
+      "pr": 794,
+      "note": "closed on the owner decision 2026-11-26"
     }
   ]
 }

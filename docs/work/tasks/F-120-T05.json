@@ -40,5 +40,11 @@
     "ownerHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 1
-  }
+  },
+  "prs": [
+    {
+      "pr": 794,
+      "note": "owner decision 2026-11-26 recorded"
+    }
+  ]
 }

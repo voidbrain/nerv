@@ -52,6 +52,10 @@
     {
       "pr": 741,
       "note": "test preload without SQLite flush; partition sync opens each store once per round"
+    },
+    {
+      "pr": 794,
+      "note": "closed on the owner decision 2026-11-26"
     }
   ]
 }

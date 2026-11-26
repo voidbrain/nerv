@@ -40,5 +40,11 @@
     "baselineAgentHours": 0,
     "estimateAgentHours": 0
   },
-  "ownerLink": "docs/evaluations/2026-11-25-f006-t31-placement-report.md#verdicts"
+  "ownerLink": "docs/evaluations/2026-11-25-f006-t31-placement-report.md#verdicts",
+  "prs": [
+    {
+      "pr": 794,
+      "note": "owner decision 2026-11-26 recorded"
+    }
+  ]
 }

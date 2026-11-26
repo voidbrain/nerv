@@ -48,6 +48,10 @@
     {
       "pr": 695,
       "note": "timing reporter, report upload, worker-link split"
+    },
+    {
+      "pr": 794,
+      "note": "closed on the owner decision 2026-11-26"
     }
   ]
 }
