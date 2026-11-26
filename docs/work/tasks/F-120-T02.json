@@ -4,7 +4,7 @@
   "parent": "F-120",
   "title": "First system-pack cases for recent features",
   "goal": "The owner-accepted cases from F-120-T01 exist in NERV's system pack and pass",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Owner accepts the proposed case list (docs/reviews/gauntlet-coverage/2026-11-25.md) before building: accepted 2026-11-25 as changed in the updated review (seven cases below)",
     "Proposed system-pack cases, each a suite group with the listed files and minimumTests (docs/reviews/gauntlet-coverage/2026-11-25.md, section 3): scheduling-reminders (scheduling-time; F-043 storage, F-046; 13), memory-and-chronicle (conversation-memory; F-020, F-044, F-054; 24), pilot-routing (tools; F-025, F-045; 24), tool-contracts (tools; F-021, F-111, F-114; 22), external-project-intake (research; F-027, F-085; 11), federated-handoff (distributed-coordination; F-050, F-070; 8), coding-jobs (security-permissions; F-084, F-091; 7)",
@@ -15,9 +15,11 @@
     "F-120-T01"
   ],
   "resources": [
+    "evals/suite.json",
     "evals/gauntlet/**",
     "test/gauntlet.test.mjs",
     "docs/test-capability-index.md",
+    "docs/archive/evidence-2026.md",
     "docs/work/records/F-120.md",
     "generated:backlog-views"
   ],
@@ -34,11 +36,19 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "3 h agent",
-    "basis": "Estimated 2026-11-24 at agent speed; 7 proposed system-pack cases added 2026-11-25 from the F-120-T01 review. Not a measurement.",
-    "reviewed": "2026-11-25",
-    "agentHours": 3.0,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-25 at 3 h agent. Implemented 2026-11-26: 7 system-pack cases added (failing test first), index regenerated, and all 13 non-expensive system cases passed and recorded in ledger.json (rerun in the 2026-11-26 takeover, the first run was not committed); remaining: CI. Model-pack cases it made pending: F-120-T15.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated",
     "baselineAgentHours": 3.0,
     "estimateAgentHours": 3.0
-  }
+  },
+  "prs": [
+    {
+      "pr": 843,
+      "note": "seven system-pack cases and the 13-case run"
+    }
+  ]
 }

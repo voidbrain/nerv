@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "parent": "B-173",
+  "dependsOn": [],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-173-T01",
+  "title": "Reproduce the exit 137 of work:pr under load, or close as not reproducible",
+  "goal": "A measured run under load: the cause found with a failing test, or the record closed with the measurements",
+  "status": "planned",
+  "acceptance": [
+    "One measured run of work:pr under heavy model load, with exit status, time, peak memory and the kernel log",
+    "A reproduced kill gets a failing test before any fix; otherwise the record closes as not reproducible"
+  ],
+  "resources": [
+    "docs/work/records/B-173.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "validation": [
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: one measured run. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
