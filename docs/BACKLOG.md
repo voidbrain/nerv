@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 57 | 50 |
-| **Require Human 🧑** | 14 | 21 |
+| **Require Human 🧑** | 14 | 22 |
 
 ### Require Human 🧑
 
@@ -22,16 +22,17 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-062](#f-062) | [F-120](#f-120) | [B-170](#b-170) | [B-175](#b-175) |
-| [F-011](#f-011) | [F-116](#f-116) | [B-057](#b-057) |  |
-| [F-004](#f-004) | [F-142](#f-142) | [B-068](#b-068) |  |
-| [F-012](#f-012) |  | [B-107](#b-107) |  |
-| [F-016](#f-016) |  | [B-113](#b-113) |  |
-| [F-086](#f-086) |  | [B-122](#b-122) |  |
-| [F-087](#f-087) |  | [B-123](#b-123) |  |
-| [F-133](#f-133) |  | [B-128](#b-128) |  |
-| [F-092](#f-092) |  | [B-129](#b-129) |  |
-| [F-060](#f-060) |  | [B-134](#b-134) |  |
-| [F-007](#f-007) |  | [B-135](#b-135) |  |
+| [F-011](#f-011) | [F-116](#f-116) | [B-176](#b-176) |  |
+| [F-004](#f-004) | [F-142](#f-142) | [B-057](#b-057) |  |
+| [F-012](#f-012) |  | [B-068](#b-068) |  |
+| [F-016](#f-016) |  | [B-107](#b-107) |  |
+| [F-086](#f-086) |  | [B-113](#b-113) |  |
+| [F-087](#f-087) |  | [B-122](#b-122) |  |
+| [F-133](#f-133) |  | [B-123](#b-123) |  |
+| [F-092](#f-092) |  | [B-128](#b-128) |  |
+| [F-060](#f-060) |  | [B-129](#b-129) |  |
+| [F-007](#f-007) |  | [B-134](#b-134) |  |
+|  |  | [B-135](#b-135) |  |
 |  |  | [B-142](#b-142) |  |
 |  |  | [B-148](#b-148) |  |
 |  |  | [B-149](#b-149) |  |
@@ -440,48 +441,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
 | Impact | The owner cannot run `nerv` from a shell; where an old link exists it runs the development checkout, so a command can behave differently from the running service. |
-
-</details>
-
----
-### <a id="b-176"></a>[🐞 B-176](#top)
-
-**A granted read with a large result answers only "Fatto: <tool>." without the data: the result is dropped from Misato's prompt**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-176-T02 (keep a large read result in the planner prompt); B-176-T04 is the owner check after B-176-T03.
-
-| | |
-|---|---|
-| **Issue** | Found by the owner 2026-11-26 on NERV-01: `nerv chat "quali genetiche ho?"` (conversation `cli`, trusted). `grover.grover_strains` ran (EVA-00, granted, 33 strains, about 9 KB), but the reply was only "Fatto: grover.grover_strains.". Cause: `misatoAsk` (`src/misato.ts`) keeps the step history under `MAX_HISTORY_CHARS` (8,000) by dropping the oldest steps, and when one step alone is larger it sends no steps at all. The model saw no result, proposed the same read again, and the duplicate guard in `src/runtime-planning.ts` closed the sortie with `doneReply` ("Fatto: …"), which for a read throws away what the owner asked for. Blocks 🪴 grover:F-012, whose closing check is NERV answering "quali genetiche ho?". |
-| **Reproduce** | Ask Misato for a granted read whose result is over 8,000 characters (e.g. "quali genetiche ho?" with Grover's strains): the reply is "Fatto: <tool>." and `misato.reply` has no `durationMs` (the service's fallback, not the model). Test: `test/misato.test.ts`, "B-176: a granted read with a large result still reaches Misato, so she can answer from it" (committed as `todo`, fails today). |
-| **Check** | The B-176 test passes without `todo`; a read result too large for the budget reaches the planner shortened (and marked as shortened), never dropped; when the model repeats a read that already ran, the owner gets an answer from the result (a last answer-only turn or a compact summary), never a bare "Fatto: <tool>."; in `nerv chat` "quali genetiche ho?" lists the owner's strains in Italian. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="b-176-t01"></a>B-176-T01 — Failing test: a granted read with a large result reaches the planner prompt | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | — | 🤖 |
-| 🟢 Small | <a id="b-176-t02"></a>B-176-T02 — Keep a large read result in the planner prompt, shortened and marked | 1 h | 0 h | 0 h | Planned | — | [B-176-T03](#b-176-t03) | 🤖 |
-| 🟢 Small | <a id="b-176-t03"></a>B-176-T03 — A repeated read gets an answer from its result, never a bare Fatto | 1.5 h | 0 h | 0 h | Planned | [B-176-T02](#b-176-t02) | [B-176-T04](#b-176-t04) | ⏳ 🤖 |
-| 🟢 Small | <a id="b-176-t04"></a>B-176-T04 — Owner check: nerv chat "quali genetiche ho?" lists the strains | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-176-T03](#b-176-t03) | — | ⏳ 🧑‍🔧 |
-| 🟢 Small | **Total** | 3 h | 0 h (0 of 4 steps recorded) | 0.5 h agent + 0.25 h owner | 0 of 4 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-176.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Found by the owner 2026-11-26; Test: `test/misato.test.ts` (B-176, `todo` until T02). Code: `src/misato.ts` (`misatoAsk`, `MAX_HISTORY_CHARS`), `src/runtime-planning.ts` (duplicate guard, `doneReply`). Related: 🪴 grover:F-012.; [#850](https://github.com/voidbrain/nerv/pull/850) |
-| Opened | 2026-11-26 |
-| Verification | Pending |
-| Reviewed | 2026-11-26 |
-| Impact | Any granted read with a result over 8,000 characters answers the owner with nothing: Grover's strain list is the first case. |
 
 </details>
 
@@ -912,6 +871,48 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
 | Impact | After the first MCP answer in a conversation, the owner's granted reads stop working there for at least 30 minutes, with no way out in the dashboard and no clear explanation. |
+
+</details>
+
+---
+### <a id="b-176"></a>[🐞 B-176](#top)
+
+**A granted read with a large result answers only "Fatto: <tool>." without the data: the result is dropped from Misato's prompt**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** B-176-T04: after `nerv update` on NERV-01, run `nerv chat "quali genetiche ho?"` (owner check below).
+
+| | |
+|---|---|
+| **Issue** | Found by the owner 2026-11-26 on NERV-01: `nerv chat "quali genetiche ho?"` (conversation `cli`, trusted). `grover.grover_strains` ran (EVA-00, granted, 33 strains, about 9 KB), but the reply was only "Fatto: grover.grover_strains.". Cause: `misatoAsk` (`src/misato.ts`) keeps the step history under `MAX_HISTORY_CHARS` (8,000) by dropping the oldest steps, and when one step alone is larger it sends no steps at all. The model saw no result, proposed the same read again, and the duplicate guard in `src/runtime-planning.ts` closed the sortie with `doneReply` ("Fatto: …"), which for a read throws away what the owner asked for. Blocks 🪴 grover:F-012, whose closing check is NERV answering "quali genetiche ho?". |
+| **Reproduce** | Ask Misato for a granted read whose result is over 8,000 characters (e.g. "quali genetiche ho?" with Grover's strains): the reply is "Fatto: <tool>." and `misato.reply` has no `durationMs` (the service's fallback, not the model). Test: `test/misato.test.ts`, "B-176: a granted read with a large result still reaches Misato, so she can answer from it" (committed as `todo`, fails today). |
+| **Check** | The B-176 test passes without `todo`; a read result too large for the budget reaches the planner shortened (and marked as shortened), never dropped; when the model repeats a read that already ran, the owner gets an answer from the result (a last answer-only turn or a compact summary), never a bare "Fatto: <tool>."; in `nerv chat` "quali genetiche ho?" lists the owner's strains in Italian. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-176-t01"></a>B-176-T01 — Failing test: a granted read with a large result reaches the planner prompt | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | — | 🤖 |
+| 🟢 Small | <a id="b-176-t02"></a>B-176-T02 — Keep a large read result in the planner prompt, shortened and marked | 1 h | 0 h | 0 h | Implemented; verification pending | — | [B-176-T03](#b-176-t03) | 🤖 |
+| 🟢 Small | <a id="b-176-t03"></a>B-176-T03 — A repeated read gets an answer from its result, never a bare Fatto | 1.5 h | 0 h | 0 h | Implemented; verification pending | [B-176-T02](#b-176-t02) | [B-176-T04](#b-176-t04) | 🤖 |
+| 🟢 Small | <a id="b-176-t04"></a>B-176-T04 — Owner check: nerv chat "quali genetiche ho?" lists the strains | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-176-T03](#b-176-t03) | — | ⏳ 🧑‍🔧 |
+| 🟢 Small | **Total** | 3 h | 0 h (0 of 4 steps recorded) | 0.5 h agent + 0.25 h owner | 0 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-176.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found by the owner 2026-11-26; Test: `test/misato.test.ts` (B-176: large result kept shortened; repeated read answers from its result; last-turn and escape-heavy review cases). Code: `src/misato.ts` (`misatoAsk`, `MAX_HISTORY_CHARS`), `src/runtime-planning.ts` (duplicate guard, `doneReply`). Related: 🪴 grover:F-012.; [#850](https://github.com/voidbrain/nerv/pull/850); [#851](https://github.com/voidbrain/nerv/pull/851) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Any granted read with a result over 8,000 characters answers the owner with nothing: Grover's strain list is the first case. |
 
 </details>
 
