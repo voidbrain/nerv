@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-143-T06",
+  "parent": "F-143",
+  "title": "Propose candidates in the image-choice surface",
+  "goal": "The owner sees the candidates as a genUI card and picks one",
+  "status": "planned",
+  "acceptance": [
+    "Owner idea 2026-11-26 in chat: \"in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted.\" Italian is required for every model-facing feature.",
+    "NERV emits an image-choice surface (bricks:F-013, registered in shared/surface.ts with the same validator) in chat and the PWA; Telegram shows the thumbnails with numbered choices as a fallback",
+    "The owner's pick becomes an approval request for the save, naming the item, the image source and its licence; \"nessuna\" / \"none\" ends with nothing saved"
+  ],
+  "dependsOn": [
+    "F-143-T04",
+    "F-143-T05"
+  ],
+  "resources": [
+    "shared/surface.ts",
+    "web/src/**",
+    "src/telegram.ts",
+    "test/**",
+    "docs/work/records/F-143.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "accessibility",
+    "distributed-contracts"
+  ],
+  "privacy": "Invented recipes, places and images only; web images are fetched only through NERV's egress proxy, the full image only after the owner accepts it; no secrets or API keys in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-26: a new surface type in the catalogue, its renderer wiring and the Telegram fallback; waits on bricks:F-013. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

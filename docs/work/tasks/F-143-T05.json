@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-143-T05",
+  "parent": "F-143",
+  "title": "Web image search adapter for the chosen provider",
+  "goal": "\"Trovane qualcuna\" returns candidates with source and licence, nothing saved",
+  "status": "planned",
+  "acceptance": [
+    "Owner idea 2026-11-26 in chat: \"in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted.\" Italian is required for every model-facing feature.",
+    "An adapter for the provider chosen in F-143-T02, through the egress proxy, returns up to 8 candidates with source URL, licence, author and attribution text; the key (if any) lives in private configuration, never in Git",
+    "Thumbnails are fetched into a short-lived cache and served same-origin; no full image is downloaded; results are tainted data; tests with a fake provider"
+  ],
+  "dependsOn": [
+    "F-143-T02",
+    "F-143-T03"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/INSTALL.md",
+    "docs/work/records/F-143.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "privacy-review",
+    "regression-design"
+  ],
+  "privacy": "Invented recipes, places and images only; web images are fetched only through NERV's egress proxy, the full image only after the owner accepts it; no secrets or API keys in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-26: one HTTP adapter and a thumbnail cache; uncertainty from the provider's API. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

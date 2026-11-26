@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-142-T05",
+  "parent": "F-142",
+  "title": "PWA chat: attach or take a photo",
+  "goal": "The owner can send a photo from the phone PWA",
+  "status": "planned",
+  "acceptance": [
+    "Owner decisions 2026-11-26 in chat: fpvbuddy:F-023 \"A\" (retire the on-device assistant and the vision demo), with \"vision capabilities ideally on nerv too\"; Italian is required for every model-facing feature (the owner uses all modules in Italian).",
+    "The PWA chat input gains an attach/take-photo control (accept image/*, capture), a preview with remove, a size message before upload; bricks tokens and the style guide, Italian and English labels",
+    "Keyboard and screen-reader accessible (labelled button, preview alt text); browser check on a phone recorded in F-142 Verification"
+  ],
+  "dependsOn": [
+    "F-142-T03"
+  ],
+  "resources": [
+    "web/src/**",
+    "docs/STYLE-GUIDE.md",
+    "docs/work/records/F-142.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "accessibility"
+  ],
+  "privacy": "Images stay on the owner's machines: no cloud route receives an image; tests use invented images generated in the test (no personal photos, no EXIF from real devices) and no secrets.",
+  "validation": [
+    "npm test",
+    "npm run build",
+    "npm run check:fast; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-26: one input control and preview in the Angular chat; uncertainty from where F-130 leaves the chat input. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

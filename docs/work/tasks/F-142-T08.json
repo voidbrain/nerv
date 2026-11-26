@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-142-T08",
+  "parent": "F-142",
+  "title": "Owner: send a photo in Italian on Telegram and the PWA",
+  "goal": "The owner sees NERV understand a real photo locally",
+  "status": "planned",
+  "acceptance": [
+    "Owner decisions 2026-11-26 in chat: fpvbuddy:F-023 \"A\" (retire the on-device assistant and the vision demo), with \"vision capabilities ideally on nerv too\"; Italian is required for every model-facing feature (the owner uses all modules in Italian).",
+    "On the live service after the update, send a photo with \"cosa vedi?\" on Telegram and on the phone PWA; NERV answers in Italian about the photo; the copy-paste page is written by F-142-T05"
+  ],
+  "dependsOn": [
+    "F-142-T05",
+    "F-142-T07"
+  ],
+  "resources": [
+    "docs/work/records/F-142.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Images stay on the owner's machines: no cloud route receives an image; tests use invented images generated in the test (no personal photos, no EXIF from real devices) and no secrets.",
+  "validation": [
+    "Owner check, recorded in F-142 Verification"
+  ],
+  "escalation": [
+    "The owner decides whether the answers are good enough; the agent records the result"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: two photos on two channels. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  },
+  "prs": []
+}

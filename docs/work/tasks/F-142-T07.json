@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-142-T07",
+  "parent": "F-142",
+  "title": "Qualify the local vision model on the Gauntlet vision pack",
+  "goal": "gemma4:12b (or another local model) is qualified for image turns with evidence",
+  "status": "planned",
+  "acceptance": [
+    "Owner decisions 2026-11-26 in chat: fpvbuddy:F-023 \"A\" (retire the on-device assistant and the vision demo), with \"vision capabilities ideally on nerv too\"; Italian is required for every model-facing feature (the owner uses all modules in Italian).",
+    "Waits on a gauntlet-protocol vision-understanding pack (Italian and English) that is not yet recorded there: gauntlet-protocol work, opened in that repository",
+    "Run the released pack and NERV's cases against gemma4:12b on Ollama; record the result in docs/agents/model-profiles.json; an unqualified model keeps the refusal reply"
+  ],
+  "dependsOn": [
+    "F-142-T06"
+  ],
+  "resources": [
+    "docs/agents/model-profiles.json",
+    "package.json",
+    "docs/work/records/F-142.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review",
+    "regression-design"
+  ],
+  "privacy": "Images stay on the owner's machines: no cloud route receives an image; tests use invented images generated in the test (no personal photos, no EXIF from real devices) and no secrets.",
+  "validation": [
+    "npm test",
+    "npm run check:fast; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-26: pin the release and run two packs; the wait on gauntlet-protocol is not counted. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": []
+}
