@@ -10,7 +10,6 @@ import {
   existsSync,
   readdirSync,
   mkdirSync,
-  renameSync,
 } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -766,11 +765,10 @@ test('B-059: browser case refuses a missing build without writing failed evidenc
   const ledger = join(dir, 'ledger.json');
   const previousLedger = process.env.NERV_GAUNTLET_LEDGER;
   process.env.NERV_GAUNTLET_LEDGER = ledger;
-  const browserBuild = resolve('dist/web/browser');
-  const hadBuild = existsSync(browserBuild);
-  const backup = resolve('dist/web/browser.b059-backup');
+  // B-127: a missing build is a temporary path, never the shared dist/web/browser that browser tests serve.
+  const previousBuild = process.env.NERV_GAUNTLET_BROWSER_BUILD;
+  process.env.NERV_GAUNTLET_BROWSER_BUILD = join(dir, 'missing-browser-build');
   try {
-    if (hadBuild) renameSync(browserBuild, backup);
     const system = readSystemPackWithInputs().pack;
     writeFileSync(
       ledger,
@@ -844,7 +842,8 @@ test('B-059: browser case refuses a missing build without writing failed evidenc
       false,
     );
   } finally {
-    if (hadBuild && existsSync(backup) && !existsSync(browserBuild)) renameSync(backup, browserBuild);
+    if (previousBuild === undefined) delete process.env.NERV_GAUNTLET_BROWSER_BUILD;
+    else process.env.NERV_GAUNTLET_BROWSER_BUILD = previousBuild;
     if (previousLedger === undefined) delete process.env.NERV_GAUNTLET_LEDGER;
     else process.env.NERV_GAUNTLET_LEDGER = previousLedger;
     rmSync(dir, { recursive: true, force: true });
@@ -853,11 +852,11 @@ test('B-059: browser case refuses a missing build without writing failed evidenc
 
 test('B-059: browser case still executes when the required build exists', async () => {
   const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-b059-built-'));
-  const browserBuild = resolve('dist/web/browser');
-  const hadBuild = existsSync(browserBuild);
+  const previousBuild = process.env.NERV_GAUNTLET_BROWSER_BUILD;
+  process.env.NERV_GAUNTLET_BROWSER_BUILD = join(dir, 'browser-build');
   let executed = false;
   try {
-    mkdirSync(browserBuild, { recursive: true });
+    mkdirSync(process.env.NERV_GAUNTLET_BROWSER_BUILD);
     const result = await main(
       ['run', '--only=browser', '--allow-expensive', '--execute', '--out=' + join(dir, 'run.json')],
       {
@@ -885,7 +884,8 @@ test('B-059: browser case still executes when the required build exists', async 
     assert.equal(executed, true);
     assert.equal(result.passed, true);
   } finally {
-    if (!hadBuild) rmSync(browserBuild, { recursive: true, force: true });
+    if (previousBuild === undefined) delete process.env.NERV_GAUNTLET_BROWSER_BUILD;
+    else process.env.NERV_GAUNTLET_BROWSER_BUILD = previousBuild;
     rmSync(dir, { recursive: true, force: true });
   }
 });
@@ -1307,7 +1307,6 @@ test('F-074-T10: identity-bound ledger coverage detects source, model, runtime a
     const profilePath = 'node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json';
     const profile = JSON.parse(readFileSync(profilePath, 'utf8'));
     const profileHash = hash(evidenceProfile(profile));
-    const currentSourceKey = systemSourceKey(system);
     const modelDigest = 'd'.repeat(64);
     const runtimeHash = 'e'.repeat(64);
     const scenarioHash = 'f'.repeat(64);
@@ -1350,18 +1349,13 @@ test('F-074-T10: identity-bound ledger coverage detects source, model, runtime a
         ],
       }),
     );
-    // systemSourceKey is independent of gitignored dist/web/browser so clean CI checkouts match built local runs.
-    const { existsSync: hasPath, renameSync: movePath } = await import('node:fs');
-    const builtBrowser = 'dist/web/browser';
-    if (hasPath(builtBrowser)) {
-      const backup = 'dist/web/browser.test-bak';
-      movePath(builtBrowser, backup);
-      try {
-        assert.equal(systemSourceKey(system), currentSourceKey);
-      } finally {
-        movePath(backup, builtBrowser);
-      }
-    }
+    // systemSourceKey is independent of gitignored dist/web/browser so clean CI checkouts match built local runs. B-127:
+    // checked on its inputs, not by moving the shared build away while browser tests serve it.
+    const { sourceInputs } = await import('../tools/evaluate.mjs');
+    assert.deepEqual(
+      Object.keys(sourceInputs()).filter((file) => file.startsWith('dist/')),
+      [],
+    );
     // Exact identity covers everything even from 2020 (no default max age).
     assert.deepEqual(
       (
