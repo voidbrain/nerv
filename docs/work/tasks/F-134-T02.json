@@ -4,7 +4,7 @@
   "parent": "F-134",
   "title": "Full audit by 2026-11-27",
   "goal": "A full audit (all eight areas) of NERV dated by 2026-11-27, so enforced audits keep CI green",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "docs/audits/<date>-full.md and its .audit.json manifest with kind full, every required area, baseline commit, findings and limits, following docs/agents/audit.md",
     "npm run check:audits reports every area fresh",
@@ -40,7 +40,7 @@
   "effort": {
     "size": "medium",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26 from the 2026-11-13 and 2026-11-20 full audits (eight areas, all active records). Not a measurement. Implemented 2026-11-26: docs/audits/2026-11-26-full.md; remaining: CI.",
+    "basis": "Estimated 2026-11-26 from the 2026-11-13 and 2026-11-20 full audits (eight areas, all active records). Not a measurement. Implemented 2026-11-26: docs/audits/2026-11-26-full.md; closed 2026-11-26 on #806's green CI (validate, windows, native-macos, full-suite).",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 3,
