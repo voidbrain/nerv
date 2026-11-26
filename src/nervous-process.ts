@@ -200,8 +200,11 @@ process.on('message', (value: unknown) => {
           p256dh: params.p256dh as string,
           auth: params.auth as string,
           ...(params.userAgent ? { userAgent: params.userAgent as string } : {}),
+          ...(params.deviceId ? { deviceId: params.deviceId as string } : {}),
         });
         return { ok: true };
+      case 'push.forgetDevice':
+        return store.forgetPushDevice(params.deviceId as string);
       case 'push.unsubscribe':
         return { ok: store.deletePushSubscription(params.endpoint as string) };
       case 'deliveries.record':

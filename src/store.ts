@@ -343,6 +343,17 @@ export class Store {
        CREATE TABLE IF NOT EXISTS push_vapid(id TEXT PRIMARY KEY, public_key TEXT NOT NULL, private_key TEXT NOT NULL, created TEXT NOT NULL);
        CREATE TABLE IF NOT EXISTS push_last_result(id TEXT PRIMARY KEY, at TEXT NOT NULL, ok INTEGER NOT NULL, status INTEGER NOT NULL, reason TEXT);`,
     );
+    // B-170, additive: the paired device that made a subscription (its next one replaces it, a revoke removes it), and
+    // when the owner marked a delivered reminder done.
+    if (
+      !(this.db.prepare('PRAGMA table_info(push_subscriptions)').all() as { name: string }[]).some(
+        (c) => c.name === 'device_id',
+      )
+    )
+      this.db.exec('ALTER TABLE push_subscriptions ADD COLUMN device_id TEXT');
+    this.db.exec(
+      'CREATE TABLE IF NOT EXISTS reminder_done(reminder_id TEXT PRIMARY KEY REFERENCES reminders(id), at TEXT NOT NULL)',
+    );
     // F-124-T01, additive: per-channel delivery state (Telegram, push) of each inbox item.
     this.deliveryChannels = new DeliveryChannels(this.db);
     this.db.exec(RESUME_INTENT_SCHEMA);
@@ -538,8 +549,18 @@ export class Store {
   pushPublicKey(): string {
     return this.pushController.pushPublicKey();
   }
-  savePushSubscription(sub: { endpoint: string; p256dh: string; auth: string; userAgent?: string }): void {
+  savePushSubscription(sub: {
+    endpoint: string;
+    p256dh: string;
+    auth: string;
+    userAgent?: string;
+    deviceId?: string;
+  }): void {
     this.pushController.savePushSubscription(sub);
+  }
+  /** B-170: a revoked device gets no more pushes. */
+  forgetPushDevice(deviceId: string): number {
+    return this.pushController.forgetPushDevice(deviceId);
   }
   deletePushSubscription(endpoint: string): boolean {
     return this.pushController.deletePushSubscription(endpoint);

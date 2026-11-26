@@ -732,7 +732,10 @@ export function makeServer(
         const self = root ? undefined : devices.idOf(bearer);
         reply(200, { devices: devices.list().map((d) => ({ ...d, current: d.id === self })) });
       } else if (!options.native && req.method === 'DELETE' && path.startsWith('/api/devices/')) {
-        const revoked = devices.revoke(decodeURIComponent(path.slice('/api/devices/'.length)));
+        const id = decodeURIComponent(path.slice('/api/devices/'.length));
+        const revoked = devices.revoke(id);
+        // B-170: a revoked device gets no more pushes.
+        if (revoked && store.forgetPushDevice) await store.forgetPushDevice(id);
         reply(revoked ? 200 : 404, { revoked });
       } else if (!options.native && root && req.method === 'POST' && path === '/api/session/revoke') {
         reply(200, { revoked: sessions.clear() });
@@ -1154,12 +1157,15 @@ export function makeServer(
         ) {
           throw new Error('endpoint and keys (p256dh, auth) are required.');
         }
+        const deviceId = root ? undefined : devices.idOf(bearer);
         if (store.savePushSubscription) {
           await store.savePushSubscription({
             endpoint: b.endpoint,
             p256dh: (b.keys as Record<string, unknown>).p256dh as string,
             auth: (b.keys as Record<string, unknown>).auth as string,
             ...(typeof b.userAgent === 'string' ? { userAgent: b.userAgent } : {}),
+            // B-170: a paired device keeps one subscription: its next one replaces this, a revoke removes it.
+            ...(deviceId ? { deviceId } : {}),
           });
         }
         reply(201, { ok: true });

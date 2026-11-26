@@ -241,8 +241,11 @@ export interface StoreApi {
     p256dh: string;
     auth: string;
     userAgent?: string;
+    deviceId?: string;
   }): Promise<void> | void;
   deletePushSubscription?(endpoint: string): Promise<boolean> | boolean;
+  /** B-170: removes a revoked paired device's subscriptions. */
+  forgetPushDevice?(deviceId: string): Promise<number> | number;
   listPushSubscriptions?(): Promise<PushSubscriptionRecord[]> | PushSubscriptionRecord[];
   pushStatus?(): Promise<{ subscribed: boolean; count: number }> | { subscribed: boolean; count: number };
   inbox(): unknown | Promise<unknown>;

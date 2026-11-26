@@ -223,8 +223,18 @@ export class Runtime implements StoreApi {
   async pushPublicKey() {
     return (await this.nervous.call('push.key')) as string;
   }
-  async savePushSubscription(sub: { endpoint: string; p256dh: string; auth: string; userAgent?: string }) {
+  async savePushSubscription(sub: {
+    endpoint: string;
+    p256dh: string;
+    auth: string;
+    userAgent?: string;
+    deviceId?: string;
+  }) {
     await this.nervous.call('push.subscribe', sub);
+  }
+  /** B-170: a revoked device gets no more pushes. */
+  async forgetPushDevice(deviceId: string) {
+    return (await this.nervous.call('push.forgetDevice', { deviceId })) as number;
   }
   async deletePushSubscription(endpoint: string) {
     const res = (await this.nervous.call('push.unsubscribe', { endpoint })) as { ok: boolean };

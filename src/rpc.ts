@@ -95,6 +95,7 @@ export const communicationGraph = [
       'push.key',
       'push.subscribe',
       'push.unsubscribe',
+      'push.forgetDevice',
       'push.status',
       'deliveries.record',
       'deliveries.state',
