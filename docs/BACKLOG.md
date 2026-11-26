@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 16 | 6 | 41 | 16 |
+| **This week** | 16 | 6 | 42 | 16 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 45 | 38 |
+| **Open** | 45 | 39 |
 | **Require Human 🧑** | 13 | 17 |
 
 ### Require Human 🧑
@@ -41,7 +41,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 187.25 h agent + 17 h owner across 166 open steps of 45 features and 38 other records. 165 h of actual effort recorded on 149 steps. Generated from the task files.
+**Remaining effort:** 187.5 h agent + 17.25 h owner across 169 open steps of 45 features and 39 other records. 165 h of actual effort recorded on 149 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1747,6 +1747,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-144-T01: [PR #769](https://github.com/voidbrain/nerv/pull/769). Test: `test/dashboard-cages.test.ts` (committed failing first); owner report 2026-11-25; [#769](https://github.com/voidbrain/nerv/pull/769) |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration: 2026-11-25 passed locally (`test/dashboard-cages.test.ts`). Browser: Pending (the owner watches the EVA cages through several polls with no change: no flicker). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-148"></a>[🐞 B-148](#top)
+
+**An MCP server started with a bare `npx` or `node` fails under the service**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-148-T01 — Failing test: a bare node command starts without the node folder on PATH (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-26: the dashboard lists `files.read_text_file` as suspended, "MCP server could not start: spawn npx ENOENT". NERV-01's `config.json` starts the `files` MCP server with `"command": "npx"`. The service runs under launchd with PATH=/usr/bin:/bin:/usr/sbin:/sbin and runs node by absolute path from the nvm folder, so a bare `npx` or `node` is not found; `nerv doctor` does not say so. |
+| **Reproduce** | Configure an MCP stdio server with `"command": "npx"` (or `node`) and start NERV with a PATH that lacks the node folder: listing its tools fails with `spawn npx ENOENT` and every grant on it shows as suspended. |
+| **Check** | A committed test fails first: a server with a bare `node` starts with PATH lacking the node folder, and a command found nowhere names itself and the folders searched. The fix resolves bare `node`, `npx`, `npm` from the running node's folder, then the service PATH (absolute folders only, no shell, no PATH change for other children); `nerv doctor` lists each MCP server that cannot start, with the reason; the owner sees the tool unsuspended after the update. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="b-148-t01"></a>B-148-T01 — Failing test: a bare node command starts without the node folder on PATH | 0.5 h | 0 h | 0 h | Implemented; verification pending | — | [B-148-T02](#b-148-t02) | 🤖 | [PR #782](https://github.com/voidbrain/nerv/pull/782) |
+| 🟢 Small | <a id="b-148-t02"></a>B-148-T02 — Resolve bare MCP commands from the node folder, then PATH; doctor reports servers that cannot start | 2 h | 0 h | 0.25 h | Implemented; verification pending | [B-148-T01](#b-148-t01) | [B-148-T03](#b-148-t03) | 🤖 | [PR #782](https://github.com/voidbrain/nerv/pull/782) |
+| 🟢 Small | <a id="b-148-t03"></a>B-148-T03 — Owner: the files tool is no longer suspended on NERV-01 after the update | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-148-T02](#b-148-t02) | — | ⏳ 🧑‍🔧 | [PR #782](https://github.com/voidbrain/nerv/pull/782) |
+| 🟢 Small | **Total** | 2.5 h | 0 h (0 of 3 steps recorded) | 0.25 h agent + 0.25 h owner | 0 of 3 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-148.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-148-T01: [PR #782](https://github.com/voidbrain/nerv/pull/782) · B-148-T02: [PR #782](https://github.com/voidbrain/nerv/pull/782) · B-148-T03: [PR #782](https://github.com/voidbrain/nerv/pull/782). Owner report 2026-11-26 (NERV-01 dashboard); Test: `test/mcp.test.ts` "B-148: …" and `test/mcp-command.test.ts`; opened in [#782](https://github.com/voidbrain/nerv/pull/782) |
+| Opened | 2026-11-26 |
+| Verification | Unit: 2026-11-26 passed locally (full `npm test` 1581 pass, 0 fail), `test/mcp.test.ts` B-148 tests (failed on main with spawn ENOENT before the fix) and `test/mcp-command.test.ts`; CI pending on [#782](https://github.com/voidbrain/nerv/pull/782). Human: Pending (B-148-T03, NERV-01 after the update). |
 | Reviewed | 2026-11-26 |
 
 </details>

@@ -11,6 +11,7 @@ import {
   type ModelSetup,
 } from './model-setup.ts';
 import type { ProcessClient } from './process-client.ts';
+import type { McpHealth } from './runtime-tools.ts';
 import { degradedReasons, type RouteHealth } from './route-health.ts';
 import type { Method } from './rpc.ts';
 import type { RuntimeInstrumentality } from './runtime-instrumentality.ts';
@@ -23,6 +24,8 @@ export interface RuntimeRoutesHost {
   scheduledHealth(): ReturnType<RuntimeInstrumentality['scheduledHealth']>;
   remoteEndpointDegraded(): string[];
   channelState(): ChannelState;
+  /** B-148: each configured MCP server's tool count or why it cannot start. */
+  mcpHealth(): Promise<McpHealth[]>;
 }
 
 /**
@@ -95,7 +98,7 @@ export class RuntimeRoutes {
 
   async doctor() {
     const channel = this.host.channelState();
-    const [r, s] = await Promise.all([this.routes(), this.host.scheduledHealth()]);
+    const [r, s, mcp] = await Promise.all([this.routes(), this.host.scheduledHealth(), this.host.mcpHealth()]);
     return {
       channel,
       channelFresh: channelIsFresh(channel, Date.now(), ONLINE_MS),
@@ -111,7 +114,13 @@ export class RuntimeRoutes {
       ),
       ...r,
       ...s,
-      degraded: [...r.degraded, ...s.degraded, ...this.host.remoteEndpointDegraded()],
+      degraded: [
+        ...r.degraded,
+        ...s.degraded,
+        ...this.host.remoteEndpointDegraded(),
+        ...mcp.flatMap((m) => ('error' in m ? [`MCP server ${m.server}: ${m.error}`] : [])),
+      ],
+      mcp,
       localModels: await this.localModels(),
       agentLoop: 'not implemented',
     };

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "parent": "B-148",
+  "privacy": "Neutral invented commands and folders only; no config contents, tokens or personal paths in tests or logs.",
+  "prs": [
+    {
+      "pr": 782
+    }
+  ],
+  "id": "B-148-T03",
+  "title": "Owner: the files tool is no longer suspended on NERV-01 after the update",
+  "goal": "After the lifecycle update NERV-01 starts the files MCP server and files.read_text_file is granted, not suspended",
+  "status": "planned",
+  "acceptance": [
+    "After the update, `nerv doctor | grep -A4 '\"mcp\"'` shows files with a tool count and no error",
+    "The dashboard tool list shows files.read_text_file without \"suspended\" (allow a minute for the listing to refresh); if it says its description changed, run `nerv tools grant` for it again"
+  ],
+  "dependsOn": [
+    "B-148-T02"
+  ],
+  "resources": [
+    "docs/work/records/B-148.md"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "validation": [
+    "Owner check, recorded in B-148 Verification"
+  ],
+  "escalation": [
+    "The agent records the result; a remaining failure reopens B-148-T02"
+  ],
+  "ownerLink": "docs/work/records/B-148.md",
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: one doctor run and a look at the dashboard. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

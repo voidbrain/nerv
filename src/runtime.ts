@@ -48,7 +48,7 @@ import type {
   SubdomainSortie,
   RegisteredPilot,
 } from './pilots.ts';
-import { callModelWithUsage, loadExternalTools } from './runtime-tools.ts';
+import { callModelWithUsage, loadExternalTools, mcpServerHealth } from './runtime-tools.ts';
 import {
   remoteOutcomeText,
   type ActReply,
@@ -1061,6 +1061,7 @@ export class Runtime implements StoreApi {
       scheduledHealth: () => this.scheduledHealth(),
       remoteEndpointDegraded: () => this.remoteEndpointDegraded(),
       channelState: () => this.channelState(),
+      mcpHealth: () => mcpServerHealth({ home: this.home, toolsProcess: () => this.toolsProcess() }),
     }));
   }
   async modelSetup(): Promise<ModelSetup> {
