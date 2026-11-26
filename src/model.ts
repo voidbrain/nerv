@@ -18,6 +18,8 @@ export interface LocalRoute {
   model: string;
   /** F-144: how long Ollama keeps a role model loaded after its last use (default {@link DEFAULT_KEEP_ALIVE}). */
   keepAlive?: string;
+  /** F-144-T04: keep the model loaded until Ollama stops (keep_alive -1); off unless set. */
+  alwaysLoaded?: true;
 }
 /** F-144: Ollama unloads a model 5 minutes after its last use; NERV asks for 30 unless the owner sets another value. */
 export const DEFAULT_KEEP_ALIVE = '30m';
@@ -28,22 +30,9 @@ export function validKeepAlive(value: unknown): value is string {
   const seconds = Number(m[1]) * { s: 1, m: 60, h: 3600 }[m[2] as 's' | 'm' | 'h'];
   return seconds >= 60 && seconds <= 24 * 3600;
 }
-/**
- * F-144-T01: after a local reply, a prompt-less `POST /api/generate` with `keep_alive` resets Ollama's unload timer to
- * the configured duration without generating (Ollama's `/v1` endpoint takes no `keep_alive`). It never delays the reply,
- * and a server that is not Ollama, or is gone, only fails this request.
- */
-function keepWarm(local: LocalRoute, fetchFn: typeof fetch = fetch): void {
-  const root = local.baseUrl.replace(/\/v1$/i, '');
-  fetchFn(`${root}/api/generate`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ model: local.model, keep_alive: local.keepAlive ?? DEFAULT_KEEP_ALIVE }),
-    signal: AbortSignal.timeout(5000),
-    redirect: 'error',
-  })
-    .then((r) => r.body?.cancel())
-    .catch(() => undefined);
+/** F-144: the keep_alive Ollama gets with each local call: -1 (never unload) when always loaded, else the duration. */
+export function keepAliveOf(local: LocalRoute): string | -1 {
+  return local.alwaysLoaded ? -1 : (local.keepAlive ?? DEFAULT_KEEP_ALIVE);
 }
 export interface CloudRoute {
   provider: 'anthropic';
@@ -254,7 +243,7 @@ export function validateModels(value: unknown): Models {
     if (
       !l ||
       typeof l !== 'object' ||
-      Object.keys(l).some((k) => !['baseUrl', 'model', 'keepAlive'].includes(k)) ||
+      Object.keys(l).some((k) => !['baseUrl', 'model', 'keepAlive', 'alwaysLoaded'].includes(k)) ||
       typeof l.baseUrl !== 'string' ||
       typeof l.model !== 'string' ||
       !l.model ||
@@ -280,12 +269,15 @@ export function validateModels(value: unknown): Models {
       }
       throw new Error('models.local.baseUrl must be a loopback address on this machine.');
     }
+    if ('alwaysLoaded' in l && typeof l.alwaysLoaded !== 'boolean')
+      throw new Error('Invalid models.local.alwaysLoaded: true or false.');
     if ('keepAlive' in l && !validKeepAlive(l.keepAlive))
       throw new Error('Invalid models.local.keepAlive: a duration such as 30m or 2h, from 1 minute to 24 hours.');
     out.local = {
       baseUrl: url.href.replace(/\/$/, ''),
       model: l.model,
       ...(typeof l.keepAlive === 'string' ? { keepAlive: l.keepAlive } : {}),
+      ...(l.alwaysLoaded === true ? { alwaysLoaded: true as const } : {}),
     };
   }
   if (v.cloud !== undefined) {
@@ -888,15 +880,12 @@ export async function complete(
     },
   };
   try {
-    if (route === 'local') {
-      const reply = await completeOpenAICompatible(ask, models.local!, {
-        ...observed,
-        route: 'local',
-        routeLabel: 'Local route (S²)',
-      });
-      keepWarm(models.local!, options.fetch);
-      return reply;
-    }
+    if (route === 'local')
+      return await completeOpenAICompatible(
+        ask,
+        { ...models.local!, keepAlive: keepAliveOf(models.local!) },
+        { ...observed, route: 'local', routeLabel: 'Local route (S²)' },
+      );
     return await completeAnthropicCompatible(
       ask,
       { model: models.cloud!.model, ...(options.cloudBaseUrl ? { baseUrl: options.cloudBaseUrl } : {}) },
