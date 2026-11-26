@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "parent": "B-169",
+  "dependsOn": [],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-169-T01",
+  "title": "Failing tests: launcher content, target and not overwriting a foreign nerv",
+  "goal": "Tests fail on main: no launcher is rendered or written",
+  "status": "planned",
+  "acceptance": [
+    "Tests fail on main: no launcher is rendered or written"
+  ],
+  "resources": [
+    "test/**",
+    "docs/work/records/B-169.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}
