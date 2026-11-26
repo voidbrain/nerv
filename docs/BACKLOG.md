@@ -9,29 +9,30 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 31 | 9 | 64 | 31 |
+| **This week** | 31 | 9 | 65 | 31 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 57 | 47 |
-| **Require Human 🧑** | 14 | 19 |
+| **Open** | 57 | 48 |
+| **Require Human 🧑** | 14 | 20 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-120](#f-120) | [B-057](#b-057) | — |
-| [F-011](#f-011) | [F-116](#f-116) | [B-068](#b-068) |  |
-| [F-004](#f-004) | [F-142](#f-142) | [B-107](#b-107) |  |
-| [F-012](#f-012) |  | [B-113](#b-113) |  |
-| [F-016](#f-016) |  | [B-122](#b-122) |  |
-| [F-086](#f-086) |  | [B-123](#b-123) |  |
-| [F-087](#f-087) |  | [B-128](#b-128) |  |
-| [F-133](#f-133) |  | [B-129](#b-129) |  |
-| [F-092](#f-092) |  | [B-134](#b-134) |  |
-| [F-060](#f-060) |  | [B-135](#b-135) |  |
-| [F-007](#f-007) |  | [B-142](#b-142) |  |
+| [F-062](#f-062) | [F-120](#f-120) | [B-170](#b-170) | — |
+| [F-011](#f-011) | [F-116](#f-116) | [B-057](#b-057) |  |
+| [F-004](#f-004) | [F-142](#f-142) | [B-068](#b-068) |  |
+| [F-012](#f-012) |  | [B-107](#b-107) |  |
+| [F-016](#f-016) |  | [B-113](#b-113) |  |
+| [F-086](#f-086) |  | [B-122](#b-122) |  |
+| [F-087](#f-087) |  | [B-123](#b-123) |  |
+| [F-133](#f-133) |  | [B-128](#b-128) |  |
+| [F-092](#f-092) |  | [B-129](#b-129) |  |
+| [F-060](#f-060) |  | [B-134](#b-134) |  |
+| [F-007](#f-007) |  | [B-135](#b-135) |  |
+|  |  | [B-142](#b-142) |  |
 |  |  | [B-148](#b-148) |  |
 |  |  | [B-149](#b-149) |  |
 |  |  | [B-056](#b-056) |  |
@@ -43,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 265.5 h agent + 21.25 h owner across 266 open steps of 57 features and 47 other records. 163.25 h of actual effort recorded on 152 steps. Generated from the task files.
+**Remaining effort:** 265.5 h agent + 21.75 h owner across 272 open steps of 57 features and 48 other records. 163.25 h of actual effort recorded on 152 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -654,13 +655,57 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="b-170"></a>[🐞 B-170](#top)
+
+**A tapped push notification is never recorded as opened, so every pushed item also reaches Telegram**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.5 h owner | — | [F-004-T10](#f-004-t10) | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** B-170-T06, after the merge and update: tap a pushed reminder, check it is recorded as opened and which route reported it, mark it done ([steps](acceptance/f004-t06-phone-push-procedure.md#tap-recorded-retest-b-170-t06)).
+
+| | |
+|---|---|
+| **Issue** | Owner phone check 2026-11-26 ([F-004](work/records/B-170.md#f-004)-T10) on NERV-01: every push ever sent has `delivery_channels.opened_at` NULL, although the owner tapped A, the update notice, A2 and A3 and the dashboard app opened each time; a fresh reinstall of the dashboard app (new subscription 20:06:56Z) did not help, so "Push first A" also reached Telegram at the deadline. Server side checked: `/api/push/opened` answers over the tailnet name without a bearer (bogus receipt: 404), the served `sw.js` is current, every push has a receipt. No request log exists to show whether the worker's POST ever arrived. Also: the removed app's subscription stayed (two rows, same user agent), and nothing lets the owner mark a delivered reminder done, which F-004-T10's acceptance asks for. |
+| **Reproduce** | With the dashboard app subscribed on an iPhone, `nerv remind "Tap test" <a minute from now>`, tap the notification when it arrives (the app opens); `opened_at` stays NULL and Telegram sends it 10 minutes after it was due. |
+| **Check** | A tap confirms the push even when iOS drops the worker's request or its notification data, or never runs the click handler: the opened page reports the receipt (from `?opened=`, or from the receipts the worker kept once their notification is gone), idempotently; each report is logged with its route (`worker` or `page`); a paired device's re-subscribe replaces its earlier subscription and revoking the device removes it; a delivered reminder can be marked done in the dashboard (`POST /api/reminders/<id>/done`), which also stops its Telegram fallback; committed tests fail first (B-170-T01) and are not edited; the owner's retest passes (B-170-T06). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-170-t01"></a>B-170-T01 — Failing tests: lost worker request, lost notification data, no click event, device-bound subscriptions, done action | 1 h | 0 h | 0 h | Implemented; verification pending | — | [B-170-T02](#b-170-t02) | 🤖 |
+| 🟢 Small | <a id="b-170-t02"></a>B-170-T02 — The opened page reports the tap: ?opened=, kept receipts, tag, via and a log line | 1.5 h | 0 h | 0 h | Implemented; verification pending | [B-170-T01](#b-170-t01) | [B-170-T03](#b-170-t03) | 🤖 |
+| 🟢 Small | <a id="b-170-t03"></a>B-170-T03 — A paired device keeps one push subscription; revoking it removes it | 1 h | 0 h | 0 h | Implemented; verification pending | [B-170-T02](#b-170-t02) | [B-170-T04](#b-170-t04) | 🤖 |
+| 🟢 Small | <a id="b-170-t04"></a>B-170-T04 — Done for delivered reminders in the dashboard and API | 1.5 h | 0 h | 0 h | Implemented; verification pending | [B-170-T03](#b-170-t03) | [B-170-T05](#b-170-t05) | 🤖 |
+| 🟢 Small | <a id="b-170-t05"></a>B-170-T05 — Procedure retest steps and area notes | 0.5 h | 0 h | 0 h | Implemented; verification pending | [B-170-T04](#b-170-t04) | [B-170-T06](#b-170-t06) | 🤖 |
+| 🟢 Small | <a id="b-170-t06"></a>B-170-T06 — Owner check: a tapped push is recorded as opened and never reaches Telegram; Done works | — | 0 h | 0 h agent + 0.5 h owner | Planned | [B-170-T05](#b-170-t05) | [F-004-T10](#f-004-t10) | ⏳ 🧑‍🔧 |
+| 🟢 Small | **Total** | 5.5 h (5 of 6 steps) | 0 h (0 of 6 steps recorded) | 0.5 h owner | 0 of 6 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-170.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Owner phone check and read-only queries of NERV-01's `nerv.sqlite`, 2026-11-26 (coordinator report); code: `web/public/dashboard/sw.js`, `web/public/dashboard/live.js`, `src/server.ts` (`/api/push/opened`), `src/store-push.ts`, `src/delivery-state.ts`. Review: design-reviewer (Opus, fresh context) 2026-11-26: nothing blocking; should-fix items fixed or recorded under Scope.; [#840](https://github.com/voidbrain/nerv/pull/840) |
+| Opened | 2026-11-26 |
+| Verification | Unit/integration 2026-11-26: `test/push-opened.test.ts` (8) and the F-004/F-133 push tests pass locally. Browser 2026-11-26: `test/push-opened.browser.mjs` (Chrome headless, `makeServer`: `?opened=`, a kept receipt only after its notification closed, Done) passes locally; the click handler runs in the node sandbox. Real-device: Pending (B-170-T06). |
+| Reviewed | 2026-11-26 |
+| Impact | Push first never holds: every reminder and brief also reaches Telegram 10 minutes later, and Grover alerts (nerv:F-122) would too. |
+
+</details>
+
+---
 ### <a id="f-004"></a>[✨ F-004](#top)
 
 **Angular PWA and validated GenUI**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h agent + 0.75 h owner | — | [F-122-T02](#f-122-t02) | 🤖 | 🧑‍🔧 | — |
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h agent + 0.75 h owner | [B-170-T06](#b-170-t06) | [F-122-T02](#f-122-t02) | 🤖 | 🧑‍🔧 | — |
 
 🧑 **→** F-004-T10: push first, Telegram as fallback, and mark the tapped reminder done in the app ([steps](acceptance/f004-t06-phone-push-procedure.md#push-first-telegram-as-fallback-f-004-t10)).
 
@@ -675,7 +720,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="f-004-t07"></a>F-004-T07 — Record the evidence of F-004-T06 and close it | 0.25 h | 0 h | 0.25 h | Planned | — | — | 🤖 | — |
-| 🟢 Small | <a id="f-004-t10"></a>F-004-T10 — Owner check: push first, Telegram as fallback on the phone | — | 0 h | 0 h agent + 0.75 h owner | Planned | — | [F-122-T02](#f-122-t02) | [🧑‍🔧](acceptance/f004-t06-phone-push-procedure.md#push-first-telegram-as-fallback-f-004-t10) | — |
+| 🟢 Small | <a id="f-004-t10"></a>F-004-T10 — Owner check: push first, Telegram as fallback on the phone | — | 0 h | 0 h agent + 0.75 h owner | Planned | [B-170-T06](#b-170-t06) | [F-122-T02](#f-122-t02) | ⏳ 🧑‍🔧 | — |
 | 🟢 Small | **Total** | 16 h (8 of 10 steps) | 4.5 h (6 of 10 steps recorded) | 0.25 h agent + 0.75 h owner | 8 of 10 completed | | | | |
 
 <details><summary>Done steps (8)</summary>

@@ -36,7 +36,7 @@ Checks F-004-T09 on the phone once it is deployed: a reminder goes to the phone 
    ```zsh
    nerv remind "Push first A" "$(date -v+1M +%Y-%m-%dT%H:%M:00%z | sed -E 's/([0-9]{2})([0-9]{2})$/\1:\2/')"
    ```
-   Expected: the notification arrives on the phone and nothing on Telegram. Tap it within 10 minutes (the dashboard opens) and mark "Push first A" done there (this was F-004-T06's last check). Reading it on the lock screen without tapping does not count: Telegram would send it at the deadline. Wait 12 minutes after it was due: still nothing about "Push first A" on Telegram.
+   Expected: the notification arrives on the phone and nothing on Telegram. Tap it within 10 minutes (the dashboard opens) and mark "Push first A" done there: **Coming up** → "Delivered · not done yet" → **Done** (this was F-004-T06's last check; Done since B-170). Reading it on the lock screen without tapping does not count: Telegram would send it at the deadline. Wait 12 minutes after it was due: still nothing about "Push first A" on Telegram.
 2. A reminder left alone reaches Telegram once, at the deadline:
    ```zsh
    nerv remind "Push first B" "$(date -v+1M +%Y-%m-%dT%H:%M:00%z | sed -E 's/([0-9]{2})([0-9]{2})$/\1:\2/')"
@@ -58,6 +58,47 @@ Checks F-004-T09 on the phone once it is deployed: a reminder goes to the phone 
    Expected: Telegram shows `Push first C` when it falls due, with no wait; no notification on the phone. Turn notifications back on afterwards on each device (Settings → Notifications → **Enable notifications**).
 
 Record the result (pass, or which step differed and what was seen) in [F-004](../work/records/F-004.md).
+
+## Tap recorded: retest (B-170-T06)
+
+B-170: on 2026-11-26 no tap was ever recorded (`opened_at` empty on every push), so every pushed item also reached Telegram. Run this first, once the update with B-170 is installed; then steps 1–4 above.
+
+1. Check the installed copy has the fix. On the Mac:
+   ```zsh
+   git -C ~/.nerv-app log --oneline -30 | grep -c B-170
+   ```
+   Expected: a number above `0`.
+2. Give the dashboard app a fresh subscription bound to this phone: in the dashboard app, Settings → Notifications → **Turn off**, then **Enable notifications** (Allow if asked). Then on the Mac, list what is left:
+   ```zsh
+   sqlite3 -readonly ~/.nerv/nerv.sqlite "SELECT created, device_id IS NOT NULL AS this_phone FROM push_subscriptions ORDER BY created;"
+   ```
+   Expected: one row with `this_phone` = `1`, plus one older row with `0` from the app you deleted. **If no row shows `1`, stop here** (the app is signed in with a login code, not paired: pair it again from Settings → Devices, then repeat this step); the next command would remove this phone's subscription too. Otherwise remove every row with `0` (only if no other app on any device has notifications on; the workspace app's own subscription also shows `0`):
+   ```zsh
+   for e in $(sqlite3 -readonly ~/.nerv/nerv.sqlite "SELECT endpoint FROM push_subscriptions WHERE device_id IS NULL;"); do curl -s -X POST http://127.0.0.1:4317/api/push/unsubscribe -H "Authorization: Bearer $(cat ~/.nerv/token)" -H 'Content-Type: application/json' -d "{\"endpoint\":\"$e\"}"; echo; done
+   ```
+   Expected: `{"ok":true,"removed":true}` per removed row; the first query then shows one row. Later, revoking a paired device in Settings → Devices also removes its subscription.
+3. A tapped reminder is recorded as opened:
+   ```zsh
+   nerv remind "Tap test E" "$(date -v+1M +%Y-%m-%dT%H:%M:00%z | sed -E 's/([0-9]{2})([0-9]{2})$/\1:\2/')"
+   ```
+   Expected: the notification arrives; tap it (the dashboard opens). Within a minute:
+   ```zsh
+   sqlite3 -readonly ~/.nerv/nerv.sqlite "SELECT c.sent_at, c.opened_at FROM delivery_channels c JOIN deliveries d ON d.id=c.delivery_id WHERE d.message LIKE '%Tap test E%' AND c.channel='push';"
+   grep 'push: opened' ~/.nerv/service.log | tail -3
+   ```
+   Expected: `opened_at` has a time; the log shows `push: opened via worker: recorded` or `push: opened via page: recorded` (which one tells which route works on iOS: note it in the result).
+4. An untapped one is not confirmed by opening the app:
+   ```zsh
+   nerv remind "Untapped F" "$(date -v+1M +%Y-%m-%dT%H:%M:00%z | sed -E 's/([0-9]{2})([0-9]{2})$/\1:\2/')"
+   ```
+   Expected: the notification arrives; do not tap it. Open the dashboard app from the Home Screen icon, leave the notification in Notification Centre, then:
+   ```zsh
+   sqlite3 -readonly ~/.nerv/nerv.sqlite "SELECT c.opened_at FROM delivery_channels c JOIN deliveries d ON d.id=c.delivery_id WHERE d.message LIKE '%Untapped F%' AND c.channel='push';"
+   ```
+   Expected: an empty `opened_at`; about 10 minutes after it was due Telegram shows "Untapped F" once.
+5. Done: in the dashboard, **Coming up** shows "Tap test E" under "Delivered · not done yet"; press **Done**. Expected: it leaves the list. Wait until 12 minutes after it was due: nothing about "Tap test E" on Telegram.
+
+Record the result (pass, or which step differed and what was seen, with the `via` from step 3) in [B-170](../work/records/B-170.md).
 
 ## Read in the app, not tapped (B-149-T03)
 

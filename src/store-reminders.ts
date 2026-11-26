@@ -229,6 +229,25 @@ export class StoreReminders {
     );
   }
 
+  /**
+   * B-170: the owner marked a delivered reminder done. Kept once; its inbox item counts as read, so the Telegram fallback
+   * skips it. False for a reminder not delivered yet, cancelled or unknown.
+   */
+  done(id: string, now = new Date()): boolean {
+    return transaction(this.host.db, () => {
+      if (
+        !this.host.db
+          .prepare('SELECT 1 FROM reminders WHERE id=? AND delivered IS NOT NULL AND cancelled IS NULL')
+          .get(id)
+      )
+        return false;
+      const at = now.toISOString();
+      this.host.db.prepare('INSERT OR IGNORE INTO reminder_done(reminder_id, at) VALUES(?, ?)').run(id, at);
+      this.host.db.prepare('UPDATE deliveries SET read_at=COALESCE(read_at, ?) WHERE reminder_id=?').run(at, id);
+      return true;
+    });
+  }
+
   tick(now = new Date()): number {
     const config = this.host.home ? readConfig(this.host.home) : undefined;
     const timeZone = config?.timeZone ?? 'Europe/Rome';

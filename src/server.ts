@@ -327,18 +327,26 @@ export function makeServer(
       }
       return;
     }
-    // F-004-T09: the phone's service worker reports a tapped reminder notification. It holds no bearer, so the receipt
+    // F-004-T09: the phone's service worker (B-170: or the page the tap opened) reports a tapped notification. It holds no bearer, so the receipt
     // itself is the credential: a one-off random value that only the push payload (encrypted to that device) carried.
     // It can mark that one push opened and nothing else.
     if (!options.native && req.method === 'POST' && path === '/api/push/opened') {
       try {
         const value = await body(req, 256);
-        const receipt = value.receipt;
-        if (Object.keys(value).length !== 1 || typeof receipt !== 'string' || receipt.length > 64) {
+        const { receipt, via = 'worker' } = value;
+        // B-170: `via` says which route reported the tap (the worker, or the page it opened); the log shows it at a
+        // phone check, without the receipt.
+        if (
+          Object.keys(value).some((k) => k !== 'receipt' && k !== 'via') ||
+          typeof receipt !== 'string' ||
+          receipt.length > 64 ||
+          (via !== 'worker' && via !== 'page')
+        ) {
           reply(400, { error: 'Send the receipt.' });
           return;
         }
         const opened = store.pushOpened ? await store.pushOpened(receipt) : false;
+        console.log(`push: opened via ${via}: ${opened ? 'recorded' : 'unknown receipt'}`);
         reply(opened ? 200 : 404, opened ? { ok: true } : { error: 'Unknown receipt.' });
       } catch {
         reply(400, { error: 'Invalid request.' });
@@ -724,7 +732,10 @@ export function makeServer(
         const self = root ? undefined : devices.idOf(bearer);
         reply(200, { devices: devices.list().map((d) => ({ ...d, current: d.id === self })) });
       } else if (!options.native && req.method === 'DELETE' && path.startsWith('/api/devices/')) {
-        const revoked = devices.revoke(decodeURIComponent(path.slice('/api/devices/'.length)));
+        const id = decodeURIComponent(path.slice('/api/devices/'.length));
+        const revoked = devices.revoke(id);
+        // B-170: a revoked device gets no more pushes.
+        if (revoked && store.forgetPushDevice) await store.forgetPushDevice(id);
         reply(revoked ? 200 : 404, { revoked });
       } else if (!options.native && root && req.method === 'POST' && path === '/api/session/revoke') {
         reply(200, { revoked: sessions.clear() });
@@ -1120,6 +1131,10 @@ export function makeServer(
         });
         if (r) reply(200, r);
         else reply(404, { error: 'No pending reminder with that ID.' });
+      } else if (req.method === 'POST' && /^\/api\/reminders\/[a-f0-9-]+\/done$/.test(path)) {
+        // B-170: the owner marked a delivered reminder done (Coming up); it also counts as read, so no Telegram fallback.
+        const done = store.reminderDone ? await store.reminderDone(path.split('/')[3]!) : false;
+        reply(done ? 200 : 404, done ? { ok: true } : { error: 'No delivered reminder with that ID.' });
       } else if (req.method === 'DELETE' && /^\/api\/reminders\/[a-f0-9-]+$/.test(path)) {
         reply((await store.cancel(path.split('/').at(-1)!)) ? 200 : 404, { message: 'Cancellation processed.' });
       } else if (req.method === 'GET' && path === '/api/push/key') {
@@ -1146,12 +1161,15 @@ export function makeServer(
         ) {
           throw new Error('endpoint and keys (p256dh, auth) are required.');
         }
+        const deviceId = root ? undefined : devices.idOf(bearer);
         if (store.savePushSubscription) {
           await store.savePushSubscription({
             endpoint: b.endpoint,
             p256dh: (b.keys as Record<string, unknown>).p256dh as string,
             auth: (b.keys as Record<string, unknown>).auth as string,
             ...(typeof b.userAgent === 'string' ? { userAgent: b.userAgent } : {}),
+            // B-170: a paired device keeps one subscription: its next one replaces this, a revoke removes it.
+            ...(deviceId ? { deviceId } : {}),
           });
         }
         reply(201, { ok: true });

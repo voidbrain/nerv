@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "parent": "B-170",
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, endpoints or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "dependsOn": [
+    "B-170-T03"
+  ],
+  "id": "B-170-T04",
+  "title": "Done for delivered reminders in the dashboard and API",
+  "goal": "B-170-T01 done tests pass unchanged; Coming up lists delivered reminders with Done",
+  "status": "implemented",
+  "acceptance": [
+    "B-170-T01 done tests pass unchanged; Coming up lists delivered reminders with Done"
+  ],
+  "resources": [
+    "src/store-reminders.ts",
+    "src/server.ts",
+    "web/public/dashboard/live.js",
+    "docs/work/records/B-170.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}
