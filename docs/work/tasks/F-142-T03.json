@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "id": "F-142-T03",
+  "parent": "F-142",
+  "title": "Image intake in chat: API, Telegram, storage and retention",
+  "goal": "An image sent in chat is checked, stripped, stored locally and handed to the vision turn",
+  "status": "planned",
+  "acceptance": [
+    "Owner decisions 2026-11-26 in chat: fpvbuddy:F-023 \"A\" (retire the on-device assistant and the vision demo), with \"vision capabilities ideally on nerv too\"; Italian is required for every model-facing feature (the owner uses all modules in Italian).",
+    "POST /api/chat accepts one image (size and type checked by magic bytes, as photos.ts); EXIF/GPS removed before writing; stored under NERV's data directory with its sha256 and a retention sweep that deletes expired chat images",
+    "Telegram: a photo with an attach caption (recipe:, crash:, part:, battery:) still attaches as today; any other photo, with or without a caption, goes to the vision turn with the caption as the question",
+    "Tests across the join: Telegram update with a photo → stored image → vision turn request; oversize, wrong type and expired images"
+  ],
+  "dependsOn": [
+    "F-142-T02"
+  ],
+  "resources": [
+    "src/telegram.ts",
+    "src/server.ts",
+    "src/runtime-chat.ts",
+    "src/photos.ts",
+    "test/**",
+    "docs/work/records/F-142.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "privacy-review",
+    "regression-design"
+  ],
+  "privacy": "Images stay on the owner's machines: no cloud route receives an image; tests use invented images generated in the test (no personal photos, no EXIF from real devices) and no secrets.",
+  "validation": [
+    "npm test",
+    "npm run check:fast; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-26: reuses photos.ts checks; the Telegram routing change and the retention sweep carry most of the work. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 822,
+      "note": "plan"
+    }
+  ]
+}

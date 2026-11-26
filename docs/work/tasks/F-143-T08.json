@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-143-T08",
+  "parent": "F-143",
+  "title": "Gauntlet cases, Italian and English",
+  "goal": "Tool choice and the no-save-without-acceptance rule are measured",
+  "status": "planned",
+  "acceptance": [
+    "Owner idea 2026-11-26 in chat: \"in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted.\" Italian is required for every model-facing feature.",
+    "NERV cases (invented items): \"trovane qualcuna sul web\" → search, \"usa questa\" → chat image candidate, an ambiguous item asked back, a pick → approval request, never a save without one; Italian and English for each; regression and holdout splits; never commit local-test changes to evals/gauntlet/ledger.json"
+  ],
+  "dependsOn": [
+    "F-143-T07"
+  ],
+  "resources": [
+    "evals/gauntlet/**",
+    "docs/work/records/F-143.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Invented recipes, places and images only; web images are fetched only through NERV's egress proxy, the full image only after the owner accepts it; no secrets or API keys in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-26: about 8 cases. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.0,
+    "baselineAgentHours": 1.0,
+    "estimateAgentHours": 1.0
+  },
+  "prs": [
+    {
+      "pr": 822,
+      "note": "plan"
+    }
+  ]
+}

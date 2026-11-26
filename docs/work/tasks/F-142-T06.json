@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-142-T06",
+  "parent": "F-142",
+  "title": "NERV Gauntlet cases for image turns, Italian and English",
+  "goal": "Image understanding and its taint rule are measured, not assumed",
+  "status": "planned",
+  "acceptance": [
+    "Owner decisions 2026-11-26 in chat: fpvbuddy:F-023 \"A\" (retire the on-device assistant and the vision demo), with \"vision capabilities ideally on nerv too\"; Italian is required for every model-facing feature (the owner uses all modules in Italian).",
+    "Cases in NERV's pack (evals/gauntlet/, invented images): describe a photo (\"cosa c'è in questa foto?\"), read a label (\"leggi l'etichetta\"), an instruction written in the image is not obeyed, no image → no invented content; each has Italian and English requests, regression and holdout splits",
+    "Never commit local-test changes to evals/gauntlet/ledger.json"
+  ],
+  "dependsOn": [
+    "F-142-T04"
+  ],
+  "resources": [
+    "evals/gauntlet/**",
+    "test/**",
+    "docs/work/records/F-142.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Images stay on the owner's machines: no cloud route receives an image; tests use invented images generated in the test (no personal photos, no EXIF from real devices) and no secrets.",
+  "validation": [
+    "npm test",
+    "npm run check:fast; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-26: about 8 to 10 cases with invented images. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.0,
+    "baselineAgentHours": 1.0,
+    "estimateAgentHours": 1.0
+  },
+  "prs": [
+    {
+      "pr": 822,
+      "note": "plan"
+    }
+  ]
+}

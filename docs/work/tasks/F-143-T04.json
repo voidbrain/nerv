@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "F-143-T04",
+  "parent": "F-143",
+  "title": "\"Usa questa\": an image sent in chat becomes the candidate",
+  "goal": "The owner can attach the photo just sent to the item found",
+  "status": "planned",
+  "acceptance": [
+    "Owner idea 2026-11-26 in chat: \"in future I will be able to recover a recipe or a hobo place, say it was without image, I will be able to put it in chat and tell to use that, or to find some on the web, propose (using genUI?) and save the accepted.\" Italian is required for every model-facing feature.",
+    "After F-143-T03 finds the item, an image from the same conversation (F-142 intake) becomes the single candidate in the image-choice surface; \"usa questa\" / \"use this one\" works in Italian and English",
+    "Understanding the image (e.g. checking it shows a dish or a place) uses F-142's local vision route and is optional; without F-142-T02 the image is still offered, not described"
+  ],
+  "dependsOn": [
+    "F-143-T03",
+    "F-142-T03"
+  ],
+  "resources": [
+    "src/runtime-chat.ts",
+    "test/**",
+    "docs/work/records/F-143.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Invented recipes, places and images only; web images are fetched only through NERV's egress proxy, the full image only after the owner accepts it; no secrets or API keys in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast; final applicable CI"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-26: reuses F-142's stored chat image. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.0,
+    "baselineAgentHours": 1.0,
+    "estimateAgentHours": 1.0
+  },
+  "prs": [
+    {
+      "pr": 822,
+      "note": "plan"
+    }
+  ]
+}
