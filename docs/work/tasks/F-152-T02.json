@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "F-152-T02",
+  "parent": "F-152",
+  "title": "Remove the duplicate automatic-update line from the Health card",
+  "goal": "The line 'Automatic updates, checked 21:00, applied 04:00 unless you say wait' with its checkbox is gone; the update settings panel stays the only place",
+  "status": "planned",
+  "acceptance": [
+    "Checked: the settings panel (set-auto-enabled, mode, check and apply hours) already holds the switch, mode and both hours, so the line adds nothing; only 'Last automatic attempt: ...' is not in the panel and stays in Health (or moves to the panel, decided in this step)",
+    "Test first: Health renders no chk-auto-update and no 'Automatic updates' label, still shows the last attempt; test/health-settings-layout.test.mjs and test/dashboard.test.ts updated for the removed id, saying which expectation changed and why",
+    "The log line at live.js 'Automatic updates on: checked at 20:00, applied at 03:00' hard-codes hours: made to read the saved schedule or dropped"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/**",
+    "src/store-push.ts",
+    "test/**",
+    "docs/work/records/F-152.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "javascript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-26 from the existing code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": [
+    {
+      "pr": 859,
+      "note": "plan"
+    }
+  ]
+}

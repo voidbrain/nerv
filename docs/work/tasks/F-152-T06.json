@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-152-T06",
+  "parent": "F-152",
+  "title": "Build the diagnostics table on the Health card",
+  "goal": "The dotted lines become the table; the other Health rows stay as they are",
+  "status": "planned",
+  "acceptance": [
+    "Replace healthMetricRows output with a table via tokens only (var(--...)), phone width: wraps to stacked label/value cells or scrolls inside its own box, no page scroll; Eva and Simple themes both readable (AA check in test/dashboard.test.ts still green)",
+    "Row ids kept (health-sample-row, data-link-peer, health-links-empty) or tests updated in the same step; docs/STYLE-GUIDE.md gets one line if a shared table style is added",
+    "Browser check in test/dashboard-shell.browser.mjs or a new browser test at 360 px width"
+  ],
+  "dependsOn": [
+    "F-152-T05"
+  ],
+  "resources": [
+    "web/public/dashboard/**",
+    "src/store-push.ts",
+    "test/**",
+    "docs/work/records/F-152.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "javascript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-26 from the existing code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 859,
+      "note": "plan"
+    }
+  ]
+}
