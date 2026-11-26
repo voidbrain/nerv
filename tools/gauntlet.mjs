@@ -42,6 +42,8 @@ const ledgerPath = () => resolve(process.env.NERV_GAUNTLET_LEDGER ?? here(ledger
 const consumptionPath = () => resolve(process.env.NERV_GAUNTLET_CONSUMPTION ?? here(consumptionFile));
 const tasksPath = () => resolve(process.env.NERV_GAUNTLET_TASKS ?? here('docs/work/tasks'));
 const systemPath = () => resolve(process.env.NERV_GAUNTLET_SYSTEM ?? here(systemFile));
+// B-127: tests point this at a temporary folder instead of moving the shared build that browser tests serve.
+const browserBuildPath = () => resolve(process.env.NERV_GAUNTLET_BROWSER_BUILD ?? here('dist/web/browser'));
 const releaseTag = () => readJSON(here('vendor/gauntlet-protocol.json')).releaseTag;
 
 export function readSystemPackWithInputs() {
@@ -166,7 +168,7 @@ const pendingByPack = (packs, ledger, options) =>
   });
 const unmetRequirements = (testCase) =>
   (testCase.requirements ?? []).filter(
-    (requirement) => requirement === 'built-browser-assets' && !existsSync(here('dist/web/browser')),
+    (requirement) => requirement === 'built-browser-assets' && !existsSync(browserBuildPath()),
   );
 const assertRequirements = (pack) => {
   const unmet = pack.cases.flatMap((testCase) => unmetRequirements(testCase));
