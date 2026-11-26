@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-120-T07",
+  "parent": "F-120",
+  "title": "Raise the coding-reference reply cap so coding answers are not cut off (owner decision 2026-11-26)",
+  "goal": "The coding cases' replies can finish inside the 180 s case: the coding-reference packs get a larger output-token budget than the profile's 2,048, the other packs keep theirs",
+  "status": "closed",
+  "acceptance": [
+    "The owner's decision is recorded in F-120 with its date and words",
+    "Packs on the coding-reference runner raise the profile's reply cap and the suite budget (3,072 tokens a case, chosen to fit the 180 s case), every other pack keeps the profile and limits, with a regression test (failing first)",
+    "The four coding cases rerun on gemma4:12b without --allow-expensive and recorded in the ledger and F-120; if still cut off at the new cap, that is recorded and the cap is not raised again"
+  ],
+  "dependsOn": ["F-120-T05"],
+  "resources": [
+    "docs/evaluations/gauntlet.md",
+    "docs/work/records/F-120.md",
+    "evals/gauntlet/**",
+    "generated:backlog-views",
+    "test/gauntlet.test.mjs",
+    "tools/gauntlet.mjs"
+  ],
+  "capabilities": ["bounded-edit", "evidence-review"],
+  "privacy": "Code, tests and neutral Gauntlet evidence only; no secrets or personal data.",
+  "validation": [
+    "node --test test/gauntlet.test.mjs (F-120-T07 fails without the change)",
+    "node tools/gauntlet.mjs pending"
+  ],
+  "escalation": ["A further raise of the cap is the owner's call"],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Opened and done 2026-11-26 from the nerv#800 coding failures (owner: \"Raise the output limit for the coding packs ok\"): cap by pack, failing-first test, docs and one coding rerun.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "ownerHours": 0,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1,
+    "actualAgentHours": 1,
+    "actualSource": "stated"
+  }
+}

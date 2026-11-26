@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-120-T08",
+  "parent": "F-120",
+  "title": "Rerun nerv-system-flows/stress and browser after the F-120-T07 wrapper change",
+  "goal": "The two expensive system cases, source-changed by the tools/gauntlet.mjs change in F-120-T07, run again and are recorded",
+  "status": "planned",
+  "acceptance": [
+    "nerv-system-flows/stress and nerv-system-flows/browser run with --allow-expensive --execute (no model; local fixtures and the worktree's npm run build) and are recorded in evals/gauntlet/ledger.json",
+    "node tools/gauntlet.mjs pending no longer lists them",
+    "Run in the development checkout, never ~/.nerv-app"
+  ],
+  "dependsOn": [
+    "F-120-T07"
+  ],
+  "resources": [
+    "evals/gauntlet/**",
+    "docs/work/records/F-120.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "node tools/gauntlet.mjs pending",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "An --allow-expensive run is approved by the owner or the coordinator first; the F-120-T07 session was not cleared for it"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h agent",
+    "basis": "Opened 2026-11-26: the F-120-T07 change to tools/gauntlet.mjs makes the system cases source-changed; the six cheap ones were rerun, these two need --allow-expensive, which that session did not run. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}

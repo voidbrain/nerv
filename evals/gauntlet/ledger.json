@@ -286,10 +286,38 @@
       "packVersion": "1.0.0",
       "case": "dependency-order-holdout",
       "caseHash": "3836921365cb496049407896f8a3c675a93b27d218453b7b54fabe42d873eb6f",
+      "profileHash": "4b75713a0b368ac468040e5d3160d74110d1fccf1cac26fc6656c852e0ee5146",
+      "status": "failed",
+      "reportHash": "040d40f091909d905eca112782e60103bccffef9cc65440f0f7c459ae7deef35",
+      "finished": "2026-11-26T09:37:07.347Z",
+      "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+      "runtimeHash": "1145131bf6da8d906f76d0c083324ccc080af29308d392bb4113e7ac5c3f2d8f",
+      "scenarioHash": null,
+      "sourceKey": "bcf3d8e35b778e30d06be62dfa060bf02ea4272d57e689c5100eed419314557c"
+    },
+    {
+      "pack": "coding",
+      "packVersion": "1.0.0",
+      "case": "dependency-order-holdout",
+      "caseHash": "3836921365cb496049407896f8a3c675a93b27d218453b7b54fabe42d873eb6f",
       "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
       "status": "failed",
       "reportHash": "9f4efb14d1121c80b165ccf2068f7b9fd1a8c06e2c0d92881461765cdcebf7c2",
       "finished": "2026-11-26T09:06:48.599Z",
+      "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+      "runtimeHash": "1145131bf6da8d906f76d0c083324ccc080af29308d392bb4113e7ac5c3f2d8f",
+      "scenarioHash": null,
+      "sourceKey": "bcf3d8e35b778e30d06be62dfa060bf02ea4272d57e689c5100eed419314557c"
+    },
+    {
+      "pack": "coding",
+      "packVersion": "1.0.0",
+      "case": "merge-intervals-holdout",
+      "caseHash": "9f2bcc064894f97049b07268b8aeb6da6d3141a557edd3285bb18de739f4aad2",
+      "profileHash": "4b75713a0b368ac468040e5d3160d74110d1fccf1cac26fc6656c852e0ee5146",
+      "status": "passed",
+      "reportHash": "040d40f091909d905eca112782e60103bccffef9cc65440f0f7c459ae7deef35",
+      "finished": "2026-11-26T09:37:07.347Z",
       "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
       "runtimeHash": "1145131bf6da8d906f76d0c083324ccc080af29308d392bb4113e7ac5c3f2d8f",
       "scenarioHash": null,
@@ -314,10 +342,38 @@
       "packVersion": "1.0.0",
       "case": "parse-duration-regression",
       "caseHash": "be489a97038e64c58a6e60a41ef451892942c37edfacf663bbfd2090250a7e07",
+      "profileHash": "4b75713a0b368ac468040e5d3160d74110d1fccf1cac26fc6656c852e0ee5146",
+      "status": "failed",
+      "reportHash": "040d40f091909d905eca112782e60103bccffef9cc65440f0f7c459ae7deef35",
+      "finished": "2026-11-26T09:37:07.347Z",
+      "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+      "runtimeHash": "1145131bf6da8d906f76d0c083324ccc080af29308d392bb4113e7ac5c3f2d8f",
+      "scenarioHash": null,
+      "sourceKey": "bcf3d8e35b778e30d06be62dfa060bf02ea4272d57e689c5100eed419314557c"
+    },
+    {
+      "pack": "coding",
+      "packVersion": "1.0.0",
+      "case": "parse-duration-regression",
+      "caseHash": "be489a97038e64c58a6e60a41ef451892942c37edfacf663bbfd2090250a7e07",
       "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
       "status": "failed",
       "reportHash": "9f4efb14d1121c80b165ccf2068f7b9fd1a8c06e2c0d92881461765cdcebf7c2",
       "finished": "2026-11-26T09:06:48.599Z",
+      "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+      "runtimeHash": "1145131bf6da8d906f76d0c083324ccc080af29308d392bb4113e7ac5c3f2d8f",
+      "scenarioHash": null,
+      "sourceKey": "bcf3d8e35b778e30d06be62dfa060bf02ea4272d57e689c5100eed419314557c"
+    },
+    {
+      "pack": "coding",
+      "packVersion": "1.0.0",
+      "case": "slugify-regression",
+      "caseHash": "50a6ade5aea9cc33cfe350f26d9aa352e1ec5ae21739c0b8de3803b32707062f",
+      "profileHash": "4b75713a0b368ac468040e5d3160d74110d1fccf1cac26fc6656c852e0ee5146",
+      "status": "passed",
+      "reportHash": "040d40f091909d905eca112782e60103bccffef9cc65440f0f7c459ae7deef35",
+      "finished": "2026-11-26T09:37:07.347Z",
       "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
       "runtimeHash": "1145131bf6da8d906f76d0c083324ccc080af29308d392bb4113e7ac5c3f2d8f",
       "scenarioHash": null,
@@ -1044,12 +1100,12 @@
       "caseHash": "18a6ca7b4c1d00204c2e1447b56e51bc288822cc8df5e45beffe65e6c421085b",
       "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
       "status": "passed",
-      "reportHash": "7934d0f89456e76816f2f1c1f39405131f9e432e38cac478be04cc94ef8d970f",
-      "finished": "2026-11-26T09:12:22.571Z",
+      "reportHash": "c1f1c212adf472a1bffd12cea0d7181720d63b3df9b822d9575385c21d4dab9d",
+      "finished": "2026-11-26T09:37:08.906Z",
       "modelDigest": null,
       "runtimeHash": null,
       "scenarioHash": null,
-      "sourceKey": "d2043092d1217a508ebf8314c2fe0d1db785f74d1a0ded631d660fd592f4d9cf"
+      "sourceKey": "5cf29cfa87f6903c69087d7ffd71fa35ecff2f4bbeb8f8c37bac61468f5e5045"
     },
     {
       "pack": "multi-step-agent",
@@ -1058,12 +1114,12 @@
       "caseHash": "ea7083058a5e01c1356ca256dac75072b4005eaac7a5ef8543efb30f416eca2a",
       "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
       "status": "passed",
-      "reportHash": "7934d0f89456e76816f2f1c1f39405131f9e432e38cac478be04cc94ef8d970f",
-      "finished": "2026-11-26T09:12:22.571Z",
+      "reportHash": "c1f1c212adf472a1bffd12cea0d7181720d63b3df9b822d9575385c21d4dab9d",
+      "finished": "2026-11-26T09:37:08.906Z",
       "modelDigest": null,
       "runtimeHash": null,
       "scenarioHash": null,
-      "sourceKey": "d2043092d1217a508ebf8314c2fe0d1db785f74d1a0ded631d660fd592f4d9cf"
+      "sourceKey": "5cf29cfa87f6903c69087d7ffd71fa35ecff2f4bbeb8f8c37bac61468f5e5045"
     },
     {
       "pack": "multi-step-agent",
@@ -1072,12 +1128,12 @@
       "caseHash": "23ffcaafb82ca1a1754cc7589c8413500ed4f87884f5aa2fc73f0ed8ebc0254f",
       "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
       "status": "passed",
-      "reportHash": "7934d0f89456e76816f2f1c1f39405131f9e432e38cac478be04cc94ef8d970f",
-      "finished": "2026-11-26T09:12:22.571Z",
+      "reportHash": "c1f1c212adf472a1bffd12cea0d7181720d63b3df9b822d9575385c21d4dab9d",
+      "finished": "2026-11-26T09:37:08.906Z",
       "modelDigest": null,
       "runtimeHash": null,
       "scenarioHash": null,
-      "sourceKey": "d2043092d1217a508ebf8314c2fe0d1db785f74d1a0ded631d660fd592f4d9cf"
+      "sourceKey": "5cf29cfa87f6903c69087d7ffd71fa35ecff2f4bbeb8f8c37bac61468f5e5045"
     },
     {
       "pack": "multi-step-agent",
@@ -1086,12 +1142,12 @@
       "caseHash": "21733bac9daeb048983f837a7ff8b14871f55e100d0112a9055a77598b4ae2ae",
       "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
       "status": "passed",
-      "reportHash": "7934d0f89456e76816f2f1c1f39405131f9e432e38cac478be04cc94ef8d970f",
-      "finished": "2026-11-26T09:12:22.571Z",
+      "reportHash": "c1f1c212adf472a1bffd12cea0d7181720d63b3df9b822d9575385c21d4dab9d",
+      "finished": "2026-11-26T09:37:08.906Z",
       "modelDigest": null,
       "runtimeHash": null,
       "scenarioHash": null,
-      "sourceKey": "d2043092d1217a508ebf8314c2fe0d1db785f74d1a0ded631d660fd592f4d9cf"
+      "sourceKey": "5cf29cfa87f6903c69087d7ffd71fa35ecff2f4bbeb8f8c37bac61468f5e5045"
     },
     {
       "pack": "nerv-system-flows",
@@ -1100,12 +1156,12 @@
       "caseHash": "29a18cdf5721f04268e8f95ddc6a51dc2e54642cd4c790f9ae3c53e8dadac5eb",
       "profileHash": null,
       "status": "passed",
-      "reportHash": "806fa6adbf7f9f9604d951fe5961d7a88d5cfd0f8d14c58872e9b3f175d7e65c",
-      "finished": "2026-11-26T09:08:42.679Z",
+      "reportHash": "78d5624c1796865b9927a49e1883b50881cfab35799410d3989e2a6f7dfe43ce",
+      "finished": "2026-11-26T09:39:03.670Z",
       "modelDigest": null,
       "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
       "scenarioHash": null,
-      "sourceKey": "92217a3fa3da113855e69f11dfd8338eb9183b8adc830705e0b4966ba9762d43"
+      "sourceKey": "40877c347a239f2d940b86acb1c590c6744f878db255db66e1c59a05da78eb1f"
     },
     {
       "pack": "nerv-system-flows",
@@ -1128,12 +1184,12 @@
       "caseHash": "80d4cc735d352cf754bcbfa9d74821b43ac1a512c537964aba3f77c226535740",
       "profileHash": null,
       "status": "passed",
-      "reportHash": "7250a62b5cb4080d9ef8c8f6ef907cc9692a5d7e8abecb6184efe2649313f2f5",
-      "finished": "2026-11-26T09:07:53.479Z",
+      "reportHash": "11b0ec7fcb07be658cfdd487b3c8c4c86167b96de21797fad457a518805cbe60",
+      "finished": "2026-11-26T09:38:11.894Z",
       "modelDigest": null,
       "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
       "scenarioHash": null,
-      "sourceKey": "a9ddb3fd6d400e412cb3d4591927f431d36d22ba341e149c3db80890490c1259"
+      "sourceKey": "6971dc80dbcb8077ec5183b288d1d402ef5f63a956248fc6ecc2731d5de6f5ea"
     },
     {
       "pack": "nerv-system-flows",
@@ -1142,12 +1198,12 @@
       "caseHash": "80f6106bc56f175afcf00e6e38defe748c41cd4f1a3e0964045c4135f355019a",
       "profileHash": null,
       "status": "passed",
-      "reportHash": "332de6a9625958add2ee48f8233ba00008d1523475739c43a18fb7d2003f1382",
-      "finished": "2026-11-26T09:07:24.241Z",
+      "reportHash": "ecd53a39e75c3222c601e025f4ded116ab56cc846f94c13349ec1c5421c34eaf",
+      "finished": "2026-11-26T09:37:43.235Z",
       "modelDigest": null,
       "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
       "scenarioHash": null,
-      "sourceKey": "871260e81cd29a4dedd5b2de72cc69fffb7e607b50680b7c782c6bd823884218"
+      "sourceKey": "722008d645b5ef36787c8c8ca5408f1009c1a8cccc10ef6abd81e45066eaa464"
     },
     {
       "pack": "nerv-system-flows",
@@ -1156,12 +1212,12 @@
       "caseHash": "bee9af53a2b2467119e77b40000ce66b73245e89b21f26a1beec913231366f8e",
       "profileHash": null,
       "status": "passed",
-      "reportHash": "0996a5e29dcde6bfc7675c0d3495537d5e5eb811c87a047828dc40b6ab591027",
-      "finished": "2026-11-26T09:06:58.336Z",
+      "reportHash": "28d6234069663a993450b0044478b8cb91aedbc5e7f1ce5d6c440fe581b5aca3",
+      "finished": "2026-11-26T09:37:18.607Z",
       "modelDigest": null,
       "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
       "scenarioHash": null,
-      "sourceKey": "035b8948d3f41eaba4f06ecee9ce911fd605668abd395c2c3598b752b83be6da"
+      "sourceKey": "fed7c627a2bd5401e10f297c90ecc9e46260d9c8870e3d041695e39365d7ebb5"
     },
     {
       "pack": "nerv-system-flows",
@@ -1170,12 +1226,12 @@
       "caseHash": "75eae83b0cff91bfb438fa78e5b50c96efb525a0fed1afdc5fe3593be592a0bd",
       "profileHash": null,
       "status": "passed",
-      "reportHash": "ddee835c5cc39e0969fa04380224e04c4514f4276b5b6bc67541cf56888a47d3",
-      "finished": "2026-11-26T09:06:50.215Z",
+      "reportHash": "5442fe2e9cfebc9ae9daad1e8b7efd7e60bcf66ff3bd2c5e986143709c98aeb0",
+      "finished": "2026-11-26T09:37:09.670Z",
       "modelDigest": null,
       "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
       "scenarioHash": null,
-      "sourceKey": "4cbce43153fd6a8dd0f0736eec1171686aa7912a5a67510848a0f027965245f7"
+      "sourceKey": "fb942a4431825c2f2f1473f3bb13e03e82d7c30e1329de803d8db49262998210"
     },
     {
       "pack": "nerv-system-flows",
@@ -1184,12 +1240,12 @@
       "caseHash": "8c200ec992cf4a5a53f19a2eea6806b1f155f12a62292407c2f90301ee7894a9",
       "profileHash": null,
       "status": "passed",
-      "reportHash": "6080b2e7a52c361d2372cc44ba63bf0c54084d8c264090814d87108867100d44",
-      "finished": "2026-11-26T09:08:49.489Z",
+      "reportHash": "852dc0fdd017c6f4397eeb84c1f307335b5f76e4b258a4890fd758e5cb29da89",
+      "finished": "2026-11-26T09:39:10.686Z",
       "modelDigest": null,
       "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
       "scenarioHash": null,
-      "sourceKey": "5cf831dfef1ff294bc6016cbd65e478c44cebbb365b318e4d4a0e93b46ce749d"
+      "sourceKey": "8c178c9962caf440cc54d4f4c8b4d121ff9e085deab30154d01099fb0560a622"
     },
     {
       "pack": "nerv-system-flows",

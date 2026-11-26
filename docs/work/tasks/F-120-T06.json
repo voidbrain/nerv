@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "id": "F-120-T06",
+  "parent": "F-120",
+  "title": "Run the four Arduino sketch cases once arduino-cli is installed (owner opt-in)",
+  "goal": "The four embedded sketch cases run and are recorded in the Gauntlet ledger after the owner opts in to installing arduino-cli",
+  "status": "planned",
+  "acceptance": [
+    "The owner opts in to arduino-cli with arduino:avr 1.8.6 and esp32:esp32 3.0.7 on the Mac (not asked for on 2026-11-26)",
+    "embedded/blink-millis-esp32-regression, embedded/debounce-toggle-uno-regression, embedded/pwm-fade-esp32-holdout and embedded/serial-command-uno-holdout run (--allow-models --allow-expensive) and are recorded in evals/gauntlet/ledger.json",
+    "Run in the development checkout, never ~/.nerv-app; not while the owner uses the local model"
+  ],
+  "dependsOn": ["F-120-T04"],
+  "resources": ["evals/gauntlet/**", "docs/work/records/F-120.md", "generated:backlog-views"],
+  "capabilities": ["bounded-edit", "evidence-review"],
+  "privacy": "Neutral invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": ["node tools/gauntlet.mjs pending", "npm run check:fast"],
+  "escalation": ["Installing arduino-cli and its cores is the owner's opt-in; never install it unasked"],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent after the owner opts in",
+    "basis": "Moved 2026-11-26 out of F-120-T04 (owner: \"Close nerv:F-120-T04 ok\") so that step can close; about one embedded run plus recording. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
