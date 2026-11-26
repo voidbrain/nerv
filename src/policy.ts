@@ -322,6 +322,22 @@ export function balthasar(action: Action, effect: Effect, executor: Executor, sp
       action.trust === 'tainted' ? 'Tainted context; external effects escalate.' : 'Within budget and executor class.',
   };
 }
+/** B-175: the EVA-03 refusal caused by a tainted conversation, as opposed to a tool granted for EVA-03 itself. */
+export const TAINTED_ISOLATION =
+  'EVA-03 outside code requires isolation; it does not run. A tool result earlier in this conversation made it untrusted: start a new conversation to use this tool.';
+/**
+ * B-175 (owner decision 2026-11-26): the service's reply when a granted outside tool is refused because the
+ * conversation is tainted. Misato stops there instead of retrying; the owner learns why and how to start clean.
+ */
+export function isolationRefusalReply(language: 'it' | 'en', tool: string, sameRequest = false): string {
+  if (sameRequest)
+    return language === 'it'
+      ? `Non ho potuto usare ${tool}: il risultato di uno strumento in questa stessa richiesta l'ha resa non fidata, e per sicurezza da lì in poi NERV non esegue altri strumenti esterni. Per avere anche quello, chiedi solo quello in una nuova conversazione (nella chat della dashboard, il pulsante «New conversation»).`
+      : `I could not use ${tool}: a tool result in this same request made it untrusted, so for safety NERV runs no further outside tools in it. To get that too, ask for it on its own in a new conversation (in the dashboard chat: "New conversation").`;
+  return language === 'it'
+    ? `Non ho usato ${tool}: in questa conversazione è già entrato il risultato di uno strumento, e per sicurezza da lì in poi NERV non esegue qui altri strumenti esterni. Apri una nuova conversazione (nella chat della dashboard, il pulsante «New conversation») e ripeti la domanda, oppure scrivi di nuovo qui dopo 30 minuti di pausa.`
+    : `I did not use ${tool}: a tool result already entered this conversation, so for safety NERV runs no further outside tools in it. Start a new conversation (in the dashboard chat: "New conversation") and ask again, or write here again after a pause of 30 minutes.`;
+}
 /** Extra seats are veto-only: their approvals never count, shadow seats are logged and ignored. */
 /** Unregistered tools (no Tool) are treated as irreversible, so Pattern Blue. */
 export function ballot(
@@ -349,9 +365,11 @@ export function ballot(
       seat: 'balthasar',
       vote: 'reject',
       reason:
-        executor === 'eva-03'
-          ? 'EVA-03 outside code requires isolation; it does not run.'
-          : 'Proactive outside code requires EVA-00 isolation; it does not run.',
+        executor !== 'eva-03'
+          ? 'Proactive outside code requires EVA-00 isolation; it does not run.'
+          : action.trust === 'tainted'
+            ? TAINTED_ISOLATION
+            : 'EVA-03 outside code requires isolation; it does not run.',
     });
   const needsCasper = intentChecked(pattern, tool);
   if (needsCasper && casper) verdicts.push({ ...casper, seat: 'casper' });

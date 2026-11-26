@@ -47,9 +47,17 @@ export function formatQueueFullMessage(maxQueued: number, language: 'en' | 'it' 
     : `Queue is full (${maxQueued} waiting). Try again later.`;
 }
 
+/**
+ * A conversation a chat request over HTTP may name: a short lowercase name, or a dashboard conversation the owner
+ * started with "New conversation" (B-175). Never another channel's id (`telegram:…`, `kaji:…`).
+ */
+export function validChatConversation(value: unknown): value is string {
+  return typeof value === 'string' && (/^[a-z]{1,20}$/.test(value) || /^dashboard:[a-z0-9]{1,30}$/.test(value));
+}
+
 export function channelFromConversation(conversation: string): RequestChannel {
   if (conversation.startsWith('telegram:')) return 'telegram';
-  if (conversation === 'dashboard') return 'dashboard';
+  if (conversation === 'dashboard' || conversation.startsWith('dashboard:')) return 'dashboard';
   if (conversation === 'cli') return 'cli';
   if (conversation.startsWith('kaji:')) return 'kaji';
   return 'other';

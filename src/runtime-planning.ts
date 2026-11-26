@@ -30,7 +30,7 @@ import { runScriptPlanInEva03 } from './script-plan.ts';
 import { callGrantedMcp } from './runtime-tools.ts';
 import type { OperatorResolution } from './operator-directory.ts';
 import { canRunRemotePilot, chooseAdvisers, rankPilots, type Chosen, type Pilot, type PilotOffer } from './pilots.ts';
-import { defaultPolicy } from './policy.ts';
+import { TAINTED_ISOLATION, defaultPolicy, isolationRefusalReply } from './policy.ts';
 import type { ProcessClient } from './process-client.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
 import { REFUSED_BEFORE_GATE, RpcFault, type Method } from './rpc.ts';
@@ -185,6 +185,16 @@ export class RuntimePlanning {
         context.map((t) => t.request),
         ownerLanguage(this.host.home),
       );
+    // B-175: set by the first isolation refusal; the owner's reply then ends with it.
+    let isolationNote: string | undefined;
+    const withIsolationNote = (reply: string) =>
+      isolationNote ? `${reply.slice(0, MAX_REPLY_CHARS - isolationNote.length - 2)}\n\n${isolationNote}` : reply;
+    const answered = () =>
+      steps.filter((s) => s.tainted && s.outcome === 'grant' && !s.error && s.result !== undefined);
+    const answeredReply = () => {
+      const last = answered().at(-1)!;
+      return withIsolationNote(readResultReply(lang(), last.tool!, last.result));
+    };
     const ranSteps = () =>
       steps
         .filter((s) => s.outcome === 'grant' && !s.error && s.tool && s.tool !== TOOL_INDEX_READ)
@@ -359,6 +369,8 @@ export class RuntimePlanning {
         )
         .catch(() => ({ error: 'Brain unavailable.' }))) as { plan?: Plan; invalid?: boolean; error?: string };
       const stepDurationMs = Math.max(0, Math.round(performance.now() - stepT0));
+      // B-175: after an isolation refusal only a reply is taken; anything else ends with the result itself.
+      if (isolationNote && (out.error || !out.plan || !('reply' in out.plan))) return finish('done', answeredReply());
       if (out.error) return finish('failed', undefined, out.error, stepDurationMs);
       if (!out.plan) {
         await this.host.record(
@@ -429,11 +441,11 @@ export class RuntimePlanning {
           );
           if (alreadyRejected) {
             const fallback = formatFleetChatReply(lang(), ungroundedFleet.result);
-            if (fallback) return finish('done', fallback, undefined, stepDurationMs);
+            if (fallback) return finish('done', withIsolationNote(fallback), undefined, stepDurationMs);
           }
           continue;
         }
-        return finish('done', out.plan.reply, undefined, stepDurationMs);
+        return finish('done', withIsolationNote(out.plan.reply), undefined, stepDurationMs);
       }
       if ('script' in out.plan) {
         try {
@@ -741,6 +753,26 @@ export class RuntimePlanning {
         'actionId' in r ? r.actionId : undefined,
         stepDurationMs,
       );
+      // B-175 (owner decision 2026-11-26): an isolation refusal does not depend on the arguments, so a retry never
+      // runs; the service's reply says what happened and how to start a clean conversation.
+      if (
+        !proactive &&
+        r.outcome === 'reject' &&
+        'blocked' in r &&
+        r.blocked === 'isolation' &&
+        r.reason.endsWith(TAINTED_ISOLATION)
+      ) {
+        // Owner evidence 2026-11-26: a result this request already has is still the answer; the refusal is added.
+        const sameRequest = answered().length > 0;
+        isolationNote = isolationRefusalReply(lang(), tool, sameRequest);
+        if (!sameRequest) return finish('done', isolationNote);
+        if (turn + 1 >= MAX_STEPS + freeReadTurns(steps)) return finish('done', answeredReply());
+        await this.host.record(sortieId, steps, {
+          outcome: 'invalid',
+          error: `${tool} cannot run in this request. Call no other tool: reply to the owner now from the results already in your steps.`,
+        });
+        continue;
+      }
       // A card ends the turn: the reply is the service's, and Misato carries on after the owner decides (F-033 resume),
       // so the model is never asked to describe an action that is only waiting.
       if ('approvalId' in r && r.approvalId) {
