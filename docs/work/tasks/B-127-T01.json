@@ -4,7 +4,7 @@
   "parent": "B-127",
   "title": "Name what the F-118-T02 browser test waits on under load and fix or bound it",
   "goal": "test/evaluation.browser.mjs F-118-T02 passes when it runs with many test files",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The wait that runs out under load is named from the run output",
     "A regression reproduces the load case and fails before the fix, or the test states the bound that absorbs it",
@@ -35,7 +35,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-24 in the reconciliation: reproduce under load, name the wait, fix or bound. Not a measurement. Checked against node tools/work-items.mjs calibrate 2026-11-24 (bug median 1.0x over 12 steps; B-117-T01, a load investigation, took 0.17x, while B-118-T01 to T03 took 2–2.5 h each), so kept. 2026-11-26: implemented in about 1 h; the cause was the gauntlet tests moving dist/web/browser, not load. Remaining: CI.",
+    "basis": "Estimated 2026-11-24 in the reconciliation: reproduce under load, name the wait, fix or bound. Not a measurement. Checked against node tools/work-items.mjs calibrate 2026-11-24 (bug median 1.0x over 12 steps; B-117-T01, a load investigation, took 0.17x, while B-118-T01 to T03 took 2–2.5 h each), so kept. 2026-11-26: implemented in about 1 h; the cause was the gauntlet tests moving dist/web/browser, not load. Remaining: CI. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 1,
