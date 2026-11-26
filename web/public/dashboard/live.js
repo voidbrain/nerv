@@ -122,7 +122,7 @@
       // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
       const byId = new Map(); for (const x of [...latest20, ...older, ...matches]) if (!byId.has(x.id)) byId.set(x.id, x);
       const list = [...byId.values()].sort((a, b) => b.created.localeCompare(a.created)); shown = list;
-      applyBases(kajiBases, healthOf(doctor)); void loadModels(); void loadTools();
+      applyBases(kajiBases, healthOf(doctor)); void loadModels(); void loadTools(); void loadSkills();
       state.pilots = pilots && Array.isArray(pilots.pilots) ? pilots.pilots : null;
       state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
       // Reminders delivered (briefs live in the inbox too since F-028, and are shown on their own in Debrief).
@@ -415,6 +415,9 @@
   // end F-021-T05 toolsHtml
   let toolsData, toolsAt = 0;
   const loadTools = async (force) => { if (!force && Date.now() - toolsAt < 60000) return; toolsAt = Date.now(); try { toolsData = await api("tools"); } catch (e) { toolsData = { error:e.message }; } const box = document.getElementById("tools-list"); if (box) box.innerHTML = toolsHtml(toolsData); };
+  // F-145: the skills store, read-only; redrawn only when it changed.
+  let skillsAt = 0, skillsSeen = "";
+  const loadSkills = async () => { if (Date.now() - skillsAt < 60000) return; skillsAt = Date.now(); let next; try { next = (await api("skills")).skills; } catch (e) { next = { error:e.message }; } const seen = JSON.stringify(next); if (seen === skillsSeen) return; skillsSeen = seen; state.skills = next; renderSkills(); };
   const loadModels = async (force) => { if (!force && Date.now() - modelsAt < 30000) return; modelsAt = Date.now(); try { modelsData = await api("models"); } catch (e) { modelsData = { error:e.message }; } renderModels(); renderMelons(); };
   window.renderModels = function () {
     const box = document.getElementById("models"); const sub = document.getElementById("models-sub"); const d = modelsData;
