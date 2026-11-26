@@ -45,5 +45,11 @@
     "agentHours": 2.5,
     "baselineAgentHours": 2.5,
     "estimateAgentHours": 2.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 817,
+      "note": "Service binds the macOS desktop driver for recording and replay"
+    }
+  ]
 }
