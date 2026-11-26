@@ -185,6 +185,16 @@ export class RuntimePlanning {
         context.map((t) => t.request),
         ownerLanguage(this.host.home),
       );
+    // B-175: set by the first isolation refusal; the owner's reply then ends with it.
+    let isolationNote: string | undefined;
+    const withIsolationNote = (reply: string) =>
+      isolationNote ? `${reply.slice(0, MAX_REPLY_CHARS - isolationNote.length - 2)}\n\n${isolationNote}` : reply;
+    const answered = () =>
+      steps.filter((s) => s.outcome === 'grant' && !s.error && s.result !== undefined && s.tool !== TOOL_INDEX_READ);
+    const answeredReply = () => {
+      const last = answered().at(-1)!;
+      return withIsolationNote(readResultReply(lang(), last.tool!, last.result));
+    };
     const ranSteps = () =>
       steps
         .filter((s) => s.outcome === 'grant' && !s.error && s.tool && s.tool !== TOOL_INDEX_READ)
@@ -433,7 +443,7 @@ export class RuntimePlanning {
           }
           continue;
         }
-        return finish('done', out.plan.reply, undefined, stepDurationMs);
+        return finish('done', withIsolationNote(out.plan.reply), undefined, stepDurationMs);
       }
       if ('script' in out.plan) {
         try {
@@ -540,6 +550,8 @@ export class RuntimePlanning {
         continue;
       }
       const { tool } = out.plan.action;
+      // B-175: after an isolation refusal Misato only replies; another action ends the request with the result itself.
+      if (isolationNote) return finish('done', answeredReply());
       const shouldReconcile =
         tool === 'reminders.add' || (tool === 'reminders.update' && typeof out.plan.action.args.due === 'string');
       const cfg = shouldReconcile && this.host.home ? readConfig(this.host.home) : undefined;
@@ -749,8 +761,18 @@ export class RuntimePlanning {
         'blocked' in r &&
         r.blocked === 'isolation' &&
         r.reason.endsWith(TAINTED_ISOLATION)
-      )
-        return finish('done', isolationRefusalReply(lang(), tool));
+      ) {
+        // Owner evidence 2026-11-26: a result this request already has is still the answer; the refusal is added.
+        const sameRequest = answered().length > 0;
+        isolationNote = isolationRefusalReply(lang(), tool, sameRequest);
+        if (!sameRequest) return finish('done', isolationNote);
+        if (turn + 1 >= MAX_STEPS + freeReadTurns(steps)) return finish('done', answeredReply());
+        await this.host.record(sortieId, steps, {
+          outcome: 'invalid',
+          error: `${tool} cannot run in this request. Call no other tool: reply to the owner now from the results already in your steps.`,
+        });
+        continue;
+      }
       // A card ends the turn: the reply is the service's, and Misato carries on after the owner decides (F-033 resume),
       // so the model is never asked to describe an action that is only waiting.
       if ('approvalId' in r && r.approvalId) {
