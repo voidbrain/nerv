@@ -1,14 +1,14 @@
 {
  "src/": {
-  "lines": 93.4,
-  "statements": 93.4,
-  "branches": 86,
-  "functions": 88.6
+  "lines": 92.8,
+  "statements": 92.8,
+  "branches": 83.2,
+  "functions": 89.4
  },
  "all": {
-  "lines": 93.4,
-  "statements": 93.4,
-  "branches": 86,
-  "functions": 88.6
+  "lines": 92.8,
+  "statements": 92.8,
+  "branches": 83.2,
+  "functions": 89.4
  }
 }

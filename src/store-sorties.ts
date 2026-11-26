@@ -468,6 +468,9 @@ export class StoreSorties {
       const facts = outcome.result as { tainted: boolean }[];
       this.host.ledger.intake(sortieId, 'tool:' + tool, facts.some((f) => f.tainted) ? 'tainted' : 'trusted');
     }
+    // F-086-T05: mail is data from outside (a sent message's read-back too): the sortie is tainted from here on.
+    if ('result' in outcome && (tool === 'gmail.search' || tool === 'gmail.read' || tool === 'gmail.send'))
+      this.host.ledger.intake(sortieId, 'tool:' + tool, 'tainted');
     // Reminder text predates per-item provenance; treat recalled stored text conservatively.
     if ('result' in outcome && tool === 'reminders.list') this.host.ledger.intake(sortieId, 'tool:' + tool, 'tainted');
     if ('result' in outcome && tool === 'sorties.explain') {

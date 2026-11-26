@@ -10,7 +10,7 @@
   "Owner connects the account, searches, approves one draft to themself"
  ],
  "dependsOn": [
-  "F-086-T03"
+  "F-086-T05"
  ],
  "resources": [
   "docs/acceptance/**",

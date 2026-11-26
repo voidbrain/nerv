@@ -1,3 +1,11 @@
+import {
+  GMAIL_NOT_CONNECTED,
+  connectGmail,
+  disconnectGmail,
+  gmailStatus,
+  readClientFile,
+  readGmailCredentials,
+} from './gmail-auth.ts';
 import { runResumeEngineTick, type CreateResumeIntentInput, type ResumeIntentStatus } from './resume-intent.ts';
 import { ClaudeCodeResumeAdapter } from './claude-resume-adapter.ts';
 import { createWebChatResumeDeps } from './web-chat-resume-adapter.ts';
@@ -550,6 +558,36 @@ export async function tryRunCliCommand(
       console.log(`${kind === 'telegram' ? 'Telegram' : 'Cloud'} credential rotated; no secret was printed.`);
       if (kind === 'cloud') console.log(await ctx.reloadIfRunning(home, readConfig(home).port));
     }
+  } else if (command === 'gmail') {
+    // F-086-T05: the owner connects Gmail himself; the credential goes to a private file, never config.json or a log.
+    const sub = args[0] ?? 'status';
+    if (sub === 'status') console.log(gmailStatus(home));
+    else if (sub === 'disconnect') console.log(await disconnectGmail(home));
+    else if (sub === 'connect') {
+      const compose = args.includes('--compose');
+      const clientFile = ctx.flag('--client-file');
+      let existing: ReturnType<typeof readGmailCredentials>;
+      try {
+        existing = readGmailCredentials(home);
+      } catch {
+        existing = undefined;
+      }
+      const client = clientFile
+        ? readClientFile(clientFile)
+        : existing
+          ? { clientId: existing.clientId, clientSecret: existing.clientSecret }
+          : {
+              clientId: (await ctx.readSecret('Google OAuth client ID (Desktop app; not shown): ')).trim(),
+              clientSecret: (await ctx.readSecret('Google OAuth client secret (not shown): ')).trim(),
+            };
+      if (!client.clientId || !client.clientSecret)
+        throw new Error(`Both the client ID and the client secret are needed. ${GMAIL_NOT_CONNECTED}`);
+      const { scopes } = await connectGmail({ home, ...client, compose, print: (line) => console.log(line) });
+      console.log(
+        `${gmailStatus(home)} Scopes: ${scopes.join(' ')}. The credential is in ${home} (mode 600); no secret was printed.`,
+      );
+      if (clientFile) console.log(`You can now delete the downloaded client file: ${clientFile}`);
+    } else throw new Error('Usage: gmail connect [--compose] [--client-file FILE] | gmail status | gmail disconnect');
   } else if (command === 'telegram') {
     // telegram link [CHAT_ID]: binds Aoba to the private chat that sent /start to the bot.
     // telegram token: asks for the BotFather token without showing it, checks its format and saves it privately.
