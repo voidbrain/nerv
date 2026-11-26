@@ -37,5 +37,10 @@
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 834,
+      "note": "config.language fallback through every caller"
+    }
+  ]
 }
