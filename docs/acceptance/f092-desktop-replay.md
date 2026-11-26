@@ -24,7 +24,7 @@ Runs on the owner's Mac (NERV-01) after NERV has updated to a version with F-092
    Record my mouse for 8 seconds as calc-seven
    ```
 
-   Expected: a Blue approval card for `desktop.record` with `{"id": "calc-seven", "seconds": 8}`; nothing is recorded before you approve. Approve it, then within 3 seconds click the Calculator title bar. During the 8 seconds: move the pointer around over Calculator, click **7** once, then keep still. The first time, macOS may ask to let `node` control System Events: choose **Allow**. Expected reply: a summary with `"id": "calc-seven"`, an `events` count, `"app": "Calculator"`, `"window": "Calculator"` and the display size; no coordinates. Then in Terminal:
+   Expected: a Blue approval card for `desktop.record` with `{"id": "calc-seven", "seconds": 8}`; nothing is recorded before you approve. Approve it, then within 3 seconds click the Calculator title bar. During the 8 seconds: move the pointer around inside the Calculator window (never outside it: a recording that leaves the window is refused at replay), click **7** once, then keep still. The first time, macOS may ask to let `node` control System Events: choose **Allow**. Expected reply: a summary with `"id": "calc-seven"`, an `events` count, `"app": "Calculator"`, `"window": "Calculator"` and the display size; no pointer coordinates. Then in Terminal:
 
    ```bash
    ls -l ~/.nerv/recordings/calc-seven.json
@@ -38,7 +38,7 @@ Runs on the owner's Mac (NERV-01) after NERV has updated to a version with F-092
    Replay the desktop recording calc-seven
    ```
 
-   Expected: a Blue card for `desktop.replay` naming `"id": "calc-seven"`, `"app": "Calculator"`, `"window": "Calculator"`, the display, the event count, the length in seconds and a `sha256`; the pointer does not move before you approve. Approve, then within 3 seconds click the Calculator title bar and let go of mouse and keyboard. Expected: the pointer retraces the recorded path, Calculator shows `7`, and the reply says `"status": "completed"`, `replayedEvents` equal to `totalEvents`, and an `afterSummary` that includes `7`.
+   Expected: a Blue card for `desktop.replay` naming `"id": "calc-seven"`, `"app": "Calculator"`, `"window": "Calculator"`, the display, the event count, the length in seconds and a `sha256`; the pointer does not move before you approve. Approve it from the dashboard or chat (not with `nerv approve` in Terminal: that answers "it runs only in the NERV service"), then within 3 seconds click the Calculator title bar and let go of mouse and keyboard. Expected: the pointer retraces the recorded path, Calculator shows `7`, and the reply says `"status": "completed"`, `replayedEvents` equal to `totalEvents`, and an `afterSummary` that includes `7`.
 5. Mismatch. Press **AC**, send the same replay message and approve, but leave the browser in front. Expected: no pointer movement and the reply `Replay precondition mismatch: expected frontmost app Calculator (com.apple.calculator), got …`.
 6. Interruption. Press **AC**, send the replay message, approve, click the Calculator title bar, and once the pointer starts moving, move the mouse yourself. Expected: the replay stops at once with `"status": "stopped"`, `"stopReason": "owner-input"` and `replayedEvents` lower than `totalEvents`; no mouse button stays pressed.
 

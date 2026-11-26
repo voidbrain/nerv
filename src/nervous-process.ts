@@ -5,6 +5,7 @@ import type { RunReason } from './instrumentality-runs.ts';
 import { parsePrices, type UsageObservation } from './model-usage.ts';
 import { MISATO_SOURCE, OWNER_SOURCE, Store, settledOutcome } from './store.ts';
 import { createCdpBrowserDriver } from './browser-cdp-driver.ts';
+import { liveDesktopControl } from './desktop-macos-driver.ts';
 import { underTestRunner } from './slicer.ts';
 import { appendFileSync } from 'node:fs';
 import { startupWatch } from './startup-watch.ts';
@@ -48,6 +49,9 @@ if (bambuLaunchLog && underTestRunner()) {
 if (process.argv.includes('--browser-cdp-test') && underTestRunner()) {
   store.browserDriver = (port) => createCdpBrowserDriver({ port, settleMs: 1 });
 }
+// F-092-T05: only the service drives the desktop (macOS credits Accessibility to this node); under the test runner the
+// live control refuses, so no test moves the mouse.
+store.desktop = liveDesktopControl();
 // F-016-T16: a standby, fenced or lease-expired base runs no coordinator tick (the authority check refuses it),
 // quietly; worker-scoped expiry still runs.
 const schedule = () => {

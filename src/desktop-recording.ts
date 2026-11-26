@@ -163,7 +163,8 @@ export class DesktopRecordingSession {
     if (!recordingsDir) return { recording };
     mkdirSync(recordingsDir, { recursive: true });
     const filePath = join(recordingsDir, `${this.id}.json`);
-    writeFileSync(filePath, JSON.stringify(recording, null, 2), { encoding: 'utf8', mode: 0o600 });
+    // 'wx': a recording is never overwritten (another one with the same name may have finished meanwhile).
+    writeFileSync(filePath, JSON.stringify(recording, null, 2), { encoding: 'utf8', mode: 0o600, flag: 'wx' });
     return { recording, filePath };
   }
 }
@@ -274,7 +275,12 @@ export async function replayDesktopRecording(
       break;
     }
     const currentApp = await driver.getFrontmostApp();
-    if (currentApp.bundleId !== expectedApp.bundleId || currentApp.windowTitle !== expectedApp.windowTitle) {
+    // F-092-T05: a moved or resized window changes where every remaining event lands, so it stops the replay too.
+    if (
+      currentApp.bundleId !== expectedApp.bundleId ||
+      currentApp.windowTitle !== expectedApp.windowTitle ||
+      (currentApp.windowFrame && !framesMatch(expectedApp.windowFrame, currentApp.windowFrame, tolerance))
+    ) {
       stopReason = 'window-changed';
       break;
     }

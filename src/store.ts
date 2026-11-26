@@ -52,8 +52,7 @@ import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
 import { bindBrowserClick, bindDesktopReplay, builtinTools, type AgencySnapshot } from './executors.ts';
-import type { DesktopControl } from './desktop-service.ts';
-import { liveDesktopControl } from './desktop-macos-driver.ts';
+import { DESKTOP_SERVICE_ONLY, refusingDesktopControl, type DesktopControl } from './desktop-service.ts';
 import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circuits.ts';
 import { createFpvStoreSlice, type FpvStoreSlice, type RegisterBatteryInput } from './packs.ts';
@@ -217,13 +216,16 @@ export class Store {
   /** F-121-T02: the slicer process runner; tests set a fake slicer. */
   slicerExec?: SlicerExecFn;
   private desktopControl?: DesktopControl;
-  /** Tests inject a fake desktop control here; the service uses the live one (it refuses under the test runner). */
+  /**
+   * F-092-T05: the service's nervous process sets the live control; tests inject a fake. Any other process (a CLI
+   * `nerv approve`, say) keeps the refusing default: macOS would credit its terminal, not the service's node.
+   */
   set desktop(control: DesktopControl | undefined) {
     this.desktopControl = control;
   }
-  /** F-092-T05: the desktop control for desktop.record and desktop.replay, built on first use. */
+  /** The desktop control for desktop.record and desktop.replay. */
   get desktop(): DesktopControl {
-    return (this.desktopControl ??= liveDesktopControl());
+    return (this.desktopControl ??= refusingDesktopControl(DESKTOP_SERVICE_ONLY));
   }
   /** The data home, when known: the schedule tool writes config.json there. */
   readonly home?: string;

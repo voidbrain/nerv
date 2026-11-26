@@ -757,7 +757,9 @@ export async function bindBrowserClick(backend: ReminderBackend, args: Record<st
  */
 const LATE_EXECUTOR_MS: Readonly<Record<string, number>> = {
   'browser.click': 30_000,
-  'desktop.record': 90_000,
+  // 3 s start delay, up to 60 s of sampling, and the display and front-window reads (the first may wait on macOS's
+  // Automation prompt for System Events).
+  'desktop.record': 150_000,
   'desktop.replay': 150_000,
   'gmail.search': 60_000,
   'gmail.read': 60_000,

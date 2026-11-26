@@ -189,6 +189,8 @@ export function openMacInputSession(options: MacInputSessionOptions = {}): Deskt
     }
   });
   child.stderr.resume();
+  // A helper that closes its input makes the next write fail with EPIPE: that fails the replay, never the service.
+  child.stdin.on('error', (e) => failAll(new Error(`The desktop input helper stopped: ${e.message}`)));
   child.on('error', (e) => failAll(new Error(`The desktop input helper stopped: ${e.message}`)));
   child.on('exit', (code) => failAll(new Error(`The desktop input helper stopped (exit ${code ?? 'signal'}).`)));
 

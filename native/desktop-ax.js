@@ -196,7 +196,11 @@ function session() {
       delay(0.05);
       if (moved(cursor())) return 'mouse moved';
     }
-    if ((pressed() & ~held) !== 0) return 'mouse button pressed';
+    if ((pressed() & ~held) !== 0) {
+      // The window server may still show a button the replay has just released.
+      delay(0.05);
+      if ((pressed() & ~held) !== 0) return 'mouse button pressed';
+    }
     if ($.CGEventSourceSecondsSinceLastEventType(HID_SYSTEM_STATE, KEY_DOWN) * 1000 < Date.now() - startedAt) {
       return 'key pressed';
     }

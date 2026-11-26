@@ -23,8 +23,9 @@ export const DESKTOP_START_DELAY_MS = 3000;
 export const MAX_DESKTOP_RECORDING_SECONDS = 60;
 /** A replay never runs longer than this wall-clock time, however slow the per-event checks are. */
 export const DESKTOP_REPLAY_DEADLINE_MS = 90_000;
-const SAMPLE_MS = 50;
+const SAMPLE_MS = 20;
 const STATUS_CACHE_MS = 30_000;
+const WINDOW_MARGIN_PX = 4;
 const MAX_EVENTS = 10_000;
 const MAX_COORDINATE = 20_000;
 const ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
@@ -84,7 +85,11 @@ export interface DesktopRecordingSummary {
   truncated?: 'max-duration' | 'max-events';
 }
 
-export type DesktopReplayReport = ReplayRecordingResult & { id: string };
+export type DesktopReplayReport = Omit<ReplayRecordingResult, 'beforeFrontmost' | 'afterFrontmost'> & {
+  id: string;
+  before: { app: string; window: string };
+  after: { app: string; window: string };
+};
 
 export interface DesktopControl {
   status(): DesktopControlStatus;
@@ -196,6 +201,21 @@ function readRecording(home: string, id: string): { recording: DesktopRecordingF
     }
     previous = ev.dtMs;
   }
+  // Replay acts only inside the recorded window: an event outside its frame (a stray to the Dock or the menu bar,
+  // or an edited file) refuses the whole recording.
+  const f = front.windowFrame;
+  const outside = recording.events.filter(
+    (ev) =>
+      ev.x! < f.x - WINDOW_MARGIN_PX ||
+      ev.y! < f.y - WINDOW_MARGIN_PX ||
+      ev.x! > f.x + f.width + WINDOW_MARGIN_PX ||
+      ev.y! > f.y + f.height + WINDOW_MARGIN_PX,
+  ).length;
+  if (outside > 0) {
+    throw new Error(
+      `Desktop recording "${id}" has ${outside} event(s) outside the recorded window "${front.windowTitle}": NERV replays only inside that window. Record again keeping the pointer over it.`,
+    );
+  }
   return { recording, sha256 };
 }
 
@@ -205,6 +225,21 @@ export function createDesktopControl(deps: DesktopControlDeps): DesktopControl {
   let cached: { at: number; status: DesktopControlStatus } | undefined;
   const requirePermission = () => {
     if (!deps.driver.checkAccessibilityPermission()) throw new Error(desktopNotAvailable(deps.executable));
+  };
+
+  const bind = (home: string, id: string): { bound: BoundDesktopReplay; recording: DesktopRecordingFile } => {
+    const { recording, sha256 } = readRecording(home, checkedId(id));
+    const last = recording.events.at(-1);
+    const bound = {
+      id,
+      sha256,
+      app: recording.header.frontmostApp.appName,
+      window: recording.header.frontmostApp.windowTitle,
+      display: displayText(recording.header.displayBounds),
+      events: recording.events.length,
+      seconds: Math.ceil((last?.dtMs ?? 0) / 1000),
+    };
+    return { bound, recording };
   };
 
   return {
@@ -264,25 +299,16 @@ export function createDesktopControl(deps: DesktopControlDeps): DesktopControl {
     },
 
     bindReplay(home, id) {
-      const { recording, sha256 } = readRecording(home, checkedId(id));
-      const last = recording.events.at(-1);
-      return {
-        id,
-        sha256,
-        app: recording.header.frontmostApp.appName,
-        window: recording.header.frontmostApp.windowTitle,
-        display: displayText(recording.header.displayBounds),
-        events: recording.events.length,
-        seconds: Math.ceil((last?.dtMs ?? 0) / 1000),
-      };
+      return bind(home, id).bound;
     },
 
     async replay(home, bound, ownerApproved) {
       if (!ownerApproved) {
         throw new Error('Replaying desktop input is a Blue action and runs only after the owner approves its card.');
       }
-      const { recording, sha256 } = readRecording(home, checkedId(bound.id));
-      if (sha256 !== bound.sha256) {
+      const { bound: fresh, recording } = bind(home, bound.id);
+      const fields = Object.keys(fresh) as (keyof BoundDesktopReplay)[];
+      if (fields.some((k) => fresh[k] !== bound[k])) {
         throw new Error(`Desktop recording "${bound.id}" changed since the approval card; propose the replay again.`);
       }
       requirePermission();
@@ -313,7 +339,14 @@ export function createDesktopControl(deps: DesktopControlDeps): DesktopControl {
           approved: true,
           maxDurationMs: MAX_DESKTOP_RECORDING_SECONDS * 1000,
         });
-        return { id: bound.id, ...result };
+        // Window frames stay out of the result (and so out of the ledger): app and title say what was in front.
+        const { beforeFrontmost, afterFrontmost, ...rest } = result;
+        return {
+          id: bound.id,
+          ...rest,
+          before: { app: beforeFrontmost.appName, window: beforeFrontmost.windowTitle },
+          after: { app: afterFrontmost.appName, window: afterFrontmost.windowTitle },
+        };
       } finally {
         await session.releaseButtons().catch(() => undefined);
         session.close();
@@ -322,13 +355,19 @@ export function createDesktopControl(deps: DesktopControlDeps): DesktopControl {
   };
 }
 
+export const DESKTOP_SERVICE_ONLY =
+  'it runs only in the NERV service, whose node holds the Accessibility grant: approve the card from the dashboard or chat.';
+
 /** A desktop control that refuses every use with one reason (no live driver on this platform, or under tests). */
 export function refusingDesktopControl(reason: string): DesktopControl {
   const refuse = (): never => {
     throw new Error(reason);
   };
   return {
-    status: () => ({ available: false, detail: `desktop control not available: ${reason}` }),
+    status: () => ({
+      available: false,
+      detail: `desktop control not available: ${reason}`,
+    }),
     record: async () => refuse(),
     bindReplay: () => refuse(),
     replay: async () => refuse(),

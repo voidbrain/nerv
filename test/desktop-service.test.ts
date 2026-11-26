@@ -5,8 +5,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, it } from 'node:test';
 import type { DesktopDriver } from '../src/desktop-control.ts';
-import { openMacInputSession } from '../src/desktop-macos-driver.ts';
-import type { DesktopInputEvent, DesktopRecordingFile, FrontmostAppMetadata } from '../src/desktop-recording.ts';
+import { liveDesktopControl, openMacInputSession } from '../src/desktop-macos-driver.ts';
+import {
+  DesktopRecordingSession,
+  type DesktopInputEvent,
+  type DesktopRecordingFile,
+  type FrontmostAppMetadata,
+} from '../src/desktop-recording.ts';
 import {
   DESKTOP_START_DELAY_MS,
   createDesktopControl,
@@ -194,7 +199,7 @@ describe('F-092-T05: the service binds the macOS desktop driver for recording an
       // A file edited after the card was shown no longer matches the hash the owner approved.
       const path = desktopRecordingPath(home, 'wiggle');
       const file = JSON.parse(readFileSync(path, 'utf8')) as DesktopRecordingFile;
-      file.events.push({ dtMs: 450, kind: 'mouseMove', x: 1, y: 1 });
+      file.events.push({ dtMs: 450, kind: 'mouseMove', x: 301, y: 301 });
       writeFileSync(path, JSON.stringify(file));
       await assert.rejects(() => control.replay(home, bound, true), /changed since the approval card/);
       assert.equal(state.opened, 0);
@@ -224,6 +229,8 @@ describe('F-092-T05: the service binds the macOS desktop driver for recording an
       assert.equal(state.released, 1);
       assert.equal(state.closed, 1);
       assert.equal(report.afterSummary, 'Scratch window, empty.');
+      assert.deepEqual(report.after, { app: 'SampleNotes', window: 'Scratch' });
+      assert.equal(JSON.stringify(report).includes('windowFrame'), false, 'no window frame in the result');
     });
   });
 
@@ -253,6 +260,62 @@ describe('F-092-T05: the service binds the macOS desktop driver for recording an
       await assert.rejects(() => control.replay(home, bound, true), /expected frontmost app/);
       assert.equal(state.posted.length, 0);
       assert.equal(state.closed, 3, 'the session closes on every path');
+    });
+  });
+});
+
+describe('F-092-T05: review fixes (window confinement, no overwrite, card fields)', () => {
+  it('refuses a recording with any event outside the recorded window', async () => {
+    await withHome(async (home) => {
+      const { control } = fakeDesktop({
+        samples: [
+          { tMs: 0, kind: 'mouseMove', x: 300, y: 300 },
+          { tMs: 50, kind: 'mouseDown', x: 5, y: 890, button: 'left' },
+          { tMs: 90, kind: 'mouseUp', x: 5, y: 890, button: 'left' },
+        ],
+      });
+      await control.record(home, { id: 'stray', seconds: 1 });
+      assert.throws(() => control.bindReplay(home, 'stray'), /2 event\(s\) outside the recorded window "Scratch"/);
+    });
+  });
+
+  it('stops when the window moves during the replay', async () => {
+    await withHome(async (home) => {
+      const { state, control } = fakeDesktop();
+      await control.record(home, { id: 'wiggle', seconds: 5 });
+      const bound = control.bindReplay(home, 'wiggle');
+      state.frontAfter = { posts: 2, front: { ...FRONT, windowFrame: { ...FRONT.windowFrame, x: 400 } } };
+      const moved = await control.replay(home, bound, true);
+      assert.equal(moved.stopReason, 'window-changed');
+      assert.equal(state.posted.length, 2);
+    });
+  });
+
+  it('refuses a card whose shown fields differ from the file, and never overwrites a recording', async () => {
+    await withHome(async (home) => {
+      const { state, control } = fakeDesktop();
+      await control.record(home, { id: 'wiggle', seconds: 5 });
+      const bound = control.bindReplay(home, 'wiggle');
+      await assert.rejects(
+        () => control.replay(home, { ...bound, window: 'Other' }, true),
+        /changed since the approval card/,
+      );
+      assert.equal(state.opened, 0);
+      // Two approved recordings with one name: the later write fails rather than replacing the first.
+      writeFileSync(desktopRecordingPath(home, 'race'), '{}');
+      const session = new DesktopRecordingSession({
+        id: 'race',
+        inputs: 'mouse',
+        permissions: { accessibilityGranted: true },
+        header: {
+          version: 1,
+          recordedAt: '2026-11-26T00:00:00Z',
+          displayBounds: { width: 1, height: 1, scaleFactor: 1 },
+          frontmostApp: FRONT,
+        },
+      });
+      assert.throws(() => session.stop(join(home, 'recordings')), /EEXIST/);
+      assert.equal(readFileSync(desktopRecordingPath(home, 'race'), 'utf8'), '{}');
     });
   });
 });
@@ -346,6 +409,17 @@ describe('F-092-T05: desktop.record and desktop.replay through the gate (service
         await settledOutcome(store.decide(card.approvalId!, 'reject', 'owner'));
         assert.deepEqual(state.posted, []);
         assert.equal(state.opened, 0);
+
+        // A file swapped after the card was shown: the approved replay refuses before any input.
+        const sortie3 = store.ledger.openSortie(MISATO_SOURCE, 'replay wiggle', 'trusted');
+        const card3 = store.runAction(sortie3, proposal);
+        const path = desktopRecordingPath(home, 'wiggle');
+        const file = JSON.parse(readFileSync(path, 'utf8')) as DesktopRecordingFile;
+        file.events.push({ dtMs: 450, kind: 'mouseDown', x: 320, y: 310, button: 'left' });
+        writeFileSync(path, JSON.stringify(file));
+        const swapped = await settledOutcome(store.decide(card3.approvalId!, 'approve', 'owner'));
+        assert.match(String(swapped.error), /changed since the approval card/);
+        assert.deepEqual(state.posted, []);
       } finally {
         store.close();
       }
@@ -362,7 +436,9 @@ describe('F-092-T05: desktop.record and desktop.replay through the gate (service
         const sortie = store.ledger.openSortie(MISATO_SOURCE, 'record', 'trusted');
         const rec = store.runAction(sortie, { tool: 'desktop.record', stage: 'production', args: { id: 'x' } });
         const decided = await settledOutcome(store.decide(rec.approvalId!, 'approve', 'owner'));
-        assert.match(String(decided.error), /A test must inject a desktop control/);
+        assert.match(String(decided.error), /runs only in the NERV service/);
+        // The service's own live control refuses under the test runner too.
+        assert.match(liveDesktopControl('darwin').status().detail, /A test must inject a desktop control/);
       } finally {
         store.close();
       }
@@ -401,6 +477,22 @@ describe('F-092-T05: the macOS input session speaks one JSON line per request', 
       assert.deepEqual(await session.getFrontmostApp(), FRONT);
       await assert.rejects(() => session.dispatchEvent({ dtMs: 20, kind: 'keyDown', keyCode: 0 }), /only mouse/);
       await session.releaseButtons();
+    } finally {
+      session.close();
+    }
+  });
+
+  it('a helper that closes its input fails the replay, not the service (no unhandled EPIPE)', async () => {
+    const closer = `require("node:fs").closeSync(0); setTimeout(() => {}, 2000);`;
+    const session = openMacInputSession({
+      spawn: () => spawn(process.execPath, ['-e', closer]),
+      requestTimeoutMs: 1500,
+    });
+    try {
+      await new Promise((done) => setTimeout(done, 200));
+      for (let i = 0; i < 3; i++) {
+        await assert.rejects(() => session.dispatchEvent({ dtMs: 0, kind: 'mouseMove', x: 1, y: 1 }));
+      }
     } finally {
       session.close();
     }
