@@ -16,7 +16,7 @@ import {
   writeGmailCredentials,
   type GmailCredentials,
 } from '../src/gmail-auth.ts';
-import { Store, settledOutcome } from '../src/store.ts';
+import { MISATO_SOURCE, Store, settledOutcome } from '../src/store.ts';
 
 // Invented fixtures only: no real client, token or mailbox.
 const CLIENT_ID = 'fixture-client-id.apps.example.test';
@@ -336,5 +336,75 @@ test(
       google.seen.map((s) => s.url),
       [GOOGLE_REVOKE_URL],
     );
+  }),
+);
+
+test(
+  'F-086-T05 review: mail read in a request makes its draft Blue, and a sent read-back taints the sortie',
+  withHome(async (home) => {
+    writeGmailCredentials(home, credentials([GMAIL_SCOPE_READONLY, GMAIL_SCOPE_COMPOSE]));
+    const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
+    store.gmailFetch = fakeGoogle().fetchFn;
+    try {
+      // Misato's sortie holds several actions: search, then the reply draft.
+      const sortie = store.ledger.openSortie(MISATO_SOURCE, 'find the test mail and draft a reply', 'trusted');
+      await settledOutcome(
+        store.runAction(sortie, { tool: 'gmail.search', args: { query: 'fixture' }, stage: 'production' }),
+      );
+      const card = store.runAction(sortie, {
+        tool: 'gmail.draft',
+        args: { to: 'me@example.test', subject: 'Re: Neutral fixture', body: 'Hi' },
+        stage: 'production',
+      });
+      assert.equal(card.outcome, 'approval');
+      assert.equal(card.pattern, 'blue', 'after reading mail the draft is Blue, never less');
+
+      // A sent message's read-back is mail too.
+      Object.assign(store, {
+        gmail: {
+          send: async () => ({ sentId: 's-1', readBack: { tainted: true, id: 's-1', subject: 'x', body: 'y' } }),
+        },
+      });
+      const clean = owner(store);
+      const send = store.runAction(clean, {
+        tool: 'gmail.send',
+        args: { to: 'me@example.test', subject: 'Fixture', body: 'Hi' },
+        stage: 'production',
+      });
+      assert.equal(send.pattern, 'blue');
+      await settledOutcome(store.decide(send.approvalId!, 'approve', 'owner'));
+      assert.equal(store.ledger.trust(clean), 'tainted');
+    } finally {
+      store.close();
+    }
+  }),
+);
+
+test(
+  'F-086-T05 review: a reconnect revokes the grant it replaces',
+  withHome(async (home) => {
+    writeGmailCredentials(home, credentials([GMAIL_SCOPE_READONLY, GMAIL_SCOPE_COMPOSE]));
+    const lines: string[] = [];
+    const revoked: string[] = [];
+    const fetchFn = (async (input: string | URL | Request, init?: RequestInit) => {
+      if (String(input) === GOOGLE_REVOKE_URL) {
+        revoked.push(String(init?.body));
+        return new Response('{}');
+      }
+      return new Response(JSON.stringify({ refresh_token: 'fixture-refresh-token-0002', scope: GMAIL_SCOPE_READONLY }));
+    }) as typeof fetch;
+    const connecting = connectGmail({
+      home,
+      clientId: CLIENT_ID,
+      clientSecret: CLIENT_SECRET,
+      compose: false,
+      print: (l) => lines.push(l),
+      fetchFn,
+    });
+    await consent(lines, 'fixture-auth-code-0003');
+    assert.deepEqual(await connecting, { scopes: [GMAIL_SCOPE_READONLY] });
+    assert.deepEqual(revoked, [`token=${REFRESH}`]);
+    assert.equal(readGmailCredentials(home)?.refreshToken, 'fixture-refresh-token-0002');
+    assert.doesNotMatch(lines.join('\n'), new RegExp(REFRESH));
   }),
 );

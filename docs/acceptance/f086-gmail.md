@@ -22,7 +22,7 @@ Runs in a Terminal on the owner's Mac (NERV-01), after NERV has updated to a ver
 
    Expected: `-rw-------` on the credential file, and no new file in the repository: the credential remains outside Git and logs.
 2. Ask NERV to search for the test message. Expected: results are treated as tainted content and no message text becomes an instruction.
-3. Allow drafting and sending (phase 2, the owner's opt-in; it reuses the stored client): `nerv gmail connect --compose`, then allow in the browser. Expected: `Gmail connected: read, draft and send (drafts need an Orange approval, sending a Blue one), since <date and time>. Scopes: https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose. …`. Then ask for a reply draft to the same account. Expected: an Orange approval card appears and no draft is created before approval.
+3. Allow drafting and sending (phase 2, the owner's opt-in; it reuses the stored client): `nerv gmail connect --compose`, then allow in the browser. Expected: `Gmail connected: read, draft and send (drafts need an Orange approval, sending a Blue one), since <date and time>. Scopes: https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose. …`. Then ask for a reply draft to the same account. Expected: an approval card appears (Orange; Blue when the same request first read mail, since mail is outside data) and no draft is created before approval.
 4. Approve the draft, inspect it, then request send. Expected: sending requires a separate Blue owner approval; expiry or rejection sends nothing.
 5. Approve send. Expected: NERV reads back the sent-message identity and reports success without exposing credentials.
 

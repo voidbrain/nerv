@@ -255,7 +255,8 @@ export async function connectGmail(options: ConnectOptions): Promise<{ scopes: s
     `Open this address in the browser on this Mac and allow ${options.compose ? 'read, draft and send' : 'read-only'} access:`,
   );
   options.print(consent.toString());
-  const timer = setTimeout(() => settle({ error: 'timeout' }), options.timeoutMs ?? 5 * 60_000);
+  const timeoutMs = options.timeoutMs ?? 5 * 60_000;
+  const timer = setTimeout(() => settle({ error: 'timeout' }), timeoutMs);
   let result: { code: string } | { error: string };
   try {
     result = await outcome;
@@ -269,7 +270,7 @@ export async function connectGmail(options: ConnectOptions): Promise<{ scopes: s
       result.error === 'declined'
         ? 'Google consent was declined: nothing was saved.'
         : result.error === 'timeout'
-          ? 'No answer from Google within 5 minutes: nothing was saved. Run nerv gmail connect again.'
+          ? `No answer from Google within ${Math.round(timeoutMs / 60_000)} minutes: nothing was saved. Run nerv gmail connect again.`
           : 'Google returned no authorization code: nothing was saved.',
     );
   const res = await fetchFn(GOOGLE_TOKEN_URL, {
@@ -294,6 +295,12 @@ export async function connectGmail(options: ConnectOptions): Promise<{ scopes: s
   if (!cleanToken(body.refresh_token))
     throw new Error('Google returned no refresh token: nothing was saved. Run nerv gmail connect again.');
   const scopes = grantedScopes(requested, typeof body.scope === 'string' ? body.scope : undefined);
+  let previous: GmailCredentials | undefined;
+  try {
+    previous = readGmailCredentials(options.home);
+  } catch {
+    previous = undefined;
+  }
   writeGmailCredentials(options.home, {
     version: 1,
     clientId: options.clientId,
@@ -302,7 +309,25 @@ export async function connectGmail(options: ConnectOptions): Promise<{ scopes: s
     scopes,
     connected: (options.now?.() ?? new Date()).toISOString(),
   });
+  // A reconnect (a downgrade from --compose included) revokes the grant it replaces, so the old token cannot still act.
+  if (previous && previous.refreshToken !== body.refresh_token) {
+    const revoked = await revokeToken(previous.refreshToken, fetchFn);
+    if (!revoked) options.print('The previous Gmail grant could not be revoked: remove it in your Google account.');
+  }
   return { scopes };
+}
+
+async function revokeToken(token: string, fetchFn: typeof fetch): Promise<boolean> {
+  try {
+    const res = await fetchFn(GOOGLE_REVOKE_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ token }).toString(),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 /**

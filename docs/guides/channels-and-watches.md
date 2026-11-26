@@ -41,7 +41,7 @@ Aoba uses outgoing HTTPS polling only (no open ports). Note that Telegram bot ch
 
 NERV reaches the owner's mailbox through the Gmail API with the owner's own Google OAuth client (a Desktop app client from Google Cloud Console).
 
-- `nerv gmail connect --client-file FILE` asks Google for read-only access in the browser (a one-time listener on 127.0.0.1 receives the answer) and keeps the client and refresh token in `~/.nerv/gmail-credentials.json` (mode 600), never in `config.json`, Git or a log. `--compose` adds drafting and sending; a draft still needs an Orange approval and sending a Blue one.
+- `nerv gmail connect --client-file FILE` asks Google for read-only access in the browser (a one-time listener on 127.0.0.1 receives the answer) and keeps the client and refresh token in `~/.nerv/gmail-credentials.json` (mode 600), never in `config.json`, Git or a log. `--compose` adds drafting and sending; a draft still needs an Orange approval (Blue when the same request read mail first) and sending a Blue one. Reconnecting revokes the grant it replaces.
 - `nerv gmail status` says whether Gmail is connected and with which access; `nerv gmail disconnect` removes the credential and asks Google to revoke it. The running service picks up each change without a restart.
 - Mail is outside data: search and read results are marked tainted and never become instructions.
 
