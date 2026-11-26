@@ -1,3 +1,4 @@
+import type { SkillOverview } from './skills.ts';
 import type { HealthSampleStore } from './health-samples.ts';
 import type { HistoryPage } from './history.ts';
 import type { HealthMetricsSnapshot, HealthThresholds } from './health-samples.ts';
@@ -291,6 +292,8 @@ export interface StoreApi {
   externalTools?(): Promise<ExternalTools>;
   /** F-045/F-051: the pilot roster for the dashboard (config.json pilots, read now). */
   pilotRoster?(): Pilot[] | Promise<Pilot[]>;
+  /** F-145: the skills store, read-only (names, versions, stages and evaluation numbers). */
+  skills?(): SkillOverview[];
   /** F-049-T09: live EVA instances per class, per machine, for the dashboard. */
   evaInstances?(): EvaInstancesSnapshot | Promise<EvaInstancesSnapshot>;
   /** F-103-T03: process health samples, per-peer link load, thresholds, and deduplicated warnings. */

@@ -817,6 +817,8 @@ export function makeServer(
           pilots: store.pilotRoster ? await store.pilotRoster() : [],
           ...(store.genericPilot ? { generic: await store.genericPilot() } : {}),
         });
+      } else if (req.method === 'GET' && path === '/api/skills') {
+        reply(200, { skills: store.skills ? store.skills() : [] });
       } else if (req.method === 'GET' && path === '/api/eva/instances') {
         reply(200, store.evaInstances ? await store.evaInstances() : { machines: [] });
       } else if (req.method === 'GET' && path === '/api/health/metrics') {
