@@ -1,3 +1,4 @@
+// @ts-check
 // F-130-T01: the workspace dashboard shell end to end in Chrome against the real service (makeServer) and the
 // production build (run `npm run build` first): a login code signs in on /full, the keyed rows keep their DOM nodes
 // across an unchanged poll and update in place on a change (B-144), both layouts link to each other, every
@@ -36,8 +37,8 @@ test(
     store.ledger.openSortie('owner', 'Neutral sortie two', 'trusted');
     const token = 'w'.repeat(32);
     const server = makeServer(store, token, { webRoot: root, language: 'en', timeZone: 'Europe/Rome' });
-    await new Promise((done) => server.listen(0, '127.0.0.1', done));
-    const origin = `http://127.0.0.1:${server.address().port}`;
+    await new Promise((done) => server.listen(0, '127.0.0.1', () => done(undefined)));
+    const origin = `http://127.0.0.1:${/** @type {import('node:net').AddressInfo} */ (server.address()).port}`;
     try {
       await browser(async ({ page, evaluate, until, errors }) => {
         const login = await (

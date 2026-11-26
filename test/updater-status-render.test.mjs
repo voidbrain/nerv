@@ -1,3 +1,4 @@
+// @ts-check
 // B-123: the Health row shows the updater's status beside Update now: in progress (with its step), completed, refused,
 // failed or uncertain, with reasons and recovery, escaped, until dismissed.
 import { test } from 'node:test';

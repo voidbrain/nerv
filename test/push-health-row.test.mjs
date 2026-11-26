@@ -1,3 +1,4 @@
+// @ts-check
 // B-134: the Health "Phone push" line shows subscribed devices and the last delivery result.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

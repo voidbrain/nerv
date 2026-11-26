@@ -1,3 +1,4 @@
+// @ts-check
 // B-129 (owner 2026-11-24): Health → Run doctor only logged a canned "scheduler ok · brain ok · routes ok · SQLite
 // integrity ok" and never asked the service. The live dashboard now calls GET /api/doctor and shows the answer next to
 // the button: ok or the problems, revision and skew, the database checks, the update status; errors said plainly.

@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node --use-system-ca src/cli.ts",
     "test": "node --test --import ./test/fixtures/exit-guard.ts --import ./test/fixtures/sqlite-no-fsync.ts --test-reporter=./tools/quiet-reporter.mjs --test-reporter-destination=stdout --test-reporter=spec --test-reporter-destination=.test-report.txt --test-reporter=./tools/test-timing-reporter.mjs --test-reporter-destination=stdout --test-timeout=60000 test/*.test.ts test/*.test.mjs",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test-js.json",
     "build": "ng build",
     "dev": "ng serve --proxy-config proxy.conf.json",
     "check:backlog": "node tools/check-backlog.mjs",
@@ -76,6 +76,7 @@
     "deps:install": "node tools/install-deps.mjs",
     "work:usage": "node tools/work-usage.mjs",
     "work:launch": "node tools/usage-launch.mjs",
+    "behaviour": "node tools/behaviour.mjs",
     "rule-load": "node tools/rule-load.mjs",
     "check:rule-load": "node tools/rule-load.mjs --check"
   },
