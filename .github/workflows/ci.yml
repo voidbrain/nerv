@@ -13,8 +13,9 @@ on:
         default: true
   schedule:
     - cron: '0 7 * * 1'
+# B-156: the weekly scheduled full run has its own group, so a push to main no longer cancels it.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'schedule' && 'schedule' || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 permissions:
   contents: read
@@ -234,16 +235,21 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: macOS scope
-        run: echo "Native work selected=${{ needs.plan.outputs.native }}"
-      - if: needs.plan.outputs.native == 'true'
+        run: echo "Native work selected=${{ needs.plan.outputs.native }}; Node work=${{ needs.plan.outputs.unit }}; full=${{ needs.plan.outputs.full }}"
+      - if: needs.plan.outputs.native == 'true' || needs.plan.outputs.full == 'true' || needs.plan.outputs.unit == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - if: needs.plan.outputs.native == 'true'
+      - if: needs.plan.outputs.native == 'true' || needs.plan.outputs.full == 'true' || needs.plan.outputs.unit == 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
-      - if: needs.plan.outputs.native == 'true'
+      - if: needs.plan.outputs.native == 'true' || needs.plan.outputs.full == 'true' || needs.plan.outputs.unit == 'true'
         run: npm ci
+      # B-152: the Node tests that skip on Linux and Windows (EVA sandbox-exec confinement, egress proxy, job user,
+      # desktop driver, moved-service joins); a skip here fails the step. About a minute.
+      - name: macOS-only Node tests
+        if: needs.plan.outputs.full == 'true' || needs.plan.outputs.unit == 'true'
+        run: node tools/macos-node-tests.mjs
       - if: needs.plan.outputs.native == 'true'
         run: swift build --package-path native/NervMenuBar
       - name: Native pairing and pinned TLS tests
