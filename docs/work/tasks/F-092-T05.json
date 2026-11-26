@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "F-092-T05",
+  "parent": "F-092",
+  "title": "Wire the macOS desktop driver into the service",
+  "goal": "The running service records and replays through the live desktop driver, behind approval cards",
+  "status": "implemented",
+  "acceptance": [
+    "The service builds the macOS desktop driver when Accessibility is granted to its node binary, and doctor and every desktop tool say \"desktop control not available: grant Accessibility to <binary> ...\" when it is not; NERV never requests or changes the grant",
+    "desktop.record (Blue, owner tool) records the mouse only, never keys, for 1 to 60 seconds into a mode-0600 file in the data home, after its approval card",
+    "desktop.replay is bound to the recording file's hash, app, window and display when proposed, runs only after the owner approves that card, keeps the display, front-app and window preconditions, stops on owner input or a focus change, releases held buttons and taints the sortie with the read-back",
+    "A join test runs the store's gate, the desktop control and a fake driver and input session; the default control refuses under the test runner; no test reads or moves the real mouse"
+  ],
+  "dependsOn": [
+    "F-092-T03"
+  ],
+  "resources": [
+    "src/**",
+    "native/desktop-ax.js",
+    "test/**",
+    "docs/acceptance/f092-desktop-replay.md",
+    "docs/decisions/desktop-input-recording.md",
+    "docs/work/records/F-092.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design",
+    "security-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2.5 h",
+    "basis": "Estimated 2026-11-26 after the owner approved this step in chat (\"A. Approve an agent step that wires up the driver\"): helper input commands, service binding, card binding, tests with a fake driver. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2.5,
+    "baselineAgentHours": 2.5,
+    "estimateAgentHours": 2.5
+  },
+  "prs": [
+    {
+      "pr": 817,
+      "note": "Service binds the macOS desktop driver for recording and replay"
+    }
+  ]
+}
