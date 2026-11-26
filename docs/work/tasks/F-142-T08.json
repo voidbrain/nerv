@@ -6,6 +6,7 @@
   "goal": "The owner sees NERV understand a real photo locally",
   "status": "planned",
   "acceptance": [
+    "Parked 2026-11-26 (owner decision in chat): this step does not start until the owner picks a use for F-142 (see the candidate uses in the record).",
     "Owner decisions 2026-11-26 in chat: fpvbuddy:F-023 \"A\" (retire the on-device assistant and the vision demo), with \"vision capabilities ideally on nerv too\"; Italian is required for every model-facing feature (the owner uses all modules in Italian).",
     "On the live service after the update, send a photo with \"cosa vedi?\" on Telegram and on the phone PWA; NERV answers in Italian about the photo; the copy-paste page is written by F-142-T05"
   ],

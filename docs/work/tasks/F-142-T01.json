@@ -6,6 +6,7 @@
   "goal": "One page fixes how an image enters chat, which model reads it, where it is kept and how its text is treated",
   "status": "planned",
   "acceptance": [
+    "Parked 2026-11-26 (owner decision in chat): this step does not start until the owner picks a use for F-142 (see the candidate uses in the record).",
     "Owner decisions 2026-11-26 in chat: fpvbuddy:F-023 \"A\" (retire the on-device assistant and the vision demo), with \"vision capabilities ideally on nerv too\"; Italian is required for every model-facing feature (the owner uses all modules in Italian).",
     "docs/decisions/vision-in-chat.md covers: intake per channel (Telegram photo without an attach caption, PWA chat, POST /api/chat), limits (reuse photos.ts: 5 MiB, JPEG/PNG/WebP by magic bytes), EXIF/GPS stripped before storage, local store and retention (default: chat images deleted after 7 days unless attached to an item; stated as a default the owner can change)",
     "Route: only a local vision-capable model (gemma4:12b on Ollama, which accepts images) reads images; no cloud or remote-provider route ever receives one; with no local vision model the reply says so in the owner's language (Italian by default) and nothing is sent elsewhere",

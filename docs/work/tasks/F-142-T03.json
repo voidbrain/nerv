@@ -6,6 +6,7 @@
   "goal": "An image sent in chat is checked, stripped, stored locally and handed to the vision turn",
   "status": "planned",
   "acceptance": [
+    "Parked 2026-11-26 (owner decision in chat): this step does not start until the owner picks a use for F-142 (see the candidate uses in the record).",
     "Owner decisions 2026-11-26 in chat: fpvbuddy:F-023 \"A\" (retire the on-device assistant and the vision demo), with \"vision capabilities ideally on nerv too\"; Italian is required for every model-facing feature (the owner uses all modules in Italian).",
     "POST /api/chat accepts one image (size and type checked by magic bytes, as photos.ts); EXIF/GPS removed before writing; stored under NERV's data directory with its sha256 and a retention sweep that deletes expired chat images",
     "Telegram: a photo with an attach caption (recipe:, crash:, part:, battery:) still attaches as today; any other photo, with or without a caption, goes to the vision turn with the caption as the question",
