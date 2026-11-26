@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "id": "F-152-T03",
+  "parent": "F-152",
+  "title": "Owner decision: keep, move or remove 'Reload models' and the config.json line",
+  "goal": "The owner decides in plain words what happens to the Edited config.json line and the Reload models button",
+  "status": "planned",
+  "acceptance": [
+    "Findings in the record: the button posts /api/models/reload, which makes the brain re-read config.json models and keeps the old settings if the file is invalid; nothing watches the file, so a hand edit applies only by this button, `nerv reload` or a restart; the model picker in settings already writes config and reloads by itself, so it does not need the button",
+    "Recommendation: move it into a collapsed Advanced section of the settings panel (hand edits and `ollama pull` are rare, but without it the only way is a CLI command or restart); plain text 'Re-read the model settings from config.json', result shown next to the button",
+    "Owner picks keep, move or remove; the decision is written in the record"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/**",
+    "src/store-push.ts",
+    "test/**",
+    "docs/work/records/F-152.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "javascript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 h agent, 0.25 h owner",
+    "basis": "Estimated 2026-11-26 from the existing code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "decision"
+  },
+  "prs": [
+    {
+      "pr": 859,
+      "note": "plan"
+    }
+  ],
+  "ownerLink": "docs/design/dashboard-reload-models.md"
+}

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "F-152-T01",
+  "parent": "F-152",
+  "title": "Test first: the Midori card also shows phone push; then show it",
+  "goal": "The card shows the phone push line: subscribed devices, last push delivered, last push opened (from the receipts B-170 records), in plain words and in Eva voice",
+  "status": "planned",
+  "acceptance": [
+    "A failing test first (test/dashboard-live-views.test.mjs): a base card with push status shows 'N devices', the last delivery result and time, and the last open time or 'not opened yet'; with no device it says so",
+    "Own base only (push is local to a base); the line sits beside the Telegram lines in channelLine, no backlog IDs in text, wording in both voices (plain and Eva), phone width keeps it on its own wrapped line",
+    "The doctor push status (src/store-push.ts status()) gains the last opened time from delivery_channels.opened_at; a test across store and card"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "web/public/dashboard/**",
+    "src/store-push.ts",
+    "test/**",
+    "docs/work/records/F-152.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "javascript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h agent",
+    "basis": "Estimated 2026-11-26 from the existing code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 859,
+      "note": "plan"
+    }
+  ]
+}
