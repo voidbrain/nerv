@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-149-T05",
+  "parent": "F-149",
+  "title": "Schedule the writing in the night window, never beside another model run",
+  "goal": "The service writes yesterday's missing Eva entries once a night, after Instrumentality, never in owner hours",
+  "status": "planned",
+  "acceptance": [
+    "A failing test (committed first) with a fake clock and fake model: nothing is written inside owner hours or while another night model run (Instrumentality or a Gauntlet run) is active; in the night window the missing days are written one at a time; a second pass the same night writes nothing; a failure leaves the template stored and does not stop the next night",
+    "The window and order reuse the settings Instrumentality already reads; no new setting unless the join shows one is needed (then it goes to the owner)",
+    "One model call at a time through the existing single-model queue; a restart in the window neither repeats nor skips a day",
+    "The nightly run writes at most the last few missing days (limit set in the test), so a long gap cannot occupy the night"
+  ],
+  "dependsOn": [
+    "F-149-T04"
+  ],
+  "resources": [
+    "src/instrumentality.ts",
+    "src/chronicle.ts",
+    "src/runtime.ts",
+    "test/**",
+    "docs/work/records/F-149.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "concurrency-control",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented bases, pilots, sorties and days only; no owner data, tokens or real conversation text in Git, tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: one scheduled job on the pattern of the nightly consolidation, with the clock and the queue under test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}

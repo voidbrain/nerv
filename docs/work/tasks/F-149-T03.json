@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-149-T03",
+  "parent": "F-149",
+  "title": "Failing test, then Fuyutsuki writes the Eva entry with the model, gated and with fallback",
+  "goal": "retellChronicleDayWithPilot uses the approved voice prompt, in Italian and English, and falls back to the template when the text fails the check",
+  "status": "planned",
+  "acceptance": [
+    "A failing test (committed first) with a fake model: a reply in the approved voice that cites every recorded source passes; a reply that omits a source, names an unrecorded source or base ID, is empty or throws returns the template entry with fallback true; today the prompt is one line and nothing calls the function",
+    "The prompt carries the approved voice, the language, the day's facts as data and the rule that nothing unrecorded may be named; the model is the main model (gemma4:26b) with the configured fallback (12b) when the first fails to load; one retry at most before the template",
+    "The Simple composer is untouched and still model-free (its tests unchanged); no new fact kinds",
+    "Tests use the fake model only; no network or real model in the suite"
+  ],
+  "dependsOn": [
+    "F-149-T02"
+  ],
+  "resources": [
+    "src/chronicle.ts",
+    "test/chronicle.test.ts",
+    "docs/work/records/F-149.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "regression-design",
+    "prompt-design"
+  ],
+  "privacy": "Neutral invented bases, pilots, sorties and days only; no owner data, tokens or real conversation text in Git, tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.75 h",
+    "basis": "Estimated 2026-11-26: one prompt, one retry and fallback chain over existing functions, with tests for each failure path. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.75,
+    "baselineAgentHours": 1.75,
+    "estimateAgentHours": 1.75
+  }
+}

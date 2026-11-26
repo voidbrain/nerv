@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "F-149-T02",
+  "parent": "F-149",
+  "title": "Owner: approve or change Fuyutsuki's voice",
+  "goal": "The owner approves the voice and sample entries, or says what to change",
+  "status": "planned",
+  "acceptance": [
+    "Read the sample entries in docs/design/chronicle-eva-voice.md. Pick a register (straight A/C, humour B/D, or a mix) and reply 'approved', or say what to change (funnier, warmer, shorter, another closing line). The agent revises until approved, then records the decision in F-149"
+  ],
+  "dependsOn": [
+    "F-149-T01"
+  ],
+  "resources": [
+    "docs/work/records/F-149.md",
+    "docs/design/chronicle-eva-voice.md"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented bases, pilots, sorties and days only; no owner data, tokens or real conversation text in Git, tests or logs.",
+  "validation": [
+    "Owner decision recorded in F-149"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: reading three short samples and one reply. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "decision"
+  },
+  "ownerLink": "docs/design/chronicle-eva-voice.md"
+}

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-149-T06",
+  "parent": "F-149",
+  "title": "Gauntlet cases for grounding, Italian and English",
+  "goal": "A pack case checks the model's Eva entry names only the day's facts, in each language",
+  "status": "planned",
+  "acceptance": [
+    "Two cases (one Italian, one English) in the Gauntlet on invented days: the entry cites every recorded source, invents no source, base or pilot, and stays in the requested language; the Italian case is written as the owner would read it, not translated",
+    "A case with a thin day (one fact) checks the entry stays short and still grounded",
+    "Follows the Gauntlet's existing case format and ledger; nothing runs against the live model in CI"
+  ],
+  "dependsOn": [
+    "F-149-T03"
+  ],
+  "resources": [
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-149.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "evaluation-design"
+  ],
+  "privacy": "Neutral invented bases, pilots, sorties and days only; no owner data, tokens or real conversation text in Git, tests or logs.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: two cases and one thin-day case on the existing format. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}
