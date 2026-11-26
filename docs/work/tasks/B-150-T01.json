@@ -4,7 +4,7 @@
   "parent": "B-150",
   "title": "Name why the Instrumentality daily-run test saw 4 digest calls on Windows and cover it",
   "goal": "The cause of CI run 45717358062's failure is named and a deterministic test drives it",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The cause is named from the run log and the scheduler code",
     "A test drives a failed daily run across local midnight and expects exactly two attempts per local day",
@@ -32,7 +32,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 0.5 h agent; read the run, B-104 and the scheduler, add the crossing test. Implemented the same day in about 0.5 h. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 0.5 h agent; read the run, B-104 and the scheduler, add the crossing test. Implemented the same day in about 0.5 h. Remaining: CI. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0.5,
