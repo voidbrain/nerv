@@ -115,16 +115,21 @@ export function systemPacks() {
 const allPacks = () => [...commonPacks(), ...systemPacks()];
 // Model limits scale Gauntlet's day limits per case, so a 10-case pack gets exactly the day limits (cache reuse keeps
 // working) and a larger pack gets the same per-case budget: time, output tokens and case count grow with the pack.
+// F-120-T05 (owner decision 2026-11-26, "yes to 180 s"): a pack whose cases run on the release's coding, embedded or
+// cad-3d reference runner scales the release's slow-host limits instead (180 s a case): those runners reserve 20 s of
+// each case for grading, so the day limits' 30 s left the model 10 s. Every other pack keeps the day limits.
+const SLOW_HOST_RUNNERS = new Set(['coding-reference', 'embedded-reference', 'cad-3d-reference']);
 export function modelLimits(pack) {
-  const day = validateLimits(readJSON(join(examples, 'limits-day.json')));
+  const slowHost = pack.cases.some((c) => SLOW_HOST_RUNNERS.has(c.runner));
+  const base = validateLimits(readJSON(join(examples, slowHost ? 'limits-slow-host.json' : 'limits-day.json')));
   const n = pack.cases.length;
   return {
-    caseMs: day.caseMs,
-    suiteMs: Math.round((day.suiteMs / day.maxCases) * n),
+    caseMs: base.caseMs,
+    suiteMs: Math.round((base.suiteMs / base.maxCases) * n),
     maxCases: n,
-    repeat: day.repeat,
-    outputTokens: Math.round((day.outputTokens / day.maxCases) * n),
-    maxBytes: day.maxBytes,
+    repeat: base.repeat,
+    outputTokens: Math.round((base.outputTokens / base.maxCases) * n),
+    maxBytes: base.maxBytes,
   };
 }
 const isModelPack = (pack) => pack.cases.some((c) => c.layer !== 'system');
