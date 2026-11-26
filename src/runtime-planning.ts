@@ -13,6 +13,7 @@ import {
   ownerDeclined,
   declinedReply,
   parseAdvice,
+  readResultReply,
   requestLanguage,
   waitingReply,
   validateFleetChatReply,
@@ -184,6 +185,16 @@ export class RuntimePlanning {
         context.map((t) => t.request),
         ownerLanguage(this.host.home),
       );
+    // B-175: set by the first isolation refusal; the owner's reply then ends with it.
+    let isolationNote: string | undefined;
+    const withIsolationNote = (reply: string) =>
+      isolationNote ? `${reply.slice(0, MAX_REPLY_CHARS - isolationNote.length - 2)}\n\n${isolationNote}` : reply;
+    const answered = () =>
+      steps.filter((s) => s.tainted && s.outcome === 'grant' && !s.error && s.result !== undefined);
+    const answeredReply = () => {
+      const last = answered().at(-1)!;
+      return withIsolationNote(readResultReply(lang(), last.tool!, last.result));
+    };
     const ranSteps = () =>
       steps
         .filter((s) => s.outcome === 'grant' && !s.error && s.tool && s.tool !== TOOL_INDEX_READ)
@@ -358,6 +369,8 @@ export class RuntimePlanning {
         )
         .catch(() => ({ error: 'Brain unavailable.' }))) as { plan?: Plan; invalid?: boolean; error?: string };
       const stepDurationMs = Math.max(0, Math.round(performance.now() - stepT0));
+      // B-175: after an isolation refusal only a reply is taken; anything else ends with the result itself.
+      if (isolationNote && (out.error || !out.plan || !('reply' in out.plan))) return finish('done', answeredReply());
       if (out.error) return finish('failed', undefined, out.error, stepDurationMs);
       if (!out.plan) {
         await this.host.record(
@@ -428,11 +441,11 @@ export class RuntimePlanning {
           );
           if (alreadyRejected) {
             const fallback = formatFleetChatReply(lang(), ungroundedFleet.result);
-            if (fallback) return finish('done', fallback, undefined, stepDurationMs);
+            if (fallback) return finish('done', withIsolationNote(fallback), undefined, stepDurationMs);
           }
           continue;
         }
-        return finish('done', out.plan.reply, undefined, stepDurationMs);
+        return finish('done', withIsolationNote(out.plan.reply), undefined, stepDurationMs);
       }
       if ('script' in out.plan) {
         try {
@@ -653,12 +666,28 @@ export class RuntimePlanning {
         continue;
       }
       // The same action already ran in this sortie: running it again is never the owner's wish (a small model loops here).
-      if (
-        steps.some(
-          (s) => s.tool === tool && s.outcome === 'grant' && !s.error && argsHash(s.args ?? {}) === argsHash(args),
-        )
-      )
-        return finish('done', doneReply(lang(), ranSteps()));
+      const ran = steps.findLast(
+        (s) => s.tool === tool && s.outcome === 'grant' && !s.error && argsHash(s.args ?? {}) === argsHash(args),
+      );
+      // B-176: a repeated read gets one last turn to answer from its result, then the owner gets the result itself.
+      const isRead = [...toolDocs, ...ext.docs].find((t) => t.name === tool)?.effect === 'read';
+      if (ran && isRead && ran.result !== undefined) {
+        const answerNow = `You already ran ${tool} with these arguments: its result is in your steps. Reply to the owner from it now; do not run it again.`;
+        const lastTurn = turn + 1 >= MAX_STEPS + freeReadTurns(steps);
+        if (!lastTurn && !steps.some((s) => s.outcome === 'invalid' && s.error === answerNow)) {
+          await this.host.record(
+            sortieId,
+            steps,
+            { tool, args, outcome: 'invalid', error: answerNow },
+            undefined,
+            stepDurationMs,
+          );
+          continue;
+        }
+        // The service's reply, not the model's: no durationMs, like doneReply.
+        return finish('done', readResultReply(lang(), tool, ran.result));
+      }
+      if (ran) return finish('done', doneReply(lang(), ranSteps()));
       // B-069: the owner already declined this tool in this request, or let its card expire: it is never asked again.
       // The sortie closes with a reply instead of a new card after every expiry (a card every hour, all night).
       const declined = steps.find((s) => s.tool === tool && ownerDeclined(s));
@@ -732,8 +761,18 @@ export class RuntimePlanning {
         'blocked' in r &&
         r.blocked === 'isolation' &&
         r.reason.endsWith(TAINTED_ISOLATION)
-      )
-        return finish('done', isolationRefusalReply(lang(), tool));
+      ) {
+        // Owner evidence 2026-11-26: a result this request already has is still the answer; the refusal is added.
+        const sameRequest = answered().length > 0;
+        isolationNote = isolationRefusalReply(lang(), tool, sameRequest);
+        if (!sameRequest) return finish('done', isolationNote);
+        if (turn + 1 >= MAX_STEPS + freeReadTurns(steps)) return finish('done', answeredReply());
+        await this.host.record(sortieId, steps, {
+          outcome: 'invalid',
+          error: `${tool} cannot run in this request. Call no other tool: reply to the owner now from the results already in your steps.`,
+        });
+        continue;
+      }
       // A card ends the turn: the reply is the service's, and Misato carries on after the owner decides (F-033 resume),
       // so the model is never asked to describe an action that is only waiting.
       if ('approvalId' in r && r.approvalId) {

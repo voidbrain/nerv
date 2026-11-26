@@ -30,7 +30,7 @@ Accepted as recommended. Stage 1 (option 2, B-175-T03): the refusal says to star
 
 Stage 1, after NERV-01 runs the release that has it (B-175-T04). In the dashboard chat (a new browser tab starts in the usual `dashboard` conversation):
 
-1. Send: `quali genetiche ho?` — expected: Misato answers from Grover (the first Grover read runs). Known limit: if she calls a second Grover tool in the same answer, you get the step 2 message already.
+1. Send: `quali genetiche ho?` — expected: Misato answers from Grover (the first Grover read runs). If she calls a second Grover tool in the same answer, that one is refused: the reply still gives what the first one returned, then says which tool could not be used and to ask for it on its own in a new conversation.
 2. Within 30 minutes, send: `e quali piante sto coltivando?` — expected: a reply that starts `Non ho usato grover.` and says to press «New conversation» or to wait 30 minutes; Misato does not try the call again (the sortie shows one refused step, not five).
 3. Press **New conversation** next to Send — expected: the trace shows `New conversation: Misato no longer sees the earlier messages.`
 4. Send again: `e quali piante sto coltivando?` — expected: the Grover read runs and Misato answers.
