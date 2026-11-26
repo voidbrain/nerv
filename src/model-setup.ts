@@ -77,6 +77,7 @@ export function planModels(current: Models, change: ModelChange, installed?: str
         (change.localUrl ?? (next.local ? next.local.baseUrl.replace(/\/v1$/, '') : OLLAMA_URL)).replace(/\/$/, '') +
         '/v1',
       model: next.local?.model ?? localModel(model),
+      ...(next.local?.keepAlive ? { keepAlive: next.local.keepAlive } : {}),
     };
   }
   const roles = { ...(next.roles ?? {}) };

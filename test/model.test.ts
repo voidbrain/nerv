@@ -280,9 +280,17 @@ test(
       assert.match(doctor, /enabled \(claude-opus-5-5\)/);
       assert.ok(!doctor.includes(KEY));
       assert.throws(() => authorize('interface', 'coordinator', 'model.complete'));
-      // One model call; doctor's read of the model list (F-037, GET /api/tags) is not a model call.
+      // One model call; doctor's read of the model list (F-037, GET /api/tags) is not a model call, nor is the
+      // prompt-less keep-alive load after a local reply (F-144, owner decision 2026-11-26: a changed requirement).
       assert.equal(p.seen.filter((x) => x.path === '/v1/chat/completions').length, 1);
-      assert.ok(p.seen.every((x) => x.path === '/v1/chat/completions' || x.path === '/api/tags'));
+      assert.ok(
+        p.seen.every(
+          (x) =>
+            x.path === '/v1/chat/completions' ||
+            x.path === '/api/tags' ||
+            (x.path === '/api/generate' && !('prompt' in x.body)),
+        ),
+      );
       await runtime.close();
       chmodSync(join(home, 'anthropic-key'), 0o644);
       runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home);

@@ -4,7 +4,7 @@
   "parent": "F-144",
   "title": "Failing test and probe: how keep_alive reaches Ollama",
   "goal": "Failing test and probe: how keep_alive reaches Ollama",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Owner decision 2026-11-26 in chat: \"ollama a+b, c as option in dashboard\".",
     "A failing test (committed first) shows that a local Ollama role call (src/engine-provider.ts, completeOpenAICompatible via /v1/chat/completions) sends no keep_alive today and that, after the change, the request or its follow-up carries keep_alive with the configured value",
@@ -13,9 +13,11 @@
   ],
   "dependsOn": [],
   "resources": [
-    "src/engine-provider.ts",
-    "test/engine-provider.test.ts",
-    "docs/**",
+    "src/model.ts",
+    "test/keep-warm.test.ts",
+    "test/model.test.ts",
+    "docs/decisions/keep-model-warm.md",
+    "docs/decisions/README.md",
     "docs/work/records/F-144.md",
     "generated:backlog-views"
   ],

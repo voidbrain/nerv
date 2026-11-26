@@ -325,3 +325,9 @@ test('the CLI: pilots add, list, pin, retire and restore; a model Ollama lacks i
     rmSync(home, { recursive: true, force: true });
   }
 });
+
+test('F-144: moving the local route to another address keeps its keepAlive', () => {
+  const current = { local: { baseUrl: 'http://127.0.0.1:11434/v1', model: 'gemma', keepAlive: '2h' } };
+  const moved = planModels(current, { localUrl: 'http://127.0.0.1:11435' }, ['gemma']);
+  assert.deepEqual(moved.local, { baseUrl: 'http://127.0.0.1:11435/v1', model: 'gemma', keepAlive: '2h' });
+});
