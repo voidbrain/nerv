@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "B-154-T02",
+  "parent": "B-154",
+  "title": "MAGI, the timeline and the flow reach AA in every theme",
+  "goal": "The B-154 browser checks pass unedited",
+  "status": "implemented",
+  "acceptance": [
+    "Light-mode CRT without dips, lighter scanlines, softer vignette",
+    "Seat tint 6 % dark, none light",
+    "Muted colour instead of opacity in the timeline and skipped nodes",
+    "Style guide and design notes updated"
+  ],
+  "dependsOn": [
+    "B-154-T01"
+  ],
+  "resources": [
+    "web/public/dashboard/index.html",
+    "docs/STYLE-GUIDE.md",
+    "docs/design/dashboard-and-native-ui.md",
+    "docs/work/records/B-154.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "css",
+    "browser-testing"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run build && npm run test:browser",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 1.5 h agent. Implemented the same day. Remaining: CI.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}
