@@ -55,11 +55,42 @@ export function preview(root, template, to) {
     }
     return full;
   };
+  const copiedAt = (ref, list) => {
+    try {
+      return JSON.parse(at(ref, list) ?? '{}').copied ?? {};
+    } catch {
+      return {};
+    }
+  };
+  // B-129: a copy the target release lists only in the fragment of a stack the project does not have is removed.
+  const otherStack = new Map();
+  if (Array.isArray(stamp.stacks)) {
+    const own = new Set(Object.keys(copiedAt(tag, 'core/.harness.json')));
+    const fragments = git('ls-tree', '--name-only', tag)
+      .split('\n')
+      .filter((d) => d && d !== 'core')
+      .map((d) => [d, copiedAt(tag, `${d}/.harness.fragment.json`)]);
+    for (const [stack, copied] of fragments)
+      if (stamp.stacks.includes(stack)) for (const path of Object.keys(copied)) own.add(path);
+    for (const [stack, copied] of fragments)
+      if (!stamp.stacks.includes(stack))
+        for (const path of Object.keys(copied)) if (!own.has(path)) otherStack.set(path, stack);
+  }
   const rows = [];
   for (const kind of ['copied', 'forked', 'adapted'])
     for (const [path, mapping] of Object.entries(stamp[kind] ?? {})) {
       const file = safe(path),
         here = existsSync(file) ? readFileSync(file, 'utf8') : null;
+      if (kind === 'copied' && otherStack.has(path)) {
+        rows.push({
+          path,
+          kind,
+          comparisons: [{ source: mapping, action: 'other-stack-remove-review' }],
+          protectedRules: [],
+          preservation: `${tag} copies it only for the ${otherStack.get(path)} stack, which this project does not have: delete it and drop it from \`copied\`, and remove any link to it.`,
+        });
+        continue;
+      }
       const sources = kind === 'forked' ? [mapping.from] : [mapping].flat();
       const base = `v${kind === 'forked' ? mapping.base : stamp.version}`;
       const comparisons = sources.map((source) => {
@@ -98,13 +129,6 @@ export function preview(root, template, to) {
     'core/.harness.json',
     ...(stamp.stacks ?? []).filter((s) => s !== 'core').map((s) => `${s}/.harness.fragment.json`),
   ];
-  const copiedAt = (ref, list) => {
-    try {
-      return JSON.parse(at(ref, list) ?? '{}').copied ?? {};
-    } catch {
-      return {};
-    }
-  };
   for (const list of lists) {
     const before = copiedAt(`v${stamp.version}`, list);
     for (const [path, source] of Object.entries(copiedAt(tag, list)))
