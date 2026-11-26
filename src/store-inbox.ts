@@ -92,7 +92,18 @@ export class StoreInbox {
         )
         .all() as Reminder[]
     ).map((r) => this.host.normalizeRow(r));
-    return { delivered, brief, pending, reminders };
+    // B-170: reminders delivered in the last 24 hours and not marked done, newest first; Coming up offers Done on each.
+    const recent = this.host.db
+      .prepare(
+        'SELECT r.id, r.title, r.due, r.delivered FROM reminders r WHERE r.delivered>? AND r.cancelled IS NULL AND r.id NOT IN (SELECT reminder_id FROM reminder_done) ORDER BY r.delivered DESC LIMIT 10',
+      )
+      .all(new Date(Date.now() - 86_400_000).toISOString()) as {
+      id: string;
+      title: string;
+      due: string;
+      delivered: string;
+    }[];
+    return { delivered, brief, pending, reminders, recent };
   }
 
   /**

@@ -58,7 +58,8 @@ test('every API call of the workspace and the dashboard bypasses the service wor
   const live = read('web/public/dashboard/live.js');
   const calls = [...live.matchAll(/fetch\("\/api\/[^\n]*/g)].map((m) => m[0]);
   // F-118-T02 added POST /api/device/pair to the dashboard (4 calls) and, through pairDevice, to the workspace.
-  assert.equal(calls.length, 4, 'live.js API calls');
+  // B-170 added the page's tap report, POST /api/push/opened (5 calls).
+  assert.equal(calls.length, 5, 'live.js API calls');
   for (const call of calls) assert.match(call, /"ngsw-bypass":"1"/, call);
   // F-130-T01: the workspace calls moved from main.ts into the shared Session (exchange, every authenticated call),
   // the live feed (the stream) and the simple page (the checklist toggle); every one still bypasses the worker.
