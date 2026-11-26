@@ -245,7 +245,7 @@ jobs:
           cache: npm
       - if: needs.plan.outputs.native == 'true' || needs.plan.outputs.full == 'true' || needs.plan.outputs.unit == 'true'
         run: npm ci
-      # B-152: the Node tests that skip on Linux and Windows (EVA sandbox-exec confinement, egress proxy, job user,
+      # B-157: the Node tests that skip on Linux and Windows (EVA sandbox-exec confinement, egress proxy, job user,
       # desktop driver, moved-service joins); a skip here fails the step. About a minute.
       - name: macOS-only Node tests
         if: needs.plan.outputs.full == 'true' || needs.plan.outputs.unit == 'true'

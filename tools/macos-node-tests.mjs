@@ -1,4 +1,4 @@
-// B-152: the Node tests that skip on every runner but macOS (sandbox-exec, launchctl, the macOS desktop driver). The
+// B-157: the Node tests that skip on every runner but macOS (sandbox-exec, launchctl, the macOS desktop driver). The
 // live service runs on macOS, so CI runs them on the native-macos job, and a skip there is a failure: a skipped
 // confinement test proves nothing. test/macos-node-tests.test.mjs keeps this list complete.
 import { spawnSync } from 'node:child_process';

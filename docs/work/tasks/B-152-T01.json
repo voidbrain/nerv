@@ -2,21 +2,6 @@
   "version": 1,
   "id": "B-152-T01",
   "parent": "B-152",
-<<<<<<< HEAD
-  "title": "Failing test: the macOS-only Node tests run on the macOS runner",
-  "goal": "test/macos-node-tests.test.mjs fails on main: no list of macOS-only tests and no native-macos step",
-  "status": "implemented",
-  "acceptance": [
-    "Every test file whose skip only macOS satisfies must be listed",
-    "A run with a skipped, failed or no test fails",
-    "The native-macos job runs the list on Node and full selections",
-    "It is not edited to pass in B-152-T02"
-  ],
-  "dependsOn": [],
-  "resources": [
-    "test/macos-node-tests.test.mjs",
-    "docs/work/records/B-152.md",
-=======
   "title": "Triage the 50 open CodeQL alerts",
   "goal": "Each open alert is fixed with a failing test first, or listed with the reason it is a false positive",
   "status": "ready",
@@ -31,31 +16,10 @@
     "docs/verification.md",
     "docs/work/records/B-152.md",
     ".github/workflows/codeql.yml",
->>>>>>> origin/main
     "generated:backlog-views"
   ],
   "capabilities": [
     "bounded-edit",
-<<<<<<< HEAD
-    "regression-design"
-  ],
-  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
-  "validation": [
-    "node --test test/macos-node-tests.test.mjs fails on main",
-    "npm run check:fast"
-  ],
-  "escalation": [
-    "A material scope or effort increase goes to the owner"
-  ],
-  "effort": {
-    "size": "small",
-    "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 0.5 h agent. Implemented the same day; fails on main. Remaining: CI.",
-    "reviewed": "2026-11-26",
-    "agentHours": 0,
-    "baselineAgentHours": 0.5,
-    "estimateAgentHours": 0.5
-=======
     "typescript",
     "evidence-review"
   ],
@@ -76,6 +40,5 @@
     "agentHours": 3,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3
->>>>>>> origin/main
   }
 }

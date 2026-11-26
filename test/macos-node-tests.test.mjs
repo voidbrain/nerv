@@ -1,4 +1,4 @@
-// B-152: the Node tests that only run on macOS (the EVA sandbox-exec confinement, the egress proxy, the EVA job user,
+// B-157: the Node tests that only run on macOS (the EVA sandbox-exec confinement, the egress proxy, the EVA job user,
 // the desktop driver, the moved-service joins) run on the macOS CI runner, and that run fails when one of them skips.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -13,7 +13,7 @@ const job = (name) => {
   return next < 0 ? workflow.slice(start) : workflow.slice(start, start + 1 + next);
 };
 
-test('B-152: every test file with a macOS-only skip is in the macOS list, and every listed file exists', () => {
+test('B-157: every test file with a macOS-only skip is in the macOS list, and every listed file exists', () => {
   const files = readdirSync('test').map((f) => `test/${f}`);
   const found = darwinOnlyTests(files, (f) => readFileSync(f, 'utf8'));
   for (const known of [
@@ -42,7 +42,7 @@ test('B-152: every test file with a macOS-only skip is in the macOS list, and ev
   );
 });
 
-test('B-152: a macOS run fails on any skipped, failed or missing test', () => {
+test('B-157: a macOS run fails on any skipped, failed or missing test', () => {
   const tap = (tests, fail, skipped) =>
     `# tests ${tests}\n# pass ${tests - fail - skipped}\n# fail ${fail}\n# skipped ${skipped}\n`;
   assert.equal(verdict(tap(45, 0, 0)).ok, true);
@@ -52,7 +52,7 @@ test('B-152: a macOS run fails on any skipped, failed or missing test', () => {
   assert.match(verdict('').why, /no test ran/);
 });
 
-test('B-152: the native-macos job runs the macOS Node tests whenever Node work or a full run is selected', () => {
+test('B-157: the native-macos job runs the macOS Node tests whenever Node work or a full run is selected', () => {
   const mac = job('native-macos');
   const selected = "needs.plan.outputs.full == 'true' || needs.plan.outputs.unit == 'true'";
   assert.ok(mac.includes('node tools/macos-node-tests.mjs'), 'the job runs the list');
