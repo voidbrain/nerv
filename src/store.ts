@@ -602,14 +602,27 @@ export class Store {
       watch: this.watch,
       normalizeRow: (row) => this.remindersController.normalizeRow(row),
       watchIsQuiet: (now) => this.watchController.watchIsQuiet(now),
+      queuePushFirst: (deliveryId, now) => this.pushController.queuePushFirst(deliveryId, now),
     }));
   }
   inbox() {
     return this.inboxController.inbox();
   }
-  /** Hyuga's brief into the inbox (F-028): every channel delivers it from here, once. */
+  /**
+   * Hyuga's brief into the inbox (F-028): every channel delivers it from here, once. F-133: a brief queued for the
+   * phone is pushed after the caller's transaction commits (the next turn of the event loop); NERV stopping first
+   * leaves it to the Telegram fallback at the deadline, as for reminders.
+   */
   addBrief(message: string, now = new Date(), day?: string): { id: string; created: string; existing?: true } {
-    return this.inboxController.addBrief(message, now, day);
+    const delivery = this.inboxController.addBrief(message, now, day);
+    if (!delivery.existing && this.deliveryChannels.pushFirst(delivery.id))
+      setImmediate(() => void this.dispatchPushBriefs([delivery.id]).catch(() => {}));
+    return delivery;
+  }
+  /** F-133: pushes brief-kind inbox items queued for the phone first. */
+  async dispatchPushBriefs(deliveryIds: string[]): Promise<void> {
+    this.assertActiveCoordinator();
+    return this.pushController.dispatchPushBriefs(deliveryIds);
   }
   /** When the latest brief was written, if any: the next brief covers what happened since. */
   lastBrief(): string | null {

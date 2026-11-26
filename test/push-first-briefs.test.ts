@@ -129,3 +129,16 @@ test('F-133: with no device a brief goes to Telegram at once, as before', async 
     await t.close();
   }
 });
+
+test('F-133-T02: a long brief is cut for the push (short title, short body); the full text stays in the inbox', async () => {
+  const { formatBriefPushPayload, BRIEF_PUSH_TITLE_MAX, BRIEF_PUSH_BODY_MAX } = await import('../src/push.ts');
+  const message =
+    'Riepilogo del mattino con un titolo molto lungo '.repeat(4) + '\n' + 'Una riga di dettaglio. '.repeat(40);
+  const { notification } = formatBriefPushPayload({ id: 'brief-1', message }, 'R'.repeat(24));
+  assert.ok(notification.title.length <= BRIEF_PUSH_TITLE_MAX && notification.title.endsWith('…'));
+  assert.ok(notification.body.length <= BRIEF_PUSH_BODY_MAX && notification.body.endsWith('…'));
+  assert.equal(notification.data.receipt, 'R'.repeat(24));
+  assert.ok(Buffer.byteLength(JSON.stringify({ notification })) < 3000, 'well inside the Web Push payload limit');
+  const short = formatBriefPushPayload({ id: 'brief-2', message: 'Update 1a2b3c4 applied.' }).notification;
+  assert.deepEqual([short.title, short.body], ['Update 1a2b3c4 applied.', 'NERV Agency · Brief']);
+});

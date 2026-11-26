@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "planned",
+  "status": "implemented",
   "privacy": "Neutral invented messages, devices and receipts only; no tokens, push endpoints, chat IDs or personal data in Git.",
   "escalation": [
     "A material scope or effort increase goes to the owner"
@@ -39,10 +39,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "3 h agent",
-    "basis": "Estimated 2026-11-26: the fallback claim and receipt exist (F-004-T09, F-124-T01); the work is the dispatch for brief kinds, the payload cut and the Telegram loop guard. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: the fallback claim and receipt exist (F-004-T09, F-124-T01); the work is the dispatch for brief kinds, the payload cut and the Telegram loop guard. Not a measurement. 2026-11-26: implemented: addBrief queues a brief-kind item for the phone in its inbox write and pushes it after commit (formatBriefPushPayload: first line as title ≤80, rest ≤240); the Telegram loop leaves pushed briefs to claimFallback, which sends a brief's own text; a brief read in the app (B-149) or tapped never falls back. Remaining: CI.",
     "reviewed": "2026-11-26",
-    "agentHours": 3,
+    "agentHours": 0,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3
   }
