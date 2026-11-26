@@ -263,7 +263,7 @@ describe('F-092-T05: desktop.record and desktop.replay through the gate (service
       assert.equal(builtinTools.find((t) => t.name === name)?.owner, true, name);
       assert.equal(toolDocs.find((d) => d.name === name)?.subject, 'agency', name);
     }
-    assert.match(toolDocs.find((d) => d.name === 'desktop.replay')!.args, /"id": string/);
+    assert.match(toolDocs.find((d) => d.name === 'desktop.replay')!.args, /"id": recording name}/);
   });
 
   it('nothing records or replays before the owner approves its card; the replay card names the recording', async () => {
@@ -291,7 +291,7 @@ describe('F-092-T05: desktop.record and desktop.replay through the gate (service
         for (const args of [{ id: 'wiggle', approved: true }, { recording: { events: [] } }]) {
           await assert.rejects(
             () => store.prepareProposal({ tool: 'desktop.replay', stage: 'production', args }),
-            /Unknown argument|unexpected argument|not allowed/i,
+            /Arguments allowed: id\./,
           );
         }
         const proposal = await store.prepareProposal({
@@ -328,11 +328,19 @@ describe('F-092-T05: desktop.record and desktop.replay through the gate (service
       try {
         await control.record(home, { id: 'wiggle', seconds: 5 });
         const sortie = store.ledger.openSortie(MISATO_SOURCE, 'replay wiggle', 'trusted');
-        const unbound = store.runAction(sortie, { tool: 'desktop.replay', stage: 'production', args: { id: 'wiggle' } });
+        const unbound = store.runAction(sortie, {
+          tool: 'desktop.replay',
+          stage: 'production',
+          args: { id: 'wiggle' },
+        });
         const failed = await settledOutcome(store.decide(unbound.approvalId!, 'approve', 'owner'));
-        assert.match(String(failed.error), /sha256 must be a string/);
+        assert.match(String(failed.error), /Argument sha256 must be a string/);
 
-        const proposal = await store.prepareProposal({ tool: 'desktop.replay', stage: 'production', args: { id: 'wiggle' } });
+        const proposal = await store.prepareProposal({
+          tool: 'desktop.replay',
+          stage: 'production',
+          args: { id: 'wiggle' },
+        });
         const sortie2 = store.ledger.openSortie(MISATO_SOURCE, 'replay wiggle', 'trusted');
         const card = store.runAction(sortie2, proposal);
         await settledOutcome(store.decide(card.approvalId!, 'reject', 'owner'));
@@ -348,7 +356,7 @@ describe('F-092-T05: desktop.record and desktop.replay through the gate (service
     await withHome(async (home) => {
       const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
       try {
-        const doctor = store.doctor() as { desktopControl?: { available: boolean; detail: string } };
+        const doctor = store.serviceDoctor();
         assert.equal(doctor.desktopControl?.available, false);
         assert.match(doctor.desktopControl!.detail, /desktop control not available/);
         const sortie = store.ledger.openSortie(MISATO_SOURCE, 'record', 'trusted');

@@ -4,7 +4,7 @@ import type { Reminder, ReminderInput } from './store.ts';
 import type { ToolDoc } from './misato.ts';
 import type { Memory } from './memory.ts';
 import { toChecklistSurface, type ListStore } from './lists.ts';
-import { replayDesktopRecording, type DesktopRecordingFile, type DesktopReplayDriver } from './desktop-recording.ts';
+import type { BoundDesktopReplay, DesktopControl } from './desktop-service.ts';
 import { pushBranchAndOpenPr, type CodingJobPrOpener } from './coding-job.ts';
 import { handOffToBambuConnect, readSlicerProfiles, type BambuConnectLauncher, type SlicerExecFn } from './slicer.ts';
 import { preparePrintPartFor, printPartByChat, sliceLibraryPart } from './print-job.ts';
@@ -78,7 +78,8 @@ export interface ReminderBackend {
   fleet?: FleetStore;
   lists?: ListStore;
   gmail?: GmailClient;
-  desktopReplayDriver?: DesktopReplayDriver;
+  /** F-092-T05: the desktop control (Store builds the live macOS one; tests inject a fake). */
+  desktop?: DesktopControl;
   codingPrOpener?: CodingJobPrOpener;
   bambuLauncher?: BambuConnectLauncher;
   /** F-121-T02: the slicer process runner (tests pass a fake slicer). */
@@ -157,6 +158,8 @@ export const builtinTools: Tool[] = [
   // F-100-T03: local FPV blackbox vibration report.
   { name: 'fpv.blackbox_report', effect: 'read' },
   // F-092-T03: desktop input replay is always Blue (owner confirmation + precondition check).
+  // F-092-T05: recording observes the owner's pointer, so it starts only from the owner's approved card.
+  { name: 'desktop.record', effect: 'write-local', owner: true },
   { name: 'desktop.replay', effect: 'physical', owner: true },
   // F-099-T03: FPV build notes and cited wiring answers.
   { name: 'fpv.import_build', effect: 'write-local' },
@@ -248,6 +251,7 @@ export const BUILTIN_TOOL_SUBJECTS: Readonly<Record<string, ToolSubject>> = {
   'tools.read': 'agency',
   'settings.schedule': 'agency',
   'kaji.run': 'agency',
+  'desktop.record': 'agency',
   'desktop.replay': 'agency',
   'coding.push_pr': 'agency',
   'bambu.handoff': 'agency',
@@ -556,11 +560,18 @@ const rawToolDocs: ToolDoc[] = [
     args: '{"item"?: string, "documentId"?: string}',
   },
   {
+    name: 'desktop.record',
+    effect: 'write-local',
+    about:
+      "Records the owner's mouse (moves and clicks, never keys) for a few seconds into a local recording, after the owner's approval card; it starts 3 s after approval.",
+    args: '{"id": recording name (letters, digits, - or _), "seconds"?: integer 1..60, default 5}',
+  },
+  {
     name: 'desktop.replay',
     effect: 'physical',
     about:
-      'Replays a bounded local desktop recording as a Blue action after verifying display, app, and window preconditions and stopping on owner input.',
-    args: '{"recording": DesktopRecordingFile, "approved": boolean}',
+      "Replays a local desktop recording after the owner's approval card, 3 s after approval; refuses unless the display, front app and window match the recording, and stops on owner input or a focus change.",
+    args: '{"id": recording name}',
   },
   {
     name: 'coding.push_pr',
@@ -716,6 +727,19 @@ function browserConfig(backend: ReminderBackend) {
 function browserDriverFor(backend: ReminderBackend, port: number): BrowserAdapterDriver {
   return (backend.browserDriver ?? liveBrowserDriver)(port);
 }
+function desktopOf(backend: ReminderBackend): { desktop: DesktopControl; home: string } {
+  if (!backend.desktop || !backend.home) throw new Error('Desktop control is not available on this base.');
+  return { desktop: backend.desktop, home: backend.home };
+}
+/**
+ * F-092-T05: what the planner proposes for desktop.replay ({id}) is bound to the recording on disk before the gate,
+ * so the owner's card names its app, window, display and length, and the grant's argument hash binds its file hash.
+ */
+export function bindDesktopReplay(backend: ReminderBackend, args: Record<string, unknown>): BoundDesktopReplay {
+  only(args, ['id']);
+  const { desktop, home } = desktopOf(backend);
+  return desktop.bindReplay(home, text(args, 'id'));
+}
 /**
  * F-089-T06: what the planner proposes for browser.click ({control}) is bound to the active tab before the gate, so
  * the owner's card names the tab, its origin and page, and the grant's argument hash binds them.
@@ -733,6 +757,7 @@ export async function bindBrowserClick(backend: ReminderBackend, args: Record<st
  */
 const LATE_EXECUTOR_MS: Readonly<Record<string, number>> = {
   'browser.click': 30_000,
+  'desktop.record': 90_000,
   'desktop.replay': 150_000,
   'gmail.search': 60_000,
   'gmail.read': 60_000,
@@ -1342,13 +1367,27 @@ function executeRaw(
       only(args, ['csv']);
       return analyzeBlackboxVibration(text(args, 'csv'));
     }
+    case 'desktop.record': {
+      only(args, ['id', 'seconds']);
+      const seconds = args.seconds ?? 5;
+      if (!Number.isInteger(seconds)) throw new Error('seconds must be an integer from 1 to 60.');
+      const { desktop, home } = desktopOf(backend);
+      return desktop.record(home, { id: text(args, 'id'), seconds: seconds as number });
+    }
     case 'desktop.replay': {
-      only(args, ['recording', 'approved']);
-      if (!backend.desktopReplayDriver) throw new Error('Desktop replay driver is not available.');
-      return replayDesktopRecording(backend.desktopReplayDriver, {
-        recording: args.recording as DesktopRecordingFile,
-        approved: args.approved === true,
-      });
+      // F-092-T05: bound to the recording file when proposed (bindDesktopReplay); approved only by the owner's card.
+      only(args, ['id', 'sha256', 'app', 'window', 'display', 'events', 'seconds']);
+      const bound: BoundDesktopReplay = {
+        id: text(args, 'id'),
+        sha256: text(args, 'sha256'),
+        app: text(args, 'app'),
+        window: text(args, 'window'),
+        display: text(args, 'display'),
+        events: args.events as number,
+        seconds: args.seconds as number,
+      };
+      const { desktop, home } = desktopOf(backend);
+      return desktop.replay(home, bound, context.ownerApproved === true);
     }
     case 'coding.push_pr': {
       only(args, ['worktreePath', 'branch', 'baseBranch', 'title', 'body', 'diffSummary', 'remote']);

@@ -145,7 +145,7 @@ process.on('message', (value: unknown) => {
       case 'runtime.ping':
         return { role: 'nervous', pid: process.pid };
       case 'runtime.doctor':
-        return store.doctor();
+        return store.serviceDoctor();
       case 'reminders.list': {
         const p = store.reminderPage(0, 50);
         if (p.next) throw new Error('Use reminders.page.');

@@ -1,7 +1,15 @@
-import { spawnSync } from 'node:child_process';
+import { execFile, spawn, spawnSync, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import type { DesktopDriver, DesktopWindowSnapshot } from './desktop-control.ts';
 import type { DisplayBounds, FrontmostAppMetadata } from './desktop-recording.ts';
+import {
+  createDesktopControl,
+  refusingDesktopControl,
+  type DesktopControl,
+  type DesktopInputSession,
+  type MouseSample,
+} from './desktop-service.ts';
+import { underTestRunner } from './slicer.ts';
 
 /** The JXA helper next to the sources' parent (`native/desktop-ax.js`). */
 export const MAC_DESKTOP_HELPER = fileURLToPath(new URL('../native/desktop-ax.js', import.meta.url));
@@ -131,4 +139,155 @@ export function desktopDriverFor(platform: NodeJS.Platform, options: MacDesktopD
     getDisplayBounds: refuse,
     getFrontmostApp: refuse,
   };
+}
+
+export interface MacInputSessionOptions {
+  /** Starts the helper's `session` command; tests start a fake that speaks the same line protocol. */
+  readonly spawn?: () => ChildProcessWithoutNullStreams;
+  readonly requestTimeoutMs?: number;
+}
+
+const MOUSE_EVENT_KINDS = new Set(['mouseMove', 'mouseDown', 'mouseUp']);
+
+/**
+ * F-092-T05: one long-lived helper process per replay (`desktop-ax.js session`), so each event costs a pipe round
+ * trip rather than an osascript start. One JSON request per line in, one JSON answer per line out, matched by id.
+ * Only mouse events are sent: a key event is refused here, before it reaches the helper (which refuses it too).
+ */
+export function openMacInputSession(options: MacInputSessionOptions = {}): DesktopInputSession {
+  const child =
+    options.spawn?.() ??
+    spawn('osascript', ['-l', 'JavaScript', MAC_DESKTOP_HELPER, 'session'], { stdio: ['pipe', 'pipe', 'pipe'] });
+  const timeoutMs = options.requestTimeoutMs ?? 10_000;
+  const pending = new Map<number, { resolve(value: Record<string, unknown>): void; reject(error: Error): void }>();
+  let nextId = 1;
+  let buffer = '';
+  let stopped: Error | undefined;
+  const failAll = (error: Error) => {
+    stopped ??= error;
+    for (const p of pending.values()) p.reject(stopped);
+    pending.clear();
+  };
+  child.stdout.setEncoding('utf8');
+  child.stdout.on('data', (chunk: string) => {
+    buffer += chunk;
+    let newline;
+    while ((newline = buffer.indexOf('\n')) >= 0) {
+      const line = buffer.slice(0, newline);
+      buffer = buffer.slice(newline + 1);
+      let answer: Record<string, unknown>;
+      try {
+        answer = JSON.parse(line) as Record<string, unknown>;
+      } catch {
+        continue;
+      }
+      const waiter = typeof answer.id === 'number' ? pending.get(answer.id) : undefined;
+      if (!waiter) continue;
+      pending.delete(answer.id as number);
+      if (typeof answer.error === 'string') waiter.reject(new Error(`Desktop input: ${answer.error}`));
+      else waiter.resolve(answer);
+    }
+  });
+  child.stderr.resume();
+  child.on('error', (e) => failAll(new Error(`The desktop input helper stopped: ${e.message}`)));
+  child.on('exit', (code) => failAll(new Error(`The desktop input helper stopped (exit ${code ?? 'signal'}).`)));
+
+  const request = (cmd: string, extra: Record<string, unknown> = {}): Promise<Record<string, unknown>> => {
+    if (stopped) return Promise.reject(stopped);
+    const id = nextId++;
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        pending.delete(id);
+        reject(new Error(`The desktop input helper did not answer ${cmd} in ${timeoutMs / 1000} s.`));
+      }, timeoutMs);
+      pending.set(id, {
+        resolve: (v) => {
+          clearTimeout(timer);
+          resolve(v);
+        },
+        reject: (e) => {
+          clearTimeout(timer);
+          reject(e);
+        },
+      });
+      child.stdin.write(`${JSON.stringify({ id, cmd, ...extra })}\n`);
+    });
+  };
+
+  return {
+    async dispatchEvent(event) {
+      if (!MOUSE_EVENT_KINDS.has(event.kind)) throw new Error('The desktop input session replays only mouse events.');
+      await request('post', {
+        event: { kind: event.kind, x: event.x, y: event.y, ...(event.button ? { button: event.button } : {}) },
+      });
+    },
+    async hasOwnerInput() {
+      return (await request('owner')).input === true;
+    },
+    async getFrontmostApp() {
+      return (await request('frontmost')).frontmost as FrontmostAppMetadata;
+    },
+    async releaseButtons() {
+      await request('release');
+    },
+    close() {
+      failAll(new Error('The desktop input session is closed.'));
+      child.stdin.end();
+      setTimeout(() => {
+        if (child.exitCode === null && child.signalCode === null) child.kill();
+      }, 1000).unref();
+    },
+  };
+}
+
+function asSamples(value: unknown): MouseSample[] {
+  const samples = (value as { samples?: unknown })?.samples;
+  if (!Array.isArray(samples)) throw new Error('Desktop helper returned unreadable mouse samples.');
+  return samples as MouseSample[];
+}
+
+/** Polls the pointer for a bounded time with the helper's `record` command (asynchronously: the scheduler keeps ticking). */
+export function sampleMacMouse(
+  durationMs: number,
+  sampleMs: number,
+  helperPath = MAC_DESKTOP_HELPER,
+): Promise<MouseSample[]> {
+  return new Promise((resolve, reject) => {
+    execFile(
+      'osascript',
+      ['-l', 'JavaScript', helperPath, 'record', JSON.stringify({ durationMs, sampleMs })],
+      { encoding: 'utf8', timeout: durationMs + 15_000, maxBuffer: MAX_OUTPUT },
+      (error, stdout, stderr) => {
+        if (error) {
+          reject(new Error(`Desktop helper record failed: ${helperError({ status: 1, stdout, stderr })}`));
+          return;
+        }
+        try {
+          resolve(asSamples(JSON.parse(stdout)));
+        } catch (e) {
+          reject(e instanceof Error ? e : new Error(String(e)));
+        }
+      },
+    );
+  });
+}
+
+/**
+ * F-092-T05: the desktop control the service uses. On macOS it binds the shared driver, the pointer sampler and the
+ * input session to the running node binary (the one the owner grants Accessibility to). Under the test runner it
+ * refuses, so no test moves the mouse on the developer's desktop: a test injects its own control.
+ */
+export function liveDesktopControl(platform: NodeJS.Platform = process.platform): DesktopControl {
+  if (underTestRunner()) {
+    return refusingDesktopControl(
+      'A test must inject a desktop control: the default one moves the mouse on this desktop.',
+    );
+  }
+  if (platform !== 'darwin') return refusingDesktopControl(UNSUPPORTED);
+  return createDesktopControl({
+    driver: createMacDesktopDriver(),
+    executable: process.execPath,
+    sampleMouse: (durationMs, sampleMs) => sampleMacMouse(durationMs, sampleMs),
+    openInputSession: () => openMacInputSession(),
+  });
 }

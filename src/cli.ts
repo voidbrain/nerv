@@ -15,7 +15,6 @@ import {
   runHarnessJobInWorktree,
   type AllowedCodingRepo,
 } from './coding-job.ts';
-import { DesktopRecordingSession, type DesktopRecordingHeader } from './desktop-recording.ts';
 import { defaultAutoUpdatePolicy } from './update-policy.ts';
 import { startAutoUpdateScheduler } from './update-scheduler.ts';
 import { buildInfo, checkRevisionSkew, type BuildInfo } from './build.ts';
@@ -510,15 +509,18 @@ try {
         let runningBuild: BuildInfo = buildInfo();
         // B-148: MCP servers are started by the service, with its PATH, so only the service can say whether they start.
         let mcp: unknown = 'not checked: the service is not running here';
+        // F-092-T05: Accessibility is granted to the service's node, so only the service can say whether it holds it.
+        let desktopControl: unknown = 'not checked: the service is not running here';
         try {
           const res = await fetch(`http://127.0.0.1:${config.port}/api/doctor`, {
             headers: { authorization: `Bearer ${readToken(home)}` },
             signal: AbortSignal.timeout(5000),
           });
           if (res.ok) {
-            const live = (await res.json()) as { build?: BuildInfo; mcp?: unknown };
+            const live = (await res.json()) as { build?: BuildInfo; mcp?: unknown; desktopControl?: unknown };
             if (live.build) runningBuild = live.build;
             if (live.mcp !== undefined) mcp = live.mcp;
+            if (live.desktopControl !== undefined) desktopControl = live.desktopControl;
           }
         } catch {
           /* service not running locally: compare against local buildInfo */
@@ -536,6 +538,7 @@ try {
               revisionSkew: checkRevisionSkew(runningBuild),
               ...local().doctor(),
               mcp,
+              desktopControl,
               update: await checkUpdateAvailability({ offline: true }),
               delivery: 'Durable local inbox; phone notifications not configured.',
               workers: {
@@ -1029,17 +1032,6 @@ try {
         );
         const proposal = buildHarnessPushProposal(res, { baseBranch: 'main' });
         console.log(JSON.stringify({ result: res, proposal }, null, 2));
-        break;
-      }
-      case 'desktop-record': {
-        if (!args[0] || !args[1]) throw new Error('Usage: nerv desktop-record <id> <header.json>');
-        const header = JSON.parse(readFileSync(resolve(args[1]), 'utf8')) as DesktopRecordingHeader;
-        const session = new DesktopRecordingSession({
-          id: args[0],
-          permissions: { accessibilityGranted: false, inputMonitoringGranted: false },
-          header,
-        });
-        console.log(JSON.stringify(session.stop(), null, 2));
         break;
       }
       case 'fpv-read-build': {

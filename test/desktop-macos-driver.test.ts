@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import { describe, it } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { clickDesktopControl, type DesktopWindowSnapshot } from '../src/desktop-control.ts';
@@ -152,6 +153,17 @@ describe('F-093-T05 macOS accessibility driver bound to the click adapter', () =
       const r = spawnSync('osascript', ['-l', 'JavaScript', MAC_DESKTOP_HELPER, 'permission'], { encoding: 'utf8' });
       assert.equal(r.status, 0, r.stderr);
       assert.equal(typeof (JSON.parse(r.stdout) as { granted: unknown }).granted, 'boolean');
+    },
+  );
+
+  it(
+    'the helper with the F-092-T05 record and session commands compiles, without running any of them (macOS only)',
+    { skip: process.platform !== 'darwin' },
+    () => {
+      const out = join(mkdtempSync(join(tmpdir(), 'nerv-ax-')), 'desktop-ax.scpt');
+      const r = spawnSync('osacompile', ['-l', 'JavaScript', '-o', out, MAC_DESKTOP_HELPER], { encoding: 'utf8' });
+      rmSync(dirname(out), { recursive: true, force: true });
+      assert.equal(r.status, 0, r.stderr);
     },
   );
 });

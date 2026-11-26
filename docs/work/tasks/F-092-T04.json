@@ -7,10 +7,10 @@
  "status": "planned",
  "ownerLink": "docs/acceptance/f092-desktop-replay.md",
  "acceptance": [
-  "Owner records and replays a short sequence and tries a mismatch"
+  "Owner grants Accessibility to the service's node, records a short mouse-only sequence, approves its replay, and tries a mismatch and an interruption"
  ],
  "dependsOn": [
-  "F-092-T03"
+  "F-092-T05"
  ],
  "resources": [
   "docs/acceptance/**",

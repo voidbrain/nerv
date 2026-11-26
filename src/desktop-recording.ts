@@ -45,8 +45,12 @@ export interface DesktopRecordingFile {
 
 export interface TccPermissions {
   accessibilityGranted: boolean;
-  inputMonitoringGranted: boolean;
+  /** Needed only to observe the keyboard; a mouse-only recording polls the pointer and does without it. */
+  inputMonitoringGranted?: boolean;
 }
+
+/** What a recording session captures: `mouse` never accepts a key event (F-092-T05, the service binding). */
+export type RecordedInputs = 'mouse' | 'mouse-and-keyboard';
 
 export interface RecordingContext {
   secureInputActive?: boolean;
@@ -67,10 +71,13 @@ const SENSITIVE_BUNDLES = new Set([
  * Preflight check for macOS Accessibility and Input Monitoring permissions.
  * Never prompts silently; tells the owner which System Settings panes to enable (F-092-T02).
  */
-export function assertDesktopRecordingPermissions(permissions: TccPermissions): void {
+export function assertDesktopRecordingPermissions(
+  permissions: TccPermissions,
+  inputs: RecordedInputs = 'mouse-and-keyboard',
+): void {
   const missing: string[] = [];
   if (!permissions.accessibilityGranted) missing.push('Accessibility');
-  if (!permissions.inputMonitoringGranted) missing.push('Input Monitoring');
+  if (inputs === 'mouse-and-keyboard' && !permissions.inputMonitoringGranted) missing.push('Input Monitoring');
   if (missing.length > 0) {
     throw new Error(
       `Desktop recording requires owner-granted macOS permission(s) in System Settings > Privacy & Security: ${missing.join(', ')}.`,
@@ -88,6 +95,7 @@ export class DesktopRecordingSession {
   readonly header: DesktopRecordingHeader;
   readonly maxDurationMs: number;
   readonly maxEvents: number;
+  readonly inputs: RecordedInputs;
   private readonly startedAtMs: number;
   private readonly events: DesktopInputEvent[] = [];
   private stopped = false;
@@ -101,8 +109,10 @@ export class DesktopRecordingSession {
     startedAtMs?: number;
     maxDurationMs?: number;
     maxEvents?: number;
+    inputs?: RecordedInputs;
   }) {
-    assertDesktopRecordingPermissions(options.permissions);
+    this.inputs = options.inputs ?? 'mouse-and-keyboard';
+    assertDesktopRecordingPermissions(options.permissions, this.inputs);
     this.id = options.id.replace(/[^a-zA-Z0-9_-]/g, '');
     if (!this.id) throw new Error('Recording id must contain alphanumeric characters.');
     this.header = options.header;
@@ -126,6 +136,7 @@ export class DesktopRecordingSession {
     }
 
     const isKeyEvent = event.kind === 'keyDown' || event.kind === 'keyUp';
+    if (isKeyEvent && this.inputs === 'mouse') return false;
     const isSensitive =
       context.secureInputActive === true ||
       context.focusedRole === 'AXSecureTextField' ||

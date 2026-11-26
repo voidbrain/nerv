@@ -51,7 +51,9 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { LEDGER_SCHEMA, Ledger, type Decision, type Proposal } from './ledger.ts';
-import { bindBrowserClick, builtinTools, type AgencySnapshot } from './executors.ts';
+import { bindBrowserClick, bindDesktopReplay, builtinTools, type AgencySnapshot } from './executors.ts';
+import type { DesktopControl } from './desktop-service.ts';
+import { liveDesktopControl } from './desktop-macos-driver.ts';
 import { MEMORY_SCHEMA, Memory, type Episode } from './memory.ts';
 import { INCIDENT_CIRCUITS_SCHEMA, IncidentCircuitStore } from './incident-circuits.ts';
 import { createFpvStoreSlice, type FpvStoreSlice, type RegisterBatteryInput } from './packs.ts';
@@ -214,6 +216,15 @@ export class Store {
   browserDriver?: (port: number) => BrowserAdapterDriver;
   /** F-121-T02: the slicer process runner; tests set a fake slicer. */
   slicerExec?: SlicerExecFn;
+  private desktopControl?: DesktopControl;
+  /** Tests inject a fake desktop control here; the service uses the live one (it refuses under the test runner). */
+  set desktop(control: DesktopControl | undefined) {
+    this.desktopControl = control;
+  }
+  /** F-092-T05: the desktop control for desktop.record and desktop.replay, built on first use. */
+  get desktop(): DesktopControl {
+    return (this.desktopControl ??= liveDesktopControl());
+  }
   /** The data home, when known: the schedule tool writes config.json there. */
   readonly home?: string;
   constructor(
@@ -728,6 +739,7 @@ export class Store {
    * tab (its id, origin and page join the arguments the card shows and the grant binds); a refusal here means no card.
    */
   async prepareProposal(proposal: Proposal): Promise<Proposal> {
+    if (proposal.tool === 'desktop.replay') return { ...proposal, args: { ...bindDesktopReplay(this, proposal.args) } };
     if (proposal.tool !== 'browser.click') return proposal;
     return { ...proposal, args: { ...(await bindBrowserClick(this, proposal.args)) } };
   }
@@ -827,6 +839,13 @@ export class Store {
       promptSizes: new PromptSampleStore(this.db).summarizeLastDay(),
       ...(this.fpv.fleetError ? { fleet: { error: this.fpv.fleetError } } : {}),
     };
+  }
+  /**
+   * F-092-T05: doctor as the service reports it, with the desktop control state of the service's own process (the
+   * one macOS attributes Accessibility to). The CLI's local doctor leaves it out and shows the service's answer.
+   */
+  serviceDoctor() {
+    return { ...this.doctor(), desktopControl: this.desktop.status() };
   }
   exportCoordinatorSnapshot(input: Omit<ExportCoordinatorSnapshotInput, 'db'>) {
     return exportCoordinatorSnapshot({ ...input, db: this.db });
