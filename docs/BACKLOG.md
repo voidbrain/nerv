@@ -14,23 +14,23 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 52 | 47 |
-| **Require Human 🧑** | 11 | 20 |
+| **Require Human 🧑** | 10 | 20 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-092](#f-092) | [B-091](#b-091) | — |
-| [F-011](#f-011) | [F-116](#f-116) | [B-057](#b-057) |  |
+| [F-062](#f-062) | [F-116](#f-116) | [B-091](#b-091) | — |
+| [F-011](#f-011) |  | [B-057](#b-057) |  |
 | [F-004](#f-004) |  | [B-068](#b-068) |  |
 | [F-012](#f-012) |  | [B-107](#b-107) |  |
 | [F-016](#f-016) |  | [B-113](#b-113) |  |
 | [F-087](#f-087) |  | [B-122](#b-122) |  |
 | [F-133](#f-133) |  | [B-123](#b-123) |  |
-| [F-092](#f-092) |  | [B-128](#b-128) |  |
-| [F-060](#f-060) |  | [B-129](#b-129) |  |
-| [F-007](#f-007) |  | [B-134](#b-134) |  |
+| [F-060](#f-060) |  | [B-128](#b-128) |  |
+| [F-007](#f-007) |  | [B-129](#b-129) |  |
+|  |  | [B-134](#b-134) |  |
 |  |  | [B-135](#b-135) |  |
 |  |  | [B-142](#b-142) |  |
 |  |  | [B-148](#b-148) |  |
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 238 h agent + 19.75 h owner across 229 open steps of 52 features and 47 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 240.5 h agent + 19.75 h owner across 230 open steps of 52 features and 47 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1682,6 +1682,55 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-092"></a>[✨ F-092](#top)
+
+**Record desktop input and replay it**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-092-T05 (the service binds the macOS desktop driver) closes on green CI; then the owner runs the [desktop replay owner check](acceptance/f092-desktop-replay.md).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: "record my mouse movements and replay them". NERV has no desktop control; replaying input acts on whatever is on screen at the time. |
+| **Reproduce** | Follow the [desktop replay owner check](acceptance/f092-desktop-replay.md) on the Mac. |
+| **Check** | Recording starts and stops on the owner's command, is bounded in time, stays local, and records no text typed into password fields; replay is Blue, checks its preconditions (screen size, front window) and stops on the first mismatch or any owner input; NERV reports what it replayed and what it observed afterwards; host accessibility permission is granted by the owner, never requested silently. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-092-t05"></a>F-092-T05 — Wire the macOS desktop driver into the service | 2.5 h | 0 h | 2.5 h | Implemented; verification pending | — | [F-092-T04](#f-092-t04) | 🤖 | [PR #817](https://github.com/voidbrain/nerv/pull/817) Service binds the macOS desktop driver for recording and replay |
+| 🟢 Small | <a id="f-092-t04"></a>F-092-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-092-T05](#f-092-t05) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 6 h (4 of 5 steps) | 0.25 h (1 of 5 steps recorded) | 2.5 h agent + 0.25 h owner | 3 of 5 completed | | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-092-t01"></a>F-092-T01 — Feasibility: recording, permissions and privacy | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-092-t02"></a>F-092-T02 — Bounded local recording | 1.5 h | 0 h | Completed | [PR #496](https://github.com/voidbrain/nerv/pull/496) implementation |
+| — | <a id="f-092-t03"></a>F-092-T03 — Replay as a Blue action with preconditions | 1.5 h | 0 h | Completed | [PR #607](https://github.com/voidbrain/nerv/pull/607) Desktop replay as Blue action with preconditions |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-092.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-092-T02: [PR #496](https://github.com/voidbrain/nerv/pull/496) implementation · F-092-T03: [PR #607](https://github.com/voidbrain/nerv/pull/607) Desktop replay as Blue action with preconditions · F-092-T05: [PR #817](https://github.com/voidbrain/nerv/pull/817) Service binds the macOS desktop driver for recording and replay. [PR #607](https://github.com/voidbrain/nerv/pull/607) (F-092-T03); [PR #496](https://github.com/voidbrain/nerv/pull/496) (merged; CI green); [Desktop input recording feasibility](decisions/desktop-input-recording.md) (`F-092-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md); [#783](https://github.com/voidbrain/nerv/pull/783); [#808](https://github.com/voidbrain/nerv/pull/808); [#817](https://github.com/voidbrain/nerv/pull/817) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-092-T02 verified: [PR #496](https://github.com/voidbrain/nerv/pull/496) merged on green CI. `F-092-T01`: `npm run check:fast` passed. |
+| Reviewed | 2026-11-21 |
+
+</details>
+
+---
 ### <a id="f-106"></a>[✨ F-106](#top)
 
 **Per-turn prompt size on the local route, then deferred domain tool loading**
@@ -2504,54 +2553,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-26 |
 | Verification | Unit: CI green on #786 (2026-11-26): `test/push-first-briefs.test.ts` "F-133 join: …" (failed before F-133-T02), "F-133: with no device a brief goes to Telegram at once, as before", "F-133-T02: a long brief is cut for the push …", "F-133 review: a notice written just before NERV stops …", "F-133 review: a brief push dispatch that throws …"; `test/update-scheduler.test.ts` "F-133 review: the notices written just before an update stops NERV are marked beforeStop" and the server join test (scheduler → runtime → nervous process → store). Device: Pending (F-133-T04). |
 | Reviewed | 2026-11-26 |
-
-</details>
-
----
-### <a id="f-092"></a>[✨ F-092](#top)
-
-**Record desktop input and replay it**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | 🤔 |
-
-🧑 **→** Approve a live-binding agent step or not: the [owner-step triage](acceptance/owner-steps-2026-11-26.md#decisions) sets out the options (the owner check cannot pass while nothing supplies the replay driver).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: "record my mouse movements and replay them". NERV has no desktop control; replaying input acts on whatever is on screen at the time. |
-| **Reproduce** | Follow the [desktop replay owner check](acceptance/f092-desktop-replay.md) on the Mac. |
-| **Check** | Recording starts and stops on the owner's command, is bounded in time, stays local, and records no text typed into password fields; replay is Blue, checks its preconditions (screen size, front window) and stops on the first mismatch or any owner input; NERV reports what it replayed and what it observed afterwards; host accessibility permission is granted by the owner, never requested silently. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-092-t04"></a>F-092-T04 — Owner check on the Mac | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/f092-desktop-replay.md) | — |
-| 🟢 Small | **Total** | 3.5 h (3 of 4 steps) | 0.25 h (1 of 4 steps recorded) | 0.25 h owner | 3 of 4 completed | | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-092-t01"></a>F-092-T01 — Feasibility: recording, permissions and privacy | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-092-t02"></a>F-092-T02 — Bounded local recording | 1.5 h | 0 h | Completed | [PR #496](https://github.com/voidbrain/nerv/pull/496) implementation |
-| — | <a id="f-092-t03"></a>F-092-T03 — Replay as a Blue action with preconditions | 1.5 h | 0 h | Completed | [PR #607](https://github.com/voidbrain/nerv/pull/607) Desktop replay as Blue action with preconditions |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-092.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-092-T02: [PR #496](https://github.com/voidbrain/nerv/pull/496) implementation · F-092-T03: [PR #607](https://github.com/voidbrain/nerv/pull/607) Desktop replay as Blue action with preconditions. [PR #607](https://github.com/voidbrain/nerv/pull/607) (F-092-T03); [PR #496](https://github.com/voidbrain/nerv/pull/496) (merged; CI green); [Desktop input recording feasibility](decisions/desktop-input-recording.md) (`F-092-T01`); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md); [#783](https://github.com/voidbrain/nerv/pull/783); [#808](https://github.com/voidbrain/nerv/pull/808) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-092-T02 verified: [PR #496](https://github.com/voidbrain/nerv/pull/496) merged on green CI. `F-092-T01`: `npm run check:fast` passed. |
-| Reviewed | 2026-11-21 |
 
 </details>
 

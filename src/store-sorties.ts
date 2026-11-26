@@ -464,6 +464,8 @@ export class StoreSorties {
     const durationMs = Math.max(0, Math.round(performance.now() - execT0));
     // F-089-T06: page text is data from outside: the sortie is tainted from here on.
     if ('result' in outcome && tool === 'browser.click') this.host.ledger.intake(sortieId, 'tool:' + tool, 'tainted');
+    // F-092-T05: a replay reads the front window's text back; screen text is data from outside.
+    if ('result' in outcome && tool === 'desktop.replay') this.host.ledger.intake(sortieId, 'tool:' + tool, 'tainted');
     if ('result' in outcome && tool === 'memory.recall') {
       const facts = outcome.result as { tainted: boolean }[];
       this.host.ledger.intake(sortieId, 'tool:' + tool, facts.some((f) => f.tainted) ? 'tainted' : 'trusted');

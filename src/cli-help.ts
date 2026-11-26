@@ -180,7 +180,6 @@ export const HELP_GROUPS: HelpGroup[] = [
         about: 'Show, then run, an open/save-as plan (macOS)',
       },
       { name: 'fpv-read-build', args: 'LINK', about: 'Read a diyfpv.com build into its local build note' },
-      { name: 'desktop-record', args: 'ID HEADER.json', about: 'Record desktop input for a workflow' },
     ],
   },
   {
