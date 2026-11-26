@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 6 | 17 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 6 | 20 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7116,6 +7116,108 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | PR / evidence | B-118-T04: Test: `test/sqlite-no-fsync.test.ts`; timing logs of runs 45506622094 to 45559316942 (Windows) and [run 45548137584](https://github.com/voidbrain/nerv/actions/runs/45548137584) (Linux); [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776); [#741](https://github.com/voidbrain/nerv/pull/741); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758); [#787](https://github.com/voidbrain/nerv/pull/787); [#794](https://github.com/voidbrain/nerv/pull/794) (closed on the owner decision) |
 | Opened | 2026-11-24 |
 | Verification | CI 2026-11-25 (later): 573, 545, 440 and 359 s (runs 45602256057, 45618960815, 45629193344, 45640302693); the first two needed a test rerun; two clean runs since. Unit 2026-11-25: Test: `test/sqlite-no-fsync.test.ts` and `test/coordinator-partition.test.ts` pass locally (B-118-T04). CI 2026-11-25: after PR #741 four Windows `npm test` runs took 352–506 s on the first attempt (runs 45572380286, 45577116814, 45580660697, 45589471622); five needed. Unit/integration 2026-11-24: Test: `test/worker-link-exit.test.ts` (B-118-T02) and `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs` (B-118-T03) pass locally. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-127
+
+**F-118-T02 browser test times out when it runs together with many test files**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: PR #793 merged on green CI (run 45781930245: validate, windows, native-macos, full-suite incl. the browser step); test/shared-build.test.mjs failed before the fix and passes after; the concurrent run (33 live.js/web/src files + gauntlet + evaluation.browser) failed 3/3 before and passed 3/3 after, locally 2026-11-26.
+
+| | |
+|---|---|
+| **Issue** | "F-118-T02: the installed app pairs with a typed code and stays signed in; a browser tab refuses the code" (`test/evaluation.browser.mjs`) fails when it runs in one `node --test` together with many other test files; it fails the same way on main and passes alone. Seen 2026-11-24 while verifying PR #716 (F-118-T05): every test reading live.js or web/src plus touched tests and `test/gauntlet.test.mjs` in one run gave 211/214 (2 skipped), the one failure this test; alone 6/6 twice. CI runs it in its own browser step and was green. |
+| **Reproduce** | On a development checkout: `node --test test/evaluation.browser.mjs` alone passes; the same file in one `node --test` with the live.js/web/src tests and `test/gauntlet.test.mjs` fails on the F-118-T02 case. |
+| **Check** | The cause under load is named from the run output (timeout, Chrome start, server or build wait); a regression that reproduces the load case fails before the fix and passes after it, or the test states the bound that absorbs it; the concurrent run passes. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: PR #793 merged on green CI (run 45781930245: validate, windows, native-macos, full-suite incl. the browser step); test/shared-build.test.mjs failed before the fix and passes after; the concurrent run (33 live.js/web/src files + gauntlet + evaluation.browser) failed 3/3 before and passed 3/3 after, locally 2026-11-26. 2026-11-24: opened in the backlog reconciliation from the F-118 verification of PR #716 ([evidence](evidence-2026.md#f-118-moved-2026-11-24-reconciliation)). Not seen in CI, so P3. Related: B-117 (gauntlet cases under machine load, closed), F-118. 2026-11-26: B-127-T01 implemented. Cause: not load. `test/gauntlet.test.mjs` renamed the shared `dist/web/browser` away (the two B-059 tests and F-074-T10's source-key check), so a browser test in the same `node --test` was served the server's 404 `{"error":"Not found."}` (Chrome's JSON view, the 185-character document at `/dashboard/`); the fixture's timeout error now prints that page. Fix: `tools/gauntlet.mjs` reads the build path from `NERV_GAUNTLET_BROWSER_BUILD`; the B-059 tests use temporary folders and F-074-T10 checks that the source inputs exclude `dist/`. Regression `test/shared-build.test.mjs` watches the build folder while those tests run: failed before the fix, passes after. The concurrent run (33 live.js/web/src files + gauntlet + evaluation.browser) failed 3/3 before, passed 3/3 after.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #716](https://github.com/voidbrain/nerv/pull/716) (where it was seen); opened in [PR #723](https://github.com/voidbrain/nerv/pull/723); [#793](https://github.com/voidbrain/nerv/pull/793) |
+| Opened | 2026-11-24 |
+| Verification | 2026-11-26: PR #793 merged on green CI (run 45781930245) with the local concurrent run passing; closed in the #778–#798 reconciliation. |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
+
+### B-133
+
+**Windows CI: the F-121-T04 cache probe answered in 698 ms while its test allows 300 ms**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: PR #788 merged on green CI (run 45774422823); test/print-transfer.test.ts passed on Windows in five first-attempt CI runs whose heads contain #788: #793 (45781930245), #795 (45783123576), #796 (45783603648), #797 (45786259079), #798 (45784812554); #791 also passed it, but was rerun for other tests (B-076).
+
+| | |
+|---|---|
+| **Issue** | On 2026-11-24 the Windows `npm test` step of PR #722 (F-121-T04) failed "F-121-T04: asking whether a part is cached never waits behind the slicer or gets busy" (`test/print-transfer.test.ts:476`): `answered in 698 ms` against a 300 ms bound, while two transfers kept a 600 ms fake slicer busy. 698 ms is longer than the fake slice, so the probe may have queued behind it (the behaviour the test forbids) or the runner was slow. A rerun passed. The test is F-121-T04's own regression, so F-121-T04 stays Implemented until this is named. |
+| **Reproduce** | Windows CI `npm test`: [run 45472575103](https://github.com/voidbrain/nerv/actions/runs/45472575103) attempt 1 (PR #722 head `d218d531`, after the review fixes). Locally: `node --test test/print-transfer.test.ts` while the machine is loaded (many test files at once). |
+| **Check** | The cause is named from the run output and a reproduction under load: a code cause gets a failing-first regression and a fix; a runner cause gets a bound stated in the test that still fails when the probe queues behind the slicer; `test/print-transfer.test.ts` passes in the next five Windows CI runs without a rerun. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: PR #788 merged on green CI (run 45774422823); test/print-transfer.test.ts passed on Windows in five first-attempt CI runs whose heads contain #788: #793 (45781930245), #795 (45783123576), #796 (45783603648), #797 (45786259079), #798 (45784812554); #791 also passed it, but was rerun for other tests (B-076). 2026-11-26 (B-133-T01): cause named, a runner cause. The probe for an uncached part has no `await` (`receivePartTransfer` returns `need: content` synchronously), so it cannot queue behind the slicer; but its answer resumes only after every microtask queued before it, and the first transfer's lane microtask stages the part synchronously (profiles read, two `mkdirSync`, `writeFileSync`, `renameSync`) and starts the slicer, all on the event loop. On a slow Windows disk or a loaded runner that work took 331 and 698 ms, which the old wall-clock bound (300 ms) counted as waiting. Reproduction committed first: `test/print-transfer.test.ts` "B-133: the synchronous staging of a concurrent transfer, not the slicer, delays the cache probe" (a slicer start that blocks the loop for 400 ms puts the probe past 300 ms while no slice has finished). Not reproduced on macOS under CPU load (2× cores of `yes`: 1–2 ms in six runs), consistent with a Windows file-system cost. Bound: the F-121-T04 test now asserts the order (the answer comes before any slice ends) instead of 300 ms (changed expectation: the requirement "never waits behind the slicer" is unchanged, its measure is); with the probe made to await the lane, that test fails (checked locally). 2026-11-25 reconciliation: a second failure, `answered in 331 ms` at `test/print-transfer.test.ts:476` on Windows ([run 45553326990](https://github.com/voidbrain/nerv/actions/runs/45553326990) attempt 2, PR #738; passed on a later attempt); 331 ms is under the 600 ms fake slice but over the 300 ms bound; cause not yet named. 2026-11-25: opened in the backlog reconciliation from the CI log of PR #722 (job 138724380031: `AssertionError: answered in 698 ms` at `test/print-transfer.test.ts:500`). F-121-T03 lists B-133-T01 among its prerequisites. Related: B-076 (scattered Windows CI failures) and B-126 (Runtime not ready on slow runners).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/print-transfer.test.ts` (B-133 reproduction; F-121-T04 order bound); [run 45472575103](https://github.com/voidbrain/nerv/actions/runs/45472575103) attempt 1 (PR #722); [run 45553326990](https://github.com/voidbrain/nerv/actions/runs/45553326990) attempt 2 (PR #738); opened in [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750); [#788](https://github.com/voidbrain/nerv/pull/788) |
+| Opened | 2026-11-25 |
+| Verification | 2026-11-26: five Windows runs without a rerun after #788; closed in the #778–#798 reconciliation. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-150
+
+**The Instrumentality daily-run test failed again on Windows after B-104 closed: the run crossed Rome midnight**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: PR #796 merged on green CI (run 45783603648, Windows first attempt); the Instrumentality daily-run test and the B-150 midnight test passed on Windows in the first attempts of #796 and of #797 (45786259079) and #798 (45784812554), whose heads contain #796.
+
+| | |
+|---|---|
+| **Issue** | Windows `npm test` of [CI run 45717358062](https://github.com/voidbrain/nerv/actions/runs/45717358062) (PR #778 head `a6dffe64`, 2026-11-25 22:58–23:06 UTC) failed "Instrumentality runs once a local day at its time, and a failed digest is not retried in a loop" (`test/instrumentality.test.ts`) with 4 digest calls where it expects 2. B-104 (closed 2026-11-22, [archive](#b-104)) fixed the same test's fixed 400 ms wait (0 calls); this was a different cause and no record owned it. |
+| **Reproduce** | Run the old test (real clock) so that its scheduler ticks before and after midnight in Europe/Rome: the first tick claims today's slot and asks twice (one retry of an unreadable reply), a tick after midnight is a new local day and asks twice more. `B-150: a failed daily run that crosses local midnight…` in `test/instrumentality.test.ts` drives that crossing with a set clock. |
+| **Check** | The cause is named; the daily-run test does not read the real clock; a test drives the midnight crossing and expects exactly two attempts per local day; the Windows job passes the test without reruns. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: PR #796 merged on green CI (run 45783603648, Windows first attempt); the Instrumentality daily-run test and the B-150 midnight test passed on Windows in the first attempts of #796 and of #797 (45786259079) and #798 (45784812554), whose heads contain #796. 2026-11-26: opened at the owner's request; B-150-T01 done in the same PR. Cause: the test used the real clock and the Windows runner reached it at 23:58–00:05 Rome, so a second local day rightly ran again (the scheduler claims one slot per local day, `src/runtime-instrumentality.ts`). Not a scheduler defect. The daily-run test was already pinned to a fixed clock in commit `aa5e7052` of PR #778 itself (named there under B-136, which is about the planner's invalid replies, so no record owned it); PR #778's next Windows run ([45719295342](https://github.com/voidbrain/nerv/actions/runs/45719295342)) passed. No failing-first test for the fix: the defect was the test's clock, as in B-104; the failing evidence is the Windows log of run 45717358062. The new test reproduces the cause deterministically (4 calls across the crossing, 2 per day). Related: B-104 (archived), B-118 (Windows run times, cites the run).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [CI run 45717358062](https://github.com/voidbrain/nerv/actions/runs/45717358062) (Windows, PR #778); fix `aa5e7052` in [PR #778](https://github.com/voidbrain/nerv/pull/778); [#796](https://github.com/voidbrain/nerv/pull/796) |
+| Opened | 2026-11-26 |
+| Verification | 2026-11-26: Windows passes without reruns on #796, #797 and #798; closed in the #778–#798 reconciliation. |
 | Reviewed | 2026-11-26 |
 
 </details>
