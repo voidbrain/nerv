@@ -679,3 +679,7 @@ PR #824 reconciles the harness to v10.24.1 (from 10.24.0); the owner authorised 
 ## 2026-11-26 — hidden-code sweep, NERV follow-up
 
 Owner decision in chat 2026-11-26 on the hidden-code sweep (coordinator `docs/reviews/2026-11-26-hidden-code.md`): "3 ok". The sweep's nerv findings (undocumented `NERV_TELEGRAM_API`, `NERV_PORT`/`NODO_PORT`, the verification-tool variables and the test-only `ajv-formats` packages) are documented in `docs/INSTALL.md`, "Environment variables" ([PR #827](https://github.com/voidbrain/nerv/pull/827)).
+
+## 2026-11-26 — harness v10.24.2
+
+The cleanup PR reconciles the harness to v10.24.2 (from 10.24.1; project-harness B-129). The owner approved on 2026-11-26 ("yep") that coordinator-only harness files are not copied into ordinary projects: `docs/agents/solution-dashboard.md`, `docs/agents/solution-refresh.md`, `docs/agents/solution-gaps.md` and `tools/solution.mjs` (no npm script ran it) are deleted and dropped from `.harness.json` `copied`; the procedures table and `solution-profile.md` name them as coordinator paths; AGENTS.md's solution-profile row no longer says "(refresh inside)". CI pending at this entry.

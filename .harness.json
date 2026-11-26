@@ -3,7 +3,7 @@
     "path": "../harness-template",
     "repo": "https://github.com/voidbrain/project-harness"
   },
-  "version": "10.24.1",
+  "version": "10.24.2",
   "stacks": [
     "core",
     "angular"
@@ -43,7 +43,6 @@
     "tools/browser-coverage.mjs": "core/tools/browser-coverage.mjs",
     "tools/backlog-dependencies.mjs": "core/tools/backlog-dependencies.mjs",
     "tools/backlog-queue.mjs": "core/tools/backlog-queue.mjs",
-    "tools/solution.mjs": "core/tools/solution.mjs",
     "tools/verification.mjs": "core/tools/verification.mjs",
     "docs/agents/verification.md": "core/docs/agents/verification.md",
     "tools/work-items.mjs": "core/tools/work-items.mjs",
@@ -66,13 +65,10 @@
     "docs/agents/rule-review.md": "core/docs/agents/rule-review.md",
     "docs/agents/behaviour-checks.md": "core/docs/agents/behaviour-checks.md",
     "docs/agents/mcp-commands.md": "core/docs/agents/mcp-commands.md",
-    "docs/agents/solution-refresh.md": "core/docs/agents/solution-refresh.md",
     "docs/agents/audit-findings.md": "core/docs/agents/audit-findings.md",
     "docs/agents/work-usage-sources.md": "core/docs/agents/work-usage-sources.md",
     "docs/agents/work-usage-effectiveness.md": "core/docs/agents/work-usage-effectiveness.md",
     "docs/agents/work-usage-launch.md": "core/docs/agents/work-usage-launch.md",
-    "docs/agents/solution-dashboard.md": "core/docs/agents/solution-dashboard.md",
-    "docs/agents/solution-gaps.md": "core/docs/agents/solution-gaps.md",
     ".github/workflows/backlog-views.yml": "core/.github/workflows/backlog-views.yml"
   },
   "forked": {},
@@ -1023,7 +1019,9 @@
     "featurePlans": true,
     "order": "queue",
     "views": "built",
-    "publishHooks": ["node tools/backlog-recap.mjs"],
+    "publishHooks": [
+      "node tools/backlog-recap.mjs"
+    ],
     "estimation": {
       "since": "2026-11-26"
     },

@@ -188,8 +188,37 @@ const real = (path) => {
 };
 const self = [root, mainCheckout(root)].some((dir) => real(dir) === real(home));
 const unreleased = [];
+// B-129: a file the latest release copies only through the fragment of a stack this project does not have (the
+// solution coordinator's pages and tool) is not this project's: it is deleted, not updated.
+const copiedIn = (file) => {
+  try {
+    return JSON.parse(at(latest, file) ?? '{}').copied ?? {};
+  } catch {
+    return {};
+  }
+};
+const otherStack = new Map();
+if (Array.isArray(stamp.stacks)) {
+  const own = new Set(Object.keys(copiedIn('core/.harness.json')));
+  const fragments = (git('ls-tree', '--name-only', `v${latest}`) ?? '')
+    .split('\n')
+    .filter((d) => d && d !== 'core')
+    .map((d) => [d, copiedIn(`${d}/.harness.fragment.json`)]);
+  for (const [stack, copied] of fragments)
+    if (stamp.stacks.includes(stack)) for (const path of Object.keys(copied)) own.add(path);
+  for (const [stack, copied] of fragments)
+    if (!stamp.stacks.includes(stack))
+      for (const path of Object.keys(copied)) if (!own.has(path)) otherStack.set(path, stack);
+}
 // Copied files are byte-identical to the template; project settings live in .harness.json, not in the files.
 for (const [path, source] of Object.entries(stamp.copied ?? {})) {
+  if (otherStack.has(path)) {
+    copyDiffers = true;
+    warn(
+      `${path}: template v${latest} copies it only for the ${otherStack.get(path)} stack, which this project does not have: delete it and drop it from "copied" in .harness.json. Remove or reword any link to it.`,
+    );
+    continue;
+  }
   const was = at(base, source),
     now = at(latest, source),
     here = mine(path);
