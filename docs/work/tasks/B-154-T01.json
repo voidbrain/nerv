@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "B-154-T01",
+  "parent": "B-154",
+  "title": "Failing test: axe fails on undecided colour contrast; MAGI measured in every theme, verdict and CRT",
+  "goal": "The browser tests fail on main with MAGI's and the flow's AA failures",
+  "status": "implemented",
+  "acceptance": [
+    "axeRun returns violations and undecided colour-contrast nodes; each accepted case named",
+    "textContrast measures text over SVG seats and through the CRT rows",
+    "MAGI and the timeline in all 20 combinations, CRT off and on, every verdict",
+    "It is not edited to pass in B-154-T02"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/fixtures/axe.mjs",
+    "test/angular.browser.mjs",
+    "test/evaluation.browser.mjs",
+    "test/dashboard-shell.browser.mjs",
+    "docs/work/records/B-154.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "browser-testing",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run build && node --test test/angular.browser.mjs fails on main"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 1.5 h agent. Implemented the same day; fails on main. Remaining: CI.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}
