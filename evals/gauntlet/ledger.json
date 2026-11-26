@@ -58,6 +58,62 @@
       "sourceKey": null
     },
     {
+      "pack": "cad-3d",
+      "packVersion": "1.0.0",
+      "case": "material-damp-isolation-holdout",
+      "caseHash": "8ee049681d2b8408db99d06e536e340e5a2746dec6bc6fb7ad8b380df92e562c",
+      "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
+      "status": "passed",
+      "reportHash": "7d1f5485d092c379821f6fbd8d3356fe60430e6a622599a8dcb0c221f73a2d23",
+      "finished": "2026-11-26T07:26:07.840Z",
+      "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+      "runtimeHash": "f7030c9836b413073f5710300a4a17c95cf63fddfce2d3208a1fa69ae7d2c741",
+      "scenarioHash": null,
+      "sourceKey": "bcf3d8e35b778e30d06be62dfa060bf02ea4272d57e689c5100eed419314557c"
+    },
+    {
+      "pack": "cad-3d",
+      "packVersion": "1.0.0",
+      "case": "material-outdoor-bracket-regression",
+      "caseHash": "dae75b4e0d83ef6811ef993ce55dba74f47d6e2a816be48ea838b88639221208",
+      "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
+      "status": "passed",
+      "reportHash": "7d1f5485d092c379821f6fbd8d3356fe60430e6a622599a8dcb0c221f73a2d23",
+      "finished": "2026-11-26T07:26:07.840Z",
+      "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+      "runtimeHash": "f7030c9836b413073f5710300a4a17c95cf63fddfce2d3208a1fa69ae7d2c741",
+      "scenarioHash": null,
+      "sourceKey": "bcf3d8e35b778e30d06be62dfa060bf02ea4272d57e689c5100eed419314557c"
+    },
+    {
+      "pack": "cad-3d",
+      "packVersion": "1.0.0",
+      "case": "slicer-flow-limit-holdout",
+      "caseHash": "9999bd4bd8c4b19d6f8eff01f8c457e51decd3d2170062660f4e165539240e15",
+      "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
+      "status": "passed",
+      "reportHash": "7d1f5485d092c379821f6fbd8d3356fe60430e6a622599a8dcb0c221f73a2d23",
+      "finished": "2026-11-26T07:26:07.840Z",
+      "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+      "runtimeHash": "f7030c9836b413073f5710300a4a17c95cf63fddfce2d3208a1fa69ae7d2c741",
+      "scenarioHash": null,
+      "sourceKey": "bcf3d8e35b778e30d06be62dfa060bf02ea4272d57e689c5100eed419314557c"
+    },
+    {
+      "pack": "cad-3d",
+      "packVersion": "1.0.0",
+      "case": "slicer-wall-layers-regression",
+      "caseHash": "b9051f3603217b16d995df00a21be79f950f716be9ad9b1d7bf7b3b0564030fb",
+      "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
+      "status": "passed",
+      "reportHash": "7d1f5485d092c379821f6fbd8d3356fe60430e6a622599a8dcb0c221f73a2d23",
+      "finished": "2026-11-26T07:26:07.840Z",
+      "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+      "runtimeHash": "f7030c9836b413073f5710300a4a17c95cf63fddfce2d3208a1fa69ae7d2c741",
+      "scenarioHash": null,
+      "sourceKey": "bcf3d8e35b778e30d06be62dfa060bf02ea4272d57e689c5100eed419314557c"
+    },
+    {
       "pack": "code-review",
       "packVersion": "1.0.0",
       "case": "command-and-retry-holdout",
@@ -792,12 +848,12 @@
       "caseHash": "18a6ca7b4c1d00204c2e1447b56e51bc288822cc8df5e45beffe65e6c421085b",
       "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
       "status": "passed",
-      "reportHash": "faa59c0ade304f0b4cd502116b1becc6f1f0f0d12fa3ca6852c48c3071e85c01",
-      "finished": "2026-11-25T16:45:00.643Z",
+      "reportHash": "44af111c62a822d57960e564e5abfb3fdf8e5c490efe473ec00b1c8bd5807aa1",
+      "finished": "2026-11-26T07:26:28.614Z",
       "modelDigest": null,
       "runtimeHash": null,
       "scenarioHash": null,
-      "sourceKey": "d8b7ef36d23428129055d38041dd55f3f0b00db9cf46325f2587cdb7b94d49db"
+      "sourceKey": "6c9e18bca474e5e6f1c3a0518e710104d0fdb0d6816bd323ab41c945a6110440"
     },
     {
       "pack": "multi-step-agent",
@@ -806,12 +862,12 @@
       "caseHash": "ea7083058a5e01c1356ca256dac75072b4005eaac7a5ef8543efb30f416eca2a",
       "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
       "status": "passed",
-      "reportHash": "faa59c0ade304f0b4cd502116b1becc6f1f0f0d12fa3ca6852c48c3071e85c01",
-      "finished": "2026-11-25T16:45:00.643Z",
+      "reportHash": "44af111c62a822d57960e564e5abfb3fdf8e5c490efe473ec00b1c8bd5807aa1",
+      "finished": "2026-11-26T07:26:28.614Z",
       "modelDigest": null,
       "runtimeHash": null,
       "scenarioHash": null,
-      "sourceKey": "d8b7ef36d23428129055d38041dd55f3f0b00db9cf46325f2587cdb7b94d49db"
+      "sourceKey": "6c9e18bca474e5e6f1c3a0518e710104d0fdb0d6816bd323ab41c945a6110440"
     },
     {
       "pack": "multi-step-agent",
@@ -820,12 +876,12 @@
       "caseHash": "23ffcaafb82ca1a1754cc7589c8413500ed4f87884f5aa2fc73f0ed8ebc0254f",
       "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
       "status": "passed",
-      "reportHash": "faa59c0ade304f0b4cd502116b1becc6f1f0f0d12fa3ca6852c48c3071e85c01",
-      "finished": "2026-11-25T16:45:00.643Z",
+      "reportHash": "44af111c62a822d57960e564e5abfb3fdf8e5c490efe473ec00b1c8bd5807aa1",
+      "finished": "2026-11-26T07:26:28.614Z",
       "modelDigest": null,
       "runtimeHash": null,
       "scenarioHash": null,
-      "sourceKey": "d8b7ef36d23428129055d38041dd55f3f0b00db9cf46325f2587cdb7b94d49db"
+      "sourceKey": "6c9e18bca474e5e6f1c3a0518e710104d0fdb0d6816bd323ab41c945a6110440"
     },
     {
       "pack": "multi-step-agent",
@@ -834,12 +890,12 @@
       "caseHash": "21733bac9daeb048983f837a7ff8b14871f55e100d0112a9055a77598b4ae2ae",
       "profileHash": "a1ec5ae0b74eeece57592f294d17d7e5e5c37989a5db6a4079fbd2f19a438f15",
       "status": "passed",
-      "reportHash": "faa59c0ade304f0b4cd502116b1becc6f1f0f0d12fa3ca6852c48c3071e85c01",
-      "finished": "2026-11-25T16:45:00.643Z",
+      "reportHash": "44af111c62a822d57960e564e5abfb3fdf8e5c490efe473ec00b1c8bd5807aa1",
+      "finished": "2026-11-26T07:26:28.614Z",
       "modelDigest": null,
       "runtimeHash": null,
       "scenarioHash": null,
-      "sourceKey": "d8b7ef36d23428129055d38041dd55f3f0b00db9cf46325f2587cdb7b94d49db"
+      "sourceKey": "6c9e18bca474e5e6f1c3a0518e710104d0fdb0d6816bd323ab41c945a6110440"
     },
     {
       "pack": "nerv-system-flows",
@@ -848,12 +904,12 @@
       "caseHash": "29a18cdf5721f04268e8f95ddc6a51dc2e54642cd4c790f9ae3c53e8dadac5eb",
       "profileHash": null,
       "status": "passed",
-      "reportHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-      "finished": "2026-11-11T00:00:00.000Z",
+      "reportHash": "59a1d11f2d9578ca8719be1ff2ca3056fc1d6fadcf4ba59b8d9c731ad382785a",
+      "finished": "2026-11-26T07:28:51.158Z",
       "modelDigest": null,
-      "runtimeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
       "scenarioHash": null,
-      "sourceKey": "e56ba238c066b75b90f9f7caca403d253a3880676d22c568fb4ea93046df3711"
+      "sourceKey": "c613aa1438b2ba2b8e8f5468e739cd033098f36e96407c5dcb97170d588ffc45"
     },
     {
       "pack": "nerv-system-flows",
@@ -876,12 +932,12 @@
       "caseHash": "80d4cc735d352cf754bcbfa9d74821b43ac1a512c537964aba3f77c226535740",
       "profileHash": null,
       "status": "passed",
-      "reportHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-      "finished": "2026-11-11T00:00:00.000Z",
+      "reportHash": "918c32b900bc07fce60a68538439018fc3b8bd0b69cff18759e64cbb40abf3f0",
+      "finished": "2026-11-26T07:27:45.949Z",
       "modelDigest": null,
-      "runtimeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
       "scenarioHash": null,
-      "sourceKey": "72644fe250eef9f8a6e66274ec125717a4b60751ee1b8c6fc51ea50410a0e623"
+      "sourceKey": "c89d0bc9dddd35b7cecbbe4c4207677c5cc94989316fecf3db9b72103f191472"
     },
     {
       "pack": "nerv-system-flows",
@@ -890,12 +946,12 @@
       "caseHash": "80f6106bc56f175afcf00e6e38defe748c41cd4f1a3e0964045c4135f355019a",
       "profileHash": null,
       "status": "passed",
-      "reportHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-      "finished": "2026-11-11T00:00:00.000Z",
+      "reportHash": "f05c6badbcf17deae36b7357f5d75cec2649da0f70edcc6f2b010091b098ca3a",
+      "finished": "2026-11-26T07:27:11.493Z",
       "modelDigest": null,
-      "runtimeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
       "scenarioHash": null,
-      "sourceKey": "81a531bc721eaabbf063726670672f9fb7f9c0639e096a2ee5505b3216375d5e"
+      "sourceKey": "ba16ae29a347c016d3333481d766b240ef0f28b552874ac587b2cbd6ee8fb195"
     },
     {
       "pack": "nerv-system-flows",
@@ -904,12 +960,12 @@
       "caseHash": "bee9af53a2b2467119e77b40000ce66b73245e89b21f26a1beec913231366f8e",
       "profileHash": null,
       "status": "passed",
-      "reportHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-      "finished": "2026-11-11T00:00:00.000Z",
+      "reportHash": "4c222673589315e0ae134a96ed3cdc50f5b8596212e146f0967def3cb531606e",
+      "finished": "2026-11-26T07:26:40.183Z",
       "modelDigest": null,
-      "runtimeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
       "scenarioHash": null,
-      "sourceKey": "6ff77339651278961a8c4afe11d4c3946ea76f1d626775799ae27c8bf69ed4e5"
+      "sourceKey": "84ed4e054d198dfeddab8ab27fd60e0baec9e941204811902e150a07527a0f85"
     },
     {
       "pack": "nerv-system-flows",
@@ -918,12 +974,12 @@
       "caseHash": "75eae83b0cff91bfb438fa78e5b50c96efb525a0fed1afdc5fe3593be592a0bd",
       "profileHash": null,
       "status": "passed",
-      "reportHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-      "finished": "2026-11-11T00:00:00.000Z",
+      "reportHash": "a36feb783ef5059916e628b92131a1926ea9e5a1165b69d94e7ef0673e40ea6d",
+      "finished": "2026-11-26T07:26:29.756Z",
       "modelDigest": null,
-      "runtimeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
       "scenarioHash": null,
-      "sourceKey": "8f7a0eb16868aa81d969131a89a98b79ffafa0bfba437f8b8713a1421d656d80"
+      "sourceKey": "2129fa17c505a109f6da9c91c036316906b1faa723079dc7d2553c3f4f4af655"
     },
     {
       "pack": "nerv-system-flows",
@@ -932,12 +988,12 @@
       "caseHash": "8c200ec992cf4a5a53f19a2eea6806b1f155f12a62292407c2f90301ee7894a9",
       "profileHash": null,
       "status": "passed",
-      "reportHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-      "finished": "2026-11-11T00:00:00.000Z",
+      "reportHash": "396431d2731ac0a9af974be6bd1a3c901b8bb8b6dacf8b27d74e99621a675a89",
+      "finished": "2026-11-26T07:29:00.062Z",
       "modelDigest": null,
-      "runtimeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "runtimeHash": "c2461cc73b117f6168ccf5922ff577e8de39393ece4f78c97426f526cdb051d2",
       "scenarioHash": null,
-      "sourceKey": "ab7d51678e7cb8db693862a3f726bc6af4a21c8028824156ac1420ffa0bd330d"
+      "sourceKey": "5cbd26e21af4dd01c6925718f1903e62f7c436724419992ea90f20726313000e"
     },
     {
       "pack": "nerv-system-flows",
