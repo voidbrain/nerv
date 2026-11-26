@@ -28,7 +28,7 @@ export type AdoptResult =
     };
 
 /**
- * B-170: a main named before F-016 (its main record has no `coordinatorEpoch`, read as 0) holds its store with no
+ * B-172: a main named before F-016 (its main record has no `coordinatorEpoch`, read as 0) holds its store with no
  * `coordinator_state`; it acts as a legacy single host, and `kaji standby`, `kaji drain` and seeding refuse it.
  * Adopting makes that store the first coordinator, epoch 1 (`kaji main` names the first main at epoch 1 or less;
  * epoch 1 is the first a lease renewal accepts): active, no lease (an unarmed lease is authority at epoch 1, as the
@@ -121,7 +121,7 @@ export async function adoptLegacyCoordinator(input: {
     throw new Error(
       `This base adopted its store before (a nerv-before-adopt backup exists) and ${probe.unreachable.join(', ')} did not answer: it may hold a later coordinator. Reach it and run kaji adopt again. Nothing was changed.`,
     );
-  // B-170 review: a base holding a later main record than this registry means another coordinator was named (this
+  // B-172 review: a base holding a later main record than this registry means another coordinator was named (this
   // store may be a restored copy from before it). Only a store restored from its own adopt backup may find the other
   // bases already at epoch 1, the epoch that adoption wrote.
   const limit = adoptedBefore ? Math.max(epoch, 1) : epoch;

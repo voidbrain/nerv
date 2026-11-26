@@ -26,7 +26,7 @@ import {
 import { Store } from '../src/store.ts';
 
 /*
- * B-170: a main named before F-016 (its main record has no coordinatorEpoch) holds its store with no
+ * B-172: a main named before F-016 (its main record has no coordinatorEpoch) holds its store with no
  * coordinator_state, so `kaji standby` and `kaji drain` refuse it and nothing created that state. `kaji adopt`
  * takes the legacy store as the first coordinator (epoch 1): backup first, idempotent, refused wherever another
  * coordinator could have run. Two real data homes: X the legacy main with the root key, B an enrolled base.
@@ -139,7 +139,7 @@ async function kaji(home: string, store: Store, args: string[]): Promise<string>
 const backups = (home: string) =>
   existsSync(join(home, 'backups')) ? readdirSync(join(home, 'backups')).filter((f) => /adopt/.test(f)) : [];
 
-describe('B-170: a main from before F-016 adopts its store as the first coordinator', () => {
+describe('B-172: a main from before F-016 adopts its store as the first coordinator', () => {
   it('kaji adopt backs up the store, signs main at epoch 1 and activates it; kaji standby then seeds and names the standby', async () => {
     const t = await legacyBases();
     try {

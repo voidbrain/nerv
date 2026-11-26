@@ -1,15 +1,15 @@
 {
   "version": 1,
-  "parent": "B-170",
+  "parent": "B-172",
   "dependsOn": [
-    "B-170-T02"
+    "B-172-T02"
   ],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
   "escalation": [
     "A material scope or effort increase goes to the owner",
     "Never let two coordinators act, or copy context as authority, to make progress"
   ],
-  "id": "B-170-T03",
+  "id": "B-172-T03",
   "title": "Owner check: kaji adopt on NERV-01, then kaji standby NERV-02 seeds and names the standby",
   "goal": "Step 0b of the relocation page passes on NERV-01",
   "status": "planned",
@@ -17,7 +17,7 @@
     "Step 0b of the relocation page passes on NERV-01"
   ],
   "resources": [
-    "docs/work/records/B-170.md",
+    "docs/work/records/B-172.md",
     "generated:backlog-views"
   ],
   "capabilities": [

@@ -16,9 +16,9 @@ nerv kaji standby
 
 Expected: `NERV-01 … enrolled  (this base)  (main)` and `NERV-02 … enrolled`; then `Standby: NERV-02` and a replication status. If it reads `No standby named.`, run `nerv kaji standby NERV-02` and expect `Standby: NERV-02. The lease renews through it from the next renewal (every 15 s).` (or a line that it seeded NERV-02's standby store first).
 
-## 0b. Once only: adopt NERV-01's store as the first coordinator (B-170)
+## 0b. Once only: adopt NERV-01's store as the first coordinator (B-172)
 
-Do this only if step 0 answered `This base holds no coordinator state to name a standby for.` (`nerv kaji standby NERV-02`) or `No standby named.` with no replication status (`nerv kaji standby`): NERV-01 was named main before relocation existed, so its store has no coordinator state (2026-11-26). Needs NERV-01 on `main` with B-170 merged, updated by `nerv update`.
+Do this only if step 0 answered `This base holds no coordinator state to name a standby for.` (`nerv kaji standby NERV-02`) or `No standby named.` with no replication status (`nerv kaji standby`): NERV-01 was named main before relocation existed, so its store has no coordinator state (2026-11-26). Needs NERV-01 on `main` with B-172 merged, updated by `nerv update`.
 
 Backup outside Git first (on NERV-01, Terminal; the service may keep running):
 

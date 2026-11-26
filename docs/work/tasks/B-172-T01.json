@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "parent": "B-170",
+  "parent": "B-172",
   "dependsOn": [],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
   "escalation": [
     "A material scope or effort increase goes to the owner",
     "Never let two coordinators act, or copy context as authority, to make progress"
   ],
-  "id": "B-170-T01",
+  "id": "B-172-T01",
   "title": "Failing test: a main from before F-016 cannot become the first coordinator",
   "goal": "Tests fail on main: no kaji adopt; kaji standby refuses the legacy main",
   "status": "implemented",
@@ -16,7 +16,7 @@
   ],
   "resources": [
     "test/**",
-    "docs/work/records/B-170.md",
+    "docs/work/records/B-172.md",
     "generated:backlog-views"
   ],
   "capabilities": [

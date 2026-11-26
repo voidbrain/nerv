@@ -99,7 +99,7 @@ export async function probeCoordinatorEpochs(
   input: EpochScope & { readonly push: (baseId: string, records: SignedRecord[]) => Promise<EpochPushReply> },
 ): Promise<{
   ranOrAcked: Map<string, number>;
-  /** B-170: the signed newest main epoch each answering base holds. */
+  /** B-172: the signed newest main epoch each answering base holds. */
   maxSeen: Map<string, number>;
   unknown: string[];
   /** The signed newest main epoch each base without the field holds (an older NERV says only that). */

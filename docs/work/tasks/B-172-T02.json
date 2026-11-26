@@ -1,27 +1,27 @@
 {
   "version": 1,
-  "parent": "B-170",
+  "parent": "B-172",
   "dependsOn": [
-    "B-170-T01"
+    "B-172-T01"
   ],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
   "escalation": [
     "A material scope or effort increase goes to the owner",
     "Never let two coordinators act, or copy context as authority, to make progress"
   ],
-  "id": "B-170-T02",
+  "id": "B-172-T02",
   "title": "kaji adopt: backup, sign main at epoch 1, activate the legacy store, refuse wherever another coordinator could have run",
-  "goal": "B-170-T01's tests pass unchanged; review findings fixed with tests",
+  "goal": "B-172-T01's tests pass unchanged; review findings fixed with tests",
   "status": "implemented",
   "acceptance": [
-    "B-170-T01's tests pass unchanged, with the coordinator suites",
+    "B-172-T01's tests pass unchanged, with the coordinator suites",
     "Fresh-context design review findings fixed or answered"
   ],
   "resources": [
     "src/**",
     "test/**",
     "docs/**",
-    "docs/work/records/B-170.md",
+    "docs/work/records/B-172.md",
     "generated:backlog-views",
     "contract:coordinator-authority"
   ],

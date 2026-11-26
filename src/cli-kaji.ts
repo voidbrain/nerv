@@ -278,7 +278,7 @@ export async function runKajiCommand(
     // #734 review (B-124): once a coordinator has moved, or runs here, a stored main record stops it unchecked.
     const held = store.coordinatorFencingState();
     // #734 re-check: the running main named again, or a revoked newest main, is refused the same way.
-    // B-170 review: an adopted first coordinator (state at epoch 1) is moved with kaji relocate too.
+    // B-172 review: an adopted first coordinator (state at epoch 1) is moved with kaji relocate too.
     if (registry.mainEpoch() >= 2 || held !== undefined)
       throw new Error(
         `The main record is at coordinator epoch ${registry.mainEpoch()}${registry.main() ? ` (${registry.main()})` : ''}: move it with kaji relocate ${id} FILE (then kaji promote --relocation FILE on ${id}). kaji main names the first main only.`,
@@ -433,7 +433,7 @@ export async function runKajiCommand(
       );
     } else process.stdout.write(out);
   } else if (sub === 'adopt') {
-    // B-170: a main from before F-016 takes its own store as the first coordinator (epoch 1).
+    // B-172: a main from before F-016 takes its own store as the first coordinator (epoch 1).
     const res = await adoptLegacyCoordinator({
       db: store.db,
       home,
