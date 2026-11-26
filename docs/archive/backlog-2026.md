@@ -7644,7 +7644,7 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 
 | Field | Value |
 |---|---|
-| PR / evidence | [#802](https://github.com/voidbrain/nerv/pull/802) (prerequisite grover:F-005-T01); Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); F-123-T01 in [PR #746](https://github.com/voidbrain/nerv/pull/746).; [#758](https://github.com/voidbrain/nerv/pull/758) |
+| PR / evidence | [#837](https://github.com/voidbrain/nerv/pull/837) (F-123-T02 owner check passed); [#802](https://github.com/voidbrain/nerv/pull/802) (prerequisite grover:F-005-T01); Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); F-123-T01 in [PR #746](https://github.com/voidbrain/nerv/pull/746).; [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-24 |
 | Verification | CI 2026-11-25: F-123-T01, Test: `test/mcp-remote.test.ts` green in run 45602256057 (#746). Owner check F-123-T02 pending. |
 | Reviewed | 2026-11-26 |
