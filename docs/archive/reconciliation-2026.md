@@ -664,4 +664,4 @@ PRs #799–#802 merged on green CI; reconciled in #806 (F-134-T02, full audit): 
 
 ## 2026-11-26 — main `6847226`
 
-PR #806 (full audit) merged on green CI, all five jobs; F-134 closed (F-134-T01 #802, F-134-T02 #806). B-152 and B-153 stay open.
+PR #806 (full audit) merged on green CI, all five jobs; F-134 closed in [#807](https://github.com/voidbrain/nerv/pull/807) (F-134-T01 #802, F-134-T02 #806). B-152 and B-153 stay open.
