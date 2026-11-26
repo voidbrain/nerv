@@ -7438,7 +7438,7 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 
 | Field | Value |
 |---|---|
-| PR / evidence | [#808](https://github.com/voidbrain/nerv/pull/808) (second rewrite by a local `npm test`, restored before merge); [#806](https://github.com/voidbrain/nerv/pull/806) commit `bfdaab98` (ledger 122 → 104 entries); [#803](https://github.com/voidbrain/nerv/pull/803) (restored); `docs/audits/2026-11-26-full.md`; `tools/gauntlet.mjs:41,217-221`; `test/gauntlet.test.mjs:898,1114`; [#815](https://github.com/voidbrain/nerv/pull/815); [#818](https://github.com/voidbrain/nerv/pull/818) |
+| PR / evidence | [#808](https://github.com/voidbrain/nerv/pull/808) (second rewrite by a local `npm test`, restored before merge); [#806](https://github.com/voidbrain/nerv/pull/806) commit `bfdaab98` (ledger 122 → 104 entries); [#803](https://github.com/voidbrain/nerv/pull/803) (restored); `docs/audits/2026-11-26-full.md`; `tools/gauntlet.mjs:41,217-221`; `test/gauntlet.test.mjs:898,1114`; [#815](https://github.com/voidbrain/nerv/pull/815); [#818](https://github.com/voidbrain/nerv/pull/818); [#819](https://github.com/voidbrain/nerv/pull/819) (closure) |
 | Opened | 2026-11-26 |
 | Verification | CI: #818 all green 2026-11-26; Test: test/gauntlet-ledger.test.mjs, test/check-gauntlet-ledger.test.mjs |
 | Reviewed | 2026-11-26 |
@@ -7473,7 +7473,7 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 
 | Field | Value |
 |---|---|
-| PR / evidence | Local full runs 2026-11-26 at `4a0df337`: 1,588 pass, 6 fail, 1 cancelled; then 1,588 pass, 5 fail, 2 cancelled. `node --test test/gauntlet.test.mjs test/dashboard-accounting.test.ts` alone: 34/34. Opened in [#806](https://github.com/voidbrain/nerv/pull/806). Cause and fix: [B-165](../work/records/B-153.md#b-165).; [#818](https://github.com/voidbrain/nerv/pull/818) |
+| PR / evidence | Local full runs 2026-11-26 at `4a0df337`: 1,588 pass, 6 fail, 1 cancelled; then 1,588 pass, 5 fail, 2 cancelled. `node --test test/gauntlet.test.mjs test/dashboard-accounting.test.ts` alone: 34/34. Opened in [#806](https://github.com/voidbrain/nerv/pull/806). Cause and fix: [B-165](../work/records/B-153.md#b-165).; [#818](https://github.com/voidbrain/nerv/pull/818); [#819](https://github.com/voidbrain/nerv/pull/819) (closure) |
 | Opened | 2026-11-26 |
 | Verification | CI: #818 all green 2026-11-26; Test: test/gauntlet-ledger.test.mjs (B-165-T01 a) |
 | Reviewed | 2026-11-26 |
