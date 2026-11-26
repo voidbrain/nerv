@@ -34,5 +34,6 @@
     "estimateAgentHours": 0,
     "ownerHours": 0.25,
     "ownerKind": "procedure"
-  }
+  },
+  "ownerLink": "docs/acceptance/f004-t06-phone-push-procedure.md#briefs-and-update-notices-push-first-f-133-t04"
 }

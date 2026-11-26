@@ -881,8 +881,9 @@ export class Runtime implements StoreApi {
     this.updatePostpone = fn;
   }
   /** An owner notice into the inbox: every channel (Telegram, web push, dashboard) delivers it from there, once. */
-  async notice(message: string): Promise<void> {
-    await this.nervous.call('inbox.brief', { message });
+  async notice(message: string, options: { beforeStop?: boolean } = {}): Promise<void> {
+    // F-133 review: a notice written just before NERV stops goes to Telegram at once, not push first.
+    await this.nervous.call('inbox.brief', { message, ...(options.beforeStop ? { beforeStop: true } : {}) });
   }
   channelState(): ChannelState {
     return this.basesController.channelState();

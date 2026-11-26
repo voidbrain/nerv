@@ -80,3 +80,17 @@ Checks B-149 on the phone once it is deployed, in the same sitting as the steps 
    Expected: one `push` row with `sent_at` and an empty `opened_at`, and no `telegram` row.
 
 Record the result (pass, or which step differed and what was seen) in [B-149](../work/records/B-149.md).
+
+## Briefs and update notices push first (F-133-T04)
+
+Checks F-133 on the phone once it is deployed: a brief-kind item (the morning brief, an "Update … applied" notice, a watch or session-limit notice) goes to the phone first, and reaches Telegram only when it is not tapped (or read in the app) within 10 minutes. Needs notifications on in the dashboard or workspace app and Telegram linked. `nerv brief` only prints a brief and writes nothing, so the check uses the two notices NERV writes anyway.
+
+1. An untapped notice reaches Telegram once, at the deadline. The update that installs F-133 writes "Update … applied" once NERV is back. Expected: a notification whose title is "Update … applied" arrives on the phone; nothing on Telegram yet. Do not tap it and do not open the app. About 10 minutes later Telegram shows the same text once (no ⏰).
+2. A tapped brief never reaches Telegram. At the next morning brief (the time in Settings → Daily brief): expected, a notification whose title is the brief's first line. Tap it within 10 minutes; the app opens. Wait 12 minutes: no copy of the brief on Telegram.
+3. Read what both channels recorded (read-only):
+   ```zsh
+   sqlite3 -readonly ~/.nerv/nerv.sqlite "SELECT substr(d.message,1,30), c.channel, c.sent_at, c.opened_at FROM delivery_channels c JOIN deliveries d ON d.id=c.delivery_id WHERE d.kind='brief' ORDER BY d.rowid DESC, c.channel LIMIT 6;"
+   ```
+   Expected: the morning brief has a `push` row with `sent_at` and `opened_at` and no `telegram` row; the update notice has a `push` row with `sent_at` and an empty `opened_at`, and a `telegram` row with `sent_at`.
+
+Record the result (pass, or which step differed and what was seen) in [F-133](../work/records/F-133.md).

@@ -992,9 +992,9 @@ export class TelegramChannel {
         const page = await this.store.inboxPage(at.sequence, 5, at.id);
         // Checkpoint after every message: a stop or crash resends at most the one in flight.
         for (const item of page.items) {
-          // F-004-T09: a reminder queued for the phone first is Telegram's only as the fallback, below.
+          // F-004-T09, F-133: a reminder or brief queued for the phone first is Telegram's only as the fallback, below.
           const pushFirst =
-            item.kind === 'reminder' &&
+            (item.kind === 'reminder' || item.kind === 'brief') &&
             !!this.store.pushFallback &&
             !!(await this.store.deliveryState?.(item.id))?.push;
           if (item.kind !== 'approval' && !pushFirst) {
@@ -1037,7 +1037,7 @@ export class TelegramChannel {
       let failed = false;
       for (const item of due) {
         try {
-          await this.out(`⏰ ${item.message}`);
+          await this.out(item.kind === 'brief' ? item.message : `⏰ ${item.message}`);
           await this.recordDelivery(item.id, 'sent');
         } catch (e) {
           failed = true;

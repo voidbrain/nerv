@@ -27,8 +27,11 @@ export interface UpdateSchedulerDeps {
   readPolicy(): AutoUpdatePolicy;
   check(channel: UpdateChannel): Promise<UpdateAvailability>;
   evaluate(input: { target: string; channel: UpdateChannel; revision?: string }): Promise<AutoUpdateEvaluation>;
-  /** An owner notice: the inbox delivers it to Telegram, web push and the dashboard, once. */
-  notify(message: string): void | Promise<void>;
+  /**
+   * An owner notice: the inbox delivers it to Telegram, web push and the dashboard, once. `beforeStop` marks a notice
+   * written just before the update stops NERV (F-133 review): it goes to Telegram at once instead of push first.
+   */
+  notify(message: string, options?: { beforeStop?: boolean }): void | Promise<void>;
   settings(): UpdateSchedulerSettings;
 }
 
@@ -289,7 +292,7 @@ export class AutoUpdateScheduler {
       }
       const scheduled = this.scheduled;
       this.scheduled = undefined;
-      await this.deps.notify(applyingText(scheduled, language));
+      await this.deps.notify(applyingText(scheduled, language), { beforeStop: true });
       let evaluation: AutoUpdateEvaluation;
       try {
         evaluation = await this.deps.evaluate({ target, channel: scheduled.channel, revision: scheduled.revision });
@@ -309,7 +312,10 @@ export class AutoUpdateScheduler {
         nextApplyAt = nextApplyWindow(now, timeZone, schedule.applyHour).toISOString();
         this.scheduled = { ...scheduled, applyAt: nextApplyAt };
       }
-      await this.deps.notify(resultText(evaluation, scheduled, nextApplyAt, timeZone, language));
+      await this.deps.notify(
+        resultText(evaluation, scheduled, nextApplyAt, timeZone, language),
+        evaluation.outcome === 'started' ? { beforeStop: true } : undefined,
+      );
       return { action: 'evaluated', evaluation, ...(nextApplyAt ? { nextApplyAt } : {}) };
     }
     if (local.hour >= schedule.checkHour && this.lastCheckDay !== local.day) {

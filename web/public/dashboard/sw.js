@@ -1,4 +1,4 @@
-/* Dashboard service worker (F-004-T08): shows the reminder pushes the service sends to this installed app and opens the
+/* Dashboard service worker (F-004-T08): shows the reminder and brief pushes (F-133) the service sends to this installed app and opens the
    dashboard on a tap. It caches nothing and has no fetch handler, so the dashboard always reads the live service. The
    payload is the one the workspace's Angular worker reads ({ notification: { title, body, icon, data } }).
    F-004-T09: a tap is the phone's delivery confirmation. The worker posts the push's one-off receipt to

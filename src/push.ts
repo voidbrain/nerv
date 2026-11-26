@@ -148,6 +148,44 @@ export function formatReminderPushPayload(
   };
 }
 
+/** F-133: a brief's push shows its first line as the title and a short cut of the rest; the full text stays in the app. */
+export const BRIEF_PUSH_TITLE_MAX = 80;
+export const BRIEF_PUSH_BODY_MAX = 240;
+const cut = (text: string, max: number) => (text.length > max ? text.slice(0, max - 1).trimEnd() + '…' : text);
+
+/**
+ * F-133: the push for a brief-kind inbox item (morning brief, update, watch and session-limit notices), in the same
+ * shape as a reminder's and with the same one-off receipt, so a tap keeps it off Telegram (F-004-T09's order).
+ */
+export function formatBriefPushPayload(
+  delivery: { id: string; message: string },
+  receipt?: string,
+): {
+  notification: {
+    title: string;
+    body: string;
+    icon: string;
+    data: { id: string; receipt?: string; onActionClick: { default: { operation: string; url: string } } };
+  };
+} {
+  const lines = delivery.message
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+  return {
+    notification: {
+      title: cut(lines[0] ?? 'NERV Agency', BRIEF_PUSH_TITLE_MAX),
+      body: cut(lines.slice(1).join(' ') || 'NERV Agency · Brief', BRIEF_PUSH_BODY_MAX),
+      icon: '/icons/icon-192.png',
+      data: {
+        id: delivery.id,
+        ...(receipt ? { receipt } : {}),
+        onActionClick: { default: { operation: 'focusLastFocusedOrOpen', url: '/' } },
+      },
+    },
+  };
+}
+
 export async function sendWebPush(
   subscription: PushSubscriptionRecord,
   payload: string | object,

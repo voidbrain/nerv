@@ -82,7 +82,7 @@ import { StoreWatch } from './store-watch.ts';
 import { StoreReminders } from './store-reminders.ts';
 import { StorePush } from './store-push.ts';
 import { StoreKajiOutbox } from './store-kaji-outbox.ts';
-import { StoreInbox } from './store-inbox.ts';
+import { StoreInbox, type BriefOptions } from './store-inbox.ts';
 import { StoreSorties } from './store-sorties.ts';
 export { REMINDER_KINDS, normalizeReminderKind, type ReminderKind } from './reminder-time.ts';
 export type { PushSubscriptionRecord } from './push.ts';
@@ -602,14 +602,46 @@ export class Store {
       watch: this.watch,
       normalizeRow: (row) => this.remindersController.normalizeRow(row),
       watchIsQuiet: (now) => this.watchController.watchIsQuiet(now),
+      queuePushFirst: (deliveryId, now) => this.pushController.queuePushFirst(deliveryId, now),
     }));
   }
   inbox() {
     return this.inboxController.inbox();
   }
-  /** Hyuga's brief into the inbox (F-028): every channel delivers it from here, once. */
-  addBrief(message: string, now = new Date(), day?: string): { id: string; created: string; existing?: true } {
-    return this.inboxController.addBrief(message, now, day);
+  /**
+   * Hyuga's brief into the inbox (F-028): every channel delivers it from here, once. F-133: a brief queued for the
+   * phone is pushed after the caller's transaction commits (the next turn of the event loop); NERV stopping first
+   * leaves it to the Telegram fallback at the deadline, as for reminders. `beforeStop` (a notice written just before an
+   * update stops NERV) skips push first, so Telegram sends it at once.
+   */
+  addBrief(
+    message: string,
+    now = new Date(),
+    day?: string,
+    options: BriefOptions = {},
+  ): { id: string; created: string; existing?: true } {
+    const delivery = this.inboxController.addBrief(message, now, day, options);
+    if (!delivery.existing && this.deliveryChannels.pushFirst(delivery.id))
+      setImmediate(
+        () =>
+          void this.dispatchPushBriefs([delivery.id]).catch((error: unknown) => {
+            // F-133 review: a dispatch that could not run is a failed push, so Telegram sends the brief at once
+            // (claimFallback) rather than after the 10-minute deadline.
+            const reason = error instanceof Error ? error.message.slice(0, 120) : 'push dispatch failed';
+            console.error(`push: brief not pushed (${reason}); Telegram sends it now`);
+            try {
+              this.deliveryChannels.record(delivery.id, 'push', 'failed', new Date(), reason);
+            } catch {
+              // closed store: the item waits for the fallback deadline after the restart
+            }
+          }),
+      );
+    return delivery;
+  }
+  /** F-133: pushes brief-kind inbox items queued for the phone first. */
+  async dispatchPushBriefs(deliveryIds: string[]): Promise<void> {
+    this.assertActiveCoordinator();
+    return this.pushController.dispatchPushBriefs(deliveryIds);
   }
   /** When the latest brief was written, if any: the next brief covers what happened since. */
   lastBrief(): string | null {

@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 46 | 40 |
-| **Require Human 🧑** | 13 | 18 |
+| **Require Human 🧑** | 14 | 18 |
 
 ### Require Human 🧑
 
@@ -28,12 +28,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-016](#f-016) |  | [B-122](#b-122) |  |
 | [F-086](#f-086) |  | [B-123](#b-123) |  |
 | [F-087](#f-087) |  | [B-128](#b-128) |  |
-| [F-092](#f-092) |  | [B-129](#b-129) |  |
-| [F-098](#f-098) |  | [B-134](#b-134) |  |
-| [F-060](#f-060) |  | [B-135](#b-135) |  |
-| [F-007](#f-007) |  | [B-142](#b-142) |  |
-| [F-123](#f-123) |  | [B-149](#b-149) |  |
-|  |  | [B-056](#b-056) |  |
+| [F-133](#f-133) |  | [B-129](#b-129) |  |
+| [F-092](#f-092) |  | [B-134](#b-134) |  |
+| [F-098](#f-098) |  | [B-135](#b-135) |  |
+| [F-060](#f-060) |  | [B-142](#b-142) |  |
+| [F-007](#f-007) |  | [B-149](#b-149) |  |
+| [F-123](#f-123) |  | [B-056](#b-056) |  |
 |  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
 |  |  | [B-112](#b-112) |  |
@@ -42,7 +42,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 192.75 h agent + 16.75 h owner across 176 open steps of 46 features and 40 other records. 165.5 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 188.25 h agent + 16.75 h owner across 176 open steps of 46 features and 40 other records. 165.5 h of actual effort recorded on 151 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1138,47 +1138,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-133"></a>[✨ F-133](#top)
-
-**Push first for briefs and update notices**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-133-T01 — Failing join test: a brief or update notice goes to the phone first (Planned).
-
-| | |
-|---|---|
-| **Issue** | F-004-T09 sends reminders to the phone first (a tap counts as delivered, Telegram fallback after 10 minutes), but brief-kind inbox items (the morning brief, update notices, and the watch and session-limit notices that share the kind) still go to Telegram only: `src/telegram.ts` applies push-first to `kind === 'reminder'` alone. Seen 2026-11-25 23:49Z on NERV-01: the "Update 67550c4 applied" brief went to Telegram only. |
-| **Reproduce** | With the phone app subscribed to push on NERV-01, wait for the morning brief or an applied update: it arrives on Telegram at once and never as a push. |
-| **Check** | A brief or update notice reaches a subscribed phone as a push first; a tap stops the fallback; an untapped one reaches Telegram once after 10 minutes; no device or a failed push sends to Telegram at once; approvals, replies and chat stay on Telegram; a committed join test fails first (F-133-T01); the owner sees it on the phone (F-133-T04). |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-133-t01"></a>F-133-T01 — Failing join test: a brief or update notice goes to the phone first | 1 h | 0 h | 1 h | Planned | — | [F-133-T02](#f-133-t02) | 🤖 |
-| 🟡 Medium | <a id="f-133-t02"></a>F-133-T02 — Push first for briefs and update notices | 3 h | 0 h | 3 h | Planned | [F-133-T01](#f-133-t01) | [F-133-T03](#f-133-t03) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-133-t03"></a>F-133-T03 — Guide and owner page for push-first briefs | 0.5 h | 0 h | 0.5 h | Planned | [F-133-T02](#f-133-t02) | [F-133-T04](#f-133-t04) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-133-t04"></a>F-133-T04 — Owner: a brief arrives on the phone first | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-133-T03](#f-133-t03) | — | ⏳ 🧑‍🔧 |
-| 🔴 Large | **Total** | 4.5 h | 0 h (0 of 4 steps recorded) | 4.5 h agent + 0.25 h owner | 0 of 4 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-133.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | NERV-01 Telegram brief "Update 67550c4 applied", 2026-11-25 23:49Z (coordinator report); `src/telegram.ts` push-first guard limited to reminders; related [F-004](work/records/F-133.md#f-004), [F-124](work/records/F-133.md#f-124), [B-149](work/records/F-133.md#b-149); [#783](https://github.com/voidbrain/nerv/pull/783) |
-| Opened | 2026-11-26 |
-| Verification | Unit: Pending (F-133-T01, F-133-T02). Device: Pending (F-133-T04). |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
 ### <a id="f-089"></a>[✨ F-089](#top)
 
 **Browser control: act on a named control in an open page**
@@ -2119,6 +2078,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-087-T02 verified: [PR #491](https://github.com/voidbrain/nerv/pull/491) merged on green CI. `F-087-T01` decision written in [bambu-print-handoff.md](decisions/bambu-print-handoff.md); verified with `npm run check:fast`. 2026-11-22: F-087-T03 verified (`bambu.handoff` Orange gate + `handOffToBambuConnect` + owner checklist); `node --test test/slicer.test.ts` and `npm run check:fast`. |
 | Reviewed | 2026-11-18 |
+
+</details>
+
+---
+### <a id="f-133"></a>[✨ F-133](#top)
+
+**Push first for briefs and update notices**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** F-133-T04, after the merge and update: the "Update … applied" notice and the next morning brief arrive as pushes first ([steps](acceptance/f004-t06-phone-push-procedure.md#briefs-and-update-notices-push-first-f-133-t04)).
+
+| | |
+|---|---|
+| **Issue** | F-004-T09 sends reminders to the phone first (a tap counts as delivered, Telegram fallback after 10 minutes), but brief-kind inbox items (the morning brief, update notices, and the watch and session-limit notices that share the kind) still go to Telegram only: `src/telegram.ts` applies push-first to `kind === 'reminder'` alone. Seen 2026-11-25 23:49Z on NERV-01: the "Update 67550c4 applied" brief went to Telegram only. |
+| **Reproduce** | With the phone app subscribed to push on NERV-01, wait for the morning brief or an applied update: it arrives on Telegram at once and never as a push. |
+| **Check** | A brief or update notice reaches a subscribed phone as a push first; a tap stops the fallback; an untapped one reaches Telegram once after 10 minutes; no device or a failed push sends to Telegram at once; approvals, replies and chat stay on Telegram; a committed join test fails first (F-133-T01); the owner sees it on the phone (F-133-T04). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-133-t01"></a>F-133-T01 — Failing join test: a brief or update notice goes to the phone first | 1 h | 0 h | 0 h | Implemented; verification pending | — | [F-133-T02](#f-133-t02) | 🤖 | [PR #786](https://github.com/voidbrain/nerv/pull/786) |
+| 🟢 Small | <a id="f-133-t02"></a>F-133-T02 — Push first for briefs and update notices | 3 h | 0 h | 0 h | Implemented; verification pending | [F-133-T01](#f-133-t01) | [F-133-T03](#f-133-t03) | 🤖 | [PR #786](https://github.com/voidbrain/nerv/pull/786) |
+| 🟢 Small | <a id="f-133-t03"></a>F-133-T03 — Guide and owner page for push-first briefs | 0.5 h | 0 h | 0 h | Implemented; verification pending | [F-133-T02](#f-133-t02) | [F-133-T04](#f-133-t04) | 🤖 | [PR #786](https://github.com/voidbrain/nerv/pull/786) |
+| 🟢 Small | <a id="f-133-t04"></a>F-133-T04 — Owner: a brief arrives on the phone first | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-133-T03](#f-133-t03) | — | ⏳ 🧑‍🔧 | — |
+| 🟢 Small | **Total** | 4.5 h | 0 h (0 of 4 steps recorded) | 0.25 h owner | 0 of 4 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-133.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-133-T01: [PR #786](https://github.com/voidbrain/nerv/pull/786) · F-133-T02: [PR #786](https://github.com/voidbrain/nerv/pull/786) · F-133-T03: [PR #786](https://github.com/voidbrain/nerv/pull/786). NERV-01 Telegram brief "Update 67550c4 applied", 2026-11-25 23:49Z (coordinator report); `src/telegram.ts` push-first guard limited to reminders; related [F-004](work/records/F-133.md#f-004), [F-124](work/records/F-133.md#f-124), [B-149](work/records/F-133.md#b-149); [#783](https://github.com/voidbrain/nerv/pull/783); [#786](https://github.com/voidbrain/nerv/pull/786) |
+| Opened | 2026-11-26 |
+| Verification | Unit: implemented, pending CI: `test/push-first-briefs.test.ts` "F-133 join: …" (failed before F-133-T02), "F-133: with no device a brief goes to Telegram at once, as before", "F-133-T02: a long brief is cut for the push …", "F-133 review: a notice written just before NERV stops …", "F-133 review: a brief push dispatch that throws …"; `test/update-scheduler.test.ts` "F-133 review: the notices written just before an update stops NERV are marked beforeStop" and the server join test (scheduler → runtime → nervous process → store). Device: Pending (F-133-T04). |
+| Reviewed | 2026-11-26 |
 
 </details>
 
