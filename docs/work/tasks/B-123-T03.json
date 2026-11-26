@@ -2,7 +2,7 @@
   "version": 1,
   "id": "B-123-T03",
   "parent": "B-123",
-  "status": "planned",
+  "status": "closed",
   "privacy": "Neutral invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
   "escalation": [
     "A material scope or effort increase goes to the owner"
@@ -28,11 +28,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h agent",
-    "basis": "Split from B-123-T02 2026-11-26 (owner-step triage): the file and inbox check is a read. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Split from B-123-T02 2026-11-26 (owner-step triage): the file and inbox check is a read. Not a measurement. Closed 2026-11-26 ~01:30Z, read-only on NERV-01: updater-status.json state completed, revision 67550c47 (= ~/.nerv-app HEAD), at 2026-11-25T23:48:48Z; nerv inbox lists \"Update 67550c4 applied\" exactly once. Actual 0.25 h stated (quarter-hour minimum).",
     "reviewed": "2026-11-26",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0,
+    "ownerHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }

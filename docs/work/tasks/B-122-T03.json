@@ -2,7 +2,7 @@
   "version": 1,
   "id": "B-122-T03",
   "parent": "B-122",
-  "status": "planned",
+  "status": "closed",
   "privacy": "Neutral invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
   "escalation": [
     "A material scope or effort increase goes to the owner"
@@ -27,11 +27,14 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h agent",
-    "basis": "Split from B-122-T02 2026-11-26 (owner-step triage): the completed-update half is a read of NERV-01's records. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Split from B-122-T02 2026-11-26 (owner-step triage): the completed-update half is a read of NERV-01's records. Not a measurement. Closed 2026-11-26 ~01:30Z, read-only on NERV-01: ~/.nerv-app HEAD 67550c47 (main, after #719); launchctl state = running; updater.log last outcome completed for revision 67550c47. Actual 0.25 h stated (quarter-hour minimum).",
     "reviewed": "2026-11-26",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
-    "estimateAgentHours": 0.25
+    "estimateAgentHours": 0,
+    "ownerHours": 0,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
   }
 }
