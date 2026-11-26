@@ -656,6 +656,6 @@ Closed B-137 and B-138 in [PR #804](https://github.com/voidbrain/nerv/pull/804) 
 
 ## 2026-11-26 — main `60bd396`
 
-PRs #799–#802 (4) merged on green CI; #804 recorded its own closures (B-137, B-138). Reconciled in the full-audit PR (F-134-T02): B-151 closed (#801), F-134-T01 closed (#802); F-120 (#800) is left to its own open PR #803. #799 was the previous reconciliation.
+PRs #799–#802 (4) merged on green CI; #804 recorded its own closures (B-137, B-138). Reconciled in the full-audit PR [#806](https://github.com/voidbrain/nerv/pull/806) (F-134-T02): B-151 closed (#801), F-134-T01 closed (#802); F-120 (#800) is left to its own open PR #803. #799 was the previous reconciliation.
 
 `npm run ci:status` for all four: every merged run green; #799, #800 and #802 are docs-only (Windows, macOS and the full suite skipped, B-139); #801 passed all five jobs. The same PR records the 2026-11-26 full audit and opens B-152 and B-153.
