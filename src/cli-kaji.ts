@@ -278,7 +278,8 @@ export async function runKajiCommand(
     // #734 review (B-124): once a coordinator has moved, or runs here, a stored main record stops it unchecked.
     const held = store.coordinatorFencingState();
     // #734 re-check: the running main named again, or a revoked newest main, is refused the same way.
-    if (registry.mainEpoch() >= 2 || (held?.coordinatorEpoch ?? 0) >= 2)
+    // B-170 review: an adopted first coordinator (state at epoch 1) is moved with kaji relocate too.
+    if (registry.mainEpoch() >= 2 || held !== undefined)
       throw new Error(
         `The main record is at coordinator epoch ${registry.mainEpoch()}${registry.main() ? ` (${registry.main()})` : ''}: move it with kaji relocate ${id} FILE (then kaji promote --relocation FILE on ${id}). kaji main names the first main only.`,
       );

@@ -107,6 +107,9 @@ async function legacyBases(mainBody: Record<string, unknown> = { kind: 'main', b
     x: sides[X]!,
     b: sides[B]!,
     rootPublicKey: key.publicKey,
+    /** The owner signs a record with the root key. */
+    sign: (body: Record<string, unknown>) =>
+      signRecord(root.privateKey, { ...body, serial: ++serial, issued: ISSUED } as unknown as RegistryBody),
     async close() {
       for (const s of Object.values(sides)) {
         await s.link.stop();
@@ -270,6 +273,61 @@ describe('B-170: a main from before F-016 adopts its store as the first coordina
         .run();
       await assert.rejects(kaji(x.home, x.store, ['adopt']), /already holds coordinator state \(fenced/);
       assert.equal(backups(x.home).length, 0);
+    } finally {
+      await t.close();
+    }
+  });
+
+  it('review: a base holding a later main record refuses adoption; after adopting, kaji main is refused (kaji relocate moves it)', async () => {
+    const t = await legacyBases();
+    try {
+      const { x, b } = t;
+      // The store may be a restored copy: B already holds main NERV-02 at epoch 2.
+      new Registry(b.store.db, t.rootPublicKey).add(t.sign({ kind: 'main', baseId: B, coordinatorEpoch: 2 }));
+      await assert.rejects(kaji(x.home, x.store, ['adopt']), /NERV-02 \(epoch 2\) holds a main record later/);
+      assert.equal(readCoordinatorFencingState(x.store.db), undefined);
+      assert.equal(backups(x.home).length, 0);
+    } finally {
+      await t.close();
+    }
+    const u = await legacyBases();
+    try {
+      await kaji(u.x.home, u.x.store, ['adopt']);
+      await assert.rejects(kaji(u.x.home, u.x.store, ['main', B]), /kaji relocate/);
+      assert.equal(new Registry(u.x.store.db, u.rootPublicKey).main(), X);
+    } finally {
+      await u.close();
+    }
+  });
+
+  it('review: an unreachable base is named and not waited for on a first adoption; with an earlier adopt backup it is waited for', async () => {
+    const t = await legacyBases();
+    try {
+      const { x, b } = t;
+      await b.link.stop();
+      const out = await kaji(x.home, x.store, ['adopt']);
+      assert.match(out, /Adopted this base's store as coordinator epoch 1/);
+      assert.match(out, /Not reached now: NERV-02/);
+      // A store restored from that backup, while NERV-02 does not answer, is refused.
+      x.store.db.exec('DROP TABLE coordinator_state');
+      await assert.rejects(kaji(x.home, x.store, ['adopt']), /adopted its store before .*NERV-02 did not answer/);
+      assert.equal(readCoordinatorFencingState(x.store.db), undefined);
+    } finally {
+      await t.close();
+    }
+  });
+
+  it('review: a run interrupted after the main record was stored adopts on a re-run with no new signature', async () => {
+    const t = await legacyBases();
+    try {
+      const { x } = t;
+      // As if the first run stopped between storing main NERV-01 at epoch 1 and writing the state.
+      new Registry(x.store.db, t.rootPublicKey).add(t.sign({ kind: 'main', baseId: X, coordinatorEpoch: 1 }));
+      const serial = new Registry(x.store.db, t.rootPublicKey).nextSerial();
+      const out = await kaji(x.home, x.store, ['adopt']);
+      assert.match(out, /Adopted this base's store as coordinator epoch 1/);
+      assert.doesNotMatch(out, /signed main/);
+      assert.equal(new Registry(x.store.db, t.rootPublicKey).nextSerial(), serial);
     } finally {
       await t.close();
     }

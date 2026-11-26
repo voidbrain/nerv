@@ -99,6 +99,8 @@ export async function probeCoordinatorEpochs(
   input: EpochScope & { readonly push: (baseId: string, records: SignedRecord[]) => Promise<EpochPushReply> },
 ): Promise<{
   ranOrAcked: Map<string, number>;
+  /** B-170: the signed newest main epoch each answering base holds. */
+  maxSeen: Map<string, number>;
   unknown: string[];
   /** The signed newest main epoch each base without the field holds (an older NERV says only that). */
   unknownMaxSeen: Map<string, number>;
@@ -110,6 +112,7 @@ export async function probeCoordinatorEpochs(
 }> {
   const { others } = otherBases(input);
   const ranOrAcked = new Map<string, number>();
+  const maxSeen = new Map<string, number>();
   const unknown: string[] = [];
   const unknownMaxSeen = new Map<string, number>();
   const unreachable: string[] = [];
@@ -125,6 +128,7 @@ export async function probeCoordinatorEpochs(
         (code === KAJI_REPLY_UNBOUND ? unbound : code === KAJI_REPLY_MISMATCH ? replayed : unreachable).push(baseId);
         return;
       }
+      maxSeen.set(baseId, reply.maxSeenCoordinatorEpoch);
       if (reply.ranOrAckedEpoch === undefined) {
         unknown.push(baseId);
         unknownMaxSeen.set(baseId, reply.maxSeenCoordinatorEpoch);
@@ -133,6 +137,7 @@ export async function probeCoordinatorEpochs(
   );
   return {
     ranOrAcked,
+    maxSeen,
     unknown: unknown.sort(),
     unknownMaxSeen,
     unreachable: unreachable.sort(),

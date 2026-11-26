@@ -1,4 +1,4 @@
-import { chmodSync, existsSync, mkdirSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import type { DatabaseSync } from 'node:sqlite';
 
@@ -37,9 +37,11 @@ export type AdoptResult =
  * Refused, before any write, wherever another coordinator could have run: this base is not the main the registry
  * names, the main record is at epoch 2 or later (that state comes only from `kaji promote`), this base holds a
  * standby store or acked another main's lease, a promotion is in progress, coordinator state already exists in
- * another mode, or another base answers the record-free epoch probe saying it ran or acked a coordinator lease.
- * A base that does not answer is not waited for: a later coordinator needs a standby store seeded from an active
- * one (none exists before this) and a promotion pushes its epoch to every unrevoked base, this one included.
+ * another mode, or another base answers the record-free epoch probe saying it ran or acked a coordinator lease or
+ * holds a later main record (or answers with a reply not bound to the request). A base that does not answer is not
+ * waited for on a first adoption: a later coordinator needs a standby store seeded from an active one (none exists
+ * before this) and a promotion pushes its epoch to every unrevoked base, this one included. Once a nerv-before-adopt
+ * backup exists (this store may be a restored copy), every base must answer.
  * After the write the registry goes to every other base over `/kaji/epoch-push`: a standby acks a lease only at the
  * epoch its own registry holds.
  *
@@ -102,10 +104,29 @@ export async function adoptLegacyCoordinator(input: {
     );
 
   const probe = await probeCoordinatorEpochs({ ...scope, push: input.push });
-  const others = [...probe.ranOrAcked].filter(([, e]) => e > 0).sort(([a], [b]) => a.localeCompare(b));
-  if (others.length)
+  const untrusted = [...probe.unbound, ...probe.replayed].sort();
+  if (untrusted.length)
     throw new Error(
-      `${others.map(([id, e]) => `${id} (epoch ${e})`).join(', ')} ran or acked a coordinator lease: another main ran, so this store is not the coordinator. Nothing was changed.`,
+      `${untrusted.join(', ')} answered with a reply not bound to this request (an older NERV, or altered on the way): update it or check the line, then run kaji adopt again. Nothing was changed.`,
+    );
+  const peersRan = [...probe.ranOrAcked].filter(([, e]) => e > 0).sort(([a], [b]) => a.localeCompare(b));
+  if (peersRan.length)
+    throw new Error(
+      `${peersRan.map(([id, e]) => `${id} (epoch ${e})`).join(', ')} ran or acked a coordinator lease: another main ran, so this store is not the coordinator. Nothing was changed.`,
+    );
+  // #review: a base holding a later main record than this registry means a later coordinator may run (this store
+  // may be a restored copy from before it).
+  const later = [...probe.maxSeen].filter(([, e]) => e > epoch).sort(([a], [b]) => a.localeCompare(b));
+  if (later.length)
+    throw new Error(
+      `${later.map(([id, e]) => `${id} (epoch ${e})`).join(', ')} holds a main record later than this base's epoch ${epoch}: a later coordinator was named, so this store is not the coordinator. Nothing was changed.`,
+    );
+  // A store restored from an earlier adopt's backup may trail a coordinator on a base that does not answer now.
+  const dir = join(home, 'backups');
+  const adoptedBefore = existsSync(dir) && readdirSync(dir).some((f) => f.startsWith('nerv-before-adopt-'));
+  if (adoptedBefore && probe.unreachable.length)
+    throw new Error(
+      `This base adopted its store before (a nerv-before-adopt backup exists) and ${probe.unreachable.join(', ')} did not answer: it may hold a later coordinator. Reach it and run kaji adopt again. Nothing was changed.`,
     );
 
   const now = input.now ?? new Date();
@@ -120,7 +141,6 @@ export async function adoptLegacyCoordinator(input: {
         })
       : undefined;
 
-  const dir = join(home, 'backups');
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true, mode: 0o700 });
   const backup = join(dir, `nerv-before-adopt-${now.toISOString().replace(/[:.]/g, '-')}.sqlite`);
   db.prepare('VACUUM INTO ?').run(backup);
