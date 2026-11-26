@@ -890,233 +890,243 @@ test('B-059: browser case still executes when the required build exists', async 
   }
 });
 
-test('the root command runs only uncovered cases, records them and reports nothing pending afterwards', async () => {
-  const { executeWithEvidence, caseHash } = await import('@voidbrain/gauntlet-protocol');
-  const { systemSourceKey } = await import('../tools/gauntlet.mjs');
-  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-all-'));
-  const ledger = join(dir, 'ledger.json');
-  process.env.NERV_GAUNTLET_LEDGER = ledger;
-  // An open fixture task names the common packs, so the test does not depend on the live backlog.
-  const tasks = join(dir, 'tasks');
-  mkdirSync(tasks);
-  writeFileSync(
-    join(tasks, 'X-001-T01.json'),
-    JSON.stringify({
-      id: 'X-001-T01',
-      status: 'planned',
-      acceptance: [
-        'Covers bilingual-it-en/*, code-review/*, general-assistant-expanded/*, italian-quality/*, logic-math/*, long-context/*, multi-step-agent/*, neutral-smoke-schema/*, neutral-smoke/*, refusal-permission/*, structured-output-robustness/* and tool-use/*',
-      ],
-    }),
-  );
-  process.env.NERV_GAUNTLET_TASKS = tasks;
-  // The coding, embedded and cad-3d reference runners call a loopback Ollama and local toolchains (Docker,
-  // arduino-cli) from their own process, out of reach of the fixture runtime: CI never runs them (owner decision).
-  const consumption = join(dir, 'consumption.json');
-  writeFileSync(
-    consumption,
-    JSON.stringify({
-      schemaVersion: 1,
-      exclude: { coding: 'toolchain', embedded: 'toolchain', 'cad-3d': 'toolchain' },
-    }),
-  );
-  process.env.NERV_GAUNTLET_CONSUMPTION = consumption;
-  try {
-    // Schema 1 entries have unknown identity and do NOT silently cover when sourceKey is checked.
-    const { readSystemPackWithInputs } = await import('../tools/gauntlet.mjs');
-    const system = readSystemPackWithInputs().pack;
+// B-153/B-165: about 18 s on an idle Mac, so a loaded host passes the suite's 60 s default; its files are command
+// settings, not the process environment, so a run the runner timed out cannot redirect another test's files.
+test(
+  'the root command runs only uncovered cases, records them and reports nothing pending afterwards',
+  { timeout: 300_000 },
+  async () => {
+    const { executeWithEvidence, caseHash } = await import('@voidbrain/gauntlet-protocol');
+    const { systemSourceKey, withGauntletSettings } = await import('../tools/gauntlet.mjs');
+    const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-all-'));
+    const ledger = join(dir, 'ledger.json');
+    // An open fixture task names the common packs, so the test does not depend on the live backlog.
+    const tasks = join(dir, 'tasks');
+    mkdirSync(tasks);
     writeFileSync(
-      ledger,
+      join(tasks, 'X-001-T01.json'),
+      JSON.stringify({
+        id: 'X-001-T01',
+        status: 'planned',
+        acceptance: [
+          'Covers bilingual-it-en/*, code-review/*, general-assistant-expanded/*, italian-quality/*, logic-math/*, long-context/*, multi-step-agent/*, neutral-smoke-schema/*, neutral-smoke/*, refusal-permission/*, structured-output-robustness/* and tool-use/*',
+        ],
+      }),
+    );
+    // The coding, embedded and cad-3d reference runners call a loopback Ollama and local toolchains (Docker,
+    // arduino-cli) from their own process, out of reach of the fixture runtime: CI never runs them (owner decision).
+    const consumption = join(dir, 'consumption.json');
+    writeFileSync(
+      consumption,
       JSON.stringify({
         schemaVersion: 1,
-        entries: system.cases.map((c) => ({
-          pack: system.id,
-          packVersion: system.version,
-          case: c.id,
-          caseHash: caseHash(c),
-          profileHash: null,
-          status: 'passed',
-          reportHash: 'c'.repeat(64),
-          finished: '2026-11-11T00:00:00.000Z',
-        })),
+        exclude: { coding: 'toolchain', embedded: 'toolchain', 'cad-3d': 'toolchain' },
       }),
     );
-    const schema1Pending = await main(['pending']);
-    assert.equal(schema1Pending.pendingLines.length, 96 + system.cases.length);
-    assert.equal(
-      schema1Pending.pendingLines.filter((l) => l.startsWith('nerv-system-flows/') && l.endsWith('(source-changed)'))
-        .length,
-      system.cases.length,
-    );
-    // Schema 2 entries with the current system sourceKey cover NERV's system cases; every common case is new.
-    writeFileSync(
-      ledger,
-      JSON.stringify({
-        schemaVersion: 2,
-        entries: system.cases.map((c) => ({
-          pack: system.id,
-          packVersion: system.version,
-          case: c.id,
-          caseHash: caseHash(c),
-          profileHash: null,
-          status: 'passed',
-          reportHash: 'c'.repeat(64),
-          finished: '2026-11-11T00:00:00.000Z',
-          modelDigest: null,
-          runtimeHash: 'a'.repeat(64),
-          scenarioHash: null,
-          sourceKey: systemSourceKey(system, c.id),
-        })),
-      }),
-    );
-    const before = await main(['pending']);
-    assert.equal(before.pendingLines.length, 96);
-    assert.equal(before.pendingLines.filter((l) => l.startsWith('general-assistant-expanded/')).length, 28);
-    // Named by an unfinished task (the fixture lists the common packs as pack/*), so the CI check passes.
-    assert.deepEqual((await main(['pending', '--check-records'])).pendingLines, []);
-    // Max age and another profile make covered cases pending again; --fresh plans every case.
-    const old = await main(['all', '--max-age-days=1']);
-    assert.ok(old.plan.find((p) => p.pack === 'nerv-system-flows').run.every((r) => r.reason === 'stale'));
-    const fresh = await main(['all', '--fresh']);
-    assert.ok(fresh.plan.every((p) => p.run.length > 0 && p.run.every((r) => r.reason === 'fresh')));
-    // Without approval the plan blocks every model case and runs nothing.
-    const plan = await main(['all']);
-    assert.equal(plan.modelCallsAuthorized, false);
-    assert.deepEqual(
-      plan.plan.map((p) => [p.pack, p.run.length, p.reuse.length, p.blocked?.cases.length ?? 0]),
-      [
-        ['bilingual-it-en', 4, 0, 4],
-        ['code-review', 6, 0, 6],
-        ['general-assistant-expanded', 28, 0, 28],
-        ['italian-quality', 6, 0, 6],
-        ['logic-math', 8, 0, 8],
-        ['long-context', 4, 0, 4],
-        ['multi-step-agent', 4, 0, 4],
-        ['refusal-permission', 4, 0, 4],
-        ['neutral-smoke-schema', 10, 0, 10],
-        ['neutral-smoke', 10, 0, 10],
-        ['structured-output-robustness', 6, 0, 6],
-        ['tool-use', 6, 0, 6],
-        ['nerv-system-flows', 0, system.cases.length, 0],
-      ],
-    );
-    await assert.rejects(main(['all', '--execute']), /out-dir/);
-    // With approval, a fixture runtime answers every case; system cases are reused, not rerun.
-    const model = 'gemma4:12b';
-    let resident = false,
-      chats = 0;
-    const fetcher = async (url) => {
-      const path = new URL(String(url)).pathname;
-      let value;
-      if (path === '/api/version') value = { version: 'neutral-test-runtime' };
-      else if (path === '/api/show') value = { details: { quantization_level: 'Q4_K_M' }, capabilities: ['thinking'] };
-      else if (path === '/api/tags') value = { models: [{ name: model, size: 100, digest: 'a'.repeat(64) }] };
-      else if (path === '/api/ps') value = { models: resident ? [{ name: model, size_vram: 128 }] : [] };
-      else if (path === '/api/generate') {
-        resident = false;
-        value = { done: true, done_reason: 'unload' };
-      } else if (path === '/api/chat') {
-        chats++;
-        resident = true;
-        const done = { model, message: { content: '' }, done: true, eval_count: 3, prompt_eval_count: 10 };
-        return new Response(
-          [{ model, message: { content: '{}' }, done: false }, done].map((x) => JSON.stringify(x)).join('\n') + '\n',
+    const settings = {
+      NERV_GAUNTLET_LEDGER: ledger,
+      NERV_GAUNTLET_TASKS: tasks,
+      NERV_GAUNTLET_CONSUMPTION: consumption,
+    };
+    try {
+      await withGauntletSettings(settings, async () => {
+        // Schema 1 entries have unknown identity and do NOT silently cover when sourceKey is checked.
+        const { readSystemPackWithInputs } = await import('../tools/gauntlet.mjs');
+        const system = readSystemPackWithInputs().pack;
+        writeFileSync(
+          ledger,
+          JSON.stringify({
+            schemaVersion: 1,
+            entries: system.cases.map((c) => ({
+              pack: system.id,
+              packVersion: system.version,
+              case: c.id,
+              caseHash: caseHash(c),
+              profileHash: null,
+              status: 'passed',
+              reportHash: 'c'.repeat(64),
+              finished: '2026-11-11T00:00:00.000Z',
+            })),
+          }),
         );
-      } else throw Error('Unexpected fixture endpoint');
-      return new Response(JSON.stringify(value));
-    };
-    const systemRuns = [];
-    const services = {
-      execute: async (pack, profile, limits, options) => {
-        if (!profile) systemRuns.push(pack.id);
-        return executeWithEvidence(pack, profile, limits, {
-          ...options,
-          fetch: fetcher,
-          environmentKey: 'neutral-nerv-all-fixture',
-        });
-      },
-    };
-    const run = await main(
-      [
-        'all',
-        '--profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json',
-        '--allow-models',
-        '--execute',
-        '--out-dir=' + join(dir, 'reports'),
-        '--cache-dir=' + join(dir, 'cache'),
-      ],
-      services,
-    );
-    assert.deepEqual(systemRuns, []);
-    assert.equal(chats, 92);
-    assert.deepEqual(
-      run.results.map((r) => [r.pack, r.cases.length]),
-      [
-        ['bilingual-it-en', 4],
-        ['code-review', 6],
-        ['general-assistant-expanded', 28],
-        ['italian-quality', 6],
-        ['logic-math', 8],
-        ['long-context', 4],
-        ['multi-step-agent', 4],
-        ['refusal-permission', 4],
-        ['neutral-smoke-schema', 10],
-        ['neutral-smoke', 10],
-        ['structured-output-robustness', 6],
-        ['tool-use', 6],
-      ],
-    );
-    // External runner supervision requires POSIX process groups, so multi-step-agent errors on win32 and stays pending.
-    const win32 = process.platform === 'win32';
-    assert.equal(run.stillPending, win32 ? 4 : 0);
-    assert.equal(typeof run.passed, 'boolean');
-    const pendingAfter = (await main(['pending'])).pendingLines;
-    if (win32) {
-      assert.equal(pendingAfter.length, 4);
-      assert.ok(pendingAfter.every((l) => l.startsWith('multi-step-agent/') && l.endsWith('(new)')));
-    } else {
-      assert.deepEqual(pendingAfter, []);
+        const schema1Pending = await main(['pending']);
+        assert.equal(schema1Pending.pendingLines.length, 96 + system.cases.length);
+        assert.equal(
+          schema1Pending.pendingLines.filter(
+            (l) => l.startsWith('nerv-system-flows/') && l.endsWith('(source-changed)'),
+          ).length,
+          system.cases.length,
+        );
+        // Schema 2 entries with the current system sourceKey cover NERV's system cases; every common case is new.
+        writeFileSync(
+          ledger,
+          JSON.stringify({
+            schemaVersion: 2,
+            entries: system.cases.map((c) => ({
+              pack: system.id,
+              packVersion: system.version,
+              case: c.id,
+              caseHash: caseHash(c),
+              profileHash: null,
+              status: 'passed',
+              reportHash: 'c'.repeat(64),
+              finished: '2026-11-11T00:00:00.000Z',
+              modelDigest: null,
+              runtimeHash: 'a'.repeat(64),
+              scenarioHash: null,
+              sourceKey: systemSourceKey(system, c.id),
+            })),
+          }),
+        );
+        const before = await main(['pending']);
+        assert.equal(before.pendingLines.length, 96);
+        assert.equal(before.pendingLines.filter((l) => l.startsWith('general-assistant-expanded/')).length, 28);
+        // Named by an unfinished task (the fixture lists the common packs as pack/*), so the CI check passes.
+        assert.deepEqual((await main(['pending', '--check-records'])).pendingLines, []);
+        // Max age and another profile make covered cases pending again; --fresh plans every case.
+        const old = await main(['all', '--max-age-days=1']);
+        assert.ok(old.plan.find((p) => p.pack === 'nerv-system-flows').run.every((r) => r.reason === 'stale'));
+        const fresh = await main(['all', '--fresh']);
+        assert.ok(fresh.plan.every((p) => p.run.length > 0 && p.run.every((r) => r.reason === 'fresh')));
+        // Without approval the plan blocks every model case and runs nothing.
+        const plan = await main(['all']);
+        assert.equal(plan.modelCallsAuthorized, false);
+        assert.deepEqual(
+          plan.plan.map((p) => [p.pack, p.run.length, p.reuse.length, p.blocked?.cases.length ?? 0]),
+          [
+            ['bilingual-it-en', 4, 0, 4],
+            ['code-review', 6, 0, 6],
+            ['general-assistant-expanded', 28, 0, 28],
+            ['italian-quality', 6, 0, 6],
+            ['logic-math', 8, 0, 8],
+            ['long-context', 4, 0, 4],
+            ['multi-step-agent', 4, 0, 4],
+            ['refusal-permission', 4, 0, 4],
+            ['neutral-smoke-schema', 10, 0, 10],
+            ['neutral-smoke', 10, 0, 10],
+            ['structured-output-robustness', 6, 0, 6],
+            ['tool-use', 6, 0, 6],
+            ['nerv-system-flows', 0, system.cases.length, 0],
+          ],
+        );
+        await assert.rejects(main(['all', '--execute']), /out-dir/);
+        // With approval, a fixture runtime answers every case; system cases are reused, not rerun.
+        const model = 'gemma4:12b';
+        let resident = false,
+          chats = 0;
+        const fetcher = async (url) => {
+          const path = new URL(String(url)).pathname;
+          let value;
+          if (path === '/api/version') value = { version: 'neutral-test-runtime' };
+          else if (path === '/api/show')
+            value = { details: { quantization_level: 'Q4_K_M' }, capabilities: ['thinking'] };
+          else if (path === '/api/tags') value = { models: [{ name: model, size: 100, digest: 'a'.repeat(64) }] };
+          else if (path === '/api/ps') value = { models: resident ? [{ name: model, size_vram: 128 }] : [] };
+          else if (path === '/api/generate') {
+            resident = false;
+            value = { done: true, done_reason: 'unload' };
+          } else if (path === '/api/chat') {
+            chats++;
+            resident = true;
+            const done = { model, message: { content: '' }, done: true, eval_count: 3, prompt_eval_count: 10 };
+            return new Response(
+              [{ model, message: { content: '{}' }, done: false }, done].map((x) => JSON.stringify(x)).join('\n') +
+                '\n',
+            );
+          } else throw Error('Unexpected fixture endpoint');
+          return new Response(JSON.stringify(value));
+        };
+        const systemRuns = [];
+        const services = {
+          execute: async (pack, profile, limits, options) => {
+            if (!profile) systemRuns.push(pack.id);
+            return executeWithEvidence(pack, profile, limits, {
+              ...options,
+              fetch: fetcher,
+              environmentKey: 'neutral-nerv-all-fixture',
+            });
+          },
+        };
+        const run = await main(
+          [
+            'all',
+            '--profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json',
+            '--allow-models',
+            '--execute',
+            '--out-dir=' + join(dir, 'reports'),
+            '--cache-dir=' + join(dir, 'cache'),
+          ],
+          services,
+        );
+        assert.deepEqual(systemRuns, []);
+        assert.equal(chats, 92);
+        assert.deepEqual(
+          run.results.map((r) => [r.pack, r.cases.length]),
+          [
+            ['bilingual-it-en', 4],
+            ['code-review', 6],
+            ['general-assistant-expanded', 28],
+            ['italian-quality', 6],
+            ['logic-math', 8],
+            ['long-context', 4],
+            ['multi-step-agent', 4],
+            ['refusal-permission', 4],
+            ['neutral-smoke-schema', 10],
+            ['neutral-smoke', 10],
+            ['structured-output-robustness', 6],
+            ['tool-use', 6],
+          ],
+        );
+        // External runner supervision requires POSIX process groups, so multi-step-agent errors on win32 and stays pending.
+        const win32 = process.platform === 'win32';
+        assert.equal(run.stillPending, win32 ? 4 : 0);
+        assert.equal(typeof run.passed, 'boolean');
+        const pendingAfter = (await main(['pending'])).pendingLines;
+        if (win32) {
+          assert.equal(pendingAfter.length, 4);
+          assert.ok(pendingAfter.every((l) => l.startsWith('multi-step-agent/') && l.endsWith('(new)')));
+        } else {
+          assert.deepEqual(pendingAfter, []);
+        }
+        const written = JSON.parse(readFileSync(ledger, 'utf8'));
+        const recorded = written.entries;
+        assert.equal(recorded.length, win32 ? 100 : 104);
+        const scriptedEntries = recorded.filter((entry) => entry.pack === 'multi-step-agent');
+        assert.equal(scriptedEntries.length, win32 ? 0 : 4);
+        assert.ok(scriptedEntries.every((entry) => entry.status === 'passed' && entry.modelDigest === null));
+        // The ledger is written as schema 2; all entries carry their identity.
+        assert.equal(written.schemaVersion, 2);
+        const identity = ['modelDigest', 'runtimeHash', 'scenarioHash', 'sourceKey'];
+        assert.ok(recorded.every((e) => identity.every((k) => k in e)));
+        assert.ok(
+          recorded.every((e) => !JSON.stringify(e).includes('content')),
+          'metadata only',
+        );
+        // A second run finds nothing to do; another profile has run nothing yet.
+        const again = await main(['all']);
+        assert.ok(again.plan.filter((p) => !win32 || p.pack !== 'multi-step-agent').every((p) => p.run.length === 0));
+        const other = join(dir, 'other-profile.json');
+        const base = JSON.parse(
+          readFileSync('node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json', 'utf8'),
+        );
+        writeFileSync(other, JSON.stringify({ ...base, id: 'other', seed: 7 }));
+        const otherPlan = await main(['all', '--profile=' + other]);
+        assert.ok(
+          otherPlan.plan
+            .filter((p) => p.layer === 'model')
+            .every((p) =>
+              win32 && p.pack === 'multi-step-agent'
+                ? p.run.every((r) => r.reason === 'new')
+                : p.run.length === p.reuse.length + p.run.length && p.run.every((r) => r.reason === 'other-profile'),
+            ),
+        );
+        assert.deepEqual(otherPlan.plan.find((p) => p.layer === 'system').run, [], 'system cases need no profile');
+      });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
     }
-    const written = JSON.parse(readFileSync(ledger, 'utf8'));
-    const recorded = written.entries;
-    assert.equal(recorded.length, win32 ? 100 : 104);
-    const scriptedEntries = recorded.filter((entry) => entry.pack === 'multi-step-agent');
-    assert.equal(scriptedEntries.length, win32 ? 0 : 4);
-    assert.ok(scriptedEntries.every((entry) => entry.status === 'passed' && entry.modelDigest === null));
-    // The ledger is written as schema 2; all entries carry their identity.
-    assert.equal(written.schemaVersion, 2);
-    const identity = ['modelDigest', 'runtimeHash', 'scenarioHash', 'sourceKey'];
-    assert.ok(recorded.every((e) => identity.every((k) => k in e)));
-    assert.ok(
-      recorded.every((e) => !JSON.stringify(e).includes('content')),
-      'metadata only',
-    );
-    // A second run finds nothing to do; another profile has run nothing yet.
-    const again = await main(['all']);
-    assert.ok(again.plan.filter((p) => !win32 || p.pack !== 'multi-step-agent').every((p) => p.run.length === 0));
-    const other = join(dir, 'other-profile.json');
-    const base = JSON.parse(
-      readFileSync('node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json', 'utf8'),
-    );
-    writeFileSync(other, JSON.stringify({ ...base, id: 'other', seed: 7 }));
-    const otherPlan = await main(['all', '--profile=' + other]);
-    assert.ok(
-      otherPlan.plan
-        .filter((p) => p.layer === 'model')
-        .every((p) =>
-          win32 && p.pack === 'multi-step-agent'
-            ? p.run.every((r) => r.reason === 'new')
-            : p.run.length === p.reuse.length + p.run.length && p.run.every((r) => r.reason === 'other-profile'),
-        ),
-    );
-    assert.deepEqual(otherPlan.plan.find((p) => p.layer === 'system').run, [], 'system cases need no profile');
-  } finally {
-    delete process.env.NERV_GAUNTLET_LEDGER;
-    delete process.env.NERV_GAUNTLET_TASKS;
-    delete process.env.NERV_GAUNTLET_CONSUMPTION;
-    rmSync(dir, { recursive: true, force: true });
-  }
-});
+  },
+);
 
 test('pending and ledger keep the harness contract: lines and exit 1 when pending, exit 2 on errors', (t) => {
   const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-cli-'));
