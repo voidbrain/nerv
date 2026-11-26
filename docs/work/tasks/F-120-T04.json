@@ -15,7 +15,8 @@
     "Run in the development checkout, never ~/.nerv-app; not while the owner uses the local model (it shares Ollama with the service)"
   ],
   "dependsOn": [
-    "F-120-T03"
+    "F-120-T03",
+    "F-120-T05"
   ],
   "resources": [
     "evals/gauntlet/**",
@@ -34,7 +35,7 @@
   "effort": {
     "size": "small",
     "estimate": "0.5 h agent",
-    "basis": "Estimated 2026-11-26: the owner campaign of F-120-T03 (0.5 h, 2026-11-25) moved to the agent, owner-step triage. Not a measurement.",
+    "basis": "Estimated 2026-11-26: the owner campaign of F-120-T03 (0.5 h, 2026-11-25) moved to the agent, owner-step triage. Not a measurement. 2026-11-26: first run 0.75 h (agent): 14 of 34 pending cases covered; the three reference-runner packs stopped on the 30 s case limit (F-120-T05). Remaining 0.5 h after T05.",
     "reviewed": "2026-11-26",
     "agentHours": 0.5,
     "baselineAgentHours": 0.5,
