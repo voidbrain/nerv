@@ -6,6 +6,7 @@
   "goal": "A chat turn with an image is answered by the local vision model, never by a cloud route",
   "status": "planned",
   "acceptance": [
+    "Parked 2026-11-26 (owner decision in chat): this step does not start until the owner picks a use for F-142 (see the candidate uses in the record).",
     "Owner decisions 2026-11-26 in chat: fpvbuddy:F-023 \"A\" (retire the on-device assistant and the vision demo), with \"vision capabilities ideally on nerv too\"; Italian is required for every model-facing feature (the owner uses all modules in Italian).",
     "The model adapter passes images to Ollama (/api/chat images field) for a route marked vision-capable in docs/agents/model-profiles.json; any other route refuses an image turn with a typed error",
     "Tests: an image turn goes to the vision route with the image bytes; a cloud or remote route is never called with an image (spy on the provider); no vision model configured gives the Italian or English refusal text from i18n"
