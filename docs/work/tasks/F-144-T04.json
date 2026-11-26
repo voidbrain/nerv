@@ -4,7 +4,7 @@
   "parent": "F-144",
   "title": "C: \"keep loaded always\" option (keep_alive -1), off by default",
   "goal": "C: \"keep loaded always\" option (keep_alive -1), off by default",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Owner decision 2026-11-26 in chat: \"ollama a+b, c as option in dashboard\".",
     "A setting keepLoadedAlways (default false) makes the keep-alive value -1; the validated settings API accepts only a boolean; tests cover default off, on, and that it overrides the duration",
@@ -14,9 +14,11 @@
     "F-144-T02"
   ],
   "resources": [
-    "src/config.ts",
+    "src/model.ts",
+    "src/model-setup.ts",
     "src/server.ts",
-    "test/**",
+    "test/keep-warm.test.ts",
+    "test/model-setup.test.ts",
     "docs/work/records/F-144.md",
     "generated:backlog-views"
   ],
@@ -36,7 +38,7 @@
     "estimate": "0.75 h agent",
     "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; bounded edit plus tests. Not a measurement.",
     "reviewed": "2026-11-26",
-    "agentHours": 0.75,
+    "agentHours": 0.5,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75
   },

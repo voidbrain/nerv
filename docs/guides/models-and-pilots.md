@@ -28,6 +28,7 @@ Every command validates before writing and updates the running service without a
 ```
 
 - **S² (local):** any loopback OpenAI-compatible endpoint (Ollama `11434/v1`, LM Studio `1234/v1`).
+- **Keep the model warm:** every local call asks Ollama to keep that model loaded for `models.local.keepAlive` afterwards (default `30m`; from `1m` to `24h`, for example `"keepAlive": "2h"` next to `model`), so the next reply after a pause does not wait for the model to load. `"alwaysLoaded": true` keeps it loaded until Ollama stops (it holds the model's memory, about 16 GB for `gemma4:26b`). Both are in the dashboard Settings. Why and how: [keep the local model warm](../decisions/keep-model-warm.md).
 - **Umbilical (cloud):** Claude (defaults to `claude-opus-5-5`). Only Misato may use cloud; Casper always stays local because it inspects action arguments.
 - `npm start -- ask "text"` uses S² only; `npm start -- ask --cloud "text"` uses Claude. NERV never falls back to cloud when S² is down.
 - After manual edits to `config.json` or `anthropic-key`, run `npm start -- reload`.

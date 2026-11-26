@@ -15,11 +15,12 @@
     "F-144-T05"
   ],
   "resources": [
-    "web/public/dashboard/index.html",
     "docs/STYLE-GUIDE.md",
-    "test/dashboard.test.ts",
     "docs/work/records/F-144.md",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "test/dashboard.test.ts",
+    "web/public/dashboard/index.html",
+    "web/public/dashboard/live.js"
   ],
   "capabilities": [
     "typescript",
@@ -38,7 +39,7 @@
     "estimate": "1 h agent",
     "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; bounded edit plus tests. Not a measurement.",
     "reviewed": "2026-11-26",
-    "agentHours": 1,
+    "agentHours": 0.5,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   },
