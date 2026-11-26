@@ -4,7 +4,7 @@
   "parent": "F-145",
   "title": "Carry live skill data into F-130-T10 and document the endpoint",
   "goal": "The Angular migration keeps the live skills panel, and the endpoint is documented",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
     "F-130-T10's acceptance gains a line: the Angular skills panel reads GET /api/skills and keeps the stage tabs and the empty state (test across the endpoint and the component); F-130-T10 stays planned and its estimate is re-reviewed",
@@ -14,8 +14,7 @@
     "F-145-T02"
   ],
   "resources": [
-    "docs/**",
-    "docs/work/tasks/F-130-T10.json",
+    "docs/guides/models-and-pilots.md",
     "docs/work/records/F-145.md",
     "generated:backlog-views"
   ],

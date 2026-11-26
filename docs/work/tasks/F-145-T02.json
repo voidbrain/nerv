@@ -4,7 +4,7 @@
   "parent": "F-145",
   "title": "Panel renders the real skills by stage, with an honest empty state",
   "goal": "Kaji's watermelons · skills shows the real store, or says there is none",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
     "renderSkills in web/public/dashboard/dashboard.js (about line 892) fetches /api/skills and lists the skills of the chosen tab (Seed | Sprout | Ripe | Dropped, Create | Try | Use | Dropped in the simple theme) with the stage counts on the tabs, each row showing id, version, status, and the latest evaluation as with-skill against baseline counts; the \"Planned · not connected yet\" text is gone",
@@ -16,9 +16,9 @@
     "F-145-T01"
   ],
   "resources": [
-    "web/public/dashboard/**",
-    "test/**",
-    "docs/STYLE-GUIDE.md",
+    "web/public/dashboard/dashboard.js",
+    "web/public/dashboard/live.js",
+    "test/skills-panel.test.ts",
     "docs/work/records/F-145.md",
     "generated:backlog-views"
   ],
@@ -42,7 +42,7 @@
     "estimate": "1 h",
     "basis": "Estimated 2026-11-26: one render function, one fetch and a join test, following renderMelons. Not a measurement.",
     "reviewed": "2026-11-26",
-    "agentHours": 1,
+    "agentHours": 0.75,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   }
