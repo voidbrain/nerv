@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 7 | 23 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 8 | 23 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7339,6 +7339,40 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | PR / evidence | Test: `test/fleet-chat.test.ts`, `test/misato.test.ts` (committed failing first in `2b25814f`); owner report 2026-11-25, NERV-01 at `2627d483`; opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); [#762](https://github.com/voidbrain/nerv/pull/762) |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration: 2026-11-25 passed locally (`test/fleet-chat.test.ts`, `test/misato.test.ts`); live NERV-01 check pending. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### F-134
+
+**Enforce the weekly audit cadence**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: #802 (F-134-T01, audit.enforce on) and #806 (F-134-T02, full audit docs/audits/2026-11-26-full.md) merged on green CI; check:audits reports every area fresh.
+
+| | |
+|---|---|
+| **Issue** | Cross-project audit 2026-11-26 (coordinator `docs/audits/2026-11-26-cross-project.md`, proposal 17): NERV has a full audit baseline but `audit.enforce` is off in `.harness.json`, so a lapsed audit only warns. The last full audit (2026-11-20) is due 2026-11-27. Owner decision 2026-11-26 (chat): "accept all 17 proposals". |
+| **Reproduce** | With `audit.enforce` false, `npm run check:audits` exits 0 even when an area is due. |
+| **Check** | `audit.enforce` is true (F-134-T01); a full audit dated by 2026-11-27 makes every area fresh (F-134-T02). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: #802 (F-134-T01, audit.enforce on) and #806 (F-134-T02, full audit docs/audits/2026-11-26-full.md) merged on green CI; check:audits reports every area fresh. 2026-11-26: opened from the owner's acceptance of the cross-project audit ([#802](https://github.com/voidbrain/nerv/pull/802)). F-134-T01 implemented in #802 (`audit.enforce` true, a project setting; `npm run check:audits` passes on the 2026-11-20 full audit). F-134-T01 closed on #802's green CI. 2026-11-26: F-134-T02 implemented in [#806](https://github.com/voidbrain/nerv/pull/806): full audit `docs/audits/2026-11-26-full.md` and its manifest at baseline `4a0df337` (all eight areas checked; 10 findings; new B-152, B-153; owner proposals A–C); `npm run check:audits` reports every area fresh from it. Remaining: CI, then close.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [#802](https://github.com/voidbrain/nerv/pull/802) (opened, F-134-T01); [#806](https://github.com/voidbrain/nerv/pull/806) (F-134-T02, full audit) |
+| Opened | 2026-11-26 |
+| Verification | Unit/integration: 2026-11-26, npm run check:audits lists every area fresh from docs/audits/2026-11-26-full.md; #806 CI passed validate, windows, native-macos and full-suite. |
 | Reviewed | 2026-11-26 |
 
 </details>
