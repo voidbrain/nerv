@@ -45,5 +45,10 @@
     "agentHours": 0,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3
-  }
+  },
+  "prs": [
+    {
+      "pr": 786
+    }
+  ]
 }
