@@ -222,6 +222,14 @@ export function doneReply(language: 'it' | 'en', ran: { tool: string; args: Reco
     .join(', ');
   return language === 'it' ? `Fatto: ${what}.` : `Done: ${what}.`;
 }
+/** B-176: a read the model ran twice without answering: the owner gets its result, shortened to fit, never a bare Done. */
+export function readResultReply(language: 'it' | 'en', tool: string, result: unknown): string {
+  const head = language === 'it' ? `Ecco il risultato di ${tool}:` : `Here is the result of ${tool}:`;
+  const r = result as { text?: unknown };
+  const text = typeof r?.text === 'string' ? r.text : JSON.stringify(result, null, 1);
+  const room = MAX_REPLY_CHARS - head.length - 2;
+  return `${head}\n${text.length > room ? text.slice(0, room - 1) + '…' : text}`;
+}
 /** Adds dueLocal next to every UTC due time, so the planner never converts time zones itself (a local model gets it wrong). */
 function localize(value: unknown, timeZone: string): unknown {
   if (Array.isArray(value)) return value.map((v) => localize(v, timeZone));
@@ -566,6 +574,33 @@ export function misatoAsk(input: StepInput, preferredRoute: RouteName): Ask {
   let steps = input.history.map((s) =>
     s.result === undefined ? s : { ...s, result: localize(s.result, input.timeZone) },
   );
+  // B-176: the newest result is what the planner answers from: when it and the steps after it are over the budget, its
+  // text is shortened (and says so), never dropped with the rest.
+  const i = steps.findLastIndex((s) => s.result !== undefined);
+  const over = () => JSON.stringify(steps.slice(i)).length - MAX_HISTORY_CHARS;
+  if (i >= 0 && over() > 0) {
+    const r = steps[i]!.result as { text?: unknown };
+    const text = typeof r?.text === 'string' ? r.text : JSON.stringify(r);
+    const step = steps[i]!;
+    const cut = (keep: number) => {
+      steps[i] = {
+        ...step,
+        result: {
+          text: text.slice(0, keep),
+          shortened: `Only the first ${keep} of ${text.length} characters are shown: the rest did not fit. Say so if the answer may be incomplete.`,
+        },
+      };
+      return over() <= 0;
+    };
+    // The longest start that fits once escaped (quotes and newlines take two characters in the prompt).
+    let [lo, hi] = [0, text.length - 1];
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      if (cut(mid)) lo = mid;
+      else hi = mid - 1;
+    }
+    cut(lo);
+  }
   while (steps.length > 1 && JSON.stringify(steps).length > MAX_HISTORY_CHARS) steps = steps.slice(1);
   if (JSON.stringify(steps).length > MAX_HISTORY_CHARS) steps = [];
   // B-021: on the answer's first turn, the question and the job it belongs to are named, not left to be found in earlier.
