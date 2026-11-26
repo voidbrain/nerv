@@ -77,7 +77,7 @@ export async function adoptLegacyCoordinator(input: {
       return { already: true, epoch, told: pushed.acked, notTold: pushed.missing };
     }
     throw new Error(
-      `This base already holds coordinator state (${state.replicationMode} at epoch ${state.coordinatorEpoch}): kaji adopt is only for a main from before F-016 with none. Nothing was changed.`,
+      `This base already holds coordinator state (${state.replicationMode} at epoch ${state.coordinatorEpoch}): kaji adopt is only for a main named before coordinator relocation existed, which holds none. Nothing was changed.`,
     );
   }
   if (existsSync(join(home, PROMOTION_MARKER_FILE)))
