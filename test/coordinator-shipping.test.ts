@@ -779,23 +779,15 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
       });
       console.log(`F-016-T21 metrics ${metrics}`);
       assert.ok(readCommittedAt > 0, 'worker reported read-committed before canonicalising');
-      assert.equal(renewOutcome, 'renewed');
-      assert.ok(
-        ticksDuringSerialise >= 1,
-        `expected event-loop ticks during ${Math.round(serialiseMs)} ms serialise/sign, got ${ticksDuringSerialise}`,
-      );
-      assert.ok(
-        renewDoneAt >= readCommittedAt && renewDoneAt < firstChunkAt,
-        `lease renewal did not complete during serialise/sign (${Math.round(renewDoneAt - readCommittedAt)} ms vs ${Math.round(serialiseMs)} ms)`,
-      );
-      assert.ok(
-        kajiDoneAt >= readCommittedAt && kajiDoneAt < firstChunkAt,
-        `Kaji request did not complete during serialise/sign (${Math.round(kajiDoneAt - readCommittedAt)} ms vs ${Math.round(serialiseMs)} ms)`,
-      );
-      assert.ok(
-        maxGapMs < Math.max(250, serialiseMs * 0.6),
-        `event-loop delay ${Math.round(maxGapMs)} ms blocked serialise/sign (${Math.round(serialiseMs)} ms)`,
-      );
+      // The event loop is what a synchronous export blocks (0 ticks during the export, re-checked 2026-11-26): it keeps
+      // turning, with a bounded gap, while the worker canonicalises and signs.
+      assert.ok(ticksDuringSerialise >= 1, `no event-loop tick during serialise/sign: ${metrics}`);
+      assert.ok(maxGapMs < Math.max(250, serialiseMs * 0.6), `event-loop delay blocked serialise/sign: ${metrics}`);
+      // The renewal and the Kaji request sent at read-commit are answered. They are not raced against the export: on
+      // the Windows runner one renewal took 664 ms against a 545 ms export (two runs of three), so finishing inside the
+      // window measured the runner's I/O, not the event loop.
+      assert.equal(renewOutcome, 'renewed', metrics);
+      assert.ok(renewDoneAt > readCommittedAt && kajiDoneAt > readCommittedAt, `requests not answered: ${metrics}`);
       assert.equal(
         readStandby(b.home, (db) => (db.prepare('SELECT COUNT(*) AS n FROM deliveries').get() as { n: number }).n),
         25_000,
