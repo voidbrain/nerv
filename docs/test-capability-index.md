@@ -123,6 +123,42 @@ Mapped cases are implemented coverage, not model qualification. Evidence retains
 | [tool-use@1.0.0 / choose-tool-holdout](https://github.com/voidbrain/gauntlet-protocol/blob/v0.11.1/examples/tool-use-v1.json) | tools | tool-selection, structured-output | model / holdout | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
 | [tool-use@1.0.0 / unknown-tool-holdout](https://github.com/voidbrain/gauntlet-protocol/blob/v0.11.1/examples/tool-use-v1.json) | tools | tool-selection, structured-output | model / holdout | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
 | [tool-use@1.0.0 / arguments-holdout](https://github.com/voidbrain/gauntlet-protocol/blob/v0.11.1/examples/tool-use-v1.json) | tools | tool-selection, structured-output | model / holdout | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / reminder-in-minutes-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-action, italian | model / regression | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / reminder-in-minutes-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-action, english | model / holdout | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / reminder-tomorrow-at-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-action, italian | model / holdout | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / reminder-tomorrow-at-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-action, english | model / regression | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / reminder-routing-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-routing, italian | model / regression | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / reminder-routing-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-routing, english | model / holdout | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / reminder-no-subject-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-clarify, italian | model / holdout | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / reminder-no-subject-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-clarify, english | model / regression | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / reminder-exists-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-already-done, italian | model / regression | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / reminder-exists-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-already-done, english | model / holdout | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / memory-fact-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-approval, italian | model / holdout | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / memory-fact-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-approval, english | model / regression | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / browser-click-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-approval, italian | model / regression | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / browser-click-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-approval, english | model / holdout | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / desktop-replay-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-approval, italian | model / holdout | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / desktop-replay-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-approval, english | model / regression | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / pilot-promote-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-approval, italian | model / regression | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / pilot-promote-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-approval, english | model / holdout | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / grover-alerts-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-mcp-read, italian | model / holdout | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / grover-alerts-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-mcp-read, english | model / regression | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / grover-overview-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-mcp-read, italian | model / regression | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / grover-overview-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-mcp-read, english | model / holdout | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / tent-light-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-decline, italian | model / holdout | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / tent-light-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-decline, english | model / regression | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / trip-place-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-decline, italian | model / regression | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / trip-place-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-decline, english | model / holdout | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / table-booking-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-decline, italian | model / holdout | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / table-booking-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-decline, english | model / regression | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / print-feet-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-action, italian | model / regression | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / print-feet-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-action, english | model / holdout | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / print-feet-switched-off-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-switched-off, italian | model / holdout | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / print-feet-switched-off-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-switched-off, english | model / regression | true / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / batteries-to-charge-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-action, italian | model / regression | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / batteries-to-charge-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-action, english | model / holdout | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / mail-routing-it](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-routing, italian | model / holdout | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
+| [nerv-planner@1.0.0 / mail-routing-en](../evals/gauntlet/nerv-planner-v1.json) | tools | tool-selection, planner-routing, english | model / regression | false / false | exact-json-v1 / local-model-runtime | Unmeasured |
 | [nerv-system-flows@1.2.0 / policy](../evals/gauntlet/system-v1.json) | security-permissions | effects, taint, vote-permutations, shadow-veto, budget, confinement | system / regression | true / false | registered:policy / posix-process-groups | Unmeasured |
 | [nerv-system-flows@1.2.0 / ledger](../evals/gauntlet/system-v1.json) | security-permissions | expiry, single-use-grants, restart, executor-effects, approval-idempotency, brief-source-recovery, daily-delivery-idempotency, proactive-admission, slot-idempotency, immutable-stage-action-limits | system / regression | true / false | registered:ledger / posix-process-groups | Unmeasured |
 | [nerv-system-flows@1.2.0 / conversation](../evals/gauntlet/system-v1.json) | conversation-memory | ambiguity, mind-change, conversation-isolation, bounded-replanning, language, explanations, proactive-local-planning, durable-step-reservations, quiet-hours, interruption-recovery | system / regression | true / false | registered:conversation / posix-process-groups | Unmeasured |
@@ -146,7 +182,7 @@ Mapped cases are implemented coverage, not model qualification. Evidence retains
 - estimation: 0 mapped cases
 - ci-operations: 1 mapped cases
 - research: 0 mapped cases
-- tools: 12 mapped cases
+- tools: 48 mapped cases
 - conversation-memory: 1 mapped cases
 - distributed-coordination: 2 mapped cases
 - ui-visual: 1 mapped cases

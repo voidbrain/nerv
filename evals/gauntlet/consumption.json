@@ -1,4 +1,5 @@
 {
   "schemaVersion": 1,
-  "exclude": {}
+  "exclude": {},
+  "nervModelPacks": ["evals/gauntlet/nerv-planner-v1.json"]
 }

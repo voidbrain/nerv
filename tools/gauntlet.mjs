@@ -124,10 +124,20 @@ export function commonPacks() {
     if (!shipped.some((p) => p.pack.id === id)) throw Error('Excluded pack ' + id + ' is not in the pinned release');
   return shipped.filter((p) => !Object.hasOwn(exclude, p.pack.id));
 }
-export function systemPacks() {
-  return [{ file: systemFile, pack: readSystemPackWithInputs().pack }];
+// F-120-T09: NERV's own model-layer packs, named by evals/gauntlet/consumption.json `nervModelPacks` (paths from the
+// repository root). Like a common pack they follow the model; their prompts come from NERV's source, so a source
+// change that changes a prompt changes the case hash and the case is pending again.
+export function nervModelPacks() {
+  const files = readJSON(consumptionPath())?.nervModelPacks ?? [];
+  if (!Array.isArray(files) || files.some((f) => typeof f !== 'string' || !f.startsWith('evals/gauntlet/')))
+    throw Error('Invalid nervModelPacks in ' + consumptionFile);
+  return files.map((file) => ({ file, pack: validatePack(readJSON(here(file))), nerv: true }));
 }
-const allPacks = () => [...commonPacks(), ...systemPacks()];
+export function systemPacks() {
+  return [{ file: systemFile, pack: readSystemPackWithInputs().pack, nerv: true }];
+}
+const modelPacks = () => [...commonPacks(), ...nervModelPacks()];
+const allPacks = () => [...modelPacks(), ...systemPacks()];
 // Model limits scale Gauntlet's day limits per case, so a 10-case pack gets exactly the day limits (cache reuse keeps
 // working) and a larger pack gets the same per-case budget: time, output tokens and case count grow with the pack.
 // F-120-T05 (owner decision 2026-11-26, "yes to 180 s"): a pack whose cases run on the release's coding, embedded or
@@ -214,8 +224,8 @@ export function testIndex(reports = []) {
   const links = Object.fromEntries(
     packs.map((p) => [
       p.pack.id,
-      p.file === systemFile
-        ? '../' + systemFile
+      p.nerv
+        ? '../' + p.file
         : `https://github.com/voidbrain/gauntlet-protocol/blob/${releaseTag()}/examples/${p.file}`,
     ]),
   );
@@ -455,7 +465,7 @@ async function command(args, services) {
         id: p.pack.id,
         version: p.pack.version,
         cases: p.pack.cases.length,
-        source: p.file === systemFile ? 'nerv' : 'common',
+        source: p.nerv ? 'nerv' : 'common',
       })),
       excluded: readJSON(consumptionPath()).exclude ?? {},
     };
@@ -645,7 +655,7 @@ async function command(args, services) {
     throw Error('Use --format=unconstrained or schema');
   if (options.format && options.pack) throw Error('Use --pack or --format, not both');
   const packId = options.pack ?? (options.format === 'schema' ? 'neutral-smoke-schema' : 'neutral-smoke');
-  let pack = model ? commonPacks().find((p) => p.pack.id === packId)?.pack : systemPacks()[0].pack;
+  let pack = model ? modelPacks().find((p) => p.pack.id === packId)?.pack : systemPacks()[0].pack;
   if (!pack) throw Error('Unknown common pack ' + packId + '; see `packs`');
   if (options.only) {
     const ids = options.only.split(',');
