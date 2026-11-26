@@ -4,7 +4,7 @@
   "parent": "B-152",
   "title": "Triage the 50 open CodeQL alerts",
   "goal": "Each open alert is fixed with a failing test first, or listed with the reason it is a false positive",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "Each of the 50 alerts is read at its location; a true positive gets a committed failing test, then the fix",
     "Each false positive is listed in docs/verification.md#codeql-alert-triage with its number, rule, location, reason and the dismissal command",
@@ -34,10 +34,10 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "3 h",
-    "basis": "Estimated 2026-11-26 in the full audit: 50 alerts, most in tests and retired prototypes. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26 in the full audit: 3 h agent. Done the same day in about 1 h: all 50 alerts read, none real, so no fix PRs. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
-    "agentHours": 3,
+    "agentHours": 0,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3
   }

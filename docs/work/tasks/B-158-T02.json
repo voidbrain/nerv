@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "B-158-T02",
+  "parent": "B-158",
+  "title": "The dashboard shell stops showing step IDs",
+  "goal": "The Moving here panel lists section names only",
+  "status": "implemented",
+  "acceptance": [
+    "MOVING holds section keys only",
+    "No step ID is rendered",
+    "The B-158 test passes unedited"
+  ],
+  "dependsOn": [
+    "B-158-T01"
+  ],
+  "resources": [
+    "web/src/dashboard/shell.ts",
+    "docs/work/records/B-158.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "angular"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "node --test test/user-text-ids.test.ts",
+    "npm run build",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day. Remaining: CI.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}
