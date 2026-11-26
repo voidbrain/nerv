@@ -43,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 188.25 h agent + 17.25 h owner across 176 open steps of 46 features and 40 other records. 165.5 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 193.75 h agent + 17.25 h owner across 179 open steps of 46 features and 40 other records. 165.5 h of actual effort recorded on 151 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2721,6 +2721,53 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-122"></a>[✨ F-122](#top)
+
+**Deliver Grover alerts**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.5 h agent + 0.5 h owner | [F-004-T10](#f-004-t10) | [F-101-T09](#f-101-t09) | ⏳ | — | — |
+
+💻 **→** F-122-T02 builds the delivery from [the design](decisions/grover-alert-delivery.md#owner-decisions) once F-004-T10 is done.
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24 (coordinator gap review): Grover's hub raises and clears alerts (pH, EC, temperature or level out of the phase range, an agent offline, a driver fault) and lists them through an MCP tool, but nothing delivers them to the owner. Grover F-008-T03 waits on this record (grover:F-008-T03). |
+| **Reproduce** | With the hub reachable, `nerv chat "ci sono allarmi Grover?"` has no answer source, and a new Grover alert reaches no channel. |
+| **Check** | A new Grover alert reaches the owner once through NERV's channels (Telegram, phone push, inbox) with its value and range; a cleared alert is reported once; repeats inside the hub's hysteresis are not re-sent; delivery survives a NERV restart without duplicates; between 22:00 and 07:00 only serious alerts (pH or EC out of range, pump or driver faults) are pushed, minor ones arrive at 07:00. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-122-t02"></a>F-122-T02 — Deliver Grover alerts through NERV's channels | 3.5 h | 0 h | 3.5 h | Planned | [F-004-T10](#f-004-t10) | [F-101-T09](#f-101-t09), [F-122-T03](#f-122-t03) | ⏳ 🤖 | [PR #775](https://github.com/voidbrain/nerv/pull/775) owner decisions recorded in the design |
+| 🟢 Small | <a id="f-122-t03"></a>F-122-T03 — Owner check: a real Grover alert arrives | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-122-T02](#f-122-t02) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 4.5 h | 0 h (0 of 3 steps recorded) | 3.5 h agent + 0.5 h owner | 1 of 3 completed | | | | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-122-t01"></a>F-122-T01 — Design Grover alert delivery | 1 h | 0 h | Completed | [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-122.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-122-T01: [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md · F-122-T02: [PR #775](https://github.com/voidbrain/nerv/pull/775) owner decisions recorded in the design. Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); design in [#747](https://github.com/voidbrain/nerv/pull/747); [#758](https://github.com/voidbrain/nerv/pull/758); owner decisions in [#775](https://github.com/voidbrain/nerv/pull/775) |
+| Opened | 2026-11-24 |
+| Verification | — |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
 ### <a id="f-098"></a>[✨ F-098](#top)
 
 **FPV fleet diary: crashes, parts, spares and photos**
@@ -2777,7 +2824,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 6.5 h | [F-098-T04](#f-098-t04), `fpvbuddy:F-009-T03`, `fpvbuddy:F-009-T04`, `fpvbuddy:F-009-T02` | [F-131-T03](#f-131-t03) | ⏳ | — | — |
+| 🔴 Open | 🔹 P3 | 🟣 Very large | 12 h | [F-098-T04](#f-098-t04), [F-122-T02](#f-122-t02), `fpvbuddy:F-009-T03`, `fpvbuddy:F-009-T04`, `fpvbuddy:F-009-T02`, `fpvbuddy:F-010-T04`, `fpvbuddy:F-011-T01`, `fpvbuddy:F-011-T02`, `fpvbuddy:F-011-T06` | [F-131-T03](#f-131-t03) | ⏳ | — | — |
 
 💻 **→** Next: F-101-T04 — Create/wire the FPVBuddy core repository and move the core into it (Planned).
 
@@ -2791,19 +2838,23 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-101-t04"></a>F-101-T04 — Create/wire the FPVBuddy core repository and move the core into it | 2 h | 0 h | 2 h | Planned | [F-098-T04](#f-098-t04) | [F-101-T05](#f-101-t05), [F-101-T07](#f-101-t07) | ⏳ 🤖 | — |
-| 🟡 Medium | <a id="f-101-t05"></a>F-101-T05 — NERV FPV pack uses the FPV core package | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T04](#f-101-t04) | [F-101-T07](#f-101-t07) | ⏳ 🤖 | — |
-| 🟡 Medium | <a id="f-101-t07"></a>F-101-T07 — Retire NERV's FPV pack views and connect NERV to FPVBuddy's MCP server | 2 h | 0 h | 2 h | Planned | [F-101-T04](#f-101-t04), [F-101-T05](#f-101-t05), `fpvbuddy:F-009-T02` | [F-101-T06](#f-101-t06), [F-131-T03](#f-131-t03) | ⏳ 🤖 | [PR #773](https://github.com/voidbrain/nerv/pull/773) |
+| 🟡 Medium | <a id="f-101-t04"></a>F-101-T04 — Create/wire the FPVBuddy core repository and move the core into it | 2 h | 0 h | 2 h | Planned | [F-098-T04](#f-098-t04) | [F-101-T07](#f-101-t07), [F-101-T08](#f-101-t08) | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-101-t08"></a>F-101-T08 — Move NERV's FPV data to FPVBuddy behind its MCP server; NERV keeps no FPV data or code | 2 h | 0 h | 2 h | Planned | [F-101-T04](#f-101-t04), `fpvbuddy:F-009-T02`, `fpvbuddy:F-010-T04` | [F-101-T07](#f-101-t07), [F-101-T09](#f-101-t09), [F-101-T10](#f-101-t10) | ⏳ 🤖 | [PR #792](https://github.com/voidbrain/nerv/pull/792) planning |
+| 🟡 Medium | <a id="f-101-t07"></a>F-101-T07 — Retire NERV's FPV pack views and connect NERV to FPVBuddy's MCP server | 2 h | 0 h | 2 h | Planned | [F-101-T04](#f-101-t04), [F-101-T08](#f-101-t08), `fpvbuddy:F-009-T02` | [F-101-T06](#f-101-t06), [F-101-T10](#f-101-t10), [F-131-T03](#f-131-t03) | ⏳ 🤖 | [PR #773](https://github.com/voidbrain/nerv/pull/773); [PR #792](https://github.com/voidbrain/nerv/pull/792) planning |
 | 🟢 Small | <a id="f-101-t06"></a>F-101-T06 — NERV shows FPV data through FPVBuddy's MCP tools and surfaces | 1 h | 0 h | 1 h | Planned | [F-101-T07](#f-101-t07), `fpvbuddy:F-009-T03`, `fpvbuddy:F-009-T04` | — | ⏳ 🤖 | [PR #773](https://github.com/voidbrain/nerv/pull/773) |
-| 🔴 Large | **Total** | 7.25 h | 0 h (0 of 7 steps recorded) | 6.5 h | 3 of 7 completed | | | | |
+| 🟡 Medium | <a id="f-101-t09"></a>F-101-T09 — Battery storage reminders become FPVBuddy alerts delivered by NERV | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T08](#f-101-t08), [F-122-T02](#f-122-t02) | [F-101-T11](#f-101-t11) | ⏳ 🤖 | [PR #792](https://github.com/voidbrain/nerv/pull/792) planning |
+| 🟡 Medium | <a id="f-101-t10"></a>F-101-T10 — Every FPV pack tool keeps a path through FPVBuddy's MCP server | 2 h | 0 h | 2 h | Planned | [F-101-T07](#f-101-t07), [F-101-T08](#f-101-t08), `fpvbuddy:F-011-T01`, `fpvbuddy:F-011-T02`, `fpvbuddy:F-011-T06` | [F-101-T11](#f-101-t11) | ⏳ 🤖 | [PR #792](https://github.com/voidbrain/nerv/pull/792) planning |
+| 🟡 Medium | <a id="f-101-t11"></a>F-101-T11 — Remove NERV's FPV data and code | 1.5 h | 0 h | 1.5 h | Planned | [F-101-T09](#f-101-t09), [F-101-T10](#f-101-t10) | — | ⏳ 🤖 | [PR #792](https://github.com/voidbrain/nerv/pull/792) planning |
+| 🟣 Very large | **Total** | 14.25 h | 0 h (0 of 11 steps recorded) | 12 h | 4 of 11 completed | | | | |
 
-<details><summary>Done steps (3)</summary>
+<details><summary>Done steps (4)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-101-t01"></a>F-101-T01 — Compare ways to share the battery manager | 0.75 h | 0 h | Completed | [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation |
 | — | <a id="f-101-t02"></a>F-101-T02 — Owner decides how to share | 0 h | 0 h | Completed | — |
 | — | <a id="f-101-t03"></a>F-101-T03 — Owner names the FPV core repository and its visibility | 0 h | 0 h | Completed | — |
+| — | <a id="f-101-t05"></a>F-101-T05 — NERV FPV pack uses the FPV core package | 1.5 h | 0 h | Completed | [PR #792](https://github.com/voidbrain/nerv/pull/792) cancellation |
 
 </details>
 
@@ -2814,7 +2865,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-101-T01: [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation · F-101-T06: [PR #773](https://github.com/voidbrain/nerv/pull/773) · F-101-T07: [PR #773](https://github.com/voidbrain/nerv/pull/773). [PR #773](https://github.com/voidbrain/nerv/pull/773) (screens via FPVBuddy MCP); [PR #647](https://github.com/voidbrain/nerv/pull/647) (F-101-T03 decision); [PR #484](https://github.com/voidbrain/nerv/pull/484) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408) |
+| PR / evidence | Steps: F-101-T01: [PR #484](https://github.com/voidbrain/nerv/pull/484) implementation · F-101-T05: [PR #792](https://github.com/voidbrain/nerv/pull/792) cancellation · F-101-T06: [PR #773](https://github.com/voidbrain/nerv/pull/773) · F-101-T07: [PR #773](https://github.com/voidbrain/nerv/pull/773); [PR #792](https://github.com/voidbrain/nerv/pull/792) planning · F-101-T08: [PR #792](https://github.com/voidbrain/nerv/pull/792) planning · F-101-T09: [PR #792](https://github.com/voidbrain/nerv/pull/792) planning · F-101-T10: [PR #792](https://github.com/voidbrain/nerv/pull/792) planning · F-101-T11: [PR #792](https://github.com/voidbrain/nerv/pull/792) planning. [PR #773](https://github.com/voidbrain/nerv/pull/773) (screens via FPVBuddy MCP); [PR #647](https://github.com/voidbrain/nerv/pull/647) (F-101-T03 decision); [PR #484](https://github.com/voidbrain/nerv/pull/484) (merged; CI green); Owner request 2026-11-14; [plan](design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408); [#792](https://github.com/voidbrain/nerv/pull/792) |
 | Opened | 2026-11-14 |
 | Verification | 2026-11-18: F-101-T01 verified: [PR #484](https://github.com/voidbrain/nerv/pull/484) merged on green CI. |
 | Reviewed | 2026-11-26 |
@@ -3274,53 +3325,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-24 |
 | Verification | 2026-11-24: F-121-T04 `node --test test/print-transfer.test.ts` (failing first: module missing) and the cross-process join test in `test/misato.test.ts` (failed with the coordinator step removed); affected suites (82 passed); full `npm test` 1393 (1391 passed, 2 skipped); `npm run build` passed; gauntlet `all` (gemma4-12b) passed, 0 still pending, ledger committed. CI 2026-11-24: [run 45475646483](https://github.com/voidbrain/nerv/actions/runs/45475646483) green (PR #722); on the PR head the cache-probe test failed once on Windows (run 45472575103 attempt 1, [B-133](work/records/F-121.md#b-133)). Earlier: F-121-T04 pre-review runs and F-121-T01, F-121-T02: [moved 2026-11-25](archive/evidence-2026.md#f-121-moved-2026-11-25). |
 | Reviewed | 2026-11-25 |
-
-</details>
-
----
-### <a id="f-122"></a>[✨ F-122](#top)
-
-**Deliver Grover alerts**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.5 h agent + 0.5 h owner | [F-004-T10](#f-004-t10) | — | ⏳ | — | — |
-
-💻 **→** F-122-T02 builds the delivery from [the design](decisions/grover-alert-delivery.md#owner-decisions) once F-004-T10 is done.
-
-| | |
-|---|---|
-| **Issue** | Owner 2026-11-24 (coordinator gap review): Grover's hub raises and clears alerts (pH, EC, temperature or level out of the phase range, an agent offline, a driver fault) and lists them through an MCP tool, but nothing delivers them to the owner. Grover F-008-T03 waits on this record (grover:F-008-T03). |
-| **Reproduce** | With the hub reachable, `nerv chat "ci sono allarmi Grover?"` has no answer source, and a new Grover alert reaches no channel. |
-| **Check** | A new Grover alert reaches the owner once through NERV's channels (Telegram, phone push, inbox) with its value and range; a cleared alert is reported once; repeats inside the hub's hysteresis are not re-sent; delivery survives a NERV restart without duplicates; between 22:00 and 07:00 only serious alerts (pH or EC out of range, pump or driver faults) are pushed, minor ones arrive at 07:00. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-122-t02"></a>F-122-T02 — Deliver Grover alerts through NERV's channels | 3.5 h | 0 h | 3.5 h | Planned | [F-004-T10](#f-004-t10) | [F-122-T03](#f-122-t03) | ⏳ 🤖 | [PR #775](https://github.com/voidbrain/nerv/pull/775) owner decisions recorded in the design |
-| 🟢 Small | <a id="f-122-t03"></a>F-122-T03 — Owner check: a real Grover alert arrives | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-122-T02](#f-122-t02) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 4.5 h | 0 h (0 of 3 steps recorded) | 3.5 h agent + 0.5 h owner | 1 of 3 completed | | | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-122-t01"></a>F-122-T01 — Design Grover alert delivery | 1 h | 0 h | Completed | [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-122.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-122-T01: [PR #747](https://github.com/voidbrain/nerv/pull/747) design: docs/decisions/grover-alert-delivery.md · F-122-T02: [PR #775](https://github.com/voidbrain/nerv/pull/775) owner decisions recorded in the design. Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); design in [#747](https://github.com/voidbrain/nerv/pull/747); [#758](https://github.com/voidbrain/nerv/pull/758); owner decisions in [#775](https://github.com/voidbrain/nerv/pull/775) |
-| Opened | 2026-11-24 |
-| Verification | — |
-| Reviewed | 2026-11-26 |
 
 </details>
 

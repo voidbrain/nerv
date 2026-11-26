@@ -4,7 +4,7 @@
   "parent": "F-101",
   "title": "NERV FPV pack uses the FPV core package",
   "goal": "NERV's battery and fleet rules come from the core package; NERV keeps only the adapter",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "The FPV pack implements the core storage interface over SQLite; existing tables and data are unchanged",
     "The moved rules and their tests are gone from NERV (no dead copies); a join test runs a chat phrase through the pack into the core and back"
@@ -35,12 +35,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-20: swap internal calls for the package and delete the moved code. Not a measurement.",
-    "reviewed": "2026-11-20",
-    "agentHours": 1.5,
+    "estimate": "0 remaining (cancelled)",
+    "basis": "Estimated 2026-11-20: swap internal calls for the package and delete the moved code. Not a measurement. Cancelled 2026-11-26: Owner decision 2026-11-26 (chat): \"Drop F-101-T05, and add a step to move your battery data to FPVBuddy, behind its MCP server.\" NERV never imports the FPV core; it reaches FPVBuddy over MCP only (coordinator docs/DOMAINS.md, screens and domain ownership 2026-11-25; coordinator:F-016 shared-assets rule). Replaced by F-101-T08 to F-101-T11. No actual: cancelled before work started.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 792,
+      "note": "cancellation"
+    }
+  ]
 }

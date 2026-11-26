@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "id": "F-101-T08",
+  "parent": "F-101",
+  "title": "Move NERV's FPV data to FPVBuddy behind its MCP server; NERV keeps no FPV data or code",
+  "goal": "Batteries, fleet, spares, crashes, FPV builds and their history and photos live in FPVBuddy, reached over its MCP server, with nothing lost",
+  "status": "planned",
+  "acceptance": [
+    "A one-time export from NERV's store and import into FPVBuddy moves batteries, fleet, spares, crashes, FPV builds and manufacturer docs with their history (resistance readings, cycles, crash-to-battery-damage links); verified by per-table counts on both sides and a sample of records compared field by field; the export file and owner data never enter Git",
+    "Photos attached to batteries, crashes and parts (src/photos.ts ownerKind battery, crash, part) stay linked: moved with the data or referenced by FPVBuddy IDs, with an ID map kept outside Git",
+    "Durability: FPVBuddy's data has a backup or replication story at least as good as NERV's store (NERV-01/NERV-02 replication), named in this record, or the owner accepts a recorded gap before the import",
+    "The migration is a script with a dry run and a test on invented data; it refuses to run twice over the same data",
+    "Owner decision 2026-11-26 (chat): \"Drop F-101-T05, and add a step to move your battery data to FPVBuddy, behind its MCP server.\" NERV never imports the FPV core; it reaches FPVBuddy over MCP only (coordinator docs/DOMAINS.md; coordinator:F-016 shared-assets rule). F-101-T09 (storage reminders), F-101-T10 (every FPV tool keeps a path, unreachable FPVBuddy) and F-101-T11 (removal) complete the move."
+  ],
+  "dependsOn": [
+    "F-101-T04",
+    "fpvbuddy:F-009-T02",
+    "fpvbuddy:F-010-T04"
+  ],
+  "resources": [
+    "src/batteries.ts",
+    "src/fleet.ts",
+    "src/fpv-builds.ts",
+    "src/photos.ts",
+    "tools/**",
+    "test/**",
+    "docs/work/records/F-101.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "api-contracts",
+    "privacy-review",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet data stays local-only and never enters Git; tests use invented batteries, drones, crashes and photos.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A durability gap, or importing owner data on a machine not recorded, goes to the owner before the import"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26 after the owner decision (export and import script with a dry run, count and sample check, photo ID map). Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": [
+    {
+      "pr": 792,
+      "note": "planning"
+    }
+  ]
+}
