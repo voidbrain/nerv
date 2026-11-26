@@ -11,7 +11,8 @@
     "NERV-02 is started again and online in kaji list"
   ],
   "dependsOn": [
-    "B-091-T01"
+    "B-091-T01",
+    "B-171-T02"
   ],
   "resources": [
     "docs/acceptance/b091-tabgha-fenced-stop.md",

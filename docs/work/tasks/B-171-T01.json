@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "parent": "B-171",
+  "dependsOn": [],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-171-T01",
+  "title": "Failing test: a launcher from an earlier release, differing only in its comment, reads foreign",
+  "goal": "The Windows lifecycle test fails on main: inspect() calls an earlier release's launcher foreign",
+  "status": "ready",
+  "acceptance": [
+    "Test committed before the fix and failing on main"
+  ],
+  "resources": [
+    "test/windows-service-lifecycle.test.ts",
+    "docs/work/records/B-171.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-26: assertions added to the existing Windows lifecycle join test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}
