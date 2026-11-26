@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-146-T07",
+  "parent": "F-146",
+  "title": "Owner: try the skill on the real fleet and promote or refuse it",
+  "goal": "The owner sees the checklist for Saturday and decides whether the skill is promoted",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
+    "After fpvbuddy:F-024-T05 (the real fleet is imported and fpv_preflight checked) and F-145-T02 (the panel shows the skill), the owner follows a copy-paste page (docs/acceptance/f146-preflight-skill-<date>.md, written by the agent): (1) `nerv skills list` shows preflight-volo staged; (2) the dashboard panel Kaji's watermelons shows it under Sprout with its evaluation; (3) ask NERV \"prepara il volo di sabato\" and read the checklist against the real batteries, drones and the weather; (4) ask \"prepare Saturday's flight\" and check the answer is in English; (5) `nerv skills promote preflight-volo <version>` only if the owner is satisfied (the promote is the owner's), else `nerv skills retire`",
+    "The owner's decision and any wrong line (a B- record for a wrong verdict) are recorded in F-146"
+  ],
+  "dependsOn": [
+    "F-146-T06",
+    "F-145-T02",
+    "fpvbuddy:F-024-T05"
+  ],
+  "resources": [
+    "docs/acceptance/**",
+    "docs/work/records/F-146.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "The owner's real data stays on their machine; the acceptance page holds invented examples only.",
+  "validation": [
+    "Owner check, recorded in F-146 Verification"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h owner",
+    "basis": "Estimated 2026-11-26: one short procedure on the live service. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.5,
+    "ownerKind": "procedure"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-145-T03",
+  "parent": "F-145",
+  "title": "Carry live skill data into F-130-T10 and document the endpoint",
+  "goal": "The Angular migration keeps the live skills panel, and the endpoint is documented",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
+    "F-130-T10's acceptance gains a line: the Angular skills panel reads GET /api/skills and keeps the stage tabs and the empty state (test across the endpoint and the component); F-130-T10 stays planned and its estimate is re-reviewed",
+    "The README/operator documentation lists GET /api/skills and the empty-state command; docs/test-capability-index.md names the join test"
+  ],
+  "dependsOn": [
+    "F-145-T02"
+  ],
+  "resources": [
+    "docs/**",
+    "docs/work/tasks/F-130-T10.json",
+    "docs/work/records/F-145.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "privacy": "Neutral invented skills, fleets, spots and weather only; no owner data, tokens or coordinates of a real place in Git or tests.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-26: two documentation edits. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}

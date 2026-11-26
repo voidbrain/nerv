@@ -7,11 +7,13 @@
   "status": "planned",
   "acceptance": [
     "/api/eva/instances, /api/pilots and /api/tools match live.js; heartbeats keep animating",
-    "B-144's check holds in Angular: two polls with the same state keep the cage images and canvases (test)"
+    "B-144's check holds in Angular: two polls with the same state keep the cage images and canvases (test)",
+    "Kaji's watermelons keeps live skill data (owner 2026-11-26, F-145): the Angular skills panel reads GET /api/skills, keeps the Seed, Sprout, Ripe and Dropped tabs and the empty state \"No skills yet. Create one with nerv skills stage <package.json>\" (test across the endpoint and the component)"
   ],
   "dependsOn": [
     "F-130-T01",
-    "F-130-T18"
+    "F-130-T18",
+    "F-145-T01"
   ],
   "resources": [
     "web/src/**",

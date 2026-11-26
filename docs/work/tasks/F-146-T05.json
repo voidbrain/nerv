@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-146-T05",
+  "parent": "F-146",
+  "title": "Evaluation: the skill against the same requests without it, held-out cases",
+  "goal": "The skill is measured, not assumed to help",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
+    "Found on 2026-11-26 while planning: nerv skills evaluate takes the with-skill and baseline outputs from the suite file; it runs no model. This step adds the runner that fills them: for each case it asks the local model twice over the same invented fleet, weather and reminders fixtures (once with the skill's instructions, once without) and writes both outputs into the suite; the runner never touches the owner's data",
+    "The suite (evals/skill-evaluation-preflight-v1.json) has at least 8 Italian and 8 English requests, half regression and half holdout, graded on expected and forbidden tokens (a battery needing storage named, the wind figure present, no invented battery, Italian reply to an Italian request, English to an English one); the Gauntlet line for this model-facing feature is a nerv-planner case for the same two requests (F-120-T09 pack, Italian and English), added here",
+    "A test runs the runner with a fake model and checks that both output sets are written and that a suite without holdout cases is rejected"
+  ],
+  "dependsOn": [
+    "F-146-T04"
+  ],
+  "resources": [
+    "evals/**",
+    "tools/**",
+    "test/**",
+    "src/skills.ts",
+    "docs/work/records/F-146.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented skills, fleets, spots and weather only; no owner data, tokens or coordinates of a real place in Git or tests.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26: a small runner, a 16-case suite in two languages and one test; the case grading carries the uncertainty. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

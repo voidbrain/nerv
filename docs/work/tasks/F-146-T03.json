@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-146-T03",
+  "parent": "F-146",
+  "title": "Apply an active skill when a request matches (runtime consumer)",
+  "goal": "A promoted skill changes how NERV answers a matching request; a staged or retired one never does",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
+    "Found on 2026-11-26 while planning: nothing in NERV applies a skill at run time today (src/skills.ts is only read by the nerv skills commands; pilots carry skill ids but no code reads the instructions). A failing test (committed first) shows an active skill's instructions reaching the planner prompt for a matching request and nothing for a staged, retired or rolled-back one",
+    "Matching is by the skill manifest's domain and an owner-readable trigger list in the manifest, not by a model guess; a skill may use only the read tools its requiredCapabilities names and the tools the owner has granted (checkSkillPermissionEscalation holds at run time too); a skill with a write or approval capability is refused here (read-only skills only in this step)",
+    "The instructions enter the prompt as data from the owner-approved package, never from a retrieved page; the tool calls the skill leads to still pass the gate at the executor; the sorties and the replies name the skill and its version"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/misato.ts",
+    "src/skills.ts",
+    "src/runtime.ts",
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-146.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "regression-design",
+    "privacy-review"
+  ],
+  "privacy": "Neutral invented skills, fleets, spots and weather only; no owner data, tokens or coordinates of a real place in Git or tests.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A skill that could write or approve anything is out of scope and goes to the owner as a separate decision"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26: a small matcher and one prompt insertion point in the planner, plus tests that staged and retired skills never apply; the insertion point carries the uncertainty. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}
