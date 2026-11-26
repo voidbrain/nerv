@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "full",
+  "reviewed": "2026-11-26T10:02:00.000Z",
+  "baseline": "4a0df337a1bcf85149f47358561b3a12ab763847",
+  "report": "docs/audits/2026-11-26-full.md",
+  "areas": {
+    "code": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-26-full.md: check:fast, build, conventions (205 files, no unused exports), marker scan, source sizes",
+      "limits": "Boundary and high-change review, not line by line"
+    },
+    "logic": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-26-full.md: 1597 tests across 119 suites; cross-project contract proposals recorded in #802",
+      "limits": "No live remote-base, device or distributed run"
+    },
+    "tests": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-26-full.md: two full npm test runs, failing files rerun alone; B-153; dormant-check gaps referenced",
+      "limits": "No browser, device or real-model run"
+    },
+    "documentation": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-26-full.md: generated ledger/roadmap/recap/rule checks; procedure script names",
+      "limits": "Screenshots and field procedures not re-recorded"
+    },
+    "harness": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-26-full.md: harness v10.21.4 copied-file match, maintenance and rule checks; v10.23.0 available",
+      "limits": "No harness file changed"
+    },
+    "security": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-26-full.md: GitHub security settings, secret/Dependabot/code-scanning alerts, npm audit, pattern scan; B-152",
+      "limits": "No dynamic, dependency-source or penetration testing"
+    },
+    "delivery": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-26-full.md: last 60 main CI runs, run 45677401195, scheduled and maintenance runs, ci:status #799-#802",
+      "limits": "No hosted deployment; merge is not release"
+    },
+    "backlog": {
+      "result": "checked",
+      "evidence": "docs/audits/2026-11-26-full.md: 84 records, 671 steps, implemented-step age, budgets; reconciliation of #799-#802",
+      "limits": "No device-dependent step inferred verified"
+    }
+  }
+}

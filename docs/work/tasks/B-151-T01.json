@@ -4,7 +4,7 @@
   "parent": "B-151",
   "title": "Failing test: the dashboard AA check reads #000 and #fff",
   "goal": "test/dashboard.test.ts checks every pair with a black or white text and fails on main with the real list",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Three-digit hex is expanded before the luminance; a colour that is not hex fails the test",
     "A ratio that is not a number fails the pair",
@@ -33,7 +33,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 0.5 h agent. Implemented the same day: fails on main with the five Eva · Light pairs. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 0.5 h agent. Implemented the same day: fails on main with the five Eva · Light pairs. Remaining: CI. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0.5,
