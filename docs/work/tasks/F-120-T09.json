@@ -52,5 +52,10 @@
     "actualAgentHours": 2.5,
     "actualSource": "stated"
   },
-  "prs": []
+  "prs": [
+    {
+      "pr": 829,
+      "note": "nerv-planner pack, wiring and failing-first tests; no real model run"
+    }
+  ]
 }
