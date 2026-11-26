@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "parent": "B-174",
+  "dependsOn": [],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-174-T01",
+  "title": "Rerun name-the-pr and ambiguous-request 10 times each and record the counts",
+  "goal": "Pass counts for both scenarios over 10 runs, recorded on B-174",
+  "status": "planned",
+  "acceptance": [
+    "10 runs of name-the-pr and 10 of ambiguous-request, with the counts and the run log lines recorded on B-174",
+    "no rule or scenario is edited in this step"
+  ],
+  "resources": [
+    "docs/work/records/B-174.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "validation": [
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

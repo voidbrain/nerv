@@ -27,7 +27,7 @@ The coordinator's `.harness.json` contains:
 {"stacks":["core","solution"],"solution":{"role":"coordinator","manifest":".solution.json"}}
 ```
 
-`.solution.json` has `schemaVersion: 1`, a solution `name`, coordinator `repository` (`owner/name`), optional `backlog`/`dashboard` paths, and a `repositories` array. Each component has a unique lowercase `id`, GitHub `repository`, explicit local checkout `path`, branch/tag/commit `ref`, optional `backlog` (default `docs/BACKLOG.md`) and `archives` (explicit file list, default empty). Paths to backlog/archive/dashboard files stay within their owning repository. Component checkout paths can be outside the coordinator; reads are allowed, writes are not.
+`.solution.json` has `schemaVersion: 1`, a solution `name`, coordinator `repository` (`owner/name`), optional `backlog`/`dashboard` paths, an optional `id` (lowercase, default `solution`: the prefix of the coordinator's own records, `solution:F-002`; set `"id": "coordinator"` to write `coordinator:F-002`), and a `repositories` array. Each component has a unique lowercase `id`, GitHub `repository`, explicit local checkout `path`, branch/tag/commit `ref`, optional `backlog` (default `docs/BACKLOG.md`) and `archives` (explicit file list, default empty). Paths to backlog/archive/dashboard files stay within their owning repository. Component checkout paths can be outside the coordinator; reads are allowed, writes are not.
 
 The manifest may also contain an optional `integrations` object (same schema as `.harness.json`) for solution-scoped MCP recommendations; project selections explicitly override matching IDs. Runtime availability is still checked per host/session.
 

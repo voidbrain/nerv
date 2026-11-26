@@ -120,6 +120,97 @@
       ],
       "allowModels": false
     },
+    "scheduling-reminders": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=scheduling-reminders",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
+    "memory-and-chronicle": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=memory-and-chronicle",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
+    "pilot-routing": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=pilot-routing",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
+    "tool-contracts": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=tool-contracts",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
+    "external-project-intake": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=external-project-intake",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
+    "federated-handoff": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=federated-handoff",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
+    "coding-jobs": {
+      "command": "node",
+      "args": [
+        "tools/gauntlet-adapter.mjs",
+        "--group=coding-jobs",
+        "--out={report}"
+      ],
+      "cwd": "../..",
+      "layers": [
+        "system"
+      ],
+      "allowModels": false
+    },
     "coding-reference": {
       "command": "node",
       "args": [

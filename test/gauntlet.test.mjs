@@ -276,7 +276,7 @@ test('generated index joins common model cases and NERV system cases with truthf
   const current = readFileSync('docs/test-capability-index.md', 'utf8');
   assert.equal(current, testIndex());
   assert.match(current, /neutral-smoke@1\.1\.0 \/ exact-json/);
-  assert.match(current, /nerv-system-flows@1\.2\.0 \/ policy/);
+  assert.match(current, /nerv-system-flows@1\.3\.0 \/ policy/);
   // F-120-T03: the 0.10/0.11 domain packs map the math, coding, embedded, code-review and cad-3d areas.
   assert.match(current, /math: 4 mapped cases/);
   assert.match(current, /cad-3d: 10 mapped cases/);
@@ -1100,7 +1100,7 @@ test(
         }
         const written = JSON.parse(readFileSync(ledger, 'utf8'));
         const recorded = written.entries;
-        assert.equal(recorded.length, win32 ? 100 : 104);
+        assert.equal(recorded.length, win32 ? 107 : 111);
         const scriptedEntries = recorded.filter((entry) => entry.pack === 'multi-step-agent');
         assert.equal(scriptedEntries.length, win32 ? 0 : 4);
         assert.ok(scriptedEntries.every((entry) => entry.status === 'passed' && entry.modelDigest === null));
@@ -1151,8 +1151,8 @@ test(
       });
     const listed = cli(['pending']);
     assert.equal(listed.status, 1);
-    // F-120-T09: 126 cases plus nerv-planner's 36.
-    assert.equal(listed.stdout.trim().split('\n').length, 162);
+    // F-120-T09: 126 cases plus nerv-planner's 36; F-120-T02 adds 7 system cases (169).
+    assert.equal(listed.stdout.trim().split('\n').length, 169);
     assert.match(listed.stdout, /^nerv-system-flows\/policy \(new\)$/m);
     assert.equal(cli(['pending', '--max-age-days=x']).status, 2);
     writeFileSync(join(dir, 'bad.json'), '{"schemaVersion":1,"entries":[{"x":1}]}');
@@ -1424,7 +1424,7 @@ test(
       assert.equal(runtimeChanged.pendingLines.length, 150);
       assert.ok(runtimeChanged.pendingLines.every((l) => l.endsWith('(runtime-changed)')));
       const scenarioChanged = await main(['pending', '--profile=' + profilePath, '--scenario-hash=' + '7'.repeat(64)]);
-      assert.equal(scenarioChanged.pendingLines.length, 158);
+      assert.equal(scenarioChanged.pendingLines.length, 165);
       assert.ok(scenarioChanged.pendingLines.every((l) => l.endsWith('(scenario-changed)')));
       // Recording a system report via `ledger` binds NERV's systemSourceKey automatically.
       const reportPath = join(dir, 'sys-report.json');
@@ -1735,11 +1735,11 @@ test('B-079: the root command reruns system cases whose source changed, as pendi
       }),
     );
     const pending = (await main(['pending'])).pendingLines.filter((l) => l.startsWith('nerv-system-flows/'));
-    assert.equal(pending.length, 8);
+    assert.equal(pending.length, system.cases.length);
     const plan = (await main(['all'])).plan.find((p) => p.pack === 'nerv-system-flows');
     assert.deepEqual(
       plan.run.map((r) => r.reason),
-      Array(8).fill('source-changed'),
+      Array(system.cases.length).fill('source-changed'),
       'a result recorded at another source is not reused',
     );
     assert.equal(plan.reuse.length, 0);
@@ -1966,6 +1966,144 @@ test(
     } finally {
       if (previousLedger === undefined) delete process.env.NERV_GAUNTLET_LEDGER;
       else process.env.NERV_GAUNTLET_LEDGER = previousLedger;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
+  'F-120-T02: seven owner-accepted system-pack cases match suite files, minimumTests, deterministic grader, index and pending lifecycle',
+  SLOW_HOST,
+  async () => {
+    const { readSystemPackWithInputs } = await import('../tools/gauntlet.mjs');
+    const { caseHash } = await import('@voidbrain/gauntlet-protocol');
+    const pack = readSystemPackWithInputs().pack;
+    const currentSuite = readSuite();
+    const registry = validateRegistry(
+      JSON.parse(readFileSync('evals/gauntlet/runners.json', 'utf8')),
+      resolve('evals/gauntlet'),
+    );
+    const expected = [
+      ['scheduling-reminders', 'scheduling-time', ['test/core.test.ts', 'test/f046-existing-check.test.ts'], 13],
+      [
+        'memory-and-chronicle',
+        'conversation-memory',
+        ['test/memory.test.ts', 'test/persona.test.ts', 'test/chronicle.test.ts', 'test/milestones.test.ts'],
+        24,
+      ],
+      ['pilot-routing', 'tools', ['test/pilots.test.ts', 'test/consultant.test.ts', 'test/pilot-model.test.ts'], 24],
+      [
+        'tool-contracts',
+        'tools',
+        ['test/mcp.test.ts', 'test/tool-listing.test.ts', 'test/read-tool-shapes.test.ts', 'test/packs.test.ts'],
+        22,
+      ],
+      ['external-project-intake', 'research', ['test/quarantine.test.ts', 'test/provenance.test.ts'], 11],
+      [
+        'federated-handoff',
+        'distributed-coordination',
+        ['test/whole-job-handoff.test.ts', 'test/operator-directory.test.ts'],
+        8,
+      ],
+      ['coding-jobs', 'security-permissions', ['test/coding-job.test.ts'], 7],
+    ];
+    const index = readFileSync('docs/test-capability-index.md', 'utf8');
+    for (const [id, area, files, minTests] of expected) {
+      const c = pack.cases.find((x) => x.id === id);
+      assert.ok(c, `missing system-v1 case ${id}`);
+      assert.equal(c.area, area, id);
+      assert.equal(c.layer, 'system', id);
+      assert.equal(c.expensive, false, id);
+      assert.equal(registry.runners[c.runner]?.allowModels, false, id);
+      const group = currentSuite.groups.find((g) => g.id === id);
+      assert.ok(group, `missing suite group ${id}`);
+      assert.deepEqual(group.files, files, id);
+      assert.equal(group.minimumTests, minTests, id);
+      assert.match(index, new RegExp(`nerv-system-flows@${pack.version.replaceAll('.', '\\.')} / ${id}`));
+
+      const mk = (counts) =>
+        normalize(
+          {
+            schemaVersion: 1,
+            mode: 'scripted-control-flow',
+            suite: currentSuite.id,
+            sourceStable: true,
+            complete: false,
+            selection: { groups: [id], notRunGroups: currentSuite.groups.filter((g) => g.id !== id).map((g) => g.id) },
+            revision: { inputs: { 'evals/suite.json': 'fixture' } },
+            results: [{ id, iteration: 1, status: 'passed', exitCode: 0, error: null, counts }],
+          },
+          id,
+          currentSuite,
+        );
+      assert.equal(mk({ tests: minTests, passed: minTests, failed: 0, skipped: 0 }).results[0].status, 'passed', id);
+      assert.equal(mk({ tests: minTests - 1, passed: minTests - 1, failed: 0, skipped: 0 }).complete, false, id);
+      assert.equal(mk({ tests: minTests, passed: minTests - 1, failed: 0, skipped: 1 }).complete, false, id);
+    }
+    assert.match(index, /scheduling-time: 1 mapped cases/);
+    assert.match(index, /research: 1 mapped cases/);
+    assert.equal((await main(['index', '--check'])).indexCurrent, true);
+
+    // Per-case inputs keep pilot-routing and tool-contracts independent.
+    const rawSystem = JSON.parse(readFileSync('evals/gauntlet/system-v1.json', 'utf8'));
+    const baseInputs = {
+      'evals/suite.json': 's1',
+      'evals/gauntlet/system-v1.json': 'v1',
+      'src/pilots.ts': 'p1',
+      'src/packs.ts': 'k1',
+    };
+    assert.notEqual(
+      systemSourceKey(rawSystem, 'pilot-routing', { ...baseInputs, 'src/pilots.ts': 'p2' }),
+      systemSourceKey(rawSystem, 'pilot-routing', baseInputs),
+    );
+    assert.equal(
+      systemSourceKey(rawSystem, 'tool-contracts', { ...baseInputs, 'src/pilots.ts': 'p2' }),
+      systemSourceKey(rawSystem, 'tool-contracts', baseInputs),
+    );
+    assert.notEqual(
+      systemSourceKey(rawSystem, 'tool-contracts', { ...baseInputs, 'src/packs.ts': 'k2' }),
+      systemSourceKey(rawSystem, 'tool-contracts', baseInputs),
+    );
+    assert.equal(
+      systemSourceKey(rawSystem, 'pilot-routing', { ...baseInputs, 'src/packs.ts': 'k2' }),
+      systemSourceKey(rawSystem, 'pilot-routing', baseInputs),
+    );
+
+    // Cases show pending against an empty ledger until recorded at their current sourceKey.
+    const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-f120-t02-'));
+    const tempLedger = join(dir, 'ledger.json');
+    try {
+      const { withGauntletSettings } = await import('../tools/gauntlet.mjs');
+      await withGauntletSettings({ NERV_GAUNTLET_LEDGER: tempLedger }, async () => {
+        const before = (await main(['pending'])).pendingLines;
+        for (const [id] of expected) assert.ok(before.includes(`nerv-system-flows/${id} (new)`), id);
+        writeFileSync(
+          tempLedger,
+          JSON.stringify({
+            schemaVersion: 2,
+            entries: expected.map(([id]) => {
+              const c = pack.cases.find((x) => x.id === id);
+              return {
+                pack: pack.id,
+                packVersion: pack.version,
+                case: id,
+                caseHash: caseHash(c),
+                profileHash: null,
+                status: 'passed',
+                reportHash: 'd'.repeat(64),
+                finished: '2026-11-26T00:00:00.000Z',
+                modelDigest: null,
+                runtimeHash: null,
+                scenarioHash: null,
+                sourceKey: systemSourceKey(pack, id),
+              };
+            }),
+          }),
+        );
+        const after = (await main(['pending'])).pendingLines;
+        for (const [id] of expected) assert.ok(!after.some((l) => l.startsWith(`nerv-system-flows/${id} `)), id);
+      });
+    } finally {
       rmSync(dir, { recursive: true, force: true });
     }
   },

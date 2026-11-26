@@ -1,4 +1,5 @@
 import type { DatabaseSync } from 'node:sqlite';
+import { transaction } from './sqlite-transaction.ts';
 import {
   formatBriefPushPayload,
   formatReminderPushPayload,
@@ -44,7 +45,14 @@ export class StorePush {
     return this.getOrGenerateVapidKeys().publicKey;
   }
 
-  savePushSubscription(sub: { endpoint: string; p256dh: string; auth: string; userAgent?: string }): void {
+  /** B-170: a paired device's subscription carries its id: the device's next subscription replaces it. */
+  savePushSubscription(sub: {
+    endpoint: string;
+    p256dh: string;
+    auth: string;
+    userAgent?: string;
+    deviceId?: string;
+  }): void {
     if (!sub || typeof sub !== 'object') throw new Error('Invalid subscription.');
     if (typeof sub.endpoint !== 'string' || !/^https?:\/\//.test(sub.endpoint) || sub.endpoint.length > 1024)
       throw new Error('Invalid subscription endpoint.');
@@ -52,11 +60,24 @@ export class StorePush {
       throw new Error('Invalid subscription p256dh key.');
     if (typeof sub.auth !== 'string' || !sub.auth || sub.auth.length > 256)
       throw new Error('Invalid subscription auth secret.');
-    this.host.db
-      .prepare(
-        'INSERT INTO push_subscriptions(endpoint, p256dh, auth, created, user_agent) VALUES(?, ?, ?, ?, ?) ON CONFLICT(endpoint) DO UPDATE SET p256dh=excluded.p256dh, auth=excluded.auth, user_agent=excluded.user_agent',
-      )
-      .run(sub.endpoint, sub.p256dh, sub.auth, new Date().toISOString(), sub.userAgent ?? null);
+    if (sub.deviceId !== undefined && !/^[a-f0-9]{16}$/.test(sub.deviceId)) throw new Error('Invalid device id.');
+    const deviceId = sub.deviceId ?? null;
+    transaction(this.host.db, () => {
+      if (deviceId)
+        this.host.db
+          .prepare('DELETE FROM push_subscriptions WHERE device_id=? AND endpoint<>?')
+          .run(deviceId, sub.endpoint);
+      this.host.db
+        .prepare(
+          'INSERT INTO push_subscriptions(endpoint, p256dh, auth, created, user_agent, device_id) VALUES(?, ?, ?, ?, ?, ?) ON CONFLICT(endpoint) DO UPDATE SET p256dh=excluded.p256dh, auth=excluded.auth, user_agent=excluded.user_agent, device_id=excluded.device_id',
+        )
+        .run(sub.endpoint, sub.p256dh, sub.auth, new Date().toISOString(), sub.userAgent ?? null, deviceId);
+    });
+  }
+
+  /** B-170: a revoked device gets no more pushes. Returns how many subscriptions it had. */
+  forgetPushDevice(deviceId: string): number {
+    return Number(this.host.db.prepare('DELETE FROM push_subscriptions WHERE device_id=?').run(deviceId).changes);
   }
 
   deletePushSubscription(endpoint: string): boolean {
