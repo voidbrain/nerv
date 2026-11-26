@@ -196,8 +196,9 @@ export function coordinatorLeaseService(input: {
     /** F-016-T20: the replication shipper on this base (it ships only while this base is the active main). */
     shipper(
       link: ShippingLink,
-      options: Pick<ReplicationShipperOptions, 'keepBatches' | 'maxBatchesPerTick' | 'log'> = {},
+      options: Pick<ReplicationShipperOptions, 'keepBatches' | 'maxBatchesPerTick' | 'log' | 'onReadCommitted'> = {},
     ): ReplicationShipper {
+      shipper?.stop();
       shipper = new ReplicationShipper({
         db,
         baseId: input.baseId,
@@ -211,6 +212,11 @@ export function coordinatorLeaseService(input: {
     stop(): void {
       keeper?.stop();
       shipper?.stop();
+      db.close();
+    },
+    async stopAsync(): Promise<void> {
+      keeper?.stop();
+      await shipper?.stopAsync();
       db.close();
     },
   };
