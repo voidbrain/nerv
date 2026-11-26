@@ -13,6 +13,7 @@ import {
   ownerDeclined,
   declinedReply,
   parseAdvice,
+  readResultReply,
   requestLanguage,
   waitingReply,
   validateFleetChatReply,
@@ -653,12 +654,28 @@ export class RuntimePlanning {
         continue;
       }
       // The same action already ran in this sortie: running it again is never the owner's wish (a small model loops here).
-      if (
-        steps.some(
-          (s) => s.tool === tool && s.outcome === 'grant' && !s.error && argsHash(s.args ?? {}) === argsHash(args),
-        )
-      )
-        return finish('done', doneReply(lang(), ranSteps()));
+      const ran = steps.findLast(
+        (s) => s.tool === tool && s.outcome === 'grant' && !s.error && argsHash(s.args ?? {}) === argsHash(args),
+      );
+      // B-176: a repeated read gets one last turn to answer from its result, then the owner gets the result itself.
+      const isRead = [...toolDocs, ...ext.docs].find((t) => t.name === tool)?.effect === 'read';
+      if (ran && isRead && ran.result !== undefined) {
+        const answerNow = `You already ran ${tool} with these arguments: its result is in your steps. Reply to the owner from it now; do not run it again.`;
+        const lastTurn = turn + 1 >= MAX_STEPS + freeReadTurns(steps);
+        if (!lastTurn && !steps.some((s) => s.outcome === 'invalid' && s.error === answerNow)) {
+          await this.host.record(
+            sortieId,
+            steps,
+            { tool, args, outcome: 'invalid', error: answerNow },
+            undefined,
+            stepDurationMs,
+          );
+          continue;
+        }
+        // The service's reply, not the model's: no durationMs, like doneReply.
+        return finish('done', readResultReply(lang(), tool, ran.result));
+      }
+      if (ran) return finish('done', doneReply(lang(), ranSteps()));
       // B-069: the owner already declined this tool in this request, or let its card expire: it is never asked again.
       // The sortie closes with a reply instead of a new card after every expiry (a card every hour, all night).
       const declined = steps.find((s) => s.tool === tool && ownerDeclined(s));

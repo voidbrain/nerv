@@ -11,7 +11,7 @@
   "id": "B-176-T03",
   "title": "A repeated read gets an answer from its result, never a bare Fatto",
   "goal": "A new test fails first, then passes: a repeated read ends with an answer-only turn or a result summary",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A new test fails first, then passes: a repeated read ends with an answer-only turn or a result summary"
   ],
