@@ -15,6 +15,8 @@ export interface Tool {
   /** F-089-T06: every call waits for the owner's approval card, whatever the Sync Ratio; the pattern stays its effect class. */
   card?: true;
   /** F-021: the EVA class an MCP tool was granted for (B-025). */ eva?: Executor;
+  /** B-175 stage 2: the owner lets this granted read run at its EVA class in a tainted conversation. */
+  allowTainted?: true;
 }
 /** The Scrolls: owner rules. Unknown keys are rejected so a typo cannot silently relax a rule. */
 export interface Policy {
@@ -294,8 +296,8 @@ const CONFINEMENT: Executor[] = ['eva-03', 'eva-00', 'eva-01', 'eva-02'];
 export function stricter(a: Executor, b: Executor | undefined): Executor {
   return b && CONFINEMENT.indexOf(b) < CONFINEMENT.indexOf(a) ? b : a;
 }
-export function executorOf(action: Action, effect: Effect): Executor {
-  if (action.trust === 'tainted' && local(effect)) return 'eva-03';
+export function executorOf(action: Action, effect: Effect, allowTainted = false): Executor {
+  if (action.trust === 'tainted' && local(effect) && !(allowTainted && effect === 'read')) return 'eva-03';
   if (action.proactive && action.stage !== 'production') return 'eva-00';
   return action.stage === 'prototype' ? 'eva-00' : action.stage === 'test' ? 'eva-01' : 'eva-02';
 }
@@ -346,7 +348,7 @@ export function ballot(
 ): Ballot {
   const effect = tool?.effect ?? 'irreversible';
   const pattern = patternOf(effect, action.trust, action.tool, policy, tool?.owner === true);
-  const executor = stricter(executorOf(action, effect), tool?.eva);
+  const executor = stricter(executorOf(action, effect, tool?.allowTainted === true), tool?.eva);
   const verdicts = [melchior(action, effect, policy), balthasar(action, effect, executor, spent, policy)];
   if (action.proactive && action.stage !== 'production' && effect !== 'read')
     verdicts.push({
