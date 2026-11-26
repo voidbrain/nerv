@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "F-101-T11",
+  "parent": "F-101",
+  "title": "Remove NERV's FPV data and code",
+  "goal": "After the move, NERV has no FPV tables, rules or tests of its own",
+  "status": "planned",
+  "acceptance": [
+    "NERV's battery, fleet, spares, crash and FPV build tables, src/battery-health.ts, src/battery-storage-reminders.ts, the FPV pack's data code (src/batteries.ts, src/fleet.ts, src/fpv-builds.ts, src/blackbox.ts, src/diyfpv-build.ts) and their tests are removed (no dead code); the tables are dropped by a migration only after F-101-T08's counts match",
+    "System and Gauntlet cases that used them are updated to the MCP path (Gauntlet's own cases through gauntlet's backlog)",
+    "npm test, check:fast and check:integrations stay green; the FPV pack still loads with only its MCP wiring"
+  ],
+  "dependsOn": [
+    "F-101-T09",
+    "F-101-T10"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "api-contracts",
+    "privacy-review",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet data stays local-only and never enters Git; tests use invented batteries, drones, crashes and photos.",
+  "validation": [
+    "npm test",
+    "npm run check:fast",
+    "npm run check:integrations"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "Dropping owner tables goes to the owner before the migration runs"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26 after the owner decision (delete modules, tables and tests, update the cases). Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": [
+    {
+      "pr": 792,
+      "note": "planning"
+    }
+  ]
+}
