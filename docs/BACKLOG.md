@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 18 | 7 | 45 | 20 |
+| **This week** | 18 | 7 | 45 | 22 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 46 | 38 |
+| **Open** | 46 | 36 |
 | **Require Human 🧑** | 12 | 20 |
 
 ### Require Human 🧑
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 193 h agent + 16.75 h owner across 178 open steps of 46 features and 38 other records. 156.25 h of actual effort recorded on 145 steps. Generated from the task files.
+**Remaining effort:** 193 h agent + 16.75 h owner across 176 open steps of 46 features and 36 other records. 156.25 h of actual effort recorded on 145 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1637,51 +1637,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-24 |
 | Verification | Unit 2026-11-24: `test/coordinator-partition.test.ts` and `test/coordinator-relocation.test.ts` pass locally. Live promotion with the installed service: Pending (F-016-T09). |
 | Reviewed | 2026-11-24 |
-
-</details>
-
----
-### <a id="b-138"></a>[🐞 B-138](#top)
-
-**`nerv chat` answers a fleet question with a generic greeting, ignoring the `fleet.chat` result**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0 h | — | — | — | — | — |
-
-💻 **→** Next: all steps closed; verify and close the record.
-
-| | |
-|---|---|
-| **Issue** | Seen by the owner on NERV-01 at `2627d483` on 2026-11-25. `nerv chat "quanti motori di scorta mi restano?"` twice answered with a generic Misato greeting, although `fleet.chat` was granted and ran (sorties `e8a4444a-16c1-4d4f-984a-1bf118d78ccf` and `e7849127-dbdd-47ad-b712-8f848f181815`): the tool result was ignored. Expected: no spare motors are registered (the spares table held only one frame row, quantity 0). Likely places: the planner's follow-up turn after a tool step (`misatoAsk` in `src/misato.ts`, history and `steps`) and the spares answer of `handleFleetChat` (`src/fleet-chat.ts`, called from `src/executors.ts`). |
-| **Reproduce** | With an invented fleet that has no motor spares: `nerv chat "quanti motori di scorta mi restano?"`; today: a greeting with no spare count. `nerv events e8a4444a-16c1-4d4f-984a-1bf118d78ccf` on NERV-01 shows the granted `fleet.chat` step and the reply. |
-| **Check** | The cause is named from the two sorties (the `fleet.chat` result and the next planner reply); a committed test across the tool step and the final reply fails first and passes with the fix; asked with no motor spares, the answer says none are registered; asked with spares, it gives the counts (new and used). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 0 h | 1 of 1 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-138-t01"></a>B-138-T01 — Answer a spares question from the fleet.chat result | 1.5 h | 0 h | Verified | [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #762](https://github.com/voidbrain/nerv/pull/762) category-scoped spares reply and planner grounding |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-138.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-138-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #762](https://github.com/voidbrain/nerv/pull/762) category-scoped spares reply and planner grounding. Test: `test/fleet-chat.test.ts`, `test/misato.test.ts` (committed failing first in `2b25814f`); owner report 2026-11-25, NERV-01 at `2627d483`; opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); [#762](https://github.com/voidbrain/nerv/pull/762) |
-| Opened | 2026-11-25 |
-| Verification | Unit/integration: 2026-11-25 passed locally (`test/fleet-chat.test.ts`, `test/misato.test.ts`); live NERV-01 check pending. |
-| Reviewed | 2026-11-26 |
 
 </details>
 
@@ -3458,51 +3413,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound · B-076-T03: [PR #695](https://github.com/voidbrain/nerv/pull/695). [PR #540](https://github.com/voidbrain/nerv/pull/540) B-076-T01; [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2; [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
-### <a id="b-137"></a>[🐞 B-137](#top)
-
-**Fleet chat reads a new drone's model and version as part categories**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | — | — | — |
-
-💻 **→** Next: all steps closed; verify and close the record.
-
-| | |
-|---|---|
-| **Issue** | Seen by the owner on NERV-01 at `2627d483` on 2026-11-25 at about 12:00. `nerv chat "aggiungi il drone Smoke, modello AOS 5, v. 5.1"` answered (after two "(invalid reply)" lines, [B-136](work/records/B-137.md#b-136)) "Quale categoria intendevi per 'modello'? Devo scegliere tra: frame, motor, prop, arm, fc, esc, vtx, camera, rx, antenna, gps.": the drone's model was taken for a part category. Answering `nerv chat "frame"` (again two "(invalid reply)" lines) gave "Non riesco a registrare 'v. 5.1' perché non corrisponde a una delle categorie di componenti valide…": the version became another category. The conversation loops instead of adding the drone with frame "AOS 5 v5.1". Likely place: `parseAddDrone` in `src/fleet-chat.ts` splits the text after the name on commas and reads each segment's first word as a part category; drone models live in `drone_models` (F-121-T01). |
-| **Reproduce** | With an invented drone: `nerv chat "aggiungi il drone Testdrone, modello Testframe 5, v. 5.1"`; today: a question about the category "modello"; answering `nerv chat "frame"`: a refusal of "v. 5.1" as a category. |
-| **Check** | A committed test fails first: adding a drone with "modello <model>" (Italian and English) and a version records the drone with that model (frame or `drone_models` link, as F-121 defines), or asks once whether to create the model; a version segment ("v. 5.1", "v5.1") joins the model; answering the follow-up never loops back to the same question. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | PRs |
-|---|---|---|---|---|---|---|
-| 🟢 Small | **Total** | 1.5 h | 0 h (0 of 1 steps recorded) | 0 h | 1 of 1 completed | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-137-t01"></a>B-137-T01 — Add a drone by chat with its model and version | 1.5 h | 0 h | Verified | [PR #764](https://github.com/voidbrain/nerv/pull/764) parse drone model and version segments on add-drone |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-137.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-137-T01: [PR #764](https://github.com/voidbrain/nerv/pull/764) parse drone model and version segments on add-drone. Test: `test/fleet-chat.test.ts` (committed failing first in `2fc02d29`); owner report 2026-11-25, NERV-01 at `2627d483`; [#750](https://github.com/voidbrain/nerv/pull/750); [#764](https://github.com/voidbrain/nerv/pull/764) |
-| Opened | 2026-11-25 |
-| Verification | Unit/integration: 2026-11-25 passed locally (`test/fleet-chat.test.ts`, `test/fleet-prints.test.ts`, `test/fleet.test.ts`); live NERV-01 check pending. |
 | Reviewed | 2026-11-26 |
 
 </details>
