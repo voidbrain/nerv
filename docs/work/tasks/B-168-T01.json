@@ -9,7 +9,7 @@
   "id": "B-168-T01",
   "title": "Failing tests: no-signal requests fall back to English despite config.language",
   "goal": "Join tests chat→planner→Misato and Telegram→Runtime→config fail on main",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Tests committed before the fix and failing on main"
   ],
@@ -29,10 +29,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h",
-    "basis": "Estimated 2026-11-26: two join tests. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: two join tests. No actual: implemented in an earlier session (#834) without a work-usage job. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
   },

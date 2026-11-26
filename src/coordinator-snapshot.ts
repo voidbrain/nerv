@@ -110,6 +110,8 @@ export interface ExportCoordinatorSnapshotInput {
   inTransaction?: boolean;
   /** #725 review: with `inTransaction`, commit the caller's (read) transaction once the tables are read. */
   commitAfterRead?: boolean;
+  /** F-016-T21: omit `tables` from the returned value once `chunks` are built (worker-thread seed export). */
+  omitTables?: boolean;
 }
 
 export interface ExportedCoordinatorSnapshot {
@@ -224,11 +226,12 @@ export function exportCoordinatorSnapshot(input: ExportCoordinatorSnapshotInput)
   const fullPayload: CoordinatorSnapshotPayload = { manifest, signature, tables };
   const payloadBytes = Buffer.from(JSON.stringify(fullPayload), 'utf8');
 
+  const returnedTables = input.omitTables ? {} : tables;
   if (payloadBytes.length <= maxBodyBytes) {
     return {
       manifest,
       signature,
-      tables,
+      tables: returnedTables,
       chunked: false,
       totalBytes: payloadBytes.length,
       chunks: [payloadBytes],
@@ -239,7 +242,7 @@ export function exportCoordinatorSnapshot(input: ExportCoordinatorSnapshotInput)
   return {
     manifest,
     signature,
-    tables,
+    tables: returnedTables,
     chunked: true,
     totalBytes: payloadBytes.length,
     chunks,

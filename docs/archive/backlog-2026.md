@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 8 | 30 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 9 | 31 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7614,6 +7614,91 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | Verification | Unit/integration: 2026-11-26, `test/misato.test.ts` "B-167" and "B-167 review", passed in CI on #831 and #833 |
 | Reviewed | 2026-11-26 |
 | Impact | The owner uses NERV in Italian: a short Italian request answered in English, and an English battery question that cannot reach the battery tools. |
+
+</details>
+
+---
+
+### B-168
+
+**A request with no language signal is answered in English instead of the owner's configured language**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: PR #834 merged on green CI (run 45881568262, all five jobs); Review: fresh-context research reviewer (Gemini 4 Carbon Medium, 2026-11-26), zero blocking or should-fix findings.
+
+| | |
+|---|---|
+| **Issue** | The owner uses NERV in Italian (owner instruction 2026-11-26: "nerv and all modules will need to work with Italian"). `requestLanguage` (`src/misato.ts`) falls back to its `fallback` argument when neither the request ("ok", "sì" alone is Italian, but "ok", a number, an emoji or a bare command such as "/cards" are not) nor an earlier exchange tells the language. Chat, PWA, voice and Telegram callers (`src/runtime-planning.ts`, `src/runtime-chat.ts`, `src/runtime-approvals.ts`, `src/telegram.ts`) passed no fallback, so it was always English, whatever `config.language` says. Found by the nerv#831 review (B-167). |
+| **Reproduce** | With `{"language":"it"}` in the data home's `config.json` and no earlier exchange, send "ok" in chat: Misato's system prompt says "Write the reply in English"; send `/cards` on Telegram with nothing waiting: the reply is "No pending approval cards." |
+| **Check** | Both reply in Italian with `config.language` "it" and stay English with "en" or no setting (`defaults.language` is "en"); tests committed failing first (B-168-T01) pass unchanged after B-168-T02. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: PR #834 merged on green CI (run 45881568262, all five jobs); Review: fresh-context research reviewer (Gemini 4 Carbon Medium, 2026-11-26), zero blocking or should-fix findings. 2026-11-26: `B-168-T01` (failing first): `test/misato.test.ts` "B-168" (chat "ok" through the runtime and planner to Misato's prompt, for `config.language` "it" and "en") and `test/telegram.test.ts` "B-168" (Telegram `/cards` through the Runtime to `config.json`). `B-168-T02`: `ownerLanguage(home)` in `src/config.ts` reads `config.language` (default "en"); every `requestLanguage` caller in the planner, chat commands, pack prompts, `/why`, interrupted-sortie notices and Telegram passes it as the fallback; Telegram reads it through the Runtime (`language()`). Voice push-to-talk confirms into the same chat path; its own command matcher (`detectVoiceLanguage`) is separate and unchanged. No real model ran.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | `src/misato.ts` (`requestLanguage`), its callers; found by the [#831](https://github.com/voidbrain/nerv/pull/831) review (B-167); fix [#834](https://github.com/voidbrain/nerv/pull/834). Test: `test/misato.test.ts` and `test/telegram.test.ts` "B-168". Review: fresh-context research reviewer (Gemini 4 Carbon Medium, 2026-11-26), zero blocking or should-fix findings across all Check clauses and failing-first test invariance |
+| Opened | 2026-11-26 |
+| Verification | Unit/integration 2026-11-26: test/misato.test.ts and test/telegram.test.ts B-168 (51/51), CI run 45881568262. |
+| Reviewed | 2026-11-26 |
+| Impact | The owner, who writes in Italian, gets English replies to "ok", numbers, emojis and bare commands at the start of a conversation. |
+
+</details>
+
+---
+
+### F-125
+
+**Reconcile to the latest harness and enable built backlog views**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: PRs #820, #823, #824 and #828 merged on green CI; reconciled to harness v10.24.3 (No review: check-harness --strict matched v10.24.3); built backlog views verified with zero incidents.
+
+| | |
+|---|---|
+| **Issue** | Owner decision 2026-11-25: the project-harness major release that stops committing backlog views (harness F-096-T06) ships only when (1) the template backlog is empty and every project has reconciled to the latest release, and (2) NERV has run with `workItems.views: "built"` for about 10 merged PRs with no view incident. NERV is on harness 10.9.0 and commits `docs/BACKLOG.md`. |
+| **Reproduce** | `.harness.json` names version 10.9.0 and has no `workItems.views`; git tracks `docs/BACKLOG.md`. |
+| **Check** | NERV is reconciled to the latest harness release; `workItems.views` is `"built"`, the ledger is untracked and the `backlog-views` branch publishes it; about 10 merged PRs after the switch are logged with any view incident (a missing or stale view, a broken link, a check failure, a coordinator misreading). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: PRs #820, #823, #824 and #828 merged on green CI; reconciled to harness v10.24.3 (No review: check-harness --strict matched v10.24.3); built backlog views verified with zero incidents. 2026-11-26 (F-125-T03, F-125-T02): the owner asked on 2026-11-26 to reconcile to harness `v10.24.0` now, while the template backlog still had open records (F-125-T01 waited for an empty one); every Check item here is met once this PR's CI passes (any later template release reconciles at session start without holding an open foreign-wait record). Copied `tools/merge-when-green.mjs`, `tools/behaviour.mjs`, `tools/guard.mjs`, `tools/browser-coverage.mjs`, `docs/agents/maintenance.md`, `docs/agents/parallel-work.md`, `docs/agents/procedures.md`, `docs/agents/rule-review.md` and `docs/agents/behaviour-checks.md` byte for byte from `v10.24.0` (`node tools/check-harness.mjs --strict` clean); reconciled adapted `AGENTS.md`, `docs/agents/pull-requests.md`, `.gitignore` and `package.json` (`guard:install`, `coverage:browser`, `mcp:recommend`, `reconcile:preview`, `friction`, `impact-map`; existing `coverage` and `verification:plan` kept). Skipped: optional `behaviour.heldOut` (left unset) and a local `npm run behaviour` run (the four `AGENTS.md` lines are verbatim from template `v10.24.0`, already measured before/after on Claude Code in template `F-102`, avoiding duplicate paid agent runs). Added `test/agents-tools.test.mjs` verifying every `tools/*.mjs` file named in `AGENTS.md` exists, missing ones fail, and `guard.mjs install` runs cleanly. Review: fresh-context research reviewer (Gemini 4 Carbon Medium), 2026-11-26: 3 must-fix and 2 should-fix fixed in the PR (inlined one-use helper in `test/agents-tools.test.mjs`, aligned `F-125` `Implemented` prose without a foreign-backlog wait, reverted out-of-scope `impact-map.md`, updated `B-158`/`B-159` archive `Verification` cells, noted skipped `behaviour` run and `heldOut`). Review: mechanical-reviewer (Claude Code, fresh context), 2026-11-26: all 65 copied files byte-identical to v10.24.0, `.harness.json` changes limited to the version, three copied entries, one rule-load entry and `estimation.since`, added scripts equal `core/package-scripts.json`, the AGENTS.md and pull-requests.md additions verbatim from the template with every project line kept; no findings. Prepared by Gemini, finished by Claude Code. Closed `F-125-T02`: rows 8–10+ logged below (and each of the 43 merges after #776 (`#777`–`#819`) has its commit on `origin/backlog-views` through `c1e91229`, every `backlog-views` run green) with zero view incidents. Earlier F-125-T02 switch narrative (#763, #779) and F-125-T01 (#753): [archive](evidence-2026.md#f-125-moved-2026-11-26-later), [earlier](evidence-2026.md#f-125-moved-2026-11-26).
+
+**View incident log (F-125-T02).** One row per merged PR after the switch, about 10, in merge order (the 43 merges after #776, `#777`–`#819`, all published through `c1e91229` with zero incidents).
+
+| # | PR | Merged | `backlog-views` commit | Incident |
+|---|---|---|---|---|
+| 0 | [#763](https://github.com/voidbrain/nerv/pull/763) (the switch) | 2026-11-25 (`d8a77708`) | `ce5775a6` | none |
+| 1 | [#770](https://github.com/voidbrain/nerv/pull/770) | 2026-11-25 (`5c306f5a`) | `a920916d` | none in the view; pre-switch branch dropped `docs/BACKLOG.md` when merging main |
+| 2 | [#771](https://github.com/voidbrain/nerv/pull/771) | 2026-11-25 (`833eee6a`) | `57dab339` | none |
+| 3 | [#772](https://github.com/voidbrain/nerv/pull/772) | 2026-11-25 (`5e1237dd`) | `72b05ba3` | none |
+| 4 | [#773](https://github.com/voidbrain/nerv/pull/773) | 2026-11-25 (`965ece3e`) | `14fd78cd` | none |
+| 5 | [#774](https://github.com/voidbrain/nerv/pull/774) | 2026-11-25 (`b6c135ee`) | `9a4c6ef8` | none |
+| 6 | [#775](https://github.com/voidbrain/nerv/pull/775) | 2026-11-25 (`7f493bc2`) | `5c2323a0` | none |
+| 7 | [#776](https://github.com/voidbrain/nerv/pull/776) | 2026-11-25 (`6b49177c`) | `4b0a82ca` | none |
+| 8 | [#777](https://github.com/voidbrain/nerv/pull/777) | 2026-11-26 (`36479983`) | `5a8b3042` | none |
+| 9 | [#780](https://github.com/voidbrain/nerv/pull/780) | 2026-11-26 (`f0d938f2`) | `ce3da80c` | none |
+| 10 | [#778](https://github.com/voidbrain/nerv/pull/778) | 2026-11-26 (`d18857db`) | `767b4d28` | none |
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Opened in [PR #748](https://github.com/voidbrain/nerv/pull/748); F-125-T01 in [PR #753](https://github.com/voidbrain/nerv/pull/753); F-125-T02 in [PR #763](https://github.com/voidbrain/nerv/pull/763); [#758](https://github.com/voidbrain/nerv/pull/758); [#779](https://github.com/voidbrain/nerv/pull/779); [#815](https://github.com/voidbrain/nerv/pull/815); [#820](https://github.com/voidbrain/nerv/pull/820) |
+| Opened | 2026-11-25 |
+| Verification | Unit 2026-11-26: check-harness --strict (v10.24.3), test/agents-tools.test.mjs, CI green on #820–#828. |
+| Reviewed | 2026-11-26 |
 
 </details>
 

@@ -2,6 +2,7 @@ import type { KeyObject } from 'node:crypto';
 import { existsSync, renameSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { readCoordinatorFencingState } from './coordinator-authority.ts';
 import { STANDBY_LEASE_SCHEMA } from './coordinator-lease.ts';
 import { PROMOTION_MARKER_FILE } from './coordinator-promote.ts';
@@ -106,14 +107,29 @@ function primaryKey(db: DatabaseSync, table: string): string[] {
  * active or draining, so a fenced old main or a standby never accumulates changes.
  */
 export function installReplicationCapture(db: DatabaseSync): void {
-  db.exec(COORDINATOR_STATE_SCHEMA);
-  db.exec(COORDINATOR_REPLICATION_SCHEMA);
-  db.exec(REPLICATION_CAPTURE_SCHEMA);
+  const objects = new Set(
+    (
+      db.prepare("SELECT type || ':' || name AS k FROM sqlite_master WHERE type IN ('table', 'trigger')").all() as {
+        k: string;
+      }[]
+    ).map((r) => r.k),
+  );
+  if (
+    !objects.has('table:coordinator_state') ||
+    !objects.has('table:coordinator_replication_log') ||
+    !objects.has('table:coordinator_replication_pending') ||
+    !objects.has('table:coordinator_replication_peer')
+  ) {
+    db.exec(COORDINATOR_STATE_SCHEMA);
+    db.exec(COORDINATOR_REPLICATION_SCHEMA);
+    db.exec(REPLICATION_CAPTURE_SCHEMA);
+  }
   const present = new Set(
     (db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as { name: string }[]).map((r) => r.name),
   );
   const when = `WHEN (SELECT replication_mode FROM coordinator_state WHERE id = 1) IN ${APPENDING}`;
   const statements: string[] = [];
+  const neededTriggers: string[] = [`${CAPTURE_PREFIX}telegram`];
   for (const table of CAPTURED_TABLES) {
     if (!present.has(table)) continue;
     const pk = primaryKey(db, table);
@@ -124,7 +140,11 @@ export function installReplicationCapture(db: DatabaseSync): void {
         : `json_object('rowid', ${row}.rowid)`;
     const note = (row: 'NEW' | 'OLD') =>
       `INSERT INTO coordinator_replication_pending(tbl, key_json) VALUES ('${table}', ${key(row)});`;
-    const name = (op: string) => quote(`${CAPTURE_PREFIX}${table}_${op}`);
+    const name = (op: string) => {
+      const raw = `${CAPTURE_PREFIX}${table}_${op}`;
+      neededTriggers.push(raw);
+      return quote(raw);
+    };
     statements.push(`CREATE TRIGGER IF NOT EXISTS ${name('ins')} AFTER INSERT ON ${quote(table)} ${when}
       BEGIN ${note('NEW')} END;`);
     if (pk.length) {
@@ -134,6 +154,7 @@ export function installReplicationCapture(db: DatabaseSync): void {
         BEGIN ${note('OLD')} END;`);
     }
   }
+  if (neededTriggers.every((t) => objects.has(`trigger:${t}`))) return;
   // The Telegram channel's checkpoint (TelegramChannel.save writes these columns): a change is noted, not a
   // rewrite of the same values (the batch append rewrites them with COALESCE).
   const moved = TELEGRAM_COLUMNS.map((c) => `OLD.${c} IS NOT NEW.${c}`).join(' OR ');
@@ -300,7 +321,7 @@ export function replicationBatchAt(
  */
 export function exportSeedSnapshot(
   db: DatabaseSync,
-  input: Source & { readonly privateKey: KeyObject; readonly maxBodyBytes?: number },
+  input: Source & { readonly privateKey: KeyObject; readonly maxBodyBytes?: number; readonly omitTables?: boolean },
 ): ExportedCoordinatorSnapshot {
   installReplicationCapture(db);
   const flush = () =>
@@ -318,18 +339,33 @@ export function exportSeedSnapshot(
     flush();
     db.exec('BEGIN');
     let state:
-      { coordinator_epoch: number; coordinator_fence: number; head_seq: number; state_digest: string } | undefined;
+      | {
+          coordinator_epoch: number;
+          coordinator_fence: number;
+          replication_mode: string;
+          head_seq: number;
+          state_digest: string;
+        }
+      | undefined;
     try {
       const noted = db.prepare('SELECT 1 FROM coordinator_replication_pending LIMIT 1').get();
       state = noted
         ? undefined
         : (db
             .prepare(
-              'SELECT coordinator_epoch, coordinator_fence, head_seq, state_digest FROM coordinator_state WHERE id = 1',
+              'SELECT coordinator_epoch, coordinator_fence, replication_mode, head_seq, state_digest FROM coordinator_state WHERE id = 1',
             )
             .get() as typeof state);
+      if (state && state.replication_mode !== 'active') {
+        db.exec('ROLLBACK');
+        throw new Error('This base is not the active main: only the active main seeds a standby.');
+      }
     } catch (err) {
-      db.exec('ROLLBACK');
+      try {
+        db.exec('ROLLBACK');
+      } catch {
+        // Already rolled back.
+      }
       throw err;
     }
     if (!state) {
@@ -349,9 +385,121 @@ export function exportSeedSnapshot(
       maxBodyBytes: input.maxBodyBytes ?? SEED_FRAME_BYTES,
       inTransaction: true,
       commitAfterRead: true,
+      ...(input.omitTables ? { omitTables: true } : {}),
     });
   }
   throw new Error('The main kept writing while the seed was read; it is tried again.');
+}
+
+interface SeedWorkerInput extends Source {
+  readonly nervSeedWorker: true;
+  readonly databasePath: string;
+  readonly privateKey: KeyObject;
+  readonly maxBodyBytes: number;
+}
+
+type SeedWorkerReply =
+  | {
+      readonly ok: true;
+      readonly manifest: ExportedCoordinatorSnapshot['manifest'];
+      readonly signature: string;
+      readonly chunked: boolean;
+      readonly totalBytes: number;
+      readonly chunkBuffers: ArrayBuffer[];
+    }
+  | { readonly ok: false; readonly error: string };
+
+/**
+ * F-016-T21: exports, serialises and signs a seed snapshot on a worker thread so serve's event loop keeps
+ * answering lease renewals and Kaji requests while a large coordinator store is read and canonicalised.
+ */
+export async function exportSeedSnapshotAsync(
+  db: DatabaseSync,
+  input: Source & { readonly privateKey: KeyObject; readonly maxBodyBytes?: number },
+  onWorker?: (worker: Worker) => void,
+): Promise<ExportedCoordinatorSnapshot> {
+  const file = (db.prepare('PRAGMA database_list').all() as { name: string; file: string }[]).find(
+    (r) => r.name === 'main',
+  )?.file;
+  if (!file) return exportSeedSnapshot(db, input);
+  const data: SeedWorkerInput = {
+    nervSeedWorker: true,
+    databasePath: file,
+    root: input.root,
+    sourceBaseId: input.sourceBaseId,
+    privateKey: input.privateKey,
+    maxBodyBytes: input.maxBodyBytes ?? SEED_FRAME_BYTES,
+  };
+  return new Promise<ExportedCoordinatorSnapshot>((resolveExport, rejectExport) => {
+    const worker = new Worker(new URL('./coordinator-shipping.ts', import.meta.url), {
+      execArgv: [],
+      workerData: data,
+    });
+    onWorker?.(worker);
+    let settled = false;
+    worker.once('message', (reply: SeedWorkerReply) => {
+      settled = true;
+      if (!reply.ok) {
+        rejectExport(new Error(reply.error));
+        return;
+      }
+      resolveExport({
+        manifest: reply.manifest,
+        signature: reply.signature,
+        tables: {},
+        chunked: reply.chunked,
+        totalBytes: reply.totalBytes,
+        chunks: reply.chunkBuffers.map((ab) => Buffer.from(ab)),
+      });
+    });
+    worker.once('error', (err) => {
+      if (!settled) {
+        settled = true;
+        rejectExport(err);
+      }
+    });
+    worker.once('exit', (code) => {
+      if (!settled) {
+        settled = true;
+        rejectExport(new Error(`Seed snapshot worker exited before replying (code ${code}).`));
+      }
+    });
+  });
+}
+
+if (!isMainThread && (workerData as Partial<SeedWorkerInput> | null)?.nervSeedWorker === true) {
+  const data = workerData as SeedWorkerInput;
+  const workerDb = new DatabaseSync(data.databasePath);
+  let reply: SeedWorkerReply;
+  let transfer: ArrayBuffer[] = [];
+  try {
+    workerDb.exec('PRAGMA busy_timeout = 5000');
+    const exported = exportSeedSnapshot(workerDb, {
+      root: data.root,
+      sourceBaseId: data.sourceBaseId,
+      privateKey: data.privateKey,
+      maxBodyBytes: data.maxBodyBytes,
+      omitTables: true,
+    });
+    transfer = exported.chunks.map((chunk) => {
+      const ab = new ArrayBuffer(chunk.byteLength);
+      new Uint8Array(ab).set(chunk);
+      return ab;
+    });
+    reply = {
+      ok: true,
+      manifest: exported.manifest,
+      signature: exported.signature,
+      chunked: exported.chunked,
+      totalBytes: exported.totalBytes,
+      chunkBuffers: transfer,
+    };
+  } catch (err) {
+    reply = { ok: false, error: err instanceof Error ? err.message : String(err) };
+  } finally {
+    workerDb.close();
+  }
+  parentPort!.postMessage(reply, transfer);
 }
 
 /** The standby's answer to one seed frame. */
@@ -625,6 +773,7 @@ export class ReplicationShipper {
   private readonly o: ReplicationShipperOptions;
   private timer: ReturnType<typeof setInterval> | undefined;
   private running: Promise<ShipOutcome> | undefined;
+  private readonly workers = new Set<Worker>();
   private installed = false;
   private seedRetryAt = 0;
   private seedFailures = 0;
@@ -688,14 +837,27 @@ export class ReplicationShipper {
     if (state?.replicationMode !== 'active')
       throw new Error('This base is not the active main: only the active main seeds a standby.');
     this.ensureCapture();
-    const exported = exportSeedSnapshot(this.o.db, { ...this.source(), privateKey: this.o.privateKey() });
+    const exported = await exportSeedSnapshotAsync(
+      this.o.db,
+      { ...this.source(), privateKey: this.o.privateKey() },
+      (worker) => {
+        this.workers.add(worker);
+        worker.once('exit', () => this.workers.delete(worker));
+      },
+    );
     const { coordinatorEpoch, headSeq } = exported.manifest;
     let reply: SeedReply = { ok: true, complete: false };
     for (const frame of exported.chunks) {
-      reply = await this.o.link.seedStandby(standby, frame, coordinatorEpoch, state.leaseExpiresAt);
+      const current = this.state();
+      if (current?.replicationMode !== 'active' || current.coordinatorEpoch !== coordinatorEpoch)
+        throw new Error('This base is no longer the active main: only the active main seeds a standby.');
+      reply = await this.o.link.seedStandby(standby, frame, coordinatorEpoch, current.leaseExpiresAt);
       if (!reply.ok) throw new Error(`${standby} refused the seed (${reply.reason}): ${reply.error}`);
     }
     if (!reply.ok || !reply.complete) throw new Error(`${standby} did not complete the seed.`);
+    const after = this.state();
+    if (after?.replicationMode !== 'active' || after.coordinatorEpoch !== coordinatorEpoch)
+      throw new Error('This base is no longer the active main: only the active main seeds a standby.');
     this.noteAck(standby, coordinatorEpoch, headSeq, true);
     this.o.log?.(`Replication: seeded ${standby} at seq ${headSeq}.`);
     return { headSeq };
@@ -856,5 +1018,7 @@ export class ReplicationShipper {
   stop(): void {
     if (this.timer) clearInterval(this.timer);
     this.timer = undefined;
+    for (const worker of this.workers) void worker.terminate();
+    this.workers.clear();
   }
 }
