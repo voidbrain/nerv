@@ -9,7 +9,8 @@ nerv chat "Remind me to renew car insurance on 2030-01-15 at 9:00"
 nerv chat "What reminders do I have?"
 ```
 
-- CLI, each Telegram chat, and the dashboard are separate conversations (last 3 exchanges within 30 minutes are included for follow-ups).
+- CLI, each Telegram chat, and the dashboard are separate conversations (last 3 exchanges within 30 minutes are included for follow-ups). The dashboard chat's **New conversation** button starts a clean one.
+- Once a tool result (for example an MCP answer) has entered a conversation, NERV runs no further outside tools in it: Misato says so once and stops. Start a new conversation, or write again after 30 minutes without messages there.
 - Misato plans one step at a time (max 6 steps), passing each proposed action through the gate before seeing the result.
 - Actions requiring approval pause until decided (`nerv approve ID` / `reject ID`, Telegram button, dashboard, or expiry), then Misato resumes and records the follow-up across restarts.
 - Times are converted to your configured IANA `timeZone` before Misato sees them.

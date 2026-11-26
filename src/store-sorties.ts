@@ -365,6 +365,7 @@ export class StoreSorties {
       pattern: p.ballot.pattern,
       reason: p.ballot.reason,
       sync: p.ballot.sync,
+      ...(p.ballot.blocked ? { blocked: p.ballot.blocked } : {}),
       ...(p.approvalId ? { approvalId: p.approvalId } : {}),
     };
     if (p.grantId && hasExecutor(proposal.tool)) {

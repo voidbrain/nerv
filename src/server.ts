@@ -19,7 +19,7 @@ import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { realpath, stat, readFile } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import type { StoreApi } from './runtime.ts';
-import { QueueCancelledError, QueueFullError } from './request-queue.ts';
+import { QueueCancelledError, QueueFullError, validChatConversation } from './request-queue.ts';
 import type { Pilot, PilotPatch } from './pilots.ts';
 import { attachRpcSocket } from './socket.ts';
 import { toChecklistSurface } from './lists.ts';
@@ -976,11 +976,12 @@ export function makeServer(
           typeof b.message !== 'string' ||
           !b.message.trim() ||
           b.message.length > 4000 ||
-          (b.conversation !== undefined &&
-            (typeof b.conversation !== 'string' || !/^[a-z]+$/.test(b.conversation) || b.conversation.length > 20)) ||
+          (b.conversation !== undefined && !validChatConversation(b.conversation)) ||
           (b.requestId !== undefined && (typeof b.requestId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(b.requestId)))
         )
-          throw new Error('Message is required: up to 4000 characters; conversation is a short lowercase name.');
+          throw new Error(
+            'Message is required: up to 4000 characters; conversation is a short lowercase name or dashboard:<id>.',
+          );
         // Each step may wait for Misato and Casper.
         const budget = MODEL_TIMEOUT_MS * MAX_STEPS * 2 + 5000;
         req.setTimeout(budget);
@@ -1027,8 +1028,7 @@ export function makeServer(
           typeof b.transcript !== 'string' ||
           typeof b.confirmed !== 'boolean' ||
           (b.language !== undefined && b.language !== 'it' && b.language !== 'en') ||
-          (b.conversation !== undefined &&
-            (typeof b.conversation !== 'string' || !/^[a-z]+$/.test(b.conversation) || b.conversation.length > 20)) ||
+          (b.conversation !== undefined && !validChatConversation(b.conversation)) ||
           (b.requestId !== undefined && (typeof b.requestId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(b.requestId)))
         ) {
           throw new Error('transcript and confirmed boolean are required.');

@@ -486,6 +486,22 @@
     } catch (e) { log("Decision failed: " + e.message, "danger"); }
     poll();
   };
+  // B-175: the dashboard chat's conversation. "New conversation" starts a clean one: Misato no longer sees the earlier
+  // messages, nor a tool result that made the old one untrusted. Kept for this tab, so a reload stays in it.
+  const CONVERSATION = "nerv.dashboard.conversation";
+  function newConversationId() {
+    const bytes = new Uint8Array(8);
+    crypto.getRandomValues(bytes);
+    return "dashboard:" + Array.from(bytes, b => b.toString(36).padStart(2, "0")).join("");
+  }
+  let conversation = "dashboard";
+  try { const saved = sessionStorage.getItem(CONVERSATION); if (saved && /^dashboard:[a-z0-9]{1,30}$/.test(saved)) conversation = saved; } catch { /* private window: the default conversation */ }
+  document.getElementById("chat-new")?.addEventListener("click", () => {
+    conversation = newConversationId();
+    try { sessionStorage.setItem(CONVERSATION, conversation); } catch { /* private window: kept until reload */ }
+    log("New conversation: Misato no longer sees the earlier messages.", "ok", null, "maya");
+    document.getElementById("chat-in")?.focus();
+  });
   window.chat = async function (text) {
     log(text, "", null, "you"); state.log[state.log.length - 1].chat = true;
     // F-051: where the request goes, said before it goes: another online main base gets it over the Kaji line.
@@ -504,7 +520,7 @@
         poll();
       } catch { /* ignore queue check errors */ }
     }, 60);
-    try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text, conversation:"dashboard", requestId }) });
+    try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text, conversation, requestId }) });
       // Dispatched (F-036): the main base answered; its sortie and cards are there, so only the reply is shown here.
       if (r.command) { followNew = null; log(r.reply || r.error || "No command result", r.error ? "danger" : "ok", null, "maya"); }
       else if (r.base) log((r.reply || ("Could not finish: " + (r.error || "no reply"))) + " · answered by " + r.base.name + (r.waiting && r.waiting.length ? "; decide its card on Aoba or on " + r.base.name + "'s dashboard" : ""), r.reply ? "ok" : "danger", null, "misato");
