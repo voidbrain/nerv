@@ -9,7 +9,7 @@
   "id": "B-176-T02",
   "title": "Keep a large read result in the planner prompt, shortened and marked",
   "goal": "The B-176 test passes without todo",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "The B-176 test passes without todo"
   ],
