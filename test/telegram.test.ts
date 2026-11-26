@@ -901,6 +901,35 @@ test('F-056-T02: Telegram /cards sends pending cards with inline buttons and rea
   }
 });
 
+test("B-168: a Telegram command with no language signal answers in the owner's config.language (Telegram → Runtime → config)", async () => {
+  const token = 'tg-b168-token';
+  const tg = await fakeTelegram(token);
+  const home = mkdtempSync(join(tmpdir(), 'nerv-tg-b168-'));
+  writeFileSync(join(home, 'config.json'), JSON.stringify({ language: 'it' }));
+  let runtime: Runtime | undefined;
+  let channel: TelegramChannel | undefined;
+  try {
+    runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+    await runtime.ready();
+    channel = new TelegramChannel({
+      api: new TelegramApi(token, tg.base),
+      store: runtime,
+      chatId: OWNER,
+      statePath: join(home, 'telegram-state.json'),
+      log: () => {},
+    });
+    await channel.start(50);
+    // "/cards" has no Italian or English word, and there is no earlier exchange.
+    tg.text(OWNER, '/cards');
+    await until(() => tg.sent().some((m) => m.text === 'Nessuna scheda in attesa.'));
+  } finally {
+    await channel?.stop();
+    await runtime?.close();
+    await tg.close();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
 test('F-016-T19: a base without coordinator authority never polls or calls the Bot API; activation hydrates and starts polling', async () => {
   const token = '123456:' + 'h'.repeat(35);
   const tg = await fakeTelegram(token);

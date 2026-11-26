@@ -687,3 +687,7 @@ PR #828 reconciles the harness to v10.24.2 (from 10.24.1; project-harness B-129)
 ## 2026-11-26 — coordinator references
 
 PR [#830](https://github.com/voidbrain/nerv/pull/830) renames `solution:ID` references to `coordinator:ID` in records and tasks (owner decision 2026-11-26, coordinator:F-020). References only.
+
+## 2026-11-26 — main `89d6791`
+
+PRs #825, #824, #826, #827, #828, #829, #830, #832, #831, #833 merged on green CI. #825: F-142, F-143; #826: F-144; #829: B-167, F-120; #832: F-145, F-146; #831, #833: B-167 (closed); #824, #827, #828, #830: no record.

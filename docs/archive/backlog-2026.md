@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 8 | 29 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 8 | 30 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7579,6 +7579,41 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | Opened | 2026-11-26 |
 | Verification | Documentation: 2026-11-26, `node tools/coverage-table.mjs --write` after `npm run test:coverage` (1595 pass, 0 fail). CI: 2026-11-26, PR #813 run 45806519489 passed all five jobs (`coverage-table.mjs --check` enforced). |
 | Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-167
+
+**Owner requests read in the wrong language, or without their battery tools, before Misato plans**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: Closed 2026-11-26: fix #831 and review fixes #833 merged on green CI (all required checks passed); Review: design-reviewer, fresh context, one regression fixed in #833.
+
+| | |
+|---|---|
+| **Issue** | Found while building the nerv-planner Gauntlet pack. `requestLanguage` (`src/misato.ts`) reads "quante batterie devo caricare?" and "stampa i piedini di Smoke" as English: the first has no word in its Italian list, and in the second "i" counts as English, so Misato is told to reply in English to the owner's Italian. `detectToolDomains` misses the English plural "batteries" (`batter[iy]\b`), so "how many batteries do I need to charge?" offers no battery tool, even after `tools.read` with subject batteries. |
+| **Reproduce** | `node --input-type=module -e "const m=await import('./src/misato.ts'); console.log(m.requestLanguage('quante batterie devo caricare?'), m.requestLanguage('stampa i piedini di Smoke'), [...m.detectToolDomains({request:'how many batteries do I need to charge?'})])"` prints `en en []`. |
+| **Check** | The three requests read as `it`, `it` and `batteries` (a test fails first, B-167-T01); the fix keeps the existing language and domain tests passing, and nerv-planner is rebuilt (`node tools/gauntlet-planner-pack.mjs`), so its changed cases are pending again (B-167-T02). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: Closed 2026-11-26: fix #831 and review fixes #833 merged on green CI (all required checks passed); Review: design-reviewer, fresh context, one regression fixed in #833. 2026-11-26: Closed: #831 (merge e15d63e9) and #833 (merge 89d67918) merged with every required check green (8 success, CodeQL neutral, swift skipped); the B-167 tests pass on main. 2026-11-26: Review: design-reviewer subagent (fresh context, Opus) read the #831 diff with probes: no blocker; one regression, fixed in B-167-T03: a request with no listed word was decided by half votes alone, so "radio", "hello" or "pizza tonight" after an English conversation read as Italian; half votes now count only beside a listed word, else the earlier exchanges, then the fallback decide. Also from the review: Italian "me" ("per me va bene") no longer votes English. Test: `test/misato.test.ts` "B-167 review" (committed failing first). Accepted heuristics, not changed: a phone-capitalised first word never votes and Italian built only on English loanwords ("check mail", "list droni") reads English, both left to the fallback, which B-168 makes the owner's `config.language`; `(?:dis)?charg\w*` and `expir\w*` also route "in charge of" or "expired license" (only extra tool schemas for that turn); determinism and word boundaries hold ("squads", "hotmails" match nothing). 2026-11-26: raised to P1: the owner uses NERV in Italian, and their short requests (an imperative or a question with a name or a word English shares, such as "i", "a" or "in") were answered in English. `B-167-T01` (failing first, `test/misato.test.ts` "B-167"): 14 Italian requests (including "accendi la luce", "spegni il ventilatore per 2 ore", "aggiungi Rocca Calascio al trip di agosto", "ricordami di bere acqua tra 5 minuti", "controlla la mail di oggi", "elenca i promemoria", "a che ora parto?") read as `it`, 13 English ones stay `en`, and English plurals and synonyms reach each topic (batteries, lipos, discharged; PIDs, quads, propellers, drones; expires, recipes, groceries; emails, mails, invoices). `B-167-T02`: `requestLanguage` no longer counts "i", "a" or "in" as English, counts common Italian verbs and question words and a few more English function words, and gives half a vote to Italian for each other lower-case word of four or more letters ending in a, i or o (capitalised names never vote); `DOMAIN_INTENT_PATTERNS` take English plurals and synonyms. nerv-planner rebuilt as 1.1.0 (`node tools/gauntlet-planner-pack.mjs`, `--check` passes): its English battery case asks "how many batteries do I need to charge?" again, and all 18 Italian cases now tell Misato to reply in Italian (three did not), so every case is pending; `docs/test-capability-index.md` regenerated. Not changed: chat callers still pass no fallback, so a request with no telling word (for example "ok" with no earlier exchanges) falls back to English rather than `config.language` (B-168). No real model ran. 2026-11-26: opened while building the nerv-planner pack: it keeps the owner's phrasings for the Italian cases (their prompts carry NERV's real, wrong language line until this is fixed) and uses "how many battery packs do I need to charge?" for the English battery case, which NERV does route. Planned: B-167-T01, B-167-T02.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | `src/misato.ts` (`requestLanguage`, `DOMAIN_INTENT_PATTERNS`); found by the nerv-planner pack; [#829](https://github.com/voidbrain/nerv/pull/829); fix [#831](https://github.com/voidbrain/nerv/pull/831); review fixes [#833](https://github.com/voidbrain/nerv/pull/833) |
+| Opened | 2026-11-26 |
+| Verification | Unit/integration: 2026-11-26, `test/misato.test.ts` "B-167" and "B-167 review", passed in CI on #831 and #833 |
+| Reviewed | 2026-11-26 |
+| Impact | The owner uses NERV in Italian: a short Italian request answered in English, and an English battery question that cannot reach the battery tools. |
 
 </details>
 

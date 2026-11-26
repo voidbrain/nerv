@@ -1,4 +1,4 @@
-import { readConfig, readScrolls } from './config.ts';
+import { ownerLanguage, readConfig, readScrolls } from './config.ts';
 import { toolDocs } from './executors.ts';
 import { TOOL_INDEX_READ, freeReadTurns } from './tool-index.ts';
 import { builtinPackRegistry } from './packs.ts';
@@ -182,6 +182,7 @@ export class RuntimePlanning {
       requestLanguage(
         message,
         context.map((t) => t.request),
+        ownerLanguage(this.host.home),
       );
     const ranSteps = () =>
       steps
@@ -734,6 +735,7 @@ export class RuntimePlanning {
             requestLanguage(
               message,
               context.map((t) => t.request),
+              ownerLanguage(this.host.home),
             ),
             tool,
             args,

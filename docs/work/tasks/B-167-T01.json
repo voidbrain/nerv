@@ -9,7 +9,7 @@
   "id": "B-167-T01",
   "title": "Failing test: Italian requests read as English, English batteries not routed",
   "goal": "A committed test fails on main for the three requests in B-167",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Test committed before the fix and failing on main"
   ],
@@ -29,10 +29,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h",
-    "basis": "Estimated 2026-11-26: three assertions in test/misato.test.ts. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: three assertions in test/misato.test.ts. Not a measurement. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
   },
