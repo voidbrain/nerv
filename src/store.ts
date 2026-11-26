@@ -39,6 +39,8 @@ import {
 } from './delivery-state.ts';
 import type { WorkerLease } from './worker-jobs.ts';
 import { credentialAges, readConfig } from './config.ts';
+import { GmailClient } from './gmail.ts';
+import { GmailTokenSource, readGmailCredentials } from './gmail-auth.ts';
 import { UPGRADE_CONTRACT } from './upgrade-contract.ts';
 import { WorkerJobs } from './worker-jobs.ts';
 import { WholeJobHandoffStore } from './whole-job-handoff.ts';
@@ -180,6 +182,30 @@ export class Store {
   private readonly cooking: CookingStoreSlice;
   readonly policySource: string;
   pushFetch: typeof fetch = fetch;
+  /** F-086-T05: how the Gmail connector reaches Google (tests pass a fake Google; nothing else sets it). */
+  gmailFetch: typeof fetch = fetch;
+  private gmailTokens?: GmailTokenSource;
+  private gmailInjected?: GmailClient;
+  /** Tests inject a client here; the service never sets it and reads the owner's private credential instead. */
+  set gmail(client: GmailClient | undefined) {
+    this.gmailInjected = client;
+  }
+  /**
+   * F-086-T05: the Gmail connector when the owner has connected an account (`nerv gmail connect`), else undefined and
+   * every gmail tool answers "Gmail not connected". The private credential is read at each use, so a connect,
+   * reconnect or disconnect applies without a restart; access tokens stay in memory.
+   */
+  get gmail(): GmailClient | undefined {
+    if (this.gmailInjected) return this.gmailInjected;
+    const home = this.home;
+    if (!home) return undefined;
+    const credentials = readGmailCredentials(home);
+    if (!credentials) return undefined;
+    const fetchFn: typeof fetch = (input, init) => this.gmailFetch(input, init);
+    this.gmailTokens ??= new GmailTokenSource(() => readGmailCredentials(home), fetchFn);
+    const tokens = this.gmailTokens;
+    return new GmailClient({ accessToken: () => tokens.accessToken(), scopes: credentials.scopes, fetchFn });
+  }
   codingPrOpener?: CodingJobPrOpener;
   bambuLauncher?: BambuConnectLauncher;
   /** B-132: overrides how long an executor that answers later may take before it ends as action.failed (tests). */

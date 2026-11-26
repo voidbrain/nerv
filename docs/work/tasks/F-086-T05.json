@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-086-T05",
+  "parent": "F-086",
+  "title": "Wire the Gmail credential flow into the service",
+  "goal": "The owner connects Gmail himself and the running service uses it",
+  "status": "implemented",
+  "acceptance": [
+    "nerv gmail connect runs Google's installed-app OAuth flow (loopback redirect on 127.0.0.1, PKCE, state) and stores the client and refresh token in a mode-0600 file in the data home, never config.json, Git or a log; read-only scope unless --compose",
+    "The service constructs a GmailClient from that file when connected and every gmail tool answers \"Gmail not connected\" with the connect command when not; drafting and sending also need gmail.compose and keep their Orange and Blue cards",
+    "Mail results taint the sortie; a join test runs service, client and tools against a fake Google; no real Google call in tests"
+  ],
+  "dependsOn": [
+    "F-086-T03"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/acceptance/f086-gmail.md",
+    "docs/guides/**",
+    "docs/work/records/F-086.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design",
+    "security-review"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run typecheck",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A change of gate class, data leaving the base, or a material effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2.5 h",
+    "basis": "Estimated 2026-11-26 after the owner approved this step in chat (\"A. Approve an agent step that wires it up\"): auth module, service wiring, CLI command, tests with a fake Google. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2.5,
+    "baselineAgentHours": 2.5,
+    "estimateAgentHours": 2.5
+  }
+}

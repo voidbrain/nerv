@@ -301,6 +301,11 @@ export const HELP_GROUPS: HelpGroup[] = [
       { name: 'root-migration', args: 'plan|apply|status', about: 'Move to a replacement root key' },
       { name: 'credentials', args: 'rotate admin|telegram|cloud', about: 'Rotate a secret' },
       { name: 'telegram', args: 'token | link [CHAT_ID]', about: 'Connect the Telegram bot' },
+      {
+        name: 'gmail',
+        args: 'connect [--compose] [--client-file FILE] | status | disconnect',
+        about: 'Connect Gmail (read-only unless --compose)',
+      },
       { name: 'native-init', about: 'Set up TLS for the native companion' },
       { name: 'pair', args: '[label]', about: 'Pair a native companion' },
       { name: 'clients', about: 'Paired companions' },

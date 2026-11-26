@@ -140,7 +140,9 @@ test(
       const tokenCalls = google.seen.filter((s) => s.url === GOOGLE_TOKEN_URL);
       assert.equal(tokenCalls.length, 1);
       assert.match(tokenCalls[0]!.body ?? '', /grant_type=refresh_token/);
-      assert.ok(google.seen.filter((s) => s.url.startsWith(GMAIL_API_BASE)).every((s) => s.auth === `Bearer ${ACCESS}`));
+      assert.ok(
+        google.seen.filter((s) => s.url.startsWith(GMAIL_API_BASE)).every((s) => s.auth === `Bearer ${ACCESS}`),
+      );
       // Nothing the ledger, inbox or doctor keeps carries a secret.
       const kept = JSON.stringify([store.events(sortie), store.inboxPage(), store.doctor()]);
       for (const secret of [CLIENT_SECRET, REFRESH, ACCESS]) assert.doesNotMatch(kept, new RegExp(secret));
@@ -229,9 +231,12 @@ test(
     const fetchFn = (async (input: string | URL | Request, init?: RequestInit) => {
       assert.equal(String(input), GOOGLE_TOKEN_URL);
       tokenBodies.push(String(init?.body));
-      return new Response(JSON.stringify({ refresh_token: REFRESH, access_token: ACCESS, scope: GMAIL_SCOPE_READONLY }), {
-        headers: { 'content-type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ refresh_token: REFRESH, access_token: ACCESS, scope: GMAIL_SCOPE_READONLY }),
+        {
+          headers: { 'content-type': 'application/json' },
+        },
+      );
     }) as typeof fetch;
     const connecting = connectGmail({
       home,
@@ -276,13 +281,30 @@ test(
         JSON.stringify({ refresh_token: REFRESH, scope: `${GMAIL_SCOPE_READONLY} https://mail.google.com/` }),
         { headers: { 'content-type': 'application/json' } },
       )) as typeof fetch;
-    const tooMuch = connectGmail({ home, clientId: CLIENT_ID, clientSecret: CLIENT_SECRET, compose: false, print: (l) => lines.push(l), fetchFn: broader });
+    const tooMuch = connectGmail({
+      home,
+      clientId: CLIENT_ID,
+      clientSecret: CLIENT_SECRET,
+      compose: false,
+      print: (l) => lines.push(l),
+      fetchFn: broader,
+    });
+    // Handled at once: the flow fails while the test is still driving the browser step.
+    tooMuch.catch(() => undefined);
     await consent(lines, 'fixture-auth-code-0002');
     await assert.rejects(tooMuch, /more Gmail access than requested: nothing was saved/);
     assert.equal(existsSync(gmailCredentialsPath(home)), false);
 
     lines.length = 0;
-    const declined = connectGmail({ home, clientId: CLIENT_ID, clientSecret: CLIENT_SECRET, compose: true, print: (l) => lines.push(l), fetchFn: broader });
+    const declined = connectGmail({
+      home,
+      clientId: CLIENT_ID,
+      clientSecret: CLIENT_SECRET,
+      compose: true,
+      print: (l) => lines.push(l),
+      fetchFn: broader,
+    });
+    declined.catch(() => undefined);
     const url = await consent(lines, undefined);
     assert.equal(url.searchParams.get('scope'), `${GMAIL_SCOPE_READONLY} ${GMAIL_SCOPE_COMPOSE}`);
     await assert.rejects(declined, /declined: nothing was saved/);

@@ -9,6 +9,7 @@ import { pushBranchAndOpenPr, type CodingJobPrOpener } from './coding-job.ts';
 import { handOffToBambuConnect, readSlicerProfiles, type BambuConnectLauncher, type SlicerExecFn } from './slicer.ts';
 import { preparePrintPartFor, printPartByChat, sliceLibraryPart } from './print-job.ts';
 import type { GmailClient } from './gmail.ts';
+import { GMAIL_NOT_CONNECTED } from './gmail-auth.ts';
 import { analyzeBlackboxVibration } from './blackbox.ts';
 import type { FpvBuildStore, BuildComponentInput, BuildWiringInput, PinoutEntry } from './fpv-builds.ts';
 import { toRecipeSurface, type DocumentStore } from './documents.ts';
@@ -1302,7 +1303,7 @@ function executeRaw(
     }
     case 'gmail.search': {
       only(args, ['query', 'maxResults']);
-      if (!backend.gmail) throw new Error('Gmail connector is not configured.');
+      if (!backend.gmail) throw new Error(GMAIL_NOT_CONNECTED);
       const maxResults = args.maxResults === undefined ? 10 : Number(args.maxResults);
       if (!Number.isInteger(maxResults) || maxResults < 1 || maxResults > 20) {
         throw new Error('gmail.search maxResults must be an integer between 1 and 20.');
@@ -1311,12 +1312,12 @@ function executeRaw(
     }
     case 'gmail.read': {
       only(args, ['id']);
-      if (!backend.gmail) throw new Error('Gmail connector is not configured.');
+      if (!backend.gmail) throw new Error(GMAIL_NOT_CONNECTED);
       return backend.gmail.read(text(args, 'id'));
     }
     case 'gmail.draft': {
       only(args, ['to', 'subject', 'body']);
-      if (!backend.gmail) throw new Error('Gmail connector is not configured.');
+      if (!backend.gmail) throw new Error(GMAIL_NOT_CONNECTED);
       return backend.gmail.createDraft({
         to: text(args, 'to'),
         subject: text(args, 'subject'),
@@ -1325,7 +1326,7 @@ function executeRaw(
     }
     case 'gmail.send': {
       only(args, ['draftId', 'to', 'subject', 'body']);
-      if (!backend.gmail) throw new Error('Gmail connector is not configured.');
+      if (!backend.gmail) throw new Error(GMAIL_NOT_CONNECTED);
       return backend.gmail.send({
         ...(args.draftId !== undefined ? { draftId: text(args, 'draftId') } : {}),
         ...(args.to !== undefined ? { to: text(args, 'to') } : {}),
