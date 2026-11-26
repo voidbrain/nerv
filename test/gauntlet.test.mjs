@@ -276,7 +276,7 @@ test('generated index joins common model cases and NERV system cases with truthf
   const current = readFileSync('docs/test-capability-index.md', 'utf8');
   assert.equal(current, testIndex());
   assert.match(current, /neutral-smoke@1\.1\.0 \/ exact-json/);
-  assert.match(current, /nerv-system-flows@1\.2\.0 \/ policy/);
+  assert.match(current, /nerv-system-flows@1\.3\.0 \/ policy/);
   // F-120-T03: the 0.10/0.11 domain packs map the math, coding, embedded, code-review and cad-3d areas.
   assert.match(current, /math: 4 mapped cases/);
   assert.match(current, /cad-3d: 10 mapped cases/);
@@ -1100,7 +1100,7 @@ test(
         }
         const written = JSON.parse(readFileSync(ledger, 'utf8'));
         const recorded = written.entries;
-        assert.equal(recorded.length, win32 ? 100 : 104);
+        assert.equal(recorded.length, win32 ? 107 : 111);
         const scriptedEntries = recorded.filter((entry) => entry.pack === 'multi-step-agent');
         assert.equal(scriptedEntries.length, win32 ? 0 : 4);
         assert.ok(scriptedEntries.every((entry) => entry.status === 'passed' && entry.modelDigest === null));
@@ -1151,8 +1151,8 @@ test(
       });
     const listed = cli(['pending']);
     assert.equal(listed.status, 1);
-    // F-120-T09: 126 cases plus nerv-planner's 36.
-    assert.equal(listed.stdout.trim().split('\n').length, 162);
+    // F-120-T09: 126 cases plus nerv-planner's 36; F-120-T02 adds 7 system cases (169).
+    assert.equal(listed.stdout.trim().split('\n').length, 169);
     assert.match(listed.stdout, /^nerv-system-flows\/policy \(new\)$/m);
     assert.equal(cli(['pending', '--max-age-days=x']).status, 2);
     writeFileSync(join(dir, 'bad.json'), '{"schemaVersion":1,"entries":[{"x":1}]}');
@@ -1424,7 +1424,7 @@ test(
       assert.equal(runtimeChanged.pendingLines.length, 150);
       assert.ok(runtimeChanged.pendingLines.every((l) => l.endsWith('(runtime-changed)')));
       const scenarioChanged = await main(['pending', '--profile=' + profilePath, '--scenario-hash=' + '7'.repeat(64)]);
-      assert.equal(scenarioChanged.pendingLines.length, 158);
+      assert.equal(scenarioChanged.pendingLines.length, 165);
       assert.ok(scenarioChanged.pendingLines.every((l) => l.endsWith('(scenario-changed)')));
       // Recording a system report via `ledger` binds NERV's systemSourceKey automatically.
       const reportPath = join(dir, 'sys-report.json');
@@ -1735,11 +1735,11 @@ test('B-079: the root command reruns system cases whose source changed, as pendi
       }),
     );
     const pending = (await main(['pending'])).pendingLines.filter((l) => l.startsWith('nerv-system-flows/'));
-    assert.equal(pending.length, 8);
+    assert.equal(pending.length, system.cases.length);
     const plan = (await main(['all'])).plan.find((p) => p.pack === 'nerv-system-flows');
     assert.deepEqual(
       plan.run.map((r) => r.reason),
-      Array(8).fill('source-changed'),
+      Array(system.cases.length).fill('source-changed'),
       'a result recorded at another source is not reused',
     );
     assert.equal(plan.reuse.length, 0);
