@@ -1,3 +1,4 @@
+// @ts-check
 // F-004-T01: the PWA files agree with each other and with the theme tokens; test/pwa.browser.mjs covers the behaviour.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -13,7 +14,7 @@ const pngSize = (file) => {
 
 test('the manifest names the app, uses the --bg token and lists square PNG icons of the declared sizes', () => {
   const manifest = JSON.parse(read('web/public/manifest.webmanifest'));
-  const bg = /--bg:(#[0-9a-f]{6})/.exec(read('web/src/styles.css'))[1];
+  const bg = /** @type {RegExpExecArray} */ (/--bg:(#[0-9a-f]{6})/.exec(read('web/src/styles.css')))[1];
   assert.equal(manifest.name, 'NERV Agency');
   assert.equal(manifest.start_url, '/');
   assert.equal(manifest.display, 'standalone');

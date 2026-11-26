@@ -1,3 +1,4 @@
+// @ts-check
 // F-125-T02: with workItems.views "built" the ledger is never committed. The recap and roadmap tools rebuild it from the
 // record sources and fill the layout's bare recap marker pair; these tests cover that join with the copied work-items tool.
 import { test } from 'node:test';

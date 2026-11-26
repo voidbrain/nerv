@@ -1,3 +1,4 @@
+// @ts-check
 // A stand-in MCP server over stdio for the F-021 tests: newline-delimited JSON-RPC, two tools, one read-only and one
 // destructive; with --v2 the read tool's description changes (a server update, to test that its grant is suspended).
 import { createInterface } from 'node:readline';

@@ -41,9 +41,9 @@ test(
           res.end(JSON.stringify(response));
         });
     });
-    await new Promise((done) => server.listen(0, '127.0.0.1', done));
+    await new Promise((done) => server.listen(0, '127.0.0.1', () => done(undefined)));
     const temp = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-eval-model-')),
-      endpoint = `http://127.0.0.1:${server.address().port}/v1`;
+      endpoint = `http://127.0.0.1:${/** @type {import('node:net').AddressInfo} */ (server.address()).port}/v1`;
     try {
       const out = join(temp, 'first.json'),
         summary = await run(['--model=fixture', '--base-url=' + endpoint, '--limit=1', '--out=' + out]);

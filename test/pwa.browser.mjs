@@ -1,3 +1,4 @@
+// @ts-check
 // F-004-T01: the installable PWA shell, end to end in Chrome against the real service (makeServer) and the production
 // build. Run `npm run build` first. Covers: the manifest is served, parsed and installable by Chrome's own criteria;
 // the service worker controls the page and serves the shell with the service down; a new build shows a prompt and the
@@ -38,14 +39,14 @@ test(
     cpSync(resolve('dist/web/browser'), root, { recursive: true });
     const store = new Store(':memory:');
     const server = makeServer(store, 'p'.repeat(32), { webRoot: root, language: 'en', timeZone: 'Europe/Rome' });
-    const listen = (port) => new Promise((done) => server.listen(port, '127.0.0.1', done));
+    const listen = (port) => new Promise((done) => server.listen(port, '127.0.0.1', () => done(undefined)));
     const stop = () =>
       new Promise((done) => {
         server.close(done);
         server.closeAllConnections();
       });
     await listen(0);
-    const port = server.address().port;
+    const port = /** @type {import('node:net').AddressInfo} */ (server.address()).port;
     const origin = `http://127.0.0.1:${port}`;
     try {
       await browser(async ({ page, evaluate, errors, network }) => {

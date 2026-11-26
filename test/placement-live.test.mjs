@@ -1,3 +1,4 @@
+// @ts-check
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
@@ -37,9 +38,9 @@ test('the probe body keeps the system message apart and every role case fits the
     items.filter((i) => probeRefusal(i.ask)).map((i) => i.id),
     [],
   );
-  assert.ok(items.some((i) => i.id.startsWith('misato:') && i.ask.system.length > 17_000));
-  assert.match(probeRefusal({ system: 's'.repeat(PROBE_SYSTEM_BYTES + 1), prompt: 'p' }), /system/);
-  assert.match(probeRefusal({ prompt: 'é'.repeat(PROBE_PROMPT_BYTES / 2 + 1) }), /prompt/);
+  assert.ok(items.some((i) => i.id.startsWith('misato:') && String(i.ask.system).length > 17_000));
+  assert.match(String(probeRefusal({ system: 's'.repeat(PROBE_SYSTEM_BYTES + 1), prompt: 'p' })), /system/);
+  assert.match(String(probeRefusal({ prompt: 'é'.repeat(PROBE_PROMPT_BYTES / 2 + 1) })), /prompt/);
   assert.equal(probeRefusal({ system: 's'.repeat(PROBE_SYSTEM_BYTES), prompt: 'p'.repeat(PROBE_PROMPT_BYTES) }), null);
 });
 

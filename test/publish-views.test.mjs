@@ -1,3 +1,4 @@
+// @ts-check
 // F-125-T02: the published backlog-views ledger carries the same recap a local `npm run work:build` then
 // `node tools/backlog-recap.mjs` writes. Since harness 10.21.3 (F-100) the copied backlog-views workflow runs
 // `work-items publish --prepare` (read-only job: build, then .harness.json workItems.publishHooks, NERV's recap tool)
