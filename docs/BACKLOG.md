@@ -3090,7 +3090,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="f-125-t03"></a>F-125-T03 — Reconcile to the current harness release and check the tools AGENTS.md names arrive | 3 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | [PR #820](https://github.com/voidbrain/nerv/pull/820) |
+| 🟢 Small | <a id="f-125-t03"></a>F-125-T03 — Reconcile to the current harness release and check the tools AGENTS.md names arrive | 3 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | [PR #820](https://github.com/voidbrain/nerv/pull/820); [PR #823](https://github.com/voidbrain/nerv/pull/823) |
 | 🟢 Small | **Total** | 6 h | 0.5 h (1 of 3 steps recorded) | 0 h | 2 of 3 completed | |
 
 <details><summary>Done steps (2)</summary>
@@ -3109,7 +3109,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-125-T01: [PR #748](https://github.com/voidbrain/nerv/pull/748); [PR #753](https://github.com/voidbrain/nerv/pull/753) · F-125-T02: [PR #748](https://github.com/voidbrain/nerv/pull/748); [PR #763](https://github.com/voidbrain/nerv/pull/763) · F-125-T03: [PR #820](https://github.com/voidbrain/nerv/pull/820). Opened in [PR #748](https://github.com/voidbrain/nerv/pull/748); F-125-T01 in [PR #753](https://github.com/voidbrain/nerv/pull/753); F-125-T02 in [PR #763](https://github.com/voidbrain/nerv/pull/763); [#758](https://github.com/voidbrain/nerv/pull/758); [#779](https://github.com/voidbrain/nerv/pull/779); [#815](https://github.com/voidbrain/nerv/pull/815); [#820](https://github.com/voidbrain/nerv/pull/820) |
+| PR / evidence | Steps: F-125-T01: [PR #748](https://github.com/voidbrain/nerv/pull/748); [PR #753](https://github.com/voidbrain/nerv/pull/753) · F-125-T02: [PR #748](https://github.com/voidbrain/nerv/pull/748); [PR #763](https://github.com/voidbrain/nerv/pull/763) · F-125-T03: [PR #820](https://github.com/voidbrain/nerv/pull/820); [PR #823](https://github.com/voidbrain/nerv/pull/823). Opened in [PR #748](https://github.com/voidbrain/nerv/pull/748); F-125-T01 in [PR #753](https://github.com/voidbrain/nerv/pull/753); F-125-T02 in [PR #763](https://github.com/voidbrain/nerv/pull/763); [#758](https://github.com/voidbrain/nerv/pull/758); [#779](https://github.com/voidbrain/nerv/pull/779); [#815](https://github.com/voidbrain/nerv/pull/815); [#820](https://github.com/voidbrain/nerv/pull/820) |
 | Opened | 2026-11-25 |
 | Verification | Unit: 2026-11-26 `node tools/check-harness.mjs --strict` (matched v10.24.0) and `node --test test/agents-tools.test.mjs test/typecheck-scope.test.ts` (3/3); `backlog-views` verified through `c1e91229` for all 50 merges from #763 to #819 (51 green `backlog-views` runs) with zero view incidents. |
 | Reviewed | 2026-11-26 |
