@@ -1846,3 +1846,74 @@ test('F-120-T05: gauntlet all gives the reference-runner packs the slow-host cas
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('F-120-T07: coding-reference packs get a 3,072-token output budget a case; other packs keep the profile and limits', async () => {
+  const { modelLimits, modelProfile, commonPacks } = await import('../tools/gauntlet.mjs');
+  const examples = 'node_modules/@voidbrain/gauntlet-protocol/examples/';
+  const profile = JSON.parse(readFileSync(examples + 'profiles/gemma4-12b.json', 'utf8'));
+  const slow = JSON.parse(readFileSync(examples + 'limits-slow-host.json', 'utf8'));
+  const pack = (id) => commonPacks().find((p) => p.pack.id === id).pack;
+  // Owner decision 2026-11-26, "Raise the output limit for the coding packs ok": the profile's 2,048 cut every reply.
+  const coding = pack('coding');
+  assert.equal(modelProfile(coding, profile).maxOutputTokens, 3072);
+  assert.equal(modelProfile(coding, profile).context, profile.context);
+  assert.equal(modelLimits(coding).outputTokens, 3072 * coding.cases.length);
+  assert.equal(modelLimits(coding).caseMs, slow.caseMs);
+  // Every other pack, embedded and cad-3d included, keeps the profile unchanged and the earlier limits.
+  for (const id of ['embedded', 'cad-3d', 'logic-math', 'multi-step-agent']) {
+    assert.deepEqual(modelProfile(pack(id), profile), profile, id);
+    assert.notEqual(modelLimits(pack(id)).outputTokens, 3072 * pack(id).cases.length, id);
+  }
+  // The join, run side: `model-run` hands the runner the raised profile and the matching suite budget for coding only.
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-coding-tokens-'));
+  const previousLedger = process.env.NERV_GAUNTLET_LEDGER;
+  process.env.NERV_GAUNTLET_LEDGER = join(dir, 'ledger.json');
+  try {
+    const seen = {};
+    const services = {
+      execute: async (selected, used, limits) => {
+        seen[selected.id] = { maxOutputTokens: used.maxOutputTokens, outputTokens: limits.outputTokens };
+        throw Error('stop before any model call');
+      },
+    };
+    for (const id of ['coding', 'embedded'])
+      await assert.rejects(
+        main(
+          ['model-run', '--pack=' + id, '--profile=' + examples + 'profiles/gemma4-12b.json', '--execute', '--allow-models', '--out=' + join(dir, id + '.json')],
+          services,
+        ),
+        /stop before any model call/,
+      );
+    assert.deepEqual(seen.coding, { maxOutputTokens: 3072, outputTokens: 3072 * coding.cases.length });
+    assert.equal(seen.embedded.maxOutputTokens, profile.maxOutputTokens);
+    // The join, ledger side: `pending` checks coding results against the same raised profile, so a coding result
+    // recorded at 3,072 is covered, and one recorded at the profile's own 2,048 is pending again.
+    const { caseHash } = await import('@voidbrain/gauntlet-protocol');
+    const { caseSourceKey, pending } = await import('../tools/gauntlet.mjs');
+    const entries = (used) =>
+      coding.cases.map((c) => ({
+        pack: coding.id,
+        packVersion: coding.version,
+        case: c.id,
+        caseHash: caseHash(c),
+        profileHash: hash(used),
+        status: 'failed',
+        reportHash: 'c'.repeat(64),
+        finished: '2026-11-26T00:00:00.000Z',
+        modelDigest: null,
+        runtimeHash: null,
+        scenarioHash: null,
+        sourceKey: caseSourceKey(coding, c.id),
+      }));
+    const codingPending = (used) => {
+      writeFileSync(process.env.NERV_GAUNTLET_LEDGER, JSON.stringify({ schemaVersion: 2, entries: entries(used) }));
+      return pending({ profile }).filter((p) => p.pack === 'coding').length;
+    };
+    assert.equal(codingPending(modelProfile(coding, profile)), 0);
+    assert.equal(codingPending(profile), coding.cases.length);
+  } finally {
+    if (previousLedger === undefined) delete process.env.NERV_GAUNTLET_LEDGER;
+    else process.env.NERV_GAUNTLET_LEDGER = previousLedger;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
