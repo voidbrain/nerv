@@ -44,6 +44,20 @@ nerv service uninstall # remove service definition (keeps data)
 - **Database upgrades:** Schema upgrades are one-way; back up `nerv.sqlite` before updating if you may roll back.
 - **Frontend dev (`4318`) & Native companion (`4319`):** `npm run dev` proxies API calls to `4317` for Angular work; `npm run test:browser` runs Chrome/axe checks after build. For the macOS SwiftUI menu-bar preview, see [native/README.md](../native/README.md).
 
+## Environment variables
+
+`NERV_HOME` (above) is the one variable a normal install sets. The others below are test and tooling seams; set them only for the purpose named.
+
+| Variable | Read by | Effect |
+|---|---|---|
+| `NERV_PORT`, `NODO_PORT` | `src/node-lifecycle-execution.ts` | Not a way to change the port (that is `config.json`). The service lifecycle (`nerv nodes lifecycle-inspect` / `lifecycle-apply`) refuses to run while either is set in its environment: it requires persistent configuration without runtime overrides. Unset it before the step. `NODO_PORT` is the legacy 0.1 name. |
+| `NERV_TELEGRAM_API` | `src/telegram.ts` | Test only. Replaces the Telegram Bot API base with a loopback stand-in (`http://127.0.0.1`, `localhost` or `[::1]`). Any other address throws, because requests carry the bot token. |
+| `NERV_FULL_CHECKS` | `tools/plan-verification.mjs` | CI. `true` makes the verification plan full, as `--full` does ([verification selection](verification.md)). |
+| `NERV_VERIFY_GROUPS`, `NERV_VERIFY_PATHS` | `tools/selected-tests.mjs` | CI. The plan hands the selected test groups (comma list) and the changed paths (JSON array) to the selected-test runner. |
+| `NERV_TEST_TIMINGS` | `tools/test-timing-reporter.mjs` | The file the test timing reporter writes (default `.test-timings.txt`). |
+
+The `ajv-formats` and `ajv-formats-draft2019` devDependencies are used only by `test/bom.test.ts`, to validate the software bill of materials against its JSON schema; nothing at runtime imports them.
+
 ## Topic guides
 
 | Guide | Covers |
