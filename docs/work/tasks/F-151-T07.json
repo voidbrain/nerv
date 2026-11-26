@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "id": "F-149-T07",
-  "parent": "F-149",
+  "id": "F-151-T07",
+  "parent": "F-151",
   "title": "Dashboard Chronicle tab shows which writer produced each Eva entry",
   "goal": "Each Eva entry shows its writer: the model, or the template when the model was unavailable or its text failed the check",
   "status": "planned",
@@ -11,13 +11,13 @@
     "If the tab has moved to Angular by then (F-130), the label lands in the registered component instead of dashboard.js"
   ],
   "dependsOn": [
-    "F-149-T04"
+    "F-151-T04"
   ],
   "resources": [
     "web/public/dashboard/dashboard.js",
     "src/server.ts",
     "test/**",
-    "docs/work/records/F-149.md",
+    "docs/work/records/F-151.md",
     "generated:backlog-views"
   ],
   "capabilities": [

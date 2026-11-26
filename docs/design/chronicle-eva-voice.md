@@ -1,8 +1,8 @@
 # Eva chronicle: Fuyutsuki's voice and the owner checks
 
-Part of [F-149](../work/records/F-149.md). The Simple chronicle stays plain and model-free; this page covers only the Eva (lore) version, which the Chronicler pilot Fuyutsuki writes with the local model.
+Part of [F-151](../work/records/F-151.md). The Simple chronicle stays plain and model-free; this page covers only the Eva (lore) version, which the Chronicler pilot Fuyutsuki writes with the local model.
 
-## Voice (draft for the owner's taste check, F-149-T02)
+## Voice (draft for the owner's taste check, F-151-T02)
 
 Owner refinement, 2026-11-26: "just not cold technical. we are in evangelion lore, I want it more immersive, even funny if you want, but he still names only that day's real facts."
 
@@ -33,7 +33,7 @@ D. Light humour, Italian, a thin day:
 
 Taste check: pick A/C (straight), B/D (humour) or a mix, and reply "approved" or say what to change (warmer, funnier, shorter, a different closing line). The agent then turns the approved text into the prompt and keeps these samples as test and Gauntlet fixtures.
 
-## Owner check (F-149-T08), on NERV-01 after the update
+## Owner check (F-151-T08), on NERV-01 after the update
 
 1. Run the night job once on demand and read the result:
 
@@ -57,4 +57,4 @@ Taste check: pick A/C (straight), B/D (humour) or a mix, and reply "approved" or
 
 5. Fallback: stop the model (`ollama stop gemma4:26b` and make it unreachable as usual), run step 1 again. Expected: the template entry with a quiet note "template (model unavailable)".
 
-Report what you see in chat; the agent records the result in F-149 Verification. (The exact flags are fixed in F-149-T03 and T05; this page is updated with them before the check.)
+Report what you see in chat; the agent records the result in F-151 Verification. (The exact flags are fixed in F-151-T03 and T05; this page is updated with them before the check.)

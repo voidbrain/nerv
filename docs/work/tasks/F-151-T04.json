@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "id": "F-149-T04",
-  "parent": "F-149",
+  "id": "F-151-T04",
+  "parent": "F-151",
   "title": "Store each Eva entry once per day with its writer",
   "goal": "A written Eva entry is kept per day with the writer (model name or template), language and time, and is not regenerated",
   "status": "planned",
@@ -12,14 +12,14 @@
     "The owner can ask for one day to be rewritten explicitly (replaces the stored entry); never automatic"
   ],
   "dependsOn": [
-    "F-149-T03"
+    "F-151-T03"
   ],
   "resources": [
     "src/chronicle.ts",
     "src/store.ts",
     "src/cli-commands.ts",
     "test/chronicle.test.ts",
-    "docs/work/records/F-149.md",
+    "docs/work/records/F-151.md",
     "generated:backlog-views"
   ],
   "capabilities": [

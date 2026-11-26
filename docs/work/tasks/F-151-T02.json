@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "id": "F-149-T02",
-  "parent": "F-149",
+  "id": "F-151-T02",
+  "parent": "F-151",
   "title": "Owner: approve or change Fuyutsuki's voice",
   "goal": "The owner approves the voice and sample entries, or says what to change",
   "status": "planned",
   "acceptance": [
-    "Read the sample entries in docs/design/chronicle-eva-voice.md. Pick a register (straight A/C, humour B/D, or a mix) and reply 'approved', or say what to change (funnier, warmer, shorter, another closing line). The agent revises until approved, then records the decision in F-149"
+    "Read the sample entries in docs/design/chronicle-eva-voice.md. Pick a register (straight A/C, humour B/D, or a mix) and reply 'approved', or say what to change (funnier, warmer, shorter, another closing line). The agent revises until approved, then records the decision in F-151"
   ],
   "dependsOn": [
-    "F-149-T01"
+    "F-151-T01"
   ],
   "resources": [
-    "docs/work/records/F-149.md",
+    "docs/work/records/F-151.md",
     "docs/design/chronicle-eva-voice.md"
   ],
   "capabilities": [
@@ -20,7 +20,7 @@
   ],
   "privacy": "Neutral invented bases, pilots, sorties and days only; no owner data, tokens or real conversation text in Git, tests or logs.",
   "validation": [
-    "Owner decision recorded in F-149"
+    "Owner decision recorded in F-151"
   ],
   "escalation": [
     "A material scope or effort increase goes to the owner",

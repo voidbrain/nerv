@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "id": "F-149-T03",
-  "parent": "F-149",
+  "id": "F-151-T03",
+  "parent": "F-151",
   "title": "Failing test, then Fuyutsuki writes the Eva entry with the model, gated and with fallback",
   "goal": "retellChronicleDayWithPilot uses the approved voice prompt, in Italian and English, and falls back to the template when the text fails the check",
   "status": "planned",
@@ -12,12 +12,12 @@
     "Tests use the fake model only; no network or real model in the suite"
   ],
   "dependsOn": [
-    "F-149-T02"
+    "F-151-T02"
   ],
   "resources": [
     "src/chronicle.ts",
     "test/chronicle.test.ts",
-    "docs/work/records/F-149.md",
+    "docs/work/records/F-151.md",
     "generated:backlog-views"
   ],
   "capabilities": [
