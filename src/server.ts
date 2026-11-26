@@ -969,7 +969,9 @@ export function makeServer(
           (b.conversation !== undefined && !validChatConversation(b.conversation)) ||
           (b.requestId !== undefined && (typeof b.requestId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(b.requestId)))
         )
-          throw new Error('Message is required: up to 4000 characters; conversation is a short lowercase name.');
+          throw new Error(
+            'Message is required: up to 4000 characters; conversation is a short lowercase name or dashboard:<id>.',
+          );
         // Each step may wait for Misato and Casper.
         const budget = MODEL_TIMEOUT_MS * MAX_STEPS * 2 + 5000;
         req.setTimeout(budget);

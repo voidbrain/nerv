@@ -29,7 +29,7 @@ import { runScriptPlanInEva03 } from './script-plan.ts';
 import { callGrantedMcp } from './runtime-tools.ts';
 import type { OperatorResolution } from './operator-directory.ts';
 import { canRunRemotePilot, chooseAdvisers, rankPilots, type Chosen, type Pilot, type PilotOffer } from './pilots.ts';
-import { defaultPolicy, isolationRefusalReply } from './policy.ts';
+import { TAINTED_ISOLATION, defaultPolicy, isolationRefusalReply } from './policy.ts';
 import type { ProcessClient } from './process-client.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
 import { REFUSED_BEFORE_GATE, RpcFault, type Method } from './rpc.ts';
@@ -726,7 +726,13 @@ export class RuntimePlanning {
       );
       // B-175 (owner decision 2026-11-26): an isolation refusal does not depend on the arguments, so a retry never
       // runs; the service's reply says what happened and how to start a clean conversation.
-      if (!proactive && r.outcome === 'reject' && 'blocked' in r && r.blocked === 'isolation')
+      if (
+        !proactive &&
+        r.outcome === 'reject' &&
+        'blocked' in r &&
+        r.blocked === 'isolation' &&
+        r.reason.endsWith(TAINTED_ISOLATION)
+      )
         return finish('done', isolationRefusalReply(lang(), tool));
       // A card ends the turn: the reply is the service's, and Misato carries on after the owner decides (F-033 resume),
       // so the model is never asked to describe an action that is only waiting.

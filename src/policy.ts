@@ -322,6 +322,9 @@ export function balthasar(action: Action, effect: Effect, executor: Executor, sp
       action.trust === 'tainted' ? 'Tainted context; external effects escalate.' : 'Within budget and executor class.',
   };
 }
+/** B-175: the EVA-03 refusal caused by a tainted conversation, as opposed to a tool granted for EVA-03 itself. */
+export const TAINTED_ISOLATION =
+  'EVA-03 outside code requires isolation; it does not run. A tool result earlier in this conversation made it untrusted: start a new conversation to use this tool.';
 /**
  * B-175 (owner decision 2026-11-26): the service's reply when a granted outside tool is refused because the
  * conversation is tainted. Misato stops there instead of retrying; the owner learns why and how to start clean.
@@ -361,7 +364,7 @@ export function ballot(
         executor !== 'eva-03'
           ? 'Proactive outside code requires EVA-00 isolation; it does not run.'
           : action.trust === 'tainted'
-            ? 'EVA-03 outside code requires isolation; it does not run. A tool result earlier in this conversation made it untrusted: start a new conversation to use this tool.'
+            ? TAINTED_ISOLATION
             : 'EVA-03 outside code requires isolation; it does not run.',
     });
   const needsCasper = intentChecked(pattern, tool);

@@ -3,10 +3,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { isolationRefusalReply } from '../src/policy.ts';
+import { TAINTED_ISOLATION, isolationRefusalReply } from '../src/policy.ts';
 import { channelFromConversation, validChatConversation } from '../src/request-queue.ts';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
+import { Store } from '../src/store.ts';
 
 test('B-175: the isolation refusal reply names the tool and the way out, in Italian and English', () => {
   const it = isolationRefusalReply('it', 'fixture.read');
@@ -17,6 +18,39 @@ test('B-175: the isolation refusal reply names the tool and the way out, in Ital
   assert.match(en, /fixture\.read/);
   assert.match(en, /new conversation/);
   assert.match(en, /30 minutes/);
+});
+
+test('B-175: only a tainted conversation gets the start-a-new-conversation refusal; an EVA-03 grant does not', () => {
+  const store = new Store(':memory:');
+  try {
+    store.ledger.setExternal([{ name: 'fixture.read', effect: 'read', eva: 'eva-03' }]);
+    const trusted = store.ledger.openSortie('misato', 'Fixture question', 'trusted');
+    const r = store.runAction(trusted, { tool: 'fixture.read', args: {}, stage: 'production' });
+    assert.equal(r.outcome, 'reject');
+    assert.equal(r.blocked, 'isolation');
+    assert.ok(!r.reason.endsWith(TAINTED_ISOLATION), r.reason);
+    store.ledger.setExternal([{ name: 'fixture.read', effect: 'read', eva: 'eva-00' }]);
+    const tainted = store.ledger.openSortie('misato', 'Fixture question', 'tainted');
+    const t = store.runAction(tainted, { tool: 'fixture.read', args: {}, stage: 'production' });
+    assert.equal(t.blocked, 'isolation');
+    assert.ok(t.reason.endsWith(TAINTED_ISOLATION), t.reason);
+  } finally {
+    store.close();
+  }
+});
+
+test('B-175: a new dashboard conversation starts with no earlier context and counts as the dashboard channel', () => {
+  const store = new Store(':memory:');
+  try {
+    const id = store.ledger.openSortie('misato', 'Fixture question', 'tainted');
+    store.ledger.note(id, 'misato.request', { text: 'Fixture question', conversation: 'dashboard' });
+    store.ledger.reply(id, 'Fixture answer');
+    store.ledger.close(id, 'done');
+    assert.equal(store.ledger.conversation('dashboard')[0]?.tainted, true);
+    assert.deepEqual(store.ledger.conversation('dashboard:k3x9a2b7'), []);
+  } finally {
+    store.close();
+  }
 });
 
 test('B-175: a chat conversation is a short lowercase name or a dashboard conversation id; nothing else', () => {
