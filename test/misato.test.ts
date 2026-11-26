@@ -1598,39 +1598,86 @@ test('B-143: "in 2 minutes" is due 2 minutes after the owner asked, not after th
   );
 });
 
-// B-176: known failing until B-176-T02. One granted read whose result is larger than the step history budget
-// (8,000 characters) leaves Misato with no steps at all, so she proposes the same read again and the owner reads
-// only "Fatto: <tool>.". Remove `todo` with the fix.
-test(
-  'B-176: a granted read with a large result still reaches Misato, so she can answer from it',
-  { todo: 'B-176: fix pending (B-176-T02)' },
-  () => {
-    const strains = Array.from({ length: 33 }, (_, n) => ({
-      id: `fixture-strain-${n}`,
-      name: `Fixture Strain ${n}`,
-      breederId: null,
-      parentIds: [],
-      sativaPercent: 50,
-      thcPercent: null,
-      cbdPercent: null,
-      floweringDays: null,
-      autoflower: false,
-    }));
-    const result = { text: JSON.stringify(strains, null, 2) };
-    assert.ok(JSON.stringify(result).length > 8000, 'the fixture must exceed the history budget');
-    const ask = misatoAsk(
-      {
-        request: 'quali genetiche ho?',
-        history: [{ tool: 'fixture.strains', args: {}, outcome: 'grant', result }],
-        tools: toolDocs,
-        now: '2030-01-01T08:00:00.000Z',
-        timeZone: 'Europe/Rome',
-      },
-      'local',
-    );
-    const steps = (JSON.parse(ask.prompt) as { steps?: { tool: string; result?: unknown }[] }).steps ?? [];
-    assert.equal(steps.length, 1, 'the granted read is missing from the planner prompt');
-    assert.equal(steps[0]?.tool, 'fixture.strains');
-    assert.match(JSON.stringify(steps[0]?.result), /Fixture Strain 0/);
-  },
-);
+// B-176: one granted read whose result was larger than the step history budget (8,000 characters) left Misato with
+// no steps at all, so she proposed the same read again and the owner read only "Fatto: <tool>.".
+test('B-176: a granted read with a large result still reaches Misato, so she can answer from it', () => {
+  const strains = Array.from({ length: 33 }, (_, n) => ({
+    id: `fixture-strain-${n}`,
+    name: `Fixture Strain ${n}`,
+    breederId: null,
+    parentIds: [],
+    sativaPercent: 50,
+    thcPercent: null,
+    cbdPercent: null,
+    floweringDays: null,
+    autoflower: false,
+  }));
+  const result = { text: JSON.stringify(strains, null, 2) };
+  assert.ok(JSON.stringify(result).length > 8000, 'the fixture must exceed the history budget');
+  const ask = misatoAsk(
+    {
+      request: 'quali genetiche ho?',
+      history: [{ tool: 'fixture.strains', args: {}, outcome: 'grant', result }],
+      tools: toolDocs,
+      now: '2030-01-01T08:00:00.000Z',
+      timeZone: 'Europe/Rome',
+    },
+    'local',
+  );
+  const steps = (JSON.parse(ask.prompt) as { steps?: { tool: string; result?: unknown }[] }).steps ?? [];
+  assert.equal(steps.length, 1, 'the granted read is missing from the planner prompt');
+  assert.equal(steps[0]?.tool, 'fixture.strains');
+  assert.match(JSON.stringify(steps[0]?.result), /Fixture Strain 0/);
+  // B-176-T02: shortened to fit, and marked as shortened.
+  assert.ok(JSON.stringify(steps).length <= 8000);
+  assert.match(JSON.stringify(steps[0]?.result), /Only the first \d+ of \d+ characters are shown/);
+});
+// B-176-T03: a repeated read ended with doneReply ("Fatto: <tool>."), which threw away what the owner asked for.
+test('B-176: a repeated read gets one last turn to answer from its result; a second repeat answers with the result, never a bare Done', async () => {
+  const LIST = '{"action":{"tool":"reminders.list","args":{}}}';
+  await agent([LIST, LIST, '{"reply":"Hai un promemoria: Stretch."}'], async (runtime, m) => {
+    await runtime.add('Stretch', '2031-01-01T09:00:00Z');
+    const chat = await runtime.chat('quali promemoria ho?');
+    assert.equal(chat.reply, 'Hai un promemoria: Stretch.');
+    assert.equal(m.asked.filter((a) => a.who === 'misato').length, 3, 'one last turn after the repeat');
+    assert.match(chat.steps.at(-1)?.error ?? '', /already ran reminders\.list/);
+    assert.equal(chat.steps.filter((s) => s.outcome === 'grant').length, 1, 'the read ran once');
+  });
+  for (const [request, head] of [
+    ['quali promemoria ho?', /^Ecco il risultato di reminders\.list:/],
+    ['what reminders do I have?', /^Here is the result of reminders\.list:/],
+  ] as const)
+    await agent([LIST, LIST, LIST], async (runtime) => {
+      await runtime.add('Stretch', '2031-01-01T09:00:00Z');
+      const chat = await runtime.chat(request);
+      assert.match(chat.reply ?? '', head, request);
+      assert.match(chat.reply ?? '', /Stretch/, 'the owner gets the result');
+    });
+});
+test('B-176 review: a repeated read on the last turn answers with the result, not "Fatto"', async () => {
+  const LIST = '{"action":{"tool":"reminders.list","args":{}}}';
+  await agent([LIST, ...Array.from({ length: MAX_STEPS - 2 }, () => 'not a plan'), LIST], async (runtime) => {
+    await runtime.add('Stretch', '2031-01-01T09:00:00Z');
+    const chat = await runtime.chat('quali promemoria ho?');
+    assert.match(chat.reply ?? '', /^Ecco il risultato di reminders\.list:/);
+    assert.match(chat.reply ?? '', /Stretch/);
+  });
+});
+test('B-176 review: an escape-heavy result is shortened to use the budget, not emptied', () => {
+  const strains = Array.from({ length: 300 }, (_, n) => ({ id: `fixture-strain-${n}`, name: `Fixture Strain ${n}` }));
+  const ask = misatoAsk(
+    {
+      request: 'which strains do I have?',
+      history: [
+        { tool: 'fixture.strains', args: {}, outcome: 'grant', result: { text: JSON.stringify(strains, null, 2) } },
+      ],
+      tools: toolDocs,
+      now: '2030-01-01T08:00:00.000Z',
+      timeZone: 'Europe/Rome',
+    },
+    'local',
+  );
+  const steps = (JSON.parse(ask.prompt) as { steps: { result: { text: string } }[] }).steps;
+  assert.ok(JSON.stringify(steps).length <= 8000);
+  assert.ok(steps[0]!.result.text.length > 5000, `kept ${steps[0]!.result.text.length} characters`);
+});
