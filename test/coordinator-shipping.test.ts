@@ -196,7 +196,7 @@ async function twoBases() {
     async close() {
       for (const s of Object.values(sides)) {
         await s.link.stop();
-        s.lease.stop();
+        await s.lease.stopAsync();
         s.store.close();
       }
       rmSync(dir, { recursive: true, force: true });
@@ -682,6 +682,136 @@ describe('F-016-T20 re-check (#725): every standby-feed refusal', () => {
           }),
         /not yet replicated/,
       );
+    } finally {
+      await t.close();
+    }
+  });
+});
+
+describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
+  it('serves lease renewals and Kaji requests during snapshot serialisation/signing with bounded event-loop delay, and aborts if fenced mid-export', async () => {
+    const t = await twoBases();
+    try {
+      const { x, b } = t;
+      await x.link.start(600_000);
+      await kaji(x.home, x.store, ['standby', B]);
+
+      // Warm steady-state lease renewal and Kaji heartbeat once so Windows NTFS SQLite/socket initialisation does not
+      // skew the steady-state concurrency check during canonicalisation/signing.
+      const keeper = x.lease.keeper((id, req) => x.link.renewLease(id, req));
+      const baselineAt = performance.now();
+      assert.equal(await keeper.renewOnce(), 'renewed');
+      const baselineRenewMs = performance.now() - baselineAt;
+      await b.link.heartbeat();
+
+      // Populate X with 25,000 committed deliveries rows (~60 MB JSON) and clear pending capture so the seed
+      // measures reading, canonicalising and signing a multi-megabyte snapshot (~500 ms+ worker CPU).
+      const body = 'neutral-delivery-payload-'.repeat(90);
+      x.store.db.exec('BEGIN IMMEDIATE');
+      const ins = x.store.db.prepare(
+        "INSERT INTO deliveries(rowid, id, reminder_id, kind, message, created, read_at) VALUES (?, ?, NULL, 'brief', ?, ?, NULL)",
+      );
+      for (let i = 1; i <= 25_000; i += 1) ins.run(i, `del-${i}`, `${i}:${body}`, ISSUED);
+      x.store.db.exec('DELETE FROM coordinator_replication_pending');
+      x.store.db.exec('COMMIT');
+
+      let readCommittedAt = 0;
+      let firstChunkAt = 0;
+      let renewOutcome: string | undefined;
+      let renewDoneAt = 0;
+      let kajiDoneAt = 0;
+      let concurrentWork: Promise<void> | undefined;
+
+      const shipper = x.lease.shipper(
+        {
+          replicate: (id, batch, lease) => x.link.replicate(id, batch, lease),
+          seedStandby: (id, frame, epoch, lease) => {
+            if (!firstChunkAt) firstChunkAt = performance.now();
+            return x.link.seedStandby(id, frame, epoch, lease);
+          },
+        },
+        {
+          // Fires right after the worker's SQLite read transaction commits, while it canonicalises and signs.
+          onReadCommitted: () => {
+            readCommittedAt = performance.now();
+            concurrentWork = Promise.all([
+              keeper.renewOnce().then((out) => {
+                renewOutcome = out;
+                renewDoneAt = performance.now();
+              }),
+              b.link.heartbeat().then(() => {
+                kajiDoneAt = performance.now();
+              }),
+            ]).then(() => undefined);
+          },
+        },
+      );
+
+      const startedAt = performance.now();
+      let lastTick = startedAt;
+      let maxGapMs = 0;
+      let ticksDuringSerialise = 0;
+      const ticker = setInterval(() => {
+        const now = performance.now();
+        const gap = now - lastTick;
+        if (!firstChunkAt) {
+          if (readCommittedAt > 0) ticksDuringSerialise += 1;
+          if (gap > maxGapMs) maxGapMs = gap;
+        }
+        lastTick = now;
+      }, 5);
+
+      try {
+        await shipper.seed(B);
+        await concurrentWork;
+      } finally {
+        clearInterval(ticker);
+      }
+
+      const serialiseMs = firstChunkAt - readCommittedAt;
+      const metrics = JSON.stringify({
+        serialiseMs: Math.round(serialiseMs),
+        baselineRenewMs: Math.round(baselineRenewMs),
+        renewMs: Math.round(renewDoneAt - readCommittedAt),
+        kajiMs: Math.round(kajiDoneAt - readCommittedAt),
+        ticksDuringSerialise,
+        maxGapMs: Math.round(maxGapMs),
+      });
+      console.log(`F-016-T21 metrics ${metrics}`);
+      assert.ok(readCommittedAt > 0, 'worker reported read-committed before canonicalising');
+      // The event loop is what a synchronous export blocks (0 ticks during the export, re-checked 2026-11-26): it keeps
+      // turning, with a bounded gap, while the worker canonicalises and signs.
+      assert.ok(ticksDuringSerialise >= 1, `no event-loop tick during serialise/sign: ${metrics}`);
+      assert.ok(maxGapMs < Math.max(250, serialiseMs * 0.6), `event-loop delay blocked serialise/sign: ${metrics}`);
+      // The renewal and the Kaji request sent at read-commit are answered. They are not raced against the export: on
+      // the Windows runner one renewal took 664 ms against a 545 ms export (two runs of three), so finishing inside the
+      // window measured the runner's I/O, not the event loop.
+      assert.equal(renewOutcome, 'renewed', metrics);
+      assert.ok(renewDoneAt > readCommittedAt && kajiDoneAt > readCommittedAt, `requests not answered: ${metrics}`);
+      assert.equal(
+        readStandby(b.home, (db) => (db.prepare('SELECT COUNT(*) AS n FROM deliveries').get() as { n: number }).n),
+        25_000,
+      );
+
+      // Authority invariant: if X fences after the worker read active state (while serialising/signing), the
+      // main-thread post-worker fence check aborts and zero seed frames leave X.
+      let sentAfterFence = 0;
+      const fencedShipper = x.lease.shipper(
+        {
+          replicate: (id, batch, lease) => x.link.replicate(id, batch, lease),
+          seedStandby: async () => {
+            sentAfterFence += 1;
+            return { ok: true as const, complete: true };
+          },
+        },
+        {
+          onReadCommitted: () => {
+            x.store.db.prepare("UPDATE coordinator_state SET replication_mode = 'fenced' WHERE id = 1").run();
+          },
+        },
+      );
+      await assert.rejects(fencedShipper.seed(B), /no longer the active main/);
+      assert.equal(sentAfterFence, 0, 'fenced main never sends a seed frame');
     } finally {
       await t.close();
     }

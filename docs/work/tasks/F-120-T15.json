@@ -43,6 +43,11 @@
     {
       "pr": 843,
       "note": "opened with the pending model-pack cases"
+    },
+    {
+      "pr": 852,
+      "note": "decision page"
     }
-  ]
+  ],
+  "ownerLink": "docs/acceptance/f120-t15-model-pack-rerun.md"
 }
