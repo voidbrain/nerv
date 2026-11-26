@@ -6,7 +6,7 @@
   "goal": "NERV runs the current project-harness release and every template tool or script that AGENTS.md or a procedure tells agents to run exists here, guard.mjs first",
   "status": "implemented",
   "acceptance": [
-    "Owner authorized reconciling to v10.24.0 on 2026-11-26 ahead of the template backlog emptying (F-125 stays open for any post-empty final release)",
+    "Owner authorized reconciling to v10.24.0 on 2026-11-26; later template releases reconcile at session start",
     ".harness.json names the current release (10.23.2 or later) and every copied, forked and adapted file is reconciled",
     "tools/guard.mjs exists and `node tools/guard.mjs install` runs, as AGENTS.md tells agents; the scripts the report lists as missing (guard:install, behaviour, coverage:browser, mcp:recommend, reconcile:preview, friction, impact-map) exist or the record names why not",
     "A test or check fails when AGENTS.md names a tools/*.mjs file that does not exist",
@@ -16,11 +16,13 @@
     "F-125-T01"
   ],
   "resources": [
+    ".gitignore",
     ".harness.json",
     "tools/**",
     "AGENTS.md",
     "docs/agents/**",
     "package.json",
+    "test/agents-tools.test.mjs",
     "docs/work/records/F-125.md",
     "generated:backlog-views"
   ],

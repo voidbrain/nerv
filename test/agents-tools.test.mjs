@@ -15,7 +15,7 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
  * @returns {string[]}
  */
 function missingToolsNamedInAgents(markdown, root) {
-  const named = new Set(markdown.match(/\btools\/[A-Za-z0-9_.-]+\.mjs\b/g) ?? []);
+  const named = new Set(markdown.match(/\btools\/[A-Za-z0-9_./-]+\.mjs\b/g) ?? []);
   return [...named].filter((rel) => !existsSync(join(root, rel)));
 }
 
@@ -44,16 +44,11 @@ test('F-125-T03: required template scripts exist and guard.mjs install runs clea
   const fixture = mkdtempSync(join(tmpdir(), 'nerv-guard-install-'));
   try {
     execFileSync('git', ['init', '-q'], { cwd: fixture });
-    mkdirTestTool(fixture);
+    mkdirSync(join(fixture, 'tools'), { recursive: true });
+    copyFileSync(join(ROOT, 'tools', 'guard.mjs'), join(fixture, 'tools', 'guard.mjs'));
     execFileSync(process.execPath, [join(fixture, 'tools', 'guard.mjs'), 'install'], { cwd: fixture });
     assert.equal(existsSync(join(fixture, '.git', 'hooks', 'pre-push')), true);
   } finally {
     rmSync(fixture, { recursive: true, force: true });
   }
 });
-
-/** @param {string} fixture */
-function mkdirTestTool(fixture) {
-  mkdirSync(join(fixture, 'tools'), { recursive: true });
-  copyFileSync(join(ROOT, 'tools', 'guard.mjs'), join(fixture, 'tools', 'guard.mjs'));
-}

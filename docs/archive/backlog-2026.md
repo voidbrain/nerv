@@ -7543,7 +7543,7 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 |---|---|
 | PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (C1); `test/user-text-ids.test.ts`; `web/src/dashboard/shell.ts`; [#809](https://github.com/voidbrain/nerv/pull/809) |
 | Opened | 2026-11-26 |
-| Verification | Unit: 2026-11-26, local: `test/user-text-ids.test.ts` failed on main with the ten shell IDs and passes after the fix. Browser: Pending (CI `test:browser`, the shell's axe and layout checks). |
+| Verification | Unit: 2026-11-26, local: `test/user-text-ids.test.ts` failed on main with the ten shell IDs and passes after the fix. Browser & CI: 2026-11-26, PR #809 run 45804069260 passed `validate` (`test:browser`), `windows` and `native-macos`. |
 | Reviewed | 2026-11-26 |
 
 </details>
@@ -7577,7 +7577,7 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 |---|---|
 | PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (S1, S3); CI run 45798962499 (coverage warning); `docs/agents/coverage.json`; [#811](https://github.com/voidbrain/nerv/pull/811); [#813](https://github.com/voidbrain/nerv/pull/813) |
 | Opened | 2026-11-26 |
-| Verification | Documentation: 2026-11-26, `node tools/coverage-table.mjs --write` after `npm run test:coverage` (1595 pass, 0 fail). CI: Pending (B-159-T02). |
+| Verification | Documentation: 2026-11-26, `node tools/coverage-table.mjs --write` after `npm run test:coverage` (1595 pass, 0 fail). CI: 2026-11-26, PR #813 run 45806519489 passed all five jobs (`coverage-table.mjs --check` enforced). |
 | Reviewed | 2026-11-26 |
 
 </details>
