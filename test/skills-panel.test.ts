@@ -11,6 +11,7 @@ import {
   type SkillPackage,
 } from '../src/skills.ts';
 import { makeServer } from '../src/server.ts';
+import { parseHTML } from 'linkedom';
 
 /** A neutral, invented skill package. */
 function skill(id: string, version: string): SkillPackage {
@@ -115,6 +116,57 @@ test(
       const broken = await getSkills(home);
       assert.ok(broken.status >= 400, String(broken.status));
       assert.match(String(broken.body.error), /Corrupt skills registry/);
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);
+
+/** The skills panel from the served dashboard script, drawn into a parsed page from what the endpoint returned. */
+function drawPanel(skills: unknown, tab?: string, theme = 'eva') {
+  const js = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+  const from = (name: string) =>
+    js.slice(js.indexOf(`function ${name}(`), js.indexOf('\n}\n', js.indexOf(`function ${name}(`)) + 3);
+  const { document } = parseHTML('<html><body><div id="skills"></div></body></html>');
+  const state = { theme, tabs: tab ? { skills: tab } : {}, skills };
+  const esc = js.slice(js.indexOf('function esc('), js.indexOf('\n', js.indexOf('function esc(')) + 1);
+  new Function('document', 'state', `${esc}${from('stageTabs')}${from('renderSkills')}renderSkills();`)(
+    document,
+    state,
+  );
+  return document.getElementById('skills')!;
+}
+
+test(
+  'F-145: a staged skill shows in the dashboard panel on its stage tab; an empty home shows how to create one',
+  { timeout: 20000 },
+  async () => {
+    const home = mkdtempSync(join(tmpdir(), 'nerv-skills-panel-'));
+    try {
+      const empty = drawPanel((await getSkills(home)).body.skills);
+      assert.match(empty.textContent!, /No skills yet\. Create one with nerv skills stage <package\.json>/);
+      assert.doesNotMatch(empty.textContent!, /not connected/);
+      stageSkillPackage(home, skill('alpha-check', '1.0.0'));
+      evaluateSkillVersion(home, 'alpha-check', '1.0.0', suite, { model: 'test-model' });
+      stageSkillPackage(home, skill('beta-check', '0.1.0'));
+      const skills = (await getSkills(home)).body.skills;
+      const seed = drawPanel(skills);
+      assert.deepEqual(
+        [...seed.querySelectorAll('[data-stagetab]')].map((b) => b.textContent),
+        ['Seed 1', 'Sprout 1', 'Ripe 0', 'Dropped 0'],
+      );
+      assert.match(seed.textContent!, /beta-check · 0\.1\.0/);
+      assert.match(seed.textContent!, /not evaluated yet/);
+      assert.doesNotMatch(seed.textContent!, /alpha-check/);
+      const sprout = drawPanel(skills, 'sprout');
+      assert.match(sprout.textContent!, /alpha-check · 1\.0\.0/);
+      assert.match(sprout.textContent!, /with the skill 6\/6 · without 3\/6/);
+      assert.match(drawPanel(skills, 'ripe').textContent!, /No skill at this stage\./);
+      assert.deepEqual(
+        [...drawPanel(skills, undefined, 'simple').querySelectorAll('[data-stagetab]')].map((b) => b.textContent),
+        ['Create 1', 'Try 1', 'Use 0', 'Dropped 0'],
+      );
+      assert.match(drawPanel({ error: 'Corrupt skills registry.' }).textContent!, /Corrupt skills registry\./);
     } finally {
       rmSync(home, { recursive: true, force: true });
     }
