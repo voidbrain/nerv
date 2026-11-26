@@ -21,11 +21,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-116](#f-116) | [B-122](#b-122) | — |
-| [F-011](#f-011) |  | [B-057](#b-057) |  |
-| [F-004](#f-004) |  | [B-068](#b-068) |  |
-| [F-012](#f-012) |  | [B-107](#b-107) |  |
-| [F-016](#f-016) |  | [B-113](#b-113) |  |
+| [F-062](#f-062) | [F-116](#f-116) | [B-057](#b-057) | — |
+| [F-011](#f-011) |  | [B-068](#b-068) |  |
+| [F-004](#f-004) |  | [B-107](#b-107) |  |
+| [F-012](#f-012) |  | [B-113](#b-113) |  |
+| [F-016](#f-016) |  | [B-122](#b-122) |  |
 | [F-086](#f-086) |  | [B-123](#b-123) |  |
 | [F-087](#f-087) |  | [B-128](#b-128) |  |
 | [F-092](#f-092) |  | [B-129](#b-129) |  |
@@ -41,7 +41,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 196.25 h agent + 16.75 h owner across 178 open steps of 46 features and 40 other records. 165 h of actual effort recorded on 149 steps. Generated from the task files.
+**Remaining effort:** 195.75 h agent + 16.75 h owner across 176 open steps of 46 features and 40 other records. 165.5 h of actual effort recorded on 151 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1711,53 +1711,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="b-122"></a>[🐞 B-122](#top)
-
-**Update now is refused with "ownership is unknown" while NERV runs as a foreground `nerv launch`**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h agent + 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
-
-💻 **→** Next: B-122-T03 — Agent: confirm read-only that an update completed on NERV-01 with the service running (Planned).
-
-| | |
-|---|---|
-| **Issue** | Found 2026-11-24 on NERV-01: the dashboard's Update now (B-108 updater job, B-110 button) was refused twice, at revision `fd0f2a0`, with "Service or runtime ownership is unknown or belongs elsewhere." and nothing stopped. The launchd service `io.nerv.agent` was not registered (stopped with `nerv service stop`); port 4317 was served by a foreground `nerv launch` from a terminal, through the global `nerv` link into the development checkout. The update refuses to stop a process the service manager did not start, which is right, but the reason did not say so, and process discovery did not even find that process (it matched only `…/src/cli.ts serve` or `launch`, not `…/bin/nerv launch`). |
-| **Reproduce** | On a base whose service was moved to the install folder: `nerv service stop`, then `nerv launch` in a terminal, then press Update now. Steps for the owner: [update from a foreground launch](acceptance/b122-update-from-foreground-2026-11-24.md). |
-| **Check** | A committed test fails first: after a service move, with the service not registered and a foreground `nerv launch` serving the base, the outside updater's refusal names the foreground process and what to do, not the generic ownership reason, and stops nothing; once it is stopped the same update plan has no blockers; a moved, registered service is observed owned. On NERV-01 the owner updates through the service and, after the fix is installed, sees the new reason (B-122-T02). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="b-122-t02"></a>B-122-T02 — Owner: Update now during a foreground nerv launch is refused with the foreground reason | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/b122-update-from-foreground-2026-11-24.md) | — |
-| 🟢 Small | <a id="b-122-t03"></a>B-122-T03 — Agent: confirm read-only that an update completed on NERV-01 with the service running | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟢 Small | **Total** | 1.75 h (2 of 3 steps) | 1.5 h (1 of 3 steps recorded) | 0.25 h agent + 0.25 h owner | 1 of 3 completed | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="b-122-t01"></a>B-122-T01 — Name a foreground NERV when an update is refused | 1.5 h | 1.5 h (stated) | Completed | [PR #719](https://github.com/voidbrain/nerv/pull/719) |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-122.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-122-T01: [PR #719](https://github.com/voidbrain/nerv/pull/719). [PR #719](https://github.com/voidbrain/nerv/pull/719) (Test: `test/update-foreground-runtime.test.ts`); [#783](https://github.com/voidbrain/nerv/pull/783) |
-| Opened | 2026-11-24 |
-| Verification | Unit/integration 2026-11-24: `test/update-foreground-runtime.test.ts` (2 of 2) and the lifecycle suites pass locally; `npm test` 1358 pass, 0 fail; gauntlet `nerv-system-flows` (incl. stress, browser) passed. Owner check on NERV-01: Pending (B-122-T02). |
-| Reviewed | 2026-11-24 |
-
-</details>
-
----
 ### <a id="b-138"></a>[🐞 B-138](#top)
 
 **`nerv chat` answers a fleet question with a generic greeting, ignoring the `fleet.chat` result**
@@ -2426,13 +2379,60 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-122"></a>[🐞 B-122](#top)
+
+**Update now is refused with "ownership is unknown" while NERV runs as a foreground `nerv launch`**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
+
+🧑 **→** Next: [🧑‍🔧](acceptance/b122-update-from-foreground-2026-11-24.md) B-122-T02 — Owner: Update now during a foreground nerv launch is refused with the foreground reason (Planned).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-24 on NERV-01: the dashboard's Update now (B-108 updater job, B-110 button) was refused twice, at revision `fd0f2a0`, with "Service or runtime ownership is unknown or belongs elsewhere." and nothing stopped. The launchd service `io.nerv.agent` was not registered (stopped with `nerv service stop`); port 4317 was served by a foreground `nerv launch` from a terminal, through the global `nerv` link into the development checkout. The update refuses to stop a process the service manager did not start, which is right, but the reason did not say so, and process discovery did not even find that process (it matched only `…/src/cli.ts serve` or `launch`, not `…/bin/nerv launch`). |
+| **Reproduce** | On a base whose service was moved to the install folder: `nerv service stop`, then `nerv launch` in a terminal, then press Update now. Steps for the owner: [update from a foreground launch](acceptance/b122-update-from-foreground-2026-11-24.md). |
+| **Check** | A committed test fails first: after a service move, with the service not registered and a foreground `nerv launch` serving the base, the outside updater's refusal names the foreground process and what to do, not the generic ownership reason, and stops nothing; once it is stopped the same update plan has no blockers; a moved, registered service is observed owned. On NERV-01 the owner updates through the service and, after the fix is installed, sees the new reason (B-122-T02). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="b-122-t02"></a>B-122-T02 — Owner: Update now during a foreground nerv launch is refused with the foreground reason | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/b122-update-from-foreground-2026-11-24.md) | — |
+| 🟢 Small | **Total** | 1.5 h (2 of 3 steps) | 1.75 h (2 of 3 steps recorded) | 0.25 h owner | 2 of 3 completed | | |
+
+<details><summary>Done steps (2)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="b-122-t01"></a>B-122-T01 — Name a foreground NERV when an update is refused | 1.5 h | 1.5 h (stated) | Completed | [PR #719](https://github.com/voidbrain/nerv/pull/719) |
+| — | <a id="b-122-t03"></a>B-122-T03 — Agent: confirm read-only that an update completed on NERV-01 with the service running | 0 h | 0.25 h (stated) | Completed | [PR #784](https://github.com/voidbrain/nerv/pull/784) |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-122.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-122-T01: [PR #719](https://github.com/voidbrain/nerv/pull/719) · B-122-T03: [PR #784](https://github.com/voidbrain/nerv/pull/784). [PR #719](https://github.com/voidbrain/nerv/pull/719) (Test: `test/update-foreground-runtime.test.ts`); [#783](https://github.com/voidbrain/nerv/pull/783) |
+| Opened | 2026-11-24 |
+| Verification | Unit/integration 2026-11-24: `test/update-foreground-runtime.test.ts` (2 of 2) and the lifecycle suites pass locally; `npm test` 1358 pass, 0 fail; gauntlet `nerv-system-flows` (incl. stress, browser) passed. Owner check on NERV-01: Pending (B-122-T02). |
+| Reviewed | 2026-11-24 |
+
+</details>
+
+---
 ### <a id="b-123"></a>[🐞 B-123](#top)
 
 **After Update now the dashboard never shows the updater's result**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h agent + 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+| 🟡 Implemented | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
 
 🧑 **→** B-123-T02: press Update now on NERV-01 and check the Health row, a reload and Dismiss ([steps](acceptance/b123-update-status.md)).
 
@@ -2447,14 +2447,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
 |---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="b-123-t02"></a>B-123-T02 — Owner: Update now shows the updater's status in Health | — | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](acceptance/b123-update-status.md) | — |
-| 🟢 Small | <a id="b-123-t03"></a>B-123-T03 — Agent: updater-status.json and the inbox agree with the last update (read-only) | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | — |
-| 🟢 Small | **Total** | 3.25 h (2 of 3 steps) | 2.5 h (1 of 3 steps recorded) | 0.25 h agent + 0.25 h owner | 1 of 3 completed | | |
+| 🟢 Small | **Total** | 3 h (2 of 3 steps) | 2.75 h (2 of 3 steps recorded) | 0.25 h owner | 2 of 3 completed | | |
 
-<details><summary>Done steps (1)</summary>
+<details><summary>Done steps (2)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="b-123-t01"></a>B-123-T01 — Show the updater's status beside Update now | 3 h | 2.5 h (stated) | Completed | [PR #720](https://github.com/voidbrain/nerv/pull/720) implementation |
+| — | <a id="b-123-t03"></a>B-123-T03 — Agent: updater-status.json and the inbox agree with the last update (read-only) | 0 h | 0.25 h (stated) | Completed | [PR #784](https://github.com/voidbrain/nerv/pull/784) |
 
 </details>
 
@@ -2465,7 +2465,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-123-T01: [PR #720](https://github.com/voidbrain/nerv/pull/720) implementation. [PR #720](https://github.com/voidbrain/nerv/pull/720) (status file, route, Health row; Test: `test/updater-status.test.ts`, `test/updater-status-render.test.mjs`, `test/updater-status.browser.mjs`); [#736](https://github.com/voidbrain/nerv/pull/736); [#783](https://github.com/voidbrain/nerv/pull/783) |
+| PR / evidence | Steps: B-123-T01: [PR #720](https://github.com/voidbrain/nerv/pull/720) implementation · B-123-T03: [PR #784](https://github.com/voidbrain/nerv/pull/784). [PR #720](https://github.com/voidbrain/nerv/pull/720) (status file, route, Health row; Test: `test/updater-status.test.ts`, `test/updater-status-render.test.mjs`, `test/updater-status.browser.mjs`); [#736](https://github.com/voidbrain/nerv/pull/736); [#783](https://github.com/voidbrain/nerv/pull/783) |
 | Opened | 2026-11-24 |
 | Verification | Unit/integration 2026-11-24: CI [run 45458207007](https://github.com/voidbrain/nerv/actions/runs/45458207007) (PR #720) green: `test/updater-status.test.ts`, `test/updater-status-render.test.mjs`. Browser/accessibility 2026-11-24: `test/updater-status.browser.mjs` passes on the production build (CI run 45458207007). Human (a real Update now on NERV-01, B-123-T02): Pending. |
 | Reviewed | 2026-11-25 |
