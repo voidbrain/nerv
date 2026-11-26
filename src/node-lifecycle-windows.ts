@@ -156,7 +156,8 @@ export function windowsServiceAdapter(
                 present(vbsPath) &&
                 (() => {
                   safe(vbsPath, context.uid, true);
-                  return hash(readFileSync(vbsPath)) === hash(expectedVbs);
+                  // B-171: an earlier release's launcher differs only in its comment line; it runs the same command.
+                  return windowsLauncherMatches(readFileSync(vbsPath), expectedVbs);
                 })();
               return taskMatches && vbsMatches ? 'owned' : 'foreign';
             } catch {
