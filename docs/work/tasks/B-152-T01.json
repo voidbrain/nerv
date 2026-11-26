@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "B-152-T01",
+  "parent": "B-152",
+  "title": "Triage the 50 open CodeQL alerts",
+  "goal": "Each open alert is fixed with a failing test first, or listed with the reason it is a false positive",
+  "status": "ready",
+  "acceptance": [
+    "Each of the 50 alerts is read at its location; a true positive gets a committed failing test, then the fix",
+    "Each false positive is listed in docs/verification.md#codeql-alert-triage with its number, rule, location, reason and the dismissal command",
+    "Alerts in the retired remove/ prototypes are either excluded from the analysis by a reviewed codeql.yml paths-ignore (with its reason) or listed",
+    "A true positive in the copied tools/work-usage.mjs is reported to the harness template, not fixed here"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/verification.md",
+    "docs/work/records/B-152.md",
+    ".github/workflows/codeql.yml",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "evidence-review"
+  ],
+  "privacy": "No secrets, tokens or personal data in the evidence; alert numbers and file locations only.",
+  "validation": [
+    "gh api --paginate 'repos/voidbrain/nerv/code-scanning/alerts?state=open&per_page=100' --jq length",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Dismissing an alert goes to the owner (B-152-T02)",
+    "A fix that changes a trust boundary gets a design review"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-26 in the full audit: 50 alerts, most in tests and retired prototypes. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  }
+}
