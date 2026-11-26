@@ -129,10 +129,11 @@ export function stageRuntime(
     execFileSync('/bin/cp', ['-cRp', from, to]);
   // Readable and listable by everyone, writable by no one: the job user reads it, never changes it.
   execFileSync('/bin/chmod', ['-R', 'a+rX,a-w', temp]);
-  chmodSync(temp, 0o555);
+  // B-157: the folder itself stays writable until it is in place: macOS 15 refuses to rename a read-only folder
+  // (EACCES), so making it read-only before the rename failed every staging there.
+  chmodSync(temp, 0o755);
   rmSync(dir, { recursive: true, force: true });
   renameSync(temp, dir);
-  chmodSync(dir, 0o755);
   writeFileSync(join(dir, '.complete'), revision + '\n');
   chmodSync(dir, 0o555);
   return paths;

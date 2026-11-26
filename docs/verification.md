@@ -17,7 +17,7 @@ Risk mappings deliberately stay conservative. A shared runtime change usually re
 
 Full deterministic CI consists of all Node tests with Linux coverage, typecheck, Angular build/browser/axe, headless lifecycle, Windows full tests/service integration and native Swift/TLS/ad-hoc packaging. It does not include repeated stress campaigns, paid/real-model evaluation, physical phone acceptance, production notarization or target-host trials. Those retain their owning records and explicit risk/request triggers.
 
-CI runs once per PR head, with concurrency cancellation for superseded heads, plus a manual trigger and a weekly main-branch freshness check. Existing `validate`, `windows` and `native-macos` job names remain. Unselected platform jobs report scoped skips without installing dependencies. The `full-suite` marker runs only for a full plan and rejects failed/cancelled/skipped dependencies. Only its successful, merged exact-head evidence resets freshness.
+CI runs once per PR head, with concurrency cancellation for superseded heads, plus a manual trigger and a weekly main-branch freshness check; the scheduled run has its own concurrency group, so a push to `main` does not cancel it (B-156). Existing `validate`, `windows` and `native-macos` job names remain. Unselected platform jobs report scoped skips without installing dependencies. Whenever Node work or a full run is selected, `native-macos` also runs the Node tests that skip on every other runner (`node tools/macos-node-tests.mjs`: EVA `sandbox-exec` confinement, egress proxy, job user, desktop driver, moved-service joins), and fails if one skips (B-157); `test/macos-node-tests.test.mjs` keeps its list complete. The `full-suite` marker runs only for a full plan and rejects failed/cancelled/skipped dependencies. Only its successful, merged exact-head evidence resets freshness.
 
 A docs-only pull request starts no Windows or macOS runner (B-139). Docs-only means every changed file is under `docs/` (records, tasks, the generated backlog views, guides, archives), a Markdown file at the repository root, or `LICENSE`; `native/README.md` or any other path is not. The `plan` job's changed-paths step decides it, and `windows` and `native-macos` skip at job level only when it is docs-only and the plan selected no work for them, so a full plan still runs both. A job-level skip reports the required `native-macos` check as skipped, which passes; a workflow-level `paths:` filter would leave it pending. Pushes to `main`, the merge queue, manual and scheduled runs always run both jobs. The `native-macos` limit stays 30 minutes: the 2026-11-25 cancellations at about 15 minutes with no step run were GitHub failing to acquire a macOS runner, which `timeout-minutes` does not govern.
 
@@ -33,6 +33,15 @@ gh api repos/voidbrain/nerv/code-scanning/default-setup -q .state
 ```
 
 Expected: the second command prints `not-configured`. Then the agent reruns the PR's CodeQL jobs (`gh run rerun <run> --failed -R voidbrain/nerv`) until they pass; only then does the PR merge. Until it merges, the repository has no CodeQL analysis on `main`.
+
+<a id="codeql-alert-triage"></a>**Alert triage** (B-152). B-152-T01 lists here each open alert it judges a false positive: number, rule, location and reason. Dismissing one is the owner's (B-152-T02): for each listed alert run
+
+```bash
+gh api -X PATCH repos/voidbrain/nerv/code-scanning/alerts/<number> -f state=dismissed -f dismissed_reason="false positive" -f dismissed_comment="<reason from the list>"
+gh api --paginate 'repos/voidbrain/nerv/code-scanning/alerts?state=open&per_page=100' --jq length
+```
+
+Expected: the second command prints the number of alerts B-152 still names with an owner (0 when every alert was fixed or dismissed). No list yet: B-152-T01 adds it.
 
 ## Gauntlet adoption
 

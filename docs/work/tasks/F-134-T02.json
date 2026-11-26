@@ -4,7 +4,7 @@
   "parent": "F-134",
   "title": "Full audit by 2026-11-27",
   "goal": "A full audit (all eight areas) of NERV dated by 2026-11-27, so enforced audits keep CI green",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "docs/audits/<date>-full.md and its .audit.json manifest with kind full, every required area, baseline commit, findings and limits, following docs/agents/audit.md",
     "npm run check:audits reports every area fresh",
@@ -16,6 +16,13 @@
   "resources": [
     "docs/audits/**",
     "docs/work/records/F-134.md",
+    "contract:backlog-ids",
+    "docs/work/records/B-151.md",
+    "docs/work/tasks/B-151-T01.json",
+    "docs/work/tasks/B-151-T02.json",
+    "docs/archive/backlog-2026.md",
+    "docs/archive/reconciliation-2026.md",
+    "docs/work/layout.json",
     "generated:backlog-views"
   ],
   "capabilities": [
@@ -32,10 +39,10 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "3 h",
-    "basis": "Estimated 2026-11-26 from the 2026-11-13 and 2026-11-20 full audits (eight areas, all active records). Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26 from the 2026-11-13 and 2026-11-20 full audits (eight areas, all active records). Not a measurement. Implemented 2026-11-26: docs/audits/2026-11-26-full.md; closed 2026-11-26 on #806's green CI (validate, windows, native-macos, full-suite).",
     "reviewed": "2026-11-26",
-    "agentHours": 3,
+    "agentHours": 0,
     "baselineAgentHours": 3,
     "estimateAgentHours": 3
   },
@@ -43,6 +50,10 @@
     {
       "pr": 802,
       "note": "planning"
+    },
+    {
+      "pr": 806,
+      "note": "full audit"
     }
   ]
 }
