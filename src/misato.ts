@@ -159,29 +159,32 @@ const system = (
       : 'Write the reply in the same language as the "request" field of this turn, whatever language tool results use: an English request gets an English reply, an Italian request an Italian one. If the request is too short to tell (yes, ok, sì), use the language of the earlier exchanges.',
     ...(clarification ? TOPIC_CHECK : []),
   ].join('\n');
+// B-167: words both languages use as a word ("i", "a", "in") do not vote; the owner's Italian is often a short imperative
+// or question with a name in it ("stampa i piedini di Smoke"), so common verbs and question words vote too.
 const ITALIAN = new Set(
-  'il lo la le gli un una di da del della che non per con sono mi ti ci si è e alle alla al ho hai ha ricorda ricordami domani oggi cosa come quando dove perché sì grazie promemoria tutti tutte questo questa'.split(
+  'il lo la le gli un una uno di da del della dei delle al alla alle ai dal nel nella sul che non per con tra fra sono mi ti ci si è e ho hai ha devo puoi posso ricorda ricordami domani oggi cosa come quando dove perché quanto quanta quanti quante quale quali chi sì grazie promemoria tutti tutte tutto questo questa accendi spegni aggiungi controlla stampa mostra elenca cancella leggi dimmi apri chiudi cerca imposta segna carica'.split(
     ' ',
   ),
 );
 const ENGLISH = new Set(
-  'the a an of to and is are i me my you your it at on in for with what when where why how remind remember tomorrow today please yes thanks all this that'.split(
+  'the an of to and is are me my you your it at on for with what when where why how remind remember tomorrow today please yes thanks all this that have has do does need can many much turn add check print list show'.split(
     ' ',
   ),
 );
-/** The language of a request by its common words; too short to tell (yes, ok, sì) falls back to the earlier exchanges, then `fallback`. */
+/** The language of a request by its common words, and half a vote for each other lower-case word ending in a, i or o
+    as Italian words do (names, capitalised, never vote); too short to tell (yes, ok, sì) falls back to the earlier
+    exchanges, then `fallback`. */
 export function requestLanguage(request: string, earlier: string[] = [], fallback: 'it' | 'en' = 'en'): 'it' | 'en' {
   // B-016: only real words vote: sortie references (S-1E0E) go first, and a token with digits is never a word ("1e0e" read as two Italian "e").
   const score = (text: string) => {
     let it = 0,
       en = 0;
-    for (const w of text
-      .toLowerCase()
-      .replace(/\bs-[0-9a-f]{4,12}\b/g, ' ')
-      .match(/[\p{L}\p{N}']+/gu) ?? []) {
-      if (/\p{N}/u.test(w)) continue;
+    for (const word of text.replace(/\b[sS]-[0-9a-fA-F]{4,12}\b/g, ' ').match(/[\p{L}\p{N}']+/gu) ?? []) {
+      if (/\p{N}/u.test(word)) continue;
+      const w = word.toLowerCase();
       if (ITALIAN.has(w)) it++;
-      if (ENGLISH.has(w)) en++;
+      else if (ENGLISH.has(w)) en++;
+      else if (w === word && w.length >= 4 && /[aio]$/.test(w)) it += 0.5;
     }
     return it - en;
   };
@@ -459,15 +462,15 @@ export function matchExistingReminders<T extends { title: string; due: string }>
 export type ToolDomain = 'fpv' | 'pantry' | 'gmail' | 'batteries' | 'fleet';
 
 const DOMAIN_INTENT_PATTERNS: Record<ToolDomain, RegExp> = {
-  fpv: /\b(fpv|drone|droni|quad|blackbox|bbl|fc|esc|vtx|rx|tx|betaflight|inav|elrs|pid|gyro|wiring|cablaggio|sald|elica|eliche|prop|props|motore|motori|motor|motors|frame|telaio)\b/i,
+  fpv: /\b(fpv|drones?|droni|quads?|blackbox|bbl|fc|esc|vtx|rx|tx|betaflight|inav|elrs|pids?|gyro|wiring|cablaggio|sald|elica|eliche|props?|propellers?|motore|motori|motor|motors|frame|telaio)\b/i,
   pantry:
-    /\b(pantry|dispensa|scad|scadenza|scadut[oaie]|comprato|comprata|acquist|spesa|supermercato|frigo|fridge|expir|expired|expiry|shelf|shelf[- ]life|latte|milk|uova|eggs|yogurt|ingredient|ricett|recipe|cucin)\b/i,
+    /\b(pantry|dispensa|scad|scadenza|scadut[oaie]|comprato|comprata|acquist|spesa|supermercato|frigo|fridge|expir\w*|shelf|shelf[- ]life|latte|milk|uova|eggs|yogurt|ingredients?|ricett|recipes?|grocer(?:y|ies)|cucin)\b/i,
   gmail:
-    /\b(gmail|email|e-mail|mail|posta|inbox|messagg[io]\s+di\s+posta|ricevut[oae]|spedizion|ordine|fattura|invoice|newsletter)\b/i,
+    /\b(gmail|e-?mails?|mails?|posta|inbox|messagg[io]\s+di\s+posta|ricevut[oae]|spedizion|ordine|fattur[ae]|invoices?|newsletters?)\b/i,
   batteries:
-    /\b(batter[iy]|batteri[ae]|lipo|li-ion|liion|celle|cell|voltag|tension|storage|scarica|ricarica|carica|mah|resistenz|resistance|pack|packs|1s|2s|3s|4s|6s)\b/i,
+    /\b(batter(?:y|ies)|batteri[ae]|lipos?|li-ion|liion|celle|cell|voltag|tension|storage|scarica|ricarica|carica|(?:dis)?charg\w*|mah|resistenz|resistance|pack|packs|1s|2s|3s|4s|6s)\b/i,
   fleet:
-    /\b(fleet|flotta|droni|drone|velivoli|aircraft|hangar|manutenzion|maintenance|crash\w*|voli|flight|flights|part[ei]|ricambi|scort[ae]|spares?|motore|motori|motors?|props?|frame|telaio|sostituit\w*|replaced|braccio|arm|elica|eliche|rotto|rotta|broken|damaged|danneggiat\w*|printed|print|stampat\w*|stampa(?:mi|re)?)\b/i,
+    /\b(fleet|flotta|droni|drones?|velivoli|aircraft|hangar|manutenzion|maintenance|crash\w*|voli|flight|flights|part[ei]|ricambi|scort[ae]|spares?|motore|motori|motors?|props?|frame|telaio|sostituit\w*|replaced|braccio|arm|elica|eliche|rotto|rotta|broken|damaged|danneggiat\w*|printed|print|stampat\w*|stampa(?:mi|re)?)\b/i,
 };
 
 const DOMAIN_PREFIXES: readonly ToolDomain[] = ['fpv', 'pantry', 'gmail', 'batteries', 'fleet'];

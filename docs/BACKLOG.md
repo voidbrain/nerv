@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 270.5 h agent + 21.5 h owner across 259 open steps of 57 features and 45 other records. 162.5 h of actual effort recorded on 149 steps. Generated from the task files.
+**Remaining effort:** 270.5 h agent + 21.25 h owner across 258 open steps of 57 features and 45 other records. 162.5 h of actual effort recorded on 149 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -436,6 +436,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
 | Impact | Report risk rank S1 of 12 (proposal 1): the highest likelihood × impact gap for the owner. |
+
+</details>
+
+---
+### <a id="b-167"></a>[🐞 B-167](#top)
+
+**Owner requests read in the wrong language, or without their battery tools, before Misato plans**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-167-T01 and B-167-T02 implemented in nerv#831; close on green CI.
+
+| | |
+|---|---|
+| **Issue** | Found while building the nerv-planner Gauntlet pack. `requestLanguage` (`src/misato.ts`) reads "quante batterie devo caricare?" and "stampa i piedini di Smoke" as English: the first has no word in its Italian list, and in the second "i" counts as English, so Misato is told to reply in English to the owner's Italian. `detectToolDomains` misses the English plural "batteries" (`batter[iy]\b`), so "how many batteries do I need to charge?" offers no battery tool, even after `tools.read` with subject batteries. |
+| **Reproduce** | `node --input-type=module -e "const m=await import('./src/misato.ts'); console.log(m.requestLanguage('quante batterie devo caricare?'), m.requestLanguage('stampa i piedini di Smoke'), [...m.detectToolDomains({request:'how many batteries do I need to charge?'})])"` prints `en en []`. |
+| **Check** | The three requests read as `it`, `it` and `batteries` (a test fails first, B-167-T01); the fix keeps the existing language and domain tests passing, and nerv-planner is rebuilt (`node tools/gauntlet-planner-pack.mjs`), so its changed cases are pending again (B-167-T02). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-167-t01"></a>B-167-T01 — Failing test: Italian requests read as English, English batteries not routed | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | — | [B-167-T02](#b-167-t02) | [PR #831](https://github.com/voidbrain/nerv/pull/831) failing tests for Italian requests and English plurals |
+| 🟢 Small | <a id="b-167-t02"></a>B-167-T02 — Read the three requests right and rebuild nerv-planner | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [B-167-T01](#b-167-t01) | — | [PR #831](https://github.com/voidbrain/nerv/pull/831) detector fix and nerv-planner 1.1.0 |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h | 0 of 2 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-167.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-167-T01: [PR #831](https://github.com/voidbrain/nerv/pull/831) failing tests for Italian requests and English plurals · B-167-T02: [PR #831](https://github.com/voidbrain/nerv/pull/831) detector fix and nerv-planner 1.1.0. `src/misato.ts` (`requestLanguage`, `DOMAIN_INTENT_PATTERNS`); found by the nerv-planner pack; [#829](https://github.com/voidbrain/nerv/pull/829); fix [#831](https://github.com/voidbrain/nerv/pull/831) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | The owner uses NERV in Italian: a short Italian request answered in English, and an English battery question that cannot reach the battery tools. |
 
 </details>
 
@@ -1104,9 +1144,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 6.75 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 6.75 h | — | — | 🤖 | — | — |
 
-💻 **→** F-120-T13 asks the owner to approve the first nerv-planner run ([page](acceptance/f120-t09-planner-first-run.md)); F-120-T08: rerun `nerv-system-flows/stress` and `browser` (`--allow-expensive`); F-120-T06 (four Arduino sketch cases) waits on the owner opting in to `arduino-cli`.
+💻 **→** F-120-T14: the first nerv-planner run (owner ok 2026-11-26, F-120-T13); F-120-T08: rerun `nerv-system-flows/stress` and `browser` (`--allow-expensive`); F-120-T06 (four Arduino sketch cases) waits on the owner opting in to `arduino-cli`.
 
 | | |
 |---|---|
@@ -1121,15 +1161,14 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | — | — | 🤖 | — |
 | 🟢 Small | <a id="f-120-t06"></a>F-120-T06 — Run the four Arduino sketch cases once arduino-cli is installed (owner opt-in) | 0.5 h | 0 h | 0.5 h | Planned | — | — | 🤖 | [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: sketch cases moved from F-120-T04 |
 | 🟢 Small | <a id="f-120-t08"></a>F-120-T08 — Rerun nerv-system-flows/stress and browser, and any system or multi-step case a later source change makes pending | 0.25 h | 0 h | 0.25 h | Planned | — | — | 🤖 | [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: stress and browser rerun |
-| 🟢 Small | <a id="f-120-t09"></a>F-120-T09 — nerv-planner-v1: model-layer cases on Misato's own tool index, Italian and English | 2.5 h | 2.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-120-T10](#f-120-t10), [F-120-T11](#f-120-t11), [F-120-T13](#f-120-t13) | 🤖 | [PR #829](https://github.com/voidbrain/nerv/pull/829) nerv-planner pack, wiring and failing-first tests; no real model run |
+| 🟢 Small | <a id="f-120-t09"></a>F-120-T09 — nerv-planner-v1: model-layer cases on Misato's own tool index, Italian and English | 2.5 h | 2.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-120-T10](#f-120-t10), [F-120-T11](#f-120-t11) | 🤖 | [PR #829](https://github.com/voidbrain/nerv/pull/829) nerv-planner pack, wiring and failing-first tests; no real model run |
 | 🟢 Small | <a id="f-120-t12"></a>F-120-T12 — Adopt scheduling-time, estimation and research packs on release | 0.5 h | 0 h | 0.5 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-120-t14"></a>F-120-T14 — Run nerv-planner once and record it in the Gauntlet ledger | 0.5 h | 0 h | 0.5 h | Planned | — | — | 🤖 | — |
 | 🟢 Small | <a id="f-120-t10"></a>F-120-T10 — A Gauntlet line on every open model-facing record | 0.5 h | 0 h | 0.5 h | Planned | [F-120-T09](#f-120-t09) | — | ⏳ 🤖 | — |
 | 🟡 Medium | <a id="f-120-t11"></a>F-120-T11 — Run the project packs nerv calls over MCP (grover-v1, fpvbuddy-v1, hobo-v1) | 1.5 h | 0 h | 1.5 h | Planned | [F-120-T09](#f-120-t09) | — | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-120-t13"></a>F-120-T13 — Owner approves the first nerv-planner run on the local model | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-120-T09](#f-120-t09) | [F-120-T14](#f-120-t14) | ⏳ 🤔 | — |
-| 🟢 Small | <a id="f-120-t14"></a>F-120-T14 — Run nerv-planner once and record it in the Gauntlet ledger | 0.5 h | 0 h | 0.5 h | Planned | [F-120-T13](#f-120-t13) | — | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 13.75 h | 6.25 h (4 of 14 steps recorded) | 6.75 h agent + 0.25 h owner | 5 of 14 completed | | | | |
+| 🔴 Large | **Total** | 13.75 h | 6.25 h (4 of 14 steps recorded) | 6.75 h | 6 of 14 completed | | | | |
 
-<details><summary>Done steps (5)</summary>
+<details><summary>Done steps (6)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -1138,6 +1177,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-120-t04"></a>F-120-T04 — Agent: run the approved Gauntlet campaign for the pending cases | 0.5 h | 2.25 h (stated) | Completed | [PR #798](https://github.com/voidbrain/nerv/pull/798) rerun after F-120-T05; 8 Docker cases pending; [PR #800](https://github.com/voidbrain/nerv/pull/800) Docker rerun; only the excluded sketch cases pending; [PR #803](https://github.com/voidbrain/nerv/pull/803) closed; coding rerun after F-120-T07 |
 | — | <a id="f-120-t05"></a>F-120-T05 — Run the reference-runner packs under a 180 s case limit (owner decision 2026-11-26) | 1 h | 0.5 h (stated) | Completed | [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded; [PR #795](https://github.com/voidbrain/nerv/pull/795) 180 s case limit for the reference-runner packs |
 | — | <a id="f-120-t07"></a>F-120-T07 — Raise the coding-reference reply cap so coding answers are not cut off (owner decision 2026-11-26) | 1 h | 1 h (stated) | Completed | [PR #803](https://github.com/voidbrain/nerv/pull/803) 3,072-token coding reply cap and rerun |
+| — | <a id="f-120-t13"></a>F-120-T13 — Owner approves the first nerv-planner run on the local model | 0 h | 0 h | Completed | [PR #831](https://github.com/voidbrain/nerv/pull/831) owner ok of 2026-11-26 recorded |
 
 </details>
 
@@ -1148,7 +1188,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749) · F-120-T04: [PR #798](https://github.com/voidbrain/nerv/pull/798) rerun after F-120-T05; 8 Docker cases pending; [PR #800](https://github.com/voidbrain/nerv/pull/800) Docker rerun; only the excluded sketch cases pending; [PR #803](https://github.com/voidbrain/nerv/pull/803) closed; coding rerun after F-120-T07 · F-120-T05: [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded; [PR #795](https://github.com/voidbrain/nerv/pull/795) 180 s case limit for the reference-runner packs · F-120-T06: [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: sketch cases moved from F-120-T04 · F-120-T07: [PR #803](https://github.com/voidbrain/nerv/pull/803) 3,072-token coding reply cap and rerun · F-120-T08: [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: stress and browser rerun · F-120-T09: [PR #829](https://github.com/voidbrain/nerv/pull/829) nerv-planner pack, wiring and failing-first tests; no real model run. Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review).; [#758](https://github.com/voidbrain/nerv/pull/758); [#783](https://github.com/voidbrain/nerv/pull/783); [#791](https://github.com/voidbrain/nerv/pull/791); [#794](https://github.com/voidbrain/nerv/pull/794); [#795](https://github.com/voidbrain/nerv/pull/795); [#798](https://github.com/voidbrain/nerv/pull/798); [#800](https://github.com/voidbrain/nerv/pull/800); [#803](https://github.com/voidbrain/nerv/pull/803); [#821](https://github.com/voidbrain/nerv/pull/821); [#829](https://github.com/voidbrain/nerv/pull/829) |
+| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749) · F-120-T04: [PR #798](https://github.com/voidbrain/nerv/pull/798) rerun after F-120-T05; 8 Docker cases pending; [PR #800](https://github.com/voidbrain/nerv/pull/800) Docker rerun; only the excluded sketch cases pending; [PR #803](https://github.com/voidbrain/nerv/pull/803) closed; coding rerun after F-120-T07 · F-120-T05: [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded; [PR #795](https://github.com/voidbrain/nerv/pull/795) 180 s case limit for the reference-runner packs · F-120-T06: [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: sketch cases moved from F-120-T04 · F-120-T07: [PR #803](https://github.com/voidbrain/nerv/pull/803) 3,072-token coding reply cap and rerun · F-120-T08: [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: stress and browser rerun · F-120-T09: [PR #829](https://github.com/voidbrain/nerv/pull/829) nerv-planner pack, wiring and failing-first tests; no real model run · F-120-T13: [PR #831](https://github.com/voidbrain/nerv/pull/831) owner ok of 2026-11-26 recorded. Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review).; [#758](https://github.com/voidbrain/nerv/pull/758); [#783](https://github.com/voidbrain/nerv/pull/783); [#791](https://github.com/voidbrain/nerv/pull/791); [#794](https://github.com/voidbrain/nerv/pull/794); [#795](https://github.com/voidbrain/nerv/pull/795); [#798](https://github.com/voidbrain/nerv/pull/798); [#800](https://github.com/voidbrain/nerv/pull/800); [#803](https://github.com/voidbrain/nerv/pull/803); [#821](https://github.com/voidbrain/nerv/pull/821); [#829](https://github.com/voidbrain/nerv/pull/829) |
 | Opened | 2026-11-24 |
 | Verification | Unit 2026-11-26: `test/gauntlet.test.mjs` F-120-T07 passes (3,072-token coding reply cap, other packs unchanged); F-120-T05 passes (180 s for the reference-runner packs, day limits for the rest). Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
 | Reviewed | 2026-11-25 |
@@ -2338,46 +2378,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-26 |
 | Verification | Browser: 2026-11-26, local headless Chrome: the three browser files fail on main with the cases above and pass with the fix (angular 1/1, evaluation 8/8, dashboard shell 2/2, each run alone); screenshot of MAGI in Eva · Light · Orange with the CRT checked by eye (not in the repository). Unit: the 66 Node tests that read the old dashboard pass. CI: 2026-11-26, PR #816 run 45808453265 passed all five jobs (B-154-T01 and B-154-T02 closed; B-154-T03 open). |
 | Reviewed | 2026-11-26 |
-
-</details>
-
----
-### <a id="b-167"></a>[🐞 B-167](#top)
-
-**Owner requests read in the wrong language, or without their battery tools, before Misato plans**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
-
-💻 **→** Next: B-167-T01 commits the failing test.
-
-| | |
-|---|---|
-| **Issue** | Found while building the nerv-planner Gauntlet pack. `requestLanguage` (`src/misato.ts`) reads "quante batterie devo caricare?" and "stampa i piedini di Smoke" as English: the first has no word in its Italian list, and in the second "i" counts as English, so Misato is told to reply in English to the owner's Italian. `detectToolDomains` misses the English plural "batteries" (`batter[iy]\b`), so "how many batteries do I need to charge?" offers no battery tool, even after `tools.read` with subject batteries. |
-| **Reproduce** | `node --input-type=module -e "const m=await import('./src/misato.ts'); console.log(m.requestLanguage('quante batterie devo caricare?'), m.requestLanguage('stampa i piedini di Smoke'), [...m.detectToolDomains({request:'how many batteries do I need to charge?'})])"` prints `en en []`. |
-| **Check** | The three requests read as `it`, `it` and `batteries` (a test fails first, B-167-T01); the fix keeps the existing language and domain tests passing, and nerv-planner is rebuilt (`node tools/gauntlet-planner-pack.mjs`), so its changed cases are pending again (B-167-T02). |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
-|---|---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-167-t01"></a>B-167-T01 — Failing test: Italian requests read as English, English batteries not routed | 0.25 h | 0 h | 0.25 h | Ready | — | [B-167-T02](#b-167-t02) |
-| 🟢 Small | <a id="b-167-t02"></a>B-167-T02 — Read the three requests right and rebuild nerv-planner | 0.5 h | 0 h | 0.5 h | Planned | [B-167-T01](#b-167-t01) | — |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h | 0 of 2 completed | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-167.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | `src/misato.ts` (`requestLanguage`, `DOMAIN_INTENT_PATTERNS`); found by the nerv-planner pack; [#829](https://github.com/voidbrain/nerv/pull/829) |
-| Opened | 2026-11-26 |
-| Verification | Pending |
-| Reviewed | 2026-11-26 |
-| Impact | The owner uses NERV in Italian: a short Italian request answered in English, and an English battery question that cannot reach the battery tools. |
 
 </details>
 
