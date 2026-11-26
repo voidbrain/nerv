@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-148-T06",
+  "parent": "F-148",
+  "title": "Owner: watch Misato and a consultant think on the dashboard",
+  "goal": "The owner sees a named, timed thinking state appear and disappear on the dashboard",
+  "status": "planned",
+  "acceptance": [
+    "On NERV-01 after the update, open the dashboard (http://127.0.0.1:<port> as usual) and keep the Pilots panel and the sorties visible. In chat type: `pianifica una cena per sabato con tre ospiti`. Expected while NERV works: the consultant's pilot card shows its name, Consultant, its model and the sortie ID, with a time that counts up, and the sortie shows the same wording as its line; when Misato plans, her state appears the same way. Expected after the answer: the marks disappear and the EVA cages line still says how many EVA jobs are active (0 if none ran), never counting the thinking",
+    "Second check: in a terminal run `nerv service restart` while a long answer is thinking. Expected: the thinking mark is gone within a few seconds of the dashboard reconnecting, not stuck",
+    "Report what you see (or a screenshot) in chat; the agent records the result in the record's Verification"
+  ],
+  "dependsOn": [
+    "F-148-T04"
+  ],
+  "resources": [
+    "docs/work/records/F-148.md"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented pilots, sorties and models only; no owner data or tokens in Git, tests or logs.",
+  "validation": [
+    "Owner check, recorded in F-148 Verification"
+  ],
+  "escalation": [
+    "The owner decides whether the display is enough; the agent records the result"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: two short checks on the Mac. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  },
+  "prs": [
+    {
+      "pr": 847
+    }
+  ]
+}

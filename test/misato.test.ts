@@ -1597,3 +1597,40 @@ test('B-143: "in 2 minutes" is due 2 minutes after the owner asked, not after th
     },
   );
 });
+
+// B-176: known failing until B-176-T02. One granted read whose result is larger than the step history budget
+// (8,000 characters) leaves Misato with no steps at all, so she proposes the same read again and the owner reads
+// only "Fatto: <tool>.". Remove `todo` with the fix.
+test(
+  'B-176: a granted read with a large result still reaches Misato, so she can answer from it',
+  { todo: 'B-176: fix pending (B-176-T02)' },
+  () => {
+    const strains = Array.from({ length: 33 }, (_, n) => ({
+      id: `fixture-strain-${n}`,
+      name: `Fixture Strain ${n}`,
+      breederId: null,
+      parentIds: [],
+      sativaPercent: 50,
+      thcPercent: null,
+      cbdPercent: null,
+      floweringDays: null,
+      autoflower: false,
+    }));
+    const result = { text: JSON.stringify(strains, null, 2) };
+    assert.ok(JSON.stringify(result).length > 8000, 'the fixture must exceed the history budget');
+    const ask = misatoAsk(
+      {
+        request: 'quali genetiche ho?',
+        history: [{ tool: 'fixture.strains', args: {}, outcome: 'grant', result }],
+        tools: toolDocs,
+        now: '2030-01-01T08:00:00.000Z',
+        timeZone: 'Europe/Rome',
+      },
+      'local',
+    );
+    const steps = (JSON.parse(ask.prompt) as { steps?: { tool: string; result?: unknown }[] }).steps ?? [];
+    assert.equal(steps.length, 1, 'the granted read is missing from the planner prompt');
+    assert.equal(steps[0]?.tool, 'fixture.strains');
+    assert.match(JSON.stringify(steps[0]?.result), /Fixture Strain 0/);
+  },
+);
