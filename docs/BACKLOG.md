@@ -46,7 +46,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 288.5 h agent + 24.25 h owner across 303 open steps of 61 features and 51 other records. 162.5 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 287.5 h agent + 24.25 h owner across 303 open steps of 61 features and 51 other records. 162.5 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1109,9 +1109,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 6.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 5.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
 
-💻 **→** Next: F-144-T01 — Failing test and probe: how keep&#95;alive reaches Ollama (Planned).
+💻 **→** Next: F-144-T03, F-144-T05 and F-144-T06; T01, T02, T04 and the T07 controls implemented.
 
 | | |
 |---|---|
@@ -1123,15 +1123,15 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-144-t01"></a>F-144-T01 — Failing test and probe: how keep&#95;alive reaches Ollama | 0.75 h | 0 h | 0.75 h | Planned | — | [F-144-T02](#f-144-t02), [F-144-T05](#f-144-t05) | 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
-| 🟢 Small | <a id="f-144-t02"></a>F-144-T02 — A: keep role models loaded longer after the last use | 1 h | 0 h | 1 h | Planned | [F-144-T01](#f-144-t01) | [F-144-T03](#f-144-t03), [F-144-T04](#f-144-t04) | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
+| 🟢 Small | <a id="f-144-t01"></a>F-144-T01 — Failing test and probe: how keep&#95;alive reaches Ollama | 0.75 h | 0 h | 1 h | Implemented; verification pending | — | [F-144-T02](#f-144-t02), [F-144-T05](#f-144-t05) | 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
+| 🟢 Small | <a id="f-144-t02"></a>F-144-T02 — A: keep role models loaded longer after the last use | 1 h | 0 h | 0.5 h | Implemented; verification pending | [F-144-T01](#f-144-t01) | [F-144-T03](#f-144-t03), [F-144-T04](#f-144-t04) | 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
+| 🟢 Small | <a id="f-144-t04"></a>F-144-T04 — C: "keep loaded always" option (keep&#95;alive -1), off by default | 0.75 h | 0 h | 0.5 h | Implemented; verification pending | [F-144-T02](#f-144-t02) | [F-144-T06](#f-144-t06), [F-144-T07](#f-144-t07) | 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
 | 🟢 Small | <a id="f-144-t03"></a>F-144-T03 — B: warm the model at service start, after an update and before scheduled briefs | 1 h | 0 h | 1 h | Planned | [F-144-T02](#f-144-t02) | [F-144-T06](#f-144-t06), [F-144-T08](#f-144-t08) | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
-| 🟢 Small | <a id="f-144-t04"></a>F-144-T04 — C: "keep loaded always" option (keep&#95;alive -1), off by default | 0.75 h | 0 h | 0.75 h | Planned | [F-144-T02](#f-144-t02) | [F-144-T06](#f-144-t06), [F-144-T07](#f-144-t07) | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
 | 🟢 Small | <a id="f-144-t05"></a>F-144-T05 — Time to first token, cold vs warm, in doctor and the dashboard | 1 h | 0 h | 1 h | Planned | [F-144-T01](#f-144-t01) | [F-144-T07](#f-144-t07) | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
 | 🟢 Small | <a id="f-144-t06"></a>F-144-T06 — Image runner and memory interplay: contract and documentation | 0.75 h | 0 h | 0.75 h | Planned | [F-144-T03](#f-144-t03), [F-144-T04](#f-144-t04) | — | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
-| 🟢 Small | <a id="f-144-t07"></a>F-144-T07 — Dashboard Settings: keep-warm duration and the "always loaded" toggle with a memory warning | 1 h | 0 h | 1 h | Planned | [F-144-T04](#f-144-t04), [F-144-T05](#f-144-t05) | [F-144-T08](#f-144-t08) | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
+| 🟢 Small | <a id="f-144-t07"></a>F-144-T07 — Dashboard Settings: keep-warm duration and the "always loaded" toggle with a memory warning | 1 h | 0 h | 0.5 h | Planned | [F-144-T04](#f-144-t04), [F-144-T05](#f-144-t05) | [F-144-T08](#f-144-t08) | ⏳ 🤖 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
 | 🟢 Small | <a id="f-144-t08"></a>F-144-T08 — Owner: see the first reply come faster after idle, and the memory warning | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-144-T03](#f-144-t03), [F-144-T07](#f-144-t07) | — | ⏳ 🧑‍🔧 | [PR #826](https://github.com/voidbrain/nerv/pull/826) plan |
-| 🔴 Large | **Total** | 6.25 h | 0 h (0 of 8 steps recorded) | 6.25 h agent + 0.25 h owner | 0 of 8 completed | | | | |
+| 🔴 Large | **Total** | 6.25 h | 0 h (0 of 8 steps recorded) | 5.25 h agent + 0.25 h owner | 0 of 8 completed | | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1140,7 +1140,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-144-T01: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T02: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T03: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T04: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T05: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T06: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T07: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T08: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan. Plan: [#826](https://github.com/voidbrain/nerv/pull/826); cold-start baseline: [#837](https://github.com/voidbrain/nerv/pull/837) |
+| PR / evidence | Steps: F-144-T01: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T02: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T03: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T04: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T05: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T06: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T07: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan · F-144-T08: [PR #826](https://github.com/voidbrain/nerv/pull/826) plan. Plan: [#826](https://github.com/voidbrain/nerv/pull/826); cold-start baseline: [#837](https://github.com/voidbrain/nerv/pull/837); [#845](https://github.com/voidbrain/nerv/pull/845) |
 | Opened | 2026-11-26 |
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
