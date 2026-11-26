@@ -4,7 +4,7 @@
   "parent": "F-123",
   "title": "Owner check: NERV lists the Grover tools",
   "goal": "The owner registers the hub URL; `nerv` lists the Grover tools and a read tool answers in chat",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "The owner registers the hub URL; `nerv` lists the Grover tools and a read tool answers in chat",
     "Owner decision 2026-11-26 (chat): \"accept all 17 proposals\" of the cross-project audit (coordinator docs/audits/2026-11-26-cross-project.md), proposal 12: waits on grover:F-005-T01 (the hub deployed on the Pi): its check registers the hub running on the Pi."
@@ -31,13 +31,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h owner",
-    "basis": "Estimated 2026-11-24 when opened from the coordinator gap review. Not a measurement. 2026-11-26 audit proposals: prerequisite added, estimate unchanged.",
+    "estimate": "0 remaining",
+    "basis": "Closed 2026-11-26: the owner ran steps 3 and 4 on NERV-01 (about 20:37-20:45Z) and the agent step 5 with the owner's OK; evidence on the record. No actual: not timed.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0,
     "estimateAgentHours": 0,
-    "ownerHours": 0.5,
+    "ownerHours": 0,
     "ownerKind": "procedure"
   },
   "ownerLink": "docs/acceptance/f123-t02-grover-tools.md",

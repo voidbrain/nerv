@@ -35,7 +35,7 @@ Status per milestone, derived from the records (Delivered: all closed; Awaiting 
 | 5 — Distributed agents/models | In progress | 7 | 0 | 14 | F-006, F-012, F-049, F-060, F-089, F-090, F-092, F-093, F-094, F-106, F-113, F-116, F-126, F-128 |
 | 5b — Coordinator relocation (later) | Planned | 0 | 0 | 1 | F-016 |
 | 6 — Voice and evaluated improvement | Planned | 0 | 0 | 2 | F-007, F-146 |
-| Independent tracks | In progress | 5 | 0 | 7 | F-008, F-099, F-101, F-121, F-122, F-123, F-132 |
+| Independent tracks | In progress | 6 | 0 | 6 | F-008, F-099, F-101, F-121, F-122, F-132 |
 <!-- roadmap-status:end -->
 
 ## NERV naming and governance (2026-11-04)
