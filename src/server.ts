@@ -33,7 +33,7 @@ import { HealthSampleStore, startLocalHealthSampler } from './health-samples.ts'
 import { RpcFault } from './rpc.ts';
 import { confirmPushToTalkDraft, preparePushToTalkDraft, prepareSpokenReply, type VoiceLanguage } from './voice.ts';
 import type { ModelChange } from './model-setup.ts';
-import { MODEL_TIMEOUT_MS } from './model.ts';
+import { MODEL_TIMEOUT_MS, validKeepAlive } from './model.ts';
 import { MAX_STEPS } from './misato.ts';
 import type { DocumentStore } from './documents.ts';
 import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.ts';
@@ -905,9 +905,17 @@ export function makeServer(
           casper = b.casper as Record<string, unknown> | undefined,
           cloud = b.cloud as Record<string, unknown> | undefined;
         const consultant = b.consultant as Record<string, unknown> | null | undefined;
+        const warm = b.warm as Record<string, unknown> | undefined;
         if (
           !Object.keys(b).length ||
-          Object.keys(b).some((k) => !['misato', 'casper', 'cloud', 'consultant'].includes(k)) ||
+          Object.keys(b).some((k) => !['misato', 'casper', 'cloud', 'consultant', 'warm'].includes(k)) ||
+          (warm !== undefined &&
+            (typeof warm !== 'object' ||
+              !warm ||
+              !Object.keys(warm).length ||
+              Object.keys(warm).some((k) => !['keepAlive', 'alwaysLoaded'].includes(k)) ||
+              (warm.keepAlive !== undefined && !validKeepAlive(warm.keepAlive)) ||
+              (warm.alwaysLoaded !== undefined && typeof warm.alwaysLoaded !== 'boolean'))) ||
           (consultant !== undefined &&
             consultant !== null &&
             (typeof consultant !== 'object' ||
@@ -932,7 +940,7 @@ export function makeServer(
               (cloud.model !== undefined && !str(cloud.model))))
         )
           throw new Error(
-            'Give misato {route, model?}, casper {model}, consultant {model} or null, and/or cloud {enabled, model?}.',
+            'Give misato {route, model?}, casper {model}, consultant {model} or null, cloud {enabled, model?}, and/or warm {keepAlive (1m to 24h), alwaysLoaded}.',
           );
         const result = await store.changeModels(b as ModelChange);
         reply(result.error ? 400 : 200, result);
