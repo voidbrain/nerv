@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "parent": "B-170",
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens, endpoints or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "dependsOn": [
+    "B-170-T04"
+  ],
+  "id": "B-170-T05",
+  "title": "Procedure retest steps and area notes",
+  "goal": "The F-004-T10 procedure has copy-paste retest steps; area notes name the page report and device-bound subscriptions",
+  "status": "planned",
+  "acceptance": [
+    "The F-004-T10 procedure has copy-paste retest steps; area notes name the page report and device-bound subscriptions"
+  ],
+  "resources": [
+    "docs/acceptance/f004-t06-phone-push-procedure.md",
+    "docs/agents/areas/**",
+    "docs/work/records/B-170.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
