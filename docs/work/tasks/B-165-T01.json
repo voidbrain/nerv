@@ -4,7 +4,7 @@
   "parent": "B-165",
   "title": "Failing test: running the Gauntlet tests leaves the tracked ledger byte-identical",
   "goal": "A committed test fails on main: it hashes evals/gauntlet/ledger.json, runs test/gauntlet.test.mjs (or the full suite) as a child process, and asserts the file is byte-identical afterwards",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Test committed before the fix and failing on main (under load if needed: run the Gauntlet tests with the concurrency the full suite uses), or the record names why it cannot fail on demand and the manual check that replaces it",
     "It restores the tracked file if the run changed it, so the failing test itself never leaves a rewritten ledger behind",
@@ -32,10 +32,10 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-26: a child-process run of the Gauntlet tests with a before/after hash, plus one narrow env-switch test. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 1.5 h agent. Implemented the same day: test/gauntlet-ledger.test.mjs; fails on main (all three tests), the ledger restored by the test. Remaining: CI.",
     "reviewed": "2026-11-26",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },

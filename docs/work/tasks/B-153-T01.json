@@ -4,7 +4,7 @@
   "parent": "B-153",
   "title": "Name why the Gauntlet tests see 104 of 126 cases in the full suite",
   "goal": "The cause of the five full-suite Gauntlet failures is named and fixed with a failing test first",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "The record names what changes the pack catalogue (or the timing) while test/gauntlet.test.mjs runs",
     "A cause in code or a test fixture gets a committed failing test before the fix",
@@ -31,10 +31,10 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "2 h",
-    "basis": "Estimated 2026-11-26 in the full audit from B-127's similar shared-folder cause. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26 from B-127. Implemented the same day with B-165-T02: the cause is the 18 s root-command test timing out on a loaded host. Remaining: CI.",
     "reviewed": "2026-11-26",
-    "agentHours": 2,
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
   }
