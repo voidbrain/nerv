@@ -2,7 +2,7 @@
 
 Optional coordination for one solution composed of multiple repositories. Use a dedicated coordinator repository even for a small solution when that is the owner's preference. Apply `core/` there, then the `solution/` fragment. Apply relevant stack add-ons to each component independently. This profile creates no actual consumer repositories and requires none for the template's own release.
 
-Moved to [solution refresh and adoption](solution-refresh.md): "Refresh and verification", "Adoption and CI".
+Moved to solution refresh and adoption (`docs/agents/solution-refresh.md`): "Refresh and verification", "Adoption and CI". Only the coordinator receives that page, `docs/agents/solution-dashboard.md`, `docs/agents/solution-gaps.md` and `tools/solution.mjs` (the `solution/` fragment, B-129), so this page names them as paths; the coordinator's `docs/SOLUTION.md` links them.
 
 ## In short
 
@@ -54,8 +54,8 @@ An optional `order` in `.solution.json` names a coordinator file (for example `d
 
 The coordinator uses the same compact B-/F- record format and validator as any project. Its own records describe integration outcomes, shared-contract decisions or coordination. Add `| Components | client:F-012, api:B-004 |` in a record's details metadata. IDs are repository-qualified using exact manifest IDs; `solution` is reserved for the coordinator. Components may use a `Solution` field to link back; that does not copy acceptance ownership. No foreign implementation action belongs in the coordinator record. A component step that waits on a step of another component names it in its task file's `dependsOn` as `<repo>:<STEP-ID>` with the same manifest ID ([ordering](../backlog/ordering.md)); the component never reads the other repository.
 
-How the dashboard reads each backlog (layouts, built views, remaining hours) is in [solution dashboard](solution-dashboard.md), moved from here unchanged (F-095-T04). Its gap review, proposals for missing cross-repository work, is in [solution gaps](solution-gaps.md).
+How the dashboard reads each backlog (layouts, built views, remaining hours) is in solution dashboard (`docs/agents/solution-dashboard.md`), moved from here unchanged (F-095-T04). Its gap review, proposals for missing cross-repository work, is in solution gaps (`docs/agents/solution-gaps.md`).
 
 ## Dashboard sections
 
-Since 10.20.0 (F-095, F-097) the dashboard holds, in order: the sources and their revisions; the owner view (a summary per project with harness and next audit, the solution order with live state, hours and open prerequisites, blocked with the block reached, nothing to do, waiting for the owner; since 10.21.0 in the layout of a coordinator's own overview, F-099); the agent runway; audits, reviews and harness release per project; the gap review; each project's open steps, collapsed; remaining effort; integration outcomes; component work; source and link problems. [Solution dashboard](solution-dashboard.md) says how each is read, [solution gaps](solution-gaps.md) what the gap review proposes, and [solution refresh](solution-refresh.md), "Moving from project tools", how a coordinator with its own order or overview tools moves to them.
+Since 10.20.0 (F-095, F-097) the dashboard holds, in order: the sources and their revisions; the owner view (a summary per project with harness and next audit, the solution order with live state, hours and open prerequisites, blocked with the block reached, nothing to do, waiting for the owner; since 10.21.0 in the layout of a coordinator's own overview, F-099); the agent runway; audits, reviews and harness release per project; the gap review; each project's open steps, collapsed; remaining effort; integration outcomes; component work; source and link problems. Solution dashboard says how each is read, solution gaps what the gap review proposes, and solution refresh, "Moving from project tools", how a coordinator with its own order or overview tools moves to them.

@@ -78,7 +78,7 @@ Each procedure is binding when its trigger applies: read it before the task; a s
 | reassess architecture or decisions | [architecture review](docs/agents/architecture-review.md) |
 | set up the project or change its stack or workflow (capability assessment) | [MCP guidance](docs/agents/mcp.md), "In short" |
 | add, configure or rely on an MCP connection, or edit MCP selections | [MCP guidance](docs/agents/mcp.md) (commands inside) |
-| work across repositories of a solution | [solution profile](docs/agents/solution-profile.md) (refresh inside) |
+| work across repositories of a solution | [solution profile](docs/agents/solution-profile.md) (the refresh is the coordinator's: its `docs/SOLUTION.md`) |
 | add or use a shared skill | [skills](docs/agents/skills.md) |
 | adopt or reconcile the harness, or review maintenance evidence | [maintenance](docs/agents/maintenance.md) |
 | change AGENTS.md, CLAUDE.md, BACKLOG-RULES or `docs/backlog/`; measure friction; consolidate rules | [rule review](docs/agents/rule-review.md) |
