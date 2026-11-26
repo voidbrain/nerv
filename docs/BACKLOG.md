@@ -43,7 +43,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 190.75 h agent + 17 h owner across 180 open steps of 46 features and 40 other records. 158.5 h of actual effort recorded on 148 steps. Generated from the task files.
+**Remaining effort:** 189.75 h agent + 17 h owner across 179 open steps of 46 features and 40 other records. 159 h of actual effort recorded on 149 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -682,9 +682,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h | — | — | 🤖 | — | — |
 
-💻 **→** Owner approved 180 s a case for the three reference-runner packs on 2026-11-26 (F-120-T05); the agent implements it, excludes the four sketch cases and reruns F-120-T04.
+💻 **→** F-120-T04: rerun the pending Gauntlet cases with the 180 s reference-runner limit (F-120-T05 done); the four sketch cases are excluded.
 
 | | |
 |---|---|
@@ -694,19 +694,19 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | — | — | 🤖 | — |
-| 🟢 Small | <a id="f-120-t05"></a>F-120-T05 — Run the reference-runner packs under a 180 s case limit (owner decision 2026-11-26) | 1 h | 0 h | 1 h | Ready | — | [F-120-T04](#f-120-t04) | 🤖 | [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded |
-| 🟢 Small | <a id="f-120-t04"></a>F-120-T04 — Agent: run the approved Gauntlet campaign for the pending cases | 0.5 h | 0 h | 0.5 h | Planned | [F-120-T05](#f-120-t05) | — | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 6.5 h | 0 h (0 of 5 steps recorded) | 4.5 h | 2 of 5 completed | | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-120-t04"></a>F-120-T04 — Agent: run the approved Gauntlet campaign for the pending cases | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
+| 🟡 Medium | **Total** | 6.5 h | 0.5 h (1 of 5 steps recorded) | 3.5 h | 3 of 5 completed | | |
 
-<details><summary>Done steps (2)</summary>
+<details><summary>Done steps (3)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
 | — | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | Completed | [PR #752](https://github.com/voidbrain/nerv/pull/752) |
 | — | <a id="f-120-t03"></a>F-120-T03 — Owner approves the first Gauntlet run of the domain-pack cases | 0.5 h | 0 h | Completed | [PR #749](https://github.com/voidbrain/nerv/pull/749) |
+| — | <a id="f-120-t05"></a>F-120-T05 — Run the reference-runner packs under a 180 s case limit (owner decision 2026-11-26) | 1 h | 0.5 h (stated) | Completed | [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded; [PR #795](https://github.com/voidbrain/nerv/pull/795) 180 s case limit for the reference-runner packs |
 
 </details>
 
@@ -717,9 +717,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749) · F-120-T05: [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded. Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review).; [#758](https://github.com/voidbrain/nerv/pull/758); [#783](https://github.com/voidbrain/nerv/pull/783); [#791](https://github.com/voidbrain/nerv/pull/791); [#794](https://github.com/voidbrain/nerv/pull/794) |
+| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749) · F-120-T05: [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded; [PR #795](https://github.com/voidbrain/nerv/pull/795) 180 s case limit for the reference-runner packs. Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review).; [#758](https://github.com/voidbrain/nerv/pull/758); [#783](https://github.com/voidbrain/nerv/pull/783); [#791](https://github.com/voidbrain/nerv/pull/791); [#794](https://github.com/voidbrain/nerv/pull/794); [#795](https://github.com/voidbrain/nerv/pull/795) |
 | Opened | 2026-11-24 |
-| Verification | Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
+| Verification | Unit 2026-11-26: `test/gauntlet.test.mjs` F-120-T05 passes (180 s for the reference-runner packs, day limits for the rest). Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
 | Reviewed | 2026-11-25 |
 
 </details>

@@ -4,7 +4,7 @@
   "parent": "F-120",
   "title": "Run the reference-runner packs under a 180 s case limit (owner decision 2026-11-26)",
   "goal": "The coding, embedded and cad-3d OpenSCAD cases can finish: their runners get a case budget that leaves the model time to answer",
-  "status": "ready",
+  "status": "closed",
   "acceptance": [
     "The owner's decision is recorded in F-120 with its date",
     "If approved: gauntlet:all runs the coding-reference, embedded-reference and cad-3d-reference cases under the release's limits-slow-host.json (180 s a case) or an owner-set limit, the other packs keep the day limits, with a regression test",
@@ -14,11 +14,11 @@
     "F-120-T03"
   ],
   "resources": [
-    "tools/gauntlet.mjs",
-    "test/gauntlet.test.mjs",
     "docs/evaluations/gauntlet.md",
     "docs/work/records/F-120.md",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "test/gauntlet.test.mjs",
+    "tools/gauntlet.mjs"
   ],
   "capabilities": [
     "architecture-review"
@@ -33,18 +33,24 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Opened 2026-11-26 from the F-120-T04 run: the case budget is a campaign budget, which the owner approves (docs/evaluations/gauntlet.md). Decided 2026-11-26: owner \"yes to 180 s\"; arduino-cli not asked for, so the four sketch cases are excluded from F-120-T04. Implementation estimated 2026-11-26: 1 h agent (limit selection by pack, failing-first test, docs).",
+    "estimate": "0 remaining",
+    "basis": "Opened 2026-11-26 from the F-120-T04 run: the case budget is a campaign budget, which the owner approves (docs/evaluations/gauntlet.md). Decided 2026-11-26: owner \"yes to 180 s\"; arduino-cli not asked for, so the four sketch cases are excluded from F-120-T04. Implementation estimated 2026-11-26: 1 h agent (limit selection by pack, failing-first test, docs). Implemented 2026-11-26 in 0.5 h: modelLimits picks limits-slow-host.json for packs on the three reference runners; Test: test/gauntlet.test.mjs F-120-T05 (failing first).",
     "reviewed": "2026-11-26",
-    "agentHours": 1,
+    "agentHours": 0,
     "ownerHours": 0,
     "baselineAgentHours": 0,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
   },
   "prs": [
     {
       "pr": 794,
       "note": "owner decision 2026-11-26 recorded"
+    },
+    {
+      "pr": 795,
+      "note": "180 s case limit for the reference-runner packs"
     }
   ]
 }

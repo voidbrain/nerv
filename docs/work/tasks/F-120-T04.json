@@ -10,8 +10,8 @@
   "title": "Agent: run the approved Gauntlet campaign for the pending cases",
   "goal": "Run the cases node tools/gauntlet.mjs pending lists, once the owner approved it in F-120-T03, and record the run",
   "acceptance": [
-    "The run covers coding/*, logic-math/*, embedded/*, italian-quality/*, cad-3d/*, code-review/*, multi-step-agent/* and nerv-system-flows/*, recorded in the ledger",
-    "node tools/gauntlet.mjs pending lists none of these",
+    "The run covers coding/*, logic-math/*, embedded/* except the four sketch cases, italian-quality/*, cad-3d/*, code-review/*, multi-step-agent/* and nerv-system-flows/*, recorded in the ledger",
+    "node tools/gauntlet.mjs pending lists none of these; the four embedded sketch cases (blink-millis-esp32-regression, debounce-toggle-uno-regression, pwm-fade-esp32-holdout, serial-command-uno-holdout) are excluded: arduino-cli not installed; owner did not opt in 2026-11-26; can be added later",
     "Run in the development checkout, never ~/.nerv-app; not while the owner uses the local model (it shares Ollama with the service)"
   ],
   "dependsOn": [
