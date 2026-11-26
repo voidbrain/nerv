@@ -118,7 +118,8 @@ test(
   'F-086-T05: join service ↔ client ↔ tools: a stored read-only credential serves gmail.search, taints the sortie and leaks no secret',
   withHome(async (home) => {
     writeGmailCredentials(home, credentials([GMAIL_SCOPE_READONLY]));
-    assert.equal(statSync(gmailCredentialsPath(home)).mode & 0o777, 0o600);
+    // Windows has no mode bits (Node reports 0o666): the profile's ACLs keep the data home private there.
+    if (process.platform !== 'win32') assert.equal(statSync(gmailCredentialsPath(home)).mode & 0o777, 0o600);
     const store = new Store(join(home, 'nerv.sqlite'), undefined, { home });
     const google = fakeGoogle();
     store.gmailFetch = google.fetchFn;
@@ -265,7 +266,8 @@ test(
     assert.match(tokenBodies[0]!, /code_verifier=/);
     assert.match(tokenBodies[0]!, /code=fixture-auth-code-0001/);
 
-    assert.equal(statSync(gmailCredentialsPath(home)).mode & 0o777, 0o600);
+    // Windows has no mode bits (Node reports 0o666): the profile's ACLs keep the data home private there.
+    if (process.platform !== 'win32') assert.equal(statSync(gmailCredentialsPath(home)).mode & 0o777, 0o600);
     assert.deepEqual(readGmailCredentials(home)?.scopes, [GMAIL_SCOPE_READONLY]);
     for (const secret of [CLIENT_SECRET, REFRESH, ACCESS]) assert.doesNotMatch(lines.join('\n'), new RegExp(secret));
     assert.doesNotMatch(readFileSync(join(home, 'config.json'), 'utf8'), /refresh|secret|gmail/i);
