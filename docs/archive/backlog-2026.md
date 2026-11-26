@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 8 | 24 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 8 | 26 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7407,6 +7407,75 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | PR / evidence | GitHub code-scanning API at main `4a0df337`, analysis of 2026-11-26 09:48 UTC (50 results); `docs/audits/2026-11-26-full.md`; [#806](https://github.com/voidbrain/nerv/pull/806); [#810](https://github.com/voidbrain/nerv/pull/810) |
 | Opened | 2026-11-26 |
 | Verification | Pending |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-165
+
+**A full local test run overwrote the tracked Gauntlet ledger and #806 committed it (18 entries lost)**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🔴 Large |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: Closed 2026-11-26: #818 merged as 5c5ca1fb with every check green (validate incl. check:gauntlet-ledger, full-suite, windows, native-macos); local full npm test twice at load average 37 and 53 left evals/gauntlet/ledger.json untouched; Review: design-reviewer, findings fixed in #818.
+
+| | |
+|---|---|
+| **Issue** | PR #806 (full audit F-134-T02, commit `bfdaab98`, a docs change) rewrote `evals/gauntlet/ledger.json`: main had 122 entries, the commit 104; it removed 10 cad-3d, 4 coding and 4 embedded entries (the F-120 campaign of 2026-11-26 07:26–09:06Z) and rewrote every remaining entry with `finished` 09:58:02–09:59:23Z and new report hashes. #803 restored them. Cause, from the evidence: a tool, not a hand edit. The new times fall inside the audit's two full `npm test` runs (09:50–10:02Z), the rewritten packs are exactly the model-free and fake-model packs the test fixtures run (no Docker-runner pack), and the 104-entry keyset is what a run starting from an empty ledger records. `tools/gauntlet.mjs` resolves the ledger path from `NERV_GAUNTLET_LEDGER` on every read and write (`ledgerPath()`, `:41`), and `test/gauntlet.test.mjs` sets and deletes that variable around async work (`:898`, `:1114`, `:1188`, …): when one test removes it while another is between reading its temp ledger and writing, the write lands on the repository's ledger. The audit commit then took the changed file along with its docs. Suspected cause, corroborated the same day: another agent's local full `npm test` on the F-086 branch also rewrote the tracked `evals/gauntlet/ledger.json` in place and the rewrite was committed by accident, then restored before merge in [#808](https://github.com/voidbrain/nerv/pull/808), so a test writes the tracked ledger in place. Reproduced on demand 2026-11-26 (B-165-T01): `node --test --test-timeout=10000 test/gauntlet.test.mjs` rewrites the ledger to the 104 entries every time. The root-command test (`the root command runs only uncovered cases…`, about 18 s idle) passes the suite's 60 s `--test-timeout` only on an idle host; on a loaded one the runner times it out and moves on while its `gauntlet all --execute` keeps running, and the next test's `finally` deletes `NERV_GAUNTLET_LEDGER`, so the orphaned run's next `writeLedger` resolves the tracked path and writes its temporary ledger's 104 entries there. The same orphan changes the next tests' files: [B-153](../work/records/B-165.md#b-153)'s five failures. |
+| **Reproduce** | In a fresh worktree after `npm ci`: run `npm test` on a loaded host (as the 2026-11-26 audit did) and then `git status evals/gauntlet/ledger.json`; or compare `git show bfdaab98^:evals/gauntlet/ledger.json` (122 entries) with `git show bfdaab98:evals/gauntlet/ledger.json` (104). |
+| **Check** | A committed test fails first (B-165-T01): it runs the Gauntlet test file (or the whole suite) and asserts `evals/gauntlet/ledger.json` is byte-identical afterwards; the fix makes it pass (B-165-T02); a branch that drops ledger entries present on main fails a check unless it names them (B-165-T03). |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: Closed 2026-11-26: #818 merged as 5c5ca1fb with every check green (validate incl. check:gauntlet-ledger, full-suite, windows, native-macos); local full npm test twice at load average 37 and 53 left evals/gauntlet/ledger.json untouched; Review: design-reviewer, findings fixed in #818. 2026-11-26: Owner decision 2026-11-26 in chat: "NERV practices inventory accept all" (all 22 proposals of the coordinator's [practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md)). Found 2026-11-26 while restoring the entries in #803; investigated for this record from `git show` of `bfdaab98` and its parent, the audit's run times (`docs/audits/2026-11-26-full.md:3,9,20`) and `tools/gauntlet.mjs:41,217-221`. Planned: B-165-T01 (failing test), B-165-T02 (fix), B-165-T03 (entry-drop check). Shares the suspect with [B-153](../work/records/B-165.md#b-153)-T01: whichever step lands first records its finding in the other record. 2026-11-26, implemented: B-165-T01 `test/gauntlet-ledger.test.mjs` (committed first, all three tests fail on main): (a) `test/gauntlet.test.mjs` under a 10 s per-test limit leaves the ledger byte-identical and passes, (b) `gauntlet all --execute` writes the ledger it started with when `NERV_GAUNTLET_LEDGER` changes mid-run, (c) under the test runner a record to the tracked ledger is refused; each restores the file before asserting. B-165-T02 (`tools/gauntlet.mjs`): `main()` captures the `NERV_GAUNTLET_*` settings once per command (AsyncLocalStorage, `withGauntletSettings` for tests), and `writeLedger` refuses `evals/gauntlet/ledger.json` (compared by real path) under the test runner (`NODE_TEST_CONTEXT`, or `--test` in this process for `--test-isolation=none`; a test file run as `node file.mjs` is not recognisable); the root-command test gets a 300 s limit and passes its files as command settings instead of the process environment. With its limit forced to 5 s it still times out, but no other test fails and the ledger is untouched. B-165-T03: `npm run check:gauntlet-ledger` (`tools/check-gauntlet-ledger.mjs`, in `check:fast` and CI) fails when the working tree lacks a ledger entry (pack, case, profile) of the merge base of HEAD and origin/main, so a branch behind main is not blamed for entries main gained since; an entry may leave only when its case left the catalogue (or its pack is excluded in `consumption.json`), which is how a deliberate drop is named; a named `--base` that cannot be read fails. Replayed on #806 (`bfdaab98^` → `bfdaab98`) it names the 18 lost entries. Limit: an entry rewritten in place by a newer run is not a drop, so a fixture run recorded over real evidence passes this check; the test-runner guard covers that path. Its test was committed before the tool. Review: design-reviewer (fresh context), 2026-11-26: no blockers; the 18-not-22 count, the guard's isolation and symlink gaps, a mistyped `--base` passing and the rewrite limit were fixed or stated here; also noted: other Gauntlet tests still set `process.env` around direct helper calls (harmless while none times out), and T01 (a)'s 10 s per-test limit could flake on a much slower host. A run at load average 50 then timed out F-074-T10 (3 s idle) under T01 (a)'s 10 s limit: the Gauntlet tests of a second or more now carry a 120 s limit of their own (`SLOW_HOST`, B-153); T01 unchanged. Full runs in Verification.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [#808](https://github.com/voidbrain/nerv/pull/808) (second rewrite by a local `npm test`, restored before merge); [#806](https://github.com/voidbrain/nerv/pull/806) commit `bfdaab98` (ledger 122 → 104 entries); [#803](https://github.com/voidbrain/nerv/pull/803) (restored); `docs/audits/2026-11-26-full.md`; `tools/gauntlet.mjs:41,217-221`; `test/gauntlet.test.mjs:898,1114`; [#815](https://github.com/voidbrain/nerv/pull/815); [#818](https://github.com/voidbrain/nerv/pull/818) |
+| Opened | 2026-11-26 |
+| Verification | CI: #818 all green 2026-11-26; Test: test/gauntlet-ledger.test.mjs, test/check-gauntlet-ledger.test.mjs |
+| Reviewed | 2026-11-26 |
+| Impact | Data integrity of the evaluation evidence: entries vanished from main without a check failing; restored by hand in #803. |
+
+</details>
+
+---
+
+### B-153
+
+**Five Gauntlet tests fail in the full local suite but pass alone**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: Closed 2026-11-26: cause named and fixed with B-165 in #818 (merged as 5c5ca1fb, every check green); local full npm test twice at load average 37 and 53 with no Gauntlet failure.
+
+| | |
+|---|---|
+| **Issue** | Two full `npm test` runs at main `4a0df337` on a Mac at load average 43–80 (other agents' jobs) failed the same five `test/gauntlet.test.mjs` cases (lines 893, 1121, 1139, 1193, 1298, and 1820 once): `gauntlet pending` lists 104 cases where the test expects 126, and the pack lookups at 1139/1193/1820 find no entry. Run alone, `test/gauntlet.test.mjs` passes. Each run also had one load-timing failure elsewhere (`dashboard-accounting.test.ts:136`, 100 ms session; `model-setup.test.ts:249`), and one or two cancellations. CI on `main` was green at the same revision. |
+| **Reproduce** | In a fresh worktree of main `4a0df337` after `npm ci`: `npm test` on a busy host; then `node --test test/gauntlet.test.mjs` alone passes. |
+| **Check** | The cause is named (a test that changes shared repository files while the Gauntlet tests read them, as B-127 found for `dist/web/browser`, or a timing limit); a committed test fails first if it is in code; the full suite passes twice on a loaded host without the five failures. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: Closed 2026-11-26: cause named and fixed with B-165 in #818 (merged as 5c5ca1fb, every check green); local full npm test twice at load average 37 and 53 with no Gauntlet failure. 2026-11-26: found by the full audit (F-134-T02, `docs/audits/2026-11-26-full.md`, finding 2). A missing 22 of 126 cases points at a pack catalogue that another test file changes in the shared checkout (B-127, closed, had `test/gauntlet.test.mjs` move `dist/web/browser`); not confirmed. Candidates to read first: tests that write under the repository's pack or Gauntlet folders (`test/packs.test.ts`, `test/coordinator-snapshot.test.ts`). The 100 ms session in `dashboard-accounting.test.ts:136` is a separate load-timing clue, kept here until T01 says otherwise. 2026-11-26, cause named with [B-165](../work/records/B-153.md#b-165) (B-153-T01): not a shared pack folder but a timing limit plus the process environment. The root-command test (`test/gauntlet.test.mjs:893`, about 18 s idle) exceeds the suite's 60 s `--test-timeout` on a loaded host; the runner moves on while it keeps running, and its `NERV_GAUNTLET_TASKS`, `_CONSUMPTION` and `_LEDGER` settings, then its `finally` deleting them, change the files the following tests read: hence "104 of 126" (its fixture ledger records 104 entries) and the failures at 1121, 1139, 1193, 1300, 1823. Reproduced on demand on main: `node --test --test-timeout=10000 test/gauntlet.test.mjs` fails exactly those seven tests (893 times out) and rewrites the tracked ledger (B-165). Fixed by B-165-T02 and this record's commit: the Gauntlet tests of a second or more get their own limit (300 s for that test, 120 s for the others) and passes its files as command settings, not the process environment, and each command captures its settings when it starts. Failing test first: B-165-T01 (a) in `test/gauntlet-ledger.test.mjs` runs the Gauntlet tests under the 10 s limit and asserts they all pass. The dashboard-accounting and model-setup load failures did not recur in the two runs below; they stay unexplained here and get a record of their own if they return.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Local full runs 2026-11-26 at `4a0df337`: 1,588 pass, 6 fail, 1 cancelled; then 1,588 pass, 5 fail, 2 cancelled. `node --test test/gauntlet.test.mjs test/dashboard-accounting.test.ts` alone: 34/34. Opened in [#806](https://github.com/voidbrain/nerv/pull/806). Cause and fix: [B-165](../work/records/B-153.md#b-165).; [#818](https://github.com/voidbrain/nerv/pull/818) |
+| Opened | 2026-11-26 |
+| Verification | CI: #818 all green 2026-11-26; Test: test/gauntlet-ledger.test.mjs (B-165-T01 a) |
 | Reviewed | 2026-11-26 |
 
 </details>
