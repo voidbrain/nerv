@@ -174,6 +174,7 @@
       state.sorties = [...queuedSorties, ...list.map(toSortie)];
       state.approvals = cards.map(toApproval).filter(ap => state.sorties.some(s => s.id === ap.sortie));
       state.reminders = history.reminders.filter(r => !r.delivered && !r.cancelled && Date.parse(r.due) > Date.now()).sort((a, b) => a.due.localeCompare(b.due));
+      state.recent = history.recent || [];
       state.upcoming = state.reminders.map(r => ({ at:Date.parse(r.due), title:r.title, kind:"reminder", label:when(r) }));
       state.doctor = doctor; showBuild(doctor.build);
       if (!kajiBases.length && doctor.base) observeTelegram([{baseId:doctor.base.id,status:"enrolled",online:true,channel:doctor.channel,channelFresh:doctor.channelFresh}]);
@@ -352,6 +353,10 @@
   };
 
   window.renderNext = function () {
+    // B-170: reminders delivered in the last 24 hours and not done yet, each with Done (which also stops the Telegram copy).
+    const recent = state.recent || [];
+    patchHTML(document.getElementById("next-done"), recent.length ? "<div class='tiny muted'>Delivered · not done yet</div>" + recent.map(r =>
+      "<div class='rem' data-key='done-" + esc(r.id) + "'><span class='small'><b>" + when(r) + "</b> " + esc(r.title) + "</span><span class='acts'><button class='btn sm primary' type='button' data-rem-done='" + esc(r.id) + "' aria-label='Done: " + esc(r.title) + "'>Done</button></span></div>").join("") : "");
     const box = document.getElementById("next-list"); const list = state.reminders || [];
     document.getElementById("next-sub").textContent = "Next " + list.length + " of " + (state.pendingCount ?? list.length) + " reminders";
     // While a reminder is being edited the list stays as it is, so a refresh never wipes what you are typing.
@@ -369,7 +374,8 @@
   };
   const reminderAction = async (path, init, done) => { try { await api(path, init); log(done, "ok", null, "penpen"); } catch (e) { log("Reminder: " + e.message, "danger", null, "penpen"); } poll(); };
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-rem-edit],[data-rem-cancel],[data-rem-keep]"); if (!t) return; e.preventDefault();
+    const t = e.target.closest("[data-rem-edit],[data-rem-cancel],[data-rem-keep],[data-rem-done]"); if (!t) return; e.preventDefault();
+    if (t.dataset.remDone) { const r = (state.recent || []).find(x => x.id === t.dataset.remDone); if (r) reminderAction("reminders/" + r.id + "/done", { method:"POST" }, "Reminder done: " + r.title); return; }
     if (t.dataset.remEdit) { editing = t.dataset.remEdit; renderNext(); return; }
     if (t.hasAttribute("data-rem-keep")) { const id = editing; editing = null; renderNext(); const b = document.querySelector("[data-rem-edit='" + id + "']"); if (b) b.focus(); return; }
     const r = (state.reminders || []).find(x => x.id === t.dataset.remCancel);
