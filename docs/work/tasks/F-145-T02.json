@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-145-T02",
+  "parent": "F-145",
+  "title": "Panel renders the real skills by stage, with an honest empty state",
+  "goal": "Kaji's watermelons · skills shows the real store, or says there is none",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
+    "renderSkills in web/public/dashboard/dashboard.js (about line 892) fetches /api/skills and lists the skills of the chosen tab (Seed | Sprout | Ripe | Dropped, Create | Try | Use | Dropped in the simple theme) with the stage counts on the tabs, each row showing id, version, status, and the latest evaluation as with-skill against baseline counts; the \"Planned · not connected yet\" text is gone",
+    "With no skills the panel says exactly \"No skills yet. Create one with nerv skills stage <package.json>\"; a failed request shows the error, not an empty state; no fake skills outside tests (the demo data of the old dashboard is not reused)",
+    "A test across the join (failing first): a skill staged in a temporary home with src/skills.ts shows in the served dashboard's panel on its stage tab, and an empty home shows the empty-state text; it follows the existing dashboard test pattern and the style guide (docs/STYLE-GUIDE.md: tokens, voice) with no new literal colour",
+    "The panel stays read-only: promotion and rollback stay on the CLI (owner approval), no buttons are added"
+  ],
+  "dependsOn": [
+    "F-145-T01"
+  ],
+  "resources": [
+    "web/public/dashboard/**",
+    "test/**",
+    "docs/STYLE-GUIDE.md",
+    "docs/work/records/F-145.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented skills, fleets, spots and weather only; no owner data, tokens or coordinates of a real place in Git or tests.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: one render function, one fetch and a join test, following renderMelons. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

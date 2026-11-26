@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-146-T06",
+  "parent": "F-146",
+  "title": "Run the evaluation on the real model and record the report",
+  "goal": "A report says whether the skill beats the baseline on held-out cases, in both languages",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
+    "After the owner says yes to the model run (a real-model run is the owner's call, as in F-120-T13), the agent runs the F-146-T05 runner with the profile model (for example gemma4:12b) and nerv skills evaluate, once; the report (with-skill against baseline, regression and holdout, Italian and English) is recorded in F-146 with the model and its digest; no skill is promoted by the agent",
+    "If the skill does not beat the baseline on the holdout cases in both languages, the record says so and the instructions are revised in a new version before the owner is asked; evals/gauntlet/ledger.json is not touched by a local run unless the run is a Gauntlet run the owner approved"
+  ],
+  "dependsOn": [
+    "F-146-T05"
+  ],
+  "resources": [
+    "evals/**",
+    "docs/**",
+    "docs/work/records/F-146.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented skills, fleets, spots and weather only; no owner data, tokens or coordinates of a real place in Git or tests.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Any run of a real model needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: one run and a short record, at the model's own speed. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
