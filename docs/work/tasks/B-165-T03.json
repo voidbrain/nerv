@@ -4,7 +4,7 @@
   "parent": "B-165",
   "title": "Check: a branch that drops ledger entries present on main fails",
   "goal": "check:gauntlet-runs (or a sibling) compares the branch ledger with origin/main and fails when an entry disappears without a superseding entry",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A failing-first test with a fixture ledger missing an entry",
     "A newer entry for the same pack, case and profile is not a drop"
@@ -34,10 +34,10 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-26: one comparison over two parsed ledgers and CI wiring. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: 1.5 h agent. Implemented the same day: tools/check-gauntlet-ledger.mjs in check:fast and CI, its test committed first. Remaining: CI.",
     "reviewed": "2026-11-26",
-    "agentHours": 1.5,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },

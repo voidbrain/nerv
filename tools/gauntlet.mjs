@@ -3,7 +3,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readFileSync, writeFileSync, existsSync, readdirSync, renameSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, renameSync, mkdirSync, realpathSync } from 'node:fs';
 import {
   readJSON,
   readEvidence,
@@ -232,8 +232,12 @@ export function testIndex(reports = []) {
 const readLedger = () => (existsSync(ledgerPath()) ? validateLedger(readJSON(ledgerPath())) : emptyLedger());
 function writeLedger(ledger) {
   const path = ledgerPath();
-  // B-165: a test records only to a ledger it owns; the tracked one changes through an owner-approved run.
-  if (process.env.NODE_TEST_CONTEXT && path === here(ledgerFile))
+  // B-165: a test records only to a ledger it owns; the tracked one changes through an owner-approved run. The test
+  // runner marks its file processes (NODE_TEST_CONTEXT) or runs in this one (--test-isolation=none); `node file.mjs`
+  // is not recognisable. Real paths, so a symlinked or differently cased path to the same file is caught too.
+  const underTest = Boolean(process.env.NODE_TEST_CONTEXT) || process.execArgv.some((a) => /^--test(=|$|-)/.test(a));
+  const same = (a, b) => existsSync(a) && existsSync(b) && realpathSync(a) === realpathSync(b);
+  if (underTest && (path === here(ledgerFile) || same(path, here(ledgerFile))))
     throw Error('Refusing to write the tracked Gauntlet ledger ' + ledgerFile + ' under the test runner (B-165)');
   const temporary = path + '.' + process.pid + '.tmp';
   writeFileSync(temporary, JSON.stringify(validateLedger(ledger), null, 2) + '\n', { flag: 'wx' });

@@ -2,7 +2,9 @@
 // test run rewrote evals/gauntlet/ledger.json (122 -> 104 entries) and a docs PR (#806) committed it while every
 // check passed. An entry may leave only with its case: a pack/case no longer in the catalogue is not a drop.
 // Base: the merge base of HEAD and origin/main (a branch behind main is not blamed for entries main gained since), or
-// --base=<ref>. Run from the repository root.
+// --base=<ref>. Run from the repository root. Limit: an entry rewritten in place (same pack, case and profile, a newer
+// run) is not a drop, so a fixture run recorded over a real one passes; the test-runner guard in gauntlet.mjs covers
+// that path.
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
@@ -31,6 +33,11 @@ function main(args) {
   try {
     before = JSON.parse(git('show', `${base}:${ledgerFile}`));
   } catch {
+    // A base the caller named must hold a readable ledger; the default base merely may not have one yet.
+    if (named) {
+      console.error(`Cannot read ${ledgerFile} at --base=${named}.`);
+      return 2;
+    }
     console.log(`Gauntlet ledger check skipped: ${ledgerFile} is not in ${base}.`);
     return 0;
   }

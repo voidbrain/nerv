@@ -50,6 +50,10 @@ test('the check fails on a working tree that lost a catalogue entry and passes o
     writeFileSync(ledger, JSON.stringify(full));
     const kept = check();
     assert.equal(kept.status, 0, kept.stdout + kept.stderr);
+
+    // A base the caller names must exist: a typo never passes silently.
+    const typo = spawnSync(process.execPath, [tool, '--base=no-such-ref'], { cwd: dir, encoding: 'utf8' });
+    assert.equal(typo.status, 2, typo.stdout + typo.stderr);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
