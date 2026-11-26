@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "id": "F-101-T10",
+  "parent": "F-101",
+  "title": "Every FPV pack tool keeps a path through FPVBuddy's MCP server",
+  "goal": "No FPV function is lost: each NERV FPV tool calls FPVBuddy over MCP or stays in NERV for a stated reason",
+  "status": "planned",
+  "acceptance": [
+    "batteries.list, batteries.chat, batteries.due, batteries.resistance and fleet.chat call FPVBuddy's MCP tools; writes (charge state, resistance, crashes) go through FPVBuddy write tools gated as actions needing approval",
+    "fleet.print stays in NERV (printing, F-121) and reads the fleet over MCP; printed-part and print-job data stay with F-121 keyed by FPVBuddy drone IDs",
+    "fpv.blackbox_report moves to FPVBuddy as a stateless analyzer tool; fpv.import_build, fpv.add_doc and fpv.wiring_answer move to FPVBuddy with the builds and manufacturer docs (src/blackbox.ts, src/fpv-builds.ts, src/diyfpv-build.ts); FPVBuddy's backlog owns those tools, and this step starts only when they exist",
+    "Unreachable FPVBuddy: NERV says so clearly in chat and Telegram (which tool, that the data is in FPVBuddy, retry later), never a silent failure or an empty list; a test covers it with a stopped fake server",
+    "A join test runs a chat phrase per tool through a fake FPVBuddy MCP server and back"
+  ],
+  "dependsOn": [
+    "F-101-T07",
+    "F-101-T08",
+    "fpvbuddy:F-011-T01",
+    "fpvbuddy:F-011-T02",
+    "fpvbuddy:F-011-T06"
+  ],
+  "resources": [
+    "src/executors.ts",
+    "src/fpv-pack.ts",
+    "src/fleet-chat.ts",
+    "src/**",
+    "test/**",
+    "docs/work/records/F-101.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "api-contracts",
+    "privacy-review",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet data stays local-only and never enters Git; tests use invented batteries, drones, crashes and photos.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A new MCP write permission goes to the owner before it is enabled"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26 after the owner decision (reroute ten tools to MCP calls, the unreachable message and per-tool join tests). Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": []
+}

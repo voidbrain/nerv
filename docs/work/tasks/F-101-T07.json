@@ -9,12 +9,12 @@
     "web/src/battery-cards.ts and the FPV pack's dashboard panels (batteries, fleet, spares, crashes) are removed with their state, helpers and tests; the FPV pack declares no dashboard panel (no dead code)",
     "NERV is configured as an MCP client of FPVBuddy's server through the MCP guidance (docs/agents/mcp.md): the connection, its allowed read-only battery tools and the owner's data location are recorded",
     "Misato is offered FPVBuddy's battery tools when the FPV pack is on and none when it is off; a test covers both with a fake MCP server",
-    "Chat and Telegram FPV phrases keep working (F-008, F-098); only the screens move",
+    "Chat and Telegram FPV phrases keep working (F-008, F-098); F-101-T10 moves the remaining tools",
     "Owner decision 2026-11-25 (coordinator docs/DOMAINS.md; FPVBuddy F-008-T07, FPVBuddy#13): each project owns its screens, built with bricks; NERV keeps no copies and shows other projects' data through MCP (genUI surface cards in chat; MCP Apps pages or links for full screens)."
   ],
   "dependsOn": [
     "F-101-T04",
-    "F-101-T05",
+    "F-101-T08",
     "fpvbuddy:F-009-T02"
   ],
   "resources": [
@@ -45,8 +45,8 @@
   "effort": {
     "size": "small",
     "estimate": "2 h",
-    "basis": "Estimated 2026-11-25: remove battery-cards and the FPV panels with their tests, add the MCP client connection and gate its tools by the pack. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "basis": "Estimated 2026-11-25: remove battery-cards and the FPV panels with their tests, add the MCP client connection and gate its tools by the pack. Not a measurement. 2026-11-26: depends on F-101-T08 (data in FPVBuddy) instead of the cancelled F-101-T05; estimate unchanged.",
+    "reviewed": "2026-11-26",
     "agentHours": 2,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2

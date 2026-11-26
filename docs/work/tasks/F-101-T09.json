@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "F-101-T09",
+  "parent": "F-101",
+  "title": "Battery storage reminders become FPVBuddy alerts delivered by NERV",
+  "goal": "Storage reminders keep firing after the move: FPVBuddy raises them, NERV delivers them",
+  "status": "planned",
+  "acceptance": [
+    "The reminders of src/battery-storage-reminders.ts keep their timing (21:00 the same day, after 5 days, then daily) and wording; FPVBuddy raises them as alerts and NERV delivers them through the alert contract built for Grover (F-122), or this record names exactly which side schedules them and why",
+    "Delivery is once per alert, survives a NERV restart without duplicates, and a cleared alert stops the daily repeat",
+    "A test across the join: a fake FPVBuddy MCP server raises a storage alert and NERV delivers it once through the stubbed channels"
+  ],
+  "dependsOn": [
+    "F-101-T08",
+    "F-122-T02"
+  ],
+  "resources": [
+    "src/battery-storage-reminders.ts",
+    "src/**",
+    "test/**",
+    "docs/decisions/grover-alert-delivery.md",
+    "docs/work/records/F-101.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "api-contracts",
+    "privacy-review",
+    "regression-design"
+  ],
+  "privacy": "Owner fleet data stays local-only and never enters Git; tests use invented batteries, drones, crashes and photos.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "If FPVBuddy cannot raise alerts, the owner chooses which side schedules the reminders"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26 after the owner decision (map the three reminder rules onto the F-122 alert contract and a join test with a fake MCP server). Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}
