@@ -167,26 +167,28 @@ const ITALIAN = new Set(
   ),
 );
 const ENGLISH = new Set(
-  'the an of to and is are me my you your it at on for with what when where why how remind remember tomorrow today please yes thanks all this that have has do does need can many much turn add check print list show'.split(
+  'the an of to and is are my you your it at on for with what when where why how remind remember tomorrow today please yes thanks all this that have has do does need can many much turn add check print list show'.split(
     ' ',
   ),
 );
 /** The language of a request by its common words, and half a vote for each other lower-case word ending in a, i or o
-    as Italian words do (names, capitalised, never vote); too short to tell (yes, ok, sì) falls back to the earlier
-    exchanges, then `fallback`. */
+    as Italian words do (names, capitalised, never vote; half votes count only beside a listed word, so "radio" alone
+    does not override an English conversation); too short to tell (yes, ok, sì) falls back to the earlier exchanges,
+    then `fallback`. Italian "me" ("per me va bene") is not an English word. */
 export function requestLanguage(request: string, earlier: string[] = [], fallback: 'it' | 'en' = 'en'): 'it' | 'en' {
   // B-016: only real words vote: sortie references (S-1E0E) go first, and a token with digits is never a word ("1e0e" read as two Italian "e").
   const score = (text: string) => {
     let it = 0,
-      en = 0;
+      en = 0,
+      half = 0;
     for (const word of text.replace(/\b[sS]-[0-9a-fA-F]{4,12}\b/g, ' ').match(/[\p{L}\p{N}']+/gu) ?? []) {
       if (/\p{N}/u.test(word)) continue;
       const w = word.toLowerCase();
       if (ITALIAN.has(w)) it++;
       else if (ENGLISH.has(w)) en++;
-      else if (w === word && w.length >= 4 && /[aio]$/.test(w)) it += 0.5;
+      else if (w === word && w.length >= 4 && /[aio]$/.test(w)) half += 0.5;
     }
-    return it - en;
+    return it + en > 0 ? it + half - en : 0;
   };
   for (const text of [request, ...[...earlier].reverse()]) {
     const d = score(text);

@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 270.5 h agent + 21.25 h owner across 258 open steps of 57 features and 45 other records. 162.5 h of actual effort recorded on 149 steps. Generated from the task files.
+**Remaining effort:** 270.75 h agent + 21.25 h owner across 259 open steps of 57 features and 45 other records. 162.5 h of actual effort recorded on 149 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -446,9 +446,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔺 P1 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-167-T01 and B-167-T02 implemented in nerv#831; close on green CI.
+💻 **→** Next: B-167-T03 (review findings) in nerv#833; close once it lands on green CI.
 
 | | |
 |---|---|
@@ -461,8 +461,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
 |---|---|---|---|---|---|---|---|---|
 | 🟢 Small | <a id="b-167-t01"></a>B-167-T01 — Failing test: Italian requests read as English, English batteries not routed | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | — | [B-167-T02](#b-167-t02) | [PR #831](https://github.com/voidbrain/nerv/pull/831) failing tests for Italian requests and English plurals |
-| 🟢 Small | <a id="b-167-t02"></a>B-167-T02 — Read the three requests right and rebuild nerv-planner | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [B-167-T01](#b-167-t01) | — | [PR #831](https://github.com/voidbrain/nerv/pull/831) detector fix and nerv-planner 1.1.0 |
-| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h | 0 of 2 completed | | | |
+| 🟢 Small | <a id="b-167-t02"></a>B-167-T02 — Read the three requests right and rebuild nerv-planner | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [B-167-T01](#b-167-t01) | [B-167-T03](#b-167-t03) | [PR #831](https://github.com/voidbrain/nerv/pull/831) detector fix and nerv-planner 1.1.0 |
+| 🟢 Small | <a id="b-167-t03"></a>B-167-T03 — Fix the nerv#831 review findings: half votes alone never decide, Italian "me" never votes English | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [B-167-T02](#b-167-t02) | — | [PR #833](https://github.com/voidbrain/nerv/pull/833) review fixes: half votes beside a listed word only; Italian me |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 3 steps recorded) | 1 h | 0 of 3 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -471,7 +472,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-167-T01: [PR #831](https://github.com/voidbrain/nerv/pull/831) failing tests for Italian requests and English plurals · B-167-T02: [PR #831](https://github.com/voidbrain/nerv/pull/831) detector fix and nerv-planner 1.1.0. `src/misato.ts` (`requestLanguage`, `DOMAIN_INTENT_PATTERNS`); found by the nerv-planner pack; [#829](https://github.com/voidbrain/nerv/pull/829); fix [#831](https://github.com/voidbrain/nerv/pull/831) |
+| PR / evidence | Steps: B-167-T01: [PR #831](https://github.com/voidbrain/nerv/pull/831) failing tests for Italian requests and English plurals · B-167-T02: [PR #831](https://github.com/voidbrain/nerv/pull/831) detector fix and nerv-planner 1.1.0 · B-167-T03: [PR #833](https://github.com/voidbrain/nerv/pull/833) review fixes: half votes beside a listed word only; Italian me. `src/misato.ts` (`requestLanguage`, `DOMAIN_INTENT_PATTERNS`); found by the nerv-planner pack; [#829](https://github.com/voidbrain/nerv/pull/829); fix [#831](https://github.com/voidbrain/nerv/pull/831); review fixes [#833](https://github.com/voidbrain/nerv/pull/833) |
 | Opened | 2026-11-26 |
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
