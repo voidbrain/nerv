@@ -75,8 +75,7 @@ function buildCase(source, c) {
       ...(index.length ? { subjects: index } : {}),
       now: source.now,
       timeZone: source.timeZone,
-      // The service decides the reply language as it does for a first request with no earlier exchanges, even
-      // where it misreads the case's language ("quante batterie devo caricare?" has no word it counts as Italian).
+      // The service decides the reply language as it does for a first request with no earlier exchanges.
       language: requestLanguage(c.request),
       ...(c.reminders ? { reminders: c.reminders } : {}),
       ...(c.memory ? { memory: c.memory } : {}),

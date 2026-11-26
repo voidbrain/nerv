@@ -9,7 +9,7 @@
   "id": "B-167-T01",
   "title": "Failing test: Italian requests read as English, English batteries not routed",
   "goal": "A committed test fails on main for the three requests in B-167",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "Test committed before the fix and failing on main"
   ],
@@ -36,5 +36,7 @@
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
   },
-  "prs": []
+  "prs": [
+    "PRNUM"
+  ]
 }

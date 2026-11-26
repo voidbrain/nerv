@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nerv-planner",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "about": "F-120-T09: Misato's first planning turn over NERV's real tool index, for Italian and English requests. Each case names the subjects already read with tools.read (read), the switched-off packs (packs), and invented reminders or facts. Built into nerv-planner-v1.json by tools/gauntlet-planner-pack.mjs.",
   "now": "2026-08-03T08:00:00.000Z",
   "timeZone": "Europe/Rome",
@@ -365,7 +365,7 @@
       "split": "holdout",
       "type": "action",
       "read": ["batteries"],
-      "request": "how many battery packs do I need to charge?",
+      "request": "how many batteries do I need to charge?",
       "expected": { "decision": "action", "tool": "batteries.list", "args": {} }
     },
     {
