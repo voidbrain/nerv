@@ -9,19 +9,19 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 32 | 9 | 67 | 31 |
+| **This week** | 32 | 9 | 68 | 31 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 58 | 50 |
-| **Require Human 🧑** | 14 | 20 |
+| **Open** | 58 | 51 |
+| **Require Human 🧑** | 14 | 21 |
 
 ### Require Human 🧑
 
 | Features | | Bugs | |
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
-| [F-062](#f-062) | [F-120](#f-120) | [B-170](#b-170) | — |
+| [F-062](#f-062) | [F-120](#f-120) | [B-170](#b-170) | [B-175](#b-175) |
 | [F-011](#f-011) | [F-116](#f-116) | [B-057](#b-057) |  |
 | [F-004](#f-004) | [F-142](#f-142) | [B-068](#b-068) |  |
 | [F-012](#f-012) |  | [B-107](#b-107) |  |
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 271.75 h agent + 22.25 h owner across 284 open steps of 58 features and 50 other records. 163.25 h of actual effort recorded on 152 steps. Generated from the task files.
+**Remaining effort:** 272.25 h agent + 22.75 h owner across 288 open steps of 58 features and 51 other records. 163.25 h of actual effort recorded on 152 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -910,6 +910,48 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | 2026-11-18: F-016-T10 verified: [PR #417](https://github.com/voidbrain/nerv/pull/417) merged on green CI (second fresh-context review found no blocker). F-016-T12 closed with the accepted decision revision and zero-blocking review in PR #470; scoped CI passed. Remaining distributed relocation acceptance is open. |
 | Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="b-175"></a>[🐞 B-175](#top)
+
+**After one MCP answer, every later granted MCP read in the same conversation is refused (tainted context sends it to EVA-03, which cannot run MCP tools)**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.5 h agent + 0.5 h owner | — | — | 🤖 | — | 🤔 |
+
+🧑 **→** Choose how granted MCP reads behave after a tool result: [options and recommendation](decisions/tainted-mcp-reads.md) (B-175-T02).
+
+| | |
+|---|---|
+| **Issue** | Found by the owner 2026-11-26 on NERV-01. In the dashboard chat, "quali genetiche ho?": `grover.grover_strains` ran (granted, Pattern Green, EVA-00), its result made the sortie and then the conversation `tainted`, and from then on every `grover.grover_plants` call was refused, ballot executor `eva-03`, `balthasar: EVA-03 outside code requires isolation; it does not run.` Cause: `executorOf` in `src/policy.ts` (and `minimumClassForJob` in `src/eva-classes.ts`) send a tainted read or local write to EVA-03, and `isolationDenied` refuses any MCP tool there because EVA-03 isolation exists only for code. The reply only says "un errore tecnico (legato all'isolamento EVA-03)", with nothing the owner can do. The dashboard always posts conversation `dashboard` and has no new-conversation control; the taint passes from question to question while each comes within 30 minutes of the last. See [the decision page](decisions/tainted-mcp-reads.md). |
+| **Reproduce** | [Decision page](decisions/tainted-mcp-reads.md), "Problem". In the dashboard chat ask a question that makes Misato call a granted MCP read (e.g. "quali genetiche ho?"), then ask again within 30 minutes: the second call's ballot is `executor: eva-03`, outcome reject. Test: `test/provenance.test.ts`, "B-175: a granted MCP read in a conversation that saw a tool result runs, or the refusal tells the owner what to do" (committed as `todo`, fails today). |
+| **Check** | The owner has chosen an option (B-175-T02); after the fix the B-175 test passes without `todo`, and in the dashboard a granted read after an earlier MCP answer either runs or the reply says in plain words why it did not and how to start clean. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-175-t01"></a>B-175-T01 — Failing test: a granted MCP read after a tool result runs or tells the owner what to do | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | — | 🤖 |
+| 🟢 Small | <a id="b-175-t02"></a>B-175-T02 — Owner decision: how granted MCP reads behave in a tainted conversation | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | — | [B-175-T03](#b-175-t03) | [🤔](decisions/tainted-mcp-reads.md) |
+| 🟢 Small | <a id="b-175-t03"></a>B-175-T03 — Fix per the owner's decision; remove todo from the B-175 test | 3 h | 0 h | 0 h | Planned | [B-175-T02](#b-175-t02) | [B-175-T04](#b-175-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="b-175-t04"></a>B-175-T04 — Owner check in the dashboard: a second granted Grover read in one conversation | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-175-T03](#b-175-t03) | — | ⏳ 🧑‍🔧 |
+| 🟢 Small | **Total** | 3.5 h | 0 h (0 of 4 steps recorded) | 0.5 h agent + 0.5 h owner | 0 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-175.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found by the owner 2026-11-26; Test: `test/provenance.test.ts` (B-175, `todo` until T03). Code: `src/policy.ts`, `src/eva-classes.ts`, `src/ledger.ts`, `web/public/dashboard/live.js`.; [#849](https://github.com/voidbrain/nerv/pull/849) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | After the first MCP answer in a conversation, the owner's granted reads stop working there for at least 30 minutes, with no way out in the dashboard and no clear explanation. |
 
 </details>
 
