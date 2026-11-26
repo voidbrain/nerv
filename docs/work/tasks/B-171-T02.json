@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "parent": "B-171",
+  "dependsOn": [
+    "B-171-T01"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-171-T02",
+  "title": "Windows inspect() ignores the launcher's comment line, as authorizedStart does",
+  "goal": "A launcher NERV wrote with an earlier release, differing only in its comment line, is owned; any other difference stays foreign",
+  "status": "implemented",
+  "prs": [{ "pr": 842, "note": "B-171" }],
+  "acceptance": [
+    "B-171-T01's test passes unchanged, with the other lifecycle tests",
+    "A design-reviewer review before landing"
+  ],
+  "resources": [
+    "src/node-lifecycle-windows.ts",
+    "docs/work/records/B-171.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: one comparison in inspect() plus review. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

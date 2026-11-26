@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 9 | 30 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 9 | 31 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7647,6 +7647,42 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | PR / evidence | [#837](https://github.com/voidbrain/nerv/pull/837) (F-123-T02 owner check passed); [#802](https://github.com/voidbrain/nerv/pull/802) (prerequisite grover:F-005-T01); Opened in [PR #730](https://github.com/voidbrain/nerv/pull/730); F-123-T01 in [PR #746](https://github.com/voidbrain/nerv/pull/746).; [#758](https://github.com/voidbrain/nerv/pull/758) |
 | Opened | 2026-11-24 |
 | Verification | CI 2026-11-25: F-123-T01, Test: `test/mcp-remote.test.ts` green in run 45602256057 (#746). Owner check F-123-T02 pending. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-091
+
+**Windows: a fenced stop ends uncertain after a SQLite "disk I/O error" while recording it**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: PR #742 merged on green CI (main 2627d483); B-091-T02 on Tabgha 2026-11-26: fenced stop receipt 872af0eb61260d590b8f5fc112cce4d6836348c1006ae40b5b2354930d432ae2, fence 17, completed, stop:completed and verify:completed, no disk I/O error.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-18 on Tabgha (F-005-T24), from the desktop session: the fenced stop removed the task and ended NERV-02, then printed "disk I/O error" and left the receipt `uncertain` with `stop:started`. The disk was fine (115 GB free) and the lifecycle journal had been written at 18:43. Cause (named 2026-11-25): the stop's poll read the live database read-only with no busy handler while the killed `serve` left its WAL behind. A later stop on the same machine completed. |
+| **Reproduce** | On Windows, a fenced stop of a running NERV service from the desktop session; intermittent (once in two stops). |
+| **Check** | The failing write is named (journal and statement); a committed test fails first if the cause is in code (for example a retry on SQLITE_IOERR or BUSY while the stopped process releases the file); a fenced stop on Tabgha completes its receipt. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: PR #742 merged on green CI (main 2627d483); B-091-T02 on Tabgha 2026-11-26: fenced stop receipt 872af0eb61260d590b8f5fc112cce4d6836348c1006ae40b5b2354930d432ae2, fence 17, completed, stop:completed and verify:completed, no disk I/O error. 2026-11-26, B-091-T02 passed on Tabgha: the update and the fenced stop were first refused as "foreign" because NERV-02's launcher predated B-102-T01's comment change ([B-171](../work/records/B-171.md)); the owner ran `service uninstall`, then `service install` with the nvm Node, then the fenced stop from the desktop session: `lifecycle-status` digest `872af0eb61260d590b8f5fc112cce4d6836348c1006ae40b5b2354930d432ae2`, resource `user-service:0:win32`, fence 17, state `completed`, steps `stop:completed`, `verify:completed`, no `disk I/O error`. The page's step 3 then said `service start`, which cannot work after a fenced stop on Windows (the stop unregisters the task); the page now uses a fenced start, and a fresh plan file name per run. **2026-11-26:** the last Check item (a fenced stop on Tabgha) needs Tabgha's desktop session (B-087) and NERV-02 on `2627d483` or later (it was at `e05aae22`, before the fix), so it is the owner's step B-091-T02 ([page](../acceptance/b091-tabgha-fenced-stop.md)); B-091-T01 stays Implemented until it passes. **2026-11-25 cause named:** the failing statement was not the journal write but the stop step's own poll: `waitFor` runs `host.inspect()`, which opened the live `~/.nerv/nerv.sqlite` read-only with no busy handler (`src/node-lifecycle-windows.ts`, `PRAGMA user_version`), and its error ends the step at `stop:started`. Reproduced on Tabgha in a temporary folder (Node 24.22.2): a reader polling a WAL database while its writer is killed (as `taskkill /F` ends `serve`) failed 16 times in 40 cycles with `disk I/O error` (errcode 1546, `SQLITE_IOERR_TRUNCATE`) and 2,747 times with `SQLITE_READONLY_ROLLBACK`; with a 5 s busy timeout, none. Same cause class as B-126 (an open without a busy timeout), in other code. Fix: `liveDatabase()` opens every lifecycle read of the live database with `timeout: 5000` (Windows, macOS and Linux inspect, update admission, release and restore checks, macOS backup); the failing-first test in `test/windows-service-lifecycle.test.ts` holds the live database during `inspect()` and failed with `database is locked` before the fix. 2026-11-25 reconciliation: [#742](https://github.com/voidbrain/nerv/pull/742) merged on green CI (main `2627d483`). Next: once NERV-02 (Tabgha, at `1c407fb8`, before the fix) is on `2627d483` or later, a fenced stop on Tabgha from its desktop session completes its receipt (the Check).
+
+Earlier evidence (2026-11-18 to 2026-11-21: PRs #557, #617, #620, Tabgha recurrences and recovery): [archive](evidence-2026.md#b-091-moved-2026-11-25).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #557](https://github.com/voidbrain/nerv/pull/557) B-091-T01 (`src/node-lifecycle-execution.ts`, `src/node-lifecycle-apply.ts`, `test/node-lifecycle-execution.test.ts`); F-005-T24 on Tabgha, 2026-11-18; [#742](https://github.com/voidbrain/nerv/pull/742); [#750](https://github.com/voidbrain/nerv/pull/750); [#790](https://github.com/voidbrain/nerv/pull/790) |
+| Opened | 2026-11-18 |
+| Verification | Real-device 2026-11-26 on Tabgha (B-091-T02); test/windows-service-lifecycle.test.ts |
 | Reviewed | 2026-11-26 |
 
 </details>
