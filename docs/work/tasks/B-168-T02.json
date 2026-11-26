@@ -11,7 +11,7 @@
   "id": "B-168-T02",
   "title": "Pass config.language as the language fallback through every chat caller",
   "goal": "Every requestLanguage caller on the chat, PWA, voice and Telegram paths falls back to config.language",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "B-168-T01's tests pass unchanged, with the other language tests"
   ],
@@ -30,10 +30,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 h",
-    "basis": "Estimated 2026-11-26: one helper and the fallback argument at each caller. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: one helper and the fallback argument at each caller. No actual: implemented in an earlier session (#834) without a work-usage job. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
-    "agentHours": 0.75,
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75
   },
