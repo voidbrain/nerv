@@ -6,7 +6,7 @@
   "goal": "A second, deliberate layout over the same components as the full dashboard shows only the chat, pending approvals, health at a glance and push on/off, with a link to the full dashboard; it grows from the web/src page (Nodo)",
   "status": "planned",
   "acceptance": [
-    "The simple view reuses the components of F-130-T02 (health), F-130-T04 (push), F-130-T05 (approvals) and F-130-T08 (chat) and the live data service of F-130-T01; no section logic is copied (later extracted as shared bricks, solution:F-012)",
+    "The simple view reuses the components of F-130-T02 (health), F-130-T04 (push), F-130-T05 (approvals) and F-130-T08 (chat) and the live data service of F-130-T01; no section logic is copied (later extracted as shared bricks, coordinator:F-012)",
     "It shows the chat, the pending approvals with their decisions, a one-line health state that links to Health, the push on/off toggle, and a link to the full dashboard; the full dashboard links back",
     "Both layouts read the same theme tokens (docs/STYLE-GUIDE.md); the plain style is the default and EVA is an optional theme in either",
     "A test renders both layouts from the same state and checks the simple one shows only its parts; an unchanged poll leaves its DOM in place; it works at phone width"
