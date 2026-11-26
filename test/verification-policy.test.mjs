@@ -157,3 +157,21 @@ test('retired-reference metadata selects documentation checks without hiding unk
   assert.equal(plan(config.verification, { ...fresh, files: ['remove/new-runner.mjs'] }).full, true);
   assert.equal(plan(config.verification, { ...fresh, files: ['src/worker-link.ts'] }).full, true);
 });
+
+// B-156: the weekly scheduled full run (cron in ci.yml) used to share the per-ref group with pushes to main.
+test('B-156: a scheduled run has its own concurrency group, so a push to main does not cancel it', () => {
+  const group = /concurrency:\n\s+group: (.+)\n/.exec(workflow)?.[1] ?? '';
+  // GitHub expressions' && and || behave as in JavaScript: evaluate the group for a push and a schedule on main.
+  const resolve = (event) =>
+    group.replace(/\$\{\{ (.+?) \}\}/g, (_, expression) =>
+      new Function('github', `return ${expression}`)({
+        workflow: 'CI',
+        event_name: event,
+        event: { pull_request: {} }, // GitHub reads a missing property as null
+        ref: 'refs/heads/main',
+      }),
+    );
+  assert.equal(resolve('push'), 'CI-refs/heads/main');
+  assert.notEqual(resolve('schedule'), resolve('push'));
+  assert.match(workflow, /cancel-in-progress: true/);
+});
