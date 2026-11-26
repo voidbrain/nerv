@@ -10,15 +10,22 @@
     "Security semantics of tainted context need explicit owner approval"
   ],
   "id": "B-175-T03",
-  "title": "Fix per the owner's decision; remove todo from the B-175 test",
-  "goal": "The B-175 test passes without todo; the F-027 test changes only as the decision names",
-  "status": "planned",
+  "title": "Stage 1 (option 2): the isolation refusal says what to do, Misato stops at the first one, dashboard New conversation",
+  "goal": "The B-175 test passes without todo; an isolation refusal ends the sortie with a plain Italian or English reply; the dashboard chat can start a clean conversation",
+  "status": "implemented",
   "acceptance": [
-    "The B-175 test passes without todo; the F-027 test changes only as the decision names"
+    "The B-175 test passes without todo; the F-027 ballot test is unchanged; the F-027 MCP test expects one refused step instead of five (named in the PR)",
+    "test/tainted-conversation.test.ts: the reply in both languages, the accepted dashboard conversation ids, and the dashboard id reaching the server"
   ],
   "resources": [
     "test/provenance.test.ts",
+    "test/mcp.test.ts",
+    "test/tainted-conversation.test.ts",
     "src/policy.ts",
+    "src/runtime-planning.ts",
+    "src/request-queue.ts",
+    "src/server.ts",
+    "web/public/dashboard/live.js",
     "docs/work/records/B-175.md",
     "generated:backlog-views"
   ],
@@ -32,11 +39,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "3 h",
-    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "estimate": "1.5 h",
+    "basis": "Re-estimated 2026-11-26 when split into stages (the 3 h covered options 2 or 4). Actual about 1 h agent.",
     "reviewed": "2026-11-26",
-    "agentHours": 0,
-    "baselineAgentHours": 3.0,
-    "estimateAgentHours": 3.0
+    "agentHours": 1.0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
   }
 }

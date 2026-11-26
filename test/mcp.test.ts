@@ -362,6 +362,76 @@ test("B-025: a granted tool runs under the stricter of its grant's EVA and the s
 });
 
 test(
+  'B-175: a read refused for isolation after an earlier read in the same request: the reply answers from the earlier result and says what could not be read',
+  { timeout: 60000 },
+  async () => {
+    const { Runtime } = await import('../src/runtime.ts');
+    const probe = new McpClient(server());
+    const fp = fingerprint((await probe.listTools())[0]!);
+    probe.close();
+    const first = '{"action":{"tool":"notes.read_note","args":{"name":"first"}}}';
+    const m = await model([
+      // Owner evidence 2026-11-26: the first read ran, the second was refused, the reply ignored the first result.
+      first,
+      '{"action":{"tool":"notes.read_note","args":{"name":"second"}}}',
+      '{"reply":"Your first note says milk and bread."}',
+      // Again, and this time Misato insists on the refused read: the service answers from the result itself.
+      '{"action":{"tool":"notes.read_note","args":{"name":"third"}}}',
+      '{"action":{"tool":"notes.read_note","args":{"name":"fourth"}}}',
+      '{"action":{"tool":"notes.read_note","args":{"name":"fourth"}}}',
+      // A script on the extra turn runs nothing either.
+      '{"action":{"tool":"notes.read_note","args":{"name":"fifth"}}}',
+      '{"action":{"tool":"notes.read_note","args":{"name":"sixth"}}}',
+      '{"script":{"steps":[{"tool":"reminders.list","args":{}}]}}',
+    ]);
+    const home = mkdtempSync(join(tmpdir(), 'nerv-mcp-same-'));
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({
+        models: {
+          local: { baseUrl: m.url, model: 'm' },
+          roles: { misato: { route: 'local' }, consultant: { model: 'c' } },
+        },
+        tools: {
+          mcp: [server()],
+          grants: [{ server: 'notes', tool: 'read_note', effect: 'read', eva: '00', fingerprint: fp }],
+        },
+      }),
+    );
+    const r = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+    try {
+      await r.ready();
+      const one = await r.chat('Read my notes', 'cli');
+      assert.deepEqual(
+        one.steps.filter((s) => s.tool).map((s) => s.outcome),
+        ['grant', 'reject'],
+      );
+      assert.match(one.reply ?? '', /^Your first note says milk and bread\./);
+      assert.match(one.reply ?? '', /notes\.read_note/);
+      assert.match(one.reply ?? '', /this same request/);
+      const two = await r.chat('Read my other notes', 'dashboard');
+      assert.deepEqual(
+        two.steps.filter((s) => s.tool).map((s) => s.outcome),
+        ['grant', 'reject'],
+        'the second refused read is never sent to the gate again',
+      );
+      assert.match(two.reply ?? '', /Note third: buy milk and bread\./);
+      assert.match(two.reply ?? '', /this same request/);
+      const three = await r.chat('Read my last notes', 'telegram:1');
+      assert.deepEqual(
+        three.steps.filter((s) => s.tool).map((s) => s.outcome),
+        ['grant', 'reject'],
+        'no script step runs after the refusal',
+      );
+      assert.match(three.reply ?? '', /Note fifth: buy milk and bread\./);
+    } finally {
+      await r.close();
+      await m.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);
+test(
   'F-027: MCP result taints the durable sortie, approved memory, resume and the next conversation turn',
   { timeout: 60000 },
   async () => {
@@ -413,11 +483,14 @@ test(
       assert.equal((await r.lilith.list())[0]?.tainted, true, 'approval does not cleanse third-party content');
       const next = await r.chat('Read another fixture note', 'cli');
       assert.equal((await r.sortie(next.sortieId))?.trust, 'tainted', 'earlier context retains its provenance');
-      assert.equal(next.steps.length, 5);
-      assert.ok(next.steps.every((s) => s.outcome === 'reject'));
+      // B-175 (owner decision 2026-11-26): Misato stops at the first isolation refusal instead of retrying it, and
+      // the reply tells the owner what happened and to start a new conversation. Before, she retried 5 times.
+      assert.equal(next.steps.length, 1);
       assert.equal(next.waiting.length, 0);
       assert.equal(next.steps[0]?.outcome, 'reject');
       assert.match(next.steps[0]?.reason ?? '', /EVA-03/);
+      assert.match(next.reply ?? '', /notes\.read_note/);
+      assert.match(next.reply ?? '', /new conversation/);
       assert.equal(
         (await r.events(next.sortieId)).some((e) => e.kind === 'grant.used'),
         false,

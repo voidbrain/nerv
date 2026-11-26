@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "parent": "B-175",
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "Security semantics of tainted context need explicit owner approval"
+  ],
+  "id": "B-175-T05",
+  "dependsOn": [
+    "B-175-T03"
+  ],
+  "title": "Stage 2 (option 4): a read grant can opt in to run in a tainted conversation",
+  "goal": "A grant field (config tools.grants) that only read grants accept; with it the read runs at its grant's EVA in a tainted conversation; without it the stage 1 refusal stays",
+  "status": "planned",
+  "acceptance": [
+    "Default unchanged: the F-027 ballot test and the stage 1 tests pass as they are",
+    "An opted-in read grant runs at its EVA when tainted; a write grant refuses the field; validateTools rejects it with a test for the invalid input"
+  ],
+  "resources": [
+    "src/policy.ts",
+    "src/mcp.ts",
+    "src/config.ts",
+    "test/provenance.test.ts",
+    "test/mcp.test.ts",
+    "docs/work/records/B-175.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: one grant field, one policy branch, validation tests. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}
