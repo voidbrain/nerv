@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 233 h agent + 19.75 h owner across 216 open steps of 52 features and 44 other records. 160 h of actual effort recorded on 148 steps. Generated from the task files.
+**Remaining effort:** 238 h agent + 19.75 h owner across 220 open steps of 52 features and 44 other records. 160 h of actual effort recorded on 148 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -928,58 +928,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-120"></a>[✨ F-120](#top)
-
-**Gauntlet coverage of NERV capabilities**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.75 h | — | — | 🤖 | — | — |
-
-💻 **→** F-120-T08: rerun `nerv-system-flows/stress` and `browser` (`--allow-expensive`); F-120-T06 (four Arduino sketch cases) waits on the owner opting in to `arduino-cli`.
-
-| | |
-|---|---|
-| **Issue** | Owner 2026-11-24: the Gauntlet exists to qualify models for NERV's general and specific capabilities, but no rule ties a finished NERV feature to a Gauntlet case. NERV's own pack (`evals/gauntlet/system-v1.json`) has 8 broad flows; pairing, relocation, update, fleet, placement and watches have no case. General domain packs (coding, embedded, logic, Italian quality, 3D printing, image generation) came from gauntlet-protocol 0.10.0 and 0.11.0; NERV adopted them in F-120-T03 (pin 0.11.1). |
-| **Reproduce** | `jq '.cases[].id' evals/gauntlet/system-v1.json` lists 8 flows; `docs/test-capability-index.md` has no row for the features closed since F-074. |
-| **Check** | Every closed NERV feature with model-facing behaviour has a system-pack case or a recorded reason; the cases run and pass in an owner-approved campaign. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | 🤖 | — |
-| 🟢 Small | <a id="f-120-t06"></a>F-120-T06 — Run the four Arduino sketch cases once arduino-cli is installed (owner opt-in) | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: sketch cases moved from F-120-T04 |
-| 🟢 Small | <a id="f-120-t08"></a>F-120-T08 — Rerun nerv-system-flows/stress and browser, and any system or multi-step case a later source change makes pending | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: stress and browser rerun |
-| 🟡 Medium | **Total** | 8.25 h | 3.75 h (3 of 8 steps recorded) | 3.75 h | 5 of 8 completed | | |
-
-<details><summary>Done steps (5)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | Completed | [PR #752](https://github.com/voidbrain/nerv/pull/752) |
-| — | <a id="f-120-t03"></a>F-120-T03 — Owner approves the first Gauntlet run of the domain-pack cases | 0.5 h | 0 h | Completed | [PR #749](https://github.com/voidbrain/nerv/pull/749) |
-| — | <a id="f-120-t04"></a>F-120-T04 — Agent: run the approved Gauntlet campaign for the pending cases | 0.5 h | 2.25 h (stated) | Completed | [PR #798](https://github.com/voidbrain/nerv/pull/798) rerun after F-120-T05; 8 Docker cases pending; [PR #800](https://github.com/voidbrain/nerv/pull/800) Docker rerun; only the excluded sketch cases pending; [PR #803](https://github.com/voidbrain/nerv/pull/803) closed; coding rerun after F-120-T07 |
-| — | <a id="f-120-t05"></a>F-120-T05 — Run the reference-runner packs under a 180 s case limit (owner decision 2026-11-26) | 1 h | 0.5 h (stated) | Completed | [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded; [PR #795](https://github.com/voidbrain/nerv/pull/795) 180 s case limit for the reference-runner packs |
-| — | <a id="f-120-t07"></a>F-120-T07 — Raise the coding-reference reply cap so coding answers are not cut off (owner decision 2026-11-26) | 1 h | 1 h (stated) | Completed | [PR #803](https://github.com/voidbrain/nerv/pull/803) 3,072-token coding reply cap and rerun |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-120.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749) · F-120-T04: [PR #798](https://github.com/voidbrain/nerv/pull/798) rerun after F-120-T05; 8 Docker cases pending; [PR #800](https://github.com/voidbrain/nerv/pull/800) Docker rerun; only the excluded sketch cases pending; [PR #803](https://github.com/voidbrain/nerv/pull/803) closed; coding rerun after F-120-T07 · F-120-T05: [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded; [PR #795](https://github.com/voidbrain/nerv/pull/795) 180 s case limit for the reference-runner packs · F-120-T06: [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: sketch cases moved from F-120-T04 · F-120-T07: [PR #803](https://github.com/voidbrain/nerv/pull/803) 3,072-token coding reply cap and rerun · F-120-T08: [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: stress and browser rerun. Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review).; [#758](https://github.com/voidbrain/nerv/pull/758); [#783](https://github.com/voidbrain/nerv/pull/783); [#791](https://github.com/voidbrain/nerv/pull/791); [#794](https://github.com/voidbrain/nerv/pull/794); [#795](https://github.com/voidbrain/nerv/pull/795); [#798](https://github.com/voidbrain/nerv/pull/798); [#800](https://github.com/voidbrain/nerv/pull/800); [#803](https://github.com/voidbrain/nerv/pull/803) |
-| Opened | 2026-11-24 |
-| Verification | Unit 2026-11-26: `test/gauntlet.test.mjs` F-120-T07 passes (3,072-token coding reply cap, other packs unchanged); F-120-T05 passes (180 s for the reference-runner packs, day limits for the rest). Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
-| Reviewed | 2026-11-25 |
-
-</details>
-
----
 ### <a id="f-138"></a>[✨ F-138](#top)
 
 **Credential list with last rotation and last auth failure; owner notice on failure**
@@ -1101,6 +1049,62 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
 | Impact | Report risk rank S11 of 12 (proposal 13). |
+
+</details>
+
+---
+### <a id="f-120"></a>[✨ F-120](#top)
+
+**Gauntlet coverage of NERV capabilities**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟣 Very large | 8.75 h | — | — | 🤖 | — | — |
+
+💻 **→** F-120-T08: rerun `nerv-system-flows/stress` and `browser` (`--allow-expensive`); F-120-T06 (four Arduino sketch cases) waits on the owner opting in to `arduino-cli`.
+
+| | |
+|---|---|
+| **Issue** | Owner 2026-11-24: the Gauntlet exists to qualify models for NERV's general and specific capabilities, but no rule ties a finished NERV feature to a Gauntlet case. NERV's own pack (`evals/gauntlet/system-v1.json`) has 8 broad flows; pairing, relocation, update, fleet, placement and watches have no case. General domain packs (coding, embedded, logic, Italian quality, 3D printing, image generation) came from gauntlet-protocol 0.10.0 and 0.11.0; NERV adopted them in F-120-T03 (pin 0.11.1). |
+| **Reproduce** | `jq '.cases[].id' evals/gauntlet/system-v1.json` lists 8 flows; `docs/test-capability-index.md` has no row for the features closed since F-074. |
+| **Check** | Every closed NERV feature with model-facing behaviour has a system-pack case or a recorded reason; the cases run and pass in an owner-approved campaign. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-120-t02"></a>F-120-T02 — First system-pack cases for recent features | 3 h | 0 h | 3 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-120-t06"></a>F-120-T06 — Run the four Arduino sketch cases once arduino-cli is installed (owner opt-in) | 0.5 h | 0 h | 0.5 h | Planned | — | — | 🤖 | [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: sketch cases moved from F-120-T04 |
+| 🟢 Small | <a id="f-120-t08"></a>F-120-T08 — Rerun nerv-system-flows/stress and browser, and any system or multi-step case a later source change makes pending | 0.25 h | 0 h | 0.25 h | Planned | — | — | 🤖 | [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: stress and browser rerun |
+| 🟡 Medium | <a id="f-120-t09"></a>F-120-T09 — nerv-planner-v1: model-layer cases on Misato's own tool index, Italian and English | 2.5 h | 0 h | 2.5 h | Planned | — | [F-120-T10](#f-120-t10), [F-120-T11](#f-120-t11) | 🤖 | — |
+| 🟢 Small | <a id="f-120-t12"></a>F-120-T12 — Adopt scheduling-time, estimation and research packs on release | 0.5 h | 0 h | 0.5 h | Planned | — | — | 🤖 | — |
+| 🟢 Small | <a id="f-120-t10"></a>F-120-T10 — A Gauntlet line on every open model-facing record | 0.5 h | 0 h | 0.5 h | Planned | [F-120-T09](#f-120-t09) | — | ⏳ 🤖 | — |
+| 🟡 Medium | <a id="f-120-t11"></a>F-120-T11 — Run the project packs nerv calls over MCP (grover-v1, fpvbuddy-v1, hobo-v1) | 1.5 h | 0 h | 1.5 h | Planned | [F-120-T09](#f-120-t09) | — | ⏳ 🤖 | — |
+| 🟣 Very large | **Total** | 13.25 h | 3.75 h (3 of 12 steps recorded) | 8.75 h | 5 of 12 completed | | | | |
+
+<details><summary>Done steps (5)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-120-t01"></a>F-120-T01 — Catch-up Gauntlet coverage review of closed features | 1.5 h | 0 h | Completed | [PR #752](https://github.com/voidbrain/nerv/pull/752) |
+| — | <a id="f-120-t03"></a>F-120-T03 — Owner approves the first Gauntlet run of the domain-pack cases | 0.5 h | 0 h | Completed | [PR #749](https://github.com/voidbrain/nerv/pull/749) |
+| — | <a id="f-120-t04"></a>F-120-T04 — Agent: run the approved Gauntlet campaign for the pending cases | 0.5 h | 2.25 h (stated) | Completed | [PR #798](https://github.com/voidbrain/nerv/pull/798) rerun after F-120-T05; 8 Docker cases pending; [PR #800](https://github.com/voidbrain/nerv/pull/800) Docker rerun; only the excluded sketch cases pending; [PR #803](https://github.com/voidbrain/nerv/pull/803) closed; coding rerun after F-120-T07 |
+| — | <a id="f-120-t05"></a>F-120-T05 — Run the reference-runner packs under a 180 s case limit (owner decision 2026-11-26) | 1 h | 0.5 h (stated) | Completed | [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded; [PR #795](https://github.com/voidbrain/nerv/pull/795) 180 s case limit for the reference-runner packs |
+| — | <a id="f-120-t07"></a>F-120-T07 — Raise the coding-reference reply cap so coding answers are not cut off (owner decision 2026-11-26) | 1 h | 1 h (stated) | Completed | [PR #803](https://github.com/voidbrain/nerv/pull/803) 3,072-token coding reply cap and rerun |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-120.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749) · F-120-T04: [PR #798](https://github.com/voidbrain/nerv/pull/798) rerun after F-120-T05; 8 Docker cases pending; [PR #800](https://github.com/voidbrain/nerv/pull/800) Docker rerun; only the excluded sketch cases pending; [PR #803](https://github.com/voidbrain/nerv/pull/803) closed; coding rerun after F-120-T07 · F-120-T05: [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded; [PR #795](https://github.com/voidbrain/nerv/pull/795) 180 s case limit for the reference-runner packs · F-120-T06: [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: sketch cases moved from F-120-T04 · F-120-T07: [PR #803](https://github.com/voidbrain/nerv/pull/803) 3,072-token coding reply cap and rerun · F-120-T08: [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: stress and browser rerun. Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review).; [#758](https://github.com/voidbrain/nerv/pull/758); [#783](https://github.com/voidbrain/nerv/pull/783); [#791](https://github.com/voidbrain/nerv/pull/791); [#794](https://github.com/voidbrain/nerv/pull/794); [#795](https://github.com/voidbrain/nerv/pull/795); [#798](https://github.com/voidbrain/nerv/pull/798); [#800](https://github.com/voidbrain/nerv/pull/800); [#803](https://github.com/voidbrain/nerv/pull/803); [#821](https://github.com/voidbrain/nerv/pull/821) |
+| Opened | 2026-11-24 |
+| Verification | Unit 2026-11-26: `test/gauntlet.test.mjs` F-120-T07 passes (3,072-token coding reply cap, other packs unchanged); F-120-T05 passes (180 s for the reference-runner packs, day limits for the rest). Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
+| Reviewed | 2026-11-25 |
 
 </details>
 
