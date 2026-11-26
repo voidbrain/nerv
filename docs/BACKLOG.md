@@ -46,7 +46,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 288.5 h agent + 24.25 h owner across 305 open steps of 61 features and 51 other records. 162.5 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 287.75 h agent + 24.25 h owner across 305 open steps of 61 features and 51 other records. 162.5 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1559,9 +1559,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h | — | [F-130-T10](#f-130-t10), [F-146-T07](#f-146-t07) | 🤖 | — | — |
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.75 h | — | [F-130-T10](#f-130-t10), [F-146-T07](#f-146-t07) | 🤖 | — | — |
 
-💻 **→** Next: F-145-T01 — Failing test and read-only endpoint: the real skills store as JSON (Planned).
+💻 **→** Next: close F-145-T01 … F-145-T03 on green CI.
 
 | | |
 |---|---|
@@ -1573,10 +1573,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
 |---|---|---|---|---|---|---|---|
-| 🟡 Medium | <a id="f-145-t01"></a>F-145-T01 — Failing test and read-only endpoint: the real skills store as JSON | 1.25 h | 0 h | 1.25 h | Planned | — | [F-130-T10](#f-130-t10), [F-145-T02](#f-145-t02) |
-| 🟢 Small | <a id="f-145-t02"></a>F-145-T02 — Panel renders the real skills by stage, with an honest empty state | 1 h | 0 h | 1 h | Planned | [F-145-T01](#f-145-t01) | [F-145-T03](#f-145-t03), [F-146-T07](#f-146-t07) |
-| 🟢 Small | <a id="f-145-t03"></a>F-145-T03 — Carry live skill data into F-130-T10 and document the endpoint | 0.25 h | 0 h | 0.25 h | Planned | [F-145-T02](#f-145-t02) | — |
-| 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 3 steps recorded) | 2.5 h | 0 of 3 completed | | |
+| 🟢 Small | <a id="f-145-t01"></a>F-145-T01 — Failing test and read-only endpoint: the real skills store as JSON | 1.25 h | 0 h | 0.75 h | Implemented; verification pending | — | [F-130-T10](#f-130-t10), [F-145-T02](#f-145-t02) |
+| 🟢 Small | <a id="f-145-t02"></a>F-145-T02 — Panel renders the real skills by stage, with an honest empty state | 1 h | 0 h | 0.75 h | Implemented; verification pending | [F-145-T01](#f-145-t01) | [F-145-T03](#f-145-t03), [F-146-T07](#f-146-t07) |
+| 🟢 Small | <a id="f-145-t03"></a>F-145-T03 — Carry live skill data into F-130-T10 and document the endpoint | 0.25 h | 0 h | 0.25 h | Implemented; verification pending | [F-145-T02](#f-145-t02) | — |
+| 🟡 Medium | **Total** | 2.5 h | 0 h (0 of 3 steps recorded) | 1.75 h | 0 of 3 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
@@ -1585,7 +1585,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Plan: pending; [#832](https://github.com/voidbrain/nerv/pull/832) |
+| PR / evidence | Plan: pending; [#832](https://github.com/voidbrain/nerv/pull/832); [#846](https://github.com/voidbrain/nerv/pull/846) |
 | Opened | 2026-11-26 |
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
