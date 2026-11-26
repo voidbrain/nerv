@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "status": "planned",
+  "privacy": "Neutral invented messages, devices and receipts only; no tokens, push endpoints, chat IDs or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-149-T02",
+  "parent": "B-149",
+  "title": "The app marks an inbox item read when the owner opens it",
+  "goal": "Opening a reminder or brief in the dashboard or the workspace app sets deliveries.read_at once, so the Telegram fallback skips it",
+  "acceptance": [
+    "An authenticated, validated endpoint sets read_at only when it is NULL (first read kept) and only for an item that exists; unknown ids are refused without detail",
+    "The dashboard and the workspace call it when the item is shown in a visible page (document.visibilityState visible), not on a background poll",
+    "B-149-T01 passes unedited; test/push-first.test.ts still passes"
+  ],
+  "dependsOn": [
+    "B-149-T01"
+  ],
+  "resources": [
+    "src/server.ts",
+    "src/store-inbox.ts",
+    "src/delivery-state.ts",
+    "web/src/**",
+    "web/public/dashboard/**",
+    "test/**",
+    "docs/work/records/B-149.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "angular",
+    "regression-design",
+    "privacy-review"
+  ],
+  "validation": [
+    "Targeted push and inbox tests, a browser test of the read call",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h agent",
+    "basis": "Estimated 2026-11-26: one endpoint, one store write, two call sites and a browser case. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

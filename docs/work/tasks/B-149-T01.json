@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "status": "planned",
+  "privacy": "Neutral invented messages, devices and receipts only; no tokens, push endpoints, chat IDs or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-149-T01",
+  "parent": "B-149",
+  "title": "Failing test: a reminder read in the app still reaches Telegram",
+  "goal": "A committed test fails on main: a pushed reminder the owner opens in the app (not by tapping the notification) is still handed to Telegram at the deadline",
+  "acceptance": [
+    "Across the join: a due reminder pushed to a fake push service, the app's inbox read reported through the same API the dashboard and workspace use, then claimFallback past the 10-minute deadline hands out nothing and the fake Bot API receives nothing",
+    "The test names the API the fix adds (for example POST /api/inbox/:id/read) and fails on main because nothing sets deliveries.read_at",
+    "It is not edited to pass in B-149-T02"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/**",
+    "docs/work/records/B-149.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "validation": [
+    "The new test fails on main",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-26: reuses test/push-first.test.ts's fake push service and Bot API. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

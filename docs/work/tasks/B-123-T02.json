@@ -7,8 +7,7 @@
   "status": "planned",
   "acceptance": [
     "Update now on NERV-01 shows \"Update in progress\" with its step, then \"Update completed · now on <sha>\" (or refused/failed with reasons and recovery) under the Update availability row",
-    "A reload keeps the status; Dismiss hides it and it stays hidden after a reload",
-    "~/.nerv/updater-status.json names the same state; the inbox reports the outcome once"
+    "A reload keeps the status; Dismiss hides it and it stays hidden after a reload"
   ],
   "dependsOn": [
     "B-123-T01"
@@ -31,8 +30,8 @@
   "effort": {
     "size": "small",
     "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-25 in the reconciliation: one Update now, a reload and Dismiss. Not a measurement.",
-    "reviewed": "2026-11-25",
+    "basis": "Estimated 2026-11-25 in the reconciliation: one Update now, a reload and Dismiss. Not a measurement. 2026-11-26: the updater-status.json and inbox half moved to B-123-T03 (agent, read-only), owner-step triage.",
+    "reviewed": "2026-11-26",
     "ownerHours": 0.25,
     "agentHours": 0,
     "ownerKind": "procedure"

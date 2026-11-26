@@ -2,11 +2,11 @@
   "version": 1,
   "id": "F-129-T03",
   "parent": "F-129",
-  "title": "Owner: check model thinking rows on a live sortie",
-  "goal": "The owner sees the model rounds of a real slow sortie in the dashboard",
+  "title": "Agent: read a live sortie's model thinking rows on NERV-01 (read-only)",
+  "goal": "Confirm on NERV-01, read-only, that a real sortie after the update shows the consultant and Misato rows with model and seconds",
   "status": "planned",
   "acceptance": [
-    "On NERV-01 after the update, ask \"remind me to drink water in 2 minutes\"; the sortie view shows the consultant and Misato rows with their model and seconds, adding up to about the sortie's duration"
+    "On NERV-01 after the update reaches F-129-T02, the newest sortie with a misato.consult round, read through the same data the sortie view renders (read-only, no chat sent), lists the consultant and Misato rows with their model and seconds, adding up to about the sortie's duration; the agent pastes the rows and the sortie id (no message text) into F-129"
   ],
   "dependsOn": [
     "F-129-T02"
@@ -19,20 +19,19 @@
   ],
   "privacy": "Neutral invented sorties and model names only.",
   "validation": [
-    "Owner visual check, recorded in F-129 Verification"
+    "Agent-run read-only check on NERV-01, recorded in F-129 Verification"
   ],
   "escalation": [
-    "The owner decides whether the rows read clearly; the agent records the result"
+    "Nothing is written to ~/.nerv, ~/.nerv-app or the live service; a row that reads wrong goes back to F-129-T02"
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-25: one chat request and a look at its sortie. Not a measurement.",
-    "reviewed": "2026-11-25",
-    "agentHours": 0,
+    "estimate": "0.25 h agent",
+    "basis": "Estimated 2026-11-25: one chat request and a look at its sortie. Not a measurement. 2026-11-26: converted from an owner check to an agent read-only check (owner-step triage): the rows and seconds are data, any sortie after the update shows them.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.25,
     "baselineAgentHours": 0,
-    "estimateAgentHours": 0,
-    "ownerHours": 0.25,
-    "ownerKind": "procedure"
+    "estimateAgentHours": 0.25,
+    "ownerHours": 0
   }
 }
