@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "F-144-T06",
+  "parent": "F-144",
+  "title": "Image runner and memory interplay: contract and documentation",
+  "goal": "Image runner and memory interplay: contract and documentation",
+  "status": "planned",
+  "acceptance": [
+    "Owner decision 2026-11-26 in chat: \"ollama a+b, c as option in dashboard\".",
+    "Find who calls ollama stop or --unload-ollama before ComfyUI image runs (not in this repository: name the repository and tool, or record that it is manual); fix the contract: during an image run NERV neither reloads nor warms, and resumes warming when the run ends or after a bounded wait",
+    "The pinned-memory warning (16 GB for gemma4:26b, conflicts with VMs and ComfyUI) is written once in docs/INSTALL.md or the owner guide and reused by the Settings text"
+  ],
+  "dependsOn": [
+    "F-144-T03",
+    "F-144-T04"
+  ],
+  "resources": [
+    "docs/**",
+    "docs/INSTALL.md",
+    "src/**",
+    "docs/work/records/F-144.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "architecture-review",
+    "typescript"
+  ],
+  "privacy": "Local Ollama only; test data is neutral and invented; no secrets; warm-up calls carry no user text.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Material scope growth or effort increase goes to the owner before adoption"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h agent",
+    "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; bounded edit plus tests. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  },
+  "prs": [
+    {
+      "pr": 826,
+      "note": "plan"
+    }
+  ]
+}
