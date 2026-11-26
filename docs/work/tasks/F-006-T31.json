@@ -15,7 +15,7 @@
     "Anything that needs a credential, an unreachable host or the owner goes back to the owner; NERV-02 is left running"
   ],
   "id": "F-006-T31",
-  "status": "implemented",
+  "status": "closed",
   "title": "Rerun the P3 Misato cases with the fixed probe budget and update the report",
   "goal": "P3 has a live Misato result on the same cases and budget as P1, so the full role half of the P3 comparison is settled",
   "acceptance": [
@@ -45,7 +45,7 @@
     "size": "small",
     "estimate": "0 remaining",
     "basis": "Estimated 2026-11-24 (F-006-T29): rerun about 6 min plus evidence and report update. Implemented 2026-11-25 in 0.75 h: Casper 15/15, Misato 8/15 with 0 errors (B-131 live check passed); P3 47/60 vs mac-only 48/60 (keep baseline) and mini-only 30/60 (prefer candidate); evidence and report through placementReport.",
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-26",
     "agentHours": 0,
     "ownerHours": 0,
     "baselineAgentHours": 1,
