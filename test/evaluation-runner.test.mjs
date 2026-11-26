@@ -60,7 +60,8 @@ test(
       assert.ok(report.notCovered.length);
       assert.ok(report.revision.commit);
       assert.equal(report.mode, 'scripted-control-flow');
-      assert.equal(report.selection.notRunGroups.length, 7);
+      // F-120-T02: seven new suite groups (15 in all), so 14 are not run with --only=policy.
+      assert.equal(report.selection.notRunGroups.length, 14);
       assert.ok(report.revision.inputs['evals/suite.json']);
       assert.throws(() => writeReport(report, output), /exist/);
       assert.throws(() => writeReport(report, '.git/evidence.json'), /metadata/);
