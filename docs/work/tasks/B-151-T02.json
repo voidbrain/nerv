@@ -4,7 +4,7 @@
   "parent": "B-151",
   "title": "Eva · Light: white text on the deep accent",
   "goal": "Every pair the dashboard AA test checks passes in all 20 combinations, Eva · Dark · Orange unchanged",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Eva · Light brand-bg is the deep accent and brand-fg white, in dashboard.js and src/dashboard-theme.ts alike",
     "test/dashboard.test.ts and test/dashboard-theme.test.ts pass unedited",
@@ -37,7 +37,7 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: two palette lines, the style guide line and screenshots. Implemented the same day in about 1 h: Eva · Light brand-bg a.deep, brand-fg #fff in both files; headless Chrome screenshots of Eva · Light orange and green show white on the deep accent. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: two palette lines, the style guide line and screenshots. Implemented the same day in about 1 h: Eva · Light brand-bg a.deep, brand-fg #fff in both files; headless Chrome screenshots of Eva · Light orange and green show white on the deep accent. Remaining: CI. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 1,

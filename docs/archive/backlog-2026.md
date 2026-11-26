@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 7 | 20 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 7 | 21 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7252,6 +7252,40 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | PR / evidence | [#802](https://github.com/voidbrain/nerv/pull/802) (F-098-T04 cancelled); F-098-T04 run evidence in [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #705](https://github.com/voidbrain/nerv/pull/705) (F-098-T06 fleet by chat); [PR #691](https://github.com/voidbrain/nerv/pull/691) (F-098-T05 fleet import); [PR #663](https://github.com/voidbrain/nerv/pull/663) (Italian `fleet` intent fix for `S-6AD9`); [PR #588](https://github.com/voidbrain/nerv/pull/588) (F-098-T03); Owner request 2026-11-14; [plan](../design/fpv-and-cooking-plan-2026-11-14.md); [PR #408](https://github.com/voidbrain/nerv/pull/408); [#750](https://github.com/voidbrain/nerv/pull/750) |
 | Opened | 2026-11-14 |
 | Verification | Unit/integration 2026-11-24: `node --test test/fleet-chat.test.ts test/fleet.test.ts test/fleet-import.test.ts` (43 passed) with the containment fix; CI green on PRs #691 and #705. Live on the real fleet 2026-11-25 (F-098-T04, owner on NERV-01): crash recorded; spare count failed (B-138). The rerun was cancelled 2026-11-26 (F-098-T04, owner decision). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-151
+
+**The dashboard's AA test skipped every black or white text: Eva · Light primary buttons fail AA**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: #801 merged 2026-11-26 on green CI (validate, windows, native-macos, full-suite); test/dashboard.test.ts AA check committed failing first and unedited.
+
+| | |
+|---|---|
+| **Issue** | `test/dashboard.test.ts` "every theme, mode and colour reaches WCAG AA …" (F-047) computes luminance by reading six hex digits, but `palette()` gives black and white as `#000` and `#fff`: the luminance is NaN, `NaN < 4.5` is false, so every pair with `hdr-fg`, `brand-fg` or `on-danger` in black or white passed unchecked. With the colours read correctly, Eva · Light fails `brand-fg` on `accent` (black on the deep accent, the `.btn.primary` text) in all five colours: orange #000 on #b34700 3.82, blue on #1d5fd1 3.61, green on #166534 2.95, violet on #7e3fc4 3.40, ochre on #7a5d00 3.39 (need 4.5). No other pair fails in the 20 combinations. |
+| **Reproduce** | In `test/dashboard.test.ts`, `lum('#000')` returns NaN (`parseInt('', 16)`); on main the test passes although Eva · Light · Orange's primary button is black on #b34700 (3.82:1). |
+| **Check** | The test reads three-digit hex and fails any ratio that is not a number (B-151-T01, committed failing first and not edited); every pair passes AA in all 20 combinations; Eva · Dark · Orange (the `:root` default) is unchanged; `src/dashboard-theme.ts` stays equal to `dashboard.js`. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: #801 merged 2026-11-26 on green CI (validate, windows, native-macos, full-suite); test/dashboard.test.ts AA check committed failing first and unedited. 2026-11-26: found while building the 🧱 bricks themes. The first report blamed a wrong-arity call (`palette(theme, mode, accent)` against `palette({ theme, mode, accent })` in `src/dashboard-theme.ts`); that is not the cause: `test/dashboard.test.ts` loads the positional `palette()` from `web/public/dashboard/dashboard.js`, and `tsconfig.json` already includes `test/**/*.ts`, so `npm run typecheck` covers the tests and no typecheck step is needed. The cause is the NaN luminance of short hex. B-151-T01 fixes the test; B-151-T02 makes Eva · Light's brand colour the deep accent with white text, as Simple · Light already does and as 🧱 bricks#20 chose for light modes. 2026-11-26: B-151-T01 and B-151-T02 implemented: the test fails on main with the five Eva · Light pairs and passes unedited after the fix; Eva · Light's brand block and primary buttons are now white on the deep accent (`.hdr` panel headers keep black on the bright accent, 4.5:1 or more); Eva · Dark · Orange and `:root` unchanged. Remaining: CI.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Code reading at main `bce6cd76`: `test/dashboard.test.ts` (lum, need), `web/public/dashboard/dashboard.js` `palette()`, `.btn.primary` and `.brand-block` in `web/public/dashboard/index.html`, `.brand` in `web/src/sign-in.ts`. Test: `test/dashboard.test.ts` "every theme, mode and colour reaches WCAG AA …"; [#801](https://github.com/voidbrain/nerv/pull/801) |
+| Opened | 2026-11-26 |
+| Verification | Unit: 2026-11-26, CI of #801: dashboard AA check passes all 20 combinations. Browser: 2026-11-26, headless screenshots of Eva · Light and Eva · Dark · Orange (not in the repository). |
 | Reviewed | 2026-11-26 |
 
 </details>
