@@ -4,7 +4,7 @@
   "parent": "B-118",
   "title": "Cut the Windows cost of the coordinator test files",
   "goal": "The Windows npm test step finishes within 12 minutes: the coordinator files no longer run 10-30 times slower there than on Linux",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The slowest Windows files are measured against Linux from the timing logs of 2026-11-24/25 and the Windows-only cost named",
     "The test processes skip SQLite's disk flush (a test preload, covered by its own test), and the partition mesh's registry sync opens each store once per round; no timeout raised, no test skipped, product code unchanged",
@@ -41,10 +41,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h",
-    "basis": "Estimated 2026-11-25 when opened: aggregate 20 Windows timing logs, compare with Linux, count store opens, two test-side changes, measure on the PR. Not a measurement.",
-    "reviewed": "2026-11-25",
-    "agentHours": 2,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-25 when opened: aggregate 20 Windows timing logs, compare with Linux, count store opens, two test-side changes, measure on the PR. Not a measurement. Closed 2026-11-26.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
   },

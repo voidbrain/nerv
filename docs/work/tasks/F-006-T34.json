@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "parent": "F-006",
+  "status": "planned",
+  "resources": [
+    "contract:model-routing",
+    "docs/decisions/placement-campaign.md",
+    "docs/acceptance/f006-placement-p2-p4.md",
+    "docs/evaluations/2026-11-25-f006-t31-placement-evidence.json",
+    "docs/evaluations/2026-11-25-f006-t31-placement-report.md",
+    "tools/placement-live.mjs",
+    "src/placement-report.ts",
+    "docs/work/records/F-006.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "structured-tools",
+    "privacy-review",
+    "distributed-contracts"
+  ],
+  "privacy": "Repository-owned neutral fixtures (evals/combination-v1.json) only; local models on the enrolled NERV-01 (gemma4:12b) and NERV-02 (qwen2.5:1.5b) over Tailscale; 0 paid cloud tokens; raw reports stay in ~/.nerv-private on their base; NERV-01's live service (~/.nerv-app, ~/.nerv) is never stopped, updated or edited by the agent.",
+  "escalation": [
+    "A stop rule of the placement campaign aborts the run without fallback or retry",
+    "Anything that needs a credential, an unreachable host or the owner goes back to the owner; NERV-02 is left running",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "validation": [
+    "Recorded evidence for this slice; scoped checks and required CI"
+  ],
+  "id": "F-006-T34",
+  "title": "Check an uncertain outcome on the mac-coder-mini-auditor route live",
+  "goal": "The auditor route's uncertain-outcome check is exercised live, so placementReport no longer reports it as not exercised",
+  "acceptance": [
+    "A bounded combination-v1 coder-reviewer case on mac-coder-mini-auditor whose auditor budget expires mid-generation is reported as unknown or an error, never as passed, and the coder's vote does not stand in",
+    "No permission gate is bypassed and the next case recovers",
+    "Live model calls: yes, local models only, 0 paid tokens; not run while the owner uses the local model"
+  ],
+  "dependsOn": [
+    "F-006-T32"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-26 from F-006-T25's uncertain-outcome probe (P3, 1 s budget): one expiring case and one recovery case on local models. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "ownerHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

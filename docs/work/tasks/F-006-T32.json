@@ -4,7 +4,7 @@
   "id": "F-006-T32",
   "title": "Decide: close F-006 on the provisional Mac-only placement or authorize the auditor-route checks",
   "goal": "The owner either accepts the still-provisional recommendation after F-006-T23 to F-006-T31 and F-006 closes, or authorizes the live checks that keep mac-coder-mini-auditor at insufficient evidence",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "The owner's decision is recorded in the F-006 record with its date",
     "If accepted: F-006 closes on its existing Check, recording the auditor-route unknowns and that the Claude path and the Pi route rest on tests only (no live paid call, no live Pi run)",
@@ -31,11 +31,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Opened 2026-11-26 from the fresh-context review of the F-006 closure: every Check clause has evidence, but the recommendation stays provisional (src/placement-report.ts: the auditor comparison is insufficient), and F-006-T22 framed closing on a provisional result as the owner's choice.",
+    "estimate": "0 remaining",
+    "basis": "Opened 2026-11-26 from the fresh-context review of the F-006 closure: every Check clause has evidence, but the recommendation stays provisional (src/placement-report.ts: the auditor comparison is insufficient), and F-006-T22 framed closing on a provisional result as the owner's choice. Closed 2026-11-26: the owner chose option B, \"Allow the extra checks\" (chat, relayed by the coordinator); the checks are F-006-T33 to F-006-T37.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "decision",
     "baselineAgentHours": 0,
     "estimateAgentHours": 0

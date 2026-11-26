@@ -4,7 +4,7 @@
   "parent": "B-118",
   "title": "Worker-link test files always exit; find why they time out on Windows",
   "goal": "No worker-link test file can hold the test process alive after its tests end or time out, and the Windows worker-link tests stop timing out",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A committed test fails on main: a worker-link test cancelled at its timeout (mid-fixture and with links connected) leaves its file process running",
     "Fixture teardown always runs (test hooks), each close is bounded, and WorkerLink.stop() and Runtime.close() end even mid-operation",
@@ -40,10 +40,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h",
-    "basis": "Estimated 2026-11-24 when opened from run 45307748925: reproduce, fix teardown, measure Windows. Not a measurement.",
-    "reviewed": "2026-11-24",
-    "agentHours": 0.5,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-24 when opened from run 45307748925: reproduce, fix teardown, measure Windows. Not a measurement. Closed 2026-11-26.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2.5,
     "actualAgentHours": 2,

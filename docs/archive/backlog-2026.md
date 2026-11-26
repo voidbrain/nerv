@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 6 | 16 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 6 | 17 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7082,6 +7082,40 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | PR / evidence | F-127-T01 in [PR #754](https://github.com/voidbrain/nerv/pull/754) |
 | Opened | 2026-11-25 |
 | Verification | Unit 2026-11-26: `npm run check:conventions` passes at `6b49177c` (194 files); CI of #754 green. |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-118
+
+**Windows CI: the test step runs into its 18-minute limit**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: Owner decision 2026-11-26 ("B-118 ok"): 13 clean first-attempt Windows npm test runs since #771 (365–490 s, none rerun) accepted instead of five consecutive green runs; evidence in PR #787.
+
+| | |
+|---|---|
+| **Issue** | The `windows` job's `npm test` step (limit `timeout-minutes: 18`, set by B-076) ran out twice on PR #679: run 45259024776, attempts 1 (20:31:12–20:49:13 UTC) and 2 (21:20:20–21:38:20 UTC), 2026-11-23. Passing attempts that day took about 9–10 minutes (attempt 3 of the same run 9 m 48 s), so the suite either slows sharply on some runners or a test hangs; either way a PR waits on reruns. |
+| **Reproduce** | Rerun the `windows` job of a full-suite PR several times; compare the step duration and the `windows-test-report` artifact (the last line before the stop names the test after which it hung). |
+| **Check** | The two stopped attempts are read from their test reports and the cause named (a hanging test, or a slow runner with the slowest files measured); a hang gets a failing-first test and a fix, slowness a split, parallelism or test change; the next five full Windows runs finish within 12 minutes (a third of margin under the limit) without reruns. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: Owner decision 2026-11-26 ("B-118 ok"): 13 clean first-attempt Windows npm test runs since #771 (365–490 s, none rerun) accepted instead of five consecutive green runs; evidence in PR #787. Closed 2026-11-26: owner decision, given in chat on 2026-11-26 and relayed by the coordinator: "B-118 ok", that is, close B-118 on the evidence already recorded (13 clean Windows `npm test` runs since #771, 365–490 s each on the first attempt, none rerun; the 3 failures in that window were single tests owned by other records, B-066 and the Instrumentality daily-run failure, not the step limit) instead of the literal Check's five consecutive green runs; the owner accepted that deviation. B-118's own defect (the step running into its 18-minute limit) did not recur. No review: records-only closure on an owner decision; the evidence it rests on was recomputed by mechanical-reviewer (fresh context, 2026-11-26), below. 2026-11-26 verification ([PR #787](https://github.com/voidbrain/nerv/pull/787)): every full Windows `npm test` run after #771 took between 365 and 490 s on the first attempt, none near the 12-minute bound or the 18-minute limit, and none was rerun (each later run is a new head): 365 s ([run 45715497349](https://github.com/voidbrain/nerv/actions/runs/45715497349), PR #777 head `b02e787c`, failed the B-066-T02 heartbeat test), 475 s ([run 45717358062](https://github.com/voidbrain/nerv/actions/runs/45717358062), PR #778 head `a6dffe64`, failed the Instrumentality daily-run test), 436 s ([run 45717488957](https://github.com/voidbrain/nerv/actions/runs/45717488957), #777), 473 s ([run 45719295342](https://github.com/voidbrain/nerv/actions/runs/45719295342), #778), 384 s ([run 45725001743](https://github.com/voidbrain/nerv/actions/runs/45725001743), #782), 490 s ([run 45728896927](https://github.com/voidbrain/nerv/actions/runs/45728896927), PR #785 head `f90b537c`, failed a worker-link "Worker connection lost" test, B-066), 465 s ([run 45729902400](https://github.com/voidbrain/nerv/actions/runs/45729902400), #786), 449 s ([run 45730760071](https://github.com/voidbrain/nerv/actions/runs/45730760071), #785), 481 s ([run 45731342468](https://github.com/voidbrain/nerv/actions/runs/45731342468), #786). That is 13 clean first-attempt runs within 12 minutes since #753 and no step over 573 s since #741; the three failures in this window were single test failures in other records (B-066, and an Instrumentality timing recurrence after B-104), not the step limit. B-118's own defect (the step running into its limit) did not recur. Review: mechanical-reviewer (fresh context, 2026-11-26) recomputed every cited step time, attempt, head and PR and found the list complete; it found the literal Check (five consecutive runs without a red first attempt) not met, so closing on the step-time reading is an owner decision. Next: the owner decides; if green-run counting continues, three consecutive so far (#786, #785, #786). The 2026-11-26 #779 reconciliation (five clean runs, #764 to #771) and the #758 one (six first-attempt runs, two clean): [archive](evidence-2026.md#b-118-moved-2026-11-26-later). The 2026-11-25 #741 reconciliation and the B-118-T04 summary: [archive](evidence-2026.md#b-118-moved-2026-11-26). Full analysis: [archive](evidence-2026.md#b-118-moved-2026-11-25). Earlier: the 2026-11-24 reconciliation (50 Windows attempts after PR #706) is in the [archive](evidence-2026.md#b-118-moved-2026-11-25). Earlier B-118 evidence (T01–T03): [archive](evidence-2026.md#b-118-moved-2026-11-24).
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | B-118-T04: Test: `test/sqlite-no-fsync.test.ts`; timing logs of runs 45506622094 to 45559316942 (Windows) and [run 45548137584](https://github.com/voidbrain/nerv/actions/runs/45548137584) (Linux); [PR #706](https://github.com/voidbrain/nerv/pull/706) (shared teardown, exit guard, failures named; Test: `test/runtime-exit.test.ts`); [run 45325080543](https://github.com/voidbrain/nerv/actions/runs/45325080543) (Windows 8.6 min); [PR #699](https://github.com/voidbrain/nerv/pull/699) (teardown hooks, bounded stop/close; Test: `test/worker-link-exit.test.ts`); [PR #695](https://github.com/voidbrain/nerv/pull/695) (timings, split); [run 45314998906](https://github.com/voidbrain/nerv/actions/runs/45314998906) (this branch, Windows); [run 45307748925](https://github.com/voidbrain/nerv/actions/runs/45307748925) (hang named); [PR #692](https://github.com/voidbrain/nerv/pull/692) (opened); [run 45259024776](https://github.com/voidbrain/nerv/actions/runs/45259024776); [#741](https://github.com/voidbrain/nerv/pull/741); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758); [#787](https://github.com/voidbrain/nerv/pull/787) |
+| Opened | 2026-11-24 |
+| Verification | CI 2026-11-25 (later): 573, 545, 440 and 359 s (runs 45602256057, 45618960815, 45629193344, 45640302693); the first two needed a test rerun; two clean runs since. Unit 2026-11-25: Test: `test/sqlite-no-fsync.test.ts` and `test/coordinator-partition.test.ts` pass locally (B-118-T04). CI 2026-11-25: after PR #741 four Windows `npm test` runs took 352–506 s on the first attempt (runs 45572380286, 45577116814, 45580660697, 45589471622); five needed. Unit/integration 2026-11-24: Test: `test/worker-link-exit.test.ts` (B-118-T02) and `test/runtime-exit.test.ts`, `test/test-timing-reporter.test.mjs` (B-118-T03) pass locally. |
 | Reviewed | 2026-11-26 |
 
 </details>
