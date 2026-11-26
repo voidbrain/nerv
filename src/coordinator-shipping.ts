@@ -341,7 +341,8 @@ export function exportSeedSnapshot(
       if (!captured) break;
     }
     const digest = (
-      db.prepare('SELECT state_digest FROM coordinator_state WHERE id = 1').get() as { state_digest: string | null } | undefined
+      db.prepare('SELECT state_digest FROM coordinator_state WHERE id = 1').get() as
+        { state_digest: string | null } | undefined
     )?.state_digest;
     // A chain starts with a batch: a main that never appended one gives the standby a digest to chain onto.
     if (!digest)
