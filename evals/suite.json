@@ -157,6 +157,98 @@
         "eva03-per-call-gate"
       ],
       "minimumTests": 2
+    },
+    {
+      "id": "scheduling-reminders",
+      "files": [
+        "test/core.test.ts",
+        "test/f046-existing-check.test.ts"
+      ],
+      "families": [
+        "reminder-time-kinds",
+        "existing-reminder-fact-check"
+      ],
+      "minimumTests": 13
+    },
+    {
+      "id": "memory-and-chronicle",
+      "files": [
+        "test/memory.test.ts",
+        "test/persona.test.ts",
+        "test/chronicle.test.ts",
+        "test/milestones.test.ts"
+      ],
+      "families": [
+        "subject-memory",
+        "typo-tolerant-recall",
+        "grounded-persona",
+        "recorded-chronicle"
+      ],
+      "minimumTests": 24
+    },
+    {
+      "id": "pilot-routing",
+      "files": [
+        "test/pilots.test.ts",
+        "test/consultant.test.ts",
+        "test/pilot-model.test.ts"
+      ],
+      "families": [
+        "pilot-selection",
+        "pilot-trust-stages",
+        "consultant-advice"
+      ],
+      "minimumTests": 24
+    },
+    {
+      "id": "tool-contracts",
+      "files": [
+        "test/mcp.test.ts",
+        "test/tool-listing.test.ts",
+        "test/read-tool-shapes.test.ts",
+        "test/packs.test.ts"
+      ],
+      "families": [
+        "mcp-grant-fingerprints",
+        "typed-read-results",
+        "domain-pack-toggles"
+      ],
+      "minimumTests": 22
+    },
+    {
+      "id": "external-project-intake",
+      "files": [
+        "test/quarantine.test.ts",
+        "test/provenance.test.ts"
+      ],
+      "families": [
+        "quarantine-intake",
+        "ireul-taint-propagation"
+      ],
+      "minimumTests": 11
+    },
+    {
+      "id": "federated-handoff",
+      "files": [
+        "test/whole-job-handoff.test.ts",
+        "test/operator-directory.test.ts"
+      ],
+      "families": [
+        "whole-job-forwarding",
+        "operator-directory"
+      ],
+      "minimumTests": 8
+    },
+    {
+      "id": "coding-jobs",
+      "files": [
+        "test/coding-job.test.ts"
+      ],
+      "families": [
+        "worktree-coding-job",
+        "pinned-harness-apply"
+      ],
+      "minimumTests": 7
     }
   ],
   "notCovered": [
