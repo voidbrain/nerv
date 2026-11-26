@@ -158,6 +158,8 @@ export interface OwnerAction {
 export type ActReply = ActResult & { casperError?: string };
 
 export interface StoreApi {
+  /** B-168: the owner's configured language (`config.language`), for replies to requests with no language signal. */
+  language?(): 'it' | 'en';
   selectExecution?(
     req: import('./model.ts').OrchestrationRequest,
   ): Promise<import('./model.ts').OrchestrationSelection>;

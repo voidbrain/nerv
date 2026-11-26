@@ -849,7 +849,7 @@ export class TelegramChannel {
       return;
     }
     if (readCommand(text)?.name === 'cards') {
-      const lang = requestLanguage(text);
+      const lang = requestLanguage(text, [], this.store.language?.());
       const pending = await this.store.approvals(10);
       if (!pending.length) {
         await this.sendLocal(lang === 'it' ? 'Nessuna scheda in attesa.' : 'No pending approval cards.');
@@ -863,7 +863,7 @@ export class TelegramChannel {
     }
     const spearCmd = readCommand(text);
     if (spearCmd?.name === 'spear') {
-      const lang = requestLanguage(text);
+      const lang = requestLanguage(text, [], this.store.language?.());
       const list = this.store.sorties ? await this.store.sorties(20) : [];
       const active = list.filter((s) => s.status === 'open' || s.status === 'waiting');
       const wanted = spearCmd.target?.trim().replace(/^s-/i, '').toLowerCase();
@@ -898,7 +898,7 @@ export class TelegramChannel {
       void this.api.call('sendChatAction', { chat_id: this.chatId, action: 'typing' }).catch(() => {});
     }, 4000);
     void this.api.call('sendChatAction', { chat_id: this.chatId, action: 'typing' }).catch(() => {});
-    const lang = requestLanguage(text);
+    const lang = requestLanguage(text, [], this.store.language?.());
     try {
       const reply = await this.store.chat(text.slice(0, 4000), `telegram:${this.chatId}`, {
         signal: this.stopping.signal,

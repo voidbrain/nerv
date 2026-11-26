@@ -4,6 +4,7 @@ import { ItemLockManager, itemKeysForTool } from './item-locks.ts';
 import type { Verdict } from './policy.ts';
 import type { ProcessClient } from './process-client.ts';
 import type { Effect, Pattern } from './policy.ts';
+import { ownerLanguage } from './config.ts';
 import { MODEL_TIMEOUT_MS, type RouteName } from './model.ts';
 import { OWNER_EXPIRED_REASON, ownerRejectedReason, requestLanguage, type Step, type Turn } from './misato.ts';
 import type { RouteHealth } from './route-health.ts';
@@ -36,6 +37,7 @@ export type RemoteConsultant = {
 };
 
 export interface RuntimeApprovalsHost {
+  readonly home?: string;
   readonly nervous: ProcessClient;
   readonly itemLocks: ItemLockManager;
   readonly resumeListeners: ((reply: ChatReply) => void)[];
@@ -426,7 +428,7 @@ export class RuntimeApprovals {
       .catch(() => [])) as { id: string; title: string; ran: string[] }[];
     let n = 0;
     for (const s of open) {
-      const it = requestLanguage(s.title) === 'it';
+      const it = requestLanguage(s.title, [], ownerLanguage(this.host.home)) === 'it';
       const title = s.title.slice(0, 120);
       const ran = s.ran.length
         ? it
