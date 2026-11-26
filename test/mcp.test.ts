@@ -379,6 +379,10 @@ test(
       '{"action":{"tool":"notes.read_note","args":{"name":"third"}}}',
       '{"action":{"tool":"notes.read_note","args":{"name":"fourth"}}}',
       '{"action":{"tool":"notes.read_note","args":{"name":"fourth"}}}',
+      // A script on the extra turn runs nothing either.
+      '{"action":{"tool":"notes.read_note","args":{"name":"fifth"}}}',
+      '{"action":{"tool":"notes.read_note","args":{"name":"sixth"}}}',
+      '{"script":{"steps":[{"tool":"reminders.list","args":{}}]}}',
     ]);
     const home = mkdtempSync(join(tmpdir(), 'nerv-mcp-same-'));
     writeFileSync(
@@ -413,6 +417,13 @@ test(
       );
       assert.match(two.reply ?? '', /Note third: buy milk and bread\./);
       assert.match(two.reply ?? '', /this same request/);
+      const three = await r.chat('Read my last notes', 'telegram:1');
+      assert.deepEqual(
+        three.steps.filter((s) => s.tool).map((s) => s.outcome),
+        ['grant', 'reject'],
+        'no script step runs after the refusal',
+      );
+      assert.match(three.reply ?? '', /Note fifth: buy milk and bread\./);
     } finally {
       await r.close();
       await m.close();

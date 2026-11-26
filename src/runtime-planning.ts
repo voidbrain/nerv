@@ -190,7 +190,7 @@ export class RuntimePlanning {
     const withIsolationNote = (reply: string) =>
       isolationNote ? `${reply.slice(0, MAX_REPLY_CHARS - isolationNote.length - 2)}\n\n${isolationNote}` : reply;
     const answered = () =>
-      steps.filter((s) => s.outcome === 'grant' && !s.error && s.result !== undefined && s.tool !== TOOL_INDEX_READ);
+      steps.filter((s) => s.tainted && s.outcome === 'grant' && !s.error && s.result !== undefined);
     const answeredReply = () => {
       const last = answered().at(-1)!;
       return withIsolationNote(readResultReply(lang(), last.tool!, last.result));
@@ -369,6 +369,8 @@ export class RuntimePlanning {
         )
         .catch(() => ({ error: 'Brain unavailable.' }))) as { plan?: Plan; invalid?: boolean; error?: string };
       const stepDurationMs = Math.max(0, Math.round(performance.now() - stepT0));
+      // B-175: after an isolation refusal only a reply is taken; anything else ends with the result itself.
+      if (isolationNote && (out.error || !out.plan || !('reply' in out.plan))) return finish('done', answeredReply());
       if (out.error) return finish('failed', undefined, out.error, stepDurationMs);
       if (!out.plan) {
         await this.host.record(
@@ -439,7 +441,7 @@ export class RuntimePlanning {
           );
           if (alreadyRejected) {
             const fallback = formatFleetChatReply(lang(), ungroundedFleet.result);
-            if (fallback) return finish('done', fallback, undefined, stepDurationMs);
+            if (fallback) return finish('done', withIsolationNote(fallback), undefined, stepDurationMs);
           }
           continue;
         }
@@ -550,8 +552,6 @@ export class RuntimePlanning {
         continue;
       }
       const { tool } = out.plan.action;
-      // B-175: after an isolation refusal Misato only replies; another action ends the request with the result itself.
-      if (isolationNote) return finish('done', answeredReply());
       const shouldReconcile =
         tool === 'reminders.add' || (tool === 'reminders.update' && typeof out.plan.action.args.due === 'string');
       const cfg = shouldReconcile && this.host.home ? readConfig(this.host.home) : undefined;
