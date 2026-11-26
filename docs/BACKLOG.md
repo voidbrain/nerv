@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 32 | 10 | 68 | 32 |
+| **This week** | 34 | 10 | 68 | 32 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 57 | 51 |
+| **Open** | 59 | 51 |
 | **Require Human 🧑** | 14 | 23 |
 
 ### Require Human 🧑
@@ -46,7 +46,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 272.25 h agent + 23 h owner across 286 open steps of 57 features and 51 other records. 162.5 h of actual effort recorded on 150 steps. Generated from the task files.
+**Remaining effort:** 276.25 h agent + 23.25 h owner across 289 open steps of 59 features and 51 other records. 162.5 h of actual effort recorded on 150 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -3562,6 +3562,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-147"></a>[✨ F-147](#top)
+
+**Live index card: show the coordinator's live index through MCP**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h agent + 0.25 h owner | `coordinator:F-024-T04`, `coordinator:F-024-T07` | [F-149-T01](#f-149-t01), [F-150-T01](#f-150-t01) | ⏳ | — | — |
+
+💻 **→** Next: F-147-T01 — Read-only MCP connection to the live index and its surface card (Planned).
+
+| | |
+|---|---|
+| **Issue** | The coordinator is building a read-only live index of every project's backlog (coordinator:F-024): a `node:sqlite` cache rebuilt from git, MCP read tools (record lookup, "waiting on me", "blocked by X") and its own screen. NERV should show it like any project, through MCP surface cards, without holding a copy (coordinator `docs/DOMAINS.md`, "The rule for screens"). Owner decisions 2026-11-26 in chat: "2" and "coordinator" on the [live index decision page](https://github.com/voidbrain/coordinator/blob/main/docs/decisions/live-index.md#answer) (step S6 is NERV's), then "1 2 ok" (turn the live-index proposals into records here and in project-harness). Proposal: [live-index-nerv-card](https://github.com/voidbrain/coordinator/blob/main/docs/proposals/live-index-nerv-card.md). |
+| **Reproduce** | NERV has the remote MCP registration (F-123-T01) and bricks surface cards (F-130-T19), but no connection to the coordinator's index and no card for it. |
+| **Check** | NERV registers the index as a remote MCP server, read-only (every tool Green, a writing tool refused); its answers render as a 🧱 bricks surface card with source links, snapshot time and a link to the index screen; Italian labels in chat; an unreachable index is reported, never shown as no work; a test across the API and the component, failing first (F-147-T01); the owner's check in chat (F-147-T02). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-147-t01"></a>F-147-T01 — Read-only MCP connection to the live index and its surface card | 1 h | 0 h | 1 h | Planned | `coordinator:F-024-T04` | [F-147-T02](#f-147-t02), [F-149-T01](#f-149-t01), [F-150-T01](#f-150-t01) | ⏳ 🤖 | [PR #835](https://github.com/voidbrain/nerv/pull/835) |
+| 🟢 Small | <a id="f-147-t02"></a>F-147-T02 — Owner: ask NERV for the live index in chat | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-147-T01](#f-147-t01), `coordinator:F-024-T07` | — | ⏳ 🧑‍🔧 | [PR #835](https://github.com/voidbrain/nerv/pull/835) |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 1 h agent + 0.25 h owner | 0 of 2 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-147.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-147-T01: [PR #835](https://github.com/voidbrain/nerv/pull/835) · F-147-T02: [PR #835](https://github.com/voidbrain/nerv/pull/835). [proposal](https://github.com/voidbrain/coordinator/blob/main/docs/proposals/live-index-nerv-card.md); [decision page](https://github.com/voidbrain/coordinator/blob/main/docs/decisions/live-index.md); owner decisions 2026-11-26 in chat ("2", "coordinator", "1 2 ok"); [#835](https://github.com/voidbrain/nerv/pull/835) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
 ### <a id="f-131"></a>[✨ F-131](#top)
 
 **Quick commands: shortcut buttons that show other projects' cards through MCP**
@@ -3642,45 +3681,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-147"></a>[✨ F-147](#top)
-
-**Live index card: show the coordinator's live index through MCP**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h agent + 0.25 h owner | `coordinator:F-024-T04`, `coordinator:F-024-T07` | — | ⏳ | — | — |
-
-💻 **→** Next: F-147-T01 — Read-only MCP connection to the live index and its surface card (Planned).
-
-| | |
-|---|---|
-| **Issue** | The coordinator is building a read-only live index of every project's backlog (coordinator:F-024): a `node:sqlite` cache rebuilt from git, MCP read tools (record lookup, "waiting on me", "blocked by X") and its own screen. NERV should show it like any project, through MCP surface cards, without holding a copy (coordinator `docs/DOMAINS.md`, "The rule for screens"). Owner decisions 2026-11-26 in chat: "2" and "coordinator" on the [live index decision page](https://github.com/voidbrain/coordinator/blob/main/docs/decisions/live-index.md#answer) (step S6 is NERV's), then "1 2 ok" (turn the live-index proposals into records here and in project-harness). Proposal: [live-index-nerv-card](https://github.com/voidbrain/coordinator/blob/main/docs/proposals/live-index-nerv-card.md). |
-| **Reproduce** | NERV has the remote MCP registration (F-123-T01) and bricks surface cards (F-130-T19), but no connection to the coordinator's index and no card for it. |
-| **Check** | NERV registers the index as a remote MCP server, read-only (every tool Green, a writing tool refused); its answers render as a 🧱 bricks surface card with source links, snapshot time and a link to the index screen; Italian labels in chat; an unreachable index is reported, never shown as no work; a test across the API and the component, failing first (F-147-T01); the owner's check in chat (F-147-T02). |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-147-t01"></a>F-147-T01 — Read-only MCP connection to the live index and its surface card | 1 h | 0 h | 1 h | Planned | `coordinator:F-024-T04` | [F-147-T02](#f-147-t02) | ⏳ 🤖 | [PR #835](https://github.com/voidbrain/nerv/pull/835) |
-| 🟢 Small | <a id="f-147-t02"></a>F-147-T02 — Owner: ask NERV for the live index in chat | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-147-T01](#f-147-t01), `coordinator:F-024-T07` | — | ⏳ 🧑‍🔧 | [PR #835](https://github.com/voidbrain/nerv/pull/835) |
-| 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 1 h agent + 0.25 h owner | 0 of 2 completed | | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-147.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-147-T01: [PR #835](https://github.com/voidbrain/nerv/pull/835) · F-147-T02: [PR #835](https://github.com/voidbrain/nerv/pull/835). [proposal](https://github.com/voidbrain/coordinator/blob/main/docs/proposals/live-index-nerv-card.md); [decision page](https://github.com/voidbrain/coordinator/blob/main/docs/decisions/live-index.md); owner decisions 2026-11-26 in chat ("2", "coordinator", "1 2 ok"); [#835](https://github.com/voidbrain/nerv/pull/835) |
-| Opened | 2026-11-26 |
-| Verification | Pending |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
 ### <a id="f-109"></a>[✨ F-109](#top)
 
 **Pilots as persona cards with editable names and one Apply**
@@ -3725,6 +3725,83 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | F-109-T03: `node --test test/dashboard.test.ts test/pilot-controls.test.mjs` and `npm run check:fast` passed; live dashboard check pending owner. |
 | Reviewed | 2026-11-20 |
+
+</details>
+
+---
+### <a id="f-149"></a>[✨ F-149](#top)
+
+**Charts on the live index card: records per status, steps per repo, PR throughput**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 2 h agent + 0.25 h owner | [F-147-T01](#f-147-t01) | — | ⏳ | — | — |
+
+💻 **→** Next: F-149-T01 — Three bricks charts on the live index card (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-26 (late evening): 🧱 bricks plans shared charts (line, bar, stacked bar, donut) in bricks:F-014, with 🚦 the coordinator's numbers as one consumer. The coordinator has no UI of its own; its live index shows in NERV through the MCP surface card F-147. NERV owns this adoption. Waits on F-147 and the bricks release with the charts (bricks:F-014-T07). The numbers come from the coordinator's live index MCP read tools (coordinator:F-024-T04); if a figure is not served there, that is a coordinator record, not work here. |
+| **Reproduce** | The F-147 card plan shows the live index as text and tables; no chart. |
+| **Check** | The live index card shows records per status (donut), open steps per repository by status (stacked bar) and merged PRs per day or week (bar or line), each from the MCP read tools, with the data-table alternative bricks provides, in light and dark (F-149-T01); the owner looks at it in chat (F-149-T02). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-149-t01"></a>F-149-T01 — Three bricks charts on the live index card | 2 h | 0 h | 2 h | Planned | [F-147-T01](#f-147-t01) | [F-149-T02](#f-149-t02) | ⏳ 🤖 | [PR #857](https://github.com/voidbrain/nerv/pull/857) plan |
+| 🟢 Small | <a id="f-149-t02"></a>F-149-T02 — Owner: look at the charts on the live index card | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-149-T01](#f-149-t01) | — | ⏳ 🧑‍🔧 | [PR #857](https://github.com/voidbrain/nerv/pull/857) plan |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 2 steps recorded) | 2 h agent + 0.25 h owner | 0 of 2 completed | | | | |
+
+<details>
+<summary>Next action, estimates and PR history</summary>
+
+[Full notes & evidence](work/records/F-149.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-149-T01: [PR #857](https://github.com/voidbrain/nerv/pull/857) plan · F-149-T02: [PR #857](https://github.com/voidbrain/nerv/pull/857) plan. Plan: [#857](https://github.com/voidbrain/nerv/pull/857) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="f-150"></a>[✨ F-150](#top)
+
+**Reorder the solution order by drag and drop on the live index card**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 2 h | [F-147-T01](#f-147-t01) | — | ⏳ | — | — |
+
+💻 **→** Next: F-150-T01 — Sortable solution order on the live index card, sent by the coordinator's reorder path (Planned).
+
+| | |
+|---|---|
+| **Issue** | Owner request 2026-11-26 (late evening): reorder the coordinator's working list (`docs/solution-order.md`) by drag and drop. Planned in 🚦 coordinator:F-025 (the write path: a reorder becomes a reviewed PR, never a silent write), with the 🧱 bricks:F-015 sortable list; NERV owns the card side here, on the live index card F-147. Waits on F-147, bricks:F-015-T02 and the owner's decision in coordinator:F-025-T02. |
+| **Reproduce** | The F-147 card plan is read-only; the order changes only by a hand-edited PR in the coordinator. |
+| **Check** | The live index card shows the solution order in a bricks sortable list; a reorder is sent by the path coordinator:F-025 chose, the card shows the PR link it gets back (or the stale-list message and reloads), and nothing is written by NERV itself unless F-025 chose that (F-150-T01); the owner tries it (coordinator:F-025-T04). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | PRs |
+|---|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-150-t01"></a>F-150-T01 — Sortable solution order on the live index card, sent by the coordinator's reorder path | 2 h | 0 h | 2 h | Planned | [F-147-T01](#f-147-t01) | — | [PR #857](https://github.com/voidbrain/nerv/pull/857) plan |
+| 🟡 Medium | **Total** | 2 h | 0 h (0 of 1 steps recorded) | 2 h | 0 of 1 completed | | | |
+
+<details>
+<summary>Next action, estimates and PR history</summary>
+
+[Full notes & evidence](work/records/F-150.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-150-T01: [PR #857](https://github.com/voidbrain/nerv/pull/857) plan. Plan: [#857](https://github.com/voidbrain/nerv/pull/857) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
 
 </details>
 

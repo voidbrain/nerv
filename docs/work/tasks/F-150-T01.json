@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-150-T01",
+  "parent": "F-150",
+  "title": "Sortable solution order on the live index card, sent by the coordinator's reorder path",
+  "goal": "A drag on the card ends as a PR link, never a silent write",
+  "status": "planned",
+  "acceptance": [
+    "The card lists the solution order with the bricks sortable list (bricks:F-015-T02); Save sends the new order and the base it loaded by the path coordinator:F-025-T02 chose, and shows the PR link or the stale-list message",
+    "No write to git happens in NERV unless coordinator:F-025 chose the NERV-job option; then it opens a PR and never merges",
+    "Tests across the join: card to the reorder call, with a fake coordinator, for success, stale base and unknown reference"
+  ],
+  "dependsOn": [
+    "F-147-T01"
+  ],
+  "resources": [
+    "src/**",
+    "web/src/**",
+    "test/**",
+    "docs/work/records/F-150.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "angular"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h agent",
+    "basis": "One list on an existing card plus one call; the write path is the coordinator's. Estimated 2026-11-26. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": [
+    {
+      "pr": 857,
+      "note": "plan"
+    }
+  ]
+}
