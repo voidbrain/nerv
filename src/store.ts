@@ -111,6 +111,8 @@ export interface InboxEntry {
   id: string;
   message: string;
   created: string;
+  /** B-149: when the owner first saw it in the app; null until then. */
+  read_at?: string | null;
   kind: 'reminder' | 'brief' | 'approval';
   approval?: { id: string; expires: string; pending: boolean };
 }
@@ -418,6 +420,10 @@ export class Store {
   }
   inboxHistory(before = 0, limit = 20): HistoryPage<InboxEntry> {
     return this.inboxController.inboxHistory(before, limit);
+  }
+  /** B-149: the owner read this inbox item in the app; the first read is kept. False for an unknown item. */
+  inboxRead(id: string): boolean {
+    return this.inboxController.markRead(id);
   }
   /** Bounded dashboard facts; counts are SQL aggregates, never a downloaded full inbox. */
   dashboardHistory(since: string) {

@@ -255,6 +255,12 @@ export const methodSchemas = {
     properties: { receipt: { type: 'string', minLength: 1, maxLength: 64 } },
     additionalProperties: false,
   },
+  'inbox.read': {
+    type: 'object',
+    required: ['id'],
+    properties: { id: { type: 'string', minLength: 1, maxLength: 64, pattern: '^[A-Za-z0-9_-]+$' } },
+    additionalProperties: false,
+  },
   'deliveries.state': {
     type: 'object',
     required: ['id'],

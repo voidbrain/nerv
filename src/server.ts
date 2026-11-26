@@ -1162,6 +1162,11 @@ export function makeServer(
         }
         const removed = store.deletePushSubscription ? await store.deletePushSubscription(b.endpoint) : false;
         reply(200, { ok: true, removed });
+      } else if (req.method === 'POST' && /^\/api\/inbox\/[A-Za-z0-9_-]{1,64}\/read$/.test(path)) {
+        // B-149: the dashboard or workspace showed this item to the owner in a visible page; the Telegram fallback
+        // skips a read item. The first read is kept; an unknown item is refused without detail.
+        const read = store.inboxRead ? await store.inboxRead(path.split('/')[3]!) : false;
+        reply(read ? 200 : 404, read ? { ok: true } : { error: 'Not found.' });
       } else if (req.method === 'GET' && path === '/api/inbox') {
         const p = await store.inboxHistory(0, 50);
         if (p.next) throw new Error('History requires /api/inbox/history.');

@@ -550,6 +550,10 @@ test(
         assert.match(await textOf('Kind until'), lang === 'it' ? /entro le / : /until /);
         await audit(lang + '-local-inbox');
       }
+      // B-149-T02: the workspace reports the inbox item it showed in a visible page as read (the Telegram fallback skips it).
+      const readAt = () => store.inbox().find((d) => d.reminder_id === delivered.id)?.read_at;
+      for (let n = 0; n < 100 && !readAt(); n++) await new Promise((done) => setTimeout(done, 50));
+      assert.ok(readAt(), 'B-149: a shown inbox item is marked read');
       for (const r of [kindAllDay, kindFromTo, kindFrom, kindUntil]) store.cancel(r.id);
       assert.ok(store.list().find((r) => r.id === delivered.id).delivered);
 

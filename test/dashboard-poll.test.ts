@@ -219,3 +219,32 @@ test('F-013: dashboard delivery aggregates stay scoped to the last-visit cursor,
   render();
   assert.match(box.innerHTML, /delivered <b>37<\/b> reminders/, 'the current cursor shows its exact SQL count');
 });
+
+test('B-149-T02: the dashboard reports the brief the owner opened in a visible page as read, once', async () => {
+  const hook = src.slice(src.indexOf('  // B-149: the brief'), src.indexOf('  // B-129: Run doctor'));
+  const posted: string[] = [];
+  const document = { visibilityState: 'hidden', addEventListener: () => {} };
+  const state: { brief: object | null; briefOpen: boolean } = { brief: null, briefOpen: false };
+  const window = { renderAway: () => {} };
+  new Function('state', 'document', 'window', 'api', hook)(state, document, window, async (path: string) => {
+    posted.push(path);
+  });
+  state.brief = { id: 'brief-1', message: 'Buongiorno', created: '2030-01-01T07:00:00Z', read_at: null };
+  window.renderAway();
+  assert.deepEqual(posted, [], 'a closed brief is not read');
+  state.briefOpen = true;
+  window.renderAway();
+  assert.deepEqual(posted, [], 'a hidden page reads nothing');
+  document.visibilityState = 'visible';
+  window.renderAway();
+  window.renderAway();
+  assert.deepEqual(posted, ['inbox/brief-1/read'], 'opened in a visible page: reported once');
+  state.brief = {
+    id: 'brief-2',
+    message: 'Già letto',
+    created: '2030-01-02T07:00:00Z',
+    read_at: '2030-01-02T07:05:00Z',
+  };
+  window.renderAway();
+  assert.deepEqual(posted, ['inbox/brief-1/read'], 'an item already read is not reported again');
+});

@@ -8,6 +8,11 @@ import { SurfaceRenderer } from './surface-renderer';
 import { BatteryCards, type BatteryCardItem } from './battery-cards';
 import { Language } from './language.ts';
 import { Session, SW_BYPASS, type SignInFailure } from './session.ts';
+interface InboxItem {
+  id: string;
+  message: string;
+  read_at?: string | null;
+}
 interface Page<T> {
   items: T[];
   next: number | null;
@@ -80,6 +85,9 @@ export class Nodo {
   editTitle = signal('');
   editDue = signal('');
   inbox = signal<string[]>([]);
+  /** B-149: the inbox items on the page and the ones already reported read, so each is reported once. */
+  private inboxShown: InboxItem[] = [];
+  private readReported = new Set<string>();
   batteries = signal<BatteryCardItem[]>([]);
   doctor = signal('');
   doctorRaw = signal<unknown>({});
@@ -312,6 +320,11 @@ export class Nodo {
         this.pushSupported.set(true);
       }
     }
+    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => this.reportRead());
+    effect(() => {
+      this.view();
+      untracked(() => this.reportRead());
+    });
     // F-130-T01: the shared Session signs in (login code, kept session or device, sign-in box); read when it does.
     effect(() => {
       const token = this.session.token();
@@ -408,7 +421,7 @@ export class Nodo {
       }
       this.reminderNext.set((r as Page<Reminder>).next);
       this.reminderBefore.set([0]);
-      this.inbox.set((i as Page<{ message: string }>).items.map((x) => x.message));
+      this.showInbox((i as Page<InboxItem>).items);
       this.inboxNext.set((i as Page<{ message: string }>).next);
       this.inboxBefore.set([0]);
       this.doctor.set(JSON.stringify(d, null, 2));
@@ -435,6 +448,25 @@ export class Nodo {
       if (revision === this.revision) this.paging.set(false);
     }
   }
+  private showInbox(items: InboxItem[]) {
+    this.inbox.set(items.map((x) => x.message));
+    this.inboxShown = items;
+    this.reportRead();
+  }
+  /**
+   * B-149: an inbox item the owner sees in this page counts as read, so its Telegram fallback is skipped. Only while
+   * the page is visible and the inbox panel is on screen; a hidden tab reports when it becomes visible again.
+   */
+  private reportRead() {
+    if (typeof document === 'undefined' || document.visibilityState !== 'visible' || this.view() === 'doctor') return;
+    for (const item of this.inboxShown) {
+      if (item.read_at || this.readReported.has(item.id)) continue;
+      this.readReported.add(item.id);
+      this.request('inbox/' + encodeURIComponent(item.id) + '/read', { method: 'POST' }).catch(() =>
+        this.readReported.delete(item.id),
+      );
+    }
+  }
   async pageReminders(next: boolean) {
     await this.turnPage('reminders', next);
   }
@@ -456,13 +488,13 @@ export class Nodo {
     try {
       const page = (await this.request(
         (kind === 'reminders' ? 'reminders/page' : 'inbox/history') + '?before=' + before.at(-1),
-      )) as Page<Reminder & { message: string }>;
+      )) as Page<Reminder & InboxItem>;
       if (revision !== this.revision) return;
       if (kind === 'reminders') {
         this.reminders.set(page.items);
         this.reminderNext.set(page.next);
       } else {
-        this.inbox.set(page.items.map((x) => x.message));
+        this.showInbox(page.items);
         this.inboxNext.set(page.next);
       }
       stack.set(before);
