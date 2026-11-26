@@ -723,13 +723,14 @@ test('every pack the pinned Gauntlet release ships is consumed unless excluded w
       shipped,
     );
     assert.ok(shipped.includes('general-assistant-expanded'), '0.5.0+ ships the expanded pack');
+    // F-120-T09 (owner decision 2026-11-26, "ok to all"): NERV's own model pack nerv-planner joins its system pack.
     assert.deepEqual(
       listed.filter((p) => p.source === 'nerv').map((p) => p.id),
-      ['nerv-system-flows'],
+      ['nerv-planner', 'nerv-system-flows'],
     );
     // The index lists every consumed pack.
     const index = readFileSync('docs/test-capability-index.md', 'utf8');
-    for (const id of [...shipped, 'nerv-system-flows']) assert.match(index, new RegExp(`\\[${id}@`));
+    for (const id of [...shipped, 'nerv-planner', 'nerv-system-flows']) assert.match(index, new RegExp(`\\[${id}@`));
     // An exclusion needs a reason and must name a shipped pack.
     const config = (value) => {
       const p = join(dir, `consumption-${Math.random()}.json`);
