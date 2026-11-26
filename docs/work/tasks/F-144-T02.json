@@ -4,7 +4,7 @@
   "parent": "F-144",
   "title": "A: keep role models loaded longer after the last use",
   "goal": "A: keep role models loaded longer after the last use",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Owner decision 2026-11-26 in chat: \"ollama a+b, c as option in dashboard\".",
     "A setting keepAlive (default \"30m\", validated: a duration up to 24h, never a free string passed to Ollama) is applied by the mechanism T01 chose to every local Ollama role call (chat, Misato, Casper), with unit tests for default, override, invalid value and non-Ollama routes",
@@ -14,9 +14,11 @@
     "F-144-T01"
   ],
   "resources": [
-    "src/config.ts",
-    "src/engine-provider.ts",
-    "test/engine-provider.test.ts",
+    "src/model.ts",
+    "src/model-setup.ts",
+    "test/keep-warm.test.ts",
+    "test/model-setup.test.ts",
+    "docs/guides/models-and-pilots.md",
     "docs/work/records/F-144.md",
     "generated:backlog-views"
   ],
@@ -36,7 +38,7 @@
     "estimate": "1 h agent",
     "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; bounded edit plus tests. Not a measurement.",
     "reviewed": "2026-11-26",
-    "agentHours": 1,
+    "agentHours": 0.5,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
   },
