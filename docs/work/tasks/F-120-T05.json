@@ -47,6 +47,10 @@
     {
       "pr": 794,
       "note": "owner decision 2026-11-26 recorded"
+    },
+    {
+      "pr": 795,
+      "note": "180 s case limit for the reference-runner packs"
     }
   ]
 }
