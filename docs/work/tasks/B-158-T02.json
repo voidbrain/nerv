@@ -4,7 +4,7 @@
   "parent": "B-158",
   "title": "The dashboard shell stops showing step IDs",
   "goal": "The Moving here panel lists section names only",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "MOVING holds section keys only",
     "No step ID is rendered",
@@ -34,10 +34,15 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day. No actual: started in an earlier session. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 809
+    }
+  ]
 }

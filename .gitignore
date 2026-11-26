@@ -4,7 +4,9 @@ dist/
 .nodo/
 .env
 .harness/friction.jsonl
+.harness/behaviour.jsonl
 .harness/friction-session.json
+.harness/review-outcomes.json
 .claude/settings.local.json
 .claude/worktrees/
 

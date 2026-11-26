@@ -4,7 +4,7 @@
   "parent": "B-154",
   "title": "Failing test: axe fails on undecided colour contrast; MAGI measured in every theme, verdict and CRT",
   "goal": "The browser tests fail on main with MAGI's and the flow's AA failures",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "axeRun returns violations and undecided colour-contrast nodes; each accepted case named",
     "textContrast measures text over SVG seats and through the CRT rows",
@@ -35,10 +35,15 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 1.5 h agent. Implemented the same day; fails on main. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 1.5 h agent. Implemented the same day; fails on main. Closed 2026-11-26: PR #816 CI run 45808453265. No actual: started in an earlier session.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 816
+    }
+  ]
 }

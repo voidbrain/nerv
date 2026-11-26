@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 8 | 26 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 8 | 29 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7476,6 +7476,108 @@ T02 implemented 2026-11-20: Scrolls `egressAllow` (`src/policy.ts`, default-deny
 | PR / evidence | Local full runs 2026-11-26 at `4a0df337`: 1,588 pass, 6 fail, 1 cancelled; then 1,588 pass, 5 fail, 2 cancelled. `node --test test/gauntlet.test.mjs test/dashboard-accounting.test.ts` alone: 34/34. Opened in [#806](https://github.com/voidbrain/nerv/pull/806). Cause and fix: [B-165](../work/records/B-153.md#b-165).; [#818](https://github.com/voidbrain/nerv/pull/818); [#819](https://github.com/voidbrain/nerv/pull/819) (closure) |
 | Opened | 2026-11-26 |
 | Verification | CI: #818 all green 2026-11-26; Test: test/gauntlet-ledger.test.mjs (B-165-T01 a) |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-157
+
+**The macOS-only Node tests (EVA sandbox, egress proxy, job user, desktop driver) never ran in CI**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: PR #805 merged on green CI (run 45801615629: native-macos ran 64 macOS-only Node tests with 0 skipped).
+
+| | |
+|---|---|
+| **Issue** | Ten Node test files skip on every runner but macOS: the EVA `sandbox-exec` confinement (network and writes outside the workspace refused or let through), the egress proxy, the EVA job user, EVA jobs and pool, the EVA-03 gate's macOS profile, the macOS desktop driver, and the moved-service joins (`test/update-doctor-slow.test.ts`, `test/update-foreground-runtime.test.ts`). CI runs the Node suite on Ubuntu and Windows; the `native-macos` job ran only the Swift tests. The live service runs on macOS, so its confinement was tested only when someone ran `npm test` on a Mac. Found by the coordinator's dormant-checks sweep of 2026-11-26 (finding T1, proposal 1), which listed 14 sites in 7 files; the two moved-service files and `eva-gate` were found here. |
+| **Reproduce** | On main, `.github/workflows/ci.yml` `native-macos` has no `node --test` step; `test/eva-runner.test.ts:32` and the other sites carry `skip: !isDarwinWithSandbox` or `platform !== 'darwin'`, so every Linux and Windows run reports them skipped. |
+| **Check** | `test/macos-node-tests.test.mjs` (B-157-T01, committed failing first and not edited): every test file with a macOS-only skip is in `MACOS_NODE_TESTS`; a run with a skipped, failed or no test fails; the `native-macos` job runs `node tools/macos-node-tests.mjs` whenever Node work or a full run is selected. The job passes in CI with 0 skipped and adds about a minute. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: PR #805 merged on green CI (run 45801615629: native-macos ran 64 macOS-only Node tests with 0 skipped). 2026-11-26: owner in chat accepted the sweep's fixes ("Accept all fixes"). B-157-T01 and B-157-T02 implemented: `tools/macos-node-tests.mjs` runs the ten files on the macOS runner (64 tests, 15 s locally, 0 skipped) and fails on a skip; checkout, Node and `npm ci` in `native-macos` now also run when Node work or a full run is selected; `docs/verification.md` says so. 2026-11-26: the step's first CI run failed one test, a real defect it was added to find: EVA job-user staging (`stageRuntime`) failed on macOS 15 (recorded and fixed in B-099, same PR); the step now prints the TAP stream on a failure. 2026-11-26: renumbered from B-152 (taken on main by the CodeQL triage record). CI run 45798962499 green: the step ran 64 tests, 0 skipped. Remaining: close on the merged run.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (T1); `.github/workflows/ci.yml` `native-macos`; `tools/macos-node-tests.mjs`; `test/macos-node-tests.test.mjs`; [#805](https://github.com/voidbrain/nerv/pull/805) |
+| Opened | 2026-11-26 |
+| Verification | Unit: 2026-11-26, local: `test/macos-node-tests.test.mjs` fails on main (no list, no step) and passes with the fix; `node tools/macos-node-tests.mjs` on macOS: 64 passed, 0 skipped. CI: 2026-11-26, PR #805 run 45798962499: `native-macos` "macOS-only Node tests" 64 passed, 0 skipped (the whole job 1 min 46 s). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-158
+
+**The dashboard shell showed the owner backlog step IDs, unseen by the B-102 test**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: PR #809 merged on green CI (run 45804069260: B-102 scan covers web/src and browser scripts, shell renders section names only).
+
+| | |
+|---|---|
+| **Issue** | The B-102 rule says no string the code can show, send or prompt with names a backlog ID, but `test/user-text-ids.test.ts` scanned only the top-level `src/*.ts` and `web/public/dashboard/dashboard.js`. The Angular workspace (`web/src`) was outside it, and the full dashboard's "Moving here" panel showed `F-130-T02` … `F-130-T11` next to each section name (`web/src/dashboard/shell.ts:12-23`, rendered at `:128`). Coordinator dormant-checks sweep of 2026-11-26, finding C1, proposal 2. |
+| **Reproduce** | On main, open `/full` signed in: each line of "Moving here" ends with a step ID such as `F-130-T02`. `node --test test/user-text-ids.test.ts` passes because `web/src` is not scanned. |
+| **Check** | `test/user-text-ids.test.ts` (B-158-T01, committed failing first and not edited) scans `src/*.ts`, every `web/src/**/*.ts` (inline Angular templates included) and every `web/public/**/*.js`, asserts the shell and the old dashboard are among them, and lists the ten shell IDs on main; after B-158-T02 it passes and the panel shows section names only. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: PR #809 merged on green CI (run 45804069260: B-102 scan covers web/src and browser scripts, shell renders section names only). 2026-11-26: owner in chat accepted the sweep's fixes ("Accept all fixes"). B-158-T01 and B-158-T02 implemented: the scan now covers the workspace and every browser script (only the shell's ten IDs were found); `MOVING` holds the section keys only, the step IDs moved to its comment, and the list no longer renders an ID. Remaining: CI.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (C1); `test/user-text-ids.test.ts`; `web/src/dashboard/shell.ts`; [#809](https://github.com/voidbrain/nerv/pull/809) |
+| Opened | 2026-11-26 |
+| Verification | Unit: 2026-11-26, local: `test/user-text-ids.test.ts` failed on main with the ten shell IDs and passes after the fix. Browser: Pending (CI `test:browser`, the shell's axe and layout checks). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+### B-159
+
+**Coverage regressions never failed CI and the agent-behaviour checks had no runner**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-26: PRs #811 and #813 merged on green CI (run 45806519489: coverage enforced against measured baseline, Claude Code behaviour runner enabled).
+
+| | |
+|---|---|
+| **Issue** | Two procedures were configured but dormant. `coverage.enforce` was `false`, so `node tools/coverage-table.mjs --check` in CI only warned and the `drop: 2` tolerance never failed a run; the committed baseline (`docs/agents/coverage.json`) dated from 2026-11-11 and the branch figure had since fallen past it (B-160). No `behaviour` setting, script or tool existed, so the agent-behaviour checks (`docs/agents/rule-review.md`) could not run. Coordinator dormant-checks sweep of 2026-11-26, findings S3 and S1 (proposals 8 and 4). |
+| **Reproduce** | On main, `.harness.json` `coverage.enforce` is `false` and has no `behaviour`; CI run 45798962499 shows `::warning` "src/: branches 86.0 % → 82.9 %" and the job passes; `npm run behaviour` does not exist. |
+| **Check** | B-159-T01: the baseline is today's measured coverage. B-159-T02: `coverage.enforce` is `true` and a later full CI run fails on a drop of more than 2 points against main's baseline; `behaviour.runner` is Claude Code (`claude -p`, the command `docs/agents/rule-review.md` gives), `tools/behaviour.mjs` is the template's v10.21.4 copy, `npm run behaviour -- list` names the scenarios; no paid run is part of enabling it. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-26: PRs #811 and #813 merged on green CI (run 45806519489: coverage enforced against measured baseline, Claude Code behaviour runner enabled). 2026-11-26: owner decisions in chat: "coverage enforcement all", "work-usage all" (NERV already has `workUsage.enabled: true`; nothing to change here, jobs recorded for this work), behaviour runner "ok" (Claude Code). B-159-T01 ([#811](https://github.com/voidbrain/nerv/pull/811)): `npm run coverage` on macOS wrote the baseline as measured today (lines 92.8 %, statements 92.8 %, branches 83.2 %, functions 89.4 %; CI on Linux read branches 82.9 % in run 45798962499, the macOS-only tests apart), so enforcement starts from the present and the earlier drop is B-160, not hidden. Enforcement compares a PR with main's baseline, so it could only be switched on once that landed (PR #811). B-159-T02 implemented: `coverage.enforce: true` (CI step comments updated); `behaviour: {times: 3, runner: "claude -p --permission-mode acceptEdits --allowedTools \"Bash(git:*)\" \"Bash(npm:*)\" \"Bash(node:*)\" -- \"$(cat \"$HARNESS_TASK_FILE\")\""}` as `docs/agents/rule-review.md` gives it; `tools/behaviour.mjs` copied byte for byte from template v10.21.4 (listed in `copied`) and `npm run behaviour`; `npm run behaviour -- list` names 10 scenarios. No run was started: enabling needs none, and each run costs agent time (10 scenarios × 3 runs of `claude -p`); once set, the rule-review procedure asks for a run when AGENTS.md, CLAUDE.md or BACKLOG-RULES change. Review: mechanical-reviewer (fresh context), 2026-11-26: copied file byte-identical to v10.21.4, runner equals the rule-review.md command, only the stated settings changed; one stray JSON reformat it found was reverted. Template v10.23.1 updates `behaviour.mjs` (before/after and held-out runs): it comes with the next harness reconcile. Remaining: CI.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (S1, S3); CI run 45798962499 (coverage warning); `docs/agents/coverage.json`; [#811](https://github.com/voidbrain/nerv/pull/811); [#813](https://github.com/voidbrain/nerv/pull/813) |
+| Opened | 2026-11-26 |
+| Verification | Documentation: 2026-11-26, `node tools/coverage-table.mjs --write` after `npm run test:coverage` (1595 pass, 0 fail). CI: Pending (B-159-T02). |
 | Reviewed | 2026-11-26 |
 
 </details>

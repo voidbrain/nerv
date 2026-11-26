@@ -2,7 +2,7 @@
 
 All applicable rules are binding from the start. An index can reduce repeated navigation, but never defers reading relevant instructions or makes ownership, evidence, privacy or safety optional.
 
-Moved to [rule review](rule-review.md): "Measure actual friction", "Agent-behaviour checks", "Periodic rule consolidation".
+Moved to [rule review](rule-review.md): "Measure actual friction", "Periodic rule consolidation"; "Agent-behaviour checks" now in [behaviour checks](behaviour-checks.md).
 
 ## In short
 

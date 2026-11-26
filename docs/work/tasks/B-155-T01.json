@@ -4,7 +4,7 @@
   "parent": "B-155",
   "title": "Failing test: every JavaScript test is type-checked, or deferred by name",
   "goal": "test/typecheck-scope.test.ts fails on main",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Every test/*.mjs and test/fixtures/*.mjs starts with // @ts-check unless deferred by name",
     "A deferred file that is already checked fails",
@@ -32,10 +32,15 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day; fails on main. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 0.25 h agent. Implemented the same day; fails on main. Closed 2026-11-26: PR #812 CI run 45806056526. No actual: started in an earlier session.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 812
+    }
+  ]
 }

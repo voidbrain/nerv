@@ -4,7 +4,7 @@
   "parent": "B-159",
   "title": "Enforce coverage; Claude Code as the behaviour runner",
   "goal": "coverage.enforce true; behaviour.runner set; tools/behaviour.mjs and npm run behaviour",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "coverage.enforce is true and CI passes against the new baseline",
     "behaviour.runner is the claude -p command from rule-review.md",
@@ -38,10 +38,15 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26: 0.5 h agent. Implemented the same day. Remaining: CI.",
+    "basis": "Estimated 2026-11-26: 0.5 h agent. Implemented the same day. No actual: started in an earlier session. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 813
+    }
+  ]
 }
