@@ -8,7 +8,19 @@ import { createRequire } from 'node:module';
 import WebSocket from 'ws';
 import { Store } from '../src/store.ts';
 import { makeServer } from '../src/server.ts';
+import { axeRun, textContrast } from './fixtures/axe.mjs';
 const require = createRequire(import.meta.url);
+/** axe found nothing: no violation and no colour contrast it could not decide (B-154). */
+const NO_FINDINGS = { violations: [], undecided: [] };
+/** B-154: text over a MAGI seat is drawn over an SVG polygon, which axe cannot measure; textContrast does. */
+const MAGI_SEATS = { '.mseat': 'measured by textContrast against the seat polygon fill' };
+/**
+ * B-154, accepted: with the opt-in EVA CRT in a dark mode, the scanline rows (2 px of every 4 px, 22 % black over text
+ * and box alike) take MAGI's accent text from AA on the plain rows to 3.3–4.4:1 on the dark rows. The plain rows pass
+ * AA, the CRT is off by default and the owner chose its look (docs/design/dashboard-and-native-ui.md); below this
+ * floor a dark-mode CRT row still fails.
+ */
+const CRT_DARK_ROWS = { floor: 3 };
 const chrome =
   process.env.CHROME_BIN ||
   ['/usr/bin/google-chrome', '/usr/bin/chromium', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find(
@@ -964,12 +976,60 @@ test(
       await evaluate(
         `{const flicker=document.querySelector('.wrap').getAnimations().find(a=>a.animationName==='crt-flicker');flicker.pause();flicker.currentTime=21100}`,
       );
-      assert.deepEqual(
+      assert.deepEqual(await evaluate(axeRun('.s-magi', MAGI_SEATS)), NO_FINDINGS, 'MAGI axe with CRT');
+      // B-154: MAGI in every Theme · Mode · Colour, CRT off and on (paused at its deepest dip, as above), with each
+      // seat verdict. axe cannot measure text over the seat polygons (SVG), so textContrast measures it, and the
+      // timeline with its MAGI step, through the CRT scanline rows.
+      const pick = async (id, value) => {
         await evaluate(
-          `axe.run(document.querySelector('.s-magi')).then(r=>r.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})))`,
-        ),
-        [],
-        'MAGI axe with CRT',
+          `(()=>{const s=document.getElementById('${id}');s.value='${value}';s.dispatchEvent(new Event('change'))})()`,
+        );
+        await new Promise((done) => setTimeout(done, 60));
+      };
+      // Transitions off while measuring: a seat's fill fades over 0.2 s, so a reading right after a change is mid-fade.
+      await evaluate(
+        `{const s=document.createElement('style');s.id='b154-still';s.textContent='*,*::before,*::after{transition:none!important}';document.head.append(s)}`,
+      );
+      const verdicts = await evaluate(
+        `[...document.querySelectorAll('#magi-big .mseat, .tmagi .tseat')].map(e=>[e.dataset.v ?? null, e.className])`,
+      );
+      for (const theme of ['eva', 'simple'])
+        for (const mode of ['dark', 'light'])
+          for (const accent of ['orange', 'blue', 'green', 'violet', 'ochre'])
+            for (const crt of theme === 'eva' ? [false, true] : [false]) {
+              await pick('theme', theme);
+              await pick('mode', mode);
+              await pick('accent', accent);
+              if ((await evaluate(`document.body.classList.contains('crt-on')`)) !== crt)
+                await evaluate(`document.querySelector('#btn-crt').click()`);
+              if (crt)
+                await evaluate(
+                  `{const flicker=document.querySelector('.wrap').getAnimations().find(a=>a.animationName==='crt-flicker');if(flicker){flicker.pause();flicker.currentTime=21100}}`,
+                );
+              for (const vote of ['none', 'approve', 'reject', 'pending', 'abstain']) {
+                await evaluate(
+                  `document.querySelectorAll('#magi-big .mseat').forEach(s=>s.dataset.v='${vote}');document.querySelectorAll('.tmagi .tseat').forEach(s=>s.className='tseat ${vote}')`,
+                );
+                const name = `MAGI ${theme} · ${mode} · ${accent}${crt ? ' · CRT' : ''} · ${vote}`;
+                assert.deepEqual(await evaluate(axeRun('.s-magi', MAGI_SEATS)), NO_FINDINGS, name + ' axe');
+                const low = [
+                  ...(await evaluate(textContrast('.s-magi'))),
+                  ...(await evaluate(textContrast('#timeline'))),
+                ].filter((f) => !(crt && mode === 'dark' && f.ratio >= CRT_DARK_ROWS.floor));
+                assert.deepEqual(low, [], name + ' text contrast');
+              }
+            }
+      await evaluate(`document.getElementById('b154-still').remove()`);
+      await evaluate(
+        `(${JSON.stringify(verdicts)}).forEach(([v,c],i)=>{const e=document.querySelectorAll('#magi-big .mseat, .tmagi .tseat')[i];if(v!==null)e.dataset.v=v;e.className=c})`,
+      );
+      await pick('theme', 'eva');
+      await pick('mode', 'dark');
+      await pick('accent', 'orange');
+      if (!(await evaluate(`document.body.classList.contains('crt-on')`)))
+        await evaluate(`document.querySelector('#btn-crt').click()`);
+      await evaluate(
+        `{const flicker=document.querySelector('.wrap').getAnimations().find(a=>a.animationName==='crt-flicker');flicker.pause();flicker.currentTime=21100}`,
       );
       await until(`document.querySelector('.crt-band-a').getAnimations().length===1`);
       assert.ok(
@@ -1058,10 +1118,7 @@ test(
       await evaluate(readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8'));
       for (const width of [1440, 390]) {
         await viewport(width, 1000);
-        const violations = await evaluate(
-          `axe.run(document.querySelector('#p-budget')).then(r=>r.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})))`,
-        );
-        assert.deepEqual(violations, [], 'Battery axe ' + width);
+        assert.deepEqual(await evaluate(axeRun('#p-budget')), NO_FINDINGS, 'Battery axe ' + width);
         assert.equal(
           await evaluate(`document.documentElement.scrollWidth<=innerWidth`),
           true,
@@ -1081,10 +1138,7 @@ test(
       assert.match(await evaluate(`document.querySelector('#chronicle')?.textContent||''`), /registry:a1b2c3d4/);
       for (const width of [1440, 390]) {
         await viewport(width, 1000);
-        const violations = await evaluate(
-          `axe.run(document.querySelector('#p-chronicle')).then(r=>r.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})))`,
-        );
-        assert.deepEqual(violations, [], 'Chronicle axe ' + width);
+        assert.deepEqual(await evaluate(axeRun('#p-chronicle')), NO_FINDINGS, 'Chronicle axe ' + width);
       }
       await evaluate(`document.querySelector('#tab-bases').click()`);
       await evaluate(

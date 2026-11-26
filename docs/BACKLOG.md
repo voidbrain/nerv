@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 25 | 8 | 58 | 24 |
+| **This week** | 25 | 8 | 59 | 24 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 52 | 48 |
+| **Open** | 52 | 49 |
 | **Require Human 🧑** | 11 | 20 |
 
 ### Require Human 🧑
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 244.5 h agent + 19.75 h owner across 230 open steps of 52 features and 48 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 244.5 h agent + 19.75 h owner across 233 open steps of 52 features and 49 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2094,6 +2094,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | PR / evidence | Steps: B-144-T01: [PR #769](https://github.com/voidbrain/nerv/pull/769). Test: `test/dashboard-cages.test.ts` (committed failing first); owner report 2026-11-25; [#769](https://github.com/voidbrain/nerv/pull/769) |
 | Opened | 2026-11-25 |
 | Verification | Unit/integration: 2026-11-25 passed locally (`test/dashboard-cages.test.ts`). Browser: Pending (the owner watches the EVA cages through several polls with no change: no flicker). |
+| Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-154"></a>[🐞 B-154](#top)
+
+**Browser axe checks passed text whose contrast axe could not decide; MAGI text fell below AA**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Agent work: CI on the PR; then B-154-T03 (the whole old dashboard in every combination).
+
+| | |
+|---|---|
+| **Issue** | The browser axe checks asserted only `violations`. Text over an SVG shape, an image or a translucent layer lands in axe's `incomplete` (undecided), which the dashboard shell dropped and most old-dashboard checks never read (`test/dashboard-shell.browser.mjs:17`; the MAGI, Battery and Chronicle checks in `test/angular.browser.mjs`; four panels in `test/evaluation.browser.mjs`; the page-wide audit at `test/angular.browser.mjs:173-185` already failed on it). MAGI was checked in Eva · Dark · Orange only. Measured in every combination, MAGI and the flow had real AA failures: Eva · Light with the CRT (the brightness dips and the 22 % scanlines faded dark text to 4.2–4.4:1, and the full vignette turned the edges into dark boxes: the owner's report after nerv#801), kanji on an approved or pending seat in Eva · Dark (4.3–4.5), warning text on a pending seat in Eva · Light (4.4–4.5), unvoted timeline seats (2.1–2.4, opacity .5), step numbers and skipped steps in the timeline (opacity .7 and .4), a skipped flow node (3.1, opacity .7, against F-051's "not greyed out"), and the blue badge in Eva · Dark (3.7). Coordinator dormant-checks sweep of 2026-11-26, finding C3, proposal 6. |
+| **Reproduce** | On main, `test/dashboard-shell.browser.mjs` passes with any colour-contrast node in `incomplete`; on the old dashboard choose Eva · Light · Orange, turn CRT on: MAGI's accent text (`.mr`, `.mv`) reads 4.2–4.4:1 on the dark scanline rows and during the dips. |
+| **Check** | `test/fixtures/axe.mjs` (B-154-T01, committed failing first and not edited): `axeRun` returns violations and every undecided colour-contrast node not accepted by name; `textContrast` measures text over SVG seats, opaque nodes over the route lines and the CRT scanline rows. Every browser axe check asserts both empty. MAGI and the timeline are measured in all 20 Theme · Mode · Colour combinations, CRT off and on (at the deepest dip), for every seat verdict; the flow panel's text is measured. Accepted, named in `test/angular.browser.mjs` `CRT_DARK_ROWS`: with the opt-in CRT in a dark mode, MAGI text on the dark scanline rows (3.3–4.4:1, floor 3) — the plain rows pass AA, the CRT is off by default and its look is the owner's. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-154-t01"></a>B-154-T01 — Failing test: axe fails on undecided colour contrast; MAGI measured in every theme, verdict and CRT | 1.5 h | 0 h | 0 h | Implemented; verification pending | — | [B-154-T02](#b-154-t02) |
+| 🟢 Small | <a id="b-154-t02"></a>B-154-T02 — MAGI, the timeline and the flow reach AA in every theme | 1.5 h | 0 h | 0 h | Implemented; verification pending | [B-154-T01](#b-154-t01) | [B-154-T03](#b-154-t03) |
+| 🟢 Small | <a id="b-154-t03"></a>B-154-T03 — The whole old dashboard passes axe in every combination | 2 h | 0 h | 0 h | Planned | [B-154-T02](#b-154-t02) | — |
+| 🟢 Small | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 0 h | 0 of 3 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-154.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report `docs/audits/2026-11-26-dormant-checks.md` (C3); `test/fixtures/axe.mjs`; `test/angular.browser.mjs` (B-154 loop); `test/evaluation.browser.mjs`; `test/dashboard-shell.browser.mjs`; `web/public/dashboard/index.html`; [#816](https://github.com/voidbrain/nerv/pull/816) |
+| Opened | 2026-11-26 |
+| Verification | Browser: 2026-11-26, local headless Chrome: the three browser files fail on main with the cases above and pass with the fix (angular 1/1, evaluation 8/8, dashboard shell 2/2, each run alone); screenshot of MAGI in Eva · Light · Orange with the CRT checked by eye (not in the repository). Unit: the 66 Node tests that read the old dashboard pass. CI: Pending. |
 | Reviewed | 2026-11-26 |
 
 </details>

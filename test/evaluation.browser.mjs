@@ -7,6 +7,7 @@ import { join, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 import { Runtime } from '../src/runtime.ts';
 import { makeServer } from '../src/server.ts';
+import { axeRun, textContrast } from './fixtures/axe.mjs';
 import { addPilot } from '../src/pilots.ts';
 import { Store } from '../src/store.ts';
 import { browser } from './fixtures/browser.mjs';
@@ -105,18 +106,22 @@ test(
         );
         await evaluate(readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8'));
         assert.deepEqual(
-          await evaluate(`axe.run(document.querySelector('#p-flow')).then(r=>r.violations.map(v=>v.id))`),
-          [],
+          await evaluate(
+            axeRun('#p-flow', {
+              '.mseat': 'measured below by textContrast against the seat polygon fill',
+              '.snode': 'measured below by textContrast: an opaque node over the SVG route lines',
+            }),
+          ),
+          { violations: [], undecided: [] },
           'waiting flow accessibility',
         );
+        assert.deepEqual(await evaluate(textContrast('#p-flow')), [], 'waiting flow text contrast');
         // F-021-T05: the Tools panel lists this base's tools with versions, and passes axe.
         await until(`document.querySelector('#tools-list').textContent.includes("NERV's own tools")`);
         await evaluate(`document.querySelector('#tools-list details').open=true`);
         assert.deepEqual(
-          await evaluate(
-            `axe.run(document.querySelector('#tools-list').closest('.panel')).then(r=>r.violations.map(v=>v.id))`,
-          ),
-          [],
+          await evaluate(axeRun('.panel:has(#tools-list)')),
+          { violations: [], undecided: [] },
           'tools panel accessibility',
         );
         // F-049-T09: EVA panel shows live instances per class, per machine, empty classes say so, and passes axe.
@@ -134,8 +139,8 @@ test(
           'EVA panel shows live instance with pilot, job, state and empty classes',
         );
         assert.deepEqual(
-          await evaluate(`axe.run(document.querySelector('#p-eva')).then(r=>r.violations.map(v=>v.id))`),
-          [],
+          await evaluate(axeRun('#p-eva')),
+          { violations: [], undecided: [] },
           'EVA instances panel accessibility',
         );
         releaseEva();
@@ -181,8 +186,8 @@ test(
         assert.equal(savedPolicy.policy.schedule.checkHour, 21);
         assert.equal(savedPolicy.policy.schedule.applyHour, 4);
         assert.deepEqual(
-          await evaluate(`axe.run(document.querySelector('#p-settings')).then(r=>r.violations.map(v=>v.id))`),
-          [],
+          await evaluate(axeRun('#p-settings')),
+          { violations: [], undecided: [] },
           'settings panel accessibility',
         );
         plans.push(
