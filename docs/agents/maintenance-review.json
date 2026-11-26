@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "reviewed": "2026-11-26T15:57:40.072Z",
+  "reviewed": "2026-11-26T17:14:38.401Z",
   "policy": "af85c38c81546d4af6d1b980dbb55a5b88738b208135324af5ccde5b852c1ee8",
   "inputs": {
-    "AGENTS.md": "7f46f3aed7814ac82a7740be72629843f5e6170c60c740dde7cc88cb239d4ecc",
+    "AGENTS.md": "a29a4567826c5f5635cc75bf2ff7c019b8b71eaae6a24ee42180c4fc390dc137",
     "docs/BACKLOG-RULES.md": "1481653f4cbe83eb5a22a4afcb13acca2f4579c9efa6d04bd0d85ef3d03eea2b",
     "docs/agents/architecture-review.md": "5d967314854912b1a5f1446aeab309763b14f9856bceb3c82df5c6c25c166526",
     "docs/agents/areas.md": "19890dcd2fb04557fcb9b9bb1df4dcbd2e584736e53a5989908bb822ef020d1c",
@@ -11,16 +11,16 @@
     "docs/agents/behaviour-checks.md": "2ec3364eef6de16a31516a9c11740872caf9ccce5267fb373be6b59d96f1119b",
     "docs/agents/change-impact.md": "dc1c473e274f76bd70a87ff57bbc53fc75dc75a35d121cf67baf163a2fd2e975",
     "docs/agents/coverage-guide.md": "3d539eb8beedfa101a5e47d9973cdf85dce197436fab2ab096f760e12d208106",
-    "docs/agents/maintenance.md": "b1da148c92f0f882f14804e16f60b11051a4a620d37764b6710e7839123da08b",
+    "docs/agents/maintenance.md": "32c077eeab35a9bbe769ea4afa93454ca15631b398794b0bc423591e62f0cbe9",
     "docs/agents/mcp.md": "06efbb58a50f9236506ca0afa9a79bb1d42c12ca380a29ed0254bf0a537f860d",
     "docs/agents/parallel-work-plans.md": "d171d89ec5431668ff770e5fcb0098ad518da6289a0d12a56aafdae60930d567",
     "docs/agents/parallel-work.md": "96360fce39201c947b0c829f33b9178aba7aafd36e2551604b83e0e8d227ed3f",
-    "docs/agents/procedures.md": "492a120d163482849cfa4068a4479fc9951dac21f993e2409a1f3aad4d7ff665",
+    "docs/agents/procedures.md": "87005b2c20ae21d25ae91d49b1f066ddadab70c4b6ea0f03de88d7c2d6648cc7",
     "docs/agents/prompt-caching.md": "3b8962bd4f2f713d5730e999e65338ebdd90347ee09dffbd9c8da98e2405a21e",
     "docs/agents/rule-review.md": "20edef109354858933477c5284ff91a16179a3aad85346fd1bb44b4e80bdb195",
     "docs/agents/skills-discovery.md": "ad322a2b93f2dc1b8f27d0b052248d57c050ca852077589ba889447577357057",
     "docs/agents/skills.md": "7da9fc43bd0886b06580cc15b9a45e47d097c6fa7fca627bf7ed0f0202a409a1",
-    "docs/agents/solution-profile.md": "4248b79a44fd9849a8fd6b563c8a76e3d82078eb4d567075f8118b4bc4cfc6e9",
+    "docs/agents/solution-profile.md": "5f7af377d9ca9ea65b93be18e27f450021a1126eac3ece86ac793caa317ebdbe",
     "docs/agents/task-context.md": "c689f02b9571ff747a4866d71690bb01afd7e6654dea640a1ce1c66e7c0fa204",
     "docs/agents/work-usage-launch.md": "3225858b8b840322d2bb073f30659c376826eea3d1f772df8582fb37eef74465",
     "docs/agents/work-usage.md": "9a4c574e6cd2b0af3ddd1cb5a70560dc84c962c991d42567b7829b9a25cae3be",
@@ -111,6 +111,12 @@
       "disposition": "implemented",
       "target": "tools/reconcile-preview.mjs",
       "evidence": "2026-11-26: reconcile from 10.24.0 to project-harness v10.24.1: tools/reconcile-preview.mjs and docs/agents/maintenance.md copied byte-identical from the tag; owner authorised reconciling now in chat 2026-11-26 ('ok to all', F-125-T03) although the template backlog is not empty."
+    },
+    {
+      "kind": "rule",
+      "disposition": "implemented",
+      "target": "AGENTS.md",
+      "evidence": "2026-11-26: reconcile to project-harness v10.24.2 (B-129): coordinator-only solution-dashboard, solution-refresh, solution-gaps pages and tools/solution.mjs deleted and dropped from copied (the owner approved 2026-11-26, 'yep': coordinator-only harness files are not copied into ordinary projects); check-harness, reconcile-preview, maintenance, procedures and solution-profile copied byte-identical from the tag; AGENTS solution-profile row no longer promises the refresh page."
     }
   ]
 }

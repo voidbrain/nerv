@@ -19,8 +19,8 @@ This index links authoritative procedures; it does not duplicate or replace them
 | Run the agent-behaviour checks or measure a rule change | [Behaviour checks](behaviour-checks.md) | Per-scenario before/after counts; held-out drops and new failures as records |
 | Set up/change stack or use MCP | [MCP guidance](mcp.md) | Useful capabilities, actual connection state and authorized setup |
 | Coordinate repositories | [Solution profile](solution-profile.md) | One-way ownership/dependencies and source-revision-qualified evidence |
-| Change how the dashboard reads a backlog | [Solution dashboard](solution-dashboard.md) | Layouts read or reported, built views, remaining hours without percentages |
-| Act on or change the solution gap review | [Solution gaps](solution-gaps.md) | Proposals naming the owning repository; records created only there |
+| Change how the dashboard reads a backlog (coordinator only) | Solution dashboard: `docs/agents/solution-dashboard.md` in the coordinator | Layouts read or reported, built views, remaining hours without percentages |
+| Act on or change the solution gap review (coordinator only) | Solution gaps: `docs/agents/solution-gaps.md` in the coordinator | Proposals naming the owning repository; records created only there |
 | Add/use a shared skill | [Skill guidance](skills.md) | Reviewed source, permissions, limits and actual host discovery |
 | Search for, recommend or run a new skill | [Skill discovery](skills-discovery.md) | OWASP AST10 checklist record, unreviewed label when source cannot be inspected |
 
