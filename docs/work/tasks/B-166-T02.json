@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "B-166-T02",
+  "parent": "B-166",
+  "title": "Remove worktree:link and its INSTALL mention",
+  "goal": "The script and the documentation that points to it are gone",
+  "status": "planned",
+  "acceptance": [
+    "B-166-T01 passes unchanged",
+    "docs/INSTALL.md names npm ci in the worktree instead"
+  ],
+  "dependsOn": [
+    "B-166-T01"
+  ],
+  "resources": [
+    "package.json",
+    "docs/INSTALL.md",
+    "docs/work/records/B-166.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-26: two edits. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  },
+  "prs": []
+}

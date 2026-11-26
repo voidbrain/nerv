@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 18 | 8 | 52 | 24 |
+| **This week** | 25 | 8 | 58 | 24 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 45 | 42 |
+| **Open** | 52 | 48 |
 | **Require Human 🧑** | 11 | 20 |
 
 ### Require Human 🧑
@@ -44,7 +44,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 194.75 h agent + 16.75 h owner across 187 open steps of 45 features and 42 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
+**Remaining effort:** 244.5 h agent + 19.75 h owner across 230 open steps of 52 features and 48 other records. 159.5 h of actual effort recorded on 147 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -260,6 +260,186 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 ---
 
+### <a id="f-062"></a>[✨ F-062](#top)
+
+**Backup and restore: agreed loss bounds, off-host snapshots and a restore drill**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h owner | — | [F-136-T01](#f-136-t01) | — | 🧑‍🔧 | — |
+
+🧑 **→** Next: [🧑‍🔧](acceptance/f062-t07-restore-drill.md) F-062-T07 — Owner runs the restore drill on NERV-01 from a real off-host copy (Ready).
+
+| | |
+|---|---|
+| **Issue** | Preserved proposal 1 of the [architecture reassessment](audits/2026-11-06-architecture-reassessment.md#1-backups-and-recovery-highest-reliability-value): reminders, memory, ledger, enrollment and grant state live in one SQLite database per base; losing the disk loses them. Litestream was dropped with Terminal Dogma, and the recovery outcome was dropped with it. No scheduled encrypted off-host backup and accepted general restore drill exists; one-off lifecycle/root snapshots do not satisfy this feature. |
+| **Reproduce** | Remove `~/.nerv` on a disposable base: nothing restores reminders, memory, identity or revoked grants. |
+| **Check** | Owner-agreed loss window and restore time; consistent live snapshots (SQLite backup API) on a schedule; retained, encrypted off-host copies with keys kept apart from routine runtime authority; a restore drill onto another location within the agreed bounds that keeps identities, revoked grants and notification checkpoints and replays no old work; no secrets in logs. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-062-t07"></a>F-062-T07 — Owner runs the restore drill on NERV-01 from a real off-host copy | — | 0 h | 0 h agent + 0.25 h owner | Ready | — | [F-136-T01](#f-136-t01) | [🧑‍🔧](acceptance/f062-t07-restore-drill.md) | — |
+| 🟢 Small | **Total** | 4 h (6 of 7 steps) | 2.5 h (4 of 7 steps recorded) | 0.25 h owner | 6 of 7 completed | | | | |
+
+<details><summary>Done steps (6)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-062-t01"></a>F-062-T01 — Owner-agreed loss window and restore time | 0.25 h | 0 h | Completed | — |
+| — | <a id="f-062-t02"></a>F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | Completed | — |
+| — | <a id="f-062-t03"></a>F-062-T03 — Encrypted off-host retention | 1 h | 1 h (stated) | Completed | — |
+| — | <a id="f-062-t04"></a>F-062-T04 — Restore drill | 0.75 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-062-t05"></a>F-062-T05 — Rerun the two expensive system cases at the snapshot source | 0.25 h | 0.25 h (stated) | Completed | — |
+| — | <a id="f-062-t06"></a>F-062-T06 — Encrypted copies to Tabgha over the Kaji line | 1.5 h | 1 h (stated) | Completed | [PR #401](https://github.com/voidbrain/nerv/pull/401) implementation |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-062.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-062-T06: [PR #401](https://github.com/voidbrain/nerv/pull/401) implementation. [PR #401](https://github.com/voidbrain/nerv/pull/401) F-062-T06 copies over the Kaji line (`/kaji/backup`), Test: test/offhost-kaji.test.ts; [PR #400](https://github.com/voidbrain/nerv/pull/400) F-062-T03 encrypted off-host copies (`src/offhost.ts`), Test: test/offhost.test.ts; [PR #395](https://github.com/voidbrain/nerv/pull/395) F-062-T02 nightly verified snapshots (`src/snapshots.ts`), Test: test/snapshots.test.ts; [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) distinguishes one-off lifecycle/root snapshots from general recovery acceptance; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | 2026-11-18: F-062-T06 verified: [PR #401](https://github.com/voidbrain/nerv/pull/401) merged on green CI. Unit/integration: snapshots (test/snapshots.test.ts), encrypted off-host copies (test/offhost.test.ts) and copies over the Kaji line (test/offhost-kaji.test.ts). Real-device: Pending (restore drill). |
+| Reviewed | 2026-11-18 |
+
+</details>
+
+---
+
+### <a id="f-136"></a>[✨ F-136](#top)
+
+**Backup age on the dashboard and a recurring restore drill**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 3.25 h agent + 0.5 h owner | [F-062-T07](#f-062-t07) | — | ⏳ | — | — |
+
+💻 **→** Next: waits for the owner's restore drill F-062-T07; then F-136-T01.
+
+| | |
+|---|---|
+| **Issue** | F-062 delivered snapshots, encrypted off-host copies and a tested drill (`test/restore-drill.test.ts:14`), but the owner's drill (F-062-T07) has not run, nothing shows how old the newest good snapshot and off-host copy are, and no drill recurs (`docs/guides/backups.md:6,51`). |
+| **Reproduce** | Open the dashboard or run `nerv doctor`: neither shows the age of the newest good snapshot or off-host copy; no reminder ever asks for another drill. |
+| **Check** | The dashboard and `nerv doctor` show the age of the newest good snapshot and of each off-host copy, warn when it passes the agreed loss window (24 h, F-062-T01), and a recurring drill reminder exists with the date of the last drill; the owner runs one drill from the reminder (F-136-T03). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-136-t01"></a>F-136-T01 — Newest good snapshot and off-host copy age, with a warning past the loss window | 2 h | 0 h | 2 h | Planned | [F-062-T07](#f-062-t07) | [F-136-T02](#f-136-t02) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-136-t02"></a>F-136-T02 — Recurring restore drill: cadence, reminder and dated evidence | 1 h | 0 h | 1 h | Planned | [F-136-T01](#f-136-t01) | [F-136-T03](#f-136-t03) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-136-t03"></a>F-136-T03 — Owner runs one restore drill from the reminder | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-136-T02](#f-136-t02) | [F-136-T04](#f-136-t04) | ⏳ 🧑‍🔧 |
+| 🟢 Small | <a id="f-136-t04"></a>F-136-T04 — Record the drill evidence | 0.25 h | 0 h | 0.25 h | Planned | [F-136-T03](#f-136-t03) | — | ⏳ 🤖 |
+| 🟡 Medium | **Total** | 3.25 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3.25 h agent + 0.5 h owner | 0 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-136.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report ([practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md), S3, proposal 4); [F-062](work/records/F-136.md#f-062); [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Report risk rank S3 of 12 (proposal 4). |
+
+</details>
+
+---
+### <a id="f-137"></a>[✨ F-137](#top)
+
+**Retention per table and a "forget" that says when the backups lose the data**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🔴 Large | 6.5 h agent + 0.25 h owner | — | [F-086](#f-086) | 🤖 | — | — |
+
+💻 **→** Next: F-137-T01 lists every table that holds personal content and proposes limits.
+
+| | |
+|---|---|
+| **Issue** | Only health samples have a retention cap (`src/health-samples.ts:41,82`); the inbox, chat episodes, history, the sortie ledger, usage and future mail-derived content are kept indefinitely (no other prune found). Nothing documents that deleting a row leaves it in the 7 kept snapshots and the off-host copies until they age out. F-086 (Gmail) is about to bring mail into NERV. |
+| **Reproduce** | On a test base, add an inbox item and a chat message, wait past any reasonable period: they are never pruned; delete one by hand and restore yesterday's snapshot: it is back, and no command or page says so. |
+| **Check** | Each table with personal content has a retention limit the owner agreed (F-137-T02) and a tested prune; `nerv forget` removes matching rows from the live database and prints the date when the last snapshot and off-host copy holding them ages out; the privacy guide says the same; no F-086 step keeps mail content (index, cache, summary) before this record's prune and forget are closed. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-137-t01"></a>F-137-T01 — Inventory of personal content per table, with proposed retention limits | 1.5 h | 0 h | 1.5 h | Ready | — | [F-137-T02](#f-137-t02) | 🤖 |
+| 🟢 Small | <a id="f-137-t02"></a>F-137-T02 — Owner decides the retention limits | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-137-T01](#f-137-t01) | [F-137-T03](#f-137-t03) | ⏳ 🤔 |
+| 🟡 Medium | <a id="f-137-t03"></a>F-137-T03 — Prune each table to its agreed limit | 2.5 h | 0 h | 2.5 h | Planned | [F-137-T02](#f-137-t02) | [F-137-T04](#f-137-t04) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-137-t04"></a>F-137-T04 — "nerv forget" removes matching rows and names the backup lag | 2 h | 0 h | 2 h | Planned | [F-137-T03](#f-137-t03) | [F-137-T05](#f-137-t05) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-137-t05"></a>F-137-T05 — Privacy guide: what is kept, for how long, and what forget means | 0.5 h | 0 h | 0.5 h | Planned | [F-137-T04](#f-137-t04) | — | ⏳ 🤖 |
+| 🔴 Large | **Total** | 6.5 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 6.5 h agent + 0.25 h owner | 0 of 5 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-137.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report ([practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md), S4, proposal 5); `src/health-samples.ts:41,82`; [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Report risk rank S4 of 12 (proposal 5); a prerequisite of any F-086 step that keeps mail content. |
+
+</details>
+
+---
+### <a id="f-135"></a>[✨ F-135](#top)
+
+**Watcher of the watcher: the owner hears when the main base goes silent**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🔴 Large | 5.75 h agent + 0.5 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-135-T01 picks the watcher and the silence limit.
+
+| | |
+|---|---|
+| **Issue** | Nothing outside the NERV process tells the owner that the main base is down, hung or asleep. launchd restarts a crash (`KeepAlive`, `src/service.ts:61`) but not a hang or a powered-off Mac; the standby bases see missed Kaji heartbeats (`src/kaji-link.ts:212`) but no owner notice was found (search: heartbeat, watchdog, "unreachable"); the threat map row ASI08 still says "partial watchdog" (`docs/security/agentic-threats.md:18`). grover and fpvbuddy alerts also flow through nerv, so a silent main base silences them too. |
+| **Reproduce** | With NERV-01 as main and Tabgha as standby: stop the service on NERV-01 (`launchctl bootout gui/$(id -u)/io.nerv.agent`) or put the Mac to sleep; no message reaches the owner on any channel, however long it stays down. |
+| **Check** | When the main base misses heartbeats for the agreed N minutes (hang, stopped service, sleep or power off), a second base sends the owner one notice on Telegram (the one-channel rule lets the standby speak while the main is offline) and one recovery notice when heartbeats return; no repeat per missed beat; a join test across both bases fails first (F-135-T02); with a single base the limit is stated, not hidden; the owner sees it once on the phone (F-135-T04). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-135-t01"></a>F-135-T01 — Decide the watcher, the silence limit and the single-base case | 1 h | 0 h | 1 h | Ready | — | [F-135-T02](#f-135-t02) | 🤖 |
+| 🟡 Medium | <a id="f-135-t02"></a>F-135-T02 — Failing join test, then the standby base tells the owner the main is silent | 3 h | 0 h | 3 h | Planned | [F-135-T01](#f-135-t01) | [F-135-T03](#f-135-t03) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-135-t03"></a>F-135-T03 — A hung main base stops its heartbeat too | 1.5 h | 0 h | 1.5 h | Planned | [F-135-T02](#f-135-t02) | [F-135-T04](#f-135-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-135-t04"></a>F-135-T04 — Owner stops the main base and sees the notice on the phone | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-135-T03](#f-135-t03) | [F-135-T05](#f-135-t05) | ⏳ 🧑‍🔧 |
+| 🟢 Small | <a id="f-135-t05"></a>F-135-T05 — Record the owner's evidence and the threat-map row | 0.25 h | 0 h | 0.25 h | Planned | [F-135-T04](#f-135-t04) | — | ⏳ 🤖 |
+| 🔴 Large | **Total** | 5.75 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 5.75 h agent + 0.5 h owner | 0 of 5 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-135.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report ([practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md), S1, proposal 1); [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Report risk rank S1 of 12 (proposal 1): the highest likelihood × impact gap for the owner. |
+
+</details>
+
+---
 ### <a id="b-143"></a>[🐞 B-143](#top)
 
 **A relative reminder time counts from the model step that writes the call, not from when the owner asked**
@@ -298,58 +478,129 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-062"></a>[✨ F-062](#top)
+### <a id="b-162"></a>[🐞 B-162](#top)
 
-**Backup and restore: agreed loss bounds, off-host snapshots and a restore drill**
+**service.log grows without rotation and nothing warns before the disk fills**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔺 P1 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
+| 🔴 Open | 🔺 P1 | 🟡 Medium | 4 h | — | — | 🤖 | — | — |
 
-🧑 **→** Next: [🧑‍🔧](acceptance/f062-t07-restore-drill.md) F-062-T07 — Owner runs the restore drill on NERV-01 from a real off-host copy (Ready).
+💻 **→** Next: B-162-T01 commits the failing tests.
 
 | | |
 |---|---|
-| **Issue** | Preserved proposal 1 of the [architecture reassessment](audits/2026-11-06-architecture-reassessment.md#1-backups-and-recovery-highest-reliability-value): reminders, memory, ledger, enrollment and grant state live in one SQLite database per base; losing the disk loses them. Litestream was dropped with Terminal Dogma, and the recovery outcome was dropped with it. No scheduled encrypted off-host backup and accepted general restore drill exists; one-off lifecycle/root snapshots do not satisfy this feature. |
-| **Reproduce** | Remove `~/.nerv` on a disposable base: nothing restores reminders, memory, identity or revoked grants. |
-| **Check** | Owner-agreed loss window and restore time; consistent live snapshots (SQLite backup API) on a schedule; retained, encrypted off-host copies with keys kept apart from routine runtime authority; a restore drill onto another location within the agreed bounds that keeps identities, revoked grants and notification checkpoints and replays no old work; no secrets in logs. |
+| **Issue** | The launchd service writes `service.log` and `service-error.log` (`src/service.ts:62-63`) with no rotation, and nothing checks free space before snapshots, model downloads or database writes (no `statfs` or rotation found). A full disk breaks SQLite writes (B-091 saw disk I/O errors) and the nightly snapshot. |
+| **Reproduce** | Look at `~/.nerv/service.log` on NERV-01 after weeks of uptime: it only grows. On a nearly full test volume, the snapshot and writes fail with I/O errors and no owner notice. |
+| **Check** | Both logs rotate at a size limit keeping a few files; below a free-space threshold NERV sends one owner notice and skips the snapshot (and model downloads) before the database runs out of room; a failing-first test for each (B-162-T01). |
 
-**Feature steps**
+**Steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-062-t07"></a>F-062-T07 — Owner runs the restore drill on NERV-01 from a real off-host copy | — | 0 h | 0 h agent + 0.25 h owner | Ready | [🧑‍🔧](acceptance/f062-t07-restore-drill.md) | — |
-| 🟢 Small | **Total** | 4 h (6 of 7 steps) | 2.5 h (4 of 7 steps recorded) | 0.25 h owner | 6 of 7 completed | | |
-
-<details><summary>Done steps (6)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-062-t01"></a>F-062-T01 — Owner-agreed loss window and restore time | 0.25 h | 0 h | Completed | — |
-| — | <a id="f-062-t02"></a>F-062-T02 — Scheduled consistent snapshots | 0.25 h | 0 h | Completed | — |
-| — | <a id="f-062-t03"></a>F-062-T03 — Encrypted off-host retention | 1 h | 1 h (stated) | Completed | — |
-| — | <a id="f-062-t04"></a>F-062-T04 — Restore drill | 0.75 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-062-t05"></a>F-062-T05 — Rerun the two expensive system cases at the snapshot source | 0.25 h | 0.25 h (stated) | Completed | — |
-| — | <a id="f-062-t06"></a>F-062-T06 — Encrypted copies to Tabgha over the Kaji line | 1.5 h | 1 h (stated) | Completed | [PR #401](https://github.com/voidbrain/nerv/pull/401) implementation |
-
-</details>
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-162-t01"></a>B-162-T01 — Failing tests: logs never rotate; a low disk gives no notice | 1 h | 0 h | 1 h | Ready | — | [B-162-T02](#b-162-t02), [B-162-T03](#b-162-t03) |
+| 🟡 Medium | <a id="b-162-t02"></a>B-162-T02 — Rotate service.log and service-error.log | 1.5 h | 0 h | 1.5 h | Planned | [B-162-T01](#b-162-t01) | — |
+| 🟡 Medium | <a id="b-162-t03"></a>B-162-T03 — Low-disk owner notice that pauses snapshots and model downloads | 1.5 h | 0 h | 1.5 h | Planned | [B-162-T01](#b-162-t01) | — |
+| 🟡 Medium | **Total** | 4 h | 0 h (0 of 3 steps recorded) | 4 h | 0 of 3 completed | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-[Full notes & evidence](work/records/F-062.md)
+[Full notes & evidence](work/records/B-162.md)
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-062-T06: [PR #401](https://github.com/voidbrain/nerv/pull/401) implementation. [PR #401](https://github.com/voidbrain/nerv/pull/401) F-062-T06 copies over the Kaji line (`/kaji/backup`), Test: test/offhost-kaji.test.ts; [PR #400](https://github.com/voidbrain/nerv/pull/400) F-062-T03 encrypted off-host copies (`src/offhost.ts`), Test: test/offhost.test.ts; [PR #395](https://github.com/voidbrain/nerv/pull/395) F-062-T02 nightly verified snapshots (`src/snapshots.ts`), Test: test/snapshots.test.ts; [PR #380](https://github.com/voidbrain/nerv/pull/380) [PR #255](https://github.com/voidbrain/nerv/pull/255) distinguishes one-off lifecycle/root snapshots from general recovery acceptance; [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #172](https://github.com/voidbrain/nerv/pull/172) record and roadmap placement; [Architecture reassessment](audits/2026-11-06-architecture-reassessment.md), 2026-11-06 |
-| Opened | 2026-11-06 |
-| Verification | 2026-11-18: F-062-T06 verified: [PR #401](https://github.com/voidbrain/nerv/pull/401) merged on green CI. Unit/integration: snapshots (test/snapshots.test.ts), encrypted off-host copies (test/offhost.test.ts) and copies over the Kaji line (test/offhost-kaji.test.ts). Real-device: Pending (restore drill). |
-| Reviewed | 2026-11-18 |
+| PR / evidence | Coordinator report ([practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md), S5, proposal 6); `src/service.ts:62-63,105`; [B-091](archive/backlog-2026.md#b-091); [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Report risk rank S5 of 12 (proposal 6); SQLite disk I/O errors were already seen (B-091). |
 
 </details>
 
 ---
+### <a id="b-161"></a>[🐞 B-161](#top)
 
+**Nightly backup and off-host copy failures repeat silently; no owner notice**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🔴 Large | 5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-161-T01 commits the failing test.
+
+| | |
+|---|---|
+| **Issue** | A failed nightly snapshot and a failed off-host copy are only written to the log and retried the next night (`src/snapshots.ts:135`, `:183`: "failed (…); next attempt tomorrow"). Nothing tells the owner, so a backup can fail every night unseen. The same pattern hid B-134 (Apple Web Push) and B-111 (health samples); the update check is in the same class. |
+| **Reproduce** | Make the snapshot folder unwritable (or point an off-host copy at a missing folder) and let two nightly runs fail: `service.log` gains two "next attempt tomorrow" lines; the inbox, Telegram and the dashboard show nothing. |
+| **Check** | A failure class that repeats (snapshot, off-host copy, push delivery, update check) becomes one owner notice on the second consecutive failure and a dashboard row, cleared by one recovery notice; one failure alone only logs; a test per class, the first committed failing (B-161-T01). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-161-t01"></a>B-161-T01 — Failing test: two failed nightly snapshots produce no owner notice | 1 h | 0 h | 1 h | Ready | — | [B-161-T02](#b-161-t02) |
+| 🟡 Medium | <a id="b-161-t02"></a>B-161-T02 — Repeat-failure tracker: snapshot and off-host copy failures become one owner notice | 2.5 h | 0 h | 2.5 h | Planned | [B-161-T01](#b-161-t01) | [B-161-T03](#b-161-t03) |
+| 🟡 Medium | <a id="b-161-t03"></a>B-161-T03 — Push delivery and update check join the tracker; dashboard row | 1.5 h | 0 h | 1.5 h | Planned | [B-161-T02](#b-161-t02) | — |
+| 🔴 Large | **Total** | 5 h | 0 h (0 of 3 steps recorded) | 5 h | 0 of 3 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-161.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report ([practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md), S2, proposal 3); `src/snapshots.ts:101-104,135,183`; [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Report risk rank S2 of 12 (proposal 3); same class as B-134 (Web Push to Apple failed silently) and B-111 (health samples never recorded live). |
+
+</details>
+
+---
+### <a id="b-165"></a>[🐞 B-165](#top)
+
+**A full local test run overwrote the tracked Gauntlet ledger and #806 committed it (18 entries lost)**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔺 P1 | 🔴 Large | 4.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-165-T01 commits the failing test.
+
+| | |
+|---|---|
+| **Issue** | PR #806 (full audit F-134-T02, commit `bfdaab98`, a docs change) rewrote `evals/gauntlet/ledger.json`: main had 122 entries, the commit 104; it removed 10 cad-3d, 4 coding and 4 embedded entries (the F-120 campaign of 2026-11-26 07:26–09:06Z) and rewrote every remaining entry with `finished` 09:58:02–09:59:23Z and new report hashes. #803 restored them. Cause, from the evidence: a tool, not a hand edit. The new times fall inside the audit's two full `npm test` runs (09:50–10:02Z), the rewritten packs are exactly the model-free and fake-model packs the test fixtures run (no Docker-runner pack), and the 104-entry keyset is what a run starting from an empty ledger records. `tools/gauntlet.mjs` resolves the ledger path from `NERV_GAUNTLET_LEDGER` on every read and write (`ledgerPath()`, `:41`), and `test/gauntlet.test.mjs` sets and deletes that variable around async work (`:898`, `:1114`, `:1188`, …): when one test removes it while another is between reading its temp ledger and writing, the write lands on the repository's ledger. The audit commit then took the changed file along with its docs. Suspected cause, corroborated the same day: another agent's local full `npm test` on the F-086 branch also rewrote the tracked `evals/gauntlet/ledger.json` in place and the rewrite was committed by accident, then restored before merge in [#808](https://github.com/voidbrain/nerv/pull/808), so a test writes the tracked ledger in place. Not yet reproduced on demand; the same full runs gave [B-153](work/records/B-165.md#b-153)'s "104 of 126 cases". |
+| **Reproduce** | In a fresh worktree after `npm ci`: run `npm test` on a loaded host (as the 2026-11-26 audit did) and then `git status evals/gauntlet/ledger.json`; or compare `git show bfdaab98^:evals/gauntlet/ledger.json` (122 entries) with `git show bfdaab98:evals/gauntlet/ledger.json` (104). |
+| **Check** | A committed test fails first (B-165-T01): it runs the Gauntlet test file (or the whole suite) and asserts `evals/gauntlet/ledger.json` is byte-identical afterwards; the fix makes it pass (B-165-T02); a branch that drops ledger entries present on main fails a check unless it names them (B-165-T03). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="b-165-t01"></a>B-165-T01 — Failing test: running the Gauntlet tests leaves the tracked ledger byte-identical | 1.5 h | 0 h | 1.5 h | Ready | — | [B-165-T02](#b-165-t02) |
+| 🟡 Medium | <a id="b-165-t02"></a>B-165-T02 — Resolve the ledger path once per command; tests pass it explicitly | 1.5 h | 0 h | 1.5 h | Planned | [B-165-T01](#b-165-t01) | [B-165-T03](#b-165-t03) |
+| 🟡 Medium | <a id="b-165-t03"></a>B-165-T03 — Check: a branch that drops ledger entries present on main fails | 1.5 h | 0 h | 1.5 h | Planned | [B-165-T02](#b-165-t02) | — |
+| 🔴 Large | **Total** | 4.5 h | 0 h (0 of 3 steps recorded) | 4.5 h | 0 of 3 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-165.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | [#808](https://github.com/voidbrain/nerv/pull/808) (second rewrite by a local `npm test`, restored before merge); [#806](https://github.com/voidbrain/nerv/pull/806) commit `bfdaab98` (ledger 122 → 104 entries); [#803](https://github.com/voidbrain/nerv/pull/803) (restored); `docs/audits/2026-11-26-full.md`; `tools/gauntlet.mjs:41,217-221`; `test/gauntlet.test.mjs:898,1114`; [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Data integrity of the evaluation evidence: entries vanished from main without a check failing; restored by hand in #803. |
+
+</details>
+
+---
 ### <a id="f-011"></a>[✨ F-011](#top)
 
 **Native macOS menu-bar companion without Electron**
@@ -574,6 +825,47 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-139"></a>[✨ F-139](#top)
+
+**Incident runbooks with copy-paste steps**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.25 h agent + 1.5 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-139-T01 writes the runbooks.
+
+| | |
+|---|---|
+| **Issue** | No runbook covers the incidents a 24/7 personal agent will meet: the main Mac down, a corrupt database, a bad update after its automatic restore, a leaked credential, split brain during relocation. `docs/INSTALL.md:40-45` covers updating only. |
+| **Reproduce** | Look for what to do when NERV-01 will not start or a token leaked: no page says it. |
+| **Check** | `docs/guides/incidents.md` has one section per case with copy-paste steps naming the machine and the expected result after each; the owner tries each once and an acceptance page records it (F-139-T02). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-139-t01"></a>F-139-T01 — Write docs/guides/incidents.md | 3 h | 0 h | 3 h | Ready | — | [F-139-T02](#f-139-t02) | 🤖 |
+| 🟢 Small | <a id="f-139-t02"></a>F-139-T02 — Owner tries each runbook once | — | 0 h | 0 h agent + 1.5 h owner | Planned | [F-139-T01](#f-139-t01) | [F-139-T03](#f-139-t03) | ⏳ 🧑‍🔧 |
+| 🟢 Small | <a id="f-139-t03"></a>F-139-T03 — Record the trials in an acceptance page | 0.25 h | 0 h | 0.25 h | Planned | [F-139-T02](#f-139-t02) | — | ⏳ 🤖 |
+| 🟡 Medium | **Total** | 3.25 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 3.25 h agent + 1.5 h owner | 0 of 3 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-139.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report ([practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md), S9, M11, proposal 12); `docs/INSTALL.md:40-45`; [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Report risk rank S9 of 12 (proposal 12). |
+
+</details>
+
+---
 ### <a id="f-082"></a>[✨ F-082](#top)
 
 **Lists: add items by chat or Telegram, recall them as a checklist card**
@@ -677,55 +969,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-086"></a>[✨ F-086](#top)
-
-**Gmail: search and read, then draft and send behind approval**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-086-T05 (the Gmail connect command and service wiring) closes on green CI; then the owner runs the [Gmail connector owner check](acceptance/f086-gmail.md).
-
-| | |
-|---|---|
-| **Issue** | Owner job 2026-11-14: Gmail integration. F-021 registers MCP tools and plans writes behind approval cards; no record owns a mail connector, its credentials or its limits. |
-| **Reproduce** | Follow the [Gmail connector owner check](acceptance/f086-gmail.md) with the owner's account. |
-| **Check** | Read-only first: search and read with the narrowest scope the provider allows; mail content is tainted and never becomes an instruction; a draft is an Orange action and sending is Blue; credentials are stored and rotated under F-066, never in Git or logs; works through a pinned MCP server or the provider API, chosen in T01. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-086-t05"></a>F-086-T05 — Wire the Gmail credential flow into the service | 2.5 h | 0 h | 2.5 h | Implemented; verification pending | — | [F-086-T04](#f-086-t04) | 🤖 | [PR #808](https://github.com/voidbrain/nerv/pull/808) Gmail connect command and service wiring |
-| 🟢 Small | <a id="f-086-t04"></a>F-086-T04 — Owner check with the owner's account | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-086-T05](#f-086-t05) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 5 h (4 of 5 steps) | 0.25 h (1 of 5 steps recorded) | 2.5 h agent + 0.5 h owner | 3 of 5 completed | | | | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-086-t01"></a>F-086-T01 — Decision: connector, scopes and credentials | 0.5 h | 0.25 h (measured) | Completed | — |
-| — | <a id="f-086-t02"></a>F-086-T02 — Search and read as Green tools | 1 h | 0 h | Completed | [PR #480](https://github.com/voidbrain/nerv/pull/480) implementation |
-| — | <a id="f-086-t03"></a>F-086-T03 — Draft and send behind approval | 1 h | 0 h | Completed | [PR #609](https://github.com/voidbrain/nerv/pull/609) Gmail draft and send behind approval |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-086.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-086-T02: [PR #480](https://github.com/voidbrain/nerv/pull/480) implementation · F-086-T03: [PR #609](https://github.com/voidbrain/nerv/pull/609) Gmail draft and send behind approval · F-086-T05: [PR #808](https://github.com/voidbrain/nerv/pull/808) Gmail connect command and service wiring. [PR #609](https://github.com/voidbrain/nerv/pull/609) (F-086-T03); [PR #480](https://github.com/voidbrain/nerv/pull/480) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md); [#783](https://github.com/voidbrain/nerv/pull/783); [#808](https://github.com/voidbrain/nerv/pull/808) |
-| Opened | 2026-11-14 |
-| Verification | 2026-11-18: F-086-T02 verified: [PR #480](https://github.com/voidbrain/nerv/pull/480) merged on green CI. `F-086-T01` decision written in [gmail-connector.md](decisions/gmail-connector.md); verified with `npm run check:fast`. |
-| Reviewed | 2026-11-21 |
-
-</details>
-
----
 ### <a id="f-120"></a>[✨ F-120](#top)
 
 **Gauntlet coverage of NERV capabilities**
@@ -774,6 +1017,131 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-24 |
 | Verification | Unit 2026-11-26: `test/gauntlet.test.mjs` F-120-T07 passes (3,072-token coding reply cap, other packs unchanged); F-120-T05 passes (180 s for the reference-runner packs, day limits for the rest). Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
 | Reviewed | 2026-11-25 |
+
+</details>
+
+---
+### <a id="f-138"></a>[✨ F-138](#top)
+
+**Credential list with last rotation and last auth failure; owner notice on failure**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 4 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-138-T01 adds the credential list.
+
+| | |
+|---|---|
+| **Issue** | NERV holds several credentials (admin token, Telegram bot, cloud model keys, APNs signing key, Gmail OAuth from F-086, a GitHub token coming in F-132) and can rotate some by hand (`nerv credentials rotate admin\|telegram\|cloud`, `src/cli-commands.ts:534-550`), but nothing lists them with their age, and an auth failure is invisible: the APNs JWT failure stayed hidden (B-134); Gmail handles only "not configured", not a revoked or expired refresh token (`src/gmail.ts:103-104`). |
+| **Reproduce** | Ask NERV which credentials it holds and when each was last rotated: no command answers. Revoke the Telegram bot token at BotFather: the owner learns it only when messages stop. |
+| **Check** | `nerv credentials list` (and the dashboard) shows each credential by name, place, last rotation and last auth failure, never a value; an auth failure (401/403, invalid_grant, a rejected JWT) sends the owner one notice naming the credential and the rotate command; a test per credential kind, failing first. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-138-t01"></a>F-138-T01 — nerv credentials list: name, place, last rotation; never a value | 1.5 h | 0 h | 1.5 h | Ready | — | [F-138-T02](#f-138-t02) |
+| 🟡 Medium | <a id="f-138-t02"></a>F-138-T02 — Record auth failures per credential and notify the owner once | 2 h | 0 h | 2 h | Planned | [F-138-T01](#f-138-t01) | [F-138-T03](#f-138-t03) |
+| 🟢 Small | <a id="f-138-t03"></a>F-138-T03 — Dashboard row and guide for credentials | 0.5 h | 0 h | 0.5 h | Planned | [F-138-T02](#f-138-t02) | — |
+| 🟡 Medium | **Total** | 4 h | 0 h (0 of 3 steps recorded) | 4 h | 0 of 3 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-138.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report ([practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md), S8, proposal 10); `src/cli-commands.ts:534-550`; `src/gmail.ts:103-104`; [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Report risk rank S8 of 12 (proposal 10). |
+
+</details>
+
+---
+### <a id="b-163"></a>[🐞 B-163](#top)
+
+**Threat map cites closed records as open gaps; no test that every outside-data tool marks its result untrusted**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h | — | [F-140-T04](#f-140-t04) | 🤖 | — | — |
+
+💻 **→** Next: B-163-T01 commits the failing checker test.
+
+| | |
+|---|---|
+| **Issue** | Rows of `docs/security/agentic-threats.md` still cite closed records as gaps: ASI08 `F-064` (`:18`), LLM06 and LLM10 `F-063` (`:31`, `:35`), LLM08 `F-065` (`:33`); last changed 2026-11-15. `tools/check-threat-map.mjs` validates only the citation shape, so it passes. Taint is tested per source (`test/gmail.test.ts:8`, `test/provenance.test.ts`) but no test asserts that every tool reading outside data (mail, MCP results, browser, files, Telegram media) returns a tainted result, so a new reader can skip it. |
+| **Reproduce** | `npm run check:threat-map` passes while F-063, F-064 and F-065 are closed in `docs/archive/backlog-2026.md`; add a tool that returns fetched text without taint: no test fails. |
+| **Check** | The checker fails on a gap row that cites a closed or archived record (failing test first, B-163-T01); every row cites current evidence or an open record; the tool registry marks each external reader and one test iterates them and fails on an untainted result (failing first, B-163-T03). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-163-t01"></a>B-163-T01 — Failing test: the threat-map checker accepts a gap that cites a closed record | 0.5 h | 0 h | 0.5 h | Ready | — | [B-163-T02](#b-163-t02) |
+| 🟢 Small | <a id="b-163-t03"></a>B-163-T03 — Failing test: every tool that reads outside data returns a tainted result | 1 h | 0 h | 1 h | Ready | — | [B-163-T04](#b-163-t04) |
+| 🟢 Small | <a id="b-163-t02"></a>B-163-T02 — Checker reads record status; refresh the stale rows | 1 h | 0 h | 1 h | Planned | [B-163-T01](#b-163-t01) | [F-140-T04](#f-140-t04) |
+| 🟡 Medium | <a id="b-163-t04"></a>B-163-T04 — Tool registry marks external readers; each returns tainted results | 2 h | 0 h | 2 h | Planned | [B-163-T03](#b-163-t03) | — |
+| 🔴 Large | **Total** | 4.5 h | 0 h (0 of 4 steps recorded) | 4.5 h | 0 of 4 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-163.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report ([practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md), N6, S7, proposal 9); `docs/security/agentic-threats.md:18,31,33,35`; `tools/check-threat-map.mjs`; [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Report risk rank S7 of 12 with N6 (proposal 9). |
+
+</details>
+
+---
+### <a id="f-140"></a>[✨ F-140](#top)
+
+**Spend window per cloud model route with an owner notice at 80 %**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 3.5 h agent + 0.25 h owner | [B-163-T02](#b-163-t02) | — | 🤖 | — | — |
+
+💻 **→** Next: F-140-T01 reads current spend and sets out the limit options.
+
+| | |
+|---|---|
+| **Issue** | Paid cloud routes have a per-sortie budget and per-model concurrency (`src/policy.ts:310`, `src/model-budget.ts:24`) but no daily or monthly cap and no alert; the threat map row LLM10 still lists cost as a gap. |
+| **Reproduce** | Run many sorties on a paid route in one day: each stays under its sortie budget, the total grows without limit, and no notice reaches the owner. |
+| **Check** | Each cloud route has a spend window (daily and monthly) the owner chose; at 80 % the owner gets one notice; at 100 % the route stops taking new calls (reminders and local routes keep working) until the window resets or the owner raises it; tests with measured and unknown usage (unknown is never zero, F-063); LLM10 cites the test. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-140-t01"></a>F-140-T01 — Current cloud spend and limit options | 0.5 h | 0 h | 0.5 h | Ready | — | [F-140-T02](#f-140-t02) | 🤖 |
+| 🟢 Small | <a id="f-140-t02"></a>F-140-T02 — Owner chooses the spend limits | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-140-T01](#f-140-t01) | [F-140-T03](#f-140-t03) | ⏳ 🤔 |
+| 🟡 Medium | <a id="f-140-t03"></a>F-140-T03 — Spend window, 80 % notice and stop at 100 % | 2.5 h | 0 h | 2.5 h | Planned | [F-140-T02](#f-140-t02) | [F-140-T04](#f-140-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-140-t04"></a>F-140-T04 — Threat map LLM10 cites the spend-window tests | 0.5 h | 0 h | 0.5 h | Planned | [F-140-T03](#f-140-t03), [B-163-T02](#b-163-t02) | — | ⏳ 🤖 |
+| 🟡 Medium | **Total** | 3.5 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3.5 h agent + 0.25 h owner | 0 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-140.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report ([practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md), S11, proposal 13); `src/policy.ts:310`; `src/model-budget.ts:24`; [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Report risk rank S11 of 12 (proposal 13). |
 
 </details>
 
@@ -2000,6 +2368,96 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-164"></a>[🐞 B-164](#top)
+
+**No test that configured secrets never reach service.log**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 1.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-164-T01 commits the canary-secret test.
+
+| | |
+|---|---|
+| **Issue** | Errors are logged as `e.message` (`src/telegram.ts:443`) and the Telegram token is part of request URLs (`src/telegram.ts:79,106`); today's messages do not include it, but no test would notice if one did. Diagnostics carry fixed reasons in some places (`test/instrumentality-runs.test.ts:45`, `src/snapshots.ts:102`), not everywhere. |
+| **Reproduce** | Configure a canary token, make Telegram, a cloud route, push and Gmail fail with errors that echo the request, then search the service log for the canary: nothing checks it today. |
+| **Check** | A test configures canary values for every secret, drives the main failure paths (Telegram, cloud model route, Web Push/APNs, Gmail, update check) and asserts no canary appears in the log or the inbox; committed first (B-164-T01); any leak it finds is fixed (B-164-T02). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-164-t01"></a>B-164-T01 — Canary-secret test over the service log for the main failure paths | 1 h | 0 h | 1 h | Ready | — | [B-164-T02](#b-164-t02) |
+| 🟢 Small | <a id="b-164-t02"></a>B-164-T02 — Redact any secret the canary test finds | 0.5 h | 0 h | 0.5 h | Planned | [B-164-T01](#b-164-t01) | — |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 2 steps recorded) | 1.5 h | 0 of 2 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-164.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report ([practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md), S10, M14, proposal 14); `src/telegram.ts:79,106,443`; [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Report risk rank S10 of 12 (proposal 14). |
+
+</details>
+
+---
+### <a id="f-086"></a>[✨ F-086](#top)
+
+**Gmail: search and read, then draft and send behind approval**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.5 h agent + 0.5 h owner | [F-137](#f-137) | — | 🤖 | — | — |
+
+💻 **→** Next: F-086-T05 (the Gmail connect command and service wiring) closes on green CI; then the owner runs the [Gmail connector owner check](acceptance/f086-gmail.md).
+
+| | |
+|---|---|
+| **Issue** | Owner job 2026-11-14: Gmail integration. F-021 registers MCP tools and plans writes behind approval cards; no record owns a mail connector, its credentials or its limits. |
+| **Reproduce** | Follow the [Gmail connector owner check](acceptance/f086-gmail.md) with the owner's account. |
+| **Check** | Read-only first: search and read with the narrowest scope the provider allows; mail content is tainted and never becomes an instruction; a draft is an Orange action and sending is Blue; credentials are stored and rotated under F-066, never in Git or logs; works through a pinned MCP server or the provider API, chosen in T01. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-086-t05"></a>F-086-T05 — Wire the Gmail credential flow into the service | 2.5 h | 0 h | 2.5 h | Implemented; verification pending | — | [F-086-T04](#f-086-t04) | 🤖 | [PR #808](https://github.com/voidbrain/nerv/pull/808) Gmail connect command and service wiring |
+| 🟢 Small | <a id="f-086-t04"></a>F-086-T04 — Owner check with the owner's account | — | 0 h | 0 h agent + 0.5 h owner | Planned | [F-086-T05](#f-086-t05) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 5 h (4 of 5 steps) | 0.25 h (1 of 5 steps recorded) | 2.5 h agent + 0.5 h owner | 3 of 5 completed | | | | |
+
+<details><summary>Done steps (3)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-086-t01"></a>F-086-T01 — Decision: connector, scopes and credentials | 0.5 h | 0.25 h (measured) | Completed | — |
+| — | <a id="f-086-t02"></a>F-086-T02 — Search and read as Green tools | 1 h | 0 h | Completed | [PR #480](https://github.com/voidbrain/nerv/pull/480) implementation |
+| — | <a id="f-086-t03"></a>F-086-T03 — Draft and send behind approval | 1 h | 0 h | Completed | [PR #609](https://github.com/voidbrain/nerv/pull/609) Gmail draft and send behind approval |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-086.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-086-T02: [PR #480](https://github.com/voidbrain/nerv/pull/480) implementation · F-086-T03: [PR #609](https://github.com/voidbrain/nerv/pull/609) Gmail draft and send behind approval · F-086-T05: [PR #808](https://github.com/voidbrain/nerv/pull/808) Gmail connect command and service wiring. [PR #609](https://github.com/voidbrain/nerv/pull/609) (F-086-T03); [PR #480](https://github.com/voidbrain/nerv/pull/480) (merged; CI green); [PR #391](https://github.com/voidbrain/nerv/pull/391) (opened); [Owner jobs case study](design/owner-jobs-case-study-2026-11-14.md); [#783](https://github.com/voidbrain/nerv/pull/783); [#808](https://github.com/voidbrain/nerv/pull/808); [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-14 |
+| Verification | 2026-11-18: F-086-T02 verified: [PR #480](https://github.com/voidbrain/nerv/pull/480) merged on green CI. `F-086-T01` decision written in [gmail-connector.md](decisions/gmail-connector.md); verified with `npm run check:fast`. |
+| Reviewed | 2026-11-21 |
+| Depends on | [F-137](#f-137) — retention limits and a backup-aware forget, before any F-086 step keeps mail content (an index, cache or summary); reads per request do not wait. No such step exists yet, so no step can be named. Owner decision 2026-11-26 in chat: "NERV practices inventory accept all" (report proposal 5). |
+
+</details>
+
+---
 ### <a id="f-087"></a>[✨ F-087](#top)
 
 **3D printing: slice a model with a material profile and send it to the printer**
@@ -2684,7 +3142,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.5 h | — | — | 🤖 | — | — |
 
 💻 **→** Next: from tasks; F-125-T02 switches to built views in PR #763; after it merges, log the next 10 merged PRs in the view incident log below.
 
@@ -2699,7 +3157,8 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
 | 🟢 Small | <a id="f-125-t02"></a>F-125-T02 — Enable built backlog views and log view incidents over about 10 merged PRs | 1 h | 0 h | 0.5 h | Implemented; verification pending | [PR #748](https://github.com/voidbrain/nerv/pull/748); [PR #763](https://github.com/voidbrain/nerv/pull/763) |
-| 🟢 Small | **Total** | 3 h | 0 h (0 of 2 steps recorded) | 0.5 h | 1 of 2 completed | |
+| 🟡 Medium | <a id="f-125-t03"></a>F-125-T03 — Reconcile to the current harness release and check the tools AGENTS.md names arrive | 3 h | 0 h | 3 h | Ready | — |
+| 🟡 Medium | **Total** | 6 h | 0 h (0 of 3 steps recorded) | 3.5 h | 1 of 3 completed | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -2716,7 +3175,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-125-T01: [PR #748](https://github.com/voidbrain/nerv/pull/748); [PR #753](https://github.com/voidbrain/nerv/pull/753) · F-125-T02: [PR #748](https://github.com/voidbrain/nerv/pull/748); [PR #763](https://github.com/voidbrain/nerv/pull/763). Opened in [PR #748](https://github.com/voidbrain/nerv/pull/748); F-125-T01 reconciled in [PR #753](https://github.com/voidbrain/nerv/pull/753).; [#758](https://github.com/voidbrain/nerv/pull/758) |
+| PR / evidence | Steps: F-125-T01: [PR #748](https://github.com/voidbrain/nerv/pull/748); [PR #753](https://github.com/voidbrain/nerv/pull/753) · F-125-T02: [PR #748](https://github.com/voidbrain/nerv/pull/748); [PR #763](https://github.com/voidbrain/nerv/pull/763). Opened in [PR #748](https://github.com/voidbrain/nerv/pull/748); F-125-T01 reconciled in [PR #753](https://github.com/voidbrain/nerv/pull/753).; [#758](https://github.com/voidbrain/nerv/pull/758); [#815](https://github.com/voidbrain/nerv/pull/815) |
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-26 |
@@ -2863,6 +3322,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-25 |
 | Verification | — |
 | Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="f-141"></a>[✨ F-141](#top)
+
+**Bundle size budgets for the phone PWA**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-141-T01 measures the bundle and sets the budgets.
+
+| | |
+|---|---|
+| **Issue** | The Angular PWA the owner opens on the phone has no `budgets` in `angular.json`, so a heavy dependency can slow it with no failing build; fpvbuddy, hobo, grover, bricks and openbando all set budgets. |
+| **Reproduce** | `grep budgets angular.json` finds nothing; `npm run build` passes at any bundle size. |
+| **Check** | `angular.json` sets initial and per-component-style budgets from today's measured sizes with a stated margin (warning and error); a build over the error budget fails CI. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="f-141-t01"></a>F-141-T01 — Measure the bundle and set warning and error budgets | 0.5 h | 0 h | 0.5 h | Ready |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 1 steps recorded) | 0.5 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-141.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report ([practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md), N2, S12, M9, proposal 22); `angular.json`; [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Report risk rank S12 of 12 (proposal 22, N2). |
 
 </details>
 
@@ -3413,7 +3911,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound · B-076-T03: [PR #695](https://github.com/voidbrain/nerv/pull/695). [PR #540](https://github.com/voidbrain/nerv/pull/540) B-076-T01; [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2; [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758) |
+| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound · B-076-T03: [PR #695](https://github.com/voidbrain/nerv/pull/695). [PR #540](https://github.com/voidbrain/nerv/pull/540) B-076-T01; [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2; [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758); [#803](https://github.com/voidbrain/nerv/pull/803) runs 45796401539 and 45800646253 attempt 1; [#815](https://github.com/voidbrain/nerv/pull/815) |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-26 |
@@ -3612,6 +4110,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-26 |
 | Verification | Unit: Pending. |
 | Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="b-166"></a>[🐞 B-166](#top)
+
+**The worktree:link script makes the node_modules symlink the install rules forbid**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.5 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-166-T01 commits the failing test.
+
+| | |
+|---|---|
+| **Issue** | `package.json:75` has `"worktree:link": "ln -sfn ../NERV/node_modules node_modules"`, and `docs/INSTALL.md` mentions it, while `tools/install-deps.mjs` (B-098) refuses `npm ci` through a symlinked `node_modules` and the owner's rule is `npm ci` in each worktree, never a symlink. |
+| **Reproduce** | `npm run worktree:link` in a worktree creates the symlink; a later `npm ci` there is refused. |
+| **Check** | No npm script creates a `node_modules` symlink (a test fails first, B-166-T01); the script and its INSTALL mention are gone (B-166-T02). |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-166-t01"></a>B-166-T01 — Failing test: no npm script symlinks node&#95;modules | 0.25 h | 0 h | 0.25 h | Ready | — | [B-166-T02](#b-166-t02) |
+| 🟢 Small | <a id="b-166-t02"></a>B-166-T02 — Remove worktree:link and its INSTALL mention | 0.25 h | 0 h | 0.25 h | Planned | [B-166-T01](#b-166-t01) | — |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h | 0 of 2 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-166.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Coordinator report ([practices transfer report](https://github.com/voidbrain/coordinator/blob/main/docs/reviews/2026-11-26-nerv-practices-transfer.md), A5, proposal 22); `package.json:75`; `docs/INSTALL.md`; [#815](https://github.com/voidbrain/nerv/pull/815) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Report proposal 22 (A5): the script contradicts the guarded install (B-098) and the worktree rule. |
 
 </details>
 

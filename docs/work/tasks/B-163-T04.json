@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "B-163-T04",
+  "parent": "B-163",
+  "title": "Tool registry marks external readers; each returns tainted results",
+  "goal": "Each tool that reads mail, MCP results, browser pages, files or Telegram media is marked and its results are tainted",
+  "status": "planned",
+  "acceptance": [
+    "B-163-T03 passes unchanged",
+    "Registering an unmarked tool that reads outside data fails a check, not only the test",
+    "The threat map cites the test"
+  ],
+  "dependsOn": [
+    "B-163-T03"
+  ],
+  "resources": [
+    "src/executors.ts",
+    "src/store-sorties.ts",
+    "docs/security/agentic-threats.md",
+    "test/**",
+    "docs/work/records/B-163.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26: one registry field, marks on the readers, any missing taint. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": []
+}

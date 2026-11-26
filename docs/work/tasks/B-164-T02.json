@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "B-164-T02",
+  "parent": "B-164",
+  "title": "Redact any secret the canary test finds",
+  "goal": "Every leaking path logs a fixed reason instead of the raw message",
+  "status": "planned",
+  "acceptance": [
+    "B-164-T01 passes unchanged"
+  ],
+  "dependsOn": [
+    "B-164-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/work/records/B-164.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: small redaction at the found call sites. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": []
+}

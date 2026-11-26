@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-137-T01",
+  "parent": "F-137",
+  "title": "Inventory of personal content per table, with proposed retention limits",
+  "goal": "One page lists every SQLite table and file that holds personal content, how long it is kept today, and a proposed limit with its reason",
+  "status": "ready",
+  "acceptance": [
+    "Every table in the schema is listed or named as holding no personal content",
+    "States whether mail text already lands in sortie results, episodes or memory since F-086-T02",
+    "Proposed limits as options for the owner; the 7-snapshot and off-host copy lag is stated"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/store.ts",
+    "src/store-sorties.ts",
+    "src/health-samples.ts",
+    "src/snapshots.ts",
+    "docs/design/**",
+    "docs/work/records/F-137.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review",
+    "privacy-review",
+    "bounded-edit"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: read the schema and write one options page. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

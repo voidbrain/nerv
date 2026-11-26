@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "B-162-T03",
+  "parent": "B-162",
+  "title": "Low-disk owner notice that pauses snapshots and model downloads",
+  "goal": "Below the threshold NERV notifies the owner once and skips the snapshot and model downloads until space returns",
+  "status": "planned",
+  "acceptance": [
+    "B-162-T01 disk test passes unchanged",
+    "One notice per low-disk episode and one when space returns"
+  ],
+  "dependsOn": [
+    "B-162-T01"
+  ],
+  "resources": [
+    "src/snapshots.ts",
+    "src/**",
+    "test/**",
+    "docs/work/records/B-162.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: statfs reader, threshold, notice. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

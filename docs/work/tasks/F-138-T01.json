@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-138-T01",
+  "parent": "F-138",
+  "title": "nerv credentials list: name, place, last rotation; never a value",
+  "goal": "One command lists every credential NERV holds with where it lives and when it was last rotated",
+  "status": "ready",
+  "acceptance": [
+    "A test shows every configured credential kind listed and no value, prefix or hash printed",
+    "Rotation through the existing commands updates the date"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/cli-commands.ts",
+    "src/config.ts",
+    "test/**",
+    "docs/work/records/F-138.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: read existing rotation paths, add a date and a list. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

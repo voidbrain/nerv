@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "B-161-T03",
+  "parent": "B-161",
+  "title": "Push delivery and update check join the tracker; dashboard row",
+  "goal": "Repeated push delivery failures and update-check failures notify the owner the same way, and the dashboard lists every failing class",
+  "status": "planned",
+  "acceptance": [
+    "One failing-first test per class (push, update check)",
+    "The dashboard health view shows each class that is failing now, with its first failure time"
+  ],
+  "dependsOn": [
+    "B-161-T02"
+  ],
+  "resources": [
+    "src/push.ts",
+    "src/update-scheduler.ts",
+    "web/src/**",
+    "test/**",
+    "docs/work/records/B-161.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-26: two classes on the T02 tracker and one view row. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  },
+  "prs": []
+}

@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-136-T02",
+  "parent": "F-136",
+  "title": "Recurring restore drill: cadence, reminder and dated evidence",
+  "goal": "NERV reminds the owner to run the restore drill every agreed interval and records the date of the last one",
+  "status": "planned",
+  "acceptance": [
+    "The cadence (proposed: every 90 days) is a setting; the reminder links the drill procedure",
+    "The date and result of the last drill are kept and shown next to the backup ages"
+  ],
+  "dependsOn": [
+    "F-136-T01"
+  ],
+  "resources": [
+    "docs/guides/backups.md",
+    "docs/acceptance/f062-t07-restore-drill.md",
+    "src/**",
+    "test/**",
+    "docs/work/records/F-136.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: one scheduled reminder and one stored date. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": []
+}
