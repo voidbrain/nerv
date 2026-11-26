@@ -11,7 +11,8 @@ import {
   type SkillPackage,
 } from '../src/skills.ts';
 import { makeServer } from '../src/server.ts';
-import { parseHTML } from 'linkedom';
+// linkedom's own type declarations do not check under this project's settings: load it untyped.
+const { parseHTML } = (await import('linkedom' as string)) as { parseHTML: (html: string) => { document: Document } };
 
 /** A neutral, invented skill package. */
 function skill(id: string, version: string): SkillPackage {
