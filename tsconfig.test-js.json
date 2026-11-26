@@ -1,0 +1,31 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "useUnknownInCatchVariables": false
+  },
+  "include": [
+    "test/*.mjs",
+    "test/fixtures/*.mjs"
+  ],
+  "deferred": [
+    "test/angular.browser.mjs",
+    "test/backlog-recap.test.mjs",
+    "test/doctor-run.browser.mjs",
+    "test/evaluation-model.test.mjs",
+    "test/evaluation-runner.test.mjs",
+    "test/evaluation.browser.mjs",
+    "test/fixtures/live-view.mjs",
+    "test/gauntlet.test.mjs",
+    "test/install-deps.test.mjs",
+    "test/map-tabs.test.mjs",
+    "test/native-release.test.mjs",
+    "test/pilot-controls.test.mjs",
+    "test/surface-dom.test.mjs",
+    "test/updater-status.browser.mjs",
+    "test/verification-policy.test.mjs"
+  ]
+}

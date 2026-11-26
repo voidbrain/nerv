@@ -434,7 +434,7 @@ export function activateSkillVersion(
 
 const ESCALATION_PATTERNS = [
   /scrolls\.json/i,
-  /anthropic-key|seat-keys/i,
+  /anthropic-key|seat-keys|gmail-credentials/i,
   /\bsudo\b|\bchmod\s+[0-7]*7/i,
   /child_process|eval\s*\(/i,
 ];

@@ -128,9 +128,23 @@ export function modelLimits(pack) {
     suiteMs: Math.round((base.suiteMs / base.maxCases) * n),
     maxCases: n,
     repeat: base.repeat,
-    outputTokens: Math.round((base.outputTokens / base.maxCases) * n),
+    outputTokens: codingPack(pack) ? CODING_REPLY_TOKENS * n : Math.round((base.outputTokens / base.maxCases) * n),
     maxBytes: base.maxBytes,
   };
+}
+// F-120-T07 (owner decision 2026-11-26, "Raise the output limit for the coding packs ok"): with thinking on, every
+// coding-reference reply hit the profile's 2,048 output tokens and was scored truncated before its tests ran. Those
+// packs raise the profile's reply cap to 3,072 tokens a case, and the suite budget with it; every other pack keeps the
+// profile unchanged. 3,072 fits the 180 s case: the runner aborts the model at 160 s and grades in what is left after a
+// 30 s reserve, and gemma4:12b on the Mac measured 20-30 tokens/s after a 12 s cold load, so 3,072 tokens end by about
+// 115-165 s; 4,096 or 8,192 would be cut by the abort or leave no time to run the tests. The raised profile changes
+// the profile hash, so `pending` checks coding results against the same raised profile (pendingByPack).
+const CODING_REPLY_TOKENS = 3072;
+const codingPack = (pack) => pack.cases.some((c) => c.runner === 'coding-reference');
+export function modelProfile(pack, profile) {
+  if (!profile || !codingPack(pack) || profile.maxOutputTokens >= CODING_REPLY_TOKENS) return profile;
+  if (CODING_REPLY_TOKENS >= profile.context) throw Error('Profile context too small for the coding reply budget');
+  return validateProfile({ ...profile, maxOutputTokens: CODING_REPLY_TOKENS });
 }
 const isModelPack = (pack) => pack.cases.some((c) => c.layer !== 'system');
 const hasRunner = (pack) => pack.cases.some((c) => !!c.runner);
@@ -152,7 +166,7 @@ export const caseSourceKey = (pack, caseId) =>
   usesModelRunner(pack) ? releaseSourceKey() : systemSourceKey(pack, caseId);
 const pendingByPack = (packs, ledger, options) =>
   packs.flatMap((pack) => {
-    const identity = { ...options };
+    const identity = { ...options, ...(options.profile ? { profile: modelProfile(pack, options.profile) } : {}) };
     // A runner-only contract pack on model-free runners exercises NERV's adapter, not the selected model binary.
     // Its profile and NERV source identity remain bound, but model digest changes do not invalidate it.
     if (modelFreeRunnerPack(pack)) {
@@ -522,7 +536,7 @@ export async function main(args = process.argv.slice(2), services = { execute: e
     allowExpensive: options['allow-expensive'] === true,
   };
   const execute = (pack, model, profile, out, extra = {}) =>
-    services.execute(pack, profile, limitsFor(model, pack), {
+    services.execute(pack, model ? modelProfile(pack, profile) : profile, limitsFor(model, pack), {
       execute: true,
       ...flags,
       scenarioConfirmed: options['confirm-scenario'] === true,
@@ -617,7 +631,7 @@ export async function main(args = process.argv.slice(2), services = { execute: e
   }
   const profile = options.profile ? validateProfile(load('profile')) : null;
   if (model && !profile) throw Error('Model plan/run needs --profile=path');
-  if (command.endsWith('plan')) return plan(pack, profile, limitsFor(model, pack), flags);
+  if (command.endsWith('plan')) return plan(pack, modelProfile(pack, profile), limitsFor(model, pack), flags);
   confirmScenario();
   if (!options.execute || !options.out) throw Error('Execution requires --execute --out=new.json');
   assertRequirements(pack);

@@ -1,3 +1,4 @@
+// @ts-check
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { milestones, statuses, state, block, problems, place, START, END } from '../tools/roadmap-status.mjs';

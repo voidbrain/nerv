@@ -314,14 +314,24 @@ export function rotateCredential(home: string, kind: CredentialKind, value: stri
     rmSync(temporary, { force: true });
   }
 }
-/** Credential health is age only: never a value, prefix, hash or identifier. */
-export function credentialAges(home: string, now = Date.now()): Record<CredentialKind, { ageSeconds: number } | null> {
-  const age = (kind: CredentialKind) => {
-    const file = credentialFile(home, kind);
+/**
+ * Credential health is age only: never a value, prefix, hash or identifier. `gmail` is the Gmail connector's
+ * credential (F-086-T05), replaced by `nerv gmail connect` rather than `credentials rotate`.
+ */
+export function credentialAges(
+  home: string,
+  now = Date.now(),
+): Record<CredentialKind | 'gmail', { ageSeconds: number } | null> {
+  const age = (file: string) => {
     if (!existsSync(file)) return null;
     return { ageSeconds: Math.max(0, Math.floor((now - statSync(file).mtimeMs) / 1000)) };
   };
-  return { admin: age('admin'), telegram: age('telegram'), cloud: age('cloud') };
+  return {
+    admin: age(credentialFile(home, 'admin')),
+    telegram: age(credentialFile(home, 'telegram')),
+    cloud: age(credentialFile(home, 'cloud')),
+    gmail: age(join(home, 'gmail-credentials.json')),
+  };
 }
 /**
  * A secret or rule file is private enough when no group/other permission bits in `mask` are set. Windows has no such

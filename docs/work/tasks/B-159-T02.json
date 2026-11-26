@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "B-159-T02",
+  "parent": "B-159",
+  "title": "Enforce coverage; Claude Code as the behaviour runner",
+  "goal": "coverage.enforce true; behaviour.runner set; tools/behaviour.mjs and npm run behaviour",
+  "status": "planned",
+  "acceptance": [
+    "coverage.enforce is true and CI passes against the new baseline",
+    "behaviour.runner is the claude -p command from rule-review.md",
+    "tools/behaviour.mjs is byte-identical to the template v10.21.4 and listed as copied",
+    "No behaviour run is started"
+  ],
+  "dependsOn": [
+    "B-159-T01"
+  ],
+  "resources": [
+    ".harness.json",
+    "package.json",
+    "tools/behaviour.mjs",
+    ".github/workflows/ci.yml",
+    "docs/work/records/B-159.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run behaviour -- list",
+    "node tools/coverage-table.mjs --check",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-26: 0.5 h agent. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

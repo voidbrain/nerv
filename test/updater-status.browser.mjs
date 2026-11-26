@@ -62,8 +62,8 @@ test(
         );
       },
     });
-    await new Promise((done) => server.listen(0, '127.0.0.1', done));
-    const origin = `http://127.0.0.1:${server.address().port}`;
+    await new Promise((done) => server.listen(0, '127.0.0.1', () => done(undefined)));
+    const origin = `http://127.0.0.1:${/** @type {import('node:net').AddressInfo} */ (server.address()).port}`;
     try {
       await browser(async ({ page, evaluate, until, errors }) => {
         const login = await (
