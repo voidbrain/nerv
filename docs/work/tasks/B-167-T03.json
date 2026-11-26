@@ -11,7 +11,7 @@
   "id": "B-167-T03",
   "title": "Fix the nerv#831 review findings: half votes alone never decide, Italian \"me\" never votes English",
   "goal": "A request with no listed word follows the earlier exchanges, then the fallback; \"per me va bene\" reads as Italian",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "A test committed before the fix fails on main and passes unchanged after it, with the other B-167 tests"
   ],
@@ -32,10 +32,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h",
-    "basis": "Estimated 2026-11-26 from the review report: one condition, one word list entry and their test. Not a measurement.",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26 from the review report: one condition, one word list entry and their test. Not a measurement. Closed 2026-11-26.",
     "reviewed": "2026-11-26",
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
   },
