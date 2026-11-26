@@ -400,10 +400,17 @@
       (misatoRoute === "local" && misatoModel && !known(misatoModel) ? opt("local:" + misatoModel, misatoModel + " (not in Ollama)", true, true) : "") +
       opt("cloud:" + cloudModel, cloudModel + " (cloud)" + (cloudOn ? "" : d.cloudKey ? " · turn the cloud route on" : " · key missing"), misatoRoute === "cloud", !cloudOn);
     const casperOpts = (casperModel ? "" : opt("", "not set", true)) + local.map(n => opt(n, n + " (local)", casperModel === n)).join("") + (casperModel && !known(casperModel) ? opt(casperModel, casperModel + " (not in Ollama)", true, true) : "");
+    // F-144: how long Ollama keeps the local model loaded after a call (models.local.keepAlive), or always (keep_alive -1).
+    const warmNow = m.local ? (m.local.alwaysLoaded ? "always" : m.local.keepAlive || "30m") : "";
+    const warmChoices = [["15m", "15 min"], ["30m", "30 min"], ["1h", "1 h"], ["2h", "2 h"], ["4h", "4 h"], ["8h", "8 h"], ["24h", "24 h"]];
+    if (m.local && m.local.keepAlive && !warmChoices.some(c => c[0] === m.local.keepAlive)) warmChoices.push([m.local.keepAlive, m.local.keepAlive]);
+    const warmOpts = warmChoices.map(c => opt(c[0], c[1] + " after the last reply", warmNow === c[0])).join("") + opt("always", "Always", warmNow === "always");
     sub.textContent = d.ollama.reachable ? local.length + " local model" + (local.length === 1 ? "" : "s") : "Ollama not found";
     box.innerHTML = (local.length || cloudOn ? "<form id='models-form' class='models-form'><label for='m-misato' class='small'>Misato</label><select id='m-misato'>" + misatoOpts + "</select>" +
       "<label for='m-casper' class='small'>Casper</label><select id='m-casper'" + (local.length ? "" : " disabled") + ">" + casperOpts + "</select>" +
+      (m.local ? "<label for='m-warm' class='small'>Keep loaded</label><select id='m-warm'>" + warmOpts + "</select>" : "") +
       "<span></span><span><button class='btn sm primary' type='submit'" + (modelsBusy ? " disabled" : "") + ">" + (modelsBusy ? "Applying…" : "Apply") + "</button></span></form>" : "") +
+      (m.local ? "<div class='tiny muted' style='margin-top:4px'>Always keeps the model in memory until Ollama stops (about 16 GB for gemma4:26b), taking it from virtual machines and image runs.</div>" : "") +
       "<div class='tiny muted' style='margin-top:6px'>" + (d.ollama.reachable ? "Ollama at " + esc(d.ollama.url) + (local.length ? "" : ": no models yet. Pull one: <code>ollama pull gemma4:12b</code>") : esc(d.ollama.error || "Ollama not found.")) + "</div>" +
       "<div class='row tiny' style='margin-top:4px'><span class='muted'>Cloud (Claude): " + (cloudOn ? "on" : "off") + " · key " + (d.cloudKey ? "saved" : "missing: type it in a terminal with <code>nerv models key</code>") + "</span>" +
       (d.cloudKey || cloudOn ? "<button class='btn sm' id='m-cloud' data-on='" + (!cloudOn) + "'>" + (cloudOn ? "Turn off" : "Turn on") + "</button>" : "") + "</div>";
@@ -421,6 +428,8 @@
     if (mv) { const [route, ...rest] = mv.split(":"); const model = rest.join(":"); const cur = roles.misato ? roles.misato.route + ":" + (roles.misato.model || "") : "";
       if (cur !== mv) change.misato = route === "cloud" ? { route:"cloud" } : { route:"local", model }; }
     if (cv && cv !== ((roles.casper && roles.casper.model) || (m.local || {}).model)) change.casper = { model:cv };
+    const wSel = document.getElementById("m-warm"); const wv = wSel ? wSel.value : "";
+    if (wv && wv !== (m.local.alwaysLoaded ? "always" : m.local.keepAlive || "30m")) change.warm = wv === "always" ? { alwaysLoaded:true } : { keepAlive:wv, alwaysLoaded:false };
     if (!Object.keys(change).length) { modelsDraft = false; log("Models: nothing changed.", "", null, "maya"); return; }
     applyModels(change, "Models applied");
   });

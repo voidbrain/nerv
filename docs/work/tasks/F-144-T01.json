@@ -14,8 +14,8 @@
   "dependsOn": [],
   "resources": [
     "src/model.ts",
+    "src/engine-provider.ts",
     "test/keep-warm.test.ts",
-    "test/model.test.ts",
     "docs/decisions/keep-model-warm.md",
     "docs/decisions/README.md",
     "docs/work/records/F-144.md",
@@ -38,7 +38,7 @@
     "estimate": "0.75 h agent",
     "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; bounded edit plus tests. Not a measurement.",
     "reviewed": "2026-11-26",
-    "agentHours": 0.75,
+    "agentHours": 1.0,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75
   },
