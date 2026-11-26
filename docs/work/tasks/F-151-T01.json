@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-151-T01",
+  "parent": "F-151",
+  "title": "Draft Fuyutsuki's voice and sample entries",
+  "goal": "A voice description and sample entries (Italian and English) ready for the owner's taste check",
+  "status": "planned",
+  "acceptance": [
+    "Agent writes the voice description in its own words and four sample entries (Italian and English) showing a range: straight immersive and light humour in docs/design/chronicle-eva-voice.md: immersive in-world narration, warm and allowed to be funny, never a cold technical log; a darker undertone optional; only invented recorded facts with their sources; no quotation or reproduction of any existing script or dialogue",
+    "No code changes in this step; the owner's approval is the next step"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "docs/design/chronicle-eva-voice.md",
+    "docs/work/records/F-151.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "documentation"
+  ],
+  "privacy": "Neutral invented bases, pilots, sorties and days only; no owner data, tokens or real conversation text in Git, tests or logs.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: one page of voice rules and three short samples. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": 858
+    }
+  ]
+}
