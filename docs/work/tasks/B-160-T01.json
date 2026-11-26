@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "B-160-T01",
+  "parent": "B-160",
+  "title": "Test the untested branches behind the drop",
+  "goal": "src/ branch coverage 86 % or more",
+  "status": "planned",
+  "acceptance": [
+    "The files with the most uncovered branches get tests of real behaviour",
+    "Baseline raised in the same PR"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "test/core.test.ts",
+    "docs/agents/coverage.json",
+    "docs/agents/coverage.md",
+    "docs/work/records/B-160.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run coverage"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "4 h agent",
+    "basis": "Estimated 2026-11-26: 4 h agent. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 4,
+    "estimateAgentHours": 4
+  }
+}
