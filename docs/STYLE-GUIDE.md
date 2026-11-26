@@ -9,7 +9,7 @@
 ## Internationalization, accessibility & workspace
 
 - **Languages & time:** English default, Italian selectable (`web/src/i18n.ts` keeps matching keys). User reminder text is never translated automatically. Browser inputs/dates use browser local time (explicitly labelled); server schedules default to `Europe/Rome`. CLI commands and raw doctor fields remain technical English.
-- **WCAG AA & layout:** Generous spacing, visible focus, persistent labels, and explicit error messages. Navigation wraps at 320 px without horizontal overflow. `npm run test:browser` verifies styles, i18n, local dates, responsiveness, and axe checks.
+- **WCAG AA & layout:** Generous spacing, visible focus, persistent labels, and explicit error messages. Navigation wraps at 320 px without horizontal overflow. `npm run test:browser` verifies styles, i18n, local dates, responsiveness, and axe checks; an axe check fails on colour contrast axe cannot decide as well as on violations, and text over an SVG shape or a CRT layer is measured by `textContrast` (`test/fixtures/axe.mjs`), with each accepted case named there or in the test (B-154).
 - **Status card & CSP:** `nerv-status-card` uses Shadow DOM with theme tokens (encapsulation only, not a security boundary; preserve escaping). Critical-CSS extraction is disabled so CSP blocks no inline activation scripts.
 - **PWA shell & update prompt:** Seven-eye icons (`web/public/icons/`, regenerated via `node tools/render-icons.mjs`) match `--bg` (`test/pwa.test.mjs`). `nerv-update-prompt` uses a polite live region with Reload/Later (never auto-reloads). Service worker caches the shell only; API calls send `ngsw-bypass`.
 
