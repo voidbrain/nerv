@@ -9,10 +9,11 @@ import { mkdtempSync, realpathSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { validatePack, executeWithEvidence, readEvidence } from '@voidbrain/gauntlet-protocol';
-import { main as gauntletMain } from '../tools/gauntlet.mjs';
+import { main as gauntletMain, modelLimits } from '../tools/gauntlet.mjs';
 import { buildPlannerPack, readPlannerSource, plannerPackFile } from '../tools/gauntlet-planner-pack.mjs';
 import { builtinTools, toolDocs } from '../src/executors.ts';
 import { patternOf, defaultPolicy } from '../src/policy.ts';
+import { MODEL_TIMEOUT_MS } from '../src/model.ts';
 
 const SLOW_HOST = { timeout: 120_000 };
 const profile = '--profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json';
@@ -32,7 +33,10 @@ test('F-120-T09: the committed nerv-planner pack is the one built from its cases
   // A tool-index change (a doc, a subject, a pack) changes the built prompts: the committed pack must be rebuilt
   // (`node tools/gauntlet-planner-pack.mjs`), which changes the case hashes, so the cases become pending again.
   assert.deepEqual(pack, buildPlannerPack(readPlannerSource()));
-  assert.ok(pack.cases.every((c) => c.layer === 'model' && c.expected.kind === 'json' && c.responseFormat === 'json'));
+  // F-120-T18: each case constrains the reply to its decision schema (a deliberate change from format "json").
+  assert.ok(
+    pack.cases.every((c) => c.layer === 'model' && c.expected.kind === 'json' && c.responseFormat?.type === 'object'),
+  );
   assert.ok(pack.cases.some((c) => c.split === 'regression') && pack.cases.some((c) => c.split === 'holdout'));
 });
 
@@ -116,6 +120,7 @@ test('F-120-T09: gauntlet consumes nerv-planner as a NERV model pack and plans i
 test('F-120-T09: a fake model run grades the decision exactly and never needs a real model', SLOW_HOST, async () => {
   const pack = committed();
   const answers = new Map(pack.cases.map((c) => [JSON.stringify(c.messages), c.expected.value]));
+  const formats = new Map(pack.cases.map((c) => [JSON.stringify(c.messages), c.responseFormat]));
   const root = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-planner-'));
   const model = 'gemma4:12b';
   const fakeModel = (wrong) => async (url, init) => {
@@ -131,6 +136,8 @@ test('F-120-T09: a fake model run grades the decision exactly and never needs a 
       assert.equal(Object.hasOwn(body, 'expected'), false);
       const expected = answers.get(JSON.stringify(body.messages));
       assert.ok(expected, 'the fake model knows every case prompt');
+      // F-120-T18: the case's decision schema reaches the model request as Ollama's structured-output format.
+      assert.deepEqual(body.format, formats.get(JSON.stringify(body.messages)));
       const answer = wrong(expected) ?? expected;
       return new Response(
         [
@@ -171,4 +178,58 @@ test('F-120-T09: a fake model run grades the decision exactly and never needs a 
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+// F-120-T18: a JSON Schema check for the keywords the decision schemas use (type, const, enum, anyOf, properties,
+// required, additionalProperties), so the tests see what Ollama's structured output lets the model write.
+/**
+ * @param {any} schema
+ * @param {any} value
+ * @returns {boolean}
+ */
+const fits = (schema, value) => {
+  /** @param {any} v */
+  const kind = (v) => (v === null ? 'null' : Array.isArray(v) ? 'array' : typeof v);
+  if (schema.anyOf && !schema.anyOf.some((/** @type {any} */ s) => fits(s, value))) return false;
+  if (schema.type && ![schema.type].flat().includes(kind(value))) return false;
+  if (Object.hasOwn(schema, 'const') && value !== schema.const) return false;
+  if (schema.enum && !schema.enum.includes(value)) return false;
+  if (kind(value) !== 'object') return true;
+  const props = schema.properties ?? {};
+  if ((schema.required ?? []).some((/** @type {string} */ k) => !Object.hasOwn(value, k))) return false;
+  if (schema.additionalProperties === false && Object.keys(value).some((k) => !Object.hasOwn(props, k))) return false;
+  return Object.entries(value).every(([k, v]) => !props[k] || fits(props[k], v));
+};
+
+test('F-120-T18: the decision schema admits the expected decision and refuses free text and optional arguments', () => {
+  const pack = committed();
+  const byId = new Map(pack.cases.map((/** @type {any} */ c) => [c.id, c]));
+  for (const c of pack.cases) assert.ok(fits(c.responseFormat, c.expected.value), c.id);
+  // What gemma4:26b and gemma4:12b wrote on the night of 2026-11-27 (matched to the reports' responseHash): the
+  // owner's words as memory.remember's text, although the contract says to leave free text out.
+  const memory = byId.get('memory-fact-it').responseFormat;
+  const fact = { decision: 'action', tool: 'memory.remember', args: { text: 'Sono allergico alle noci' } };
+  assert.equal(fits(memory, fact), false);
+  assert.ok(fits(memory, { decision: 'action', tool: 'memory.remember', args: {} }));
+  const reminder = byId.get('reminder-in-minutes-it').responseFormat;
+  const due = '2026-08-03T10:05:00+02:00';
+  assert.equal(fits(reminder, { decision: 'action', tool: 'reminders.add', args: { title: 'bere acqua', due } }), false);
+  assert.equal(fits(reminder, { decision: 'action', tool: 'reminders.add', args: { due, kind: 'at' } }), false);
+  // A wrong decision still fits: the schema shapes the reply, the model still decides.
+  assert.ok(fits(reminder, { decision: 'action', tool: 'reminders.list', args: {} }));
+  const ask = byId.get('reminder-no-subject-it').responseFormat;
+  assert.equal(fits(ask, { decision: 'ask', question: 'Di cosa vuoi che ti ricordi?' }), false);
+  assert.equal(fits(ask, { decision: 'ask', tool: 'reminders.add', args: {} }), false);
+  assert.ok(fits(ask, { decision: 'ask' }) && fits(ask, { decision: 'reply' }));
+  for (const c of pack.cases)
+    for (const name of ['title', 'text', 'texts', 'body', 'phrase', 'query', 'notes'])
+      assert.equal(fits(c.responseFormat, { decision: 'action', tool: 'x.y', args: { [name]: 'words' } }), false, c.id);
+});
+
+test('F-120-T18: a nerv-planner case gets the planner turn time NERV gives Misato, not the 30 s day limit', () => {
+  // On 2026-11-27 pilot-promote-it hit the 30 s case limit on both models; a timeout leaves the model's consumption
+  // unverified, so Gauntlet skipped the 19 cases after it. NERV gives a planner step MODEL_TIMEOUT_MS.
+  const limits = modelLimits(committed());
+  assert.equal(limits.caseMs, MODEL_TIMEOUT_MS);
+  assert.equal(limits.maxCases, committed().cases.length);
 });
