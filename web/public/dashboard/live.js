@@ -822,10 +822,25 @@
     initMap();
   }
   const sinceText = t => { if (!t) return "never heard"; const s = Math.round((Date.now() - Date.parse(t)) / 1000); return s < 90 ? "seen " + s + " s ago" : s < 5400 ? "last seen " + Math.round(s / 60) + " min ago" : "last seen " + new Date(t).toLocaleString(); };
+  /** F-152: the phone push line for this base (push is local to a base): devices, the last push and its open time. */
+  function pushLines(p) {
+    if (!p) return "<div class='tiny muted'>Phone push · state not reported</div>";
+    const n = p.devices || 0;
+    if (!n) return "<div class='tiny muted'>Phone push · no device subscribed</div>";
+    const last = p.last;
+    const sent = !last
+      ? "No push sent yet"
+      : last.ok
+        ? "Last push accepted · " + esc(new Date(last.at).toLocaleString())
+        : "<span class='warn'>Last push failed (" + esc(last.status + (last.reason ? " " + last.reason : "")) + ")</span> · " + esc(new Date(last.at).toLocaleString());
+    return "<div class='tiny muted'>Phone push · " + n + (n === 1 ? " device" : " devices") + "</div>" +
+      "<div class='tiny muted'>" + sent + " · " + (p.lastOpened ? "opened " + esc(new Date(p.lastOpened).toLocaleString()) : "not opened yet") + "</div>";
+  }
   // A heartbeat reports a route check, not successful delivery to a phone.
   function channelLine(b) {
+    const push = b.self ? pushLines(b.push) : "";
     const c = b.channel;
-    if (!c) return "<div class='tiny muted'>Telegram · state not reported</div>";
+    if (!c) return "<div class='tiny muted'>Telegram · state not reported</div>" + push;
     const labels = { "via-main":"via main", "local-fallback":"local fallback", local:"local channel", unavailable:"unavailable · not configured", unknown:"unknown" };
     const destination = c.destination ? " · main " + baseName(c.destination) : "";
     const fresh = b.channelFresh;
@@ -837,7 +852,8 @@
       "<div class='tiny muted'><span class='" + (apiState === "responding" ? "ok" : apiState === "failed" ? "warn" : "muted") + "'>● Midori API · " + esc(connection) + "</span>" + (c.api ? " · checked " + esc(new Date(c.api.at).toLocaleString()) : "") + "</div>" +
       "<div class='tiny muted'>Route checked " + esc(new Date(c.checkedAt).toLocaleString()) + (!fresh ? " · stale or offline" : "") + "</div>" +
       (c.lastReceived ? "<div class='tiny muted'>Last received " + esc(new Date(c.lastReceived).toLocaleString()) + "</div>" : "") +
-      (d ? "<div class='tiny muted'>Last send " + esc(d.result === "accepted" ? "accepted" : "failed") + " via " + esc(d.route === "main" ? "main" : "local bot") + " · " + esc(new Date(d.at).toLocaleString()) + " (phone receipt unknown)</div>" : "<div class='tiny muted'>No send result reported</div>");
+      (d ? "<div class='tiny muted'>Last send " + esc(d.result === "accepted" ? "accepted" : "failed") + " via " + esc(d.route === "main" ? "main" : "local bot") + " · " + esc(new Date(d.at).toLocaleString()) + " (phone receipt unknown)</div>" : "<div class='tiny muted'>No send result reported</div>") +
+      push;
   }
   window.renderBases = function () {
     const list = state.kajiBases || []; const roles = ((state.doctor || {}).models || {}).roles || {};
@@ -848,7 +864,7 @@
     if (!enrolled.length) {
       const base = (state.doctor || {}).base || { id:"NERV-01", name:"Neo Tokyo-3" };
       document.getElementById("bases-sub").textContent = BASES[0].status === "online" ? "1/1 online" : "1/1 " + (BASES[0].status === "standby" ? "degraded" : "down");
-      document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.id) + " · " + esc(base.name) + "</span>" + (BASES[0].status === "standby" ? "<span class='badge b-warn'>DEGRADED</span>" : BASES[0].status === "offline" ? "<span class='badge b-danger'>DOWN</span>" : "<span class='badge b-ok'>ONLINE</span>") + "</div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" + channelLine({online:BASES[0].status !== "offline",channel:(state.doctor || {}).channel,channelFresh:(state.doctor || {}).channelFresh}) + "</div>" +
+      document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.id) + " · " + esc(base.name) + "</span>" + (BASES[0].status === "standby" ? "<span class='badge b-warn'>DEGRADED</span>" : BASES[0].status === "offline" ? "<span class='badge b-danger'>DOWN</span>" : "<span class='badge b-ok'>ONLINE</span>") + "</div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" + channelLine({self:true,push:(state.doctor || {}).push,online:BASES[0].status !== "offline",channel:(state.doctor || {}).channel,channelFresh:(state.doctor || {}).channelFresh}) + "</div>" +
         (revokedHtml || "<div class='muted small' style='margin-top:4px'>No Kaji line yet: enrol your bases (INSTALL, Kaji line) to see them here.</div>");
       return;
     }
@@ -860,7 +876,7 @@
       "<div class='tiny muted'>" + (b.self ? "this machine" : esc(b.address)) + " · key " + esc(b.fingerprint.slice(0, 9)) + " · " + (b.self ? "local" : esc(sinceText(b.lastSeen))) + "</div>" +
       (b.self ? "<div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" : "") +
       (!b.self && b.online && b.health && b.health.reasons.length ? b.health.reasons.map(r => "<div class='tiny warn'>▲ " + esc(r) + "</div>").join("") : "") +
-      (!b.self && b.online && !b.health ? "<div class='tiny muted'>health not reported (that base runs an older version)</div>" : "") + channelLine(b) + "</div>").join("") + revokedHtml;
+      (!b.self && b.online && !b.health ? "<div class='tiny muted'>health not reported (that base runs an older version)</div>" : "") + channelLine(b.self ? { ...b, push:(state.doctor || {}).push } : b) + "</div>").join("") + revokedHtml;
     // B-093: the list is rebuilt on every poll, so the Revoked section's open state lives in state, not in the DOM.
     const fold = document.getElementById("bases").querySelector && document.getElementById("bases").querySelector(".revoked-bases");
     if (fold) fold.addEventListener("toggle", () => { state.revokedOpen = fold.open; });
