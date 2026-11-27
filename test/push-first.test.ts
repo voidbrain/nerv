@@ -13,7 +13,24 @@ import { fakeBotApi, fakePushService, until, wait } from './fixtures/delivery-fa
 
 const OWNER = 5150;
 const TOKEN = '123456:' + 'p'.repeat(35);
+const dashboardLive = readFileSync('web/public/dashboard/live.js', 'utf8');
 type Payload = { notification: { title: string; data: Record<string, unknown> } };
+
+function dashboardSeen(state: object, api: (path: string, init?: RequestInit) => Promise<unknown>, localStorage: object) {
+  const start = dashboardLive.indexOf('  const VISIT = "nerv.dashboard.lastVisit";');
+  const end = dashboardLive.indexOf('  window.renderAway = function ()', start);
+  assert.ok(start >= 0 && end > start, 'the dashboard exposes its Mark as read handler');
+  const window: Record<string, unknown> = {};
+  new Function(
+    'state',
+    'window',
+    'api',
+    'localStorage',
+    'HOUR',
+    `${dashboardLive.slice(start, end)}; return window.liveSeen;`,
+  )(state, window, api, localStorage, 60 * 60 * 1000);
+  return window.liveSeen as () => Promise<void>;
+}
 
 /** The dashboard's real service worker (web/public/dashboard/sw.js) in a sandbox whose fetch reaches `origin`. */
 function phone(origin: string) {
@@ -359,6 +376,50 @@ test('B-149: a pushed reminder read in the app before the deadline never reaches
     assert.equal(t.telegrams('Letto nella app'), 0, 'read in the app: never on Telegram');
     assert.equal(t.store.deliveryState(seen).telegram, undefined);
     assert.equal(readAt(unseen), null, 'only the item the app showed is read');
+  } finally {
+    await t.close();
+  }
+});
+
+test('B-180 join: Mark as read updates every covered delivery so Telegram skips them', async () => {
+  const t = await setup({ fallbackMs: 1500 });
+  const origin = `http://127.0.0.1:${(t.server.address() as { port: number }).port}`;
+  const api = async (path: string, init: RequestInit = {}) => {
+    const response = await fetch(origin + '/api/' + path, {
+      ...init,
+      headers: { Authorization: 'Bearer ' + 's'.repeat(32), ...init.headers },
+    });
+    const body: unknown = await response.json();
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return body;
+  };
+  const readAt = (id: string) =>
+    (t.store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(id) as { read_at: string | null })
+      .read_at;
+  try {
+    const outside = await t.due('Not covered by this visit');
+    await until(() => t.push.received.length === 1);
+    const since = Date.now();
+    const first = await t.due('Covered reminder one');
+    const second = await t.due('Covered reminder two');
+    await until(() => t.push.received.length === 3);
+    const history = (await api(
+      'dashboard/history?since=' + encodeURIComponent(new Date(since).toISOString()),
+    )) as { delivered: number };
+    assert.equal(history.delivered, 2, 'the dashboard panel covers both delivered reminders');
+
+    const state = { lastVisit: since, deliveredCount: history.delivered, deliveredSince: since, brief: null };
+    const saved: string[] = [];
+    const localStorage = { getItem: () => String(since), setItem: (_key: string, value: string) => saved.push(value) };
+    await dashboardSeen(state, api, localStorage)();
+
+    assert.ok(readAt(first), 'the first covered delivery is marked read on the service');
+    assert.ok(readAt(second), 'the second covered delivery is marked read on the service');
+    assert.equal(readAt(outside), null, 'a delivery outside the panel remains unread');
+    assert.deepEqual(saved, [String(since)], 'the dashboard cursor is persisted after service reads succeed');
+    await until(() => t.telegrams('Not covered by this visit') === 1);
+    assert.equal(t.telegrams('Covered reminder one'), 0);
+    assert.equal(t.telegrams('Covered reminder two'), 0);
   } finally {
     await t.close();
   }
