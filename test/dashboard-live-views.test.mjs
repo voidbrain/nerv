@@ -273,7 +273,8 @@ test('F-152: the store push status carries the last open time to the card', asyn
 // F-152 (owner decision, 2026-11-27): the model reload moves from Health into a collapsed Advanced section of Settings.
 const liveCode = readFileSync('web/public/dashboard/live.js', 'utf8');
 const settingsHtml = (/** @type {object} */ state) => {
-  const el = { innerHTML: '' };
+  /** @type {Record<string, { innerHTML: string }>} */
+  const boxes = {};
   const code = liveCode.slice(
     liveCode.indexOf('  window.renderSettings ='),
     liveCode.indexOf('  function readSettingsDraft()'),
@@ -281,7 +282,7 @@ const settingsHtml = (/** @type {object} */ state) => {
   new Function('esc', 'state', 'document', 'window', 'settingsModel', code + ';window.renderSettings();')(
     run('esc'),
     state,
-    { getElementById: () => el },
+    { getElementById: (/** @type {string} */ id) => (boxes[id] ??= { innerHTML: '' }) },
     {},
     () => ({
       enabled: false,
@@ -295,7 +296,8 @@ const settingsHtml = (/** @type {object} */ state) => {
       timeZone: 'Europe/Rome',
     }),
   );
-  return el.innerHTML;
+  // F-152-T08: Advanced is its own full-width box below the two columns.
+  return boxes.settings.innerHTML + (boxes['settings-more'] ? boxes['settings-more'].innerHTML : '');
 };
 
 test('F-152: Settings has a collapsed Advanced section with the model reload, outside the settings form', () => {
@@ -307,7 +309,12 @@ test('F-152: Settings has a collapsed Advanced section with the model reload, ou
   assert.equal(/** @type {Element} */ (adv.querySelector('summary')).textContent, 'Advanced');
   const btn = /** @type {Element} */ (adv.querySelector('button#btn-reload'));
   assert.equal(btn.getAttribute('type'), 'button');
-  assert.equal(btn.textContent, 'Re-read the model settings from config.json');
+  // F-152-T08 (owner, 2026-11-27): the long button label was confusing; a short one and one help line instead.
+  assert.equal(btn.textContent, 'Reload models');
+  assert.equal(
+    /** @type {Element} */ (adv.querySelector('.help')).textContent,
+    'Re-reads the model settings from config.json',
+  );
   assert.equal(d.querySelector('#settings-form #btn-reload'), null, 'not a submit inside the form');
   assert.ok(adv.querySelector('#reload-status[role=status]'), 'the result shows next to the button');
   assert.doesNotMatch(out, /\b[BF]-\d{3}\b/, 'no backlog IDs in the text');
@@ -360,4 +367,40 @@ test('F-152: the reload posts once per click and shows its result in plain words
     kind: 'danger',
     text: 'Not re-read: invalid models section. The previous settings stay in use.',
   });
+});
+
+test('F-152-T08: Advanced is rendered below the two Settings columns, full width', () => {
+  const html = readFileSync('web/public/dashboard/index.html', 'utf8');
+  const cols = html.indexOf('id="settings-cols"');
+  const more = html.indexOf('id="settings-more"');
+  const end = html.indexOf('</section>', cols);
+  assert.ok(more > cols && more < end, 'inside the Settings panel');
+  const inner = html.slice(cols, more);
+  assert.equal(
+    (inner.match(/<div/g) ?? []).length,
+    (inner.match(/<\/div>/g) ?? []).length,
+    'after the columns close, not inside one',
+  );
+  const boxes = {};
+  new Function(
+    'esc',
+    'state',
+    'document',
+    'window',
+    'settingsModel',
+    liveCode.slice(liveCode.indexOf('  window.renderSettings ='), liveCode.indexOf('  function readSettingsDraft()')) +
+      ';window.renderSettings();',
+  )(run('esc'), {}, { getElementById: (/** @type {string} */ id) => (boxes[id] ??= { innerHTML: '' }) }, {}, () => ({
+    enabled: false,
+    mode: 'apply',
+    checkHour: 20,
+    applyHour: 3,
+    quietFrom: 8,
+    quietUntil: 23,
+    briefEnabled: false,
+    briefAt: '08:00',
+    timeZone: 'Europe/Rome',
+  }));
+  assert.doesNotMatch(boxes.settings.innerHTML, /settings-advanced/, 'not in the left column');
+  assert.match(boxes['settings-more']?.innerHTML ?? '', /<details id='settings-advanced'/);
 });

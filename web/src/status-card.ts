@@ -11,6 +11,7 @@ export class NervStatusCard extends HTMLElement {
   private titleNode: HTMLElement;
   private detailNode: HTMLElement;
   private statusNode: HTMLElement;
+  private statusLabel: HTMLElement;
 
   constructor() {
     super();
@@ -20,10 +21,16 @@ export class NervStatusCard extends HTMLElement {
       'border:1px solid var(--line);border-radius:8px;padding:20px;margin-bottom:20px;background:var(--panel);color:var(--text)';
     this.titleNode = document.createElement('h2');
     this.detailNode = document.createElement('p');
+    // Owner, 2026-11-27: a bare "ok" said nothing; the status reads as a label and its value.
+    const line = document.createElement('p');
+    line.className = 'status-line';
+    this.statusLabel = document.createElement('span');
+    this.statusLabel.style.cssText = 'color:var(--muted)';
     this.statusNode = document.createElement('span');
     this.statusNode.setAttribute('role', 'status');
+    line.append(this.statusLabel, this.statusNode);
     this.detailNode.style.cssText = 'color:var(--muted);font-size:14px';
-    panel.append(this.titleNode, this.detailNode, this.statusNode);
+    panel.append(this.titleNode, this.detailNode, line);
     root.append(panel);
   }
 
@@ -34,11 +41,13 @@ export class NervStatusCard extends HTMLElement {
       const p = s.props as StatusSurface['props'];
       this.titleNode.textContent = p.title;
       this.detailNode.textContent = p.detail;
+      this.statusLabel.textContent = (document.documentElement.lang === 'it' ? 'Stato' : 'Status') + ': ';
       this.statusNode.textContent = p.status;
       this.statusNode.style.color = p.status === 'error' ? 'var(--error)' : 'var(--accent)';
     } catch {
       this.titleNode.textContent = 'Nodo';
       this.detailNode.textContent = 'Invalid surface';
+      this.statusLabel.textContent = 'Status: ';
       this.statusNode.textContent = 'error';
     }
   }

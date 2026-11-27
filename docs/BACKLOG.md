@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 37 | 10 | 73 | 34 |
+| **This week** | 37 | 10 | 74 | 34 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 62 | 54 |
-| **Require Human 🧑** | 18 | 22 |
+| **Open** | 62 | 55 |
+| **Require Human 🧑** | 18 | 23 |
 
 ### Require Human 🧑
 
@@ -37,6 +37,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |  |  | [B-142](#b-142) |  |
 |  |  | [B-148](#b-148) |  |
 |  |  | [B-149](#b-149) |  |
+|  |  | [B-182](#b-182) |  |
 |  |  | [B-056](#b-056) |  |
 |  |  | [B-096](#b-096) |  |
 |  |  | [B-110](#b-110) |  |
@@ -46,7 +47,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 287.25 h agent + 24 h owner across 302 open steps of 62 features and 54 other records. 165.25 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 289.75 h agent + 24.25 h owner across 306 open steps of 62 features and 55 other records. 165.25 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -3656,6 +3657,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-182"></a>[🐞 B-182](#top)
+
+**On an iPhone the installed dashboard zooms out to a narrow column and stays zoomed after a field**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔶 P2 | 🟡 Medium | 1.5 h agent + 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the next service update, the owner's phone check B-182-T03 (copy-paste steps in Next action below).
+
+| | |
+|---|---|
+| **Issue** | Owner report 2026-11-27, the dashboard installed as an iPhone app (the simple page `/` and `/full`): (1) a pinch zooms the page out past 100 % to a narrow column, so something is wider than the screen; (2) focusing a field zooms in and the page stays zoomed after leaving it. Causes found: on the simple page the single-column grid sized its track to its widest content (`1fr`), so a long unbroken reminder title, and on iOS the date-time field, made the page wider than the screen; the old `/dashboard/` overflowed at 320 px (sortie flow) and with a long reminder (its actions); form controls were 11–13 px (iOS zooms into a control under 16 px). |
+| **Reproduce** | At 320–430 px with a reminder or sortie title holding a long unbroken word, `document.documentElement.scrollWidth` exceeds the screen width on `/` and `/dashboard/`; every select and text field computes under 16 px on all three pages. |
+| **Check** | `test/mobile-viewport.browser.mjs` "B-182: …" (B-182-T01, committed failing first and not edited): at 320, 375, 390 and 430 px, `/` signed out, signed in and editing a reminder, `/full` in every Theme · Mode and `/dashboard/` dark and light have no sideways scroll, no element outside the screen unless its own box clips or scrolls it, and no visible control under 16 px. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="b-182-t01"></a>B-182-T01 — Failing test: no page wider than an iPhone screen, no control under 16 px | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [B-182-T02](#b-182-t02) | 🤖 | [PR #879](https://github.com/voidbrain/nerv/pull/879) |
+| 🟢 Small | <a id="b-182-t02"></a>B-182-T02 — Fit every page to the screen and keep controls at 16 px on phones | 1 h | 0 h | 1 h | Implemented; verification pending | [B-182-T01](#b-182-t01) | [B-182-T03](#b-182-t03) | 🤖 | [PR #879](https://github.com/voidbrain/nerv/pull/879) |
+| 🟢 Small | <a id="b-182-t03"></a>B-182-T03 — Owner phone check: no zoom-out past 100 %, no zoom on a field | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-182-T02](#b-182-t02) | — | ⏳ 🧑‍🔧 | — |
+| 🟡 Medium | **Total** | 1.5 h | 0 h (0 of 3 steps recorded) | 1.5 h agent + 0.25 h owner | 0 of 3 completed | | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-182.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: B-182-T01: [PR #879](https://github.com/voidbrain/nerv/pull/879) · B-182-T02: [PR #879](https://github.com/voidbrain/nerv/pull/879). [#879](https://github.com/voidbrain/nerv/pull/879); Test: `test/mobile-viewport.browser.mjs` "B-182: …" |
+| Opened | 2026-11-27 |
+| Verification | Browser: 2026-11-27, `test/mobile-viewport.browser.mjs` fails on main and passes with the fix (Chrome, 320–430 px); iOS simulator 2026-11-27 as above. Real device: pending (B-182-T03). |
+| Reviewed | 2026-11-27 |
+
+</details>
+
+---
 ### <a id="f-147"></a>[✨ F-147](#top)
 
 **Live index card: show the coordinator's live index through MCP**
@@ -4779,7 +4820,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h agent + 0.5 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+| 🔴 Open | 🔹 P3 | 🔴 Large | 6 h agent + 0.5 h owner | — | — | 🤖 | 🧑‍🔧 | — |
 
 🧑 **→** After the next service update, do the owner check F-152-T07 on the phone and the Mac (copy-paste steps in Next action below).
 
@@ -4797,9 +4838,10 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-152-t02"></a>F-152-T02 — Remove the duplicate automatic-update line from the Health card | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
 | 🟢 Small | <a id="f-152-t04"></a>F-152-T04 — Apply the decision on Reload models | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
 | 🟢 Small | <a id="f-152-t05"></a>F-152-T05 — Test first: Health diagnostics as a real table | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-152-T06](#f-152-t06) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
-| 🟡 Medium | <a id="f-152-t06"></a>F-152-T06 — Build the diagnostics table on the Health card | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [F-152-T05](#f-152-t05) | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
-| 🟢 Small | <a id="f-152-t07"></a>F-152-T07 — Owner visual check on the live dashboard | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-152-T01](#f-152-t01), [F-152-T02](#f-152-t02), [F-152-T04](#f-152-t04), [F-152-T06](#f-152-t06) | — | ⏳ 🧑‍🔧 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
-| 🔴 Large | **Total** | 5 h | 0 h (0 of 7 steps recorded) | 5 h agent + 0.5 h owner | 1 of 7 completed | | | | |
+| 🟡 Medium | <a id="f-152-t06"></a>F-152-T06 — Build the diagnostics table on the Health card | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [F-152-T05](#f-152-t05) | [F-152-T07](#f-152-t07), [F-152-T08](#f-152-t08) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
+| 🟢 Small | <a id="f-152-t08"></a>F-152-T08 — Owner feedback: diagnostics as cards, Advanced full width, shorter reload button, labelled Doctor status | 1 h | 0 h | 1 h | Implemented; verification pending | [F-152-T06](#f-152-t06) | [F-152-T07](#f-152-t07) | 🤖 | [PR #879](https://github.com/voidbrain/nerv/pull/879) |
+| 🟢 Small | <a id="f-152-t07"></a>F-152-T07 — Owner visual check on the live dashboard | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-152-T01](#f-152-t01), [F-152-T02](#f-152-t02), [F-152-T04](#f-152-t04), [F-152-T06](#f-152-t06), [F-152-T08](#f-152-t08) | — | ⏳ 🧑‍🔧 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
+| 🔴 Large | **Total** | 6 h | 0 h (0 of 8 steps recorded) | 6 h agent + 0.5 h owner | 1 of 8 completed | | | | |
 
 <details><summary>Done steps (1)</summary>
 
@@ -4816,7 +4858,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-152-T01: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T02: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T03: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan; [PR #860](https://github.com/voidbrain/nerv/pull/860) owner decision · F-152-T04: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T05: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T06: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T07: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan. Plan: [#859](https://github.com/voidbrain/nerv/pull/859). Decision T03: [#860](https://github.com/voidbrain/nerv/pull/860); [#873](https://github.com/voidbrain/nerv/pull/873); [#874](https://github.com/voidbrain/nerv/pull/874); [#876](https://github.com/voidbrain/nerv/pull/876); [#877](https://github.com/voidbrain/nerv/pull/877) |
+| PR / evidence | Steps: F-152-T01: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T02: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T03: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan; [PR #860](https://github.com/voidbrain/nerv/pull/860) owner decision · F-152-T04: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T05: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T06: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T07: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T08: [PR #879](https://github.com/voidbrain/nerv/pull/879). Plan: [#859](https://github.com/voidbrain/nerv/pull/859). Decision T03: [#860](https://github.com/voidbrain/nerv/pull/860); [#873](https://github.com/voidbrain/nerv/pull/873); [#874](https://github.com/voidbrain/nerv/pull/874); [#876](https://github.com/voidbrain/nerv/pull/876); [#877](https://github.com/voidbrain/nerv/pull/877) |
 | Opened | 2026-11-26 |
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
