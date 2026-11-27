@@ -14,6 +14,7 @@ import type { UsageRecord } from './model-usage.ts';
 import { MODEL_TIMEOUT_MS, type Ask, type Reply } from './model.ts';
 import type { OperatorResolution, PublicOperatorInfo } from './operator-directory.ts';
 import type { Pilot, PilotPatch } from './pilots.ts';
+import type { ThinkingEntry } from './thinking.ts';
 import type { Effect, Pattern, Stage } from './policy.ts';
 import type { QueueSnapshot } from './request-queue.ts';
 import type { ListItem, ListView, OwnerList } from './lists.ts';
@@ -303,6 +304,8 @@ export interface StoreApi {
   externalTools?(): Promise<ExternalTools>;
   /** F-045/F-051: the pilot roster for the dashboard (config.json pilots, read now). */
   pilotRoster?(): Pilot[] | Promise<Pilot[]>;
+  /** F-148: the model calls in flight (pilot, role, model, sortie, start); no prompt or answer text. */
+  thinking?(): Promise<ThinkingEntry[]>;
   /** F-145: the skills store, read-only (names, versions, stages and evaluation numbers). */
   skills?(): SkillOverview[];
   /** F-049-T09: live EVA instances per class, per machine, for the dashboard. */

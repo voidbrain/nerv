@@ -177,8 +177,11 @@ export class Runtime implements StoreApi {
       ...(limit === undefined ? {} : { limit }),
     })) as { items: (UsageRecord & { sequence: number })[]; next: number | null };
   }
+  /** The ledger's revision, moved on by every change of who is thinking (F-148-T03); still two numbers, "a:b". */
   async dashboardRevision() {
-    return (await this.nervous.call('dashboard.revision')) as string;
+    const [a, b] = ((await this.nervous.call('dashboard.revision')) as string).split(':');
+    this.thinkingNow.snapshot();
+    return `${a}:${Number(b) + this.thinkingNow.version}`;
   }
   async ready() {
     await this.nervous.call('runtime.ping');
