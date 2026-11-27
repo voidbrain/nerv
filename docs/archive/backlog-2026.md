@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 10 | 34 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 11 | 34 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7843,6 +7843,40 @@ nerv chat "quali genetiche ho?"
 | Verification | Owner check passed 2026-11-27 (B-176-T04), see evidence |
 | Reviewed | 2026-11-27 |
 | Impact | Any granted read with a result over 8,000 characters answers the owner with nothing: Grover's strain list is the first case. |
+
+</details>
+
+---
+
+### F-060
+
+**Spike: herdr-core as a coding-agent terminal runtime**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P3 | Closed | 🟡 Medium |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-27: Cancelled 2026-11-27 by owner decision (chat): skip herdr features, coding agents go all in NERV (F-090, PR #889); herdr kept as interim terminal app.
+
+| | |
+|---|---|
+| **Issue** | Owner question 2026-11-06: is [herdr-core](https://herdr.dev/core/) (`hc`, Apache 2.0, [source](https://github.com/herdrdev/herdr-core)) useful for coding with Claude Code and Codex, and for NERV? It offers persistent terminals, agents that start and direct helper agents, attach/takeover, remote machines over SSH, explicit program status (OSC 7501) and an OpenRPC API. Not evaluated yet. |
+| **Reproduce** | Install `hc` (read the install script first) and run one implementer agent, one reviewer and one test terminal, each in its own git worktree; detach, reattach, restart the viewer, delegate a review and read its report. |
+| **Check** | A dated note in this record answering: (1) does switching, reviewing and recovering sessions get easier than today; (2) can Claude Code / Codex emit OSC 7501 status (hook or wrapper), or do they have none; (3) what `--keep` recovery preserves after a daemon or machine restart; (4) API stability and security model confirmed from the docs; (5) outcome per NERV record (F-012, F-019, F-045, F-048, F-049): adapter candidate, borrow the concept only, or not relevant. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-27: Cancelled 2026-11-27 by owner decision (chat): skip herdr features, coding agents go all in NERV (F-090, PR #889); herdr kept as interim terminal app. 2026-11-13: lowered to P3 by the owner. Hypotheses from the 2026-11-06 review (landing page and repository README; the security and API pages were not read): (a) development workspace first, NERV adapter later and optional; (b) F-012: a still-running session could be found by name, status-checked and resumed with one `hc send`, but the README says “Recovery starts a fresh shell, never reruns the task”, so herdr does not cover resumption after reboot or crash; (c) F-019 / F-052: status reported by the program rather than inferred matches the observed-versus-inferred telemetry rule, but “a program that does not report status has none”; (d) F-045 / F-048: parent/child ownership, completion notices and cancel-with-parent as a lifecycle pattern for pilots and parallel work; (e) F-049: herdr runs commands with the user's full access and is not a sandbox; at most it would run inside an EVA, and attach/takeover is a separate capability. Any integration stays behind NERV's grants, action gate, isolation and ledger; `hc send` is a write action. Repository at review: 440 stars, 134 commits, no published releases. Close with the outcome note; adapter work, if chosen, gets its own record.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | [PR #386](https://github.com/voidbrain/nerv/pull/386) [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #169](https://github.com/voidbrain/nerv/pull/169) spike record; Owner question 2026-11-06 |
+| Opened | 2026-11-06 |
+| Verification | Documentation: Pending. Human: Pending (trial). |
+| Reviewed | 2026-11-06 |
 
 </details>
 
