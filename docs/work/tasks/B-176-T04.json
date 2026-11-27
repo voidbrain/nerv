@@ -35,5 +35,6 @@
     "estimateAgentHours": 0.0,
     "ownerHours": 0.25,
     "ownerKind": "procedure"
-  }
+  },
+  "ownerLink": "docs/work/records/B-176.md"
 }

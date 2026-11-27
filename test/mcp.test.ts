@@ -512,6 +512,59 @@ test(
   },
 );
 test(
+  'B-175-T04: a dashboard follow-up within 30 minutes carries the earlier exchange, so its taint, into the next sortie',
+  { timeout: 60000 },
+  async () => {
+    const { Runtime } = await import('../src/runtime.ts');
+    const probe = new McpClient(server());
+    const fp = fingerprint((await probe.listTools())[0]!);
+    probe.close();
+    // Owner check 2026-11-27 (S-DFCA, then S-6AAF on NERV-01): the follow-up opened trusted with no context.intake.
+    const m = await model([
+      '{"action":{"tool":"notes.read_note","args":{"name":"strains"}}}',
+      '{"action":{"tool":"notes.read_note","args":{"name":"plants"}}}',
+      '{"reply":"Your strains: one."}',
+      '{"action":{"tool":"notes.read_note","args":{"name":"plants"}}}',
+    ]);
+    const home = mkdtempSync(join(tmpdir(), 'nerv-mcp-followup-'));
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({
+        models: {
+          local: { baseUrl: m.url, model: 'm' },
+          roles: { misato: { route: 'local' }, consultant: { model: 'c' } },
+        },
+        tools: {
+          mcp: [server()],
+          grants: [{ server: 'notes', tool: 'read_note', effect: 'read', eva: '00', fingerprint: fp }],
+        },
+      }),
+    );
+    const r = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+    try {
+      await r.ready();
+      const one = await r.chat('quali genetiche ho?', 'dashboard');
+      assert.equal((await r.sortie(one.sortieId))?.trust, 'tainted');
+      const two = await r.chat('e quali piante sto coltivando?', 'dashboard');
+      const intake = (await r.events(two.sortieId)).filter((e) => e.kind === 'context.intake');
+      assert.deepEqual(
+        intake.map((e) => (e.payload as { source: string; trust: string }).trust),
+        ['tainted'],
+        'the earlier exchange is context of the follow-up',
+      );
+      assert.equal((await r.sortie(two.sortieId))?.trust, 'tainted');
+      assert.deepEqual(
+        two.steps.filter((s) => s.tool).map((s) => s.outcome),
+        ['reject'],
+      );
+    } finally {
+      await r.close();
+      await m.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);
+test(
   'F-027: MCP result taints the durable sortie, approved memory, resume and the next conversation turn',
   { timeout: 60000 },
   async () => {

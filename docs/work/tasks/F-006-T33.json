@@ -1,7 +1,7 @@
 {
   "version": 1,
   "parent": "F-006",
-  "status": "implemented",
+  "status": "closed",
   "resources": [
     "contract:model-routing",
     "docs/decisions/placement-campaign.md",
@@ -45,13 +45,19 @@
   "effort": {
     "size": "small",
     "estimate": "0 remaining",
-    "basis": "Estimated 2026-11-26 from F-006-T25 (0.5 h). Exercised live 2026-11-26 on NERV-01 + NERV-02 (coder cancel, auditor cancel, recovery case; 0 paid tokens) with unit regression in test/placement-live.test.mjs; remaining: CI.",
-    "reviewed": "2026-11-26",
+    "basis": "Estimated 2026-11-26 from F-006-T25 (0.5 h). Exercised live 2026-11-26 on NERV-01 + NERV-02 (coder cancel, auditor cancel, recovery case; 0 paid tokens) with unit regression in test/placement-live.test.mjs; remaining: CI. Closed 2026-11-27: #839 merged on green CI (run 45889947589).",
+    "reviewed": "2026-11-27",
     "agentHours": 0,
     "ownerHours": 0,
     "actualAgentHours": 0.25,
     "actualSource": "stated",
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 839,
+      "note": "merged on green CI"
+    }
+  ]
 }

@@ -12,7 +12,7 @@
   "id": "B-172-T02",
   "title": "kaji adopt: backup, sign main at epoch 1, activate the legacy store, refuse wherever another coordinator could have run",
   "goal": "B-172-T01's tests pass unchanged; review findings fixed with tests",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "B-172-T01's tests pass unchanged, with the coordinator suites",
     "Fresh-context design review findings fixed or answered"
@@ -37,10 +37,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "2 h",
-    "basis": "Estimated 2026-11-26: one command reusing the epoch probe and push, review fixes and docs. Not a measurement.",
-    "reviewed": "2026-11-26",
-    "agentHours": 2,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: one command reusing the epoch probe and push, review fixes and docs. Not a measurement. Closed 2026-11-27: #841 merged on green CI (run 45905616846).",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
     "baselineAgentHours": 2,
     "estimateAgentHours": 2
   },
