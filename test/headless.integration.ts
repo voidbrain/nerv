@@ -87,6 +87,11 @@ test(
         encoding: 'utf8',
       });
       assert.match(dashboard.stdout, /\/dashboard\/#code=[a-f0-9]{32}/);
+      // B-184: open full signs the full dashboard in directly; typing /full in the address bar would reload and ask again.
+      const full = spawnSync(process.execPath, ['src/cli.ts', 'open', 'full', '--print'], { env, encoding: 'utf8' });
+      assert.equal(full.status, 0, full.stderr);
+      assert.match(full.stdout, new RegExp(`^${base}/full#code=[a-f0-9]{32}$`, 'm'));
+      assert.match(await (await fetch(base + '/full')).text(), /nerv-app/, '/full is served as the workspace app');
       assert.match(
         await (await fetch(base + '/dashboard/')).text(),
         /<script src="live\.js"><\/script>/,
