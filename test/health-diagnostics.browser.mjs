@@ -71,7 +71,16 @@ test('F-152-T08: the diagnostics are cards that fit the box at every width', { t
         await new Promise((done) => setTimeout(done, 200));
         assert.deepEqual(
           await evaluate(fit),
-          { page: true, box: true, cards: 3, columns: width >= 720 ? 2 : 1, lines: false, pad: true, tight: true, inside: true },
+          {
+            page: true,
+            box: true,
+            cards: 3,
+            columns: width >= 720 ? 2 : 1,
+            lines: false,
+            pad: true,
+            tight: true,
+            inside: true,
+          },
           `cards fit, two per row on a wide screen and one on a phone, compact and without row lines, at ${width} px`,
         );
         assert.deepEqual(
