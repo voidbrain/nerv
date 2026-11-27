@@ -703,6 +703,11 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
       assert.equal(await keeper.renewOnce(), 'renewed');
       const baselineRenewMs = performance.now() - baselineAt;
       await b.link.heartbeat();
+      // B-076: the main thread's CPU time for the same pair of requests with no export running, the baseline below.
+      const cpuBefore = process.threadCpuUsage();
+      await Promise.all([keeper.renewOnce(), b.link.heartbeat()]);
+      const baselineCpu = process.threadCpuUsage(cpuBefore);
+      const baselineCpuMs = (baselineCpu.user + baselineCpu.system) / 1000;
 
       // Populate X with 25,000 committed deliveries rows (~60 MB JSON) and clear pending capture so the seed
       // measures reading, canonicalising and signing a multi-megabyte snapshot (~500 ms+ worker CPU).
@@ -721,12 +726,18 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
       let renewDoneAt = 0;
       let kajiDoneAt = 0;
       let concurrentWork: Promise<void> | undefined;
+      let cpuAtRead: NodeJS.CpuUsage | undefined;
+      let mainCpuMs = -1;
 
       const shipper = x.lease.shipper(
         {
           replicate: (id, batch, lease) => x.link.replicate(id, batch, lease),
           seedStandby: (id, frame, epoch, lease) => {
-            if (!firstChunkAt) firstChunkAt = performance.now();
+            if (!firstChunkAt) {
+              firstChunkAt = performance.now();
+              const cpu = process.threadCpuUsage(cpuAtRead);
+              mainCpuMs = (cpu.user + cpu.system) / 1000;
+            }
             return x.link.seedStandby(id, frame, epoch, lease);
           },
         },
@@ -734,6 +745,7 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
           // Fires right after the worker's SQLite read transaction commits, while it canonicalises and signs.
           onReadCommitted: () => {
             readCommittedAt = performance.now();
+            cpuAtRead = process.threadCpuUsage();
             concurrentWork = Promise.all([
               keeper.renewOnce().then((out) => {
                 renewOutcome = out;
@@ -776,13 +788,24 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
         kajiMs: Math.round(kajiDoneAt - readCommittedAt),
         ticksDuringSerialise,
         maxGapMs: Math.round(maxGapMs),
+        mainCpuMs: Math.round(mainCpuMs),
+        baselineCpuMs: Math.round(baselineCpuMs),
       });
       console.log(`F-016-T21 metrics ${metrics}`);
       assert.ok(readCommittedAt > 0, 'worker reported read-committed before canonicalising');
       // The event loop is what a synchronous export blocks (0 ticks during the export, re-checked 2026-11-26): it keeps
-      // turning, with a bounded gap, while the worker canonicalises and signs.
+      // turning while the worker canonicalises and signs.
       assert.ok(ticksDuringSerialise >= 1, `no event-loop tick during serialise/sign: ${metrics}`);
-      assert.ok(maxGapMs < Math.max(250, serialiseMs * 0.6), `event-loop delay blocked serialise/sign: ${metrics}`);
+      // B-076: the canonicalising and signing are not on the main thread: during the export it spends about the CPU time
+      // the same two requests take with no export (11-14 ms against 8-15 ms locally), where an export on it spends
+      // 146-217 ms. CPU time, not the longest wall-clock gap: both bases share this process, and on the Windows runner
+      // B's synchronous write answering the renewal (INSERT INTO standby_lease_state) waited 203 ms for the disk while
+      // the main thread used 16 ms of CPU (run 45976907230); in a deployment that wait is on B's host. The floor
+      // covers Windows counting thread CPU time in 15.6 ms clock ticks.
+      assert.ok(
+        mainCpuMs >= 0 && mainCpuMs < Math.max(100, 5 * baselineCpuMs),
+        `serialise/sign used the main thread's CPU: ${metrics}`,
+      );
       // The renewal and the Kaji request sent at read-commit are answered. They are not raced against the export: on
       // the Windows runner one renewal took 664 ms against a 545 ms export (two runs of three), so finishing inside the
       // window measured the runner's I/O, not the event loop.

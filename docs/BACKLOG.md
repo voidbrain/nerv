@@ -4382,7 +4382,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | PRs |
 |---|---|---|---|---|---|---|
-| 🟢 Small | <a id="b-076-t01"></a>B-076-T01 — Name the cause of each scattered CI failure of 2026-11-18 | 1.25 h | 1 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound |
+| 🟢 Small | <a id="b-076-t01"></a>B-076-T01 — Name the cause of each scattered CI failure of 2026-11-18 | 1.25 h | 1 h so far (stated) | 0.25 h | Implemented; verification pending | [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound; [PR #868](https://github.com/voidbrain/nerv/pull/868) F-016-T21 Windows gap |
 | 🟢 Small | **Total** | 1.75 h | 1.25 h (2 of 3 steps recorded) | 0.25 h | 2 of 3 completed | |
 
 <details><summary>Done steps (2)</summary>
@@ -4401,7 +4401,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound · B-076-T03: [PR #695](https://github.com/voidbrain/nerv/pull/695). [PR #540](https://github.com/voidbrain/nerv/pull/540) B-076-T01; [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2; [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758); [#803](https://github.com/voidbrain/nerv/pull/803) runs 45796401539 and 45800646253 attempt 1; [#815](https://github.com/voidbrain/nerv/pull/815); [#864](https://github.com/voidbrain/nerv/pull/864) |
+| PR / evidence | Steps: B-076-T01: [PR #510](https://github.com/voidbrain/nerv/pull/510) opened; [PR #508](https://github.com/voidbrain/nerv/pull/508) headless bound; [PR #513](https://github.com/voidbrain/nerv/pull/513) watch bound; [PR #868](https://github.com/voidbrain/nerv/pull/868) F-016-T21 Windows gap · B-076-T03: [PR #695](https://github.com/voidbrain/nerv/pull/695). [PR #540](https://github.com/voidbrain/nerv/pull/540) B-076-T01; [PR #510](https://github.com/voidbrain/nerv/pull/510); run 44259214063 attempt 2; [#736](https://github.com/voidbrain/nerv/pull/736); [#750](https://github.com/voidbrain/nerv/pull/750); [#758](https://github.com/voidbrain/nerv/pull/758); [#803](https://github.com/voidbrain/nerv/pull/803) runs 45796401539 and 45800646253 attempt 1; [#815](https://github.com/voidbrain/nerv/pull/815); [#864](https://github.com/voidbrain/nerv/pull/864); [#868](https://github.com/voidbrain/nerv/pull/868) |
 | Opened | 2026-11-18 |
 | Verification | Pending. |
 | Reviewed | 2026-11-26 |
