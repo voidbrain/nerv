@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-152-T09",
+  "parent": "F-152",
+  "title": "Owner feedback: compact diagnostics cards, two per row, no row lines",
+  "goal": "Health diagnostics cards sit two per row from 720 px and one on a phone, compact, with no line between values",
+  "status": "implemented",
+  "acceptance": [
+    "At 360-390 px one card per row, at 1440 px two per row; inside the box; nothing scrolls sideways; axe and contrast pass",
+    "No border between a card's label/value rows; card padding at most 3px 6px; no blank space between rows",
+    "Tests changed first (owner changed the requirement); tokens only; style guide updated"
+  ],
+  "dependsOn": [
+    "F-152-T08"
+  ],
+  "resources": [
+    "web/public/dashboard/**",
+    "test/**",
+    "docs/work/records/F-152.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "javascript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h agent",
+    "basis": "Estimated 2026-11-27 from owner feedback on #879: CSS only over the same markup. Not a measurement. Implemented 2026-11-27.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
