@@ -65,11 +65,15 @@ export async function loadExternalTools(options: {
       return undefined;
     }
   })();
-  // F-159: an off module's grants are kept but offer nothing; a switch invalidates the cache at once.
+  // F-159: an off module's grants are kept but offer nothing (listed as suspended, with how to turn it on, so an
+  // approval or another base's request says why); a switch invalidates the cache at once.
   const off = (tools?.mcp ?? []).filter((s) => s.off).map((s) => s.id);
   const grants = (tools?.grants ?? []).filter((g) => !off.includes(g.server));
+  const switchedOff = (tools?.grants ?? [])
+    .filter((g) => off.includes(g.server))
+    .map((g) => ({ name: toolName(g.server, g.tool), why: `its module is off: nerv modules on ${g.server}` }));
   const key = off.join(',');
-  if (!grants.length) return { value: { docs: [], byName: new Map(), suspended: [] }, cache: options.cache };
+  if (!grants.length) return { value: { docs: [], byName: new Map(), suspended: switchedOff }, cache: options.cache };
   if (!options.force && options.cache && options.cache.off === key && Date.now() - options.cache.at < 60_000) {
     return { value: options.cache.value, cache: options.cache };
   }
@@ -77,7 +81,7 @@ export async function loadExternalTools(options: {
     .toolsProcess()
     .call('tools.list')
     .catch(() => [])) as { server: string; tools?: (McpTool & { fingerprint: string })[]; error?: string }[];
-  const value: ExternalTools = { docs: [], byName: new Map(), suspended: [] };
+  const value: ExternalTools = { docs: [], byName: new Map(), suspended: [...switchedOff] };
   for (const g of grants) {
     const server = listed.find((l) => l.server === g.server);
     const t = server?.tools?.find((x) => x.name === g.tool);

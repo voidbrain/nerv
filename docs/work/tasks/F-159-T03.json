@@ -2,7 +2,7 @@
   "version": 1,
   "id": "F-159-T03",
   "parent": "F-159",
-  "title": "Test first: the Modules panel in Settings; off hides the module's cards and stops their polling",
+  "title": "Test first: the Modules panel on the full dashboard; off hides the module's cards and stops their polling",
   "goal": "A Modules panel on the full dashboard switches each module, and an off module's cards hide",
   "status": "implemented",
   "acceptance": [

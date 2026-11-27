@@ -86,3 +86,11 @@ export function setModuleOn(home: string, id: string, on: boolean): ModuleRow {
   }
   return { ...row, on };
 }
+
+/** What this base offers other bases now: its `kaji.offers` less the tools of an off module (a server's or a pack's). */
+export function offersOn(config: Config): string[] {
+  const off = (config.tools?.mcp ?? []).filter((s) => s.off).map((s) => s.id + '.');
+  return (config.kaji?.offers ?? []).filter(
+    (n) => !off.some((p) => n.startsWith(p)) && builtinPackRegistry.isToolEnabled(n, config.packs),
+  );
+}

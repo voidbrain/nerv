@@ -418,6 +418,8 @@ export class Nodo {
   }
   async refresh() {
     const revision = ++this.revision;
+    // F-159: read beside the rest, never holding it up (a hub that does not answer would).
+    void this.modules.load();
     this.error.set('');
     this.paging.set(true);
     try {
@@ -426,7 +428,6 @@ export class Nodo {
         this.request('inbox/history'),
         this.request('doctor'),
         this.request('batteries').catch(() => ({ items: [] })),
-        this.modules.load(),
       ]);
       if (revision !== this.revision) return;
       this.batteries.set((b as { items?: BatteryCardItem[] }).items ?? []);

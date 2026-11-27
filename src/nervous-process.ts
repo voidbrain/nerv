@@ -105,12 +105,16 @@ const registry = () =>
 const external = () => {
   try {
     const t = process.argv[3] ? readConfig(process.argv[3]).tools : undefined;
-    return (t?.grants ?? []).map((g) => ({
-      name: toolName(g.server, g.tool),
-      effect: g.effect,
-      eva: `eva-${g.eva}` as const,
-      ...(g.allowTainted ? { allowTainted: true as const } : {}),
-    }));
+    // F-159: an off module's grants are kept in config.json but grant nothing until it is on again.
+    const off = (t?.mcp ?? []).filter((s) => s.off).map((s) => s.id);
+    return (t?.grants ?? [])
+      .filter((g) => !off.includes(g.server))
+      .map((g) => ({
+        name: toolName(g.server, g.tool),
+        effect: g.effect,
+        eva: `eva-${g.eva}` as const,
+        ...(g.allowTainted ? { allowTainted: true as const } : {}),
+      }));
   } catch {
     return [];
   }
