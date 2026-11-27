@@ -649,9 +649,10 @@
   /** B-134: the Phone push line: subscribed devices and the last delivery result, read-only from the doctor. */
   function pushRow(p) {
     if (!p) return ["Phone push", "warn", "unknown"];
-    const n = p.devices || 0, last = p.last;
-    const devices = n + (n === 1 ? " device" : " devices");
-    if (!last) return ["Phone push", n ? "ok" : "warn", devices + " · no delivery yet"];
+    // B-183: paired devices, as Settings lists them, then subscriptions no paired device made (they still get pushes).
+    const n = p.devices || 0, u = p.unpaired || 0, last = p.last;
+    const devices = n + (n === 1 ? " device" : " devices") + (u ? " · " + u + " unpaired subscription" + (u === 1 ? "" : "s") : "");
+    if (!last) return ["Phone push", n || u ? "ok" : "warn", devices + " · no delivery yet"];
     const when = new Date(last.at).toLocaleString();
     return ["Phone push", last.ok ? "ok" : "danger", devices + " · " + (last.ok ? "last ok (" + last.status + ")" : "last failed (" + last.status + (last.reason ? " " + last.reason : "") + ")") + " · " + when];
   }
@@ -824,15 +825,16 @@
   /** F-152: the phone push line for this base (push is local to a base): devices, the last push and its open time. */
   function pushLines(p) {
     if (!p) return "<div class='tiny muted'>Phone push · state not reported</div>";
-    const n = p.devices || 0;
-    if (!n) return "<div class='tiny muted'>Phone push · no device subscribed</div>";
+    // B-183: paired devices, then subscriptions no paired device made, as in Health.
+    const n = p.devices || 0, u = p.unpaired || 0;
+    if (!n && !u) return "<div class='tiny muted'>Phone push · no device subscribed</div>";
     const last = p.last;
     const sent = !last
       ? "No push sent yet"
       : last.ok
         ? "Last push accepted · " + esc(new Date(last.at).toLocaleString())
         : "<span class='warn'>Last push failed (" + esc(last.status + (last.reason ? " " + last.reason : "")) + ")</span> · " + esc(new Date(last.at).toLocaleString());
-    return "<div class='tiny muted'>Phone push · " + n + (n === 1 ? " device" : " devices") + "</div>" +
+    return "<div class='tiny muted'>Phone push · " + n + (n === 1 ? " device" : " devices") + (u ? " · " + u + " unpaired subscription" + (u === 1 ? "" : "s") : "") + "</div>" +
       "<div class='tiny muted'>" + sent + " · " + (p.lastOpened ? "opened " + esc(new Date(p.lastOpened).toLocaleString()) : "not opened yet") + "</div>";
   }
   // A heartbeat reports a route check, not successful delivery to a phone.

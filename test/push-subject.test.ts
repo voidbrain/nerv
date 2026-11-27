@@ -80,9 +80,10 @@ test('B-134: a failed dispatch is logged (host, status, reason only) and stored 
   try {
     store.pushFetch = (async () => new Response('{"reason":"BadJwtToken"}', { status: 403 })) as typeof fetch;
     const endpoint = 'https://web.push.apple.com/SECRET-TOKEN-123';
-    store.savePushSubscription({ endpoint, ...sub() });
-    // F-152: the status also carries the last open time (a deliberate change of the expected shape).
-    assert.deepEqual(store.pushHealth(), { devices: 1, last: null, lastOpened: null });
+    store.savePushSubscription({ endpoint, ...sub(), deviceId: '0123456789abcdef' });
+    // F-152: the status also carries the last open time; B-183: devices counts paired devices' subscriptions and
+    // unpaired the rest (deliberate changes of the expected shape).
+    assert.deepEqual(store.pushHealth(), { devices: 1, unpaired: 0, last: null, lastOpened: null });
     store.add('Phone push test', '2030-01-01T10:00:00Z');
     store.tick(new Date('2030-01-01T10:01:00Z'));
     const end = Date.now() + 3000;
