@@ -4,7 +4,7 @@
   "parent": "B-180",
   "title": "Dashboard mark read updates the inbox service",
   "goal": "The dashboard action marks every covered delivered reminder read before saving its visit cursor",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A failing-first join test loads the dashboard Mark as read handler and exercises the authenticated inbox read endpoint and Telegram fallback",
     "Every delivered reminder covered by the visit cursor is posted to /api/inbox/<id>/read; deliveries outside the panel remain unread",

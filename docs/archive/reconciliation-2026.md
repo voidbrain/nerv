@@ -699,3 +699,7 @@ PRs #835, #834, #836 and #837 merged on green CI (#835, #836, #837 docs-only: F-
 ## 2026-11-27 — main `b02b82b`
 
 PRs #838–#861 (24) merged on green CI; #854 and #856 after one Windows B-076 failure each. Closed B-171; 23 steps closed on green CI. B-175-T04 step 2 failed: B-175-T08. Owner checks open: B-170-T06, B-172-T03, B-176-T04, B-177-T03, F-006-T35.
+
+## 2026-11-27 — main `a1646b6`
+
+PRs #864, #865, #863, #866 and #862 merged on green CI. #866 closed archived B-176 after the owner's check; #862 fixed B-178. Reconcile draft reported #866 as unnamed because its record was already archived.
