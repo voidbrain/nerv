@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-158-T02",
+  "parent": "F-158",
+  "title": "Read API: the graph nodes, the possible links and the last paths",
+  "goal": "A dashboard endpoint returns nodes by column, links between possible followers, and recent decisions",
+  "status": "planned",
+  "acceptance": [
+    "Test first on the endpoint shape; nodes come from config (roles, routes, models), links from what each column may reach (Casper only to local)",
+    "Auth like the other dashboard endpoints; a bounded number of recent sorties"
+  ],
+  "dependsOn": [
+    "F-158-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "web/**",
+    "docs/**",
+    "docs/work/records/F-158.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

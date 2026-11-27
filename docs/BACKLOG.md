@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 37 | 10 | 74 | 34 |
+| **This week** | 42 | 10 | 74 | 34 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 62 | 55 |
-| **Require Human 🧑** | 18 | 23 |
+| **Open** | 67 | 55 |
+| **Require Human 🧑** | 19 | 23 |
 
 ### Require Human 🧑
 
@@ -22,8 +22,8 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |---|---|---|---|
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-062](#f-062) | [F-120](#f-120) | [B-170](#b-170) | — |
-| [F-006](#f-006) | [F-116](#f-116) | [B-172](#b-172) |  |
-| [F-011](#f-011) | [F-126](#f-126) | [B-175](#b-175) |  |
+| [F-006](#f-006) | [F-126](#f-126) | [B-172](#b-172) |  |
+| [F-011](#f-011) | [F-116](#f-116) | [B-175](#b-175) |  |
 | [F-004](#f-004) | [F-151](#f-151) | [B-057](#b-057) |  |
 | [F-012](#f-012) | [F-142](#f-142) | [B-068](#b-068) |  |
 | [F-016](#f-016) |  | [B-107](#b-107) |  |
@@ -33,8 +33,8 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-092](#f-092) |  | [B-128](#b-128) |  |
 | [F-152](#f-152) |  | [B-129](#b-129) |  |
 | [F-060](#f-060) |  | [B-134](#b-134) |  |
-| [F-007](#f-007) |  | [B-135](#b-135) |  |
-|  |  | [B-142](#b-142) |  |
+| [F-157](#f-157) |  | [B-135](#b-135) |  |
+| [F-007](#f-007) |  | [B-142](#b-142) |  |
 |  |  | [B-148](#b-148) |  |
 |  |  | [B-149](#b-149) |  |
 |  |  | [B-182](#b-182) |  |
@@ -47,7 +47,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 289.75 h agent + 24.25 h owner across 306 open steps of 62 features and 55 other records. 165.25 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 311.5 h agent + 25.75 h owner across 329 open steps of 67 features and 55 other records. 165.25 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -4125,6 +4125,182 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-126"></a>[✨ F-126](#top)
+
+**Evaluate gemma4:26b as the local chat model instead of gemma4:12b**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.75 h agent + 0.25 h owner | — | [F-154-T05](#f-154-t05), [F-155-T01](#f-155-t01), [F-156-T01](#f-156-t01), [F-156-T02](#f-156-t02) | 🤖 | — | 🤔 |
+
+🧑 **→** F-126-T03: confirm gemma4:26b as the main model or go back to gemma4:12b, after the [quality report](evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md).
+
+| | |
+|---|---|
+| **Issue** | Owner approved 2026-11-25. On the owner's Mac (M3 Pro, 36 GB, load average 8–15), with a 3,900-token prompt and uncached prompt reading, gemma4:26b read the prompt about twice as fast as gemma4:12b and generated faster: gemma4:12b 200 tok/s reading, 37 tok/s generation; gemma4:26b 441 / 45; qwen3-coder:30b 565 / 35; qwen2.5-coder:14b 168 / 13; devstral-small-2:24b 99 / 7; gemma4:e2b about 3,000 / 50. The cost is memory: about 16 GB against 8 GB for gemma4:12b. Prompt reading matters because every "(invalid reply)" retry (B-136) re-reads the whole prompt. Speed alone does not justify a switch: the quality evidence that placed gemma4:12b has to be rerun. |
+| **Reproduce** | The owner's figures were measured by hand; F-126-T01 makes the measurement repeatable. |
+| **Check** | A repeatable speed benchmark per model under evals (uncached prompt reading and generation); gemma4:26b's results on the F-006 placement probes and the relevant gauntlet cases next to gemma4:12b's, local models only; the owner's recorded decision; if the owner switches, the configured chat model and its documentation name gemma4:26b. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-126-t02"></a>F-126-T02 — Rerun the gemma4:12b quality evidence with gemma4:26b | 2.5 h | 0 h | 1 h | Planned | — | [F-126-T03](#f-126-t03), [F-126-T05](#f-126-t05), [F-126-T06](#f-126-t06), [F-126-T07](#f-126-t07) | 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟢 Small | <a id="f-126-t05"></a>F-126-T05 — Night rerun: the six cad-3d cases gemma4:26b has not finished | 0.5 h | 0 h | 0.5 h | Planned | [F-126-T02](#f-126-t02) | [F-126-T03](#f-126-t03) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-126-t06"></a>F-126-T06 — Night run: gemma4:26b with a larger reply cap and without thinking on coding, embedded and cad-3d | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T02](#f-126-t02) | [F-126-T03](#f-126-t03), [F-154-T05](#f-154-t05) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-126-t07"></a>F-126-T07 — Night run: gauntlet all on gemma4:12b for the main-model comparison | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T02](#f-126-t02) | [F-126-T03](#f-126-t03), [F-154-T05](#f-154-t05), [F-155-T01](#f-155-t01), [F-156-T01](#f-156-t01), [F-156-T02](#f-156-t02) | ⏳ 🤖 | — |
+| 🟢 Small | <a id="f-126-t03"></a>F-126-T03 — Owner decides whether to switch the chat model to gemma4:26b | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-126-T02](#f-126-t02), [F-126-T05](#f-126-t05), [F-126-T06](#f-126-t06), [F-126-T07](#f-126-t07) | [F-126-T04](#f-126-t04) | ⏳ 🤔 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟢 Small | <a id="f-126-t04"></a>F-126-T04 — Switch the configured chat model to gemma4:26b | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T03](#f-126-t03) | — | ⏳ 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟡 Medium | **Total** | 6.75 h (6 of 7 steps) | 0 h (0 of 7 steps recorded) | 3.75 h agent + 0.25 h owner | 1 of 7 completed | | | | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | Completed | [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-126.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); F-126-T01 speed benchmark in [2026-11-25-f126-t01-speed-benchmark.md](evaluations/2026-11-25-f126-t01-speed-benchmark.md); [#761](https://github.com/voidbrain/nerv/pull/761); [F-126-T02 Gauntlet report](evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md); [#863](https://github.com/voidbrain/nerv/pull/863); [#867](https://github.com/voidbrain/nerv/pull/867) |
+| Opened | 2026-11-25 |
+| Verification | Unit/integration: 2026-11-25 `test/speed-benchmark.test.mjs` passed (2/2); local benchmark run recorded in `docs/evaluations/2026-11-25-f126-t01-speed-benchmark.md`. Gauntlet 2026-11-26/27 (real local models): recorded in `docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md` and `evals/gauntlet/ledger.json`; placement probes and 6 cad-3d cases pending. |
+| Reviewed | 2026-11-27 |
+
+</details>
+
+---
+### <a id="f-154"></a>[✨ F-154](#top)
+
+**Per-role routes and models: Misato and the Consultant on local or cloud, each with its own model**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 6 h | [F-126-T06](#f-126-t06), [F-126-T07](#f-126-t07) | [F-155-T01](#f-155-t01), [F-155-T02](#f-155-t02), [F-157-T01](#f-157-t01), [F-158-T01](#f-158-t01) | 🤖 | — | — |
+
+💻 **→** Blocked until the night evaluations F-126-T06 and F-126-T07 are in; then from tasks.
+
+| | |
+|---|---|
+| **Issue** | Owner decision 2026-11-27 ("yep"), to be built after the 12b/26b night evaluations ([F-126-T06](work/records/F-126.md), [F-126-T07](work/records/F-126.md)). Today only Misato may use cloud (`roles.misato.route`), the Consultant is local-only by design (`roles.consultant` has a model, no route), one `models.cloud.model` (default claude-opus-5-5) serves all, and there is no automatic fallback. Wanted: each role (Misato, Consultant) local or cloud with its own model: a local Ollama model, or a cloud Claude model chosen among Haiku 5.5, Sonnet 5.5 and Opus 5.5. Casper stays local always (it sees the action arguments); that rule is kept and tested. Owner addition 2026-11-27: each route also carries its model parameters ([F-154-T05](work/records/F-154.md)): for cloud Claude models the effort level (low, medium, high, xhigh, max; defaults Haiku 5.5 and Opus 5.5 medium, Sonnet 5.5 high), no temperature or top_p because current Claude models no longer accept them; for local Ollama models thinking on or off, reply cap (num_predict), context size and temperature where the model honours it; defaults from the Gauntlet nights (F-126-T06, F-126-T07), each parameter with its reason. |
+| **Reproduce** | `nerv models` shows one cloud model for every role; `nerv models set consultant MODEL` accepts only a local model; a role cannot be cloud with its own model. |
+| **Check** | Roles accept route and model per role for Misato and Consultant; the three cloud models are selectable by name; Casper refuses a cloud route with a clear error; the Consultant on cloud sends only what its stated rule allows (F-154-T02 names it, F-156 enforces it); no silent fallback between routes; Italian consultant cases pass on the chosen routes; each parameter has a recorded reason and an evidence-based default, and a cloud route refuses temperature and top_p; tests came first. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟡 Medium | <a id="f-154-t01"></a>F-154-T01 — Test first: roles take a route and a model each; Casper stays local | 1.25 h | 0 h | 1.25 h | Planned | — | [F-154-T02](#f-154-t02), [F-154-T05](#f-154-t05), [F-155-T01](#f-155-t01) |
+| 🟡 Medium | <a id="f-154-t02"></a>F-154-T02 — Resolve each role to its own route at run time; state what the Consultant may send | 1.5 h | 0 h | 1.5 h | Planned | [F-154-T01](#f-154-t01) | [F-154-T03](#f-154-t03), [F-154-T04](#f-154-t04), [F-158-T01](#f-158-t01) |
+| 🟢 Small | <a id="f-154-t03"></a>F-154-T03 — Choose roles and cloud models from the CLI and the dashboard picker | 1 h | 0 h | 1 h | Planned | [F-154-T02](#f-154-t02) | [F-155-T02](#f-155-t02), [F-157-T01](#f-157-t01) |
+| 🟢 Small | <a id="f-154-t04"></a>F-154-T04 — Italian cases for the Consultant and cloud-routed chat | 1 h | 0 h | 1 h | Planned | [F-154-T02](#f-154-t02) | — |
+| 🟡 Medium | <a id="f-154-t05"></a>F-154-T05 — Per-route model parameters, each with its reason and an evidence-based default | 1.25 h | 0 h | 1.25 h | Planned | [F-154-T01](#f-154-t01), [F-126-T06](#f-126-t06), [F-126-T07](#f-126-t07) | — |
+| 🔴 Large | **Total** | 6 h | 0 h (0 of 5 steps recorded) | 6 h | 0 of 5 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-154.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Plan: [#882](https://github.com/voidbrain/nerv/pull/882) |
+| Opened | 2026-11-27 |
+| Verification | Pending |
+| Reviewed | 2026-11-27 |
+
+</details>
+
+---
+### <a id="f-156"></a>[✨ F-156](#top)
+
+**Cloud budget and privacy: a monthly € limit NERV enforces, and what may be sent to the cloud**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 4.5 h agent + 0.25 h owner | [F-126-T07](#f-126-t07) | [F-155-T03](#f-155-t03), [F-157-T01](#f-157-t01), [F-158-T01](#f-158-t01) | ⏳ | — | — |
+
+💻 **→** Blocked until the night evaluations F-126-T06 and F-126-T07 are in; then from tasks.
+
+| | |
+|---|---|
+| **Issue** | Owner decision 2026-11-27 ("yep"). (1) A monthly € limit enforced by NERV before each cloud call. Checked 2026-11-27: `src/model-budget.ts` bounds concurrent calls per model, it is not money; there is no spend limit. What exists: `src/model-usage.ts` records each call's tokens and estimates a cost from explicit price snapshots (`usageCost`, `parsePrices`), which the limit builds on. (2) A rule for what may be sent to the cloud, with the owner's choice per category: tool results (tainted or not), memory facts and summaries, Grover data, the owner's conversation. Depends on [F-126-T07](work/records/F-126.md) only for ordering; [F-154](work/records/F-154.md) uses these rules. |
+| **Reproduce** | `nerv models cloud on` has no spend ceiling; there is no per-category switch for what is sent. |
+| **Check** | A monthly limit in euros refuses cloud calls when the estimated spend plus the call would pass it, tells the owner, and resets each calendar month; cost is estimated from the price snapshots and says it is an estimate; the data categories each have allow or deny (default deny except the owner's own question), enforced before the request is built, and visible in the dashboard; tests came first; Italian cases included. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-156-t01"></a>F-156-T01 — Test first: monthly € limit enforced before each cloud call | 1.75 h | 0 h | 1.75 h | Planned | [F-126-T07](#f-126-t07) | [F-155-T03](#f-155-t03), [F-158-T01](#f-158-t01) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-156-t02"></a>F-156-T02 — Test first: data categories and the owner's allow or deny per category | 2 h | 0 h | 2 h | Planned | [F-126-T07](#f-126-t07) | [F-155-T03](#f-155-t03), [F-156-T03](#f-156-t03), [F-156-T04](#f-156-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-156-t03"></a>F-156-T03 — Italian and English cases: private data is not sent | 0.75 h | 0 h | 0.75 h | Planned | [F-156-T02](#f-156-t02) | — | ⏳ 🤖 |
+| 🟢 Small | <a id="f-156-t04"></a>F-156-T04 — Owner decision: which categories may go to the cloud, and the monthly limit | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-156-T02](#f-156-t02) | [F-157-T01](#f-157-t01) | ⏳ 🤔 |
+| 🔴 Large | **Total** | 4.5 h | 0 h (0 of 4 steps recorded) | 4.5 h agent + 0.25 h owner | 0 of 4 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-156.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Plan: [#882](https://github.com/voidbrain/nerv/pull/882) |
+| Opened | 2026-11-27 |
+| Verification | Pending |
+| Reviewed | 2026-11-27 |
+
+</details>
+
+---
+### <a id="f-155"></a>[✨ F-155](#top)
+
+**Per-pilot model choice from evidence: the cheapest model that passes the pilot's own tests**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h agent + 0.25 h owner | [F-126-T07](#f-126-t07), [F-154-T01](#f-154-t01), [F-154-T03](#f-154-t03), [F-156-T01](#f-156-t01), [F-156-T02](#f-156-t02) | [F-158-T01](#f-158-t01) | ⏳ | — | — |
+
+💻 **→** Blocked until the night evaluations F-126-T06 and F-126-T07 are in; then from tasks.
+
+| | |
+|---|---|
+| **Issue** | Owner decision 2026-11-27 ("yep"). Each pilot (domain specialist) should use the cheapest model whose Gauntlet results pass for its domain, from the ledger and night runs: for example reminders on local gemma4:12b, coding on local qwen3-coder:30b, hard planning on cloud Sonnet 5.5 only if the local models fail their tests. Optional: Misato falls back to cloud only when the local answer fails; "fails" must be measurable, not a feeling. Depends on [F-154](work/records/F-154.md) for per-role routes, and on the 12b and 26b night evidence ([F-126-T07](work/records/F-126.md)). |
+| **Reproduce** | One main model serves every pilot; the Gauntlet ledger has per-pack results but nothing turns them into a per-pilot choice. |
+| **Check** | A pure function in src/ picks, per pilot, the cheapest route and model (local before cloud, smaller before larger, then price) whose ledger result passes that pilot's pack at the owner's threshold, and says why; the owner confirms the table; a fallback to cloud happens only on a measurable failure and only for Misato; tests came first; Italian cases included. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-155-t01"></a>F-155-T01 — Test first: pick the cheapest passing model per pilot from the ledger | 1.5 h | 0 h | 1.5 h | Planned | [F-126-T07](#f-126-t07), [F-154-T01](#f-154-t01) | [F-155-T02](#f-155-t02), [F-155-T04](#f-155-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-155-t02"></a>F-155-T02 — Apply the table: pilots read their model from the chosen result | 1 h | 0 h | 1 h | Planned | [F-155-T01](#f-155-t01), [F-154-T03](#f-154-t03) | [F-155-T03](#f-155-t03), [F-155-T05](#f-155-t05), [F-158-T01](#f-158-t01) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-155-t03"></a>F-155-T03 — Define "fails" and add the optional Misato fallback to cloud | 1.5 h | 0 h | 1.5 h | Planned | [F-155-T02](#f-155-t02), [F-156-T01](#f-156-t01), [F-156-T02](#f-156-t02) | — | ⏳ 🤖 |
+| 🟢 Small | <a id="f-155-t04"></a>F-155-T04 — Italian cases per pilot and a re-run rule | 1 h | 0 h | 1 h | Planned | [F-155-T01](#f-155-t01) | — | ⏳ 🤖 |
+| 🟢 Small | <a id="f-155-t05"></a>F-155-T05 — Owner confirms the pilot table | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-155-T02](#f-155-t02) | — | ⏳ 🤔 |
+| 🔴 Large | **Total** | 5 h | 0 h (0 of 5 steps recorded) | 5 h agent + 0.25 h owner | 0 of 5 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-155.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Plan: [#882](https://github.com/voidbrain/nerv/pull/882) |
+| Opened | 2026-11-27 |
+| Verification | Pending |
+| Reviewed | 2026-11-27 |
+
+</details>
+
+---
 ### <a id="f-113"></a>[✨ F-113](#top)
 
 **Compact tool index with details on request**
@@ -4168,6 +4344,49 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-20 |
 | Verification | F-113-T02: `node --test test/tool-index.test.ts`, `npm test`, `npm run check:fast` passed 2026-11-23. F-113-T01: `node --test test/prompt-samples.test.ts` and `npm run check:fast` passed. |
 | Reviewed | 2026-11-26 |
+
+</details>
+
+---
+### <a id="f-158"></a>[✨ F-158](#top)
+
+**Live model routing graph in the dashboard: which pilot, role, route and model a sortie took, and why**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 5.5 h agent + 0.5 h owner | [F-154-T02](#f-154-t02), [F-155-T02](#f-155-t02), [F-156-T01](#f-156-t01) | — | ⏳ | — | — |
+
+💻 **→** Blocked until F-154 and F-155 are built; then from tasks.
+
+| | |
+|---|---|
+| **Issue** | Owner addition 2026-11-27. A live "model routing" graph in the dashboard, in NERV and Eva lore styling: columns of nodes from left to right (request, pilot or domain, role Misato, Consultant or Casper, route local or cloud, model: local gemma4:26b, gemma4:12b, qwen3-coder:30b, cloud Haiku 5.5, Sonnet 5.5, Opus 5.5 and so on), each node joined to its possible followers. The path a sortie took lights up (activation), and every hop carries its justification in plain words, for example "cloud: enabled for this role", "Haiku 5.5: cheapest model that passed this pilot's tests", "local: cloud budget used up", "Casper: always local". The data is what the router decided, recorded per sortie, never re-guessed afterwards. Plain and Eva voices, Italian and English justifications. Depends on [F-154](work/records/F-154.md) (roles and routes) and [F-155](work/records/F-155.md) (pilot choice and fallback reasons); the budget reason comes from [F-156](work/records/F-156.md). |
+| **Reproduce** | The dashboard shows no routing: nothing says which model answered a sortie or why. |
+| **Check** | Each routed sortie stores its decision (hops with a reason code each) when it is made; the graph draws the configured nodes and links and lights the stored path; each hop shows its reason in plain words and in Eva voice, in Italian and English; it uses 🧱 bricks charts or plain SVG per the UI rules, reads only var(--…) tokens and is readable at phone width and by screen reader (the path also as a list); tests came first; the owner confirms on phone and desktop. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟡 Medium | <a id="f-158-t01"></a>F-158-T01 — Test first: the router records each sortie's decision as hops with a reason code | 1.25 h | 0 h | 1.25 h | Planned | [F-154-T02](#f-154-t02), [F-155-T02](#f-155-t02), [F-156-T01](#f-156-t01) | [F-158-T02](#f-158-t02), [F-158-T04](#f-158-t04) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-158-t02"></a>F-158-T02 — Read API: the graph nodes, the possible links and the last paths | 1 h | 0 h | 1 h | Planned | [F-158-T01](#f-158-t01) | [F-158-T03](#f-158-t03) | ⏳ 🤖 |
+| 🟡 Medium | <a id="f-158-t03"></a>F-158-T03 — The graph: columns of nodes, links and the lit path, in plain SVG or 🧱 bricks charts | 2 h | 0 h | 2 h | Planned | [F-158-T02](#f-158-t02) | [F-158-T05](#f-158-t05) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-158-t04"></a>F-158-T04 — Justification wording per hop: plain, Eva, Italian and English | 0.75 h | 0 h | 0.75 h | Planned | [F-158-T01](#f-158-t01) | [F-158-T05](#f-158-t05) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-158-t05"></a>F-158-T05 — Join test: from a sortie through the router to the lit path | 0.5 h | 0 h | 0.5 h | Planned | [F-158-T03](#f-158-t03), [F-158-T04](#f-158-t04) | [F-158-T06](#f-158-t06) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-158-t06"></a>F-158-T06 — Owner visual check on phone and desktop | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-158-T05](#f-158-t05) | — | ⏳ 🧑‍🔧 |
+| 🔴 Large | **Total** | 5.5 h | 0 h (0 of 6 steps recorded) | 5.5 h agent + 0.5 h owner | 0 of 6 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-158.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Plan: [#882](https://github.com/voidbrain/nerv/pull/882) |
+| Opened | 2026-11-27 |
+| Verification | Pending |
+| Reviewed | 2026-11-27 |
 
 </details>
 
@@ -4953,52 +5172,41 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-126"></a>[✨ F-126](#top)
+### <a id="f-157"></a>[✨ F-157](#top)
 
-**Evaluate gemma4:26b as the local chat model instead of gemma4:12b**
+**Owner turn-on: an Anthropic API key with billing, then cloud roles with a small budget**
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.75 h agent + 0.25 h owner | — | — | 🤖 | — | 🤔 |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h agent + 0.5 h owner | [F-154-T03](#f-154-t03), [F-156-T04](#f-156-t04) | — | ⏳ | 🧑‍🔧 | — |
 
-🧑 **→** F-126-T03: confirm gemma4:26b as the main model or go back to gemma4:12b, after the [quality report](evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md).
+🧑 **→** F-157-T02 after F-154 and F-156 are built: follow the copy-paste guide.
 
 | | |
 |---|---|
-| **Issue** | Owner approved 2026-11-25. On the owner's Mac (M3 Pro, 36 GB, load average 8–15), with a 3,900-token prompt and uncached prompt reading, gemma4:26b read the prompt about twice as fast as gemma4:12b and generated faster: gemma4:12b 200 tok/s reading, 37 tok/s generation; gemma4:26b 441 / 45; qwen3-coder:30b 565 / 35; qwen2.5-coder:14b 168 / 13; devstral-small-2:24b 99 / 7; gemma4:e2b about 3,000 / 50. The cost is memory: about 16 GB against 8 GB for gemma4:12b. Prompt reading matters because every "(invalid reply)" retry (B-136) re-reads the whole prompt. Speed alone does not justify a switch: the quality evidence that placed gemma4:12b has to be rerun. |
-| **Reproduce** | The owner's figures were measured by hand; F-126-T01 makes the measurement repeatable. |
-| **Check** | A repeatable speed benchmark per model under evals (uncached prompt reading and generation); gemma4:26b's results on the F-006 placement probes and the relevant gauntlet cases next to gemma4:12b's, local models only; the owner's recorded decision; if the owner switches, the configured chat model and its documentation name gemma4:26b. |
+| **Issue** | Owner decision 2026-11-27 ("yep"). Using Claude by API is billed separately from the Claude subscription: it needs an Anthropic Console account, an API key and prepaid billing. Steps for the owner to turn the cloud roles on safely: create the key, store it with `nerv models key`, start with Sonnet 5.5 (or Haiku 5.5) for the chosen roles and a 5 euro budget for the first week. Prices per million tokens in/out (2026-11-27): Haiku 5.5 $0.10/$0.50, Sonnet 5.5 $2/$10, Opus 5.5 $4/$20; rough estimate about 20k in and 2k out per chat question, so about $0.06 per question on Sonnet 5.5 ($0.04 input, $0.02 output) and $0.004 on Haiku 5.5; 5 euros is on the order of 80 Sonnet questions. Estimates, not measurements: F-157-T03 compares them with the real first-week spend. Depends on [F-154](work/records/F-154.md) and [F-156](work/records/F-156.md) (and so on [F-126-T07](work/records/F-126.md)). |
+| **Reproduce** | Not applicable: nothing is turned on until the owner follows the steps. |
+| **Check** | A copy-paste guide in docs/acceptance/ with the Console steps, `nerv models key`, `nerv models set ...`, the € limit and the data categories; the owner turns on one role on Haiku 5.5 or Sonnet 5.5 and asks three questions; the first-week spend is compared with the estimate and recorded. |
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-126-t02"></a>F-126-T02 — Rerun the gemma4:12b quality evidence with gemma4:26b | 2.5 h | 0 h | 1 h | Planned | — | [F-126-T03](#f-126-t03), [F-126-T05](#f-126-t05), [F-126-T06](#f-126-t06), [F-126-T07](#f-126-t07) | 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
-| 🟢 Small | <a id="f-126-t05"></a>F-126-T05 — Night rerun: the six cad-3d cases gemma4:26b has not finished | 0.5 h | 0 h | 0.5 h | Planned | [F-126-T02](#f-126-t02) | [F-126-T03](#f-126-t03) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-126-t06"></a>F-126-T06 — Night run: gemma4:26b with a larger reply cap and without thinking on coding, embedded and cad-3d | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T02](#f-126-t02) | [F-126-T03](#f-126-t03) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-126-t07"></a>F-126-T07 — Night run: gauntlet all on gemma4:12b for the main-model comparison | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T02](#f-126-t02) | [F-126-T03](#f-126-t03) | ⏳ 🤖 | — |
-| 🟢 Small | <a id="f-126-t03"></a>F-126-T03 — Owner decides whether to switch the chat model to gemma4:26b | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-126-T02](#f-126-t02), [F-126-T05](#f-126-t05), [F-126-T06](#f-126-t06), [F-126-T07](#f-126-t07) | [F-126-T04](#f-126-t04) | ⏳ 🤔 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
-| 🟢 Small | <a id="f-126-t04"></a>F-126-T04 — Switch the configured chat model to gemma4:26b | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T03](#f-126-t03) | — | ⏳ 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
-| 🟡 Medium | **Total** | 6.75 h (6 of 7 steps) | 0 h (0 of 7 steps recorded) | 3.75 h agent + 0.25 h owner | 1 of 7 completed | | | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | Completed | [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run |
-
-</details>
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-157-t01"></a>F-157-T01 — Write the owner guide with copy-paste steps and expected output | 0.5 h | 0 h | 0.5 h | Planned | [F-154-T03](#f-154-t03), [F-156-T04](#f-156-t04) | [F-157-T02](#f-157-t02) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-157-t02"></a>F-157-T02 — Owner: turn the cloud role on and ask three questions | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-157-T01](#f-157-t01) | [F-157-T03](#f-157-t03) | ⏳ 🧑‍🔧 |
+| 🟢 Small | <a id="f-157-t03"></a>F-157-T03 — Compare the first week of spend with the estimate | 0.25 h | 0 h | 0.25 h | Planned | [F-157-T02](#f-157-t02) | — | ⏳ 🤖 |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 3 steps recorded) | 0.75 h agent + 0.5 h owner | 0 of 3 completed | | | |
 
 <details>
 <summary>Next action, estimates and evidence</summary>
 
-[Full notes & evidence](work/records/F-126.md)
+[Full notes & evidence](work/records/F-157.md)
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); F-126-T01 speed benchmark in [2026-11-25-f126-t01-speed-benchmark.md](evaluations/2026-11-25-f126-t01-speed-benchmark.md); [#761](https://github.com/voidbrain/nerv/pull/761); [F-126-T02 Gauntlet report](evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md); [#863](https://github.com/voidbrain/nerv/pull/863); [#867](https://github.com/voidbrain/nerv/pull/867) |
-| Opened | 2026-11-25 |
-| Verification | Unit/integration: 2026-11-25 `test/speed-benchmark.test.mjs` passed (2/2); local benchmark run recorded in `docs/evaluations/2026-11-25-f126-t01-speed-benchmark.md`. Gauntlet 2026-11-26/27 (real local models): recorded in `docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md` and `evals/gauntlet/ledger.json`; placement probes and 6 cad-3d cases pending. |
+| PR / evidence | Plan: [#882](https://github.com/voidbrain/nerv/pull/882) |
+| Opened | 2026-11-27 |
+| Verification | Pending |
 | Reviewed | 2026-11-27 |
 
 </details>
