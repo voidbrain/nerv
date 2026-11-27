@@ -15,7 +15,8 @@
   "status": "implemented",
   "acceptance": [
     "Default unchanged: the F-027 ballot test and the stage 1 tests pass as they are",
-    "An opted-in read grant runs at its EVA when tainted; a write grant refuses the field; validateTools rejects it with a test for the invalid input"
+    "An opted-in read grant runs at its EVA when tainted; a write grant refuses the field; validateTools rejects it with a test for the invalid input",
+    "Owner decision 2026-11-27: the opt-in is accepted on a command server and on a url server on the owner's tailnet (host ending in .ts.net); a public url server refuses it, with tests"
   ],
   "resources": [
     "src/policy.ts",

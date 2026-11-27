@@ -30,7 +30,7 @@ This map ties OWASP **ASI01–10** (Agentic Applications), **LLM01–10 (2026)**
 | LLM05 | Improper Output Handling | `v1.01-C5.1.2`, `v1.01-C9.1.1` | `src/misato.ts`, `src/executors.ts` | `test/misato.test.ts`, `test/gate.test.ts` |
 | LLM06 | Excessive Agency / Unbounded Consumption | `v1.01-C9.2.1`, `v1.01-C10.4.3` | `src/policy.ts`, `src/model-budget.ts` | `test/gate.test.ts`, `test/model-usage.test.ts` (hard circuit: gap, `F-063`) |
 | LLM07 | System Prompt Leakage | `v1.01-C5.3.2` | `src/misato.ts`, `src/brain-process.ts` | `test/consultant.test.ts` |
-| LLM08 | Vector & Embedding Weaknesses / Hidden Context | `v1.01-C5.2.2`, `v1.01-C10.2.2` | `src/mcp.ts`, `src/memory.ts` | `test/mcp.test.ts`, `test/provenance.test.ts` (MCP prompt taint: gap, `F-065`; owner-accepted exception: `allowTainted` read grants on local servers, [decision](../decisions/tainted-mcp-reads.md)) |
+| LLM08 | Vector & Embedding Weaknesses / Hidden Context | `v1.01-C5.2.2`, `v1.01-C10.2.2` | `src/mcp.ts`, `src/memory.ts` | `test/mcp.test.ts`, `test/provenance.test.ts` (MCP prompt taint: gap, `F-065`; owner-accepted exception: `allowTainted` read grants on local servers and tailnet `.ts.net` url servers, [decision](../decisions/tainted-mcp-reads.md)) |
 | LLM09 | Misinformation / Embedding Drift | `v1.01-C5.2.3` | N/A (no vector embeddings; Lilith uses deterministic SQLite FTS5 in `src/memory.ts`) | `test/memory.test.ts` |
 | LLM10 | Unbounded Consumption (Inference) | `v1.01-C10.4.3` | `src/model-budget.ts`, `src/model-usage.ts` | `test/model-usage.test.ts` (global budget caps: gap, `F-063`) |
 

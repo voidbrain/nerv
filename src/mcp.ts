@@ -163,9 +163,13 @@ export function validateTools(value: unknown): ToolsConfig {
       throw new Error(`Tool grant ${g.server}.${g.tool}: allowTainted is true or absent.`);
     if (g.allowTainted === true && g.effect !== 'read')
       throw new Error(`Tool grant ${g.server}.${g.tool}: allowTainted is only for a read grant.`);
-    // Tainted context never leaves the machine (canLeaveMachine): a server on another machine never gets the opt-in.
-    if (g.allowTainted === true && isHttpServer(mcp.find((x) => x.id === g.server)!))
-      throw new Error(`Tool grant ${g.server}.${g.tool}: allowTainted is only for a server on this machine.`);
+    // Tainted context reaches no public server: the opt-in is for a server on this machine or, by the owner's
+    // decision of 2026-11-27, a url server on the owner's tailnet (a Tailscale .ts.net name, e.g. the Grover hub).
+    const server = mcp.find((x) => x.id === g.server)!;
+    if (g.allowTainted === true && isHttpServer(server) && !new URL(server.url).hostname.endsWith('.ts.net'))
+      throw new Error(
+        `Tool grant ${g.server}.${g.tool}: allowTainted is only for a server on this machine or on your tailnet (.ts.net).`,
+      );
     if (grants.some((x) => x.server === g.server && x.tool === g.tool))
       throw new Error(`Tool ${g.server}.${g.tool} is granted twice.`);
     grants.push({
