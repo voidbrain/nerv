@@ -32,7 +32,7 @@ Status per milestone, derived from the records (Delivered: all closed; Awaiting 
 | 2b — Governed extensions | In progress | 12 | 0 | 7 | F-086, F-087, F-120, F-137, F-138, F-140, F-159 |
 | 3 — Multi-node foundation | In progress | 5 | 0 | 6 | F-005, F-088, F-102, F-103, F-117, F-135 |
 | 4 — Angular PWA, GenUI and live dashboard | In progress | 7 | 1 | 17 | F-004, F-124, F-109, F-110, F-118, F-129, F-130, F-131, F-141, F-143, F-145, F-147, F-148, F-149, F-150, F-152, F-160 |
-| 5 — Distributed agents/models | In progress | 7 | 0 | 19 | F-006, F-012, F-049, F-060, F-089, F-090, F-092, F-093, F-094, F-106, F-113, F-116, F-126, F-128, F-154, F-155, F-156, F-157, F-158 |
+| 5 — Distributed agents/models | In progress | 8 | 0 | 18 | F-006, F-012, F-049, F-089, F-090, F-092, F-093, F-094, F-106, F-113, F-116, F-126, F-128, F-154, F-155, F-156, F-157, F-158 |
 | 5b — Coordinator relocation (later) | Planned | 0 | 0 | 1 | F-016 |
 | 6 — Voice and evaluated improvement | Planned | 0 | 0 | 3 | F-007, F-146, F-153 |
 | Independent tracks | In progress | 6 | 0 | 7 | F-008, F-099, F-101, F-121, F-122, F-132, F-151 |
