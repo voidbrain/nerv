@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-120-T19",
+  "parent": "F-120",
+  "title": "Every model case gets 120 s (owner decision 2026-11-27), suite and output budgets stay",
+  "goal": "A cold first load no longer times out a model pack's first case and skips the rest of the pack",
+  "status": "implemented",
+  "acceptance": [
+    "Owner decision 2026-11-27 morning in chat: \"ok\" to raising the per-case time for the other packs too, replacing F-120-T05's \"every other pack keeps the day limits\" (2026-11-26)",
+    "Found 2026-11-27 night (stage four): at the 30 s day case limit italian-quality on gemma4:12b (30,005 ms) and code-review on devstral-small-2:24b (30,007 ms) timed out on their first, cold-load case; a timeout leaves consumption unverified, so Gauntlet skipped the other five cases of each pack",
+    "Chosen option, the smallest: modelLimits gives every model case max(day or slow-host case time, MODEL_TIMEOUT_MS), so 120 s (the time NERV gives one model call, as nerv-planner since F-120-T18) and 180 s on the coding, embedded and cad-3d runner packs; the suite and output budgets stay the day limits'. Not chosen: a first-case-only allowance (Gauntlet has one case limit per run, so it needs a release change)",
+    "Tests first: test/gauntlet.test.mjs F-120-T19 (every non-runner model pack, including a --only selection of cad-3d's knowledge cases, gets MODEL_TIMEOUT_MS with unchanged suite and output budgets). Two deliberate expectation changes from this decision: F-120-T05's test now expects MODEL_TIMEOUT_MS for the other packs, and the cross-consumer reuse test runs the other consumer under the same 120 s limits (a consumer on the release's plain day limits no longer reuses NERV's cached common evidence)"
+  ],
+  "dependsOn": [
+    "F-120-T05"
+  ],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "docs/evaluations/gauntlet.md",
+    "docs/work/records/F-120.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Code and tests only; no model call, device or service change.",
+  "validation": [
+    "node --test test/gauntlet.test.mjs test/gauntlet-planner.test.mjs",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Not verified on a real model: the next owner-approved run of italian-quality and code-review is the check"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Done 2026-11-27: one rule in modelLimits, failing-first test, docs. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  }
+}

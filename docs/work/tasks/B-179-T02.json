@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "B-179-T02",
+  "parent": "B-179",
+  "title": "recordSelected records the whole report and sets the per-case source key after",
+  "goal": "gauntlet.mjs ledger records every graded case of a multi-case report of a runner pack",
+  "status": "implemented",
+  "acceptance": [
+    "The B-179 test passes unchanged",
+    "A report whose source key differs from NERV's is still refused",
+    "The night's cad-3d rest report records its four cases"
+  ],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "docs/work/records/B-179.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "validation": [
+    "node --test test/gauntlet.test.mjs test/gauntlet-ledger.test.mjs",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Done 2026-11-27: one change in recordSelected. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5,
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
+  },
+  "dependsOn": [
+    "B-179-T01"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ]
+}

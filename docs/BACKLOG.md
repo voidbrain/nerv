@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 36 | 10 | 69 | 33 |
+| **This week** | 36 | 10 | 70 | 33 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 61 | 51 |
-| **Require Human 🧑** | 16 | 23 |
+| **Open** | 61 | 52 |
+| **Require Human 🧑** | 17 | 23 |
 
 ### Require Human 🧑
 
@@ -23,9 +23,9 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-062](#f-062) | [F-120](#f-120) | [B-170](#b-170) | — |
 | [F-006](#f-006) | [F-116](#f-116) | [B-172](#b-172) |  |
-| [F-011](#f-011) | [F-151](#f-151) | [B-176](#b-176) |  |
-| [F-004](#f-004) | [F-142](#f-142) | [B-175](#b-175) |  |
-| [F-012](#f-012) |  | [B-057](#b-057) |  |
+| [F-011](#f-011) | [F-126](#f-126) | [B-176](#b-176) |  |
+| [F-004](#f-004) | [F-151](#f-151) | [B-175](#b-175) |  |
+| [F-012](#f-012) | [F-142](#f-142) | [B-057](#b-057) |  |
 | [F-016](#f-016) |  | [B-068](#b-068) |  |
 | [F-086](#f-086) |  | [B-107](#b-107) |  |
 | [F-087](#f-087) |  | [B-113](#b-113) |  |
@@ -47,7 +47,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 282.25 h agent + 24 h owner across 291 open steps of 61 features and 51 other records. 164 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 281 h agent + 24 h owner across 293 open steps of 61 features and 52 other records. 165.25 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2938,9 +2938,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🔴 Large | 4.5 h | — | — | 🤖 | — | 🤔 |
+| 🔴 Open | 🔶 P2 | 🔴 Large | 4.25 h | — | — | 🤖 | — | 🤔 |
 
-🧑 **→** F-120-T17: the one night rerun of `cad-3d/*`, `coding/*` and `embedded/*` (12 cases) on gemma4:12b after the F-120-T16 key fix (owner "b" 2026-11-26, F-120-T15); F-120-T14: the first nerv-planner run (owner ok 2026-11-26, F-120-T13); F-120-T08: rerun `nerv-system-flows/stress` and `browser` (`--allow-expensive`); F-120-T06 (four Arduino sketch cases) waits on the owner opting in to `arduino-cli`.
+🧑 **→** F-120-T17: the one night rerun of `cad-3d/*`, `coding/*` and `embedded/*` (12 cases) on gemma4:12b after the F-120-T16 key fix (owner "b" 2026-11-26, F-120-T15); F-120-T14: one `--capture-failures` run of the nerv-planner cases whose failed replies could not be matched (needs the owner); F-120-T08: rerun `nerv-system-flows/stress` and `browser` (`--allow-expensive`); F-120-T06 (four Arduino sketch cases) waits on the owner opting in to `arduino-cli`.
 
 | | |
 |---|---|
@@ -2950,20 +2950,19 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 **Feature steps**
 
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-120-t06"></a>F-120-T06 — Run the four Arduino sketch cases once arduino-cli is installed (owner opt-in) | 0.5 h | 0 h | 0.5 h | Planned | — | — | 🤖 | [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: sketch cases moved from F-120-T04 |
-| 🟢 Small | <a id="f-120-t08"></a>F-120-T08 — Rerun nerv-system-flows/stress and browser, and any system or multi-step case a later source change makes pending | 0.25 h | 0 h | 0.25 h | Planned | — | — | 🤖 | [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: stress and browser rerun |
-| 🟢 Small | <a id="f-120-t09"></a>F-120-T09 — nerv-planner-v1: model-layer cases on Misato's own tool index, Italian and English | 2.5 h | 2.5 h so far (stated) | 0 h | Implemented; verification pending | — | [F-120-T10](#f-120-t10), [F-120-T11](#f-120-t11) | 🤖 | [PR #829](https://github.com/voidbrain/nerv/pull/829) nerv-planner pack, wiring and failing-first tests; no real model run |
-| 🟢 Small | <a id="f-120-t12"></a>F-120-T12 — Adopt scheduling-time, estimation and research packs on release | 0.5 h | 0 h | 0.5 h | Planned | — | — | 🤖 | — |
-| 🟢 Small | <a id="f-120-t14"></a>F-120-T14 — Run nerv-planner once and record it in the Gauntlet ledger | 0.5 h | 0 h | 0.5 h | Planned | — | [F-120-T18](#f-120-t18) | 🤖 | — |
-| 🟢 Small | <a id="f-120-t17"></a>F-120-T17 — Rerun the 12 cad-3d, coding and embedded cases once on gemma4:12b after the key fix | 0.75 h | 0 h | 0.75 h | Planned | — | — | 🤖 | [PR #855](https://github.com/voidbrain/nerv/pull/855) planned with the rerun commands |
-| 🟢 Small | <a id="f-120-t18"></a>F-120-T18 — nerv-planner 1.2.0: replies held to the decision schema, planner case time 120 s | 1.5 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | [F-120-T14](#f-120-t14) | — | 🤖 | [PR #861](https://github.com/voidbrain/nerv/pull/861) decision schema, planner case time, nerv-planner 1.2.0; no model ran |
-| 🟢 Small | <a id="f-120-t10"></a>F-120-T10 — A Gauntlet line on every open model-facing record | 0.5 h | 0 h | 0.5 h | Planned | [F-120-T09](#f-120-t09) | — | ⏳ 🤖 | — |
-| 🟡 Medium | <a id="f-120-t11"></a>F-120-T11 — Run the project packs nerv calls over MCP (grover-v1, fpvbuddy-v1, hobo-v1) | 1.5 h | 0 h | 1.5 h | Planned | [F-120-T09](#f-120-t09) | — | ⏳ 🤖 | — |
-| 🔴 Large | **Total** | 16.5 h | 7.75 h (5 of 18 steps recorded) | 4.5 h | 9 of 18 completed | | | | |
+| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
+|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-120-t06"></a>F-120-T06 — Run the four Arduino sketch cases once arduino-cli is installed (owner opt-in) | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: sketch cases moved from F-120-T04 |
+| 🟢 Small | <a id="f-120-t08"></a>F-120-T08 — Rerun nerv-system-flows/stress and browser, and any system or multi-step case a later source change makes pending | 0.25 h | 0 h | 0.25 h | Planned | 🤖 | [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: stress and browser rerun |
+| 🟢 Small | <a id="f-120-t10"></a>F-120-T10 — A Gauntlet line on every open model-facing record | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
+| 🟡 Medium | <a id="f-120-t11"></a>F-120-T11 — Run the project packs nerv calls over MCP (grover-v1, fpvbuddy-v1, hobo-v1) | 1.5 h | 0 h | 1.5 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-120-t12"></a>F-120-T12 — Adopt scheduling-time, estimation and research packs on release | 0.5 h | 0 h | 0.5 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-120-t14"></a>F-120-T14 — Run nerv-planner once and record it in the Gauntlet ledger | 0.5 h | 0 h | 0.25 h | Planned | 🤖 | — |
+| 🟢 Small | <a id="f-120-t17"></a>F-120-T17 — Rerun the 12 cad-3d, coding and embedded cases once on gemma4:12b after the key fix | 0.75 h | 0 h | 0.75 h | Planned | 🤖 | [PR #855](https://github.com/voidbrain/nerv/pull/855) planned with the rerun commands |
+| 🟢 Small | <a id="f-120-t19"></a>F-120-T19 — Every model case gets 120 s (owner decision 2026-11-27), suite and output budgets stay | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | 🤖 | — |
+| 🔴 Large | **Total** | 17 h | 8.25 h (6 of 19 steps recorded) | 4.25 h | 11 of 19 completed | | |
 
-<details><summary>Done steps (9)</summary>
+<details><summary>Done steps (11)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -2973,9 +2972,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="f-120-t04"></a>F-120-T04 — Agent: run the approved Gauntlet campaign for the pending cases | 0.5 h | 2.25 h (stated) | Completed | [PR #798](https://github.com/voidbrain/nerv/pull/798) rerun after F-120-T05; 8 Docker cases pending; [PR #800](https://github.com/voidbrain/nerv/pull/800) Docker rerun; only the excluded sketch cases pending; [PR #803](https://github.com/voidbrain/nerv/pull/803) closed; coding rerun after F-120-T07 |
 | — | <a id="f-120-t05"></a>F-120-T05 — Run the reference-runner packs under a 180 s case limit (owner decision 2026-11-26) | 1 h | 0.5 h (stated) | Completed | [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded; [PR #795](https://github.com/voidbrain/nerv/pull/795) 180 s case limit for the reference-runner packs |
 | — | <a id="f-120-t07"></a>F-120-T07 — Raise the coding-reference reply cap so coding answers are not cut off (owner decision 2026-11-26) | 1 h | 1 h (stated) | Completed | [PR #803](https://github.com/voidbrain/nerv/pull/803) 3,072-token coding reply cap and rerun |
+| — | <a id="f-120-t09"></a>F-120-T09 — nerv-planner-v1: model-layer cases on Misato's own tool index, Italian and English | 2.5 h | 2.5 h (stated) | Completed | [PR #829](https://github.com/voidbrain/nerv/pull/829) nerv-planner pack, wiring and failing-first tests; no real model run |
 | — | <a id="f-120-t13"></a>F-120-T13 — Owner approves the first nerv-planner run on the local model | 0 h | 0 h | Completed | [PR #831](https://github.com/voidbrain/nerv/pull/831) owner ok of 2026-11-26 recorded |
 | — | <a id="f-120-t15"></a>F-120-T15 — Owner decides on the model-pack cases that F-120-T02's runner entries made pending | 0 h | 0 h | Completed | [PR #843](https://github.com/voidbrain/nerv/pull/843) opened with the pending model-pack cases; [PR #852](https://github.com/voidbrain/nerv/pull/852) decision page; [PR #855](https://github.com/voidbrain/nerv/pull/855) owner decision b of 2026-11-26 recorded |
 | — | <a id="f-120-t16"></a>F-120-T16 — A model case source key binds only the runners its pack uses | 0.5 h | 0 h | Completed | [PR #855](https://github.com/voidbrain/nerv/pull/855) key fix and failing-first test |
+| — | <a id="f-120-t18"></a>F-120-T18 — nerv-planner 1.2.0: replies held to the decision schema, planner case time 120 s | 1.5 h | 1.5 h (stated) | Completed | [PR #861](https://github.com/voidbrain/nerv/pull/861) decision schema, planner case time, nerv-planner 1.2.0; no model ran |
 
 </details>
 
@@ -2986,7 +2987,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T02: [PR #843](https://github.com/voidbrain/nerv/pull/843) seven system-pack cases and the 13-case run; [PR #852](https://github.com/voidbrain/nerv/pull/852) closed on green CI · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749) · F-120-T04: [PR #798](https://github.com/voidbrain/nerv/pull/798) rerun after F-120-T05; 8 Docker cases pending; [PR #800](https://github.com/voidbrain/nerv/pull/800) Docker rerun; only the excluded sketch cases pending; [PR #803](https://github.com/voidbrain/nerv/pull/803) closed; coding rerun after F-120-T07 · F-120-T05: [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded; [PR #795](https://github.com/voidbrain/nerv/pull/795) 180 s case limit for the reference-runner packs · F-120-T06: [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: sketch cases moved from F-120-T04 · F-120-T07: [PR #803](https://github.com/voidbrain/nerv/pull/803) 3,072-token coding reply cap and rerun · F-120-T08: [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: stress and browser rerun · F-120-T09: [PR #829](https://github.com/voidbrain/nerv/pull/829) nerv-planner pack, wiring and failing-first tests; no real model run · F-120-T13: [PR #831](https://github.com/voidbrain/nerv/pull/831) owner ok of 2026-11-26 recorded · F-120-T15: [PR #843](https://github.com/voidbrain/nerv/pull/843) opened with the pending model-pack cases; [PR #852](https://github.com/voidbrain/nerv/pull/852) decision page; [PR #855](https://github.com/voidbrain/nerv/pull/855) owner decision b of 2026-11-26 recorded · F-120-T16: [PR #855](https://github.com/voidbrain/nerv/pull/855) key fix and failing-first test · F-120-T17: [PR #855](https://github.com/voidbrain/nerv/pull/855) planned with the rerun commands · F-120-T18: [PR #861](https://github.com/voidbrain/nerv/pull/861) decision schema, planner case time, nerv-planner 1.2.0; no model ran. Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review); [archived 2026-11-26 runs](archive/evidence-2026.md#f-120-moved-2026-11-26-later); [#843](https://github.com/voidbrain/nerv/pull/843) (F-120-T02, F-120-T15); [#855](https://github.com/voidbrain/nerv/pull/855) (F-120-T15 decision, F-120-T16); [#758](https://github.com/voidbrain/nerv/pull/758); [#783](https://github.com/voidbrain/nerv/pull/783); [#791](https://github.com/voidbrain/nerv/pull/791); [#794](https://github.com/voidbrain/nerv/pull/794); [#795](https://github.com/voidbrain/nerv/pull/795); [#798](https://github.com/voidbrain/nerv/pull/798); [#800](https://github.com/voidbrain/nerv/pull/800); [#803](https://github.com/voidbrain/nerv/pull/803); [#821](https://github.com/voidbrain/nerv/pull/821); [#829](https://github.com/voidbrain/nerv/pull/829); [#861](https://github.com/voidbrain/nerv/pull/861) (F-120-T18) |
+| PR / evidence | Steps: F-120-T01: [PR #752](https://github.com/voidbrain/nerv/pull/752) · F-120-T02: [PR #843](https://github.com/voidbrain/nerv/pull/843) seven system-pack cases and the 13-case run; [PR #852](https://github.com/voidbrain/nerv/pull/852) closed on green CI · F-120-T03: [PR #749](https://github.com/voidbrain/nerv/pull/749) · F-120-T04: [PR #798](https://github.com/voidbrain/nerv/pull/798) rerun after F-120-T05; 8 Docker cases pending; [PR #800](https://github.com/voidbrain/nerv/pull/800) Docker rerun; only the excluded sketch cases pending; [PR #803](https://github.com/voidbrain/nerv/pull/803) closed; coding rerun after F-120-T07 · F-120-T05: [PR #794](https://github.com/voidbrain/nerv/pull/794) owner decision 2026-11-26 recorded; [PR #795](https://github.com/voidbrain/nerv/pull/795) 180 s case limit for the reference-runner packs · F-120-T06: [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: sketch cases moved from F-120-T04 · F-120-T07: [PR #803](https://github.com/voidbrain/nerv/pull/803) 3,072-token coding reply cap and rerun · F-120-T08: [PR #803](https://github.com/voidbrain/nerv/pull/803) opened: stress and browser rerun · F-120-T09: [PR #829](https://github.com/voidbrain/nerv/pull/829) nerv-planner pack, wiring and failing-first tests; no real model run · F-120-T13: [PR #831](https://github.com/voidbrain/nerv/pull/831) owner ok of 2026-11-26 recorded · F-120-T15: [PR #843](https://github.com/voidbrain/nerv/pull/843) opened with the pending model-pack cases; [PR #852](https://github.com/voidbrain/nerv/pull/852) decision page; [PR #855](https://github.com/voidbrain/nerv/pull/855) owner decision b of 2026-11-26 recorded · F-120-T16: [PR #855](https://github.com/voidbrain/nerv/pull/855) key fix and failing-first test · F-120-T17: [PR #855](https://github.com/voidbrain/nerv/pull/855) planned with the rerun commands · F-120-T18: [PR #861](https://github.com/voidbrain/nerv/pull/861) decision schema, planner case time, nerv-planner 1.2.0; no model ran. Opened in [PR #711](https://github.com/voidbrain/nerv/pull/711); pin 0.11.1 and domain packs (F-120-T03) in [PR #749](https://github.com/voidbrain/nerv/pull/749); [PR #752](https://github.com/voidbrain/nerv/pull/752) (F-120-T01 catch-up coverage review); [archived 2026-11-26 runs](archive/evidence-2026.md#f-120-moved-2026-11-26-later); [#843](https://github.com/voidbrain/nerv/pull/843) (F-120-T02, F-120-T15); [#855](https://github.com/voidbrain/nerv/pull/855) (F-120-T15 decision, F-120-T16); [#758](https://github.com/voidbrain/nerv/pull/758); [#783](https://github.com/voidbrain/nerv/pull/783); [#791](https://github.com/voidbrain/nerv/pull/791); [#794](https://github.com/voidbrain/nerv/pull/794); [#795](https://github.com/voidbrain/nerv/pull/795); [#798](https://github.com/voidbrain/nerv/pull/798); [#800](https://github.com/voidbrain/nerv/pull/800); [#803](https://github.com/voidbrain/nerv/pull/803); [#821](https://github.com/voidbrain/nerv/pull/821); [#829](https://github.com/voidbrain/nerv/pull/829); [#861](https://github.com/voidbrain/nerv/pull/861) (F-120-T18); [#863](https://github.com/voidbrain/nerv/pull/863) |
 | Opened | 2026-11-24 |
 | Verification | Unit 2026-11-26: `test/gauntlet.test.mjs` (29/29, incl. F-120-T02 seven system-pack cases, F-120-T07 3,072-token coding cap, F-120-T05 180 s reference-runner limits) and all 13 non-expensive `nerv-system-flows` cases passed (`evals/gauntlet/ledger.json`). Documentation: 2026-11-25, passed (`docs/reviews/gauntlet-coverage/2026-11-25.md`, `npm run check:fast`). |
 | Reviewed | 2026-11-27 |
@@ -4151,54 +4152,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-126"></a>[✨ F-126](#top)
-
-**Evaluate gemma4:26b as the local chat model instead of gemma4:12b**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟡 Medium | 3.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-126-T02 — Rerun the gemma4:12b quality evidence with gemma4:26b (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner approved 2026-11-25. On the owner's Mac (M3 Pro, 36 GB, load average 8–15), with a 3,900-token prompt and uncached prompt reading, gemma4:26b read the prompt about twice as fast as gemma4:12b and generated faster: gemma4:12b 200 tok/s reading, 37 tok/s generation; gemma4:26b 441 / 45; qwen3-coder:30b 565 / 35; qwen2.5-coder:14b 168 / 13; devstral-small-2:24b 99 / 7; gemma4:e2b about 3,000 / 50. The cost is memory: about 16 GB against 8 GB for gemma4:12b. Prompt reading matters because every "(invalid reply)" retry (B-136) re-reads the whole prompt. Speed alone does not justify a switch: the quality evidence that placed gemma4:12b has to be rerun. |
-| **Reproduce** | The owner's figures were measured by hand; F-126-T01 makes the measurement repeatable. |
-| **Check** | A repeatable speed benchmark per model under evals (uncached prompt reading and generation); gemma4:26b's results on the F-006 placement probes and the relevant gauntlet cases next to gemma4:12b's, local models only; the owner's recorded decision; if the owner switches, the configured chat model and its documentation name gemma4:26b. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-126-t02"></a>F-126-T02 — Rerun the gemma4:12b quality evidence with gemma4:26b | 2.5 h | 0 h | 2.5 h | Planned | — | [F-126-T03](#f-126-t03) | 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
-| 🟢 Small | <a id="f-126-t03"></a>F-126-T03 — Owner decides whether to switch the chat model to gemma4:26b | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-126-T02](#f-126-t02) | [F-126-T04](#f-126-t04) | ⏳ 🤔 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
-| 🟢 Small | <a id="f-126-t04"></a>F-126-T04 — Switch the configured chat model to gemma4:26b | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T03](#f-126-t03) | — | ⏳ 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
-| 🟡 Medium | **Total** | 4.75 h (3 of 4 steps) | 0 h (0 of 4 steps recorded) | 3.25 h agent + 0.25 h owner | 1 of 4 completed | | | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | Completed | [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-126.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); F-126-T01 speed benchmark in [2026-11-25-f126-t01-speed-benchmark.md](evaluations/2026-11-25-f126-t01-speed-benchmark.md); [#761](https://github.com/voidbrain/nerv/pull/761) |
-| Opened | 2026-11-25 |
-| Verification | Unit/integration: 2026-11-25 `test/speed-benchmark.test.mjs` passed (2/2); local benchmark run recorded in `docs/evaluations/2026-11-25-f126-t01-speed-benchmark.md`; quality evaluation pending F-126-T02. |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
 ### <a id="f-099"></a>[✨ F-099](#top)
 
 **FPV build knowledge: components and wiring from cited sources**
@@ -4676,6 +4629,46 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="b-179"></a>[🐞 B-179](#top)
+
+**`gauntlet.mjs ledger` refuses a multi-case report of a pack with runners: "Inconsistent token totals"**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: merge on green CI, then close.
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-27 in the F-126 night campaign: `node tools/gauntlet.mjs ledger --report=<cad-3d rest report> --pack=cad-3d` refused a valid report (4 cases passed, 2,013 output tokens) with "Inconsistent token totals". For a pack with runner cases (`cad-3d`, `coding`, `embedded`, system packs) `recordSelected` in `tools/gauntlet.mjs` recorded each case from a copy of the report cut to that case, which kept the whole report's token total, case count and pack hash; Gauntlet's validator (gauntlet-protocol `src/index.ts` ~L1667) rightly refuses it. NERV's side, not the release's. Reports with one case, or whose cases used no tokens (system runs), passed, which is why it had not shown. |
+| **Reproduce** | Test: `test/gauntlet.test.mjs` "B-179: gauntlet ledger records a multi-case report of a model-runner pack whose cases used tokens" (two coding cases on a stand-in runner, 7 tokens each, through `main(['ledger', …])`); fails on `main` with "Inconsistent token totals". |
+| **Check** | The B-179 test passes; the night's cad-3d report records its four cases; a report whose source key differs from the one NERV computes is still refused. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-179-t01"></a>B-179-T01 — Failing test: gauntlet ledger records a multi-case model-runner report | 0.25 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | — | [B-179-T02](#b-179-t02) |
+| 🟢 Small | <a id="b-179-t02"></a>B-179-T02 — recordSelected records the whole report and sets the per-case source key after | 0.5 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | [B-179-T01](#b-179-t01) | — |
+| 🟢 Small | **Total** | 0.75 h | 0.75 h | 0 h | 0 of 2 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-179.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: `test/gauntlet.test.mjs` (B-179). Code: `tools/gauntlet.mjs` (`recordSelected`). Found in [F-126](work/records/F-126.md); [#863](https://github.com/voidbrain/nerv/pull/863) |
+| Opened | 2026-11-27 |
+| Verification | Unit 2026-11-27: the B-179 test fails without the fix and passes with it; `npm run check:gauntlet-ledger` keeps all 133 entries (255 now). |
+| Reviewed | 2026-11-27 |
+| Impact | A report of the runner packs with more than one case could not reach the ledger by hand; `gauntlet all` was not affected (it passes one source key per batch). |
+
+</details>
+
+---
 ### <a id="b-094"></a>[🐞 B-094](#top)
 
 **Remote action wording: a doubled full stop, "queued" for a finished job, "offline" for a revoked base**
@@ -4807,6 +4800,55 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-22 |
 | Verification | 2026-11-22: F-116-T01 feasibility note written in [model-splitting.md](design/model-splitting.md); verified with `npm run check:fast`. Pending: owner decision (F-116-T02). |
 | Reviewed | 2026-11-22 |
+
+</details>
+
+---
+### <a id="f-126"></a>[✨ F-126](#top)
+
+**Evaluate gemma4:26b as the local chat model instead of gemma4:12b**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟡 Medium | 2.25 h agent + 0.25 h owner | — | — | 🤖 | — | 🤔 |
+
+🧑 **→** F-126-T03: confirm gemma4:26b as the main model or go back to gemma4:12b, after the [quality report](evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md).
+
+| | |
+|---|---|
+| **Issue** | Owner approved 2026-11-25. On the owner's Mac (M3 Pro, 36 GB, load average 8–15), with a 3,900-token prompt and uncached prompt reading, gemma4:26b read the prompt about twice as fast as gemma4:12b and generated faster: gemma4:12b 200 tok/s reading, 37 tok/s generation; gemma4:26b 441 / 45; qwen3-coder:30b 565 / 35; qwen2.5-coder:14b 168 / 13; devstral-small-2:24b 99 / 7; gemma4:e2b about 3,000 / 50. The cost is memory: about 16 GB against 8 GB for gemma4:12b. Prompt reading matters because every "(invalid reply)" retry (B-136) re-reads the whole prompt. Speed alone does not justify a switch: the quality evidence that placed gemma4:12b has to be rerun. |
+| **Reproduce** | The owner's figures were measured by hand; F-126-T01 makes the measurement repeatable. |
+| **Check** | A repeatable speed benchmark per model under evals (uncached prompt reading and generation); gemma4:26b's results on the F-006 placement probes and the relevant gauntlet cases next to gemma4:12b's, local models only; the owner's recorded decision; if the owner switches, the configured chat model and its documentation name gemma4:26b. |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟢 Small | <a id="f-126-t02"></a>F-126-T02 — Rerun the gemma4:12b quality evidence with gemma4:26b | 2.5 h | 0 h | 1 h | Planned | — | [F-126-T03](#f-126-t03), [F-126-T05](#f-126-t05) | 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟢 Small | <a id="f-126-t03"></a>F-126-T03 — Owner decides whether to switch the chat model to gemma4:26b | — | 0 h | 0 h agent + 0.25 h owner | Planned | [F-126-T02](#f-126-t02) | [F-126-T04](#f-126-t04) | ⏳ 🤔 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟢 Small | <a id="f-126-t04"></a>F-126-T04 — Switch the configured chat model to gemma4:26b | 0.75 h | 0 h | 0.75 h | Planned | [F-126-T03](#f-126-t03) | — | ⏳ 🤖 | [PR #751](https://github.com/voidbrain/nerv/pull/751) |
+| 🟢 Small | <a id="f-126-t05"></a>F-126-T05 — Night rerun: the six cad-3d cases gemma4:26b has not finished | 0.5 h | 0 h | 0.5 h | Planned | [F-126-T02](#f-126-t02) | — | ⏳ 🤖 | — |
+| 🟡 Medium | **Total** | 5.25 h (4 of 5 steps) | 0 h (0 of 5 steps recorded) | 2.25 h agent + 0.25 h owner | 1 of 5 completed | | | | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-126-t01"></a>F-126-T01 — Repeatable local model speed benchmark | 1.5 h | 0 h | Completed | [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run |
+
+</details>
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-126.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-126-T01: [PR #751](https://github.com/voidbrain/nerv/pull/751); [PR #761](https://github.com/voidbrain/nerv/pull/761) speed benchmark tool and gemma4:12b vs gemma4:26b run · F-126-T02: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T03: [PR #751](https://github.com/voidbrain/nerv/pull/751) · F-126-T04: [PR #751](https://github.com/voidbrain/nerv/pull/751). Owner benchmark 2026-11-25 (by hand); opened in [PR #751](https://github.com/voidbrain/nerv/pull/751); F-126-T01 speed benchmark in [2026-11-25-f126-t01-speed-benchmark.md](evaluations/2026-11-25-f126-t01-speed-benchmark.md); [#761](https://github.com/voidbrain/nerv/pull/761); [F-126-T02 Gauntlet report](evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md); [#863](https://github.com/voidbrain/nerv/pull/863) |
+| Opened | 2026-11-25 |
+| Verification | Unit/integration: 2026-11-25 `test/speed-benchmark.test.mjs` passed (2/2); local benchmark run recorded in `docs/evaluations/2026-11-25-f126-t01-speed-benchmark.md`. Gauntlet 2026-11-26/27 (real local models): recorded in `docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md` and `evals/gauntlet/ledger.json`; placement probes and 6 cad-3d cases pending. |
+| Reviewed | 2026-11-27 |
 
 </details>
 
