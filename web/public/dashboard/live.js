@@ -1118,7 +1118,27 @@
   // While you were away: from real sorties and deliveries since your last visit, remembered in this browser only.
   const VISIT = "nerv.dashboard.lastVisit";
   try { const v = Number(localStorage.getItem(VISIT)); state.lastVisit = Number.isFinite(v) && v > 0 ? v : Date.now() - 12 * HOUR; } catch { state.lastVisit = Date.now() - 12 * HOUR; }
-  window.liveSeen = function () { try { localStorage.setItem(VISIT, String(state.lastVisit)); } catch { /* private window: forget on reload */ } };
+  window.liveSeen = async function () {
+    const since = state.lastVisit; const ids = new Set();
+    try {
+      if (state.deliveredSince === since) {
+        let before = 0;
+        while (true) {
+          const page = await api("inbox/history?before=" + before + "&limit=50");
+          const items = Array.isArray(page.items) ? page.items : [];
+          for (const item of items) if (item.kind === "reminder" && Date.parse(item.created) > since) ids.add(item.id);
+          const oldest = items.at(-1);
+          if (!page.next || !oldest || Date.parse(oldest.created) <= since) break;
+          before = page.next;
+        }
+      }
+      if (state.brief && state.brief.id) ids.add(state.brief.id);
+      await Promise.all([...ids].map(id => api("inbox/" + encodeURIComponent(id) + "/read", { method:"POST" })));
+      state.lastVisit = Date.now(); state.deliveredSince = state.lastVisit; state.deliveredCount = 0;
+      try { localStorage.setItem(VISIT, String(state.lastVisit)); } catch { /* private window: forget on reload */ }
+      renderAll();
+    } catch { /* leave the visit cursor unchanged so the service read can be retried */ }
+  };
   window.renderAway = function () {
     const since = state.lastVisit; const ended = state.sorties.filter(s => s.ended && s.ended > since);
     const count = st => ended.filter(s => s.status === st).length; const delivered = state.deliveredSince === state.lastVisit ? state.deliveredCount || 0 : 0;
