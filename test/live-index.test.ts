@@ -21,7 +21,12 @@ const TOOLS = [
     inputSchema: { type: 'object', properties: {} },
     annotations: READ_ONLY,
   },
-  { name: 'blocked_by', description: 'Open items whose prerequisites name repo:ID.', inputSchema: REF, annotations: READ_ONLY },
+  {
+    name: 'blocked_by',
+    description: 'Open items whose prerequisites name repo:ID.',
+    inputSchema: REF,
+    annotations: READ_ONLY,
+  },
   {
     name: 'rebuild_now',
     description: 'Rebuilds the cache.',
@@ -49,7 +54,8 @@ const turn = Array.from({ length: 40 }, (_, i) => ({
   ownerHours: 0.25,
   dependsOn: [],
   prs: [],
-  source: i === 1 ? { ...source('beta', 'docs/BACKLOG.md'), url: 'javascript:alert(1)' } : source('alpha', 'docs/BACKLOG.md'),
+  source:
+    i === 1 ? { ...source('beta', 'docs/BACKLOG.md'), url: 'javascript:alert(1)' } : source('alpha', 'docs/BACKLOG.md'),
 }));
 const blocked = {
   kind: 'record',
@@ -99,7 +105,11 @@ async function fakeIndex() {
       const name = m.params!.name!,
         args = m.params!.arguments ?? {};
       state.calls.push({ name, args });
-      const head = { version: state.version, snapshot: SNAPSHOT, unknown: [{ repo: 'gamma', message: 'no BACKLOG.md' }] };
+      const head = {
+        version: state.version,
+        snapshot: SNAPSHOT,
+        unknown: [{ repo: 'gamma', message: 'no BACKLOG.md' }],
+      };
       const a =
         name === 'waiting_on_me'
           ? { ...head, steps: turn }
@@ -124,7 +134,12 @@ async function fakeIndex() {
 test('an answer is read only in the contract version it knows, with safe links only', () => {
   assert.throws(() => readLiveIndexAnswer({ version: 2, snapshot: SNAPSHOT, unknown: [] }), /version 2/);
   assert.throws(() => readLiveIndexAnswer('not an answer'), /not a live index answer/);
-  const a = readLiveIndexAnswer({ version: 1, snapshot: SNAPSHOT, unknown: [{ repo: 'gamma', message: 'gone' }], steps: turn });
+  const a = readLiveIndexAnswer({
+    version: 1,
+    snapshot: SNAPSHOT,
+    unknown: [{ repo: 'gamma', message: 'gone' }],
+    steps: turn,
+  });
   assert.deepEqual(a.unknown, [{ repo: 'gamma', reason: 'gone' }]);
   assert.equal(a.items.length, 40);
   assert.equal(a.items[0]!.url, 'https://github.com/example/alpha/blob/abc123/docs/BACKLOG.md');
@@ -197,7 +212,7 @@ test(
 
       // Ready: every owner step, read from the structured answer (its text is far past 8000 characters).
       const ready = await card();
-      assert.equal(ready.state, 'ready');
+      assert.equal(ready.state, 'ready', JSON.stringify(ready));
       if (ready.state !== 'ready') return;
       assert.equal(ready.snapshot, SNAPSHOT);
       assert.equal(ready.screen, idx.url.replace(/mcp$/, ''));

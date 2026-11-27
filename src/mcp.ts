@@ -227,6 +227,24 @@ export function resultText(result: unknown, max = 8000): string {
     .slice(0, max);
 }
 
+/**
+ * A tool call's answer: its text (cut to size, for Misato and the ledger) and, when the server sends one, its
+ * `structuredContent`, whole: a reader that needs every row (the live index card) reads that, not the cut text.
+ */
+export interface ToolResult {
+  text: string;
+  isError: boolean;
+  structured?: unknown;
+}
+function toolResult(value: unknown): ToolResult {
+  const r = value as { isError?: boolean; structuredContent?: unknown } | undefined;
+  return {
+    text: resultText(r),
+    isError: r?.isError === true,
+    ...(r?.structuredContent !== undefined ? { structured: r.structuredContent } : {}),
+  };
+}
+
 /** Commands that ship with node: looked for next to the running node first (B-148). */
 const NODE_COMMANDS = new Set(['node', 'npx', 'npm']);
 const isExecutable = (file: string) => {
@@ -399,10 +417,9 @@ export class McpClient implements McpConnection {
     }
     return tools.filter((t) => t && typeof t.name === 'string');
   }
-  async callTool(name: string, args: Record<string, unknown>): Promise<{ text: string; isError: boolean }> {
+  async callTool(name: string, args: Record<string, unknown>): Promise<ToolResult> {
     await this.ready;
-    const r = (await this.request('tools/call', { name, arguments: args })) as { isError?: boolean };
-    return { text: resultText(r), isError: r?.isError === true };
+    return toolResult(await this.request('tools/call', { name, arguments: args }));
   }
   close() {
     if (this.closed) return;
@@ -416,7 +433,7 @@ export class McpClient implements McpConnection {
 /** What NERV needs from any MCP server, whatever carries it. */
 export interface McpConnection {
   listTools(): Promise<McpTool[]>;
-  callTool(name: string, args: Record<string, unknown>): Promise<{ text: string; isError: boolean }>;
+  callTool(name: string, args: Record<string, unknown>): Promise<ToolResult>;
   close(): void;
 }
 /** The client for a configured server: stdio for a command, streamable HTTP for a URL (F-123). */
@@ -583,12 +600,9 @@ export class McpHttpClient implements McpConnection {
     }
     return tools.filter((t) => t && typeof t.name === 'string');
   }
-  async callTool(name: string, args: Record<string, unknown>): Promise<{ text: string; isError: boolean }> {
+  async callTool(name: string, args: Record<string, unknown>): Promise<ToolResult> {
     await this.init();
-    const r = (await this.request('tools/call', { name, arguments: args }, this.callTimeoutMs)) as {
-      isError?: boolean;
-    };
-    return { text: resultText(r), isError: r?.isError === true };
+    return toolResult(await this.request('tools/call', { name, arguments: args }, this.callTimeoutMs));
   }
   close() {
     this.closed = true;

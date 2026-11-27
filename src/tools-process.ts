@@ -5,6 +5,8 @@ import { connect, fingerprint, type McpConnection, type McpServer, type McpTool 
 // server's tools or call one already granted and gated; it never decides whether a call is allowed, and it holds no
 // ledger. When EVAs exist (F-049) this is the process that moves into a sandbox.
 const home = process.argv[2];
+/** Room for a tool's structured answer in one reply: the frame less the text (8000 characters, up to 4 bytes each). */
+const STRUCTURED_BYTES = MAX_FRAME_BYTES - 33_000;
 const clients = new Map<string, McpConnection>();
 const specs = new Map<string, string>();
 const servers = (): McpServer[] => {
@@ -79,7 +81,11 @@ process.on('message', (value: unknown) => {
         if (fingerprint(now) !== params.fingerprint)
           return { error: `${id}.${name} changed since it was granted: grant it again (nerv tools grant).` };
         const r = await c.callTool(name, params.args as Record<string, unknown>);
-        return r.isError ? { error: r.text || 'The tool reported an error.' } : { text: r.text };
+        if (r.isError) return { error: r.text || 'The tool reported an error.' };
+        // The structured answer rides along only while the reply fits one IPC frame beside its text, so a large one
+        // never turns a call that answered into an error.
+        const fits = r.structured !== undefined && Buffer.byteLength(JSON.stringify(r.structured)) <= STRUCTURED_BYTES;
+        return fits ? { text: r.text, structured: r.structured } : { text: r.text };
       } catch (e) {
         forget(id);
         return { error: e instanceof Error ? e.message : 'The MCP call failed.' };

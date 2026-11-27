@@ -136,6 +136,7 @@
         "test/updater-status.browser.mjs",
         "test/doctor-run.browser.mjs",
         "test/dashboard-shell.browser.mjs",
+        "test/live-index.browser.mjs",
         "test/push-opened.browser.mjs"
       ],
       "families": [

@@ -52,6 +52,19 @@ An unreachable server is reported, not hidden:
 - An action you approved while the server was unreachable does not run. Misato is told it was approved but did not run, and why.
 - An approval issues a single-use grant that lasts 60 seconds. NERV normally makes the call within a few seconds of your approval. If it gets to it later (for example, the service was stopped), the call does not run and Misato says why: ask again. An approval never runs a call twice.
 
+## The coordinator's live index
+
+The coordinator's live index (every project's backlog, rebuilt from git) is an MCP server on the same machine, at `http://127.0.0.1:7380/mcp`. Install and start it first ([its install page](https://github.com/voidbrain/coordinator/blob/main/docs/live-index-install.md)), then register it under the id `coordinator` and grant its three read tools as reads:
+
+```bash
+nerv tools add coordinator http://127.0.0.1:7380/mcp
+nerv tools grant coordinator/waiting_on_me
+nerv tools grant coordinator/blocked_by
+nerv tools grant coordinator/record_lookup
+```
+
+The full dashboard (`/full`) then shows a card with your turn across every project, what each step unblocks, how old the index's snapshot is and the projects it could not read (their work is unknown, not none), each row linked to its source file on GitHub. The card reads the index through these grants every 5 minutes and on Refresh, and keeps no copy. It uses `waiting_on_me` and `blocked_by`; `record_lookup` is for questions in chat. Until the server and both grants exist, the card shows the commands still to run; a grant other than `read` is not used; when the index is not running it says so, never that nothing waits.
+
 ## Check it
 
 1. `nerv tools`: the server's tools are listed, each granted one with its effect class and EVA.

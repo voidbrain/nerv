@@ -2,6 +2,7 @@ import { Component, computed, DestroyRef, effect, inject, untracked } from '@ang
 import { RouterLink } from '@angular/router';
 import { Language } from '../language.ts';
 import { LiveFeed } from '../live-feed.ts';
+import { LiveIndexCard } from '../live-index-card.ts';
 import { Session } from '../session.ts';
 import { SignIn } from '../sign-in.ts';
 import { ThemeService } from '../theme.ts';
@@ -40,7 +41,7 @@ const ACCENT_KEY = {
  */
 @Component({
   selector: 'nerv-dashboard',
-  imports: [RouterLink, SignIn, Panel, Stat],
+  imports: [RouterLink, SignIn, Panel, Stat, LiveIndexCard],
   host: { class: 'dash', '[style]': 'theme.tokens()', '[attr.data-theme]': 'theme.choice().theme' },
   template: `
     <header class="dash-head">
@@ -122,6 +123,7 @@ const ACCENT_KEY = {
             </ul>
           </nerv-panel>
         </div>
+        <nerv-live-index-card />
         <nerv-panel [heading]="t().movingHere" headingId="dash-moving">
           <p class="meta">
             {{ t().movingBefore }} <a href="/dashboard/">{{ t().oldDashboard }}</a>{{ t().movingAfter }}
