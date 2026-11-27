@@ -42,5 +42,6 @@
     "estimateAgentHours": 0,
     "ownerHours": 0.25,
     "ownerKind": "procedure"
-  }
+  },
+  "ownerLink": "docs/acceptance/f159-modules-2026-11-27.md"
 }
