@@ -22,7 +22,17 @@ const LONG = 'neutral-reminder-https://example.invalid/a-long/unbroken/path/that
 const MEASURE = `(() => {
   const W = document.documentElement.clientWidth;
   const name = (e) => e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + (typeof e.className === 'string' && e.className.trim() ? '.' + e.className.trim().split(/\\s+/).join('.') : '');
-  const clipped = (e) => { for (let p = e.parentElement; p && p !== document.body && p !== document.documentElement; p = p.parentElement) if (getComputedStyle(p).overflowX !== 'visible') return true; return false; };
+  // A box clips a descendant only if it contains it: an absolutely placed element (a screen-reader-only label) escapes
+  // every box up to its positioned ancestor, and WebKit then counts it in the page width although Chrome does not.
+  const clipped = (e) => {
+    let free = ['absolute', 'fixed'].includes(getComputedStyle(e).position);
+    for (let p = e.parentElement; p && p !== document.body && p !== document.documentElement; p = p.parentElement) {
+      const s = getComputedStyle(p);
+      if (!free && s.overflowX !== 'visible') return true;
+      if (s.position !== 'static') free = ['absolute', 'fixed'].includes(s.position);
+    }
+    return false;
+  };
   const wide = [];
   for (const e of document.querySelectorAll('body *')) {
     const r = e.getBoundingClientRect();
@@ -44,6 +54,15 @@ test(
     const store = new Store(':memory:');
     store.modelUsage = async (before, limit) => store.usage.page(before, limit);
     store.lilith = { list: async () => store.memory.list(), episodes: async () => store.memory.episodes() };
+    // A service sample, as a running service has: its row has cells that do not apply, each a dash with a
+    // screen-reader-only name.
+    store.healthMetrics = async () => ({
+      latestSample: { rssBytes: 600 * 1048576, heapUsedBytes: 120 * 1048576, eventLoopDelayMs: 12, pollCount: 9 },
+      recentSamples: [],
+      links: [],
+      thresholds: null,
+      warnings: [],
+    });
     store.ledger.openSortie('owner', 'Neutral sortie ' + LONG, 'trusted');
     store.ledger.openSortie('owner', 'Neutral sortie two', 'trusted');
     const token = 'm'.repeat(32);
@@ -91,6 +110,8 @@ test(
               await evaluate(
                 `localStorage.setItem('nerv.workspace.theme', JSON.stringify({ theme: '${theme}', mode: '${mode}', accent: 'orange' }))`,
               );
+              // A fresh load: the workspace reads `#code=` only when it starts, never on a hash change.
+              await page('Page.navigate', { url: 'about:blank' });
               await page('Page.navigate', { url: origin + '/full#code=' + (await code()) });
               await until(`document.querySelectorAll('nerv-dashboard [data-key]').length === 2`, 30000);
               await until(`document.querySelector('nerv-dashboard').dataset.theme === '${theme}'`);
