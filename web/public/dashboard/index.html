@@ -186,13 +186,14 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .health-row { align-items:baseline; }
 .health-row > .health-label { flex:none; white-space:nowrap; }
 .health-row > .health-value { gap:6px; min-width:0; justify-content:flex-end; text-align:right; }
-/* F-152-T08 (owner): diagnostics are cards at every width, one per row, "label: value" lines that wrap to the box. */
-.diag { margin-top:6px; display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr)); gap:6px; font-size:11px; font-variant-numeric:tabular-nums; }
+/* F-152-T08/T09 (owner): diagnostics are compact cards, one per row on a phone and two per row from 720 px, "label value" lines without separators. */
+.diag { margin-top:4px; display:grid; grid-template-columns:minmax(0,1fr); gap:4px; font-size:11px; line-height:1.3; font-variant-numeric:tabular-nums; }
+@media (min-width:720px) { .diag { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 .diag-title { grid-column:1 / -1; }
-.diag-card { border:1px solid var(--border); border-radius:var(--radius); padding:4px 8px; min-width:0; }
-.diag-card h2 { margin:0 0 2px; font-size:11px; font-weight:700; color:var(--title); overflow-wrap:anywhere; }
+.diag-card { border:1px solid var(--border); border-radius:var(--radius); padding:3px 6px; min-width:0; }
+.diag-card h2 { margin:0; font-size:11px; font-weight:700; color:var(--title); overflow-wrap:anywhere; }
 .diag-card dl { margin:0; }
-.diag-card dl > div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:0 8px; border-top:1px solid var(--border); padding:1px 0; }
+.diag-card dl > div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:0 6px; padding:0; }
 .diag-card dt { color:var(--muted); }
 .diag-card dd { margin:0 0 0 auto; text-align:right; }
 .diag-card p { margin:0; }

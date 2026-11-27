@@ -44,6 +44,15 @@ const MEASURE = `(() => {
     .map((e) => name(e) + ' ' + getComputedStyle(e).fontSize);
   return { scroll: document.documentElement.scrollWidth - W, wide: wide.slice(0, 5), small: small.slice(0, 5) };
 })()`;
+/** B-182-T04: every visible control's right edge stays inside its card's content box (the card's padding is respected), here in the reminder form (What, When). */
+const INSIDE = `(() => [...document.querySelectorAll('nerv-nodo .panel:has(input[type=datetime-local]) :is(input, select, textarea)')]
+  .filter((e) => e.getClientRects().length)
+  .map((e) => {
+    const p = e.closest('.panel'), s = getComputedStyle(p), pr = p.getBoundingClientRect(), r = e.getBoundingClientRect();
+    const edge = pr.right - parseFloat(s.borderRightWidth) - parseFloat(s.paddingRight);
+    return r.right > edge + 0.5 ? (e.type || e.tagName) + ' ' + Math.round(r.right) + ' > ' + Math.round(edge) : '';
+  })
+  .filter(Boolean))()`;
 const FITS = { scroll: 0, wide: [], small: [] };
 
 test(
@@ -101,6 +110,11 @@ test(
           await page('Page.navigate', { url: origin + '/#code=' + (await code()) });
           await until(`!!document.querySelector('nerv-nodo [data-reminder-id]')`, 30000);
           await fits(`/ at ${width} px`);
+          assert.deepEqual(await evaluate(INSIDE), [], `/ reminder form controls inside the card at ${width} px`);
+          assert.ok(
+            await evaluate(`!!document.querySelector('nerv-nodo input[type=datetime-local]')`),
+            'the When field is on the page',
+          );
           await evaluate(`document.querySelector('nerv-nodo .edit-btn').click()`);
           await until(`!!document.querySelector('nerv-nodo .rem-edit input')`);
           await fits(`/ editing a reminder at ${width} px`);
