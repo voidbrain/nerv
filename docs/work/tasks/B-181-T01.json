@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "B-181-T01",
+  "parent": "B-181",
+  "title": "Record a digest of each staged skill version and refuse a changed one at run time",
+  "goal": "Only the text the owner staged and promoted reaches the planner",
+  "status": "planned",
+  "acceptance": [
+    "A failing test (committed first) edits a promoted invented skill's stored SKILL.md and expects chooseActiveSkill to refuse it with a reason naming the change, and the planner prompt to carry no instructions",
+    "stageSkillPackage records a sha-256 of the stored package files in the registry; loadSkillVersion, or the run-time matcher, compares it; a version staged before the digest existed is refused at run time until it is staged again as a new version, and the guide says so"
+  ],
+  "resources": [
+    "src/skills.ts",
+    "test/**",
+    "docs/guides/models-and-pilots.md",
+    "docs/work/records/B-181.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "regression-design",
+    "privacy-review"
+  ],
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-27: one digest at staging, one comparison, tests. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  },
+  "dependsOn": [],
+  "privacy": "Neutral invented skills only; no owner data, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ]
+}

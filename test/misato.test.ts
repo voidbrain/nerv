@@ -19,6 +19,7 @@ import { KajiLink } from '../src/kaji-link.ts';
 import { Registry, createRootKey, signRecord, unlockRootKey, type RegistryBody } from '../src/kaji.ts';
 import { completeRemotePrint, receivePartTransfer, type PartTransfer } from '../src/print-transfer.ts';
 import { Runtime } from '../src/runtime.ts';
+import { activateSkillVersion, stageSkillPackage } from '../src/skills.ts';
 import { makeServer } from '../src/server.ts';
 import { Store } from '../src/store.ts';
 test('Misato is asked for one JSON step with the tools, the time and the latest steps; its reply is read strictly', () => {
@@ -1680,4 +1681,104 @@ test('B-176 review: an escape-heavy result is shortened to use the budget, not e
   const steps = (JSON.parse(ask.prompt) as { steps: { result: { text: string } }[] }).steps;
   assert.ok(JSON.stringify(steps).length <= 8000);
   assert.ok(steps[0]!.result.text.length > 5000, `kept ${steps[0]!.result.text.length} characters`);
+});
+/** F-146-T03: an invented read-only skill over reminders.list, staged (and promoted when `promote`) in the data home. */
+const reminderSkill = (promote: boolean) => (home: string) => {
+  stageSkillPackage(home, {
+    manifest: {
+      id: 'reminder-review',
+      version: '1.2.0',
+      title: 'Promemoria: cosa manca?',
+      domain: 'reminders',
+      description: 'Invented read-only skill for the run-time join test.',
+      requiredCapabilities: ['reminders.list'],
+      triggers: ['cosa manca nei promemoria', "what's missing in my reminders"],
+      createdAt: '2026-11-27T00:00:00.000Z',
+    },
+    instructions: 'SKILL-MARKER: leggi i promemoria con reminders.list e rispondi in una riga.\n',
+  });
+  if (promote) activateSkillVersion(home, 'reminder-review', '1.2.0', { ownerApproved: true });
+};
+test('an active skill reaches the planner for its Italian trigger, limits the tools, and the sortie and reply name it (F-146-T03)', async () => {
+  await agent(
+    [
+      '{"action":{"tool":"reminders.add","args":{"title":"Comprare semi","due":"2030-01-02T09:00:00+01:00"}}}',
+      '{"action":{"tool":"reminders.list","args":{}}}',
+      '{"reply":"Non manca nulla: nessun promemoria in sospeso."}',
+    ],
+    async (runtime, m) => {
+      const chat = await runtime.chat('Cosa manca nei promemoria?');
+      const first = m.asked.find((a) => a.who === 'misato')!;
+      assert.match(first.system, /SKILL-MARKER/);
+      assert.match(first.system, /"Promemoria: cosa manca\?" \(reminder-review 1\.2\.0\)/);
+      assert.deepEqual(
+        first.system
+          .split('\n')
+          .filter((l) => /^- [a-z]+\.[a-z_.]+ \(/.test(l))
+          .map((l) => l.split(' ')[1]),
+        ['reminders.list'],
+        'only the skill tools are offered',
+      );
+      assert.deepEqual(
+        chat.steps.map((s) => [s.tool, s.outcome]),
+        [
+          ['reminders.add', 'invalid'],
+          ['reminders.list', 'grant'],
+        ],
+      );
+      assert.match(chat.steps[0]!.error!, /Promemoria: cosa manca\?.*only reminders\.list/);
+      assert.equal((await runtime.list()).length, 0, 'the refused write never ran');
+      assert.match(chat.reply!, /^Non manca nulla/);
+      assert.match(chat.reply!, /\n\nSkill: Promemoria: cosa manca\? \(reminder-review 1\.2\.0\)$/);
+      const events = await runtime.events(chat.sortieId);
+      const applied = events.find((e) => e.kind === 'skill.applied');
+      assert.deepEqual(applied?.payload, {
+        id: 'reminder-review',
+        version: '1.2.0',
+        title: 'Promemoria: cosa manca?',
+        tools: ['reminders.list'],
+      });
+      assert.equal(events.filter((e) => e.kind === 'ballot').length, 1, 'only the skill tool reached the gate');
+    },
+    undefined,
+    undefined,
+    reminderSkill(true),
+  );
+});
+test('a staged skill is never applied: the English trigger plans with the full catalogue and no skill (F-146-T03)', async () => {
+  await agent(
+    ['{"reply":"Nothing is missing."}'],
+    async (runtime, m) => {
+      const chat = await runtime.chat("What's missing in my reminders?");
+      const first = m.asked.find((a) => a.who === 'misato')!;
+      assert.doesNotMatch(first.system, /SKILL-MARKER|reminder-review/);
+      assert.match(first.system, /Tools: reminders\.list, reminders\.add/, 'the full catalogue, compacted as usual');
+      assert.equal(chat.reply, 'Nothing is missing.');
+      assert.ok(!(await runtime.events(chat.sortieId)).some((e) => e.kind.startsWith('skill.')));
+    },
+    undefined,
+    undefined,
+    reminderSkill(false),
+  );
+});
+test('an answer to the planner question keeps the skill of the original request, matched once more from it (F-146-T03)', async () => {
+  await agent(
+    ['{"ask":"Di quale giorno?"}', '{"reply":"Domani non manca nulla."}'],
+    async (runtime, m) => {
+      const asked = await runtime.chat('Cosa manca nei promemoria?', 'telegram:1');
+      assert.equal(asked.reply, 'Di quale giorno?');
+      const answered = await runtime.chat('domani', 'telegram:1');
+      const prompts = m.asked.filter((a) => a.who === 'misato');
+      assert.equal(prompts.length, 2);
+      assert.match(
+        prompts[1]!.system,
+        /SKILL-MARKER/,
+        'the answer "domani" names no trigger, the original request does',
+      );
+      assert.match(answered.reply!, /\n\nSkill: Promemoria: cosa manca\? \(reminder-review 1\.2\.0\)$/);
+    },
+    undefined,
+    undefined,
+    reminderSkill(true),
+  );
 });

@@ -68,6 +68,10 @@ export interface EventPayloads {
   /** F-051: this request went to the main base over the Kaji line, and what came back. */
   'kaji.forwarded': { base: { id: string; name: string } };
   'kaji.answered': { base: { id: string; name: string }; sortieId: string; transferMs?: number };
+  /** F-146-T03: the active skill this request matched, applied to the planner (its instructions are not copied here). */
+  'skill.applied': { id: string; version: string; title: string; tools: string[] };
+  /** F-146-T03: the active skill this request matched, not applied, and why. */
+  'skill.refused': { id: string; version: string; title: string; reason: string };
   /** F-045: no specialist fitted this request; the generic pilot named its domain. Counted to propose a new pilot. */
   'pilot.unmatched': { domain: string; durationMs?: number };
   /** B-011: what another base did with an action this sortie sent it (kaji.run), as the owner reads it. */
@@ -141,6 +145,8 @@ export const EVENT_KINDS = [
   'kaji.forwarded',
   'kaji.answered',
   'pilot.unmatched',
+  'skill.applied',
+  'skill.refused',
   'kaji.result',
   'ballot.shadow',
   'eva03.started',

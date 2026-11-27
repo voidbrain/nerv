@@ -40,6 +40,7 @@ import {
   type Turn,
 } from './misato.ts';
 import { toolDocs } from './executors.ts';
+import type { AppliedSkill } from './skills.ts';
 import { compactToolCatalogue } from './tool-index.ts';
 import { builtinPackRegistry } from './packs.ts';
 import { digestAsk, factLimit, parseDigest, type Exchange } from './instrumentality.ts';
@@ -191,22 +192,25 @@ process.on('message', (value: unknown) => {
             error:
               'No model route for Misato: add models.local (or enable models.cloud) in config.json, then run nerv reload. See docs/INSTALL.md, section "Model routes".',
           };
-        const remote = Array.isArray(params.remote) ? (params.remote as RemoteOffer[]) : [];
+        // F-146-T03: an applied skill limits the catalogue to its own tools, so the planner can ask for nothing else.
+        const skill = params.skill as AppliedSkill | undefined;
+        const remote = !skill && Array.isArray(params.remote) ? (params.remote as RemoteOffer[]) : [];
         const domains = detectToolDomains({
           request: params.request as string,
           history: params.history as Step[],
           context: params.context as Turn[] | undefined,
         });
-        const offered = filterToolsByIntent(
-          [
-            ...builtinPackRegistry
-              .filterToolDocs(toolDocs, readConfig(home).packs)
-              .filter((t) => !proactive?.readOnly || t.effect === 'read'),
-            ...((params.external as ToolDoc[] | undefined) ?? []),
-            ...(remote.length ? [remoteToolDoc(remote)] : []),
-          ],
-          domains,
-        );
+        const catalogue = [
+          ...builtinPackRegistry
+            .filterToolDocs(toolDocs, readConfig(home).packs)
+            .filter((t) => !proactive?.readOnly || t.effect === 'read'),
+          ...((params.external as ToolDoc[] | undefined) ?? []),
+          ...(remote.length ? [remoteToolDoc(remote)] : []),
+        ];
+        // A skill's own tools are offered even when the request names none of their domain words.
+        const offered = skill
+          ? catalogue.filter((t) => skill.tools.includes(t.name))
+          : filterToolsByIntent(catalogue, domains);
         // F-113-T02: subjects the planner has not read yet go in as one line each; tools.read returns their docs.
         const { tools, index: subjects } = compactToolCatalogue(offered, params.history as Step[]);
         const ask = misatoAsk(
@@ -229,6 +233,7 @@ process.on('message', (value: unknown) => {
             ...(typeof params.advice === 'string' ? { advice: params.advice } : {}),
             ...(params.language === 'it' || params.language === 'en' ? { language: params.language } : {}),
             personaName: personas.enabled ? personas.names.misato : null,
+            ...(skill ? { skill } : {}),
           },
           route,
         );
