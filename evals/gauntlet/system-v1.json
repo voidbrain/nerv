@@ -236,6 +236,7 @@
         "test/doctor-run.browser.mjs",
         "test/dashboard-shell.browser.mjs",
         "test/live-index.browser.mjs",
+        "test/health-diagnostics.browser.mjs",
         "test/fixtures/browser.mjs"
       ]
     },
