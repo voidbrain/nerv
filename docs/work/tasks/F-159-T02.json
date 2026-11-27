@@ -44,6 +44,7 @@
     "agentHours": 0,
     "baselineAgentHours": 1.25,
     "estimateAgentHours": 1.25,
-    "actualAgentHours": 0.5
+    "actualAgentHours": 0.5,
+    "actualSource": "stated"
   }
 }
