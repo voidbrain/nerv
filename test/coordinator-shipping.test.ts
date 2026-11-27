@@ -793,9 +793,9 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
       });
       console.log(`F-016-T21 metrics ${metrics}`);
       assert.ok(readCommittedAt > 0, 'worker reported read-committed before canonicalising');
-      // The event loop is what a synchronous export blocks (0 ticks during the export, re-checked 2026-11-26): it keeps
-      // turning while the worker canonicalises and signs.
-      assert.ok(ticksDuringSerialise >= 1, `no event-loop tick during serialise/sign: ${metrics}`);
+      // B-076: no tick-count assertion. A synchronous export gives 0 ticks, but so can B's standby write when its wait
+      // outlasts the export (1 tick, renewal 662 ms against a 545 ms export, Windows run 45978210692 attempt 2); the CPU
+      // check below fails a synchronous export on its own. The count stays in the metrics.
       // B-076: the canonicalising and signing are not on the main thread: during the export it spends about the CPU time
       // the same two requests take with no export (11-14 ms against 8-15 ms locally), where an export on it spends
       // 146-217 ms. CPU time, not the longest wall-clock gap: both bases share this process, and on the Windows runner
