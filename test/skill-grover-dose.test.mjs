@@ -6,8 +6,11 @@ import assert from 'node:assert/strict';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { misatoAsk } from '../src/misato.ts';
 import {
+  activateSkillVersion,
   checkSkillPermissionEscalation,
+  chooseActiveSkill,
   evaluateSkillVersion,
   stageSkillPackage,
   validateSkillPackage,
@@ -74,14 +77,14 @@ test('F-153-T01: graded outputs make a rule-following skill eligible and a feed-
   const vague = Object.fromEntries(suite.cases.map((c) => [c.id, 'Il vaso 2 sembra a posto.']));
   withHome((home) => {
     stageSkillPackage(home, validateSkillPackage(read(PACKAGE)));
-    const pass = evaluateSkillVersion(home, 'grover-dose', '1.0.0', suite, {
+    const pass = evaluateSkillVersion(home, 'grover-dose', read(PACKAGE).manifest.version, suite, {
       model: 'fake',
       baselineOutputs: vague,
       withSkillOutputs: good,
     });
     assert.equal(pass.eligibleForPromotion, true, pass.reason);
     const started = { ...good, 'it-refused-holdout': `${good['it-refused-holdout']} ho avviato la dose` };
-    const fail = evaluateSkillVersion(home, 'grover-dose', '1.0.0', suite, {
+    const fail = evaluateSkillVersion(home, 'grover-dose', read(PACKAGE).manifest.version, suite, {
       model: 'fake-2',
       baselineOutputs: vague,
       withSkillOutputs: started,
@@ -152,3 +155,69 @@ test('F-153-T02: the runner refuses a remote endpoint, a run without --out and a
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+// F-153-T04: the join across the package, the skill store, the run-time matcher and the planner prompt (fake model:
+// no model runs; the offered tools are the three granted reads plus an invented feed tool that must never be used).
+const OFFERED = [
+  ...READS.map((name) => ({ name, effect: 'read' })),
+  { name: 'grover.grover_feed', effect: 'write-external' },
+  { name: 'reminders.list', effect: 'read' },
+];
+
+test('F-153-T04: 1.1.0 follows 1.0.0 and carries Italian and English trigger phrases', () => {
+  const { manifest } = validateSkillPackage(read(PACKAGE));
+  assert.equal(manifest.version, '1.1.0');
+  assert.equal(manifest.parentVersion, '1.0.0');
+  for (const phrase of ["controlla se è richiesta un'altra dose", 'serve una dose', 'need a dose', 'need another dose'])
+    assert.ok(manifest.triggers?.includes(phrase), phrase);
+});
+
+test('F-153-T04: a promoted 1.1.0 applies to Italian and English triggers with only the three reads; staged does not', () =>
+  withHome((home) => {
+    const pkg = validateSkillPackage(read(PACKAGE)),
+      { version } = pkg.manifest;
+    const requests = [
+      "Controlla se è richiesta un'altra dose",
+      'serve una dose al vaso 2?',
+      'Does pot 2 need another dose?',
+      'does the tent pot need a dose today',
+    ];
+    stageSkillPackage(home, pkg);
+    for (const request of requests)
+      assert.equal(chooseActiveSkill(home, request, OFFERED), undefined, `staged: ${request}`);
+    activateSkillVersion(home, 'grover-dose', version, { ownerApproved: true });
+    for (const request of requests) {
+      const choice = chooseActiveSkill(home, request, OFFERED);
+      assert.ok(choice && 'applied' in choice, request);
+      assert.equal(choice.applied.version, '1.1.0');
+      assert.deepEqual(choice.applied.tools, READS, 'only the three granted reads');
+      const input = {
+        request,
+        history: [],
+        tools: OFFERED.filter((t) => choice.applied.tools.includes(t.name)).map((t) => ({
+          ...t,
+          args: '{}',
+          about: 'Invented.',
+        })),
+        now: '2030-01-01T08:00:00.000Z',
+        timeZone: 'Europe/Rome',
+        language: /** @type {'it'} */ ('it'),
+        skill: choice.applied,
+      };
+      const system = misatoAsk(input, 'local').system ?? '';
+      assert.match(system, /Serve una dose\? \(Grover\)/);
+      assert.doesNotMatch(system, /^- grover\.grover_feed \(/m, 'the feed tool is not offered');
+    }
+    assert.equal(chooseActiveSkill(home, 'che tempo fa domani?', OFFERED), undefined);
+    assert.equal(chooseActiveSkill(home, 'dose', OFFERED), undefined, 'a bare word is not a trigger');
+  }));
+
+test('F-153-T04: without the three reads granted the matching skill is refused, never applied', () =>
+  withHome((home) => {
+    const pkg = validateSkillPackage(read(PACKAGE));
+    stageSkillPackage(home, pkg);
+    activateSkillVersion(home, 'grover-dose', pkg.manifest.version, { ownerApproved: true });
+    const choice = chooseActiveSkill(home, 'serve una dose?', OFFERED.slice(0, 2));
+    assert.ok(choice && 'refused' in choice);
+    assert.match(choice.refused.reason, /grover_feed_preview.*not granted/);
+  }));
