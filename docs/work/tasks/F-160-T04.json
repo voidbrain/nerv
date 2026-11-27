@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "F-160-T04",
+  "parent": "F-160",
+  "title": "Eva skill tree skin: finishing a step unlocks what depends on it",
+  "goal": "In the Eva theme the graph reads as a skill tree; the Simple theme keeps the plain look",
+  "status": "planned",
+  "acceptance": [
+    "Each node has a state shown by shape and word as well as colour: locked (a prerequisite is open), available (all prerequisites done), done; a done step \"unlocks\" its dependents on the next refresh, with a short transition that reduced motion removes",
+    "Only the Eva theme gets the skin; Simple keeps the plain look; every colour is a var(--…) token and the AA contrast test still passes on all combinations; no new literal colour",
+    "docs/STYLE-GUIDE.md describes the skin; the page docs/acceptance/f160-work-graph.md holds the exact owner steps for T05",
+    "Browser test: the three states in Eva dark and light, Simple unchanged, axe, reduced motion"
+  ],
+  "dependsOn": [
+    "F-160-T02"
+  ],
+  "resources": [
+    "web/src/**",
+    "test/**",
+    "docs/STYLE-GUIDE.md",
+    "docs/acceptance/f160-work-graph.md",
+    "docs/work/records/F-160.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "angular",
+    "accessibility"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h agent",
+    "basis": "A consumer skin through the component's node slot and CSS parts, from existing Eva tokens; a new token or shared component updates the style guide in the same change. Estimated 2026-11-27. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 3,
+    "baselineAgentHours": 3,
+    "estimateAgentHours": 3
+  },
+  "prs": [
+    {
+      "pr": 1,
+      "note": "plan"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "id": "F-160-T01",
+  "parent": "F-160",
+  "title": "Read the work graph from the coordinator's index, across the API and the service",
+  "goal": "NERV serves the coordinator's work graph, or says the index is unreachable",
+  "status": "planned",
+  "acceptance": [
+    "The `work_graph` tool joins the coordinator server's read grants (read-only, a writing tool still refused); `GET /api/live-index/graph` returns the payload with its snapshot time and source links, or an unreachable answer that is never shown as no work",
+    "A test across the CLI grants, the service and the API with a fake index, committed failing first: a graph with a critical path, a problem entry, the index stopped",
+    "The guide remote-mcp.md names the new tool"
+  ],
+  "dependsOn": [
+    "coordinator:F-026-T03",
+    "F-147-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/guides/remote-mcp.md",
+    "docs/work/records/F-160.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "distributed-contracts",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h agent",
+    "basis": "One more read grant and one more API answer next to the live index's; the reading code and the tools process already carry structuredContent. Estimated 2026-11-27. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": [
+    {
+      "pr": 1,
+      "note": "plan"
+    }
+  ]
+}

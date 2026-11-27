@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "F-160-T03",
+  "parent": "F-160",
+  "title": "In-lane drag sends the reorder by the one write path, refusals shown",
+  "goal": "A drag on the graph ends as the same reviewed PR as the list, or a refusal with its reason",
+  "status": "planned",
+  "acceptance": [
+    "The graph's reorderRequest goes through the same call and approval card as the solution-order list (F-150-T01), which opens a reviewed PR for the owner to merge; no other write path exists in NERV, and nothing is merged by NERV",
+    "A refusal from the component or from the path (\"X depends on Y\", stale base) is shown on the card and the graph reloads; the drag between dependent items is refused before any call is made",
+    "Tests across the join (graph to reorder call to fake coordinator): accepted move, move across a dependency, stale base"
+  ],
+  "dependsOn": [
+    "F-160-T02",
+    "F-150-T01",
+    "bricks:F-017-T05",
+    "coordinator:F-026-T05"
+  ],
+  "resources": [
+    "src/**",
+    "web/src/**",
+    "test/**",
+    "docs/work/records/F-160.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "angular"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h agent",
+    "basis": "The card's reorder call exists (F-150-T01); this wires the graph's reorderRequest to it and shows the refusal. Estimated 2026-11-27. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": [
+    {
+      "pr": 1,
+      "note": "plan"
+    }
+  ]
+}

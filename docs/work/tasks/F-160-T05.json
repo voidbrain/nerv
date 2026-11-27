@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "F-160-T05",
+  "parent": "F-160",
+  "title": "Owner: look at the graph and try one drag",
+  "goal": "The owner sees the graph in both looks and one reorder ends as a PR or a refusal",
+  "status": "planned",
+  "acceptance": [
+    "On NERV-01 after the update, open the full dashboard, the \"Work across projects\" card, then the Graph view. Expected: lanes by who acts, one chain marked \"critical\" with the hours of slack on the other steps, each node linked to its file; the lane switch regroups by repository",
+    "Switch Theme to Eva. Expected: the same graph as a skill tree, locked, available and done steps told apart by shape and word; switch to Simple: the plain look returns",
+    "Drag one step past an independent step in its lane and approve. Expected: a PR link in voidbrain/coordinator changing only docs/solution-order.md (do not merge it unless you want the new order). Then drag a step past one it depends on. Expected: the step snaps back and the card says \"X depends on Y\"",
+    "Resize to phone width (or open on the phone). Expected: the text list replaces the drawing"
+  ],
+  "dependsOn": [
+    "F-160-T03",
+    "F-160-T04"
+  ],
+  "resources": [
+    "docs/work/records/F-160.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "Owner check, recorded in F-160 Verification"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Two screens and one drag on the Mac. Estimated 2026-11-27. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  },
+  "prs": [
+    {
+      "pr": 1,
+      "note": "plan"
+    }
+  ],
+  "ownerLink": "docs/acceptance/f160-work-graph.md"
+}
