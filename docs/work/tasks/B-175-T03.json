@@ -12,7 +12,7 @@
   "id": "B-175-T03",
   "title": "Stage 1 (option 2): the isolation refusal says what to do, Misato stops at the first one, dashboard New conversation",
   "goal": "The B-175 test passes without todo; an isolation refusal ends the sortie with a plain Italian or English reply; the dashboard chat can start a clean conversation",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The B-175 test passes without todo; the F-027 ballot test is unchanged; the F-027 MCP test expects one refused step instead of five (named in the PR)",
     "test/tainted-conversation.test.ts: the reply in both languages, the accepted dashboard conversation ids, and the dashboard id reaching the server"
@@ -39,11 +39,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h",
-    "basis": "Re-estimated 2026-11-26 when split into stages (the 3 h covered options 2 or 4). Actual about 1 h agent.",
-    "reviewed": "2026-11-26",
-    "agentHours": 1.0,
+    "estimate": "0 remaining",
+    "basis": "Re-estimated 2026-11-26 when split into stages (the 3 h covered options 2 or 4). Actual about 1 h agent. Closed 2026-11-27: #853 merged on green CI (run 45910849858).",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 853,
+      "note": "merged on green CI"
+    }
+  ]
 }

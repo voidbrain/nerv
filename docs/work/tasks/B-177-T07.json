@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "parent": "B-177",
+  "dependsOn": [
+    "B-177-T05",
+    "B-177-T06"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-177-T07",
+  "title": "Document a measured minimum host size",
+  "goal": "docs/INSTALL.md names the minimum memory with the measurements behind it and says whether a 512 MB host is supported",
+  "status": "planned",
+  "acceptance": [
+    "docs/INSTALL.md names the minimum memory with the measurements behind it and says whether a 512 MB host is supported"
+  ],
+  "resources": [
+    "docs/INSTALL.md",
+    "docs/work/records/B-177.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "documentation"
+  ],
+  "validation": [
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 1.0,
+    "estimateAgentHours": 1.0
+  }
+}

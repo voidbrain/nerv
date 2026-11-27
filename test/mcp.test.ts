@@ -46,6 +46,37 @@ test('the tools config: reserved server ids refused, grants only for known serve
     }).grants.length,
     1,
   );
+  // B-175 stage 2: the opt-in to tainted conversations exists only on a read grant, and only as true.
+  const optIn = (effect: string, allowTainted: unknown) =>
+    validateTools({
+      mcp: [{ id: 'notes', command: 'x' }],
+      grants: [{ server: 'notes', tool: 't', effect, eva: '00', fingerprint: '0123456789abcdef', allowTainted }],
+    });
+  assert.equal(optIn('read', true).grants[0]!.allowTainted, true);
+  for (const effect of ['write-local', 'write-external', 'irreversible'])
+    assert.throws(() => optIn(effect, true), /allowTainted is only for a read grant/);
+  // Owner decision 2026-11-27: a url server on the owner's tailnet (a .ts.net name) may opt in too; a public one never.
+  const urlOptIn = (url: string) =>
+    validateTools({
+      mcp: [{ id: 'hub', url }],
+      grants: [
+        { server: 'hub', tool: 't', effect: 'read', eva: '00', fingerprint: '0123456789abcdef', allowTainted: true },
+      ],
+    });
+  assert.equal(urlOptIn('https://raspberrypi.taildea7a.ts.net/mcp').grants[0]!.allowTainted, true);
+  for (const url of [
+    'https://hub.example.test/mcp',
+    'https://ts.net/mcp',
+    'https://hub.ts.net.example.test/mcp',
+    'https://hubts.net/mcp',
+    'https://.ts.net/mcp',
+    'https://hub.tailx.ts.net./mcp',
+  ])
+    assert.throws(() => urlOptIn(url), /only for a command server or a url server on your tailnet/, url);
+  // A tailnet name as user info is refused before the grant check (the host is evil.example.test).
+  assert.throws(() => urlOptIn('https://hub.tailx.ts.net@evil.example.test/mcp'), /no user name or password/);
+  assert.throws(() => optIn('read', 'yes'), /allowTainted is true or absent/);
+  assert.throws(() => optIn('read', false), /allowTainted is true or absent/);
   assert.match(
     grantRefusal({ name: 'd', annotations: { destructiveHint: true } }, 'read', '00')!,
     /cannot be granted as a read/,
@@ -424,6 +455,108 @@ test(
         'no script step runs after the refusal',
       );
       assert.match(three.reply ?? '', /Note fifth: buy milk and bread\./);
+    } finally {
+      await r.close();
+      await m.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);
+test(
+  'B-175 stage 2: through every process, an opted-in read grant runs again in a tainted conversation',
+  { timeout: 60000 },
+  async () => {
+    const { Runtime } = await import('../src/runtime.ts');
+    const probe = new McpClient(server());
+    const fp = fingerprint((await probe.listTools())[0]!);
+    probe.close();
+    const m = await model([
+      '{"action":{"tool":"notes.read_note","args":{"name":"first"}}}',
+      '{"reply":"First read."}',
+      '{"action":{"tool":"notes.read_note","args":{"name":"second"}}}',
+      '{"reply":"Second read."}',
+    ]);
+    const home = mkdtempSync(join(tmpdir(), 'nerv-mcp-optin-'));
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({
+        models: {
+          local: { baseUrl: m.url, model: 'm' },
+          roles: { misato: { route: 'local' }, consultant: { model: 'c' } },
+        },
+        tools: {
+          mcp: [server()],
+          grants: [
+            { server: 'notes', tool: 'read_note', effect: 'read', eva: '00', fingerprint: fp, allowTainted: true },
+          ],
+        },
+      }),
+    );
+    const r = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+    try {
+      await r.ready();
+      const first = await r.chat('Read my first note', 'cli');
+      assert.equal(first.steps[0]?.outcome, 'grant');
+      const next = await r.chat('Now read my second note', 'cli');
+      assert.equal((await r.sortie(next.sortieId))?.trust, 'tainted', 'the conversation is still tainted');
+      assert.equal(next.steps[0]?.outcome, 'grant');
+      assert.deepEqual(next.steps[0]?.result, { text: 'Note second: buy milk and bread.' });
+      assert.equal(next.reply, 'Second read.');
+      const ballots = (await r.events(next.sortieId)).filter((e) => e.kind === 'ballot');
+      assert.equal((ballots[0]!.payload as { executor: string }).executor, 'eva-00');
+    } finally {
+      await r.close();
+      await m.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);
+test(
+  'B-175-T04: a dashboard follow-up within 30 minutes carries the earlier exchange, so its taint, into the next sortie',
+  { timeout: 60000 },
+  async () => {
+    const { Runtime } = await import('../src/runtime.ts');
+    const probe = new McpClient(server());
+    const fp = fingerprint((await probe.listTools())[0]!);
+    probe.close();
+    // Owner check 2026-11-27 (S-DFCA, then S-6AAF on NERV-01): the follow-up opened trusted with no context.intake.
+    const m = await model([
+      '{"action":{"tool":"notes.read_note","args":{"name":"strains"}}}',
+      '{"action":{"tool":"notes.read_note","args":{"name":"plants"}}}',
+      '{"reply":"Your strains: one."}',
+      '{"action":{"tool":"notes.read_note","args":{"name":"plants"}}}',
+    ]);
+    const home = mkdtempSync(join(tmpdir(), 'nerv-mcp-followup-'));
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({
+        models: {
+          local: { baseUrl: m.url, model: 'm' },
+          roles: { misato: { route: 'local' }, consultant: { model: 'c' } },
+        },
+        tools: {
+          mcp: [server()],
+          grants: [{ server: 'notes', tool: 'read_note', effect: 'read', eva: '00', fingerprint: fp }],
+        },
+      }),
+    );
+    const r = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+    try {
+      await r.ready();
+      const one = await r.chat('quali genetiche ho?', 'dashboard');
+      assert.equal((await r.sortie(one.sortieId))?.trust, 'tainted');
+      const two = await r.chat('e quali piante sto coltivando?', 'dashboard');
+      const intake = (await r.events(two.sortieId)).filter((e) => e.kind === 'context.intake');
+      assert.deepEqual(
+        intake.map((e) => (e.payload as { source: string; trust: string }).trust),
+        ['tainted'],
+        'the earlier exchange is context of the follow-up',
+      );
+      assert.equal((await r.sortie(two.sortieId))?.trust, 'tainted');
+      assert.deepEqual(
+        two.steps.filter((s) => s.tool).map((s) => s.outcome),
+        ['reject'],
+      );
     } finally {
       await r.close();
       await m.close();

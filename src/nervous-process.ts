@@ -109,6 +109,7 @@ const external = () => {
       name: toolName(g.server, g.tool),
       effect: g.effect,
       eva: `eva-${g.eva}` as const,
+      ...(g.allowTainted ? { allowTainted: true as const } : {}),
     }));
   } catch {
     return [];

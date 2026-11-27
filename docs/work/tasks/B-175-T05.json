@@ -11,11 +11,12 @@
     "B-175-T03"
   ],
   "title": "Stage 2 (option 4): a read grant can opt in to run in a tainted conversation",
-  "goal": "A grant field (config tools.grants) that only read grants accept; with it the read runs at its grant's EVA in a tainted conversation; without it the stage 1 refusal stays",
-  "status": "planned",
+  "goal": "A read grant with \"allowTainted\": true (config tools.grants) runs at its grant's EVA in a tainted conversation; without it the stage 1 refusal stays; the guide names the leftover risk",
+  "status": "closed",
   "acceptance": [
     "Default unchanged: the F-027 ballot test and the stage 1 tests pass as they are",
-    "An opted-in read grant runs at its EVA when tainted; a write grant refuses the field; validateTools rejects it with a test for the invalid input"
+    "An opted-in read grant runs at its EVA when tainted; a write grant refuses the field; validateTools rejects it with a test for the invalid input",
+    "Owner decision 2026-11-27: the opt-in is accepted on a command server and on a url server on the owner's tailnet (host ending in .ts.net); a public url server refuses it, with tests"
   ],
   "resources": [
     "src/policy.ts",
@@ -24,7 +25,9 @@
     "test/provenance.test.ts",
     "test/mcp.test.ts",
     "docs/work/records/B-175.md",
-    "generated:backlog-views"
+    "generated:backlog-views",
+    "src/nervous-process.ts",
+    "docs/guides/memory-and-chat.md"
   ],
   "capabilities": [
     "bounded-edit",
@@ -36,11 +39,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-26: one grant field, one policy branch, validation tests. Not a measurement.",
-    "reviewed": "2026-11-26",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: one grant field, one policy branch, validation tests. Actual about 0.5 h agent. Tailnet scope added 2026-11-27 (about 0.5 h more). Closed 2026-11-27: #856 merged on green CI (run 45961751819).",
+    "reviewed": "2026-11-27",
     "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 856,
+      "note": "merged on green CI"
+    }
+  ]
 }
