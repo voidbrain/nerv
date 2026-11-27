@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "B-182-T05",
+  "parent": "B-182",
+  "title": "Owner recheck: the When field has the same right margin as What",
+  "goal": "On the installed iPhone app a new reminder's When field ends where What ends",
+  "status": "planned",
+  "acceptance": [
+    "Owner confirms the recheck on the record"
+  ],
+  "dependsOn": [
+    "B-182-T04"
+  ],
+  "resources": [
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "structured-tools"
+  ],
+  "privacy": "No credential, code or token in the evidence.",
+  "validation": [
+    "Owner observation on the installed iPhone app, recorded in the record"
+  ],
+  "escalation": [
+    "A failure reopens the fix with a new failing test"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-27: open a new reminder and look. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerKind": "procedure"
+  }
+}
