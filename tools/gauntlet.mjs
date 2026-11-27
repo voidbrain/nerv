@@ -31,6 +31,7 @@ import {
 } from '@voidbrain/gauntlet-protocol';
 import { sourceInputs } from './evaluate.mjs';
 import { validateRoleBundleConfig, runRoleBundle } from './evaluate-model.mjs';
+import { MODEL_TIMEOUT_MS } from '../src/model.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const here = (path) => resolve(root, path);
@@ -143,13 +144,16 @@ const allPacks = () => [...modelPacks(), ...systemPacks()];
 // F-120-T05 (owner decision 2026-11-26, "yes to 180 s"): a pack whose cases run on the release's coding, embedded or
 // cad-3d reference runner scales the release's slow-host limits instead (180 s a case): those runners reserve 20 s of
 // each case for grading, so the day limits' 30 s left the model 10 s. Every other pack keeps the day limits.
+// F-120-T18: a nerv-planner case is one Misato planning step, so it gets the time NERV gives that step
+// (MODEL_TIMEOUT_MS): on 2026-11-27 pilot-promote-it hit the 30 s day limit on both gemma4 models, and a timeout
+// leaves consumption unverified, so Gauntlet skipped every case after it. The suite budget stays the day limits'.
 const SLOW_HOST_RUNNERS = new Set(['coding-reference', 'embedded-reference', 'cad-3d-reference']);
 export function modelLimits(pack) {
   const slowHost = pack.cases.some((c) => SLOW_HOST_RUNNERS.has(c.runner));
   const base = validateLimits(readJSON(join(examples, slowHost ? 'limits-slow-host.json' : 'limits-day.json')));
   const n = pack.cases.length;
   return {
-    caseMs: base.caseMs,
+    caseMs: pack.id.split(':')[0] === 'nerv-planner' ? MODEL_TIMEOUT_MS : base.caseMs,
     suiteMs: Math.round((base.suiteMs / base.maxCases) * n),
     maxCases: n,
     repeat: base.repeat,
