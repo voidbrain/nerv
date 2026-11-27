@@ -1,7 +1,8 @@
 {
   "manifest": {
     "id": "grover-dose",
-    "version": "1.0.0",
+    "version": "1.1.0",
+    "parentVersion": "1.0.0",
     "title": "Grover: serve una dose?",
     "domain": "grover",
     "description": "Read-only: says whether a Grover pot needs another dose and why, from the overview, the probe readings and the feed preview, in Italian unless asked in English. Never starts a feed. Owner phrase: \"controlla se è richiesta un'altra dose\".",
@@ -9,6 +10,15 @@
       "grover.grover_overview",
       "grover.grover_readings",
       "grover.grover_feed_preview"
+    ],
+    "triggers": [
+      "controlla se è richiesta un'altra dose",
+      "serve una dose",
+      "serve un'altra dose",
+      "need another dose",
+      "needs another dose",
+      "need a dose",
+      "needs a dose"
     ],
     "createdAt": "2026-11-27T00:00:00.000Z"
   },
