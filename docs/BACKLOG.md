@@ -2295,7 +2295,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | 🟢 Small | <a id="f-153-t01"></a>F-153-T01 — The grover-dose skill package and its Italian and English evaluation suite | 1 h | 0 h | 1 h | Implemented; verification pending | — | — | 🤖 |
 | 🟢 Small | <a id="f-153-t02"></a>F-153-T02 — Evaluation runner: the same requests with and without the skill on the local model | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | — | [F-153-T03](#f-153-t03) | 🤖 |
 | 🟢 Small | <a id="f-153-t03"></a>F-153-T03 — Night: run the evaluation on gemma4:26b and record the report | 0.5 h | 0 h | 0.5 h | Planned | [F-153-T02](#f-153-t02) | [F-153-T04](#f-153-t04), [F-153-T05](#f-153-t05) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-153-t04"></a>F-153-T04 — The skill applies at run time for its trigger phrases | 0.75 h | 0 h | 0.75 h | Planned | [F-146-T03](#f-146-t03), [F-153-T03](#f-153-t03) | [F-153-T05](#f-153-t05) | ⏳ 🤖 |
+| 🟢 Small | <a id="f-153-t04"></a>F-153-T04 — The skill applies at run time for its trigger phrases | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | [F-146-T03](#f-146-t03), [F-153-T03](#f-153-t03) | [F-153-T05](#f-153-t05) | 🤖 |
 | 🟢 Small | <a id="f-153-t05"></a>F-153-T05 — Owner: grant the reads, stage the skill, try it on the real tent, promote or retire | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-153-T03](#f-153-t03), [F-153-T04](#f-153-t04) | — | ⏳ 🧑‍🔧 |
 | 🟡 Medium | **Total** | 3 h | 0 h (0 of 5 steps recorded) | 3 h agent + 0.25 h owner | 0 of 5 completed | | | |
 

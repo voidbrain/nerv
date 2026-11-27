@@ -4,7 +4,7 @@
   "parent": "F-153",
   "title": "The skill applies at run time for its trigger phrases",
   "goal": "Asking NERV \"controlla se è richiesta un'altra dose\" uses the active grover-dose skill",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Owner 2026-11-27 in chat: \"ok\" to starting the first real skills, a Grover check for \"controlla se è richiesta un'altra dose\"; read-only.",
     "Waits on F-146-T03 (the run-time consumer: nothing in NERV applies a skill today). Once it lands, grover-dose gets its trigger phrases in the form F-146-T03 defines (manifest `triggers`: whole-word phrases, any case and punctuation, longest match wins) (Italian: \"controlla se è richiesta un'altra dose\", \"serve una dose\", \"serve un'altra dose\"; English: \"needs another dose\", \"need a dose\") in a new package version, re-evaluated",
