@@ -8,17 +8,21 @@
   "acceptance": [
     "The F-006 placement probes (neutral-smoke, Casper, Misato, repeat 3, as in the F-006-T31 report) run with gemma4:26b, local models only, holding the shared machine lock",
     "The relevant gauntlet cases (Casper and Misato role bundle) run with gemma4:26b within the owner-approved budget of docs/evaluations/gauntlet.md",
-    "A report in docs/evaluations/ compares both models: pass counts, invalid replies, latency, memory"
+    "A report in docs/evaluations/ compares both models: pass counts, invalid replies, latency, memory",
+    "Progress 2026-11-27: the Gauntlet part ran (evening 2026-11-26 under load, night 2026-11-27 on a quiet Mac) and is reported in docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md next to gemma4:12b, qwen3-coder:30b and devstral-small-2:24b; validating reports are in evals/gauntlet/ledger.json under evals/gauntlet/profiles/gemma4-26b.json. Remaining: the F-006 placement probes with gemma4:26b; the 6 cad-3d cases left are F-126-T05"
   ],
   "dependsOn": [
     "F-126-T01"
   ],
   "resources": [
-    "tools/placement-live.mjs",
-    "docs/evaluations/gauntlet.md",
     "docs/evaluations/2026-11-25-f006-t31-placement-report.md",
+    "docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md",
+    "docs/evaluations/gauntlet.md",
     "docs/work/records/F-126.md",
-    "generated:backlog-views"
+    "evals/gauntlet/ledger.json",
+    "evals/gauntlet/profiles/gemma4-26b.json",
+    "generated:backlog-views",
+    "tools/placement-live.mjs"
   ],
   "capabilities": [
     "bounded-edit",
@@ -33,10 +37,10 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "2.5 h",
-    "basis": "Re-estimated 2026-11-26 from 2 h → 2.5 h via node tools/work-items.mjs calibrate (F-120-T04 live-model campaign 4.5x outlier vs 1.0x overall median over 25 steps). Not a measurement.",
-    "agentHours": 2.5,
-    "reviewed": "2026-11-26",
+    "estimate": "1 h",
+    "basis": "Gauntlet part done 2026-11-26/27 (report 2026-11-26-f126-t02-gemma4-26b-gauntlet.md); 1 h left for the placement probes, a model run on a quiet Mac. Not a measurement.",
+    "agentHours": 1,
+    "reviewed": "2026-11-27",
     "baselineAgentHours": 2,
     "estimateAgentHours": 2.5
   },

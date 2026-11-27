@@ -33,9 +33,9 @@
   "effort": {
     "size": "small",
     "estimate": "0.75 h",
-    "basis": "Estimated 2026-11-25: default and documentation change plus the owner's commands. Not a measurement.",
+    "basis": "Estimated 2026-11-25: default and documentation change plus the owner's commands. Not a measurement. 2026-11-27: waits on F-126-T03's confirmation after the quality report.",
     "agentHours": 0.75,
-    "reviewed": "2026-11-25",
+    "reviewed": "2026-11-27",
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75
   },
