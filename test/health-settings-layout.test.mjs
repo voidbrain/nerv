@@ -121,3 +121,46 @@ test('B-141: Settings is two columns (schedule | pair, notifications, revoke), o
   assert.match(devices, /data-revoke=/);
   assert.doesNotMatch(devices, /<code>/, 'the command reads inline, not as a full-width block');
 });
+
+// The Health card rendered from live.js with the doctor and update state it reads; the helpers it calls from
+// elsewhere in live.js (model routes, updater status, degraded banner) are stubbed empty.
+const renderHealthHtml = (/** @type {object} */ state) => {
+  const code = live.slice(live.indexOf('  /** B-134: the Phone push line'), live.indexOf('  // Kaji bases (F-036)'));
+  const el = { innerHTML: '' };
+  new Function(
+    'esc',
+    'state',
+    'document',
+    'window',
+    'routeRows',
+    'updaterStatusHtml',
+    'degradedBanner',
+    code + ';window.renderHealth();',
+  )(
+    esc,
+    state,
+    { getElementById: () => el },
+    {},
+    () => [],
+    () => '',
+    () => '',
+  );
+  return el.innerHTML;
+};
+const doctor = { processes: { nervous: 1, brain: 2, brainAlive: true }, models: { roles: {} }, push: null };
+
+// F-152 (owner, 2026-11-26): the automatic-update line repeated the settings panel (switch, mode, both hours).
+test('F-152: Health has no automatic-update switch line; the last automatic attempt stays', () => {
+  const out = renderHealthHtml({
+    doctor,
+    updatePolicy: {
+      policy: { enabled: true, schedule: { mode: 'apply', checkHour: 21, applyHour: 4 } },
+      lastAttempt: { outcome: 'completed', revision: 'c'.repeat(40), reasons: [] },
+    },
+  });
+  assert.doesNotMatch(out, /chk-auto-update/);
+  assert.doesNotMatch(out, /Automatic updates/);
+  assert.match(out, /Last automatic attempt: completed · ccccccc/);
+  assert.doesNotMatch(live, /chk-auto-update|liveSetAutoUpdate/, 'its handler went with it');
+  assert.doesNotMatch(live, /checked at 20:00, applied at 03:00/, 'no hard-coded hours left');
+});
