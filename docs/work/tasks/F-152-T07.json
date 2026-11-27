@@ -14,7 +14,8 @@
     "F-152-T01",
     "F-152-T02",
     "F-152-T04",
-    "F-152-T06"
+    "F-152-T06",
+    "F-152-T08"
   ],
   "resources": [
     "web/public/dashboard/**",
