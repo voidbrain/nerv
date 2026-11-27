@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "gemma4-26b-nvfp4-8192",
+  "model": "gemma4:26b",
+  "quantization": "nvfp4",
+  "endpoint": "http://127.0.0.1:11434",
+  "context": 8192,
+  "maxOutputTokens": 2048,
+  "temperature": null,
+  "topP": null,
+  "topK": null,
+  "seed": 42,
+  "think": true,
+  "parallel": 1,
+  "hardware": "apple-m3-pro-36g-shared-ram",
+  "cache": "server-default-unverified",
+  "backend": "ollama",
+  "residency": "suite"
+}

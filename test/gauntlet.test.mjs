@@ -28,6 +28,7 @@ import {
 import { normalize } from '../tools/gauntlet-adapter.mjs';
 import { main, systemSourceKey, systemPacks, pending } from '../tools/gauntlet.mjs';
 import { readSuite } from '../tools/evaluate.mjs';
+import { MODEL_TIMEOUT_MS } from '../src/model.ts';
 
 // B-153: the Gauntlet tests that take a second or more on an idle Mac carry their own limit, so a loaded host (load
 // average 40-50 makes them 4x slower) does not time them out under the suite's per-test default.
@@ -432,8 +433,13 @@ test(
       const first = await main([...args, '--confirm-scenario', '--out=' + join(root, 'nerv.json')], services);
       assert.equal(first.passed, true);
       assert.equal(calls, 10);
+      // Deliberate change, owner decision 2026-11-27 (F-120-T19): NERV runs a model case for MODEL_TIMEOUT_MS, so another
+      // consumer reuses its evidence under the same limits, no longer under the release's plain day limits.
       const commonProfile = JSON.parse(readFileSync(profilePath, 'utf8')),
-        limits = JSON.parse(readFileSync('node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json', 'utf8'));
+        limits = {
+          ...JSON.parse(readFileSync('node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json', 'utf8')),
+          caseMs: MODEL_TIMEOUT_MS,
+        };
       const otherConsumer = await executeWithEvidence(pack, commonProfile, limits, {
         ...lastOptions,
         output: join(root, 'other-consumer.json'),
@@ -1349,6 +1355,63 @@ writeFileSync(out, JSON.stringify({ schemaVersion: 1, layer: 'coding', caseHash:
   }
 });
 
+test('B-179: gauntlet ledger records a multi-case report of a model-runner pack whose cases used tokens', async () => {
+  // On 2026-11-27 `gauntlet.mjs ledger` refused the night's cad-3d report (4 cases passed, 2,013 output tokens) with
+  // "Inconsistent token totals": it checks each case on its own but kept the whole report's token total.
+  const { run, validateRegistry } = await import('@voidbrain/gauntlet-protocol');
+  const { commonPacks, modelLimits } = await import('../tools/gauntlet.mjs');
+  if (process.platform === 'win32') return; // Gauntlet refuses external runners on win32 (see F-120-T03 above).
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-b178-'));
+  const profile = JSON.parse(
+    readFileSync('node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json', 'utf8'),
+  );
+  try {
+    writeFileSync(
+      join(dir, 'runner.mjs'),
+      `import { readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+const [out, configuration, , caseFile] = process.argv.slice(2);
+const c = JSON.parse(readFileSync(caseFile, 'utf8'));
+const h = (v) => createHash('sha256').update(JSON.stringify(v)).digest('hex');
+writeFileSync(out, JSON.stringify({ schemaVersion: 1, layer: 'coding', caseHash: h(c), fixtureHash: '${'a'.repeat(64)}',
+  configurationHash: h(JSON.parse(readFileSync(configuration, 'utf8'))), modelDigest: '${'d'.repeat(64)}',
+  runtimeIdentity: 'stand-in', sourceStable: true, complete: true, outputTokens: 7,
+  results: [{ id: c.id, status: 'passed', checks: 1 }] }));\n`,
+    );
+    const registry = validateRegistry(
+      {
+        schemaVersion: 1,
+        runners: {
+          'coding-reference': {
+            command: 'node',
+            args: ['runner.mjs', '{report}', '{configuration}', '{budget}', '{case}'],
+            cwd: '.',
+            layers: ['coding'],
+            allowModels: true,
+          },
+        },
+      },
+      dir,
+    );
+    const coding = commonPacks().find((p) => p.pack.id === 'coding').pack;
+    const two = { ...coding, id: 'coding:selected', cases: coding.cases.slice(0, 2) };
+    const report = await run(two, profile, modelLimits(two), { execute: true, allowModels: true, registry });
+    assert.equal(report.usage.outputTokens, 14);
+    const reportPath = join(dir, 'report.json');
+    writeFileSync(reportPath, JSON.stringify(report));
+    process.env.NERV_GAUNTLET_LEDGER = join(dir, 'ledger.json');
+    await main(['ledger', '--report=' + reportPath, '--pack=coding']);
+    const entries = JSON.parse(readFileSync(join(dir, 'ledger.json'), 'utf8')).entries;
+    assert.deepEqual(
+      entries.map((e) => e.case),
+      two.cases.map((c) => c.id),
+    );
+  } finally {
+    delete process.env.NERV_GAUNTLET_LEDGER;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('check:gauntlet-runs fails for a pending case that no unfinished task lists', async () => {
   const { unnamedPending } = await import('../tools/gauntlet.mjs');
   const changed = { pack: 'nerv-system-flows', case: 'policy', reason: 'changed' };
@@ -1890,13 +1953,12 @@ test('F-079-T02: committed system-v1.json declarations catch a seeded change ins
 });
 
 test(
-  'F-120-T05: gauntlet all gives the reference-runner packs the slow-host case limit, other packs the day limits',
+  'F-120-T05: gauntlet all gives the reference-runner packs the slow-host case limit, other packs MODEL_TIMEOUT_MS',
   SLOW_HOST,
   async () => {
     const { modelLimits, commonPacks } = await import('../tools/gauntlet.mjs');
     const examples = 'node_modules/@voidbrain/gauntlet-protocol/examples/';
     const slow = JSON.parse(readFileSync(examples + 'limits-slow-host.json', 'utf8'));
-    const day = JSON.parse(readFileSync(examples + 'limits-day.json', 'utf8'));
     assert.equal(slow.caseMs, 180000);
     const pack = (id) => commonPacks().find((p) => p.pack.id === id).pack;
     // Owner decision 2026-11-26: the coding-reference, embedded-reference and cad-3d-reference runners get 180 s a case.
@@ -1905,8 +1967,9 @@ test(
       assert.equal(limits.caseMs, slow.caseMs, id);
       assert.equal(limits.suiteMs, Math.round((slow.suiteMs / slow.maxCases) * pack(id).cases.length), id);
     }
+    // Deliberate change, owner decision 2026-11-27 (F-120-T19): the other packs get MODEL_TIMEOUT_MS, not the day 30 s.
     for (const id of ['logic-math', 'italian-quality', 'code-review', 'multi-step-agent'])
-      assert.equal(modelLimits(pack(id)).caseMs, day.caseMs, id);
+      assert.equal(modelLimits(pack(id)).caseMs, MODEL_TIMEOUT_MS, id);
     // The join: the plan `gauntlet all` builds (the budget it executes with) carries the same per-pack case limits.
     const dir = mkdtempSync(join(realpathSync(tmpdir()), 'nerv-gauntlet-slow-host-'));
     process.env.NERV_GAUNTLET_LEDGER = join(dir, 'ledger.json');
@@ -1915,13 +1978,36 @@ test(
       for (const id of ['coding', 'embedded', 'cad-3d'])
         assert.equal(plan.find((p) => p.pack === id).budget.caseMs, slow.caseMs, id);
       for (const id of ['logic-math', 'italian-quality', 'code-review'])
-        assert.equal(plan.find((p) => p.pack === id).budget.caseMs, day.caseMs, id);
+        assert.equal(plan.find((p) => p.pack === id).budget.caseMs, MODEL_TIMEOUT_MS, id);
     } finally {
       delete process.env.NERV_GAUNTLET_LEDGER;
       rmSync(dir, { recursive: true, force: true });
     }
   },
 );
+
+test('F-120-T19: every other model pack gets MODEL_TIMEOUT_MS a case; suite and output budgets stay the day limits', async () => {
+  // Owner decision 2026-11-27 ("ok"): on 2026-11-27 the 30 s day case limit timed out italian-quality (30,005 ms) and
+  // devstral code-review (30,007 ms) on their first, cold-load case, and Gauntlet skipped the rest of each pack.
+  const { modelLimits, commonPacks, nervModelPacks } = await import('../tools/gauntlet.mjs');
+  const day = JSON.parse(readFileSync('node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json', 'utf8'));
+  const runners = new Set(['coding-reference', 'embedded-reference', 'cad-3d-reference']);
+  const others = [...commonPacks(), ...nervModelPacks()]
+    .map((p) => p.pack)
+    .filter((p) => p.cases.some((c) => c.layer !== 'system') && !p.cases.some((c) => runners.has(c.runner)));
+  assert.ok(others.some((p) => p.id === 'italian-quality') && others.some((p) => p.id === 'code-review'));
+  for (const p of others) {
+    const limits = modelLimits(p);
+    assert.equal(limits.caseMs, MODEL_TIMEOUT_MS, p.id);
+    assert.equal(limits.suiteMs, Math.round((day.suiteMs / day.maxCases) * p.cases.length), p.id);
+    assert.equal(limits.outputTokens, Math.round((day.outputTokens / day.maxCases) * p.cases.length), p.id);
+  }
+  // A selection without a reference-runner case (model-run --only on cad-3d's knowledge cases) gets it too.
+  const cad = commonPacks().find((p) => p.pack.id === 'cad-3d').pack;
+  const knowledge = { ...cad, id: 'cad-3d:selected', cases: cad.cases.filter((c) => !c.runner) };
+  assert.ok(knowledge.cases.length > 0);
+  assert.equal(modelLimits(knowledge).caseMs, MODEL_TIMEOUT_MS);
+});
 
 test(
   'F-120-T07: coding-reference packs get a 3,072-token output budget a case; other packs keep the profile and limits',
