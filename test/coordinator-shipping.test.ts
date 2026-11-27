@@ -703,6 +703,11 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
       assert.equal(await keeper.renewOnce(), 'renewed');
       const baselineRenewMs = performance.now() - baselineAt;
       await b.link.heartbeat();
+      // B-076: the main thread's CPU time for the same pair of requests with no export running, the baseline below.
+      const cpuBefore = process.threadCpuUsage();
+      await Promise.all([keeper.renewOnce(), b.link.heartbeat()]);
+      const baselineCpu = process.threadCpuUsage(cpuBefore);
+      const baselineCpuMs = (baselineCpu.user + baselineCpu.system) / 1000;
 
       // Populate X with 25,000 committed deliveries rows (~60 MB JSON) and clear pending capture so the seed
       // measures reading, canonicalising and signing a multi-megabyte snapshot (~500 ms+ worker CPU).
@@ -723,7 +728,6 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
       let concurrentWork: Promise<void> | undefined;
       let cpuAtRead: NodeJS.CpuUsage | undefined;
       let mainCpuMs = -1;
-      let gapAfterRead = 0;
 
       const shipper = x.lease.shipper(
         {
@@ -731,8 +735,8 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
           seedStandby: (id, frame, epoch, lease) => {
             if (!firstChunkAt) {
               firstChunkAt = performance.now();
-              const c = process.threadCpuUsage(cpuAtRead);
-              mainCpuMs = Math.round((c.user + c.system) / 1000);
+              const cpu = process.threadCpuUsage(cpuAtRead);
+              mainCpuMs = (cpu.user + cpu.system) / 1000;
             }
             return x.link.seedStandby(id, frame, epoch, lease);
           },
@@ -751,52 +755,9 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
                 kajiDoneAt = performance.now();
               }),
             ]).then(() => undefined);
-            handlerMs = performance.now() - readCommittedAt;
           },
         },
       );
-
-      // DIAGNOSTIC (B-076, temporary): the longest synchronous SQLite call on the main thread during the window.
-      const { StatementSync } = await import('node:sqlite');
-      const slow: Array<{ ms: number; at: number; sql: string }> = [];
-      const restore: Array<() => void> = [];
-      for (const m of ['run', 'get', 'all'] as const) {
-        const proto = StatementSync.prototype as unknown as Record<string, (...a: unknown[]) => unknown>;
-        const orig = proto[m]!;
-        proto[m] = function (this: { sourceSQL: string }, ...a: unknown[]) {
-          const s0 = performance.now();
-          try {
-            return orig.apply(this, a);
-          } finally {
-            const ms = performance.now() - s0;
-            if (ms > 20)
-              slow.push({
-                ms: Math.round(ms),
-                at: Math.round(s0 - (readCommittedAt || s0)),
-                sql: this.sourceSQL.slice(0, 80),
-              });
-          }
-        };
-        restore.push(() => (proto[m] = orig));
-      }
-      const dbProto = DatabaseSync.prototype as unknown as Record<string, (...a: unknown[]) => unknown>;
-      const origExec = dbProto.exec!;
-      dbProto.exec = function (this: unknown, sql: unknown) {
-        const s0 = performance.now();
-        try {
-          return origExec.call(this, sql);
-        } finally {
-          const ms = performance.now() - s0;
-          if (ms > 20)
-            slow.push({
-              ms: Math.round(ms),
-              at: Math.round(s0 - (readCommittedAt || s0)),
-              sql: String(sql).slice(0, 80),
-            });
-        }
-      };
-      restore.push(() => (dbProto.exec = origExec));
-      let handlerMs = 0;
 
       const startedAt = performance.now();
       let lastTick = startedAt;
@@ -808,7 +769,6 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
         if (!firstChunkAt) {
           if (readCommittedAt > 0) ticksDuringSerialise += 1;
           if (gap > maxGapMs) maxGapMs = gap;
-          if (readCommittedAt > 0 && gap > gapAfterRead) gapAfterRead = gap;
         }
         lastTick = now;
       }, 5);
@@ -818,7 +778,6 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
         await concurrentWork;
       } finally {
         clearInterval(ticker);
-        for (const r of restore) r();
       }
 
       const serialiseMs = firstChunkAt - readCommittedAt;
@@ -829,18 +788,24 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
         kajiMs: Math.round(kajiDoneAt - readCommittedAt),
         ticksDuringSerialise,
         maxGapMs: Math.round(maxGapMs),
-        handlerMs: Math.round(handlerMs),
-        mainCpuMs,
-        gapAfterRead: Math.round(gapAfterRead),
-        cpus: (await import('node:os')).availableParallelism(),
-        slow,
+        mainCpuMs: Math.round(mainCpuMs),
+        baselineCpuMs: Math.round(baselineCpuMs),
       });
       console.log(`F-016-T21 metrics ${metrics}`);
       assert.ok(readCommittedAt > 0, 'worker reported read-committed before canonicalising');
       // The event loop is what a synchronous export blocks (0 ticks during the export, re-checked 2026-11-26): it keeps
-      // turning, with a bounded gap, while the worker canonicalises and signs.
+      // turning while the worker canonicalises and signs.
       assert.ok(ticksDuringSerialise >= 1, `no event-loop tick during serialise/sign: ${metrics}`);
-      assert.ok(maxGapMs < Math.max(250, serialiseMs * 0.6), `event-loop delay blocked serialise/sign: ${metrics}`);
+      // B-076: the canonicalising and signing are not on the main thread: during the export it spends about the CPU time
+      // the same two requests take with no export (11-14 ms against 8-15 ms locally), where an export on it spends
+      // 146-217 ms. CPU time, not the longest wall-clock gap: both bases share this process, and on the Windows runner
+      // B's synchronous write answering the renewal (INSERT INTO standby_lease_state) waited 203 ms for the disk while
+      // the main thread used 16 ms of CPU (run 45976907230); in a deployment that wait is on B's host. The floor
+      // covers Windows counting thread CPU time in 15.6 ms clock ticks.
+      assert.ok(
+        mainCpuMs >= 0 && mainCpuMs < Math.max(100, 5 * baselineCpuMs),
+        `serialise/sign used the main thread's CPU: ${metrics}`,
+      );
       // The renewal and the Kaji request sent at read-commit are answered. They are not raced against the export: on
       // the Windows runner one renewal took 664 ms against a 545 ms export (two runs of three), so finishing inside the
       // window measured the runner's I/O, not the event loop.
