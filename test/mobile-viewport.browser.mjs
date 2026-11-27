@@ -28,8 +28,9 @@ const MEASURE = `(() => {
     let free = ['absolute', 'fixed'].includes(getComputedStyle(e).position);
     for (let p = e.parentElement; p && p !== document.body && p !== document.documentElement; p = p.parentElement) {
       const s = getComputedStyle(p);
+      if (s.position !== 'static') free = false; // p contains everything below it
       if (!free && s.overflowX !== 'visible') return true;
-      if (s.position !== 'static') free = ['absolute', 'fixed'].includes(s.position);
+      if (['absolute', 'fixed'].includes(s.position)) free = true;
     }
     return false;
   };
