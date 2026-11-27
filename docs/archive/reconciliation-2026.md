@@ -703,3 +703,7 @@ PRs #838–#861 (24) merged on green CI; #854 and #856 after one Windows B-076 f
 ## 2026-11-27 — main `a1646b6`
 
 PRs #864, #865, #863, #866 and #862 merged on green CI. #866 closed archived B-176 after the owner's check; #862 fixed B-178. Reconcile draft reported #866 as unnamed because its record was already archived.
+
+## 2026-11-27 — main `f50f48a`
+
+PR #867 merged on green CI; its changes are recorded in F-120, F-126, F-146, F-149 and F-153. It added the Grover dose skill and owner-approved model steps; no model ran for the PR.
