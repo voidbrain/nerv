@@ -9,7 +9,7 @@
   "id": "B-176-T01",
   "title": "Failing test: a granted read with a large result reaches the planner prompt",
   "goal": "The B-176 test in test/misato.test.ts fails on main and is committed as todo",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The B-176 test in test/misato.test.ts fails on main and is committed as todo"
   ],
@@ -28,11 +28,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
-    "reviewed": "2026-11-26",
-    "agentHours": 0.5,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement. Closed 2026-11-27: #850 merged on green CI (run 45901023291).",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 850,
+      "note": "merged on green CI"
+    }
+  ]
 }

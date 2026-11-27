@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 10 | 32 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 10 | 33 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7754,6 +7754,43 @@ Earlier evidence (2026-11-18 to 2026-11-21: PRs #557, #617, #620, Tabgha recurre
 | Opened | 2026-11-18 |
 | Verification | Real-device 2026-11-26 on Tabgha (B-091-T02); test/windows-service-lifecycle.test.ts |
 | Reviewed | 2026-11-26 |
+
+</details>
+
+---
+
+## Closed 2026-11-27
+
+### B-171
+
+**Windows: a service installed before B-102-T01 is "foreign" because only the launcher's comment line changed**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P2 | Closed | 🟢 Small |
+
+💻 **→ Human action required: No**<br />Closed 2026-11-27: nerv#842 merged on green CI (run 45893149014, windows lifecycle tests included); B-171-T01 test failed first and passes unchanged.
+
+| | |
+|---|---|
+| **Issue** | Seen 2026-11-26 on NERV-02 (Tabgha, Windows): `nerv update` and `lifecycle-apply stop` are refused with "Service or runtime ownership is unknown or belongs elsewhere." and "The definition must exactly match this profile, source and Node." The data home's `nerv-service.vbs` (written 2026-11-18, Node path and source correct) differs from what the current release renders only in its first comment line: B-102-T01 (`932ade4c`) dropped "(F-037)" from it. The Windows `inspect()` (`src/node-lifecycle-windows.ts`) compared the launcher byte for byte, so the definition read `foreign` and no lifecycle action could follow (install needs it absent, the others owned). `authorizedStart` already ignored the comment line (`windowsLauncherMatches`, B-091); `inspect()` did not. It blocked [B-091-T02](#b-091) until the owner's workaround: `service uninstall`, then `service install` run with the nvm Node, which rewrites both files (done on Tabgha 2026-11-26; B-091-T02 then passed). |
+| **Reproduce** | Install the Windows service, replace the launcher's first comment line with the earlier release's text, run `lifecycle-plan stop`: the plan is blocked with the ownership blocker. |
+| **Check** | A launcher that differs only in its first comment line is `owned`, and a fenced stop and uninstall run with it in place; a launcher whose command differs stays `foreign`; the test committed failing first (B-171-T01) passes unchanged after B-171-T02. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-27: nerv#842 merged on green CI (run 45893149014, windows lifecycle tests included); B-171-T01 test failed first and passes unchanged. 2026-11-26 ~21:30 CET (owner, evidence from F-016-T09): updating NERV-02 to `40615c4`, `nerv update` was refused for an unknown service definition or ownership from SSH and from the desktop session (old code on NERV-02; exact text not captured); the owner used the manual path and `nerv service install`. 2026-11-26: `B-171-T01` (failing first): `test/windows-service-lifecycle.test.ts`, the install/stop/start/uninstall case, writes the earlier release's comment line into the launcher, asserts `inspect()` owns it, then runs the fenced stop and uninstall with it in place; a command change stays `foreign`. `B-171-T02`: `inspect()` uses the same comment-insensitive comparison as `authorizedStart`. macOS and Linux: the plist and the systemd unit hold no comment line, and every change to their templates so far changed what runs (Node path, source, flags), so they have no such exposure today; a future change to the unit's `Description=` would need the same treatment. The Windows task XML is still compared byte for byte: its user is rendered from the session that checks it (B-082, `25cbfa61` and `a16ea3a1`), so a task written before B-082 or from another kind of session can still read `foreign`; that changes who it runs as and stays `foreign` by design. NERV-02 no longer has an old launcher (reinstalled 2026-11-26), so no real-device check remains for this record. Design review 2026-11-26 (design-reviewer): fine to land; the comment strip removes at most one leading `'` line, everything else is compared exactly, and no later apply step re-hashes the launcher.
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | `src/node-lifecycle-windows.ts` (`inspect`, `windowsLauncherMatches`); cause `932ade4c` (B-102-T01); [#842](https://github.com/voidbrain/nerv/pull/842). Test: `test/windows-service-lifecycle.test.ts` "B-171" |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
+| Impact | Every Windows service installed before B-102-T01 cannot be updated or stopped through the lifecycle; NERV-02 on Tabgha is the known case. |
 
 </details>
 

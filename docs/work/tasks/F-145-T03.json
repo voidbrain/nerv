@@ -4,7 +4,7 @@
   "parent": "F-145",
   "title": "Carry live skill data into F-130-T10 and document the endpoint",
   "goal": "The Angular migration keeps the live skills panel, and the endpoint is documented",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
     "F-130-T10's acceptance gains a line: the Angular skills panel reads GET /api/skills and keeps the stage tabs and the empty state (test across the endpoint and the component); F-130-T10 stays planned and its estimate is re-reviewed",
@@ -31,11 +31,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h",
-    "basis": "Estimated 2026-11-26: two documentation edits. Not a measurement.",
-    "reviewed": "2026-11-26",
-    "agentHours": 0.25,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: two documentation edits. Not a measurement. Closed 2026-11-27: #846 merged on green CI (run 45912067128).",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
     "baselineAgentHours": 0.25,
     "estimateAgentHours": 0.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 846,
+      "note": "merged on green CI"
+    }
+  ]
 }

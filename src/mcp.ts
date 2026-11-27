@@ -49,6 +49,8 @@ export interface ToolGrant {
   effect: Effect;
   eva: Eva;
   fingerprint: string;
+  /** B-175 stage 2: this read also runs in a conversation a tool result has tainted (owner opt-in). */
+  allowTainted?: true;
 }
 export interface ToolsConfig {
   mcp: McpServer[];
@@ -142,9 +144,9 @@ export function validateTools(value: unknown): ToolsConfig {
     if (
       !g ||
       typeof g !== 'object' ||
-      Object.keys(g).some((k) => !['server', 'tool', 'effect', 'eva', 'fingerprint'].includes(k))
+      Object.keys(g).some((k) => !['server', 'tool', 'effect', 'eva', 'fingerprint', 'allowTainted'].includes(k))
     )
-      throw new Error('Invalid tool grant: server, tool, effect, eva, fingerprint.');
+      throw new Error('Invalid tool grant: server, tool, effect, eva, fingerprint, allowTainted.');
     if (typeof g.server !== 'string' || !mcp.some((s) => s.id === g.server))
       throw new Error(`Tool grant for an unknown server ${JSON.stringify(g.server)}.`);
     if (typeof g.tool !== 'string' || !/^[A-Za-z0-9_-]{1,64}$/.test(g.tool))
@@ -157,6 +159,21 @@ export function validateTools(value: unknown): ToolsConfig {
       throw new Error(`Tool grant ${g.server}.${g.tool}: eva is 00, 01, 02 or 03.`);
     if (typeof g.fingerprint !== 'string' || !/^[0-9a-f]{16}$/.test(g.fingerprint))
       throw new Error(`Tool grant ${g.server}.${g.tool}: a fingerprint.`);
+    if ('allowTainted' in g && g.allowTainted !== true)
+      throw new Error(`Tool grant ${g.server}.${g.tool}: allowTainted is true or absent.`);
+    if (g.allowTainted === true && g.effect !== 'read')
+      throw new Error(`Tool grant ${g.server}.${g.tool}: allowTainted is only for a read grant.`);
+    // Tainted context reaches no public server: the opt-in is for a command server or, by the owner's
+    // decision of 2026-11-27, a url server on the owner's tailnet (a Tailscale .ts.net name, e.g. the Grover hub).
+    const server = mcp.find((x) => x.id === g.server)!;
+    if (
+      g.allowTainted === true &&
+      isHttpServer(server) &&
+      !/^[a-z0-9-]+(\.[a-z0-9-]+)*\.ts\.net$/.test(new URL(server.url).hostname)
+    )
+      throw new Error(
+        `Tool grant ${g.server}.${g.tool}: allowTainted is only for a command server or a url server on your tailnet (.ts.net).`,
+      );
     if (grants.some((x) => x.server === g.server && x.tool === g.tool))
       throw new Error(`Tool ${g.server}.${g.tool} is granted twice.`);
     grants.push({
@@ -165,6 +182,7 @@ export function validateTools(value: unknown): ToolsConfig {
       effect: g.effect as Effect,
       eva: g.eva as Eva,
       fingerprint: g.fingerprint,
+      ...(g.allowTainted === true ? { allowTainted: true as const } : {}),
     });
   }
   return { mcp, grants };

@@ -11,7 +11,7 @@
   "id": "B-177-T02",
   "title": "readConfig checks each timezone once per process",
   "goal": "The B-177 test passes without todo; an unknown timezone is still refused on every read",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The B-177 test passes without todo; an unknown timezone is still refused on every read"
   ],
@@ -31,11 +31,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
-    "reviewed": "2026-11-26",
-    "agentHours": 0.5,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement. Closed 2026-11-27: #854 merged on green CI (run 45959523308).",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 854,
+      "note": "merged on green CI"
+    }
+  ]
 }
