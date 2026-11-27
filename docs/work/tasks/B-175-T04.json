@@ -14,7 +14,7 @@
   "goal": "Asking two Grover questions within 30 minutes in the dashboard either answers both or explains plainly how to start clean",
   "status": "planned",
   "acceptance": [
-    "In the dashboard chat, two Grover questions within 30 minutes: the second answers with a plain message naming the New conversation button; after pressing it, the same question runs the Grover read"
+    "In the dashboard chat, send both Grover questions in the same place (both in the dashboard chat, not one with `nerv chat` in the terminal: the terminal and the dashboard are separate conversations, so the second question would correctly start without the first). Within 30 minutes the second answers with a plain message naming the New conversation button; after pressing it, the same question runs the Grover read"
   ],
   "resources": [
     "test/provenance.test.ts",
