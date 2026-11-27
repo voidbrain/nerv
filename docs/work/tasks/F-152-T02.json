@@ -4,7 +4,7 @@
   "parent": "F-152",
   "title": "Remove the duplicate automatic-update line from the Health card",
   "goal": "The line 'Automatic updates, checked 21:00, applied 04:00 unless you say wait' with its checkbox is gone; the update settings panel stays the only place",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Checked: the settings panel (set-auto-enabled, mode, check and apply hours) already holds the switch, mode and both hours, so the line adds nothing; only 'Last automatic attempt: ...' is not in the panel and stays in Health (or moves to the panel, decided in this step)",
     "Test first: Health renders no chk-auto-update and no 'Automatic updates' label, still shows the last attempt; test/health-settings-layout.test.mjs and test/dashboard.test.ts updated for the removed id, saying which expectation changed and why",
@@ -36,7 +36,7 @@
     "size": "small",
     "estimate": "0.5 h agent",
     "basis": "Estimated 2026-11-26 from the existing code paths read for this plan. Not a measurement.",
-    "reviewed": "2026-11-26",
+    "reviewed": "2026-11-27",
     "agentHours": 0.5,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
