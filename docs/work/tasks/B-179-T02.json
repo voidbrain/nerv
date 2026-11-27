@@ -1,19 +1,19 @@
 {
   "version": 1,
-  "id": "B-178-T02",
-  "parent": "B-178",
+  "id": "B-179-T02",
+  "parent": "B-179",
   "title": "recordSelected records the whole report and sets the per-case source key after",
   "goal": "gauntlet.mjs ledger records every graded case of a multi-case report of a runner pack",
   "status": "implemented",
   "acceptance": [
-    "The B-178 test passes unchanged",
+    "The B-179 test passes unchanged",
     "A report whose source key differs from NERV's is still refused",
     "The night's cad-3d rest report records its four cases"
   ],
   "resources": [
     "tools/gauntlet.mjs",
     "test/gauntlet.test.mjs",
-    "docs/work/records/B-178.md",
+    "docs/work/records/B-179.md",
     "generated:backlog-views"
   ],
   "capabilities": [
@@ -36,7 +36,7 @@
     "actualSource": "stated"
   },
   "dependsOn": [
-    "B-178-T01"
+    "B-179-T01"
   ],
   "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
   "escalation": [

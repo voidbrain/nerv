@@ -1355,7 +1355,7 @@ writeFileSync(out, JSON.stringify({ schemaVersion: 1, layer: 'coding', caseHash:
   }
 });
 
-test('B-178: gauntlet ledger records a multi-case report of a model-runner pack whose cases used tokens', async () => {
+test('B-179: gauntlet ledger records a multi-case report of a model-runner pack whose cases used tokens', async () => {
   // On 2026-11-27 `gauntlet.mjs ledger` refused the night's cad-3d report (4 cases passed, 2,013 output tokens) with
   // "Inconsistent token totals": it checks each case on its own but kept the whole report's token total.
   const { run, validateRegistry } = await import('@voidbrain/gauntlet-protocol');

@@ -1,16 +1,16 @@
 {
   "version": 1,
-  "id": "B-178-T01",
-  "parent": "B-178",
+  "id": "B-179-T01",
+  "parent": "B-179",
   "title": "Failing test: gauntlet ledger records a multi-case model-runner report",
-  "goal": "The B-178 test in test/gauntlet.test.mjs fails on main",
+  "goal": "The B-179 test in test/gauntlet.test.mjs fails on main",
   "status": "implemented",
   "acceptance": [
-    "The B-178 test in test/gauntlet.test.mjs fails on main with \"Inconsistent token totals\" and is committed before the fix"
+    "The B-179 test in test/gauntlet.test.mjs fails on main with \"Inconsistent token totals\" and is committed before the fix"
   ],
   "resources": [
     "test/gauntlet.test.mjs",
-    "docs/work/records/B-178.md",
+    "docs/work/records/B-179.md",
     "generated:backlog-views"
   ],
   "capabilities": [

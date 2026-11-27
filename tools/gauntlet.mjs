@@ -267,7 +267,7 @@ const entryKey = (e) => JSON.stringify([e.pack, e.case, e.profileHash]);
 // Gauntlet checks the report against the selected pack it actually ran, and the entries are kept under the full pack.
 export function recordSelected(ledger, report, full, selected, sourceKey = null) {
   const entries = new Map(ledger.entries.map((e) => [entryKey(e), e]));
-  // B-178: Gauntlet checks the whole report against the pack it ran; a per-case source key is set on each entry after,
+  // B-179: Gauntlet checks the whole report against the pack it ran; a per-case source key is set on each entry after,
   // since a report cut to one case no longer matches its token total, case count or pack hash.
   const perCase = typeof sourceKey === 'function';
   const rawEntries = recordRun(emptyLedger(), report, selected, perCase ? {} : { sourceKey }).entries.map((e) => {
