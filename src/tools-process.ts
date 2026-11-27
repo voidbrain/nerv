@@ -19,6 +19,11 @@ const servers = (): McpServer[] => {
 const client = (id: string): McpConnection => {
   const s = servers().find((x) => x.id === id);
   if (!s) throw new Error(`No MCP server ${id} in config.json.`);
+  // F-159: an off module is never called, whoever asks.
+  if (s.off) {
+    forget(id);
+    throw new Error(`${id} is off: nerv modules on ${id}`);
+  }
   // A server whose command, arguments or URL changed in config.json is restarted, never kept on its old definition.
   const spec = JSON.stringify(s);
   if (specs.get(id) !== spec) forget(id);
@@ -39,6 +44,11 @@ const forget = (id: string) => {
 async function listAll() {
   const out: { server: string; tools?: (McpTool & { fingerprint: string })[]; error?: string }[] = [];
   for (const s of servers()) {
+    // F-159: an off module is not listed, so not contacted; a connection left open from before is closed.
+    if (s.off) {
+      forget(s.id);
+      continue;
+    }
     try {
       out.push({
         server: s.id,

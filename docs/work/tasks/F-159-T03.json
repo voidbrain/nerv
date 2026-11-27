@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-159-T03",
+  "parent": "F-159",
+  "title": "Test first: the Modules panel in Settings; off hides the module's cards and stops their polling",
+  "goal": "A Modules panel on the full dashboard switches each module, and an off module's cards hide",
+  "status": "planned",
+  "acceptance": [
+    "Failing tests first: GET /api/modules and PUT /api/modules/NAME; the panel lists rows with on/off, reachable and tools and switches them",
+    "Off hides the live index card (its polling stops) and the FPV battery cards; on brings them back",
+    "Plain and Eva voices, Italian and English, no backlog IDs; var(--…) tokens only; axe clean; readable at phone width; a browser join test across config, the tools process, offered tools and the dashboard"
+  ],
+  "dependsOn": [
+    "F-159-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "web/**",
+    "docs/**",
+    "docs/work/records/F-159.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "angular",
+    "accessibility",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.75 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 1.75,
+    "baselineAgentHours": 1.75,
+    "estimateAgentHours": 1.75
+  }
+}

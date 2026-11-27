@@ -32,6 +32,8 @@ export type LiveIndexView =
       turn: LiveIndexTurn[];
     }
   | { state: 'not-set-up'; commands: string[] }
+  /** F-159: the module is off: nothing is asked of the index, and the card hides. */
+  | { state: 'off' }
   | { state: 'offline'; screen: string; reason: string }
   | { state: 'failed'; reason: string };
 

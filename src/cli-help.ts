@@ -128,6 +128,12 @@ export const HELP_GROUPS: HelpGroup[] = [
           'tools grant SERVER/TOOL [--effect read] [--eva 00|01|02|03] | tools revoke SERVER/TOOL',
         ],
       },
+      {
+        name: 'modules',
+        args: '[on|off NAME]',
+        about: 'Turn a module (an MCP server or a built-in pack) off and on, keeping its grants',
+        usage: ['modules | modules on NAME | modules off NAME'],
+      },
       { name: 'seats', args: '[check | key SEAT-ID]', about: 'MAGI seats and their keys' },
       {
         name: 'placement',

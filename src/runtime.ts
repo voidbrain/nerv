@@ -49,7 +49,13 @@ import type {
   SubdomainSortie,
   RegisteredPilot,
 } from './pilots.ts';
-import { callModelWithUsage, loadExternalTools, mcpServerHealth, readLiveIndex } from './runtime-tools.ts';
+import {
+  callModelWithUsage,
+  loadExternalTools,
+  mcpServerHealth,
+  readLiveIndex,
+  type ExternalToolsCache,
+} from './runtime-tools.ts';
 import type { LiveIndexView } from './live-index.ts';
 import {
   remoteOutcomeText,
@@ -632,7 +638,7 @@ export class Runtime implements StoreApi {
   liveIndex(): Promise<LiveIndexView> {
     return readLiveIndex({ home: this.home, toolsProcess: () => this.toolsProcess() });
   }
-  private externalCache?: { at: number; value: ExternalTools };
+  private externalCache?: ExternalToolsCache;
   /**
    * Granted MCP tools Misato may use now (F-021): only those whose description still has the fingerprint they were
    * granted with; a changed or missing one is left out, with the reason, for `nerv tools` and the dashboard.
