@@ -1864,7 +1864,7 @@ test('F-110-T03: settings panel renders schedule controls, preserves drafts acro
   assert.match(live, /id='set-update-mode'/);
   assert.match(live, /id='btn-save-settings'/);
   assert.match(live, /if \(state\.settingsDraft\) return state\.settingsDraft;/);
-  assert.match(live, /· checked " \+ pad2\(sch\.checkHour\) \+ ":00, "/);
+  // F-152: Health no longer repeats the saved hours (the settings panel shows them); that expectation was removed.
   const settingsBlock = live.slice(
     live.indexOf('window.renderSettings ='),
     live.indexOf('function readSettingsDraft()', live.indexOf('window.renderSettings =')),
