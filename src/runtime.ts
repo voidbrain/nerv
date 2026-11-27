@@ -11,6 +11,7 @@ import { REFUSED_BEFORE_GATE, RpcFault, type Method } from './rpc.ts';
 import { gateCallTimeoutMs } from './executors.ts';
 import type { HistoryPage } from './history.ts';
 import type { ChannelState, HeardChannel } from './channel-state.ts';
+import { ThinkingRegistry, type ThinkingEntry } from './thinking.ts';
 import { ProcessClient } from './process-client.ts';
 import { RequestQueue, type QueueSnapshot } from './request-queue.ts';
 import { ItemLockManager, itemKeysForTool } from './item-locks.ts';
@@ -139,6 +140,14 @@ export class Runtime implements StoreApi {
       'nervous',
     );
     this.brain = new ProcessClient(brainEntry, home ? [home] : [], 'brain', 1500);
+    // F-148-T02: the service mirrors the brain's thinking list; a brain that ends leaves nothing thinking.
+    this.brain.onThinking = (entries) => this.thinkingNow.replace(entries);
+    this.brain.child.once('exit', () => this.thinkingNow.clear());
+  }
+  private readonly thinkingNow = new ThinkingRegistry();
+  /** F-148: the model calls in flight (pilot, role, model, sortie, start), for the dashboard; no prompt or answer. */
+  async thinking(): Promise<ThinkingEntry[]> {
+    return this.thinkingNow.snapshot();
   }
   private recordPromptSample(metrics: PromptMetrics): void {
     if (this.database === ':memory:') return;

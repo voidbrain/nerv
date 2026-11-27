@@ -259,6 +259,7 @@ export class RuntimePlanning {
         .modelCall(
           'consultant.advise',
           {
+            sortieId,
             request: localFiltered.request,
             ...(localFiltered.previousAdvice ? { previousAdvice: localFiltered.previousAdvice } : {}),
             ...(localFiltered.context.length ? { context: localFiltered.context } : {}),
@@ -382,6 +383,7 @@ export class RuntimePlanning {
         .modelCall(
           'misato.step',
           {
+            sortieId,
             ...(proactive
               ? { watch: { readOnly: proactive.readOnly, ...(proactive.model ? { model: proactive.model } : {}) } }
               : {}),

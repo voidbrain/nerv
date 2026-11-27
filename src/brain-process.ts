@@ -1,6 +1,8 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import type { UsageObservation } from './model-usage.ts';
 const accounting = new AsyncLocalStorage<{ observation: UsageObservation | null }>();
+// F-148-T02: who a model call thinks for (pilot, role, sortie); run() adds the model and marks the call in `thinking`.
+const thinkingFor = new AsyncLocalStorage<Omit<ThinkingStart, 'model'>>();
 import { connect } from 'node:net';
 import { dispatchRpc, MAX_FRAME_BYTES, READY, RpcFault } from './rpc.ts';
 import { readConfig, readModelKey, readScrolls } from './config.ts';
@@ -45,6 +47,7 @@ import { compactToolCatalogue } from './tool-index.ts';
 import { builtinPackRegistry } from './packs.ts';
 import { digestAsk, factLimit, parseDigest, type Exchange } from './instrumentality.ts';
 import { measureMisatoPrompt } from './prompt-samples.ts';
+import { ThinkingRegistry, type ThinkingStart } from './thinking.ts';
 // Execution boundary: model routes, the Casper seat and Misato's planning step. It plans and reviews; it never executes a tool.
 // The data home arrives as argv; the cloud key is read here from its private file, never passed in env or argv.
 const home = process.argv[2];
@@ -56,6 +59,11 @@ let personas: PersonaConfig = defaultPersonas;
 let configError: string | undefined;
 let loaded = false;
 const modelBudget = new ModelBudget();
+const thinking = new ThinkingRegistry();
+/** Every change goes to the service at once; the service keeps the list for the dashboard (a new brain starts empty). */
+function announceThinking(): void {
+  if (process.connected) process.send?.({ nerv: 'thinking', entries: thinking.snapshot() });
+}
 /** Reads the model settings and the cloud key. A failed reload keeps the settings that last worked, so a typo never takes the brain down. */
 function load(): { error?: string; kept?: boolean } {
   if (!home) return {};
@@ -101,6 +109,10 @@ async function run(ask: Ask, m: Models): Promise<Reply> {
   }
   const modelName = route === 'local' ? m.local?.model : m.cloud?.model;
   const lease = modelName ? await modelBudget.acquire(modelName) : undefined;
+  // Marked once the model's turn comes (waiting for a free slot is not thinking); the finally clears it however it ends.
+  const who = thinkingFor.getStore();
+  const mark = who ? thinking.begin({ ...who, model: (modelName ?? '').slice(0, 100) }) : undefined;
+  if (mark) announceThinking();
   try {
     const reply = await complete(ask, m, key, {
       timeoutMs: MODEL_TIMEOUT_MS - 5000,
@@ -116,6 +128,10 @@ async function run(ask: Ask, m: Models): Promise<Reply> {
     throw e;
   } finally {
     lease?.release();
+    if (mark) {
+      mark.end();
+      announceThinking();
+    }
   }
 }
 /** A cheap reachability check of the local route: a TCP connection opened and closed, no request and no model call.
@@ -350,13 +366,31 @@ process.on('message', (value: unknown) => {
       throw new RpcFault(-32601, 'Method not found.');
     };
     if (!tracked) return execute();
-    return accounting.run(context, async () => {
-      try {
-        return { value: await execute(), accounting: context.observation };
-      } catch (e) {
-        return { failure: e instanceof RpcFault ? e.message : 'Model route failed.', accounting: context.observation };
-      }
-    });
+    const sortieId = typeof params.sortieId === 'string' ? { sortieId: params.sortieId } : {};
+    const pilot = params.pilot as { name?: unknown } | undefined;
+    const who: Omit<ThinkingStart, 'model'> | undefined =
+      method === 'misato.step'
+        ? { pilot: personas.names.misato, role: 'planner', ...sortieId }
+        : method === 'consultant.advise'
+          ? { pilot: typeof pilot?.name === 'string' ? pilot.name : 'Generic pilot', role: 'consultant', ...sortieId }
+          : method === 'casper.verdict'
+            ? { pilot: 'Casper', role: 'casper', ...sortieId }
+            : method === 'model.complete'
+              ? { pilot: 'Ask', role: 'ask' }
+              : undefined;
+    const marked = <T>(fn: () => Promise<T>) => (who ? thinkingFor.run(who, fn) : fn());
+    return marked(() =>
+      accounting.run(context, async () => {
+        try {
+          return { value: await execute(), accounting: context.observation };
+        } catch (e) {
+          return {
+            failure: e instanceof RpcFault ? e.message : 'Model route failed.',
+            accounting: context.observation,
+          };
+        }
+      }),
+    );
   }).then((reply) => {
     if (reply && process.connected) process.send?.(reply);
   });

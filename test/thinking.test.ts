@@ -5,7 +5,6 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ThinkingRegistry, type ThinkingEntry } from '../src/thinking.ts';
-import { defaultPolicy } from '../src/policy.ts';
 
 // F-148: who is thinking right now. Unit tests for the registry, then the join across the brain, the service and
 // (F-148-T03) the endpoint: a model call shows while it runs and is gone when it ends, however it ends.
@@ -138,8 +137,8 @@ async function service(url: string) {
       },
     }),
   );
-  // reminders.add is Orange here, so Casper is asked and no owner card stops the sortie.
-  writeFileSync(join(home, 'scrolls.json'), JSON.stringify({ ...defaultPolicy, localOnly: [] }), { mode: 0o600 });
+  // reminders.add is Blue here, so Casper is asked before the owner's card.
+  writeFileSync(join(home, 'scrolls.json'), JSON.stringify({ blue: ['reminders.add'] }), { mode: 0o600 });
   const r = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
   await r.ready();
   return {
@@ -179,24 +178,28 @@ test(
         ['consultant', 'Check the date.'],
         ['planner', ADD],
         ['casper', '{"vote":"approve","reason":"Matches.","confidence":0.9}'],
-        ['planner', '{"reply":"Done."}'],
       ] as const) {
         const call = await m.next();
         assert.equal(call.role, role);
+        // The previous call's entry is gone and this one is the only one: the end ran before the next begin.
         const now = await until(
           () => t.r.thinking(),
-          (e) => e.some((x) => x.role === role),
+          (e) => e.length === 1 && e[0]!.role === role,
         );
         assert.equal(now.length, 1, `only the ${role} thinks: ${JSON.stringify(now)}`);
+        assert.equal(now[0]!.role, role);
         seen[role] = now[0]!;
         m.answer(call.res, call.model, content);
+      }
+      const out = await chat;
+      assert.deepEqual(
         await until(
           () => t.r.thinking(),
           (e) => !e.length,
-        );
-      }
-      const out = await chat;
-      assert.deepEqual(await t.r.thinking(), [], 'nothing thinks after the answer');
+        ),
+        [],
+        'nothing thinks after the answer',
+      );
       for (const e of Object.values(seen)) {
         assert.equal(e.sortieId, out.sortieId);
         assert.ok(Number.isFinite(Date.parse(e.startedAt)));
