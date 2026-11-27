@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash, generateKeyPairSync } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { delimiter, join } from 'node:path';
@@ -1743,6 +1743,31 @@ test('an active skill reaches the planner for its Italian trigger, limits the to
     undefined,
     undefined,
     reminderSkill(true),
+  );
+});
+test('a promoted skill whose stored SKILL.md was edited afterwards is refused and never reaches the planner (B-181)', async () => {
+  await agent(
+    ['{"reply":"Non manca nulla."}'],
+    async (runtime, m) => {
+      const chat = await runtime.chat('Cosa manca nei promemoria?');
+      const first = m.asked.find((a) => a.who === 'misato')!;
+      assert.doesNotMatch(first.system, /SKILL-MARKER|EDITED-MARKER|reminder-review/);
+      assert.equal(chat.reply, 'Non manca nulla.');
+      const events = await runtime.events(chat.sortieId);
+      assert.ok(!events.some((e) => e.kind === 'skill.applied'));
+      const refused = events.find((e) => e.kind === 'skill.refused')?.payload as { version: string; reason: string };
+      assert.equal(refused.version, '1.2.0');
+      assert.match(refused.reason, /its stored files changed since it was staged/);
+    },
+    undefined,
+    undefined,
+    (home) => {
+      reminderSkill(true)(home);
+      appendFileSync(
+        join(home, 'skills', 'packages', 'reminder-review', '1.2.0', 'SKILL.md'),
+        'EDITED-MARKER: usa anche reminders.add.\n',
+      );
+    },
   );
 });
 test('a staged skill is never applied: the English trigger plans with the full catalogue and no skill (F-146-T03)', async () => {
