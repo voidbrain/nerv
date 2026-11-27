@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "B-182-T02",
+  "parent": "B-182",
+  "title": "Fit every page to the screen and keep controls at 16 px on phones",
+  "goal": "Layouts give their content a minimum width of zero and wrap long words; controls use the --control-font token on small or touch screens",
+  "status": "implemented",
+  "acceptance": [
+    "test/mobile-viewport.browser.mjs passes",
+    "Existing browser tests pass",
+    "Style guide names the token",
+    "User zoom stays enabled"
+  ],
+  "dependsOn": [
+    "B-182-T01"
+  ],
+  "resources": [
+    "web/src/styles.css",
+    "web/public/dashboard/index.html",
+    "docs/STYLE-GUIDE.md",
+    "docs/work/records/B-182.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "validation": [
+    "npm run build && node --test test/mobile-viewport.browser.mjs",
+    "npm run test:browser",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-27: 1 h agent. Implemented 2026-11-27.",
+    "reviewed": "2026-11-27",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": [
+    {
+      "pr": 879
+    }
+  ]
+}

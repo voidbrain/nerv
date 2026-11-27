@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "B-182-T03",
+  "parent": "B-182",
+  "title": "Owner phone check: no zoom-out past 100 %, no zoom on a field",
+  "goal": "On the iPhone app, / and /full fill the screen at the smallest pinch and a field does not zoom in",
+  "status": "planned",
+  "acceptance": [
+    "Owner confirms both steps of the phone check on the record"
+  ],
+  "dependsOn": [
+    "B-182-T02"
+  ],
+  "resources": [
+    "docs/work/records/**",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "structured-tools"
+  ],
+  "privacy": "No credential, code or token in the evidence.",
+  "validation": [
+    "Owner observation on the installed iPhone app, recorded in the record"
+  ],
+  "escalation": [
+    "A failure reopens the fix with a new failing test"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-27: two pinches and two taps on each page. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
+    "ownerHours": 0.25,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerKind": "procedure"
+  }
+}
