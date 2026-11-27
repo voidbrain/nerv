@@ -17,7 +17,7 @@ function fixture(events) {
   const mapping = source.slice(source.indexOf('  function mapStatus'), source.indexOf('  function toApproval'));
   const loading = source.slice(source.indexOf('  async function loadEvents'), source.indexOf('  // Longer history'));
   const detail = source.slice(source.indexOf('  window.renderDetail ='), source.indexOf('  window.renderBudget ='));
-  const code = `const window={},state={log:[]},short=id=>'S-'+id.slice(0,4).toUpperCase(),detailCache={},TOOLS={},known=new Map(),consulted=new Set(),seen=new Set(),phaseOf=new Map(),advisedBy=new Map(),forwardedTo=new Map(),originOf=new Map(),remoteSorties=new Map(),generic=()=>false,baseName=id=>id,baseDetail=()=>{};${mapping}${loading}${detail};return {loadEvents,toSortie,render:window.renderDetail};`;
+  const code = `const window={},state={log:[]},short=id=>'S-'+id.slice(0,4).toUpperCase(),detailCache={},TOOLS={},known=new Map(),consulted=new Set(),seen=new Set(),phaseOf=new Map(),advisedBy=new Map(),forwardedTo=new Map(),originOf=new Map(),remoteSorties=new Map(),generic=()=>false,baseName=id=>id,baseDetail=()=>{};${mapping}${loading}${detail};return {loadEvents,toSortie,render:window.renderDetail,state};`;
   return { document, ...new Function('document', 'api', 'esc', code)(document, async () => events, esc) };
 }
 test('ledger relay events reach the live detail with the destination reference, escaped, and no claim that work ran locally', async () => {
@@ -74,5 +74,35 @@ test('empty local sorties distinguish planning, failure, stop and a completed to
   ]) {
     f.render({ ...base, status });
     assert.match(f.document.getElementById('detail').textContent, /** @type {RegExp} */ (expected));
+  }
+});
+test('the Comms trace names the skill a sortie applied, and why a matched one was refused (F-146-T03)', async () => {
+  const store = new Store(':memory:');
+  try {
+    const id = store.ledger.openSortie(OWNER_SOURCE, 'Serve una dose?', 'trusted');
+    store.ledger.note(id, 'skill.applied', {
+      id: 'tank-check',
+      version: '1.0.0',
+      title: 'Serbatoio <acqua>',
+      tools: ['garden.tank_level'],
+    });
+    store.ledger.note(id, 'skill.refused', {
+      id: 'tank-fill',
+      version: '2.0.0',
+      title: 'Riempi',
+      reason: 'it needs garden.tank_fill, which is not a read: only read-only skills apply.',
+    });
+    const f = fixture(store.ledger.events(id));
+    await f.loadEvents(id);
+    const lines = f.state.log.map((l) => [l.msg, l.cls]);
+    assert.deepEqual(lines, [
+      ['Skill: Serbatoio <acqua> · tank-check 1.0.0 · tools garden.tank_level', ''],
+      [
+        'Skill Riempi · tank-fill 2.0.0 not applied: it needs garden.tank_fill, which is not a read: only read-only skills apply.',
+        'warn',
+      ],
+    ]);
+  } finally {
+    store.close();
   }
 });
