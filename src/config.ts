@@ -131,6 +131,9 @@ export function databasePath(home: string): string {
 export function ownerLanguage(home?: string): 'it' | 'en' {
   return home ? readConfig(home).language : defaults.language;
 }
+// B-177: readConfig runs several times a second (the nervous scheduler tick); each new Intl.DateTimeFormat holds ICU
+// memory outside the V8 heap, so a timezone is checked once per process.
+const checkedTimeZones = new Set<string>();
 export function readConfig(home: string): Config {
   const path = join(home, 'config.json');
   const value: unknown = existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : {};
@@ -288,10 +291,13 @@ export function readConfig(home: string): Config {
     throw new Error('Invalid NERV Agency port.');
   if (!['it', 'en'].includes(config.language)) throw new Error('Invalid language: use it or en.');
   if (typeof config.timeZone !== 'string') throw new Error('Invalid timezone.');
-  try {
-    new Intl.DateTimeFormat('it', { timeZone: config.timeZone }).format();
-  } catch {
-    throw new Error('Invalid IANA timezone.');
+  if (!checkedTimeZones.has(config.timeZone)) {
+    try {
+      new Intl.DateTimeFormat('it', { timeZone: config.timeZone }).format();
+    } catch {
+      throw new Error('Invalid IANA timezone.');
+    }
+    checkedTimeZones.add(config.timeZone);
   }
   return config;
 }
