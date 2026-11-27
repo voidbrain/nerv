@@ -718,16 +718,10 @@
     const statusHtml = updaterStatusHtml(shownStatus);
     if (availabilityRow) availabilityRow[4] = statusHtml;
     const updateResultHtml = availabilityRow ? "" : statusHtml;
-    // F-102-T02: the automatic update switch (20:00 check, notice, 03:00 apply unless the owner says wait).
-    const up = state.updatePolicy && state.updatePolicy.policy;
+    // F-102-T02: the last automatic attempt; the switch, mode and hours live in the settings panel only (F-152).
     const la = state.updatePolicy && state.updatePolicy.lastAttempt;
-    const sch = (up && up.schedule) || { mode:"apply", checkHour:20, applyHour:3 };
-    const pad2 = n => String(n).padStart(2, "0");
-    const policyLabel = "Automatic updates · checked " + pad2(sch.checkHour) + ":00, " +
-      (sch.mode === "notify" ? "notify only" : "applied " + pad2(sch.applyHour) + ":00 unless you say wait");
-    const policyHtml = up
-      ? "<div class='row small' style='margin-top:6px'><label for='chk-auto-update' class='muted'>" + esc(policyLabel) + "</label><input type='checkbox' id='chk-auto-update'" + (up.enabled ? " checked" : "") + (state.updatePolicyBusy ? " disabled" : "") + "></div>" +
-        (la ? "<div class='small " + (la.outcome === "completed" || la.outcome === "started" ? "ok" : la.outcome === "refused" ? "warn" : "muted") + "'>Last automatic attempt: " + esc(la.outcome) + (la.revision ? " · " + esc(la.revision.slice(0, 7)) : "") + ((la.reasons || []).length ? " · " + esc(la.reasons.join("; ")) : "") + "</div>" : "")
+    const policyHtml = la
+      ? "<div class='small " + (la.outcome === "completed" || la.outcome === "started" ? "ok" : la.outcome === "refused" ? "warn" : "muted") + "'>Last automatic attempt: " + esc(la.outcome) + (la.revision ? " · " + esc(la.revision.slice(0, 7)) : "") + ((la.reasons || []).length ? " · " + esc(la.reasons.join("; ")) : "") + "</div>"
       : "";
     const hm = state.healthMetrics;
     const warnings = hm && Array.isArray(hm.warnings) ? hm.warnings : [];
@@ -1475,29 +1469,6 @@
     if (!e.target || !e.target.closest) return;
     if (e.target.closest("#btn-push-enable")) void pushChange(true);
     else if (e.target.closest("#btn-push-disable")) void pushChange(false);
-  });
-  // F-102-T02: the switch posts the policy; an empty selection means this base on main (the server fills it in).
-  window.liveSetAutoUpdate = async function (enabled) {
-    if (state.updatePolicyBusy) return;
-    const current = (state.updatePolicy && state.updatePolicy.policy) || { channels: [], targets: [] };
-    state.updatePolicyBusy = true;
-    renderHealth();
-    try {
-      const r = await api("update/policy", { method:"POST", body:JSON.stringify({ enabled: !!enabled, channels: current.channels || [], targets: current.targets || [] }) });
-      state.updatePolicy = Object.assign({}, state.updatePolicy, { policy: r.policy });
-      log(enabled ? "Automatic updates on: checked at 20:00, applied at 03:00 unless you say wait." : "Automatic updates off; nothing is scheduled.", "ok", null, "maya");
-    } catch (e) {
-      log("Update policy error: " + e.message, "danger", null, "maya");
-    } finally {
-      state.updatePolicyBusy = false;
-      renderHealth();
-      if (!state.settingsDraft && typeof renderSettings === "function") renderSettings();
-    }
-  };
-  document.addEventListener("change", e => {
-    const t = e.target && e.target.closest && e.target.closest("#chk-auto-update");
-    if (!t) return;
-    void window.liveSetAutoUpdate(t.checked);
   });
   window.liveSpear = async function (shortId) {
     const s = state.sorties.find(x => x.id === shortId); if (!s) return;
