@@ -667,7 +667,7 @@
     const mb = n => (Number(n) / 1048576).toFixed(1);
     const bytes = n => (n = Number(n) || 0) < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : mb(n) + " MB";
     const none = why => "<td><span aria-hidden='true'>—</span><span class='sr-only'>" + why + "</span></td>";
-    const NA = none("not applicable");
+    const NA = "<td class='na'><span aria-hidden='true'>—</span><span class='sr-only'>not applicable</span></td>";
     const td = v => "<td>" + esc(v) + "</td>";
     const status = (warn, extra) => "<td><span class='" + (warn ? "warn'>✗ warning" : "ok'>✓ ok") + "</span>" + esc(extra || "") + "</td>";
     const empty = (attr, label, text) => "<tr" + attr + "><th scope='row'>" + label + "</th><td colspan='7' class='muted'>· " + text + "</td></tr>";
@@ -679,9 +679,13 @@
     const linkRows = links.length
       ? links.map(l => "<tr data-link-peer='" + esc(l.peerId) + "'><th scope='row'>Link · " + esc(l.peerId) + "</th>" + status(warned("link:" + l.peerId + ":")) + td(bytes(l.bytesSent)) + td(bytes(l.bytesReceived)) + (l.lastLatencyMs == null ? none("not measured yet") : td(l.lastLatencyMs + " ms")) + td(l.inFlight) + td(l.reconnects) + NA + "</tr>").join("")
       : empty(" id='health-links-empty'", "Links", "No peer link traffic recorded.");
-    const head = ["Status", "Sent", "Received", "Latency", "In flight", "Reconnects", "Memory"].map(h => "<th scope='col'>" + h + "</th>").join("");
+    const cols = ["Status", "Sent", "Received", "Latency", "In flight", "Reconnects", "Memory"];
+    const head = cols.map(h => "<th scope='col'>" + h + "</th>").join("");
+    // F-152-T08: each cell names its column, so on a phone a row reads as a card of "column: value" lines.
+    let i = 0;
+    const labelled = rows => rows.replace(/<tr|<td(?![^>]*colspan)/g, m => m === "<tr" ? (i = 0, m) : "<td data-label='" + cols[i++] + "'");
     return "<div class='diag-wrap' role='region' aria-label='Diagnostics' tabindex='0'><table class='diag'><caption>Diagnostics · service and peer links</caption>" +
-      "<thead><tr><td></td>" + head + "</tr></thead><tbody>" + sample + linkRows + "</tbody></table></div>";
+      "<thead><tr><td></td>" + head + "</tr></thead><tbody>" + labelled(sample + linkRows) + "</tbody></table></div>";
   }
   // B-142: health rows (end)
   window.renderHealth = function () {
@@ -1306,11 +1310,14 @@
       "<div class='tiny muted'>Time zone " + esc(m.timeZone) + " · Sync Ratio 80% · Telegram 90 s</div>" +
       "<div class='row'><button class='btn sm primary' id='btn-save-settings' type='submit'" + (busy ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button>" +
       "<span id='settings-status' role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : (state.settingsDraft ? "Unsaved changes" : "")) + "</span></div>" +
-      "</form>" +
-      // The panel redraws on every poll: the Advanced section's open state lives in state (toggle listener below).
-      "<details id='settings-advanced'" + (state.advancedOpen ? " open" : "") + "><summary class='tiny muted'>Advanced</summary>" +
-      "<div class='row small'><button class='btn sm' id='btn-reload' type='button'" + (state.reloadBusy ? " disabled" : "") + ">Re-read the model settings from config.json</button>" +
-      "<span id='reload-status' role='status' class='tiny " + (rm ? rm.kind : "muted") + "'>" + esc(rm ? rm.text : "") + "</span></div></details>";
+      "</form>";
+    // The panel redraws on every poll: the Advanced section's open state lives in state (toggle listener below).
+    // F-152-T08: below both columns, full width.
+    const more = document.getElementById("settings-more"); if (!more) return;
+    more.innerHTML = "<details id='settings-advanced'" + (state.advancedOpen ? " open" : "") + "><summary class='tiny muted'>Advanced</summary>" +
+      "<div class='row small'><button class='btn sm' id='btn-reload' type='button'" + (state.reloadBusy ? " disabled" : "") + ">Reload models</button>" +
+      "<span id='reload-status' role='status' class='tiny " + (rm ? rm.kind : "muted") + "'>" + esc(rm ? rm.text : "") + "</span></div>" +
+      "<div class='tiny muted help'>Re-reads the model settings from config.json</div></details>";
   };
   function readSettingsDraft() {
     const enabled = !!document.getElementById("set-auto-enabled").checked;

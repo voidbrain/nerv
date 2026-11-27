@@ -4,7 +4,7 @@
   "parent": "B-182",
   "title": "Fit every page to the screen and keep controls at 16 px on phones",
   "goal": "Layouts give their content a minimum width of zero and wrap long words; controls use the --control-font token on small or touch screens",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "test/mobile-viewport.browser.mjs passes",
     "Existing browser tests pass",
@@ -37,7 +37,7 @@
   "effort": {
     "size": "small",
     "estimate": "1 h agent",
-    "basis": "Estimated 2026-11-27: 1 h agent.",
+    "basis": "Estimated 2026-11-27: 1 h agent. Implemented 2026-11-27.",
     "reviewed": "2026-11-27",
     "agentHours": 1,
     "baselineAgentHours": 1,

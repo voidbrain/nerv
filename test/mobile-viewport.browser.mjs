@@ -1,4 +1,3 @@
-// @ts-check
 // B-182 (owner 2026-11-27, the dashboard installed as an iPhone app): (1) a pinch zoomed the page out to a narrow
 // column, because something was wider than the screen; (2) focusing a field zoomed in (iOS zooms on a control whose
 // text is under 16 px) and the page stayed zoomed. End to end in Chrome against the real service (makeServer) and the
