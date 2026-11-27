@@ -14,6 +14,7 @@ import { fakeBotApi, fakePushService, until, wait } from './fixtures/delivery-fa
 const OWNER = 5150;
 const TOKEN = '123456:' + 'p'.repeat(35);
 const dashboardLive = readFileSync('web/public/dashboard/live.js', 'utf8');
+const dashboardShell = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
 type Payload = { notification: { title: string; data: Record<string, unknown> } };
 
 function dashboardSeen(state: object, api: (path: string, init?: RequestInit) => Promise<unknown>, localStorage: object) {
@@ -30,6 +31,19 @@ function dashboardSeen(state: object, api: (path: string, init?: RequestInit) =>
     `${dashboardLive.slice(start, end)}; return window.liveSeen;`,
   )(state, window, api, localStorage, 60 * 60 * 1000);
   return window.liveSeen as () => Promise<void>;
+}
+
+function clickDashboardSeen(state: object, window: object, renderAll: () => void) {
+  const start = dashboardShell.indexOf('  if (t.id === "btn-seen")');
+  const end = dashboardShell.indexOf('\n', start);
+  assert.ok(start >= 0 && end > start, 'the dashboard binds #btn-seen');
+  new Function('t', 'state', 'LIVE', 'window', 'renderAll', dashboardShell.slice(start, end))(
+    { id: 'btn-seen' },
+    state,
+    true,
+    window,
+    renderAll,
+  );
 }
 
 /** The dashboard's real service worker (web/public/dashboard/sw.js) in a sandbox whose fetch reaches `origin`. */
@@ -451,6 +465,48 @@ test('B-180 join: Mark as read includes the displayed brief', async () => {
       read_at: string | null;
     };
     assert.ok(row.read_at, 'the displayed brief is marked read on the service');
+  } finally {
+    await t.close();
+  }
+});
+
+test('B-180 join: clicking #btn-seen reads the old visit panel before advancing its cursor', async () => {
+  const t = await setup({ fallbackMs: 1500 });
+  const origin = `http://127.0.0.1:${(t.server.address() as { port: number }).port}`;
+  const api = async (path: string, init: RequestInit = {}) => {
+    const response = await fetch(origin + '/api/' + path, {
+      ...init,
+      headers: { Authorization: 'Bearer ' + 's'.repeat(32), ...init.headers },
+    });
+    const body: unknown = await response.json();
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return body;
+  };
+  try {
+    const since = Date.now() - 10_000;
+    const id = await t.due('Covered through the dashboard button');
+    const history = (await api(
+      'dashboard/history?since=' + encodeURIComponent(new Date(since).toISOString()),
+    )) as { delivered: number };
+    assert.equal(history.delivered, 1);
+    const state = { lastVisit: since, deliveredCount: history.delivered, deliveredSince: since, brief: null };
+    const saved: string[] = [];
+    const visitStorage = { getItem: () => String(since), setItem: (_key: string, value: string) => saved.push(value) };
+    const liveSeen = dashboardSeen(state, api, visitStorage);
+    let serviceRead: Promise<void> | undefined;
+    const window = { liveSeen: () => (serviceRead = liveSeen()) };
+    let renders = 0;
+    clickDashboardSeen(state, window, () => renders++);
+    await serviceRead;
+
+    const readAt = (deliveryId: string) =>
+      (t.store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(deliveryId) as {
+        read_at: string | null;
+      }).read_at;
+    assert.ok(readAt(id), '#btn-seen marks the delivery shown by the previous visit cursor');
+    assert.ok(state.lastVisit > since, 'the visit cursor advances only after the service read');
+    assert.deepEqual(saved, [String(state.lastVisit)], 'the advanced cursor is persisted');
+    assert.equal(renders, 0, 'the service-owned handler redraws only after its read completes');
   } finally {
     await t.close();
   }
