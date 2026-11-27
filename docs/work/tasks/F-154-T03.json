@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-154-T03",
+  "parent": "F-154",
+  "title": "Choose roles and cloud models from the CLI and the dashboard picker",
+  "goal": "`nerv models set <role> local MODEL | cloud haiku|sonnet|opus` and the settings picker list the same choices; the models report shows route and model per role",
+  "status": "planned",
+  "acceptance": [
+    "Test first on the CLI parsing and the report; picker shows the three cloud models with prices per million tokens (Haiku 5.5 $0.10/$0.50, Sonnet 5.5 $2/$10, Opus 5.5 $4/$20 in/out)",
+    "Plain and Eva wording, STYLE-GUIDE tokens, phone width; no backlog IDs in text"
+  ],
+  "dependsOn": [
+    "F-154-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-154.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

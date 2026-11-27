@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-156-T02",
+  "parent": "F-156",
+  "title": "Test first: data categories and the owner's allow or deny per category",
+  "goal": "Categories: owner question, tool results (untainted), tool results (tainted, Ireul), memory facts, memory summaries, Grover data; each allow or deny, default deny except the owner question",
+  "status": "planned",
+  "acceptance": [
+    "Failing tests first on the filter that builds the cloud request: a denied category is removed or the call is refused if the plan cannot be made without it",
+    "Tainted tool results never go to the cloud unless the owner allows that category by name; Casper and its inspected arguments never go to the cloud, whatever the setting",
+    "`nerv models cloud allow|deny <category>` and a settings panel list; a test across config, filter and the Consultant and Misato calls"
+  ],
+  "dependsOn": [
+    "F-126-T07"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-156.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "id": "F-157-T01",
+  "parent": "F-157",
+  "title": "Write the owner guide with copy-paste steps and expected output",
+  "goal": "docs/acceptance/f157-cloud-turn-on-<date>.md with exact commands and the expected result of each",
+  "status": "planned",
+  "acceptance": [
+    "Steps: (1) console.anthropic.com, create an account separate from claude.ai, add billing and a small prepaid amount, create an API key named nerv; (2) `nerv models key` and paste it; (3) `nerv models cloud allow|deny` per F-156-T04; (4) `nerv models set misato cloud sonnet` (or haiku); limit 5; (5) ask three questions, `nerv models` shows spend and the estimate",
+    "Each step lists what the output must show and how to turn it off again (`nerv models cloud off`)",
+    "No key, name or personal data in Git"
+  ],
+  "dependsOn": [
+    "F-154-T03",
+    "F-156-T04"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-157.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
