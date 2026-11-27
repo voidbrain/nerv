@@ -4,7 +4,7 @@
   "parent": "F-060",
   "title": "Answer the five questions and per-record outcomes",
   "goal": "Answer the five questions and per-record outcomes",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Dated note: OSC 7501 support, --keep recovery, API stability and security, outcome for F-012, F-019, F-045, F-048, F-049"
   ],
@@ -30,11 +30,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h agent",
-    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12).",
-    "reviewed": "2026-11-13",
+    "estimate": "0 remaining (cancelled)",
+    "basis": "Re-estimated 2026-11-13 at 0.25x from node tools/work-items.mjs calibrate (median 0.25x over 16 closed steps since 2026-11-12). Cancelled 2026-11-27: owner decision (chat): \"skip herdr features if any planned since we will go with nerv (herdr as is ok for now)\". Coding agents will run all in NERV (F-090 direction, PR #889); herdr stays only as the owner's interim terminal app. Findings kept: herdr's hc send/read/status worked for relaying tasks to Codex on 2026-11-27 (OSC 7501 status reported by herdr itself). No actual: cancelled.",
+    "reviewed": "2026-11-27",
     "baselineDays": 1,
-    "agentHours": 0.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 0.25
   }

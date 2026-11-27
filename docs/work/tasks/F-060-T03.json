@@ -4,7 +4,7 @@
   "parent": "F-060",
   "title": "Record the evidence of F-060-T01 and close it",
   "goal": "The result of F-060-T01 is recorded in its record with the evidence the owner reported",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "Evidence of F-060-T01 recorded in the record; failures become B- records"
   ],
@@ -30,10 +30,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h",
-    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total.",
-    "reviewed": "2026-11-13",
-    "agentHours": 0.25,
+    "estimate": "0 remaining (cancelled)",
+    "basis": "Split 2026-11-13 into one-actor steps (harness 8.10.0); hours unchanged in total. Cancelled 2026-11-27: owner decision (chat): \"skip herdr features if any planned since we will go with nerv (herdr as is ok for now)\". Coding agents will run all in NERV (F-090 direction, PR #889); herdr stays only as the owner's interim terminal app. Findings kept: herdr's hc send/read/status worked for relaying tasks to Codex on 2026-11-27 (OSC 7501 status reported by herdr itself). No actual: cancelled.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
     "baselineAgentHours": 1,
     "estimateAgentHours": 0.25
   }
