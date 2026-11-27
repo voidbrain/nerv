@@ -109,7 +109,7 @@ import { detectOllama, modelsReport, ollamaUrlOf, planModels, writeModels, type 
 
 export interface CliCommandContext {
   readSecret: (prompt: string) => Promise<string>;
-  openPage: (home: string, page: '/' | '/dashboard/', print: boolean) => Promise<void>;
+  openPage: (home: string, page: '/' | '/full' | '/dashboard/', print: boolean) => Promise<void>;
   reloadIfRunning: (homeDir: string, port: number) => Promise<string>;
   flag: (name: string) => string | undefined;
 }
@@ -691,8 +691,10 @@ export async function tryRunCliCommand(
           'On the phone, open NERV from the Home Screen and type the code. For a QR to scan: nerv open --phone --qr.',
       );
   } else if (command === 'open') {
-    // open dashboard: the same sign-in, landing on the live dashboard instead of the workspace.
-    await ctx.openPage(home, args.includes('dashboard') ? '/dashboard/' : '/', args.includes('--print'));
+    // open dashboard: the same sign-in, landing on the live dashboard instead of the workspace. open full (B-184): the
+    // workspace's full dashboard; the sign-in lives in page memory, so typing /full afterwards would ask again.
+    const page = args.includes('full') ? '/full' : args.includes('dashboard') ? '/dashboard/' : '/';
+    await ctx.openPage(home, page, args.includes('--print'));
   } else if (command === 'base') {
     // base: show this machine's identity; base ID "Name": change it (restart the service to show it everywhere).
     if (args[0] === 'pubkey') {

@@ -168,7 +168,7 @@ const flag = (name: string) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 /** Mints a one-use login code from the running service and opens (or prints) the page signed in. */
-async function openPage(home: string, page: '/' | '/dashboard/', print: boolean) {
+async function openPage(home: string, page: '/' | '/full' | '/dashboard/', print: boolean) {
   const config = readConfig(home);
   const response = await fetch(`http://127.0.0.1:${config.port}/api/session/codes`, {
     method: 'POST',

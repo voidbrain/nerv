@@ -2,7 +2,7 @@
 
 ## Dashboard
 
-`nerv open dashboard` opens **http://127.0.0.1:4317/dashboard/** using a short-lived dashboard session (12 h, tab close, service restart, or `nerv sessions revoke`). Demo data only loads when opened from disk or with `?demo`.
+`nerv open dashboard` opens **http://127.0.0.1:4317/dashboard/** using a short-lived dashboard session (12 h, tab close, service restart, or `nerv sessions revoke`). `nerv open` opens the workspace's simple page (`/`) and `nerv open full` its full dashboard (`/full`) the same way; the workspace keeps that sign-in in the page's memory only, so open the layout you want with its command rather than typing its address (a reload asks again). `--print` prints the address instead of opening it. Demo data only loads when opened from disk or with `?demo`.
 
 `nerv open --phone` prints a one-use pairing code (`XXXX-XXXX`, 5 minutes) for a phone. `POST /api/device/pair` with `{code, name}` swaps it once for a device credential that the phone sends as its bearer: same powers as a dashboard session, stored only as a hash in `devices.json` (mode 0600), lapsing after 90 days without use, revocable per device (`GET`/`DELETE /api/devices`: admin token, dashboard session or a paired device; pairing codes are minted by the CLI or a dashboard session, never by a paired device) and ended by rotating the admin token. Failed codes are limited to 5 a minute per client; 20 a minute in all lock pairing for a minute, doubling up to an hour and back to a minute after an equally long quiet period. Pending pairing and login codes end when the admin token rotates, and both code exchanges take `Content-Type: application/json` only (415 otherwise).
 
