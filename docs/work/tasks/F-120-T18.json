@@ -48,5 +48,11 @@
     "estimateAgentHours": 1.5,
     "actualAgentHours": 1.5,
     "actualSource": "stated"
-  }
+  },
+  "prs": [
+    {
+      "pr": 861,
+      "note": "decision schema, planner case time, nerv-planner 1.2.0; no model ran"
+    }
+  ]
 }
