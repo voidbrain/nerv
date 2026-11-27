@@ -743,9 +743,52 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
                 kajiDoneAt = performance.now();
               }),
             ]).then(() => undefined);
+            handlerMs = performance.now() - readCommittedAt;
           },
         },
       );
+
+      // DIAGNOSTIC (B-076, temporary): the longest synchronous SQLite call on the main thread during the window.
+      const { StatementSync } = await import('node:sqlite');
+      const slow: Array<{ ms: number; at: number; sql: string }> = [];
+      const restore: Array<() => void> = [];
+      for (const m of ['run', 'get', 'all'] as const) {
+        const proto = StatementSync.prototype as unknown as Record<string, (...a: unknown[]) => unknown>;
+        const orig = proto[m]!;
+        proto[m] = function (this: { sourceSQL: string }, ...a: unknown[]) {
+          const s0 = performance.now();
+          try {
+            return orig.apply(this, a);
+          } finally {
+            const ms = performance.now() - s0;
+            if (ms > 20)
+              slow.push({
+                ms: Math.round(ms),
+                at: Math.round(s0 - (readCommittedAt || s0)),
+                sql: this.sourceSQL.slice(0, 80),
+              });
+          }
+        };
+        restore.push(() => (proto[m] = orig));
+      }
+      const dbProto = DatabaseSync.prototype as unknown as Record<string, (...a: unknown[]) => unknown>;
+      const origExec = dbProto.exec!;
+      dbProto.exec = function (this: unknown, sql: unknown) {
+        const s0 = performance.now();
+        try {
+          return origExec.call(this, sql);
+        } finally {
+          const ms = performance.now() - s0;
+          if (ms > 20)
+            slow.push({
+              ms: Math.round(ms),
+              at: Math.round(s0 - (readCommittedAt || s0)),
+              sql: String(sql).slice(0, 80),
+            });
+        }
+      };
+      restore.push(() => (dbProto.exec = origExec));
+      let handlerMs = 0;
 
       const startedAt = performance.now();
       let lastTick = startedAt;
@@ -766,6 +809,7 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
         await concurrentWork;
       } finally {
         clearInterval(ticker);
+        for (const r of restore) r();
       }
 
       const serialiseMs = firstChunkAt - readCommittedAt;
@@ -776,6 +820,8 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
         kajiMs: Math.round(kajiDoneAt - readCommittedAt),
         ticksDuringSerialise,
         maxGapMs: Math.round(maxGapMs),
+        handlerMs: Math.round(handlerMs),
+        slow,
       });
       console.log(`F-016-T21 metrics ${metrics}`);
       assert.ok(readCommittedAt > 0, 'worker reported read-committed before canonicalising');
