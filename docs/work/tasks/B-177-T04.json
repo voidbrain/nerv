@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "parent": "B-177",
+  "dependsOn": [],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-177-T04",
+  "title": "Reuse the formatters other hot paths build per call",
+  "goal": "A failing test counts Intl.DateTimeFormat constructions per call in reminder-time, chronicle, brief, update-scheduler, misato and why; a small formatter cache makes it pass",
+  "status": "planned",
+  "acceptance": [
+    "A failing test counts Intl.DateTimeFormat constructions per call in reminder-time, chronicle, brief, update-scheduler, misato and why; a small formatter cache makes it pass"
+  ],
+  "resources": [
+    "src/reminder-time.ts",
+    "src/chronicle.ts",
+    "src/brief.ts",
+    "src/update-scheduler.ts",
+    "src/misato.ts",
+    "src/why.ts",
+    "docs/work/records/B-177.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 2.0,
+    "estimateAgentHours": 2.0
+  }
+}

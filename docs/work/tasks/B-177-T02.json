@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "parent": "B-177",
+  "dependsOn": [
+    "B-177-T01"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-177-T02",
+  "title": "readConfig checks each timezone once per process",
+  "goal": "The B-177 test passes without todo; an unknown timezone is still refused on every read",
+  "status": "implemented",
+  "acceptance": [
+    "The B-177 test passes without todo; an unknown timezone is still refused on every read"
+  ],
+  "resources": [
+    "src/config.ts",
+    "test/config-timezone.test.ts",
+    "docs/work/records/B-177.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
