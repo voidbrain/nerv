@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "parent": "B-177",
+  "dependsOn": [
+    "B-177-T02"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-177-T03",
+  "title": "NERV-03: nervous RSS stays near start-up size after 2 h on the fix",
+  "goal": "Two read-only samples 5 minutes apart on NERV-03, 2 h or more after it runs B-177-T02, show nervous-process.ts under 250 MB and not rising; numbers recorded in the record",
+  "status": "planned",
+  "acceptance": [
+    "Two read-only samples 5 minutes apart on NERV-03, 2 h or more after it runs B-177-T02, show nervous-process.ts under 250 MB and not rising; numbers recorded in the record"
+  ],
+  "resources": [
+    "docs/work/records/B-177.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "validation": [
+    "read-only ssh samples as in the record"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 36 | 10 | 68 | 32 |
+| **This week** | 36 | 10 | 69 | 32 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 61 | 51 |
+| **Open** | 61 | 52 |
 | **Require Human 🧑** | 15 | 22 |
 
 ### Require Human 🧑
@@ -46,7 +46,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 289 h agent + 24 h owner across 307 open steps of 61 features and 51 other records. 164 h of actual effort recorded on 151 steps. Generated from the task files.
+**Remaining effort:** 290 h agent + 24 h owner across 314 open steps of 61 features and 52 other records. 164 h of actual effort recorded on 151 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2548,6 +2548,51 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
 | Impact | Every Windows service installed before B-102-T01 cannot be updated or stopped through the lifecycle; NERV-02 on Tabgha is the known case. |
+
+</details>
+
+---
+### <a id="b-177"></a>[🐞 B-177](#top)
+
+**The nervous process grows to ~590 MB on a Raspberry Pi: two timezone checks per scheduler tick pile up native ICU memory**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 1 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-177-T03, the read-only RSS check on NERV-03 once it runs a build with B-177-T02; B-177-T04 (other hot-path formatters) can start now.
+
+| | |
+|---|---|
+| **Issue** | Owner asked 2026-11-26 where NERV's memory goes (a smaller base, e.g. a Pi Zero 2 W with 512 MB, cannot run NERV today). On NERV-03 (Raspberry Pi CM4, 3.7 GB, Debian 11) `nervous-process.ts` was 579–593 MB RSS after 2.5 h, 2.8× the Mac's 207 MB with a smaller database. Cause found: `readConfig` (`src/config.ts`) checked the timezone by building a new `Intl.DateTimeFormat` on every call, and the nervous scheduler calls it twice per 250 ms tick (`Store.tick`: reminder defaults and FPV), about 29,000 formatters an hour. Each holds about 36 KB of ICU memory outside the V8 heap, so V8 sees no pressure and collects late; on Linux glibc keeps the freed memory in the process (`[heap]` 471 MB of the 593 MB on NERV-03). macOS returns more of it, so the Mac looks smaller. |
+| **Reproduce** | Linux arm64 container (`node:24-bookworm-slim`), a temp NERV home with `config.json` `{"timeZone":"Europe/Rome"}`, `Store.tick()` and `Store.expire()` driven by a 1 ms interval, 4 ticks each: main reaches RSS 636 MB at 8,000 ticks and 1,737 MB at 40,000 (malloc `[heap]` 631 MB). Test: `test/config-timezone.test.ts`, "B-177: reading config.json again does not build a new Intl.DateTimeFormat for the same timezone" (committed as `todo`, failed with 100 formatters for 100 reads). |
+| **Check** | The B-177 test passes; on NERV-03, after 2 h or more running the fix, `nervous-process.ts` RSS stays near its start-up size (target under 250 MB) and does not rise across samples a few minutes apart; the planned steps below give a measured minimum host size in `docs/INSTALL.md`. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks |
+|---|---|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-177-t01"></a>B-177-T01 — Failing test: reading config.json again builds no new Intl.DateTimeFormat | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [B-177-T02](#b-177-t02) |
+| 🟢 Small | <a id="b-177-t02"></a>B-177-T02 — readConfig checks each timezone once per process | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | [B-177-T01](#b-177-t01) | [B-177-T03](#b-177-t03) |
+| 🟢 Small | <a id="b-177-t04"></a>B-177-T04 — Reuse the formatters other hot paths build per call | 2 h | 0 h | 0 h | Planned | — | — |
+| 🟢 Small | <a id="b-177-t03"></a>B-177-T03 — NERV-03: nervous RSS stays near start-up size after 2 h on the fix | 0.5 h | 0 h | 0 h | Planned | [B-177-T02](#b-177-t02) | [B-177-T05](#b-177-t05), [B-177-T06](#b-177-t06) |
+| 🟢 Small | <a id="b-177-t05"></a>B-177-T05 — Measure each process's start-up footprint and what lazy imports would save | 3 h | 0 h | 0 h | Planned | [B-177-T03](#b-177-t03) | [B-177-T07](#b-177-t07) |
+| 🟢 Small | <a id="b-177-t06"></a>B-177-T06 — Measure small-host settings: capped V8 heap and MALLOC&#95;ARENA&#95;MAX | 2 h | 0 h | 0 h | Planned | [B-177-T03](#b-177-t03) | [B-177-T07](#b-177-t07) |
+| 🟢 Small | <a id="b-177-t07"></a>B-177-T07 — Document a measured minimum host size | 1 h | 0 h | 0 h | Planned | [B-177-T05](#b-177-t05), [B-177-T06](#b-177-t06) | — |
+| 🟢 Small | **Total** | 9.5 h | 0 h (0 of 7 steps recorded) | 1 h | 0 of 7 completed | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-177.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found by the owner 2026-11-26 (RSS on NERV-03 and NERV-01); Test: `test/config-timezone.test.ts` (B-177). Code: `src/config.ts` (`readConfig`, timezone check), `src/store.ts` (`tick`), `src/nervous-process.ts` (250 ms scheduler).; [#854](https://github.com/voidbrain/nerv/pull/854) |
+| Opened | 2026-11-26 |
+| Verification | Pending: Unit/integration (B-177 test, Linux container run above); live check on NERV-03 is B-177-T03. |
+| Reviewed | 2026-11-26 |
+| Impact | The nervous process on a Linux base holds hundreds of MB of freed ICU memory (593 MB on NERV-03 after 2.5 h); it blocks any host under about 1 GB. |
 
 </details>
 

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "parent": "B-177",
+  "dependsOn": [
+    "B-177-T03"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-177-T06",
+  "title": "Measure small-host settings: capped V8 heap and MALLOC_ARENA_MAX",
+  "goal": "A throwaway instance on NERV-03 compares RSS with and without the settings; the service definition adopts only what the measurement supports, for hosts under 2 GB",
+  "status": "planned",
+  "acceptance": [
+    "A throwaway instance on NERV-03 compares RSS with and without the settings; the service definition adopts only what the measurement supports, for hosts under 2 GB"
+  ],
+  "resources": [
+    "docs/work/records/B-177.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review",
+    "architecture-review"
+  ],
+  "validation": [
+    "npm test",
+    "numbers recorded in the record"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 2.0,
+    "estimateAgentHours": 2.0
+  }
+}
