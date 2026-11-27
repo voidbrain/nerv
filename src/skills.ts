@@ -3,11 +3,13 @@
  * Packages are staged privately under <home>/skills/packages/<id>/<version>/ and
  * never become active without explicit owner promotion.
  */
+import { createHash } from 'node:crypto';
 import {
   chmodSync,
   existsSync,
   lstatSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
   realpathSync,
   renameSync,
@@ -104,6 +106,8 @@ export interface SkillVersionRecord {
   promotedAt?: string;
   retiredAt?: string;
   parentVersion?: string;
+  /** B-181: sha-256 of every stored file of the version, recorded at staging; a version without one never applies. */
+  digest?: string;
   evaluations?: SkillEvaluationReport[];
 }
 
@@ -355,11 +359,45 @@ export function stageSkillPackage(home: string, rawPkg: SkillPackage): SkillVers
     status: 'staged',
     stagedAt: new Date().toISOString(),
     ...(parentVersion ? { parentVersion } : {}),
+    digest: storedDigest(dir),
   };
   entry.versions.push(record);
   registry.skills[id] = entry;
   writeRegistry(home, registry);
   return record;
+}
+
+/** B-181: sha-256 over every file under a stored version (relative path, length, bytes), in path order. */
+function storedDigest(dir: string): string {
+  const hash = createHash('sha256');
+  const walk = (rel: string): void => {
+    for (const name of readdirSync(join(dir, rel)).sort()) {
+      const path = rel ? `${rel}/${name}` : name;
+      const stat = lstatSync(join(dir, path));
+      if (stat.isDirectory()) walk(path);
+      else if (stat.isFile()) {
+        const body = readFileSync(join(dir, path));
+        hash.update(`${path}\0${body.length}\0`).update(body);
+      } else throw new Error(`Only files and folders are permitted in isolated skill storage: ${path}`);
+    }
+  };
+  walk('');
+  return `sha256:${hash.digest('hex')}`;
+}
+
+/** B-181: why a version's stored files are not the ones staged (and evaluated and promoted), or undefined when they are. */
+function storedFilesDrift(home: string, id: string, record: SkillVersionRecord): string | undefined {
+  if (!record.digest)
+    return 'it was staged before NERV recorded a digest of its files: stage it again as a new version.';
+  let now: string;
+  try {
+    now = storedDigest(versionDir(home, id, record.version));
+  } catch {
+    now = '';
+  }
+  return now === record.digest
+    ? undefined
+    : 'its stored files changed since it was staged: stage, evaluate and promote a new version.';
 }
 
 /** Loads and validates a stored skill package version from isolated storage. */
@@ -518,10 +556,11 @@ export function chooseActiveSkill(
   offered: readonly { name: string; effect: string }[],
 ): SkillChoice | undefined {
   const words = ` ${phraseWords(request)} `;
-  let best: { pkg: SkillPackage; length: number } | undefined;
+  let best: { pkg: SkillPackage; length: number; id: string; version: string; drift?: string } | undefined;
   for (const entry of listSkillPackages(home)) {
     const version = entry.activeVersion;
-    if (!version || entry.versions.find((v) => v.version === version)?.status !== 'active') continue;
+    const record = entry.versions.find((v) => v.version === version);
+    if (!version || record?.status !== 'active') continue;
     let pkg: SkillPackage;
     try {
       pkg = loadSkillVersion(home, entry.id, version);
@@ -532,14 +571,16 @@ export function chooseActiveSkill(
       0,
       ...(pkg.manifest.triggers ?? []).map(phraseWords).map((t) => (words.includes(` ${t} `) ? t.length : 0)),
     );
-    if (length > (best?.length ?? 0)) best = { pkg, length };
+    if (length > (best?.length ?? 0))
+      best = { pkg, length, id: entry.id, version, drift: storedFilesDrift(home, entry.id, record) };
   }
   if (!best) return undefined;
   const { manifest, instructions } = best.pkg;
   const tools = manifest.requiredCapabilities ?? [];
   const refuse = (reason: string): SkillChoice => ({
-    refused: { id: manifest.id, version: manifest.version, title: manifest.title, reason: reason.slice(0, 400) },
+    refused: { id: best.id, version: best.version, title: manifest.title, reason: reason.slice(0, 400) },
   });
+  if (best.drift) return refuse(best.drift);
   for (const tool of tools) {
     const doc = offered.find((t) => t.name === tool);
     if (!doc) return refuse(`it needs ${tool}, which is not granted or not enabled now.`);
@@ -576,6 +617,8 @@ export function activateSkillVersion(
   if (target.status === 'retired') {
     throw new Error(`Skill ${id}@${version} is retired and cannot be activated.`);
   }
+  const drift = storedFilesDrift(home, id, target);
+  if (drift) throw new Error(`Skill ${id}@${version} cannot be promoted: ${drift}`);
   if (options.requireEvaluation || options.model !== undefined) {
     const matching = (target.evaluations ?? []).find(
       (ev) =>
