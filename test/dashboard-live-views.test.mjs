@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseHTML } from 'linkedom';
 import { loadDashboard, touched } from './fixtures/live-view.mjs';
+import { Store } from '../src/store.ts';
 
 // B-145: the sections that rewrote the most DOM on every poll (EVA heartbeat status, the questions strip, the flow
 // and Misato's apartment) update only the values that changed, so Web Inspector keeps what the owner expanded.
@@ -155,6 +156,118 @@ test('B-145: the live questions strip (live.js) writes nothing when the state is
   const t2 = await touched(w, d.querySelector('#questions'), render);
   assert.deepEqual(t2.changed.map(id).sort(), ['qd-needs', 'qv-needs']);
   assert.equal(t2.replaced.length, 0);
+});
+
+// F-152: the base card shows phone push beside Telegram, for this base only (push is local to a base).
+const liveSource = readFileSync('web/public/dashboard/live.js', 'utf8');
+const dashSource = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
+const apiState = dashSource.slice(
+  dashSource.indexOf('function telegramApiState('),
+  dashSource.indexOf('function drawTelegram', dashSource.indexOf('function telegramApiState(')),
+);
+/** @type {(b: object) => string} */
+const cardLines = (b) =>
+  new Function(
+    'esc',
+    'baseName',
+    apiState +
+      liveSource.slice(
+        liveSource.indexOf('  /** F-152: the phone push line'),
+        liveSource.indexOf('  window.renderBases ='),
+      ) +
+      ';return channelLine;',
+  )(
+    run('esc'),
+    String,
+  )(b);
+const cardText = (/** @type {string} */ html) =>
+  parseHTML('<div>' + html + '</div>')
+    .document.toString()
+    .replace(/<[^>]+>/g, '\n');
+const at = '2030-01-02T09:00:00.000Z';
+
+test('F-152: the base card shows phone push devices, the last push and its open time', () => {
+  const html = cardLines({
+    self: true,
+    push: { devices: 2, last: { at, ok: true, status: 201, reason: null }, lastOpened: at },
+  });
+  const t = cardText(html);
+  assert.match(t, /Telegram · state not reported/, 'the Telegram lines stay');
+  assert.match(t, /Phone push · 2 devices/);
+  assert.match(t, /Last push accepted · /);
+  assert.match(t, /opened /);
+  assert.ok(html.includes(new Date(at).toLocaleString()), 'times read as local date and time');
+  assert.match(
+    cardText(
+      cardLines({
+        self: true,
+        push: { devices: 1, last: { at, ok: true, status: 201, reason: null }, lastOpened: null },
+      }),
+    ),
+    /1 device[\s\S]*not opened yet/,
+  );
+  const failed = cardLines({
+    self: true,
+    push: { devices: 1, last: { at, ok: false, status: 403, reason: 'BadJwtToken' }, lastOpened: null },
+  });
+  assert.match(cardText(failed), /Last push failed \(403 BadJwtToken\)/, 'a failure is said in words, not only colour');
+  assert.match(failed, /class='warn'/);
+  assert.match(
+    cardText(cardLines({ self: true, push: { devices: 1, last: null, lastOpened: null } })),
+    /1 device[\s\S]*No push sent yet/,
+  );
+  assert.match(
+    cardText(cardLines({ self: true, push: { devices: 0, last: null, lastOpened: null } })),
+    /Phone push · no device subscribed/,
+  );
+  assert.match(cardText(cardLines({ self: true })), /Phone push · state not reported/);
+  assert.doesNotMatch(
+    cardLines({ self: false, push: { devices: 2, last: null, lastOpened: null } }),
+    /Phone push/,
+    'another base: push is local',
+  );
+  assert.doesNotMatch(html, /\b[BF]-\d+/, 'no backlog IDs in the text');
+});
+
+test('F-152: the push line reads the same in the plain and Eva voices', () => {
+  const push = { devices: 1, last: { at, ok: true, status: 201, reason: null }, lastOpened: null };
+  const lines = [];
+  for (const theme of ['simple', 'eva']) {
+    run(`state.theme = ${JSON.stringify(theme)}`);
+    lines.push(cardLines({ self: true, push }));
+  }
+  run('state.theme = "eva"');
+  assert.equal(lines[0], lines[1]);
+  assert.doesNotMatch(lines[0], /Pen Pen|Kaji|Misato|EVA/, 'no Eva names in a line both voices share');
+});
+
+test('F-152: the store push status carries the last open time to the card', async () => {
+  const store = new Store(':memory:');
+  try {
+    store.pushFetch = /** @type {typeof fetch} */ (async () => new Response('', { status: 201 }));
+    store.savePushSubscription({
+      endpoint: 'https://push.example.test/device-a',
+      p256dh: 'BNeutralTestKey',
+      auth: 'neutral-auth',
+    });
+    assert.equal(store.pushHealth().lastOpened, null);
+    store.add('Water the plants', '2030-01-01T10:00:00Z');
+    store.tick(new Date('2030-01-01T10:01:00Z'));
+    const id = store.inboxPage(0, 5).items[0].id;
+    assert.ok(store.recordDelivery(id, 'push', 'opened'));
+    const health = store.pushHealth();
+    assert.match(String(health.lastOpened), /^\d{4}-\d\d-\d\dT/);
+    const t = cardText(cardLines({ self: true, push: health }));
+    assert.match(t, /Phone push · 1 device/);
+    assert.match(
+      t,
+      new RegExp(
+        'opened ' + new Date(String(health.lastOpened)).toLocaleString().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+      ),
+    );
+  } finally {
+    store.close();
+  }
 });
 
 // F-152 (owner decision, 2026-11-27): the model reload moves from Health into a collapsed Advanced section of Settings.
