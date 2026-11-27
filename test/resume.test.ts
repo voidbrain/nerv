@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Runtime, type ChatReply } from '../src/runtime.ts';
 import { Store } from '../src/store.ts';
+import { activateSkillVersion, stageSkillPackage } from '../src/skills.ts';
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 async function until(check: () => boolean, ms = 8000) {
   const end = Date.now() + ms;
@@ -288,6 +289,43 @@ test('B-069: after the owner rejects, the same action proposed again gets no sec
     assert.match(follow[0]!.reply ?? '', /you rejected reminders\.add; I will not ask again/);
     assert.equal((await r.approvals()).length, 0);
     assert.notEqual((await r.sorties())[0]!.closed, null);
+  } finally {
+    await t.close();
+  }
+});
+test('a resume after an answer and an approval keeps the skill of the original request (F-146-T03)', async () => {
+  const t = await setup([
+    '{"ask":"Di quale giorno?"}',
+    '{"action":{"tool":"reminders.list","args":{}}}',
+    '{"reply":"Domani non manca nulla."}',
+  ]);
+  try {
+    // An invented read-only skill; its read is Blue here so the sortie waits for the owner and resumes.
+    writeFileSync(join(t.home, 'scrolls.json'), JSON.stringify({ blue: ['reminders.list'] }), { mode: 0o600 });
+    stageSkillPackage(t.home, {
+      manifest: {
+        id: 'reminder-review',
+        version: '1.2.0',
+        title: 'Promemoria: cosa manca?',
+        domain: 'reminders',
+        description: 'Invented read-only skill for the resume test.',
+        requiredCapabilities: ['reminders.list'],
+        triggers: ['cosa manca nei promemoria'],
+        createdAt: '2026-11-27T00:00:00.000Z',
+      },
+      instructions: 'Leggi i promemoria con reminders.list e rispondi in una riga.\n',
+    });
+    activateSkillVersion(t.home, 'reminder-review', '1.2.0', { ownerApproved: true });
+    const { r, follow } = await t.start();
+    await r.chat('Cosa manca nei promemoria?', 'telegram:1');
+    const answered = await r.chat('domani', 'telegram:1');
+    assert.equal(answered.waiting.length, 1);
+    await r.decide(answered.waiting[0]!.approvalId, 'approve', 'telegram');
+    await until(() => follow.length === 1);
+    assert.match(
+      follow[0]!.reply ?? '',
+      /^Domani non manca nulla\.\n\nSkill: Promemoria: cosa manca\? \(reminder-review 1\.2\.0\)$/,
+    );
   } finally {
     await t.close();
   }

@@ -33,6 +33,7 @@ import { canRunRemotePilot, chooseAdvisers, rankPilots, type Chosen, type Pilot,
 import { TAINTED_ISOLATION, defaultPolicy, isolationRefusalReply } from './policy.ts';
 import type { ProcessClient } from './process-client.ts';
 import { reconcileReminderArgs } from './reminder-time.ts';
+import { chooseActiveSkill, type AppliedSkill } from './skills.ts';
 import { REFUSED_BEFORE_GATE, RpcFault, type Method } from './rpc.ts';
 import {
   guardActionDuplicates,
@@ -95,6 +96,8 @@ export class RuntimePlanning {
       answering?: boolean;
       watch?: WatchWork;
       askBoth?: boolean;
+      /** F-146-T03: the sortie's original request, which picks the skill when `message` is an answer or a resume. */
+      skillRequest?: string;
     },
   ): Promise<ChatReply> {
     const waiting: ChatReply['waiting'] = [];
@@ -131,12 +134,19 @@ export class RuntimePlanning {
         source: ('memory:' + m.id).slice(0, 100),
         trust: m.tainted ? 'tainted' : 'trusted',
       });
+    // F-146-T03: the active skill this request follows, set before the first planning step.
+    let skill: AppliedSkill | undefined;
     const finish = async (
       status: 'done' | 'failed',
       reply?: string,
       error?: string,
       durationMs?: number,
     ): Promise<ChatReply> => {
+      // The service names the skill and version under the planner's reply; the model never writes this line.
+      if (skill && status === 'done' && reply && !waiting.length) {
+        const line = `Skill: ${skill.title} (${skill.id} ${skill.version})`;
+        reply = `${reply.slice(0, MAX_REPLY_CHARS - line.length - 2)}\n\n${line}`;
+      }
       // B-094: a worker can answer a kaji.run while Misato is still writing; her reply then carries that result.
       if (reply && !waiting.length && steps.some((s) => s.tool === 'kaji.run' && s.outcome === 'grant' && !s.error))
         reply = withRemoteResults(
@@ -337,10 +347,33 @@ export class RuntimePlanning {
       void this.host.proposePilot(unmatched).catch(() => {
         /* best effort */
       });
+    // F-146-T03: an owner-promoted skill whose trigger the request contains (an answer or a resume is matched on the
+    // sortie's original request, and records the skill again); chat only, never a watch. Its tools must be offered now
+    // and be reads, else it is refused.
+    if (!proactive && this.host.home) {
+      const home = this.host.home;
+      const ext = await this.host.externalTools();
+      const offeredNow = [
+        ...builtinPackRegistry.filterToolDocs(toolDocs, readConfig(home).packs),
+        ...ext.docs.filter((t) => ext.byName.get(t.name)?.eva !== '03'),
+      ];
+      const choice = (() => {
+        try {
+          return chooseActiveSkill(home, followup?.skillRequest || message, offeredNow);
+        } catch {
+          return undefined; // An unreadable skills store never blocks chat: the request is planned without a skill.
+        }
+      })();
+      if (choice && 'applied' in choice) {
+        skill = choice.applied;
+        const { id, version, title, tools } = skill;
+        await this.host.note(sortieId, 'skill.applied', { id, version, title, tools });
+      } else if (choice) await this.host.note(sortieId, 'skill.refused', choice.refused);
+    }
     // F-113-T02: reading a subject's tool docs costs no action step, up to MAX_FREE_SUBJECT_READS per request.
     for (let turn = 0; turn < MAX_STEPS + freeReadTurns(steps); turn++) {
       if (proactive && !(await this.host.nervous.call('watch.plan', { sortieId }).catch(() => false))) break;
-      const remote = proactive?.readOnly ? [] : await this.host.remoteOffers();
+      const remote = proactive?.readOnly || skill ? [] : await this.host.remoteOffers();
       const ext = proactive?.readOnly
         ? { docs: [], byName: new Map(), suspended: [] }
         : await this.host.externalTools();
@@ -361,6 +394,7 @@ export class RuntimePlanning {
             ...(ext.docs.length ? { external: ext.docs } : {}),
             ...(advice ? { advice } : {}),
             language: lang(),
+            ...(skill ? { skill } : {}),
             ...(context.length ? { context } : {}),
             ...(memory.length ? { memory: memory.slice(0, 10) } : {}),
             ...(matchedReminders.length ? { reminders: matchedReminders } : {}),
@@ -456,6 +490,7 @@ export class RuntimePlanning {
             const ext = await this.host.externalTools();
             return [...builtinPackRegistry.filterToolDocs(toolDocs, packs), ...ext.docs]
               .filter((t) => ext.byName.get(t.name)?.eva !== '03')
+              .filter((t) => !skill || skill.tools.includes(t.name))
               .map((t) => ({
                 name: t.name,
                 effect: t.effect,
@@ -562,6 +597,22 @@ export class RuntimePlanning {
             briefAt: cfg?.brief?.at ?? '08:00',
           })
         : out.plan.action.args;
+      // F-146-T03: a tool outside the applied skill's list goes back to Misato, before the gate sees it.
+      if (skill && !skill.tools.includes(tool)) {
+        await this.host.record(
+          sortieId,
+          steps,
+          {
+            tool,
+            args,
+            outcome: 'invalid',
+            error: `This request follows the skill "${skill.title}": it may use only ${skill.tools.join(', ') || 'no tools'}.`,
+          },
+          undefined,
+          stepDurationMs,
+        );
+        continue;
+      }
       // A tool Misato was not offered (often a misspelling) has no executor: it goes back to Misato, never to the owner as a card.
       // kaji.run (F-036 slice 3b): only to a base online now, for an action it offers; anything else goes back to Misato.
       if (tool === 'kaji.run') {
