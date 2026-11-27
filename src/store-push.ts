@@ -214,11 +214,23 @@ export class StorePush {
       .run('last', new Date().toISOString(), ok ? 1 : 0, status, reason ?? null);
   }
 
-  status(): { devices: number; last: { at: string; ok: boolean; status: number; reason: string | null } | null } {
+  /** F-152: `lastOpened` is when the owner last opened a push on the phone (its receipt came back). */
+  status(): {
+    devices: number;
+    last: { at: string; ok: boolean; status: number; reason: string | null } | null;
+    lastOpened: string | null;
+  } {
     const devices = (this.host.db.prepare('SELECT count(*) AS n FROM push_subscriptions').get() as { n: number }).n;
     const row = this.host.db.prepare('SELECT at, ok, status, reason FROM push_last_result WHERE id=?').get('last') as
       { at: string; ok: number; status: number; reason: string | null } | undefined;
-    return { devices, last: row ? { at: row.at, ok: row.ok === 1, status: row.status, reason: row.reason } : null };
+    const opened = this.host.db
+      .prepare("SELECT max(opened_at) AS at FROM delivery_channels WHERE channel='push'")
+      .get() as { at: string | null };
+    return {
+      devices,
+      last: row ? { at: row.at, ok: row.ok === 1, status: row.status, reason: row.reason } : null,
+      lastOpened: opened.at,
+    };
   }
 }
 
