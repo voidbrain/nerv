@@ -4,11 +4,12 @@
   "parent": "F-147",
   "title": "Read-only MCP connection to the live index and its surface card",
   "goal": "The index's answers show in NERV as a bricks surface card, read-only, with Italian labels in chat",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Failing test first, across the API and the component, on an invented fake index server: a \"waiting on me\" answer renders the bricks surface card with each row's source link, the snapshot time and a link to the index screen; a tool that writes is refused at registration; an unreachable index is reported, not shown as no work",
     "The index registers through the remote MCP path of F-123-T01 with every tool Green; the tool names and shapes follow the contract row coordinator:F-024-T04 writes in the coordinator's docs/SOLUTION.md; NERV stores none of the index's data",
-    "Chat labels in Italian (for example \"In attesa di te\", \"Bloccato da\", \"Indice live\"); an Italian Gauntlet case for the chat request, or a recorded skip with its reason"
+    "Chat labels in Italian (for example \"In attesa di te\", \"Bloccato da\", \"Indice live\"); an Italian Gauntlet case for the chat request, or a recorded skip with its reason",
+    "2026-11-27, as built: bricks surface cards are not consumed yet (F-130-T19 is planned), so the card is a full-dashboard panel on web/src/ui.ts, which F-130-T19 moves to bricks with the other sections; it reads waiting_on_me and blocked_by through read grants of the server registered as `coordinator`, structuredContent only (tools process carries it up to 32 KB), every 5 minutes and on Refresh, without the ledger (a display read, like doctor's listing). Chat: no NERV wording changed; a granted record_lookup, waiting_on_me or blocked_by answers in chat like any MCP read, so the Italian Gauntlet case is skipped (no model-facing code changed); in chat Misato sees the text cut at 8000 characters, so a full waiting_on_me (about 17 KB) reaches her partly: the owner's check F-147-T02 shows whether that needs a record"
   ],
   "dependsOn": [
     "coordinator:F-024-T04"

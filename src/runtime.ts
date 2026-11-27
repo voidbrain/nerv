@@ -49,7 +49,8 @@ import type {
   SubdomainSortie,
   RegisteredPilot,
 } from './pilots.ts';
-import { callModelWithUsage, loadExternalTools, mcpServerHealth } from './runtime-tools.ts';
+import { callModelWithUsage, loadExternalTools, mcpServerHealth, readLiveIndex } from './runtime-tools.ts';
+import type { LiveIndexView } from './live-index.ts';
 import {
   remoteOutcomeText,
   type ActReply,
@@ -626,6 +627,10 @@ export class Runtime implements StoreApi {
         30_000,
       );
     return this.toolsClient;
+  }
+  /** F-147: the coordinator's live index for the dashboard card, through the read grants and the tools process. */
+  liveIndex(): Promise<LiveIndexView> {
+    return readLiveIndex({ home: this.home, toolsProcess: () => this.toolsProcess() });
   }
   private externalCache?: { at: number; value: ExternalTools };
   /**

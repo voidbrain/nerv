@@ -3662,9 +3662,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h agent + 0.25 h owner | `coordinator:F-024-T04`, `coordinator:F-024-T07` | [F-149-T01](#f-149-t01), [F-150-T01](#f-150-t01) | ⏳ | — | — |
+| 🔴 Open | 🔹 P3 | 🟢 Small | 1 h agent + 0.25 h owner | `coordinator:F-024-T04`, `coordinator:F-024-T07` | [F-149-T01](#f-149-t01), [F-150-T01](#f-150-t01) | 🤖 | — | — |
 
-💻 **→** Next: F-147-T01 — Read-only MCP connection to the live index and its surface card (Planned).
+💻 **→** Next: F-147-T01 — Read-only MCP connection to the live index and its surface card (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -3676,7 +3676,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="f-147-t01"></a>F-147-T01 — Read-only MCP connection to the live index and its surface card | 1 h | 0 h | 1 h | Planned | `coordinator:F-024-T04` | [F-147-T02](#f-147-t02), [F-149-T01](#f-149-t01), [F-150-T01](#f-150-t01) | ⏳ 🤖 | [PR #835](https://github.com/voidbrain/nerv/pull/835) |
+| 🟢 Small | <a id="f-147-t01"></a>F-147-T01 — Read-only MCP connection to the live index and its surface card | 1 h | 0 h | 1 h | Implemented; verification pending | `coordinator:F-024-T04` | [F-147-T02](#f-147-t02), [F-149-T01](#f-149-t01), [F-150-T01](#f-150-t01) | 🤖 | [PR #835](https://github.com/voidbrain/nerv/pull/835) |
 | 🟢 Small | <a id="f-147-t02"></a>F-147-T02 — Owner: ask NERV for the live index in chat | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-147-T01](#f-147-t01), `coordinator:F-024-T07` | — | ⏳ 🧑‍🔧 | [PR #835](https://github.com/voidbrain/nerv/pull/835) |
 | 🟢 Small | **Total** | 1 h | 0 h (0 of 2 steps recorded) | 1 h agent + 0.25 h owner | 0 of 2 completed | | | | |
 
@@ -3687,7 +3687,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-147-T01: [PR #835](https://github.com/voidbrain/nerv/pull/835) · F-147-T02: [PR #835](https://github.com/voidbrain/nerv/pull/835). [proposal](https://github.com/voidbrain/coordinator/blob/main/docs/proposals/live-index-nerv-card.md); [decision page](https://github.com/voidbrain/coordinator/blob/main/docs/decisions/live-index.md); owner decisions 2026-11-26 in chat ("2", "coordinator", "1 2 ok"); [#835](https://github.com/voidbrain/nerv/pull/835) |
+| PR / evidence | Steps: F-147-T01: [PR #835](https://github.com/voidbrain/nerv/pull/835) · F-147-T02: [PR #835](https://github.com/voidbrain/nerv/pull/835). [proposal](https://github.com/voidbrain/coordinator/blob/main/docs/proposals/live-index-nerv-card.md); [decision page](https://github.com/voidbrain/coordinator/blob/main/docs/decisions/live-index.md); owner decisions 2026-11-26 in chat ("2", "coordinator", "1 2 ok"); [#835](https://github.com/voidbrain/nerv/pull/835); [#875](https://github.com/voidbrain/nerv/pull/875) |
 | Opened | 2026-11-26 |
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
