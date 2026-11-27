@@ -8,6 +8,7 @@
   "acceptance": [
     "A failing-first join test loads the dashboard Mark as read handler and exercises the authenticated inbox read endpoint and Telegram fallback",
     "Every delivered reminder covered by the visit cursor is posted to /api/inbox/<id>/read; deliveries outside the panel remain unread",
+    "A brief displayed in the panel is posted to /api/inbox/<id>/read",
     "The dashboard visit cursor is stored only after all service reads succeed"
   ],
   "dependsOn": [],

@@ -425,6 +425,37 @@ test('B-180 join: Mark as read updates every covered delivery so Telegram skips 
   }
 });
 
+test('B-180 join: Mark as read includes the displayed brief', async () => {
+  const t = await setup({ fallbackMs: 1500 });
+  const origin = `http://127.0.0.1:${(t.server.address() as { port: number }).port}`;
+  const api = async (path: string, init: RequestInit = {}) => {
+    const response = await fetch(origin + '/api/' + path, {
+      ...init,
+      headers: { Authorization: 'Bearer ' + 's'.repeat(32), ...init.headers },
+    });
+    const body: unknown = await response.json();
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return body;
+  };
+  try {
+    const brief = t.store.addBrief('A neutral brief shown in the dashboard panel.');
+    const since = Date.now();
+    const history = (await api(
+      'dashboard/history?since=' + encodeURIComponent(new Date(since).toISOString()),
+    )) as { brief: { id: string; created: string; read_at: string | null } };
+    assert.equal(history.brief.id, brief.id, 'the service supplies the brief shown in the panel');
+    const state = { lastVisit: since, deliveredCount: 0, deliveredSince: since, brief: history.brief };
+    await dashboardSeen(state, api, { getItem: () => String(since), setItem: () => {} })();
+
+    const row = t.store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(brief.id) as {
+      read_at: string | null;
+    };
+    assert.ok(row.read_at, 'the displayed brief is marked read on the service');
+  } finally {
+    await t.close();
+  }
+});
+
 test('B-149 review: marking an inbox item read needs sign-in', async () => {
   const store = new Store(':memory:');
   const server = makeServer(store, 's'.repeat(32));
