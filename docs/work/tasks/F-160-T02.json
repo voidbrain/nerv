@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "F-160-T02",
+  "parent": "F-160",
+  "title": "The plain graph on the Work across projects card",
+  "goal": "The card shows the dependency graph in swimlanes with the critical path and slack; a node opens its record",
+  "status": "planned",
+  "acceptance": [
+    "The card has a Graph view beside the existing list, with a switch for lanes by who acts or per repository; critical path and slack as the component draws them; a node click opens a panel with the record or step, its estimate and recorded actual hours, and the source link at its commit",
+    "Labels in both voices and both languages the card already has; tokens only; narrow width shows the text list",
+    "Browser test across the API and the built card with a fake index: both lane switches, node click and source link, the unreachable state, phone width, axe",
+    "The plain look is the default in Simple and in Eva until T04"
+  ],
+  "dependsOn": [
+    "F-160-T01",
+    "bricks:F-017-T05"
+  ],
+  "resources": [
+    "web/src/**",
+    "test/**",
+    "docs/STYLE-GUIDE.md",
+    "docs/work/records/F-160.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "angular",
+    "accessibility"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2.5 h agent",
+    "basis": "One card section that places bx-work-graph on data the API already serves; read docs/STYLE-GUIDE.md and docs/agents/angular.md first. Estimated 2026-11-27. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 2.5,
+    "baselineAgentHours": 2.5,
+    "estimateAgentHours": 2.5
+  },
+  "prs": [
+    {
+      "pr": 886,
+      "note": "plan"
+    }
+  ]
+}
