@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fingerprint, validateTools } from '../src/mcp.ts';
 import { builtinPackRegistry } from '../src/packs.ts';
-import { listModules, setModuleOn } from '../src/modules.ts';
+import { listModules, offersOn, setModuleOn } from '../src/modules.ts';
 import { readConfig, type Config } from '../src/config.ts';
 import { ProcessClient } from '../src/process-client.ts';
 import { readLiveIndex } from '../src/runtime-tools.ts';
@@ -194,6 +194,11 @@ test(
         /grover · .* · off, not asked: nerv modules on grover · 1 grant\(s\) kept/,
       );
       assert.equal(hub.requests(), before, 'an off server is not contacted by either listing');
+      assert.match(
+        (await cli('tools', 'grant', 'grover/hub_overview')).stderr,
+        /grover is off: nerv modules on grover/,
+      );
+      assert.equal(hub.requests(), before, 'granting does not contact an off server either');
       assert.match((await cli('modules', 'on', 'grover')).stdout, /Grover is on/);
       assert.match((await cli('modules', 'off', 'garden')).stderr, /No module garden/);
       assert.match((await cli('modules', 'pause', 'grover')).stderr, /Usage: modules/);
@@ -253,7 +258,11 @@ test(
       assert.equal((await cli('modules', 'off', 'grover')).status, 0);
       const before = hub.requests();
       assert.deepEqual(await offered(), []);
-      assert.deepEqual((await r.externalTools(true)).suspended, [], 'off is not reported as suspended');
+      assert.deepEqual(
+        (await r.externalTools(true)).suspended,
+        [{ name: 'grover.hub_overview', why: 'its module is off: nerv modules on grover' }],
+        'off says why, so an approval or another base is told how to turn it on',
+      );
       const asked = m.misato.length;
       const off = await r.chat('quali piante ho?');
       assert.deepEqual(off.steps, []);
@@ -384,4 +393,19 @@ test('F-159-T03: GET /api/modules lists them; PUT /api/modules/NAME switches one
     });
     store.close();
   }
+});
+
+test('F-159-T02: another base is not offered an off module tool, a server tool or a pack tool', () => {
+  const config = {
+    packs: { fpv: false },
+    kaji: { offers: ['reminders.add', 'grover.hub_overview', 'batteries.list', 'files.read'] },
+    tools: {
+      mcp: [
+        { id: 'grover', url: 'https://hub.example.ts.net/mcp', off: true },
+        { id: 'files', command: 'node', args: [] },
+      ],
+      grants: [],
+    },
+  } as unknown as Config;
+  assert.deepEqual(offersOn(config), ['reminders.add', 'files.read']);
 });

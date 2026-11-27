@@ -1,7 +1,7 @@
 // @ts-check
 // F-159-T03: the Modules panel end to end in Chrome (run `npm run build` first). A stand-in plant hub (grover) and a
 // stand-in live index (coordinator), both streamable-HTTP MCP servers on loopback, granted in config.json and read by
-// the real tools process through the Runtime that serves the dashboard. Switching a module in Settings writes
+// the real tools process through the Runtime that serves the dashboard. Switching a module in the Modules panel writes
 // config.json, changes what Misato is offered, hides the module's cards and stops their calls; on restores it with no
 // new grant. Both voices, Italian, axe, phone width. Neutral invented data.
 import { test } from 'node:test';
