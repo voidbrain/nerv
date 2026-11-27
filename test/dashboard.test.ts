@@ -2105,3 +2105,23 @@ test('B-112: conditional routes on the full map are drawn dashed and dimmed', ()
   const html = readFileSync('web/public/dashboard/index.html', 'utf8');
   assert.match(html, /\.sephirot svg\.edges > path\.cond \{[^}]*stroke-dasharray[^}]*opacity/);
 });
+
+test('the action trace names the EVA class the ballot chose, not always EVA-02', () => {
+  const store = new Store(':memory:');
+  try {
+    const s = store.ledger.openSortie('misato', 'Read a note', 'trusted');
+    const p = store.ledger.propose(s, { tool: 'notes.read', args: { path: 'a', limit: 1 }, stage: 'prototype' });
+    assert.equal(p.ballot.executor, 'eva-00');
+    store.ledger.finished(s, p.actionId, 'notes.read', { result: { ok: true } });
+    const done = store.ledger.events(s).find((e) => e.kind === 'action.done');
+    assert.equal((done?.payload as { executor?: string }).executor, 'eva-00');
+  } finally {
+    store.close();
+  }
+  const live = readFileSync('web/public/dashboard/live.js', 'utf8');
+  assert.doesNotMatch(live, /"EVA-02: "/);
+  const evaOf = new Function(`${/const evaOf = [^\n]*/.exec(live)![0]}\nreturn evaOf;`)() as (p: unknown) => string;
+  assert.equal(evaOf({ executor: 'eva-00' }), 'EVA-00');
+  assert.equal(evaOf({ evaInstance: { evaClass: 'eva-01' } }), 'EVA-01');
+  assert.equal(evaOf({}), 'EVA-02');
+});
