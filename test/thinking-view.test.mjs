@@ -79,7 +79,7 @@ test('F-148-T04: a thinking consultant shows in the Pilots panel and on its sort
 test('F-148-T04: one client timer runs only while something thinks, with no request per tick', () => {
   const { run } = loadDashboard(NOW);
   run(
-    'var started = 0, stopped = 0; setInterval = () => { started++; return 1; }; clearInterval = () => { stopped++; };',
+    'var started = 0, stopped = 0; setInterval = (fn) => (fn === thinkingTick ? (started++, "thinking") : 1); clearInterval = (id) => { if (id === "thinking") stopped++; };',
   );
   run('state.thinking = ' + JSON.stringify([consultant]) + '; renderAll(); renderAll()');
   assert.equal(run('started'), 1, 'one timer, however often the page renders');

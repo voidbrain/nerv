@@ -109,7 +109,9 @@
     if (polling || !token) return; polling = true;
     const historySince = state.lastVisit;
     try {
-      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy, evaData, healthMetrics, scheduleSettings, updaterStatus] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null), api("eva/instances").catch(() => null), api("health/metrics").catch(() => null), api("settings/schedule").catch(() => null), api("update/status").catch(() => null)]);
+      const [latest20, cards, doctor, history, facts, episodes, kajiBases, pilots, update, queueData, updatePolicy, evaData, healthMetrics, scheduleSettings, updaterStatus, thinking] = await Promise.all([api("sorties?limit=20"), api("approvals?limit=20"), api("doctor"), api("dashboard/history?since=" + encodeURIComponent(new Date(historySince).toISOString())), api("memory"), api("memory/episodes"), api("bases").catch(() => []), api("pilots").catch(() => null), api("update").catch(() => null), api("queue").catch(() => null), api("update/policy").catch(() => null), api("eva/instances").catch(() => null), api("health/metrics").catch(() => null), api("settings/schedule").catch(() => null), api("update/status").catch(() => null), api("thinking").catch(() => null)]);
+      // F-148: who is thinking now; re-read on each feed refresh, the elapsed time is counted by renderThinking.
+      state.thinking = thinking && Array.isArray(thinking.thinking) ? thinking.thinking : [];
       state.evaMachines = evaData && Array.isArray(evaData.machines) ? evaData.machines : null;
       state.healthMetrics = healthMetrics || null;
       state.scheduleSettings = scheduleSettings || null;
@@ -1073,10 +1075,13 @@
     };
     const stageOf = p => p.retired ? "retired" : p.stage; const counts = {}; roster.forEach(p => { counts[stageOf(p)] = (counts[stageOf(p)] || 0) + 1; });
     const tab = currentTab("pilots", "prototype"); const shown = roster.filter(p => stageOf(p) === tab);
+    // F-148: a pilot that is thinking now says so in words (its details and time are in the strip above the cards).
+    const names = roster.map(p => p.name);
+    const thinkingBadge = name => thinkingFor(name, names).length ? "<span class='badge b-info'>THINKING</span>" : "";
     const gridHtml = shown.length
-      ? "<div class='pilot-grid'>" + shown.map(p => card(p.name, p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "), specialistControl(p))).join("") + "</div>"
+      ? "<div class='pilot-grid'>" + shown.map(p => card(p.name, p.domain + " · " + p.model + (p.pinned ? " · pinned" : ""), thinkingBadge(p.name) + "<span class='badge " + (p.retired ? "b-muted" : badge[p.stage]) + "'>" + (p.retired ? "RETIRED" : short[p.stage]) + "</span>", "keywords: " + p.keywords.join(", "), specialistControl(p))).join("") + "</div>"
       : "";
-    box.innerHTML = card("Generic pilot", "anything no specialist covers · " + (generic || "off"), "<span class='badge b-muted'>GENERIC</span>", "", modelControl("generic", generic, true)) +
+    box.innerHTML = card("Generic pilot", "anything no specialist covers · " + (generic || "off"), thinkingBadge(null) + "<span class='badge b-muted'>GENERIC</span>", "", modelControl("generic", generic, true)) +
       stageTabs("pilots", [["prototype","Proto"],["test","Test"],["production","Prod"],["retired","Retired"]], counts) +
       gridHtml +
       (roster.length ? (shown.length ? "" : "<div class='muted small'>No pilot at this stage.</div>") : "<div class='muted small'>No specialists yet. Add one: nerv pilots add ID --name … --domain … --keywords … --model …, or approve a proposal from the Marduk Institute.</div>");
