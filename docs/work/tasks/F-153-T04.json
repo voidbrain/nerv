@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-153-T04",
+  "parent": "F-153",
+  "title": "The skill applies at run time for its trigger phrases",
+  "goal": "Asking NERV \"controlla se è richiesta un'altra dose\" uses the active grover-dose skill",
+  "status": "planned",
+  "acceptance": [
+    "Owner 2026-11-27 in chat: \"ok\" to starting the first real skills, a Grover check for \"controlla se è richiesta un'altra dose\"; read-only.",
+    "Waits on F-146-T03 (the run-time consumer: nothing in NERV applies a skill today). Once it lands, grover-dose gets its trigger phrases in the form F-146-T03 defines (Italian: \"controlla se è richiesta un'altra dose\", \"serve una dose\", \"serve un'altra dose\"; English: \"needs another dose\", \"need a dose\") in a new package version, re-evaluated",
+    "A test across the planner and the skill store (fake model): an active grover-dose puts its instructions in the prompt for an Italian and an English trigger, and a staged or retired one does not; the tool calls it leads to are only the three granted reads"
+  ],
+  "dependsOn": [
+    "F-146-T03",
+    "F-153-T03"
+  ],
+  "resources": [
+    "skills/**",
+    "test/**",
+    "docs/work/records/F-153.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Invented tent, pot and readings only in Git and tests; the owner's real Grover data stays on the owner's machines.",
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A skill that could start a feed or any other effect is out of scope and goes to the owner as a separate decision"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-27: a manifest change and a join test on F-146-T03's matcher. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}

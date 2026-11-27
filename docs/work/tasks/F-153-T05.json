@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-153-T05",
+  "parent": "F-153",
+  "title": "Owner: grant the reads, stage the skill, try it on the real tent, promote or retire",
+  "goal": "The owner sees the answer for a real pot and decides",
+  "status": "planned",
+  "acceptance": [
+    "Owner 2026-11-27 in chat: \"ok\" to starting the first real skills, a Grover check for \"controlla se è richiesta un'altra dose\"; read-only.",
+    "A copy-paste page (docs/acceptance/f153-grover-dose-<date>.md, by the agent) on NERV-01: (1) nerv tools grant grover/grover_overview, grover/grover_readings and grover/grover_feed_preview, each printing \"granted as a read (Pattern Green), EVA-00\"; (2) nerv skills stage <checkout>/skills/grover-dose.json prints status staged; (3) nerv chat \"controlla se è richiesta un'altra dose al vaso <n>\" and the English request, read against Grover's dashboard; (4) nerv skills promote grover-dose <version> --owner-approved only if satisfied, else nerv skills retire",
+    "The owner's decision and any wrong verdict (a B- record) are recorded in F-153"
+  ],
+  "dependsOn": [
+    "F-153-T03",
+    "F-153-T04"
+  ],
+  "resources": [
+    "docs/acceptance/**",
+    "docs/work/records/F-153.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Invented tent, pot and readings only in Git and tests; the owner's real Grover data stays on the owner's machines.",
+  "validation": [
+    "Owner check, recorded in F-153 Verification"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A skill that could start a feed or any other effect is out of scope and goes to the owner as a separate decision"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-27: one short procedure on the live service. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}

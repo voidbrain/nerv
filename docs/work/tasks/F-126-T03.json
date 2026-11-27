@@ -7,10 +7,14 @@
   "status": "planned",
   "acceptance": [
     "The owner's decision (switch or keep, and why) is recorded with the date",
-    "2026-11-26 in chat, before the quality evidence: \"gemma4:26b your main model\"; the owner switched NERV-01's live roles (Misato, Casper, Consultant) to gemma4:26b the same day. The evidence of 2026-11-27 (docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md) shows gemma4:12b as good or better on the planner (18/36 against 17/36), embedded (3/4 against 2/4) and cad-3d; the owner confirms the switch or goes back to gemma4:12b"
+    "2026-11-26 in chat, before the quality evidence: \"gemma4:26b your main model\"; the owner switched NERV-01's live roles (Misato, Casper, Consultant) to gemma4:26b the same day. The evidence of 2026-11-27 (docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md) shows gemma4:12b as good or better on the planner (18/36 against 17/36), embedded (3/4 against 2/4) and cad-3d; the owner confirms the switch or goes back to gemma4:12b",
+    "Owner 2026-11-27 in chat: first \"ok\" (about 10:00) to going back to gemma4:12b, then (about 10:10) \"Keep 26b, test more\": gemma4:26b stays the main model on NERV-01 (no switch back), and the owner wants more evidence before the final choice: F-126-T05, F-126-T06 (26b with a larger reply cap and without thinking) and F-126-T07 (gauntlet all on gemma4:12b for comparison). This step closes when the owner confirms or changes the choice on that evidence"
   ],
   "dependsOn": [
-    "F-126-T02"
+    "F-126-T02",
+    "F-126-T05",
+    "F-126-T06",
+    "F-126-T07"
   ],
   "resources": [
     "docs/work/records/F-126.md",
