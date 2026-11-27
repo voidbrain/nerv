@@ -4,7 +4,7 @@
   "parent": "F-146",
   "title": "Apply an active skill when a request matches (runtime consumer)",
   "goal": "A promoted skill changes how NERV answers a matching request; a staged or retired one never does",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
     "Found on 2026-11-26 while planning: nothing in NERV applies a skill at run time today (src/skills.ts is only read by the nerv skills commands; pilots carry skill ids but no code reads the instructions). A failing test (committed first) shows an active skill's instructions reaching the planner prompt for a matching request and nothing for a staged, retired or rolled-back one",
