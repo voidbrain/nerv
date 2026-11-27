@@ -10,16 +10,16 @@
   "dependsOn": [
     "B-175-T05"
   ],
-  "title": "Stage 2: the owner sets the opt-in (nerv tools grant, Tools panel shows it) and the guide explains the risk",
-  "goal": "The owner can turn the opt-in on and off per granted read tool and sees which grants have it",
+  "title": "Stage 2: the owner sets the opt-in with nerv tools grant, and the Tools panel shows it",
+  "goal": "The owner can turn the opt-in on and off per granted read tool without editing config.json, and sees which grants have it",
   "status": "planned",
   "acceptance": [
-    "nerv tools grant takes the opt-in; the dashboard Tools panel marks opted-in grants; the guide names the leftover risk (data placed in a read call's arguments)"
+    "nerv tools grant takes the opt-in (read grants only); nerv tools and the dashboard Tools panel mark opted-in grants"
   ],
   "resources": [
     "src/cli-commands.ts",
     "web/public/dashboard/live.js",
-    "docs/guides",
+    "docs/guides/memory-and-chat.md",
     "docs/work/records/B-175.md",
     "generated:backlog-views"
   ],
@@ -33,11 +33,11 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-26: one CLI flag, one panel marker, one guide section. Not a measurement.",
+    "estimate": "1 h",
+    "basis": "Re-estimated 2026-11-26: the guide moved to B-175-T05; one CLI flag and one panel marker remain. Not a measurement.",
     "reviewed": "2026-11-26",
     "agentHours": 0,
-    "baselineAgentHours": 1.5,
-    "estimateAgentHours": 1.5
+    "baselineAgentHours": 1.0,
+    "estimateAgentHours": 1.0
   }
 }
