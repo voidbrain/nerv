@@ -69,8 +69,12 @@ test('the tools config: reserved server ids refused, grants only for known serve
     'https://ts.net/mcp',
     'https://hub.ts.net.example.test/mcp',
     'https://hubts.net/mcp',
+    'https://.ts.net/mcp',
+    'https://hub.tailx.ts.net./mcp',
   ])
-    assert.throws(() => urlOptIn(url), /only for a server on this machine or on your tailnet/, url);
+    assert.throws(() => urlOptIn(url), /only for a command server or a url server on your tailnet/, url);
+  // A tailnet name as user info is refused before the grant check (the host is evil.example.test).
+  assert.throws(() => urlOptIn('https://hub.tailx.ts.net@evil.example.test/mcp'), /no user name or password/);
   assert.throws(() => optIn('read', 'yes'), /allowTainted is true or absent/);
   assert.throws(() => optIn('read', false), /allowTainted is true or absent/);
   assert.match(
