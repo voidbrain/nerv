@@ -695,3 +695,7 @@ PRs #825, #824, #826, #827, #828, #829, #830, #832, #831, #833 merged on green C
 ## 2026-11-26 — main `40615c4`
 
 PRs #835, #834, #836 and #837 merged on green CI (#835, #836, #837 docs-only: F-147, B-169, F-123 closed; #834 all five jobs after one Windows B-076 rerun, B-168 closed after fresh-context review). Closed F-125 (#820–#828 green) and reconciled harness v10.24.3.
+
+## 2026-11-27 — main `b02b82b`
+
+PRs #838–#861 (24) merged on green CI; #854 and #856 after one Windows B-076 failure each. Closed B-171; 23 steps closed on green CI. B-175-T04 step 2 failed: B-175-T08. Owner checks open: B-170-T06, B-172-T03, B-176-T04, B-177-T03, F-006-T35.

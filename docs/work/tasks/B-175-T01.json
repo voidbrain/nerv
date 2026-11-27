@@ -10,7 +10,7 @@
   "id": "B-175-T01",
   "title": "Failing test: a granted MCP read after a tool result runs or tells the owner what to do",
   "goal": "The B-175 test in test/provenance.test.ts fails on main and is committed as todo",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The B-175 test in test/provenance.test.ts fails on main and is committed as todo"
   ],
@@ -30,11 +30,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
-    "reviewed": "2026-11-26",
-    "agentHours": 0.5,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement. Closed 2026-11-27: #849 merged on green CI (run 45901512939).",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 849,
+      "note": "merged on green CI"
+    }
+  ]
 }

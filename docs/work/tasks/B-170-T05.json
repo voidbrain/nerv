@@ -11,7 +11,7 @@
   "id": "B-170-T05",
   "title": "Procedure retest steps and area notes",
   "goal": "The F-004-T10 procedure has copy-paste retest steps; area notes name the page report and device-bound subscriptions",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "The F-004-T10 procedure has copy-paste retest steps; area notes name the page report and device-bound subscriptions"
   ],
@@ -30,11 +30,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
-    "reviewed": "2026-11-26",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement. Closed 2026-11-27: #840 merged on green CI (run 45898322877).",
+    "reviewed": "2026-11-27",
     "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 840,
+      "note": "merged on green CI"
+    }
+  ]
 }

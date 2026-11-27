@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "parent": "B-175",
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "Security semantics of tainted context need explicit owner approval"
+  ],
+  "id": "B-175-T08",
+  "dependsOn": [],
+  "title": "Find why a dashboard follow-up carried no earlier exchange (B-175-T04 step 2, S-6AAF)",
+  "goal": "A follow-up question in the same dashboard conversation within 30 minutes gets the earlier exchange as context (and its taint), as it does in tests",
+  "status": "planned",
+  "acceptance": [
+    "The cause is named from NERV-01 read-only evidence: the misato.request payloads (conversation, created) of S-DFCA and S-6AAF, and what misato.context returned or threw",
+    "A test reproducing that cause is committed failing first, then the fix; the B-175-T04 runtime test in test/mcp.test.ts (two dashboard chats, an earlier read then a tainted follow-up; added 2026-11-27, passes with a command MCP server) passes unchanged",
+    "If the cause is a failed context read, the failure is no longer indistinguishable from an empty conversation (src/runtime-chat.ts swallows it with .catch(() => []))"
+  ],
+  "resources": [
+    "src/runtime-chat.ts",
+    "src/ledger.ts",
+    "src/runtime-planning.ts",
+    "web/public/dashboard/live.js",
+    "test/mcp.test.ts",
+    "docs/work/records/B-175.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-27: one read-only evidence query, one failing test, one fix in the context read path. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}
