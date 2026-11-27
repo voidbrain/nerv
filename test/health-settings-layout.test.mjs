@@ -246,3 +246,29 @@ test('F-152: Health has no automatic-update switch line; the last automatic atte
   assert.doesNotMatch(live, /chk-auto-update|liveSetAutoUpdate/, 'its handler went with it');
   assert.doesNotMatch(live, /checked at 20:00, applied at 03:00/, 'no hard-coded hours left');
 });
+
+// F-152-T08 (owner, 2026-11-27, on the iPhone): on a narrow screen the diagnostics are one card per row, each value
+// with its column name, instead of a table that scrolls sideways. Same cells: each names its column, and a cell that
+// does not apply is marked so the card can leave it out.
+test('F-152-T08: every diagnostics cell names its column for the phone cards', () => {
+  const { document } = parseHTML(
+    '<div>' +
+      diagnostics({
+        latestSample: { rssBytes: 1048576, heapUsedBytes: 1048576, eventLoopDelayMs: 1, pollCount: 1 },
+        links: [{ peerId: 'NERV-02', bytesSent: 0, bytesReceived: 0, lastLatencyMs: null, inFlight: 0, reconnects: 0 }],
+      }) +
+      '</div>',
+  );
+  const cols = [...document.querySelectorAll('thead th[scope=col]')].map((th) => th.textContent);
+  for (const tr of document.querySelectorAll('tbody tr')) {
+    const tds = [...tr.querySelectorAll('td')];
+    assert.deepEqual(
+      tds.map((td) => td.getAttribute('data-label')),
+      cols,
+      'one label per column, in order',
+    );
+  }
+  const na = [...document.querySelectorAll('tr#health-sample-row td.na')].length;
+  assert.equal(na, 4, 'the four cells that do not apply to the service are marked');
+  assert.equal(document.querySelectorAll("tr[data-link-peer='NERV-02'] td.na").length, 1, 'memory, for a link');
+});

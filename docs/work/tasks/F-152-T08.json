@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-152-T08",
+  "parent": "F-152",
+  "title": "Owner feedback: diagnostics as cards on a phone, Advanced full width, shorter reload button",
+  "goal": "Below 720 px each diagnostics row is a card of column: value lines; Settings → Advanced spans the panel; the button reads Reload models with one help line",
+  "status": "ready",
+  "acceptance": [
+    "At 360, 375 and 390 px each diagnostics row is a card and the table box does not scroll sideways; a wide screen keeps the table",
+    "Advanced is rendered below the two Settings columns, full width",
+    "Button 'Reload models' with the help line 'Re-reads the model settings from config.json'",
+    "Tests changed first (owner changed the requirement); tokens only; style guide updated"
+  ],
+  "dependsOn": [
+    "F-152-T06"
+  ],
+  "resources": [
+    "web/public/dashboard/**",
+    "src/store-push.ts",
+    "test/**",
+    "docs/work/records/F-152.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "javascript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h agent",
+    "basis": "Estimated 2026-11-27 from the owner feedback on #877: CSS cards over the same cells, one moved box, one label. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}
