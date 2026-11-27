@@ -278,6 +278,8 @@
         : e.kind === "kaji.answered" ? ["Kaji line · answered by " + (p.base && p.base.name || "the main base") + (p.sortieId ? " (its S-" + String(p.sortieId).slice(0, 4).toUpperCase() + ")" : ""), "ok", "maya"]
         : e.kind === "kaji.result" ? ["Kaji line · " + p.text, p.outcome === "grant" ? "ok" : p.outcome === "refused" || p.outcome === "reject" ? "danger" : "", "maya"]
         : e.kind === "misato.consult" ? [(p.pilot && p.pilot.name ? "Pilot " + p.pilot.name : "Consultant") + (p.model ? " (" + p.model + ")" : "") + ": " + p.advice, "", "maya"]
+        : e.kind === "skill.applied" ? ["Skill: " + p.title + " · " + p.id + " " + p.version + (p.tools && p.tools.length ? " · tools " + p.tools.join(", ") : ""), "", "misato"]
+        : e.kind === "skill.refused" ? ["Skill " + p.title + " · " + p.id + " " + p.version + " not applied: " + p.reason, "warn", "misato"]
         : e.kind === "misato.resumed" ? ["Misato: resuming after your decision", "", "misato"] : e.kind === "sortie.done" || e.kind === "sortie.failed" ? ["Debrief: " + e.kind.slice(7), e.kind === "sortie.done" ? "ok" : "danger", "misato"] : null;
       if (e.kind === "misato.reply") known.set(id, p.text);
       if (e.kind === "kaji.forwarded") forwardedTo.set(id, p.base && p.base.name || "the main base");

@@ -66,13 +66,14 @@ export interface RuntimeApprovalsHost {
     context: Turn[];
     advice?: string;
     conversation?: string;
+    original: string;
   }>;
   loop(
     sortieId: string,
     request: string,
     steps: Step[],
     context: Turn[],
-    opts?: { consult: boolean; advice?: string; conversation?: string; watch?: WatchWork },
+    opts?: { consult: boolean; advice?: string; conversation?: string; watch?: WatchWork; skillRequest?: string },
   ): Promise<ChatReply>;
   /** F-123: granted MCP tools and the process that calls them, for an MCP action the owner approved. */
   externalTools?(force?: boolean): Promise<ExternalTools>;
@@ -548,6 +549,7 @@ export class RuntimeApprovals {
       consult: false,
       advice: history.advice,
       conversation: history.conversation ?? 'cli',
+      skillRequest: history.original || claim.request,
       ...(proactive ? { watch: proactive } : {}),
     });
   }

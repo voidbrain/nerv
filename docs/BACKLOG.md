@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 37 | 10 | 72 | 34 |
+| **This week** | 37 | 10 | 73 | 34 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 62 | 53 |
+| **Open** | 62 | 54 |
 | **Require Human 🧑** | 17 | 22 |
 
 ### Require Human 🧑
@@ -46,7 +46,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 286.5 h agent + 24 h owner across 301 open steps of 62 features and 53 other records. 165.25 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 287.25 h agent + 24 h owner across 302 open steps of 62 features and 54 other records. 165.25 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -2249,7 +2249,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
 |---|---|---|---|---|---|---|---|:---:|
 | 🟢 Small | <a id="f-146-t01"></a>F-146-T01 — Weather source decision: what NERV has, a free source, where it is called | 0.75 h | 0 h | 0.75 h | Planned | — | [F-146-T02](#f-146-t02) | 🤖 |
-| 🟡 Medium | <a id="f-146-t03"></a>F-146-T03 — Apply an active skill when a request matches (runtime consumer) | 2 h | 0 h | 2 h | Planned | — | [F-146-T04](#f-146-t04), [F-153-T04](#f-153-t04) | 🤖 |
+| 🟡 Medium | <a id="f-146-t03"></a>F-146-T03 — Apply an active skill when a request matches (runtime consumer) | 2 h | 0 h | 2 h | Implemented; verification pending | — | [F-146-T04](#f-146-t04), [F-153-T04](#f-153-t04) | 🤖 |
 | 🟡 Medium | <a id="f-146-t02"></a>F-146-T02 — Weather read tool with a cached forecast | 1.5 h | 0 h | 1.5 h | Planned | [F-146-T01](#f-146-t01) | [F-146-T04](#f-146-t04) | ⏳ 🤖 |
 | 🟡 Medium | <a id="f-146-t04"></a>F-146-T04 — The preflight skill package: Italian and English checklist | 1.25 h | 0 h | 1.25 h | Planned | [F-146-T02](#f-146-t02), [F-146-T03](#f-146-t03), `fpvbuddy:F-024-T03`, [F-101-T10](#f-101-t10) | [F-146-T05](#f-146-t05) | ⏳ 🤖 |
 | 🟡 Medium | <a id="f-146-t05"></a>F-146-T05 — Evaluation: the skill against the same requests without it, held-out cases | 2 h | 0 h | 2 h | Planned | [F-146-T04](#f-146-t04) | [F-146-T06](#f-146-t06) | ⏳ 🤖 |
@@ -2264,7 +2264,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Plan: pending; [#832](https://github.com/voidbrain/nerv/pull/832); [#867](https://github.com/voidbrain/nerv/pull/867) |
+| PR / evidence | Plan: pending; [#832](https://github.com/voidbrain/nerv/pull/832); [#867](https://github.com/voidbrain/nerv/pull/867); [#870](https://github.com/voidbrain/nerv/pull/870) |
 | Opened | 2026-11-26 |
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
@@ -2306,7 +2306,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Pending; [#867](https://github.com/voidbrain/nerv/pull/867) |
+| PR / evidence | Pending; [#867](https://github.com/voidbrain/nerv/pull/867); [#870](https://github.com/voidbrain/nerv/pull/870) |
 | Opened | 2026-11-27 |
 | Verification | Unit: 2026-11-27 `node --test test/skill-grover-dose.test.mjs` passed (8/8), no model. Real-model evaluation pending F-153-T03. |
 | Reviewed | 2026-11-27 |
@@ -4734,6 +4734,44 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Verification | Unit 2026-11-27: the B-179 test fails without the fix and passes with it; `npm run check:gauntlet-ledger` keeps all 133 entries (255 now). |
 | Reviewed | 2026-11-27 |
 | Impact | A report of the runner packs with more than one case could not reach the ledger by hand; `gauntlet all` was not affected (it passes one source key per batch). |
+
+</details>
+
+---
+### <a id="b-181"></a>[🐞 B-181](#top)
+
+**A promoted skill's stored files are not tied to the version the owner approved**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: B-181-T01 — Record a digest of each staged skill version and refuse a changed one at run time (Planned).
+
+| | |
+|---|---|
+| **Issue** | Found 2026-11-27 in the design review of [F-146-T03](work/records/F-146.md) (PR #870): `loadSkillVersion` (`src/skills.ts`) reads `manifest.json` and `SKILL.md` from the private store without checking them against a digest recorded when the version was staged or promoted. Since F-146-T03, an active skill's `SKILL.md` goes into the planner prompt as owner-approved text, so anything that edits a promoted package's files after promotion changes what the planner follows without a new version or a new promotion. The store is private (0700/0600) under the data home, so this needs local write access; it was already true before F-146-T03, but the text now has prompt weight. |
+| **Reproduce** | Stage and promote an invented skill, edit its stored `SKILL.md`, ask a matching request: the edited text reaches the planner and the trace still names the same version. |
+| **Check** | A test (fake model) shows an edited stored package is refused at run time (`skill.refused`, "its stored files changed since it was staged") and never reaches the prompt; an unchanged one still applies. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-181-t01"></a>B-181-T01 — Record a digest of each staged skill version and refuse a changed one at run time | 0.75 h | 0 h | 0.75 h | Planned |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-181.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Pending; found in [#870](https://github.com/voidbrain/nerv/pull/870) |
+| Opened | 2026-11-27 |
+| Verification | Pending |
+| Reviewed | 2026-11-27 |
 
 </details>
 
