@@ -4,7 +4,7 @@
   "parent": "F-152",
   "title": "Apply the decision on Reload models",
   "goal": "The button and line follow the owner's choice from F-152-T03",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Test first for the chosen place (or absence) in test/dashboard-live-views.test.mjs; when removed, liveReload, its route handler and unused strings go too (no dead code), when moved the id stays and the click still posts once",
     "Wording in both voices, no backlog IDs in text"
@@ -37,7 +37,7 @@
     "size": "small",
     "estimate": "0.5 h agent",
     "basis": "Estimated 2026-11-26 from the existing code paths read for this plan. Not a measurement.",
-    "reviewed": "2026-11-26",
+    "reviewed": "2026-11-27",
     "agentHours": 0.5,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
