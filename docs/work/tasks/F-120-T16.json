@@ -4,7 +4,7 @@
   "parent": "F-120",
   "title": "A model case source key binds only the runners its pack uses",
   "goal": "Adding or changing a NERV system (no-model) runner in evals/gauntlet/runners.json no longer marks recorded model-pack cases as changed",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Owner decision 2026-11-26 on F-120-T15: \"b\" (fix the key first)",
     "releaseSourceKey (tools/gauntlet.mjs) hashes the pinned release manifest and only the registry entries the pack's cases name, not the whole registry file",
@@ -35,10 +35,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Owner decision b on F-120-T15, 2026-11-26: one function and one test. Not a measurement.",
-    "reviewed": "2026-11-26",
-    "agentHours": 0.5,
+    "estimate": "0 remaining",
+    "basis": "Owner decision b on F-120-T15, 2026-11-26: one function and one test. Not a measurement. Closed 2026-11-27: #855 merged on green CI (run 45913696452).",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   },

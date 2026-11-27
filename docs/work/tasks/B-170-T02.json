@@ -11,7 +11,7 @@
   "id": "B-170-T02",
   "title": "The opened page reports the tap: ?opened=, kept receipts, tag, via and a log line",
   "goal": "B-170-T01 opened tests pass unchanged; each /api/push/opened outcome is logged with its route",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "B-170-T01 opened tests pass unchanged; each /api/push/opened outcome is logged with its route"
   ],
@@ -32,11 +32,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1.5 h",
-    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
-    "reviewed": "2026-11-26",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement. Closed 2026-11-27: #840 merged on green CI (run 45898322877).",
+    "reviewed": "2026-11-27",
     "agentHours": 0,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
-  }
+  },
+  "prs": [
+    {
+      "pr": 840,
+      "note": "merged on green CI"
+    }
+  ]
 }

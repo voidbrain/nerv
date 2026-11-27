@@ -38,5 +38,6 @@
     "estimateAgentHours": 0.0,
     "ownerHours": 0.25,
     "ownerKind": "procedure"
-  }
+  },
+  "ownerLink": "docs/decisions/tainted-mcp-reads.md#owner-check"
 }

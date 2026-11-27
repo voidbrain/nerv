@@ -4,7 +4,7 @@
   "parent": "F-145",
   "title": "Failing test and read-only endpoint: the real skills store as JSON",
   "goal": "GET /api/skills returns what nerv skills list returns, plus each skill's stage and latest evaluation",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Owner decision 2026-11-26 in chat: \"y\" to the skills panel and pre-flight skill plan (earlier: \"pre flight check, ok\", real data).",
     "A failing test (committed first) stages a skill in a temporary home with src/skills.ts and expects GET /api/skills to list it; today the route does not exist and the dashboard shows only a placeholder",
@@ -40,11 +40,17 @@
   ],
   "effort": {
     "size": "medium",
-    "estimate": "1.25 h",
-    "basis": "Estimated 2026-11-26: one read route over the existing registry and report types, plus the stage rule and tests. Not a measurement.",
-    "reviewed": "2026-11-26",
-    "agentHours": 0.75,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: one read route over the existing registry and report types, plus the stage rule and tests. Not a measurement. Closed 2026-11-27: #846 merged on green CI (run 45912067128).",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
     "baselineAgentHours": 1.25,
     "estimateAgentHours": 1.25
-  }
+  },
+  "prs": [
+    {
+      "pr": 846,
+      "note": "merged on green CI"
+    }
+  ]
 }

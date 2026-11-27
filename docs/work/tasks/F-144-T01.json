@@ -4,7 +4,7 @@
   "parent": "F-144",
   "title": "Failing test and probe: how keep_alive reaches Ollama",
   "goal": "Failing test and probe: how keep_alive reaches Ollama",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Owner decision 2026-11-26 in chat: \"ollama a+b, c as option in dashboard\".",
     "A failing test (committed first) shows that a local Ollama role call (src/engine-provider.ts, completeOpenAICompatible via /v1/chat/completions) sends no keep_alive today and that, after the change, the request or its follow-up carries keep_alive with the configured value",
@@ -35,10 +35,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.75 h agent",
-    "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; bounded edit plus tests. Not a measurement.",
-    "reviewed": "2026-11-26",
-    "agentHours": 1.0,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26 at agent speed from the existing engine-provider, config and dashboard code; bounded edit plus tests. Not a measurement. Closed 2026-11-27: #845 merged on green CI (run 45909424033).",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
     "baselineAgentHours": 0.75,
     "estimateAgentHours": 0.75
   },
@@ -46,6 +46,10 @@
     {
       "pr": 826,
       "note": "plan"
+    },
+    {
+      "pr": 845,
+      "note": "merged on green CI"
     }
   ]
 }

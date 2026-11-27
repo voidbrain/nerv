@@ -10,7 +10,7 @@
   "id": "B-172-T01",
   "title": "Failing test: a main from before F-016 cannot become the first coordinator",
   "goal": "Tests fail on main: no kaji adopt; kaji standby refuses the legacy main",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "Tests fail on main: no kaji adopt; kaji standby refuses the legacy main"
   ],
@@ -30,10 +30,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Estimated 2026-11-26: one two-base fixture. Not a measurement.",
-    "reviewed": "2026-11-26",
-    "agentHours": 0.5,
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: one two-base fixture. Not a measurement. Closed 2026-11-27: #841 merged on green CI (run 45905616846).",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   },

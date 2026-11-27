@@ -11,7 +11,7 @@
   "id": "B-170-T03",
   "title": "A paired device keeps one push subscription; revoking it removes it",
   "goal": "B-170-T01 subscription tests pass unchanged",
-  "status": "implemented",
+  "status": "closed",
   "acceptance": [
     "B-170-T01 subscription tests pass unchanged"
   ],
@@ -31,11 +31,17 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "1 h",
-    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
-    "reviewed": "2026-11-26",
+    "estimate": "0 remaining",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement. Closed 2026-11-27: #840 merged on green CI (run 45898322877).",
+    "reviewed": "2026-11-27",
     "agentHours": 0,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
-  }
+  },
+  "prs": [
+    {
+      "pr": 840,
+      "note": "merged on green CI"
+    }
+  ]
 }
