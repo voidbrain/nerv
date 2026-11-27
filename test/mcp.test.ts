@@ -55,16 +55,22 @@ test('the tools config: reserved server ids refused, grants only for known serve
   assert.equal(optIn('read', true).grants[0]!.allowTainted, true);
   for (const effect of ['write-local', 'write-external', 'irreversible'])
     assert.throws(() => optIn(effect, true), /allowTainted is only for a read grant/);
-  assert.throws(
-    () =>
-      validateTools({
-        mcp: [{ id: 'hub', url: 'https://hub.example.test/mcp' }],
-        grants: [
-          { server: 'hub', tool: 't', effect: 'read', eva: '00', fingerprint: '0123456789abcdef', allowTainted: true },
-        ],
-      }),
-    /only for a server on this machine/,
-  );
+  // Owner decision 2026-11-27: a url server on the owner's tailnet (a .ts.net name) may opt in too; a public one never.
+  const urlOptIn = (url: string) =>
+    validateTools({
+      mcp: [{ id: 'hub', url }],
+      grants: [
+        { server: 'hub', tool: 't', effect: 'read', eva: '00', fingerprint: '0123456789abcdef', allowTainted: true },
+      ],
+    });
+  assert.equal(urlOptIn('https://raspberrypi.taildea7a.ts.net/mcp').grants[0]!.allowTainted, true);
+  for (const url of [
+    'https://hub.example.test/mcp',
+    'https://ts.net/mcp',
+    'https://hub.ts.net.example.test/mcp',
+    'https://hubts.net/mcp',
+  ])
+    assert.throws(() => urlOptIn(url), /only for a server on this machine or on your tailnet/, url);
   assert.throws(() => optIn('read', 'yes'), /allowTainted is true or absent/);
   assert.throws(() => optIn('read', false), /allowTainted is true or absent/);
   assert.match(
