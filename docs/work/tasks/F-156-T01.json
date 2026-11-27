@@ -8,7 +8,8 @@
   "acceptance": [
     "Failing tests first: under limit passes, at limit refuses, month rollover resets, unknown price means refuse (never guess), limit unset on a cloud-on config is refused at enable time",
     "Spend shown in `nerv models` and the dashboard as an estimate (USD price snapshots converted by an owner-set rate, stated) with an alert at 80 percent",
-    "A refused call is a visible failure, no fallback to another route"
+    "A refused call is a visible failure, no fallback to another route",
+    "Bulk, non-interactive cloud work (night Gauntlet runs on cloud models) uses the Message Batches API (about 50% cheaper, results within hours, never for chat), counted against the same monthly limit"
   ],
   "dependsOn": [
     "F-126-T07"
