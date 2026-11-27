@@ -17,7 +17,12 @@ const dashboardLive = readFileSync('web/public/dashboard/live.js', 'utf8');
 const dashboardShell = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
 type Payload = { notification: { title: string; data: Record<string, unknown> } };
 
-function dashboardSeen(state: object, api: (path: string, init?: RequestInit) => Promise<unknown>, localStorage: object) {
+function dashboardSeen(
+  state: object,
+  api: (path: string, init?: RequestInit) => Promise<unknown>,
+  localStorage: object,
+  renderAll: () => void = () => {},
+) {
   const start = dashboardLive.indexOf('  const VISIT = "nerv.dashboard.lastVisit";');
   const end = dashboardLive.indexOf('  window.renderAway = function ()', start);
   assert.ok(start >= 0 && end > start, 'the dashboard exposes its Mark as read handler');
@@ -28,8 +33,9 @@ function dashboardSeen(state: object, api: (path: string, init?: RequestInit) =>
     'api',
     'localStorage',
     'HOUR',
+    'renderAll',
     `${dashboardLive.slice(start, end)}; return window.liveSeen;`,
-  )(state, window, api, localStorage, 60 * 60 * 1000);
+  )(state, window, api, localStorage, 60 * 60 * 1000, renderAll);
   return window.liveSeen as () => Promise<void>;
 }
 
@@ -473,6 +479,7 @@ test('B-180 join: Mark as read includes the displayed brief', async () => {
 test('B-180 join: clicking #btn-seen reads the old visit panel before advancing its cursor', async () => {
   const t = await setup({ fallbackMs: 1500 });
   const origin = `http://127.0.0.1:${(t.server.address() as { port: number }).port}`;
+  let readsSucceeded = false;
   const api = async (path: string, init: RequestInit = {}) => {
     const response = await fetch(origin + '/api/' + path, {
       ...init,
@@ -480,6 +487,7 @@ test('B-180 join: clicking #btn-seen reads the old visit panel before advancing 
     });
     const body: unknown = await response.json();
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (path.startsWith('inbox/') && path.endsWith('/read')) readsSucceeded = true;
     return body;
   };
   try {
@@ -492,11 +500,16 @@ test('B-180 join: clicking #btn-seen reads the old visit panel before advancing 
     const state = { lastVisit: since, deliveredCount: history.delivered, deliveredSince: since, brief: null };
     const saved: string[] = [];
     const visitStorage = { getItem: () => String(since), setItem: (_key: string, value: string) => saved.push(value) };
-    const liveSeen = dashboardSeen(state, api, visitStorage);
+    const order: string[] = [];
+    const redraw = () => order.push(readsSucceeded ? 'after service read' : 'before service read');
+    const liveSeen = dashboardSeen(state, api, visitStorage, redraw);
     let serviceRead: Promise<void> | undefined;
     const window = { liveSeen: () => (serviceRead = liveSeen()) };
     let renders = 0;
-    clickDashboardSeen(state, window, () => renders++);
+    clickDashboardSeen(state, window, () => {
+      renders++;
+      redraw();
+    });
     await serviceRead;
 
     const readAt = (deliveryId: string) =>
@@ -506,7 +519,8 @@ test('B-180 join: clicking #btn-seen reads the old visit panel before advancing 
     assert.ok(readAt(id), '#btn-seen marks the delivery shown by the previous visit cursor');
     assert.ok(state.lastVisit > since, 'the visit cursor advances only after the service read');
     assert.deepEqual(saved, [String(state.lastVisit)], 'the advanced cursor is persisted');
-    assert.equal(renders, 0, 'the service-owned handler redraws only after its read completes');
+    assert.equal(renders, 0, 'the button does not redraw before the service read');
+    assert.deepEqual(order, ['after service read'], 'the live handler redraws after the service read succeeds');
   } finally {
     await t.close();
   }
