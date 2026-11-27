@@ -38,7 +38,7 @@ test('each pilot card owns an independent labelled model selector, drafts surviv
     'modelsData',
     'pilotDrafts',
     'esc',
-    `const window={},pilotBusy=new Set(),PLANNED='planned',stageTabs=()=>'',currentTab=()=> 'prototype';${code};return window.renderMelons;`,
+    `const window={},pilotBusy=new Set(),PLANNED='planned',stageTabs=()=>'',currentTab=()=> 'prototype',thinkingFor=()=>[];${code};return window.renderMelons;`,
   )(document, { pilots: roster }, models, drafts, esc);
   render();
   assert.equal(document.querySelectorAll('.card').length, 3);
@@ -140,7 +140,7 @@ test('F-109-T03: specialist card exposes call name, second name, model and one A
     'api',
     'loadModels',
     'log',
-    `const window={},pilotBusy=new Set(),PLANNED='planned',stageTabs=()=>'',currentTab=()=> 'prototype';${code};return window.renderMelons;`,
+    `const window={},pilotBusy=new Set(),PLANNED='planned',stageTabs=()=>'',currentTab=()=> 'prototype',thinkingFor=()=>[];${code};return window.renderMelons;`,
   )(
     docProxy,
     { pilots: roster },
