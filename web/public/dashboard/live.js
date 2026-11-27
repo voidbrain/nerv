@@ -733,8 +733,7 @@
     document.getElementById("health").innerHTML = degraded + "<div class='health-table'>" + table.map(healthRowHtml).join("") + "</div>" +
       warningsHtml +
       policyHtml +
-      updateResultHtml +
-      "<div class='row small' style='margin-top:6px'><span class='muted'>Edited config.json? Apply it without a restart.</span><button class='btn sm' id='btn-reload'>Reload models</button></div>";
+      updateResultHtml;
   };
   // Kaji bases (F-036): every enrolled base with its real status; positions are a fixed layout around this base
   // (no real coordinates exist), redrawn when the set of bases or their status changes.
@@ -1187,9 +1186,18 @@
     log(doctorChatLine(run), run.error || doctorProblems(run.result).length ? "danger" : "ok", null, "maya");
     if (run.result) renderHealth();
   };
+  // F-152: Settings, Advanced: re-reads the models part of config.json after a hand edit; the result shows by the button.
   window.liveReload = async function () {
-    try { const r = await api("models/reload", { method:"POST" }); const roles = (r.models || {}).roles || {}; log("Models reloaded · Misato " + (roles.misato || "—") + " · Casper " + (roles.casper || "—"), "ok", null, "maya"); }
-    catch (e) { log("Reload refused: " + e.message + " (the previous settings stay in use)", "danger", null, "maya"); }
+    if (state.reloadBusy) return;
+    state.reloadBusy = true; state.reloadMsg = null; renderSettings();
+    try {
+      const r = await api("models/reload", { method:"POST" }); const roles = (r.models || {}).roles || {};
+      state.reloadMsg = { kind:"ok", text:"Model settings re-read from config.json." };
+      log("Models reloaded · Misato " + (roles.misato || "—") + " · Casper " + (roles.casper || "—"), "ok", null, "maya");
+    } catch (e) {
+      state.reloadMsg = { kind:"danger", text:"Not re-read: " + e.message + ". The previous settings stay in use." };
+      log("Reload refused: " + e.message + " (the previous settings stay in use)", "danger", null, "maya");
+    } finally { state.reloadBusy = false; renderSettings(); }
     poll();
   };
   window.liveApplyUpdate = async function () {
@@ -1274,6 +1282,7 @@
     const m = settingsModel();
     const busy = !!state.settingsBusy;
     const msg = state.settingsMsg;
+    const rm = state.reloadMsg;
     const hour = (label, value) => " aria-label='" + label + "' type='number' min='0' max='23' step='1' value='" + esc(value) + "'" + (busy ? " disabled" : "") + ">";
     // Update schedule: one label and its controls per line, so the fields align in their column.
     box.innerHTML = "<form id='settings-form' class='list'>" +
@@ -1288,7 +1297,11 @@
       "<div class='tiny muted'>Time zone " + esc(m.timeZone) + " · Sync Ratio 80% · Telegram 90 s</div>" +
       "<div class='row'><button class='btn sm primary' id='btn-save-settings' type='submit'" + (busy ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button>" +
       "<span id='settings-status' role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : (state.settingsDraft ? "Unsaved changes" : "")) + "</span></div>" +
-      "</form>";
+      "</form>" +
+      // The panel redraws on every poll: the Advanced section's open state lives in state (toggle listener below).
+      "<details id='settings-advanced'" + (state.advancedOpen ? " open" : "") + "><summary class='tiny muted'>Advanced</summary>" +
+      "<div class='row small'><button class='btn sm' id='btn-reload' type='button'" + (state.reloadBusy ? " disabled" : "") + ">Re-read the model settings from config.json</button>" +
+      "<span id='reload-status' role='status' class='tiny " + (rm ? rm.kind : "muted") + "'>" + esc(rm ? rm.text : "") + "</span></div></details>";
   };
   function readSettingsDraft() {
     const enabled = !!document.getElementById("set-auto-enabled").checked;
@@ -1308,6 +1321,7 @@
       timeZone:(state.scheduleSettings && state.scheduleSettings.timeZone) || "Europe/Rome"
     };
   }
+  document.addEventListener("toggle", e => { if (e.target && e.target.id === "settings-advanced") state.advancedOpen = e.target.open; }, true);
   document.addEventListener("input", e => {
     if (e.target && e.target.closest && e.target.closest("#settings-form")) { state.settingsDraft = readSettingsDraft(); state.settingsMsg = null; }
   });
