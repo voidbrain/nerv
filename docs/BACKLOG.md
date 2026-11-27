@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 36 | 10 | 70 | 33 |
+| **This week** | 36 | 10 | 70 | 34 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 61 | 52 |
-| **Require Human 🧑** | 17 | 23 |
+| **Open** | 61 | 51 |
+| **Require Human 🧑** | 17 | 22 |
 
 ### Require Human 🧑
 
@@ -23,17 +23,16 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | **Procedures 🧑‍🔧** | **Decisions 🤔** | **Procedures 🧑‍🔧** | **Decisions 🤔** |
 | [F-062](#f-062) | [F-120](#f-120) | [B-170](#b-170) | — |
 | [F-006](#f-006) | [F-116](#f-116) | [B-172](#b-172) |  |
-| [F-011](#f-011) | [F-126](#f-126) | [B-176](#b-176) |  |
-| [F-004](#f-004) | [F-151](#f-151) | [B-175](#b-175) |  |
-| [F-012](#f-012) | [F-142](#f-142) | [B-057](#b-057) |  |
-| [F-016](#f-016) |  | [B-068](#b-068) |  |
-| [F-086](#f-086) |  | [B-107](#b-107) |  |
-| [F-087](#f-087) |  | [B-113](#b-113) |  |
-| [F-133](#f-133) |  | [B-122](#b-122) |  |
-| [F-092](#f-092) |  | [B-123](#b-123) |  |
-| [F-060](#f-060) |  | [B-128](#b-128) |  |
-| [F-007](#f-007) |  | [B-129](#b-129) |  |
-|  |  | [B-134](#b-134) |  |
+| [F-011](#f-011) | [F-126](#f-126) | [B-175](#b-175) |  |
+| [F-004](#f-004) | [F-151](#f-151) | [B-057](#b-057) |  |
+| [F-012](#f-012) | [F-142](#f-142) | [B-068](#b-068) |  |
+| [F-016](#f-016) |  | [B-107](#b-107) |  |
+| [F-086](#f-086) |  | [B-113](#b-113) |  |
+| [F-087](#f-087) |  | [B-122](#b-122) |  |
+| [F-133](#f-133) |  | [B-123](#b-123) |  |
+| [F-092](#f-092) |  | [B-128](#b-128) |  |
+| [F-060](#f-060) |  | [B-129](#b-129) |  |
+| [F-007](#f-007) |  | [B-134](#b-134) |  |
 |  |  | [B-135](#b-135) |  |
 |  |  | [B-142](#b-142) |  |
 |  |  | [B-148](#b-148) |  |
@@ -47,7 +46,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 281 h agent + 24 h owner across 293 open steps of 61 features and 52 other records. 165.25 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 281 h agent + 23.75 h owner across 292 open steps of 61 features and 51 other records. 165.25 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -886,55 +885,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-01 |
 | Verification | 2026-11-26: Unit/integration: `test/coordinator-shipping.test.ts` and `test/coordinator-snapshot.test.ts` (24/24, incl. F-016-T21 25,000-row off-loop seed regression). 2026-11-18: F-016-T10 verified: [PR #417](https://github.com/voidbrain/nerv/pull/417) merged on green CI (second fresh-context review found no blocker). F-016-T12 closed with the accepted decision revision and zero-blocking review in PR #470; scoped CI passed. Remaining distributed relocation acceptance is open. |
 | Reviewed | 2026-11-26 |
-
-</details>
-
----
-### <a id="b-176"></a>[🐞 B-176](#top)
-
-**A granted read with a large result answers only "Fatto: <tool>." without the data: the result is dropped from Misato's prompt**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟡 Implemented | 🔺 P1 | 🟢 Small | 0.25 h owner | — | — | — | 🧑‍🔧 | — |
-
-🧑 **→** B-176-T04: after `nerv update` on NERV-01, run `nerv chat "quali genetiche ho?"` (owner check below).
-
-| | |
-|---|---|
-| **Issue** | Found by the owner 2026-11-26 on NERV-01: `nerv chat "quali genetiche ho?"` (conversation `cli`, trusted). `grover.grover_strains` ran (EVA-00, granted, 33 strains, about 9 KB), but the reply was only "Fatto: grover.grover_strains.". Cause: `misatoAsk` (`src/misato.ts`) keeps the step history under `MAX_HISTORY_CHARS` (8,000) by dropping the oldest steps, and when one step alone is larger it sends no steps at all. The model saw no result, proposed the same read again, and the duplicate guard in `src/runtime-planning.ts` closed the sortie with `doneReply` ("Fatto: …"), which for a read throws away what the owner asked for. Blocks 🪴 grover:F-012, whose closing check is NERV answering "quali genetiche ho?". |
-| **Reproduce** | Ask Misato for a granted read whose result is over 8,000 characters (e.g. "quali genetiche ho?" with Grover's strains): the reply is "Fatto: <tool>." and `misato.reply` has no `durationMs` (the service's fallback, not the model). Test: `test/misato.test.ts`, "B-176: a granted read with a large result still reaches Misato, so she can answer from it" (committed as `todo`, fails today). |
-| **Check** | The B-176 test passes without `todo`; a read result too large for the budget reaches the planner shortened (and marked as shortened), never dropped; when the model repeats a read that already ran, the owner gets an answer from the result (a last answer-only turn or a compact summary), never a bare "Fatto: <tool>."; in `nerv chat` "quali genetiche ho?" lists the owner's strains in Italian. |
-
-**Steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Who | PRs |
-|---|---|---|---|---|---|:---:|---|
-| 🟢 Small | <a id="b-176-t04"></a>B-176-T04 — Owner check: nerv chat "quali genetiche ho?" lists the strains | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [🧑‍🔧](work/records/B-176.md) | — |
-| 🟢 Small | **Total** | 3 h | 0 h (0 of 4 steps recorded) | 0.25 h owner | 3 of 4 completed | | |
-
-<details><summary>Done steps (3)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="b-176-t01"></a>B-176-T01 — Failing test: a granted read with a large result reaches the planner prompt | 0.5 h | 0 h | Completed | [PR #850](https://github.com/voidbrain/nerv/pull/850) merged on green CI |
-| — | <a id="b-176-t02"></a>B-176-T02 — Keep a large read result in the planner prompt, shortened and marked | 1 h | 0 h | Completed | [PR #851](https://github.com/voidbrain/nerv/pull/851) merged on green CI |
-| — | <a id="b-176-t03"></a>B-176-T03 — A repeated read gets an answer from its result, never a bare Fatto | 1.5 h | 0 h | Completed | [PR #851](https://github.com/voidbrain/nerv/pull/851) merged on green CI |
-
-</details>
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/B-176.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: B-176-T01: [PR #850](https://github.com/voidbrain/nerv/pull/850) merged on green CI · B-176-T02: [PR #851](https://github.com/voidbrain/nerv/pull/851) merged on green CI · B-176-T03: [PR #851](https://github.com/voidbrain/nerv/pull/851) merged on green CI. Found by the owner 2026-11-26; Test: `test/misato.test.ts` (B-176: large result kept shortened; repeated read answers from its result; last-turn and escape-heavy review cases). Code: `src/misato.ts` (`misatoAsk`, `MAX_HISTORY_CHARS`), `src/runtime-planning.ts` (duplicate guard, `doneReply`). Related: 🪴 grover:F-012.; [#850](https://github.com/voidbrain/nerv/pull/850); [#851](https://github.com/voidbrain/nerv/pull/851) |
-| Opened | 2026-11-26 |
-| Verification | Pending |
-| Reviewed | 2026-11-27 |
-| Impact | Any granted read with a result over 8,000 characters answers the owner with nothing: Grover's strain list is the first case. |
 
 </details>
 
