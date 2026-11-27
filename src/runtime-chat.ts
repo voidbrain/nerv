@@ -17,6 +17,8 @@ export type ChatNoteKind =
   | 'misato.waiting'
   | 'misato.consult'
   | 'pilot.unmatched'
+  | 'skill.applied'
+  | 'skill.refused'
   | 'kaji.forwarded'
   | 'kaji.answered';
 

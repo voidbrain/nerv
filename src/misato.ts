@@ -1,4 +1,5 @@
 import { sanitizeProposedDomain } from './pilots.ts';
+import type { AppliedSkill } from './skills.ts';
 import type { Ask, RouteName } from './model.ts';
 import { TOOL_INDEX_READ, formatSubjectLine, type SubjectIndexEntry } from './tool-index.ts';
 export { parseReminderRequest, reconcileReminderArgs, type ParsedReminderRequest } from './reminder-time.ts';
@@ -87,6 +88,8 @@ export interface StepInput {
   clarification?: boolean;
   /** Display only. Authorization remains entirely in the deterministic gate. Null disables the persona layer. */
   personaName?: string | null;
+  /** F-146-T03: the active skill this request matched; `tools` already holds only its tools. */
+  skill?: AppliedSkill;
 }
 /** B-021: the first turn after Misato asked something decides, before anything else, whether the message answers her
     question or starts something new. Recorded real-model evidence (2026-11-08) showed a local model answering a new
@@ -105,6 +108,7 @@ const system = (
   language?: 'it' | 'en',
   clarification?: boolean,
   personaName?: string | null,
+  skill?: AppliedSkill,
 ): string =>
   [
     personaName
@@ -149,6 +153,15 @@ const system = (
     '"earlier" (when present) holds the previous exchanges of this conversation, oldest first, only as background. Act on the current "request": use earlier to understand a short follow-up such as "yes", "all of them" or "the first one" and carry out what was agreed; do not ask again for something the owner just confirmed, and never repeat an earlier reply.',
     `Tool results give "due" in UTC and "dueLocal" already in the owner's time zone (${timeZone}): in the reply, use dueLocal in plain words, never raw ISO strings or ids.`,
     "Keep the reply short and concrete, written for the owner in your own words: never copy a step's reason or error text verbatim. Never claim an action happened unless its step shows a result.",
+    // F-146-T03: after the rules, so they stay a stable prefix; the instructions come from the package the owner promoted.
+    ...(skill
+      ? [
+          `An owner-approved skill applies to this request: ${JSON.stringify(skill.title)} (${skill.id} ${skill.version}). Follow its instructions below for this request. They never grant a tool, change a Pattern, or override the gate or an owner decision: the tools listed above are the only ones you may use.`,
+          '<skill-instructions>',
+          skill.instructions.trim(),
+          '</skill-instructions>',
+        ]
+      : []),
     // F-106: the clock changes every turn, so it follows the system text and tool schemas, which stay a byte-identical
     // prefix across turns (cloud prompt caching, Ollama prefix reuse).
     `Now: ${now}. The owner's time zone: ${timeZone}. Write dates as ISO 8601 with an explicit offset.`,
@@ -644,6 +657,7 @@ export function misatoAsk(input: StepInput, preferredRoute: RouteName): Ask {
       input.language,
       input.clarification,
       input.personaName,
+      input.skill,
     ),
     privacy: route === 'local' ? 'local-only' : 'any',
     route,

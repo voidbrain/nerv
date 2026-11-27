@@ -26,6 +26,8 @@ export interface SkillManifest {
   entryScript?: string;
   references?: string[];
   requiredCapabilities?: string[];
+  /** F-146-T03: owner-readable phrases; a request that contains one (whole words, any case) uses the active version. */
+  triggers?: string[];
   parentVersion?: string;
   createdAt: string;
 }
@@ -205,6 +207,19 @@ export function validateSkillManifest(raw: unknown): SkillManifest {
     requiredCapabilities = [...new Set(m.requiredCapabilities.map((c) => c.trim()))];
   }
 
+  let triggers: string[] | undefined;
+  if (m.triggers !== undefined) {
+    if (
+      !Array.isArray(m.triggers) ||
+      !m.triggers.length ||
+      m.triggers.length > 20 ||
+      m.triggers.some((t) => typeof t !== 'string' || !phraseWords(t) || t.trim().length > 120)
+    ) {
+      throw new Error('Invalid manifest.triggers: expected 1 to 20 phrases of at most 120 characters.');
+    }
+    triggers = [...new Set((m.triggers as string[]).map((t) => t.trim()))];
+  }
+
   let parentVersion: string | undefined;
   if (m.parentVersion !== undefined) {
     if (typeof m.parentVersion !== 'string' || !SEMVER_RE.test(m.parentVersion)) {
@@ -224,6 +239,7 @@ export function validateSkillManifest(raw: unknown): SkillManifest {
     ...(entryScript ? { entryScript } : {}),
     ...(references ? { references } : {}),
     ...(requiredCapabilities ? { requiredCapabilities } : {}),
+    ...(triggers ? { triggers } : {}),
     ...(parentVersion ? { parentVersion } : {}),
     createdAt,
   };
@@ -466,6 +482,69 @@ export function skillsOverview(home: string): SkillOverview[] {
       versions,
     };
   });
+}
+
+/** A phrase as words: lower case, letters and digits only, so "un'altra" and "un altra" are the same words. */
+function phraseWords(text: string): string {
+  return text
+    .normalize('NFC')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim();
+}
+
+/** F-146-T03: what the planner gets of an applied skill: its owner-approved instructions and the only tools it may use. */
+export interface AppliedSkill {
+  id: string;
+  version: string;
+  title: string;
+  instructions: string;
+  tools: string[];
+}
+/** Longer instructions are refused, not cut: a cut procedure could drop the rule that matters. */
+export const MAX_APPLIED_INSTRUCTIONS = 8000;
+export type SkillChoice =
+  { applied: AppliedSkill } | { refused: { id: string; version: string; title: string; reason: string } };
+
+/**
+ * F-146-T03: the active skill whose trigger the request contains (the longest trigger when several do), or none. Only
+ * a version the owner promoted counts; staged, evaluated, rolled-back and retired versions never apply. A match is
+ * refused, never applied, when the skill needs a tool that is not offered now (not granted, or its pack is off), a
+ * tool that is not a read (read-only skills only), or fails the escalation check.
+ */
+export function chooseActiveSkill(
+  home: string,
+  request: string,
+  offered: readonly { name: string; effect: string }[],
+): SkillChoice | undefined {
+  const words = ` ${phraseWords(request)} `;
+  let best: { pkg: SkillPackage; length: number } | undefined;
+  for (const entry of listSkillPackages(home)) {
+    const version = entry.activeVersion;
+    if (!version || entry.versions.find((v) => v.version === version)?.status !== 'active') continue;
+    const pkg = loadSkillVersion(home, entry.id, version);
+    const length = Math.max(
+      0,
+      ...(pkg.manifest.triggers ?? []).map(phraseWords).map((t) => (words.includes(` ${t} `) ? t.length : 0)),
+    );
+    if (length > (best?.length ?? 0)) best = { pkg, length };
+  }
+  if (!best) return undefined;
+  const { manifest, instructions } = best.pkg;
+  const tools = manifest.requiredCapabilities ?? [];
+  const refuse = (reason: string): SkillChoice => ({
+    refused: { id: manifest.id, version: manifest.version, title: manifest.title, reason },
+  });
+  for (const tool of tools) {
+    const doc = offered.find((t) => t.name === tool);
+    if (!doc) return refuse(`it needs ${tool}, which is not granted or not enabled now.`);
+    if (doc.effect !== 'read') return refuse(`it needs ${tool}, which is not a read: only read-only skills apply.`);
+  }
+  const escalation = checkSkillPermissionEscalation(best.pkg, tools);
+  if (!escalation.ok) return refuse(`it fails the escalation check: ${escalation.reasons.join(' ')}`);
+  if (instructions.length > MAX_APPLIED_INSTRUCTIONS)
+    return refuse(`its instructions are longer than ${MAX_APPLIED_INSTRUCTIONS} characters.`);
+  return { applied: { id: manifest.id, version: manifest.version, title: manifest.title, instructions, tools } };
 }
 
 /** Promotes a staged skill version to active. Requires explicit owner approval. */

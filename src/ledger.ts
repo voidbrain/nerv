@@ -406,6 +406,8 @@ export class Ledger {
       | 'misato.waiting'
       | 'misato.consult'
       | 'pilot.unmatched'
+      | 'skill.applied'
+      | 'skill.refused'
       | 'kaji.forwarded'
       | 'kaji.answered',
   >(sortieId: string, kind: K, payload: EventPayloads[K], now = new Date()): void {
