@@ -414,8 +414,7 @@ test('B-180 join: Mark as read updates every covered delivery so Telegram skips 
     return body;
   };
   const readAt = (id: string) =>
-    (t.store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(id) as { read_at: string | null })
-      .read_at;
+    (t.store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(id) as { read_at: string | null }).read_at;
   try {
     const outside = await t.due('Not covered by this visit');
     await until(() => t.push.received.length === 1);
@@ -423,9 +422,9 @@ test('B-180 join: Mark as read updates every covered delivery so Telegram skips 
     const first = await t.due('Covered reminder one');
     const second = await t.due('Covered reminder two');
     await until(() => t.push.received.length === 3);
-    const history = (await api(
-      'dashboard/history?since=' + encodeURIComponent(new Date(since).toISOString()),
-    )) as { delivered: number };
+    const history = (await api('dashboard/history?since=' + encodeURIComponent(new Date(since).toISOString()))) as {
+      delivered: number;
+    };
     assert.equal(history.delivered, 2, 'the dashboard panel covers both delivered reminders');
 
     const state = { lastVisit: since, deliveredCount: history.delivered, deliveredSince: since, brief: null };
@@ -461,9 +460,9 @@ test('B-180 join: Mark as read includes the displayed brief', async () => {
   try {
     const brief = t.store.addBrief('A neutral brief shown in the dashboard panel.');
     const since = Date.now();
-    const history = (await api(
-      'dashboard/history?since=' + encodeURIComponent(new Date(since).toISOString()),
-    )) as { brief: { id: string; created: string; read_at: string | null } };
+    const history = (await api('dashboard/history?since=' + encodeURIComponent(new Date(since).toISOString()))) as {
+      brief: { id: string; created: string; read_at: string | null };
+    };
     assert.equal(history.brief.id, brief.id, 'the service supplies the brief shown in the panel');
     const state = { lastVisit: since, deliveredCount: 0, deliveredSince: since, brief: history.brief };
     await dashboardSeen(state, api, { getItem: () => String(since), setItem: () => {} })();
@@ -494,9 +493,9 @@ test('B-180 join: clicking #btn-seen reads the old visit panel before advancing 
   try {
     const since = Date.now() - 10_000;
     const id = await t.due('Covered through the dashboard button');
-    const history = (await api(
-      'dashboard/history?since=' + encodeURIComponent(new Date(since).toISOString()),
-    )) as { delivered: number };
+    const history = (await api('dashboard/history?since=' + encodeURIComponent(new Date(since).toISOString()))) as {
+      delivered: number;
+    };
     assert.equal(history.delivered, 1);
     const state = { lastVisit: since, deliveredCount: history.delivered, deliveredSince: since, brief: null };
     const saved: string[] = [];
@@ -514,9 +513,11 @@ test('B-180 join: clicking #btn-seen reads the old visit panel before advancing 
     await serviceRead;
 
     const readAt = (deliveryId: string) =>
-      (t.store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(deliveryId) as {
-        read_at: string | null;
-      }).read_at;
+      (
+        t.store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(deliveryId) as {
+          read_at: string | null;
+        }
+      ).read_at;
     assert.ok(readAt(id), '#btn-seen marks the delivery shown by the previous visit cursor');
     assert.ok(state.lastVisit > since, 'the visit cursor advances only after the service read');
     assert.deepEqual(saved, [String(state.lastVisit)], 'the advanced cursor is persisted');
