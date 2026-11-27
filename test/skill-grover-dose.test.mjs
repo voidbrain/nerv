@@ -1,3 +1,4 @@
+// @ts-check
 // F-153-T01, F-153-T02: the Grover dose skill package, its evaluation suite and the runner that fills the suite.
 // No real model, Grover hub or owner data: a fake fetch stands in for Ollama and the tool results are invented.
 import { test } from 'node:test';
