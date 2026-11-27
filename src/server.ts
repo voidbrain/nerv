@@ -573,6 +573,13 @@ export function makeServer(
             Number(url.searchParams.get('limit') ?? 50),
           ),
         );
+      } else if (req.method === 'GET' && path === '/api/live-index') {
+        if (url.search) throw new Error('Unknown live index query.');
+        if (!store.liveIndex) {
+          reply(404, { error: 'Live index unavailable.' });
+          return;
+        }
+        reply(200, await store.liveIndex());
       } else if (req.method === 'GET' && path === '/api/batteries') {
         if (url.search) throw new Error('Unknown batteries query.');
         reply(200, { items: store.batteryCards ? await store.batteryCards() : [] });

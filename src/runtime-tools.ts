@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { readConfig } from './config.ts';
-import { toolName, type McpTool } from './mcp.ts';
+import { isHttpServer, toolName, type McpTool } from './mcp.ts';
+import { readLiveIndexAnswer, type LiveIndexView } from './live-index.ts';
 import { parsePrices, type Price, type UsageObservation } from './model-usage.ts';
 import type { ProcessClient } from './process-client.ts';
 import type { PromptMetrics } from './prompt-samples.ts';
@@ -173,4 +174,69 @@ export async function callGrantedMcp(options: {
   });
   await (options.finishBestEffort ? finished.catch(() => undefined) : finished);
   return out;
+}
+
+/** F-147: the server id and address the live index is registered under (`nerv tools add`). */
+const LIVE_INDEX_SERVER = 'coordinator';
+const LIVE_INDEX_URL = 'http://127.0.0.1:7380/mcp';
+/** The tools the card calls; `record_lookup` is granted too, for chat, but the card does not need it. */
+const CARD_TOOLS = ['waiting_on_me', 'blocked_by'] as const;
+/** A failure the tools process reports when the index's machine or port does not answer. */
+const OFFLINE = /is unreachable|could not be reached|did not answer in time/;
+
+/** The card's view: the owner's turn and what each step unblocks, or why it cannot be shown. */
+export async function readLiveIndex(options: {
+  home?: string;
+  toolsProcess: () => ProcessClient;
+}): Promise<LiveIndexView> {
+  const tools = options.home ? readConfig(options.home).tools : undefined;
+  const server = tools?.mcp.find((s) => s.id === LIVE_INDEX_SERVER);
+  const grants = (tools?.grants ?? []).filter((g) => g.server === LIVE_INDEX_SERVER);
+  const commands = [
+    ...(server ? [] : [`nerv tools add ${LIVE_INDEX_SERVER} ${LIVE_INDEX_URL}`]),
+    ...CARD_TOOLS.filter((t) => !grants.some((g) => g.tool === t)).map(
+      (t) => `nerv tools grant ${LIVE_INDEX_SERVER}/${t}`,
+    ),
+  ];
+  if (!server || commands.length) return { state: 'not-set-up', commands };
+  if (!isHttpServer(server)) return { state: 'failed', reason: `${LIVE_INDEX_SERVER} is not registered by its URL` };
+  const notRead = grants.find((g) => CARD_TOOLS.includes(g.tool as (typeof CARD_TOOLS)[number]) && g.effect !== 'read');
+  if (notRead)
+    return {
+      state: 'failed',
+      reason: `${notRead.tool} is granted as ${notRead.effect}; the card reads only tools granted as a read (nerv tools revoke, then nerv tools grant)`,
+    };
+  const screen = new URL('/', server.url).href;
+  const call = async (tool: string, args: Record<string, unknown>) => {
+    const g = grants.find((x) => x.tool === tool)!;
+    const out = (await options
+      .toolsProcess()
+      .call('tools.call', { server: LIVE_INDEX_SERVER, tool, args, fingerprint: g.fingerprint }, 20_000)
+      .catch((e: unknown) => ({ error: e instanceof Error ? e.message : 'The tools process did not answer.' }))) as {
+      error?: string;
+      structured?: unknown;
+    };
+    if (out.error) throw new Error(out.error);
+    if (out.structured === undefined) throw new Error(`${tool} sent no structured answer`);
+    return readLiveIndexAnswer(out.structured);
+  };
+  try {
+    const waiting = await call('waiting_on_me', {});
+    // One at a time: the tools process's queue is shared with Misato's calls.
+    const blocks: Awaited<ReturnType<typeof call>>[] = [];
+    for (const s of waiting.items) blocks.push(await call('blocked_by', { ref: s.key }));
+    return {
+      state: 'ready',
+      screen,
+      snapshot: waiting.snapshot,
+      unknown: waiting.unknown,
+      turn: waiting.items.map((s, i) => ({
+        ...s,
+        blocks: blocks[i]!.items.map(({ key, repo, title, url }) => ({ key, repo, title, url })),
+      })),
+    };
+  } catch (e) {
+    const reason = (e instanceof Error ? e.message : 'The index could not be read.').slice(0, 300);
+    return OFFLINE.test(reason) ? { state: 'offline', screen, reason } : { state: 'failed', reason };
+  }
 }

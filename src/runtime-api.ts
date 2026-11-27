@@ -159,6 +159,8 @@ export interface OwnerAction {
 export type ActReply = ActResult & { casperError?: string };
 
 export interface StoreApi {
+  /** F-147: the coordinator's live index, read through its granted MCP read tools. */
+  liveIndex?(): Promise<import('./live-index.ts').LiveIndexView>;
   /** B-168: the owner's configured language (`config.language`), for replies to requests with no language signal. */
   language?(): 'it' | 'en';
   selectExecution?(
