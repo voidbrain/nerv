@@ -183,6 +183,12 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .health-row { align-items:baseline; }
 .health-row > .health-label { flex:none; white-space:nowrap; }
 .health-row > .health-value { gap:6px; min-width:0; justify-content:flex-end; text-align:right; }
+.diag-wrap { overflow-x:auto; margin-top:6px; }
+.diag { border-collapse:collapse; width:100%; font-size:11px; font-variant-numeric:tabular-nums; }
+.diag caption { text-align:left; color:var(--muted); padding-bottom:2px; }
+.diag th, .diag td { padding:2px 6px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap; }
+.diag th[scope=row], .diag td[colspan] { text-align:left; }
+.diag thead th { color:var(--muted); font-weight:400; }
 .update-status { margin-top:6px; padding:6px 8px; border:1px solid currentColor; border-left-width:3px; border-radius:var(--radius); background:color-mix(in srgb,currentColor 10%,transparent); font-size:11px; font-weight:700; }
 .update-status .muted { font-weight:400; }
 .pilot-model-form button:disabled { opacity:.5; cursor:default; }

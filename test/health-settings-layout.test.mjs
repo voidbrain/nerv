@@ -106,7 +106,7 @@ test('F-152: diagnostics are a table: caption, column and row headers, one row p
   );
   assert.match(
     /** @type {Element} */ (table.querySelector("tr[data-link-peer='NERV-02'] td")).outerHTML,
-    /class='warn'/,
+    /class="warn">✗ warning/,
     'warning is text and colour',
   );
   const hostile = diagnostics({

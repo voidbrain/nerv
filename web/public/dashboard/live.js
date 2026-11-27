@@ -661,19 +661,27 @@
     const mark = c[1] === "ok" ? "✓ " : c[1] === "muted" ? "· " : "✗ ";
     return "<div class='row small health-row'" + (c[5] || "") + "><span class='health-label'>" + esc(c[0]) + "</span><span class='row health-value'><span class='" + c[1] + "'>" + mark + esc(c[2]) + "</span>" + (c[3] || "") + "</span></div>" + (c[4] || "");
   }
-  /** The service sample and peer link rows, shaped like every other Health row; a row with a warning is warn. */
-  function healthMetricRows(hm) {
+  /** F-152: the diagnostics table: the service sample and one row per peer link, so they compare by column. */
+  function healthDiagnosticsHtml(hm) {
     const warned = prefix => (hm && Array.isArray(hm.warnings) ? hm.warnings : []).some(w => String(w.key).startsWith(prefix));
-    const s = hm && hm.latestSample;
     const mb = n => (Number(n) / 1048576).toFixed(1);
+    const bytes = n => (n = Number(n) || 0) < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : mb(n) + " MB";
+    const none = why => "<td><span aria-hidden='true'>—</span><span class='sr-only'>" + why + "</span></td>";
+    const NA = none("not applicable");
+    const td = v => "<td>" + esc(v) + "</td>";
+    const status = (warn, extra) => "<td><span class='" + (warn ? "warn'>✗ warning" : "ok'>✓ ok") + "</span>" + esc(extra || "") + "</td>";
+    const empty = (attr, label, text) => "<tr" + attr + "><th scope='row'>" + label + "</th><td colspan='7' class='muted'>· " + text + "</td></tr>";
+    const s = hm && hm.latestSample;
     const sample = s
-      ? ["Service sample", warned("sample:") ? "warn" : "ok", "RSS " + mb(s.rssBytes) + " MB · Heap " + mb(s.heapUsedBytes) + " MB · Loop " + s.eventLoopDelayMs + " ms · Polls " + s.pollCount, "", "", " id='health-sample-row'"]
-      : ["Service sample", "muted", "No health samples yet.", "", "", " id='health-sample-row'"];
+      ? "<tr id='health-sample-row'><th scope='row'>Service sample</th>" + status(warned("sample:"), " · " + s.pollCount + " polls") + NA + NA + td("loop " + s.eventLoopDelayMs + " ms") + NA + NA + td("RSS " + mb(s.rssBytes) + " MB · heap " + mb(s.heapUsedBytes) + " MB") + "</tr>"
+      : empty(" id='health-sample-row'", "Service sample", "No health samples yet.");
     const links = hm && Array.isArray(hm.links) ? hm.links : [];
     const linkRows = links.length
-      ? links.map(l => ["Link · " + l.peerId, warned("link:" + l.peerId + ":") ? "warn" : "ok", l.bytesSent + "B↑ / " + l.bytesReceived + "B↓ · " + (l.lastLatencyMs == null ? "—" : l.lastLatencyMs + " ms") + " · in-flight " + l.inFlight + " · reconnects " + l.reconnects, "", "", " data-link-peer='" + esc(l.peerId) + "'"])
-      : [["Link load", "muted", "No peer link traffic recorded.", "", "", " id='health-links-empty'"]];
-    return [sample, ...linkRows];
+      ? links.map(l => "<tr data-link-peer='" + esc(l.peerId) + "'><th scope='row'>Link · " + esc(l.peerId) + "</th>" + status(warned("link:" + l.peerId + ":")) + td(bytes(l.bytesSent)) + td(bytes(l.bytesReceived)) + (l.lastLatencyMs == null ? none("not measured yet") : td(l.lastLatencyMs + " ms")) + td(l.inFlight) + td(l.reconnects) + NA + "</tr>").join("")
+      : empty(" id='health-links-empty'", "Links", "No peer link traffic recorded.");
+    const head = ["Status", "Sent", "Received", "Latency", "In flight", "Reconnects", "Memory"].map(h => "<th scope='col'>" + h + "</th>").join("");
+    return "<div class='diag-wrap' role='region' aria-label='Diagnostics' tabindex='0'><table class='diag'><caption>Diagnostics · service and peer links</caption>" +
+      "<thead><tr><td></td>" + head + "</tr></thead><tbody>" + sample + linkRows + "</tbody></table></div>";
   }
   // B-142: health rows (end)
   window.renderHealth = function () {
@@ -734,9 +742,10 @@
     const warningsHtml = warnings.length
       ? "<div id='health-warnings' style='margin-top:4px'>" + warnings.map(w => "<div class='small warn' data-health-warning='" + esc(w.key) + "'>▲ " + esc(w.message) + "</div>").join("") + "</div>"
       : "";
-    // B-142: the service sample and link rows belong to the table; Update availability (with the updater status) ends it.
-    const table = rows.filter(r => r !== availabilityRow).concat(healthMetricRows(hm), availabilityRow ? [availabilityRow] : []);
+    // B-142: Update availability (with the updater status) ends the table; F-152: the diagnostics table follows it.
+    const table = rows.filter(r => r !== availabilityRow).concat(availabilityRow ? [availabilityRow] : []);
     document.getElementById("health").innerHTML = degraded + "<div class='health-table'>" + table.map(healthRowHtml).join("") + "</div>" +
+      healthDiagnosticsHtml(hm) +
       warningsHtml +
       policyHtml +
       updateResultHtml +
