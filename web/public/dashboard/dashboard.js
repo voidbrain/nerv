@@ -1339,7 +1339,7 @@ document.addEventListener("click", e => {
   if (t.dataset.promote) { const p = PILOTS.find(x => x.id === t.dataset.promote); if (p.stage === "prototype") { p.stage = "test"; log("Watermelons: " + p.id + " → test", "ok"); } else { log("Promotion of " + p.id + " to production needs you (card in Misato's apartment)", "warn"); p.stage = "production"; } renderAll(); return; }
   if (t.dataset.demote) { const p = PILOTS.find(x => x.id === t.dataset.demote); p.stage = p.stage === "production" ? "test" : "prototype"; log("Watermelons: " + p.id + " demoted → " + p.stage, "danger"); renderAll(); return; }
   if (t.dataset.toggle) { const b = BASES.find(x => x.id === t.dataset.toggle); b.status = b.status === "online" ? "offline" : "online"; if (b.status === "online") b.rtt = b.id === "tokyo3" ? 0 : 120; log(b.name + " → " + b.status, b.status === "online" ? "ok" : "warn"); renderAll(); return; }
-  if (t.id === "btn-seen") { state.lastVisit = Date.now(); if (LIVE) window.liveSeen(); renderAll(); return; }
+  if (t.id === "btn-seen") { if (LIVE) window.liveSeen(); else { state.lastVisit = Date.now(); renderAll(); } return; }
   if (t.id === "btn-reload" && LIVE) { window.liveReload(); return; }
   // B-129: the live dashboard asks the service (GET /api/doctor); the demo has no service to ask.
   if (t.id === "btn-doctor") { if (LIVE) { window.liveDoctor(); return; } log("Demo: Run doctor needs the live service; nothing was checked.", "warn"); return; }

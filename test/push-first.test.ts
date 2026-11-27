@@ -13,7 +13,44 @@ import { fakeBotApi, fakePushService, until, wait } from './fixtures/delivery-fa
 
 const OWNER = 5150;
 const TOKEN = '123456:' + 'p'.repeat(35);
+const dashboardLive = readFileSync('web/public/dashboard/live.js', 'utf8');
+const dashboardShell = readFileSync('web/public/dashboard/dashboard.js', 'utf8');
 type Payload = { notification: { title: string; data: Record<string, unknown> } };
+
+function dashboardSeen(
+  state: object,
+  api: (path: string, init?: RequestInit) => Promise<unknown>,
+  localStorage: object,
+  renderAll: () => void = () => {},
+) {
+  const start = dashboardLive.indexOf('  const VISIT = "nerv.dashboard.lastVisit";');
+  const end = dashboardLive.indexOf('  window.renderAway = function ()', start);
+  assert.ok(start >= 0 && end > start, 'the dashboard exposes its Mark as read handler');
+  const window: Record<string, unknown> = {};
+  new Function(
+    'state',
+    'window',
+    'api',
+    'localStorage',
+    'HOUR',
+    'renderAll',
+    `${dashboardLive.slice(start, end)}; return window.liveSeen;`,
+  )(state, window, api, localStorage, 60 * 60 * 1000, renderAll);
+  return window.liveSeen as () => Promise<void>;
+}
+
+function clickDashboardSeen(state: object, window: object, renderAll: () => void) {
+  const start = dashboardShell.indexOf('  if (t.id === "btn-seen")');
+  const end = dashboardShell.indexOf('\n', start);
+  assert.ok(start >= 0 && end > start, 'the dashboard binds #btn-seen');
+  new Function('t', 'state', 'LIVE', 'window', 'renderAll', dashboardShell.slice(start, end))(
+    { id: 'btn-seen' },
+    state,
+    true,
+    window,
+    renderAll,
+  );
+}
 
 /** The dashboard's real service worker (web/public/dashboard/sw.js) in a sandbox whose fetch reaches `origin`. */
 function phone(origin: string) {
@@ -359,6 +396,133 @@ test('B-149: a pushed reminder read in the app before the deadline never reaches
     assert.equal(t.telegrams('Letto nella app'), 0, 'read in the app: never on Telegram');
     assert.equal(t.store.deliveryState(seen).telegram, undefined);
     assert.equal(readAt(unseen), null, 'only the item the app showed is read');
+  } finally {
+    await t.close();
+  }
+});
+
+test('B-180 join: Mark as read updates every covered delivery so Telegram skips them', async () => {
+  const t = await setup({ fallbackMs: 1500 });
+  const origin = `http://127.0.0.1:${(t.server.address() as { port: number }).port}`;
+  const api = async (path: string, init: RequestInit = {}) => {
+    const response = await fetch(origin + '/api/' + path, {
+      ...init,
+      headers: { Authorization: 'Bearer ' + 's'.repeat(32), ...init.headers },
+    });
+    const body: unknown = await response.json();
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return body;
+  };
+  const readAt = (id: string) =>
+    (t.store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(id) as { read_at: string | null }).read_at;
+  try {
+    const outside = await t.due('Not covered by this visit');
+    await until(() => t.push.received.length === 1);
+    const since = Date.now();
+    const first = await t.due('Covered reminder one');
+    const second = await t.due('Covered reminder two');
+    await until(() => t.push.received.length === 3);
+    const history = (await api('dashboard/history?since=' + encodeURIComponent(new Date(since).toISOString()))) as {
+      delivered: number;
+    };
+    assert.equal(history.delivered, 2, 'the dashboard panel covers both delivered reminders');
+
+    const state = { lastVisit: since, deliveredCount: history.delivered, deliveredSince: since, brief: null };
+    const saved: string[] = [];
+    const localStorage = { getItem: () => String(since), setItem: (_key: string, value: string) => saved.push(value) };
+    await dashboardSeen(state, api, localStorage)();
+
+    assert.ok(readAt(first), 'the first covered delivery is marked read on the service');
+    assert.ok(readAt(second), 'the second covered delivery is marked read on the service');
+    assert.equal(readAt(outside), null, 'a delivery outside the panel remains unread');
+    assert.ok(state.lastVisit > since, 'the dashboard cursor advances after service reads succeed');
+    assert.deepEqual(saved, [String(state.lastVisit)], 'the advanced cursor is persisted');
+    await until(() => t.telegrams('Not covered by this visit') === 1);
+    assert.equal(t.telegrams('Covered reminder one'), 0);
+    assert.equal(t.telegrams('Covered reminder two'), 0);
+  } finally {
+    await t.close();
+  }
+});
+
+test('B-180 join: Mark as read includes the displayed brief', async () => {
+  const t = await setup({ fallbackMs: 1500 });
+  const origin = `http://127.0.0.1:${(t.server.address() as { port: number }).port}`;
+  const api = async (path: string, init: RequestInit = {}) => {
+    const response = await fetch(origin + '/api/' + path, {
+      ...init,
+      headers: { Authorization: 'Bearer ' + 's'.repeat(32), ...init.headers },
+    });
+    const body: unknown = await response.json();
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return body;
+  };
+  try {
+    const brief = t.store.addBrief('A neutral brief shown in the dashboard panel.');
+    const since = Date.now();
+    const history = (await api('dashboard/history?since=' + encodeURIComponent(new Date(since).toISOString()))) as {
+      brief: { id: string; created: string; read_at: string | null };
+    };
+    assert.equal(history.brief.id, brief.id, 'the service supplies the brief shown in the panel');
+    const state = { lastVisit: since, deliveredCount: 0, deliveredSince: since, brief: history.brief };
+    await dashboardSeen(state, api, { getItem: () => String(since), setItem: () => {} })();
+
+    const row = t.store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(brief.id) as {
+      read_at: string | null;
+    };
+    assert.ok(row.read_at, 'the displayed brief is marked read on the service');
+  } finally {
+    await t.close();
+  }
+});
+
+test('B-180 join: clicking #btn-seen reads the old visit panel before advancing its cursor', async () => {
+  const t = await setup({ fallbackMs: 1500 });
+  const origin = `http://127.0.0.1:${(t.server.address() as { port: number }).port}`;
+  let readsSucceeded = false;
+  const api = async (path: string, init: RequestInit = {}) => {
+    const response = await fetch(origin + '/api/' + path, {
+      ...init,
+      headers: { Authorization: 'Bearer ' + 's'.repeat(32), ...init.headers },
+    });
+    const body: unknown = await response.json();
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (path.startsWith('inbox/') && path.endsWith('/read')) readsSucceeded = true;
+    return body;
+  };
+  try {
+    const since = Date.now() - 10_000;
+    const id = await t.due('Covered through the dashboard button');
+    const history = (await api('dashboard/history?since=' + encodeURIComponent(new Date(since).toISOString()))) as {
+      delivered: number;
+    };
+    assert.equal(history.delivered, 1);
+    const state = { lastVisit: since, deliveredCount: history.delivered, deliveredSince: since, brief: null };
+    const saved: string[] = [];
+    const visitStorage = { getItem: () => String(since), setItem: (_key: string, value: string) => saved.push(value) };
+    const order: string[] = [];
+    const redraw = () => order.push(readsSucceeded ? 'after service read' : 'before service read');
+    const liveSeen = dashboardSeen(state, api, visitStorage, redraw);
+    let serviceRead: Promise<void> | undefined;
+    const window = { liveSeen: () => (serviceRead = liveSeen()) };
+    let renders = 0;
+    clickDashboardSeen(state, window, () => {
+      renders++;
+      redraw();
+    });
+    await serviceRead;
+
+    const readAt = (deliveryId: string) =>
+      (
+        t.store.db.prepare('SELECT read_at FROM deliveries WHERE id=?').get(deliveryId) as {
+          read_at: string | null;
+        }
+      ).read_at;
+    assert.ok(readAt(id), '#btn-seen marks the delivery shown by the previous visit cursor');
+    assert.ok(state.lastVisit > since, 'the visit cursor advances only after the service read');
+    assert.deepEqual(saved, [String(state.lastVisit)], 'the advanced cursor is persisted');
+    assert.equal(renders, 0, 'the button does not redraw before the service read');
+    assert.deepEqual(order, ['after service read'], 'the live handler redraws after the service read succeeds');
   } finally {
     await t.close();
   }
