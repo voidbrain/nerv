@@ -6,7 +6,7 @@
   "goal": "The owner confirms every section works in the full workspace dashboard, the simple view shows only its essentials, and push taps still confirm delivery",
   "status": "planned",
   "acceptance": [
-    "On the Mac, open the full dashboard after the update: each section shows live data and an idle poll reloads nothing; switching the theme between plain and EVA changes both layouts",
+    "On the Mac, run `nerv open full` after the update (it opens the full dashboard signed in): each section shows live data and an idle poll reloads nothing; switching the theme between plain and EVA changes both layouts",
     "On the Mac and the phone, open the simple view: it shows the chat, pending approvals, health at a glance, push on/off and a link to the full dashboard, and nothing else; the link opens the full dashboard and back",
     "On the phone, the installed app opens the workspace"
   ],

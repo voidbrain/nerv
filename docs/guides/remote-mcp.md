@@ -64,7 +64,7 @@ nerv tools grant coordinator/blocked_by
 nerv tools grant coordinator/record_lookup
 ```
 
-The full dashboard (`/full`) then shows a card with your turn across every project, what each step unblocks, how old the index's snapshot is and the projects it could not read (their work is unknown, not none), each row linked to its source file on GitHub. The card reads the index through these grants every 5 minutes and on Refresh, and keeps no copy. It uses `waiting_on_me` and `blocked_by`; `record_lookup` is for questions in chat. Until the server and both grants exist, the card shows the commands still to run; a grant other than `read` is not used; when the index is not running it says so, never that nothing waits.
+The full dashboard (open it with `nerv open full`: typing `/full` in the address bar reloads the page and asks to sign in again) then shows a card with your turn across every project, what each step unblocks, how old the index's snapshot is and the projects it could not read (their work is unknown, not none), each row linked to its source file on GitHub. The card reads the index through these grants every 5 minutes and on Refresh, and keeps no copy. It uses `waiting_on_me` and `blocked_by`; `record_lookup` is for questions in chat. Until the server and both grants exist, the card shows the commands still to run; a grant other than `read` is not used; when the index is not running it says so, never that nothing waits.
 
 ## Modules
 

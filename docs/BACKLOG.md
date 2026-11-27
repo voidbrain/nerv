@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 44 | 10 | 75 | 34 |
+| **This week** | 44 | 10 | 76 | 34 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 69 | 56 |
-| **Require Human 🧑** | 19 | 24 |
+| **Open** | 69 | 57 |
+| **Require Human 🧑** | 19 | 25 |
 
 ### Require Human 🧑
 
@@ -44,11 +44,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |  |  | [B-112](#b-112) |  |
 |  |  | [B-130](#b-130) |  |
 |  |  | [B-183](#b-183) |  |
+|  |  | [B-184](#b-184) |  |
 |  |  | [B-141](#b-141) |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 322.75 h agent + 26.75 h owner across 344 open steps of 69 features and 56 other records. 168.25 h of actual effort recorded on 158 steps. Generated from the task files.
+**Remaining effort:** 323.25 h agent + 27 h owner across 346 open steps of 69 features and 57 other records. 168.25 h of actual effort recorded on 158 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -5630,6 +5631,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Field | Value |
 |---|---|
 | PR / evidence | Pending PR; [#881](https://github.com/voidbrain/nerv/pull/881) |
+| Opened | 2026-11-27 |
+| Verification | Pending |
+| Reviewed | 2026-11-27 |
+
+</details>
+
+---
+### <a id="b-184"></a>[🐞 B-184](#top)
+
+**`nerv open` cannot land on the full dashboard: typing /full reloads and asks for pairing again**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.5 h agent + 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** B-184-T02, after the merge and the lifecycle update: run `nerv open full` and check the full dashboard opens signed in.
+
+| | |
+|---|---|
+| **Issue** | Owner finding 2026-11-27: `nerv open` lands on `/` with the sign-in held only in page memory (F-130-T01), so typing `/full` in the address bar reloads the page and asks for pairing or a code again. The guides told the owner to open `/full` by hand. |
+| **Reproduce** | `nerv open`, then type `/full` after the address in the same tab: the full dashboard shows its sign-in box. |
+| **Check** | `nerv open full` opens the full dashboard already signed in; `nerv open`, `nerv open dashboard` and `--print` behave as before. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-184-t01"></a>B-184-T01 — Add nerv open full: the one-time sign-in landing on the full dashboard | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [B-184-T02](#b-184-t02) | 🤖 |
+| 🟢 Small | <a id="b-184-t02"></a>B-184-T02 — Owner: open the full dashboard with nerv open full | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-184-T01](#b-184-t01) | — | ⏳ 🧑‍🔧 |
+| 🟢 Small | **Total** | 0.5 h | 0 h (0 of 2 steps recorded) | 0.5 h agent + 0.25 h owner | 0 of 2 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-184.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Pending PR; [#880](https://github.com/voidbrain/nerv/pull/880) |
 | Opened | 2026-11-27 |
 | Verification | Pending |
 | Reviewed | 2026-11-27 |

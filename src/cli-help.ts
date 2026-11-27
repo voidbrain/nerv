@@ -319,8 +319,8 @@ export const HELP_GROUPS: HelpGroup[] = [
       { name: 'devices', args: '[list] | revoke NAME|ID', about: 'Paired phones: list or revoke' },
       {
         name: 'open',
-        args: '[dashboard] [--phone [--qr] [--url URL]]',
-        about: 'Open the dashboard, or pair a phone (with a QR)',
+        args: '[full | dashboard] [--print] [--phone [--qr] [--url URL]]',
+        about: 'Open the workspace signed in (full: the full dashboard), or pair a phone (with a QR)',
       },
     ],
   },
