@@ -4,7 +4,7 @@
   "parent": "B-181",
   "title": "Record a digest of each staged skill version and refuse a changed one at run time",
   "goal": "Only the text the owner staged and promoted reaches the planner",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A failing test (committed first) edits a promoted invented skill's stored SKILL.md and expects chooseActiveSkill to refuse it with a reason naming the change, and the planner prompt to carry no instructions",
     "stageSkillPackage records a sha-256 of the stored package files in the registry; loadSkillVersion, or the run-time matcher, compares it; a version staged before the digest existed is refused at run time until it is staged again as a new version, and the guide says so"
