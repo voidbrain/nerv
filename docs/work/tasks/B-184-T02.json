@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "B-184-T02",
+  "parent": "B-184",
+  "title": "Owner: open the full dashboard with nerv open full",
+  "goal": "The owner confirms the full dashboard opens signed in",
+  "status": "planned",
+  "acceptance": [
+    "On NERV-01 after the lifecycle update, in Terminal: `nerv open full`. Expected: the browser opens http://127.0.0.1:4317/full (the #code part disappears at once) on the full dashboard, signed in, with no sign-in box. Then `nerv open --print`. Expected: one line http://127.0.0.1:4317/#code=… (32 hex characters), as before"
+  ],
+  "dependsOn": [
+    "B-184-T01"
+  ],
+  "resources": [
+    "docs/work/records/B-184.md"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "The owner keeps the printed code to themselves; nothing from it goes into Git.",
+  "validation": [
+    "Owner check, recorded in B-184 Verification"
+  ],
+  "escalation": [
+    "The owner decides; the agent records the result"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-27: two commands on the Mac. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  }
+}
