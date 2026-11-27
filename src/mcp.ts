@@ -32,11 +32,15 @@ export interface McpStdioServer {
   id: string;
   command: string;
   args: string[];
+  /** F-159: the module is off: nothing calls it and Misato is offered none of its tools; its grants are kept. */
+  off?: true;
 }
 /** F-123: a server already running elsewhere, reached at its MCP endpoint over streamable HTTP. */
 export interface McpHttpServer {
   id: string;
   url: string;
+  /** F-159: as for a stdio server. */
+  off?: true;
 }
 export type McpServer = McpStdioServer | McpHttpServer;
 export const isHttpServer = (s: McpServer): s is McpHttpServer => 'url' in s;
@@ -114,19 +118,21 @@ export function validateTools(value: unknown): ToolsConfig {
   const mcp: McpServer[] = [];
   for (const raw of (v.mcp ?? []) as unknown[]) {
     const s = raw as Record<string, unknown>;
-    if (!s || typeof s !== 'object' || Object.keys(s).some((k) => !['id', 'command', 'args', 'url'].includes(k)))
+    if (!s || typeof s !== 'object' || Object.keys(s).some((k) => !['id', 'command', 'args', 'url', 'off'].includes(k)))
       throw new Error('Invalid MCP server: id with command and args, or id with url.');
     if (typeof s.id !== 'string' || !/^[a-z][a-z0-9]{1,15}$/.test(s.id) || RESERVED.includes(s.id))
       throw new Error(
         `Invalid MCP server id ${JSON.stringify(s.id)}: lower-case letters and digits, not one of NERV's own (${RESERVED.join(', ')}).`,
       );
     if (mcp.some((x) => x.id === s.id)) throw new Error(`MCP server ${s.id} is listed twice.`);
+    if ('off' in s && s.off !== true) throw new Error(`MCP server ${s.id}: off is true or absent.`);
+    const off = s.off === true ? { off: true as const } : {};
     if (s.url !== undefined) {
       if (s.command !== undefined || s.args !== undefined)
         throw new Error(`MCP server ${s.id}: a url or a command, not both.`);
       const why = urlRefusal(s.url);
       if (why) throw new Error(`MCP server ${s.id}: ${why}.`);
-      mcp.push({ id: s.id, url: s.url as string });
+      mcp.push({ id: s.id, url: s.url as string, ...off });
       continue;
     }
     if (typeof s.command !== 'string' || !s.command.trim() || s.command.length > 300)
@@ -136,7 +142,7 @@ export function validateTools(value: unknown): ToolsConfig {
       (!Array.isArray(s.args) || s.args.length > 30 || s.args.some((a) => typeof a !== 'string' || a.length > 500))
     )
       throw new Error(`MCP server ${s.id}: args is a list of strings.`);
-    mcp.push({ id: s.id, command: s.command, args: (s.args as string[] | undefined) ?? [] });
+    mcp.push({ id: s.id, command: s.command, args: (s.args as string[] | undefined) ?? [], ...off });
   }
   const grants: ToolGrant[] = [];
   for (const raw of (v.grants ?? []) as unknown[]) {

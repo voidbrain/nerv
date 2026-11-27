@@ -4,7 +4,7 @@
   "parent": "F-159",
   "title": "Test first: modules listed and switched in config and the CLI",
   "goal": "`nerv modules` lists every module with on/off, reachable and tool count; `nerv modules on|off NAME` switches it, keeping grants",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Failing tests first: FPVBuddy (the FPV pack), Cooking and each MCP server are one row each; an MCP server named fpvbuddy joins the FPVBuddy row",
     "Off writes packs.<id>: false or off: true on the server entry; grants stay in config.json; On clears it",
@@ -36,10 +36,11 @@
   "effort": {
     "size": "small",
     "estimate": "1 h",
-    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement. Implemented 2026-11-27 test first; actual is elapsed agent time to the PR.",
     "reviewed": "2026-11-27",
-    "agentHours": 1,
+    "agentHours": 0,
     "baselineAgentHours": 1,
-    "estimateAgentHours": 1
+    "estimateAgentHours": 1,
+    "actualAgentHours": 0.75
   }
 }

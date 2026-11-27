@@ -189,7 +189,11 @@ test(
       );
       const before = hub.requests();
       assert.match((await cli('modules')).stdout, /Grover \(grover\) · off · not asked while off · 1 tool\(s\)/);
-      assert.equal(hub.requests(), before, 'an off server is not contacted by the listing');
+      assert.match(
+        (await cli('tools')).stdout,
+        /grover · .* · off, not asked: nerv modules on grover · 1 grant\(s\) kept/,
+      );
+      assert.equal(hub.requests(), before, 'an off server is not contacted by either listing');
       assert.match((await cli('modules', 'on', 'grover')).stdout, /Grover is on/);
       assert.match((await cli('modules', 'off', 'garden')).stderr, /No module garden/);
       assert.match((await cli('modules', 'pause', 'grover')).stderr, /Usage: modules/);

@@ -98,6 +98,8 @@ import {
   type Eva,
   type McpTool,
 } from './mcp.ts';
+import { listModules, setModuleOn, type ServerListing } from './modules.ts';
+import { builtinPackRegistry } from './packs.ts';
 import { effects, patternOf, defaultPolicy, type Effect } from './policy.ts';
 import { TelegramApi, diagnoseNoStart, startChats, telegramBase } from './telegram.ts';
 
@@ -858,6 +860,11 @@ export async function tryRunCliCommand(
         );
       }
       for (const s of tools.mcp) {
+        if (s.off) {
+          const kept = tools.grants.filter((g) => g.server === s.id).length;
+          console.log(`${s.id} · ${serverLabel(s)} · off, not asked: nerv modules on ${s.id} · ${kept} grant(s) kept`);
+          continue;
+        }
         let list: McpTool[];
         try {
           list = await listOf(s.id);
@@ -948,6 +955,42 @@ export async function tryRunCliCommand(
           `${toolName(server, tool)} granted as ${effect === 'read' ? 'a read' : effect} (${how}), EVA-${eva}${eva === '03' ? ': it will not run until EVAs exist' : ''}. Pinned to its current description: if the server changes it, the grant is suspended.`,
         );
       }
+    } else throw new Error(usage);
+  } else if (command === 'modules') {
+    // F-159: one switch per MCP server and built-in pack. Off keeps grants and data; `tools remove` drops a server.
+    const [sub, id] = args;
+    const usage = 'Usage: modules | modules on NAME | modules off NAME';
+    if (!sub) {
+      const config = readConfig(home);
+      const listing: ServerListing = [];
+      for (const s of config.tools?.mcp ?? []) {
+        if (s.off) continue;
+        const c = connectMcp(s);
+        try {
+          await c.listTools();
+          listing.push({ server: s.id });
+        } catch (e) {
+          listing.push({ server: s.id, error: e instanceof Error ? e.message : 'could not list its tools' });
+        } finally {
+          c.close();
+        }
+      }
+      for (const m of listModules(config, builtinPackRegistry, listing)) {
+        const reach = !m.on
+          ? 'not asked while off'
+          : m.reachable === false
+            ? `not reachable: ${m.why ?? 'unknown'}`
+            : 'reachable';
+        console.log(`${m.name} (${m.id}) · ${m.on ? 'on' : 'off'} · ${reach} · ${m.tools} tool(s)`);
+      }
+    } else if ((sub === 'on' || sub === 'off') && id && args.length === 2) {
+      const m = setModuleOn(home, id, sub === 'on');
+      const grants = (readConfig(home).tools?.grants ?? []).filter((g) => m.servers.includes(g.server)).length;
+      console.log(
+        sub === 'off'
+          ? `${m.name} is off: Misato is offered none of its tools, its dashboard cards hide and nothing calls it; its ${grants} grant(s) and its data are kept. Turn it back on: nerv modules on ${m.id}`
+          : `${m.name} is on: its tools are offered again as granted, no new grant needed.`,
+      );
     } else throw new Error(usage);
   } else if (command === 'pilots') {
     // F-045: the owner's permanent agents. Slice 1: they advise Misato before it plans, by domain keywords.

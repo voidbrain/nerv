@@ -53,18 +53,22 @@ export async function callModelWithUsage(options: {
 export async function loadExternalTools(options: {
   home?: string;
   force?: boolean;
-  cache?: { at: number; value: ExternalTools };
+  cache?: ExternalToolsCache;
   toolsProcess: () => ProcessClient;
-}): Promise<{ value: ExternalTools; cache?: { at: number; value: ExternalTools } }> {
-  const grants = (() => {
+}): Promise<{ value: ExternalTools; cache?: ExternalToolsCache }> {
+  const tools = (() => {
     try {
-      return options.home ? (readConfig(options.home).tools?.grants ?? []) : [];
+      return options.home ? readConfig(options.home).tools : undefined;
     } catch {
-      return [];
+      return undefined;
     }
   })();
+  // F-159: an off module's grants are kept but offer nothing; a switch invalidates the cache at once.
+  const off = (tools?.mcp ?? []).filter((s) => s.off).map((s) => s.id);
+  const grants = (tools?.grants ?? []).filter((g) => !off.includes(g.server));
+  const key = off.join(',');
   if (!grants.length) return { value: { docs: [], byName: new Map(), suspended: [] }, cache: options.cache };
-  if (!options.force && options.cache && Date.now() - options.cache.at < 60_000) {
+  if (!options.force && options.cache && options.cache.off === key && Date.now() - options.cache.at < 60_000) {
     return { value: options.cache.value, cache: options.cache };
   }
   const listed = (await options
@@ -94,8 +98,10 @@ export async function loadExternalTools(options: {
       args: JSON.stringify(t.inputSchema ?? {}).slice(0, 1400),
     });
   }
-  return { value, cache: { at: Date.now(), value } };
+  return { value, cache: { at: Date.now(), value, off: key } };
 }
+/** The granted tools last listed, with the off modules they were listed under (F-159). */
+export type ExternalToolsCache = { at: number; value: ExternalTools; off?: string };
 
 /** B-148: one configured MCP server as doctor reports it: how many tools it lists, or why it cannot start. */
 export type McpHealth = { server: string; tools: number } | { server: string; error: string };
@@ -110,7 +116,8 @@ export async function mcpServerHealth(options: {
 }): Promise<McpHealth[]> {
   let ids: string[];
   try {
-    ids = options.home ? (readConfig(options.home).tools?.mcp ?? []).map((s) => s.id) : [];
+    // F-159: an off module is not checked: it is not broken, and nothing calls it.
+    ids = options.home ? (readConfig(options.home).tools?.mcp ?? []).filter((s) => !s.off).map((s) => s.id) : [];
   } catch (e) {
     return [{ server: 'config.json', error: e instanceof Error ? e.message : 'The tools section cannot be read.' }];
   }
@@ -198,6 +205,7 @@ export async function readLiveIndex(options: {
       (t) => `nerv tools grant ${LIVE_INDEX_SERVER}/${t}`,
     ),
   ];
+  if (server?.off) return { state: 'off' };
   if (!server || commands.length) return { state: 'not-set-up', commands };
   if (!isHttpServer(server)) return { state: 'failed', reason: `${LIVE_INDEX_SERVER} is not registered by its URL` };
   const notRead = grants.find((g) => CARD_TOOLS.includes(g.tool as (typeof CARD_TOOLS)[number]) && g.effect !== 'read');

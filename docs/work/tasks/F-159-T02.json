@@ -4,7 +4,7 @@
   "parent": "F-159",
   "title": "Test first: off means no tools offered and no calls; on restores without re-granting",
   "goal": "Misato is offered none of an off module's tools and nothing calls its server; On restores the grants as they were",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Failing join test first across config, the tools process and Misato's offered tools: off offers no tool of the server (no stale cache) and the server receives no request; on offers them again without a new grant",
     "A tool whose description changed while off stays suspended after on",
@@ -39,10 +39,11 @@
   "effort": {
     "size": "medium",
     "estimate": "1.25 h",
-    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement. Implemented 2026-11-27 test first; actual is elapsed agent time to the PR.",
     "reviewed": "2026-11-27",
-    "agentHours": 1.25,
+    "agentHours": 0,
     "baselineAgentHours": 1.25,
-    "estimateAgentHours": 1.25
+    "estimateAgentHours": 1.25,
+    "actualAgentHours": 0.5
   }
 }
