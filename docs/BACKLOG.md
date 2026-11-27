@@ -947,7 +947,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|:---:|:---:|:---:|
 | 🔴 Open | 🔺 P1 | 🟡 Medium | 1.5 h agent + 0.5 h owner | — | — | 🤖 | 🧑‍🔧 | — |
 
-🧑 **→** B-175-T08: paste the read-only NERV-01 query in "Owner check 2026-11-27" below, so the agent can name why the dashboard follow-up S-6AAF carried no earlier exchange. Stages 1 and 2 merged (#853, #856); B-175-T04 step 2 failed, B-175-T06 and B-175-T07 remain.
+🧑 **→** B-175-T04: repeat step 2 with both Grover questions in the dashboard chat (not one in `nerv chat`: they are separate conversations). Stages 1 and 2 merged (#853, #856); B-175-T06 and B-175-T07 remain.
 
 | | |
 |---|---|
@@ -961,11 +961,11 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 |---|---|---|---|---|---|---|---|:---:|---|
 | 🟢 Small | <a id="b-175-t04"></a>B-175-T04 — Owner check in the dashboard: a second granted Grover read in one conversation | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | — | — | [🧑‍🔧](decisions/tainted-mcp-reads.md#owner-check) | — |
 | 🟢 Small | <a id="b-175-t06"></a>B-175-T06 — Stage 2: the owner sets the opt-in with nerv tools grant, and the Tools panel shows it | 1 h | 0 h | 0 h | Planned | — | [B-175-T07](#b-175-t07) | 🤖 | — |
-| 🟡 Medium | <a id="b-175-t08"></a>B-175-T08 — Find why a dashboard follow-up carried no earlier exchange (B-175-T04 step 2, S-6AAF) | 1.5 h | 0 h | 1.5 h | Planned | — | — | 🤖 | — |
+| 🟡 Medium | <a id="b-175-t09"></a>B-175-T09 — A failed misato.context read is no longer indistinguishable from an empty conversation | 1.5 h | 0 h | 1.5 h | Planned | — | — | 🤖 | — |
 | 🟢 Small | <a id="b-175-t07"></a>B-175-T07 — Owner check: an opted-in Grover read answers twice in one dashboard conversation | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-175-T06](#b-175-t06) | — | ⏳ 🧑‍🔧 | — |
-| 🟡 Medium | **Total** | 6 h | 0 h (0 of 8 steps recorded) | 1.5 h agent + 0.5 h owner | 4 of 8 completed | | | | |
+| 🟡 Medium | **Total** | 6 h | 0 h (0 of 9 steps recorded) | 1.5 h agent + 0.5 h owner | 5 of 9 completed | | | | |
 
-<details><summary>Done steps (4)</summary>
+<details><summary>Done steps (5)</summary>
 
 | Effort | Step | Estimate | Actual | Status | PRs |
 |---|---|---|---|---|---|
@@ -973,6 +973,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | — | <a id="b-175-t02"></a>B-175-T02 — Owner decision: how granted MCP reads behave in a tainted conversation | 0 h | 0 h | Completed | — |
 | — | <a id="b-175-t03"></a>B-175-T03 — Stage 1 (option 2): the isolation refusal says what to do, Misato stops at the first one, dashboard New conversation | 1.5 h | 0 h | Completed | [PR #853](https://github.com/voidbrain/nerv/pull/853) merged on green CI |
 | — | <a id="b-175-t05"></a>B-175-T05 — Stage 2 (option 4): a read grant can opt in to run in a tainted conversation | 1.5 h | 0 h | Completed | [PR #856](https://github.com/voidbrain/nerv/pull/856) merged on green CI |
+| — | <a id="b-175-t08"></a>B-175-T08 — Find why a dashboard follow-up carried no earlier exchange (B-175-T04 step 2, S-6AAF): not a bug | 0 h | 0 h | Completed | — |
 
 </details>
 
@@ -983,7 +984,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: B-175-T01: [PR #849](https://github.com/voidbrain/nerv/pull/849) merged on green CI · B-175-T03: [PR #853](https://github.com/voidbrain/nerv/pull/853) merged on green CI · B-175-T05: [PR #856](https://github.com/voidbrain/nerv/pull/856) merged on green CI. Found by the owner 2026-11-26; Test: `test/provenance.test.ts` (B-175, `todo` until T03). Code: `src/policy.ts`, `src/eva-classes.ts`, `src/ledger.ts`, `web/public/dashboard/live.js`.; [#849](https://github.com/voidbrain/nerv/pull/849); [#853](https://github.com/voidbrain/nerv/pull/853) (stage 1). [#856](https://github.com/voidbrain/nerv/pull/856) (stage 2). Review: design-reviewer (Opus, fresh context) 2026-11-26 on #853: no blockers; two should-fix (EVA-03 grant reply, dashboard context test) fixed in the PR; a second review of the same-request answer: no blockers, three should-fix (script or question on the extra turn, only outside results count, nothing lost on a bad turn) fixed. Stage 2 review: design-reviewer (Opus, fresh context) 2026-11-26: no blockers; four should-fix (remote servers refused, guide risk and exception, threat row) fixed in #856.; [#864](https://github.com/voidbrain/nerv/pull/864) |
+| PR / evidence | Steps: B-175-T01: [PR #849](https://github.com/voidbrain/nerv/pull/849) merged on green CI · B-175-T03: [PR #853](https://github.com/voidbrain/nerv/pull/853) merged on green CI · B-175-T05: [PR #856](https://github.com/voidbrain/nerv/pull/856) merged on green CI. Found by the owner 2026-11-26; Test: `test/provenance.test.ts` (B-175, `todo` until T03). Code: `src/policy.ts`, `src/eva-classes.ts`, `src/ledger.ts`, `web/public/dashboard/live.js`.; [#849](https://github.com/voidbrain/nerv/pull/849); [#853](https://github.com/voidbrain/nerv/pull/853) (stage 1). [#856](https://github.com/voidbrain/nerv/pull/856) (stage 2); [#865](https://github.com/voidbrain/nerv/pull/865) (T08 closed). Review: design-reviewer (Opus, fresh context) 2026-11-26 on #853: no blockers; two should-fix (EVA-03 grant reply, dashboard context test) fixed in the PR; a second review of the same-request answer: no blockers, three should-fix (script or question on the extra turn, only outside results count, nothing lost on a bad turn) fixed. Stage 2 review: design-reviewer (Opus, fresh context) 2026-11-26: no blockers; four should-fix (remote servers refused, guide risk and exception, threat row) fixed in #856.; [#864](https://github.com/voidbrain/nerv/pull/864) |
 | Opened | 2026-11-26 |
 | Verification | Pending |
 | Reviewed | 2026-11-27 |
