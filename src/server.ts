@@ -573,6 +573,22 @@ export function makeServer(
             Number(url.searchParams.get('limit') ?? 50),
           ),
         );
+      } else if (req.method === 'GET' && path === '/api/modules') {
+        // F-159: one switch per MCP server and built-in pack; off keeps grants and data.
+        if (url.search) throw new Error('Unknown modules query.');
+        reply(200, { modules: store.modules ? await store.modules() : [] });
+      } else if (req.method === 'PUT' && /^\/api\/modules\/[a-z][a-z0-9-]{0,39}$/i.test(path) && store.setModule) {
+        const b = await body(req);
+        if (Object.keys(b).length !== 1 || typeof b.on !== 'boolean') {
+          reply(400, { error: 'Send {"on": true} or {"on": false}.' });
+          return;
+        }
+        try {
+          reply(200, { modules: await store.setModule(path.split('/')[3]!, b.on) });
+        } catch (e) {
+          const message = (e as Error).message;
+          reply(message.startsWith('No module ') ? 404 : 400, { error: message });
+        }
       } else if (req.method === 'GET' && path === '/api/live-index') {
         if (url.search) throw new Error('Unknown live index query.');
         if (!store.liveIndex) {

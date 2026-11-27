@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { Language } from '../language.ts';
 import { LiveFeed } from '../live-feed.ts';
 import { LiveIndexCard } from '../live-index-card.ts';
+import { Modules, ModulesPanel } from '../modules-panel.ts';
 import { Session } from '../session.ts';
 import { SignIn } from '../sign-in.ts';
 import { ThemeService } from '../theme.ts';
@@ -41,7 +42,7 @@ const ACCENT_KEY = {
  */
 @Component({
   selector: 'nerv-dashboard',
-  imports: [RouterLink, SignIn, Panel, Stat, LiveIndexCard],
+  imports: [RouterLink, SignIn, Panel, Stat, LiveIndexCard, ModulesPanel],
   host: { class: 'dash', '[style]': 'theme.tokens()', '[attr.data-theme]': 'theme.choice().theme' },
   template: `
     <header class="dash-head">
@@ -123,7 +124,11 @@ const ACCENT_KEY = {
             </ul>
           </nerv-panel>
         </div>
-        <nerv-live-index-card />
+        <!-- The card exists only while its module is on, so off also stops its polling. -->
+        @if (modules.shown('coordinator')) {
+          <nerv-live-index-card />
+        }
+        <nerv-modules-panel />
         <nerv-panel [heading]="t().movingHere" headingId="dash-moving">
           <p class="meta">
             {{ t().movingBefore }} <a href="/dashboard/">{{ t().oldDashboard }}</a>{{ t().movingAfter }}
@@ -273,6 +278,7 @@ const ACCENT_KEY = {
 export class DashboardShell {
   protected readonly session = inject(Session);
   protected readonly feed = inject(LiveFeed);
+  protected readonly modules = inject(Modules);
   protected readonly theme = inject(ThemeService);
   protected readonly lang = inject(Language);
   protected readonly t = this.lang.t;

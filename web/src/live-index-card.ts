@@ -1,6 +1,7 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { liveIndexAgeMinutes, type LiveIndexView } from '../../src/live-index.ts';
 import { Language } from './language.ts';
+import { Modules } from './modules-panel.ts';
 import { Session } from './session.ts';
 import { ThemeService } from './theme.ts';
 import { Panel } from './ui.ts';
@@ -165,6 +166,7 @@ const READ_EVERY_MS = 5 * 60_000;
 })
 export class LiveIndexCard {
   private readonly session = inject(Session);
+  private readonly modules = inject(Modules);
   private readonly theme = inject(ThemeService);
   protected readonly t = inject(Language).t;
   protected readonly eva = computed(() => this.theme.choice().theme === 'eva');
@@ -203,6 +205,8 @@ export class LiveIndexCard {
     this.reading.set(true);
     try {
       const v = (await this.session.request('live-index')) as LiveIndexView;
+      // F-159: turned off elsewhere (the CLI, another tab): reread the modules, so the dashboard drops this card.
+      if (v.state === 'off') void this.modules.load();
       this.readAt.set(Date.now());
       this.view.set(v);
       this.problem.set('');

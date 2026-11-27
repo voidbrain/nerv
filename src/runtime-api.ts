@@ -159,6 +159,10 @@ export interface OwnerAction {
 export type ActReply = ActResult & { casperError?: string };
 
 export interface StoreApi {
+  /** F-159: every module (MCP servers and built-in packs) with on/off, reachable and tools. */
+  modules?(): Promise<import('./modules.ts').ModuleRow[]>;
+  /** F-159: turn one module on or off, keeping its grants and data; the modules as they are now. */
+  setModule?(id: string, on: boolean): Promise<import('./modules.ts').ModuleRow[]>;
   /** F-147: the coordinator's live index, read through its granted MCP read tools. */
   liveIndex?(): Promise<import('./live-index.ts').LiveIndexView>;
   /** B-168: the owner's configured language (`config.language`), for replies to requests with no language signal. */
