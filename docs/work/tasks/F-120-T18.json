@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-120-T18",
+  "parent": "F-120",
+  "title": "nerv-planner 1.2.0: replies held to the decision schema, planner case time 120 s",
+  "goal": "A nerv-planner case fails only on the model's decision, not on the contract's shape or a case limit shorter than NERV's planner step",
+  "status": "implemented",
+  "acceptance": [
+    "Found by the first real run (owner-approved F-120-T14 run, 2026-11-27 01:10-01:18, gemma4:26b and gemma4:12b, nerv-planner 1.1.0; reports hold responseHash only, matched by hashing candidate replies): memory-fact-it/en wrote memory.remember with the owner's words as text (26b it: \"Sono allergico alle noci\"; en on both: \"I am allergic to walnuts\") although the contract says to leave free text out; pilot-promote-it hit the 30 s day case limit on both models, which leaves consumption unverified, so Gauntlet skipped the 19 cases after it",
+    "Each case sends its decision shape as Ollama's structured-output schema (responseFormat): an action's args hold only arguments an offered tool requires that are not free text (title, text, texts, body, phrase, query, notes), ask and reply hold nothing else; the model still picks decision, tool and values",
+    "A nerv-planner case gets MODEL_TIMEOUT_MS (120 s, src/model.ts), the time NERV gives one planner step; suite budget and output tokens stay the day limits'",
+    "Pack 1.2.0 rebuilt (node tools/gauntlet-planner-pack.mjs --check), capability index regenerated; tests first: test/gauntlet-planner.test.mjs F-120-T18 (schema admits each expected value, refuses the night's memory.remember text, title and kind on reminders.add, extra keys on ask; the fake model receives the schema as format; planner case time); one deliberate change: the committed-pack test now expects a schema instead of format \"json\"",
+    "Left as the model's (or the planner prompt's) answer, not changed: on 26b all six reminder action and routing cases, on 12b reminder-in-minutes-it/en, answered reminders.list (check for duplicates first) where reminders.add or tools.read was expected; the prompt says to check \"reminders\" and call reminders.list if needed, and the runtime omits \"reminders\" when none match, as the cases do. reminder-no-subject and reminder-exists replies could not be matched (they likely carried free text, which the schema now refuses)"
+  ],
+  "dependsOn": [
+    "F-120-T14"
+  ],
+  "resources": [
+    "evals/gauntlet/**",
+    "tools/gauntlet.mjs",
+    "tools/gauntlet-planner-pack.mjs",
+    "test/gauntlet-planner.test.mjs",
+    "docs/test-capability-index.md",
+    "docs/evaluations/gauntlet.md",
+    "docs/work/records/F-120.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "privacy": "Neutral invented data only; captured replies stay private evidence, never committed.",
+  "validation": [
+    "node --test test/gauntlet-planner.test.mjs test/gauntlet.test.mjs",
+    "node tools/gauntlet-planner-pack.mjs --check",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Not verified on a real model: no model ran while this was built (a model campaign was using the Mac). The rerun of 1.2.0 on both models is the check; a further run needs the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Done 2026-11-27: cause analysis from the saved reports, schema in the pack builder, case time, tests. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
+  }
+}
