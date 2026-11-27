@@ -36,5 +36,10 @@
     "agentHours": 0,
     "ownerKind": "procedure"
   },
-  "ownerLink": "docs/acceptance/f060-t01-herdr-trial.md"
+  "ownerLink": "docs/acceptance/f060-t01-herdr-trial.md",
+  "prs": [
+    {
+      "pr": 890
+    }
+  ]
 }
