@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "B-178-T01",
+  "parent": "B-178",
+  "title": "Failing test: gauntlet ledger records a multi-case model-runner report",
+  "goal": "The B-178 test in test/gauntlet.test.mjs fails on main",
+  "status": "implemented",
+  "acceptance": [
+    "The B-178 test in test/gauntlet.test.mjs fails on main with \"Inconsistent token totals\" and is committed before the fix"
+  ],
+  "resources": [
+    "test/gauntlet.test.mjs",
+    "docs/work/records/B-178.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "regression-design"
+  ],
+  "validation": [
+    "node --test test/gauntlet.test.mjs"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 remaining",
+    "basis": "Done 2026-11-27 with a stand-in coding runner. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25,
+    "actualAgentHours": 0.25,
+    "actualSource": "stated"
+  },
+  "dependsOn": [],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ]
+}

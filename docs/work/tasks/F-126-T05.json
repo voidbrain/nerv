@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "F-126-T05",
+  "parent": "F-126",
+  "title": "Night rerun: the six cad-3d cases gemma4:26b has not finished",
+  "goal": "gemma4:26b has a graded result for every cad-3d case, so the cad-3d comparison with gemma4:12b (10/10) is complete",
+  "status": "planned",
+  "acceptance": [
+    "In a night model plan on a quiet Mac (no owner use of the local model), from a development worktree at origin/main, never ~/.nerv-app: node tools/gauntlet.mjs model-run --profile=evals/gauntlet/profiles/gemma4-26b.json --pack=cad-3d --only=slicer-wall-layers-regression,tolerance-shrinkage-compensation-holdout,spacer-cylinder-regression,l-bracket-regression,open-tray-holdout,flanged-bushing-holdout --allow-models --execute --fresh --out=<new report>, then node tools/gauntlet.mjs ledger --report=<report> --pack=cad-3d",
+    "slicer-wall-layers-regression used the whole 2,048-token reply twice (evening 58 to 72 s, night 52 s); if it errors again it stops the run, so the other five run with --only without it",
+    "The result is added to docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md and F-126"
+  ],
+  "dependsOn": [
+    "F-126-T02"
+  ],
+  "resources": [
+    "docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md",
+    "evals/gauntlet/ledger.json",
+    "docs/work/records/F-126.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "evaluation-design"
+  ],
+  "privacy": "Local models only; no paid route, prompts are neutral fixtures, raw reports stay private on their base.",
+  "validation": [
+    "npm run check:gauntlet-ledger",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A model run needs a quiet Mac and the owner's night plan; a material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-27: about 10 minutes of model time plus the ledger and report lines. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

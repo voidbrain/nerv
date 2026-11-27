@@ -6,7 +6,8 @@
   "goal": "The owner chooses gemma4:26b or keeps gemma4:12b from the speed and quality evidence",
   "status": "planned",
   "acceptance": [
-    "The owner's decision (switch or keep, and why) is recorded with the date"
+    "The owner's decision (switch or keep, and why) is recorded with the date",
+    "2026-11-26 in chat, before the quality evidence: \"gemma4:26b your main model\"; the owner switched NERV-01's live roles (Misato, Casper, Consultant) to gemma4:26b the same day. The evidence of 2026-11-27 (docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md) shows gemma4:12b as good or better on the planner (18/36 against 17/36), embedded (3/4 against 2/4) and cad-3d; the owner confirms the switch or goes back to gemma4:12b"
   ],
   "dependsOn": [
     "F-126-T02"
@@ -32,7 +33,7 @@
     "agentHours": 0,
     "ownerHours": 0.25,
     "ownerKind": "decision",
-    "reviewed": "2026-11-25"
+    "reviewed": "2026-11-27"
   },
   "prs": [
     {

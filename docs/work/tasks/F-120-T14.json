@@ -7,7 +7,8 @@
   "status": "planned",
   "acceptance": [
     "After F-120-T13's ok: nerv-planner/* runs once (--allow-models --execute, profile gemma4-12b.json, in a development worktree, never ~/.nerv-app, not while the owner uses the local model) and is recorded in evals/gauntlet/ledger.json",
-    "Failed cases are read with --capture-failures and each is recorded as a model answer, a case problem (fixed in a new pack version) or a NERV defect (a B- record)"
+    "Failed cases are read with --capture-failures and each is recorded as a model answer, a case problem (fixed in a new pack version) or a NERV defect (a B- record)",
+    "Progress 2026-11-27 (owner-approved night): 1.1.0 ran 01:10 on gemma4:26b and gemma4:12b (19 cases not run after a 30 s timeout, F-120-T18); 1.2.0 ran 01:49 on both, every case ran, and both reports are in the ledger (26b 17/36, 12b 18/36). 22 of 37 failed replies matched by hash: reminders.list instead of reminders.add (4 cases, both models) or tools.read (routing), grover.grover_overview before declining (26b: tent light, switched-off print, promotion; 12b: table booking), docs.list or lists.show on trip-place-en, ask or agency.status on pilot-promote (12b). Remaining: a --capture-failures run of the unmatched cases (memory-fact, print-feet, some decline cases), which needs the owner"
   ],
   "dependsOn": [
     "F-120-T13"
@@ -30,10 +31,10 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.5 h",
-    "basis": "Split from F-120-T09: one run of about 18 minutes at most, the ledger entry and the failure notes. Not a measurement.",
-    "reviewed": "2026-11-26",
-    "agentHours": 0.5,
+    "estimate": "0.25 h",
+    "basis": "Runs and ledger done 2026-11-27; 0.25 h left to read the unmatched failures from one --capture-failures run. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.25,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5
   },
