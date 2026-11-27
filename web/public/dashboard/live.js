@@ -733,8 +733,7 @@
     document.getElementById("health").innerHTML = degraded + "<div class='health-table'>" + table.map(healthRowHtml).join("") + "</div>" +
       warningsHtml +
       policyHtml +
-      updateResultHtml +
-      "<div class='row small' style='margin-top:6px'><span class='muted'>Edited config.json? Apply it without a restart.</span><button class='btn sm' id='btn-reload'>Reload models</button></div>";
+      updateResultHtml;
   };
   // Kaji bases (F-036): every enrolled base with its real status; positions are a fixed layout around this base
   // (no real coordinates exist), redrawn when the set of bases or their status changes.
@@ -813,10 +812,25 @@
     initMap();
   }
   const sinceText = t => { if (!t) return "never heard"; const s = Math.round((Date.now() - Date.parse(t)) / 1000); return s < 90 ? "seen " + s + " s ago" : s < 5400 ? "last seen " + Math.round(s / 60) + " min ago" : "last seen " + new Date(t).toLocaleString(); };
+  /** F-152: the phone push line for this base (push is local to a base): devices, the last push and its open time. */
+  function pushLines(p) {
+    if (!p) return "<div class='tiny muted'>Phone push · state not reported</div>";
+    const n = p.devices || 0;
+    if (!n) return "<div class='tiny muted'>Phone push · no device subscribed</div>";
+    const last = p.last;
+    const sent = !last
+      ? "No push sent yet"
+      : last.ok
+        ? "Last push accepted · " + esc(new Date(last.at).toLocaleString())
+        : "<span class='warn'>Last push failed (" + esc(last.status + (last.reason ? " " + last.reason : "")) + ")</span> · " + esc(new Date(last.at).toLocaleString());
+    return "<div class='tiny muted'>Phone push · " + n + (n === 1 ? " device" : " devices") + "</div>" +
+      "<div class='tiny muted'>" + sent + " · " + (p.lastOpened ? "opened " + esc(new Date(p.lastOpened).toLocaleString()) : "not opened yet") + "</div>";
+  }
   // A heartbeat reports a route check, not successful delivery to a phone.
   function channelLine(b) {
+    const push = b.self ? pushLines(b.push) : "";
     const c = b.channel;
-    if (!c) return "<div class='tiny muted'>Telegram · state not reported</div>";
+    if (!c) return "<div class='tiny muted'>Telegram · state not reported</div>" + push;
     const labels = { "via-main":"via main", "local-fallback":"local fallback", local:"local channel", unavailable:"unavailable · not configured", unknown:"unknown" };
     const destination = c.destination ? " · main " + baseName(c.destination) : "";
     const fresh = b.channelFresh;
@@ -828,7 +842,8 @@
       "<div class='tiny muted'><span class='" + (apiState === "responding" ? "ok" : apiState === "failed" ? "warn" : "muted") + "'>● Midori API · " + esc(connection) + "</span>" + (c.api ? " · checked " + esc(new Date(c.api.at).toLocaleString()) : "") + "</div>" +
       "<div class='tiny muted'>Route checked " + esc(new Date(c.checkedAt).toLocaleString()) + (!fresh ? " · stale or offline" : "") + "</div>" +
       (c.lastReceived ? "<div class='tiny muted'>Last received " + esc(new Date(c.lastReceived).toLocaleString()) + "</div>" : "") +
-      (d ? "<div class='tiny muted'>Last send " + esc(d.result === "accepted" ? "accepted" : "failed") + " via " + esc(d.route === "main" ? "main" : "local bot") + " · " + esc(new Date(d.at).toLocaleString()) + " (phone receipt unknown)</div>" : "<div class='tiny muted'>No send result reported</div>");
+      (d ? "<div class='tiny muted'>Last send " + esc(d.result === "accepted" ? "accepted" : "failed") + " via " + esc(d.route === "main" ? "main" : "local bot") + " · " + esc(new Date(d.at).toLocaleString()) + " (phone receipt unknown)</div>" : "<div class='tiny muted'>No send result reported</div>") +
+      push;
   }
   window.renderBases = function () {
     const list = state.kajiBases || []; const roles = ((state.doctor || {}).models || {}).roles || {};
@@ -839,7 +854,7 @@
     if (!enrolled.length) {
       const base = (state.doctor || {}).base || { id:"NERV-01", name:"Neo Tokyo-3" };
       document.getElementById("bases-sub").textContent = BASES[0].status === "online" ? "1/1 online" : "1/1 " + (BASES[0].status === "standby" ? "degraded" : "down");
-      document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.id) + " · " + esc(base.name) + "</span>" + (BASES[0].status === "standby" ? "<span class='badge b-warn'>DEGRADED</span>" : BASES[0].status === "offline" ? "<span class='badge b-danger'>DOWN</span>" : "<span class='badge b-ok'>ONLINE</span>") + "</div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" + channelLine({online:BASES[0].status !== "offline",channel:(state.doctor || {}).channel,channelFresh:(state.doctor || {}).channelFresh}) + "</div>" +
+      document.getElementById("bases").innerHTML = "<div class='card'><div class='row'><span class='b'>" + esc(base.id) + " · " + esc(base.name) + "</span>" + (BASES[0].status === "standby" ? "<span class='badge b-warn'>DEGRADED</span>" : BASES[0].status === "offline" ? "<span class='badge b-danger'>DOWN</span>" : "<span class='badge b-ok'>ONLINE</span>") + "</div><div class='tiny muted'>this machine · coordinator, scheduler, brain</div><div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" + channelLine({self:true,push:(state.doctor || {}).push,online:BASES[0].status !== "offline",channel:(state.doctor || {}).channel,channelFresh:(state.doctor || {}).channelFresh}) + "</div>" +
         (revokedHtml || "<div class='muted small' style='margin-top:4px'>No Kaji line yet: enrol your bases (INSTALL, Kaji line) to see them here.</div>");
       return;
     }
@@ -851,7 +866,7 @@
       "<div class='tiny muted'>" + (b.self ? "this machine" : esc(b.address)) + " · key " + esc(b.fingerprint.slice(0, 9)) + " · " + (b.self ? "local" : esc(sinceText(b.lastSeen))) + "</div>" +
       (b.self ? "<div class='tiny muted'>Misato " + esc(roles.misato || "—") + " · Casper " + esc(roles.casper || "—") + "</div>" : "") +
       (!b.self && b.online && b.health && b.health.reasons.length ? b.health.reasons.map(r => "<div class='tiny warn'>▲ " + esc(r) + "</div>").join("") : "") +
-      (!b.self && b.online && !b.health ? "<div class='tiny muted'>health not reported (that base runs an older version)</div>" : "") + channelLine(b) + "</div>").join("") + revokedHtml;
+      (!b.self && b.online && !b.health ? "<div class='tiny muted'>health not reported (that base runs an older version)</div>" : "") + channelLine(b.self ? { ...b, push:(state.doctor || {}).push } : b) + "</div>").join("") + revokedHtml;
     // B-093: the list is rebuilt on every poll, so the Revoked section's open state lives in state, not in the DOM.
     const fold = document.getElementById("bases").querySelector && document.getElementById("bases").querySelector(".revoked-bases");
     if (fold) fold.addEventListener("toggle", () => { state.revokedOpen = fold.open; });
@@ -1171,9 +1186,18 @@
     log(doctorChatLine(run), run.error || doctorProblems(run.result).length ? "danger" : "ok", null, "maya");
     if (run.result) renderHealth();
   };
+  // F-152: Settings, Advanced: re-reads the models part of config.json after a hand edit; the result shows by the button.
   window.liveReload = async function () {
-    try { const r = await api("models/reload", { method:"POST" }); const roles = (r.models || {}).roles || {}; log("Models reloaded · Misato " + (roles.misato || "—") + " · Casper " + (roles.casper || "—"), "ok", null, "maya"); }
-    catch (e) { log("Reload refused: " + e.message + " (the previous settings stay in use)", "danger", null, "maya"); }
+    if (state.reloadBusy) return;
+    state.reloadBusy = true; state.reloadMsg = null; renderSettings();
+    try {
+      const r = await api("models/reload", { method:"POST" }); const roles = (r.models || {}).roles || {};
+      state.reloadMsg = { kind:"ok", text:"Model settings re-read from config.json." };
+      log("Models reloaded · Misato " + (roles.misato || "—") + " · Casper " + (roles.casper || "—"), "ok", null, "maya");
+    } catch (e) {
+      state.reloadMsg = { kind:"danger", text:"Not re-read: " + e.message + ". The previous settings stay in use." };
+      log("Reload refused: " + e.message + " (the previous settings stay in use)", "danger", null, "maya");
+    } finally { state.reloadBusy = false; renderSettings(); }
     poll();
   };
   window.liveApplyUpdate = async function () {
@@ -1258,6 +1282,7 @@
     const m = settingsModel();
     const busy = !!state.settingsBusy;
     const msg = state.settingsMsg;
+    const rm = state.reloadMsg;
     const hour = (label, value) => " aria-label='" + label + "' type='number' min='0' max='23' step='1' value='" + esc(value) + "'" + (busy ? " disabled" : "") + ">";
     // Update schedule: one label and its controls per line, so the fields align in their column.
     box.innerHTML = "<form id='settings-form' class='list'>" +
@@ -1272,7 +1297,11 @@
       "<div class='tiny muted'>Time zone " + esc(m.timeZone) + " · Sync Ratio 80% · Telegram 90 s</div>" +
       "<div class='row'><button class='btn sm primary' id='btn-save-settings' type='submit'" + (busy ? " disabled" : "") + ">" + (busy ? "Applying…" : "Apply") + "</button>" +
       "<span id='settings-status' role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : (state.settingsDraft ? "Unsaved changes" : "")) + "</span></div>" +
-      "</form>";
+      "</form>" +
+      // The panel redraws on every poll: the Advanced section's open state lives in state (toggle listener below).
+      "<details id='settings-advanced'" + (state.advancedOpen ? " open" : "") + "><summary class='tiny muted'>Advanced</summary>" +
+      "<div class='row small'><button class='btn sm' id='btn-reload' type='button'" + (state.reloadBusy ? " disabled" : "") + ">Re-read the model settings from config.json</button>" +
+      "<span id='reload-status' role='status' class='tiny " + (rm ? rm.kind : "muted") + "'>" + esc(rm ? rm.text : "") + "</span></div></details>";
   };
   function readSettingsDraft() {
     const enabled = !!document.getElementById("set-auto-enabled").checked;
@@ -1292,6 +1321,7 @@
       timeZone:(state.scheduleSettings && state.scheduleSettings.timeZone) || "Europe/Rome"
     };
   }
+  document.addEventListener("toggle", e => { if (e.target && e.target.id === "settings-advanced") state.advancedOpen = e.target.open; }, true);
   document.addEventListener("input", e => {
     if (e.target && e.target.closest && e.target.closest("#settings-form")) { state.settingsDraft = readSettingsDraft(); state.settingsMsg = null; }
   });
