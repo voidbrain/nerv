@@ -11,7 +11,7 @@
   "id": "B-176-T04",
   "title": "Owner check: nerv chat \"quali genetiche ho?\" lists the strains",
   "goal": "The copy-paste step in the record answers with the strains in Italian on NERV-01",
-  "status": "planned",
+  "status": "closed",
   "acceptance": [
     "The copy-paste step in the record answers with the strains in Italian on NERV-01"
   ],
@@ -27,14 +27,13 @@
   ],
   "effort": {
     "size": "small",
-    "estimate": "0.25 h owner",
-    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
-    "reviewed": "2026-11-26",
+    "estimate": "0 remaining",
+    "basis": "Closed 2026-11-27: the owner ran the step on NERV-01 (556b518a+, Calvary hub abaa053), sortie 606e811f-9650-4359-a6de-4cdf5843a0d1; evidence on the record. No actual: not timed.",
+    "reviewed": "2026-11-27",
     "agentHours": 0,
     "baselineAgentHours": 0.0,
     "estimateAgentHours": 0.0,
-    "ownerHours": 0.25,
+    "ownerHours": 0,
     "ownerKind": "procedure"
-  },
-  "ownerLink": "docs/work/records/B-176.md"
+  }
 }

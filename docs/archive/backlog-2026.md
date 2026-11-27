@@ -11,7 +11,7 @@ Closed records in this archive, grouped by closing date (Monday–Sunday). Links
 
 | Closing week | Features closed | Bugs closed |
 |---|---:|---:|
-| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 10 | 33 |
+| [2026-11-23 – 2026-11-29](#archive-week-2026-11-23) | 10 | 34 |
 | [2026-11-16 – 2026-11-22](#archive-week-2026-11-16) | 21 | 32 |
 | [2026-11-09 – 2026-11-15](#archive-week-2026-11-09) | 22 | 20 |
 | [2026-11-02 – 2026-11-08](#archive-week-2026-11-02) | 41 | 42 |
@@ -7791,6 +7791,58 @@ Earlier evidence (2026-11-18 to 2026-11-21: PRs #557, #617, #620, Tabgha recurre
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
 | Impact | Every Windows service installed before B-102-T01 cannot be updated or stopped through the lifecycle; NERV-02 on Tabgha is the known case. |
+
+</details>
+
+---
+
+### B-176
+
+**A granted read with a large result answers only "Fatto: <tool>." without the data: the result is dropped from Misato's prompt**
+
+| Signal | Priority | Status | Effort |
+|:---:|---|---|---|
+| 🔵 | ◻️ P1 | Closed | 🟢 Small |
+
+🧑 **→ Human action required: No**<br />Closed 2026-11-27: Owner check passed 2026-11-27 ~09:30 CET on NERV-01 (runs 556b518a+; Calvary hub abaa053 after the compact-MCP fix and removal, with a backup, of the repeated importer note from all 33 strains; grover_strains result now 5,188 characters). nerv chat "quali genetiche ho?" printed "grover.grover_strains grant, Sync Ratio 100%." then an Italian answer grouping 32 strains by sativa/indica/balanced (Haze, Amnesia Haze, Brain Damage, Skunk #1, Cheese; about 19 balanced incl. Northern Lights #5 x Haze; Acapulco, Afgani, Hawaii 93, KC36, Mango 2001, Northern Lights #5, Frosted Guava, Lava Cake), nothing cut off, no incompleta note, no refusal; the 33rd strain is the placeholder Unknown (old record), reasonably omitted. Sortie 606e811f-9650-4359-a6de-4cdf5843a0d1. Fix PRs #850, #851 on green CI. Closed 2026-11-27.
+
+| | |
+|---|---|
+| **Issue** | Found by the owner 2026-11-26 on NERV-01: `nerv chat "quali genetiche ho?"` (conversation `cli`, trusted). `grover.grover_strains` ran (EVA-00, granted, 33 strains, about 9 KB), but the reply was only "Fatto: grover.grover_strains.". Cause: `misatoAsk` (`src/misato.ts`) keeps the step history under `MAX_HISTORY_CHARS` (8,000) by dropping the oldest steps, and when one step alone is larger it sends no steps at all. The model saw no result, proposed the same read again, and the duplicate guard in `src/runtime-planning.ts` closed the sortie with `doneReply` ("Fatto: …"), which for a read throws away what the owner asked for. Blocks 🪴 grover:F-012, whose closing check is NERV answering "quali genetiche ho?". |
+| **Reproduce** | Ask Misato for a granted read whose result is over 8,000 characters (e.g. "quali genetiche ho?" with Grover's strains): the reply is "Fatto: <tool>." and `misato.reply` has no `durationMs` (the service's fallback, not the model). Test: `test/misato.test.ts`, "B-176: a granted read with a large result still reaches Misato, so she can answer from it" (committed as `todo`, fails today). |
+| **Check** | The B-176 test passes without `todo`; a read result too large for the budget reaches the planner shortened (and marked as shortened), never dropped; when the model repeats a read that already ran, the owner gets an answer from the result (a last answer-only turn or a compact summary), never a bare "Fatto: <tool>."; in `nerv chat` "quali genetiche ho?" lists the owner's strains in Italian. |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+**Next action / closure evidence:** Closed 2026-11-27: Owner check passed 2026-11-27 ~09:30 CET on NERV-01 (runs 556b518a+; Calvary hub abaa053 after the compact-MCP fix and removal, with a backup, of the repeated importer note from all 33 strains; grover_strains result now 5,188 characters). nerv chat "quali genetiche ho?" printed "grover.grover_strains grant, Sync Ratio 100%." then an Italian answer grouping 32 strains by sativa/indica/balanced (Haze, Amnesia Haze, Brain Damage, Skunk #1, Cheese; about 19 balanced incl. Northern Lights #5 x Haze; Acapulco, Afgani, Hawaii 93, KC36, Mango 2001, Northern Lights #5, Frosted Guava, Lava Cake), nothing cut off, no incompleta note, no refusal; the 33rd strain is the placeholder Unknown (old record), reasonably omitted. Sortie 606e811f-9650-4359-a6de-4cdf5843a0d1. Fix PRs #850, #851 on green CI. Closed 2026-11-27. Owner check passed; see the close command.
+
+**Evidence (NERV-01 `~/.nerv/nerv.sqlite`, read-only):** sortie `157bdd16-b6d3-4fdf-ad67-146942d3ce5b`, 2026-11-26 21:47:22–21:48:01 UTC: `misato.consult` advised `grover.grover_strains`; ballot Pattern Green, EVA-00, grant; `action.done` 9,037 bytes; `misato.step` 9,205 bytes (its `step` JSON 9,128 characters, over the 8,000 budget); `misato.reply` "Fatto: grover.grover_strains." 2.3 s later, without `durationMs`.
+
+**Checked and ruled out:** the tainted-result handling. The step carries `tainted: true` (`context.intake` `mcp:grover.grover_strains`), but nothing filters tainted steps from the planner prompt; the size alone empties `steps`. The same 8,000-character limit drops every step of a turn once the newest step is over it.
+
+**Plan:**
+- B-176-T02: in `misatoAsk`, when the newest step alone is over the budget, keep it with its result shortened to fit (keep the start of the text, add a note that it was shortened and how many characters were left out), so the model can answer from it. The B-176 test passes without `todo`.
+- B-176-T03: in `src/runtime-planning.ts`, when the model repeats a read that already ran, give it one last answer-only turn with the result (no tools) instead of `doneReply`; if that fails, reply with a short summary of the result in the owner's language. New failing test first. `doneReply` stays for write actions.
+- B-176-T04: owner check (below).
+
+**Done (B-176-T02, B-176-T03):** `misatoAsk` shortens the newest result to the longest start that fits once escaped, with a `shortened` note ("Only the first N of M characters are shown…"), before dropping older steps. A repeated read (tool effect `read`) gets one more turn with "You already ran <tool> … Reply to the owner from it now"; a second repeat, or a repeat on the last turn, ends with the service's `readResultReply` ("Ecco il risultato di <tool>:" / "Here is the result of <tool>:" plus the result, up to 4,000 characters, no `durationMs`). Writes keep `doneReply`. The fallback shows the raw result text to the owner (tainted for MCP reads); the taint policy stays with B-175. Review: design-reviewer (fresh context) 2026-11-26; its blocker (escape-heavy results shortened to nothing) and should-fixes (a repeat on the last turn, the service reply's `durationMs`) are fixed in the PR with tests.
+
+**Owner check (B-176-T04), after the fix is installed on NERV-01:**
+```
+nerv chat "quali genetiche ho?"
+# expect: an Italian reply naming the strains from Grover, not "Fatto: grover.grover_strains."
+```
+
+**Estimates:** No remaining effort.
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found by the owner 2026-11-26; Test: `test/misato.test.ts` (B-176: large result kept shortened; repeated read answers from its result; last-turn and escape-heavy review cases). Code: `src/misato.ts` (`misatoAsk`, `MAX_HISTORY_CHARS`), `src/runtime-planning.ts` (duplicate guard, `doneReply`). Related: 🪴 grover:F-012.; [#850](https://github.com/voidbrain/nerv/pull/850); [#851](https://github.com/voidbrain/nerv/pull/851) |
+| Opened | 2026-11-26 |
+| Verification | Owner check passed 2026-11-27 (B-176-T04), see evidence |
+| Reviewed | 2026-11-27 |
+| Impact | Any granted read with a result over 8,000 characters answers the owner with nothing: Grover's strain list is the first case. |
 
 </details>
 
