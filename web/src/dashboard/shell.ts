@@ -124,7 +124,7 @@ const ACCENT_KEY = {
             </ul>
           </nerv-panel>
         </div>
-        <!-- F-159: the card exists only while its module is on, so off also stops its polling. -->
+        <!-- The card exists only while its module is on, so off also stops its polling. -->
         @if (modules.shown('coordinator')) {
           <nerv-live-index-card />
         }
