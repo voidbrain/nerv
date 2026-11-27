@@ -21,6 +21,8 @@
 - **Workspace components** (F-130-T01): dashboard sections build on `nerv-panel` (titled section) and `nerv-stat` (label, value, detail) in `web/src/ui.ts`, which read only tokens; 🧱 bricks replaces that file once it can be consumed without publishing. Workspace styles stay in the component: the global `web/src/styles.css` rules for `header`, `label`, `p` and `.brand` belong to the simple page.
 - **Live views** (B-145): render once, then update only the values that changed (`setText`, `setAttr`, `patchHTML` in `dashboard.js`); lists are keyed rows (`data-key` or `id`): add, remove, move or patch a row, never rebuild the list; no innerHTML on a polled section after its first render. Markup built from data is escaped with `esc`. New UI goes in the Angular workspace (F-130), not the dashboard.
 
+- **Module-owned cards** (F-159): a card that belongs to a module (an MCP server or a built-in pack: the live index card, the FPV battery cards) renders inside `@if (modules.shown('<id>'))` (`web/src/modules-panel.ts`), so an off module's card is never created and never polls. The Modules panel uses native checkboxes with `role="switch"` and states the result in words (On / Off, Eva: Connected / Ejected).
+
 ## Detailed component specifications
 
 For MAGI/Sephirot lore rules, CRT brightness/noise tuning, Map/Midori/Battery/Pilots/History/Search UI details, and native macOS companion preview rules, see [Dashboard and Native UI Specifications](design/dashboard-and-native-ui.md).

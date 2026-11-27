@@ -4,7 +4,7 @@
   "parent": "F-159",
   "title": "Test first: the Modules panel in Settings; off hides the module's cards and stops their polling",
   "goal": "A Modules panel on the full dashboard switches each module, and an off module's cards hide",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Failing tests first: GET /api/modules and PUT /api/modules/NAME; the panel lists rows with on/off, reachable and tools and switches them",
     "Off hides the live index card (its polling stops) and the FPV battery cards; on brings them back",
@@ -40,10 +40,12 @@
   "effort": {
     "size": "medium",
     "estimate": "1.75 h",
-    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement. Implemented 2026-11-27 test first; actual is elapsed agent time to the PR.",
     "reviewed": "2026-11-27",
-    "agentHours": 1.75,
+    "agentHours": 0,
     "baselineAgentHours": 1.75,
-    "estimateAgentHours": 1.75
+    "estimateAgentHours": 1.75,
+    "actualAgentHours": 1.5,
+    "actualSource": "stated"
   }
 }
