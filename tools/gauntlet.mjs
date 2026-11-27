@@ -181,14 +181,17 @@ const modelRunner = (name) => readJSON(here(registryFile)).runners?.[name]?.allo
 const usesModelRunner = (pack) => pack.cases.some((c) => !!c.runner && modelRunner(c.runner));
 const modelFreeRunnerPack = (pack) =>
   isModelPack(pack) && pack.cases.every((c) => !!c.runner) && !usesModelRunner(pack);
-export function releaseSourceKey() {
+// F-120-T16 (owner decision 2026-11-26, "b: fix the key first"): the key binds only the registry entries the pack's
+// cases run, so adding or changing a system runner no longer marks model cases as changed.
+export function releaseSourceKey(pack, registry = readJSON(here(registryFile))) {
+  const used = [...new Set(pack.cases.map((c) => c.runner).filter(Boolean))].sort();
   return hash({
     dependency: hash(readFileSync(here('vendor/gauntlet-protocol.json'), 'utf8')),
-    registry: hash(readFileSync(here(registryFile), 'utf8')),
+    runners: used.map((name) => [name, registry.runners?.[name] ?? null]),
   });
 }
 export const caseSourceKey = (pack, caseId) =>
-  usesModelRunner(pack) ? releaseSourceKey() : systemSourceKey(pack, caseId);
+  usesModelRunner(pack) ? releaseSourceKey(pack) : systemSourceKey(pack, caseId);
 const pendingByPack = (packs, ledger, options) =>
   packs.flatMap((pack) => {
     const identity = { ...options, ...(options.profile ? { profile: modelProfile(pack, options.profile) } : {}) };
