@@ -122,7 +122,7 @@
       // The newest sorties, plus older pages the owner loaded and every match of the current search, newest first.
       const byId = new Map(); for (const x of [...latest20, ...older, ...matches]) if (!byId.has(x.id)) byId.set(x.id, x);
       const list = [...byId.values()].sort((a, b) => b.created.localeCompare(a.created)); shown = list;
-      applyBases(kajiBases, healthOf(doctor)); void loadModels(); void loadTools();
+      applyBases(kajiBases, healthOf(doctor)); void loadModels(); void loadTools(); void loadSkills();
       state.pilots = pilots && Array.isArray(pilots.pilots) ? pilots.pilots : null;
       state.lilith = Object.assign(state.lilith || { history:{} }, { facts, episodes });
       // Reminders delivered (briefs live in the inbox too since F-028, and are shown on their own in Debrief).
@@ -415,6 +415,9 @@
   // end F-021-T05 toolsHtml
   let toolsData, toolsAt = 0;
   const loadTools = async (force) => { if (!force && Date.now() - toolsAt < 60000) return; toolsAt = Date.now(); try { toolsData = await api("tools"); } catch (e) { toolsData = { error:e.message }; } const box = document.getElementById("tools-list"); if (box) box.innerHTML = toolsHtml(toolsData); };
+  // F-145: the skills store, read-only; redrawn only when it changed.
+  let skillsAt = 0, skillsSeen = "";
+  const loadSkills = async () => { if (Date.now() - skillsAt < 60000) return; skillsAt = Date.now(); let next; try { next = (await api("skills")).skills; } catch (e) { next = { error:e.message }; } const seen = JSON.stringify(next); if (seen === skillsSeen) return; skillsSeen = seen; state.skills = next; renderSkills(); };
   const loadModels = async (force) => { if (!force && Date.now() - modelsAt < 30000) return; modelsAt = Date.now(); try { modelsData = await api("models"); } catch (e) { modelsData = { error:e.message }; } renderModels(); renderMelons(); };
   window.renderModels = function () {
     const box = document.getElementById("models"); const sub = document.getElementById("models-sub"); const d = modelsData;
@@ -433,10 +436,17 @@
       (misatoRoute === "local" && misatoModel && !known(misatoModel) ? opt("local:" + misatoModel, misatoModel + " (not in Ollama)", true, true) : "") +
       opt("cloud:" + cloudModel, cloudModel + " (cloud)" + (cloudOn ? "" : d.cloudKey ? " · turn the cloud route on" : " · key missing"), misatoRoute === "cloud", !cloudOn);
     const casperOpts = (casperModel ? "" : opt("", "not set", true)) + local.map(n => opt(n, n + " (local)", casperModel === n)).join("") + (casperModel && !known(casperModel) ? opt(casperModel, casperModel + " (not in Ollama)", true, true) : "");
+    // F-144: how long Ollama keeps the local model loaded after a call (models.local.keepAlive), or always (keep_alive -1).
+    const warmNow = m.local ? (m.local.alwaysLoaded ? "always" : m.local.keepAlive || "30m") : "";
+    const warmChoices = [["15m", "15 min"], ["30m", "30 min"], ["1h", "1 h"], ["2h", "2 h"], ["4h", "4 h"], ["8h", "8 h"], ["24h", "24 h"]];
+    if (m.local && m.local.keepAlive && !warmChoices.some(c => c[0] === m.local.keepAlive)) warmChoices.push([m.local.keepAlive, m.local.keepAlive]);
+    const warmOpts = warmChoices.map(c => opt(c[0], c[1] + " after the last reply", warmNow === c[0])).join("") + opt("always", "Always", warmNow === "always");
     sub.textContent = d.ollama.reachable ? local.length + " local model" + (local.length === 1 ? "" : "s") : "Ollama not found";
     box.innerHTML = (local.length || cloudOn ? "<form id='models-form' class='models-form'><label for='m-misato' class='small'>Misato</label><select id='m-misato'>" + misatoOpts + "</select>" +
       "<label for='m-casper' class='small'>Casper</label><select id='m-casper'" + (local.length ? "" : " disabled") + ">" + casperOpts + "</select>" +
+      (m.local ? "<label for='m-warm' class='small'>Keep loaded</label><select id='m-warm'>" + warmOpts + "</select>" : "") +
       "<span></span><span><button class='btn sm primary' type='submit'" + (modelsBusy ? " disabled" : "") + ">" + (modelsBusy ? "Applying…" : "Apply") + "</button></span></form>" : "") +
+      (m.local ? "<div class='tiny muted' style='margin-top:4px'>Always keeps the model in memory until Ollama stops (about 16 GB for gemma4:26b), taking it from virtual machines and image runs.</div>" : "") +
       "<div class='tiny muted' style='margin-top:6px'>" + (d.ollama.reachable ? "Ollama at " + esc(d.ollama.url) + (local.length ? "" : ": no models yet. Pull one: <code>ollama pull gemma4:12b</code>") : esc(d.ollama.error || "Ollama not found.")) + "</div>" +
       "<div class='row tiny' style='margin-top:4px'><span class='muted'>Cloud (Claude): " + (cloudOn ? "on" : "off") + " · key " + (d.cloudKey ? "saved" : "missing: type it in a terminal with <code>nerv models key</code>") + "</span>" +
       (d.cloudKey || cloudOn ? "<button class='btn sm' id='m-cloud' data-on='" + (!cloudOn) + "'>" + (cloudOn ? "Turn off" : "Turn on") + "</button>" : "") + "</div>";
@@ -454,6 +464,8 @@
     if (mv) { const [route, ...rest] = mv.split(":"); const model = rest.join(":"); const cur = roles.misato ? roles.misato.route + ":" + (roles.misato.model || "") : "";
       if (cur !== mv) change.misato = route === "cloud" ? { route:"cloud" } : { route:"local", model }; }
     if (cv && cv !== ((roles.casper && roles.casper.model) || (m.local || {}).model)) change.casper = { model:cv };
+    const wSel = document.getElementById("m-warm"); const wv = wSel ? wSel.value : "";
+    if (wv && wv !== (m.local.alwaysLoaded ? "always" : m.local.keepAlive || "30m")) change.warm = wv === "always" ? { alwaysLoaded:true } : { keepAlive:wv, alwaysLoaded:false };
     if (!Object.keys(change).length) { modelsDraft = false; log("Models: nothing changed.", "", null, "maya"); return; }
     applyModels(change, "Models applied");
   });
@@ -474,6 +486,22 @@
     } catch (e) { log("Decision failed: " + e.message, "danger"); }
     poll();
   };
+  // B-175: the dashboard chat's conversation. "New conversation" starts a clean one: Misato no longer sees the earlier
+  // messages, nor a tool result that made the old one untrusted. Kept for this tab, so a reload stays in it.
+  const CONVERSATION = "nerv.dashboard.conversation";
+  function newConversationId() {
+    const bytes = new Uint8Array(8);
+    crypto.getRandomValues(bytes);
+    return "dashboard:" + Array.from(bytes, b => b.toString(36).padStart(2, "0")).join("");
+  }
+  let conversation = "dashboard";
+  try { const saved = sessionStorage.getItem(CONVERSATION); if (saved && /^dashboard:[a-z0-9]{1,30}$/.test(saved)) conversation = saved; } catch { /* private window: the default conversation */ }
+  document.getElementById("chat-new")?.addEventListener("click", () => {
+    conversation = newConversationId();
+    try { sessionStorage.setItem(CONVERSATION, conversation); } catch { /* private window: kept until reload */ }
+    log("New conversation: Misato no longer sees the earlier messages.", "ok", null, "maya");
+    document.getElementById("chat-in")?.focus();
+  });
   window.chat = async function (text) {
     log(text, "", null, "you"); state.log[state.log.length - 1].chat = true;
     // F-051: where the request goes, said before it goes: another online main base gets it over the Kaji line.
@@ -492,7 +520,7 @@
         poll();
       } catch { /* ignore queue check errors */ }
     }, 60);
-    try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text, conversation:"dashboard", requestId }) });
+    try { const r = await api("chat", { method:"POST", body:JSON.stringify({ message:text, conversation, requestId }) });
       // Dispatched (F-036): the main base answered; its sortie and cards are there, so only the reply is shown here.
       if (r.command) { followNew = null; log(r.reply || r.error || "No command result", r.error ? "danger" : "ok", null, "maya"); }
       else if (r.base) log((r.reply || ("Could not finish: " + (r.error || "no reply"))) + " · answered by " + r.base.name + (r.waiting && r.waiting.length ? "; decide its card on Aoba or on " + r.base.name + "'s dashboard" : ""), r.reply ? "ok" : "danger", null, "misato");

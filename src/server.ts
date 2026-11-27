@@ -19,7 +19,7 @@ import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { realpath, stat, readFile } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import type { StoreApi } from './runtime.ts';
-import { QueueCancelledError, QueueFullError } from './request-queue.ts';
+import { QueueCancelledError, QueueFullError, validChatConversation } from './request-queue.ts';
 import type { Pilot, PilotPatch } from './pilots.ts';
 import { attachRpcSocket } from './socket.ts';
 import { toChecklistSurface } from './lists.ts';
@@ -33,7 +33,7 @@ import { HealthSampleStore, startLocalHealthSampler } from './health-samples.ts'
 import { RpcFault } from './rpc.ts';
 import { confirmPushToTalkDraft, preparePushToTalkDraft, prepareSpokenReply, type VoiceLanguage } from './voice.ts';
 import type { ModelChange } from './model-setup.ts';
-import { MODEL_TIMEOUT_MS } from './model.ts';
+import { MODEL_TIMEOUT_MS, validKeepAlive } from './model.ts';
 import { MAX_STEPS } from './misato.ts';
 import type { DocumentStore } from './documents.ts';
 import { MAX_PHOTO_BYTES, type PhotoOwnerKind, type PhotoStore } from './photos.ts';
@@ -828,6 +828,8 @@ export function makeServer(
           pilots: store.pilotRoster ? await store.pilotRoster() : [],
           ...(store.genericPilot ? { generic: await store.genericPilot() } : {}),
         });
+      } else if (req.method === 'GET' && path === '/api/skills') {
+        reply(200, { skills: store.skills ? store.skills() : [] });
       } else if (req.method === 'GET' && path === '/api/eva/instances') {
         reply(200, store.evaInstances ? await store.evaInstances() : { machines: [] });
       } else if (req.method === 'GET' && path === '/api/health/metrics') {
@@ -916,9 +918,17 @@ export function makeServer(
           casper = b.casper as Record<string, unknown> | undefined,
           cloud = b.cloud as Record<string, unknown> | undefined;
         const consultant = b.consultant as Record<string, unknown> | null | undefined;
+        const warm = b.warm as Record<string, unknown> | undefined;
         if (
           !Object.keys(b).length ||
-          Object.keys(b).some((k) => !['misato', 'casper', 'cloud', 'consultant'].includes(k)) ||
+          Object.keys(b).some((k) => !['misato', 'casper', 'cloud', 'consultant', 'warm'].includes(k)) ||
+          (warm !== undefined &&
+            (typeof warm !== 'object' ||
+              !warm ||
+              !Object.keys(warm).length ||
+              Object.keys(warm).some((k) => !['keepAlive', 'alwaysLoaded'].includes(k)) ||
+              (warm.keepAlive !== undefined && !validKeepAlive(warm.keepAlive)) ||
+              (warm.alwaysLoaded !== undefined && typeof warm.alwaysLoaded !== 'boolean'))) ||
           (consultant !== undefined &&
             consultant !== null &&
             (typeof consultant !== 'object' ||
@@ -943,7 +953,7 @@ export function makeServer(
               (cloud.model !== undefined && !str(cloud.model))))
         )
           throw new Error(
-            'Give misato {route, model?}, casper {model}, consultant {model} or null, and/or cloud {enabled, model?}.',
+            'Give misato {route, model?}, casper {model}, consultant {model} or null, cloud {enabled, model?}, and/or warm {keepAlive (1m to 24h), alwaysLoaded}.',
           );
         const result = await store.changeModels(b as ModelChange);
         reply(result.error ? 400 : 200, result);
@@ -966,11 +976,12 @@ export function makeServer(
           typeof b.message !== 'string' ||
           !b.message.trim() ||
           b.message.length > 4000 ||
-          (b.conversation !== undefined &&
-            (typeof b.conversation !== 'string' || !/^[a-z]+$/.test(b.conversation) || b.conversation.length > 20)) ||
+          (b.conversation !== undefined && !validChatConversation(b.conversation)) ||
           (b.requestId !== undefined && (typeof b.requestId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(b.requestId)))
         )
-          throw new Error('Message is required: up to 4000 characters; conversation is a short lowercase name.');
+          throw new Error(
+            'Message is required: up to 4000 characters; conversation is a short lowercase name or dashboard:<id>.',
+          );
         // Each step may wait for Misato and Casper.
         const budget = MODEL_TIMEOUT_MS * MAX_STEPS * 2 + 5000;
         req.setTimeout(budget);
@@ -1017,8 +1028,7 @@ export function makeServer(
           typeof b.transcript !== 'string' ||
           typeof b.confirmed !== 'boolean' ||
           (b.language !== undefined && b.language !== 'it' && b.language !== 'en') ||
-          (b.conversation !== undefined &&
-            (typeof b.conversation !== 'string' || !/^[a-z]+$/.test(b.conversation) || b.conversation.length > 20)) ||
+          (b.conversation !== undefined && !validChatConversation(b.conversation)) ||
           (b.requestId !== undefined && (typeof b.requestId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(b.requestId)))
         ) {
           throw new Error('transcript and confirmed boolean are required.');

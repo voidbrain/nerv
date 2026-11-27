@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "F-120-T16",
+  "parent": "F-120",
+  "title": "A model case source key binds only the runners its pack uses",
+  "goal": "Adding or changing a NERV system (no-model) runner in evals/gauntlet/runners.json no longer marks recorded model-pack cases as changed",
+  "status": "implemented",
+  "acceptance": [
+    "Owner decision 2026-11-26 on F-120-T15: \"b\" (fix the key first)",
+    "releaseSourceKey (tools/gauntlet.mjs) hashes the pinned release manifest and only the registry entries the pack's cases name, not the whole registry file",
+    "test/gauntlet.test.mjs F-120-T16 (committed failing first): a new or changed system runner leaves the cad-3d, coding and embedded keys unchanged; a change to the runner the pack runs changes its key",
+    "The key changes once with this step, so the 12 recorded cases stay source-changed until F-120-T17 reruns them; check:gauntlet-ledger is unaffected (it compares entries by pack, case and profile)"
+  ],
+  "dependsOn": [
+    "F-120-T15"
+  ],
+  "resources": [
+    "tools/gauntlet.mjs",
+    "test/gauntlet.test.mjs",
+    "docs/evaluations/gauntlet.md",
+    "docs/work/records/F-120.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented data only; no secrets, tokens, private channel IDs or personal data in Git.",
+  "validation": [
+    "node --test test/gauntlet.test.mjs",
+    "npm run check:gauntlet-runs",
+    "npm run check:gauntlet-ledger"
+  ],
+  "escalation": [
+    "A real-model run needs the owner (F-120-T17 is approved by the F-120-T15 decision, at night only)"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Owner decision b on F-120-T15, 2026-11-26: one function and one test. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  },
+  "prs": [
+    {
+      "pr": 855,
+      "note": "key fix and failing-first test"
+    }
+  ]
+}

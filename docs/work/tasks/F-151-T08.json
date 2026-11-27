@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "id": "F-151-T08",
+  "parent": "F-151",
+  "title": "Owner: read the new lore entries and the fallback",
+  "goal": "The owner confirms the voice reads as approved and the fallback is quiet",
+  "status": "planned",
+  "acceptance": [
+    "Follow the steps in docs/design/chronicle-eva-voice.md, section Owner check, on NERV-01 after the update: write the entries once on demand, read them in Italian, check the dashboard label, check the plain version is unchanged, and check the template fallback with the model unreachable",
+    "Report what you see (or a screenshot) in chat; the agent records the result in F-151 Verification"
+  ],
+  "dependsOn": [
+    "F-151-T05",
+    "F-151-T06",
+    "F-151-T07"
+  ],
+  "resources": [
+    "docs/work/records/F-151.md",
+    "docs/design/chronicle-eva-voice.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented bases, pilots, sorties and days only; no owner data, tokens or real conversation text in Git, tests or logs.",
+  "validation": [
+    "Owner check, recorded in F-151 Verification"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A visible change in how a section looks or behaves goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h owner",
+    "basis": "Estimated 2026-11-26: five short commands and a look at the dashboard. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "procedure"
+  },
+  "ownerLink": "docs/design/chronicle-eva-voice.md#owner-check-f-149-t08-on-nerv-01-after-the-update",
+  "prs": [
+    {
+      "pr": 858
+    }
+  ]
+}

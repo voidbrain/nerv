@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-149-T01",
+  "parent": "F-149",
+  "title": "Three bricks charts on the live index card",
+  "goal": "The card shows the coordinator's figures as charts",
+  "status": "planned",
+  "acceptance": [
+    "Records per status (donut), open steps per repository by status (stacked bar) and merged PRs per day or week (bar or line), mapped from the coordinator's MCP read tools (coordinator:F-024-T04) in src/ with unit tests",
+    "The surface card renders them with the bricks release that has the charts (bricks:F-014-T07); a figure the tools do not serve is recorded as a coordinator request, not computed here",
+    "Browser test: the charts and their data tables render in light and dark"
+  ],
+  "dependsOn": [
+    "F-147-T01"
+  ],
+  "resources": [
+    "src/**",
+    "web/src/**",
+    "test/**",
+    "docs/work/records/F-149.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "angular"
+  ],
+  "privacy": "Neutral invented data only; no personal data, tokens or private reports in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h agent",
+    "basis": "Three mappings and a card layout on top of F-147. Estimated 2026-11-26. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  },
+  "prs": [
+    {
+      "pr": 857,
+      "note": "plan"
+    }
+  ]
+}
