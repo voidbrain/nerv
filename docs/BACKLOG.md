@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 44 | 10 | 76 | 34 |
+| **This week** | 44 | 11 | 76 | 34 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 69 | 57 |
-| **Require Human 🧑** | 19 | 25 |
+| **Open** | 68 | 57 |
+| **Require Human 🧑** | 18 | 25 |
 
 ### Require Human 🧑
 
@@ -32,9 +32,9 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-133](#f-133) |  | [B-123](#b-123) |  |
 | [F-092](#f-092) |  | [B-128](#b-128) |  |
 | [F-152](#f-152) |  | [B-129](#b-129) |  |
-| [F-060](#f-060) |  | [B-134](#b-134) |  |
-| [F-157](#f-157) |  | [B-135](#b-135) |  |
-| [F-007](#f-007) |  | [B-142](#b-142) |  |
+| [F-157](#f-157) |  | [B-134](#b-134) |  |
+| [F-007](#f-007) |  | [B-135](#b-135) |  |
+|  |  | [B-142](#b-142) |  |
 |  |  | [B-148](#b-148) |  |
 |  |  | [B-149](#b-149) |  |
 |  |  | [B-182](#b-182) |  |
@@ -49,7 +49,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 323.25 h agent + 27 h owner across 346 open steps of 69 features and 57 other records. 168.25 h of actual effort recorded on 158 steps. Generated from the task files.
+**Remaining effort:** 322.75 h agent + 25 h owner across 343 open steps of 68 features and 57 other records. 168.25 h of actual effort recorded on 158 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -5174,47 +5174,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-060"></a>[✨ F-060](#top)
-
-**Spike: herdr-core as a coding-agent terminal runtime**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🟠 Investigate | 🔹 P3 | 🟢 Small | 0.5 h agent + 2 h owner | — | — | ⏳ | 🧑‍🔧 | — |
-
-🧑 **→** Next: [🧑‍🔧](acceptance/f060-t01-herdr-trial.md) F-060-T01 — herdr-core trial in the development workspace (Planned).
-
-| | |
-|---|---|
-| **Issue** | Owner question 2026-11-06: is [herdr-core](https://herdr.dev/core/) (`hc`, Apache 2.0, [source](https://github.com/herdrdev/herdr-core)) useful for coding with Claude Code and Codex, and for NERV? It offers persistent terminals, agents that start and direct helper agents, attach/takeover, remote machines over SSH, explicit program status (OSC 7501) and an OpenRPC API. Not evaluated yet. |
-| **Reproduce** | Install `hc` (read the install script first) and run one implementer agent, one reviewer and one test terminal, each in its own git worktree; detach, reattach, restart the viewer, delegate a review and read its report. |
-| **Check** | A dated note in this record answering: (1) does switching, reviewing and recovering sessions get easier than today; (2) can Claude Code / Codex emit OSC 7501 status (hook or wrapper), or do they have none; (3) what `--keep` recovery preserves after a daemon or machine restart; (4) API stability and security model confirmed from the docs; (5) outcome per NERV record (F-012, F-019, F-045, F-048, F-049): adapter candidate, borrow the concept only, or not relevant. |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-060-t01"></a>F-060-T01 — herdr-core trial in the development workspace | — | 0 h | 0 h agent + 2 h owner | Planned | — | [F-060-T03](#f-060-t03) | [🧑‍🔧](acceptance/f060-t01-herdr-trial.md) |
-| 🟢 Small | <a id="f-060-t03"></a>F-060-T03 — Record the evidence of F-060-T01 and close it | 0.25 h | 0 h | 0.25 h | Planned | [F-060-T01](#f-060-t01) | [F-060-T02](#f-060-t02) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-060-t02"></a>F-060-T02 — Answer the five questions and per-record outcomes | 0.25 h | 0 h | 0.25 h | Planned | [F-060-T03](#f-060-t03) | — | ⏳ 🤖 |
-| 🟢 Small | **Total** | 0.5 h (2 of 3 steps) | 0 h (0 of 3 steps recorded) | 0.5 h agent + 2 h owner | 0 of 3 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-060.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | [PR #386](https://github.com/voidbrain/nerv/pull/386) [PR #194](https://github.com/voidbrain/nerv/pull/194) format migration and operator assessment; [PR #169](https://github.com/voidbrain/nerv/pull/169) spike record; Owner question 2026-11-06 |
-| Opened | 2026-11-06 |
-| Verification | Documentation: Pending. Human: Pending (trial). |
-| Reviewed | 2026-11-06 |
-
-</details>
-
----
-
 ### <a id="f-116"></a>[✨ F-116](#top)
 
 **Split a model too big for one base across bases**
