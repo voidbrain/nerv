@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-158-T04",
+  "parent": "F-158",
+  "title": "Justification wording per hop: plain, Eva, Italian and English",
+  "goal": "Each reason code has a short sentence in both voices and both languages",
+  "status": "planned",
+  "acceptance": [
+    "Test first: every reason code has all four sentences and none is empty; examples \"cloud: enabled for this role\", \"Haiku 5.5: cheapest model that passed this pilot's tests\", \"local: cloud budget used up\", \"Casper: always local\" with Italian and Eva equivalents",
+    "Wording follows the voice rules in docs/STYLE-GUIDE.md"
+  ],
+  "dependsOn": [
+    "F-158-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "web/**",
+    "docs/**",
+    "docs/work/records/F-158.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "javascript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}

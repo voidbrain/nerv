@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-155-T05",
+  "parent": "F-155",
+  "title": "Owner confirms the pilot table",
+  "goal": "The owner reads the proposed table and says yes, or changes a row",
+  "status": "planned",
+  "acceptance": [
+    "Copy-paste: run `nerv models pilots` (proposal) and reply \"ok\" or the row to change"
+  ],
+  "dependsOn": [
+    "F-155-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-155.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 h agent, 0.25 h owner",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.25,
+    "ownerKind": "decision"
+  }
+}

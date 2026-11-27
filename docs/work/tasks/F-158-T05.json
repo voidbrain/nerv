@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-158-T05",
+  "parent": "F-158",
+  "title": "Join test: from a sortie through the router to the lit path",
+  "goal": "A test across router, store, endpoint and component shows the stored path lights with its reasons",
+  "status": "planned",
+  "acceptance": [
+    "Fake models; a local sortie, a cloud sortie, a budget-refused sortie and a Casper hop each light the right nodes with the right sentence"
+  ],
+  "dependsOn": [
+    "F-158-T03",
+    "F-158-T04"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "web/**",
+    "docs/**",
+    "docs/work/records/F-158.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}

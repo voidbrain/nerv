@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-154-T02",
+  "parent": "F-154",
+  "title": "Resolve each role to its own route at run time; state what the Consultant may send",
+  "goal": "Misato and the Consultant call their own route and model; the Consultant on cloud sends only what its rule allows, written in the record and in the code comment",
+  "status": "planned",
+  "acceptance": [
+    "Test across config and runtime (models resolved per role, not from one shared cloud model); a failed route reports failure, no automatic fallback",
+    "The Consultant on cloud gets the owner question and Misato's plan context only: no tool results marked private or local-only, no memory facts, no Grover data until F-156 lets the owner allow a category",
+    "Local-only input still never leaves the machine (areas.md: never fall back to cloud for local-only input)"
+  ],
+  "dependsOn": [
+    "F-154-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-154.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}
