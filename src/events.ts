@@ -1,4 +1,4 @@
-import type { Ballot, Trust } from './policy.ts';
+import type { Ballot, Executor, Trust } from './policy.ts';
 import type { Step } from './misato.ts';
 /**
  * Sortie event schema (F-024): the one shape the ledger writes and every reader (CLI, REST, RPC, the F-019 dashboard,
@@ -98,8 +98,20 @@ export interface EventPayloads {
     durationMs?: number;
     transferMs?: number;
   };
-  'action.done': { tool: string; result: unknown; durationMs?: number; evaInstance?: EvaInstanceRef };
-  'action.failed': { tool: string; error: string; durationMs?: number; evaInstance?: EvaInstanceRef };
+  'action.done': {
+    tool: string;
+    result: unknown;
+    durationMs?: number;
+    evaInstance?: EvaInstanceRef;
+    executor?: Executor;
+  };
+  'action.failed': {
+    tool: string;
+    error: string;
+    durationMs?: number;
+    evaInstance?: EvaInstanceRef;
+    executor?: Executor;
+  };
   'sortie.done': Record<string, never>;
   'sortie.failed': Record<string, never>;
 }

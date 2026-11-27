@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "parent": "B-178",
+  "dependsOn": [],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-178-T01",
+  "title": "Show the EVA class the ballot chose in the dashboard trace",
+  "goal": "The trace names the executor of each finished action",
+  "status": "implemented",
+  "acceptance": [
+    "The trace names the executor of each finished action"
+  ],
+  "resources": [
+    "src/ledger.ts",
+    "src/events.ts",
+    "web/public/dashboard/live.js",
+    "test/dashboard.test.ts",
+    "docs/work/records/B-178.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-27: see the record. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
+    "baselineAgentHours": 1.0,
+    "estimateAgentHours": 1.0
+  }
+}
