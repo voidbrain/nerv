@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-157-T02",
+  "parent": "F-157",
+  "title": "Owner: turn the cloud role on and ask three questions",
+  "goal": "🧑 Follow the guide; reply \"ok\" or what looks wrong",
+  "status": "planned",
+  "acceptance": [
+    "Copy-paste: the commands of the guide; expect the models report to show the role on cloud, the spend line and the limit"
+  ],
+  "dependsOn": [
+    "F-157-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-157.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0 h agent, 0.5 h owner",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0,
+    "baselineAgentHours": 0,
+    "estimateAgentHours": 0,
+    "ownerHours": 0.5,
+    "ownerKind": "procedure"
+  }
+}

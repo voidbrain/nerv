@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-154-T01",
+  "parent": "F-154",
+  "title": "Test first: roles take a route and a model each; Casper stays local",
+  "goal": "Failing tests first, then config validation: misato and consultant accept {route, model}; model must be a local name or one of claude-haiku-5-5, claude-sonnet-5-5, claude-opus-5-5; casper with a cloud route is refused",
+  "status": "planned",
+  "acceptance": [
+    "A failing test first for each: consultant on cloud, per-role cloud model, unknown cloud model refused, Casper cloud refused with an error naming the rule",
+    "Old configs (consultant: {model}, one models.cloud.model) still load and behave as before",
+    "The config schema, models report and docs/agents/areas.md (Local core) state the Casper rule"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-154.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.25 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 1.25,
+    "baselineAgentHours": 1.25,
+    "estimateAgentHours": 1.25
+  }
+}
