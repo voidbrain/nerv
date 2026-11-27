@@ -6,6 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { parseHTML } from 'linkedom';
 
 const live = readFileSync('web/public/dashboard/live.js', 'utf8');
 const html = readFileSync('web/public/dashboard/index.html', 'utf8');
@@ -17,10 +18,10 @@ const block = (name) => {
   assert.ok(start > 0 && end > start, `${name} is marked in live.js`);
   return live.slice(start, end);
 };
-const { healthRowHtml, healthMetricRows } = new Function(
-  'esc',
-  block('B-142: health rows') + ';return { healthRowHtml, healthMetricRows };',
-)(esc);
+const { healthRowHtml } = new Function('esc', block('B-142: health rows') + ';return { healthRowHtml };')(esc);
+/** F-152: the diagnostics table (service sample and one row per peer link), read lazily so a missing builder fails a test. */
+const diagnostics = (/** @type {object} */ hm) =>
+  new Function('esc', block('B-142: health rows') + ';return healthDiagnosticsHtml;')(esc)(hm);
 const { updaterStatusHtml } = new Function('esc', block('B-123: updater status') + ';return { updaterStatusHtml };')(
   esc,
 );
@@ -34,36 +35,117 @@ const css = (selector) => {
 const ROW =
   /^<div class='row small health-row'(?: [^>]*)?><span class='health-label'>[^<]*<\/span><span class='row health-value'><span class='(ok|warn|danger|muted)'>([✓✗·]) [^<]*<\/span>(?:<button[^>]*>[^<]*<\/button>)?<\/span><\/div>$/;
 
-test('B-142: service sample and link rows render with the same two-cell structure as every Health row', () => {
+// F-152 (owner, 2026-11-26): the service sample and the link rows were dotted text lines; they become one table so the
+// service and each link compare column by column.
+test('F-152: diagnostics are a table: caption, column and row headers, one row per link, units in the cells', () => {
   const hm = {
     latestSample: { rssBytes: 600 * 1048576, heapUsedBytes: 120 * 1048576, eventLoopDelayMs: 12, pollCount: 9 },
-    links: [{ peerId: 'NERV-02', bytesSent: 512, bytesReceived: 1024, lastLatencyMs: 38, inFlight: 1, reconnects: 2 }],
+    links: [
+      { peerId: 'NERV-02', bytesSent: 512, bytesReceived: 2048, lastLatencyMs: 38, inFlight: 1, reconnects: 2 },
+      { peerId: 'NERV-03', bytesSent: 3 * 1048576, bytesReceived: 0, lastLatencyMs: null, inFlight: 0, reconnects: 0 },
+    ],
     warnings: [{ key: 'link:NERV-02:reconnects', message: 'reconnects' }],
   };
-  const rows = healthMetricRows(hm).map(healthRowHtml);
-  assert.equal(rows.length, 2);
-  for (const row of rows) assert.match(row, ROW);
-  assert.match(rows[0], /^<div class='row small health-row' id='health-sample-row'>/);
-  assert.match(rows[0], /<span class='health-label'>Service sample<\/span>/);
-  assert.match(rows[0], /<span class='ok'>✓ RSS 600\.0 MB · Heap 120\.0 MB · Loop 12 ms · Polls 9<\/span>/);
-  assert.match(rows[1], /data-link-peer='NERV-02'/);
-  assert.match(rows[1], /<span class='health-label'>Link · NERV-02<\/span>/);
-  assert.match(rows[1], /<span class='warn'>✗ 512B↑ \/ 1024B↓ · 38 ms · in-flight 1 · reconnects 2<\/span>/);
+  const { document } = parseHTML('<div>' + diagnostics(hm) + '</div>');
+  const table = /** @type {Element} */ (document.querySelector('table'));
+  assert.ok(table, 'a real <table>');
+  assert.match(/** @type {Element} */ (table.querySelector('caption')).textContent, /Diagnostics/);
+  assert.deepEqual(
+    [...table.querySelectorAll('thead th[scope=col]')].map((th) => th.textContent),
+    ['Status', 'Sent', 'Received', 'Latency', 'In flight', 'Reconnects', 'Memory'],
+  );
+  const cells = (/** @type {string} */ sel) => {
+    const tr = /** @type {Element} */ (table.querySelector(sel));
+    assert.ok(tr, sel);
+    return [
+      /** @type {Element} */ (tr.querySelector('th[scope=row]')).textContent,
+      ...[...tr.querySelectorAll('td')].map((td) => td.textContent),
+    ];
+  };
+  const NA = '—not applicable';
+  assert.deepEqual(cells('tr#health-sample-row'), [
+    'Service sample',
+    '✓ ok · 9 polls',
+    NA,
+    NA,
+    'loop 12 ms',
+    NA,
+    NA,
+    'RSS 600.0 MB · heap 120.0 MB',
+  ]);
+  assert.deepEqual(cells("tr[data-link-peer='NERV-02']"), [
+    'Link · NERV-02',
+    '✗ warning',
+    '512 B',
+    '2.0 KB',
+    '38 ms',
+    '1',
+    '2',
+    NA,
+  ]);
+  assert.deepEqual(cells("tr[data-link-peer='NERV-03']"), [
+    'Link · NERV-03',
+    '✓ ok',
+    '3.0 MB',
+    '0 B',
+    '—not measured yet',
+    '0',
+    '0',
+    NA,
+  ]);
+  const dash = /** @type {Element} */ (table.querySelector('tr#health-sample-row td:nth-child(3)'));
+  assert.equal(
+    /** @type {Element} */ (dash.querySelector('[aria-hidden=true]')).textContent,
+    '—',
+    'the dash is hidden from screen readers',
+  );
+  assert.equal(
+    /** @type {Element} */ (dash.querySelector('.sr-only')).textContent,
+    'not applicable',
+    'and named for them',
+  );
+  assert.match(
+    /** @type {Element} */ (table.querySelector("tr[data-link-peer='NERV-02'] td")).outerHTML,
+    /class="warn">✗ warning/,
+    'warning is text and colour',
+  );
+  const hostile = diagnostics({
+    links: [{ peerId: "<b x='1'>", bytesSent: 0, bytesReceived: 0, inFlight: 0, reconnects: 0 }],
+  });
+  assert.doesNotMatch(hostile, /<b /, 'a peer id is escaped in the header and the attribute');
+});
 
-  const empty = healthMetricRows(null).map(healthRowHtml);
-  for (const row of empty) assert.match(row, ROW);
-  assert.match(empty[0], /id='health-sample-row'[\s\S]*<span class='muted'>· No health samples yet\.<\/span>/);
-  assert.match(empty[1], /id='health-links-empty'[\s\S]*<span class='muted'>· No peer link traffic recorded\.<\/span>/);
+test('F-152: empty diagnostics keep one readable row each', () => {
+  const { document } = parseHTML('<div>' + diagnostics(null) + '</div>');
+  const sample = /** @type {Element} */ (document.querySelector('tr#health-sample-row'));
+  assert.equal(/** @type {Element} */ (sample.querySelector('th[scope=row]')).textContent, 'Service sample');
+  assert.equal(
+    /** @type {Element} */ (sample.querySelector('td[colspan="7"]')).textContent,
+    '· No health samples yet.',
+  );
+  const links = /** @type {Element} */ (document.querySelector('tr#health-links-empty'));
+  assert.equal(/** @type {Element} */ (links.querySelector('th[scope=row]')).textContent, 'Links');
+  assert.equal(
+    /** @type {Element} */ (links.querySelector('td[colspan="7"]')).textContent,
+    '· No peer link traffic recorded.',
+  );
+});
 
-  const hostile = healthRowHtml(healthMetricRows({ links: [{ peerId: "<b x='1'>" }] })[1]);
-  assert.doesNotMatch(hostile, /<b /, 'a peer id is escaped in the label and the attribute');
+test('F-152: at phone width the table scrolls inside its own focusable box, styled with tokens only', () => {
+  const out = diagnostics(null);
+  assert.match(out, /^<div class='diag-wrap' role='region' aria-label='Diagnostics' tabindex='0'><table class='diag'>/);
+  assert.match(css('.diag-wrap'), /overflow-x:auto/);
+  for (const sel of ['.diag-wrap', '.diag', '.diag th, .diag td'])
+    assert.doesNotMatch(css(sel), /#[0-9a-f]{3,8}\b|rgb\(/i, sel + ': tokens only');
+  const render = live.slice(live.indexOf('window.renderHealth ='), live.indexOf('// Kaji bases (F-036)'));
+  assert.match(render, /healthDiagnosticsHtml\(hm\)/, 'Health renders the table');
 });
 
 test('B-142: the rows sit in one Health table, the labels never wrap, and the availability row ends it', () => {
   const render = live.slice(live.indexOf('window.renderHealth ='), live.indexOf('// Kaji bases (F-036)'));
   assert.match(render, /<div class='health-table'>" \+ table\.map\(healthRowHtml\)\.join\(""\) \+ "<\/div>"/);
-  assert.match(render, /concat\(healthMetricRows\(hm\), availabilityRow \? \[availabilityRow\] : \[\]\)/);
-  assert.doesNotMatch(render, /sampleHtml|linksHtml/, 'no metric row is rendered outside the table');
+  // F-152: the service sample and link rows left this list for the diagnostics table (expectation changed with them).
+  assert.match(render, /concat\(availabilityRow \? \[availabilityRow\] : \[\]\)/);
   assert.match(css('.health-row > .health-label'), /white-space:nowrap/);
   assert.match(css('.health-row > .health-value'), /justify-content:flex-end/);
   const withAction = healthRowHtml([

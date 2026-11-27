@@ -19,6 +19,7 @@
     "test/evaluation-runner.test.mjs",
     "test/evaluation.browser.mjs",
     "test/fixtures/live-view.mjs",
+    "test/health-diagnostics.browser.mjs",
     "test/gauntlet.test.mjs",
     "test/install-deps.test.mjs",
     "test/map-tabs.test.mjs",

@@ -136,7 +136,8 @@
         "test/updater-status.browser.mjs",
         "test/doctor-run.browser.mjs",
         "test/dashboard-shell.browser.mjs",
-        "test/push-opened.browser.mjs"
+        "test/push-opened.browser.mjs",
+        "test/health-diagnostics.browser.mjs"
       ],
       "families": [
         "dashboard-operator",

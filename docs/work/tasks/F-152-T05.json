@@ -4,7 +4,7 @@
   "parent": "F-152",
   "title": "Test first: Health diagnostics as a real table",
   "goal": "A failing test describes the table: columns Status, Sent, Received, Latency, In flight, Reconnects, Memory; rows Service sample and one per link",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "test/dashboard-live-views.test.mjs: a <table> with caption, <th scope=col> and <th scope=row>, one row for the service sample (RSS, heap, loop delay, polls) and one per link; empty states keep a single readable row; the warning state is text as well as colour",
     "Units in the header or cell (MB, ms, bytes shown as KB/MB when large), not-applicable cells show a dash with an accessible name"
@@ -35,7 +35,7 @@
     "size": "small",
     "estimate": "1 h agent",
     "basis": "Estimated 2026-11-26 from the existing code paths read for this plan. Not a measurement.",
-    "reviewed": "2026-11-26",
+    "reviewed": "2026-11-27",
     "agentHours": 1,
     "baselineAgentHours": 1,
     "estimateAgentHours": 1
