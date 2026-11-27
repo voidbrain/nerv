@@ -291,3 +291,91 @@ test('F-148-T01: a brain that goes away takes its thinking with it', { timeout: 
     await m.close();
   }
 });
+
+// ---- F-148-T03: the endpoint and the existing feed -------------------------------------------------------------------
+
+async function nextRefresh(reader: ReadableStreamDefaultReader<Uint8Array>): Promise<void> {
+  let text = '';
+  const timer = setTimeout(() => void reader.cancel(), 5000);
+  try {
+    while (!text.includes('event: refresh')) {
+      const next = await reader.read();
+      assert.equal(next.done, false, 'the stream ended before the change');
+      text += new TextDecoder().decode(next.value);
+    }
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+test(
+  'F-148-T03: a begin and an end are each announced over the dashboard feed and read from GET /api/thinking',
+  { timeout: 30000 },
+  async () => {
+    const { makeServer } = await import('../src/server.ts');
+    const m = await heldModel();
+    const t = await service(m.url);
+    const token = 'f'.repeat(32);
+    const server = makeServer(t.r, token);
+    await new Promise<void>((d) => server.listen(0, '127.0.0.1', d));
+    const base = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
+    const headers = { authorization: 'Bearer ' + token };
+    const read = async () =>
+      ((await (await fetch(base + '/api/thinking', { headers })).json()) as { thinking: ThinkingEntry[] }).thinking;
+    const controller = new AbortController();
+    try {
+      assert.equal((await fetch(base + '/api/thinking')).status, 401, 'no token, nothing');
+      assert.deepEqual(await read(), [], 'an empty list when nothing thinks');
+      const stream = await fetch(base + '/api/dashboard/stream', { headers, signal: controller.signal });
+      const reader = stream.body!.getReader();
+      await nextRefresh(reader);
+      const chat = t.r.chat('Remind me to call Ada');
+      chat.catch(() => undefined);
+      const consult = await m.next();
+      await nextRefresh(reader);
+      const now = await until(read, (e) => e.length === 1);
+      assert.deepEqual(
+        now.map(({ pilot, role, model }) => ({ pilot, role, model })),
+        [{ pilot: 'Generic pilot', role: 'consultant', model: 'advisor' }],
+      );
+      assert.equal(typeof now[0]!.sortieId, 'string');
+      // The consultant ends with no advice; Misato's turn begins: both are changes the feed announces.
+      m.answer(consult.res, consult.model, 'none');
+      await nextRefresh(reader);
+      const plan = await m.next();
+      plan.res.socket?.destroy();
+      await chat.catch(() => undefined);
+      await nextRefresh(reader);
+      assert.deepEqual(await until(read, (e) => !e.length), []);
+      await reader.cancel();
+    } finally {
+      controller.abort();
+      await new Promise<void>((d) => server.close(() => d()));
+      await t.close();
+      await m.close();
+    }
+  },
+);
+
+test('F-148-T03: the revision moves on with every change of who is thinking and keeps its "a:b" form', async () => {
+  const m = await heldModel();
+  const t = await service(m.url);
+  try {
+    const before = await t.r.dashboardRevision();
+    assert.match(before, /^\d+:\d+$/);
+    assert.equal(await t.r.dashboardRevision(), before, 'no change, same revision');
+    // What the brain sends when a call begins and ends; nothing is written to the ledger here.
+    const entry = { id: 't1', pilot: 'Maya', role: 'consultant', model: 'm', startedAt: new Date().toISOString() };
+    t.r.brain.onThinking!([entry]);
+    const during = await t.r.dashboardRevision();
+    assert.match(during, /^\d+:\d+$/);
+    assert.notEqual(during, before);
+    t.r.brain.onThinking!([]);
+    const after = await t.r.dashboardRevision();
+    assert.notEqual(after, during);
+    assert.equal(await t.r.dashboardRevision(), after);
+  } finally {
+    await t.close();
+    await m.close();
+  }
+});
