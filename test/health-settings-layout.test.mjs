@@ -228,6 +228,7 @@ test('F-152-T08: empty diagnostics keep one readable card each', () => {
 test('F-152-T08: the cards wrap to the box at every width, styled with tokens only', () => {
   for (const sel of ['.diag', '.diag-card', '.diag-card dl > div'])
     assert.doesNotMatch(css(sel), /#[0-9a-f]{3,8}\b|rgb\(/i, sel + ': tokens only');
+  assert.doesNotMatch(css('.diag-card dl > div'), /border-top/, 'F-152-T09: no line between the rows of a card');
   assert.doesNotMatch(html, /\.diag-wrap|overflow-x:auto; margin-top:6px/, 'no sideways-scrolling box');
   const render = live.slice(live.indexOf('window.renderHealth ='), live.indexOf('// Kaji bases (F-036)'));
   assert.match(render, /healthDiagnosticsHtml\(hm\)/, 'Health renders the cards');

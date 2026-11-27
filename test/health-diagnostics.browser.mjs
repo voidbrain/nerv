@@ -54,6 +54,10 @@ test('F-152-T08: the diagnostics are cards that fit the box at every width', { t
           page: document.documentElement.scrollWidth <= innerWidth,
           box: box.scrollWidth <= box.clientWidth && r.right <= innerWidth,
           cards: cards.length,
+          columns: new Set(cards.map((c) => Math.round(c.getBoundingClientRect().left))).size,
+          lines: cards.some((c) => [...c.querySelectorAll('dl > div')].some((d) => parseFloat(getComputedStyle(d).borderTopWidth) > 0)),
+          pad: cards.every((c) => { const s = getComputedStyle(c); return parseFloat(s.paddingTop) <= 4 && parseFloat(s.paddingLeft) <= 6; }),
+          tight: cards.every((c) => { const rows = [...c.querySelectorAll('dl > div')].map((d) => d.getBoundingClientRect()); return rows.every((b, i) => i === 0 || b.top - rows[i - 1].bottom <= 0.5); }),
           inside: cards.every((c) => { const b = c.getBoundingClientRect(); return b.left >= r.left - 0.5 && b.right <= r.right + 0.5; }),
         };
       })()`;
@@ -67,8 +71,8 @@ test('F-152-T08: the diagnostics are cards that fit the box at every width', { t
         await new Promise((done) => setTimeout(done, 200));
         assert.deepEqual(
           await evaluate(fit),
-          { page: true, box: true, cards: 3, inside: true },
-          `cards fit at ${width} px`,
+          { page: true, box: true, cards: 3, columns: width >= 720 ? 2 : 1, lines: false, pad: true, tight: true, inside: true },
+          `cards fit, two per row on a wide screen and one on a phone, compact and without row lines, at ${width} px`,
         );
         assert.deepEqual(
           await evaluate(axeRun('#health .diag', { '#health .diag': 'measured by textContrast below' })),
