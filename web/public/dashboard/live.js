@@ -1312,7 +1312,7 @@
       "<span id='settings-status' role='status' class='tiny " + (msg ? msg.kind : "muted") + "'>" + esc(msg ? msg.text : (state.settingsDraft ? "Unsaved changes" : "")) + "</span></div>" +
       "</form>";
     // The panel redraws on every poll: the Advanced section's open state lives in state (toggle listener below).
-    // F-152-T08: below both columns, full width.
+    // Below both columns, full width (owner, 2026-11-27).
     const more = document.getElementById("settings-more"); if (!more) return;
     more.innerHTML = "<details id='settings-advanced'" + (state.advancedOpen ? " open" : "") + "><summary class='tiny muted'>Advanced</summary>" +
       "<div class='row small'><button class='btn sm' id='btn-reload' type='button'" + (state.reloadBusy ? " disabled" : "") + ">Reload models</button>" +

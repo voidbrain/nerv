@@ -1,3 +1,4 @@
+// @ts-check
 // B-182 (owner 2026-11-27, the dashboard installed as an iPhone app): (1) a pinch zoomed the page out to a narrow
 // column, because something was wider than the screen; (2) focusing a field zoomed in (iOS zooms on a control whose
 // text is under 16 px) and the page stayed zoomed. End to end in Chrome against the real service (makeServer) and the
@@ -51,7 +52,8 @@ test(
   async () => {
     const root = mkdtempSync(join(tmpdir(), 'nerv-b182-web-'));
     cpSync(resolve('dist/web/browser'), root, { recursive: true });
-    const store = new Store(':memory:');
+    // The stubs below stand in for the brain and the health sampler; their shapes are not the point here.
+    const store = /** @type {any} */ (new Store(':memory:'));
     store.modelUsage = async (before, limit) => store.usage.page(before, limit);
     store.lilith = { list: async () => store.memory.list(), episodes: async () => store.memory.episodes() };
     // A service sample, as a running service has: its row has cells that do not apply, each a dash with a
