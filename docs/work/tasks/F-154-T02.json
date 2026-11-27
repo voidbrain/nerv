@@ -8,7 +8,9 @@
   "acceptance": [
     "Test across config and runtime (models resolved per role, not from one shared cloud model); a failed route reports failure, no automatic fallback",
     "The Consultant on cloud gets the owner question and Misato's plan context only: no tool results marked private or local-only, no memory facts, no Grover data until F-156 lets the owner allow a category",
-    "Local-only input still never leaves the machine (areas.md: never fall back to cloud for local-only input)"
+    "Local-only input still never leaves the machine (areas.md: never fall back to cloud for local-only input)",
+    "Prompt caching on every cloud call: the stable prefix (Misato's instructions, tool index, rules) comes first and the volatile parts (time, request, context) after the last cache breakpoint; a test across the request builder and the usage record checks `usage.cache_read_input_tokens` > 0 on a repeated call (cached input costs about a tenth)",
+    "The per-model concurrency budget (src/model-budget.ts, default 2) is set per route: local models stay at 1-2, cloud models may run several sorties in parallel (e.g. 4-8), bounded by Anthropic rate limits and the F-156 budget; separate budgets let a cloud Consultant run alongside a local Misato (tested)"
   ],
   "dependsOn": [
     "F-154-T01"
