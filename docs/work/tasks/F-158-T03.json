@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "F-158-T03",
+  "parent": "F-158",
+  "title": "The graph: columns of nodes, links and the lit path, in plain SVG or 🧱 bricks charts",
+  "goal": "A component draws request, pilot, role, route and model columns with their links and lights the chosen path",
+  "status": "planned",
+  "acceptance": [
+    "Read docs/STYLE-GUIDE.md and docs/agents/angular.md first; tokens only, no new literal colour; a new shared component updates the style guide in the same change",
+    "Lit path animates once on a new sortie and respects reduced motion; the path is also a text list for screen readers; works at phone width (scrolls inside its box)",
+    "A component test with a fixture decision; no backlog IDs in text"
+  ],
+  "dependsOn": [
+    "F-158-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "web/**",
+    "docs/**",
+    "docs/work/records/F-158.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "javascript",
+    "accessibility",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "2 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 2,
+    "baselineAgentHours": 2,
+    "estimateAgentHours": 2
+  }
+}

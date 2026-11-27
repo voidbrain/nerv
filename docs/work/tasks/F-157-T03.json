@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "F-157-T03",
+  "parent": "F-157",
+  "title": "Compare the first week of spend with the estimate",
+  "goal": "After a week, compare the real spend with about $0.06 per Sonnet 5.5 question and correct the estimate in the guide and the models report",
+  "status": "planned",
+  "acceptance": [
+    "Spend and question count recorded in F-157; the estimate is corrected if off by more than half"
+  ],
+  "dependsOn": [
+    "F-157-T02"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-157.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.25 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.25,
+    "baselineAgentHours": 0.25,
+    "estimateAgentHours": 0.25
+  }
+}
