@@ -1761,3 +1761,24 @@ test('a staged skill is never applied: the English trigger plans with the full c
     reminderSkill(false),
   );
 });
+test('an answer to the planner question keeps the skill of the original request, matched once more from it (F-146-T03)', async () => {
+  await agent(
+    ['{"ask":"Di quale giorno?"}', '{"reply":"Domani non manca nulla."}'],
+    async (runtime, m) => {
+      const asked = await runtime.chat('Cosa manca nei promemoria?', 'telegram:1');
+      assert.equal(asked.reply, 'Di quale giorno?');
+      const answered = await runtime.chat('domani', 'telegram:1');
+      const prompts = m.asked.filter((a) => a.who === 'misato');
+      assert.equal(prompts.length, 2);
+      assert.match(
+        prompts[1]!.system,
+        /SKILL-MARKER/,
+        'the answer "domani" names no trigger, the original request does',
+      );
+      assert.match(answered.reply!, /\n\nSkill: Promemoria: cosa manca\? \(reminder-review 1\.2\.0\)$/);
+    },
+    undefined,
+    undefined,
+    reminderSkill(true),
+  );
+});
