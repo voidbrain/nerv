@@ -14,7 +14,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | Status | Features | Bugs |
 |---|---:|---:|
 | **Open** | 62 | 54 |
-| **Require Human 🧑** | 17 | 22 |
+| **Require Human 🧑** | 18 | 22 |
 
 ### Require Human 🧑
 
@@ -31,9 +31,9 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | [F-087](#f-087) |  | [B-122](#b-122) |  |
 | [F-133](#f-133) |  | [B-123](#b-123) |  |
 | [F-092](#f-092) |  | [B-128](#b-128) |  |
-| [F-060](#f-060) |  | [B-129](#b-129) |  |
-| [F-007](#f-007) |  | [B-134](#b-134) |  |
-|  |  | [B-135](#b-135) |  |
+| [F-152](#f-152) |  | [B-129](#b-129) |  |
+| [F-060](#f-060) |  | [B-134](#b-134) |  |
+| [F-007](#f-007) |  | [B-135](#b-135) |  |
 |  |  | [B-142](#b-142) |  |
 |  |  | [B-148](#b-148) |  |
 |  |  | [B-149](#b-149) |  |
@@ -4038,57 +4038,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
-### <a id="f-152"></a>[✨ F-152](#top)
-
-**Dashboard feedback: phone push on the Midori card, one less update line, a real diagnostics table, and the config reload question**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h agent + 0.5 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: from tasks (the reload decision is recorded: T04 applies it).
-
-| | |
-|---|---|
-| **Issue** | Owner feedback on the live dashboard, 2026-11-26 23:55. (1) The Midori card shows only Telegram; it should also show phone push (PWA): subscribed devices, last push delivered and opened (the open data exists since [B-170](work/records/F-152.md#b-170)). (2) The line "Automatic updates · checked 21:00, applied 04:00 unless you say wait" repeats the update settings panel. (3) "Edited config.json? Apply it without a restart." and "Reload models": are they needed? (4) The diagnostics (service sample, one line per peer link) are dotted text lines; the owner wants a table so service and links compare. |
-| **Reproduce** | Open `/dashboard/`: the Midori card lists only Telegram lines; Health ends with the update checkbox line, the diagnostics lines and the reload line. |
-| **Check** | The Midori card shows phone push beside Telegram; Health has no duplicate update line; the reload control is where the owner decided (or gone); the diagnostics are an accessible table (Status, Sent, Received, Latency, In flight, Reconnects, Memory; rows service sample and each link) readable at phone width; plain and Eva voices both read right; no backlog IDs in user-facing text; tests came first and pass; the owner confirms on phone and desktop (F-152-T07). |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
-|---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-152-t01"></a>F-152-T01 — Test first: the Midori card also shows phone push; then show it | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
-| 🟢 Small | <a id="f-152-t02"></a>F-152-T02 — Remove the duplicate automatic-update line from the Health card | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
-| 🟢 Small | <a id="f-152-t04"></a>F-152-T04 — Apply the decision on Reload models | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
-| 🟢 Small | <a id="f-152-t05"></a>F-152-T05 — Test first: Health diagnostics as a real table | 1 h | 0 h | 1 h | Planned | — | [F-152-T06](#f-152-t06) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
-| 🟡 Medium | <a id="f-152-t06"></a>F-152-T06 — Build the diagnostics table on the Health card | 1.5 h | 0 h | 1.5 h | Planned | [F-152-T05](#f-152-t05) | [F-152-T07](#f-152-t07) | ⏳ 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
-| 🟢 Small | <a id="f-152-t07"></a>F-152-T07 — Owner visual check on the live dashboard | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-152-T01](#f-152-t01), [F-152-T02](#f-152-t02), [F-152-T04](#f-152-t04), [F-152-T06](#f-152-t06) | — | ⏳ 🧑‍🔧 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
-| 🔴 Large | **Total** | 5 h | 0 h (0 of 7 steps recorded) | 5 h agent + 0.5 h owner | 1 of 7 completed | | | | |
-
-<details><summary>Done steps (1)</summary>
-
-| Effort | Step | Estimate | Actual | Status | PRs |
-|---|---|---|---|---|---|
-| — | <a id="f-152-t03"></a>F-152-T03 — Owner decision: keep, move or remove 'Reload models' and the config.json line | 0 h | 0 h | Completed | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan; [PR #860](https://github.com/voidbrain/nerv/pull/860) owner decision |
-
-</details>
-
-<details>
-<summary>Next action, estimates and PR history</summary>
-
-[Full notes & evidence](work/records/F-152.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Steps: F-152-T01: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T02: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T03: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan; [PR #860](https://github.com/voidbrain/nerv/pull/860) owner decision · F-152-T04: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T05: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T06: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T07: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan. Plan: [#859](https://github.com/voidbrain/nerv/pull/859). Decision T03: [#860](https://github.com/voidbrain/nerv/pull/860); [#873](https://github.com/voidbrain/nerv/pull/873); [#874](https://github.com/voidbrain/nerv/pull/874); [#876](https://github.com/voidbrain/nerv/pull/876) |
-| Opened | 2026-11-26 |
-| Verification | Pending |
-| Reviewed | 2026-11-26 |
-
-</details>
-
----
 ### <a id="f-143"></a>[✨ F-143](#top)
 
 **Attach an image to a recipe or a Hobo place by chat**
@@ -4820,6 +4769,57 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-18 |
 | Verification | 2026-11-19: B-094-T02 by CI run 44486070427 (PR #535). B-094-T03 by CI run 44516436567 (PR #545, attempt 2); live check pending. |
 | Reviewed | 2026-11-19 |
+
+</details>
+
+---
+### <a id="f-152"></a>[✨ F-152](#top)
+
+**Dashboard feedback: phone push on the Midori card, one less update line, a real diagnostics table, and the config reload question**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔹 P3 | 🔴 Large | 5 h agent + 0.5 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** After the next service update, do the owner check F-152-T07 on the phone and the Mac (copy-paste steps in Next action below).
+
+| | |
+|---|---|
+| **Issue** | Owner feedback on the live dashboard, 2026-11-26 23:55. (1) The Midori card shows only Telegram; it should also show phone push (PWA): subscribed devices, last push delivered and opened (the open data exists since [B-170](work/records/F-152.md#b-170)). (2) The line "Automatic updates · checked 21:00, applied 04:00 unless you say wait" repeats the update settings panel. (3) "Edited config.json? Apply it without a restart." and "Reload models": are they needed? (4) The diagnostics (service sample, one line per peer link) are dotted text lines; the owner wants a table so service and links compare. |
+| **Reproduce** | Open `/dashboard/`: the Midori card lists only Telegram lines; Health ends with the update checkbox line, the diagnostics lines and the reload line. |
+| **Check** | The Midori card shows phone push beside Telegram; Health has no duplicate update line; the reload control is where the owner decided (or gone); the diagnostics are an accessible table (Status, Sent, Received, Latency, In flight, Reconnects, Memory; rows service sample and each link) readable at phone width; plain and Eva voices both read right; no backlog IDs in user-facing text; tests came first and pass; the owner confirms on phone and desktop (F-152-T07). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
+|---|---|---|---|---|---|---|---|:---:|---|
+| 🟡 Medium | <a id="f-152-t01"></a>F-152-T01 — Test first: the Midori card also shows phone push; then show it | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
+| 🟢 Small | <a id="f-152-t02"></a>F-152-T02 — Remove the duplicate automatic-update line from the Health card | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
+| 🟢 Small | <a id="f-152-t04"></a>F-152-T04 — Apply the decision on Reload models | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
+| 🟢 Small | <a id="f-152-t05"></a>F-152-T05 — Test first: Health diagnostics as a real table | 1 h | 0 h | 1 h | Implemented; verification pending | — | [F-152-T06](#f-152-t06) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
+| 🟡 Medium | <a id="f-152-t06"></a>F-152-T06 — Build the diagnostics table on the Health card | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | [F-152-T05](#f-152-t05) | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
+| 🟢 Small | <a id="f-152-t07"></a>F-152-T07 — Owner visual check on the live dashboard | 0 h | 0 h | 0 h agent + 0.5 h owner | Planned | [F-152-T01](#f-152-t01), [F-152-T02](#f-152-t02), [F-152-T04](#f-152-t04), [F-152-T06](#f-152-t06) | — | ⏳ 🧑‍🔧 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
+| 🔴 Large | **Total** | 5 h | 0 h (0 of 7 steps recorded) | 5 h agent + 0.5 h owner | 1 of 7 completed | | | | |
+
+<details><summary>Done steps (1)</summary>
+
+| Effort | Step | Estimate | Actual | Status | PRs |
+|---|---|---|---|---|---|
+| — | <a id="f-152-t03"></a>F-152-T03 — Owner decision: keep, move or remove 'Reload models' and the config.json line | 0 h | 0 h | Completed | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan; [PR #860](https://github.com/voidbrain/nerv/pull/860) owner decision |
+
+</details>
+
+<details>
+<summary>Next action, estimates and PR history</summary>
+
+[Full notes & evidence](work/records/F-152.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Steps: F-152-T01: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T02: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T03: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan; [PR #860](https://github.com/voidbrain/nerv/pull/860) owner decision · F-152-T04: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T05: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T06: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T07: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan. Plan: [#859](https://github.com/voidbrain/nerv/pull/859). Decision T03: [#860](https://github.com/voidbrain/nerv/pull/860); [#873](https://github.com/voidbrain/nerv/pull/873); [#874](https://github.com/voidbrain/nerv/pull/874); [#876](https://github.com/voidbrain/nerv/pull/876); [#877](https://github.com/voidbrain/nerv/pull/877) |
+| Opened | 2026-11-26 |
+| Verification | Pending |
+| Reviewed | 2026-11-26 |
 
 </details>
 
