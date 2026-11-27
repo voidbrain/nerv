@@ -1,3 +1,4 @@
+import { skillsOverview, type SkillOverview } from './skills.ts';
 import type { WatchWork } from './watch.ts';
 import type { DeliveryChannel, DeliveryOutcome, DeliveryState, FallbackItem } from './delivery-state.ts';
 import { EvaPool, defaultEvaLimits, type EvaInstancesSnapshot, type EvaMachineInstances } from './eva-pool.ts';
@@ -462,6 +463,10 @@ export class Runtime implements StoreApi {
   /** The pilot roster (F-045), read on every request so a change applies without a restart. */
   setPilots(fn: () => Pilot[]) {
     this.pilots = fn;
+  }
+  /** F-145: the skills store for the dashboard; no data home, no skills. A corrupt registry throws. */
+  skills(): SkillOverview[] {
+    return this.home ? skillsOverview(this.home) : [];
   }
   pilotRoster(): Pilot[] {
     try {

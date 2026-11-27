@@ -28,6 +28,7 @@ Every command validates before writing and updates the running service without a
 ```
 
 - **S² (local):** any loopback OpenAI-compatible endpoint (Ollama `11434/v1`, LM Studio `1234/v1`).
+- **Keep the model warm:** every local call asks Ollama to keep that model loaded for `models.local.keepAlive` afterwards (default `30m`; from `1m` to `24h`, for example `"keepAlive": "2h"` next to `model`), so the next reply after a pause does not wait for the model to load. `"alwaysLoaded": true` keeps it loaded until Ollama stops (it holds the model's memory, about 16 GB for `gemma4:26b`). Both are in the dashboard Settings. Why and how: [keep the local model warm](../decisions/keep-model-warm.md).
 - **Umbilical (cloud):** Claude (defaults to `claude-opus-5-5`). Only Misato may use cloud; Casper always stays local because it inspects action arguments.
 - `npm start -- ask "text"` uses S² only; `npm start -- ask --cloud "text"` uses Claude. NERV never falls back to cloud when S² is down.
 - After manual edits to `config.json` or `anthropic-key`, run `npm start -- reload`.
@@ -54,3 +55,10 @@ Specialists advise Misato when a request matches their keywords (advice only, re
 - Priority: pinned pilot → most matched keywords → later stage → generic fallback.
 - When no specialist fits, the generic pilot tags the request field; after three matching requests in 30 days, Marduk proposes a new specialist card (or ask Misato: *"make me a pilot for photo editing"*).
 - The dashboard **Pilots** panel updates each pilot's local Ollama model independently. Only local Ollama models are supported for pilots today; see [the roadmap](../ROADMAP.md) for planned routing work.
+
+## Skills (Kaji's watermelons)
+
+A skill is a versioned procedure package a pilot uses. `nerv skills stage <package.json>` stores a version, `nerv skills evaluate` measures it against the same cases without the skill, and `nerv skills promote` makes it active only with your approval; `nerv skills list` and `nerv skills inspect` read the store.
+
+- The dashboard **Kaji's watermelons** panel shows the real store, read-only, through `GET /api/skills` (names, versions and evaluation numbers, never instructions or scripts): one row per version on its tab. **Seed** is staged and not evaluated yet, **Sprout** staged and evaluated, **Ripe** active, **Dropped** retired or rolled back (in the Simple theme: Create, Try, Use, Dropped).
+- With no skills the panel says: "No skills yet. Create one with nerv skills stage <package.json>".

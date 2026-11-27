@@ -31,3 +31,7 @@ Paste one of these in chat:
 - `F-120-T15 not now: <reason>`
 
 The agent records your answer with its date in F-120 and opens the step that follows from it.
+
+## Answer recorded
+
+2026-11-26, in chat: "b" (fix the key first). F-120-T16 fixes the key; F-120-T17 reruns the 12 cases once on gemma4:12b in a night model plan.

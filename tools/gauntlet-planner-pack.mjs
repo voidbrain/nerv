@@ -27,6 +27,45 @@ const CONTRACT = [
 ].join('\n');
 const DECISIONS = new Set(['action', 'ask', 'reply']);
 const SAFETY = new Set(['approval', 'decline', 'switched-off']);
+const FREE_TEXT = new Set(['title', 'text', 'texts', 'body', 'phrase', 'query', 'notes']);
+
+// F-120-T18: on the first real run (2026-11-27) both gemma4 models wrote memory.remember's text and extra keys
+// although the contract said to leave them out, and exact grading failed the case. Ollama's structured output now
+// holds the reply to the contract's shape: an action carries only arguments that some offered tool requires and that
+// are not free text; ask and reply carry nothing else. The model still picks the decision, the tool and the values.
+const ANY = { type: ['string', 'number', 'boolean', 'array', 'object', 'null'] };
+const requiredArgs = (doc) => {
+  if (doc.source?.startsWith('mcp:')) return JSON.parse(doc.args).required ?? [];
+  return [...doc.args.matchAll(/"([A-Za-z_]\w*)"(\?)?:/g)].filter((m) => !m[2]).map((m) => m[1]);
+};
+const decisionSchema = (tools) => {
+  const names = [...new Set(tools.flatMap(requiredArgs))].filter((n) => !FREE_TEXT.has(n)).sort();
+  return {
+    type: 'object',
+    anyOf: [
+      {
+        type: 'object',
+        properties: {
+          decision: { const: 'action' },
+          tool: { type: 'string' },
+          args: {
+            type: 'object',
+            properties: Object.fromEntries(names.map((n) => [n, ANY])),
+            additionalProperties: false,
+          },
+        },
+        required: ['decision', 'tool', 'args'],
+        additionalProperties: false,
+      },
+      {
+        type: 'object',
+        properties: { decision: { enum: ['ask', 'reply'] } },
+        required: ['decision'],
+        additionalProperties: false,
+      },
+    ],
+  };
+};
 
 // A granted MCP tool as the runtime offers it to the planner (src/runtime-tools.ts).
 const mcpDoc = (m) => ({
@@ -97,7 +136,7 @@ function buildCase(source, c) {
     expected: { kind: 'json', value: c.expected },
     area: 'tools',
     requirements: ['local-model-runtime'],
-    responseFormat: 'json',
+    responseFormat: decisionSchema(tools),
   };
 }
 

@@ -14,6 +14,7 @@ import {
   setupAtInit,
 } from '../src/model-setup.ts';
 import { makeServer } from '../src/server.ts';
+import { readConfig } from '../src/config.ts';
 /** A fake Ollama: its model list, and an OpenAI-compatible chat endpoint for the brain. */
 async function fakeOllama(
   models: { name: string; size: number }[],
@@ -325,3 +326,67 @@ test('the CLI: pilots add, list, pin, retire and restore; a model Ollama lacks i
     rmSync(home, { recursive: true, force: true });
   }
 });
+
+test('F-144: moving the local route to another address keeps its keepAlive', () => {
+  const current = { local: { baseUrl: 'http://127.0.0.1:11434/v1', model: 'gemma', keepAlive: '2h' } };
+  const moved = planModels(current, { localUrl: 'http://127.0.0.1:11435' }, ['gemma']);
+  assert.deepEqual(moved.local, { baseUrl: 'http://127.0.0.1:11435/v1', model: 'gemma', keepAlive: '2h' });
+});
+
+test(
+  'F-144: the dashboard sets how long the local model stays loaded, or always, through PUT /api/models into config.json',
+  { timeout: 20000 },
+  async () => {
+    const { Runtime } = await import('../src/runtime.ts');
+    const o = await fakeOllama(MODELS);
+    const home = mkdtempSync(join(tmpdir(), 'nerv-models-warm-'));
+    writeFileSync(
+      join(home, 'config.json'),
+      JSON.stringify({ models: { local: { baseUrl: o.url + '/v1', model: 'gemma4:12b' } } }),
+    );
+    const runtime = new Runtime(join(home, 'nerv.sqlite'), undefined, home);
+    const token = 'w'.repeat(32);
+    const server = makeServer(runtime, token);
+    try {
+      await runtime.ready();
+      await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
+      const base = `http://127.0.0.1:${(server.address() as { port: number }).port}/api/models`;
+      const call = (method = 'GET', body?: object) =>
+        fetch(base, {
+          method,
+          headers: { authorization: 'Bearer ' + token, 'content-type': 'application/json' },
+          ...(body ? { body: JSON.stringify(body) } : {}),
+        });
+      const local = async () =>
+        ((await (await call()).json()) as { models: { local: Record<string, unknown> } }).models.local;
+      assert.equal((await local()).keepAlive, undefined, 'nothing set: the 30-minute default applies');
+      assert.equal((await call('PUT', { warm: { keepAlive: '2h' } })).status, 200);
+      assert.equal((await local()).keepAlive, '2h');
+      assert.equal(readConfig(home).models.local?.keepAlive, '2h');
+      assert.equal((await call('PUT', { warm: { alwaysLoaded: true } })).status, 200);
+      assert.deepEqual(
+        { keepAlive: (await local()).keepAlive, alwaysLoaded: (await local()).alwaysLoaded },
+        { keepAlive: '2h', alwaysLoaded: true },
+        'always loaded keeps the duration for when it is turned off',
+      );
+      assert.equal((await call('PUT', { warm: { alwaysLoaded: false } })).status, 200);
+      assert.equal((await local()).alwaysLoaded, undefined, 'off by default and off again: not written');
+      const before = readFileSync(join(home, 'config.json'), 'utf8');
+      for (const warm of [
+        { keepAlive: 'forever' },
+        { keepAlive: '-1' },
+        { alwaysLoaded: 'yes' },
+        { other: 1 },
+        {},
+        'x',
+      ])
+        assert.equal((await call('PUT', { warm })).status, 400, JSON.stringify(warm));
+      assert.equal(readFileSync(join(home, 'config.json'), 'utf8'), before, 'a refused change writes nothing');
+    } finally {
+      await new Promise<void>((done) => server.close(() => done()));
+      await runtime.close();
+      await o.close();
+      rmSync(home, { recursive: true, force: true });
+    }
+  },
+);

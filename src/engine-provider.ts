@@ -181,7 +181,7 @@ async function readWholeReply(response: Response, label: string): Promise<OpenAI
  */
 export async function completeOpenAICompatible(
   ask: Ask,
-  endpoint: { baseUrl: string; model: string; apiKey?: string },
+  endpoint: { baseUrl: string; model: string; apiKey?: string; keepAlive?: string | -1 },
   options: EngineCompleteOptions,
 ): Promise<Reply> {
   const route = options.route ?? 'local';
@@ -217,6 +217,8 @@ export async function completeOpenAICompatible(
             max_tokens: MAX_TOKENS,
             stream: true,
             stream_options: { include_usage: true },
+            // F-144: how long Ollama keeps the model loaded after this call (its /v1 endpoint honours it).
+            ...(endpoint.keepAlive !== undefined ? { keep_alive: endpoint.keepAlive } : {}),
             // B-136: structured outputs, so a local model cannot answer in prose or wrap two objects.
             ...(structured && ask.schema
               ? { response_format: { type: 'json_schema', json_schema: { ...ask.schema, strict: true } } }

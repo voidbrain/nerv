@@ -384,6 +384,90 @@ export function listSkillPackages(home: string): SkillRegistryEntry[] {
   return Object.values(readRegistry(home).skills).sort((a, b) => a.id.localeCompare(b.id));
 }
 
+/**
+ * F-145: where a skill version is in its life, as the dashboard tabs show it: seed = staged and not evaluated yet,
+ * sprout = staged with an evaluation, ripe = active, dropped = retired or rolled back.
+ */
+export type SkillStage = 'seed' | 'sprout' | 'ripe' | 'dropped';
+export interface SkillOverview {
+  id: string;
+  title: string;
+  domain: string;
+  /** The active version's stage (ripe), else the newest version's. */
+  stage: SkillStage;
+  activeVersion?: string;
+  versions: {
+    version: string;
+    status: SkillStatus;
+    stage: SkillStage;
+    stagedAt: string;
+    promotedAt?: string;
+    retiredAt?: string;
+    /** The latest evaluation against the baseline; numbers only, never the cases' prompts or outputs. */
+    evaluation?: Pick<
+      SkillEvaluationReport,
+      | 'evaluatedAt'
+      | 'model'
+      | 'totalCases'
+      | 'baselinePassed'
+      | 'withSkillPassed'
+      | 'holdoutCases'
+      | 'holdoutPassed'
+      | 'regressions'
+      | 'eligibleForPromotion'
+    >;
+  }[];
+}
+function skillStage(v: SkillVersionRecord): SkillStage {
+  if (v.status === 'active') return 'ripe';
+  if (v.status === 'retired' || v.status === 'rolled-back') return 'dropped';
+  return v.evaluations?.length ? 'sprout' : 'seed';
+}
+/** F-145: the skills store for the dashboard: names, versions, stages and evaluation numbers; no instructions or scripts. */
+export function skillsOverview(home: string): SkillOverview[] {
+  return listSkillPackages(home).map((entry) => {
+    const newest = entry.versions.at(-1);
+    const { title, domain } = newest
+      ? loadSkillVersion(home, entry.id, newest.version).manifest
+      : { title: entry.id, domain: '' };
+    const versions = entry.versions.map((v) => {
+      const e = v.evaluations?.at(-1);
+      return {
+        version: v.version,
+        status: v.status,
+        stage: skillStage(v),
+        stagedAt: v.stagedAt,
+        ...(v.promotedAt ? { promotedAt: v.promotedAt } : {}),
+        ...(v.retiredAt ? { retiredAt: v.retiredAt } : {}),
+        ...(e
+          ? {
+              evaluation: {
+                evaluatedAt: e.evaluatedAt,
+                model: e.model,
+                totalCases: e.totalCases,
+                baselinePassed: e.baselinePassed,
+                withSkillPassed: e.withSkillPassed,
+                holdoutCases: e.holdoutCases,
+                holdoutPassed: e.holdoutPassed,
+                regressions: e.regressions,
+                eligibleForPromotion: e.eligibleForPromotion,
+              },
+            }
+          : {}),
+      };
+    });
+    const active = versions.find((v) => v.version === entry.activeVersion);
+    return {
+      id: entry.id,
+      title,
+      domain,
+      stage: (active ?? versions.at(-1))?.stage ?? 'seed',
+      ...(entry.activeVersion ? { activeVersion: entry.activeVersion } : {}),
+      versions,
+    };
+  });
+}
+
 /** Promotes a staged skill version to active. Requires explicit owner approval. */
 export function activateSkillVersion(
   home: string,
