@@ -49,7 +49,15 @@ import type {
   SubdomainSortie,
   RegisteredPilot,
 } from './pilots.ts';
-import { callModelWithUsage, loadExternalTools, mcpServerHealth, readLiveIndex } from './runtime-tools.ts';
+import {
+  callModelWithUsage,
+  loadExternalTools,
+  mcpServerHealth,
+  readLiveIndex,
+  readModules,
+  type ExternalToolsCache,
+} from './runtime-tools.ts';
+import { setModuleOn, type ModuleRow } from './modules.ts';
 import type { LiveIndexView } from './live-index.ts';
 import {
   remoteOutcomeText,
@@ -629,10 +637,18 @@ export class Runtime implements StoreApi {
     return this.toolsClient;
   }
   /** F-147: the coordinator's live index for the dashboard card, through the read grants and the tools process. */
+  modules(): Promise<ModuleRow[]> {
+    return readModules({ home: this.home, toolsProcess: () => this.toolsProcess() });
+  }
+  async setModule(id: string, on: boolean): Promise<ModuleRow[]> {
+    if (!this.home) throw new Error('No NERV home: modules live in its config.json.');
+    setModuleOn(this.home, id, on);
+    return this.modules();
+  }
   liveIndex(): Promise<LiveIndexView> {
     return readLiveIndex({ home: this.home, toolsProcess: () => this.toolsProcess() });
   }
-  private externalCache?: { at: number; value: ExternalTools };
+  private externalCache?: ExternalToolsCache;
   /**
    * Granted MCP tools Misato may use now (F-021): only those whose description still has the fingerprint they were
    * granted with; a changed or missing one is left out, with the reason, for `nerv tools` and the dashboard.

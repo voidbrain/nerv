@@ -239,7 +239,8 @@ export async function runKajiCommand(
     const offerable = [
       ...builtinTools.map((t) => t.name).filter((n) => n !== 'kaji.run'),
       ...(config.tools?.grants ?? [])
-        .filter((g) => g.eva !== '03')
+        // F-159: an off module's tools are not offered.
+        .filter((g) => g.eva !== '03' && !config.tools?.mcp.find((s) => s.id === g.server)?.off)
         .map((g) => toolName(g.server, g.tool))
         .filter((n) => OFFER_NAME.test(n)),
     ];

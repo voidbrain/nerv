@@ -249,6 +249,7 @@ test('F-152: the store push status carries the last open time to the card', asyn
       endpoint: 'https://push.example.test/device-a',
       p256dh: 'BNeutralTestKey',
       auth: 'neutral-auth',
+      deviceId: '0123456789abcdef',
     });
     assert.equal(store.pushHealth().lastOpened, null);
     store.add('Water the plants', '2030-01-01T10:00:00Z');
@@ -264,6 +265,71 @@ test('F-152: the store push status carries the last open time to the card', asyn
       new RegExp(
         'opened ' + new Date(String(health.lastOpened)).toLocaleString().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
       ),
+    );
+  } finally {
+    store.close();
+  }
+});
+
+// B-183: Health said "Phone push · 2 devices" beside one paired device: it counted every subscription, also one left
+// by an earlier install of the app, from before subscriptions carried the device id.
+const iphone = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko)';
+const mac = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko)';
+/** @type {(p: object) => string[]} */
+const pushRow = new Function(
+  liveSource.slice(
+    liveSource.indexOf('  /** B-134: the Phone push line'),
+    liveSource.indexOf('  window.renderHealth = function'),
+  ) + ';return pushRow;',
+)();
+const sub = (/** @type {string} */ name, /** @type {string} */ userAgent, /** @type {string} */ deviceId = '') => ({
+  endpoint: 'https://push.example.test/' + name,
+  p256dh: 'BNeutralTestKey',
+  auth: 'neutral-auth',
+  userAgent,
+  ...(deviceId ? { deviceId } : {}),
+});
+
+test('B-183: the base card and Health count paired devices, and name unpaired subscriptions apart', () => {
+  const store = new Store(':memory:');
+  try {
+    store.savePushSubscription(sub('earlier-install', iphone));
+    store.savePushSubscription(sub('mac-browser', mac));
+    store.savePushSubscription(sub('phone-app', iphone, '0123456789abcdef'));
+    const health = store.pushHealth();
+    assert.equal(health.devices, 1, 'one paired device, as Settings lists');
+    const t = cardText(cardLines({ self: true, push: health }));
+    assert.match(t, /Phone push · 1 device · 1 unpaired subscription\b/);
+    assert.match(pushRow(health)[2], /^1 device · 1 unpaired subscription · no delivery yet/);
+    assert.match(
+      cardText(cardLines({ self: true, push: { devices: 0, unpaired: 2, last: null, lastOpened: null } })),
+      /Phone push · 0 devices · 2 unpaired subscriptions/,
+      'subscriptions without a paired device are still said, never "no device subscribed"',
+    );
+  } finally {
+    store.close();
+  }
+});
+
+test('B-183: a paired device that subscribes drops the unpaired subscriptions an earlier install left on that kind of device', () => {
+  const store = new Store(':memory:');
+  try {
+    store.savePushSubscription(sub('earlier-install', iphone));
+    store.savePushSubscription(sub('older-install', iphone.replace('18_7', '18_6')));
+    store.savePushSubscription(sub('mac-browser', mac));
+    assert.deepEqual(store.pushHealth().devices, 0);
+    store.savePushSubscription(sub('phone-app', iphone, '0123456789abcdef'));
+    assert.deepEqual(
+      store
+        .listPushSubscriptions()
+        .map((s) => s.endpoint.split('/').pop())
+        .sort(),
+      ['mac-browser', 'phone-app'],
+      'the iPhone leftovers go; the Mac browser, subscribed without pairing, stays',
+    );
+    assert.deepEqual(
+      { devices: store.pushHealth().devices, unpaired: store.pushHealth().unpaired },
+      { devices: 1, unpaired: 1 },
     );
   } finally {
     store.close();

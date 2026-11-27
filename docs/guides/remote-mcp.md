@@ -40,6 +40,7 @@ nerv tools grant hub/hub_run_pump --effect physical       # hardware: a card for
 - A change runs in EVA-01 by default (`--eva 01`); EVA-00 is shadow work and refuses outside effects. EVA-03 does not run yet.
 - A grant is pinned to the tool's description. If the server changes it, the grant is suspended until you grant it again.
 - `nerv tools revoke hub/hub_run_pump` withdraws a grant; `nerv tools remove hub` removes the server and its grants.
+- `nerv modules off hub` turns the server off without losing anything: Misato is offered none of its tools, its dashboard cards hide and nothing calls it, while its grants stay in config.json. `nerv modules on hub` brings it back with the same grants (a tool whose description changed meanwhile stays suspended). The same switches are in the Modules panel on the full dashboard. See [Modules](#modules).
 
 For a hub that drives hardware, a sensible start: its read tools as `read`, its record-keeping tools as `write-external`, and every tool that moves hardware as `physical`.
 
@@ -64,6 +65,18 @@ nerv tools grant coordinator/record_lookup
 ```
 
 The full dashboard (open it with `nerv open full`: typing `/full` in the address bar reloads the page and asks to sign in again) then shows a card with your turn across every project, what each step unblocks, how old the index's snapshot is and the projects it could not read (their work is unknown, not none), each row linked to its source file on GitHub. The card reads the index through these grants every 5 minutes and on Refresh, and keeps no copy. It uses `waiting_on_me` and `blocked_by`; `record_lookup` is for questions in chat. Until the server and both grants exist, the card shows the commands still to run; a grant other than `read` is not used; when the index is not running it says so, never that nothing waits.
+
+## Modules
+
+`nerv modules` lists every module with on or off, whether it answers and how many tools it gives Misato: each MCP server, and the built-in packs. FPVBuddy is one module: today it is the built-in FPV pack (batteries, fleet); when the FPVBuddy server is registered as `fpvbuddy` it joins the same switch. Cooking is its own module.
+
+```bash
+nerv modules
+nerv modules off grover
+nerv modules on grover
+```
+
+Off is stored in config.json: `"off": true` on the server's entry in `tools.mcp`, or `"packs": {"fpv": false}` for a pack. Off differs from `nerv tools remove`, which deletes the server and its grants.
 
 ## Check it
 

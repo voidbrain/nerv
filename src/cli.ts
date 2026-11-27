@@ -1,4 +1,5 @@
 #!/usr/bin/env -S node --use-system-ca
+import { offersOn } from './modules.ts';
 import { phoneBaseFor, tryRunCliCommand } from './cli-commands.ts';
 import { runKajiCommand, runKajiPromoteCommand } from './cli-kaji.ts';
 import { startSnapshots } from './snapshots.ts';
@@ -868,7 +869,7 @@ try {
             // Dispatch, on the main base: a request asked on another base, with its own conversation per base and channel.
             // Slice 3b, on the base asked: only actions this base offers, once per id, through this base's own gate.
             offers: () => {
-              const base = live().kaji?.offers ?? [];
+              const base = offersOn(live());
               return live().models.remote?.serve?.enabled && !base.includes('model.infer')
                 ? [...base, 'model.infer']
                 : base;

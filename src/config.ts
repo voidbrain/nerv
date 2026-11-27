@@ -545,6 +545,18 @@ export function saveTools(home: string, tools: ToolsConfig): void {
   chmodSync(path, 0o600);
   readConfig(home);
 }
+/** F-159: the packs switches (`packs.<id>: false` turns a pack off); an empty map leaves no `packs` key. */
+export function savePacks(home: string, packs: PacksConfig): void {
+  const path = join(home, 'config.json');
+  const current = existsSync(path)
+    ? (JSON.parse(readFileSync(path, 'utf8')) as Record<string, unknown>)
+    : { ...defaults };
+  const next: Record<string, unknown> = { ...current, packs: validatePacksConfig(packs) };
+  if (!Object.keys(packs).length) delete next.packs;
+  writeFileSync(path, JSON.stringify(next, null, 2) + '\n', { mode: 0o600 });
+  chmodSync(path, 0o600);
+  readConfig(home);
+}
 export type ScheduleValue = string | null;
 /** The two schedules the owner may change by talking to Misato (F-003): times, "idle" or off. Nothing security-relevant. */
 export function readSchedule(home: string): { brief: string; instrumentality: string } {
