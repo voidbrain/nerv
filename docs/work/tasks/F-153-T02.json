@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-153-T02",
+  "parent": "F-153",
+  "title": "Evaluation runner: the same requests with and without the skill on the local model",
+  "goal": "nerv skills evaluate grades measured replies, not hand-written ones",
+  "status": "implemented",
+  "acceptance": [
+    "Owner 2026-11-27 in chat: \"ok\" to starting the first real skills, a Grover check for \"controlla se è richiesta un'altra dose\"; read-only.",
+    "evals/skill-evaluation-run.mjs asks the local model (loopback Ollama only) twice per case over the same invented tool results, once with the skill instructions in the system prompt, and writes a copy of the suite with baselineOutput and withSkillOutput to a new file; without --allow-models --execute --out it only plans",
+    "It measures the instructions on the plain model, not through NERV's planner: applying a skill at run time is F-146-T03. F-146-T05 can reuse this runner for the pre-flight skill (F-146 is an adopted plan: that change is the owner's to approve)",
+    "Tests with a fake fetch: plan mode calls nothing; a run sends both prompts and writes both replies; a remote endpoint, a run without --out, an existing out file and a case without a fixture are refused"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "evals/**",
+    "test/**",
+    "docs/work/records/F-153.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "regression-design"
+  ],
+  "privacy": "Invented tent, pot and readings only in Git and tests; the owner's real Grover data stays on the owner's machines.",
+  "validation": [
+    "node --test test/skill-grover-dose.test.mjs",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A skill that could start a feed or any other effect is out of scope and goes to the owner as a separate decision"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-27: a small runner on the speed benchmark's loopback pattern, with fake-model tests. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  },
+  "prs": []
+}

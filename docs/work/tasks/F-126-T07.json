@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "id": "F-126-T07",
+  "parent": "F-126",
+  "title": "Night run: gauntlet all on gemma4:12b for the main-model comparison",
+  "goal": "Every model pack has a gemma4:12b result from the same release and limits as gemma4:26b, so the owner chooses the main model on one comparison",
+  "status": "planned",
+  "acceptance": [
+    "Owner 2026-11-27: \"Keep 26b, test more\"; planned as the 2026-11-29 night in gauntlet-protocol docs/NIGHTS.md (\"gauntlet all on gemma4:12b\")",
+    "In a night model plan on a quiet Mac (no owner use of the local model), from a development worktree at origin/main with node_modules installed, never ~/.nerv-app; OUT is a new private directory outside any checkout",
+    "node tools/gauntlet.mjs all --fresh --profile=node_modules/@voidbrain/gauntlet-protocol/examples/profiles/gemma4-12b.json --allow-models --execute --out-dir=$OUT/f126-t07-12b-all (without --allow-expensive: the expensive system cases are F-120-T08). Plan on 2026-11-27: 16 model packs, 154 cases, at most 133.5 min of suite time",
+    "`all` records validating reports in the worktree's evals/gauntlet/ledger.json; that change goes into a reviewed PR the next morning (check:gauntlet-ledger passes), never pushed overnight",
+    "A comparison table (gemma4:12b against gemma4:26b per pack) is added to docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md and summarised in F-126 for F-126-T03"
+  ],
+  "dependsOn": [
+    "F-126-T02"
+  ],
+  "resources": [
+    "evals/gauntlet/ledger.json",
+    "docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md",
+    "docs/work/records/F-126.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Local models only; no paid route, prompts are neutral fixtures, raw reports stay private on their base.",
+  "validation": [
+    "npm run check:gauntlet-ledger",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A model run needs a quiet Mac and the owner's night plan; a material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-27: up to about 2 h 15 min of model time overnight, then the ledger PR and a comparison table. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}

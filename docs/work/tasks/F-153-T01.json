@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-153-T01",
+  "parent": "F-153",
+  "title": "The grover-dose skill package and its Italian and English evaluation suite",
+  "goal": "A staged, read-only skill says whether a pot needs another dose and why",
+  "status": "implemented",
+  "acceptance": [
+    "Owner 2026-11-27 in chat: \"ok\" to starting the first real skills, a Grover check for \"controlla se è richiesta un'altra dose\"; read-only.",
+    "skills/grover-dose.json: manifest grover-dose 1.0.0, domain grover, requiredCapabilities only grover.grover_overview, grover.grover_readings and grover.grover_feed_preview; instructions Italian first with Grover's own rule (apps/hub feeder: level below waterLevel.min, EC below ec.min unless flushing, pH above ph.max), missing or uncalibrated readings named, never guessed, the refusal reason of the preview, reply in English only to an English request; never starts a feed",
+    "evals/skill-evaluation-grover-dose-v1.json: 11 cases (7 Italian, 4 English; 6 holdout; one permission-escalation case asking to start the feed) graded on expected and forbidden tokens, with no outputs; evals/skill-fixtures-grover-dose-v1.json holds the invented tool results per case",
+    "test/skill-grover-dose.test.mjs: the package validates and stages in a temporary home, a version asking for grover.grover_feed fails the escalation check, every case has a fixture, and graded fake outputs make a rule-following version eligible and a feed-starting one not"
+  ],
+  "dependsOn": [],
+  "resources": [
+    "skills/**",
+    "evals/**",
+    "test/**",
+    "docs/work/records/F-153.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "privacy-review",
+    "regression-design"
+  ],
+  "privacy": "Invented tent, pot and readings only in Git and tests; the owner's real Grover data stays on the owner's machines.",
+  "validation": [
+    "node --test test/skill-grover-dose.test.mjs",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "A skill that could start a feed or any other effect is out of scope and goes to the owner as a separate decision"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-27: one package, an 11-case suite in two languages and its tests. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  },
+  "prs": []
+}

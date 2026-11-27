@@ -1,0 +1,16 @@
+{
+  "manifest": {
+    "id": "grover-dose",
+    "version": "1.0.0",
+    "title": "Grover: serve una dose?",
+    "domain": "grover",
+    "description": "Read-only: says whether a Grover pot needs another dose and why, from the overview, the probe readings and the feed preview, in Italian unless asked in English. Never starts a feed. Owner phrase: \"controlla se è richiesta un'altra dose\".",
+    "requiredCapabilities": [
+      "grover.grover_overview",
+      "grover.grover_readings",
+      "grover.grover_feed_preview"
+    ],
+    "createdAt": "2026-11-27T00:00:00.000Z"
+  },
+  "instructions": "# Serve una dose? (Grover)\n\nUsa questa skill quando il proprietario chiede se un vaso ha bisogno di un'altra dose, per esempio \"controlla se è richiesta un'altra dose\", \"serve una dose al vaso 2?\" o, in inglese, \"does pot 2 need another dose?\".\n\n## Cosa leggere (solo lettura)\n\n1. grover.grover_overview: per ogni vaso la fase (phase) con gli intervalli ec, ph e waterLevel e il campo flushing, l'ultima lettura di ogni sonda (latest), la modalità della tenda (mode) e lo stato dell'agente.\n2. grover.grover_readings di una sonda, solo se serve l'andamento delle ultime ore.\n3. grover.grover_feed_preview del vaso: cosa mescolerebbe ora (millilitri per pompa) oppure perché la dose verrebbe rifiutata.\n\n## La regola (la stessa della dose automatica di Grover)\n\nServe una dose se almeno una di queste è vera:\n- il livello dell'acqua è sotto il minimo della fase (waterLevel.min);\n- l'EC è sotto il minimo della fase (ec.min), tranne in fase di lavaggio (flushing: true), quando l'EC bassa è voluta;\n- il pH è sopra il massimo della fase (ph.max).\nAltrimenti non serve una dose.\n\nUna lettura mancante (latest null) non conta: scrivi \"lettura mancante\" per quella sonda e non indovinare il valore. Una sonda non calibrata (l'anteprima dice che legge volt) non conta: scrivi che non è calibrata.\n\n## Come rispondere\n\n- In italiano, a meno che la domanda sia in inglese: allora in inglese.\n- Prima riga: \"Sì, serve una dose al <vaso>\" oppure \"No, non serve una dose al <vaso>\". In inglese: \"Yes, a dose is needed for <pot>\" oppure \"No dose needed for <pot>\".\n- Poi il perché, con i numeri letti e il limite della fase, per esempio \"livello 38 sotto il minimo 45\" (\"level 38 below the minimum 45\").\n- Se l'anteprima è rifiutata, scrivi il motivo (per esempio agente offline, tenda in manutenzione) e che ora la dose non si può dare. Se è pronta, scrivi i millilitri dell'anteprima.\n- Usa solo i numeri degli strumenti: mai numeri inventati.\n\n## Limiti\n\nQuesta skill legge e basta. Non avviare mai una dose e non chiamare strumenti che agiscono (grover_feed, pompe, luci). Se il proprietario chiede di darla, rispondi che non puoi avviarla tu: la avvia il proprietario da Grover o con un'approvazione. In inglese: \"I cannot start a feed: the owner starts it in Grover or approves it\".\n"
+}

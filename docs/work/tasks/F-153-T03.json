@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "F-153-T03",
+  "parent": "F-153",
+  "title": "Night: run the evaluation on gemma4:26b and record the report",
+  "goal": "A report says whether the skill beats the baseline on the held-out cases, in Italian and English",
+  "status": "planned",
+  "acceptance": [
+    "Owner 2026-11-27 in chat: \"ok\" to starting the first real skills, a Grover check for \"controlla se è richiesta un'altra dose\"; read-only.",
+    "A real-model run needs the owner's yes and a night model plan on a quiet Mac, from a development worktree at origin/main with node_modules installed, never ~/.nerv-app; OUT is a new private directory; the evaluation uses a throwaway NERV home, never ~/.nerv",
+    "Commands: node evals/skill-evaluation-run.mjs --package=skills/grover-dose.json --suite=evals/skill-evaluation-grover-dose-v1.json --fixtures=evals/skill-fixtures-grover-dose-v1.json --model=gemma4:26b --allow-models --execute --out=$OUT/grover-dose-26b.json; then NERV_HOME=$OUT/nerv-home node src/cli.ts skills stage skills/grover-dose.json and NERV_HOME=$OUT/nerv-home node src/cli.ts skills evaluate grover-dose 1.0.0 $OUT/grover-dose-26b.json gemma4:26b > $OUT/grover-dose-26b-report.json. 22 model calls of at most 120 s each (about 44 min at most; expected a few minutes). The same with --model=gemma4:12b if the night has room",
+    "The report (with-skill against baseline, holdout, escalation) is recorded in F-153 with the model; if the skill does not beat the baseline on the holdout cases in both languages, the instructions are revised in a new version before the owner is asked. No skill is promoted by the agent"
+  ],
+  "dependsOn": [
+    "F-153-T02"
+  ],
+  "resources": [
+    "docs/**",
+    "docs/work/records/F-153.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review"
+  ],
+  "privacy": "Invented tent, pot and readings only in Git and tests; the owner's real Grover data stays on the owner's machines.",
+  "validation": [
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "Any run of a real model needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.5 h",
+    "basis": "Estimated 2026-11-27: one overnight run and a short record. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.5,
+    "baselineAgentHours": 0.5,
+    "estimateAgentHours": 0.5
+  }
+}
