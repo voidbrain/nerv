@@ -343,3 +343,45 @@ test('F-159-T02: the live index read says off without calling; doctor does not r
     rmSync(home, { recursive: true, force: true });
   }
 });
+
+test('F-159-T03: GET /api/modules lists them; PUT /api/modules/NAME switches one; bad input is refused', async () => {
+  const { Store } = await import('../src/store.ts');
+  const { makeServer } = await import('../src/server.ts');
+  const rows = [{ id: 'grover', name: 'Grover', on: true, reachable: true, tools: 1, packs: [], servers: ['grover'] }];
+  const store = Object.assign(new Store(':memory:'), {
+    modules: async () => rows,
+    setModule: async (id: string, on: boolean) => {
+      if (id !== 'grover') throw new Error(`No module ${id}: nerv modules lists them.`);
+      rows[0]!.on = on;
+      return rows;
+    },
+  });
+  const token = 'm'.repeat(32);
+  const server = makeServer(store, token, { language: 'en', timeZone: 'Europe/Rome' });
+  await new Promise<void>((d) => server.listen(0, '127.0.0.1', d));
+  const base = `http://127.0.0.1:${(server.address() as { port: number }).port}/api/modules`;
+  const call = async (path: string, init: RequestInit = {}) => {
+    const res = await fetch(base + path, {
+      ...init,
+      headers: { authorization: 'Bearer ' + token, 'content-type': 'application/json' },
+    });
+    return { status: res.status, body: (await res.json()) as { modules?: typeof rows; error?: string } };
+  };
+  try {
+    assert.deepEqual(await call(''), { status: 200, body: { modules: rows } });
+    const off = await call('/grover', { method: 'PUT', body: JSON.stringify({ on: false }) });
+    assert.equal(off.status, 200);
+    assert.equal(off.body.modules![0]!.on, false);
+    assert.equal((await call('/grover', { method: 'PUT', body: JSON.stringify({ on: 'no' }) })).status, 400);
+    assert.equal((await call('/grover', { method: 'PUT', body: JSON.stringify({ on: true, x: 1 }) })).status, 400);
+    const unknown = await call('/garden', { method: 'PUT', body: JSON.stringify({ on: false }) });
+    assert.deepEqual([unknown.status, unknown.body.error], [404, 'No module garden: nerv modules lists them.']);
+    assert.equal((await call('/Bad%20Name', { method: 'PUT', body: JSON.stringify({ on: false }) })).status, 404);
+  } finally {
+    await new Promise((d) => {
+      server.close(d);
+      server.closeAllConnections();
+    });
+    store.close();
+  }
+});

@@ -8,23 +8,13 @@
  */
 import { readConfig, savePacks, saveTools, type Config } from './config.ts';
 import { builtinPackRegistry, type PackRegistry } from './packs.ts';
+import type { ModuleRow } from './module-row.ts';
+
+export type { ModuleRow };
 
 /** A pack the owner knows under another module's name. */
 const PACK_MODULE: Record<string, { id: string; name: string }> = { fpv: { id: 'fpvbuddy', name: 'FPVBuddy' } };
 
-export interface ModuleRow {
-  id: string;
-  name: string;
-  on: boolean;
-  /** Whether its parts answer now: a pack always does; null for a server while off (nothing is asked) or unlisted. */
-  reachable: boolean | null;
-  /** Why it is not reachable, as the tools process said. */
-  why?: string;
-  /** The tools it gives Misato: a pack's own and the server's granted ones. */
-  tools: number;
-  packs: string[];
-  servers: string[];
-}
 /** What the tools process's `tools.list` says per server (only servers that are on are listed). */
 export type ServerListing = { server: string; error?: string }[];
 
