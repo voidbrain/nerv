@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "parent": "B-177",
+  "dependsOn": [
+    "B-177-T03"
+  ],
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ],
+  "id": "B-177-T05",
+  "title": "Measure each process's start-up footprint and what lazy imports would save",
+  "goal": "READY-time memoryUsage and a heap profile per process on NERV-03 and the Mac, recorded with the subsystems worth loading lazily (over 10 MB a process) or none",
+  "status": "planned",
+  "acceptance": [
+    "READY-time memoryUsage and a heap profile per process on NERV-03 and the Mac, recorded with the subsystems worth loading lazily (over 10 MB a process) or none"
+  ],
+  "resources": [
+    "src/nervous-process.ts",
+    "src/store.ts",
+    "docs/work/records/B-177.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "evidence-review",
+    "typescript"
+  ],
+  "validation": [
+    "numbers recorded in the record"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "3 h",
+    "basis": "Estimated 2026-11-26: see the record. Not a measurement.",
+    "reviewed": "2026-11-26",
+    "agentHours": 0,
+    "baselineAgentHours": 3.0,
+    "estimateAgentHours": 3.0
+  }
+}
