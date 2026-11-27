@@ -1187,7 +1187,7 @@ test(
     const coding = commonPacks().find((p) => p.pack.id === 'coding').pack;
     const scripted = commonPacks().find((p) => p.pack.id === 'multi-step-agent').pack;
     const system = readSystemPackWithInputs().pack;
-    assert.equal(caseSourceKey(coding, coding.cases[0].id), releaseSourceKey());
+    assert.equal(caseSourceKey(coding, coding.cases[0].id), releaseSourceKey(coding));
     assert.equal(caseSourceKey(scripted, scripted.cases[0].id), systemSourceKey(scripted, scripted.cases[0].id));
     assert.equal(caseSourceKey(system, 'policy'), systemSourceKey(system, 'policy'));
     // Their cases follow the model digest too: see the F-074-T10 model-changed count.
@@ -1218,6 +1218,40 @@ test(
     }
   },
 );
+
+test('F-120-T16: a model case source key binds only the runners its pack uses, not every registry entry', async () => {
+  const { releaseSourceKey, caseSourceKey, commonPacks } = await import('../tools/gauntlet.mjs');
+  const registry = JSON.parse(readFileSync('evals/gauntlet/runners.json', 'utf8'));
+  const packs = commonPacks()
+    .map((p) => p.pack)
+    .filter((p) => ['coding', 'embedded', 'cad-3d'].includes(p.id));
+  assert.equal(packs.length, 3);
+  const withSystemRunner = {
+    ...registry,
+    runners: {
+      ...registry.runners,
+      'new-system-flow': { ...registry.runners.policy, args: ['tools/gauntlet-adapter.mjs', '--group=new'] },
+    },
+  };
+  for (const pack of packs) {
+    const key = releaseSourceKey(pack, registry);
+    assert.equal(caseSourceKey(pack, pack.cases[0].id), key, pack.id + ': the committed registry gives the same key');
+    // Adding or changing a system (no-model) runner leaves a model case's key unchanged.
+    assert.equal(releaseSourceKey(pack, withSystemRunner), key, pack.id + ': a new system runner');
+    const changedSystem = {
+      ...registry,
+      runners: { ...registry.runners, policy: { ...registry.runners.policy, args: ['x'] } },
+    };
+    assert.equal(releaseSourceKey(pack, changedSystem), key, pack.id + ': a changed system runner');
+    // Changing the runner the pack runs changes its key.
+    const used = pack.cases.find((c) => c.runner).runner;
+    const changedUsed = {
+      ...registry,
+      runners: { ...registry.runners, [used]: { ...registry.runners[used], args: ['y'] } },
+    };
+    assert.notEqual(releaseSourceKey(pack, changedUsed), key, pack.id + ': its own runner changed');
+  }
+});
 
 test('F-120-T03: coding and embedded results keep and follow the model digest (model-calling runners)', async () => {
   const { run, validateRegistry, emptyLedger, caseHash, evidenceProfile, hash } =
@@ -1266,7 +1300,7 @@ writeFileSync(out, JSON.stringify({ schemaVersion: 1, layer: 'coding', caseHash:
       assert.equal(report.results[0].status, 'error');
     } else {
       assert.equal(report.passed, true);
-      const recorded = recordSelected(emptyLedger(), report, coding, one, releaseSourceKey()).entries;
+      const recorded = recordSelected(emptyLedger(), report, coding, one, releaseSourceKey(coding)).entries;
       assert.equal(recorded.length, 1);
       assert.equal(recorded[0].modelDigest, digest, 'a coding run keeps the model it graded');
     }
@@ -1295,7 +1329,7 @@ writeFileSync(out, JSON.stringify({ schemaVersion: 1, layer: 'coding', caseHash:
             modelDigest: digest,
             runtimeHash: null,
             scenarioHash: null,
-            sourceKey: releaseSourceKey(),
+            sourceKey: releaseSourceKey(p),
           })),
         ),
       }),
