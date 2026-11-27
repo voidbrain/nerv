@@ -721,12 +721,19 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
       let renewDoneAt = 0;
       let kajiDoneAt = 0;
       let concurrentWork: Promise<void> | undefined;
+      let cpuAtRead: NodeJS.CpuUsage | undefined;
+      let mainCpuMs = -1;
+      let gapAfterRead = 0;
 
       const shipper = x.lease.shipper(
         {
           replicate: (id, batch, lease) => x.link.replicate(id, batch, lease),
           seedStandby: (id, frame, epoch, lease) => {
-            if (!firstChunkAt) firstChunkAt = performance.now();
+            if (!firstChunkAt) {
+              firstChunkAt = performance.now();
+              const c = process.threadCpuUsage(cpuAtRead);
+              mainCpuMs = Math.round((c.user + c.system) / 1000);
+            }
             return x.link.seedStandby(id, frame, epoch, lease);
           },
         },
@@ -734,6 +741,7 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
           // Fires right after the worker's SQLite read transaction commits, while it canonicalises and signs.
           onReadCommitted: () => {
             readCommittedAt = performance.now();
+            cpuAtRead = process.threadCpuUsage();
             concurrentWork = Promise.all([
               keeper.renewOnce().then((out) => {
                 renewOutcome = out;
@@ -800,6 +808,7 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
         if (!firstChunkAt) {
           if (readCommittedAt > 0) ticksDuringSerialise += 1;
           if (gap > maxGapMs) maxGapMs = gap;
+          if (readCommittedAt > 0 && gap > gapAfterRead) gapAfterRead = gap;
         }
         lastTick = now;
       }, 5);
@@ -821,6 +830,9 @@ describe('F-016-T21: seed snapshot export runs off serve event loop', () => {
         ticksDuringSerialise,
         maxGapMs: Math.round(maxGapMs),
         handlerMs: Math.round(handlerMs),
+        mainCpuMs,
+        gapAfterRead: Math.round(gapAfterRead),
+        cpus: (await import('node:os')).availableParallelism(),
         slow,
       });
       console.log(`F-016-T21 metrics ${metrics}`);
