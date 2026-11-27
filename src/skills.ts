@@ -502,7 +502,7 @@ export interface AppliedSkill {
   tools: string[];
 }
 /** Longer instructions are refused, not cut: a cut procedure could drop the rule that matters. */
-export const MAX_APPLIED_INSTRUCTIONS = 8000;
+const MAX_APPLIED_INSTRUCTIONS = 8000;
 export type SkillChoice =
   { applied: AppliedSkill } | { refused: { id: string; version: string; title: string; reason: string } };
 
@@ -522,7 +522,12 @@ export function chooseActiveSkill(
   for (const entry of listSkillPackages(home)) {
     const version = entry.activeVersion;
     if (!version || entry.versions.find((v) => v.version === version)?.status !== 'active') continue;
-    const pkg = loadSkillVersion(home, entry.id, version);
+    let pkg: SkillPackage;
+    try {
+      pkg = loadSkillVersion(home, entry.id, version);
+    } catch {
+      continue; // One unreadable package never takes the others out; the skills panel and nerv skills list show it.
+    }
     const length = Math.max(
       0,
       ...(pkg.manifest.triggers ?? []).map(phraseWords).map((t) => (words.includes(` ${t} `) ? t.length : 0)),
@@ -533,14 +538,18 @@ export function chooseActiveSkill(
   const { manifest, instructions } = best.pkg;
   const tools = manifest.requiredCapabilities ?? [];
   const refuse = (reason: string): SkillChoice => ({
-    refused: { id: manifest.id, version: manifest.version, title: manifest.title, reason },
+    refused: { id: manifest.id, version: manifest.version, title: manifest.title, reason: reason.slice(0, 400) },
   });
   for (const tool of tools) {
     const doc = offered.find((t) => t.name === tool);
     if (!doc) return refuse(`it needs ${tool}, which is not granted or not enabled now.`);
     if (doc.effect !== 'read') return refuse(`it needs ${tool}, which is not a read: only read-only skills apply.`);
   }
-  const escalation = checkSkillPermissionEscalation(best.pkg, tools);
+  if (tools.length > 40) return refuse('it needs more than 40 tools.');
+  const escalation = checkSkillPermissionEscalation(
+    best.pkg,
+    offered.filter((t) => t.effect === 'read').map((t) => t.name),
+  );
   if (!escalation.ok) return refuse(`it fails the escalation check: ${escalation.reasons.join(' ')}`);
   if (instructions.length > MAX_APPLIED_INSTRUCTIONS)
     return refuse(`its instructions are longer than ${MAX_APPLIED_INSTRUCTIONS} characters.`);

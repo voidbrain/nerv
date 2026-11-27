@@ -96,6 +96,8 @@ export class RuntimePlanning {
       answering?: boolean;
       watch?: WatchWork;
       askBoth?: boolean;
+      /** F-146-T03: the sortie's original request, which picks the skill when `message` is an answer or a resume. */
+      skillRequest?: string;
     },
   ): Promise<ChatReply> {
     const waiting: ChatReply['waiting'] = [];
@@ -345,8 +347,9 @@ export class RuntimePlanning {
       void this.host.proposePilot(unmatched).catch(() => {
         /* best effort */
       });
-    // F-146-T03: an owner-promoted skill whose trigger the request contains (an answer to a question keeps the original
-    // request's skill); chat only, never a watch. Its tools must be offered now and be reads, else it is refused.
+    // F-146-T03: an owner-promoted skill whose trigger the request contains (an answer or a resume is matched on the
+    // sortie's original request, and records the skill again); chat only, never a watch. Its tools must be offered now
+    // and be reads, else it is refused.
     if (!proactive && this.host.home) {
       const home = this.host.home;
       const ext = await this.host.externalTools();
@@ -356,7 +359,7 @@ export class RuntimePlanning {
       ];
       const choice = (() => {
         try {
-          return chooseActiveSkill(home, followup?.answering && context[0] ? context[0].request : message, offeredNow);
+          return chooseActiveSkill(home, followup?.skillRequest || message, offeredNow);
         } catch {
           return undefined; // An unreadable skills store never blocks chat: the request is planned without a skill.
         }

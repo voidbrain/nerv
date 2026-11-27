@@ -49,7 +49,7 @@ export interface RuntimeChatHost {
     request: string,
     steps: Step[],
     context: Turn[],
-    opts?: { answering?: boolean; consult: boolean; advice?: string; conversation?: string },
+    opts?: { answering?: boolean; consult: boolean; advice?: string; conversation?: string; skillRequest?: string },
   ): Promise<ChatReply>;
 }
 
@@ -312,6 +312,7 @@ export class RuntimeChat {
         consult: message.trim().split(/\s+/u).length > 8,
         advice: history.advice,
         conversation: key,
+        skillRequest: history.original,
       });
     }
     if (question?.forwarded && (await this.host.kaji.main?.()) !== question.forwarded.id)
@@ -446,6 +447,7 @@ export class RuntimeChat {
       })),
       advice: advice?.kind === 'misato.consult' ? advice.payload.advice : undefined,
       conversation: request?.kind === 'misato.request' ? request.payload.conversation : undefined,
+      original,
     };
   }
 

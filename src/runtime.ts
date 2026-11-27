@@ -565,6 +565,8 @@ export class Runtime implements StoreApi {
       answering?: boolean;
       watch?: WatchWork;
       askBoth?: boolean;
+      /** F-146-T03: the sortie's original request, which picks the skill when `message` is an answer or a resume. */
+      skillRequest?: string;
     },
   ): Promise<ChatReply> {
     return this.planningController.loop(sortieId, message, steps, context, followup);
