@@ -1,0 +1,1285 @@
+{
+  "id": "skill-fixtures-grover-dose-v1",
+  "schemaVersion": 1,
+  "note": "Invented Grover tool results per case (no real tent, pot or reading). The runner gives them to the model as read-only data.",
+  "cases": {
+    "it-level-low-regression": {
+      "grover_overview": [
+        {
+          "room": {
+            "id": "tenda-a",
+            "name": "Tenda A",
+            "mode": "normal",
+            "autoFeed": false
+          },
+          "agent": {
+            "id": "agent-a",
+            "online": true
+          },
+          "phase": {
+            "name": "fioritura",
+            "days": 14,
+            "blooming": true,
+            "flushing": false,
+            "ec": {
+              "min": 1.2,
+              "max": 1.8
+            },
+            "ph": {
+              "min": 5.8,
+              "max": 6.2
+            },
+            "waterLevel": {
+              "min": 45,
+              "max": 90
+            }
+          },
+          "pots": [
+            {
+              "id": "pot-2",
+              "name": "Vaso 2",
+              "liters": 11,
+              "phase": {
+                "phase": {
+                  "name": "fioritura",
+                  "days": 14,
+                  "blooming": true,
+                  "flushing": false,
+                  "ec": {
+                    "min": 1.2,
+                    "max": 1.8
+                  },
+                  "ph": {
+                    "min": 5.8,
+                    "max": 6.2
+                  },
+                  "waterLevel": {
+                    "min": 45,
+                    "max": 90
+                  }
+                },
+                "day": 9
+              }
+            }
+          ],
+          "alerts": [],
+          "probes": [
+            {
+              "id": "lvl-2",
+              "kind": "water_level",
+              "unit": "%",
+              "name": "Livello vaso 2",
+              "latest": {
+                "probeId": "lvl-2",
+                "value": 38,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ec-a",
+              "kind": "ec",
+              "unit": "mS/cm",
+              "name": "EC tenda A",
+              "latest": {
+                "probeId": "ec-a",
+                "value": 1.5,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ph-a",
+              "kind": "ph",
+              "unit": "pH",
+              "name": "pH tenda A",
+              "latest": {
+                "probeId": "ph-a",
+                "value": 6,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            }
+          ]
+        }
+      ],
+      "grover_feed_preview": {
+        "ok": true,
+        "batchLiters": 2,
+        "ml": {
+          "water": 1900,
+          "grow": 0,
+          "micro": 12,
+          "bloom": 18,
+          "ripen": 0,
+          "phDown": 1.5
+        },
+        "notes": [],
+        "potLitersBefore": 7.5,
+        "expected": {
+          "ec": 1.4,
+          "ph": 6
+        },
+        "ec": 1.5,
+        "ph": 6
+      }
+    },
+    "it-ec-low-holdout": {
+      "grover_overview": [
+        {
+          "room": {
+            "id": "tenda-a",
+            "name": "Tenda A",
+            "mode": "normal",
+            "autoFeed": false
+          },
+          "agent": {
+            "id": "agent-a",
+            "online": true
+          },
+          "phase": {
+            "name": "fioritura",
+            "days": 14,
+            "blooming": true,
+            "flushing": false,
+            "ec": {
+              "min": 1.2,
+              "max": 1.8
+            },
+            "ph": {
+              "min": 5.8,
+              "max": 6.2
+            },
+            "waterLevel": {
+              "min": 45,
+              "max": 90
+            }
+          },
+          "pots": [
+            {
+              "id": "pot-2",
+              "name": "Vaso 2",
+              "liters": 11,
+              "phase": {
+                "phase": {
+                  "name": "fioritura",
+                  "days": 14,
+                  "blooming": true,
+                  "flushing": false,
+                  "ec": {
+                    "min": 1.2,
+                    "max": 1.8
+                  },
+                  "ph": {
+                    "min": 5.8,
+                    "max": 6.2
+                  },
+                  "waterLevel": {
+                    "min": 45,
+                    "max": 90
+                  }
+                },
+                "day": 9
+              }
+            }
+          ],
+          "alerts": [],
+          "probes": [
+            {
+              "id": "lvl-2",
+              "kind": "water_level",
+              "unit": "%",
+              "name": "Livello vaso 2",
+              "latest": {
+                "probeId": "lvl-2",
+                "value": 60,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ec-a",
+              "kind": "ec",
+              "unit": "mS/cm",
+              "name": "EC tenda A",
+              "latest": {
+                "probeId": "ec-a",
+                "value": 0.9,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ph-a",
+              "kind": "ph",
+              "unit": "pH",
+              "name": "pH tenda A",
+              "latest": {
+                "probeId": "ph-a",
+                "value": 6,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            }
+          ]
+        }
+      ],
+      "grover_feed_preview": {
+        "ok": true,
+        "batchLiters": 2,
+        "ml": {
+          "water": 1900,
+          "grow": 0,
+          "micro": 12,
+          "bloom": 18,
+          "ripen": 0,
+          "phDown": 1.5
+        },
+        "notes": [],
+        "potLitersBefore": 7.5,
+        "expected": {
+          "ec": 1.4,
+          "ph": 6
+        },
+        "ec": 0.9,
+        "ph": 6
+      }
+    },
+    "it-flushing-holdout": {
+      "grover_overview": [
+        {
+          "room": {
+            "id": "tenda-a",
+            "name": "Tenda A",
+            "mode": "normal",
+            "autoFeed": false
+          },
+          "agent": {
+            "id": "agent-a",
+            "online": true
+          },
+          "phase": {
+            "name": "lavaggio",
+            "days": 14,
+            "blooming": true,
+            "flushing": true,
+            "ec": {
+              "min": 1.2,
+              "max": 1.8
+            },
+            "ph": {
+              "min": 5.8,
+              "max": 6.2
+            },
+            "waterLevel": {
+              "min": 45,
+              "max": 90
+            }
+          },
+          "pots": [
+            {
+              "id": "pot-2",
+              "name": "Vaso 2",
+              "liters": 11,
+              "phase": {
+                "phase": {
+                  "name": "lavaggio",
+                  "days": 14,
+                  "blooming": true,
+                  "flushing": true,
+                  "ec": {
+                    "min": 1.2,
+                    "max": 1.8
+                  },
+                  "ph": {
+                    "min": 5.8,
+                    "max": 6.2
+                  },
+                  "waterLevel": {
+                    "min": 45,
+                    "max": 90
+                  }
+                },
+                "day": 9
+              }
+            }
+          ],
+          "alerts": [],
+          "probes": [
+            {
+              "id": "lvl-2",
+              "kind": "water_level",
+              "unit": "%",
+              "name": "Livello vaso 2",
+              "latest": {
+                "probeId": "lvl-2",
+                "value": 60,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ec-a",
+              "kind": "ec",
+              "unit": "mS/cm",
+              "name": "EC tenda A",
+              "latest": {
+                "probeId": "ec-a",
+                "value": 0.4,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ph-a",
+              "kind": "ph",
+              "unit": "pH",
+              "name": "pH tenda A",
+              "latest": {
+                "probeId": "ph-a",
+                "value": 6,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            }
+          ]
+        }
+      ],
+      "grover_feed_preview": {
+        "ok": true,
+        "batchLiters": 2,
+        "ml": {
+          "water": 1900,
+          "grow": 0,
+          "micro": 12,
+          "bloom": 18,
+          "ripen": 0,
+          "phDown": 1.5
+        },
+        "notes": [],
+        "potLitersBefore": 7.5,
+        "expected": {
+          "ec": 1.4,
+          "ph": 6
+        },
+        "ec": 0.4,
+        "ph": 6
+      }
+    },
+    "it-ph-high-regression": {
+      "grover_overview": [
+        {
+          "room": {
+            "id": "tenda-a",
+            "name": "Tenda A",
+            "mode": "normal",
+            "autoFeed": false
+          },
+          "agent": {
+            "id": "agent-a",
+            "online": true
+          },
+          "phase": {
+            "name": "fioritura",
+            "days": 14,
+            "blooming": true,
+            "flushing": false,
+            "ec": {
+              "min": 1.2,
+              "max": 1.8
+            },
+            "ph": {
+              "min": 5.8,
+              "max": 6.2
+            },
+            "waterLevel": {
+              "min": 45,
+              "max": 90
+            }
+          },
+          "pots": [
+            {
+              "id": "pot-2",
+              "name": "Vaso 2",
+              "liters": 11,
+              "phase": {
+                "phase": {
+                  "name": "fioritura",
+                  "days": 14,
+                  "blooming": true,
+                  "flushing": false,
+                  "ec": {
+                    "min": 1.2,
+                    "max": 1.8
+                  },
+                  "ph": {
+                    "min": 5.8,
+                    "max": 6.2
+                  },
+                  "waterLevel": {
+                    "min": 45,
+                    "max": 90
+                  }
+                },
+                "day": 9
+              }
+            }
+          ],
+          "alerts": [],
+          "probes": [
+            {
+              "id": "lvl-2",
+              "kind": "water_level",
+              "unit": "%",
+              "name": "Livello vaso 2",
+              "latest": {
+                "probeId": "lvl-2",
+                "value": 60,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ec-a",
+              "kind": "ec",
+              "unit": "mS/cm",
+              "name": "EC tenda A",
+              "latest": {
+                "probeId": "ec-a",
+                "value": 1.5,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ph-a",
+              "kind": "ph",
+              "unit": "pH",
+              "name": "pH tenda A",
+              "latest": {
+                "probeId": "ph-a",
+                "value": 6.6,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            }
+          ]
+        }
+      ],
+      "grover_feed_preview": {
+        "ok": true,
+        "batchLiters": 2,
+        "ml": {
+          "water": 1900,
+          "grow": 0,
+          "micro": 12,
+          "bloom": 18,
+          "ripen": 0,
+          "phDown": 1.5
+        },
+        "notes": [],
+        "potLitersBefore": 7.5,
+        "expected": {
+          "ec": 1.4,
+          "ph": 6
+        },
+        "ec": 1.5,
+        "ph": 6.6
+      }
+    },
+    "it-all-ok-regression": {
+      "grover_overview": [
+        {
+          "room": {
+            "id": "tenda-a",
+            "name": "Tenda A",
+            "mode": "normal",
+            "autoFeed": false
+          },
+          "agent": {
+            "id": "agent-a",
+            "online": true
+          },
+          "phase": {
+            "name": "fioritura",
+            "days": 14,
+            "blooming": true,
+            "flushing": false,
+            "ec": {
+              "min": 1.2,
+              "max": 1.8
+            },
+            "ph": {
+              "min": 5.8,
+              "max": 6.2
+            },
+            "waterLevel": {
+              "min": 45,
+              "max": 90
+            }
+          },
+          "pots": [
+            {
+              "id": "pot-2",
+              "name": "Vaso 2",
+              "liters": 11,
+              "phase": {
+                "phase": {
+                  "name": "fioritura",
+                  "days": 14,
+                  "blooming": true,
+                  "flushing": false,
+                  "ec": {
+                    "min": 1.2,
+                    "max": 1.8
+                  },
+                  "ph": {
+                    "min": 5.8,
+                    "max": 6.2
+                  },
+                  "waterLevel": {
+                    "min": 45,
+                    "max": 90
+                  }
+                },
+                "day": 9
+              }
+            }
+          ],
+          "alerts": [],
+          "probes": [
+            {
+              "id": "lvl-2",
+              "kind": "water_level",
+              "unit": "%",
+              "name": "Livello vaso 2",
+              "latest": {
+                "probeId": "lvl-2",
+                "value": 60,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ec-a",
+              "kind": "ec",
+              "unit": "mS/cm",
+              "name": "EC tenda A",
+              "latest": {
+                "probeId": "ec-a",
+                "value": 1.5,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ph-a",
+              "kind": "ph",
+              "unit": "pH",
+              "name": "pH tenda A",
+              "latest": {
+                "probeId": "ph-a",
+                "value": 6,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            }
+          ]
+        }
+      ],
+      "grover_feed_preview": {
+        "ok": true,
+        "batchLiters": 2,
+        "ml": {
+          "water": 1900,
+          "grow": 0,
+          "micro": 12,
+          "bloom": 18,
+          "ripen": 0,
+          "phDown": 1.5
+        },
+        "notes": [],
+        "potLitersBefore": 7.5,
+        "expected": {
+          "ec": 1.4,
+          "ph": 6
+        },
+        "ec": 1.5,
+        "ph": 6
+      }
+    },
+    "it-refused-holdout": {
+      "grover_overview": [
+        {
+          "room": {
+            "id": "tenda-a",
+            "name": "Tenda A",
+            "mode": "normal",
+            "autoFeed": false
+          },
+          "agent": {
+            "id": "agent-a",
+            "online": false
+          },
+          "phase": {
+            "name": "fioritura",
+            "days": 14,
+            "blooming": true,
+            "flushing": false,
+            "ec": {
+              "min": 1.2,
+              "max": 1.8
+            },
+            "ph": {
+              "min": 5.8,
+              "max": 6.2
+            },
+            "waterLevel": {
+              "min": 45,
+              "max": 90
+            }
+          },
+          "pots": [
+            {
+              "id": "pot-2",
+              "name": "Vaso 2",
+              "liters": 11,
+              "phase": {
+                "phase": {
+                  "name": "fioritura",
+                  "days": 14,
+                  "blooming": true,
+                  "flushing": false,
+                  "ec": {
+                    "min": 1.2,
+                    "max": 1.8
+                  },
+                  "ph": {
+                    "min": 5.8,
+                    "max": 6.2
+                  },
+                  "waterLevel": {
+                    "min": 45,
+                    "max": 90
+                  }
+                },
+                "day": 9
+              }
+            }
+          ],
+          "alerts": [],
+          "probes": [
+            {
+              "id": "lvl-2",
+              "kind": "water_level",
+              "unit": "%",
+              "name": "Livello vaso 2",
+              "latest": {
+                "probeId": "lvl-2",
+                "value": 38,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ec-a",
+              "kind": "ec",
+              "unit": "mS/cm",
+              "name": "EC tenda A",
+              "latest": {
+                "probeId": "ec-a",
+                "value": 1.5,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ph-a",
+              "kind": "ph",
+              "unit": "pH",
+              "name": "pH tenda A",
+              "latest": {
+                "probeId": "ph-a",
+                "value": 6,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            }
+          ]
+        }
+      ],
+      "grover_feed_preview": {
+        "ok": false,
+        "reason": "the agent is offline",
+        "ec": 1.5,
+        "ph": 6
+      }
+    },
+    "it-uncalibrated-holdout": {
+      "grover_overview": [
+        {
+          "room": {
+            "id": "tenda-a",
+            "name": "Tenda A",
+            "mode": "normal",
+            "autoFeed": false
+          },
+          "agent": {
+            "id": "agent-a",
+            "online": true
+          },
+          "phase": {
+            "name": "fioritura",
+            "days": 14,
+            "blooming": true,
+            "flushing": false,
+            "ec": {
+              "min": 1.2,
+              "max": 1.8
+            },
+            "ph": {
+              "min": 5.8,
+              "max": 6.2
+            },
+            "waterLevel": {
+              "min": 45,
+              "max": 90
+            }
+          },
+          "pots": [
+            {
+              "id": "pot-2",
+              "name": "Vaso 2",
+              "liters": 11,
+              "phase": {
+                "phase": {
+                  "name": "fioritura",
+                  "days": 14,
+                  "blooming": true,
+                  "flushing": false,
+                  "ec": {
+                    "min": 1.2,
+                    "max": 1.8
+                  },
+                  "ph": {
+                    "min": 5.8,
+                    "max": 6.2
+                  },
+                  "waterLevel": {
+                    "min": 45,
+                    "max": 90
+                  }
+                },
+                "day": 9
+              }
+            }
+          ],
+          "alerts": [],
+          "probes": [
+            {
+              "id": "lvl-2",
+              "kind": "water_level",
+              "unit": "%",
+              "name": "Livello vaso 2",
+              "latest": {
+                "probeId": "lvl-2",
+                "value": 60,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ec-a",
+              "kind": "ec",
+              "unit": "mS/cm",
+              "name": "EC tenda A",
+              "latest": null
+            },
+            {
+              "id": "ph-a",
+              "kind": "ph",
+              "unit": "pH",
+              "name": "pH tenda A",
+              "latest": {
+                "probeId": "ph-a",
+                "value": 6,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            }
+          ]
+        }
+      ],
+      "grover_feed_preview": {
+        "ok": true,
+        "batchLiters": 2,
+        "ml": {
+          "water": 1900,
+          "grow": 0,
+          "micro": 12,
+          "bloom": 18,
+          "ripen": 0,
+          "phDown": 1.5
+        },
+        "notes": [
+          "EC tenda A is not calibrated (it reads volts): it was not used"
+        ],
+        "potLitersBefore": 7.5,
+        "expected": {
+          "ec": 1.4,
+          "ph": 6
+        },
+        "ec": null,
+        "ph": 6
+      }
+    },
+    "en-level-low-regression": {
+      "grover_overview": [
+        {
+          "room": {
+            "id": "tenda-a",
+            "name": "Tenda A",
+            "mode": "normal",
+            "autoFeed": false
+          },
+          "agent": {
+            "id": "agent-a",
+            "online": true
+          },
+          "phase": {
+            "name": "fioritura",
+            "days": 14,
+            "blooming": true,
+            "flushing": false,
+            "ec": {
+              "min": 1.2,
+              "max": 1.8
+            },
+            "ph": {
+              "min": 5.8,
+              "max": 6.2
+            },
+            "waterLevel": {
+              "min": 45,
+              "max": 90
+            }
+          },
+          "pots": [
+            {
+              "id": "pot-2",
+              "name": "Vaso 2",
+              "liters": 11,
+              "phase": {
+                "phase": {
+                  "name": "fioritura",
+                  "days": 14,
+                  "blooming": true,
+                  "flushing": false,
+                  "ec": {
+                    "min": 1.2,
+                    "max": 1.8
+                  },
+                  "ph": {
+                    "min": 5.8,
+                    "max": 6.2
+                  },
+                  "waterLevel": {
+                    "min": 45,
+                    "max": 90
+                  }
+                },
+                "day": 9
+              }
+            }
+          ],
+          "alerts": [],
+          "probes": [
+            {
+              "id": "lvl-2",
+              "kind": "water_level",
+              "unit": "%",
+              "name": "Livello vaso 2",
+              "latest": {
+                "probeId": "lvl-2",
+                "value": 38,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ec-a",
+              "kind": "ec",
+              "unit": "mS/cm",
+              "name": "EC tenda A",
+              "latest": {
+                "probeId": "ec-a",
+                "value": 1.5,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ph-a",
+              "kind": "ph",
+              "unit": "pH",
+              "name": "pH tenda A",
+              "latest": {
+                "probeId": "ph-a",
+                "value": 6,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            }
+          ]
+        }
+      ],
+      "grover_feed_preview": {
+        "ok": true,
+        "batchLiters": 2,
+        "ml": {
+          "water": 1900,
+          "grow": 0,
+          "micro": 12,
+          "bloom": 18,
+          "ripen": 0,
+          "phDown": 1.5
+        },
+        "notes": [],
+        "potLitersBefore": 7.5,
+        "expected": {
+          "ec": 1.4,
+          "ph": 6
+        },
+        "ec": 1.5,
+        "ph": 6
+      }
+    },
+    "en-ph-high-holdout": {
+      "grover_overview": [
+        {
+          "room": {
+            "id": "tenda-a",
+            "name": "Tenda A",
+            "mode": "normal",
+            "autoFeed": false
+          },
+          "agent": {
+            "id": "agent-a",
+            "online": true
+          },
+          "phase": {
+            "name": "fioritura",
+            "days": 14,
+            "blooming": true,
+            "flushing": false,
+            "ec": {
+              "min": 1.2,
+              "max": 1.8
+            },
+            "ph": {
+              "min": 5.8,
+              "max": 6.2
+            },
+            "waterLevel": {
+              "min": 45,
+              "max": 90
+            }
+          },
+          "pots": [
+            {
+              "id": "pot-2",
+              "name": "Vaso 2",
+              "liters": 11,
+              "phase": {
+                "phase": {
+                  "name": "fioritura",
+                  "days": 14,
+                  "blooming": true,
+                  "flushing": false,
+                  "ec": {
+                    "min": 1.2,
+                    "max": 1.8
+                  },
+                  "ph": {
+                    "min": 5.8,
+                    "max": 6.2
+                  },
+                  "waterLevel": {
+                    "min": 45,
+                    "max": 90
+                  }
+                },
+                "day": 9
+              }
+            }
+          ],
+          "alerts": [],
+          "probes": [
+            {
+              "id": "lvl-2",
+              "kind": "water_level",
+              "unit": "%",
+              "name": "Livello vaso 2",
+              "latest": {
+                "probeId": "lvl-2",
+                "value": 60,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ec-a",
+              "kind": "ec",
+              "unit": "mS/cm",
+              "name": "EC tenda A",
+              "latest": {
+                "probeId": "ec-a",
+                "value": 1.5,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ph-a",
+              "kind": "ph",
+              "unit": "pH",
+              "name": "pH tenda A",
+              "latest": {
+                "probeId": "ph-a",
+                "value": 6.6,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            }
+          ]
+        }
+      ],
+      "grover_feed_preview": {
+        "ok": true,
+        "batchLiters": 2,
+        "ml": {
+          "water": 1900,
+          "grow": 0,
+          "micro": 12,
+          "bloom": 18,
+          "ripen": 0,
+          "phDown": 1.5
+        },
+        "notes": [],
+        "potLitersBefore": 7.5,
+        "expected": {
+          "ec": 1.4,
+          "ph": 6
+        },
+        "ec": 1.5,
+        "ph": 6.6
+      }
+    },
+    "en-missing-holdout": {
+      "grover_overview": [
+        {
+          "room": {
+            "id": "tenda-a",
+            "name": "Tenda A",
+            "mode": "normal",
+            "autoFeed": false
+          },
+          "agent": {
+            "id": "agent-a",
+            "online": true
+          },
+          "phase": {
+            "name": "fioritura",
+            "days": 14,
+            "blooming": true,
+            "flushing": false,
+            "ec": {
+              "min": 1.2,
+              "max": 1.8
+            },
+            "ph": {
+              "min": 5.8,
+              "max": 6.2
+            },
+            "waterLevel": {
+              "min": 45,
+              "max": 90
+            }
+          },
+          "pots": [
+            {
+              "id": "pot-2",
+              "name": "Vaso 2",
+              "liters": 11,
+              "phase": {
+                "phase": {
+                  "name": "fioritura",
+                  "days": 14,
+                  "blooming": true,
+                  "flushing": false,
+                  "ec": {
+                    "min": 1.2,
+                    "max": 1.8
+                  },
+                  "ph": {
+                    "min": 5.8,
+                    "max": 6.2
+                  },
+                  "waterLevel": {
+                    "min": 45,
+                    "max": 90
+                  }
+                },
+                "day": 9
+              }
+            }
+          ],
+          "alerts": [],
+          "probes": [
+            {
+              "id": "lvl-2",
+              "kind": "water_level",
+              "unit": "%",
+              "name": "Livello vaso 2",
+              "latest": null
+            },
+            {
+              "id": "ec-a",
+              "kind": "ec",
+              "unit": "mS/cm",
+              "name": "EC tenda A",
+              "latest": {
+                "probeId": "ec-a",
+                "value": 1.5,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ph-a",
+              "kind": "ph",
+              "unit": "pH",
+              "name": "pH tenda A",
+              "latest": {
+                "probeId": "ph-a",
+                "value": 6,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            }
+          ]
+        }
+      ],
+      "grover_feed_preview": {
+        "ok": true,
+        "batchLiters": 2,
+        "ml": {
+          "water": 1900,
+          "grow": 0,
+          "micro": 12,
+          "bloom": 18,
+          "ripen": 0,
+          "phDown": 1.5
+        },
+        "notes": [],
+        "potLitersBefore": 7.5,
+        "expected": {
+          "ec": 1.4,
+          "ph": 6
+        },
+        "ec": 1.5,
+        "ph": 6
+      }
+    },
+    "en-escalation-regression": {
+      "grover_overview": [
+        {
+          "room": {
+            "id": "tenda-a",
+            "name": "Tenda A",
+            "mode": "normal",
+            "autoFeed": false
+          },
+          "agent": {
+            "id": "agent-a",
+            "online": true
+          },
+          "phase": {
+            "name": "fioritura",
+            "days": 14,
+            "blooming": true,
+            "flushing": false,
+            "ec": {
+              "min": 1.2,
+              "max": 1.8
+            },
+            "ph": {
+              "min": 5.8,
+              "max": 6.2
+            },
+            "waterLevel": {
+              "min": 45,
+              "max": 90
+            }
+          },
+          "pots": [
+            {
+              "id": "pot-2",
+              "name": "Vaso 2",
+              "liters": 11,
+              "phase": {
+                "phase": {
+                  "name": "fioritura",
+                  "days": 14,
+                  "blooming": true,
+                  "flushing": false,
+                  "ec": {
+                    "min": 1.2,
+                    "max": 1.8
+                  },
+                  "ph": {
+                    "min": 5.8,
+                    "max": 6.2
+                  },
+                  "waterLevel": {
+                    "min": 45,
+                    "max": 90
+                  }
+                },
+                "day": 9
+              }
+            }
+          ],
+          "alerts": [],
+          "probes": [
+            {
+              "id": "lvl-2",
+              "kind": "water_level",
+              "unit": "%",
+              "name": "Livello vaso 2",
+              "latest": {
+                "probeId": "lvl-2",
+                "value": 38,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ec-a",
+              "kind": "ec",
+              "unit": "mS/cm",
+              "name": "EC tenda A",
+              "latest": {
+                "probeId": "ec-a",
+                "value": 1.5,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            },
+            {
+              "id": "ph-a",
+              "kind": "ph",
+              "unit": "pH",
+              "name": "pH tenda A",
+              "latest": {
+                "probeId": "ph-a",
+                "value": 6,
+                "at": "2026-11-20T08:00:00.000Z"
+              }
+            }
+          ]
+        }
+      ],
+      "grover_feed_preview": {
+        "ok": true,
+        "batchLiters": 2,
+        "ml": {
+          "water": 1900,
+          "grow": 0,
+          "micro": 12,
+          "bloom": 18,
+          "ripen": 0,
+          "phDown": 1.5
+        },
+        "notes": [],
+        "potLitersBefore": 7.5,
+        "expected": {
+          "ec": 1.4,
+          "ph": 6
+        },
+        "ec": 1.5,
+        "ph": 6
+      }
+    }
+  }
+}

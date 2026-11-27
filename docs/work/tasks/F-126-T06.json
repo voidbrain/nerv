@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "F-126-T06",
+  "parent": "F-126",
+  "title": "Night run: gemma4:26b with a larger reply cap and without thinking on coding, embedded and cad-3d",
+  "goal": "The owner sees whether gemma4:26b loses to gemma4:12b on coding, embedded and cad-3d because of the reply cap and thinking, not the model",
+  "status": "planned",
+  "acceptance": [
+    "Owner 2026-11-27: \"Keep 26b, test more\". On 2026-11-27 gemma4:26b used the whole reply on 3 of 4 coding cases (3,072 tokens) and stopped cad-3d on its first case at 2,048 tokens; the per-case time is now 120 s (180 s for these runner packs, F-120-T19)",
+    "Two profiles next to evals/gauntlet/profiles/gemma4-26b.json: gemma4-26b-out4096.json (maxOutputTokens 4096, thinking on) and gemma4-26b-nothink.json (2,048 tokens, think false); `node tools/gauntlet.mjs model-plan --pack=<pack> --profile=<profile>` accepts both for coding, embedded and cad-3d",
+    "In a night model plan on a quiet Mac (no owner use of the local model), from a development worktree at origin/main with node_modules installed, never ~/.nerv-app; OUT is a new private directory outside any checkout",
+    "For V in out4096 nothink: node tools/gauntlet.mjs model-run --pack=coding --profile=evals/gauntlet/profiles/gemma4-26b-$V.json --allow-models --execute --fresh --out=$OUT/f126-t06-$V-coding.json; the same with --pack=embedded --only=led-blink-gpiozero-regression,pwm-servo-rpigpio-regression,button-toggle-gpiozero-holdout,edge-counter-rpigpio-holdout (the Arduino cases wait on F-120-T06) and --out=$OUT/f126-t06-$V-embedded.json; and --pack=cad-3d (all 10 cases) --out=$OUT/f126-t06-$V-cad-3d.json",
+    "At most 18 cases x 180 s = 54 min per profile, 108 min in all. With 4,096 tokens a reply the suite output budget (coding 12,288, embedded 4 cases 8,192, cad-3d 20,480) can stop a pack early if most replies use the whole cap: the report says so and that is a result, not a failure of the step",
+    "The next morning: node tools/gauntlet.mjs ledger --report=<report> --pack=<pack> for each report that validates, in a PR; results added to docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md and F-126 next to gemma4:12b"
+  ],
+  "dependsOn": [
+    "F-126-T02"
+  ],
+  "resources": [
+    "evals/gauntlet/profiles/**",
+    "evals/gauntlet/ledger.json",
+    "docs/evaluations/2026-11-26-f126-t02-gemma4-26b-gauntlet.md",
+    "docs/work/records/F-126.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "evaluation-design"
+  ],
+  "privacy": "Local models only; no paid route, prompts are neutral fixtures, raw reports stay private on their base.",
+  "validation": [
+    "npm run check:gauntlet-ledger",
+    "npm run check:fast"
+  ],
+  "escalation": [
+    "A model run needs a quiet Mac and the owner's night plan; a material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-27: up to 108 minutes of model time overnight, then the ledger and report lines in the morning. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  }
+}
