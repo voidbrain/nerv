@@ -139,21 +139,23 @@ export function systemPacks() {
 }
 const modelPacks = () => [...commonPacks(), ...nervModelPacks()];
 const allPacks = () => [...modelPacks(), ...systemPacks()];
-// Model limits scale Gauntlet's day limits per case, so a 10-case pack gets exactly the day limits (cache reuse keeps
-// working) and a larger pack gets the same per-case budget: time, output tokens and case count grow with the pack.
+// Model limits scale Gauntlet's day limits per case, so a 10-case pack gets the day suite and output budgets and a
+// larger pack the same per-case budget: time, output tokens and case count grow with the pack. Since F-120-T19 the case
+// time is MODEL_TIMEOUT_MS, so another consumer reuses NERV's cached evidence only under the same limits.
 // F-120-T05 (owner decision 2026-11-26, "yes to 180 s"): a pack whose cases run on the release's coding, embedded or
 // cad-3d reference runner scales the release's slow-host limits instead (180 s a case): those runners reserve 20 s of
-// each case for grading, so the day limits' 30 s left the model 10 s. Every other pack keeps the day limits.
-// F-120-T18: a nerv-planner case is one Misato planning step, so it gets the time NERV gives that step
-// (MODEL_TIMEOUT_MS): on 2026-11-27 pilot-promote-it hit the 30 s day limit on both gemma4 models, and a timeout
-// leaves consumption unverified, so Gauntlet skipped every case after it. The suite budget stays the day limits'.
+// each case for grading, so the day limits' 30 s left the model 10 s.
+// F-120-T18, F-120-T19 (owner decision 2026-11-27, "ok"): every other model case gets the time NERV gives one model
+// call (MODEL_TIMEOUT_MS, 120 s), not the day limits' 30 s: on 2026-11-27 nerv-planner's pilot-promote-it,
+// italian-quality and devstral's code-review timed out at 30 s (a cold first load), and a timeout leaves consumption
+// unverified, so Gauntlet skipped every case after it. The suite and output budgets stay the day limits'.
 const SLOW_HOST_RUNNERS = new Set(['coding-reference', 'embedded-reference', 'cad-3d-reference']);
 export function modelLimits(pack) {
   const slowHost = pack.cases.some((c) => SLOW_HOST_RUNNERS.has(c.runner));
   const base = validateLimits(readJSON(join(examples, slowHost ? 'limits-slow-host.json' : 'limits-day.json')));
   const n = pack.cases.length;
   return {
-    caseMs: pack.id.split(':')[0] === 'nerv-planner' ? MODEL_TIMEOUT_MS : base.caseMs,
+    caseMs: Math.max(base.caseMs, MODEL_TIMEOUT_MS),
     suiteMs: Math.round((base.suiteMs / base.maxCases) * n),
     maxCases: n,
     repeat: base.repeat,
@@ -265,14 +267,16 @@ const entryKey = (e) => JSON.stringify([e.pack, e.case, e.profileHash]);
 // Gauntlet checks the report against the selected pack it actually ran, and the entries are kept under the full pack.
 export function recordSelected(ledger, report, full, selected, sourceKey = null) {
   const entries = new Map(ledger.entries.map((e) => [entryKey(e), e]));
-  const rawEntries =
-    typeof sourceKey === 'function'
-      ? selected.cases.flatMap((c) => {
-          const single = { ...selected, cases: [c] };
-          const filtered = { ...report, results: report.results.filter((r) => r.id === c.id) };
-          return recordRun(emptyLedger(), filtered, single, { sourceKey: sourceKey(c.id) }).entries;
-        })
-      : recordRun(emptyLedger(), report, selected, { sourceKey }).entries;
+  // B-178: Gauntlet checks the whole report against the pack it ran; a per-case source key is set on each entry after,
+  // since a report cut to one case no longer matches its token total, case count or pack hash.
+  const perCase = typeof sourceKey === 'function';
+  const rawEntries = recordRun(emptyLedger(), report, selected, perCase ? {} : { sourceKey }).entries.map((e) => {
+    if (!perCase) return e;
+    const key = sourceKey(e.case);
+    if (report.sourceKey !== undefined && report.sourceKey !== key)
+      throw Error('Report source key does not match the ledger recording');
+    return { ...e, sourceKey: key };
+  });
   for (const e of rawEntries) {
     const entry = { ...e, pack: full.id, packVersion: full.version };
     if (modelFreeRunnerPack(full)) {

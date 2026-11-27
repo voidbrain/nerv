@@ -433,8 +433,13 @@ test(
       const first = await main([...args, '--confirm-scenario', '--out=' + join(root, 'nerv.json')], services);
       assert.equal(first.passed, true);
       assert.equal(calls, 10);
+      // Deliberate change, owner decision 2026-11-27 (F-120-T19): NERV runs a model case for MODEL_TIMEOUT_MS, so another
+      // consumer reuses its evidence under the same limits, no longer under the release's plain day limits.
       const commonProfile = JSON.parse(readFileSync(profilePath, 'utf8')),
-        limits = JSON.parse(readFileSync('node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json', 'utf8'));
+        limits = {
+          ...JSON.parse(readFileSync('node_modules/@voidbrain/gauntlet-protocol/examples/limits-day.json', 'utf8')),
+          caseMs: MODEL_TIMEOUT_MS,
+        };
       const otherConsumer = await executeWithEvidence(pack, commonProfile, limits, {
         ...lastOptions,
         output: join(root, 'other-consumer.json'),
