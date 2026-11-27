@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "parent": "B-175",
+  "privacy": "Neutral fixtures and invented data only; no secrets, tokens or personal data in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner",
+    "Security semantics of tainted context need explicit owner approval"
+  ],
+  "id": "B-175-T09",
+  "dependsOn": [],
+  "title": "A failed misato.context read is no longer indistinguishable from an empty conversation",
+  "goal": "src/runtime-chat.ts reports a failed misato.context read instead of swallowing it (.catch(() => [])), so it cannot pass for \"no earlier exchange\"",
+  "status": "planned",
+  "acceptance": [
+    "A failing context read is recorded or surfaced, with a test that fails without the change; an empty conversation behaves as before"
+  ],
+  "resources": [
+    "src/runtime-chat.ts",
+    "test/mcp.test.ts",
+    "docs/work/records/B-175.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "bounded-edit",
+    "typescript",
+    "regression-design"
+  ],
+  "validation": [
+    "npm test",
+    "npm run check:fast"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1.5 h",
+    "basis": "Estimated 2026-11-27: one catch handler and one test. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 1.5,
+    "baselineAgentHours": 1.5,
+    "estimateAgentHours": 1.5
+  }
+}
