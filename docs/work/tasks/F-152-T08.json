@@ -4,7 +4,7 @@
   "parent": "F-152",
   "title": "Owner feedback: diagnostics as cards, Advanced full width, shorter reload button, labelled Doctor status",
   "goal": "Diagnostics are cards at every width; Settings → Advanced spans the panel; the button reads Reload models with one help line; the Doctor block reads Status: ok and promises nothing unplanned",
-  "status": "ready",
+  "status": "implemented",
   "acceptance": [
     "At 360, 375, 390 and 1440 px the diagnostics are one card per row (heading, label: value pairs), inside the box, nothing scrolls sideways; axe passes",
     "Advanced is rendered below the two Settings columns, full width",

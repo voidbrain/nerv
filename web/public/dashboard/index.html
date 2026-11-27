@@ -186,22 +186,16 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .health-row { align-items:baseline; }
 .health-row > .health-label { flex:none; white-space:nowrap; }
 .health-row > .health-value { gap:6px; min-width:0; justify-content:flex-end; text-align:right; }
-.diag-wrap { position:relative; overflow-x:auto; margin-top:6px; } /* B-182: relative, so the hidden dash names scroll with the table instead of widening the page */
-.diag { border-collapse:collapse; width:100%; font-size:11px; font-variant-numeric:tabular-nums; }
-.diag caption { text-align:left; color:var(--muted); padding-bottom:2px; }
-.diag th, .diag td { padding:2px 6px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap; }
-.diag th[scope=row], .diag td[colspan] { text-align:left; }
-.diag thead th { color:var(--muted); font-weight:400; }
-/* F-152-T08 (owner): on a phone each row is a card of "column: value" lines; the cells name their columns (data-label).
-   A cell that does not apply is left out; the screen-reader names stay with the cells. */
-@media (max-width:720px) {
-  .diag, .diag caption, .diag tbody, .diag tr, .diag th, .diag td { display:block; }
-  .diag thead { display:none; }
-  .diag tr { border:1px solid var(--border); border-radius:var(--radius); padding:2px 6px; margin-top:6px; }
-  .diag th[scope=row] { border-bottom:1px solid var(--border); padding:2px 0; }
-  .diag td { display:flex; justify-content:flex-end; gap:0 6px; padding:2px 0; border-bottom:0; white-space:normal; }
-  .diag td::before { content:attr(data-label) ": "; color:var(--muted); margin-right:auto; }
-  .diag td.na { display:none; }
+/* F-152-T08 (owner): diagnostics are cards at every width, one per row, "label: value" lines that wrap to the box. */
+.diag { margin-top:6px; display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr)); gap:6px; font-size:11px; font-variant-numeric:tabular-nums; }
+.diag-title { grid-column:1 / -1; }
+.diag-card { border:1px solid var(--border); border-radius:var(--radius); padding:4px 8px; min-width:0; }
+.diag-card h2 { margin:0 0 2px; font-size:11px; font-weight:700; color:var(--title); overflow-wrap:anywhere; }
+.diag-card dl { margin:0; }
+.diag-card dl > div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:0 8px; border-top:1px solid var(--border); padding:1px 0; }
+.diag-card dt { color:var(--muted); }
+.diag-card dd { margin:0 0 0 auto; text-align:right; }
+.diag-card p { margin:0; }
 }
 .update-status { margin-top:6px; padding:6px 8px; border:1px solid currentColor; border-left-width:3px; border-radius:var(--radius); background:color-mix(in srgb,currentColor 10%,transparent); font-size:11px; font-weight:700; }
 .update-status .muted { font-weight:400; }

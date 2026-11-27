@@ -661,31 +661,29 @@
     const mark = c[1] === "ok" ? "✓ " : c[1] === "muted" ? "· " : "✗ ";
     return "<div class='row small health-row'" + (c[5] || "") + "><span class='health-label'>" + esc(c[0]) + "</span><span class='row health-value'><span class='" + c[1] + "'>" + mark + esc(c[2]) + "</span>" + (c[3] || "") + "</span></div>" + (c[4] || "");
   }
-  /** F-152: the diagnostics table: the service sample and one row per peer link, so they compare by column. */
+  /**
+   * F-152: the diagnostics: the service sample and one card per peer link. F-152-T08 (owner): cards at every width, each a
+   * group named by its heading, with "label: value" pairs in a definition list; a value that does not apply is left out.
+   */
   function healthDiagnosticsHtml(hm) {
     const warned = prefix => (hm && Array.isArray(hm.warnings) ? hm.warnings : []).some(w => String(w.key).startsWith(prefix));
     const mb = n => (Number(n) / 1048576).toFixed(1);
     const bytes = n => (n = Number(n) || 0) < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : mb(n) + " MB";
-    const none = why => "<td><span aria-hidden='true'>—</span><span class='sr-only'>" + why + "</span></td>";
-    const NA = "<td class='na'><span aria-hidden='true'>—</span><span class='sr-only'>not applicable</span></td>";
-    const td = v => "<td>" + esc(v) + "</td>";
-    const status = (warn, extra) => "<td><span class='" + (warn ? "warn'>✗ warning" : "ok'>✓ ok") + "</span>" + esc(extra || "") + "</td>";
-    const empty = (attr, label, text) => "<tr" + attr + "><th scope='row'>" + label + "</th><td colspan='7' class='muted'>· " + text + "</td></tr>";
+    const status = (warn, extra) => "<span class='" + (warn ? "warn'>✗ warning" : "ok'>✓ ok") + "</span>" + esc(extra || "");
+    const pair = (label, html) => "<div><dt>" + label + "</dt><dd>" + html + "</dd></div>";
+    let n = 0;
+    const card = (attr, title, body) => { const id = "diag-h-" + (n++); return "<section class='diag-card'" + attr + " aria-labelledby='" + id + "'><h2 id='" + id + "'>" + title + "</h2>" + body + "</section>"; };
+    const dl = pairs => "<dl>" + pairs.join("") + "</dl>";
+    const empty = text => "<p class='muted'>· " + text + "</p>";
     const s = hm && hm.latestSample;
     const sample = s
-      ? "<tr id='health-sample-row'><th scope='row'>Service sample</th>" + status(warned("sample:"), " · " + s.pollCount + " polls") + NA + NA + td("loop " + s.eventLoopDelayMs + " ms") + NA + NA + td("RSS " + mb(s.rssBytes) + " MB · heap " + mb(s.heapUsedBytes) + " MB") + "</tr>"
-      : empty(" id='health-sample-row'", "Service sample", "No health samples yet.");
+      ? card(" id='health-sample-row'", "Service sample", dl([pair("Status", status(warned("sample:"), " · " + s.pollCount + " polls")), pair("Latency", esc("loop " + s.eventLoopDelayMs + " ms")), pair("Memory", esc("RSS " + mb(s.rssBytes) + " MB · heap " + mb(s.heapUsedBytes) + " MB"))]))
+      : card(" id='health-sample-row'", "Service sample", empty("No health samples yet."));
     const links = hm && Array.isArray(hm.links) ? hm.links : [];
-    const linkRows = links.length
-      ? links.map(l => "<tr data-link-peer='" + esc(l.peerId) + "'><th scope='row'>Link · " + esc(l.peerId) + "</th>" + status(warned("link:" + l.peerId + ":")) + td(bytes(l.bytesSent)) + td(bytes(l.bytesReceived)) + (l.lastLatencyMs == null ? none("not measured yet") : td(l.lastLatencyMs + " ms")) + td(l.inFlight) + td(l.reconnects) + NA + "</tr>").join("")
-      : empty(" id='health-links-empty'", "Links", "No peer link traffic recorded.");
-    const cols = ["Status", "Sent", "Received", "Latency", "In flight", "Reconnects", "Memory"];
-    const head = cols.map(h => "<th scope='col'>" + h + "</th>").join("");
-    // F-152-T08: each cell names its column, so on a phone a row reads as a card of "column: value" lines.
-    let i = 0;
-    const labelled = rows => rows.replace(/<tr|<td(?![^>]*colspan)/g, m => m === "<tr" ? (i = 0, m) : "<td data-label='" + cols[i++] + "'");
-    return "<div class='diag-wrap' role='region' aria-label='Diagnostics' tabindex='0'><table class='diag'><caption>Diagnostics · service and peer links</caption>" +
-      "<thead><tr><td></td>" + head + "</tr></thead><tbody>" + labelled(sample + linkRows) + "</tbody></table></div>";
+    const linkCards = links.length
+      ? links.map(l => card(" data-link-peer='" + esc(l.peerId) + "'", "Link · " + esc(l.peerId), dl([pair("Status", status(warned("link:" + l.peerId + ":"))), pair("Sent", esc(bytes(l.bytesSent))), pair("Received", esc(bytes(l.bytesReceived))), pair("Latency", l.lastLatencyMs == null ? "not measured yet" : esc(l.lastLatencyMs + " ms")), pair("In flight", esc(l.inFlight)), pair("Reconnects", esc(l.reconnects))]))).join("")
+      : card(" id='health-links-empty'", "Links", empty("No peer link traffic recorded."));
+    return "<div class='diag' role='group' aria-labelledby='diag-title'><div class='diag-title muted' id='diag-title'>Diagnostics · service and peer links</div>" + sample + linkCards + "</div>";
   }
   // B-142: health rows (end)
   window.renderHealth = function () {
