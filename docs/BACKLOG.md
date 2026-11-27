@@ -9,11 +9,11 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 36 | 10 | 70 | 34 |
+| **This week** | 36 | 10 | 71 | 34 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 61 | 51 |
+| **Open** | 61 | 52 |
 | **Require Human 🧑** | 17 | 22 |
 
 ### Require Human 🧑
@@ -46,7 +46,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 281 h agent + 23.75 h owner across 292 open steps of 61 features and 51 other records. 165.25 h of actual effort recorded on 154 steps. Generated from the task files.
+**Remaining effort:** 281 h agent + 23.75 h owner across 293 open steps of 61 features and 52 other records. 165.25 h of actual effort recorded on 154 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -4575,6 +4575,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
 | Impact | An agent's PR can merge with the records not naming it, so the record cannot be traced to its PR. |
+
+</details>
+
+---
+### <a id="b-178"></a>[🐞 B-178](#top)
+
+**The dashboard trace says "EVA-02" for every finished action, whichever EVA class the ballot chose**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0 h | — | — | 🤖 | — | — |
+
+💻 **→** Next: none; reconcile when the PR merges.
+
+| | |
+|---|---|
+| **Issue** | Found by the owner 2026-11-27 08:38 (sortie S-DFCA on NERV-01, "quali genetiche ho?"): the trace read "EVA-02: grover.grover_strains done" although the ballot chose eva-00. `web/public/dashboard/live.js` hard-coded "EVA-02" and its style for every `action.done` and `action.failed`. |
+| **Reproduce** | Run any action whose ballot chose eva-00 or eva-01 and open its sortie trace in the dashboard: the line says "EVA-02". |
+| **Check** | `action.done` and `action.failed` carry the ballot's `executor` (additive); the trace shows that class, falling back to the recorded EVA instance and then to EVA-02 for events recorded before. Test: `test/dashboard.test.ts`, "the action trace names the EVA class the ballot chose". |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status |
+|---|---|---|---|---|---|
+| 🟢 Small | <a id="b-178-t01"></a>B-178-T01 — Show the EVA class the ballot chose in the dashboard trace | 1 h | 0 h | 0 h | Implemented; verification pending |
+| 🟢 Small | **Total** | 1 h | 0 h (0 of 1 steps recorded) | 0 h | 0 of 1 completed |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-178.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Found by the owner 2026-11-27. [#862](https://github.com/voidbrain/nerv/pull/862). Code: `src/ledger.ts` (`finished`), `web/public/dashboard/live.js` (`evaOf`). |
+| Opened | 2026-11-27 |
+| Verification | Pending |
+| Reviewed | 2026-11-27 |
+| Impact | The trace misnamed the EVA class of every action. |
 
 </details>
 

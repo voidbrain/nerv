@@ -12,6 +12,7 @@ import {
   intentChecked,
   validatePolicy,
   type Ballot,
+  type Executor,
   type Pattern,
   type Policy,
   type Stage,
@@ -750,6 +751,12 @@ export class Ledger {
       ),
     );
   }
+  /** The EVA class the ballot chose for an action (the dashboard trace names it). */
+  private ballotExecutor(actionId: string): Executor | undefined {
+    const row = this.db.prepare('SELECT ballot FROM actions WHERE id=?').get(actionId) as
+      { ballot: string } | undefined;
+    return row ? (JSON.parse(row.ballot) as Ballot).executor : undefined;
+  }
   /** Records what an executor did after `authorize` let it run. */
   finished(
     sortieId: string,
@@ -761,6 +768,7 @@ export class Ledger {
     evaInstance?: EvaInstanceRef,
   ): void {
     this.tx(() => {
+      const executor = this.ballotExecutor(actionId);
       if ('error' in outcome)
         this.event(
           sortieId,
@@ -771,6 +779,7 @@ export class Ledger {
             error: outcome.error.slice(0, 500),
             ...(durationMs !== undefined ? { durationMs } : {}),
             ...(evaInstance ? { evaInstance } : {}),
+            ...(executor ? { executor } : {}),
           },
           now,
         );
@@ -784,6 +793,7 @@ export class Ledger {
             result: outcome.result,
             ...(durationMs !== undefined ? { durationMs } : {}),
             ...(evaInstance ? { evaInstance } : {}),
+            ...(executor ? { executor } : {}),
           },
           now,
         );

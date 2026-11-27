@@ -259,6 +259,8 @@
   const phaseOf = new Map(), phaseStarted = new Map(), nodeTimings = new Map(), advisedBy = new Map(), forwardedTo = new Map(), originOf = new Map(), remoteSorties = new Map();
   const sortieSurfaces = new Map();
   const addNodeTiming = (id, node, ms) => { if (typeof ms !== "number") return; const nt = nodeTimings.get(id) || {}; nt[node] = (nt[node] || 0) + ms; nodeTimings.set(id, nt); };
+  // The EVA class that ran the action: its ballot's executor, else the recorded instance; EVA-02 only for events recorded before either was stored.
+  const evaOf = (p) => String(p.executor || (p.evaInstance && p.evaInstance.evaClass) || "eva-02").toUpperCase();
   const generic = () => { const r = modelsData && modelsData.models && modelsData.models.roles; return !!(r && r.consultant && r.consultant.model); };
   async function loadEvents(id) {
     let after = 0; const all = []; let added = 0;
@@ -270,7 +272,7 @@
         : e.kind === "ballot" ? ["MAGI: Pattern " + p.pattern.toUpperCase() + " · " + p.outcome + " · " + p.reason, p.outcome === "grant" ? "ok" : p.outcome === "reject" ? "danger" : "warn", "magi"]
         : e.kind === "approval.requested" ? ["Approval card: " + p.reason, "warn", "penpen"]
         : e.kind.startsWith("approval.") ? ["Owner " + e.kind.slice(9) + " (" + (p.source || "") + ")", e.kind === "approval.approve" ? "ok" : "danger", "you"]
-        : e.kind === "action.done" ? ["EVA-02: " + p.tool + " done", "ok", "eva-02"] : e.kind === "action.failed" ? ["EVA-02: " + p.tool + " failed · " + p.error, "danger", "eva-02"]
+        : e.kind === "action.done" ? [evaOf(p) + ": " + p.tool + " done", "ok", evaOf(p).toLowerCase()] : e.kind === "action.failed" ? [evaOf(p) + ": " + p.tool + " failed · " + p.error, "danger", evaOf(p).toLowerCase()]
         : e.kind === "ballot.shadow" ? ["MAGI · " + p.seat + " (shadow, after the decision): " + p.vote + (p.reason ? " — " + p.reason : ""), p.vote === "reject" ? "warn" : "", "magi"]
         : e.kind === "kaji.forwarded" ? ["Kaji line · forwarded to " + (p.base && p.base.name || "the main base"), "", "maya"]
         : e.kind === "kaji.answered" ? ["Kaji line · answered by " + (p.base && p.base.name || "the main base") + (p.sortieId ? " (its S-" + String(p.sortieId).slice(0, 4).toUpperCase() + ")" : ""), "ok", "maya"]
