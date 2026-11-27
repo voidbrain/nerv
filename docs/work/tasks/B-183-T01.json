@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "B-183-T01",
+  "parent": "B-183",
+  "title": "Count paired devices only in the push status; drop an earlier install's unpaired subscriptions",
+  "goal": "Health and the base card count the devices Settings lists, and leftovers go without a manual step",
+  "status": "implemented",
+  "acceptance": [
+    "A failing test (committed first) saves an unpaired iPhone subscription, an unpaired Mac one and a paired iPhone one, and expects 1 device and 1 unpaired subscription in the store status, the base card and the Health line",
+    "When a paired device saves a subscription, unpaired subscriptions with the same user-agent platform are removed; another platform's stay"
+  ],
+  "resources": [
+    "src/store-push.ts",
+    "web/public/dashboard/live.js",
+    "test/dashboard-live-views.test.mjs",
+    "test/push-subject.test.ts",
+    "docs/guides/channels-and-watches.md",
+    "docs/work/records/B-183.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "regression-design"
+  ],
+  "validation": [
+    "npm run check:fast",
+    "npm test"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "0.75 h",
+    "basis": "Estimated 2026-11-27: one status query, one cleanup in the save, two render lines, tests. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 0.75,
+    "baselineAgentHours": 0.75,
+    "estimateAgentHours": 0.75
+  },
+  "dependsOn": [],
+  "privacy": "Neutral invented endpoints and user agents only; the base's store was read, never changed, and none of it is in Git.",
+  "escalation": [
+    "A material scope or effort increase goes to the owner"
+  ]
+}
