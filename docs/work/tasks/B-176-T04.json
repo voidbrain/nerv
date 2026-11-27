@@ -35,5 +35,11 @@
     "estimateAgentHours": 0.0,
     "ownerHours": 0,
     "ownerKind": "procedure"
-  }
+  },
+  "prs": [
+    {
+      "pr": 866,
+      "note": "records the owner check; merged on green CI"
+    }
+  ]
 }
