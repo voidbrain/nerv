@@ -9,12 +9,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 | | Features | | Bugs | |
 |---|---:|---:|---:|---:|
 | | **Opened** | **Closed** | **Opened** | **Closed** |
-| **This week** | 44 | 10 | 74 | 34 |
+| **This week** | 44 | 10 | 75 | 34 |
 
 | Status | Features | Bugs |
 |---|---:|---:|
-| **Open** | 69 | 55 |
-| **Require Human 🧑** | 19 | 23 |
+| **Open** | 69 | 56 |
+| **Require Human 🧑** | 19 | 24 |
 
 ### Require Human 🧑
 
@@ -43,11 +43,12 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 |  |  | [B-110](#b-110) |  |
 |  |  | [B-112](#b-112) |  |
 |  |  | [B-130](#b-130) |  |
+|  |  | [B-183](#b-183) |  |
 |  |  | [B-141](#b-141) |  |
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 322 h agent + 26.5 h owner across 342 open steps of 69 features and 55 other records. 168.25 h of actual effort recorded on 158 steps. Generated from the task files.
+**Remaining effort:** 322.75 h agent + 26.75 h owner across 344 open steps of 69 features and 56 other records. 168.25 h of actual effort recorded on 158 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -5593,6 +5594,45 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Opened | 2026-11-24 |
 | Verification | 2026-11-24: `test/dashboard.test.ts` "B-130" committed first and failing on main (`skip` for the Apt); with the fix it passes with the B-044 and B-112 flow tests unchanged. Before the PR: `npm test` 1,443 pass (2 skipped); the browser tests reading live.js, dashboard.js or web/src (`test/angular.browser.mjs`, `test/evaluation.browser.mjs`, `test/pwa.browser.mjs`, `test/updater-status.browser.mjs`, `test/doctor-run.browser.mjs`) 11/11 on the production build; `npm run gauntlet:all` (owner-approved, gemma4-12b profile) passed, none pending. Browser look on a real sortie not yet observed. |
 | Reviewed | 2026-11-24 |
+
+</details>
+
+---
+### <a id="b-183"></a>[🐞 B-183](#top)
+
+**Health counts every push subscription as a device: "Phone push · 2 devices" beside one paired device**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.75 h agent + 0.25 h owner | — | — | 🤖 | 🧑‍🔧 | — |
+
+🧑 **→** B-183-T02, after the merge and the lifecycle update: turn notifications off and on once in the phone app, then read the push line in Health and on the base card.
+
+| | |
+|---|---|
+| **Issue** | Owner finding 2026-11-27: Health and the base card say "Phone push · 2 devices" while Settings → Paired devices lists one. The push status counted every row of `push_subscriptions`. A read-only look at the base's store the same day found three subscriptions and none bound to a device: two from the iPhone app made before the phone was paired again and before subscriptions carried the device id (B-170-T03), one from Safari on the Mac with a dashboard session. A subscription is bound only when a paired device sends it, and the apps do not send an existing subscription again, so a leftover stays until something removes it. |
+| **Reproduce** | Subscribe from the phone app before pairing (or before B-170-T03), pair the phone: Health counts both subscriptions as devices. |
+| **Check** | Health and the base card count only subscriptions bound to a paired device and name the others apart ("1 device · 1 unpaired subscription"); a paired device's new subscription removes the unpaired ones left on the same kind of device; a browser subscribed with a dashboard session on another kind of device stays. |
+
+**Steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="b-183-t01"></a>B-183-T01 — Count paired devices only in the push status; drop an earlier install's unpaired subscriptions | 0.75 h | 0 h | 0.75 h | Implemented; verification pending | — | [B-183-T02](#b-183-t02) | 🤖 |
+| 🟢 Small | <a id="b-183-t02"></a>B-183-T02 — Owner: re-subscribe the phone once and read the push line | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [B-183-T01](#b-183-t01) | — | ⏳ 🧑‍🔧 |
+| 🟢 Small | **Total** | 0.75 h | 0 h (0 of 2 steps recorded) | 0.75 h agent + 0.25 h owner | 0 of 2 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/B-183.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Pending PR; [#881](https://github.com/voidbrain/nerv/pull/881) |
+| Opened | 2026-11-27 |
+| Verification | Pending |
+| Reviewed | 2026-11-27 |
 
 </details>
 

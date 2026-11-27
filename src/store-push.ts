@@ -63,10 +63,22 @@ export class StorePush {
     if (sub.deviceId !== undefined && !/^[a-f0-9]{16}$/.test(sub.deviceId)) throw new Error('Invalid device id.');
     const deviceId = sub.deviceId ?? null;
     transaction(this.host.db, () => {
-      if (deviceId)
+      if (deviceId) {
         this.host.db
           .prepare('DELETE FROM push_subscriptions WHERE device_id=? AND endpoint<>?')
           .run(deviceId, sub.endpoint);
+        // B-183: an unpaired subscription on the same kind of device is a leftover of an earlier install (or one from
+        // before subscriptions carried the device id); another platform's, such as a Mac browser's, stays.
+        const platform = platformOf(sub.userAgent);
+        const unpaired = this.host.db
+          .prepare(
+            'SELECT endpoint, user_agent AS userAgent FROM push_subscriptions WHERE device_id IS NULL AND endpoint<>?',
+          )
+          .all(sub.endpoint) as { endpoint: string; userAgent: string | null }[];
+        for (const row of unpaired)
+          if (platform && platformOf(row.userAgent ?? undefined) === platform)
+            this.host.db.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').run(row.endpoint);
+      }
       this.host.db
         .prepare(
           'INSERT INTO push_subscriptions(endpoint, p256dh, auth, created, user_agent, device_id) VALUES(?, ?, ?, ?, ?, ?) ON CONFLICT(endpoint) DO UPDATE SET p256dh=excluded.p256dh, auth=excluded.auth, user_agent=excluded.user_agent, device_id=excluded.device_id',
@@ -214,24 +226,36 @@ export class StorePush {
       .run('last', new Date().toISOString(), ok ? 1 : 0, status, reason ?? null);
   }
 
-  /** F-152: `lastOpened` is when the owner last opened a push on the phone (its receipt came back). */
+  /**
+   * F-152: `lastOpened` is when the owner last opened a push on the phone (its receipt came back). B-183: `devices`
+   * counts subscriptions bound to a paired device, as Settings lists them; `unpaired` the rest, which still get pushes.
+   */
   status(): {
     devices: number;
+    unpaired: number;
     last: { at: string; ok: boolean; status: number; reason: string | null } | null;
     lastOpened: string | null;
   } {
-    const devices = (this.host.db.prepare('SELECT count(*) AS n FROM push_subscriptions').get() as { n: number }).n;
+    const counts = this.host.db
+      .prepare('SELECT count(device_id) AS devices, count(*) - count(device_id) AS unpaired FROM push_subscriptions')
+      .get() as { devices: number; unpaired: number };
     const row = this.host.db.prepare('SELECT at, ok, status, reason FROM push_last_result WHERE id=?').get('last') as
       { at: string; ok: number; status: number; reason: string | null } | undefined;
     const opened = this.host.db
       .prepare("SELECT max(opened_at) AS at FROM delivery_channels WHERE channel='push'")
       .get() as { at: string | null };
     return {
-      devices,
+      devices: counts.devices,
+      unpaired: counts.unpaired,
       last: row ? { at: row.at, ok: row.ok === 1, status: row.status, reason: row.reason } : null,
       lastOpened: opened.at,
     };
   }
+}
+
+/** B-183: the first word in a user agent's parentheses (iPhone, iPad, Macintosh, Windows NT 10.0, …), or ''. */
+function platformOf(userAgent: string | undefined): string {
+  return /\(([^;)]+)/.exec(userAgent ?? '')?.[1]?.trim() ?? '';
 }
 
 function endpointHost(endpoint: string): string {
