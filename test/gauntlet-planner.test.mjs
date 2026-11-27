@@ -213,7 +213,10 @@ test('F-120-T18: the decision schema admits the expected decision and refuses fr
   assert.ok(fits(memory, { decision: 'action', tool: 'memory.remember', args: {} }));
   const reminder = byId.get('reminder-in-minutes-it').responseFormat;
   const due = '2026-08-03T10:05:00+02:00';
-  assert.equal(fits(reminder, { decision: 'action', tool: 'reminders.add', args: { title: 'bere acqua', due } }), false);
+  assert.equal(
+    fits(reminder, { decision: 'action', tool: 'reminders.add', args: { title: 'bere acqua', due } }),
+    false,
+  );
   assert.equal(fits(reminder, { decision: 'action', tool: 'reminders.add', args: { due, kind: 'at' } }), false);
   // A wrong decision still fits: the schema shapes the reply, the model still decides.
   assert.ok(fits(reminder, { decision: 'action', tool: 'reminders.list', args: {} }));
