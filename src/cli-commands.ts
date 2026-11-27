@@ -843,6 +843,7 @@ export async function tryRunCliCommand(
     const listOf = async (id: string) => {
       const s = tools.mcp.find((x) => x.id === id);
       if (!s) throw new Error(`No MCP server ${id}: nerv tools add ${id} COMMAND …`);
+      if (s.off) throw new Error(`${id} is off: nerv modules on ${id}, then grant.`);
       const c = connectMcp(s);
       try {
         return await c.listTools();

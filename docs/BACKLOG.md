@@ -47,7 +47,7 @@ Governance and naming follow the [architecture vocabulary](architecture/vocabula
 <!-- recap:end -->
 
 <!-- totals:start -->
-**Remaining effort:** 314.75 h agent + 26.25 h owner across 337 open steps of 68 features and 55 other records. 166.5 h of actual effort recorded on 156 steps. Generated from the task files.
+**Remaining effort:** 312.5 h agent + 26.25 h owner across 337 open steps of 68 features and 55 other records. 168.25 h of actual effort recorded on 158 steps. Generated from the task files.
 <!-- totals:end -->
 
 ## Work items
@@ -1140,6 +1140,48 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 </details>
 
 ---
+### <a id="f-159"></a>[✨ F-159](#top)
+
+**Modules: one on/off switch per module (MCP servers and built-in packs), on the dashboard and in the CLI, keeping grants and data**
+
+| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
+|---|---|---|---|---|---|:---:|:---:|:---:|
+| 🔴 Open | 🔶 P2 | 🟢 Small | 0.25 h owner | — | — | 🤖 | — | — |
+
+💻 **→** Next: F-159-T01 — Test first: modules listed and switched in config and the CLI (Implemented; verification pending).
+
+| | |
+|---|---|
+| **Issue** | Owner decision 2026-11-27 ("yep"). One "Modules" panel in Settings (Settings is moving from the old page to the full dashboard, so the panel goes on the full dashboard now) and a CLI equivalent (`nerv modules`, `nerv modules on\|off <name>`): one switch per module, either an external MCP server (the coordinator's live index, the Grover hub, later others) or a built-in domain pack (Cooking; FPV, which config.json already turns on and off with `packs.<id>`, reused, not duplicated). Owner correction 2026-11-27: FPV is one module named FPVBuddy: the built-in FPV pack and the future FPVBuddy MCP server (FPV functions move behind it, served on the tailnet like Grover) are the same module; until the server exists the FPVBuddy switch controls the pack, then both. Cooking stays its own module. Each row shows on or off, reachable or not and the number of tools it gives Misato. Off: Misato is offered none of its tools, its dashboard cards and panels hide, nothing calls it in the background (the live index card stops polling); its grants and data are kept, so On restores it without granting again. A grant whose tool description changed while off stays suspended, as today. `nerv tools remove` stays what it is (drops the server and its grants), distinct from off. Plain and Eva voices, Italian and English, no backlog IDs in what the owner reads. |
+| **Reproduce** | Steps: [owner check](acceptance/f159-modules-2026-11-27.md). Before this feature the only way to stop Misato using the Grover hub is `nerv tools remove grover` (grants lost, re-granting needed) or hand-editing config.json; packs have no switch outside config.json. |
+| **Check** | `nerv modules` lists FPVBuddy, Cooking and every MCP server with on/off, reachable and tool count; `nerv modules off grover` leaves the grants in config.json, Misato is offered no Grover tool and the hub receives no request; `nerv modules on grover` offers them again with no new grant; a description changed while off stays suspended; the Modules panel on the full dashboard switches the same state and hides the module's cards (the live index card stops polling); a join test spans config, the tools process, Misato's offered tools and the dashboard; the owner runs the copy-paste check (Grover off: "quali piante ho?" gets no Grover tool; on: it works without re-granting). |
+
+**Feature steps**
+
+| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
+|---|---|---|---|---|---|---|---|:---:|
+| 🟢 Small | <a id="f-159-t01"></a>F-159-T01 — Test first: modules listed and switched in config and the CLI | 1 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | [F-159-T02](#f-159-t02) | 🤖 |
+| 🟢 Small | <a id="f-159-t02"></a>F-159-T02 — Test first: off means no tools offered and no calls; on restores without re-granting | 1.25 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | [F-159-T01](#f-159-t01) | [F-159-T03](#f-159-t03) | 🤖 |
+| 🟢 Small | <a id="f-159-t03"></a>F-159-T03 — Test first: the Modules panel on the full dashboard; off hides the module's cards and stops their polling | 1.75 h | 1.5 h so far (stated) | 0 h | Implemented; verification pending | [F-159-T02](#f-159-t02) | [F-159-T04](#f-159-t04) | 🤖 |
+| 🟢 Small | <a id="f-159-t04"></a>F-159-T04 — Owner guide and documentation for modules | 0.5 h | 0.25 h so far (stated) | 0 h | Implemented; verification pending | [F-159-T03](#f-159-t03) | [F-159-T05](#f-159-t05) | 🤖 |
+| 🟢 Small | <a id="f-159-t05"></a>F-159-T05 — Owner: Grover off and on, with the copy-paste guide | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-159-T04](#f-159-t04) | — | ⏳ 🧑‍🔧 |
+| 🟢 Small | **Total** | 4.5 h | 3 h (4 of 5 steps recorded) | 0.25 h owner | 0 of 5 completed | | | |
+
+<details>
+<summary>Next action, estimates and evidence</summary>
+
+[Full notes & evidence](work/records/F-159.md)
+
+| Field | Value |
+|---|---|
+| PR / evidence | Test: test/modules.test.ts, test/modules.browser.mjs (each committed failing before its code). Review: design-reviewer in a fresh context, one blocker (offers to other bases) and five should-fix, all fixed with tests. [#884](https://github.com/voidbrain/nerv/pull/884); [#885](https://github.com/voidbrain/nerv/pull/885) |
+| Opened | 2026-11-27 |
+| Verification | Pending |
+| Reviewed | 2026-11-27 |
+
+</details>
+
+---
 ### <a id="f-138"></a>[✨ F-138](#top)
 
 **Credential list with last rotation and last auth failure; owner notice on failure**
@@ -1261,48 +1303,6 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 | Verification | Pending |
 | Reviewed | 2026-11-26 |
 | Impact | Report risk rank S11 of 12 (proposal 13). |
-
-</details>
-
----
-### <a id="f-159"></a>[✨ F-159](#top)
-
-**Modules: one on/off switch per module (MCP servers and built-in packs), in Settings and the CLI, keeping grants and data**
-
-| Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
-|---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔶 P2 | 🟡 Medium | 2.25 h agent + 0.25 h owner | — | — | 🤖 | — | — |
-
-💻 **→** Next: F-159-T01 — Test first: modules listed and switched in config and the CLI (Implemented; verification pending).
-
-| | |
-|---|---|
-| **Issue** | Owner decision 2026-11-27 ("yep"). One "Modules" panel in Settings on the full dashboard and a CLI equivalent (`nerv modules`, `nerv modules on\|off <name>`): one switch per module, either an external MCP server (the coordinator's live index, the Grover hub, later others) or a built-in domain pack (Cooking; FPV, which config.json already turns on and off with `packs.<id>`, reused, not duplicated). Owner correction 2026-11-27: FPV is one module named FPVBuddy: the built-in FPV pack and the future FPVBuddy MCP server (FPV functions move behind it, served on the tailnet like Grover) are the same module; until the server exists the FPVBuddy switch controls the pack, then both. Cooking stays its own module. Each row shows on or off, reachable or not and the number of tools it gives Misato. Off: Misato is offered none of its tools, its dashboard cards and panels hide, nothing calls it in the background (the live index card stops polling); its grants and data are kept, so On restores it without granting again. A grant whose tool description changed while off stays suspended, as today. `nerv tools remove` stays what it is (drops the server and its grants), distinct from off. Plain and Eva voices, Italian and English, no backlog IDs in what the owner reads. |
-| **Reproduce** | Today the only way to stop Misato using the Grover hub is `nerv tools remove grover` (grants lost, re-granting needed) or hand-editing config.json; packs have no switch outside config.json. |
-| **Check** | `nerv modules` lists FPVBuddy, Cooking and every MCP server with on/off, reachable and tool count; `nerv modules off grover` leaves the grants in config.json, Misato is offered no Grover tool and the hub receives no request; `nerv modules on grover` offers them again with no new grant; a description changed while off stays suspended; the Settings panel switches the same state and hides the module's cards (the live index card stops polling); a join test spans config, the tools process, Misato's offered tools and the dashboard; the owner runs the copy-paste check (Grover off: "quali piante ho?" gets no Grover tool; on: it works without re-granting). |
-
-**Feature steps**
-
-| Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who |
-|---|---|---|---|---|---|---|---|:---:|
-| 🟢 Small | <a id="f-159-t01"></a>F-159-T01 — Test first: modules listed and switched in config and the CLI | 1 h | 0.75 h so far (stated) | 0 h | Implemented; verification pending | — | [F-159-T02](#f-159-t02) | 🤖 |
-| 🟢 Small | <a id="f-159-t02"></a>F-159-T02 — Test first: off means no tools offered and no calls; on restores without re-granting | 1.25 h | 0.5 h so far (stated) | 0 h | Implemented; verification pending | [F-159-T01](#f-159-t01) | [F-159-T03](#f-159-t03) | 🤖 |
-| 🟡 Medium | <a id="f-159-t03"></a>F-159-T03 — Test first: the Modules panel in Settings; off hides the module's cards and stops their polling | 1.75 h | 0 h | 1.75 h | Planned | [F-159-T02](#f-159-t02) | [F-159-T04](#f-159-t04) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-159-t04"></a>F-159-T04 — Owner guide and documentation for modules | 0.5 h | 0 h | 0.5 h | Planned | [F-159-T03](#f-159-t03) | [F-159-T05](#f-159-t05) | ⏳ 🤖 |
-| 🟢 Small | <a id="f-159-t05"></a>F-159-T05 — Owner: Grover off and on, with the copy-paste guide | 0 h | 0 h | 0 h agent + 0.25 h owner | Planned | [F-159-T04](#f-159-t04) | — | ⏳ 🧑‍🔧 |
-| 🟡 Medium | **Total** | 4.5 h | 1.25 h (2 of 5 steps recorded) | 2.25 h agent + 0.25 h owner | 0 of 5 completed | | | |
-
-<details>
-<summary>Next action, estimates and evidence</summary>
-
-[Full notes & evidence](work/records/F-159.md)
-
-| Field | Value |
-|---|---|
-| PR / evidence | Test: test/modules.test.ts (failing first, commit before the code); [#884](https://github.com/voidbrain/nerv/pull/884) |
-| Opened | 2026-11-27 |
-| Verification | Pending |
-| Reviewed | 2026-11-27 |
 
 </details>
 

@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fingerprint, validateTools } from '../src/mcp.ts';
 import { builtinPackRegistry } from '../src/packs.ts';
-import { listModules, setModuleOn } from '../src/modules.ts';
+import { listModules, offersOn, setModuleOn } from '../src/modules.ts';
 import { readConfig, type Config } from '../src/config.ts';
 import { ProcessClient } from '../src/process-client.ts';
 import { readLiveIndex } from '../src/runtime-tools.ts';
@@ -194,6 +194,11 @@ test(
         /grover · .* · off, not asked: nerv modules on grover · 1 grant\(s\) kept/,
       );
       assert.equal(hub.requests(), before, 'an off server is not contacted by either listing');
+      assert.match(
+        (await cli('tools', 'grant', 'grover/hub_overview')).stderr,
+        /grover is off: nerv modules on grover/,
+      );
+      assert.equal(hub.requests(), before, 'granting does not contact an off server either');
       assert.match((await cli('modules', 'on', 'grover')).stdout, /Grover is on/);
       assert.match((await cli('modules', 'off', 'garden')).stderr, /No module garden/);
       assert.match((await cli('modules', 'pause', 'grover')).stderr, /Usage: modules/);
@@ -253,7 +258,11 @@ test(
       assert.equal((await cli('modules', 'off', 'grover')).status, 0);
       const before = hub.requests();
       assert.deepEqual(await offered(), []);
-      assert.deepEqual((await r.externalTools(true)).suspended, [], 'off is not reported as suspended');
+      assert.deepEqual(
+        (await r.externalTools(true)).suspended,
+        [{ name: 'grover.hub_overview', why: 'its module is off: nerv modules on grover' }],
+        'off says why, so an approval or another base is told how to turn it on',
+      );
       const asked = m.misato.length;
       const off = await r.chat('quali piante ho?');
       assert.deepEqual(off.steps, []);
@@ -342,4 +351,61 @@ test('F-159-T02: the live index read says off without calling; doctor does not r
   } finally {
     rmSync(home, { recursive: true, force: true });
   }
+});
+
+test('F-159-T03: GET /api/modules lists them; PUT /api/modules/NAME switches one; bad input is refused', async () => {
+  const { Store } = await import('../src/store.ts');
+  const { makeServer } = await import('../src/server.ts');
+  const rows = [{ id: 'grover', name: 'Grover', on: true, reachable: true, tools: 1, packs: [], servers: ['grover'] }];
+  const store = Object.assign(new Store(':memory:'), {
+    modules: async () => rows,
+    setModule: async (id: string, on: boolean) => {
+      if (id !== 'grover') throw new Error(`No module ${id}: nerv modules lists them.`);
+      rows[0]!.on = on;
+      return rows;
+    },
+  });
+  const token = 'm'.repeat(32);
+  const server = makeServer(store, token, { language: 'en', timeZone: 'Europe/Rome' });
+  await new Promise<void>((d) => server.listen(0, '127.0.0.1', d));
+  const base = `http://127.0.0.1:${(server.address() as { port: number }).port}/api/modules`;
+  const call = async (path: string, init: RequestInit = {}) => {
+    const res = await fetch(base + path, {
+      ...init,
+      headers: { authorization: 'Bearer ' + token, 'content-type': 'application/json' },
+    });
+    return { status: res.status, body: (await res.json()) as { modules?: typeof rows; error?: string } };
+  };
+  try {
+    assert.deepEqual(await call(''), { status: 200, body: { modules: rows } });
+    const off = await call('/grover', { method: 'PUT', body: JSON.stringify({ on: false }) });
+    assert.equal(off.status, 200);
+    assert.equal(off.body.modules![0]!.on, false);
+    assert.equal((await call('/grover', { method: 'PUT', body: JSON.stringify({ on: 'no' }) })).status, 400);
+    assert.equal((await call('/grover', { method: 'PUT', body: JSON.stringify({ on: true, x: 1 }) })).status, 400);
+    const unknown = await call('/garden', { method: 'PUT', body: JSON.stringify({ on: false }) });
+    assert.deepEqual([unknown.status, unknown.body.error], [404, 'No module garden: nerv modules lists them.']);
+    assert.equal((await call('/Bad%20Name', { method: 'PUT', body: JSON.stringify({ on: false }) })).status, 404);
+  } finally {
+    await new Promise((d) => {
+      server.close(d);
+      server.closeAllConnections();
+    });
+    store.close();
+  }
+});
+
+test('F-159-T02: another base is not offered an off module tool, a server tool or a pack tool', () => {
+  const config = {
+    packs: { fpv: false },
+    kaji: { offers: ['reminders.add', 'grover.hub_overview', 'batteries.list', 'files.read'] },
+    tools: {
+      mcp: [
+        { id: 'grover', url: 'https://hub.example.ts.net/mcp', off: true },
+        { id: 'files', command: 'node', args: [] },
+      ],
+      grants: [],
+    },
+  } as unknown as Config;
+  assert.deepEqual(offersOn(config), ['reminders.add', 'files.read']);
 });

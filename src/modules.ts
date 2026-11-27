@@ -8,23 +8,13 @@
  */
 import { readConfig, savePacks, saveTools, type Config } from './config.ts';
 import { builtinPackRegistry, type PackRegistry } from './packs.ts';
+import type { ModuleRow } from './module-row.ts';
+
+export type { ModuleRow };
 
 /** A pack the owner knows under another module's name. */
 const PACK_MODULE: Record<string, { id: string; name: string }> = { fpv: { id: 'fpvbuddy', name: 'FPVBuddy' } };
 
-export interface ModuleRow {
-  id: string;
-  name: string;
-  on: boolean;
-  /** Whether its parts answer now: a pack always does; null for a server while off (nothing is asked) or unlisted. */
-  reachable: boolean | null;
-  /** Why it is not reachable, as the tools process said. */
-  why?: string;
-  /** The tools it gives Misato: a pack's own and the server's granted ones. */
-  tools: number;
-  packs: string[];
-  servers: string[];
-}
 /** What the tools process's `tools.list` says per server (only servers that are on are listed). */
 export type ServerListing = { server: string; error?: string }[];
 
@@ -95,4 +85,12 @@ export function setModuleOn(home: string, id: string, on: boolean): ModuleRow {
     });
   }
   return { ...row, on };
+}
+
+/** What this base offers other bases now: its `kaji.offers` less the tools of an off module (a server's or a pack's). */
+export function offersOn(config: Config): string[] {
+  const off = (config.tools?.mcp ?? []).filter((s) => s.off).map((s) => s.id + '.');
+  return (config.kaji?.offers ?? []).filter(
+    (n) => !off.some((p) => n.startsWith(p)) && builtinPackRegistry.isToolEnabled(n, config.packs),
+  );
 }

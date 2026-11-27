@@ -300,18 +300,21 @@ export class RuntimePeers {
     }
     // F-021-T04: an offered MCP tool runs only while it is granted here and its description still matches the grant.
     const builtin = builtinTools.some((t) => t.name === item.tool);
-    const granted =
-      builtin || !offered.includes(item.tool)
-        ? undefined
-        : (await this.host.externalTools().catch(() => undefined))?.byName.get(item.tool);
+    const ext =
+      builtin || !offered.includes(item.tool) ? undefined : await this.host.externalTools().catch(() => undefined);
+    const granted = ext?.byName.get(item.tool);
+    // F-159: a tool whose module is off says so, rather than "not granted".
+    const off = ext?.suspended.find((x) => x.name === item.tool && x.why.startsWith('its module is off'));
     const mcpRefusal =
       builtin || !offered.includes(item.tool)
         ? undefined
-        : !granted
-          ? `${item.tool} is not granted on this base now (a changed or removed tool is suspended; on it: grant it again)`
-          : granted.eva === '03'
-            ? `${item.tool} is granted for EVA-03 (quarantine), which does not run tools yet`
-            : undefined;
+        : off
+          ? `${item.tool}: ${off.why}`
+          : !granted
+            ? `${item.tool} is not granted on this base now (a changed or removed tool is suspended; on it: grant it again)`
+            : granted.eva === '03'
+              ? `${item.tool} is granted for EVA-03 (quarantine), which does not run tools yet`
+              : undefined;
     const result = pilotRefusal
       ? { refused: pilotRefusal }
       : mcpRefusal

@@ -3,6 +3,8 @@ import { join } from 'node:path';
 import { readConfig } from './config.ts';
 import { isHttpServer, toolName, type McpTool } from './mcp.ts';
 import { readLiveIndexAnswer, type LiveIndexView } from './live-index.ts';
+import { listModules, type ModuleRow, type ServerListing } from './modules.ts';
+import { builtinPackRegistry } from './packs.ts';
 import { parsePrices, type Price, type UsageObservation } from './model-usage.ts';
 import type { ProcessClient } from './process-client.ts';
 import type { PromptMetrics } from './prompt-samples.ts';
@@ -63,11 +65,15 @@ export async function loadExternalTools(options: {
       return undefined;
     }
   })();
-  // F-159: an off module's grants are kept but offer nothing; a switch invalidates the cache at once.
+  // F-159: an off module's grants are kept but offer nothing (listed as suspended, with how to turn it on, so an
+  // approval or another base's request says why); a switch invalidates the cache at once.
   const off = (tools?.mcp ?? []).filter((s) => s.off).map((s) => s.id);
   const grants = (tools?.grants ?? []).filter((g) => !off.includes(g.server));
+  const switchedOff = (tools?.grants ?? [])
+    .filter((g) => off.includes(g.server))
+    .map((g) => ({ name: toolName(g.server, g.tool), why: `its module is off: nerv modules on ${g.server}` }));
   const key = off.join(',');
-  if (!grants.length) return { value: { docs: [], byName: new Map(), suspended: [] }, cache: options.cache };
+  if (!grants.length) return { value: { docs: [], byName: new Map(), suspended: switchedOff }, cache: options.cache };
   if (!options.force && options.cache && options.cache.off === key && Date.now() - options.cache.at < 60_000) {
     return { value: options.cache.value, cache: options.cache };
   }
@@ -75,7 +81,7 @@ export async function loadExternalTools(options: {
     .toolsProcess()
     .call('tools.list')
     .catch(() => [])) as { server: string; tools?: (McpTool & { fingerprint: string })[]; error?: string }[];
-  const value: ExternalTools = { docs: [], byName: new Map(), suspended: [] };
+  const value: ExternalTools = { docs: [], byName: new Map(), suspended: [...switchedOff] };
   for (const g of grants) {
     const server = listed.find((l) => l.server === g.server);
     const t = server?.tools?.find((x) => x.name === g.tool);
@@ -181,6 +187,22 @@ export async function callGrantedMcp(options: {
   });
   await (options.finishBestEffort ? finished.catch(() => undefined) : finished);
   return out;
+}
+
+/**
+ * F-159: every module with on/off, reachable and tools, for the dashboard. Only servers that are on are listed (so
+ * asked); a tools process that does not answer leaves reachability unknown, never "unreachable".
+ */
+export async function readModules(options: { home?: string; toolsProcess: () => ProcessClient }): Promise<ModuleRow[]> {
+  const config = options.home ? readConfig(options.home) : undefined;
+  if (!config) return [];
+  const listing = (config.tools?.mcp ?? []).some((s) => !s.off)
+    ? ((await options
+        .toolsProcess()
+        .call('tools.list', {}, 30_000)
+        .catch(() => undefined)) as ServerListing | undefined)
+    : [];
+  return listModules(config, builtinPackRegistry, listing);
 }
 
 /** F-147: the server id and address the live index is registered under (`nerv tools add`). */
