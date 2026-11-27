@@ -436,7 +436,8 @@ test('B-180 join: Mark as read updates every covered delivery so Telegram skips 
     assert.ok(readAt(first), 'the first covered delivery is marked read on the service');
     assert.ok(readAt(second), 'the second covered delivery is marked read on the service');
     assert.equal(readAt(outside), null, 'a delivery outside the panel remains unread');
-    assert.deepEqual(saved, [String(since)], 'the dashboard cursor is persisted after service reads succeed');
+    assert.ok(state.lastVisit > since, 'the dashboard cursor advances after service reads succeed');
+    assert.deepEqual(saved, [String(state.lastVisit)], 'the advanced cursor is persisted');
     await until(() => t.telegrams('Not covered by this visit') === 1);
     assert.equal(t.telegrams('Covered reminder one'), 0);
     assert.equal(t.telegrams('Covered reminder two'), 0);
