@@ -17,6 +17,8 @@
   --radius:0; --font:"Share Tech Mono",ui-monospace,monospace;
   /* F-118-T05: a pairing QR is dark on light in every palette, so any camera reads it. */
   --qr-ink:#000; --qr-paper:#fff;
+  /* B-182: a phone's form controls; iOS zooms into one under 16 px. */
+  --control-font:16px;
 }
 .pair-code { font-size:20px; letter-spacing:.12em; color:var(--accent); margin:6px 0 2px; }
 b.pair-code { font-size:16px; }
@@ -164,7 +166,7 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .apcard.armed { outline:2px solid var(--accent); outline-offset:1px; }
 .keynote { font-size:10px; color:var(--warn); padding:0 8px 6px; } .keynote:empty { display:none; }
 .keyhint kbd { font:inherit; border:1px solid var(--border); padding:0 3px; border-radius:var(--radius); }
-.rem { display:grid; grid-template-columns:1fr auto; gap:2px 6px; align-items:center; padding:4px 0; border-bottom:1px dashed color-mix(in srgb,var(--border) 60%,transparent); }
+.rem { display:grid; grid-template-columns:minmax(0,1fr) auto; overflow-wrap:anywhere; gap:2px 6px; align-items:center; padding:4px 0; border-bottom:1px dashed color-mix(in srgb,var(--border) 60%,transparent); }
 .rem .acts { display:flex; gap:4px; }
 .models-form { display:grid; grid-template-columns:auto 1fr; gap:4px 8px; align-items:center; }
 .models-form select { min-width:0; width:100%; }
@@ -184,12 +186,18 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .health-row { align-items:baseline; }
 .health-row > .health-label { flex:none; white-space:nowrap; }
 .health-row > .health-value { gap:6px; min-width:0; justify-content:flex-end; text-align:right; }
-.diag-wrap { overflow-x:auto; margin-top:6px; }
-.diag { border-collapse:collapse; width:100%; font-size:11px; font-variant-numeric:tabular-nums; }
-.diag caption { text-align:left; color:var(--muted); padding-bottom:2px; }
-.diag th, .diag td { padding:2px 6px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap; }
-.diag th[scope=row], .diag td[colspan] { text-align:left; }
-.diag thead th { color:var(--muted); font-weight:400; }
+/* F-152-T08/T09 (owner): diagnostics are compact cards, one per row on a phone and two per row from 720 px, "label value" lines without separators. */
+.diag { margin-top:4px; display:grid; grid-template-columns:minmax(0,1fr); gap:4px; font-size:11px; line-height:1.3; font-variant-numeric:tabular-nums; }
+@media (min-width:720px) { .diag { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.diag-title { grid-column:1 / -1; }
+.diag-card { border:1px solid var(--border); border-radius:var(--radius); padding:3px 6px; min-width:0; }
+.diag-card h2 { margin:0; font-size:11px; font-weight:700; color:var(--title); overflow-wrap:anywhere; }
+.diag-card dl { margin:0; }
+.diag-card dl > div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:0 6px; padding:0; }
+.diag-card dt { color:var(--muted); }
+.diag-card dd { margin:0 0 0 auto; text-align:right; }
+.diag-card p { margin:0; }
+}
 .update-status { margin-top:6px; padding:6px 8px; border:1px solid currentColor; border-left-width:3px; border-radius:var(--radius); background:color-mix(in srgb,currentColor 10%,transparent); font-size:11px; font-weight:700; }
 .update-status .muted { font-weight:400; }
 .pilot-model-form button:disabled { opacity:.5; cursor:default; }
@@ -226,7 +234,7 @@ main.grid { display:grid; grid-template-columns:minmax(0,3.2fr) minmax(0,6fr) mi
 .sephirot svg.edges > path.skip { opacity:.22; }
 /* B-112: with no sortie selected, conditional routes (answer, declined, relay) are on the map, dashed and dimmed. */
 .sephirot svg.edges > path.cond { stroke-dasharray:2 5; opacity:.45; }
-.sgrid { position:relative; display:grid; grid-template-columns:1fr 1.25fr 1fr; grid-auto-rows:auto; gap:10px 18px; align-items:center; }
+.sgrid { position:relative; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1fr); grid-auto-rows:auto; gap:10px 18px; align-items:center; }
 .snode { position:relative; z-index:1; border:1px solid var(--border); background:var(--panel2); padding:3px 8px; text-align:center; transition:.15s; }
 .snode .sn { font-size:8px; color:var(--muted); letter-spacing:.12em; text-align:left; padding-right:26px; min-height:12px; }
 .snode .sn .he { font-size:10px; color:var(--kanji); } [lang="he"] { letter-spacing:0; }
@@ -348,6 +356,9 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
 ::-webkit-scrollbar { width:5px; height:5px; } ::-webkit-scrollbar-thumb { background:var(--border); }
 .sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
 .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+/* B-182: iOS zooms into a field whose text is under 16 px and keeps the zoom after it. On a phone or a touch screen every
+   control reads --control-font; important, because the dense desktop rules above size some controls by class. */
+@media (max-width:720px),(pointer:coarse) { input,select,textarea { font-size:var(--control-font) !important; } }
 </style>
 </head>
 <body class="theme-eva mode-dark accent-orange">
@@ -516,6 +527,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
             <div class="pad" id="settings-push"></div>
           </div>
         </div>
+        <div class="pad" id="settings-more"></div>
       </section>
 
       <section class="panel" id="p-models">

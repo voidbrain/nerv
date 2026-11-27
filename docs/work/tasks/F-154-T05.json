@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "id": "F-154-T05",
+  "parent": "F-154",
+  "title": "Per-route model parameters, each with its reason and an evidence-based default",
+  "goal": "Each role route carries only the parameters its engine accepts, and every parameter has a recorded reason and a default from Gauntlet evidence",
+  "status": "planned",
+  "acceptance": [
+    "Cloud Claude models: effort level low, medium, high, xhigh or max (defaults: Haiku 5.5 and Opus 5.5 medium, Sonnet 5.5 high); temperature and top_p are not accepted by current Claude models, so config validation refuses them for a cloud route and the picker never shows them (test first)",
+    "Local Ollama models: thinking on or off, reply cap (num_predict), context size (num_ctx), temperature where the model honours it; unset means the engine default",
+    "A table in docs (the record and docs/agents/areas.md) states for each parameter why it exists: effort trades answer depth for cost and latency; thinking and reply cap decide whether a long answer is cut off (the 26b cad-3d cases); context size bounds memory use and what fits in a prompt; temperature only where it changes the result",
+    "Defaults come from the Gauntlet nights, not from guesses: F-126-T06 (gemma4:26b without thinking and with a larger cap) and F-126-T07 (12b); a default changes only with a new report cited",
+    "Parameters appear in the models report and the settings picker beside their route, in plain and Eva wording"
+  ],
+  "dependsOn": [
+    "F-154-T01",
+    "F-126-T06",
+    "F-126-T07"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "web/**",
+    "docs/**",
+    "docs/work/records/F-154.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "medium",
+    "estimate": "1.25 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 1.25,
+    "baselineAgentHours": 1.25,
+    "estimateAgentHours": 1.25
+  }
+}

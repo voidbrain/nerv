@@ -35,112 +35,10 @@ const css = (selector) => {
 const ROW =
   /^<div class='row small health-row'(?: [^>]*)?><span class='health-label'>[^<]*<\/span><span class='row health-value'><span class='(ok|warn|danger|muted)'>([✓✗·]) [^<]*<\/span>(?:<button[^>]*>[^<]*<\/button>)?<\/span><\/div>$/;
 
-// F-152 (owner, 2026-11-26): the service sample and the link rows were dotted text lines; they become one table so the
-// service and each link compare column by column.
-test('F-152: diagnostics are a table: caption, column and row headers, one row per link, units in the cells', () => {
-  const hm = {
-    latestSample: { rssBytes: 600 * 1048576, heapUsedBytes: 120 * 1048576, eventLoopDelayMs: 12, pollCount: 9 },
-    links: [
-      { peerId: 'NERV-02', bytesSent: 512, bytesReceived: 2048, lastLatencyMs: 38, inFlight: 1, reconnects: 2 },
-      { peerId: 'NERV-03', bytesSent: 3 * 1048576, bytesReceived: 0, lastLatencyMs: null, inFlight: 0, reconnects: 0 },
-    ],
-    warnings: [{ key: 'link:NERV-02:reconnects', message: 'reconnects' }],
-  };
-  const { document } = parseHTML('<div>' + diagnostics(hm) + '</div>');
-  const table = /** @type {Element} */ (document.querySelector('table'));
-  assert.ok(table, 'a real <table>');
-  assert.match(/** @type {Element} */ (table.querySelector('caption')).textContent, /Diagnostics/);
-  assert.deepEqual(
-    [...table.querySelectorAll('thead th[scope=col]')].map((th) => th.textContent),
-    ['Status', 'Sent', 'Received', 'Latency', 'In flight', 'Reconnects', 'Memory'],
-  );
-  const cells = (/** @type {string} */ sel) => {
-    const tr = /** @type {Element} */ (table.querySelector(sel));
-    assert.ok(tr, sel);
-    return [
-      /** @type {Element} */ (tr.querySelector('th[scope=row]')).textContent,
-      ...[...tr.querySelectorAll('td')].map((td) => td.textContent),
-    ];
-  };
-  const NA = '—not applicable';
-  assert.deepEqual(cells('tr#health-sample-row'), [
-    'Service sample',
-    '✓ ok · 9 polls',
-    NA,
-    NA,
-    'loop 12 ms',
-    NA,
-    NA,
-    'RSS 600.0 MB · heap 120.0 MB',
-  ]);
-  assert.deepEqual(cells("tr[data-link-peer='NERV-02']"), [
-    'Link · NERV-02',
-    '✗ warning',
-    '512 B',
-    '2.0 KB',
-    '38 ms',
-    '1',
-    '2',
-    NA,
-  ]);
-  assert.deepEqual(cells("tr[data-link-peer='NERV-03']"), [
-    'Link · NERV-03',
-    '✓ ok',
-    '3.0 MB',
-    '0 B',
-    '—not measured yet',
-    '0',
-    '0',
-    NA,
-  ]);
-  const dash = /** @type {Element} */ (table.querySelector('tr#health-sample-row td:nth-child(3)'));
-  assert.equal(
-    /** @type {Element} */ (dash.querySelector('[aria-hidden=true]')).textContent,
-    '—',
-    'the dash is hidden from screen readers',
-  );
-  assert.equal(
-    /** @type {Element} */ (dash.querySelector('.sr-only')).textContent,
-    'not applicable',
-    'and named for them',
-  );
-  assert.match(
-    /** @type {Element} */ (table.querySelector("tr[data-link-peer='NERV-02'] td")).outerHTML,
-    /class="warn">✗ warning/,
-    'warning is text and colour',
-  );
-  const hostile = diagnostics({
-    links: [{ peerId: "<b x='1'>", bytesSent: 0, bytesReceived: 0, inFlight: 0, reconnects: 0 }],
-  });
-  assert.doesNotMatch(hostile, /<b /, 'a peer id is escaped in the header and the attribute');
-});
-
-test('F-152: empty diagnostics keep one readable row each', () => {
-  const { document } = parseHTML('<div>' + diagnostics(null) + '</div>');
-  const sample = /** @type {Element} */ (document.querySelector('tr#health-sample-row'));
-  assert.equal(/** @type {Element} */ (sample.querySelector('th[scope=row]')).textContent, 'Service sample');
-  assert.equal(
-    /** @type {Element} */ (sample.querySelector('td[colspan="7"]')).textContent,
-    '· No health samples yet.',
-  );
-  const links = /** @type {Element} */ (document.querySelector('tr#health-links-empty'));
-  assert.equal(/** @type {Element} */ (links.querySelector('th[scope=row]')).textContent, 'Links');
-  assert.equal(
-    /** @type {Element} */ (links.querySelector('td[colspan="7"]')).textContent,
-    '· No peer link traffic recorded.',
-  );
-});
-
-test('F-152: at phone width the table scrolls inside its own focusable box, styled with tokens only', () => {
-  const out = diagnostics(null);
-  assert.match(out, /^<div class='diag-wrap' role='region' aria-label='Diagnostics' tabindex='0'><table class='diag'>/);
-  assert.match(css('.diag-wrap'), /overflow-x:auto/);
-  for (const sel of ['.diag-wrap', '.diag', '.diag th, .diag td'])
-    assert.doesNotMatch(css(sel), /#[0-9a-f]{3,8}\b|rgb\(/i, sel + ': tokens only');
-  const render = live.slice(live.indexOf('window.renderHealth ='), live.indexOf('// Kaji bases (F-036)'));
-  assert.match(render, /healthDiagnosticsHtml\(hm\)/, 'Health renders the table');
-});
-
+// F-152 (owner, 2026-11-26): the service sample and the link rows were dotted text lines; they became one table so the
+// service and each link compare. F-152-T08 (owner, 2026-11-27, changed requirement): the table scrolled sideways on the
+// phone and on the Mac, so the diagnostics are cards at every width: one per row (service, each link), a heading and
+// "label: value" pairs in a definition list; a value that does not apply is left out.
 test('B-142: the rows sit in one Health table, the labels never wrap, and the availability row ends it', () => {
   const render = live.slice(live.indexOf('window.renderHealth ='), live.indexOf('// Kaji bases (F-036)'));
   assert.match(render, /<div class='health-table'>" \+ table\.map\(healthRowHtml\)\.join\(""\) \+ "<\/div>"/);
@@ -245,4 +143,93 @@ test('F-152: Health has no automatic-update switch line; the last automatic atte
   assert.match(out, /Last automatic attempt: completed · ccccccc/);
   assert.doesNotMatch(live, /chk-auto-update|liveSetAutoUpdate/, 'its handler went with it');
   assert.doesNotMatch(live, /checked at 20:00, applied at 03:00/, 'no hard-coded hours left');
+});
+
+test('F-152-T08: diagnostics are cards: one group per row with a heading and label: value pairs', () => {
+  const hm = {
+    latestSample: { rssBytes: 600 * 1048576, heapUsedBytes: 120 * 1048576, eventLoopDelayMs: 12, pollCount: 9 },
+    links: [
+      { peerId: 'NERV-02', bytesSent: 512, bytesReceived: 2048, lastLatencyMs: 38, inFlight: 1, reconnects: 2 },
+      { peerId: 'NERV-03', bytesSent: 3 * 1048576, bytesReceived: 0, lastLatencyMs: null, inFlight: 0, reconnects: 0 },
+    ],
+    warnings: [{ key: 'link:NERV-02:reconnects', message: 'reconnects' }],
+  };
+  const out = diagnostics(hm);
+  assert.doesNotMatch(out, /<table/, 'no table any more');
+  const { document } = parseHTML('<div>' + out + '</div>');
+  const box = /** @type {Element} */ (document.querySelector('.diag[role=group]'));
+  assert.ok(box, 'one labelled group');
+  assert.match(
+    /** @type {Element} */ (document.getElementById(String(box.getAttribute('aria-labelledby')))).textContent,
+    /Diagnostics/,
+  );
+  const card = (/** @type {string} */ sel) => {
+    const c = /** @type {Element} */ (box.querySelector(sel));
+    assert.ok(c, sel);
+    const h = /** @type {Element} */ (c.querySelector('h2'));
+    assert.equal(c.getAttribute('aria-labelledby'), h.id, sel + ' is named by its heading');
+    return [
+      h.textContent,
+      ...[...c.querySelectorAll('dl > div')].map(
+        (d) => d.querySelector('dt')?.textContent + ': ' + d.querySelector('dd')?.textContent,
+      ),
+    ];
+  };
+  assert.deepEqual(card('section#health-sample-row'), [
+    'Service sample',
+    'Status: ✓ ok · 9 polls',
+    'Latency: loop 12 ms',
+    'Memory: RSS 600.0 MB · heap 120.0 MB',
+  ]);
+  assert.deepEqual(card("section[data-link-peer='NERV-02']"), [
+    'Link · NERV-02',
+    'Status: ✗ warning',
+    'Sent: 512 B',
+    'Received: 2.0 KB',
+    'Latency: 38 ms',
+    'In flight: 1',
+    'Reconnects: 2',
+  ]);
+  assert.deepEqual(card("section[data-link-peer='NERV-03']"), [
+    'Link · NERV-03',
+    'Status: ✓ ok',
+    'Sent: 3.0 MB',
+    'Received: 0 B',
+    'Latency: not measured yet',
+    'In flight: 0',
+    'Reconnects: 0',
+  ]);
+  assert.equal(
+    new Set([...box.querySelectorAll('[id]')].map((e) => e.id)).size,
+    box.querySelectorAll('[id]').length,
+    'unique ids',
+  );
+  assert.match(
+    /** @type {Element} */ (box.querySelector("section[data-link-peer='NERV-02'] dd")).innerHTML,
+    /class="warn">✗ warning/,
+    'warning is text and colour',
+  );
+  const hostile = diagnostics({
+    links: [{ peerId: "<b x='1'>", bytesSent: 0, bytesReceived: 0, inFlight: 0, reconnects: 0 }],
+  });
+  assert.doesNotMatch(hostile, /<b /, 'a peer id is escaped in the heading, the id and the attribute');
+});
+
+test('F-152-T08: empty diagnostics keep one readable card each', () => {
+  const { document } = parseHTML('<div>' + diagnostics(null) + '</div>');
+  const sample = /** @type {Element} */ (document.querySelector('section#health-sample-row'));
+  assert.equal(/** @type {Element} */ (sample.querySelector('h2')).textContent, 'Service sample');
+  assert.equal(/** @type {Element} */ (sample.querySelector('p')).textContent, '· No health samples yet.');
+  const links = /** @type {Element} */ (document.querySelector('section#health-links-empty'));
+  assert.equal(/** @type {Element} */ (links.querySelector('h2')).textContent, 'Links');
+  assert.equal(/** @type {Element} */ (links.querySelector('p')).textContent, '· No peer link traffic recorded.');
+});
+
+test('F-152-T08: the cards wrap to the box at every width, styled with tokens only', () => {
+  for (const sel of ['.diag', '.diag-card', '.diag-card dl > div'])
+    assert.doesNotMatch(css(sel), /#[0-9a-f]{3,8}\b|rgb\(/i, sel + ': tokens only');
+  assert.doesNotMatch(css('.diag-card dl > div'), /border-top/, 'F-152-T09: no line between the rows of a card');
+  assert.doesNotMatch(html, /\.diag-wrap|overflow-x:auto; margin-top:6px/, 'no sideways-scrolling box');
+  const render = live.slice(live.indexOf('window.renderHealth ='), live.indexOf('// Kaji bases (F-036)'));
+  assert.match(render, /healthDiagnosticsHtml\(hm\)/, 'Health renders the cards');
 });

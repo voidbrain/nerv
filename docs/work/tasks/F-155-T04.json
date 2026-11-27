@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "F-155-T04",
+  "parent": "F-155",
+  "title": "Italian cases per pilot and a re-run rule",
+  "goal": "Italian and English cases for each pilot pack and a rule that a new local model or a new cloud model re-runs the selector",
+  "status": "planned",
+  "acceptance": [
+    "Italian cases added next to the English ones, invented data",
+    "A changed model or pack hash marks the old choice stale and asks the owner"
+  ],
+  "dependsOn": [
+    "F-155-T01"
+  ],
+  "resources": [
+    "src/**",
+    "test/**",
+    "docs/**",
+    "docs/work/records/F-155.md",
+    "generated:backlog-views"
+  ],
+  "capabilities": [
+    "typescript",
+    "testing"
+  ],
+  "privacy": "Neutral invented data only; no keys, tokens, personal data or real Grover readings in Git.",
+  "validation": [
+    "npm run check:fast",
+    "npm test",
+    "npm run build",
+    "CI"
+  ],
+  "escalation": [
+    "Any run of a real model or a cloud call needs the owner's yes first",
+    "A material scope or effort increase goes to the owner"
+  ],
+  "effort": {
+    "size": "small",
+    "estimate": "1 h",
+    "basis": "Estimated 2026-11-27 from the code paths read for this plan. Not a measurement.",
+    "reviewed": "2026-11-27",
+    "agentHours": 1,
+    "baselineAgentHours": 1,
+    "estimateAgentHours": 1
+  }
+}

@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseHTML } from 'linkedom';
+import { readFileSync } from 'node:fs';
 
 test('registered Web Component displays hostile text without creating executable markup', async () => {
   const { window } = parseHTML('<html><body></body></html>');
@@ -23,6 +24,22 @@ test('registered Web Component displays hostile text without creating executable
   assert.equal(statusEl.shadowRoot.querySelector('img'), null);
   assert.equal(statusEl.shadowRoot.querySelector('script'), null);
   assert.match(statusEl.shadowRoot.querySelector('p').textContent, /<script>bad/);
+  // Owner, 2026-11-27: the Doctor block read a bare "ok"; the status now has its label, in the page language.
+  statusEl.surface = {
+    version: 1,
+    component: 'nerv-status-card',
+    props: { title: 'Doctor', detail: 'd', status: 'ok' },
+  };
+  assert.equal(statusEl.shadowRoot.querySelector('.status-line').textContent, 'Status: ok');
+  assert.equal(statusEl.shadowRoot.querySelector('[role=status]').textContent, 'ok');
+  window.document.documentElement.lang = 'it';
+  statusEl.surface = {
+    version: 1,
+    component: 'nerv-status-card',
+    props: { title: 'Doctor', detail: 'd', status: 'ok' },
+  };
+  assert.equal(statusEl.shadowRoot.querySelector('.status-line').textContent, 'Stato: ok');
+  window.document.documentElement.lang = 'en';
 
   statusEl.surface = { component: 'script' };
   assert.match(statusEl.shadowRoot.querySelector('p').textContent, /Invalid surface/);
@@ -183,4 +200,10 @@ test('GenUI surface renderer rejects and logs arbitrary component, code or actio
     props: { title: 'Soup', category: 'soups', body: 42 },
   });
   assert.equal(invalidRecipe.ok, false);
+});
+
+test('the Doctor hint promises no remote-node probes: no step plans them (owner, 2026-11-27)', () => {
+  const i18n = readFileSync('web/src/i18n.ts', 'utf8');
+  assert.match(i18n, /doctorHint: 'Diagnostics from this service\.'/);
+  assert.match(i18n, /doctorHint: 'Diagnostica di questo servizio\.'/);
 });
