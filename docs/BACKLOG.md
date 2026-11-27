@@ -4058,7 +4058,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status | Depends on | Unlocks | Who | PRs |
 |---|---|---|---|---|---|---|---|:---:|---|
-| 🟡 Medium | <a id="f-152-t01"></a>F-152-T01 — Test first: the Midori card also shows phone push; then show it | 1.5 h | 0 h | 1.5 h | Planned | — | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
+| 🟡 Medium | <a id="f-152-t01"></a>F-152-T01 — Test first: the Midori card also shows phone push; then show it | 1.5 h | 0 h | 1.5 h | Implemented; verification pending | — | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
 | 🟢 Small | <a id="f-152-t02"></a>F-152-T02 — Remove the duplicate automatic-update line from the Health card | 0.5 h | 0 h | 0.5 h | Implemented; verification pending | — | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
 | 🟢 Small | <a id="f-152-t04"></a>F-152-T04 — Apply the decision on Reload models | 0.5 h | 0 h | 0.5 h | Planned | — | [F-152-T07](#f-152-t07) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
 | 🟢 Small | <a id="f-152-t05"></a>F-152-T05 — Test first: Health diagnostics as a real table | 1 h | 0 h | 1 h | Planned | — | [F-152-T06](#f-152-t06) | 🤖 | [PR #859](https://github.com/voidbrain/nerv/pull/859) plan |
@@ -4081,7 +4081,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Steps: F-152-T01: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T02: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T03: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan; [PR #860](https://github.com/voidbrain/nerv/pull/860) owner decision · F-152-T04: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T05: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T06: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T07: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan. Plan: [#859](https://github.com/voidbrain/nerv/pull/859). Decision T03: [#860](https://github.com/voidbrain/nerv/pull/860); [#874](https://github.com/voidbrain/nerv/pull/874) |
+| PR / evidence | Steps: F-152-T01: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T02: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T03: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan; [PR #860](https://github.com/voidbrain/nerv/pull/860) owner decision · F-152-T04: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T05: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T06: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan · F-152-T07: [PR #859](https://github.com/voidbrain/nerv/pull/859) plan. Plan: [#859](https://github.com/voidbrain/nerv/pull/859). Decision T03: [#860](https://github.com/voidbrain/nerv/pull/860); [#873](https://github.com/voidbrain/nerv/pull/873); [#874](https://github.com/voidbrain/nerv/pull/874) |
 | Opened | 2026-11-26 |
 | Verification | Pending |
 | Reviewed | 2026-11-26 |

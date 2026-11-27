@@ -4,7 +4,7 @@
   "parent": "F-152",
   "title": "Test first: the Midori card also shows phone push; then show it",
   "goal": "The card shows the phone push line: subscribed devices, last push delivered, last push opened (from the receipts B-170 records), in plain words and in Eva voice",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "A failing test first (test/dashboard-live-views.test.mjs): a base card with push status shows 'N devices', the last delivery result and time, and the last open time or 'not opened yet'; with no device it says so",
     "Own base only (push is local to a base); the line sits beside the Telegram lines in channelLine, no backlog IDs in text, wording in both voices (plain and Eva), phone width keeps it on its own wrapped line",
@@ -36,7 +36,7 @@
     "size": "medium",
     "estimate": "1.5 h agent",
     "basis": "Estimated 2026-11-26 from the existing code paths read for this plan. Not a measurement.",
-    "reviewed": "2026-11-26",
+    "reviewed": "2026-11-27",
     "agentHours": 1.5,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
