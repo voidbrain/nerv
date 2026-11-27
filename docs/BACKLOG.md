@@ -4693,9 +4693,9 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Status | Priority | Effort | Remaining | Depends on | Unlocks | Agent | Procedures | Decisions |
 |---|---|---|---|---|---|:---:|:---:|:---:|
-| 🔴 Open | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
+| 🟡 Implemented | 🔹 P3 | 🟢 Small | 0.75 h | — | — | 🤖 | — | — |
 
-💻 **→** Next: B-181-T01 — Record a digest of each staged skill version and refuse a changed one at run time (Planned).
+💻 **→** Next: B-181-T01 — Record a digest of each staged skill version and refuse a changed one at run time (Implemented; verification pending).
 
 | | |
 |---|---|
@@ -4707,7 +4707,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Effort | Step | Estimate | Actual | Remaining | Status |
 |---|---|---|---|---|---|
-| 🟢 Small | <a id="b-181-t01"></a>B-181-T01 — Record a digest of each staged skill version and refuse a changed one at run time | 0.75 h | 0 h | 0.75 h | Planned |
+| 🟢 Small | <a id="b-181-t01"></a>B-181-T01 — Record a digest of each staged skill version and refuse a changed one at run time | 0.75 h | 0 h | 0.75 h | Implemented; verification pending |
 | 🟢 Small | **Total** | 0.75 h | 0 h (0 of 1 steps recorded) | 0.75 h | 0 of 1 completed |
 
 <details>
@@ -4717,7 +4717,7 @@ Bugs (🐞 B-) and features (✨ F-) in one list, ordered by priority (`P1` → 
 
 | Field | Value |
 |---|---|
-| PR / evidence | Pending; found in [#870](https://github.com/voidbrain/nerv/pull/870) |
+| PR / evidence | Pending PR; found in [#870](https://github.com/voidbrain/nerv/pull/870); [#878](https://github.com/voidbrain/nerv/pull/878) |
 | Opened | 2026-11-27 |
 | Verification | Pending |
 | Reviewed | 2026-11-27 |
