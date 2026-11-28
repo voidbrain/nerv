@@ -4,7 +4,7 @@
   "parent": "F-148",
   "title": "Mark the start and end of each model call in the brain seam",
   "goal": "Planner, consultant, Casper and the other brain model calls begin and end an entry, whichever way they finish",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Where the brain knows the call starts and ends is named in the record: src/brain-process.ts handlers misato.step, consultant.advise, casper.verdict and model.complete (the route and model are known there; the sortie ID and pilot come with the request params or from the caller in src/runtime-planning.ts); the seam is chosen once and written in the record's evidence, not duplicated in each caller",
     "The end runs in a finally, so an error, a timeout, a cancelled sortie and a brain restart all clear the entry; a restarted brain clears everything it had open",
@@ -40,8 +40,8 @@
     "size": "medium",
     "estimate": "1.5 h",
     "basis": "Estimated 2026-11-26: three handlers wrapped with begin and end, plus the crash and timeout paths and their tests. Not a measurement.",
-    "reviewed": "2026-11-26",
-    "agentHours": 1.5,
+    "reviewed": "2026-11-27",
+    "agentHours": 1.25,
     "baselineAgentHours": 1.5,
     "estimateAgentHours": 1.5
   },

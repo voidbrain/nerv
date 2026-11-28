@@ -4,7 +4,7 @@
   "parent": "F-148",
   "title": "Document the live state and reconcile the records",
   "goal": "The dashboard guide, the style guide and the records say what the thinking state is and is not",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "The dashboard documentation names the thinking state: what it shows, that it comes from the existing feed, that it is not an EVA job and not an activity log, and that it carries no prompt or answer text; STYLE-GUIDE.md lists any new token or component",
     "F-148 evidence names the PRs; the ROADMAP row and the generated views are rebuilt (npm run work:build, node tools/backlog-recap.mjs) and the checks pass"
@@ -34,7 +34,7 @@
     "size": "small",
     "estimate": "0.5 h",
     "basis": "Estimated 2026-11-26: two documentation edits and a views rebuild. Not a measurement.",
-    "reviewed": "2026-11-26",
+    "reviewed": "2026-11-27",
     "agentHours": 0.5,
     "baselineAgentHours": 0.5,
     "estimateAgentHours": 0.5

@@ -254,6 +254,7 @@ export class RuntimeApprovals {
             .modelCall(
               'casper.verdict',
               {
+                sortieId,
                 request: action.request,
                 tool: action.tool,
                 args: action.args,

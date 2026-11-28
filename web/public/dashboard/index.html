@@ -60,6 +60,7 @@ body.theme-eva .panel { box-shadow:inset 0 0 14px color-mix(in srgb,var(--accent
 .pad { padding:8px; }
 .row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
 .col { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.thinking-now { padding-bottom:0; } .thinking-row,.thinking-line { color:var(--accent); } .thinking-row .b { color:var(--text); } .thinking-dot { margin-right:2px; }
 .muted { color:var(--muted); } .ok { color:var(--ok); } .warn { color:var(--warn); } .danger { color:var(--danger); } .info { color:var(--info); }
 .small { font-size:10px; } .tiny { font-size:9px; } .b { font-weight:700; }
 .btn { border:1px solid var(--border); background:transparent; color:var(--text); padding:4px 8px; border-radius:var(--radius); font-size:11px; cursor:pointer; letter-spacing:.04em; }
@@ -575,6 +576,7 @@ body.theme-eva .eva-img, body.theme-eva .eva-img { display:block; }
 
       <section class="panel">
         <div class="hdr"><span data-l="melons">Marduk Institute · Pilots</span><span class="sub">proto → test → prod</span></div>
+        <div class="pad thinking-now" id="thinking-now" role="status" aria-live="polite" hidden></div>
         <div class="pad list" id="melons"></div>
       </section>
       <!-- F-021-T05: tools are actions (pilots are agents above, skills are Kaji's watermelons below). -->
