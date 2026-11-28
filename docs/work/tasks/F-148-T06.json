@@ -6,9 +6,9 @@
   "goal": "The owner sees a named, timed thinking state appear and disappear on the dashboard",
   "status": "planned",
   "acceptance": [
-    "On NERV-01 after the update, open the dashboard (http://127.0.0.1:<port> as usual) and keep the Pilots panel and the sorties visible. In chat type: `pianifica una cena per sabato con tre ospiti`. Expected while NERV works: the consultant's pilot card shows its name, Consultant, its model and the sortie ID, with a time that counts up, and the sortie shows the same wording as its line; when Misato plans, her state appears the same way. Expected after the answer: the marks disappear and the EVA cages line still says how many EVA jobs are active (0 if none ran), never counting the thinking",
-    "Second check: in a terminal run `nerv service restart` while a long answer is thinking. Expected: the thinking mark is gone within a few seconds of the dashboard reconnecting, not stuck",
-    "Report what you see (or a screenshot) in chat; the agent records the result in the record's Verification"
+    "After the update reaches NERV-01 (`nerv update` or the dashboard's update button), open the dashboard with `nerv open` and keep the Marduk Institute · Pilots panel and the Sorties list in view. In the chat box paste: `pianifica una cena per sabato con tre ospiti`. Expected while NERV works: at the top of the Pilots panel a line such as `● Generic pilot · Consultant (gemma4:26b) · S-1A2B · thinking 3 s` whose seconds count up by themselves (a specialist shows its own name, e.g. `Pilot Ada`), a THINKING badge on that pilot's card (the Generic pilot card when no specialist matched), then `● Misato · Planner (<model>) · S-1A2B · thinking N s` while Misato plans; the sortie card shows the same line under its title. (No consultant line appears if no consultant is configured: `nerv models` shows roles.consultant.) Expected after the answer: the lines and the badge are gone, and the EVA cages header still says how many EVA jobs are active (`0 active` if none ran), never counting the thinking",
+    "Second check: paste the same chat request again and, while a thinking line is counting, run in a terminal: `nerv service stop && nerv service start` (there is no `nerv service restart`; these two are the restart). Expected: once the dashboard reconnects (a few seconds after the start), no thinking line or THINKING badge is left; nothing stays counting",
+    "Report what you see (or a screenshot) in chat; the agent records the result in F-148's Verification"
   ],
   "dependsOn": [
     "F-148-T04"

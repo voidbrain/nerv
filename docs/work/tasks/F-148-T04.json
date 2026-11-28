@@ -4,7 +4,7 @@
   "parent": "F-148",
   "title": "Show the thinking pilot in the Pilots panel and on the sortie",
   "goal": "While a pilot thinks, the dashboard names it, its role, model, sortie and how long, and clears when the call ends",
-  "status": "planned",
+  "status": "implemented",
   "acceptance": [
     "Before the change read docs/STYLE-GUIDE.md (voice, tokens, type, spacing: var(--...) tokens only, no new literal colour; a new token or shared component updates the guide in the same change) and, if web/src is touched, docs/agents/angular.md; the dashboard files are web/public/dashboard/dashboard.js and live.js (renderMelons, renderSorties); the Angular migration (F-130-T10) keeps this requirement",
     "The Pilots panel (Marduk Institute, melons) marks the thinking pilot's card with a live state naming pilot, role, model and sortie ID (e.g. Maya, Consultant, gemma4:26b, S-19EE) and the time it has been thinking; the sortie shows the same state in the same wording as its line (Maya S-19EE · Consultant (gemma4:26b)); a pilot not in the roster still shows, as Generic pilot, so no thinking is hidden",
@@ -44,8 +44,8 @@
     "size": "medium",
     "estimate": "1.75 h",
     "basis": "Estimated 2026-11-26: one marker in two renderers, one client timer, both voices and the join test. Not a measurement.",
-    "reviewed": "2026-11-26",
-    "agentHours": 1.75,
+    "reviewed": "2026-11-27",
+    "agentHours": 1.5,
     "baselineAgentHours": 1.75,
     "estimateAgentHours": 1.75
   },

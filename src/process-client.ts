@@ -33,6 +33,8 @@ export class ProcessClient {
   private stderrTail = '';
   private stderrDone: Promise<void> = Promise.resolve();
   private lastStep?: { step: string; atMs: number };
+  /** F-148-T02: the brain's list of model calls in flight, sent on every change without being asked. */
+  onThinking?: (entries: unknown) => void;
   constructor(
     entry: URL,
     args: string[],
@@ -75,6 +77,10 @@ export class ProcessClient {
       const step = (value as { nerv?: unknown; step?: unknown }).step;
       if ((value as { nerv?: unknown }).nerv === 'starting' && typeof step === 'string') {
         this.lastStep = { step: step.slice(0, 80), atMs: Date.now() - this.startedAt };
+        return;
+      }
+      if ((value as { nerv?: unknown }).nerv === 'thinking') {
+        this.onThinking?.((value as { entries?: unknown }).entries);
         return;
       }
       if ((value as { nerv?: unknown }).nerv === READY.nerv) {

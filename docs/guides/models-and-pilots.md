@@ -55,6 +55,7 @@ Specialists advise Misato when a request matches their keywords (advice only, re
 - Priority: pinned pilot → most matched keywords → later stage → generic fallback.
 - When no specialist fits, the generic pilot tags the request field; after three matching requests in 30 days, Marduk proposes a new specialist card (or ask Misato: *"make me a pilot for photo editing"*).
 - The dashboard **Pilots** panel updates each pilot's local Ollama model independently. Only local Ollama models are supported for pilots today; see [the roadmap](../ROADMAP.md) for planned routing work.
+- **Thinking now** (top of the Pilots panel): while a model call runs, a line names who is thinking, in which role and on which model, for which sortie, and for how long: *Generic pilot · Consultant (gemma4:26b) · S-19EE · thinking 12 s*; Misato planning and Casper checking show the same way (Simple theme: *Planner*, *Review*). The pilot's card carries a THINKING badge (a consultant not in the roster marks the generic pilot), and the sortie card shows the same line. It comes from `GET /api/thinking` (same access as `GET /api/pilots`), re-read when the dashboard's existing change feed says something changed; the seconds are counted by the browser. The line goes when the call ends, fails or times out, when the brain process stops, and after a service restart (the list lives in memory only). It is not an EVA job (the EVA cages count only those), not an activity log, and carries no prompt or answer text.
 
 ## Skills (Kaji's watermelons)
 

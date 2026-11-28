@@ -588,6 +588,7 @@ export const methodSchemas = {
     type: 'object',
     required: ['request'],
     properties: {
+      sortieId: { type: 'string', minLength: 1, maxLength: 100 },
       previousAdvice: { type: 'string', maxLength: 1200 },
       request: { type: 'string', minLength: 1, maxLength: 4000 },
       tools: {
@@ -862,6 +863,7 @@ export const methodSchemas = {
     type: 'object',
     required: ['request', 'history'],
     properties: {
+      sortieId: { type: 'string', minLength: 1, maxLength: 100 },
       watch: {
         type: 'object',
         required: ['readOnly'],
@@ -979,6 +981,7 @@ export const methodSchemas = {
     type: 'object',
     required: ['request', 'tool', 'args', 'effect'],
     properties: {
+      sortieId: { type: 'string', minLength: 1, maxLength: 100 },
       request: { type: 'string', minLength: 1, maxLength: 4000 },
       tool: { type: 'string', minLength: 1, maxLength: 100 },
       args: { type: 'object', maxProperties: 50 },

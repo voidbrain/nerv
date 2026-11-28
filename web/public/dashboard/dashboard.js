@@ -546,11 +546,40 @@ function renderSorties() {
     return "<div class='card sortie" + (s.id === state.selected ? " sel" : "") + "' tabindex='0' role='button' aria-pressed='" + (s.id === state.selected) + "' data-s='" + s.id + "'>" +
       "<div class='row'><span class='b'>" + esc(s.id) + " · " + highlight(s.title, state.search) + "</span>" + sortieBadge(s) + "</div>" +
       "<div class='row small muted'><span>" + (s.forwarded ? "→ " + esc(s.forwarded) : s.origin ? "from " + esc(s.origin) : s.source === "hyuga" ? "Hyuga" : "Aoba") + " · " + dayTime(s.started) + " · " + s.actions.length + " action" + (s.actions.length > 1 ? "s" : "") + " " + pats + "</span><span>" + (s.status === "queued" && s.realId ? "<button class='btn sm' data-cancel-queue='" + esc(s.realId) + "' type='button'>Cancel</button>" : "$" + s.spent.toFixed(3)) + "</span></div>" +
+      (s.realId ? (state.thinking || []).filter(e => e.sortieId === s.realId).map(e => "<div class='tiny thinking-line'><span class='thinking-dot' aria-hidden='true'>●</span> " + esc(thinkingRole(e)) + " · thinking " + thinkingSince(e) + "</div>").join("") : "") +
       (s.why ? "<div class='tiny whyline'>" + esc(s.why) + "</div>" : "") +
       (s.outcome ? "<div class='tiny muted'>" + esc(s.outcome) + "</div>" : "") + "</div>";
   }).join("") || "<div class='muted small'>" + sortiesEmpty(f, q) + "</div>";
   const more = document.getElementById("sorties-more");
   if (more) { more.hidden = !LIVE || !!q || !state.sorties.length || !!state.noOlder; more.disabled = !!state.loadingOlder; more.textContent = state.loadingOlder ? "Loading…" : "Load older sorties"; }
+}
+/* F-148: who is thinking right now (GET /api/thinking, re-read on each feed refresh): pilot, role, model, sortie and
+   start; the elapsed time is counted here, by one timer that runs only while something thinks. Never an EVA job. */
+let thinkingTimer = null;
+function thinkingElapsed(e) { const s = Math.max(0, Math.floor((Date.now() - Date.parse(e.startedAt)) / 1000)); return s < 60 ? s + " s" : Math.floor(s / 60) + " min " + (s % 60) + " s"; }
+/** The role as the Comms line words it: "Consultant (model)" for the generic pilot, "Pilot Ada (model)" for a specialist. */
+function thinkingRole(e) {
+  const eva = state.theme === "eva";
+  const role = e.role === "consultant" ? (e.pilot === "Generic pilot" ? "Consultant" : "Pilot " + e.pilot) : e.role === "planner" ? (eva ? e.pilot + " · Planner" : "Planner") : e.role === "casper" ? (eva ? "Casper · MAGI" : "Review") : (eva ? "Ask" : "Direct question");
+  return role + (e.model ? " (" + e.model + ")" : "");
+}
+function thinkingSince(e) { return "<span class='thinking-time' aria-hidden='true' data-since='" + esc(e.startedAt) + "'>" + thinkingElapsed(e) + "</span>"; }
+/** Entries for one Pilots card: its own name, or (name null) the generic card: the generic pilot and any no roster names. */
+function thinkingFor(name, roster) {
+  return (state.thinking || []).filter(e => e.role === "consultant" && (name === null ? e.pilot === "Generic pilot" || !roster.includes(e.pilot) : e.pilot === name));
+}
+function thinkingTick() { document.querySelectorAll(".thinking-time[data-since]").forEach(n => setText(n, thinkingElapsed({ startedAt:n.dataset.since }))); }
+function renderThinking() {
+  const list = state.thinking || [], box = document.getElementById("thinking-now");
+  if (box) {
+    box.hidden = !list.length;
+    patchHTML(box, list.map(e => "<div class='thinking-row tiny' data-key='" + esc(e.id) + "'><span class='thinking-dot' aria-hidden='true'>●</span> " +
+      (e.role === "consultant" ? "<span class='b'>" + esc(e.pilot) + "</span> · " : "") + esc(thinkingRole(e)) +
+      (e.sortieId ? " · S-" + esc(e.sortieId.slice(0, 4).toUpperCase()) : "") + " · thinking " + thinkingSince(e) + "</div>").join(""));
+  }
+  thinkingTick();
+  if (list.length && !thinkingTimer) thinkingTimer = setInterval(thinkingTick, 1000);
+  else if (!list.length && thinkingTimer) { clearInterval(thinkingTimer); thinkingTimer = null; }
 }
 /** What the empty Sorties list says: why it is empty and what to do next. */
 function sortiesEmpty(f, q) {
@@ -1035,7 +1064,7 @@ function renderSettings() {
   const box = document.getElementById("settings"); if (!box) return;
   box.innerHTML = "<div class='tiny muted'>Simulation · live mode edits automatic update schedule (mode, check 20:00, apply 03:00, no-apply 08:00–23:00).</div>";
 }
-function renderAll() { renderSkills(); fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderSettings(); renderBudget(); renderMelons(); renderBases(); renderChronicle(); renderCages(); renderLilith(); renderModels(); }
+function renderAll() { renderSkills(); fillAvatars(); renderQuestions(); renderNeeds(); renderSorties(); renderFlow(); renderAway(); renderNext(); renderHealth(); renderSettings(); renderBudget(); renderMelons(); renderBases(); renderChronicle(); renderCages(); renderLilith(); renderModels(); renderThinking(); }
 
 /* ================= MAP: zoomed regional topography (procedural hills and valleys) ================= */
 const map = { ready:false, w:540, h:250, proj:null, contours:[], base:null, linkPaths:{} };

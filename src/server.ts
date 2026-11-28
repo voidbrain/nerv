@@ -851,6 +851,9 @@ export function makeServer(
           pilots: store.pilotRoster ? await store.pilotRoster() : [],
           ...(store.genericPilot ? { generic: await store.genericPilot() } : {}),
         });
+      } else if (req.method === 'GET' && path === '/api/thinking') {
+        // F-148-T03: read-only; the same clients as the pilots it names. Elapsed time is counted by the browser.
+        reply(200, { thinking: store.thinking ? await store.thinking() : [] });
       } else if (req.method === 'GET' && path === '/api/skills') {
         reply(200, { skills: store.skills ? store.skills() : [] });
       } else if (req.method === 'GET' && path === '/api/eva/instances') {
